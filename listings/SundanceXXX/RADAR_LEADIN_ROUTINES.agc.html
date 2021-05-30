@@ -96,89 +96,89 @@ from scratch to match what we believe would have been in the original listing.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-019548,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-019549,000003:                                                                                                  <span class="co">## Filename:    RADAR_LEADIN_ROUTINES.agc</span>
-019550,000004:                                                                                                  <span class="co">## Purpose:     A section of a reconstructed, mixed version of Sundance</span>
-019551,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the Lunar</span>
-019552,000006:                                                                                                  <span class="co">##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 9.</span>
-019553,000007:                                                                                                  <span class="co">##              No original listings of this program are available;</span>
-019554,000008:                                                                                                  <span class="co">##              instead, this file was created via disassembly of dumps</span>
-019555,000009:                                                                                                  <span class="co">##              of various revisions of Sundance core rope modules.</span>
-019556,000010:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-019557,000011:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-019558,000012:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-019559,000013:                                                                                                  <span class="co">## Mod history: 2020-06-17 MAS  Created from Luminary 69.</span>
-019560,000014: 
-019561,000015:                                                                                                  <span class="co">## Sundance 302</span>
-019562,000016: 
-019563,000017: 25,2000                                           <span class="ps">BANK    </span> 25                                    
-019564,000018: 25,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#52524C454144494E">RRLEADIN</a>                              
-019565,000019: 25,2000                                           <span class="ps">BANK    </span>                                       
-019566,000020: 
-019567,000021: 25,2000  E4,1606                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52535441434B">RSTACK</a>                                
-019568,000022: 
-019569,000023:                                                                                                  <span class="co">#  RADAR SAMPLING LOOP.</span>
-019570,000024: 
-019571,000025: 25,2000                                           <span class="ps">COUNT*  </span> $$/RLEAD                              
-<a name="52414453414D50"></a>019572,000026: 25,2000           11525        <span class="sm">RADSAMP </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5253414D504454">RSAMPDT</a>                               <span class="co">#  TIMES NORMAL ONCE-PER-SECOND SAMPLING.</span>
-019573,000027: 25,2001           12003                           <span class="op">TCF     </span> +2                                    
-019574,000028: 25,2002           15321                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  +0 INSERTED MANUALLY TERMINATES TEST.</span>
-019575,000029: 
-019576,000030: 25,2003           05252                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-019577,000031: 25,2004  E4,1606                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52535441434B">RSTACK</a>                                
-019578,000032: 25,2004           02000 52064                     <span class="ps">2CADR   </span> <a href="#52414453414D50">RADSAMP</a>                               
-019579,000033: 
-019580,000034: 25,2006           37665                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3235">PRIO25</a>                                
-019581,000035: 25,2007           05142                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
-019582,000036: 25,2010  E4,1606                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52535441434B">RSTACK</a>                                
-019583,000037: 25,2010           02020 52064                     <span class="ps">2CADR   </span> <a href="#444F5253414D50">DORSAMP</a>                               
-019584,000038: 
-019585,000039: 25,2012           35011                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 <span class="co">#  FOR CYCLIC SAMPLING, RTSTDEX=</span>
-019586,000040: 25,2013           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  RTSTLOC/2 + RTSTBASE</span>
-019587,000041: 25,2014           71524                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#525453544C4F43">RTSTLOC</a>                               
-019588,000042: 25,2015           61523                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5254535442415345">RTSTBASE</a>                              <span class="co">#  0 FOR RR, 2 FOR LR.</span>
-019589,000043: 25,2016           55521                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52545354444558">RTSTDEX</a>                               
-019590,000044: 25,2017           15321                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-019591,000045: 
-019592,000046:                                                                                                  <span class="co">#  DO THE ACTUAL RADAR SAMPLE.</span>
-019593,000047: 
-<a name="444F5253414D50"></a>019594,000048: 25,2020           02040        <span class="sm">DORSAMP </span>           <span class="op">TC      </span> <a href="#56415241444152">VARADAR</a>                               <span class="co">#  SELECTS VARIABLE RADAR CHANNEL.</span>
-019595,000049: 25,2021           04655                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-019596,000050: 25,2022           17623                           <span class="ps">CADR    </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#5241445354414C4C">RADSTALL</a>                              
-019597,000051: 
-019598,000052: 25,2023           25526                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524641494C434E54">RFAILCNT</a>                              <span class="co">#  ADVANCE FAIL COUNTER BUT ACCEPT BAD DATA</span>
-019599,000053: 
-<a name="444F5253414D5032"></a>019600,000054: 25,2024           00004        <span class="sm">DORSAMP2</span>           <span class="op">INHINT  </span>                                       
-019601,000055: 25,2025           53105                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53414D504C53554D">SAMPLSUM</a>                              
-019602,000056: 25,2026           51524                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#525453544C4F43">RTSTLOC</a>                               
-019603,000057: 25,2027           53607                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52535441434B">RSTACK</a>                                
-019604,000058: 
-019605,000059: 25,2030           41524                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#525453544C4F43">RTSTLOC</a>                               <span class="co">#  CYCLE RTSTLOC.</span>
-019606,000060: 25,2031           61522                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#525453544D4158">RTSTMAX</a>                               
-019607,000061: 25,2032           00006                           <span class="op">EXTEND  </span>                                       
-019608,000062: 
-019609,000063: 25,2033           12036                           <span class="op">BZF     </span> +3                                    
-019610,000064: 25,2034           31524                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#525453544C4F43">RTSTLOC</a>                               
-019611,000065: 25,2035           65025                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  STORAGE IS DP</span>
-019612,000066: 25,2036           55524                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#525453544C4F43">RTSTLOC</a>                               
-019613,000067: 25,2037           15225                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              <span class="co">#  CONTINUOUS SAMPLING AND 2N TRIES - GONE.</span>
-019614,000068: 
-019615,000069:                                                                                                  <span class="co">#  VARIABLE RADAR DATA CALLER FOR ONE MEASUREMENT ONLY.</span>
-019616,000070: 
-<a name="56415241444152"></a>019617,000071: 25,2040           35026        <span class="sm">VARADAR </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   <span class="co">#  WILL BE SENT TO RADAR ROUTINE IN A BY</span>
-019618,000072: 25,2041           54133                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554632">BUF2</a>                                  <span class="co">#  SWCALL.</span>
-019619,000073: 25,2042           51521                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52545354444558">RTSTDEX</a>                               
-019620,000074: 25,2043           32045                           <span class="op">CAF     </span> <a href="#5244524C4F4353">RDRLOCS</a>                               
-019621,000075: 25,2044           14661                           <span class="op">TCF     </span> <a href="INTER-BANK_COMMUNICATION.agc.html#535743414C4C">SWCALL</a>                                <span class="co">#  NOT TOUCHING Q.</span>
-019622,000076: 
-<a name="5244524C4F4353"></a>019623,000077: 25,2045           53057        <span class="sm">RDRLOCS </span>           <span class="ps">CADR    </span> <a href="P20-P25.agc.html#525252414E4745">RRRANGE</a>                               <span class="co">#  = 0</span>
-019624,000078: 25,2046           53055                           <span class="ps">CADR    </span> <a href="P20-P25.agc.html#525252444F54">RRRDOT</a>                                <span class="co">#  = 1</span>
-019625,000079: 25,2047           53053                           <span class="ps">CADR    </span> <a href="P20-P25.agc.html#4C5256454C58">LRVELX</a>                                <span class="co">#  = 2</span>
-019626,000080: 25,2050           53051                           <span class="ps">CADR    </span> <a href="P20-P25.agc.html#4C5256454C59">LRVELY</a>                                <span class="co">#  = 3</span>
-019627,000081: 25,2051           53047                           <span class="ps">CADR    </span> <a href="P20-P25.agc.html#4C5256454C5A">LRVELZ</a>                                <span class="co">#  = 4</span>
-019628,000082: 25,2052           53045                           <span class="ps">CADR    </span> <a href="P20-P25.agc.html#4C52414C54">LRALT</a>                                 <span class="co">#  = 5</span>
-019629,000083: 
-019630,000084: 
+019555,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+019556,000003:                                                                                                  <span class="co">## Filename:    RADAR_LEADIN_ROUTINES.agc</span>
+019557,000004:                                                                                                  <span class="co">## Purpose:     A section of a reconstructed, mixed version of Sundance</span>
+019558,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the Lunar</span>
+019559,000006:                                                                                                  <span class="co">##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 9.</span>
+019560,000007:                                                                                                  <span class="co">##              No original listings of this program are available;</span>
+019561,000008:                                                                                                  <span class="co">##              instead, this file was created via disassembly of dumps</span>
+019562,000009:                                                                                                  <span class="co">##              of various revisions of Sundance core rope modules.</span>
+019563,000010:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+019564,000011:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+019565,000012:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+019566,000013:                                                                                                  <span class="co">## Mod history: 2020-06-17 MAS  Created from Luminary 69.</span>
+019567,000014: 
+019568,000015:                                                                                                  <span class="co">## Sundance 302</span>
+019569,000016: 
+019570,000017: 25,2000                                           <span class="ps">BANK    </span> 25                                    
+019571,000018: 25,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#52524C454144494E">RRLEADIN</a>                              
+019572,000019: 25,2000                                           <span class="ps">BANK    </span>                                       
+019573,000020: 
+019574,000021: 25,2000  E4,1606                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52535441434B">RSTACK</a>                                
+019575,000022: 
+019576,000023:                                                                                                  <span class="co">#  RADAR SAMPLING LOOP.</span>
+019577,000024: 
+019578,000025: 25,2000                                           <span class="ps">COUNT*  </span> $$/RLEAD                              
+<a name="52414453414D50"></a>019579,000026: 25,2000           11525        <span class="sm">RADSAMP </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5253414D504454">RSAMPDT</a>                               <span class="co">#  TIMES NORMAL ONCE-PER-SECOND SAMPLING.</span>
+019580,000027: 25,2001           12003                           <span class="op">TCF     </span> +2                                    
+019581,000028: 25,2002           15321                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  +0 INSERTED MANUALLY TERMINATES TEST.</span>
+019582,000029: 
+019583,000030: 25,2003           05252                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+019584,000031: 25,2004  E4,1606                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52535441434B">RSTACK</a>                                
+019585,000032: 25,2004           02000 52064                     <span class="ps">2CADR   </span> <a href="#52414453414D50">RADSAMP</a>                               
+019586,000033: 
+019587,000034: 25,2006           37665                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3235">PRIO25</a>                                
+019588,000035: 25,2007           05142                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
+019589,000036: 25,2010  E4,1606                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52535441434B">RSTACK</a>                                
+019590,000037: 25,2010           02020 52064                     <span class="ps">2CADR   </span> <a href="#444F5253414D50">DORSAMP</a>                               
+019591,000038: 
+019592,000039: 25,2012           35011                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 <span class="co">#  FOR CYCLIC SAMPLING, RTSTDEX=</span>
+019593,000040: 25,2013           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  RTSTLOC/2 + RTSTBASE</span>
+019594,000041: 25,2014           71524                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#525453544C4F43">RTSTLOC</a>                               
+019595,000042: 25,2015           61523                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5254535442415345">RTSTBASE</a>                              <span class="co">#  0 FOR RR, 2 FOR LR.</span>
+019596,000043: 25,2016           55521                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52545354444558">RTSTDEX</a>                               
+019597,000044: 25,2017           15321                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+019598,000045: 
+019599,000046:                                                                                                  <span class="co">#  DO THE ACTUAL RADAR SAMPLE.</span>
+019600,000047: 
+<a name="444F5253414D50"></a>019601,000048: 25,2020           02040        <span class="sm">DORSAMP </span>           <span class="op">TC      </span> <a href="#56415241444152">VARADAR</a>                               <span class="co">#  SELECTS VARIABLE RADAR CHANNEL.</span>
+019602,000049: 25,2021           04655                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+019603,000050: 25,2022           17623                           <span class="ps">CADR    </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#5241445354414C4C">RADSTALL</a>                              
+019604,000051: 
+019605,000052: 25,2023           25526                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524641494C434E54">RFAILCNT</a>                              <span class="co">#  ADVANCE FAIL COUNTER BUT ACCEPT BAD DATA</span>
+019606,000053: 
+<a name="444F5253414D5032"></a>019607,000054: 25,2024           00004        <span class="sm">DORSAMP2</span>           <span class="op">INHINT  </span>                                       
+019608,000055: 25,2025           53105                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53414D504C53554D">SAMPLSUM</a>                              
+019609,000056: 25,2026           51524                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#525453544C4F43">RTSTLOC</a>                               
+019610,000057: 25,2027           53607                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52535441434B">RSTACK</a>                                
+019611,000058: 
+019612,000059: 25,2030           41524                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#525453544C4F43">RTSTLOC</a>                               <span class="co">#  CYCLE RTSTLOC.</span>
+019613,000060: 25,2031           61522                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#525453544D4158">RTSTMAX</a>                               
+019614,000061: 25,2032           00006                           <span class="op">EXTEND  </span>                                       
+019615,000062: 
+019616,000063: 25,2033           12036                           <span class="op">BZF     </span> +3                                    
+019617,000064: 25,2034           31524                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#525453544C4F43">RTSTLOC</a>                               
+019618,000065: 25,2035           65025                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  STORAGE IS DP</span>
+019619,000066: 25,2036           55524                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#525453544C4F43">RTSTLOC</a>                               
+019620,000067: 25,2037           15225                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              <span class="co">#  CONTINUOUS SAMPLING AND 2N TRIES - GONE.</span>
+019621,000068: 
+019622,000069:                                                                                                  <span class="co">#  VARIABLE RADAR DATA CALLER FOR ONE MEASUREMENT ONLY.</span>
+019623,000070: 
+<a name="56415241444152"></a>019624,000071: 25,2040           35026        <span class="sm">VARADAR </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   <span class="co">#  WILL BE SENT TO RADAR ROUTINE IN A BY</span>
+019625,000072: 25,2041           54133                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554632">BUF2</a>                                  <span class="co">#  SWCALL.</span>
+019626,000073: 25,2042           51521                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52545354444558">RTSTDEX</a>                               
+019627,000074: 25,2043           32045                           <span class="op">CAF     </span> <a href="#5244524C4F4353">RDRLOCS</a>                               
+019628,000075: 25,2044           14661                           <span class="op">TCF     </span> <a href="INTER-BANK_COMMUNICATION.agc.html#535743414C4C">SWCALL</a>                                <span class="co">#  NOT TOUCHING Q.</span>
+019629,000076: 
+<a name="5244524C4F4353"></a>019630,000077: 25,2045           53057        <span class="sm">RDRLOCS </span>           <span class="ps">CADR    </span> <a href="P20-P25.agc.html#525252414E4745">RRRANGE</a>                               <span class="co">#  = 0</span>
+019631,000078: 25,2046           53055                           <span class="ps">CADR    </span> <a href="P20-P25.agc.html#525252444F54">RRRDOT</a>                                <span class="co">#  = 1</span>
+019632,000079: 25,2047           53053                           <span class="ps">CADR    </span> <a href="P20-P25.agc.html#4C5256454C58">LRVELX</a>                                <span class="co">#  = 2</span>
+019633,000080: 25,2050           53051                           <span class="ps">CADR    </span> <a href="P20-P25.agc.html#4C5256454C59">LRVELY</a>                                <span class="co">#  = 3</span>
+019634,000081: 25,2051           53047                           <span class="ps">CADR    </span> <a href="P20-P25.agc.html#4C5256454C5A">LRVELZ</a>                                <span class="co">#  = 4</span>
+019635,000082: 25,2052           53045                           <span class="ps">CADR    </span> <a href="P20-P25.agc.html#4C52414C54">LRALT</a>                                 <span class="co">#  = 5</span>
+019636,000083: 
+019637,000084: 
 
 End of include-file RADAR_LEADIN_ROUTINES.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

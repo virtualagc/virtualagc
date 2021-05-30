@@ -95,20 +95,20 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-036316,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
-036317,000003:                                                                                                  <span class="co">## Filename:     THROTTLE_CONTROL.agc</span>
-036318,000004:                                                                                                  <span class="co">## Purpose:      A module for revision 0 of BURST120 (Sunburst). It </span>
-036319,000005:                                                                                                  <span class="co">##               is part of the source code for the Lunar Module's</span>
-036320,000006:                                                                                                  <span class="co">##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
-036321,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
-036322,000008:                                                                                                  <span class="co">## Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
-036323,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
-036324,000010:                                                                                                  <span class="co">## Mod history:  2016-09-30 RSB  Created draft version.</span>
-036325,000011:                                                                                                  <span class="co">##               2016-10-30 MAS  Transcribed.</span>
-036326,000012:                                                                                                  <span class="co">##               2016-11-02 RSB  Typo.</span>
-036327,000013:                                                                                                  <span class="co">##               2016-12-06 RSB  Comment-proofing via octopus/ProoferComments;</span>
-036328,000014:                                                                                                  <span class="co">##                               changes were made.</span>
-036329,000015: 
+036322,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
+036323,000003:                                                                                                  <span class="co">## Filename:     THROTTLE_CONTROL.agc</span>
+036324,000004:                                                                                                  <span class="co">## Purpose:      A module for revision 0 of BURST120 (Sunburst). It </span>
+036325,000005:                                                                                                  <span class="co">##               is part of the source code for the Lunar Module's</span>
+036326,000006:                                                                                                  <span class="co">##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
+036327,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
+036328,000008:                                                                                                  <span class="co">## Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
+036329,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
+036330,000010:                                                                                                  <span class="co">## Mod history:  2016-09-30 RSB  Created draft version.</span>
+036331,000011:                                                                                                  <span class="co">##               2016-10-30 MAS  Transcribed.</span>
+036332,000012:                                                                                                  <span class="co">##               2016-11-02 RSB  Typo.</span>
+036333,000013:                                                                                                  <span class="co">##               2016-12-06 RSB  Comment-proofing via octopus/ProoferComments;</span>
+036334,000014:                                                                                                  <span class="co">##                               changes were made.</span>
+036335,000015: 
 </pre>
 </span>
 </p>
@@ -124,56 +124,56 @@ Page 849
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-036331,000017:                                                                                                  <span class="co">#        THROTTLE CONTROL CAN BE USED IN EITHER OF TWO MODES: IN "PERCENTAGE MODE" (WHEN A CERTAIN FRACTION OF</span>
-036332,000018:                                                                                                  <span class="co">#  MAXIMUM THRUST IS DESIRED) AND IN "ACCELERATION MODE"  (WHEN THE THRUST DESIRED IS THAT CORRESPONDING TO A</span>
-036333,000019:                                                                                                  <span class="co">#  SPECIFIED ACCELERATION).</span>
-036334,000020: 
-036335,000021:                                                                                                  <span class="co">#                   PERCENTAGE MODE                                               ACCELERATION MODE</span>
-036336,000022: 
-036337,000023:                                                                                                  <span class="co">#        THE FRACTION OF MAXIMUM THRUST (NOMINALLY                     DESIRED ACCELERATION, IN DOUBLE PRECISION,</span>
-036338,000024:                                                                                                  <span class="co">#  10500 POUNDS) DESIRED, IN SINGLE PRECISION, IS                IN UNITS OF 2(-5) M/CS/CS, IS PLACED IN /ACF/.</span>
-036339,000025:                                                                                                  <span class="co">#  PLACED IN PCNTF.   ENTRY IS VIA A DTCB AN THE                 ENTRY IS VIA A DTCB ON THE 2CADR OF THROTCON.</span>
-036340,000026:                                                                                                  <span class="co">#  2CADR OF PCNTFMAX.   THE ROUTINE BEGINNING AT                 THE ROUTINE BEGINNING AT THROTCON SETS UP A JOB -</span>
-036341,000027:                                                                                                  <span class="co">#  PCNTFMAX SETS UP A JOB - PCNTJOB - AND RETURNS                ACCLJOB - AND RETURNS TO THE USER (AT THE</span>
-036342,000028:                                                                                                  <span class="co">#  TO THE USER (AT THE INSTRUCTION IMMEDIATELY                   INSTRUCTION FOLLOWING THE DTCB).</span>
-036343,000029:                                                                                                  <span class="co">#  FOLLOWING THE DTCB).</span>
-036344,000030:                                                                                                  <span class="co">#                                                                     ACCLJOB, AFTER A RESTART PROTECT,</span>
-036345,000031:                                                                                                  <span class="co">#        PCNTJOB, AFTER A RESTART PROTECT,                       COMPUTES DESIRED ACCELERATION, FC = /ACF/ MASS,</span>
-036346,000032:                                                                                                  <span class="co">#  TURNS OFF THE TRIM GIMBAL, SETS UP A WAITLIST                SCALED AT ABOUT 2.7 POUNDS PER BIT.</span>
-036347,000033:                                                                                                  <span class="co">#  TASK (DESCRIBED LOCALLY), COMPUTES THRUST DESIRED,</span>
-036348,000034:                                                                                                  <span class="co">#  FC = PCNTF FMAX, SCALED AT ABOUT 2.7 POUNDS PER BIT,                (NOTE THAT IN THE ACCELERATION MODE THE TRIM</span>
-036349,000035:                                                                                                  <span class="co">#  AND TCF'S AROUND THE COMMENCEMENT OF ACCLJOB TO               GIMBAL IS NOT TURNED OFF; IT IS ASSUMED TO BE OFF</span>
-036350,000036:                                                                                                  <span class="co">#  FOLDCALC.                                                    BY THE TIME THROTTLE CHANGES ARE COMMANDED.</span>
-036351,000037: 
-036352,000038:                                                                                                  <span class="co">#        FOLDCALC BEGINS BY COMPUTING PRESENT THRUST,  FOLD = MASS /AF/,  SCALED AS IS FC.   NEXT, SINCE /AF/ IS</span>
-036353,000039:                                                                                                  <span class="co">#  MERELY AN "AVERAGE" OF THE THROTTLE LEVELS OF THE PRECEEDING PIPA INTERVAL, FOLD IS WEIGHTED BY FWEIGHT, A</span>
-036354,000040:                                                                                                  <span class="co">#  FUNCTION OF THE PRECEEDING THROTTLE COMMAND (DESCRIBED LOCALLY).   TO PRECLUDE A SPURIOUS WEIGHTING THAT WOULD</span>
-036355,000041:                                                                                                  <span class="co">#  OTHERWISE OCCUR, FWEIGHT IS ZEROED 1.95 SECONDS AFTER EVERY PERCENTAGE MODE THROTTLING.</span>
-036356,000042: 
-036357,000043:                                                                                                  <span class="co">#        NEXT, TO COMPENSATE FOR THE DIFFERENTIAL BETWEEN BITS FOR MAXIMUM THRUST AND BITS FOR FULL THROTTLE, THE</span>
-036358,000044:                                                                                                  <span class="co">#  NUMBER  FOLD - FODD IS COMPUTED AND SET INTO PIFPSET WHENEVER FCOLD INDICATES THE THROTTLE IS AT MAXIMUM.</span>
-036359,000045:                                                                                                  <span class="co">#  SINCE PIFPSET IS USED, RATHER THAN PIF, PIF STILL REFLECTS ACCURATELY THE ACTUAL THRUST CHANGE AND FWEIGHT IS</span>
-036360,000046:                                                                                                  <span class="co">#  COMPUTED PROPERLY.</span>
-036361,000047: 
-036362,000048:                                                                                                  <span class="co">#        NEXT COMES IS-IT-ON.   HERE THE ENGINE-OFF BIT (14 OF CHANNEL 11) IS QUERIED; IF THE ENGINE IS OFF</span>
-036363,000049:                                                                                                  <span class="co">#  FCOLD, THE SINGLE PRECISION HISTORY REGISTER, IS SET TO 10% FMAX AND PIFPSET, A PRESETTING ADDED TO PIF AT</span>
-036364,000050:                                                                                                  <span class="co">#  THE LAST MOMENT, IS SET TO -10% FMAX TO COMPENSATE FOR THE ASSUMED SETTING OF THE MANUAL THROTTLE.</span>
-036365,000051: 
-036366,000052:                                                                                                  <span class="co">#        THE SERIES OF DECISIONS BEGINNING AT WHERETO CAUSES THE THROTTLE TO REACT TO USERS' DESIRES IN THE</span>
-036367,000053:                                                                                                  <span class="co">#  MANNER DESCRIBED BY FIGURE 5.3-5 OF THE FLIGHT 206 GSOP.   WHERETO PROCEEDS (OR BRANCHES) TO FLATOUT (IF THE</span>
-036368,000054:                                                                                                  <span class="co">#  THROTTLE LEVEL ASKED FOR IS IN THE FORBIDDEN REGION) OR TO DOPIF.   FLATOUT RESETS FC TO 94% FMAX, SETS FEXTRA</span>
-036369,000055:                                                                                                  <span class="co">#  (A BOOST GIVEN TO THE THROTTLE TO KEEP IT JAMMED AGAINST ITS STOPS) INTO PIFPSET, AND PROCEEDS TO DOPIF.</span>
-036370,000056: 
-036371,000057:                                                                                                  <span class="co">#        DOPIF, AFTER A "TYPE C" RESTART PROTECT (NECESSITATED BY THE FACT THAT FCOLD AND PIF, USED EARLIER, ARE</span>
-036372,000058:                                                                                                  <span class="co">#  ABOUT TO BE MODIFIED), SETS FCOLD = FC, COMPUTES PIF (PULSE INCREMENT FOR ACCELERATION) = FC - FOLD, AND, AS</span>
-036373,000059:                                                                                                  <span class="co">#  IT PROCEEDS TO DOIT, HAS THIS NUMBER PLUS PIFPSET IN A &amp; L.</span>
-036374,000060: 
-036375,000061:                                                                                                  <span class="co">#        DOIT DOES IT.   IT TS'S INTO THRUST, THE CHANNEL (55) LEADING TO DECA, THE THROTTLE-AGC INTERFACE</span>
-036376,000062:                                                                                                  <span class="co">#  CIRCUIT, AND SETS BIT 4 IN CHANNEL 11, THE SIGNAL FOR THRUST TO BE COUNTED DOWN (AT 3200 PPS).   FINALLY,</span>
-036377,000063:                                                                                                  <span class="co">#  FWEIGHT = F(PIF) IS COMPUTED FOR USE NEXT PASS.</span>
-036378,000064: 
-036379,000065:                                                                                                  <span class="co">#        AFTER ANOTHER RESTART PROTECT A TCF ENDOFJOB ENDS THROTTLE CONTROL.</span>
-036380,000066: 
+036337,000017:                                                                                                  <span class="co">#        THROTTLE CONTROL CAN BE USED IN EITHER OF TWO MODES: IN "PERCENTAGE MODE" (WHEN A CERTAIN FRACTION OF</span>
+036338,000018:                                                                                                  <span class="co">#  MAXIMUM THRUST IS DESIRED) AND IN "ACCELERATION MODE"  (WHEN THE THRUST DESIRED IS THAT CORRESPONDING TO A</span>
+036339,000019:                                                                                                  <span class="co">#  SPECIFIED ACCELERATION).</span>
+036340,000020: 
+036341,000021:                                                                                                  <span class="co">#                   PERCENTAGE MODE                                               ACCELERATION MODE</span>
+036342,000022: 
+036343,000023:                                                                                                  <span class="co">#        THE FRACTION OF MAXIMUM THRUST (NOMINALLY                     DESIRED ACCELERATION, IN DOUBLE PRECISION,</span>
+036344,000024:                                                                                                  <span class="co">#  10500 POUNDS) DESIRED, IN SINGLE PRECISION, IS                IN UNITS OF 2(-5) M/CS/CS, IS PLACED IN /ACF/.</span>
+036345,000025:                                                                                                  <span class="co">#  PLACED IN PCNTF.   ENTRY IS VIA A DTCB AN THE                 ENTRY IS VIA A DTCB ON THE 2CADR OF THROTCON.</span>
+036346,000026:                                                                                                  <span class="co">#  2CADR OF PCNTFMAX.   THE ROUTINE BEGINNING AT                 THE ROUTINE BEGINNING AT THROTCON SETS UP A JOB -</span>
+036347,000027:                                                                                                  <span class="co">#  PCNTFMAX SETS UP A JOB - PCNTJOB - AND RETURNS                ACCLJOB - AND RETURNS TO THE USER (AT THE</span>
+036348,000028:                                                                                                  <span class="co">#  TO THE USER (AT THE INSTRUCTION IMMEDIATELY                   INSTRUCTION FOLLOWING THE DTCB).</span>
+036349,000029:                                                                                                  <span class="co">#  FOLLOWING THE DTCB).</span>
+036350,000030:                                                                                                  <span class="co">#                                                                     ACCLJOB, AFTER A RESTART PROTECT,</span>
+036351,000031:                                                                                                  <span class="co">#        PCNTJOB, AFTER A RESTART PROTECT,                       COMPUTES DESIRED ACCELERATION, FC = /ACF/ MASS,</span>
+036352,000032:                                                                                                  <span class="co">#  TURNS OFF THE TRIM GIMBAL, SETS UP A WAITLIST                SCALED AT ABOUT 2.7 POUNDS PER BIT.</span>
+036353,000033:                                                                                                  <span class="co">#  TASK (DESCRIBED LOCALLY), COMPUTES THRUST DESIRED,</span>
+036354,000034:                                                                                                  <span class="co">#  FC = PCNTF FMAX, SCALED AT ABOUT 2.7 POUNDS PER BIT,                (NOTE THAT IN THE ACCELERATION MODE THE TRIM</span>
+036355,000035:                                                                                                  <span class="co">#  AND TCF'S AROUND THE COMMENCEMENT OF ACCLJOB TO               GIMBAL IS NOT TURNED OFF; IT IS ASSUMED TO BE OFF</span>
+036356,000036:                                                                                                  <span class="co">#  FOLDCALC.                                                    BY THE TIME THROTTLE CHANGES ARE COMMANDED.</span>
+036357,000037: 
+036358,000038:                                                                                                  <span class="co">#        FOLDCALC BEGINS BY COMPUTING PRESENT THRUST,  FOLD = MASS /AF/,  SCALED AS IS FC.   NEXT, SINCE /AF/ IS</span>
+036359,000039:                                                                                                  <span class="co">#  MERELY AN "AVERAGE" OF THE THROTTLE LEVELS OF THE PRECEEDING PIPA INTERVAL, FOLD IS WEIGHTED BY FWEIGHT, A</span>
+036360,000040:                                                                                                  <span class="co">#  FUNCTION OF THE PRECEEDING THROTTLE COMMAND (DESCRIBED LOCALLY).   TO PRECLUDE A SPURIOUS WEIGHTING THAT WOULD</span>
+036361,000041:                                                                                                  <span class="co">#  OTHERWISE OCCUR, FWEIGHT IS ZEROED 1.95 SECONDS AFTER EVERY PERCENTAGE MODE THROTTLING.</span>
+036362,000042: 
+036363,000043:                                                                                                  <span class="co">#        NEXT, TO COMPENSATE FOR THE DIFFERENTIAL BETWEEN BITS FOR MAXIMUM THRUST AND BITS FOR FULL THROTTLE, THE</span>
+036364,000044:                                                                                                  <span class="co">#  NUMBER  FOLD - FODD IS COMPUTED AND SET INTO PIFPSET WHENEVER FCOLD INDICATES THE THROTTLE IS AT MAXIMUM.</span>
+036365,000045:                                                                                                  <span class="co">#  SINCE PIFPSET IS USED, RATHER THAN PIF, PIF STILL REFLECTS ACCURATELY THE ACTUAL THRUST CHANGE AND FWEIGHT IS</span>
+036366,000046:                                                                                                  <span class="co">#  COMPUTED PROPERLY.</span>
+036367,000047: 
+036368,000048:                                                                                                  <span class="co">#        NEXT COMES IS-IT-ON.   HERE THE ENGINE-OFF BIT (14 OF CHANNEL 11) IS QUERIED; IF THE ENGINE IS OFF</span>
+036369,000049:                                                                                                  <span class="co">#  FCOLD, THE SINGLE PRECISION HISTORY REGISTER, IS SET TO 10% FMAX AND PIFPSET, A PRESETTING ADDED TO PIF AT</span>
+036370,000050:                                                                                                  <span class="co">#  THE LAST MOMENT, IS SET TO -10% FMAX TO COMPENSATE FOR THE ASSUMED SETTING OF THE MANUAL THROTTLE.</span>
+036371,000051: 
+036372,000052:                                                                                                  <span class="co">#        THE SERIES OF DECISIONS BEGINNING AT WHERETO CAUSES THE THROTTLE TO REACT TO USERS' DESIRES IN THE</span>
+036373,000053:                                                                                                  <span class="co">#  MANNER DESCRIBED BY FIGURE 5.3-5 OF THE FLIGHT 206 GSOP.   WHERETO PROCEEDS (OR BRANCHES) TO FLATOUT (IF THE</span>
+036374,000054:                                                                                                  <span class="co">#  THROTTLE LEVEL ASKED FOR IS IN THE FORBIDDEN REGION) OR TO DOPIF.   FLATOUT RESETS FC TO 94% FMAX, SETS FEXTRA</span>
+036375,000055:                                                                                                  <span class="co">#  (A BOOST GIVEN TO THE THROTTLE TO KEEP IT JAMMED AGAINST ITS STOPS) INTO PIFPSET, AND PROCEEDS TO DOPIF.</span>
+036376,000056: 
+036377,000057:                                                                                                  <span class="co">#        DOPIF, AFTER A "TYPE C" RESTART PROTECT (NECESSITATED BY THE FACT THAT FCOLD AND PIF, USED EARLIER, ARE</span>
+036378,000058:                                                                                                  <span class="co">#  ABOUT TO BE MODIFIED), SETS FCOLD = FC, COMPUTES PIF (PULSE INCREMENT FOR ACCELERATION) = FC - FOLD, AND, AS</span>
+036379,000059:                                                                                                  <span class="co">#  IT PROCEEDS TO DOIT, HAS THIS NUMBER PLUS PIFPSET IN A &amp; L.</span>
+036380,000060: 
+036381,000061:                                                                                                  <span class="co">#        DOIT DOES IT.   IT TS'S INTO THRUST, THE CHANNEL (55) LEADING TO DECA, THE THROTTLE-AGC INTERFACE</span>
+036382,000062:                                                                                                  <span class="co">#  CIRCUIT, AND SETS BIT 4 IN CHANNEL 11, THE SIGNAL FOR THRUST TO BE COUNTED DOWN (AT 3200 PPS).   FINALLY,</span>
+036383,000063:                                                                                                  <span class="co">#  FWEIGHT = F(PIF) IS COMPUTED FOR USE NEXT PASS.</span>
+036384,000064: 
+036385,000065:                                                                                                  <span class="co">#        AFTER ANOTHER RESTART PROTECT A TCF ENDOFJOB ENDS THROTTLE CONTROL.</span>
+036386,000066: 
 </pre>
 </span>
 </p>
@@ -189,44 +189,44 @@ Page 850
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-036382,000068: 30,3445                                           <span class="ps">BANK    </span> 30                                    
-036383,000069: 30,3445  E5,1565                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455448524F54">ETHROT</a>                                
-036384,000070: 
-036385,000071: 
-036386,000072: 
-036387,000073:                                                                                                  <span class="co">#  ***************</span>
-036388,000074:                                                                                                  <span class="co">#  * SUBROUTINES *</span>
-036389,000075:                                                                                                  <span class="co">#  ***************</span>
-036390,000076: 
-036391,000077:                                                                                                  <span class="co">#  THIS SUBROUTINE MULTIPLIES ACCELERATION</span>
-036392,000078:                                                                                                  <span class="co">#  (ARRIVING IN A AND L) BY MASS AND LEAVES</span>
-036393,000079:                                                                                                  <span class="co">#  FORCE (THRUST) IN A &amp; L, SCALED AT ABOUT</span>
-036394,000080:                                                                                                  <span class="co">#  2.7 POUNDS PER BIT.</span>
-036395,000081: 
-<a name="4D4153534D554C54"></a>036396,000082: 30,3445           00006        <span class="sm">MASSMULT</span>           <span class="op">EXTEND  </span>                                       
-036397,000083: 30,3446           22120                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  PRESERVING RETURN ADDRESS</span>
-036398,000084: 30,3447           52145                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-036399,000085: 30,3450           07155                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#444D50">DMP</a>                                   <span class="co">#  LEAVES ODDLY SCALED FORCE IN MPAC</span>
-036400,000086: 30,3451           01320                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D415353">MASS</a>                                  
-036401,000087: 30,3452           07155                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#444D50">DMP</a>                                   <span class="co">#  LEAVES PROPERLY SCALED FORCE IN MPAC</span>
-036402,000088: 30,3453           03533                           <span class="ps">ADRES   </span> <a href="#5343414C45464143">SCALEFAC</a>                              
-036403,000089: 30,3454           52146                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         <span class="co">#  LOADING FORCE INTO A AND L</span>
-036404,000090: 30,3455           00120                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  IN WHICH Q WAS STORED</span>
-036405,000091: 
-036406,000092: 
-036407,000093: 
-036408,000094:                                                                                                  <span class="co">#  THIS TASK WILL BE EXECUTED 1.95 SECONDS</span>
-036409,000095:                                                                                                  <span class="co">#    AFTER PERCENTAGE MODE THROTTLING.</span>
-036410,000096: 
-<a name="50434E544F564552"></a>036411,000097: 30,3456           47767        <span class="sm">PCNTOVER</span>           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
-036412,000098: 30,3457           55576                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46574549474854">FWEIGHT</a>                               <span class="co">#    SCHEME WILL WORK PROPERLY NEXT PASS</span>
-036413,000099: 30,3460           55577                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46574549474854">FWEIGHT</a>    +1                         
-036414,000100: 30,3461           22007                           <span class="op">ZL      </span>                                       <span class="co">#  -0 STILL IN A</span>
-036415,000101: 30,3462           53100                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534531">-PHASE1</a>                               
-036416,000102: 30,3463           15727                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-036417,000103: 
-036418,000104: 
-036419,000105: 
+036388,000068: 30,3445                                           <span class="ps">BANK    </span> 30                                    
+036389,000069: 30,3445  E5,1565                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455448524F54">ETHROT</a>                                
+036390,000070: 
+036391,000071: 
+036392,000072: 
+036393,000073:                                                                                                  <span class="co">#  ***************</span>
+036394,000074:                                                                                                  <span class="co">#  * SUBROUTINES *</span>
+036395,000075:                                                                                                  <span class="co">#  ***************</span>
+036396,000076: 
+036397,000077:                                                                                                  <span class="co">#  THIS SUBROUTINE MULTIPLIES ACCELERATION</span>
+036398,000078:                                                                                                  <span class="co">#  (ARRIVING IN A AND L) BY MASS AND LEAVES</span>
+036399,000079:                                                                                                  <span class="co">#  FORCE (THRUST) IN A &amp; L, SCALED AT ABOUT</span>
+036400,000080:                                                                                                  <span class="co">#  2.7 POUNDS PER BIT.</span>
+036401,000081: 
+<a name="4D4153534D554C54"></a>036402,000082: 30,3445           00006        <span class="sm">MASSMULT</span>           <span class="op">EXTEND  </span>                                       
+036403,000083: 30,3446           22120                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  PRESERVING RETURN ADDRESS</span>
+036404,000084: 30,3447           52145                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+036405,000085: 30,3450           07155                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#444D50">DMP</a>                                   <span class="co">#  LEAVES ODDLY SCALED FORCE IN MPAC</span>
+036406,000086: 30,3451           01320                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D415353">MASS</a>                                  
+036407,000087: 30,3452           07155                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#444D50">DMP</a>                                   <span class="co">#  LEAVES PROPERLY SCALED FORCE IN MPAC</span>
+036408,000088: 30,3453           03533                           <span class="ps">ADRES   </span> <a href="#5343414C45464143">SCALEFAC</a>                              
+036409,000089: 30,3454           52146                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         <span class="co">#  LOADING FORCE INTO A AND L</span>
+036410,000090: 30,3455           00120                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  IN WHICH Q WAS STORED</span>
+036411,000091: 
+036412,000092: 
+036413,000093: 
+036414,000094:                                                                                                  <span class="co">#  THIS TASK WILL BE EXECUTED 1.95 SECONDS</span>
+036415,000095:                                                                                                  <span class="co">#    AFTER PERCENTAGE MODE THROTTLING.</span>
+036416,000096: 
+<a name="50434E544F564552"></a>036417,000097: 30,3456           47767        <span class="sm">PCNTOVER</span>           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
+036418,000098: 30,3457           55576                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46574549474854">FWEIGHT</a>                               <span class="co">#    SCHEME WILL WORK PROPERLY NEXT PASS</span>
+036419,000099: 30,3460           55577                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46574549474854">FWEIGHT</a>    +1                         
+036420,000100: 30,3461           22007                           <span class="op">ZL      </span>                                       <span class="co">#  -0 STILL IN A</span>
+036421,000101: 30,3462           53100                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534531">-PHASE1</a>                               
+036422,000102: 30,3463           15727                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+036423,000103: 
+036424,000104: 
+036425,000105: 
 </pre>
 </span>
 </p>
@@ -243,11 +243,11 @@ box, similar to the unicode white square (U+25A1). All occurrences have been rep
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-036422,000108:                                                                                                  <span class="co">#  ========================================================================</span>
-<a name="5448524F544454"></a>036423,000109: 30,3464           00303        <span class="sm">THROTDT </span>           <span class="ps">DEC     </span> +195       B-14                       
-<a name="5047554944"></a>036424,000110: 30,3465           00310        <span class="sm">PGUID   </span>           <span class="ps">DEC     </span> +200       B-14                       
-036425,000111:                                                                                                  <span class="co">#  ========================================================================</span>
-036426,000112: 
+036428,000108:                                                                                                  <span class="co">#  ========================================================================</span>
+<a name="5448524F544454"></a>036429,000109: 30,3464           00303        <span class="sm">THROTDT </span>           <span class="ps">DEC     </span> +195       B-14                       
+<a name="5047554944"></a>036430,000110: 30,3465           00310        <span class="sm">PGUID   </span>           <span class="ps">DEC     </span> +200       B-14                       
+036431,000111:                                                                                                  <span class="co">#  ========================================================================</span>
+036432,000112: 
 </pre>
 </span>
 </p>
@@ -263,47 +263,47 @@ Page 851
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-036428,000114:                                                                                                  <span class="co">#  ***********</span>
-036429,000115:                                                                                                  <span class="co">#  * ENTRIES *</span>
-036430,000116:                                                                                                  <span class="co">#  ***********</span>
-036431,000117: 
-036432,000118:                                                                                                  <span class="co">#  THIS ENTRY SETS UP A JOB WHICH WILL</span>
-036433,000119:                                                                                                  <span class="co">#  DELIVER A SPECIFIED FRACTION OF MAXIMUM</span>
-036434,000120:                                                                                                  <span class="co">#  THRUST.   THIS FRACTION ARRIVES (SP) IN</span>
-036435,000121:                                                                                                  <span class="co">#  REGISTER PCNTF.</span>
-036436,000122: 
-<a name="50434E54464D4158"></a>036437,000123: 30,3466           53575        <span class="sm">PCNTFMAX</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52544E484F4C44">RTNHOLD</a>                               <span class="co">#  RETAINING 2CADR FOR RETURN TO USER</span>
-036438,000124: 30,3467           35647                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3235">PRIO25</a>                                
-036439,000125: 30,3470           00004                           <span class="op">INHINT  </span>                                       
-036440,000126: 30,3471           05505                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
-036441,000127: 30,3472  E5,1565                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455448524F54">ETHROT</a>                                
-036442,000128: 30,3472           03507 60065                     <span class="ps">2CADR   </span> <a href="#50434E544A4F42">PCNTJOB</a>                               
-036443,000129: 
-036444,000130: 30,3474           00003                           <span class="op">RELINT  </span>                                       
-036445,000131: 30,3475           13505                           <span class="op">TCF     </span> <a href="#41574159">AWAY</a>                                  
-036446,000132: 
-036447,000133:                                                                                                  <span class="co">#  NORMAL ENTRY FROM GUIDANCE EQUATIONS:</span>
-036448,000134:                                                                                                  <span class="co">#  THE JOB SET UP HERE DELIVERS A THRUST</span>
-036449,000135:                                                                                                  <span class="co">#  CORRESPONDING TO THE DESIRED MAGNITUDE</span>
-036450,000136:                                                                                                  <span class="co">#  OF THRUST-ACCELERATION.   THIS VALUE</span>
-036451,000137:                                                                                                  <span class="co">#  ARRIVES (DP) IN /ACF/, SCALED IN UNITS</span>
-036452,000138:                                                                                                  <span class="co">#  OF 2(-5) M/CS/CS.</span>
-036453,000139: 
-<a name="5448524F54434F4E"></a>036454,000140: 30,3476           53575        <span class="sm">THROTCON</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52544E484F4C44">RTNHOLD</a>                               <span class="co">#  RETAINING 2CADR FOR RETURN TO USER</span>
-036455,000141: 30,3477           35210                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3330">PRIO30</a>                                
-036456,000142: 30,3500           00004                           <span class="op">INHINT  </span>                                       
-036457,000143: 30,3501           05505                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
-036458,000144: 30,3502  E5,1565                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455448524F54">ETHROT</a>                                
-036459,000145: 30,3502           03540 60065                     <span class="ps">2CADR   </span> <a href="#4143434C4A4F42">ACCLJOB</a>                               
-036460,000146: 
-036461,000147: 30,3504           00003                           <span class="op">RELINT  </span>                                       
-036462,000148: 
-036463,000149: 
-036464,000150:                                                                                                  <span class="co">#  THIS RETURN IS COMMON TO BOTH ENTRIES.</span>
-036465,000151: 
-<a name="41574159"></a>036466,000152: 30,3505           53575        <span class="sm">AWAY    </span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52544E484F4C44">RTNHOLD</a>                               
-036467,000153: 30,3506           52006                           <span class="op">DTCB    </span>                                       
-036468,000154: 
+036434,000114:                                                                                                  <span class="co">#  ***********</span>
+036435,000115:                                                                                                  <span class="co">#  * ENTRIES *</span>
+036436,000116:                                                                                                  <span class="co">#  ***********</span>
+036437,000117: 
+036438,000118:                                                                                                  <span class="co">#  THIS ENTRY SETS UP A JOB WHICH WILL</span>
+036439,000119:                                                                                                  <span class="co">#  DELIVER A SPECIFIED FRACTION OF MAXIMUM</span>
+036440,000120:                                                                                                  <span class="co">#  THRUST.   THIS FRACTION ARRIVES (SP) IN</span>
+036441,000121:                                                                                                  <span class="co">#  REGISTER PCNTF.</span>
+036442,000122: 
+<a name="50434E54464D4158"></a>036443,000123: 30,3466           53575        <span class="sm">PCNTFMAX</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52544E484F4C44">RTNHOLD</a>                               <span class="co">#  RETAINING 2CADR FOR RETURN TO USER</span>
+036444,000124: 30,3467           35647                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3235">PRIO25</a>                                
+036445,000125: 30,3470           00004                           <span class="op">INHINT  </span>                                       
+036446,000126: 30,3471           05505                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
+036447,000127: 30,3472  E5,1565                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455448524F54">ETHROT</a>                                
+036448,000128: 30,3472           03507 60065                     <span class="ps">2CADR   </span> <a href="#50434E544A4F42">PCNTJOB</a>                               
+036449,000129: 
+036450,000130: 30,3474           00003                           <span class="op">RELINT  </span>                                       
+036451,000131: 30,3475           13505                           <span class="op">TCF     </span> <a href="#41574159">AWAY</a>                                  
+036452,000132: 
+036453,000133:                                                                                                  <span class="co">#  NORMAL ENTRY FROM GUIDANCE EQUATIONS:</span>
+036454,000134:                                                                                                  <span class="co">#  THE JOB SET UP HERE DELIVERS A THRUST</span>
+036455,000135:                                                                                                  <span class="co">#  CORRESPONDING TO THE DESIRED MAGNITUDE</span>
+036456,000136:                                                                                                  <span class="co">#  OF THRUST-ACCELERATION.   THIS VALUE</span>
+036457,000137:                                                                                                  <span class="co">#  ARRIVES (DP) IN /ACF/, SCALED IN UNITS</span>
+036458,000138:                                                                                                  <span class="co">#  OF 2(-5) M/CS/CS.</span>
+036459,000139: 
+<a name="5448524F54434F4E"></a>036460,000140: 30,3476           53575        <span class="sm">THROTCON</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52544E484F4C44">RTNHOLD</a>                               <span class="co">#  RETAINING 2CADR FOR RETURN TO USER</span>
+036461,000141: 30,3477           35210                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3330">PRIO30</a>                                
+036462,000142: 30,3500           00004                           <span class="op">INHINT  </span>                                       
+036463,000143: 30,3501           05505                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
+036464,000144: 30,3502  E5,1565                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455448524F54">ETHROT</a>                                
+036465,000145: 30,3502           03540 60065                     <span class="ps">2CADR   </span> <a href="#4143434C4A4F42">ACCLJOB</a>                               
+036466,000146: 
+036467,000147: 30,3504           00003                           <span class="op">RELINT  </span>                                       
+036468,000148: 
+036469,000149: 
+036470,000150:                                                                                                  <span class="co">#  THIS RETURN IS COMMON TO BOTH ENTRIES.</span>
+036471,000151: 
+<a name="41574159"></a>036472,000152: 30,3505           53575        <span class="sm">AWAY    </span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52544E484F4C44">RTNHOLD</a>                               
+036473,000153: 30,3506           52006                           <span class="op">DTCB    </span>                                       
+036474,000154: 
 </pre>
 </span>
 </p>
@@ -319,36 +319,36 @@ Page 852
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-036470,000156:                                                                                                  <span class="co">#  ***************</span>
-036471,000157:                                                                                                  <span class="co">#  * COMPUTATION *</span>
-036472,000158:                                                                                                  <span class="co">#  ***************</span>
-036473,000159: 
-<a name="50434E544A4F42"></a>036474,000160: 30,3507           00004        <span class="sm">PCNTJOB </span>           <span class="op">INHINT  </span>                                       <span class="co">#  SINCE THROTTLING IS ABOUT TO COMMENCE.</span>
-036475,000161: 
-036476,000162: 30,3510           33464                           <span class="op">CAF     </span> <a href="#5448524F544454">THROTDT</a>                               <span class="co">#  SET UP A TASK TO ZERO FWEIGHT IN 2 SECS</span>
-036477,000163: 30,3511           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-036478,000164: 30,3512  E5,1565                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455448524F54">ETHROT</a>                                
-036479,000165: 30,3512           03456 60065                     <span class="ps">2CADR   </span> <a href="#50434E544F564552">PCNTOVER</a>                              
-036480,000166: 
-036481,000167: 30,3514           04141                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#3250485343484E47">2PHSCHNG</a>                              
-036482,000168: 30,3515           40031                           <span class="ps">OCT     </span> 40031                                 <span class="co">#  1.3 SPOT FOR PCNTOVER</span>
-036483,000169: 30,3516           05024                           <span class="ps">OCT     </span> 05024                                 
-036484,000170: 30,3517           25000                           <span class="ps">OCT     </span> 25000                                 
-036485,000171: 
-036486,000172: 30,3520           00006                           <span class="op">EXTEND  </span>                                       
-036487,000173: 30,3521           43701                           <span class="op">DCS     </span> <a href="#2D464D4158">-FMAX</a>                                 
-036488,000174: 30,3522           52145                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-036489,000175: 30,3523           31323                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50434E5446">PCNTF</a>                                 
-036490,000176: 30,3524           07357                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#53484F52544D50">SHORTMP</a>                               
-036491,000177: 30,3525           52145                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  LOADING</span>
-036492,000178: 30,3526           53571                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4643">FC</a>                                    <span class="co">#  STORING</span>
-036493,000179: 
-036494,000180: 30,3527           37767                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  ZEROING FWEIGHT SINCE IT'S UNKNOWN</span>
-036495,000181: 30,3530           55576                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46574549474854">FWEIGHT</a>                               
-036496,000182: 30,3531           55577                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46574549474854">FWEIGHT</a>    +1                         
-036497,000183: 30,3532           13547                           <span class="op">TCF     </span> <a href="#464F4C4443414C43">FOLDCALC</a>                              
-036498,000184: 
-036499,000185: 
+036476,000156:                                                                                                  <span class="co">#  ***************</span>
+036477,000157:                                                                                                  <span class="co">#  * COMPUTATION *</span>
+036478,000158:                                                                                                  <span class="co">#  ***************</span>
+036479,000159: 
+<a name="50434E544A4F42"></a>036480,000160: 30,3507           00004        <span class="sm">PCNTJOB </span>           <span class="op">INHINT  </span>                                       <span class="co">#  SINCE THROTTLING IS ABOUT TO COMMENCE.</span>
+036481,000161: 
+036482,000162: 30,3510           33464                           <span class="op">CAF     </span> <a href="#5448524F544454">THROTDT</a>                               <span class="co">#  SET UP A TASK TO ZERO FWEIGHT IN 2 SECS</span>
+036483,000163: 30,3511           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+036484,000164: 30,3512  E5,1565                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455448524F54">ETHROT</a>                                
+036485,000165: 30,3512           03456 60065                     <span class="ps">2CADR   </span> <a href="#50434E544F564552">PCNTOVER</a>                              
+036486,000166: 
+036487,000167: 30,3514           04141                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#3250485343484E47">2PHSCHNG</a>                              
+036488,000168: 30,3515           40031                           <span class="ps">OCT     </span> 40031                                 <span class="co">#  1.3 SPOT FOR PCNTOVER</span>
+036489,000169: 30,3516           05024                           <span class="ps">OCT     </span> 05024                                 
+036490,000170: 30,3517           25000                           <span class="ps">OCT     </span> 25000                                 
+036491,000171: 
+036492,000172: 30,3520           00006                           <span class="op">EXTEND  </span>                                       
+036493,000173: 30,3521           43701                           <span class="op">DCS     </span> <a href="#2D464D4158">-FMAX</a>                                 
+036494,000174: 30,3522           52145                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+036495,000175: 30,3523           31323                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50434E5446">PCNTF</a>                                 
+036496,000176: 30,3524           07357                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#53484F52544D50">SHORTMP</a>                               
+036497,000177: 30,3525           52145                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  LOADING</span>
+036498,000178: 30,3526           53571                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4643">FC</a>                                    <span class="co">#  STORING</span>
+036499,000179: 
+036500,000180: 30,3527           37767                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  ZEROING FWEIGHT SINCE IT'S UNKNOWN</span>
+036501,000181: 30,3530           55576                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46574549474854">FWEIGHT</a>                               
+036502,000182: 30,3531           55577                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46574549474854">FWEIGHT</a>    +1                         
+036503,000183: 30,3532           13547                           <span class="op">TCF     </span> <a href="#464F4C4443414C43">FOLDCALC</a>                              
+036504,000184: 
+036505,000185: 
 </pre>
 </span>
 </p>
@@ -366,24 +366,24 @@ hardcopy, they appear as small rectangular boxes.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-036503,000189:                                                                                                  <span class="co">#  ########################################################################</span>
-<a name="5343414C45464143"></a>036504,000190: 30,3533           00063 36233  <span class="sm">SCALEFAC</span>           <span class="ps">2DEC    </span> +51.946987 B-14                       <span class="co">#  QUASI-NEWTONS TO PULSE UNITS</span>
-036505,000191: 
-<a name="322E50472E465254"></a>036506,000192: 30,3535           31000        <span class="sm">2.PG.FRT</span>           <span class="ps">DEC     </span> 12800      B-14                       <span class="co">#  TWICE PGUID TIME PULSE RATE</span>
-<a name="2D4C4F43524954"></a>036507,000193: 30,3536           74034        <span class="sm">-LOCRIT </span>           <span class="ps">DEC     </span> -2019      B-14                       <span class="co">#  THE LOWER MID-SCALE CRITERION</span>
-<a name="464558545241"></a>036508,000194: 30,3537  30,3536               <span class="sm">FEXTRA  </span>           <span class="ps">=       </span> <a href="#2D4C4F43524954">-LOCRIT</a>                               
-<a name="2B464C4F57"></a>036509,000195: 30,3537           00666        <span class="sm">+FLOW   </span>           <span class="ps">DEC     </span> +438       B-14                       <span class="co">#  MINIMUM ATTAINABLE THRUST</span>
-036510,000196:                                                                                                  <span class="co">#  ########################################################################</span>
-036511,000197: 
-<a name="4143434C4A4F42"></a>036512,000198: 30,3540           04161        <span class="sm">ACCLJOB </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
-036513,000199: 30,3541           05024                           <span class="ps">OCT     </span> 05024                                 
-036514,000200: 30,3542           30000                           <span class="ps">OCT     </span> 30000                                 
-036515,000201: 
-036516,000202: 30,3543           00006                           <span class="op">EXTEND  </span>                                       
-036517,000203: 30,3544           31323                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2F4143462F">/ACF/</a>                                 
-036518,000204: 30,3545           03445                           <span class="op">TC      </span> <a href="#4D4153534D554C54">MASSMULT</a>                              
-036519,000205: 30,3546           53571                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4643">FC</a>                                    <span class="co">#  FC = MASS /ACF/, SCALED</span>
-036520,000206: 
+036509,000189:                                                                                                  <span class="co">#  ########################################################################</span>
+<a name="5343414C45464143"></a>036510,000190: 30,3533           00063 36233  <span class="sm">SCALEFAC</span>           <span class="ps">2DEC    </span> +51.946987 B-14                       <span class="co">#  QUASI-NEWTONS TO PULSE UNITS</span>
+036511,000191: 
+<a name="322E50472E465254"></a>036512,000192: 30,3535           31000        <span class="sm">2.PG.FRT</span>           <span class="ps">DEC     </span> 12800      B-14                       <span class="co">#  TWICE PGUID TIME PULSE RATE</span>
+<a name="2D4C4F43524954"></a>036513,000193: 30,3536           74034        <span class="sm">-LOCRIT </span>           <span class="ps">DEC     </span> -2019      B-14                       <span class="co">#  THE LOWER MID-SCALE CRITERION</span>
+<a name="464558545241"></a>036514,000194: 30,3537  30,3536               <span class="sm">FEXTRA  </span>           <span class="ps">=       </span> <a href="#2D4C4F43524954">-LOCRIT</a>                               
+<a name="2B464C4F57"></a>036515,000195: 30,3537           00666        <span class="sm">+FLOW   </span>           <span class="ps">DEC     </span> +438       B-14                       <span class="co">#  MINIMUM ATTAINABLE THRUST</span>
+036516,000196:                                                                                                  <span class="co">#  ########################################################################</span>
+036517,000197: 
+<a name="4143434C4A4F42"></a>036518,000198: 30,3540           04161        <span class="sm">ACCLJOB </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
+036519,000199: 30,3541           05024                           <span class="ps">OCT     </span> 05024                                 
+036520,000200: 30,3542           30000                           <span class="ps">OCT     </span> 30000                                 
+036521,000201: 
+036522,000202: 30,3543           00006                           <span class="op">EXTEND  </span>                                       
+036523,000203: 30,3544           31323                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2F4143462F">/ACF/</a>                                 
+036524,000204: 30,3545           03445                           <span class="op">TC      </span> <a href="#4D4153534D554C54">MASSMULT</a>                              
+036525,000205: 30,3546           53571                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4643">FC</a>                                    <span class="co">#  FC = MASS /ACF/, SCALED</span>
+036526,000206: 
 </pre>
 </span>
 </p>
@@ -399,55 +399,55 @@ Page 853
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="464F4C4443414C43"></a>036522,000208: 30,3547           00006        <span class="sm">FOLDCALC</span>           <span class="op">EXTEND  </span>                                       
-036523,000209: 30,3550           31325                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2F41462F">/AF/</a>                                  
-036524,000210: 30,3551           03445                           <span class="op">TC      </span> <a href="#4D4153534D554C54">MASSMULT</a>                              
-036525,000211: 30,3552           53566                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F4C44">FOLD</a>                                  <span class="co">#  FOLD = MASS /AF/, SCALED</span>
-036526,000212: 
-036527,000213: 30,3553           00006                           <span class="op">EXTEND  </span>                                       
-036528,000214: 30,3554           31577                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46574549474854">FWEIGHT</a>                               <span class="co">#  WEIGHTING FOLD BY FWEIGHT</span>
-036529,000215: 30,3555           21566                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F4C44">FOLD</a>                                  <span class="co">#    AS COMPUTED LAST PASS</span>
-036530,000216: 
-036531,000217:                                                                                                  <span class="co">#  IF THE THROTTLE IS AT MAXIMUM, THE</span>
-036532,000218:                                                                                                  <span class="co">#  QUANTITY  -(FODD-FOLD)  IS COMPUTED AND</span>
-036533,000219:                                                                                                  <span class="co">#  PUT INTO PIFPSET TO COMPENSATE FOR THE</span>
-036534,000220:                                                                                                  <span class="co">#  DIFFERENCE BETWEEN THE NUMBER OF BITS</span>
-036535,000221:                                                                                                  <span class="co">#  (I.E. PULSES) CORRESPONDING TO 100%</span>
-036536,000222:                                                                                                  <span class="co">#  THROTTLE (FODD) AND THE NUMBER CORRES-</span>
-036537,000223:                                                                                                  <span class="co">#  PONDING TO ACTUAL THRUST (FOLD).   THIS</span>
-036538,000224:                                                                                                  <span class="co">#  COMPENSATION IS NEEDED IF THE THROTTLE</span>
-036539,000225:                                                                                                  <span class="co">#  RETURNS TO THE THROTTLEABLE REGION THIS</span>
-036540,000226:                                                                                                  <span class="co">#  PASS.   IF IT DOES NOT, PIFPSET IS RESET</span>
-036541,000227:                                                                                                  <span class="co">#  IN FLATOUT.</span>
-036542,000228: 
-<a name="46434F4D50534554"></a>036543,000229: 30,3556           47767        <span class="sm">FCOMPSET</span>           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
-036544,000230: 30,3557           55574                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50494650534554">PIFPSET</a>                               
-036545,000231: 30,3560           43704                           <span class="op">CS      </span> <a href="#2B484943524954">+HICRIT</a>                               
-036546,000232: 30,3561           61567                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46434F4C44">FCOLD</a>                                 
-036547,000233: 30,3562           00006                           <span class="op">EXTEND  </span>                                       
-036548,000234: 30,3563           63567                           <span class="op">BZMF    </span> <a href="#49532D49542D4F4E">IS-IT-ON</a>                              <span class="co">#  BRANCH IF FCOLD &lt; HICRIT, OTHERWISE</span>
-036549,000235: 30,3564           43677                           <span class="op">CS      </span> <a href="#2B464F4444">+FODD</a>                                 <span class="co">#    COMPUTE THE COMPENSATION NUMBER</span>
-036550,000236: 30,3565           61565                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F4C44">FOLD</a>                                  
-036551,000237: 30,3566           55574                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50494650534554">PIFPSET</a>                               
-036552,000238: 
-036553,000239: 
-036554,000240: 
-036555,000241:                                                                                                  <span class="co">#  THIS ROUTINE CHECKS THE ENGINE-OFF BIT.</span>
-036556,000242:                                                                                                  <span class="co">#  IF THE ENGINE IS OFF, FCOLD IS SET TO</span>
-036557,000243:                                                                                                  <span class="co">#  10 PERCENT FMAX, AND, SINCE /AF/ DOES</span>
-036558,000244:                                                                                                  <span class="co">#  NOT REFLECT THE SETTING OF THE MANUAL</span>
-036559,000245:                                                                                                  <span class="co">#  THROTTLE, THAT SETTING (AROUND 12%) IS</span>
-036560,000246:                                                                                                  <span class="co">#  PLACED NEGATIVELY IN PIFPSET.</span>
-036561,000247: 
-<a name="49532D49542D4F4E"></a>036562,000248: 30,3567           40075        <span class="sm">IS-IT-ON</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524431">FLAGWRD1</a>                              
-036563,000249: 30,3570           77757                           <span class="op">MASK    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#454E47494E424954">ENGINBIT</a>                              
-036564,000250: 30,3571           00006                           <span class="op">EXTEND  </span>                                       
-036565,000251: 30,3572           13577                           <span class="op">BZF     </span> <a href="#5748455245544F">WHERETO</a>                               <span class="co">#  BRANCH HERE IF ENGINE IS ON</span>
-036566,000252: 30,3573           33537                           <span class="op">CA      </span> <a href="#2B464C4F57">+FLOW</a>                                 
-036567,000253: 30,3574           55567                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46434F4C44">FCOLD</a>                                 <span class="co">#  SETTING FCOLD</span>
-036568,000254: 30,3575           43537                           <span class="op">CS      </span> <a href="#2B464C4F57">+FLOW</a>                                 
-036569,000255: 30,3576           55574                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50494650534554">PIFPSET</a>                               
-036570,000256: 
+<a name="464F4C4443414C43"></a>036528,000208: 30,3547           00006        <span class="sm">FOLDCALC</span>           <span class="op">EXTEND  </span>                                       
+036529,000209: 30,3550           31325                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2F41462F">/AF/</a>                                  
+036530,000210: 30,3551           03445                           <span class="op">TC      </span> <a href="#4D4153534D554C54">MASSMULT</a>                              
+036531,000211: 30,3552           53566                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F4C44">FOLD</a>                                  <span class="co">#  FOLD = MASS /AF/, SCALED</span>
+036532,000212: 
+036533,000213: 30,3553           00006                           <span class="op">EXTEND  </span>                                       
+036534,000214: 30,3554           31577                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46574549474854">FWEIGHT</a>                               <span class="co">#  WEIGHTING FOLD BY FWEIGHT</span>
+036535,000215: 30,3555           21566                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F4C44">FOLD</a>                                  <span class="co">#    AS COMPUTED LAST PASS</span>
+036536,000216: 
+036537,000217:                                                                                                  <span class="co">#  IF THE THROTTLE IS AT MAXIMUM, THE</span>
+036538,000218:                                                                                                  <span class="co">#  QUANTITY  -(FODD-FOLD)  IS COMPUTED AND</span>
+036539,000219:                                                                                                  <span class="co">#  PUT INTO PIFPSET TO COMPENSATE FOR THE</span>
+036540,000220:                                                                                                  <span class="co">#  DIFFERENCE BETWEEN THE NUMBER OF BITS</span>
+036541,000221:                                                                                                  <span class="co">#  (I.E. PULSES) CORRESPONDING TO 100%</span>
+036542,000222:                                                                                                  <span class="co">#  THROTTLE (FODD) AND THE NUMBER CORRES-</span>
+036543,000223:                                                                                                  <span class="co">#  PONDING TO ACTUAL THRUST (FOLD).   THIS</span>
+036544,000224:                                                                                                  <span class="co">#  COMPENSATION IS NEEDED IF THE THROTTLE</span>
+036545,000225:                                                                                                  <span class="co">#  RETURNS TO THE THROTTLEABLE REGION THIS</span>
+036546,000226:                                                                                                  <span class="co">#  PASS.   IF IT DOES NOT, PIFPSET IS RESET</span>
+036547,000227:                                                                                                  <span class="co">#  IN FLATOUT.</span>
+036548,000228: 
+<a name="46434F4D50534554"></a>036549,000229: 30,3556           47767        <span class="sm">FCOMPSET</span>           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
+036550,000230: 30,3557           55574                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50494650534554">PIFPSET</a>                               
+036551,000231: 30,3560           43704                           <span class="op">CS      </span> <a href="#2B484943524954">+HICRIT</a>                               
+036552,000232: 30,3561           61567                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46434F4C44">FCOLD</a>                                 
+036553,000233: 30,3562           00006                           <span class="op">EXTEND  </span>                                       
+036554,000234: 30,3563           63567                           <span class="op">BZMF    </span> <a href="#49532D49542D4F4E">IS-IT-ON</a>                              <span class="co">#  BRANCH IF FCOLD &lt; HICRIT, OTHERWISE</span>
+036555,000235: 30,3564           43677                           <span class="op">CS      </span> <a href="#2B464F4444">+FODD</a>                                 <span class="co">#    COMPUTE THE COMPENSATION NUMBER</span>
+036556,000236: 30,3565           61565                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F4C44">FOLD</a>                                  
+036557,000237: 30,3566           55574                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50494650534554">PIFPSET</a>                               
+036558,000238: 
+036559,000239: 
+036560,000240: 
+036561,000241:                                                                                                  <span class="co">#  THIS ROUTINE CHECKS THE ENGINE-OFF BIT.</span>
+036562,000242:                                                                                                  <span class="co">#  IF THE ENGINE IS OFF, FCOLD IS SET TO</span>
+036563,000243:                                                                                                  <span class="co">#  10 PERCENT FMAX, AND, SINCE /AF/ DOES</span>
+036564,000244:                                                                                                  <span class="co">#  NOT REFLECT THE SETTING OF THE MANUAL</span>
+036565,000245:                                                                                                  <span class="co">#  THROTTLE, THAT SETTING (AROUND 12%) IS</span>
+036566,000246:                                                                                                  <span class="co">#  PLACED NEGATIVELY IN PIFPSET.</span>
+036567,000247: 
+<a name="49532D49542D4F4E"></a>036568,000248: 30,3567           40075        <span class="sm">IS-IT-ON</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524431">FLAGWRD1</a>                              
+036569,000249: 30,3570           77757                           <span class="op">MASK    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#454E47494E424954">ENGINBIT</a>                              
+036570,000250: 30,3571           00006                           <span class="op">EXTEND  </span>                                       
+036571,000251: 30,3572           13577                           <span class="op">BZF     </span> <a href="#5748455245544F">WHERETO</a>                               <span class="co">#  BRANCH HERE IF ENGINE IS ON</span>
+036572,000252: 30,3573           33537                           <span class="op">CA      </span> <a href="#2B464C4F57">+FLOW</a>                                 
+036573,000253: 30,3574           55567                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46434F4C44">FCOLD</a>                                 <span class="co">#  SETTING FCOLD</span>
+036574,000254: 30,3575           43537                           <span class="op">CS      </span> <a href="#2B464C4F57">+FLOW</a>                                 
+036575,000255: 30,3576           55574                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50494650534554">PIFPSET</a>                               
+036576,000256: 
 </pre>
 </span>
 </p>
@@ -463,32 +463,32 @@ Page 854
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-036572,000258:                                                                                                  <span class="co">#  ************</span>
-036573,000259:                                                                                                  <span class="co">#  * DECISION *</span>
-036574,000260:                                                                                                  <span class="co">#  ************</span>
-036575,000261: 
-036576,000262:                                                                                                  <span class="co">#  THIS LOGIC DETERMINES THROTTLING IN THE</span>
-036577,000263:                                                                                                  <span class="co">#  REGION 10% - 94%.   THE MANUAL THROTTLE,</span>
-036578,000264:                                                                                                  <span class="co">#  SET TO MINIMUM BY MISSION PHASE PROGRMS,</span>
-036579,000265:                                                                                                  <span class="co">#  PROVIDES THE LOWER BOUND; A STOP IN THE</span>
-036580,000266:                                                                                                  <span class="co">#  ENGINE ITSELF PROVIDES THE UPPER.</span>
-036581,000267: 
-036582,000268: 
-036583,000269: 
-<a name="5748455245544F"></a>036584,000270: 30,3577           31570        <span class="sm">WHERETO </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4643">FC</a>                                    
-036585,000271: 30,3600           63536                           <span class="op">AD      </span> <a href="#2D4C4F43524954">-LOCRIT</a>                               
-036586,000272: 30,3601           00006                           <span class="op">EXTEND  </span>                                       
-036587,000273: 30,3602           63620                           <span class="op">BZMF    </span> <a href="#444F504946">DOPIF</a>                                 <span class="co">#  BRANCH IF FC &lt; LOCRIT</span>
-036588,000274: 30,3603           41570                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4643">FC</a>                                    
-036589,000275: 30,3604           63704                           <span class="op">AD      </span> <a href="#2B484943524954">+HICRIT</a>                               
-036590,000276: 30,3605           00006                           <span class="op">EXTEND  </span>                                       
-036591,000277: 30,3606           63613                           <span class="op">BZMF    </span> <a href="#464C41544F5554">FLATOUT</a>                               <span class="co">#  BRANCH IF FC > OR = HICRIT</span>
-036592,000278: 30,3607           43704                           <span class="op">CS      </span> <a href="#2B484943524954">+HICRIT</a>                               
-036593,000279: 30,3610           61567                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46434F4C44">FCOLD</a>                                 
-036594,000280: 30,3611           00006                           <span class="op">EXTEND  </span>                                       
-036595,000281: 30,3612           63620                           <span class="op">BZMF    </span> <a href="#444F504946">DOPIF</a>                                 <span class="co">#  BRANCH IF FCOLD &lt; OR = HICRIT,</span>
-036596,000282:                                                                                                  <span class="co">#    OTHERWISE PROCEED TO FLATOUT</span>
-036597,000283: 
+036578,000258:                                                                                                  <span class="co">#  ************</span>
+036579,000259:                                                                                                  <span class="co">#  * DECISION *</span>
+036580,000260:                                                                                                  <span class="co">#  ************</span>
+036581,000261: 
+036582,000262:                                                                                                  <span class="co">#  THIS LOGIC DETERMINES THROTTLING IN THE</span>
+036583,000263:                                                                                                  <span class="co">#  REGION 10% - 94%.   THE MANUAL THROTTLE,</span>
+036584,000264:                                                                                                  <span class="co">#  SET TO MINIMUM BY MISSION PHASE PROGRMS,</span>
+036585,000265:                                                                                                  <span class="co">#  PROVIDES THE LOWER BOUND; A STOP IN THE</span>
+036586,000266:                                                                                                  <span class="co">#  ENGINE ITSELF PROVIDES THE UPPER.</span>
+036587,000267: 
+036588,000268: 
+036589,000269: 
+<a name="5748455245544F"></a>036590,000270: 30,3577           31570        <span class="sm">WHERETO </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4643">FC</a>                                    
+036591,000271: 30,3600           63536                           <span class="op">AD      </span> <a href="#2D4C4F43524954">-LOCRIT</a>                               
+036592,000272: 30,3601           00006                           <span class="op">EXTEND  </span>                                       
+036593,000273: 30,3602           63620                           <span class="op">BZMF    </span> <a href="#444F504946">DOPIF</a>                                 <span class="co">#  BRANCH IF FC &lt; LOCRIT</span>
+036594,000274: 30,3603           41570                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4643">FC</a>                                    
+036595,000275: 30,3604           63704                           <span class="op">AD      </span> <a href="#2B484943524954">+HICRIT</a>                               
+036596,000276: 30,3605           00006                           <span class="op">EXTEND  </span>                                       
+036597,000277: 30,3606           63613                           <span class="op">BZMF    </span> <a href="#464C41544F5554">FLATOUT</a>                               <span class="co">#  BRANCH IF FC > OR = HICRIT</span>
+036598,000278: 30,3607           43704                           <span class="op">CS      </span> <a href="#2B484943524954">+HICRIT</a>                               
+036599,000279: 30,3610           61567                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46434F4C44">FCOLD</a>                                 
+036600,000280: 30,3611           00006                           <span class="op">EXTEND  </span>                                       
+036601,000281: 30,3612           63620                           <span class="op">BZMF    </span> <a href="#444F504946">DOPIF</a>                                 <span class="co">#  BRANCH IF FCOLD &lt; OR = HICRIT,</span>
+036602,000282:                                                                                                  <span class="co">#    OTHERWISE PROCEED TO FLATOUT</span>
+036603,000283: 
 </pre>
 </span>
 </p>
@@ -504,38 +504,38 @@ Page 855
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-036599,000285:                                                                                                  <span class="co">#  *************</span>
-036600,000286:                                                                                                  <span class="co">#  * EXECUTION *</span>
-036601,000287:                                                                                                  <span class="co">#  *************</span>
-036602,000288: 
-<a name="464C41544F5554"></a>036603,000289: 30,3613           00006        <span class="sm">FLATOUT </span>           <span class="op">EXTEND  </span>                                       
-036604,000290: 30,3614           33703                           <span class="op">DCA     </span> <a href="#2B4648494748">+FHIGH</a>                                
-036605,000291: 30,3615           53571                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4643">FC</a>                                    
-036606,000292: 30,3616           43536                           <span class="op">CS      </span> <a href="#464558545241">FEXTRA</a>                                
-036607,000293: 30,3617           55574                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50494650534554">PIFPSET</a>                               
-036608,000294: 
-<a name="444F504946"></a>036609,000295: 30,3620           04161        <span class="sm">DOPIF   </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
-036610,000296: 30,3621           04024                           <span class="ps">OCT     </span> 04024                                 <span class="co">#  ?</span>
-036611,000297: 
-036612,000298: 30,3622           00006                           <span class="op">EXTEND  </span>                                       
-036613,000299: 30,3623           31571                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4643">FC</a>                                    
-036614,000300: 30,3624           55567                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46434F4C44">FCOLD</a>                                 <span class="co">#  HISTORY</span>
-036615,000301: 30,3625           53573                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504946">PIF</a>                                   
-036616,000302: 30,3626           00006                           <span class="op">EXTEND  </span>                                       
-036617,000303: 30,3627           41566                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F4C44">FOLD</a>                                  
-036618,000304: 30,3630           21573                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504946">PIF</a>                                   <span class="co">#  PIF = FC - FOLD</span>
-036619,000305: 30,3631           03713                           <span class="op">TC      </span> <a href="#4441504C4F474943">DAPLOGIC</a>                              
-036620,000306: 
-<a name="4441504C5245544E"></a>036621,000307: 30,3632           31572        <span class="sm">DAPLRETN</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504946">PIF</a>                                   
-036622,000308: 30,3633           61574                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50494650534554">PIFPSET</a>                               <span class="co">#  ADD IN PIFPSET, NOT CHANGING PIF</span>
-036623,000309: 
-<a name="444F4954"></a>036624,000310: 30,3634           54055        <span class="sm">DOIT    </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544852555354">THRUST</a>                                
-036625,000311: 30,3635           04161                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
-036626,000312: 30,3636           04024                           <span class="ps">OCT     </span> 04024                                 
-036627,000313: 
-036628,000314: 30,3637           37760                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495434">BIT4</a>                                  
-036629,000315: 30,3640           00006                           <span class="op">EXTEND  </span>                                       
-036630,000316: 30,3641           05014                           <span class="op">WOR     </span> 14                                    <span class="co">#  AND THE ENGINE DOES THE REST...</span>
+036605,000285:                                                                                                  <span class="co">#  *************</span>
+036606,000286:                                                                                                  <span class="co">#  * EXECUTION *</span>
+036607,000287:                                                                                                  <span class="co">#  *************</span>
+036608,000288: 
+<a name="464C41544F5554"></a>036609,000289: 30,3613           00006        <span class="sm">FLATOUT </span>           <span class="op">EXTEND  </span>                                       
+036610,000290: 30,3614           33703                           <span class="op">DCA     </span> <a href="#2B4648494748">+FHIGH</a>                                
+036611,000291: 30,3615           53571                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4643">FC</a>                                    
+036612,000292: 30,3616           43536                           <span class="op">CS      </span> <a href="#464558545241">FEXTRA</a>                                
+036613,000293: 30,3617           55574                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50494650534554">PIFPSET</a>                               
+036614,000294: 
+<a name="444F504946"></a>036615,000295: 30,3620           04161        <span class="sm">DOPIF   </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
+036616,000296: 30,3621           04024                           <span class="ps">OCT     </span> 04024                                 <span class="co">#  ?</span>
+036617,000297: 
+036618,000298: 30,3622           00006                           <span class="op">EXTEND  </span>                                       
+036619,000299: 30,3623           31571                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4643">FC</a>                                    
+036620,000300: 30,3624           55567                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46434F4C44">FCOLD</a>                                 <span class="co">#  HISTORY</span>
+036621,000301: 30,3625           53573                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504946">PIF</a>                                   
+036622,000302: 30,3626           00006                           <span class="op">EXTEND  </span>                                       
+036623,000303: 30,3627           41566                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F4C44">FOLD</a>                                  
+036624,000304: 30,3630           21573                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504946">PIF</a>                                   <span class="co">#  PIF = FC - FOLD</span>
+036625,000305: 30,3631           03713                           <span class="op">TC      </span> <a href="#4441504C4F474943">DAPLOGIC</a>                              
+036626,000306: 
+<a name="4441504C5245544E"></a>036627,000307: 30,3632           31572        <span class="sm">DAPLRETN</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504946">PIF</a>                                   
+036628,000308: 30,3633           61574                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50494650534554">PIFPSET</a>                               <span class="co">#  ADD IN PIFPSET, NOT CHANGING PIF</span>
+036629,000309: 
+<a name="444F4954"></a>036630,000310: 30,3634           54055        <span class="sm">DOIT    </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544852555354">THRUST</a>                                
+036631,000311: 30,3635           04161                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
+036632,000312: 30,3636           04024                           <span class="ps">OCT     </span> 04024                                 
+036633,000313: 
+036634,000314: 30,3637           37760                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495434">BIT4</a>                                  
+036635,000315: 30,3640           00006                           <span class="op">EXTEND  </span>                                       
+036636,000316: 30,3641           05014                           <span class="op">WOR     </span> 14                                    <span class="co">#  AND THE ENGINE DOES THE REST...</span>
 </pre>
 </span>
 </p>
@@ -552,22 +552,22 @@ in the original hardcopy.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-036633,000319:                                                                                                  <span class="co">#  SINCE /AF/ IS NOT AN INSTANTANEOUS</span>
-036634,000320:                                                                                                  <span class="co">#  ACCELERATION (WOULD THAT IT WERE%) BUT</span>
-036635,000321:                                                                                                  <span class="co">#  RATHER AN "AVERAGE" OF THE ACCELERATION</span>
-036636,000322:                                                                                                  <span class="co">#  LEVELS OF THE LAST PIPA INTERVAL, AND</span>
-036637,000323:                                                                                                  <span class="co">#  SINCE FOLD IS COMPUTED DIRECTLY FROM</span>
-036638,000324:                                                                                                  <span class="co">#  /AF/, FOLD IN ORDER TO CORRESPOND TO THE</span>
-036639,000325:                                                                                                  <span class="co">#  ACTUAL THRUST LEVEL AT THE END OF THE</span>
-036640,000326:                                                                                                  <span class="co">#  INTERVAL MUST BE WEIGHTED BY</span>
-036641,000327: 
-036642,000328:                                                                                                  <span class="co">#             PIF PPROCES     PIF /PIF/</span>
-036643,000329:                                                                                                  <span class="co">#   FWEIGHT = ----------- + ------------- ,</span>
-036644,000330:                                                                                                  <span class="co">#                PGUID      2 PGUID FRATE</span>
-036645,000331: 
-036646,000332:                                                                                                  <span class="co">#  WHERE PPROCES IS THE TIME BETWEEN PIPA</span>
-036647,000333:                                                                                                  <span class="co">#  READING AND THE START OF THROTTLING,</span>
-036648,000334:                                                                                                  <span class="co">#  PGUID IS THE GUIDANCE PERIOD (2 SECONDS)</span>
+036639,000319:                                                                                                  <span class="co">#  SINCE /AF/ IS NOT AN INSTANTANEOUS</span>
+036640,000320:                                                                                                  <span class="co">#  ACCELERATION (WOULD THAT IT WERE%) BUT</span>
+036641,000321:                                                                                                  <span class="co">#  RATHER AN "AVERAGE" OF THE ACCELERATION</span>
+036642,000322:                                                                                                  <span class="co">#  LEVELS OF THE LAST PIPA INTERVAL, AND</span>
+036643,000323:                                                                                                  <span class="co">#  SINCE FOLD IS COMPUTED DIRECTLY FROM</span>
+036644,000324:                                                                                                  <span class="co">#  /AF/, FOLD IN ORDER TO CORRESPOND TO THE</span>
+036645,000325:                                                                                                  <span class="co">#  ACTUAL THRUST LEVEL AT THE END OF THE</span>
+036646,000326:                                                                                                  <span class="co">#  INTERVAL MUST BE WEIGHTED BY</span>
+036647,000327: 
+036648,000328:                                                                                                  <span class="co">#             PIF PPROCES     PIF /PIF/</span>
+036649,000329:                                                                                                  <span class="co">#   FWEIGHT = ----------- + ------------- ,</span>
+036650,000330:                                                                                                  <span class="co">#                PGUID      2 PGUID FRATE</span>
+036651,000331: 
+036652,000332:                                                                                                  <span class="co">#  WHERE PPROCES IS THE TIME BETWEEN PIPA</span>
+036653,000333:                                                                                                  <span class="co">#  READING AND THE START OF THROTTLING,</span>
+036654,000334:                                                                                                  <span class="co">#  PGUID IS THE GUIDANCE PERIOD (2 SECONDS)</span>
 </pre>
 </span>
 </p>
@@ -583,42 +583,42 @@ Page 856
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-036650,000336:                                                                                                  <span class="co">#  AND FRATE IS THE THROTTLING RATE (SOME</span>
-036651,000337:                                                                                                  <span class="co">#  3200 UNITS PER SECOND).   HERE FWEIGHT</span>
-036652,000338:                                                                                                  <span class="co">#  IS COMPUTED FOR USE NEXT PASS.</span>
-036653,000339: 
-036654,000340: 30,3642           00006                           <span class="op">EXTEND  </span>                                       
-036655,000341: 30,3643           30025                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 
-036656,000342: 30,3644           52145                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-036657,000343: 30,3645           00006                           <span class="op">EXTEND  </span>                                       
-036658,000344: 30,3646           41307                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50495054494D45">PIPTIME</a>                               
-036659,000345: 30,3647           20145                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-036660,000346: 30,3650           33465                           <span class="op">CA      </span> <a href="#5047554944">PGUID</a>                                 
-036661,000347: 30,3651           56145                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
-036662,000348: 30,3652           77743                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#  IN CASE THAT LOUSY SIGN BIT IS SET</span>
-036663,000349: 30,3653           00006                           <span class="op">EXTEND  </span>                                       
-036664,000350: 30,3654           10145                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         <span class="co">#  WHICH CONTAINS PGUID</span>
-036665,000351: 30,3655           00006                           <span class="op">EXTEND  </span>                                       
-036666,000352: 30,3656           71572                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504946">PIF</a>                                   
-036667,000353: 30,3657           53577                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46574549474854">FWEIGHT</a>                               <span class="co">#  FWEIGHT = (PPROCES/PGUID)PIF, SO FAR...</span>
-036668,000354: 
-036669,000355: 30,3660           33535                           <span class="op">CA      </span> <a href="#322E50472E465254">2.PG.FRT</a>                              
-036670,000356: 30,3661           56144                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  TO BE USED AS A DIVISOR LATER</span>
-036671,000357: 30,3662           11572                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504946">PIF</a>                                   
-036672,000358: 30,3663           67763                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4F4E45">ONE</a>                                   
-036673,000359: 30,3664           13666                           <span class="op">TCF     </span> +2                                    
-036674,000360: 30,3665           67763                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4F4E45">ONE</a>                                   
-036675,000361: 30,3666           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  AT THIS POINT HAVE /PIF/ IN A</span>
-036676,000362: 30,3667           71572                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504946">PIF</a>                                   
-036677,000363: 30,3670           00006                           <span class="op">EXTEND  </span>                                       
-036678,000364: 30,3671           10144                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  WHICH CONTAINS 2.PG.FRT</span>
-036679,000365: 30,3672           22007                           <span class="op">LXCH    </span> 7                                     
-036680,000366: 30,3673           21577                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46574549474854">FWEIGHT</a>                               
-036681,000367: 
-036682,000368: 30,3674           04161                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
-036683,000369: 30,3675           00004                           <span class="ps">OCT     </span> 00004                                 
-036684,000370: 30,3676           15567                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-036685,000371: 
+036656,000336:                                                                                                  <span class="co">#  AND FRATE IS THE THROTTLING RATE (SOME</span>
+036657,000337:                                                                                                  <span class="co">#  3200 UNITS PER SECOND).   HERE FWEIGHT</span>
+036658,000338:                                                                                                  <span class="co">#  IS COMPUTED FOR USE NEXT PASS.</span>
+036659,000339: 
+036660,000340: 30,3642           00006                           <span class="op">EXTEND  </span>                                       
+036661,000341: 30,3643           30025                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 
+036662,000342: 30,3644           52145                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+036663,000343: 30,3645           00006                           <span class="op">EXTEND  </span>                                       
+036664,000344: 30,3646           41307                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50495054494D45">PIPTIME</a>                               
+036665,000345: 30,3647           20145                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+036666,000346: 30,3650           33465                           <span class="op">CA      </span> <a href="#5047554944">PGUID</a>                                 
+036667,000347: 30,3651           56145                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
+036668,000348: 30,3652           77743                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#  IN CASE THAT LOUSY SIGN BIT IS SET</span>
+036669,000349: 30,3653           00006                           <span class="op">EXTEND  </span>                                       
+036670,000350: 30,3654           10145                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         <span class="co">#  WHICH CONTAINS PGUID</span>
+036671,000351: 30,3655           00006                           <span class="op">EXTEND  </span>                                       
+036672,000352: 30,3656           71572                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504946">PIF</a>                                   
+036673,000353: 30,3657           53577                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46574549474854">FWEIGHT</a>                               <span class="co">#  FWEIGHT = (PPROCES/PGUID)PIF, SO FAR...</span>
+036674,000354: 
+036675,000355: 30,3660           33535                           <span class="op">CA      </span> <a href="#322E50472E465254">2.PG.FRT</a>                              
+036676,000356: 30,3661           56144                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  TO BE USED AS A DIVISOR LATER</span>
+036677,000357: 30,3662           11572                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504946">PIF</a>                                   
+036678,000358: 30,3663           67763                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4F4E45">ONE</a>                                   
+036679,000359: 30,3664           13666                           <span class="op">TCF     </span> +2                                    
+036680,000360: 30,3665           67763                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4F4E45">ONE</a>                                   
+036681,000361: 30,3666           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  AT THIS POINT HAVE /PIF/ IN A</span>
+036682,000362: 30,3667           71572                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504946">PIF</a>                                   
+036683,000363: 30,3670           00006                           <span class="op">EXTEND  </span>                                       
+036684,000364: 30,3671           10144                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  WHICH CONTAINS 2.PG.FRT</span>
+036685,000365: 30,3672           22007                           <span class="op">LXCH    </span> 7                                     
+036686,000366: 30,3673           21577                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46574549474854">FWEIGHT</a>                               
+036687,000367: 
+036688,000368: 30,3674           04161                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
+036689,000369: 30,3675           00004                           <span class="ps">OCT     </span> 00004                                 
+036690,000370: 30,3676           15567                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+036691,000371: 
 </pre>
 </span>
 </p>
@@ -634,20 +634,20 @@ Page 857
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-036687,000373:                                                                                                  <span class="co">#  *************</span>
-036688,000374:                                                                                                  <span class="co">#  * CONSTANTS *</span>
-036689,000375:                                                                                                  <span class="co">#  *************</span>
-036690,000376: 
-036691,000377:                                                                                                  <span class="co">#  CONSTANTS FOR DECISION</span>
-036692,000378: 
-<a name="2B464F4444"></a>036693,000379: 30,3677           07432        <span class="sm">+FODD   </span>           <span class="ps">DEC     </span> +3866      B-14                       <span class="co">#  THIS MUCH SATURATES THROTTLE</span>
-036694,000380: 
-<a name="2D464D4158"></a>036695,000381: 30,3700           70325 77777  <span class="sm">-FMAX   </span>           <span class="ps">2DEC    </span> -3882      B-14                       <span class="co">#  NOMINAL MAX THRUST IN BIT UNITS</span>
-036696,000382: 
-<a name="2B4648494748"></a>036697,000383: 30,3702           07100 00000  <span class="sm">+FHIGH  </span>           <span class="ps">2DEC    </span> +3648      B-14                       <span class="co">#  MAX ATTAINABLE THRUST, UNERODED</span>
-036698,000384: 
-<a name="2B484943524954"></a>036699,000385: 30,3704           04314        <span class="sm">+HICRIT </span>           <span class="ps">DEC     </span> +2252      B-14                       <span class="co">#  THE HIGHER MID-SCALE CRITERION</span>
-036700,000386: 
+036693,000373:                                                                                                  <span class="co">#  *************</span>
+036694,000374:                                                                                                  <span class="co">#  * CONSTANTS *</span>
+036695,000375:                                                                                                  <span class="co">#  *************</span>
+036696,000376: 
+036697,000377:                                                                                                  <span class="co">#  CONSTANTS FOR DECISION</span>
+036698,000378: 
+<a name="2B464F4444"></a>036699,000379: 30,3677           07432        <span class="sm">+FODD   </span>           <span class="ps">DEC     </span> +3866      B-14                       <span class="co">#  THIS MUCH SATURATES THROTTLE</span>
+036700,000380: 
+<a name="2D464D4158"></a>036701,000381: 30,3700           70325 77777  <span class="sm">-FMAX   </span>           <span class="ps">2DEC    </span> -3882      B-14                       <span class="co">#  NOMINAL MAX THRUST IN BIT UNITS</span>
+036702,000382: 
+<a name="2B4648494748"></a>036703,000383: 30,3702           07100 00000  <span class="sm">+FHIGH  </span>           <span class="ps">2DEC    </span> +3648      B-14                       <span class="co">#  MAX ATTAINABLE THRUST, UNERODED</span>
+036704,000384: 
+<a name="2B484943524954"></a>036705,000385: 30,3704           04314        <span class="sm">+HICRIT </span>           <span class="ps">DEC     </span> +2252      B-14                       <span class="co">#  THE HIGHER MID-SCALE CRITERION</span>
+036706,000386: 
 </pre>
 </span>
 </p>
@@ -665,42 +665,42 @@ hardcopy, they appear as small rectangular boxes.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-036704,000390:                                                                                                  <span class="co">#  ########################################################################</span>
-036705,000391:                                                                                                  <span class="co">#  SINCE BETWEEN REVISION 113 AND 114 IT WAS NECESSARY TO PRESERVE THE</span>
-036706,000392:                                                                                                  <span class="co">#  LOCATIONS IN MEMORY OF LABELS ADDRESSED FROM OTHER BANKS (SINCE THE ROPE</span>
-036707,000393:                                                                                                  <span class="co">#  IS ALREADY UNDER CONSTRUCTION) CERTAIN CONSTANTS WERE REMOVED FROM THIS</span>
-036708,000394:                                                                                                  <span class="co">#  SECTION FOR USE AS FILLER ELSEWHERE.   THESE ARE -LOCRIT, +FLOW,</span>
-036709,000395:                                                                                                  <span class="co">#  SCALEFAC, FEXTRA, THROTDT, PGUID, AND 2.PG.FRT.</span>
-036710,000396:                                                                                                  <span class="co">#  ########################################################################</span>
-036711,000397: 
-036712,000398: 
-036713,000399: 
-036714,000400:                                                                                                  <span class="co">#  IF THE TRIM GIMBAL IS TURNED OFF BY</span>
-036715,000401:                                                                                                  <span class="co">#  THE THROTTLE, THIS TASK WILL REENABLE IT</span>
-036716,000402:                                                                                                  <span class="co">#  ABOUT 2 SECONDS LATER.</span>
-036717,000403: 
-<a name="5448524F544F5652"></a>036718,000404: 30,3705           06076        <span class="sm">THROTOVR</span>           <span class="op">TC      </span> <a href="206_SERVICE_ROUTINES.agc.html#464C41473244574E">FLAG2DWN</a>                              
-036719,000405: 30,3706           00010                           <span class="ps">OCT     </span> 00010                                 
-036720,000406: 30,3707           47767                           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
-036721,000407: 30,3710           22007                           <span class="op">ZL      </span>                                       
-036722,000408: 30,3711           53100                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534531">-PHASE1</a>                               
-036723,000409: 30,3712           15727                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-036724,000410: 
-036725,000411: 
-036726,000412: 
-<a name="4441504C4F474943"></a>036727,000413: 30,3713           31572        <span class="sm">DAPLOGIC</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504946">PIF</a>                                   
-036728,000414: 30,3714           00006                           <span class="op">EXTEND  </span>                                       
-036729,000415: 30,3715           63717                           <span class="op">BZMF    </span> +2                                    
-036730,000416: 30,3716           40000                           <span class="op">COM     </span>                                       
-036731,000417: 
-036732,000418: 30,3717           63770                           <span class="op">AD      </span> <a href="#4849544852455348">HITHRESH</a>                              
-036733,000419: 30,3720           00006                           <span class="op">EXTEND  </span>                                       
-036734,000420: 30,3721           63750                           <span class="op">BZMF    </span> <a href="#4A4554534554">JETSET</a>                                <span class="co">#  BRANCH IF /PIF/ > OR = HITHRESH</span>
-036735,000421: 
-036736,000422: 30,3722           31565                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F4C44">FOLD</a>                                  
-036737,000423: 30,3723           60000                           <span class="op">DOUBLE  </span>                                       
-036738,000424: 30,3724           54120                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-036739,000425: 
+036710,000390:                                                                                                  <span class="co">#  ########################################################################</span>
+036711,000391:                                                                                                  <span class="co">#  SINCE BETWEEN REVISION 113 AND 114 IT WAS NECESSARY TO PRESERVE THE</span>
+036712,000392:                                                                                                  <span class="co">#  LOCATIONS IN MEMORY OF LABELS ADDRESSED FROM OTHER BANKS (SINCE THE ROPE</span>
+036713,000393:                                                                                                  <span class="co">#  IS ALREADY UNDER CONSTRUCTION) CERTAIN CONSTANTS WERE REMOVED FROM THIS</span>
+036714,000394:                                                                                                  <span class="co">#  SECTION FOR USE AS FILLER ELSEWHERE.   THESE ARE -LOCRIT, +FLOW,</span>
+036715,000395:                                                                                                  <span class="co">#  SCALEFAC, FEXTRA, THROTDT, PGUID, AND 2.PG.FRT.</span>
+036716,000396:                                                                                                  <span class="co">#  ########################################################################</span>
+036717,000397: 
+036718,000398: 
+036719,000399: 
+036720,000400:                                                                                                  <span class="co">#  IF THE TRIM GIMBAL IS TURNED OFF BY</span>
+036721,000401:                                                                                                  <span class="co">#  THE THROTTLE, THIS TASK WILL REENABLE IT</span>
+036722,000402:                                                                                                  <span class="co">#  ABOUT 2 SECONDS LATER.</span>
+036723,000403: 
+<a name="5448524F544F5652"></a>036724,000404: 30,3705           06076        <span class="sm">THROTOVR</span>           <span class="op">TC      </span> <a href="206_SERVICE_ROUTINES.agc.html#464C41473244574E">FLAG2DWN</a>                              
+036725,000405: 30,3706           00010                           <span class="ps">OCT     </span> 00010                                 
+036726,000406: 30,3707           47767                           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
+036727,000407: 30,3710           22007                           <span class="op">ZL      </span>                                       
+036728,000408: 30,3711           53100                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534531">-PHASE1</a>                               
+036729,000409: 30,3712           15727                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+036730,000410: 
+036731,000411: 
+036732,000412: 
+<a name="4441504C4F474943"></a>036733,000413: 30,3713           31572        <span class="sm">DAPLOGIC</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504946">PIF</a>                                   
+036734,000414: 30,3714           00006                           <span class="op">EXTEND  </span>                                       
+036735,000415: 30,3715           63717                           <span class="op">BZMF    </span> +2                                    
+036736,000416: 30,3716           40000                           <span class="op">COM     </span>                                       
+036737,000417: 
+036738,000418: 30,3717           63770                           <span class="op">AD      </span> <a href="#4849544852455348">HITHRESH</a>                              
+036739,000419: 30,3720           00006                           <span class="op">EXTEND  </span>                                       
+036740,000420: 30,3721           63750                           <span class="op">BZMF    </span> <a href="#4A4554534554">JETSET</a>                                <span class="co">#  BRANCH IF /PIF/ > OR = HITHRESH</span>
+036741,000421: 
+036742,000422: 30,3722           31565                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F4C44">FOLD</a>                                  
+036743,000423: 30,3723           60000                           <span class="op">DOUBLE  </span>                                       
+036744,000424: 30,3724           54120                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+036745,000425: 
 </pre>
 </span>
 </p>
@@ -716,55 +716,55 @@ Page 858
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-036741,000427: 30,3725           31570                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4643">FC</a>                                    
-036742,000428: 30,3726           00006                           <span class="op">EXTEND  </span>                                       
-036743,000429: 30,3727           10120                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  WHERE TWICE FOLD WAS STORED</span>
-036744,000430: 30,3730           54120                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-036745,000431: 30,3731           35632                           <span class="op">CA      </span> <a href="EXECUTIVE.agc.html#4542414E4B36">EBANK6</a>                                
-036746,000432: 30,3732           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
-036747,000433: 30,3733  E6,1563                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#443243445559464C">D2CDUYFL</a>                              
-036748,000434: 30,3733           30120                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-036749,000435: 30,3734           00006                           <span class="op">EXTEND  </span>                                       
-036750,000436: 30,3735           71563                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#443243445559464C">D2CDUYFL</a>                              
-036751,000437: 30,3736           60000                           <span class="op">DOUBLE  </span>                                       
-036752,000438: 30,3737           57563                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#443243445559464C">D2CDUYFL</a>                              
-036753,000439: 30,3740           30120                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-036754,000440: 30,3741           00006                           <span class="op">EXTEND  </span>                                       
-036755,000441: 30,3742           71565                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44324344555A464C">D2CDUZFL</a>                              
-036756,000442: 30,3743           60000                           <span class="op">DOUBLE  </span>                                       
-036757,000443: 30,3744           57565                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44324344555A464C">D2CDUZFL</a>                              
-036758,000444: 
-036759,000445: 30,3745           35661                           <span class="op">CA      </span> <a href="EXECUTIVE.agc.html#4542414E4B35">EBANK5</a>                                
-036760,000446: 30,3746           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
-036761,000447: 30,3747  E5,1565                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455448524F54">ETHROT</a>                                
-036762,000448: 30,3747           13632                           <span class="op">TCF     </span> <a href="#4441504C5245544E">DAPLRETN</a>                              
-036763,000449: 
-036764,000450: 
-036765,000451: 
-<a name="4A4554534554"></a>036766,000452: 30,3750           00004        <span class="sm">JETSET  </span>           <span class="op">INHINT  </span>                                       
-036767,000453: 30,3751           40077                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              <span class="co">#  INHIBIT USE OF TRIM GIMBAL</span>
-036768,000454: 30,3752           77762                           <span class="op">MASK    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#55534551524A5453">USEQRJTS</a>                              
-036769,000455: 30,3753           26077                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              
-036770,000456: 
-036771,000457: 30,3754           33464                           <span class="op">CA      </span> <a href="#5448524F544454">THROTDT</a>                               <span class="co">#  SET UP TASK TO REMOVE THE INHIBITION</span>
-036772,000458: 30,3755           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              <span class="co">#    CREATED BELOW</span>
-036773,000459: 30,3756  E5,1565                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455448524F54">ETHROT</a>                                
-036774,000460: 30,3756           03705 60065                     <span class="ps">2CADR   </span> <a href="#5448524F544F5652">THROTOVR</a>                              
-036775,000461: 
-036776,000462: 30,3760           06060                           <span class="op">TC      </span> <a href="206_SERVICE_ROUTINES.agc.html#464C4147325550">FLAG2UP</a>                               <span class="co">#  INHIBIT THE GIMBLMON FROM REACTIVATING</span>
-036777,000463: 30,3761           00010                           <span class="ps">OCT     </span> 00010                                 <span class="co">#    THE GIMBAL</span>
-036778,000464: 
-036779,000465: 30,3762           04161                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
-036780,000466: 30,3763           47011                           <span class="ps">OCT     </span> 47011                                 
-036781,000467: 30,3764           00303                           <span class="ps">DEC     </span> 195        B-14                       
-036782,000468: 30,3765  E5,1565                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455448524F54">ETHROT</a>                                
-036783,000469: 30,3765           03705 60065                     <span class="ps">2CADR   </span> <a href="#5448524F544F5652">THROTOVR</a>                              
-036784,000470: 
-036785,000471: 30,3767           13632                           <span class="op">TCF     </span> <a href="#4441504C5245544E">DAPLRETN</a>                              
-036786,000472: 
-036787,000473: 
-036788,000474: 
-<a name="4849544852455348"></a>036789,000475: 30,3770           00302        <span class="sm">HITHRESH</span>           <span class="ps">DEC     </span> +194       B-14                       <span class="co">#  ABOUT 5 % OF NOMINAL MAXIMUM THRUST</span>
+036747,000427: 30,3725           31570                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4643">FC</a>                                    
+036748,000428: 30,3726           00006                           <span class="op">EXTEND  </span>                                       
+036749,000429: 30,3727           10120                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  WHERE TWICE FOLD WAS STORED</span>
+036750,000430: 30,3730           54120                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+036751,000431: 30,3731           35632                           <span class="op">CA      </span> <a href="EXECUTIVE.agc.html#4542414E4B36">EBANK6</a>                                
+036752,000432: 30,3732           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
+036753,000433: 30,3733  E6,1563                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#443243445559464C">D2CDUYFL</a>                              
+036754,000434: 30,3733           30120                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+036755,000435: 30,3734           00006                           <span class="op">EXTEND  </span>                                       
+036756,000436: 30,3735           71563                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#443243445559464C">D2CDUYFL</a>                              
+036757,000437: 30,3736           60000                           <span class="op">DOUBLE  </span>                                       
+036758,000438: 30,3737           57563                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#443243445559464C">D2CDUYFL</a>                              
+036759,000439: 30,3740           30120                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+036760,000440: 30,3741           00006                           <span class="op">EXTEND  </span>                                       
+036761,000441: 30,3742           71565                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44324344555A464C">D2CDUZFL</a>                              
+036762,000442: 30,3743           60000                           <span class="op">DOUBLE  </span>                                       
+036763,000443: 30,3744           57565                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44324344555A464C">D2CDUZFL</a>                              
+036764,000444: 
+036765,000445: 30,3745           35661                           <span class="op">CA      </span> <a href="EXECUTIVE.agc.html#4542414E4B35">EBANK5</a>                                
+036766,000446: 30,3746           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
+036767,000447: 30,3747  E5,1565                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455448524F54">ETHROT</a>                                
+036768,000448: 30,3747           13632                           <span class="op">TCF     </span> <a href="#4441504C5245544E">DAPLRETN</a>                              
+036769,000449: 
+036770,000450: 
+036771,000451: 
+<a name="4A4554534554"></a>036772,000452: 30,3750           00004        <span class="sm">JETSET  </span>           <span class="op">INHINT  </span>                                       
+036773,000453: 30,3751           40077                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              <span class="co">#  INHIBIT USE OF TRIM GIMBAL</span>
+036774,000454: 30,3752           77762                           <span class="op">MASK    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#55534551524A5453">USEQRJTS</a>                              
+036775,000455: 30,3753           26077                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              
+036776,000456: 
+036777,000457: 30,3754           33464                           <span class="op">CA      </span> <a href="#5448524F544454">THROTDT</a>                               <span class="co">#  SET UP TASK TO REMOVE THE INHIBITION</span>
+036778,000458: 30,3755           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              <span class="co">#    CREATED BELOW</span>
+036779,000459: 30,3756  E5,1565                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455448524F54">ETHROT</a>                                
+036780,000460: 30,3756           03705 60065                     <span class="ps">2CADR   </span> <a href="#5448524F544F5652">THROTOVR</a>                              
+036781,000461: 
+036782,000462: 30,3760           06060                           <span class="op">TC      </span> <a href="206_SERVICE_ROUTINES.agc.html#464C4147325550">FLAG2UP</a>                               <span class="co">#  INHIBIT THE GIMBLMON FROM REACTIVATING</span>
+036783,000463: 30,3761           00010                           <span class="ps">OCT     </span> 00010                                 <span class="co">#    THE GIMBAL</span>
+036784,000464: 
+036785,000465: 30,3762           04161                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
+036786,000466: 30,3763           47011                           <span class="ps">OCT     </span> 47011                                 
+036787,000467: 30,3764           00303                           <span class="ps">DEC     </span> 195        B-14                       
+036788,000468: 30,3765  E5,1565                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455448524F54">ETHROT</a>                                
+036789,000469: 30,3765           03705 60065                     <span class="ps">2CADR   </span> <a href="#5448524F544F5652">THROTOVR</a>                              
+036790,000470: 
+036791,000471: 30,3767           13632                           <span class="op">TCF     </span> <a href="#4441504C5245544E">DAPLRETN</a>                              
+036792,000472: 
+036793,000473: 
+036794,000474: 
+<a name="4849544852455348"></a>036795,000475: 30,3770           00302        <span class="sm">HITHRESH</span>           <span class="ps">DEC     </span> +194       B-14                       <span class="co">#  ABOUT 5 % OF NOMINAL MAXIMUM THRUST</span>
 
 End of include-file THROTTLE_CONTROL.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

@@ -87,26 +87,26 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-028733,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-028734,000003:                                                                                                  <span class="co">## Filename:    GROUND_TRACKING_DETERMINATION_PROGRAM_-_P21.agc</span>
-028735,000004:                                                                                                  <span class="co">## Purpose:     A log section of Zerlina 56, the final revision of</span>
-028736,000005:                                                                                                  <span class="co">##              Don Eyles's offline development program for the variable </span>
-028737,000006:                                                                                                  <span class="co">##              guidance period servicer. It also includes a new P66 with LPD </span>
-028738,000007:                                                                                                  <span class="co">##              (Landing Point Designator) capability, based on an idea of John </span>
-028739,000008:                                                                                                  <span class="co">##              Young's. Neither of these advanced features were actually flown,</span>
-028740,000009:                                                                                                  <span class="co">##              but Zerlina was also the birthplace of other big improvements to</span>
-028741,000010:                                                                                                  <span class="co">##              Luminary including the terrain model and new (Luminary 1E)</span>
-028742,000011:                                                                                                  <span class="co">##              analog display programs. Zerlina was branched off of Luminary 145,</span>
-028743,000012:                                                                                                  <span class="co">##              and revision 56 includes all changes up to and including Luminary</span>
-028744,000013:                                                                                                  <span class="co">##              183. It is therefore quite close to the Apollo 14 program,</span>
-028745,000014:                                                                                                  <span class="co">##              Luminary 178, where not modified with new features.</span>
-028746,000015:                                                                                                  <span class="co">## Reference:   pp. 649-652</span>
-028747,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-028748,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-028749,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-028750,000019:                                                                                                  <span class="co">## Mod history: 2017-07-28 MAS  Created from Luminary 210.</span>
-028751,000020:                                                                                                  <span class="co">##              2017-08-24 MAS  Updated for Zerlina 56.</span>
-028752,000021: 
+028740,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+028741,000003:                                                                                                  <span class="co">## Filename:    GROUND_TRACKING_DETERMINATION_PROGRAM_-_P21.agc</span>
+028742,000004:                                                                                                  <span class="co">## Purpose:     A log section of Zerlina 56, the final revision of</span>
+028743,000005:                                                                                                  <span class="co">##              Don Eyles's offline development program for the variable </span>
+028744,000006:                                                                                                  <span class="co">##              guidance period servicer. It also includes a new P66 with LPD </span>
+028745,000007:                                                                                                  <span class="co">##              (Landing Point Designator) capability, based on an idea of John </span>
+028746,000008:                                                                                                  <span class="co">##              Young's. Neither of these advanced features were actually flown,</span>
+028747,000009:                                                                                                  <span class="co">##              but Zerlina was also the birthplace of other big improvements to</span>
+028748,000010:                                                                                                  <span class="co">##              Luminary including the terrain model and new (Luminary 1E)</span>
+028749,000011:                                                                                                  <span class="co">##              analog display programs. Zerlina was branched off of Luminary 145,</span>
+028750,000012:                                                                                                  <span class="co">##              and revision 56 includes all changes up to and including Luminary</span>
+028751,000013:                                                                                                  <span class="co">##              183. It is therefore quite close to the Apollo 14 program,</span>
+028752,000014:                                                                                                  <span class="co">##              Luminary 178, where not modified with new features.</span>
+028753,000015:                                                                                                  <span class="co">## Reference:   pp. 649-652</span>
+028754,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+028755,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+028756,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+028757,000019:                                                                                                  <span class="co">## Mod history: 2017-07-28 MAS  Created from Luminary 210.</span>
+028758,000020:                                                                                                  <span class="co">##              2017-08-24 MAS  Updated for Zerlina 56.</span>
+028759,000021: 
 </pre>
 </span>
 </p>
@@ -122,56 +122,56 @@ Page 649
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-028754,000023:                                                                                                  <span class="co">#  GROUND TRACKING DETERMINATION PROGRAM P21</span>
-028755,000024:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION</span>
-028756,000025:                                                                                                  <span class="co">#  MOD NO - 1</span>
-028757,000026:                                                                                                  <span class="co">#  MOD BY - N.M.NEVILLE</span>
-028758,000027:                                                                                                  <span class="co">#  FUNCTIONAL DECRIPTION-</span>
-028759,000028: 
-028760,000029:                                                                                                  <span class="co">#  TO PROVIDE THE ASTRONAUT DETAILS OF THE LM OR CSM GROUND TRACK WITHOUT</span>
-028761,000030:                                                                                                  <span class="co">#  THE NEED FOR GROUND COMMUNICATION (REQUESTED BY DSKY).</span>
-028762,000031:                                                                                                  <span class="co">#  CALLING SEQUENCE -</span>
-028763,000032: 
-028764,000033:                                                                                                  <span class="co">#  ASTRONAUT REQUEST THROUGH DSKY V37E21E</span>
-028765,000034:                                                                                                  <span class="co">#  SUBROUTINES CALLED-</span>
-028766,000035: 
-028767,000036:                                                                                                  <span class="co">#  GOPERF4</span>
-028768,000037:                                                                                                  <span class="co">#  GOFLASH</span>
-028769,000038:                                                                                                  <span class="co">#  THISPREC</span>
-028770,000039:                                                                                                  <span class="co">#  OTHPREC</span>
-028771,000040:                                                                                                  <span class="co">#  LAT-LONG</span>
-028772,000041:                                                                                                  <span class="co">#  NORMAL EXIT MODES-</span>
-028773,000042: 
-028774,000043:                                                                                                  <span class="co">#  ASTRONAUT REQUEST TROUGH DSKY TO TERMINATE PROGRAM V34E</span>
-028775,000044:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODES-</span>
-028776,000045: 
-028777,000046:                                                                                                  <span class="co">#  NONE</span>
-028778,000047:                                                                                                  <span class="co">#  OUTPUT -</span>
-028779,000048: 
-028780,000049:                                                                                                  <span class="co">#  OCTAL DISPLAY OF OPTION CODE AND VEHICLE WHOSE GROUND TRACK IS TO BE</span>
-028781,000050:                                                                                                  <span class="co">#  COMPUTED</span>
-028782,000051:                                                                                                  <span class="co">#           OPTION CODE  00002</span>
-028783,000052:                                                                                                  <span class="co">#           THIS         00001</span>
-028784,000053:                                                                                                  <span class="co">#           OTHER        00002</span>
-028785,000054:                                                                                                  <span class="co">#  DECIMAL DISPLAY OF TIME TO BE INTEGRATED TO HOURS , MINUTES , SECONDS</span>
-028786,000055:                                                                                                  <span class="co">#  DECIMAL DISPLAY OF LAT,LONG,ALT</span>
-028787,000056:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED</span>
-028788,000057: 
-028789,000058:                                                                                                  <span class="co">#  AX0      2DEC   4.652459653 E-5   RADIANS       %68-69 CONSTANTS"</span>
-028790,000059: 
-028791,000060:                                                                                                  <span class="co">#  -AY0     2DEC   2.147535898 E-5   RADIANS</span>
-028792,000061: 
-028793,000062:                                                                                                  <span class="co">#  AZ0      2DEC   .7753206164       REVOLUTIONS</span>
-028794,000063:                                                                                                  <span class="co">#  FOR LUNAR ORBITS 504LM VECTOR IS NEEDED</span>
-028795,000064: 
-028796,000065:                                                                                                  <span class="co">#  504LM    2DEC   -2.700340600 E-5  RADIANS</span>
-028797,000066: 
-028798,000067:                                                                                                  <span class="co">#  504LM _2 2DEC   -7.514128400 E-4  RADIANS     </span>
-028799,000068: 
-028800,000069:                                                                                                  <span class="co">#  504LM _4 2DEC   _2.553198641 E-4  RADIANS     </span>
-028801,000070: 
-028802,000071:                                                                                                  <span class="co">#  NONE</span>
-028803,000072:                                                                                                  <span class="co">#  DEBRIS</span>
+028761,000023:                                                                                                  <span class="co">#  GROUND TRACKING DETERMINATION PROGRAM P21</span>
+028762,000024:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION</span>
+028763,000025:                                                                                                  <span class="co">#  MOD NO - 1</span>
+028764,000026:                                                                                                  <span class="co">#  MOD BY - N.M.NEVILLE</span>
+028765,000027:                                                                                                  <span class="co">#  FUNCTIONAL DECRIPTION-</span>
+028766,000028: 
+028767,000029:                                                                                                  <span class="co">#  TO PROVIDE THE ASTRONAUT DETAILS OF THE LM OR CSM GROUND TRACK WITHOUT</span>
+028768,000030:                                                                                                  <span class="co">#  THE NEED FOR GROUND COMMUNICATION (REQUESTED BY DSKY).</span>
+028769,000031:                                                                                                  <span class="co">#  CALLING SEQUENCE -</span>
+028770,000032: 
+028771,000033:                                                                                                  <span class="co">#  ASTRONAUT REQUEST THROUGH DSKY V37E21E</span>
+028772,000034:                                                                                                  <span class="co">#  SUBROUTINES CALLED-</span>
+028773,000035: 
+028774,000036:                                                                                                  <span class="co">#  GOPERF4</span>
+028775,000037:                                                                                                  <span class="co">#  GOFLASH</span>
+028776,000038:                                                                                                  <span class="co">#  THISPREC</span>
+028777,000039:                                                                                                  <span class="co">#  OTHPREC</span>
+028778,000040:                                                                                                  <span class="co">#  LAT-LONG</span>
+028779,000041:                                                                                                  <span class="co">#  NORMAL EXIT MODES-</span>
+028780,000042: 
+028781,000043:                                                                                                  <span class="co">#  ASTRONAUT REQUEST TROUGH DSKY TO TERMINATE PROGRAM V34E</span>
+028782,000044:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODES-</span>
+028783,000045: 
+028784,000046:                                                                                                  <span class="co">#  NONE</span>
+028785,000047:                                                                                                  <span class="co">#  OUTPUT -</span>
+028786,000048: 
+028787,000049:                                                                                                  <span class="co">#  OCTAL DISPLAY OF OPTION CODE AND VEHICLE WHOSE GROUND TRACK IS TO BE</span>
+028788,000050:                                                                                                  <span class="co">#  COMPUTED</span>
+028789,000051:                                                                                                  <span class="co">#           OPTION CODE  00002</span>
+028790,000052:                                                                                                  <span class="co">#           THIS         00001</span>
+028791,000053:                                                                                                  <span class="co">#           OTHER        00002</span>
+028792,000054:                                                                                                  <span class="co">#  DECIMAL DISPLAY OF TIME TO BE INTEGRATED TO HOURS , MINUTES , SECONDS</span>
+028793,000055:                                                                                                  <span class="co">#  DECIMAL DISPLAY OF LAT,LONG,ALT</span>
+028794,000056:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED</span>
+028795,000057: 
+028796,000058:                                                                                                  <span class="co">#  AX0      2DEC   4.652459653 E-5   RADIANS       %68-69 CONSTANTS"</span>
+028797,000059: 
+028798,000060:                                                                                                  <span class="co">#  -AY0     2DEC   2.147535898 E-5   RADIANS</span>
+028799,000061: 
+028800,000062:                                                                                                  <span class="co">#  AZ0      2DEC   .7753206164       REVOLUTIONS</span>
+028801,000063:                                                                                                  <span class="co">#  FOR LUNAR ORBITS 504LM VECTOR IS NEEDED</span>
+028802,000064: 
+028803,000065:                                                                                                  <span class="co">#  504LM    2DEC   -2.700340600 E-5  RADIANS</span>
+028804,000066: 
+028805,000067:                                                                                                  <span class="co">#  504LM _2 2DEC   -7.514128400 E-4  RADIANS     </span>
+028806,000068: 
+028807,000069:                                                                                                  <span class="co">#  504LM _4 2DEC   _2.553198641 E-4  RADIANS     </span>
+028808,000070: 
+028809,000071:                                                                                                  <span class="co">#  NONE</span>
+028810,000072:                                                                                                  <span class="co">#  DEBRIS</span>
 </pre>
 </span>
 </p>
@@ -187,56 +187,56 @@ Page 650
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-028805,000074: 
-028806,000075:                                                                                                  <span class="co">#  CENTRALS-A,Q,L</span>
-028807,000076:                                                                                                  <span class="co">#  OTHER-THOSE USED BY THE ABOVE LISTED SUBROUTINES</span>
-028808,000077:                                                                                                  <span class="co">#  SEE LEMPREC,LAT-LONG</span>
-028809,000078: 35,2455  30,2000                                  <span class="ps">SBANK=  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4C4F575355504552">LOWSUPER</a>                              <span class="co">#  FOR LOW 2CADR'S.</span>
-028810,000079: 
-028811,000080: 33,2031                                           <span class="ps">BANK    </span> 33                                    
-028812,000081: 24,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#50323053">P20S</a>                                  
-028813,000082: 24,2000                                           <span class="ps">BANK    </span>                                       
-028814,000083: 
-028815,000084: 24,3442  E7,1762                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50323154494D45">P21TIME</a>                               
-028816,000085: 24,3442                                           <span class="ps">COUNT*  </span> $$/P21                                
-<a name="50524F473231"></a>028817,000086: 24,3442           34753        <span class="sm">PROG21  </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-028818,000087: 24,3443           55144                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494F4E32">OPTION2</a>                               <span class="co">#  ASSUMED VEHICLE IS LM , R2 = 00001</span>
-028819,000088: 24,3444           34752                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  <span class="co">#   OPTION 2</span>
-028820,000089: 24,3445           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-028821,000090: 24,3446           20634                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5045524634">GOPERF4</a>                               
-028822,000091: 24,3447           06001                           <span class="op">TC      </span> <a href="FRESH_START_AND_RESTART.agc.html#474F544F504F4F48">GOTOPOOH</a>                              <span class="co">#  TERMINATE</span>
-028823,000092: 24,3450           03452                           <span class="op">TC      </span> +2                                    <span class="co">#  PROCEED VALUE OF ASSUMED VEHICLE OK</span>
-028824,000093: 24,3451           03444                           <span class="op">TC      </span> -5                                    <span class="co">#  R2 LOADED THROUGH DSKY</span>
-028825,000094: 24,3452           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  INITIAL TIME = PRESENT TIME</span>
-028826,000095: 24,3453           55044                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44535054454D31">DSPTEM1</a>                               
-028827,000096: 24,3454           55045                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44535054454D31">DSPTEM1</a>    +1                         
-<a name="50323150524F4731"></a>028828,000097: 24,3455           33631        <span class="sm">P21PROG1</span>           <span class="op">CAF     </span> <a href="#56364E3334">V6N34</a>                                 <span class="co">#  LOAD DESIRED TIME OF LAT-LONG.</span>
-028829,000098: 24,3456           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-028830,000099: 24,3457           20477                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F464C415348">GOFLASH</a>                               
-028831,000100: 24,3460           06001                           <span class="op">TC      </span> <a href="FRESH_START_AND_RESTART.agc.html#474F544F504F4F48">GOTOPOOH</a>                              <span class="co">#  TERM</span>
-028832,000101: 24,3461           03463                           <span class="op">TC      </span> +2                                    <span class="co">#  PROCEED VALUES OK</span>
-028833,000102: 24,3462           03455                           <span class="op">TC      </span> -5                                    <span class="co">#  TIME LOADED THROUGH DSKY</span>
-028834,000103: 24,3463           06051                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-028835,000104: 24,3464           53145                           <span class="in">DLOAD   </span> <span class="in">BZE       </span>                            
-028836,000105: 24,3465           01045                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44535054454D31">DSPTEM1</a>                               
-028837,000106: 24,3466           51623                                    <a href="#5032315052544D">P21PRTM</a>                               
-<a name="50323150524F4732"></a>028838,000107: 24,3467           34041        <span class="sm">P21PROG2</span>           <span class="in">STCALL  </span> <a href="ORBITAL_INTEGRATION.agc.html#5444454331">TDEC1</a>                                 <span class="co">#  INTEG TO TIME SPECIFIED IN TDEC1</span>
-028839,000108: 24,3470           27410                                    <a href="INTEGRATION_INITIALIZATION.agc.html#494E545354414C4C">INTSTALL</a>                              
-028840,000109: 24,3471           43014                           <span class="in">BON     </span> <span class="in">CLEAR     </span>                            
-028841,000110: 24,3472           00304                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#503231464C4147">P21FLAG</a>                               
-028842,000111: 24,3473           51511                                    <a href="#503231434F4E54">P21CONT</a>                               <span class="co">#  ON---RECYCLE USING BASE VECTOR</span>
-028843,000112: 24,3474           01674                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#56494E54464C4147">VINTFLAG</a>                              <span class="co">#  OFF--1ST PASS CALL BASE VECTOR</span>
-028844,000113: 24,3475           70535                           <span class="in">SLOAD   </span> <span class="in">SR1       </span>                            
-028845,000114: 24,3476           01145                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494F4E32">OPTION2</a>                               
-028846,000115: 24,3477           43030                           <span class="in">BHIZ    </span> <span class="in">SET       </span>                            
-028847,000116: 24,3500           51502                                    +2                                    <span class="co">#  ZERO--THIS VEHICLE(LM)</span>
-028848,000117: 24,3501           01474                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#56494E54464C4147">VINTFLAG</a>                              <span class="co">#  ONE--OTHER VEHICLE(CM)</span>
-028849,000118: 24,3502           43014                           <span class="in">CLEAR   </span> <span class="in">CLEAR     </span>                            
-028850,000119: 24,3503           01676                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#44494D30464C4147">DIM0FLAG</a>                              
-028851,000120: 24,3504           01673                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#494E545950464C47">INTYPFLG</a>                              <span class="co">#  PRECISION</span>
-028852,000121: 24,3505           77624                           <span class="in">CALL    </span>                                       
-028853,000122: 24,3506           27133                                    <a href="INTEGRATION_INITIALIZATION.agc.html#494E5445475256">INTEGRV</a>                               <span class="co">#  CALCULATE</span>
-028854,000123: 24,3507           77650                           <span class="in">GOTO    </span>                                       <span class="co">#  -AND</span>
+028812,000074: 
+028813,000075:                                                                                                  <span class="co">#  CENTRALS-A,Q,L</span>
+028814,000076:                                                                                                  <span class="co">#  OTHER-THOSE USED BY THE ABOVE LISTED SUBROUTINES</span>
+028815,000077:                                                                                                  <span class="co">#  SEE LEMPREC,LAT-LONG</span>
+028816,000078: 35,2455  30,2000                                  <span class="ps">SBANK=  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4C4F575355504552">LOWSUPER</a>                              <span class="co">#  FOR LOW 2CADR'S.</span>
+028817,000079: 
+028818,000080: 33,2031                                           <span class="ps">BANK    </span> 33                                    
+028819,000081: 24,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#50323053">P20S</a>                                  
+028820,000082: 24,2000                                           <span class="ps">BANK    </span>                                       
+028821,000083: 
+028822,000084: 24,3442  E7,1762                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50323154494D45">P21TIME</a>                               
+028823,000085: 24,3442                                           <span class="ps">COUNT*  </span> $$/P21                                
+<a name="50524F473231"></a>028824,000086: 24,3442           34753        <span class="sm">PROG21  </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+028825,000087: 24,3443           55144                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494F4E32">OPTION2</a>                               <span class="co">#  ASSUMED VEHICLE IS LM , R2 = 00001</span>
+028826,000088: 24,3444           34752                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  <span class="co">#   OPTION 2</span>
+028827,000089: 24,3445           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+028828,000090: 24,3446           20634                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5045524634">GOPERF4</a>                               
+028829,000091: 24,3447           06001                           <span class="op">TC      </span> <a href="FRESH_START_AND_RESTART.agc.html#474F544F504F4F48">GOTOPOOH</a>                              <span class="co">#  TERMINATE</span>
+028830,000092: 24,3450           03452                           <span class="op">TC      </span> +2                                    <span class="co">#  PROCEED VALUE OF ASSUMED VEHICLE OK</span>
+028831,000093: 24,3451           03444                           <span class="op">TC      </span> -5                                    <span class="co">#  R2 LOADED THROUGH DSKY</span>
+028832,000094: 24,3452           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  INITIAL TIME = PRESENT TIME</span>
+028833,000095: 24,3453           55044                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44535054454D31">DSPTEM1</a>                               
+028834,000096: 24,3454           55045                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44535054454D31">DSPTEM1</a>    +1                         
+<a name="50323150524F4731"></a>028835,000097: 24,3455           33631        <span class="sm">P21PROG1</span>           <span class="op">CAF     </span> <a href="#56364E3334">V6N34</a>                                 <span class="co">#  LOAD DESIRED TIME OF LAT-LONG.</span>
+028836,000098: 24,3456           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+028837,000099: 24,3457           20477                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F464C415348">GOFLASH</a>                               
+028838,000100: 24,3460           06001                           <span class="op">TC      </span> <a href="FRESH_START_AND_RESTART.agc.html#474F544F504F4F48">GOTOPOOH</a>                              <span class="co">#  TERM</span>
+028839,000101: 24,3461           03463                           <span class="op">TC      </span> +2                                    <span class="co">#  PROCEED VALUES OK</span>
+028840,000102: 24,3462           03455                           <span class="op">TC      </span> -5                                    <span class="co">#  TIME LOADED THROUGH DSKY</span>
+028841,000103: 24,3463           06051                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+028842,000104: 24,3464           53145                           <span class="in">DLOAD   </span> <span class="in">BZE       </span>                            
+028843,000105: 24,3465           01045                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44535054454D31">DSPTEM1</a>                               
+028844,000106: 24,3466           51623                                    <a href="#5032315052544D">P21PRTM</a>                               
+<a name="50323150524F4732"></a>028845,000107: 24,3467           34041        <span class="sm">P21PROG2</span>           <span class="in">STCALL  </span> <a href="ORBITAL_INTEGRATION.agc.html#5444454331">TDEC1</a>                                 <span class="co">#  INTEG TO TIME SPECIFIED IN TDEC1</span>
+028846,000108: 24,3470           27410                                    <a href="INTEGRATION_INITIALIZATION.agc.html#494E545354414C4C">INTSTALL</a>                              
+028847,000109: 24,3471           43014                           <span class="in">BON     </span> <span class="in">CLEAR     </span>                            
+028848,000110: 24,3472           00304                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#503231464C4147">P21FLAG</a>                               
+028849,000111: 24,3473           51511                                    <a href="#503231434F4E54">P21CONT</a>                               <span class="co">#  ON---RECYCLE USING BASE VECTOR</span>
+028850,000112: 24,3474           01674                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#56494E54464C4147">VINTFLAG</a>                              <span class="co">#  OFF--1ST PASS CALL BASE VECTOR</span>
+028851,000113: 24,3475           70535                           <span class="in">SLOAD   </span> <span class="in">SR1       </span>                            
+028852,000114: 24,3476           01145                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494F4E32">OPTION2</a>                               
+028853,000115: 24,3477           43030                           <span class="in">BHIZ    </span> <span class="in">SET       </span>                            
+028854,000116: 24,3500           51502                                    +2                                    <span class="co">#  ZERO--THIS VEHICLE(LM)</span>
+028855,000117: 24,3501           01474                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#56494E54464C4147">VINTFLAG</a>                              <span class="co">#  ONE--OTHER VEHICLE(CM)</span>
+028856,000118: 24,3502           43014                           <span class="in">CLEAR   </span> <span class="in">CLEAR     </span>                            
+028857,000119: 24,3503           01676                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#44494D30464C4147">DIM0FLAG</a>                              
+028858,000120: 24,3504           01673                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#494E545950464C47">INTYPFLG</a>                              <span class="co">#  PRECISION</span>
+028859,000121: 24,3505           77624                           <span class="in">CALL    </span>                                       
+028860,000122: 24,3506           27133                                    <a href="INTEGRATION_INITIALIZATION.agc.html#494E5445475256">INTEGRV</a>                               <span class="co">#  CALCULATE</span>
+028861,000123: 24,3507           77650                           <span class="in">GOTO    </span>                                       <span class="co">#  -AND</span>
 </pre>
 </span>
 </p>
@@ -252,55 +252,55 @@ Page 651
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-028856,000125: 24,3510           51532                                    <a href="#5032315653415645">P21VSAVE</a>                              <span class="co">#  -SAVE BASE VECTOR</span>
-<a name="503231434F4E54"></a>028857,000126: 24,3511           77775        <span class="sm">P21CONT </span>           <span class="in">VLOAD   </span>                                       
-028858,000127: 24,3512           03676                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5032314241534552">P21BASER</a>                              <span class="co">#  RECYCLE--INTEG FROM BASE VECTOR</span>
-028859,000128: 24,3513           25535                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524356">RCV</a>                                   <span class="co">#  --POS</span>
-028860,000129: 24,3514           03704                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5032314241534556">P21BASEV</a>                              
-028861,000130: 24,3515           15543                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564356">VCV</a>                                   <span class="co">#  --VEL</span>
-028862,000131: 24,3516           03763                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#50323154494D45">P21TIME</a>                               
-028863,000132: 24,3517           01517                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544554">TET</a>                                   <span class="co">#  --TIME</span>
-028864,000133: 24,3520           43014                           <span class="in">CLEAR   </span> <span class="in">CLEAR     </span>                            
-028865,000134: 24,3521           01676                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#44494D30464C4147">DIM0FLAG</a>                              
-028866,000135: 24,3522           00263                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#4D4F4F4E464C4147">MOONFLAG</a>                              
-028867,000136: 24,3523           53135                           <span class="in">SLOAD   </span> <span class="in">BZE       </span>                            
-028868,000137: 24,3524           01163                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5032314F524947">P21ORIG</a>                               
-028869,000138: 24,3525           51530                                    +3                                    <span class="co">#  ZERO=EARTH</span>
-028870,000139: 24,3526           77614                           <span class="in">SET     </span>                                       <span class="co">#  ---2=MOON</span>
-028871,000140: 24,3527           00063                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#4D4F4F4E464C4147">MOONFLAG</a>                              
-028872,000141: 24,3530           77624                 +3        <span class="in">CALL    </span>                                       
-028873,000142: 24,3531           27106                                    <a href="INTEGRATION_INITIALIZATION.agc.html#494E544547525653">INTEGRVS</a>                              
-<a name="5032315653415645"></a>028874,000143: 24,3532           77745        <span class="sm">P21VSAVE</span>           <span class="in">DLOAD   </span>                                       <span class="co">#  SAVE CURRENT BASE VECTOR</span>
-028875,000144: 24,3533           00015                                    <a href="ORBITAL_INTEGRATION.agc.html#544154">TAT</a>                                   
-028876,000145: 24,3534           27763                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50323154494D45">P21TIME</a>                               <span class="co">#  --TIME</span>
-028877,000146: 24,3535           00017                                    <a href="ORBITAL_INTEGRATION.agc.html#5241545431">RATT1</a>                                 
-028878,000147: 24,3536           27676                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5032314241534552">P21BASER</a>                              <span class="co">#  --POS B-29 OR B-27</span>
-028879,000148: 24,3537           00025                                    <a href="ORBITAL_INTEGRATION.agc.html#5641545431">VATT1</a>                                 
-028880,000149: 24,3540           03704                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5032314241534556">P21BASEV</a>                              <span class="co">#  --VEL B-07 OR B-05</span>
-028881,000150: 24,3541           53646                           <span class="in">ABVAL   </span> <span class="in">SL*       </span>                            
-028882,000151: 24,3542           57576                                    0,2                                   
-028883,000152: 24,3543           27712                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50323156454C">P21VEL</a>                                <span class="co">#  VEL/ FOR N91 DISP</span>
-028884,000153: 24,3544           00001                                    <a href="ORBITAL_INTEGRATION.agc.html#52415454">RATT</a>                                  
-028885,000154: 24,3545           50256                           <span class="in">UNIT    </span> <span class="in">DOT       </span>                            
-028886,000155: 24,3546           00007                                    <a href="ORBITAL_INTEGRATION.agc.html#56415454">VATT</a>                                  <span class="co">#   U(R).V</span>
-028887,000156: 24,3547           67471                           <span class="in">DDV     </span> <span class="in">ASIN      </span>                            <span class="co">#  U(R).U(V)</span>
-028888,000157: 24,3550           03712                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#50323156454C">P21VEL</a>                                
-028889,000158: 24,3551           03714                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50323147414D">P21GAM</a>                                <span class="co">#  SIN-1 U(R).U(V) , -90 TO &amp;90</span>
-028890,000159: 24,3552           67334                           <span class="in">SXA,2   </span> <span class="in">SLOAD     </span>                            
-028891,000160: 24,3553           01162                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5032314F524947">P21ORIG</a>                               <span class="co">#  0=EARTH</span>
-028892,000161: 24,3554           01145                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494F4E32">OPTION2</a>                               
-028893,000162: 24,3555           46142                           <span class="in">SR1     </span> <span class="in">BHIZ      </span>                            
-028894,000163: 24,3556           51561                                    +3                                    
-028895,000164: 24,3557           77650                           <span class="in">GOTO    </span>                                       
-028896,000165: 24,3560           51564                                    +4                                    
-028897,000166: 24,3561           77614                 +3        <span class="in">BON     </span>                                       
-028898,000167: 24,3562           04307                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#53555246464C4147">SURFFLAG</a>                              
-028899,000168: 24,3563           51566                                    <a href="#503231445350">P21DSP</a>                                
-028900,000169: 24,3564           77614                 +4        <span class="in">SET     </span>                                       
-028901,000170: 24,3565           00064                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#503231464C4147">P21FLAG</a>                               
-<a name="503231445350"></a>028902,000171: 24,3566           67214        <span class="sm">P21DSP  </span>           <span class="in">CLEAR   </span> <span class="in">SLOAD     </span>                            <span class="co">#  GENERATE DISPLAY DATA</span>
-028903,000172: 24,3567           01663                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#4C554E41464C4147">LUNAFLAG</a>                              
-028904,000173: 24,3570           00050                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5832">X2</a>                                    
+028863,000125: 24,3510           51532                                    <a href="#5032315653415645">P21VSAVE</a>                              <span class="co">#  -SAVE BASE VECTOR</span>
+<a name="503231434F4E54"></a>028864,000126: 24,3511           77775        <span class="sm">P21CONT </span>           <span class="in">VLOAD   </span>                                       
+028865,000127: 24,3512           03676                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5032314241534552">P21BASER</a>                              <span class="co">#  RECYCLE--INTEG FROM BASE VECTOR</span>
+028866,000128: 24,3513           25535                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524356">RCV</a>                                   <span class="co">#  --POS</span>
+028867,000129: 24,3514           03704                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5032314241534556">P21BASEV</a>                              
+028868,000130: 24,3515           15543                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564356">VCV</a>                                   <span class="co">#  --VEL</span>
+028869,000131: 24,3516           03763                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#50323154494D45">P21TIME</a>                               
+028870,000132: 24,3517           01517                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544554">TET</a>                                   <span class="co">#  --TIME</span>
+028871,000133: 24,3520           43014                           <span class="in">CLEAR   </span> <span class="in">CLEAR     </span>                            
+028872,000134: 24,3521           01676                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#44494D30464C4147">DIM0FLAG</a>                              
+028873,000135: 24,3522           00263                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#4D4F4F4E464C4147">MOONFLAG</a>                              
+028874,000136: 24,3523           53135                           <span class="in">SLOAD   </span> <span class="in">BZE       </span>                            
+028875,000137: 24,3524           01163                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5032314F524947">P21ORIG</a>                               
+028876,000138: 24,3525           51530                                    +3                                    <span class="co">#  ZERO=EARTH</span>
+028877,000139: 24,3526           77614                           <span class="in">SET     </span>                                       <span class="co">#  ---2=MOON</span>
+028878,000140: 24,3527           00063                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#4D4F4F4E464C4147">MOONFLAG</a>                              
+028879,000141: 24,3530           77624                 +3        <span class="in">CALL    </span>                                       
+028880,000142: 24,3531           27106                                    <a href="INTEGRATION_INITIALIZATION.agc.html#494E544547525653">INTEGRVS</a>                              
+<a name="5032315653415645"></a>028881,000143: 24,3532           77745        <span class="sm">P21VSAVE</span>           <span class="in">DLOAD   </span>                                       <span class="co">#  SAVE CURRENT BASE VECTOR</span>
+028882,000144: 24,3533           00015                                    <a href="ORBITAL_INTEGRATION.agc.html#544154">TAT</a>                                   
+028883,000145: 24,3534           27763                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50323154494D45">P21TIME</a>                               <span class="co">#  --TIME</span>
+028884,000146: 24,3535           00017                                    <a href="ORBITAL_INTEGRATION.agc.html#5241545431">RATT1</a>                                 
+028885,000147: 24,3536           27676                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5032314241534552">P21BASER</a>                              <span class="co">#  --POS B-29 OR B-27</span>
+028886,000148: 24,3537           00025                                    <a href="ORBITAL_INTEGRATION.agc.html#5641545431">VATT1</a>                                 
+028887,000149: 24,3540           03704                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5032314241534556">P21BASEV</a>                              <span class="co">#  --VEL B-07 OR B-05</span>
+028888,000150: 24,3541           53646                           <span class="in">ABVAL   </span> <span class="in">SL*       </span>                            
+028889,000151: 24,3542           57576                                    0,2                                   
+028890,000152: 24,3543           27712                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50323156454C">P21VEL</a>                                <span class="co">#  VEL/ FOR N91 DISP</span>
+028891,000153: 24,3544           00001                                    <a href="ORBITAL_INTEGRATION.agc.html#52415454">RATT</a>                                  
+028892,000154: 24,3545           50256                           <span class="in">UNIT    </span> <span class="in">DOT       </span>                            
+028893,000155: 24,3546           00007                                    <a href="ORBITAL_INTEGRATION.agc.html#56415454">VATT</a>                                  <span class="co">#   U(R).V</span>
+028894,000156: 24,3547           67471                           <span class="in">DDV     </span> <span class="in">ASIN      </span>                            <span class="co">#  U(R).U(V)</span>
+028895,000157: 24,3550           03712                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#50323156454C">P21VEL</a>                                
+028896,000158: 24,3551           03714                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50323147414D">P21GAM</a>                                <span class="co">#  SIN-1 U(R).U(V) , -90 TO &amp;90</span>
+028897,000159: 24,3552           67334                           <span class="in">SXA,2   </span> <span class="in">SLOAD     </span>                            
+028898,000160: 24,3553           01162                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5032314F524947">P21ORIG</a>                               <span class="co">#  0=EARTH</span>
+028899,000161: 24,3554           01145                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494F4E32">OPTION2</a>                               
+028900,000162: 24,3555           46142                           <span class="in">SR1     </span> <span class="in">BHIZ      </span>                            
+028901,000163: 24,3556           51561                                    +3                                    
+028902,000164: 24,3557           77650                           <span class="in">GOTO    </span>                                       
+028903,000165: 24,3560           51564                                    +4                                    
+028904,000166: 24,3561           77614                 +3        <span class="in">BON     </span>                                       
+028905,000167: 24,3562           04307                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#53555246464C4147">SURFFLAG</a>                              
+028906,000168: 24,3563           51566                                    <a href="#503231445350">P21DSP</a>                                
+028907,000169: 24,3564           77614                 +4        <span class="in">SET     </span>                                       
+028908,000170: 24,3565           00064                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#503231464C4147">P21FLAG</a>                               
+<a name="503231445350"></a>028909,000171: 24,3566           67214        <span class="sm">P21DSP  </span>           <span class="in">CLEAR   </span> <span class="in">SLOAD     </span>                            <span class="co">#  GENERATE DISPLAY DATA</span>
+028910,000172: 24,3567           01663                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#4C554E41464C4147">LUNAFLAG</a>                              
+028911,000173: 24,3570           00050                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5832">X2</a>                                    
 </pre>
 </span>
 </p>
@@ -316,41 +316,41 @@ Page 652
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-028906,000175: 24,3571           43054                           <span class="in">BZE     </span> <span class="in">SET       </span>                            
-028907,000176: 24,3572           51574                                    +2                                    <span class="co">#  0=EARTH</span>
-028908,000177: 24,3573           01463                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#4C554E41464C4147">LUNAFLAG</a>                              
-028909,000178: 24,3574           77775                           <span class="in">VLOAD   </span>                                       
-028910,000179: 24,3575           00001                                    <a href="ORBITAL_INTEGRATION.agc.html#52415454">RATT</a>                                  
-028911,000180: 24,3576           16032                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>                                
-028912,000181: 24,3577           00015                                    <a href="ORBITAL_INTEGRATION.agc.html#544154">TAT</a>                                   
-028913,000182: 24,3600           45014                           <span class="in">CLEAR   </span> <span class="in">CALL      </span>                            
-028914,000183: 24,3601           00662                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#45524144464C4147">ERADFLAG</a>                              
-028915,000184: 24,3602           26347                                    <a href="LATITUDE_LONGITUDE_SUBROUTINES.agc.html#4C41542D4C4F4E47">LAT-LONG</a>                              
-028916,000185: 24,3603           77605                           <span class="in">DMP     </span>                                       <span class="co">#  MPAC = ALT,METERS B-29</span>
-028917,000186: 24,3604           11633                                    <a href="#4B2E3031">K.01</a>                                  
-028918,000187: 24,3605           03716                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503231414C54">P21ALT</a>                                <span class="co">#  ALT/100 FOR N91 DISP</span>
-028919,000188: 24,3606           77776                           <span class="in">EXIT    </span>                                       
-028920,000189: 24,3607           33630                           <span class="op">CAF     </span> <a href="#5630364E3433">V06N43</a>                                <span class="co">#  DISPLAY LAT,LONG,ALT</span>
-028921,000190: 24,3610           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  LAT,LONG = 1/2 REVS B0</span>
-028922,000191: 24,3611           20477                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F464C415348">GOFLASH</a>                               <span class="co">#  ALT = KM  B14</span>
-028923,000192: 24,3612           06001                           <span class="op">TC      </span> <a href="FRESH_START_AND_RESTART.agc.html#474F544F504F4F48">GOTOPOOH</a>                              <span class="co">#  TERM</span>
-028924,000193: 24,3613           06001                           <span class="op">TC      </span> <a href="FRESH_START_AND_RESTART.agc.html#474F544F504F4F48">GOTOPOOH</a>                              
-028925,000194: 24,3614           06051                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               <span class="co">#  V32E RECYCLE</span>
-028926,000195: 24,3615           43345                           <span class="in">DLOAD   </span> <span class="in">DAD       </span>                            
-028927,000196: 24,3616           03763                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#50323154494D45">P21TIME</a>                               
-028928,000197: 24,3617           11627                                    <a href="#363030534543">600SEC</a>                                <span class="co">#  600 SECONDS OR 10 MIN</span>
-028929,000198: 24,3620           01045                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44535054454D31">DSPTEM1</a>                               
-028930,000199: 24,3621           77634                           <span class="in">RTB     </span>                                       
-028931,000200: 24,3622           51455                                    <a href="#50323150524F4731">P21PROG1</a>                              
-<a name="5032315052544D"></a>028932,000201: 24,3623           52034        <span class="sm">P21PRTM </span>           <span class="in">RTB     </span> <span class="in">GOTO      </span>                            
-028933,000202: 24,3624           21555                                    <a href="RTB_OP_CODES.agc.html#4C4F414454494D45">LOADTIME</a>                              
-028934,000203: 24,3625           51467                                    <a href="#50323150524F4732">P21PROG2</a>                              
-<a name="363030534543"></a>028935,000204: 24,3626           00003 25140  <span class="sm">600SEC  </span>           <span class="ps">2DEC    </span> 60000      B-28                       <span class="co">#  10 MIN</span>
-028936,000205: 
-<a name="5630364E3433"></a>028937,000206: 24,3630           01453        <span class="sm">V06N43  </span>           <span class="ps">VN      </span> 00643                                 
-<a name="56364E3334"></a>028938,000207: 24,3631           01442        <span class="sm">V6N34   </span>           <span class="ps">VN      </span> 00634                                 
-<a name="4B2E3031"></a>028939,000208: 24,3632           00243 32703  <span class="sm">K.01    </span>           <span class="ps">2DEC    </span> .01                                   
-028940,000209: 
+028913,000175: 24,3571           43054                           <span class="in">BZE     </span> <span class="in">SET       </span>                            
+028914,000176: 24,3572           51574                                    +2                                    <span class="co">#  0=EARTH</span>
+028915,000177: 24,3573           01463                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#4C554E41464C4147">LUNAFLAG</a>                              
+028916,000178: 24,3574           77775                           <span class="in">VLOAD   </span>                                       
+028917,000179: 24,3575           00001                                    <a href="ORBITAL_INTEGRATION.agc.html#52415454">RATT</a>                                  
+028918,000180: 24,3576           16032                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>                                
+028919,000181: 24,3577           00015                                    <a href="ORBITAL_INTEGRATION.agc.html#544154">TAT</a>                                   
+028920,000182: 24,3600           45014                           <span class="in">CLEAR   </span> <span class="in">CALL      </span>                            
+028921,000183: 24,3601           00662                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#45524144464C4147">ERADFLAG</a>                              
+028922,000184: 24,3602           26347                                    <a href="LATITUDE_LONGITUDE_SUBROUTINES.agc.html#4C41542D4C4F4E47">LAT-LONG</a>                              
+028923,000185: 24,3603           77605                           <span class="in">DMP     </span>                                       <span class="co">#  MPAC = ALT,METERS B-29</span>
+028924,000186: 24,3604           11633                                    <a href="#4B2E3031">K.01</a>                                  
+028925,000187: 24,3605           03716                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503231414C54">P21ALT</a>                                <span class="co">#  ALT/100 FOR N91 DISP</span>
+028926,000188: 24,3606           77776                           <span class="in">EXIT    </span>                                       
+028927,000189: 24,3607           33630                           <span class="op">CAF     </span> <a href="#5630364E3433">V06N43</a>                                <span class="co">#  DISPLAY LAT,LONG,ALT</span>
+028928,000190: 24,3610           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  LAT,LONG = 1/2 REVS B0</span>
+028929,000191: 24,3611           20477                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F464C415348">GOFLASH</a>                               <span class="co">#  ALT = KM  B14</span>
+028930,000192: 24,3612           06001                           <span class="op">TC      </span> <a href="FRESH_START_AND_RESTART.agc.html#474F544F504F4F48">GOTOPOOH</a>                              <span class="co">#  TERM</span>
+028931,000193: 24,3613           06001                           <span class="op">TC      </span> <a href="FRESH_START_AND_RESTART.agc.html#474F544F504F4F48">GOTOPOOH</a>                              
+028932,000194: 24,3614           06051                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               <span class="co">#  V32E RECYCLE</span>
+028933,000195: 24,3615           43345                           <span class="in">DLOAD   </span> <span class="in">DAD       </span>                            
+028934,000196: 24,3616           03763                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#50323154494D45">P21TIME</a>                               
+028935,000197: 24,3617           11627                                    <a href="#363030534543">600SEC</a>                                <span class="co">#  600 SECONDS OR 10 MIN</span>
+028936,000198: 24,3620           01045                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44535054454D31">DSPTEM1</a>                               
+028937,000199: 24,3621           77634                           <span class="in">RTB     </span>                                       
+028938,000200: 24,3622           51455                                    <a href="#50323150524F4731">P21PROG1</a>                              
+<a name="5032315052544D"></a>028939,000201: 24,3623           52034        <span class="sm">P21PRTM </span>           <span class="in">RTB     </span> <span class="in">GOTO      </span>                            
+028940,000202: 24,3624           21555                                    <a href="RTB_OP_CODES.agc.html#4C4F414454494D45">LOADTIME</a>                              
+028941,000203: 24,3625           51467                                    <a href="#50323150524F4732">P21PROG2</a>                              
+<a name="363030534543"></a>028942,000204: 24,3626           00003 25140  <span class="sm">600SEC  </span>           <span class="ps">2DEC    </span> 60000      B-28                       <span class="co">#  10 MIN</span>
+028943,000205: 
+<a name="5630364E3433"></a>028944,000206: 24,3630           01453        <span class="sm">V06N43  </span>           <span class="ps">VN      </span> 00643                                 
+<a name="56364E3334"></a>028945,000207: 24,3631           01442        <span class="sm">V6N34   </span>           <span class="ps">VN      </span> 00634                                 
+<a name="4B2E3031"></a>028946,000208: 24,3632           00243 32703  <span class="sm">K.01    </span>           <span class="ps">2DEC    </span> .01                                   
+028947,000209: 
 
 End of include-file GROUND_TRACKING_DETERMINATION_PROGRAM_-_P21.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

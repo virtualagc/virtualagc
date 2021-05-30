@@ -91,28 +91,29 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-057631,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-057632,000003:                                                                                                  <span class="co">## Filename:    KEYRUPT,_UPRUPT.agc</span>
-057633,000004:                                                                                                  <span class="co">## Purpose:     The main source file for Luminary revision 069.</span>
-057634,000005:                                                                                                  <span class="co">##              It is part of the source code for the original release</span>
-057635,000006:                                                                                                  <span class="co">##              of the flight software for the Lunar Module's (LM) Apollo</span>
-057636,000007:                                                                                                  <span class="co">##              Guidance Computer (AGC) for Apollo 10. The actual flown</span>
-057637,000008:                                                                                                  <span class="co">##              version was Luminary 69 revision 2, which included a</span>
-057638,000009:                                                                                                  <span class="co">##              newer lunar gravity model and only affected module 2.</span>
-057639,000010:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-057640,000011:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-057641,000012:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-057642,000013:                                                                                                  <span class="co">##              original YUL assembler.</span>
-057643,000014:                                                                                                  <span class="co">## Reference:   pp. 1332-1334</span>
-057644,000015:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-057645,000016:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-057646,000017:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-057647,000018:                                                                                                  <span class="co">## Mod history: 2016-12-13 MAS  Created from Luminary 99.</span>
-057648,000019:                                                                                                  <span class="co">##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.</span>
-057649,000020:                                                                                                  <span class="co">##              2017-01-05 RRB  Updated for Luminary 69.</span>
-057650,000021:                                                                                                  <span class="co">##              2017-01-28 RSB  Proofed comment text using octopus/prooferComments</span>
-057651,000022:                                                                                                  <span class="co">##                              but no errors found.</span>
-057652,000023: 
+057655,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+057656,000003:                                                                                                  <span class="co">## Filename:    KEYRUPT,_UPRUPT.agc</span>
+057657,000004:                                                                                                  <span class="co">## Purpose:     The main source file for Luminary revision 069.</span>
+057658,000005:                                                                                                  <span class="co">##              It is part of the source code for the original release</span>
+057659,000006:                                                                                                  <span class="co">##              of the flight software for the Lunar Module's (LM) Apollo</span>
+057660,000007:                                                                                                  <span class="co">##              Guidance Computer (AGC) for Apollo 10. The actual flown</span>
+057661,000008:                                                                                                  <span class="co">##              version was Luminary 69 revision 2, which included a</span>
+057662,000009:                                                                                                  <span class="co">##              newer lunar gravity model and only affected module 2.</span>
+057663,000010:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+057664,000011:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+057665,000012:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+057666,000013:                                                                                                  <span class="co">##              original YUL assembler.</span>
+057667,000014:                                                                                                  <span class="co">## Reference:   pp. 1332-1334</span>
+057668,000015:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+057669,000016:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+057670,000017:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+057671,000018:                                                                                                  <span class="co">## Mod history: 2016-12-13 MAS  Created from Luminary 99.</span>
+057672,000019:                                                                                                  <span class="co">##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.</span>
+057673,000020:                                                                                                  <span class="co">##              2017-01-05 RRB  Updated for Luminary 69.</span>
+057674,000021:                                                                                                  <span class="co">##              2017-01-28 RSB  Proofed comment text using octopus/prooferComments</span>
+057675,000022:                                                                                                  <span class="co">##                              but no errors found.</span>
+057676,000023:                                                                                                  <span class="co">##              2021-05-30 ABS  UPCK -> UPOK</span>
+057677,000024: 
 </pre>
 </span>
 </p>
@@ -128,33 +129,33 @@ Page 1332
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-057654,000025: 14,3711                                           <span class="ps">BANK    </span> 14                                    
-057655,000026: 04,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4B455952555054">KEYRUPT</a>                               
-057656,000027: 04,2000                                           <span class="ps">BANK    </span>                                       
-057657,000028: 04,3215                                           <span class="ps">COUNT*  </span> $$/KEYUP                              
-057658,000029: 
-<a name="4B45595255505431"></a>057659,000030: 04,3215           54016        <span class="sm">KEYRUPT1</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              
-057660,000031: 04,3216           56002                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-057661,000032: 04,3217           54012                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152555054">QRUPT</a>                                 
-057662,000033: 04,3220           04400                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F4453414D5054">LODSAMPT</a>                              <span class="co">#  TIME IS SNATCHED IN RUPT FOR NOUN 65.</span>
-057663,000034: 04,3221           34346                           <span class="op">CAF     </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5735">LOW5</a>                                  
-057664,000035: 04,3222           00006                           <span class="op">EXTEND  </span>                                       
-057665,000036: 04,3223           02015                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4E4B4559494E">MNKEYIN</a>                               <span class="co">#  CHECK IF KEYS 5M-1M ON</span>
-<a name="4B4559434F4D"></a>057666,000037: 04,3224           54073        <span class="sm">KEYCOM  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454734">RUPTREG4</a>                              
-057667,000038: 04,3225           40101                           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524435">FLAGWRD5</a>                              
-057668,000039: 04,3226           74735                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#44534B5946424954">DSKYFBIT</a>                              
-057669,000040: 04,3227           26101                           <span class="op">ADS     </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524435">FLAGWRD5</a>                              
-057670,000041: 
-<a name="4143434550545550"></a>057671,000042: 04,3230           34355        <span class="sm">ACCEPTUP</span>           <span class="op">CAF     </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4348525052494F">CHRPRIO</a>                               <span class="co">#  (NOTE: RUPTREG4 = KEYTEMP1)</span>
-057672,000043: 04,3231           05072                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
-057673,000044: 04,3232     0777                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350434F554E54">DSPCOUNT</a>                              
-057674,000045: 04,3232           02077 60101                     <span class="ps">2CADR   </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#43484152494E">CHARIN</a>                                
-057675,000046: 
-057676,000047: 04,3234           30073                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454734">RUPTREG4</a>                              
-057677,000048: 04,3235           50064                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
-057678,000049: 04,3236           54154                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  LEAVE 5 BIT KEY CDE IN MPAC FOR CHARIN</span>
-057679,000050: 04,3237           05270                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
-057680,000051: 
+057679,000026: 14,3711                                           <span class="ps">BANK    </span> 14                                    
+057680,000027: 04,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4B455952555054">KEYRUPT</a>                               
+057681,000028: 04,2000                                           <span class="ps">BANK    </span>                                       
+057682,000029: 04,3215                                           <span class="ps">COUNT*  </span> $$/KEYUP                              
+057683,000030: 
+<a name="4B45595255505431"></a>057684,000031: 04,3215           54016        <span class="sm">KEYRUPT1</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              
+057685,000032: 04,3216           56002                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+057686,000033: 04,3217           54012                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152555054">QRUPT</a>                                 
+057687,000034: 04,3220           04400                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F4453414D5054">LODSAMPT</a>                              <span class="co">#  TIME IS SNATCHED IN RUPT FOR NOUN 65.</span>
+057688,000035: 04,3221           34346                           <span class="op">CAF     </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5735">LOW5</a>                                  
+057689,000036: 04,3222           00006                           <span class="op">EXTEND  </span>                                       
+057690,000037: 04,3223           02015                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4E4B4559494E">MNKEYIN</a>                               <span class="co">#  CHECK IF KEYS 5M-1M ON</span>
+<a name="4B4559434F4D"></a>057691,000038: 04,3224           54073        <span class="sm">KEYCOM  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454734">RUPTREG4</a>                              
+057692,000039: 04,3225           40101                           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524435">FLAGWRD5</a>                              
+057693,000040: 04,3226           74735                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#44534B5946424954">DSKYFBIT</a>                              
+057694,000041: 04,3227           26101                           <span class="op">ADS     </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524435">FLAGWRD5</a>                              
+057695,000042: 
+<a name="4143434550545550"></a>057696,000043: 04,3230           34355        <span class="sm">ACCEPTUP</span>           <span class="op">CAF     </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4348525052494F">CHRPRIO</a>                               <span class="co">#  (NOTE: RUPTREG4 = KEYTEMP1)</span>
+057697,000044: 04,3231           05072                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
+057698,000045: 04,3232     0777                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350434F554E54">DSPCOUNT</a>                              
+057699,000046: 04,3232           02077 60101                     <span class="ps">2CADR   </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#43484152494E">CHARIN</a>                                
+057700,000047: 
+057701,000048: 04,3234           30073                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454734">RUPTREG4</a>                              
+057702,000049: 04,3235           50064                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
+057703,000050: 04,3236           54154                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  LEAVE 5 BIT KEY CDE IN MPAC FOR CHARIN</span>
+057704,000051: 04,3237           05270                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
+057705,000052: 
 </pre>
 </span>
 </p>
@@ -170,56 +171,56 @@ Page 1333
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-057682,000053:                                                                                                  <span class="co">#  UPRUPT PROGRAM</span>
-057683,000054: 
-<a name="555052555054"></a>057684,000055: 04,3240           54016        <span class="sm">UPRUPT  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              
-057685,000056: 04,3241           56002                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-057686,000057: 04,3242           54012                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152555054">QRUPT</a>                                 
-057687,000058: 04,3243           04400                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F4453414D5054">LODSAMPT</a>                              <span class="co">#  TIME IS SNATCHED IN RUPT FOR NOUN 65.</span>
-057688,000059: 04,3244           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-057689,000060: 04,3245           56045                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494E4C494E4B">INLINK</a>                                
-057690,000061: 04,3246           54073                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B455954454D5031">KEYTEMP1</a>                              
-057691,000062: 04,3247           34751                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495433">BIT3</a>                                  <span class="co">#  TURN ON UPACT LIGHT</span>
-057692,000063: 04,3250           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  (BIT 3 OF CHANNEL 11)</span>
-057693,000064: 04,3251           05011                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453414C4D4F5554">DSALMOUT</a>                              
-<a name="555052505431"></a>057694,000065: 04,3252           34346        <span class="sm">UPRPT1  </span>           <span class="op">CAF     </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5735">LOW5</a>                                  <span class="co">#  TEST FOR TRIPLE CHAR REDUNDANCY</span>
-057695,000066: 04,3253           70073                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B455954454D5031">KEYTEMP1</a>                              <span class="co">#  LOW5 OF WORD</span>
-057696,000067: 04,3254           56073                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B455954454D5031">KEYTEMP1</a>                              <span class="co">#  LOW5 INTO KEYTEMP1</span>
-057697,000068: 04,3255           00006                           <span class="op">EXTEND  </span>                                       
-057698,000069: 04,3256           74742                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543130">BIT10</a>                                 <span class="co">#  SHIFT RIGHT 5</span>
-057699,000070: 04,3257           54734                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B455954454D5032">KEYTEMP2</a>                              
-057700,000071: 04,3260           74346                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5735">LOW5</a>                                  <span class="co">#  MID 5</span>
-057701,000072: 04,3261           63315                           <span class="op">AD      </span> <a href="#48493130">HI10</a>                                  
-057702,000073: 04,3262           03312                           <span class="op">TC      </span> <a href="#555054455354">UPTEST</a>                                
-057703,000074: 04,3263           34742                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543130">BIT10</a>                                 
-057704,000075: 04,3264           00006                           <span class="op">EXTEND  </span>                                       
-057705,000076: 04,3265           70734                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B455954454D5032">KEYTEMP2</a>                              <span class="co">#  SHIFT RIGHT 5</span>
-057706,000077: 04,3266           74346                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5735">LOW5</a>                                  <span class="co">#  HIGH 5</span>
-057707,000078: 04,3267           40000                           <span class="op">COM     </span>                                       
-057708,000079: 04,3270           03312                           <span class="op">TC      </span> <a href="#555054455354">UPTEST</a>                                
-057709,000080: 
-<a name="5550434B"></a>057710,000081: 04,3271           43320        <span class="sm">UPCK    </span>           <span class="op">CS      </span> <a href="#454C52434F4445">ELRCODE</a>                               <span class="co">#  CODE IS GOOD. IF CODE = 'ERROR RESET',</span>
-057711,000082: 04,3272           60073                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B455954454D5031">KEYTEMP1</a>                              <span class="co">#  CLEAR UPLOCKFL(SET BIT4 OF FLAGWRD7 = 0)</span>
-057712,000083: 04,3273           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  IF CODE DOES NOT = 'ERROR RESET', ACCEPT</span>
-057713,000084: 04,3274           13302                           <span class="op">BZF     </span> <a href="#434C55504C4F434B">CLUPLOCK</a>                              <span class="co">#  CODE ONLY IF UPLOCKFL IS CLEAR (=0).</span>
-057714,000085: 
-057715,000086: 04,3275           34750                           <span class="op">CAF     </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#55504C4F43424954">UPLOCBIT</a>                              <span class="co">#  TEST UPLOCKFL FOR 0 OR 1</span>
-057716,000087: 04,3276           70103                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524437">FLAGWRD7</a>                              
-057717,000088: 04,3277           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-057718,000089: 04,3300           05270                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  UPLOCKFL = 1</span>
-057719,000090: 04,3301           03230                           <span class="op">TC      </span> <a href="#4143434550545550">ACCEPTUP</a>                              <span class="co">#  UPLOCKFL = 0</span>
-057720,000091: 
-<a name="434C55504C4F434B"></a>057721,000092: 04,3302           44750        <span class="sm">CLUPLOCK</span>           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#55504C4F43424954">UPLOCBIT</a>                              <span class="co">#  CLEAR UPLOCKFL (I.E., SET BIT 4 OF )</span>
-057722,000093: 04,3303           70103                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524437">FLAGWRD7</a>                              <span class="co">#  FLAGWRD7 = 0)</span>
-057723,000094: 04,3304           54103                           <span class="op">TS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524437">FLAGWRD7</a>                              
-057724,000095: 04,3305           03230                           <span class="op">TC      </span> <a href="#4143434550545550">ACCEPTUP</a>                              
-057725,000096: 
-057726,000097:                                                                                                  <span class="co">#  CODE IS BAD</span>
-<a name="544D4641494C32"></a>057727,000098: 04,3306           40103        <span class="sm">TMFAIL2 </span>           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524437">FLAGWRD7</a>                              <span class="co">#  LOCK OUT FURTHER UPLINK ACTIVITY</span>
-057728,000099: 04,3307           74750                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#55504C4F43424954">UPLOCBIT</a>                              <span class="co">#  (BY SETTING UPLOCKFL = 1) UNTIL</span>
-057729,000100: 04,3310           26103                           <span class="op">ADS     </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524437">FLAGWRD7</a>                              <span class="co">#  'ERROR RESET' IS SENT VIA UPLINK.</span>
-057730,000101: 04,3311           05270                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
-<a name="555054455354"></a>057731,000102: 04,3312           60073        <span class="sm">UPTEST  </span>           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B455954454D5031">KEYTEMP1</a>                              
+057707,000054:                                                                                                  <span class="co">#  UPRUPT PROGRAM</span>
+057708,000055: 
+<a name="555052555054"></a>057709,000056: 04,3240           54016        <span class="sm">UPRUPT  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              
+057710,000057: 04,3241           56002                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+057711,000058: 04,3242           54012                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152555054">QRUPT</a>                                 
+057712,000059: 04,3243           04400                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F4453414D5054">LODSAMPT</a>                              <span class="co">#  TIME IS SNATCHED IN RUPT FOR NOUN 65.</span>
+057713,000060: 04,3244           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+057714,000061: 04,3245           56045                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494E4C494E4B">INLINK</a>                                
+057715,000062: 04,3246           54073                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B455954454D5031">KEYTEMP1</a>                              
+057716,000063: 04,3247           34751                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495433">BIT3</a>                                  <span class="co">#  TURN ON UPACT LIGHT</span>
+057717,000064: 04,3250           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  (BIT 3 OF CHANNEL 11)</span>
+057718,000065: 04,3251           05011                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453414C4D4F5554">DSALMOUT</a>                              
+<a name="555052505431"></a>057719,000066: 04,3252           34346        <span class="sm">UPRPT1  </span>           <span class="op">CAF     </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5735">LOW5</a>                                  <span class="co">#  TEST FOR TRIPLE CHAR REDUNDANCY</span>
+057720,000067: 04,3253           70073                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B455954454D5031">KEYTEMP1</a>                              <span class="co">#  LOW5 OF WORD</span>
+057721,000068: 04,3254           56073                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B455954454D5031">KEYTEMP1</a>                              <span class="co">#  LOW5 INTO KEYTEMP1</span>
+057722,000069: 04,3255           00006                           <span class="op">EXTEND  </span>                                       
+057723,000070: 04,3256           74742                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543130">BIT10</a>                                 <span class="co">#  SHIFT RIGHT 5</span>
+057724,000071: 04,3257           54734                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B455954454D5032">KEYTEMP2</a>                              
+057725,000072: 04,3260           74346                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5735">LOW5</a>                                  <span class="co">#  MID 5</span>
+057726,000073: 04,3261           63315                           <span class="op">AD      </span> <a href="#48493130">HI10</a>                                  
+057727,000074: 04,3262           03312                           <span class="op">TC      </span> <a href="#555054455354">UPTEST</a>                                
+057728,000075: 04,3263           34742                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543130">BIT10</a>                                 
+057729,000076: 04,3264           00006                           <span class="op">EXTEND  </span>                                       
+057730,000077: 04,3265           70734                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B455954454D5032">KEYTEMP2</a>                              <span class="co">#  SHIFT RIGHT 5</span>
+057731,000078: 04,3266           74346                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5735">LOW5</a>                                  <span class="co">#  HIGH 5</span>
+057732,000079: 04,3267           40000                           <span class="op">COM     </span>                                       
+057733,000080: 04,3270           03312                           <span class="op">TC      </span> <a href="#555054455354">UPTEST</a>                                
+057734,000081: 
+<a name="55504F4B"></a>057735,000082: 04,3271           43320        <span class="sm">UPOK    </span>           <span class="op">CS      </span> <a href="#454C52434F4445">ELRCODE</a>                               <span class="co">#  CODE IS GOOD. IF CODE = 'ERROR RESET',</span>
+057736,000083: 04,3272           60073                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B455954454D5031">KEYTEMP1</a>                              <span class="co">#  CLEAR UPLOCKFL(SET BIT4 OF FLAGWRD7 = 0)</span>
+057737,000084: 04,3273           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  IF CODE DOES NOT = 'ERROR RESET', ACCEPT</span>
+057738,000085: 04,3274           13302                           <span class="op">BZF     </span> <a href="#434C55504C4F434B">CLUPLOCK</a>                              <span class="co">#  CODE ONLY IF UPLOCKFL IS CLEAR (=0).</span>
+057739,000086: 
+057740,000087: 04,3275           34750                           <span class="op">CAF     </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#55504C4F43424954">UPLOCBIT</a>                              <span class="co">#  TEST UPLOCKFL FOR 0 OR 1</span>
+057741,000088: 04,3276           70103                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524437">FLAGWRD7</a>                              
+057742,000089: 04,3277           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+057743,000090: 04,3300           05270                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  UPLOCKFL = 1</span>
+057744,000091: 04,3301           03230                           <span class="op">TC      </span> <a href="#4143434550545550">ACCEPTUP</a>                              <span class="co">#  UPLOCKFL = 0</span>
+057745,000092: 
+<a name="434C55504C4F434B"></a>057746,000093: 04,3302           44750        <span class="sm">CLUPLOCK</span>           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#55504C4F43424954">UPLOCBIT</a>                              <span class="co">#  CLEAR UPLOCKFL (I.E., SET BIT 4 OF )</span>
+057747,000094: 04,3303           70103                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524437">FLAGWRD7</a>                              <span class="co">#  FLAGWRD7 = 0)</span>
+057748,000095: 04,3304           54103                           <span class="op">TS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524437">FLAGWRD7</a>                              
+057749,000096: 04,3305           03230                           <span class="op">TC      </span> <a href="#4143434550545550">ACCEPTUP</a>                              
+057750,000097: 
+057751,000098:                                                                                                  <span class="co">#  CODE IS BAD</span>
+<a name="544D4641494C32"></a>057752,000099: 04,3306           40103        <span class="sm">TMFAIL2 </span>           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524437">FLAGWRD7</a>                              <span class="co">#  LOCK OUT FURTHER UPLINK ACTIVITY</span>
+057753,000100: 04,3307           74750                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#55504C4F43424954">UPLOCBIT</a>                              <span class="co">#  (BY SETTING UPLOCKFL = 1) UNTIL</span>
+057754,000101: 04,3310           26103                           <span class="op">ADS     </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524437">FLAGWRD7</a>                              <span class="co">#  'ERROR RESET' IS SENT VIA UPLINK.</span>
+057755,000102: 04,3311           05270                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
+<a name="555054455354"></a>057756,000103: 04,3312           60073        <span class="sm">UPTEST  </span>           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B455954454D5031">KEYTEMP1</a>                              
 </pre>
 </span>
 </p>
@@ -235,30 +236,30 @@ Page 1334
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-057733,000104: 04,3313           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-057734,000105: 04,3314           03306                           <span class="op">TC      </span> <a href="#544D4641494C32">TMFAIL2</a>                               
-<a name="48493130"></a>057735,000106: 04,3315           77740        <span class="sm">HI10    </span>           <span class="ps">OCT     </span> 77740                                 
-057736,000107: 04,3316           03306                           <span class="op">TC      </span> <a href="#544D4641494C32">TMFAIL2</a>                               
-057737,000108: 04,3317           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-057738,000109: 
-<a name="454C52434F4445"></a>057739,000110: 04,3320           00022        <span class="sm">ELRCODE </span>           <span class="ps">OCT     </span> 22                                    
-057740,000111: 
-057741,000112:                                                                                                  <span class="co">#  'UPLINK ACTIVITY LIGHT' IS TURNED OFF BY .....</span>
-057742,000113:                                                                                                  <span class="co">#        1.      VBRELDSP</span>
-057743,000114:                                                                                                  <span class="co">#        2.      ERROR RESET</span>
-057744,000115:                                                                                                  <span class="co">#        3.      UPDATE PROGRAM (P27) ENTERED BY V70,V71,V72,AND V73.</span>
-057745,000116:                                                                                                  <span class="co">#                                     -</span>
-057746,000117:                                                                                                  <span class="co">#  THE RECEPTION OF A BAD CODE (I.E  CCC FAILURE) LOCKS OUT FURTHER UPLINK ACTIVITY BY SETTING BIT4 OF FLAGWRD7 = 1.</span>
-057747,000118:                                                                                                  <span class="co">#  THIS INDICATION WILL BE TRANSFERRED TO THE GROUND BY THE DOWNLINK WHICH DOWNLINKS ALL FLAGWORDS.</span>
-057748,000119:                                                                                                  <span class="co">#  WHEN UPLINK ACTIVITY IS LOCKED OUT, IT CAN BE ALLOWED WHEN THE GROUND UPLINKS AND 'ERROR RESET' CODE.</span>
-057749,000120:                                                                                                  <span class="co">#  (IT IS RECOMMENDED THAT THE 'ERROR LIGHT RESET' CODE IS PRECEEDED BY 16 BITS THE FIRST OF WHICH IS 1 FOLLOWED</span>
-057750,000121:                                                                                                  <span class="co">#  BY 15 ZEROES.  THIS WILL ELIMINATE EXTRANEOUS BITS FROM INLINK WHICH MAY HAVE BEEN LEFT OVER FROM THE ORIGINAL</span>
-057751,000122:                                                                                                  <span class="co">#  FAILURE)</span>
-057752,000123: 
-057753,000124:                                                                                                  <span class="co">#  UPLINK ACTIVITY IS ALSO ALLOWED (UNLOCKED) DURING FRESH START WHEN FRESH START SETS BIT4 OF FLAGWRD7 = 0.</span>
-057754,000125: 
-057755,000126: 04,3321           44753                           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#58445350424954">XDSPBIT</a>                               
-057756,000127: 
+057758,000105: 04,3313           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+057759,000106: 04,3314           03306                           <span class="op">TC      </span> <a href="#544D4641494C32">TMFAIL2</a>                               
+<a name="48493130"></a>057760,000107: 04,3315           77740        <span class="sm">HI10    </span>           <span class="ps">OCT     </span> 77740                                 
+057761,000108: 04,3316           03306                           <span class="op">TC      </span> <a href="#544D4641494C32">TMFAIL2</a>                               
+057762,000109: 04,3317           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+057763,000110: 
+<a name="454C52434F4445"></a>057764,000111: 04,3320           00022        <span class="sm">ELRCODE </span>           <span class="ps">OCT     </span> 22                                    
+057765,000112: 
+057766,000113:                                                                                                  <span class="co">#  'UPLINK ACTIVITY LIGHT' IS TURNED OFF BY .....</span>
+057767,000114:                                                                                                  <span class="co">#        1.      VBRELDSP</span>
+057768,000115:                                                                                                  <span class="co">#        2.      ERROR RESET</span>
+057769,000116:                                                                                                  <span class="co">#        3.      UPDATE PROGRAM (P27) ENTERED BY V70,V71,V72,AND V73.</span>
+057770,000117:                                                                                                  <span class="co">#                                     -</span>
+057771,000118:                                                                                                  <span class="co">#  THE RECEPTION OF A BAD CODE (I.E  CCC FAILURE) LOCKS OUT FURTHER UPLINK ACTIVITY BY SETTING BIT4 OF FLAGWRD7 = 1.</span>
+057772,000119:                                                                                                  <span class="co">#  THIS INDICATION WILL BE TRANSFERRED TO THE GROUND BY THE DOWNLINK WHICH DOWNLINKS ALL FLAGWORDS.</span>
+057773,000120:                                                                                                  <span class="co">#  WHEN UPLINK ACTIVITY IS LOCKED OUT, IT CAN BE ALLOWED WHEN THE GROUND UPLINKS AND 'ERROR RESET' CODE.</span>
+057774,000121:                                                                                                  <span class="co">#  (IT IS RECOMMENDED THAT THE 'ERROR LIGHT RESET' CODE IS PRECEEDED BY 16 BITS THE FIRST OF WHICH IS 1 FOLLOWED</span>
+057775,000122:                                                                                                  <span class="co">#  BY 15 ZEROES.  THIS WILL ELIMINATE EXTRANEOUS BITS FROM INLINK WHICH MAY HAVE BEEN LEFT OVER FROM THE ORIGINAL</span>
+057776,000123:                                                                                                  <span class="co">#  FAILURE)</span>
+057777,000124: 
+057778,000125:                                                                                                  <span class="co">#  UPLINK ACTIVITY IS ALSO ALLOWED (UNLOCKED) DURING FRESH START WHEN FRESH START SETS BIT4 OF FLAGWRD7 = 0.</span>
+057779,000126: 
+057780,000127: 04,3321           44753                           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#58445350424954">XDSPBIT</a>                               
+057781,000128: 
 
 End of include-file KEYRUPT,_UPRUPT.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

@@ -112,22 +112,22 @@ Project's GitHub repository</a>.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-034325,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-034326,000003:                                                                                                  <span class="co">## Filename:    LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc</span>
-034327,000004:                                                                                                  <span class="co">## Purpose:     A section of Comanche revision 045.</span>
-034328,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the</span>
-034329,000006:                                                                                                  <span class="co">##              second release of the flight software for the Command</span>
-034330,000007:                                                                                                  <span class="co">##              Module's (CM) Apollo Guidance Computer (AGC) for Apollo 10.</span>
-034331,000008:                                                                                                  <span class="co">##              The code has been recreated from a copy of Comanche 055. It</span>
-034332,000009:                                                                                                  <span class="co">##              has been adapted such that the resulting bugger words</span>
-034333,000010:                                                                                                  <span class="co">##              exactly match those specified for Comanche 45 in NASA drawing</span>
-034334,000011:                                                                                                  <span class="co">##              2021153D, which gives relatively high confidence that the</span>
-034335,000012:                                                                                                  <span class="co">##              reconstruction is correct.</span>
-034336,000013:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-034337,000014:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-034338,000015:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-034339,000016:                                                                                                  <span class="co">## Mod history: 2020-12-06 MAS  Created from Comanche 44.</span>
-034340,000017: 
+034337,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+034338,000003:                                                                                                  <span class="co">## Filename:    LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc</span>
+034339,000004:                                                                                                  <span class="co">## Purpose:     A section of Comanche revision 045.</span>
+034340,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the</span>
+034341,000006:                                                                                                  <span class="co">##              second release of the flight software for the Command</span>
+034342,000007:                                                                                                  <span class="co">##              Module's (CM) Apollo Guidance Computer (AGC) for Apollo 10.</span>
+034343,000008:                                                                                                  <span class="co">##              The code has been recreated from a copy of Comanche 055. It</span>
+034344,000009:                                                                                                  <span class="co">##              has been adapted such that the resulting bugger words</span>
+034345,000010:                                                                                                  <span class="co">##              exactly match those specified for Comanche 45 in NASA drawing</span>
+034346,000011:                                                                                                  <span class="co">##              2021153D, which gives relatively high confidence that the</span>
+034347,000012:                                                                                                  <span class="co">##              reconstruction is correct.</span>
+034348,000013:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+034349,000014:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+034350,000015:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+034351,000016:                                                                                                  <span class="co">## Mod history: 2020-12-06 MAS  Created from Comanche 44.</span>
+034352,000017: 
 </pre>
 </span>
 </p>
@@ -143,18 +143,18 @@ Page 785
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-034342,000019:                                                                                                  <span class="co">#  LUNAR AND SOLAR EPHEMERIDES SUBROUTINES</span>
-034343,000020: 
-034344,000021:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION</span>
-034345,000022: 
-034346,000023:                                                                                                  <span class="co">#        THESE SUBROUTINES ARE USED TO DETERMINE THE POSITION AND VELOCITY</span>
-034347,000024:                                                                                                  <span class="co">#        VECTORS OF THE SUN AND THE MOON RELATIVE TO THE EARTH AT THE</span>
-034348,000025:                                                                                                  <span class="co">#        SPECIFIED GROUND ELAPSED TIME INPUT BY THE USER.</span>
-034349,000026: 
-034350,000027:                                                                                                  <span class="co">#        THE POSITION OF THE MOON IS STORED IN THE COMPUTER IN THE FORM OF</span>
-034351,000028:                                                                                                  <span class="co">#        A NINTH DEGREE POLYNOMIAL APPROXIMATION WHICH IS VALID OVER A 15</span>
-034352,000029:                                                                                                  <span class="co">#        DAY INTERVAL BEGINNING SHORTLY BEFORE LAUNCH.  THEREFORE THE TIME</span>
-034353,000030:                                                                                                  <span class="co">#        INPUT BY THE USER SHOULD FALL WITHIN THIS 15 DAY INTERVAL.</span>
+034354,000019:                                                                                                  <span class="co">#  LUNAR AND SOLAR EPHEMERIDES SUBROUTINES</span>
+034355,000020: 
+034356,000021:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION</span>
+034357,000022: 
+034358,000023:                                                                                                  <span class="co">#        THESE SUBROUTINES ARE USED TO DETERMINE THE POSITION AND VELOCITY</span>
+034359,000024:                                                                                                  <span class="co">#        VECTORS OF THE SUN AND THE MOON RELATIVE TO THE EARTH AT THE</span>
+034360,000025:                                                                                                  <span class="co">#        SPECIFIED GROUND ELAPSED TIME INPUT BY THE USER.</span>
+034361,000026: 
+034362,000027:                                                                                                  <span class="co">#        THE POSITION OF THE MOON IS STORED IN THE COMPUTER IN THE FORM OF</span>
+034363,000028:                                                                                                  <span class="co">#        A NINTH DEGREE POLYNOMIAL APPROXIMATION WHICH IS VALID OVER A 15</span>
+034364,000029:                                                                                                  <span class="co">#        DAY INTERVAL BEGINNING SHORTLY BEFORE LAUNCH.  THEREFORE THE TIME</span>
+034365,000030:                                                                                                  <span class="co">#        INPUT BY THE USER SHOULD FALL WITHIN THIS 15 DAY INTERVAL.</span>
 </pre>
 </span>
 </p>
@@ -176,44 +176,44 @@ solar ephemerides</a>.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-034361,000038: 
-034362,000039:                                                                                                  <span class="co">#        LSPOS COMPUTES THE POSITION VECTORS OF THE SUN AND THE MOON.</span>
-034363,000040: 
-034364,000041:                                                                                                  <span class="co">#        LUNPOS COMPUTES THE POSITION VECTOR OF THE MOON.</span>
-034365,000042: 
-034366,000043:                                                                                                  <span class="co">#        LUNVEL COMPUTES THE VELOCITY VECTOR OF THE MOON.</span>
-034367,000044: 
-034368,000045:                                                                                                  <span class="co">#        SOLPOS COMPUTES THE POSITION VECTOR OF THE SUN.</span>
-034369,000046: 
-034370,000047:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
-034371,000048: 
-034372,000049:                                                                                                  <span class="co">#        DLOAD   CALL</span>
-034373,000050:                                                                                                  <span class="co">#                TIME            GROUND ELAPSED TIME</span>
-034374,000051:                                                                                                  <span class="co">#                SUBROUTINE      LSPOS OR LUNPOS OR LUNVEL OR SOLPOS</span>
-034375,000052: 
-034376,000053:                                                                                                  <span class="co">#  INPUT</span>
-034377,000054: 
-034378,000055:                                                                                                  <span class="co">#        1) SPECIFIED GROUND ELAPSED TIME IN CS X B-28 LOADED IN MPAC.</span>
-034379,000056: 
-034380,000057:                                                                                                  <span class="co">#        2) TIMEMO - TIME AT THE CENTER OF THE RANGE OVER WHICH THE LUNAR</span>
-034381,000058:                                                                                                  <span class="co">#        POSITION POLYNOMIAL IS VALID IN CS X B-42.</span>
-034382,000059: 
-034383,000060:                                                                                                  <span class="co">#        3) VECOEM - VECTOR COEFFICIENTS OF THE LUNAR POSITION POLYNOMIAL</span>
-034384,000061:                                                                                                  <span class="co">#        LOADED IN DESCENDING SEQUENCE IN METERS/CS**N X B-2</span>
-034385,000062: 
-034386,000063:                                                                                                  <span class="co">#        4) RESO - POSITION VECTOR OF THE SUN RELATIVE TO THE EARTH AT</span>
-034387,000064:                                                                                                  <span class="co">#        TIMEMO IN METERS X B-38.</span>
-034388,000065: 
-034389,000066:                                                                                                  <span class="co">#        5) VESO - VELOCITY VECTOR OF THE SUN RELATIVE TO THE EARTH AT</span>
-034390,000067:                                                                                                  <span class="co">#        TIMEMO IN METERS/CS X B-9.</span>
-034391,000068:                                                                                                  <span class="co">#  </span>
-034392,000069:                                                                                                  <span class="co">#        6) OMEGAES - ANGULAR VELOCITY OF THE VECTOR RESO AT TIMEMO IN</span>
-034393,000070:                                                                                                  <span class="co">#        REV/CS X B+26.</span>
-034394,000071: 
-034395,000072:                                                                                                  <span class="co">#        ALL EXCEPT THE FIRST INPUT ARE INCLUDED IN THE PRE-LAUNCH</span>
-034396,000073:                                                                                                  <span class="co">#        ERASABLE DATA LOAD.</span>
-034397,000074: 
-034398,000075:                                                                                                  <span class="co">#  OUTPUT - LSPOS</span>
+034373,000038: 
+034374,000039:                                                                                                  <span class="co">#        LSPOS COMPUTES THE POSITION VECTORS OF THE SUN AND THE MOON.</span>
+034375,000040: 
+034376,000041:                                                                                                  <span class="co">#        LUNPOS COMPUTES THE POSITION VECTOR OF THE MOON.</span>
+034377,000042: 
+034378,000043:                                                                                                  <span class="co">#        LUNVEL COMPUTES THE VELOCITY VECTOR OF THE MOON.</span>
+034379,000044: 
+034380,000045:                                                                                                  <span class="co">#        SOLPOS COMPUTES THE POSITION VECTOR OF THE SUN.</span>
+034381,000046: 
+034382,000047:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
+034383,000048: 
+034384,000049:                                                                                                  <span class="co">#        DLOAD   CALL</span>
+034385,000050:                                                                                                  <span class="co">#                TIME            GROUND ELAPSED TIME</span>
+034386,000051:                                                                                                  <span class="co">#                SUBROUTINE      LSPOS OR LUNPOS OR LUNVEL OR SOLPOS</span>
+034387,000052: 
+034388,000053:                                                                                                  <span class="co">#  INPUT</span>
+034389,000054: 
+034390,000055:                                                                                                  <span class="co">#        1) SPECIFIED GROUND ELAPSED TIME IN CS X B-28 LOADED IN MPAC.</span>
+034391,000056: 
+034392,000057:                                                                                                  <span class="co">#        2) TIMEMO - TIME AT THE CENTER OF THE RANGE OVER WHICH THE LUNAR</span>
+034393,000058:                                                                                                  <span class="co">#        POSITION POLYNOMIAL IS VALID IN CS X B-42.</span>
+034394,000059: 
+034395,000060:                                                                                                  <span class="co">#        3) VECOEM - VECTOR COEFFICIENTS OF THE LUNAR POSITION POLYNOMIAL</span>
+034396,000061:                                                                                                  <span class="co">#        LOADED IN DESCENDING SEQUENCE IN METERS/CS**N X B-2</span>
+034397,000062: 
+034398,000063:                                                                                                  <span class="co">#        4) RESO - POSITION VECTOR OF THE SUN RELATIVE TO THE EARTH AT</span>
+034399,000064:                                                                                                  <span class="co">#        TIMEMO IN METERS X B-38.</span>
+034400,000065: 
+034401,000066:                                                                                                  <span class="co">#        5) VESO - VELOCITY VECTOR OF THE SUN RELATIVE TO THE EARTH AT</span>
+034402,000067:                                                                                                  <span class="co">#        TIMEMO IN METERS/CS X B-9.</span>
+034403,000068:                                                                                                  <span class="co">#  </span>
+034404,000069:                                                                                                  <span class="co">#        6) OMEGAES - ANGULAR VELOCITY OF THE VECTOR RESO AT TIMEMO IN</span>
+034405,000070:                                                                                                  <span class="co">#        REV/CS X B+26.</span>
+034406,000071: 
+034407,000072:                                                                                                  <span class="co">#        ALL EXCEPT THE FIRST INPUT ARE INCLUDED IN THE PRE-LAUNCH</span>
+034408,000073:                                                                                                  <span class="co">#        ERASABLE DATA LOAD.</span>
+034409,000074: 
+034410,000075:                                                                                                  <span class="co">#  OUTPUT - LSPOS</span>
 </pre>
 </span>
 </p>
@@ -229,59 +229,59 @@ Page 786
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-034400,000077: 
-034401,000078:                                                                                                  <span class="co">#        1) 2D OF VAC AREA CONTAINS THE POSITION VECTOR OF THE SUN RELATIVE</span>
-034402,000079:                                                                                                  <span class="co">#        TO THE EARTH AT TIME INPUT BY THE USER IN METERS X B-38.</span>
-034403,000080: 
-034404,000081:                                                                                                  <span class="co">#        2) MPAC CONTAINS THE POSITION VECTOR OF THE MOON RELATIVE TO THE</span>
-034405,000082:                                                                                                  <span class="co">#        EARTH AT TIME INPUT BY THE USER IN METERS X B-29.</span>
-034406,000083: 
-034407,000084:                                                                                                  <span class="co">#  OUTPUT - LUNPOS</span>
-034408,000085: 
-034409,000086:                                                                                                  <span class="co">#        MPAC CONTAINS THE POSITION VECTOR OF THE MOON RELATIVE TO THE</span>
-034410,000087:                                                                                                  <span class="co">#        EARTH AT THE TIME INPUT BY USER IN METERS X B-29.</span>
-034411,000088: 
-034412,000089:                                                                                                  <span class="co">#  OUTPUT - LUNVEL</span>
-034413,000090: 
-034414,000091:                                                                                                  <span class="co">#        MPAC CONTAINS THE VELOCITY VECTOR OF THE MOON RELATIVE TO THE</span>
-034415,000092:                                                                                                  <span class="co">#        EARTH AT TIME INPUT BY THE USER IN METERS/CS X B-7.</span>
-034416,000093: 
-034417,000094:                                                                                                  <span class="co">#  OUTPUT - SOLPOS</span>
-034418,000095: 
-034419,000096:                                                                                                  <span class="co">#        MPAC CONTAINS THE POSITION VECTOR OF THE SUN RELATIVE TO THE EARTH</span>
-034420,000097:                                                                                                  <span class="co">#        AT TIME INPUT BY THE USER IN METERS X B-38.</span>
-034421,000098: 
-034422,000099:                                                                                                  <span class="co">#  SUBROUTINES USED</span>
-034423,000100: 
-034424,000101:                                                                                                  <span class="co">#        NONE</span>
-034425,000102: 
-034426,000103:                                                                                                  <span class="co">#  REMARKS</span>
-034427,000104: 
-034428,000105:                                                                                                  <span class="co">#        THE VAC AREA IS USED FOR STORAGE OF INTERMEDIATE AND FINAL RESULTS</span>
-034429,000106:                                                                                                  <span class="co">#        OF COMPUTATIONS.</span>
-034430,000107: 
-034431,000108:                                                                                                  <span class="co">#        S1, X1 AND X2 ARE USED BY THESE SUBROUTINES.</span>
-034432,000109: 
-034433,000110:                                                                                                  <span class="co">#        PRELAUNCH ERASABLE DATA LOAD ARE ONLY ERASABLE STORAGE USED BY</span>
-034434,000111:                                                                                                  <span class="co">#        THESE SUBROUTINES.</span>
-034435,000112: 
-034436,000113:                                                                                                  <span class="co">#        RESTARTS DURING OPERATION OF THESE SUBROUTINES MUST BE HANDLED BY</span>
-034437,000114:                                                                                                  <span class="co">#        THE USER.</span>
-034438,000115: 
-034439,000116: 36,2454                                           <span class="ps">BANK    </span> 36                                    
-034440,000117: 26,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#455048454D">EPHEM</a>                                 
-034441,000118: 26,2000                                           <span class="ps">BANK    </span>                                       
-034442,000119: 
-034443,000120: 26,2110                                           <span class="ps">COUNT*  </span> $$/<a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#455048454D">EPHEM</a>                              
-034444,000121: 26,2110  E7,1777                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E442D4537">END-E7</a>                                
-<a name="4C53504F53"></a>034445,000122: 26,2110           77774        <span class="sm">LSPOS   </span>           <span class="in">AXT,2   </span>                                       <span class="co">#  COMPUTES POSITION VECTORS OF BOTH THE</span>
-034446,000123: 26,2111           54161                                    <a href="#52455341">RESA</a>                                  <span class="co">#  SUN AND THE MOON.  THE POSITION VECTOR</span>
-034447,000124: 26,2112           52170                           <span class="in">AXT,1   </span> <span class="in">GOTO      </span>                            <span class="co">#  OF THE SUN IS STORED IN 2D OF THE VAC</span>
-034448,000125: 26,2113           54143                                    <a href="#524553">RES</a>                                   <span class="co">#  AREA.  THE POSITION VECTOR OF THE MOON</span>
-034449,000126: 26,2114           54126                                    <a href="#4C5354494D45">LSTIME</a>                                <span class="co">#  IS STORED IN MPAC.</span>
-<a name="4C554E504F53"></a>034450,000127: 26,2115           52170        <span class="sm">LUNPOS  </span>           <span class="in">AXT,1   </span> <span class="in">GOTO      </span>                            <span class="co">#  COMPUTES THE POSITION VECTOR OF THE MOON</span>
-034451,000128: 26,2116           54162                                    <a href="#52454D">REM</a>                                   <span class="co">#  AND STORES IT IN MPAC.</span>
-034452,000129: 26,2117           54126                                    <a href="#4C5354494D45">LSTIME</a>                                
+034412,000077: 
+034413,000078:                                                                                                  <span class="co">#        1) 2D OF VAC AREA CONTAINS THE POSITION VECTOR OF THE SUN RELATIVE</span>
+034414,000079:                                                                                                  <span class="co">#        TO THE EARTH AT TIME INPUT BY THE USER IN METERS X B-38.</span>
+034415,000080: 
+034416,000081:                                                                                                  <span class="co">#        2) MPAC CONTAINS THE POSITION VECTOR OF THE MOON RELATIVE TO THE</span>
+034417,000082:                                                                                                  <span class="co">#        EARTH AT TIME INPUT BY THE USER IN METERS X B-29.</span>
+034418,000083: 
+034419,000084:                                                                                                  <span class="co">#  OUTPUT - LUNPOS</span>
+034420,000085: 
+034421,000086:                                                                                                  <span class="co">#        MPAC CONTAINS THE POSITION VECTOR OF THE MOON RELATIVE TO THE</span>
+034422,000087:                                                                                                  <span class="co">#        EARTH AT THE TIME INPUT BY USER IN METERS X B-29.</span>
+034423,000088: 
+034424,000089:                                                                                                  <span class="co">#  OUTPUT - LUNVEL</span>
+034425,000090: 
+034426,000091:                                                                                                  <span class="co">#        MPAC CONTAINS THE VELOCITY VECTOR OF THE MOON RELATIVE TO THE</span>
+034427,000092:                                                                                                  <span class="co">#        EARTH AT TIME INPUT BY THE USER IN METERS/CS X B-7.</span>
+034428,000093: 
+034429,000094:                                                                                                  <span class="co">#  OUTPUT - SOLPOS</span>
+034430,000095: 
+034431,000096:                                                                                                  <span class="co">#        MPAC CONTAINS THE POSITION VECTOR OF THE SUN RELATIVE TO THE EARTH</span>
+034432,000097:                                                                                                  <span class="co">#        AT TIME INPUT BY THE USER IN METERS X B-38.</span>
+034433,000098: 
+034434,000099:                                                                                                  <span class="co">#  SUBROUTINES USED</span>
+034435,000100: 
+034436,000101:                                                                                                  <span class="co">#        NONE</span>
+034437,000102: 
+034438,000103:                                                                                                  <span class="co">#  REMARKS</span>
+034439,000104: 
+034440,000105:                                                                                                  <span class="co">#        THE VAC AREA IS USED FOR STORAGE OF INTERMEDIATE AND FINAL RESULTS</span>
+034441,000106:                                                                                                  <span class="co">#        OF COMPUTATIONS.</span>
+034442,000107: 
+034443,000108:                                                                                                  <span class="co">#        S1, X1 AND X2 ARE USED BY THESE SUBROUTINES.</span>
+034444,000109: 
+034445,000110:                                                                                                  <span class="co">#        PRELAUNCH ERASABLE DATA LOAD ARE ONLY ERASABLE STORAGE USED BY</span>
+034446,000111:                                                                                                  <span class="co">#        THESE SUBROUTINES.</span>
+034447,000112: 
+034448,000113:                                                                                                  <span class="co">#        RESTARTS DURING OPERATION OF THESE SUBROUTINES MUST BE HANDLED BY</span>
+034449,000114:                                                                                                  <span class="co">#        THE USER.</span>
+034450,000115: 
+034451,000116: 36,2454                                           <span class="ps">BANK    </span> 36                                    
+034452,000117: 26,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#455048454D">EPHEM</a>                                 
+034453,000118: 26,2000                                           <span class="ps">BANK    </span>                                       
+034454,000119: 
+034455,000120: 26,2110                                           <span class="ps">COUNT*  </span> $$/<a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#455048454D">EPHEM</a>                              
+034456,000121: 26,2110  E7,1777                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E442D4537">END-E7</a>                                
+<a name="4C53504F53"></a>034457,000122: 26,2110           77774        <span class="sm">LSPOS   </span>           <span class="in">AXT,2   </span>                                       <span class="co">#  COMPUTES POSITION VECTORS OF BOTH THE</span>
+034458,000123: 26,2111           54161                                    <a href="#52455341">RESA</a>                                  <span class="co">#  SUN AND THE MOON.  THE POSITION VECTOR</span>
+034459,000124: 26,2112           52170                           <span class="in">AXT,1   </span> <span class="in">GOTO      </span>                            <span class="co">#  OF THE SUN IS STORED IN 2D OF THE VAC</span>
+034460,000125: 26,2113           54143                                    <a href="#524553">RES</a>                                   <span class="co">#  AREA.  THE POSITION VECTOR OF THE MOON</span>
+034461,000126: 26,2114           54126                                    <a href="#4C5354494D45">LSTIME</a>                                <span class="co">#  IS STORED IN MPAC.</span>
+<a name="4C554E504F53"></a>034462,000127: 26,2115           52170        <span class="sm">LUNPOS  </span>           <span class="in">AXT,1   </span> <span class="in">GOTO      </span>                            <span class="co">#  COMPUTES THE POSITION VECTOR OF THE MOON</span>
+034463,000128: 26,2116           54162                                    <a href="#52454D">REM</a>                                   <span class="co">#  AND STORES IT IN MPAC.</span>
+034464,000129: 26,2117           54126                                    <a href="#4C5354494D45">LSTIME</a>                                
 </pre>
 </span>
 </p>
@@ -297,56 +297,56 @@ Page 787
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="4C554E56454C"></a>034454,000131: 26,2120           52170        <span class="sm">LUNVEL  </span>           <span class="in">AXT,1   </span> <span class="in">GOTO      </span>                            <span class="co">#  COMPUTES THE VELOCITY VECTOR OF THE MOON</span>
-034455,000132: 26,2121           54173                                    <a href="#56454D">VEM</a>                                   <span class="co">#  AND STORES IT IN MPAC.</span>
-034456,000133: 26,2122           54126                                    <a href="#4C5354494D45">LSTIME</a>                                
-<a name="534F4C504F53"></a>034457,000134: 26,2123           76020        <span class="sm">SOLPOS  </span>           <span class="in">STQ     </span> <span class="in">AXT,1     </span>                            <span class="co">#  COMPUTES THE POSITION VECTOR OF THE SUN</span>
-034458,000135: 26,2124           00047                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5832">X2</a>                                    <span class="co">#  AND STORES IT IN MPAC.</span>
-034459,000136: 26,2125           54143                                    <a href="#524553">RES</a>                                   
-<a name="4C5354494D45"></a>034460,000137: 26,2126           54201        <span class="sm">LSTIME  </span>           <span class="in">SETPD   </span> <span class="in">SR        </span>                            
-034461,000138: 26,2127           00001                                    0D                                    
-034462,000139: 26,2130           20617                                    14D                                   
-034463,000140: 26,2131           57571                           <span class="in">TAD     </span> <span class="in">DCOMP     </span>                            
-034464,000141: 26,2132           01707                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                
-034465,000142: 26,2133           57571                           <span class="in">TAD     </span> <span class="in">DCOMP     </span>                            
-034466,000143: 26,2134           02034                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D454D4F">TIMEMO</a>                                
-034467,000144: 26,2135           66261                           <span class="in">SL      </span> <span class="in">SSP       </span>                            
-034468,000145: 26,2136           20221                                    16D                                   
-034469,000146: 26,2137           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
-034470,000147: 26,2140           00006                                    6D                                    
-034471,000148: 26,2141           77650                           <span class="in">GOTO    </span>                                       
-034472,000149: 26,2142           00046                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5831">X1</a>                                    
-<a name="524553"></a>034473,000150: 26,2143           41206        <span class="sm">RES     </span>           <span class="in">PUSH    </span> <span class="in">DMP       </span>                            <span class="co">#                                        PD- 2</span>
-034474,000151: 26,2144           02147                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547414553">OMEGAES</a>                               
-034475,000152: 26,2145           71406                           <span class="in">PUSH    </span> <span class="in">COS       </span>                            <span class="co">#                                        PD- 4</span>
-034476,000153: 26,2146           65361                           <span class="in">VXSC    </span> <span class="in">PDDL      </span>                            <span class="co">#                                        PD- 8</span>
-034477,000154: 26,2147           02133                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5245534F">RESO</a>                                  
-034478,000155: 26,2150           63356                           <span class="in">SIN     </span> <span class="in">PDVL      </span>                            <span class="co">#                                        PD-10</span>
-034479,000156: 26,2151           02133                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5245534F">RESO</a>                                  
-034480,000157: 26,2152           53406                           <span class="in">PUSH    </span> <span class="in">UNIT      </span>                            <span class="co">#                                        PD-16</span>
-034481,000158: 26,2153           53435                           <span class="in">VXV     </span> <span class="in">UNIT      </span>                            
-034482,000159: 26,2154           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5645534F">VESO</a>                                  
-034483,000160: 26,2155           76435                           <span class="in">VXV     </span> <span class="in">VSL1      </span>                            <span class="co">#                                        PD-10</span>
-034484,000161: 26,2156           53361                           <span class="in">VXSC    </span> <span class="in">VAD       </span>                            <span class="co">#                                        PD-02</span>
-034485,000162: 26,2157           52172                           <span class="in">VSL1    </span> <span class="in">GOTO      </span>                            <span class="co">#  RES IN METERS X B-38 IN MPAC.</span>
-034486,000163: 26,2160           00047                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5832">X2</a>                                    
-<a name="52455341"></a>034487,000164: 26,2161           14003        <span class="sm">RESA    </span>           <span class="in">STODL   </span> 2D                                    <span class="co">#  RES IN METERS X B-38 IN 2D OF VAC.    PD- 0</span>
-<a name="52454D"></a>034488,000165: 26,2162           63370        <span class="sm">REM     </span>           <span class="in">AXT,1   </span> <span class="in">PDVL      </span>                            <span class="co">#                                        PD- 2</span>
-034489,000166: 26,2163           00066                                    54D                                   
-034490,000167: 26,2164           02037                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5645434F454D">VECOEM</a>                                
-<a name="52454D41"></a>034491,000168: 26,2165           52761        <span class="sm">REMA    </span>           <span class="in">VXSC    </span> <span class="in">VAD*      </span>                            
-034492,000169: 26,2166           00001                                    0D                                    
-034493,000170: 26,2167           02133                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5645434F454D">VECOEM</a>     +60D,1                     
-034494,000171: 26,2170           72500                           <span class="in">TIX,1   </span> <span class="in">VSL2      </span>                            <span class="co">#  REM IN METERS X B-29 IN MPAC.</span>
-034495,000172: 26,2171           54165                                    <a href="#52454D41">REMA</a>                                  
-034496,000173: 26,2172           77616                           <span class="in">RVQ     </span>                                       
-<a name="56454D"></a>034497,000174: 26,2173           65370        <span class="sm">VEM     </span>           <span class="in">AXT,1   </span> <span class="in">PDDL      </span>                            <span class="co">#                                        PD- 2</span>
-034498,000175: 26,2174           00060                                    48D                                   
-034499,000176: 26,2175           14214                                    <a href="#4E494E454234">NINEB4</a>                                
-034500,000177: 26,2176           74206                           <span class="in">PUSH    </span> <span class="in">VXSC      </span>                            <span class="co">#                                        PD- 4</span>
-034501,000178: 26,2177           02037                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5645434F454D">VECOEM</a>                                
-<a name="56454D41"></a>034502,000179: 26,2200           77761        <span class="sm">VEMA    </span>           <span class="in">VXSC    </span>                                       
-034503,000180: 26,2201           00001                                    0D                                    
+<a name="4C554E56454C"></a>034466,000131: 26,2120           52170        <span class="sm">LUNVEL  </span>           <span class="in">AXT,1   </span> <span class="in">GOTO      </span>                            <span class="co">#  COMPUTES THE VELOCITY VECTOR OF THE MOON</span>
+034467,000132: 26,2121           54173                                    <a href="#56454D">VEM</a>                                   <span class="co">#  AND STORES IT IN MPAC.</span>
+034468,000133: 26,2122           54126                                    <a href="#4C5354494D45">LSTIME</a>                                
+<a name="534F4C504F53"></a>034469,000134: 26,2123           76020        <span class="sm">SOLPOS  </span>           <span class="in">STQ     </span> <span class="in">AXT,1     </span>                            <span class="co">#  COMPUTES THE POSITION VECTOR OF THE SUN</span>
+034470,000135: 26,2124           00047                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5832">X2</a>                                    <span class="co">#  AND STORES IT IN MPAC.</span>
+034471,000136: 26,2125           54143                                    <a href="#524553">RES</a>                                   
+<a name="4C5354494D45"></a>034472,000137: 26,2126           54201        <span class="sm">LSTIME  </span>           <span class="in">SETPD   </span> <span class="in">SR        </span>                            
+034473,000138: 26,2127           00001                                    0D                                    
+034474,000139: 26,2130           20617                                    14D                                   
+034475,000140: 26,2131           57571                           <span class="in">TAD     </span> <span class="in">DCOMP     </span>                            
+034476,000141: 26,2132           01707                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                
+034477,000142: 26,2133           57571                           <span class="in">TAD     </span> <span class="in">DCOMP     </span>                            
+034478,000143: 26,2134           02034                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D454D4F">TIMEMO</a>                                
+034479,000144: 26,2135           66261                           <span class="in">SL      </span> <span class="in">SSP       </span>                            
+034480,000145: 26,2136           20221                                    16D                                   
+034481,000146: 26,2137           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
+034482,000147: 26,2140           00006                                    6D                                    
+034483,000148: 26,2141           77650                           <span class="in">GOTO    </span>                                       
+034484,000149: 26,2142           00046                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5831">X1</a>                                    
+<a name="524553"></a>034485,000150: 26,2143           41206        <span class="sm">RES     </span>           <span class="in">PUSH    </span> <span class="in">DMP       </span>                            <span class="co">#                                        PD- 2</span>
+034486,000151: 26,2144           02147                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547414553">OMEGAES</a>                               
+034487,000152: 26,2145           71406                           <span class="in">PUSH    </span> <span class="in">COS       </span>                            <span class="co">#                                        PD- 4</span>
+034488,000153: 26,2146           65361                           <span class="in">VXSC    </span> <span class="in">PDDL      </span>                            <span class="co">#                                        PD- 8</span>
+034489,000154: 26,2147           02133                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5245534F">RESO</a>                                  
+034490,000155: 26,2150           63356                           <span class="in">SIN     </span> <span class="in">PDVL      </span>                            <span class="co">#                                        PD-10</span>
+034491,000156: 26,2151           02133                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5245534F">RESO</a>                                  
+034492,000157: 26,2152           53406                           <span class="in">PUSH    </span> <span class="in">UNIT      </span>                            <span class="co">#                                        PD-16</span>
+034493,000158: 26,2153           53435                           <span class="in">VXV     </span> <span class="in">UNIT      </span>                            
+034494,000159: 26,2154           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5645534F">VESO</a>                                  
+034495,000160: 26,2155           76435                           <span class="in">VXV     </span> <span class="in">VSL1      </span>                            <span class="co">#                                        PD-10</span>
+034496,000161: 26,2156           53361                           <span class="in">VXSC    </span> <span class="in">VAD       </span>                            <span class="co">#                                        PD-02</span>
+034497,000162: 26,2157           52172                           <span class="in">VSL1    </span> <span class="in">GOTO      </span>                            <span class="co">#  RES IN METERS X B-38 IN MPAC.</span>
+034498,000163: 26,2160           00047                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5832">X2</a>                                    
+<a name="52455341"></a>034499,000164: 26,2161           14003        <span class="sm">RESA    </span>           <span class="in">STODL   </span> 2D                                    <span class="co">#  RES IN METERS X B-38 IN 2D OF VAC.    PD- 0</span>
+<a name="52454D"></a>034500,000165: 26,2162           63370        <span class="sm">REM     </span>           <span class="in">AXT,1   </span> <span class="in">PDVL      </span>                            <span class="co">#                                        PD- 2</span>
+034501,000166: 26,2163           00066                                    54D                                   
+034502,000167: 26,2164           02037                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5645434F454D">VECOEM</a>                                
+<a name="52454D41"></a>034503,000168: 26,2165           52761        <span class="sm">REMA    </span>           <span class="in">VXSC    </span> <span class="in">VAD*      </span>                            
+034504,000169: 26,2166           00001                                    0D                                    
+034505,000170: 26,2167           02133                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5645434F454D">VECOEM</a>     +60D,1                     
+034506,000171: 26,2170           72500                           <span class="in">TIX,1   </span> <span class="in">VSL2      </span>                            <span class="co">#  REM IN METERS X B-29 IN MPAC.</span>
+034507,000172: 26,2171           54165                                    <a href="#52454D41">REMA</a>                                  
+034508,000173: 26,2172           77616                           <span class="in">RVQ     </span>                                       
+<a name="56454D"></a>034509,000174: 26,2173           65370        <span class="sm">VEM     </span>           <span class="in">AXT,1   </span> <span class="in">PDDL      </span>                            <span class="co">#                                        PD- 2</span>
+034510,000175: 26,2174           00060                                    48D                                   
+034511,000176: 26,2175           14214                                    <a href="#4E494E454234">NINEB4</a>                                
+034512,000177: 26,2176           74206                           <span class="in">PUSH    </span> <span class="in">VXSC      </span>                            <span class="co">#                                        PD- 4</span>
+034513,000178: 26,2177           02037                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5645434F454D">VECOEM</a>                                
+<a name="56454D41"></a>034514,000179: 26,2200           77761        <span class="sm">VEMA    </span>           <span class="in">VXSC    </span>                                       
+034515,000180: 26,2201           00001                                    0D                                    
 </pre>
 </span>
 </p>
@@ -362,21 +362,21 @@ Page 788
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-034505,000182: 26,2202           14005                           <span class="in">STODL   </span> 4D                                    <span class="co">#                                        PD- 2</span>
-034506,000183: 26,2203           41425                           <span class="in">DSU     </span> <span class="in">PUSH      </span>                            <span class="co">#                                        PD- 4</span>
-034507,000184: 26,2204           14216                                    <a href="#4F4E454234">ONEB4</a>                                 
-034508,000185: 26,2205           53357                           <span class="in">VXSC*   </span> <span class="in">VAD       </span>                            
-034509,000186: 26,2206           02125                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5645434F454D">VECOEM</a>     +54D,1                     
-034510,000187: 26,2207           00005                                    4D                                    
-034511,000188: 26,2210           72500                           <span class="in">TIX,1   </span> <span class="in">VSL2      </span>                            <span class="co">#  VEM IN METERS/CS X B-7 IN MPAC.</span>
-034512,000189: 26,2211           54200                                    <a href="#56454D41">VEMA</a>                                  
-034513,000190: 26,2212           77616                           <span class="in">RVQ     </span>                                       
-<a name="4E494E454234"></a>034514,000191: 26,2213           22000 00000  <span class="sm">NINEB4  </span>           <span class="ps">2DEC    </span> 9.0        B-4                        
-034515,000192: 
-<a name="4F4E454234"></a>034516,000193: 26,2215           02000 00000  <span class="sm">ONEB4   </span>           <span class="ps">2DEC    </span> 1.0        B-4                        
-034517,000194: 
-034518,000195: 
-034519,000196: 
+034517,000182: 26,2202           14005                           <span class="in">STODL   </span> 4D                                    <span class="co">#                                        PD- 2</span>
+034518,000183: 26,2203           41425                           <span class="in">DSU     </span> <span class="in">PUSH      </span>                            <span class="co">#                                        PD- 4</span>
+034519,000184: 26,2204           14216                                    <a href="#4F4E454234">ONEB4</a>                                 
+034520,000185: 26,2205           53357                           <span class="in">VXSC*   </span> <span class="in">VAD       </span>                            
+034521,000186: 26,2206           02125                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5645434F454D">VECOEM</a>     +54D,1                     
+034522,000187: 26,2207           00005                                    4D                                    
+034523,000188: 26,2210           72500                           <span class="in">TIX,1   </span> <span class="in">VSL2      </span>                            <span class="co">#  VEM IN METERS/CS X B-7 IN MPAC.</span>
+034524,000189: 26,2211           54200                                    <a href="#56454D41">VEMA</a>                                  
+034525,000190: 26,2212           77616                           <span class="in">RVQ     </span>                                       
+<a name="4E494E454234"></a>034526,000191: 26,2213           22000 00000  <span class="sm">NINEB4  </span>           <span class="ps">2DEC    </span> 9.0        B-4                        
+034527,000192: 
+<a name="4F4E454234"></a>034528,000193: 26,2215           02000 00000  <span class="sm">ONEB4   </span>           <span class="ps">2DEC    </span> 1.0        B-4                        
+034529,000194: 
+034530,000195: 
+034531,000196: 
 
 End of include-file LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

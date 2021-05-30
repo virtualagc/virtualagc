@@ -89,24 +89,24 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047076,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-047077,000003:                                                                                                  <span class="co">## Filename:    FIXED-FIXED_CONSTANT_POOL.agc</span>
-047078,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 210.</span>
-047079,000005:                                                                                                  <span class="co">##              It is part of the source code for the Lunar Module's (LM)</span>
-047080,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 15-17.</span>
-047081,000007:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-047082,000008:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-047083,000009:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-047084,000010:                                                                                                  <span class="co">##              original YUL assembler.</span>
-047085,000011:                                                                                                  <span class="co">## Reference:   pp. 1093-1097</span>
-047086,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-047087,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-047088,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-047089,000015:                                                                                                  <span class="co">## Mod history: 2016-11-17 JL   Created from Luminary131 version.</span>
-047090,000016:                                                                                                  <span class="co">##              2016-12-05 RRB  Updated from Luminary210.</span>
-047091,000017:                                                                                                  <span class="co">##              2016-12-26 RSB  Comment-text proofed using ProoferComments</span>
-047092,000018:                                                                                                  <span class="co">##                              and corrected errors found.</span>
-047093,000019: 
+047086,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+047087,000003:                                                                                                  <span class="co">## Filename:    FIXED-FIXED_CONSTANT_POOL.agc</span>
+047088,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 210.</span>
+047089,000005:                                                                                                  <span class="co">##              It is part of the source code for the Lunar Module's (LM)</span>
+047090,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 15-17.</span>
+047091,000007:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+047092,000008:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+047093,000009:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+047094,000010:                                                                                                  <span class="co">##              original YUL assembler.</span>
+047095,000011:                                                                                                  <span class="co">## Reference:   pp. 1093-1097</span>
+047096,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+047097,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+047098,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+047099,000015:                                                                                                  <span class="co">## Mod history: 2016-11-17 JL   Created from Luminary131 version.</span>
+047100,000016:                                                                                                  <span class="co">##              2016-12-05 RRB  Updated from Luminary210.</span>
+047101,000017:                                                                                                  <span class="co">##              2016-12-26 RSB  Comment-text proofed using ProoferComments</span>
+047102,000018:                                                                                                  <span class="co">##                              and corrected errors found.</span>
+047103,000019: 
 </pre>
 </span>
 </p>
@@ -122,56 +122,56 @@ Page 1093
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047095,000021:    4723                                           <span class="ps">BLOCK   </span> 02                                    
-047096,000022:    4723                                           <span class="ps">COUNT*  </span> $$/FCONS                              
-047097,000023: 
-047098,000024:                                                                                                  <span class="co">#  THE FOLLOWING TABLE OF 18 VALUES IS INDEXED.  DO NOT INSERT OR REMOVE ANY QUANTITIES.</span>
-047099,000025: 
-<a name="44504F534D4158"></a>047100,000026:    4723           37777        <span class="sm">DPOSMAX </span>           <span class="ps">OCT     </span> 37777                                 <span class="co">#  MUST PRECEDE POSMAX</span>
-<a name="504F534D4158"></a>047101,000027:    4724           37777        <span class="sm">POSMAX  </span>           <span class="ps">OCT     </span> 37777                                 
-047102,000028: 
-<a name="4C494D495453"></a>047103,000029:    4725     4725               <span class="sm">LIMITS  </span>           <span class="ps">=       </span> <a href="#4E4547312F32">NEG1/2</a>                                
-047104,000030: 
-<a name="4E4547312F32"></a>047105,000031:    4725           57777        <span class="sm">NEG1/2  </span>           <span class="ps">OCT     </span> -20000                                <span class="co">#  USED BY SIN ROUTINE (MUST BE TWO </span>
-047106,000032:                                                                                                  <span class="co">#  LOCATIONS IN FRONT OF BIT14)</span>
-047107,000033: 
-047108,000034:                                                                                                  <span class="co">#  BIT TABLE                                     </span>
-047109,000035: 
-<a name="4249543135"></a>047110,000036:    4726           40000        <span class="sm">BIT15   </span>           <span class="ps">OCT     </span> 40000                                 
-<a name="4249543134"></a>047111,000037:    4727           20000        <span class="sm">BIT14   </span>           <span class="ps">OCT     </span> 20000                                 
-<a name="4249543133"></a>047112,000038:    4730           10000        <span class="sm">BIT13   </span>           <span class="ps">OCT     </span> 10000                                 
-<a name="4249543132"></a>047113,000039:    4731           04000        <span class="sm">BIT12   </span>           <span class="ps">OCT     </span> 04000                                 
-<a name="4249543131"></a>047114,000040:    4732           02000        <span class="sm">BIT11   </span>           <span class="ps">OCT     </span> 02000                                 
-<a name="4249543130"></a>047115,000041:    4733           01000        <span class="sm">BIT10   </span>           <span class="ps">OCT     </span> 01000                                 
-<a name="42495439"></a>047116,000042:    4734           00400        <span class="sm">BIT9    </span>           <span class="ps">OCT     </span> 00400                                 
-<a name="42495438"></a>047117,000043:    4735           00200        <span class="sm">BIT8    </span>           <span class="ps">OCT     </span> 00200                                 
-<a name="42495437"></a>047118,000044:    4736           00100        <span class="sm">BIT7    </span>           <span class="ps">OCT     </span> 00100                                 
-<a name="42495436"></a>047119,000045:    4737           00040        <span class="sm">BIT6    </span>           <span class="ps">OCT     </span> 00040                                 
-<a name="42495435"></a>047120,000046:    4740           00020        <span class="sm">BIT5    </span>           <span class="ps">OCT     </span> 00020                                 
-<a name="42495434"></a>047121,000047:    4741           00010        <span class="sm">BIT4    </span>           <span class="ps">OCT     </span> 00010                                 
-<a name="42495433"></a>047122,000048:    4742           00004        <span class="sm">BIT3    </span>           <span class="ps">OCT     </span> 00004                                 
-<a name="42495432"></a>047123,000049:    4743           00002        <span class="sm">BIT2    </span>           <span class="ps">OCT     </span> 00002                                 
-<a name="42495431"></a>047124,000050:    4744           00001        <span class="sm">BIT1    </span>           <span class="ps">OCT     </span> 00001                                 
-047125,000051: 
-047126,000052:                                                                                                  <span class="co">#  DO NOT DESTROY THIS COMBINATION, SINCE IT IS USED IN DOUBLE PRECISION INSTRUCTIONS.</span>
-<a name="4E454730"></a>047127,000053:    4745           77777        <span class="sm">NEG0    </span>           <span class="ps">OCT     </span> -0                                    <span class="co">#  MUST PRECEDE ZERO</span>
-<a name="5A45524F"></a>047128,000054:    4746           00000        <span class="sm">ZERO    </span>           <span class="ps">OCT     </span> 0                                     <span class="co">#  MUST FOLLOW NEG0</span>
-047129,000055:                                                                                                  <span class="co">#  BIT1          OCT     00001</span>
-047130,000056:                                                                                                  <span class="co">#  NO.WDS        OCT     2               INTERPRETER</span>
-047131,000057:                                                                                                  <span class="co">#  OCTAL3        OCT     3               INTERPRETER</span>
-047132,000058:                                                                                                  <span class="co">#  R3D1          OCT     4               PINBALL</span>
-<a name="46495645"></a>047133,000059:    4747           00005        <span class="sm">FIVE    </span>           <span class="ps">OCT     </span> 5                                     
-047134,000060:                                                                                                  <span class="co">#  REVCNT        OCT     6               INTERPRETER</span>
-<a name="534556454E"></a>047135,000061:    4750           00007        <span class="sm">SEVEN   </span>           <span class="ps">OCT     </span> 7                                     
-047136,000062:                                                                                                  <span class="co">#  BIT4          OCT     00010</span>
-047137,000063:                                                                                                  <span class="co">#  R2D1          OCT     11              PINBALL</span>
-<a name="4F43543131"></a>047138,000064:    4751     4311               <span class="sm">OCT11   </span>           <span class="ps">=       </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#52324431">R2D1</a>                                  <span class="co">#  P20S</span>
-047139,000065:                                                                                                  <span class="co">#  BINCON        DEC     10              PINBALL         (OCTAL 12)</span>
-<a name="454C4556454E"></a>047140,000066:    4751           00013        <span class="sm">ELEVEN  </span>           <span class="ps">DEC     </span> 11         B-14                       
-047141,000067:                                                                                                  <span class="co">#  OCT14         OCT     14              ALARM AND ABORT (FILLER)</span>
-<a name="4F43543135"></a>047142,000068:    4752           00015        <span class="sm">OCT15   </span>           <span class="ps">OCT     </span> 15                                    
-047143,000069:                                                                                                  <span class="co">#  R1D1          OCT     16              PINBALL</span>
-<a name="4C4F5734"></a>047144,000070:    4753           00017        <span class="sm">LOW4    </span>           <span class="ps">OCT     </span> 17                                    
+047105,000021:    4723                                           <span class="ps">BLOCK   </span> 02                                    
+047106,000022:    4723                                           <span class="ps">COUNT*  </span> $$/FCONS                              
+047107,000023: 
+047108,000024:                                                                                                  <span class="co">#  THE FOLLOWING TABLE OF 18 VALUES IS INDEXED.  DO NOT INSERT OR REMOVE ANY QUANTITIES.</span>
+047109,000025: 
+<a name="44504F534D4158"></a>047110,000026:    4723           37777        <span class="sm">DPOSMAX </span>           <span class="ps">OCT     </span> 37777                                 <span class="co">#  MUST PRECEDE POSMAX</span>
+<a name="504F534D4158"></a>047111,000027:    4724           37777        <span class="sm">POSMAX  </span>           <span class="ps">OCT     </span> 37777                                 
+047112,000028: 
+<a name="4C494D495453"></a>047113,000029:    4725     4725               <span class="sm">LIMITS  </span>           <span class="ps">=       </span> <a href="#4E4547312F32">NEG1/2</a>                                
+047114,000030: 
+<a name="4E4547312F32"></a>047115,000031:    4725           57777        <span class="sm">NEG1/2  </span>           <span class="ps">OCT     </span> -20000                                <span class="co">#  USED BY SIN ROUTINE (MUST BE TWO </span>
+047116,000032:                                                                                                  <span class="co">#  LOCATIONS IN FRONT OF BIT14)</span>
+047117,000033: 
+047118,000034:                                                                                                  <span class="co">#  BIT TABLE                                     </span>
+047119,000035: 
+<a name="4249543135"></a>047120,000036:    4726           40000        <span class="sm">BIT15   </span>           <span class="ps">OCT     </span> 40000                                 
+<a name="4249543134"></a>047121,000037:    4727           20000        <span class="sm">BIT14   </span>           <span class="ps">OCT     </span> 20000                                 
+<a name="4249543133"></a>047122,000038:    4730           10000        <span class="sm">BIT13   </span>           <span class="ps">OCT     </span> 10000                                 
+<a name="4249543132"></a>047123,000039:    4731           04000        <span class="sm">BIT12   </span>           <span class="ps">OCT     </span> 04000                                 
+<a name="4249543131"></a>047124,000040:    4732           02000        <span class="sm">BIT11   </span>           <span class="ps">OCT     </span> 02000                                 
+<a name="4249543130"></a>047125,000041:    4733           01000        <span class="sm">BIT10   </span>           <span class="ps">OCT     </span> 01000                                 
+<a name="42495439"></a>047126,000042:    4734           00400        <span class="sm">BIT9    </span>           <span class="ps">OCT     </span> 00400                                 
+<a name="42495438"></a>047127,000043:    4735           00200        <span class="sm">BIT8    </span>           <span class="ps">OCT     </span> 00200                                 
+<a name="42495437"></a>047128,000044:    4736           00100        <span class="sm">BIT7    </span>           <span class="ps">OCT     </span> 00100                                 
+<a name="42495436"></a>047129,000045:    4737           00040        <span class="sm">BIT6    </span>           <span class="ps">OCT     </span> 00040                                 
+<a name="42495435"></a>047130,000046:    4740           00020        <span class="sm">BIT5    </span>           <span class="ps">OCT     </span> 00020                                 
+<a name="42495434"></a>047131,000047:    4741           00010        <span class="sm">BIT4    </span>           <span class="ps">OCT     </span> 00010                                 
+<a name="42495433"></a>047132,000048:    4742           00004        <span class="sm">BIT3    </span>           <span class="ps">OCT     </span> 00004                                 
+<a name="42495432"></a>047133,000049:    4743           00002        <span class="sm">BIT2    </span>           <span class="ps">OCT     </span> 00002                                 
+<a name="42495431"></a>047134,000050:    4744           00001        <span class="sm">BIT1    </span>           <span class="ps">OCT     </span> 00001                                 
+047135,000051: 
+047136,000052:                                                                                                  <span class="co">#  DO NOT DESTROY THIS COMBINATION, SINCE IT IS USED IN DOUBLE PRECISION INSTRUCTIONS.</span>
+<a name="4E454730"></a>047137,000053:    4745           77777        <span class="sm">NEG0    </span>           <span class="ps">OCT     </span> -0                                    <span class="co">#  MUST PRECEDE ZERO</span>
+<a name="5A45524F"></a>047138,000054:    4746           00000        <span class="sm">ZERO    </span>           <span class="ps">OCT     </span> 0                                     <span class="co">#  MUST FOLLOW NEG0</span>
+047139,000055:                                                                                                  <span class="co">#  BIT1          OCT     00001</span>
+047140,000056:                                                                                                  <span class="co">#  NO.WDS        OCT     2               INTERPRETER</span>
+047141,000057:                                                                                                  <span class="co">#  OCTAL3        OCT     3               INTERPRETER</span>
+047142,000058:                                                                                                  <span class="co">#  R3D1          OCT     4               PINBALL</span>
+<a name="46495645"></a>047143,000059:    4747           00005        <span class="sm">FIVE    </span>           <span class="ps">OCT     </span> 5                                     
+047144,000060:                                                                                                  <span class="co">#  REVCNT        OCT     6               INTERPRETER</span>
+<a name="534556454E"></a>047145,000061:    4750           00007        <span class="sm">SEVEN   </span>           <span class="ps">OCT     </span> 7                                     
+047146,000062:                                                                                                  <span class="co">#  BIT4          OCT     00010</span>
+047147,000063:                                                                                                  <span class="co">#  R2D1          OCT     11              PINBALL</span>
+<a name="4F43543131"></a>047148,000064:    4751     4311               <span class="sm">OCT11   </span>           <span class="ps">=       </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#52324431">R2D1</a>                                  <span class="co">#  P20S</span>
+047149,000065:                                                                                                  <span class="co">#  BINCON        DEC     10              PINBALL         (OCTAL 12)</span>
+<a name="454C4556454E"></a>047150,000066:    4751           00013        <span class="sm">ELEVEN  </span>           <span class="ps">DEC     </span> 11         B-14                       
+047151,000067:                                                                                                  <span class="co">#  OCT14         OCT     14              ALARM AND ABORT (FILLER)</span>
+<a name="4F43543135"></a>047152,000068:    4752           00015        <span class="sm">OCT15   </span>           <span class="ps">OCT     </span> 15                                    
+047153,000069:                                                                                                  <span class="co">#  R1D1          OCT     16              PINBALL</span>
+<a name="4C4F5734"></a>047154,000070:    4753           00017        <span class="sm">LOW4    </span>           <span class="ps">OCT     </span> 17                                    
 </pre>
 </span>
 </p>
@@ -187,56 +187,56 @@ Page 1094
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047146,000072:                                                                                                  <span class="co">#  BIT5          OCT     00020</span>
-047147,000073:                                                                                                  <span class="co">#  ND1           OCT     21              PINBALL</span>
-047148,000074:                                                                                                  <span class="co">#  VD1           OCT     23              PINBALL</span>
-047149,000075:                                                                                                  <span class="co">#  OCT24         OCT     24              SERVICE ROUTINES</span>
-047150,000076:                                                                                                  <span class="co">#  MD1           OCT     25              PINBALL</span>
-<a name="42495453342635"></a>047151,000077:    4754           00030        <span class="sm">BITS4&amp;5 </span>           <span class="ps">OCT     </span> 30                                    
-047152,000078:                                                                                                  <span class="co">#  OCT31         OCT     31              SERVICE ROUTINES</span>
-<a name="4F43543333"></a>047153,000079:    4755           00033        <span class="sm">OCT33   </span>           <span class="ps">OCT     </span> 33                                    
-<a name="4445433237"></a>047154,000080:    4756     4755               <span class="sm">DEC27   </span>           <span class="ps">=       </span> <a href="#4F43543333">OCT33</a>                                 
-<a name="4F43543335"></a>047155,000081:    4756           00035        <span class="sm">OCT35   </span>           <span class="ps">OCT     </span> 35                                    
-<a name="4445433239"></a>047156,000082:    4757     4756               <span class="sm">DEC29   </span>           <span class="ps">=       </span> <a href="#4F43543335">OCT35</a>                                 
-<a name="43414C4C434F4445"></a>047157,000083:    4757           00032        <span class="sm">CALLCODE</span>           <span class="ps">OCT     </span> 00032                                 
-047158,000084:                                                                                                  <span class="co">#  LOW5          OCT     37              PINBALL</span>
-047159,000085:                                                                                                  <span class="co">#  33DEC         DEC     33              PINBALL         (OCTAL 41)</span>
-047160,000086:                                                                                                  <span class="co">#  34DEC         DEC     34              PINBALL         (OCTAL 42)</span>
-<a name="544255494C444658"></a>047161,000087:    4760           00045        <span class="sm">TBUILDFX</span>           <span class="ps">DEC     </span> 37         B-14                       <span class="co">#  BUILDUP FOR CONVIENCE IN DAPTESTING</span>
-<a name="5444454341594658"></a>047162,000088:    4761           00046        <span class="sm">TDECAYFX</span>           <span class="ps">DEC     </span> 38         B-14                       <span class="co">#  CONVENIENCE FOR DAPTESTING</span>
-047163,000089:                                                                                                  <span class="co">#  BIT6          OCT     00040</span>
-<a name="4F43543530"></a>047164,000090:    4762           00050        <span class="sm">OCT50   </span>           <span class="ps">OCT     </span> 50                                    
-<a name="4445433435"></a>047165,000091:    4763           00055        <span class="sm">DEC45   </span>           <span class="ps">DEC     </span> 45         B-14                       
-<a name="5355504552303131"></a>047166,000092:    4764           00060        <span class="sm">SUPER011</span>           <span class="ps">OCT     </span> 60                                    <span class="co">#  BITS FOR SUPERBNK SETTING 011.</span>
-<a name="2E35534543"></a>047167,000093:    4765           00062        <span class="sm">.5SEC   </span>           <span class="ps">DEC     </span> 50         B-14                       
-047168,000094:                                                                                                  <span class="co">#  BIT7          OCT     00100</span>
-047169,000095: 
-<a name="5355504552313030"></a>047170,000096:    4766     4736               <span class="sm">SUPER100</span>           <span class="ps">=       </span> <a href="#42495437">BIT7</a>                                  <span class="co">#  BITS FOR SUPERBNK SETTING 100</span>
-047171,000097:                                                                                                  <span class="co">#  (LAST 4K OF ROPE)</span>
-<a name="5355504552313031"></a>047172,000098:    4766           00120        <span class="sm">SUPER101</span>           <span class="ps">OCT     </span> 120                                   <span class="co">#  BITS FOR SUPERBNK SETTING 101</span>
-047173,000099:                                                                                                  <span class="co">#  OCT121        OCT     121             SERVICE ROUTINES</span>
-047174,000100:                                                                                                  <span class="co">#  (FIRST 8K OF ACM)</span>
-<a name="5355504552313130"></a>047175,000101:    4767           00140        <span class="sm">SUPER110</span>           <span class="ps">OCT     </span> 140                                   <span class="co">#  BITS FOR SUPERBNK SETTING 110.</span>
-047176,000102:                                                                                                  <span class="co">#  (LAST 8K OF ACM)</span>
-<a name="31534543"></a>047177,000103:    4770           00144        <span class="sm">1SEC    </span>           <span class="ps">DEC     </span> 100        B-14                       
-047178,000104:                                                                                                  <span class="co">#  LOW7          OCT     177             INTERPRETER</span>
-047179,000105:                                                                                                  <span class="co">#  BIT8          OCT     00200</span>
-047180,000106:                                                                                                  <span class="co">#  OT215         OCT     215             ALARM AND ABORT</span>
-047181,000107:                                                                                                  <span class="co">#  8,5           OCT     00220           P20-P25 SUNDANCE</span>
-<a name="3253454353"></a>047182,000108:    4771           00310        <span class="sm">2SECS   </span>           <span class="ps">DEC     </span> 200        B-14                       
-047183,000109:                                                                                                  <span class="co">#  LOW8          OCT     377             PINBALL</span>
-047184,000110:                                                                                                  <span class="co">#  BIT9          OCT     00400</span>
-<a name="474E2F43434F4445"></a>047185,000111:    4772           00401        <span class="sm">GN/CCODE</span>           <span class="ps">OCT     </span> 00401                                 <span class="co">#  SET S/C CONTROL SWITCH TO G/N</span>
-<a name="3353454353"></a>047186,000112:    4773           00454        <span class="sm">3SECS   </span>           <span class="ps">DEC     </span> 300        B-14                       
-<a name="3453454353"></a>047187,000113:    4774           00620        <span class="sm">4SECS   </span>           <span class="ps">DEC     </span> 400        B-14                       
-<a name="4C4F5739"></a>047188,000114:    4775           00777        <span class="sm">LOW9    </span>           <span class="ps">OCT     </span> 777                                   
-047189,000115:                                                                                                  <span class="co">#  BIT10         OCT     01000</span>
-047190,000116:                                                                                                  <span class="co">#  5.5DEGS       DEC     .03056          P20-P25 SUNDANCE        (OCTAL 00765)</span>
-047191,000117:                                                                                                  <span class="co">#  OCT1103       OCT     1103            ALARM AND ABORT</span>
-<a name="43352F32"></a>047192,000118:    4776           01124        <span class="sm">C5/2    </span>           <span class="ps">DEC     </span> .0363551                              <span class="co">#                        (OCTAL 01124)</span>
-<a name="5630354E3039"></a>047193,000119:    4777           01211        <span class="sm">V05N09  </span>           <span class="ps">VN      </span> 0509                                  <span class="co">#  (SAME AS OCTAL 1211)</span>
-<a name="4F435431343030"></a>047194,000120:    5000           01400        <span class="sm">OCT1400 </span>           <span class="ps">OCT     </span> 01400                                 
-<a name="5630364E3232"></a>047195,000121:    5001           01426        <span class="sm">V06N22  </span>           <span class="ps">VN      </span> 0622                                  
+047156,000072:                                                                                                  <span class="co">#  BIT5          OCT     00020</span>
+047157,000073:                                                                                                  <span class="co">#  ND1           OCT     21              PINBALL</span>
+047158,000074:                                                                                                  <span class="co">#  VD1           OCT     23              PINBALL</span>
+047159,000075:                                                                                                  <span class="co">#  OCT24         OCT     24              SERVICE ROUTINES</span>
+047160,000076:                                                                                                  <span class="co">#  MD1           OCT     25              PINBALL</span>
+<a name="42495453342635"></a>047161,000077:    4754           00030        <span class="sm">BITS4&amp;5 </span>           <span class="ps">OCT     </span> 30                                    
+047162,000078:                                                                                                  <span class="co">#  OCT31         OCT     31              SERVICE ROUTINES</span>
+<a name="4F43543333"></a>047163,000079:    4755           00033        <span class="sm">OCT33   </span>           <span class="ps">OCT     </span> 33                                    
+<a name="4445433237"></a>047164,000080:    4756     4755               <span class="sm">DEC27   </span>           <span class="ps">=       </span> <a href="#4F43543333">OCT33</a>                                 
+<a name="4F43543335"></a>047165,000081:    4756           00035        <span class="sm">OCT35   </span>           <span class="ps">OCT     </span> 35                                    
+<a name="4445433239"></a>047166,000082:    4757     4756               <span class="sm">DEC29   </span>           <span class="ps">=       </span> <a href="#4F43543335">OCT35</a>                                 
+<a name="43414C4C434F4445"></a>047167,000083:    4757           00032        <span class="sm">CALLCODE</span>           <span class="ps">OCT     </span> 00032                                 
+047168,000084:                                                                                                  <span class="co">#  LOW5          OCT     37              PINBALL</span>
+047169,000085:                                                                                                  <span class="co">#  33DEC         DEC     33              PINBALL         (OCTAL 41)</span>
+047170,000086:                                                                                                  <span class="co">#  34DEC         DEC     34              PINBALL         (OCTAL 42)</span>
+<a name="544255494C444658"></a>047171,000087:    4760           00045        <span class="sm">TBUILDFX</span>           <span class="ps">DEC     </span> 37         B-14                       <span class="co">#  BUILDUP FOR CONVIENCE IN DAPTESTING</span>
+<a name="5444454341594658"></a>047172,000088:    4761           00046        <span class="sm">TDECAYFX</span>           <span class="ps">DEC     </span> 38         B-14                       <span class="co">#  CONVENIENCE FOR DAPTESTING</span>
+047173,000089:                                                                                                  <span class="co">#  BIT6          OCT     00040</span>
+<a name="4F43543530"></a>047174,000090:    4762           00050        <span class="sm">OCT50   </span>           <span class="ps">OCT     </span> 50                                    
+<a name="4445433435"></a>047175,000091:    4763           00055        <span class="sm">DEC45   </span>           <span class="ps">DEC     </span> 45         B-14                       
+<a name="5355504552303131"></a>047176,000092:    4764           00060        <span class="sm">SUPER011</span>           <span class="ps">OCT     </span> 60                                    <span class="co">#  BITS FOR SUPERBNK SETTING 011.</span>
+<a name="2E35534543"></a>047177,000093:    4765           00062        <span class="sm">.5SEC   </span>           <span class="ps">DEC     </span> 50         B-14                       
+047178,000094:                                                                                                  <span class="co">#  BIT7          OCT     00100</span>
+047179,000095: 
+<a name="5355504552313030"></a>047180,000096:    4766     4736               <span class="sm">SUPER100</span>           <span class="ps">=       </span> <a href="#42495437">BIT7</a>                                  <span class="co">#  BITS FOR SUPERBNK SETTING 100</span>
+047181,000097:                                                                                                  <span class="co">#  (LAST 4K OF ROPE)</span>
+<a name="5355504552313031"></a>047182,000098:    4766           00120        <span class="sm">SUPER101</span>           <span class="ps">OCT     </span> 120                                   <span class="co">#  BITS FOR SUPERBNK SETTING 101</span>
+047183,000099:                                                                                                  <span class="co">#  OCT121        OCT     121             SERVICE ROUTINES</span>
+047184,000100:                                                                                                  <span class="co">#  (FIRST 8K OF ACM)</span>
+<a name="5355504552313130"></a>047185,000101:    4767           00140        <span class="sm">SUPER110</span>           <span class="ps">OCT     </span> 140                                   <span class="co">#  BITS FOR SUPERBNK SETTING 110.</span>
+047186,000102:                                                                                                  <span class="co">#  (LAST 8K OF ACM)</span>
+<a name="31534543"></a>047187,000103:    4770           00144        <span class="sm">1SEC    </span>           <span class="ps">DEC     </span> 100        B-14                       
+047188,000104:                                                                                                  <span class="co">#  LOW7          OCT     177             INTERPRETER</span>
+047189,000105:                                                                                                  <span class="co">#  BIT8          OCT     00200</span>
+047190,000106:                                                                                                  <span class="co">#  OT215         OCT     215             ALARM AND ABORT</span>
+047191,000107:                                                                                                  <span class="co">#  8,5           OCT     00220           P20-P25 SUNDANCE</span>
+<a name="3253454353"></a>047192,000108:    4771           00310        <span class="sm">2SECS   </span>           <span class="ps">DEC     </span> 200        B-14                       
+047193,000109:                                                                                                  <span class="co">#  LOW8          OCT     377             PINBALL</span>
+047194,000110:                                                                                                  <span class="co">#  BIT9          OCT     00400</span>
+<a name="474E2F43434F4445"></a>047195,000111:    4772           00401        <span class="sm">GN/CCODE</span>           <span class="ps">OCT     </span> 00401                                 <span class="co">#  SET S/C CONTROL SWITCH TO G/N</span>
+<a name="3353454353"></a>047196,000112:    4773           00454        <span class="sm">3SECS   </span>           <span class="ps">DEC     </span> 300        B-14                       
+<a name="3453454353"></a>047197,000113:    4774           00620        <span class="sm">4SECS   </span>           <span class="ps">DEC     </span> 400        B-14                       
+<a name="4C4F5739"></a>047198,000114:    4775           00777        <span class="sm">LOW9    </span>           <span class="ps">OCT     </span> 777                                   
+047199,000115:                                                                                                  <span class="co">#  BIT10         OCT     01000</span>
+047200,000116:                                                                                                  <span class="co">#  5.5DEGS       DEC     .03056          P20-P25 SUNDANCE        (OCTAL 00765)</span>
+047201,000117:                                                                                                  <span class="co">#  OCT1103       OCT     1103            ALARM AND ABORT</span>
+<a name="43352F32"></a>047202,000118:    4776           01124        <span class="sm">C5/2    </span>           <span class="ps">DEC     </span> .0363551                              <span class="co">#                        (OCTAL 01124)</span>
+<a name="5630354E3039"></a>047203,000119:    4777           01211        <span class="sm">V05N09  </span>           <span class="ps">VN      </span> 0509                                  <span class="co">#  (SAME AS OCTAL 1211)</span>
+<a name="4F435431343030"></a>047204,000120:    5000           01400        <span class="sm">OCT1400 </span>           <span class="ps">OCT     </span> 01400                                 
+<a name="5630364E3232"></a>047205,000121:    5001           01426        <span class="sm">V06N22  </span>           <span class="ps">VN      </span> 0622                                  
 </pre>
 </span>
 </p>
@@ -252,56 +252,56 @@ Page 1095
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047197,000123:                                                                                                  <span class="co">#  MID5          OCT     1740            PINBALL</span>
-<a name="42495453322D3130"></a>047198,000124:    5002           01776        <span class="sm">BITS2-10</span>           <span class="ps">OCT     </span> 1776                                  
-<a name="4C4F573130"></a>047199,000125:    5003           01777        <span class="sm">LOW10   </span>           <span class="ps">OCT     </span> 1777                                  
-047200,000126:                                                                                                  <span class="co">#  BIT11         OCT     02000</span>
-047201,000127:                                                                                                  <span class="co">#  2K+3          OCT     2003            PINBALL</span>
-<a name="4C4F57372B324B"></a>047202,000128:    5004           02177        <span class="sm">LOW7+2K </span>           <span class="ps">OCT     </span> 2177                                  <span class="co">#  OP CODE MASK + BANK 1 FBANK SETTING.</span>
-<a name="4542414E4B35"></a>047203,000129:    5005           02400        <span class="sm">EBANK5  </span>           <span class="ps">OCT     </span> 02400                                 
-<a name="5052494F33"></a>047204,000130:    5006           03000        <span class="sm">PRIO3   </span>           <span class="ps">OCT     </span> 03000                                 
-<a name="4542414E4B37"></a>047205,000131:    5007           03400        <span class="sm">EBANK7  </span>           <span class="ps">OCT     </span> 03400                                 
-047206,000132:                                                                                                  <span class="co">#  LOW11         OCT     3777            PINBALL</span>
-047207,000133:                                                                                                  <span class="co">#  BIT12         OCT     04000</span>
-047208,000134:                                                                                                  <span class="co">#  RELTAB        OCT     04025           T4RUPT</span>
-<a name="5052494F35"></a>047209,000135:    5010           05000        <span class="sm">PRIO5   </span>           <span class="ps">OCT     </span> 05000                                 
-<a name="5052494F36"></a>047210,000136:    5011           06000        <span class="sm">PRIO6   </span>           <span class="ps">OCT     </span> 06000                                 
-<a name="5052494F37"></a>047211,000137:    5012           07000        <span class="sm">PRIO7   </span>           <span class="ps">OCT     </span> 07000                                 
-047212,000138: 
-047213,000139:                                                                                                  <span class="co">#  BIT13         OCT     10000</span>
-047214,000140:                                                                                                  <span class="co">#                OCT     10003           T4RUPT  RELTAB +1D</span>
-047215,000141:                                                                                                  <span class="co">#  13,7,2        OCT     10102           P20-P25 SUNDANCE</span>
-<a name="5052494F3131"></a>047216,000142:    5013           11000        <span class="sm">PRIO11  </span>           <span class="ps">OCT     </span> 11000                                 
-047217,000143:                                                                                                  <span class="co">#  PRIO12        OCT     12000           BANKCALL</span>
-<a name="5052494F3133"></a>047218,000144:    5014           13000        <span class="sm">PRIO13  </span>           <span class="ps">OCT     </span> 13000                                 
-<a name="5052494F3134"></a>047219,000145:    5015           14000        <span class="sm">PRIO14  </span>           <span class="ps">OCT     </span> 14000                                 
-047220,000146:                                                                                                  <span class="co">#                OCT     14031           T4RUPT  RELTAB +2D</span>
-<a name="5052494F3135"></a>047221,000147:    5016           15000        <span class="sm">PRIO15  </span>           <span class="ps">OCT     </span> 15000                                 
-<a name="5052494F3136"></a>047222,000148:    5017           16000        <span class="sm">PRIO16  </span>           <span class="ps">OCT     </span> 16000                                 
-047223,000149:                                                                                                  <span class="co">#  85DEGS        DEC     .45556          P20-P25 SUNDANCE        (OCTAL 16450)</span>
-<a name="5052494F3137"></a>047224,000150:    5020           17000        <span class="sm">PRIO17  </span>           <span class="ps">OCT     </span> 17000                                 
-<a name="4F43543137373730"></a>047225,000151:    5021           17770        <span class="sm">OCT17770</span>           <span class="ps">OCT     </span> 17770                                 
-047226,000152:                                                                                                  <span class="co">#  BIT14         OCT     20000</span>
-047227,000153:                                                                                                  <span class="co">#                OCT     20033           T4RUPT  RELTAB +3D</span>
-<a name="5052494F3231"></a>047228,000154:    5022           21000        <span class="sm">PRIO21  </span>           <span class="ps">OCT     </span> 21000                                 
-047229,000155:    7731                                           <span class="ps">BLOCK   </span> 03                                    
-047230,000156:    7731                                           <span class="ps">COUNT*  </span> $$/FCONS                              
-<a name="5052494F3232"></a>047231,000157:    7731           22000        <span class="sm">PRIO22  </span>           <span class="ps">OCT     </span> 22000                                 <span class="co">#  SERVICE ROUTINES</span>
-<a name="5052494F3233"></a>047232,000158:    7732           23000        <span class="sm">PRIO23  </span>           <span class="ps">OCT     </span> 23000                                 
-<a name="5052494F3234"></a>047233,000159:    7733           24000        <span class="sm">PRIO24  </span>           <span class="ps">OCT     </span> 24000                                 
-047234,000160:                                                                                                  <span class="co">#  5/8+1         OCT     24001           SINGLE PRECISION SUBROUTINES</span>
-047235,000161:                                                                                                  <span class="co">#                OCT     24017           T4RUPT  RELTAB +4D</span>
-<a name="5052494F3235"></a>047236,000162:    7734           25000        <span class="sm">PRIO25  </span>           <span class="ps">OCT     </span> 25000                                 
-<a name="5052494F3236"></a>047237,000163:    7735           26000        <span class="sm">PRIO26  </span>           <span class="ps">OCT     </span> 26000                                 
-<a name="5052494F3237"></a>047238,000164:    7736           27000        <span class="sm">PRIO27  </span>           <span class="ps">OCT     </span> 27000                                 
-047239,000165:                                                                                                  <span class="co">#  CHRPRIO       OCT     30000           PINBALL</span>
-047240,000166:                                                                                                  <span class="co">#                OCT     30036           T4RUPT  RELTAB +5D</span>
-<a name="5052494F3331"></a>047241,000167:    7737           31000        <span class="sm">PRIO31  </span>           <span class="ps">OCT     </span> 31000                                 
-<a name="43312F32"></a>047242,000168:    7740           31103        <span class="sm">C1/2    </span>           <span class="ps">DEC     </span> .7853134                              <span class="co">#                        (OCTAL 31103)</span>
-<a name="5052494F3332"></a>047243,000169:    7741           32000        <span class="sm">PRIO32  </span>           <span class="ps">OCT     </span> 32000                                 
-<a name="5052494F3333"></a>047244,000170:    7742           33000        <span class="sm">PRIO33  </span>           <span class="ps">OCT     </span> 33000                                 
-<a name="5052494F3334"></a>047245,000171:    7743           34000        <span class="sm">PRIO34  </span>           <span class="ps">OCT     </span> 34000                                 
-047246,000172:                                                                                                  <span class="co">#                OCT     34034           T4RUPT  RELTAB +6D              </span>
+047207,000123:                                                                                                  <span class="co">#  MID5          OCT     1740            PINBALL</span>
+<a name="42495453322D3130"></a>047208,000124:    5002           01776        <span class="sm">BITS2-10</span>           <span class="ps">OCT     </span> 1776                                  
+<a name="4C4F573130"></a>047209,000125:    5003           01777        <span class="sm">LOW10   </span>           <span class="ps">OCT     </span> 1777                                  
+047210,000126:                                                                                                  <span class="co">#  BIT11         OCT     02000</span>
+047211,000127:                                                                                                  <span class="co">#  2K+3          OCT     2003            PINBALL</span>
+<a name="4C4F57372B324B"></a>047212,000128:    5004           02177        <span class="sm">LOW7+2K </span>           <span class="ps">OCT     </span> 2177                                  <span class="co">#  OP CODE MASK + BANK 1 FBANK SETTING.</span>
+<a name="4542414E4B35"></a>047213,000129:    5005           02400        <span class="sm">EBANK5  </span>           <span class="ps">OCT     </span> 02400                                 
+<a name="5052494F33"></a>047214,000130:    5006           03000        <span class="sm">PRIO3   </span>           <span class="ps">OCT     </span> 03000                                 
+<a name="4542414E4B37"></a>047215,000131:    5007           03400        <span class="sm">EBANK7  </span>           <span class="ps">OCT     </span> 03400                                 
+047216,000132:                                                                                                  <span class="co">#  LOW11         OCT     3777            PINBALL</span>
+047217,000133:                                                                                                  <span class="co">#  BIT12         OCT     04000</span>
+047218,000134:                                                                                                  <span class="co">#  RELTAB        OCT     04025           T4RUPT</span>
+<a name="5052494F35"></a>047219,000135:    5010           05000        <span class="sm">PRIO5   </span>           <span class="ps">OCT     </span> 05000                                 
+<a name="5052494F36"></a>047220,000136:    5011           06000        <span class="sm">PRIO6   </span>           <span class="ps">OCT     </span> 06000                                 
+<a name="5052494F37"></a>047221,000137:    5012           07000        <span class="sm">PRIO7   </span>           <span class="ps">OCT     </span> 07000                                 
+047222,000138: 
+047223,000139:                                                                                                  <span class="co">#  BIT13         OCT     10000</span>
+047224,000140:                                                                                                  <span class="co">#                OCT     10003           T4RUPT  RELTAB +1D</span>
+047225,000141:                                                                                                  <span class="co">#  13,7,2        OCT     10102           P20-P25 SUNDANCE</span>
+<a name="5052494F3131"></a>047226,000142:    5013           11000        <span class="sm">PRIO11  </span>           <span class="ps">OCT     </span> 11000                                 
+047227,000143:                                                                                                  <span class="co">#  PRIO12        OCT     12000           BANKCALL</span>
+<a name="5052494F3133"></a>047228,000144:    5014           13000        <span class="sm">PRIO13  </span>           <span class="ps">OCT     </span> 13000                                 
+<a name="5052494F3134"></a>047229,000145:    5015           14000        <span class="sm">PRIO14  </span>           <span class="ps">OCT     </span> 14000                                 
+047230,000146:                                                                                                  <span class="co">#                OCT     14031           T4RUPT  RELTAB +2D</span>
+<a name="5052494F3135"></a>047231,000147:    5016           15000        <span class="sm">PRIO15  </span>           <span class="ps">OCT     </span> 15000                                 
+<a name="5052494F3136"></a>047232,000148:    5017           16000        <span class="sm">PRIO16  </span>           <span class="ps">OCT     </span> 16000                                 
+047233,000149:                                                                                                  <span class="co">#  85DEGS        DEC     .45556          P20-P25 SUNDANCE        (OCTAL 16450)</span>
+<a name="5052494F3137"></a>047234,000150:    5020           17000        <span class="sm">PRIO17  </span>           <span class="ps">OCT     </span> 17000                                 
+<a name="4F43543137373730"></a>047235,000151:    5021           17770        <span class="sm">OCT17770</span>           <span class="ps">OCT     </span> 17770                                 
+047236,000152:                                                                                                  <span class="co">#  BIT14         OCT     20000</span>
+047237,000153:                                                                                                  <span class="co">#                OCT     20033           T4RUPT  RELTAB +3D</span>
+<a name="5052494F3231"></a>047238,000154:    5022           21000        <span class="sm">PRIO21  </span>           <span class="ps">OCT     </span> 21000                                 
+047239,000155:    7731                                           <span class="ps">BLOCK   </span> 03                                    
+047240,000156:    7731                                           <span class="ps">COUNT*  </span> $$/FCONS                              
+<a name="5052494F3232"></a>047241,000157:    7731           22000        <span class="sm">PRIO22  </span>           <span class="ps">OCT     </span> 22000                                 <span class="co">#  SERVICE ROUTINES</span>
+<a name="5052494F3233"></a>047242,000158:    7732           23000        <span class="sm">PRIO23  </span>           <span class="ps">OCT     </span> 23000                                 
+<a name="5052494F3234"></a>047243,000159:    7733           24000        <span class="sm">PRIO24  </span>           <span class="ps">OCT     </span> 24000                                 
+047244,000160:                                                                                                  <span class="co">#  5/8+1         OCT     24001           SINGLE PRECISION SUBROUTINES</span>
+047245,000161:                                                                                                  <span class="co">#                OCT     24017           T4RUPT  RELTAB +4D</span>
+<a name="5052494F3235"></a>047246,000162:    7734           25000        <span class="sm">PRIO25  </span>           <span class="ps">OCT     </span> 25000                                 
+<a name="5052494F3236"></a>047247,000163:    7735           26000        <span class="sm">PRIO26  </span>           <span class="ps">OCT     </span> 26000                                 
+<a name="5052494F3237"></a>047248,000164:    7736           27000        <span class="sm">PRIO27  </span>           <span class="ps">OCT     </span> 27000                                 
+047249,000165:                                                                                                  <span class="co">#  CHRPRIO       OCT     30000           PINBALL</span>
+047250,000166:                                                                                                  <span class="co">#                OCT     30036           T4RUPT  RELTAB +5D</span>
+<a name="5052494F3331"></a>047251,000167:    7737           31000        <span class="sm">PRIO31  </span>           <span class="ps">OCT     </span> 31000                                 
+<a name="43312F32"></a>047252,000168:    7740           31103        <span class="sm">C1/2    </span>           <span class="ps">DEC     </span> .7853134                              <span class="co">#                        (OCTAL 31103)</span>
+<a name="5052494F3332"></a>047253,000169:    7741           32000        <span class="sm">PRIO32  </span>           <span class="ps">OCT     </span> 32000                                 
+<a name="5052494F3333"></a>047254,000170:    7742           33000        <span class="sm">PRIO33  </span>           <span class="ps">OCT     </span> 33000                                 
+<a name="5052494F3334"></a>047255,000171:    7743           34000        <span class="sm">PRIO34  </span>           <span class="ps">OCT     </span> 34000                                 
+047256,000172:                                                                                                  <span class="co">#                OCT     34034           T4RUPT  RELTAB +6D              </span>
 </pre>
 </span>
 </p>
@@ -317,41 +317,41 @@ Page 1096
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="5052494F3335"></a>047248,000174:    7744           35000        <span class="sm">PRIO35  </span>           <span class="ps">OCT     </span> 35000                                 
-<a name="5052494F3336"></a>047249,000175:    7745           36000        <span class="sm">PRIO36  </span>           <span class="ps">OCT     </span> 36000                                 
-<a name="5052494F3337"></a>047250,000176:    7746           37000        <span class="sm">PRIO37  </span>           <span class="ps">OCT     </span> 37000                                 
-<a name="36332F36342B31"></a>047251,000177:    7747           37401        <span class="sm">63/64+1 </span>           <span class="ps">OCT     </span> 37401                                 
-047252,000178:                                                                                                  <span class="co">#  MID7          OCT     37600           PINBALL</span>
-<a name="4F43543337373636"></a>047253,000179:    7750           37766        <span class="sm">OCT37766</span>           <span class="ps">OCT     </span> 37766                                 
-<a name="4F43543337373734"></a>047254,000180:    7751           37774        <span class="sm">OCT37774</span>           <span class="ps">OCT     </span> 37774                                 
-<a name="4F43543337373736"></a>047255,000181:    7752           37776        <span class="sm">OCT37776</span>           <span class="ps">OCT     </span> 37776                                 
-047256,000182:                                                                                                  <span class="co">#  DPOSMAX       OCT     37777</span>
-047257,000183:                                                                                                  <span class="co">#  BIT15         OCT     40000</span>
-047258,000184:                                                                                                  <span class="co">#  OCT40001      OCT     40001           INTERPRETER (CS 1 INSTRUCTION)</span>
-<a name="444C4F4144434F44"></a>047259,000185:    7753           40014        <span class="sm">DLOADCOD</span>           <span class="ps">OCT     </span> 40014                                 
-<a name="444C4F41442A"></a>047260,000186:    7754           40015        <span class="sm">DLOAD*  </span>           <span class="ps">OCT     </span> 40015                                 
-047261,000187:                                                                                                  <span class="co">#                OCT     40023           T4RUPT  RELTAB +7D</span>
-<a name="42495431352B36"></a>047262,000188:    7755           40040        <span class="sm">BIT15+6 </span>           <span class="ps">OCT     </span> 40040                                 
-<a name="4F43543430323030"></a>047263,000189:    7756           40200        <span class="sm">OCT40200</span>           <span class="ps">OCT     </span> 40200                                 
-047264,000190:                                                                                                  <span class="co">#                OCT     44035           T4RUPT  RELTAB +8D</span>
-047265,000191:                                                                                                  <span class="co">#                OCT     50037           T4RUPT   RELTAB +9D</span>
-047266,000192:                                                                                                  <span class="co">#                OCT     54000           T4RUPT   RELTAB +10D</span>
-<a name="2D4249543134"></a>047267,000193:    7757           57777        <span class="sm">-BIT14  </span>           <span class="ps">OCT     </span> 57777                                 
-047268,000194:                                                                                                  <span class="co">#  RELTAB11      OCT     60000           T4RUPT</span>
-<a name="43332F32"></a>047269,000195:    7760           65552        <span class="sm">C3/2    </span>           <span class="ps">DEC     </span> -.3216147                             <span class="co">#                        (OCTAL 65552)</span>
-<a name="31332C31342C3135"></a>047270,000196:    7761           70000        <span class="sm">13,14,15</span>           <span class="ps">OCT     </span> 70000                                 
-<a name="2D312F38"></a>047271,000197:    7762           73777        <span class="sm">-1/8    </span>           <span class="ps">OCT     </span> 73777                                 
-<a name="4849474834"></a>047272,000198:    7763           74000        <span class="sm">HIGH4   </span>           <span class="ps">OCT     </span> 74000                                 
-<a name="2D454E4445524153"></a>047273,000199:    7764           74056        <span class="sm">-ENDERAS</span>           <span class="ps">DEC     </span> -2001      B-14                       <span class="co">#                        (OCTAL 74056)</span>
-047274,000200:                                                                                                  <span class="co">#  HI5           OCT     76000           PINBALL</span>
-<a name="4849474839"></a>047275,000201:    7765           77700        <span class="sm">HIGH9   </span>           <span class="ps">OCT     </span> 77700                                 
-047276,000202:                                                                                                  <span class="co">#  -ENDVAC       DEC     -45             INTERPRETER             (OCTAL 77722)</span>
-047277,000203:                                                                                                  <span class="co">#  -OCT10        OCT     -10                                     (OCT 77767)</span>
-047278,000204:                                                                                                  <span class="co">#  NEG4          DEC     -4                                      (OCTAL 77773)</span>
-<a name="4E454733"></a>047279,000205:    7766           77774        <span class="sm">NEG3    </span>           <span class="ps">DEC     </span> -3         B-14                       <span class="co">## In octal to left, "77774 0" is circled - RRB</span>
-<a name="4E454732"></a>047280,000206:    7767           77775        <span class="sm">NEG2    </span>           <span class="ps">OCT     </span> 77775                                 
-<a name="4E45474F4E45"></a>047281,000207:    7770           77776        <span class="sm">NEGONE  </span>           <span class="ps">DEC     </span> -1         B-14                       
-047282,000208: 
+<a name="5052494F3335"></a>047258,000174:    7744           35000        <span class="sm">PRIO35  </span>           <span class="ps">OCT     </span> 35000                                 
+<a name="5052494F3336"></a>047259,000175:    7745           36000        <span class="sm">PRIO36  </span>           <span class="ps">OCT     </span> 36000                                 
+<a name="5052494F3337"></a>047260,000176:    7746           37000        <span class="sm">PRIO37  </span>           <span class="ps">OCT     </span> 37000                                 
+<a name="36332F36342B31"></a>047261,000177:    7747           37401        <span class="sm">63/64+1 </span>           <span class="ps">OCT     </span> 37401                                 
+047262,000178:                                                                                                  <span class="co">#  MID7          OCT     37600           PINBALL</span>
+<a name="4F43543337373636"></a>047263,000179:    7750           37766        <span class="sm">OCT37766</span>           <span class="ps">OCT     </span> 37766                                 
+<a name="4F43543337373734"></a>047264,000180:    7751           37774        <span class="sm">OCT37774</span>           <span class="ps">OCT     </span> 37774                                 
+<a name="4F43543337373736"></a>047265,000181:    7752           37776        <span class="sm">OCT37776</span>           <span class="ps">OCT     </span> 37776                                 
+047266,000182:                                                                                                  <span class="co">#  DPOSMAX       OCT     37777</span>
+047267,000183:                                                                                                  <span class="co">#  BIT15         OCT     40000</span>
+047268,000184:                                                                                                  <span class="co">#  OCT40001      OCT     40001           INTERPRETER (CS 1 INSTRUCTION)</span>
+<a name="444C4F4144434F44"></a>047269,000185:    7753           40014        <span class="sm">DLOADCOD</span>           <span class="ps">OCT     </span> 40014                                 
+<a name="444C4F41442A"></a>047270,000186:    7754           40015        <span class="sm">DLOAD*  </span>           <span class="ps">OCT     </span> 40015                                 
+047271,000187:                                                                                                  <span class="co">#                OCT     40023           T4RUPT  RELTAB +7D</span>
+<a name="42495431352B36"></a>047272,000188:    7755           40040        <span class="sm">BIT15+6 </span>           <span class="ps">OCT     </span> 40040                                 
+<a name="4F43543430323030"></a>047273,000189:    7756           40200        <span class="sm">OCT40200</span>           <span class="ps">OCT     </span> 40200                                 
+047274,000190:                                                                                                  <span class="co">#                OCT     44035           T4RUPT  RELTAB +8D</span>
+047275,000191:                                                                                                  <span class="co">#                OCT     50037           T4RUPT   RELTAB +9D</span>
+047276,000192:                                                                                                  <span class="co">#                OCT     54000           T4RUPT   RELTAB +10D</span>
+<a name="2D4249543134"></a>047277,000193:    7757           57777        <span class="sm">-BIT14  </span>           <span class="ps">OCT     </span> 57777                                 
+047278,000194:                                                                                                  <span class="co">#  RELTAB11      OCT     60000           T4RUPT</span>
+<a name="43332F32"></a>047279,000195:    7760           65552        <span class="sm">C3/2    </span>           <span class="ps">DEC     </span> -.3216147                             <span class="co">#                        (OCTAL 65552)</span>
+<a name="31332C31342C3135"></a>047280,000196:    7761           70000        <span class="sm">13,14,15</span>           <span class="ps">OCT     </span> 70000                                 
+<a name="2D312F38"></a>047281,000197:    7762           73777        <span class="sm">-1/8    </span>           <span class="ps">OCT     </span> 73777                                 
+<a name="4849474834"></a>047282,000198:    7763           74000        <span class="sm">HIGH4   </span>           <span class="ps">OCT     </span> 74000                                 
+<a name="2D454E4445524153"></a>047283,000199:    7764           74056        <span class="sm">-ENDERAS</span>           <span class="ps">DEC     </span> -2001      B-14                       <span class="co">#                        (OCTAL 74056)</span>
+047284,000200:                                                                                                  <span class="co">#  HI5           OCT     76000           PINBALL</span>
+<a name="4849474839"></a>047285,000201:    7765           77700        <span class="sm">HIGH9   </span>           <span class="ps">OCT     </span> 77700                                 
+047286,000202:                                                                                                  <span class="co">#  -ENDVAC       DEC     -45             INTERPRETER             (OCTAL 77722)</span>
+047287,000203:                                                                                                  <span class="co">#  -OCT10        OCT     -10                                     (OCT 77767)</span>
+047288,000204:                                                                                                  <span class="co">#  NEG4          DEC     -4                                      (OCTAL 77773)</span>
+<a name="4E454733"></a>047289,000205:    7766           77774        <span class="sm">NEG3    </span>           <span class="ps">DEC     </span> -3         B-14                       <span class="co">## In octal to left, "77774 0" is circled - RRB</span>
+<a name="4E454732"></a>047290,000206:    7767           77775        <span class="sm">NEG2    </span>           <span class="ps">OCT     </span> 77775                                 
+<a name="4E45474F4E45"></a>047291,000207:    7770           77776        <span class="sm">NEGONE  </span>           <span class="ps">DEC     </span> -1         B-14                       
+047292,000208: 
 </pre>
 </span>
 </p>
@@ -367,52 +367,52 @@ Page 1097
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047284,000210: 
-047285,000211:                                                                                                  <span class="co">#  DEFINED BY EQUALS</span>
-047286,000212: 
-047287,000213:                                                                                                  <span class="co">#  IT WOULD BE TO THE USERS ADVANTAGE TO OCCASIONALLY CHECK ANY OF THESE SYMBOLS IN ORDER TO PREVENT ANY</span>
-047288,000214:                                                                                                  <span class="co">#  ACCIDENTAL DEFINITION CHANGES.</span>
-047289,000215: 
-<a name="4D494E555331"></a>047290,000216:    7771     7770               <span class="sm">MINUS1  </span>           <span class="ps">=       </span> <a href="#4E454731">NEG1</a>                                  
-<a name="4E454731"></a>047291,000217:    7771     7770               <span class="sm">NEG1    </span>           <span class="ps">=       </span> <a href="#4E45474F4E45">NEGONE</a>                                
-<a name="4F4E45"></a>047292,000218:    7771     4744               <span class="sm">ONE     </span>           <span class="ps">=       </span> <a href="#42495431">BIT1</a>                                  
-<a name="54574F"></a>047293,000219:    7771     4743               <span class="sm">TWO     </span>           <span class="ps">=       </span> <a href="#42495432">BIT2</a>                                  
-<a name="5448524545"></a>047294,000220:    7771     6266               <span class="sm">THREE   </span>           <span class="ps">=       </span> <a href="INTERPRETER.agc.html#4F4354414C33">OCTAL3</a>                                
-<a name="4C4F5732"></a>047295,000221:    7771     6266               <span class="sm">LOW2    </span>           <span class="ps">=       </span> <a href="#5448524545">THREE</a>                                 
-<a name="464F5552"></a>047296,000222:    7771     4742               <span class="sm">FOUR    </span>           <span class="ps">=       </span> <a href="#42495433">BIT3</a>                                  
-<a name="534958"></a>047297,000223:    7771     6263               <span class="sm">SIX     </span>           <span class="ps">=       </span> <a href="INTERPRETER.agc.html#524556434E54">REVCNT</a>                                
-<a name="4C4F5733"></a>047298,000224:    7771     4750               <span class="sm">LOW3    </span>           <span class="ps">=       </span> <a href="#534556454E">SEVEN</a>                                 
-<a name="4549474854"></a>047299,000225:    7771     4741               <span class="sm">EIGHT   </span>           <span class="ps">=       </span> <a href="#42495434">BIT4</a>                                  
-<a name="4E494E45"></a>047300,000226:    7771     4311               <span class="sm">NINE    </span>           <span class="ps">=       </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#52324431">R2D1</a>                                  
-<a name="54454E"></a>047301,000227:    7771     4354               <span class="sm">TEN     </span>           <span class="ps">=       </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#42494E434F4E">BINCON</a>                                
-<a name="4E4F5554434F4E"></a>047302,000228:    7771     4751               <span class="sm">NOUTCON </span>           <span class="ps">=       </span> <a href="#454C4556454E">ELEVEN</a>                                
-<a name="4F43543233"></a>047303,000229:    7771     4351               <span class="sm">OCT23   </span>           <span class="ps">=       </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#564431">VD1</a>                                   
-<a name="4F43543235"></a>047304,000230:    7771     4353               <span class="sm">OCT25   </span>           <span class="ps">=       </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4D4431">MD1</a>                                   
-<a name="5052494F31"></a>047305,000231:    7771     4733               <span class="sm">PRIO1   </span>           <span class="ps">=       </span> <a href="#4249543130">BIT10</a>                                 
-<a name="4542414E4B33"></a>047306,000232:    7771     5000               <span class="sm">EBANK3  </span>           <span class="ps">=       </span> <a href="#4F435431343030">OCT1400</a>                               
-<a name="5052494F32"></a>047307,000233:    7771     4732               <span class="sm">PRIO2   </span>           <span class="ps">=       </span> <a href="#4249543131">BIT11</a>                                 
-<a name="4F4354313230"></a>047308,000234:    7771     4766               <span class="sm">OCT120  </span>           <span class="ps">=       </span> <a href="#5355504552313031">SUPER101</a>                              
-<a name="4F4354313430"></a>047309,000235:    7771     4767               <span class="sm">OCT140  </span>           <span class="ps">=       </span> <a href="#5355504552313130">SUPER110</a>                              
-<a name="324B"></a>047310,000236:    7771     4732               <span class="sm">2K      </span>           <span class="ps">=       </span> <a href="#4249543131">BIT11</a>                                 
-<a name="4542414E4B34"></a>047311,000237:    7771     4732               <span class="sm">EBANK4  </span>           <span class="ps">=       </span> <a href="#4249543131">BIT11</a>                                 
-<a name="5052494F34"></a>047312,000238:    7771     4731               <span class="sm">PRIO4   </span>           <span class="ps">=       </span> <a href="#4249543132">BIT12</a>                                 
-<a name="4542414E4B36"></a>047313,000239:    7771     5006               <span class="sm">EBANK6  </span>           <span class="ps">=       </span> <a href="#5052494F33">PRIO3</a>                                 
-<a name="51554152544552"></a>047314,000240:    7771     4730               <span class="sm">QUARTER </span>           <span class="ps">=       </span> <a href="#4249543133">BIT13</a>                                 
-<a name="5052494F3130"></a>047315,000241:    7771     4730               <span class="sm">PRIO10  </span>           <span class="ps">=       </span> <a href="#4249543133">BIT13</a>                                 
-<a name="4F43543130303031"></a>047316,000242:    7771     7704               <span class="sm">OCT10001</span>           <span class="ps">=       </span> <a href="INTERPRETER.agc.html#4343534C">CCSL</a>                                  
-<a name="504F53312F32"></a>047317,000243:    7771     4727               <span class="sm">POS1/2  </span>           <span class="ps">=       </span> <a href="#48414C46">HALF</a>                                  
-<a name="5052494F3230"></a>047318,000244:    7771     4727               <span class="sm">PRIO20  </span>           <span class="ps">=       </span> <a href="#4249543134">BIT14</a>                                 
-<a name="48414C46"></a>047319,000245:    7771     4727               <span class="sm">HALF    </span>           <span class="ps">=       </span> <a href="#4249543134">BIT14</a>                                 
-<a name="5052494F3330"></a>047320,000246:    7771     4346               <span class="sm">PRIO30  </span>           <span class="ps">=       </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4348525052494F">CHRPRIO</a>                               
-<a name="42495431332D3134"></a>047321,000247:    7771     4346               <span class="sm">BIT13-14</span>           <span class="ps">=       </span> <a href="#5052494F3330">PRIO30</a>                                <span class="co">#  INTERPRETER USES IN PROCESSING STORECODE</span>
-<a name="4F43543330303032"></a>047322,000248:    7771     6512               <span class="sm">OCT30002</span>           <span class="ps">=       </span> <a href="INTERPRETER.agc.html#544C4F4144">TLOAD</a>      +1                         
-<a name="423132543134"></a>047323,000249:    7771     7743               <span class="sm">B12T14  </span>           <span class="ps">=       </span> <a href="#5052494F3334">PRIO34</a>                                
-<a name="4E45474D4158"></a>047324,000250:    7771     4726               <span class="sm">NEGMAX  </span>           <span class="ps">=       </span> <a href="#4249543135">BIT15</a>                                 
-<a name="564C4F4144434F44"></a>047325,000251:    7771     4726               <span class="sm">VLOADCOD</span>           <span class="ps">=       </span> <a href="#4249543135">BIT15</a>                                 
-<a name="564C4F41442A"></a>047326,000252:    7771     6130               <span class="sm">VLOAD*  </span>           <span class="ps">=       </span> <a href="INTERPRETER.agc.html#4F43543430303031">OCT40001</a>                              
-<a name="4F43543630303030"></a>047327,000253:    7771     4101               <span class="sm">OCT60000</span>           <span class="ps">=       </span> <a href="T4RUPT_PROGRAM.agc.html#52454C5441423131">RELTAB11</a>                              
-<a name="42414E4B4D41534B"></a>047328,000254:    7771     4341               <span class="sm">BANKMASK</span>           <span class="ps">=       </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#484935">HI5</a>                                   
-047329,000255: 
+047294,000210: 
+047295,000211:                                                                                                  <span class="co">#  DEFINED BY EQUALS</span>
+047296,000212: 
+047297,000213:                                                                                                  <span class="co">#  IT WOULD BE TO THE USERS ADVANTAGE TO OCCASIONALLY CHECK ANY OF THESE SYMBOLS IN ORDER TO PREVENT ANY</span>
+047298,000214:                                                                                                  <span class="co">#  ACCIDENTAL DEFINITION CHANGES.</span>
+047299,000215: 
+<a name="4D494E555331"></a>047300,000216:    7771     7770               <span class="sm">MINUS1  </span>           <span class="ps">=       </span> <a href="#4E454731">NEG1</a>                                  
+<a name="4E454731"></a>047301,000217:    7771     7770               <span class="sm">NEG1    </span>           <span class="ps">=       </span> <a href="#4E45474F4E45">NEGONE</a>                                
+<a name="4F4E45"></a>047302,000218:    7771     4744               <span class="sm">ONE     </span>           <span class="ps">=       </span> <a href="#42495431">BIT1</a>                                  
+<a name="54574F"></a>047303,000219:    7771     4743               <span class="sm">TWO     </span>           <span class="ps">=       </span> <a href="#42495432">BIT2</a>                                  
+<a name="5448524545"></a>047304,000220:    7771     6266               <span class="sm">THREE   </span>           <span class="ps">=       </span> <a href="INTERPRETER.agc.html#4F4354414C33">OCTAL3</a>                                
+<a name="4C4F5732"></a>047305,000221:    7771     6266               <span class="sm">LOW2    </span>           <span class="ps">=       </span> <a href="#5448524545">THREE</a>                                 
+<a name="464F5552"></a>047306,000222:    7771     4742               <span class="sm">FOUR    </span>           <span class="ps">=       </span> <a href="#42495433">BIT3</a>                                  
+<a name="534958"></a>047307,000223:    7771     6263               <span class="sm">SIX     </span>           <span class="ps">=       </span> <a href="INTERPRETER.agc.html#524556434E54">REVCNT</a>                                
+<a name="4C4F5733"></a>047308,000224:    7771     4750               <span class="sm">LOW3    </span>           <span class="ps">=       </span> <a href="#534556454E">SEVEN</a>                                 
+<a name="4549474854"></a>047309,000225:    7771     4741               <span class="sm">EIGHT   </span>           <span class="ps">=       </span> <a href="#42495434">BIT4</a>                                  
+<a name="4E494E45"></a>047310,000226:    7771     4311               <span class="sm">NINE    </span>           <span class="ps">=       </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#52324431">R2D1</a>                                  
+<a name="54454E"></a>047311,000227:    7771     4354               <span class="sm">TEN     </span>           <span class="ps">=       </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#42494E434F4E">BINCON</a>                                
+<a name="4E4F5554434F4E"></a>047312,000228:    7771     4751               <span class="sm">NOUTCON </span>           <span class="ps">=       </span> <a href="#454C4556454E">ELEVEN</a>                                
+<a name="4F43543233"></a>047313,000229:    7771     4351               <span class="sm">OCT23   </span>           <span class="ps">=       </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#564431">VD1</a>                                   
+<a name="4F43543235"></a>047314,000230:    7771     4353               <span class="sm">OCT25   </span>           <span class="ps">=       </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4D4431">MD1</a>                                   
+<a name="5052494F31"></a>047315,000231:    7771     4733               <span class="sm">PRIO1   </span>           <span class="ps">=       </span> <a href="#4249543130">BIT10</a>                                 
+<a name="4542414E4B33"></a>047316,000232:    7771     5000               <span class="sm">EBANK3  </span>           <span class="ps">=       </span> <a href="#4F435431343030">OCT1400</a>                               
+<a name="5052494F32"></a>047317,000233:    7771     4732               <span class="sm">PRIO2   </span>           <span class="ps">=       </span> <a href="#4249543131">BIT11</a>                                 
+<a name="4F4354313230"></a>047318,000234:    7771     4766               <span class="sm">OCT120  </span>           <span class="ps">=       </span> <a href="#5355504552313031">SUPER101</a>                              
+<a name="4F4354313430"></a>047319,000235:    7771     4767               <span class="sm">OCT140  </span>           <span class="ps">=       </span> <a href="#5355504552313130">SUPER110</a>                              
+<a name="324B"></a>047320,000236:    7771     4732               <span class="sm">2K      </span>           <span class="ps">=       </span> <a href="#4249543131">BIT11</a>                                 
+<a name="4542414E4B34"></a>047321,000237:    7771     4732               <span class="sm">EBANK4  </span>           <span class="ps">=       </span> <a href="#4249543131">BIT11</a>                                 
+<a name="5052494F34"></a>047322,000238:    7771     4731               <span class="sm">PRIO4   </span>           <span class="ps">=       </span> <a href="#4249543132">BIT12</a>                                 
+<a name="4542414E4B36"></a>047323,000239:    7771     5006               <span class="sm">EBANK6  </span>           <span class="ps">=       </span> <a href="#5052494F33">PRIO3</a>                                 
+<a name="51554152544552"></a>047324,000240:    7771     4730               <span class="sm">QUARTER </span>           <span class="ps">=       </span> <a href="#4249543133">BIT13</a>                                 
+<a name="5052494F3130"></a>047325,000241:    7771     4730               <span class="sm">PRIO10  </span>           <span class="ps">=       </span> <a href="#4249543133">BIT13</a>                                 
+<a name="4F43543130303031"></a>047326,000242:    7771     7704               <span class="sm">OCT10001</span>           <span class="ps">=       </span> <a href="INTERPRETER.agc.html#4343534C">CCSL</a>                                  
+<a name="504F53312F32"></a>047327,000243:    7771     4727               <span class="sm">POS1/2  </span>           <span class="ps">=       </span> <a href="#48414C46">HALF</a>                                  
+<a name="5052494F3230"></a>047328,000244:    7771     4727               <span class="sm">PRIO20  </span>           <span class="ps">=       </span> <a href="#4249543134">BIT14</a>                                 
+<a name="48414C46"></a>047329,000245:    7771     4727               <span class="sm">HALF    </span>           <span class="ps">=       </span> <a href="#4249543134">BIT14</a>                                 
+<a name="5052494F3330"></a>047330,000246:    7771     4346               <span class="sm">PRIO30  </span>           <span class="ps">=       </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4348525052494F">CHRPRIO</a>                               
+<a name="42495431332D3134"></a>047331,000247:    7771     4346               <span class="sm">BIT13-14</span>           <span class="ps">=       </span> <a href="#5052494F3330">PRIO30</a>                                <span class="co">#  INTERPRETER USES IN PROCESSING STORECODE</span>
+<a name="4F43543330303032"></a>047332,000248:    7771     6512               <span class="sm">OCT30002</span>           <span class="ps">=       </span> <a href="INTERPRETER.agc.html#544C4F4144">TLOAD</a>      +1                         
+<a name="423132543134"></a>047333,000249:    7771     7743               <span class="sm">B12T14  </span>           <span class="ps">=       </span> <a href="#5052494F3334">PRIO34</a>                                
+<a name="4E45474D4158"></a>047334,000250:    7771     4726               <span class="sm">NEGMAX  </span>           <span class="ps">=       </span> <a href="#4249543135">BIT15</a>                                 
+<a name="564C4F4144434F44"></a>047335,000251:    7771     4726               <span class="sm">VLOADCOD</span>           <span class="ps">=       </span> <a href="#4249543135">BIT15</a>                                 
+<a name="564C4F41442A"></a>047336,000252:    7771     6130               <span class="sm">VLOAD*  </span>           <span class="ps">=       </span> <a href="INTERPRETER.agc.html#4F43543430303031">OCT40001</a>                              
+<a name="4F43543630303030"></a>047337,000253:    7771     4101               <span class="sm">OCT60000</span>           <span class="ps">=       </span> <a href="T4RUPT_PROGRAM.agc.html#52454C5441423131">RELTAB11</a>                              
+<a name="42414E4B4D41534B"></a>047338,000254:    7771     4341               <span class="sm">BANKMASK</span>           <span class="ps">=       </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#484935">HI5</a>                                   
+047339,000255: 
 
 End of include-file FIXED-FIXED_CONSTANT_POOL.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

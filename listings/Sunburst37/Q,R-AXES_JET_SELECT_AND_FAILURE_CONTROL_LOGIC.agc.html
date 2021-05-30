@@ -90,28 +90,28 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-022992,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-022993,000003:                                                                                                  <span class="co">## Filename:    Q,R-AXES_JET_SELECT_AND_FAILURE_CONTROL_LOGIC.agc</span>
-022994,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
-022995,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
-022996,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
-022997,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
-022998,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
-022999,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
-023000,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
-023001,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-023002,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-023003,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-023004,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
-023005,000015:                                                                                                  <span class="co">## Reference:   pp. 520-534</span>
-023006,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-023007,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-023008,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-023009,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
-023010,000020:                                                                                                  <span class="co">##              2017-05-30 HG   Transcribed</span>
-023011,000021:                                                                                                  <span class="co">##              2017-06-22 RSB  Proofed comment text with</span>
-023012,000022:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
-023013,000023: 
+022999,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+023000,000003:                                                                                                  <span class="co">## Filename:    Q,R-AXES_JET_SELECT_AND_FAILURE_CONTROL_LOGIC.agc</span>
+023001,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
+023002,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
+023003,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
+023004,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
+023005,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
+023006,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
+023007,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
+023008,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+023009,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+023010,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+023011,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
+023012,000015:                                                                                                  <span class="co">## Reference:   pp. 520-534</span>
+023013,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+023014,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+023015,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+023016,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
+023017,000020:                                                                                                  <span class="co">##              2017-05-30 HG   Transcribed</span>
+023018,000021:                                                                                                  <span class="co">##              2017-06-22 RSB  Proofed comment text with</span>
+023019,000022:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
+023020,000023: 
 </pre>
 </span>
 </p>
@@ -127,57 +127,57 @@ Page 520
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023015,000025:                                                                                                  <span class="co">#  PROGRAM: POLTYPEP               MOD. NO. 1  DATE: NOVEMBER 14, 1966</span>
-023016,000026: 
-023017,000027:                                                                                                  <span class="co">#  AUTHOR: JONATHAN D. ADDELSTON (ADAMS ASSOCIATES)</span>
-023018,000028: 
-023019,000029:                                                                                                  <span class="co">#  THIS PROGRAM IS DESIGNED TO SELECT A POLICY OF JETS (OF WHICH NONE HAVE FAILED) WHICH CAN BE USED TO CREATE THE</span>
-023020,000030:                                                                                                  <span class="co">#  ROTATION AND/OR TRANSLATION WHICH IS REQUIRED BY THE LM DAP.  FROM THE INDEX "NETACNDX" (WHICH MUST BE SET WHEN</span>
-023021,000031:                                                                                                  <span class="co">#  ROTATION IS REQUESTED), THE OPTIMAL POLICY IS SELECTED.  WHEN FAILURES ARE DETECTED WITHIN A CHOSEN POLICY, AN</span>
-023022,000032:                                                                                                  <span class="co">#  ALTERNATE POLICY IS SELECTED.  IF ALL ALTERNATE POLICIES ARE EXHAUSTED WITHOUT FINDING AN UNFAILED POLICY, A JET</span>
-023023,000033:                                                                                                  <span class="co">#  FAILURE ABORT IS INITIATED.  WHEN THE ROUTINE IS USE FOR TRANSLATION JETS ONLY, "TRANONLY" MUST BE SET POSITIVE</span>
-023024,000034:                                                                                                  <span class="co">#  (NONZERO) AND THE ENTRY POINT IS "+/-XTRAN".</span>
-023025,000035: 
-023026,000036:                                                                                                  <span class="co">#  CALLING SEQUENCES:</span>
-023027,000037: 
-023028,000038:                                                                                                  <span class="co">#  1. FOR ROTATION (WITH POSSIBLE +X TRANSLATION):</span>
-023029,000039: 
-023030,000040:                                                                                                  <span class="co">#                                                   CAF    RETURN          (GENADR OF RETURN)</span>
-023031,000041:                                                                                                  <span class="co">#                                                   TS     TJETADR</span>
-023032,000042:                                                                                                  <span class="co">#                                                   ...</span>
-023033,000043:                                                                                                  <span class="co">#                                                   CAF    INDEXVAL        INDICATE ROT. AXIS, DIRECTION,</span>
-023034,000044:                                                                                                  <span class="co">#                                                   TS     NETACNDX        AND NUMBER OF JETS.</span>
-023035,000045:                                                                                                  <span class="co">#                                                   EXTEND</span>
-023036,000046:                                                                                                  <span class="co">#                                                   DCA    POLADR          TRANSFER ACROSS BANKS TO POLTYPEP.</span>
-023037,000047:                                                                                                  <span class="co">#                                                   DTCB</span>
-023038,000048: 
-023039,000049:                                                                                                  <span class="co">#  2. FOR TRANSLATION ONLY:</span>
-023040,000050: 
-023041,000051:                                                                                                  <span class="co">#                                                   CAF    POSMAX/NEGMAX   INDICATE -X TRANSLATION BY POSMAX.</span>
-023042,000052:                                                                                                  <span class="co">#                                                   TS     ANYTRANS                 +X TRANSLATION BY NEGMAX.</span>
-023043,000053:                                                                                                  <span class="co">#                                                   CAF    ZERO            ZERO EXTRANEOUS FLAGS FOR ROUTINE</span>
-023044,000054:                                                                                                  <span class="co">#                                                   TS     TRANSNOW        ...</span>
-023045,000055:                                                                                                  <span class="co">#                                                   TS     TRANSAVE        ...</span>
-023046,000056:                                                                                                  <span class="co">#                                                   EXTEND</span>
-023047,000057:                                                                                                  <span class="co">#                                                   DCA    JTPOLADR        TRANSFER ACROSS BANKS TO +/-XTRAN</span>
-023048,000058:                                                                                                  <span class="co">#                                                   TS     TRANONLY        (AND SET TRANONLY POSITIVE NONZERO.)</span>
-023049,000059:                                                                                                  <span class="co">#                                                   DTCB</span>
-023050,000060: 
-023051,000061:                                                                                                  <span class="co">#  SUBROUTINES CALLED: NONE.</span>
-023052,000062: 
-023053,000063:                                                                                                  <span class="co">#  NORMAL RETURN  1. FOR ROTATION, TO ADDRESS IN BANK 17 SPECIFIED BY C(TJETADR).</span>
-023054,000064:                                                                                                  <span class="co">#                 2. FOR TRANSLATION, RESUME.</span>
-023055,000065: 
-023056,000066:                                                                                                  <span class="co">#  ALARM/ABORT MODE: WHENEVER THERE IS NO USABLE JET POLICY FOUND, TRANSFER TO JETABORT.</span>
-023057,000067: 
-023058,000068:                                                                                                  <span class="co">#  INPUT: NETACNDX,CH5MASK,1/NETACS.</span>
-023059,000069: 
-023060,000070:                                                                                                  <span class="co">#  OUTPUT: JETS ON IN CHANNEL 5, JTSATCHG.</span>
-023061,000071: 
-023062,000072:                                                                                                  <span class="co">#  DEBRIS: A,L,ALLL ITEMPS,ALL RUPTREGS.</span>
-023063,000073: 
-023064,000074:                                                                                                  <span class="co">#  INITIALIZATION AT ROTATION REQUEST ENTRY POINT:</span>
-023065,000075: 
+023022,000025:                                                                                                  <span class="co">#  PROGRAM: POLTYPEP               MOD. NO. 1  DATE: NOVEMBER 14, 1966</span>
+023023,000026: 
+023024,000027:                                                                                                  <span class="co">#  AUTHOR: JONATHAN D. ADDELSTON (ADAMS ASSOCIATES)</span>
+023025,000028: 
+023026,000029:                                                                                                  <span class="co">#  THIS PROGRAM IS DESIGNED TO SELECT A POLICY OF JETS (OF WHICH NONE HAVE FAILED) WHICH CAN BE USED TO CREATE THE</span>
+023027,000030:                                                                                                  <span class="co">#  ROTATION AND/OR TRANSLATION WHICH IS REQUIRED BY THE LM DAP.  FROM THE INDEX "NETACNDX" (WHICH MUST BE SET WHEN</span>
+023028,000031:                                                                                                  <span class="co">#  ROTATION IS REQUESTED), THE OPTIMAL POLICY IS SELECTED.  WHEN FAILURES ARE DETECTED WITHIN A CHOSEN POLICY, AN</span>
+023029,000032:                                                                                                  <span class="co">#  ALTERNATE POLICY IS SELECTED.  IF ALL ALTERNATE POLICIES ARE EXHAUSTED WITHOUT FINDING AN UNFAILED POLICY, A JET</span>
+023030,000033:                                                                                                  <span class="co">#  FAILURE ABORT IS INITIATED.  WHEN THE ROUTINE IS USE FOR TRANSLATION JETS ONLY, "TRANONLY" MUST BE SET POSITIVE</span>
+023031,000034:                                                                                                  <span class="co">#  (NONZERO) AND THE ENTRY POINT IS "+/-XTRAN".</span>
+023032,000035: 
+023033,000036:                                                                                                  <span class="co">#  CALLING SEQUENCES:</span>
+023034,000037: 
+023035,000038:                                                                                                  <span class="co">#  1. FOR ROTATION (WITH POSSIBLE +X TRANSLATION):</span>
+023036,000039: 
+023037,000040:                                                                                                  <span class="co">#                                                   CAF    RETURN          (GENADR OF RETURN)</span>
+023038,000041:                                                                                                  <span class="co">#                                                   TS     TJETADR</span>
+023039,000042:                                                                                                  <span class="co">#                                                   ...</span>
+023040,000043:                                                                                                  <span class="co">#                                                   CAF    INDEXVAL        INDICATE ROT. AXIS, DIRECTION,</span>
+023041,000044:                                                                                                  <span class="co">#                                                   TS     NETACNDX        AND NUMBER OF JETS.</span>
+023042,000045:                                                                                                  <span class="co">#                                                   EXTEND</span>
+023043,000046:                                                                                                  <span class="co">#                                                   DCA    POLADR          TRANSFER ACROSS BANKS TO POLTYPEP.</span>
+023044,000047:                                                                                                  <span class="co">#                                                   DTCB</span>
+023045,000048: 
+023046,000049:                                                                                                  <span class="co">#  2. FOR TRANSLATION ONLY:</span>
+023047,000050: 
+023048,000051:                                                                                                  <span class="co">#                                                   CAF    POSMAX/NEGMAX   INDICATE -X TRANSLATION BY POSMAX.</span>
+023049,000052:                                                                                                  <span class="co">#                                                   TS     ANYTRANS                 +X TRANSLATION BY NEGMAX.</span>
+023050,000053:                                                                                                  <span class="co">#                                                   CAF    ZERO            ZERO EXTRANEOUS FLAGS FOR ROUTINE</span>
+023051,000054:                                                                                                  <span class="co">#                                                   TS     TRANSNOW        ...</span>
+023052,000055:                                                                                                  <span class="co">#                                                   TS     TRANSAVE        ...</span>
+023053,000056:                                                                                                  <span class="co">#                                                   EXTEND</span>
+023054,000057:                                                                                                  <span class="co">#                                                   DCA    JTPOLADR        TRANSFER ACROSS BANKS TO +/-XTRAN</span>
+023055,000058:                                                                                                  <span class="co">#                                                   TS     TRANONLY        (AND SET TRANONLY POSITIVE NONZERO.)</span>
+023056,000059:                                                                                                  <span class="co">#                                                   DTCB</span>
+023057,000060: 
+023058,000061:                                                                                                  <span class="co">#  SUBROUTINES CALLED: NONE.</span>
+023059,000062: 
+023060,000063:                                                                                                  <span class="co">#  NORMAL RETURN  1. FOR ROTATION, TO ADDRESS IN BANK 17 SPECIFIED BY C(TJETADR).</span>
+023061,000064:                                                                                                  <span class="co">#                 2. FOR TRANSLATION, RESUME.</span>
+023062,000065: 
+023063,000066:                                                                                                  <span class="co">#  ALARM/ABORT MODE: WHENEVER THERE IS NO USABLE JET POLICY FOUND, TRANSFER TO JETABORT.</span>
+023064,000067: 
+023065,000068:                                                                                                  <span class="co">#  INPUT: NETACNDX,CH5MASK,1/NETACS.</span>
+023066,000069: 
+023067,000070:                                                                                                  <span class="co">#  OUTPUT: JETS ON IN CHANNEL 5, JTSATCHG.</span>
+023068,000071: 
+023069,000072:                                                                                                  <span class="co">#  DEBRIS: A,L,ALLL ITEMPS,ALL RUPTREGS.</span>
+023070,000073: 
+023071,000074:                                                                                                  <span class="co">#  INITIALIZATION AT ROTATION REQUEST ENTRY POINT:</span>
+023072,000075: 
 </pre>
 </span>
 </p>
@@ -193,54 +193,54 @@ Page 521
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023067,000077: 20,2170                                           <span class="ps">BANK    </span> 20                                    
-023068,000078: 20,2170  E6,1471                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A54534F4E4E4F57">JTSONNOW</a>                              
-023069,000079: 
-<a name="504F4C5459504550"></a>023070,000080: 20,2170           37761        <span class="sm">POLTYPEP</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  SET VOLATILE SWITCHES TO INDICATE</span>
-023071,000081: 20,2171           54070                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452414E4F4E4C59">TRANONLY</a>                              <span class="co">#  1) TRANSLATION ENTRY NOT MADE (ROTATION)</span>
-023072,000082: 20,2172           54071                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414E595452414E53">ANYTRANS</a>                              <span class="co">#  2) NO TRANSLATION KNOWN YET.</span>
-023073,000083: 20,2173           54072                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452414E534E4F57">TRANSNOW</a>                              <span class="co">#  3) NO TRANS. DURING ROT. KNOWN YET.</span>
-023074,000084: 20,2174           54073                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452414E53415645">TRANSAVE</a>                              <span class="co">#  4) NO TRANSLATION POLICY SELECTED YET.</span>
-023075,000085: 
-023076,000086:                                                                                                  <span class="co">#  TEST FOR SENSE OF ROTATION JETS.  (MAKE TRANSLATION REQUEST FROM THE ASTRONAUT'S STICK OVERRIDE INTERNAL ULLAGE)</span>
-023077,000087: 
-023078,000088: 20,2175           37747                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495437">BIT7</a>                                  <span class="co">#  ASTRONAUT +X TRANSLATION REQUEST TEST.</span>
-023079,000089: 20,2176           00006                           <span class="op">EXTEND  </span>                                       
-023080,000090: 20,2177           02031                           <span class="op">RAND    </span> 31                                    
-023081,000091: 20,2200           00006                           <span class="op">EXTEND  </span>                                       
-023082,000092: 20,2201           12264                           <span class="op">BZF     </span> <a href="#2B585452414E534C">+XTRANSL</a>                              
-023083,000093: 
-023084,000094: 20,2202           37746                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495438">BIT8</a>                                  <span class="co">#  ASTRONAUT -X TRANSLATION REQUEST TEST.</span>
-023085,000095: 20,2203           00006                           <span class="op">EXTEND  </span>                                       
-023086,000096: 20,2204           02031                           <span class="op">RAND    </span> 31                                    
-023087,000097: 20,2205           00006                           <span class="op">EXTEND  </span>                                       
-023088,000098: 20,2206           12271                           <span class="op">BZF     </span> <a href="#2D5853454E5345">-XSENSE</a>                               
-023089,000099: 
-023090,000100:                                                                                                  <span class="co">#  CHECK FOR ULLAGE OR ASCENT BURN:</span>
-023091,000101: 
-<a name="554C4C2F2B58"></a>023092,000102: 20,2207           32455        <span class="sm">ULL/+X  </span>           <span class="op">CAF     </span> <a href="#42495453362638">BITS6&amp;8</a>                               <span class="co">#  CHECK FOR ULLAGE OR ASCENT BURN: (EITHER</span>
-023093,000103: 20,2210           70077                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              <span class="co">#  BIT REQUIRES +X SENSE FOR ROTATION JETS)</span>
-023094,000104: 20,2211           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  BIT6: ULLAGE BIT  (+X TRANSLATION ASKED)</span>
-023095,000105: 20,2212           12260                           <span class="op">TCF     </span> <a href="#2B5853454C454354">+XSELECT</a>                              <span class="co">#  BIT8: ASCENT BURN (NO TRANSLATION ASKED)</span>
-023096,000106: 
-023097,000107:                                                                                                  <span class="co">#  LM IS EITHER IN POWERED DESCENT OR IN COASTING FLIGHT  SELECT JETS WHICH ARE PAIRED IN FORCE COUPLES.</span>
-023098,000108: 
-023099,000109: 20,2213           50061                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E455441434E4458">NETACNDX</a>                              <span class="co">#  PICK UP FORCE-COUPLE TABLE INDEX AND THE</span>
-023100,000110: 20,2214           32475                           <span class="op">CAF     </span> <a href="#4E4F524D4C504F4C">NORMLPOL</a>                              <span class="co">#  NUMBER OF POLICIES TO CHECK (PACKED).</span>
-023101,000111: 
-023102,000112:                                                                                                  <span class="co">#  UNPACK THE RELATIVE ADDRESS OF THE BEST POLICY AND THE NUMBER OF ALTERNATE POLICIES TO CHECK WITHIN THE LOOP.</span>
-023103,000113: 
-023104,000114:                                                                                                  <span class="co">#  THIS BITS ARE PACKED THUSLY  0XYYY, WHERE X BECOMES C(LOOPCTR) AND YYY BECOMES C(POLRELOC). BITS8,9 ARE ZERO.</span>
-023105,000115: 
-<a name="4E554D42414C5453"></a>023106,000116: 20,2215           54001        <span class="sm">NUMBALTS</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  SAVE FULL WORD TO GET BITS 10-12, LATER.</span>
-023107,000117: 20,2216           76130                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#4C4F5737">LOW7</a>                                  <span class="co">#  MASK BITS GIVING INDEX VALUE FOR BEST</span>
-023108,000118: 20,2217           54063                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F4C52454C4F43">POLRELOC</a>                              <span class="co">#  POLICY (W.R.T. TOP OF POLTABLE).</span>
-023109,000119: 
-023110,000120: 20,2220           37750                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495436">BIT6</a>                                  <span class="co">#  EXTRACT BITS 10-12 OF ORIGINAL WORD:</span>
-023111,000121: 20,2221           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  THIS VALUE IS USED AS A LOOP COUNTER TO</span>
-023112,000122: 20,2222           70001                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  TEST ALL THE FEASIBLE JET POLICIES FOR</span>
-<a name="42455354504F4C53"></a>023113,000123: 20,2223           54064        <span class="sm">BESTPOLS</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4F50435452">LOOPCTR</a>                               <span class="co">#  THE GIVEN REQUEST.  (ALSO TOP 0F LOOP.)</span>
-023114,000124: 
+023074,000077: 20,2170                                           <span class="ps">BANK    </span> 20                                    
+023075,000078: 20,2170  E6,1471                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A54534F4E4E4F57">JTSONNOW</a>                              
+023076,000079: 
+<a name="504F4C5459504550"></a>023077,000080: 20,2170           37761        <span class="sm">POLTYPEP</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  SET VOLATILE SWITCHES TO INDICATE</span>
+023078,000081: 20,2171           54070                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452414E4F4E4C59">TRANONLY</a>                              <span class="co">#  1) TRANSLATION ENTRY NOT MADE (ROTATION)</span>
+023079,000082: 20,2172           54071                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414E595452414E53">ANYTRANS</a>                              <span class="co">#  2) NO TRANSLATION KNOWN YET.</span>
+023080,000083: 20,2173           54072                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452414E534E4F57">TRANSNOW</a>                              <span class="co">#  3) NO TRANS. DURING ROT. KNOWN YET.</span>
+023081,000084: 20,2174           54073                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452414E53415645">TRANSAVE</a>                              <span class="co">#  4) NO TRANSLATION POLICY SELECTED YET.</span>
+023082,000085: 
+023083,000086:                                                                                                  <span class="co">#  TEST FOR SENSE OF ROTATION JETS.  (MAKE TRANSLATION REQUEST FROM THE ASTRONAUT'S STICK OVERRIDE INTERNAL ULLAGE)</span>
+023084,000087: 
+023085,000088: 20,2175           37747                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495437">BIT7</a>                                  <span class="co">#  ASTRONAUT +X TRANSLATION REQUEST TEST.</span>
+023086,000089: 20,2176           00006                           <span class="op">EXTEND  </span>                                       
+023087,000090: 20,2177           02031                           <span class="op">RAND    </span> 31                                    
+023088,000091: 20,2200           00006                           <span class="op">EXTEND  </span>                                       
+023089,000092: 20,2201           12264                           <span class="op">BZF     </span> <a href="#2B585452414E534C">+XTRANSL</a>                              
+023090,000093: 
+023091,000094: 20,2202           37746                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495438">BIT8</a>                                  <span class="co">#  ASTRONAUT -X TRANSLATION REQUEST TEST.</span>
+023092,000095: 20,2203           00006                           <span class="op">EXTEND  </span>                                       
+023093,000096: 20,2204           02031                           <span class="op">RAND    </span> 31                                    
+023094,000097: 20,2205           00006                           <span class="op">EXTEND  </span>                                       
+023095,000098: 20,2206           12271                           <span class="op">BZF     </span> <a href="#2D5853454E5345">-XSENSE</a>                               
+023096,000099: 
+023097,000100:                                                                                                  <span class="co">#  CHECK FOR ULLAGE OR ASCENT BURN:</span>
+023098,000101: 
+<a name="554C4C2F2B58"></a>023099,000102: 20,2207           32455        <span class="sm">ULL/+X  </span>           <span class="op">CAF     </span> <a href="#42495453362638">BITS6&amp;8</a>                               <span class="co">#  CHECK FOR ULLAGE OR ASCENT BURN: (EITHER</span>
+023100,000103: 20,2210           70077                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              <span class="co">#  BIT REQUIRES +X SENSE FOR ROTATION JETS)</span>
+023101,000104: 20,2211           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  BIT6: ULLAGE BIT  (+X TRANSLATION ASKED)</span>
+023102,000105: 20,2212           12260                           <span class="op">TCF     </span> <a href="#2B5853454C454354">+XSELECT</a>                              <span class="co">#  BIT8: ASCENT BURN (NO TRANSLATION ASKED)</span>
+023103,000106: 
+023104,000107:                                                                                                  <span class="co">#  LM IS EITHER IN POWERED DESCENT OR IN COASTING FLIGHT  SELECT JETS WHICH ARE PAIRED IN FORCE COUPLES.</span>
+023105,000108: 
+023106,000109: 20,2213           50061                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E455441434E4458">NETACNDX</a>                              <span class="co">#  PICK UP FORCE-COUPLE TABLE INDEX AND THE</span>
+023107,000110: 20,2214           32475                           <span class="op">CAF     </span> <a href="#4E4F524D4C504F4C">NORMLPOL</a>                              <span class="co">#  NUMBER OF POLICIES TO CHECK (PACKED).</span>
+023108,000111: 
+023109,000112:                                                                                                  <span class="co">#  UNPACK THE RELATIVE ADDRESS OF THE BEST POLICY AND THE NUMBER OF ALTERNATE POLICIES TO CHECK WITHIN THE LOOP.</span>
+023110,000113: 
+023111,000114:                                                                                                  <span class="co">#  THIS BITS ARE PACKED THUSLY  0XYYY, WHERE X BECOMES C(LOOPCTR) AND YYY BECOMES C(POLRELOC). BITS8,9 ARE ZERO.</span>
+023112,000115: 
+<a name="4E554D42414C5453"></a>023113,000116: 20,2215           54001        <span class="sm">NUMBALTS</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  SAVE FULL WORD TO GET BITS 10-12, LATER.</span>
+023114,000117: 20,2216           76130                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#4C4F5737">LOW7</a>                                  <span class="co">#  MASK BITS GIVING INDEX VALUE FOR BEST</span>
+023115,000118: 20,2217           54063                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F4C52454C4F43">POLRELOC</a>                              <span class="co">#  POLICY (W.R.T. TOP OF POLTABLE).</span>
+023116,000119: 
+023117,000120: 20,2220           37750                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495436">BIT6</a>                                  <span class="co">#  EXTRACT BITS 10-12 OF ORIGINAL WORD:</span>
+023118,000121: 20,2221           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  THIS VALUE IS USED AS A LOOP COUNTER TO</span>
+023119,000122: 20,2222           70001                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  TEST ALL THE FEASIBLE JET POLICIES FOR</span>
+<a name="42455354504F4C53"></a>023120,000123: 20,2223           54064        <span class="sm">BESTPOLS</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4F50435452">LOOPCTR</a>                               <span class="co">#  THE GIVEN REQUEST.  (ALSO TOP 0F LOOP.)</span>
+023121,000124: 
 </pre>
 </span>
 </p>
@@ -256,46 +256,46 @@ Page 522
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023116,000126:                                                                                                  <span class="co">#  LOOP TP SET UP "TRANSNOW" AND REJECT ALL FAILED POLICIES:</span>
-023117,000127: 
-023118,000128: 20,2224           50063                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F4C52454C4F43">POLRELOC</a>                              <span class="co">#  PICK UP NEXT POLICY TO CHECK FOR FAILURE</span>
-023119,000129: 20,2225           32553                           <span class="op">CAF     </span> <a href="#504F4C5441424C45">POLTABLE</a>                              <span class="co">#  (MUST DO A "CAF" THEN "CCS" FOR RANGE.)</span>
-023120,000130: 20,2226           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IF POLICY TABLE ENTRY IS NEGATIVE, THEN</span>
-<a name="43484B4641494C53"></a>023121,000131: 20,2227           54065        <span class="sm">CHKFAILS</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54484953504F4C59">THISPOLY</a>                              <span class="co">#  A FLAG IS SET TO DO SOME TRANSLATION</span>
-023122,000132: 20,2230           12233                           <span class="op">TCF     </span> +3                                    <span class="co">#  WITH THE ROTATION POLICY SELECTED. IF</span>
-023123,000133: 20,2231           54072                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452414E534E4F57">TRANSNOW</a>                              <span class="co">#  REQUESTED. POLTABLE VALUES ARE CCS-ABLE.</span>
-023124,000134: 20,2232           12227                           <span class="op">TCF     </span> <a href="#43484B4641494C53">CHKFAILS</a>                              <span class="co">#  TRANSNOW (ONCE ON) STAYS ON FOR THIS CSP</span>
-023125,000135: 
-023126,000136: 20,2233           71502                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               <span class="co">#  COMPARE THISPOLY WITH BITS OF FAILED JET</span>
-023127,000137: 20,2234           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IF C(A) = +0, THEN THERE ARE NO FAILURES</span>
-023128,000138: 20,2235           12237                           <span class="op">TCF     </span> +2                                    <span class="co">#  IN THIS POLICY AND THE LM DAP USES IT.</span>
-023129,000139: 20,2236           12276                           <span class="op">TCF     </span> <a href="#504F4C464F554E44">POLFOUND</a>                              <span class="co">#  IF C(A) IS NOT +0, IT IS POSITIVE AND</span>
-023130,000140: 
-023131,000141: 20,2237           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  FIRST THE RELATIVE ADDRESS INDEXER IS</span>
-023132,000142: 20,2240           26063                           <span class="op">DIM     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F4C52454C4F43">POLRELOC</a>                              <span class="co">#  DECREMENTED BY ONE FOR THE NEXT POLICY,</span>
-023133,000143: 20,2241           10064                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4F50435452">LOOPCTR</a>                               <span class="co">#  THEN A CHECK IS MADE FOR ANY MORE USABLE</span>
-023134,000144: 20,2242           12223                           <span class="op">TCF     </span> <a href="#42455354504F4C53">BESTPOLS</a>                              <span class="co">#  POLICIES, IF NO MORE, C(LOOPCTR) = +0.</span>
-023135,000145: 
-023136,000146:                                                                                                  <span class="co">#  ***** JET FAILURE ABORT SEQUENCE. *****</span>
-023137,000147: 
-<a name="41424F52544A4554"></a>023138,000148: 20,2243           37761        <span class="sm">ABORTJET</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  TURN OFF ALL JETS.</span>
-023139,000149: 20,2244           00006                           <span class="op">EXTEND  </span>                                       
-023140,000150: 20,2245           01005                           <span class="op">WRITE   </span> 5                                     
-023141,000151: 20,2246           00006                           <span class="op">EXTEND  </span>                                       
-023142,000152: 20,2247           01006                           <span class="op">WRITE   </span> 6                                     
-023143,000153: 
-023144,000154: 20,2250           35676                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3337">PRIO37</a>                                <span class="co">#  ABORT PRIORITY.</span>
-023145,000155: 20,2251           05523                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 <span class="co">#  CALL JETABORT THROUGH EXECUTIVE.</span>
-023146,000156: 20,2252  E6,1471                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A54534F4E4E4F57">JTSONNOW</a>                              
-023147,000157: 20,2252           02070 16006                     <span class="ps">2CADR   </span> <a href="ALARM_AND_ABORT.agc.html#4A455441424F5254">JETABORT</a>                              
-023148,000158: 20,2254           47743                           <span class="op">CS      </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#474F444150474F">GODAPGO</a>                               <span class="co">#  SET GODAPGO TO TURN LM DAP OFF WHEN THIS</span>
-023149,000159: 20,2255           70077                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              <span class="co">#  BIT IS CHECKED IN THE NEXT P-AXIS RUPT.</span>
-023150,000160: 20,2256           54077                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              
-023151,000161: 
-023152,000162: 20,2257           15751                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
-023153,000163: 
-023154,000164:                                                                                                  <span class="co">#  ***** END JET FAILURE ABORT SEQUENCE. *****</span>
-023155,000165: 
+023123,000126:                                                                                                  <span class="co">#  LOOP TP SET UP "TRANSNOW" AND REJECT ALL FAILED POLICIES:</span>
+023124,000127: 
+023125,000128: 20,2224           50063                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F4C52454C4F43">POLRELOC</a>                              <span class="co">#  PICK UP NEXT POLICY TO CHECK FOR FAILURE</span>
+023126,000129: 20,2225           32553                           <span class="op">CAF     </span> <a href="#504F4C5441424C45">POLTABLE</a>                              <span class="co">#  (MUST DO A "CAF" THEN "CCS" FOR RANGE.)</span>
+023127,000130: 20,2226           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IF POLICY TABLE ENTRY IS NEGATIVE, THEN</span>
+<a name="43484B4641494C53"></a>023128,000131: 20,2227           54065        <span class="sm">CHKFAILS</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54484953504F4C59">THISPOLY</a>                              <span class="co">#  A FLAG IS SET TO DO SOME TRANSLATION</span>
+023129,000132: 20,2230           12233                           <span class="op">TCF     </span> +3                                    <span class="co">#  WITH THE ROTATION POLICY SELECTED. IF</span>
+023130,000133: 20,2231           54072                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452414E534E4F57">TRANSNOW</a>                              <span class="co">#  REQUESTED. POLTABLE VALUES ARE CCS-ABLE.</span>
+023131,000134: 20,2232           12227                           <span class="op">TCF     </span> <a href="#43484B4641494C53">CHKFAILS</a>                              <span class="co">#  TRANSNOW (ONCE ON) STAYS ON FOR THIS CSP</span>
+023132,000135: 
+023133,000136: 20,2233           71502                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               <span class="co">#  COMPARE THISPOLY WITH BITS OF FAILED JET</span>
+023134,000137: 20,2234           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IF C(A) = +0, THEN THERE ARE NO FAILURES</span>
+023135,000138: 20,2235           12237                           <span class="op">TCF     </span> +2                                    <span class="co">#  IN THIS POLICY AND THE LM DAP USES IT.</span>
+023136,000139: 20,2236           12276                           <span class="op">TCF     </span> <a href="#504F4C464F554E44">POLFOUND</a>                              <span class="co">#  IF C(A) IS NOT +0, IT IS POSITIVE AND</span>
+023137,000140: 
+023138,000141: 20,2237           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  FIRST THE RELATIVE ADDRESS INDEXER IS</span>
+023139,000142: 20,2240           26063                           <span class="op">DIM     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F4C52454C4F43">POLRELOC</a>                              <span class="co">#  DECREMENTED BY ONE FOR THE NEXT POLICY,</span>
+023140,000143: 20,2241           10064                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4F50435452">LOOPCTR</a>                               <span class="co">#  THEN A CHECK IS MADE FOR ANY MORE USABLE</span>
+023141,000144: 20,2242           12223                           <span class="op">TCF     </span> <a href="#42455354504F4C53">BESTPOLS</a>                              <span class="co">#  POLICIES, IF NO MORE, C(LOOPCTR) = +0.</span>
+023142,000145: 
+023143,000146:                                                                                                  <span class="co">#  ***** JET FAILURE ABORT SEQUENCE. *****</span>
+023144,000147: 
+<a name="41424F52544A4554"></a>023145,000148: 20,2243           37761        <span class="sm">ABORTJET</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  TURN OFF ALL JETS.</span>
+023146,000149: 20,2244           00006                           <span class="op">EXTEND  </span>                                       
+023147,000150: 20,2245           01005                           <span class="op">WRITE   </span> 5                                     
+023148,000151: 20,2246           00006                           <span class="op">EXTEND  </span>                                       
+023149,000152: 20,2247           01006                           <span class="op">WRITE   </span> 6                                     
+023150,000153: 
+023151,000154: 20,2250           35676                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3337">PRIO37</a>                                <span class="co">#  ABORT PRIORITY.</span>
+023152,000155: 20,2251           05523                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 <span class="co">#  CALL JETABORT THROUGH EXECUTIVE.</span>
+023153,000156: 20,2252  E6,1471                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A54534F4E4E4F57">JTSONNOW</a>                              
+023154,000157: 20,2252           02070 16006                     <span class="ps">2CADR   </span> <a href="ALARM_AND_ABORT.agc.html#4A455441424F5254">JETABORT</a>                              
+023155,000158: 20,2254           47743                           <span class="op">CS      </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#474F444150474F">GODAPGO</a>                               <span class="co">#  SET GODAPGO TO TURN LM DAP OFF WHEN THIS</span>
+023156,000159: 20,2255           70077                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              <span class="co">#  BIT IS CHECKED IN THE NEXT P-AXIS RUPT.</span>
+023157,000160: 20,2256           54077                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              
+023158,000161: 
+023159,000162: 20,2257           15751                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
+023160,000163: 
+023161,000164:                                                                                                  <span class="co">#  ***** END JET FAILURE ABORT SEQUENCE. *****</span>
+023162,000165: 
 </pre>
 </span>
 </p>
@@ -311,58 +311,58 @@ Page 523
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023157,000167:                                                                                                  <span class="co">#  ENTER HERE AFTER ULLAGE/ASCENT DETECTION:</span>
-023158,000168: 
-<a name="2B5853454C454354"></a>023159,000169: 20,2260           40077        <span class="sm">+XSELECT</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              <span class="co">#  CHECK FOR ULLAGE  BIT6/DAPBOOLS =1.</span>
-023160,000170: 20,2261           77750                           <span class="op">MASK    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#554C4C41474552">ULLAGER</a>                               <span class="co">#  IF THE ULLAGE BIT IS 0, THEN THE LM IS</span>
-023161,000171: 20,2262           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IN AN ASCENT BURN AND NO +X TRANSLATION</span>
-023162,000172: 20,2263           12266                           <span class="op">TCF     </span> <a href="#2B5853454E5345">+XSENSE</a>                               <span class="co">#  HAS BEEN REQUESTED (SEE ULL/+X).</span>
-023163,000173: 
-023164,000174:                                                                                                  <span class="co">#  ENTER HERE FOR +X TRANSLATION:</span>
-023165,000175: 
-<a name="2B585452414E534C"></a>023166,000176: 20,2264           37737        <span class="sm">+XTRANSL</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4E45474D4158">NEGMAX</a>                                <span class="co">#  INDICATE +X TRANSLATION FOR CCS LATER.</span>
-023167,000177: 20,2265           54071                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414E595452414E53">ANYTRANS</a>                              <span class="co">#  (ANYTRANS IS A VOLATILE SWITCH.)</span>
-023168,000178: 
-023169,000179:                                                                                                  <span class="co">#  ENTER HERE FOR +X SENSE JETS:</span>
-023170,000180: 
-<a name="2B5853454E5345"></a>023171,000181: 20,2266           50061        <span class="sm">+XSENSE </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E455441434E4458">NETACNDX</a>                              <span class="co">#  PICK UP +X SENSE TABLE INDEX AND THE</span>
-023172,000182: 20,2267           32515                           <span class="op">CAF     </span> <a href="#2B53454E53544142">+SENSTAB</a>                              <span class="co">#  NUMBER OF ALTERNATE POLICIES TO CHECK.</span>
-023173,000183: 
-023174,000184: 20,2270           12215                           <span class="op">TCF     </span> <a href="#4E554D42414C5453">NUMBALTS</a>                              <span class="co">#  GO TO BEGIN FAILURE CHECKING (ROTATION).</span>
-023175,000185: 
-023176,000186:                                                                                                  <span class="co">#  ENTER HERE FOR -X TRANSLATION:</span>
-023177,000187: 
-<a name="2D5853454E5345"></a>023178,000188: 20,2271           37735        <span class="sm">-XSENSE </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#  INDICATE -X TRANSLATION FOR CCS LATER.</span>
-023179,000189: 20,2272           54071                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414E595452414E53">ANYTRANS</a>                              <span class="co">#  (ANYTRANS IS A VOLATILE SWITCH.)</span>
-023180,000190: 
-023181,000191: 20,2273           50061                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E455441434E4458">NETACNDX</a>                              <span class="co">#  PICK UP -X SENSE TABLE INDEX AND THE</span>
-023182,000192: 20,2274           32535                           <span class="op">CAF     </span> <a href="#2D53454E53544142">-SENSTAB</a>                              <span class="co">#  NUMBER OF ALTERNATE POLICIES TO CHECK.</span>
-023183,000193: 
-023184,000194: 20,2275           12215                           <span class="op">TCF     </span> <a href="#4E554D42414C5453">NUMBALTS</a>                              <span class="co">#  GO TO BEGIN FAILURE CHECKING (ROTATION).</span>
-023185,000195: 
-023186,000196:                                                                                                  <span class="co">#  ENTER HERE AFTER A ROTATION POLICY HAS BEEN FOUND:</span>
-023187,000197: 
-<a name="504F4C464F554E44"></a>023188,000198: 20,2276           30065        <span class="sm">POLFOUND</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54484953504F4C59">THISPOLY</a>                              <span class="co">#  GET POSITIVE-VALUED POLICY TABLE ENTRY</span>
-023189,000199: 20,2277           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  WHICH IS INSURED AGAINST FAILURE.</span>
-023190,000200: 20,2300           77752                           <span class="op">MP      </span> <a href="INTERPRETER.agc.html#42495434">BIT4</a>                                  <span class="co">#  UNPACK BITS 12-14 OF TABLE ENTRY GET THE</span>
-023191,000201: 20,2301           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  NUMBER OF Q-AXIS JETS FROM TORQUE TABLE.</span>
-023192,000202: 20,2302           32456                           <span class="op">CAF     </span> <a href="#544F524B5441424C">TORKTABL</a>                              <span class="co">#  SAVE FOR TORQUE VECTOR RECONSTRUCTION</span>
-023193,000203: 20,2303           55606                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F2E514A455453">NO.QJETS</a>                              <span class="co">#  AND FOR DETERMINING 1/NETACC.</span>
-023194,000204: 
-023195,000205: 20,2304           30001                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  UNPACK BITS 9-11 OF TABLE ENTRY WHICH</span>
-023196,000206: 20,2305           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  ARE NOW BITS 12-14 OF THE L-REGISTER.</span>
-023197,000207: 20,2306           77752                           <span class="op">MP      </span> <a href="INTERPRETER.agc.html#42495434">BIT4</a>                                  <span class="co">#  (BIT15 OF L IS 0 DUE TO SIGN AGREEMENT.)</span>
-023198,000208: 20,2307           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  GET NUMBER OF R-AXIS JETS FROM TORQUE</span>
-023199,000209: 20,2310           32456                           <span class="op">CAF     </span> <a href="#544F524B5441424C">TORKTABL</a>                              <span class="co">#  TABLE.  SAVE FOR TORQUE VECTOR RECON-</span>
-023200,000210: 
-023201,000211: 20,2311           55607                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F2E524A455453">NO.RJETS</a>                              <span class="co">#  STRUCTION AND FOR GETTING 1/NETACC.</span>
-023202,000212: 
-023203,000213:                                                                                                  <span class="co">#  PICK OUT ROTATION JETS FROM TABLE ENTRY:</span>
-023204,000214: 
-023205,000215: 20,2312           30065                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54484953504F4C59">THISPOLY</a>                              <span class="co">#  UNPACK BITS 1-8 OF TABLE ENTRY (DONE</span>
-023206,000216: 20,2313           74553                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  <span class="co">#  MOST EASILY BY THE MASKING OPERATION).</span>
-023207,000217: 20,2314           67737                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4249543135">BIT15</a>                                 <span class="co">#  SET SIGN TO INDICATE Q,R-AXES JETS.</span>
-023208,000218: 
+023164,000167:                                                                                                  <span class="co">#  ENTER HERE AFTER ULLAGE/ASCENT DETECTION:</span>
+023165,000168: 
+<a name="2B5853454C454354"></a>023166,000169: 20,2260           40077        <span class="sm">+XSELECT</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              <span class="co">#  CHECK FOR ULLAGE  BIT6/DAPBOOLS =1.</span>
+023167,000170: 20,2261           77750                           <span class="op">MASK    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#554C4C41474552">ULLAGER</a>                               <span class="co">#  IF THE ULLAGE BIT IS 0, THEN THE LM IS</span>
+023168,000171: 20,2262           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IN AN ASCENT BURN AND NO +X TRANSLATION</span>
+023169,000172: 20,2263           12266                           <span class="op">TCF     </span> <a href="#2B5853454E5345">+XSENSE</a>                               <span class="co">#  HAS BEEN REQUESTED (SEE ULL/+X).</span>
+023170,000173: 
+023171,000174:                                                                                                  <span class="co">#  ENTER HERE FOR +X TRANSLATION:</span>
+023172,000175: 
+<a name="2B585452414E534C"></a>023173,000176: 20,2264           37737        <span class="sm">+XTRANSL</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4E45474D4158">NEGMAX</a>                                <span class="co">#  INDICATE +X TRANSLATION FOR CCS LATER.</span>
+023174,000177: 20,2265           54071                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414E595452414E53">ANYTRANS</a>                              <span class="co">#  (ANYTRANS IS A VOLATILE SWITCH.)</span>
+023175,000178: 
+023176,000179:                                                                                                  <span class="co">#  ENTER HERE FOR +X SENSE JETS:</span>
+023177,000180: 
+<a name="2B5853454E5345"></a>023178,000181: 20,2266           50061        <span class="sm">+XSENSE </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E455441434E4458">NETACNDX</a>                              <span class="co">#  PICK UP +X SENSE TABLE INDEX AND THE</span>
+023179,000182: 20,2267           32515                           <span class="op">CAF     </span> <a href="#2B53454E53544142">+SENSTAB</a>                              <span class="co">#  NUMBER OF ALTERNATE POLICIES TO CHECK.</span>
+023180,000183: 
+023181,000184: 20,2270           12215                           <span class="op">TCF     </span> <a href="#4E554D42414C5453">NUMBALTS</a>                              <span class="co">#  GO TO BEGIN FAILURE CHECKING (ROTATION).</span>
+023182,000185: 
+023183,000186:                                                                                                  <span class="co">#  ENTER HERE FOR -X TRANSLATION:</span>
+023184,000187: 
+<a name="2D5853454E5345"></a>023185,000188: 20,2271           37735        <span class="sm">-XSENSE </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#  INDICATE -X TRANSLATION FOR CCS LATER.</span>
+023186,000189: 20,2272           54071                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414E595452414E53">ANYTRANS</a>                              <span class="co">#  (ANYTRANS IS A VOLATILE SWITCH.)</span>
+023187,000190: 
+023188,000191: 20,2273           50061                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E455441434E4458">NETACNDX</a>                              <span class="co">#  PICK UP -X SENSE TABLE INDEX AND THE</span>
+023189,000192: 20,2274           32535                           <span class="op">CAF     </span> <a href="#2D53454E53544142">-SENSTAB</a>                              <span class="co">#  NUMBER OF ALTERNATE POLICIES TO CHECK.</span>
+023190,000193: 
+023191,000194: 20,2275           12215                           <span class="op">TCF     </span> <a href="#4E554D42414C5453">NUMBALTS</a>                              <span class="co">#  GO TO BEGIN FAILURE CHECKING (ROTATION).</span>
+023192,000195: 
+023193,000196:                                                                                                  <span class="co">#  ENTER HERE AFTER A ROTATION POLICY HAS BEEN FOUND:</span>
+023194,000197: 
+<a name="504F4C464F554E44"></a>023195,000198: 20,2276           30065        <span class="sm">POLFOUND</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54484953504F4C59">THISPOLY</a>                              <span class="co">#  GET POSITIVE-VALUED POLICY TABLE ENTRY</span>
+023196,000199: 20,2277           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  WHICH IS INSURED AGAINST FAILURE.</span>
+023197,000200: 20,2300           77752                           <span class="op">MP      </span> <a href="INTERPRETER.agc.html#42495434">BIT4</a>                                  <span class="co">#  UNPACK BITS 12-14 OF TABLE ENTRY GET THE</span>
+023198,000201: 20,2301           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  NUMBER OF Q-AXIS JETS FROM TORQUE TABLE.</span>
+023199,000202: 20,2302           32456                           <span class="op">CAF     </span> <a href="#544F524B5441424C">TORKTABL</a>                              <span class="co">#  SAVE FOR TORQUE VECTOR RECONSTRUCTION</span>
+023200,000203: 20,2303           55606                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F2E514A455453">NO.QJETS</a>                              <span class="co">#  AND FOR DETERMINING 1/NETACC.</span>
+023201,000204: 
+023202,000205: 20,2304           30001                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  UNPACK BITS 9-11 OF TABLE ENTRY WHICH</span>
+023203,000206: 20,2305           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  ARE NOW BITS 12-14 OF THE L-REGISTER.</span>
+023204,000207: 20,2306           77752                           <span class="op">MP      </span> <a href="INTERPRETER.agc.html#42495434">BIT4</a>                                  <span class="co">#  (BIT15 OF L IS 0 DUE TO SIGN AGREEMENT.)</span>
+023205,000208: 20,2307           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  GET NUMBER OF R-AXIS JETS FROM TORQUE</span>
+023206,000209: 20,2310           32456                           <span class="op">CAF     </span> <a href="#544F524B5441424C">TORKTABL</a>                              <span class="co">#  TABLE.  SAVE FOR TORQUE VECTOR RECON-</span>
+023207,000210: 
+023208,000211: 20,2311           55607                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F2E524A455453">NO.RJETS</a>                              <span class="co">#  STRUCTION AND FOR GETTING 1/NETACC.</span>
+023209,000212: 
+023210,000213:                                                                                                  <span class="co">#  PICK OUT ROTATION JETS FROM TABLE ENTRY:</span>
+023211,000214: 
+023212,000215: 20,2312           30065                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54484953504F4C59">THISPOLY</a>                              <span class="co">#  UNPACK BITS 1-8 OF TABLE ENTRY (DONE</span>
+023213,000216: 20,2313           74553                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  <span class="co">#  MOST EASILY BY THE MASKING OPERATION).</span>
+023214,000217: 20,2314           67737                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4249543135">BIT15</a>                                 <span class="co">#  SET SIGN TO INDICATE Q,R-AXES JETS.</span>
+023215,000218: 
 </pre>
 </span>
 </p>
@@ -378,8 +378,8 @@ Page 524
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023210,000220: 20,2315           55471                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A54534F4E4E4F57">JTSONNOW</a>                              <span class="co">#  SET POLICY UP FOR IMMEDIATE USE.</span>
-023211,000221: 
+023217,000220: 20,2315           55471                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A54534F4E4E4F57">JTSONNOW</a>                              <span class="co">#  SET POLICY UP FOR IMMEDIATE USE.</span>
+023218,000221: 
 </pre>
 </span>
 </p>
@@ -395,60 +395,60 @@ Page 525
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023213,000223: 
-023214,000224:                                                                                                  <span class="co">#  ENTRY POINT FOR +X TRANS, OR -X TRANS. REQUEST ALONE:</span>
-023215,000225: 
-023216,000226:                                                                                                  <span class="co">#  (ALSO CONTINUATION OF TRANSLATION-WITH-ROTATION LOGIC.)</span>
-023217,000227: 
-<a name="2B2F2D585452414E"></a>023218,000228: 20,2316           37754        <span class="sm">+/-XTRAN</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#54574F">TWO</a>                                   <span class="co">#  SET UP LOOP TO TEST ALL THREE POSSIBLE</span>
-023219,000229: 20,2317           54064                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4F50435452">LOOPCTR</a>                               <span class="co">#  TRANSLATION POLICIES, IF 4 JETS ASKED.</span>
-023220,000230: 
-023221,000231: 20,2320           10071                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414E595452414E53">ANYTRANS</a>                              <span class="co">#  TEST FOR TRANSLATION REQUESTS: -0 UNUSED</span>
-023222,000232: 
-023223,000233: 20,2321           12325                           <span class="op">TCF     </span> <a href="#2D58504F4C494359">-XPOLICY</a>                              <span class="co">#  POSMAX: -X TRANSLATION.</span>
-023224,000234: 20,2322           12412                           <span class="op">TCF     </span> <a href="#4C415445524A4554">LATERJET</a>                              <span class="co">#   +ZERO: NO TRANSLATION.</span>
-023225,000235: 
-023226,000236:                                                                                                  <span class="co">#  ENTER HERE FOR +X TRANSLATION POLICIES:</span>
-023227,000237: 
-<a name="2B58504F4C494359"></a>023228,000238: 20,2323           37754        <span class="sm">+XPOLICY</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#54574F">TWO</a>                                   <span class="co">#  NEGMAX: +X TRANSLATION.</span>
-023229,000239: 20,2324           12326                           <span class="op">TCF     </span> +2                                    <span class="co">#  SET POLRELOC FOR +X TRANS. INDEXING.</span>
-023230,000240: 
-023231,000241:                                                                                                  <span class="co">#  ENTER HERE FOR -X TRANSLATION POLICIES:</span>
-023232,000242: 
-<a name="2D58504F4C494359"></a>023233,000243: 20,2325           37760        <span class="sm">-XPOLICY</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#46495645">FIVE</a>                                  <span class="co">#  SET POLRELOC FOR -X TRANS. INDEXING.</span>
-023234,000244: 20,2326           54063                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F4C52454C4F43">POLRELOC</a>                              <span class="co">#  (INITIAL VALUE ALWAYS FOR 4-JET POLICY.)</span>
-023235,000245: 
-023236,000246:                                                                                                  <span class="co">#  TEST FOR TRANSLATION TO BE COMBINED WITH ROTATION JETS.</span>
-023237,000247: 
-023238,000248: 20,2327           10072                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452414E534E4F57">TRANSNOW</a>                              <span class="co">#  TEST IF TRANSLATION WITH ROTATION IS</span>
-023239,000249: 20,2330           12375                           <span class="op">TCF     </span> <a href="#5452414E434F4E54">TRANCONT</a>                              <span class="co">#  REQUESTED, IF SO, OVER-RIDE 4-JET TEST.</span>
-023240,000250: 
-023241,000251:                                                                                                  <span class="co">#  DETERMINE IF LM DAP IS IN 2 OR 4 JET TRANSLATION MODE:</span>
-023242,000252: 
-023243,000253: 20,2331           40077                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              <span class="co">#  TEST FOR 2/4-JET TRANSLATION MODE IN</span>
-023244,000254: 20,2332           77752                           <span class="op">MASK    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#414343344F523258">ACC4OR2X</a>                              <span class="co">#  BIT4/DAPBOOLS (ASTRONAUT DSKY INPUT)</span>
-023245,000255: 20,2333           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  0: 2 JET MODE (SKIP OUT).</span>
-023246,000256: 
-023247,000257: 20,2334           12375                           <span class="op">TCF     </span> <a href="#5452414E434F4E54">TRANCONT</a>                              <span class="co">#  1: 4 JET MODE (CONTINUE).</span>
-023248,000258: 
-023249,000259:                                                                                                  <span class="co">#  TEST TRANSLATION POLICIES FOR JET FAILURES:</span>
-023250,000260: 
-<a name="5452414E4E455854"></a>023251,000261: 20,2335           50063        <span class="sm">TRANNEXT</span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F4C52454C4F43">POLRELOC</a>                              <span class="co">#  PICK UP POLICY FOR +/-X TRANSLATION</span>
-023252,000262: 20,2336           32545                           <span class="op">CAF     </span> <a href="#5452414E504F4C59">TRANPOLY</a>                              <span class="co">#  FROM TABLE (INDEXED WITHIN REQUESTED</span>
-023253,000263: 20,2337           54065                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54484953504F4C59">THISPOLY</a>                              <span class="co">#  RANGE OF POLICIES); TEST FOR FAILURES</span>
-023254,000264: 20,2340           71502                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               <span class="co">#  IF NO FAILURES, C(A) = +0.  IF POLICY</span>
-023255,000265: 20,2341           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  CANNOT BE USED , C(A) IS POSITIVE.</span>
-023256,000266: 20,2342           12373                           <span class="op">TCF     </span> <a href="#5452414E434E5444">TRANCNTD</a>                              <span class="co">#  IF FAILED, CHECK FOR STORE GOOD TRANS.</span>
-023257,000267: 
-023258,000268:                                                                                                  <span class="co">#  SPECIAL TESTS ARE NEEDED FOR TRANSLATION DURING ROTATION:</span>
-023259,000269: 
-023260,000270: 20,2343           10072                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452414E534E4F57">TRANSNOW</a>                              <span class="co">#  TEST FOR TRANSLATION DURING ROTATION</span>
-023261,000271: 20,2344           12363                           <span class="op">TCF     </span> <a href="#5452414E53544F52">TRANSTOR</a>                              <span class="co">#  IF SO, GO TEST THIS POLICY FOR USE NOW.</span>
-023262,000272: 
-023263,000273:                                                                                                  <span class="co">#  TEST FOR ONLY TRANSLATION REQUEST:</span>
-023264,000274: 
-023265,000275: 20,2345           10070                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452414E4F4E4C59">TRANONLY</a>                              <span class="co">#  TEST FOR PURE TRANSLATION REQUEST</span>
-023266,000276: 
+023220,000223: 
+023221,000224:                                                                                                  <span class="co">#  ENTRY POINT FOR +X TRANS, OR -X TRANS. REQUEST ALONE:</span>
+023222,000225: 
+023223,000226:                                                                                                  <span class="co">#  (ALSO CONTINUATION OF TRANSLATION-WITH-ROTATION LOGIC.)</span>
+023224,000227: 
+<a name="2B2F2D585452414E"></a>023225,000228: 20,2316           37754        <span class="sm">+/-XTRAN</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#54574F">TWO</a>                                   <span class="co">#  SET UP LOOP TO TEST ALL THREE POSSIBLE</span>
+023226,000229: 20,2317           54064                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4F50435452">LOOPCTR</a>                               <span class="co">#  TRANSLATION POLICIES, IF 4 JETS ASKED.</span>
+023227,000230: 
+023228,000231: 20,2320           10071                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414E595452414E53">ANYTRANS</a>                              <span class="co">#  TEST FOR TRANSLATION REQUESTS: -0 UNUSED</span>
+023229,000232: 
+023230,000233: 20,2321           12325                           <span class="op">TCF     </span> <a href="#2D58504F4C494359">-XPOLICY</a>                              <span class="co">#  POSMAX: -X TRANSLATION.</span>
+023231,000234: 20,2322           12412                           <span class="op">TCF     </span> <a href="#4C415445524A4554">LATERJET</a>                              <span class="co">#   +ZERO: NO TRANSLATION.</span>
+023232,000235: 
+023233,000236:                                                                                                  <span class="co">#  ENTER HERE FOR +X TRANSLATION POLICIES:</span>
+023234,000237: 
+<a name="2B58504F4C494359"></a>023235,000238: 20,2323           37754        <span class="sm">+XPOLICY</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#54574F">TWO</a>                                   <span class="co">#  NEGMAX: +X TRANSLATION.</span>
+023236,000239: 20,2324           12326                           <span class="op">TCF     </span> +2                                    <span class="co">#  SET POLRELOC FOR +X TRANS. INDEXING.</span>
+023237,000240: 
+023238,000241:                                                                                                  <span class="co">#  ENTER HERE FOR -X TRANSLATION POLICIES:</span>
+023239,000242: 
+<a name="2D58504F4C494359"></a>023240,000243: 20,2325           37760        <span class="sm">-XPOLICY</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#46495645">FIVE</a>                                  <span class="co">#  SET POLRELOC FOR -X TRANS. INDEXING.</span>
+023241,000244: 20,2326           54063                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F4C52454C4F43">POLRELOC</a>                              <span class="co">#  (INITIAL VALUE ALWAYS FOR 4-JET POLICY.)</span>
+023242,000245: 
+023243,000246:                                                                                                  <span class="co">#  TEST FOR TRANSLATION TO BE COMBINED WITH ROTATION JETS.</span>
+023244,000247: 
+023245,000248: 20,2327           10072                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452414E534E4F57">TRANSNOW</a>                              <span class="co">#  TEST IF TRANSLATION WITH ROTATION IS</span>
+023246,000249: 20,2330           12375                           <span class="op">TCF     </span> <a href="#5452414E434F4E54">TRANCONT</a>                              <span class="co">#  REQUESTED, IF SO, OVER-RIDE 4-JET TEST.</span>
+023247,000250: 
+023248,000251:                                                                                                  <span class="co">#  DETERMINE IF LM DAP IS IN 2 OR 4 JET TRANSLATION MODE:</span>
+023249,000252: 
+023250,000253: 20,2331           40077                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              <span class="co">#  TEST FOR 2/4-JET TRANSLATION MODE IN</span>
+023251,000254: 20,2332           77752                           <span class="op">MASK    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#414343344F523258">ACC4OR2X</a>                              <span class="co">#  BIT4/DAPBOOLS (ASTRONAUT DSKY INPUT)</span>
+023252,000255: 20,2333           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  0: 2 JET MODE (SKIP OUT).</span>
+023253,000256: 
+023254,000257: 20,2334           12375                           <span class="op">TCF     </span> <a href="#5452414E434F4E54">TRANCONT</a>                              <span class="co">#  1: 4 JET MODE (CONTINUE).</span>
+023255,000258: 
+023256,000259:                                                                                                  <span class="co">#  TEST TRANSLATION POLICIES FOR JET FAILURES:</span>
+023257,000260: 
+<a name="5452414E4E455854"></a>023258,000261: 20,2335           50063        <span class="sm">TRANNEXT</span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F4C52454C4F43">POLRELOC</a>                              <span class="co">#  PICK UP POLICY FOR +/-X TRANSLATION</span>
+023259,000262: 20,2336           32545                           <span class="op">CAF     </span> <a href="#5452414E504F4C59">TRANPOLY</a>                              <span class="co">#  FROM TABLE (INDEXED WITHIN REQUESTED</span>
+023260,000263: 20,2337           54065                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54484953504F4C59">THISPOLY</a>                              <span class="co">#  RANGE OF POLICIES); TEST FOR FAILURES</span>
+023261,000264: 20,2340           71502                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               <span class="co">#  IF NO FAILURES, C(A) = +0.  IF POLICY</span>
+023262,000265: 20,2341           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  CANNOT BE USED , C(A) IS POSITIVE.</span>
+023263,000266: 20,2342           12373                           <span class="op">TCF     </span> <a href="#5452414E434E5444">TRANCNTD</a>                              <span class="co">#  IF FAILED, CHECK FOR STORE GOOD TRANS.</span>
+023264,000267: 
+023265,000268:                                                                                                  <span class="co">#  SPECIAL TESTS ARE NEEDED FOR TRANSLATION DURING ROTATION:</span>
+023266,000269: 
+023267,000270: 20,2343           10072                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452414E534E4F57">TRANSNOW</a>                              <span class="co">#  TEST FOR TRANSLATION DURING ROTATION</span>
+023268,000271: 20,2344           12363                           <span class="op">TCF     </span> <a href="#5452414E53544F52">TRANSTOR</a>                              <span class="co">#  IF SO, GO TEST THIS POLICY FOR USE NOW.</span>
+023269,000272: 
+023270,000273:                                                                                                  <span class="co">#  TEST FOR ONLY TRANSLATION REQUEST:</span>
+023271,000274: 
+023272,000275: 20,2345           10070                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452414E4F4E4C59">TRANONLY</a>                              <span class="co">#  TEST FOR PURE TRANSLATION REQUEST</span>
+023273,000276: 
 </pre>
 </span>
 </p>
@@ -464,58 +464,58 @@ Page 526
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023268,000278: 20,2346           12357                           <span class="op">TCF     </span> <a href="#5452414E4F524F54">TRANOROT</a>                              <span class="co">#  IF SO, GIVE TRANSLATION, NO ROTATION</span>
-023269,000279: 
-023270,000280:                                                                                                  <span class="co">#  SPECIAL TEST FOR GOOD 4-JET TRANSLATION:</span>
-023271,000281: 
-023272,000282: 20,2347           47754                           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#54574F">TWO</a>                                   <span class="co">#  TEST IF POLICY IS USING FOUR JETS (WHICH</span>
-023273,000283: 20,2350           60064                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4F50435452">LOOPCTR</a>                               <span class="co">#  IS EQUIVALENT TO LOOPCTR = 2).  IF 4-JET</span>
-023274,000284: 20,2351           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  THIS POLICY MUST BE USED AS JTSATCHG.</span>
-023275,000285: 20,2352           12355                           <span class="op">BZF     </span> <a href="#5452414E344A4554">TRAN4JET</a>                              <span class="co">#  OTHERWISE, MUST CHECK TRANSAVE FIRST.</span>
-023276,000286: 
-023277,000287:                                                                                                  <span class="co">#  WHEN NOT 4-JET TRANSLATION,  CHECK FOR SAVED POLICY:</span>
-023278,000288: 
-023279,000289: 20,2353           10073                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452414E53415645">TRANSAVE</a>                              <span class="co">#  TEST FOR SAVED POLICY; IF SAVED, USE IT.</span>
-023280,000290: 20,2354           12411                           <span class="op">TCF     </span> <a href="#5452414E55534544">TRANUSED</a>                              <span class="co">#  IF NOT SAVED YET, USE THIS POLICY.</span>
-023281,000291: 
-023282,000292:                                                                                                  <span class="co">#  USE THIS POLICY (EITHER 4 JETS OR BEST 2 JET):</span>
-023283,000293: 
-<a name="5452414E344A4554"></a>023284,000294: 20,2355           30065        <span class="sm">TRAN4JET</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54484953504F4C59">THISPOLY</a>                              <span class="co">#  USE THIS UNFAILED POLICY AS THE TRANS-</span>
-023285,000295: 20,2356           12412                           <span class="op">TCF     </span> <a href="#4C415445524A4554">LATERJET</a>                              <span class="co">#  LATION POLICY AFTER ROTATION.</span>
-023286,000296: 
-023287,000297:                                                                                                  <span class="co">#  FOR TRANSLATION WITHOUT ROTATION, TURN JETS ON IMMEDIATELY AND RESUME:</span>
-023288,000298: 
-<a name="5452414E4F524F54"></a>023289,000299: 20,2357           30065        <span class="sm">TRANOROT</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54484953504F4C59">THISPOLY</a>                              <span class="co">#  TURN ON UNFAILED Q,R-AXES JETS AS A PURE</span>
-023290,000300: 20,2360           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  TRANSLATION POLICY WITHOUT ANY TJETLAW</span>
-023291,000301: 20,2361           01005                           <span class="op">WRITE   </span> 5                                     <span class="co">#  CALCULATIONS (AND NO TIME6 SETTING).</span>
-023292,000302: 
-023293,000303: 20,2362           15751                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  END T5RUPT SINCE JETS ON FOR FULL CSP.</span>
-023294,000304: 
-023295,000305:                                                                                                  <span class="co">#  TEST THIS TRANSLATION FOR USE DURING ROTATION:</span>
-023296,000306: 
-<a name="5452414E53544F52"></a>023297,000307: 20,2363           30065        <span class="sm">TRANSTOR</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54484953504F4C59">THISPOLY</a>                              <span class="co">#  SAVE THIS POLICY FOR LATER USE AS THE</span>
-023298,000308: 20,2364           54073                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452414E53415645">TRANSAVE</a>                              <span class="co">#  JTSATCHG POLICY UNLESS IT IS SUPERCEDED.</span>
-023299,000309: 20,2365           71471                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A54534F4E4E4F57">JTSONNOW</a>                              <span class="co">#  TEST FOR USE WITH ROTATION POLICY  MUST</span>
-023300,000310: 20,2366           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  HAVE NO JETS IN COMMON WITH JTSONNOW.</span>
-023301,000311: 20,2367           12375                           <span class="op">TCF     </span> <a href="#5452414E434F4E54">TRANCONT</a>                              <span class="co">#  C(A) POSITIVE MEANS POLICIES CONFLICT.</span>
-023302,000312: 
-023303,000313:                                                                                                  <span class="co">#  COINCIDENT TRANSLATION FOUND, GO FIND PURE TRANSLATION POLICY (FOR USE AFTER ROTATION):</span>
-023304,000314: 
-023305,000315: 20,2370           30065                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54484953504F4C59">THISPOLY</a>                              <span class="co">#  USE BOTH ROTATION AND TRANSLATION JETS</span>
-023306,000316: 
-023307,000317: 20,2371           27471                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A54534F4E4E4F57">JTSONNOW</a>                              <span class="co">#  AT JTSONNOW (BIT 15 IS ALREADY SET).</span>
-023308,000318: 
-023309,000319: 20,2372           12404                           <span class="op">TCF     </span> <a href="#5452414E534C4154">TRANSLAT</a>                              <span class="co">#  GO TO START FINDING JTSATCHG POLICY.</span>
-023310,000320: 
-023311,000321:                                                                                                  <span class="co">#  STOP SEARCH IF GOOD TRANSLATION POLICY ALREADY RECORDED:</span>
-023312,000322: 
-<a name="5452414E434E5444"></a>023313,000323: 20,2373           10073        <span class="sm">TRANCNTD</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452414E53415645">TRANSAVE</a>                              <span class="co">#  TEST FOR PREVIOUSLY SAVED TRANSLATION</span>
-023314,000324: 20,2374           12411                           <span class="op">TCF     </span> <a href="#5452414E55534544">TRANUSED</a>                              <span class="co">#  POLICY, IF IT EXISTS, USE IT.</span>
-023315,000325: 
-023316,000326:                                                                                                  <span class="co">#  CONTINUE FAILURE CHECKING LOOP:</span>
-023317,000327: 
-<a name="5452414E434F4E54"></a>023318,000328: 20,2375           00006        <span class="sm">TRANCONT</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  CONTINUE THE TRANSLATION-FAIL LOOP</span>
-023319,000329: 
+023275,000278: 20,2346           12357                           <span class="op">TCF     </span> <a href="#5452414E4F524F54">TRANOROT</a>                              <span class="co">#  IF SO, GIVE TRANSLATION, NO ROTATION</span>
+023276,000279: 
+023277,000280:                                                                                                  <span class="co">#  SPECIAL TEST FOR GOOD 4-JET TRANSLATION:</span>
+023278,000281: 
+023279,000282: 20,2347           47754                           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#54574F">TWO</a>                                   <span class="co">#  TEST IF POLICY IS USING FOUR JETS (WHICH</span>
+023280,000283: 20,2350           60064                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4F50435452">LOOPCTR</a>                               <span class="co">#  IS EQUIVALENT TO LOOPCTR = 2).  IF 4-JET</span>
+023281,000284: 20,2351           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  THIS POLICY MUST BE USED AS JTSATCHG.</span>
+023282,000285: 20,2352           12355                           <span class="op">BZF     </span> <a href="#5452414E344A4554">TRAN4JET</a>                              <span class="co">#  OTHERWISE, MUST CHECK TRANSAVE FIRST.</span>
+023283,000286: 
+023284,000287:                                                                                                  <span class="co">#  WHEN NOT 4-JET TRANSLATION,  CHECK FOR SAVED POLICY:</span>
+023285,000288: 
+023286,000289: 20,2353           10073                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452414E53415645">TRANSAVE</a>                              <span class="co">#  TEST FOR SAVED POLICY; IF SAVED, USE IT.</span>
+023287,000290: 20,2354           12411                           <span class="op">TCF     </span> <a href="#5452414E55534544">TRANUSED</a>                              <span class="co">#  IF NOT SAVED YET, USE THIS POLICY.</span>
+023288,000291: 
+023289,000292:                                                                                                  <span class="co">#  USE THIS POLICY (EITHER 4 JETS OR BEST 2 JET):</span>
+023290,000293: 
+<a name="5452414E344A4554"></a>023291,000294: 20,2355           30065        <span class="sm">TRAN4JET</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54484953504F4C59">THISPOLY</a>                              <span class="co">#  USE THIS UNFAILED POLICY AS THE TRANS-</span>
+023292,000295: 20,2356           12412                           <span class="op">TCF     </span> <a href="#4C415445524A4554">LATERJET</a>                              <span class="co">#  LATION POLICY AFTER ROTATION.</span>
+023293,000296: 
+023294,000297:                                                                                                  <span class="co">#  FOR TRANSLATION WITHOUT ROTATION, TURN JETS ON IMMEDIATELY AND RESUME:</span>
+023295,000298: 
+<a name="5452414E4F524F54"></a>023296,000299: 20,2357           30065        <span class="sm">TRANOROT</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54484953504F4C59">THISPOLY</a>                              <span class="co">#  TURN ON UNFAILED Q,R-AXES JETS AS A PURE</span>
+023297,000300: 20,2360           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  TRANSLATION POLICY WITHOUT ANY TJETLAW</span>
+023298,000301: 20,2361           01005                           <span class="op">WRITE   </span> 5                                     <span class="co">#  CALCULATIONS (AND NO TIME6 SETTING).</span>
+023299,000302: 
+023300,000303: 20,2362           15751                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  END T5RUPT SINCE JETS ON FOR FULL CSP.</span>
+023301,000304: 
+023302,000305:                                                                                                  <span class="co">#  TEST THIS TRANSLATION FOR USE DURING ROTATION:</span>
+023303,000306: 
+<a name="5452414E53544F52"></a>023304,000307: 20,2363           30065        <span class="sm">TRANSTOR</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54484953504F4C59">THISPOLY</a>                              <span class="co">#  SAVE THIS POLICY FOR LATER USE AS THE</span>
+023305,000308: 20,2364           54073                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452414E53415645">TRANSAVE</a>                              <span class="co">#  JTSATCHG POLICY UNLESS IT IS SUPERCEDED.</span>
+023306,000309: 20,2365           71471                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A54534F4E4E4F57">JTSONNOW</a>                              <span class="co">#  TEST FOR USE WITH ROTATION POLICY  MUST</span>
+023307,000310: 20,2366           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  HAVE NO JETS IN COMMON WITH JTSONNOW.</span>
+023308,000311: 20,2367           12375                           <span class="op">TCF     </span> <a href="#5452414E434F4E54">TRANCONT</a>                              <span class="co">#  C(A) POSITIVE MEANS POLICIES CONFLICT.</span>
+023309,000312: 
+023310,000313:                                                                                                  <span class="co">#  COINCIDENT TRANSLATION FOUND, GO FIND PURE TRANSLATION POLICY (FOR USE AFTER ROTATION):</span>
+023311,000314: 
+023312,000315: 20,2370           30065                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54484953504F4C59">THISPOLY</a>                              <span class="co">#  USE BOTH ROTATION AND TRANSLATION JETS</span>
+023313,000316: 
+023314,000317: 20,2371           27471                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A54534F4E4E4F57">JTSONNOW</a>                              <span class="co">#  AT JTSONNOW (BIT 15 IS ALREADY SET).</span>
+023315,000318: 
+023316,000319: 20,2372           12404                           <span class="op">TCF     </span> <a href="#5452414E534C4154">TRANSLAT</a>                              <span class="co">#  GO TO START FINDING JTSATCHG POLICY.</span>
+023317,000320: 
+023318,000321:                                                                                                  <span class="co">#  STOP SEARCH IF GOOD TRANSLATION POLICY ALREADY RECORDED:</span>
+023319,000322: 
+<a name="5452414E434E5444"></a>023320,000323: 20,2373           10073        <span class="sm">TRANCNTD</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452414E53415645">TRANSAVE</a>                              <span class="co">#  TEST FOR PREVIOUSLY SAVED TRANSLATION</span>
+023321,000324: 20,2374           12411                           <span class="op">TCF     </span> <a href="#5452414E55534544">TRANUSED</a>                              <span class="co">#  POLICY, IF IT EXISTS, USE IT.</span>
+023322,000325: 
+023323,000326:                                                                                                  <span class="co">#  CONTINUE FAILURE CHECKING LOOP:</span>
+023324,000327: 
+<a name="5452414E434F4E54"></a>023325,000328: 20,2375           00006        <span class="sm">TRANCONT</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  CONTINUE THE TRANSLATION-FAIL LOOP</span>
+023326,000329: 
 </pre>
 </span>
 </p>
@@ -531,57 +531,57 @@ Page 527
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023321,000331: 20,2376           26063                           <span class="op">DIM     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F4C52454C4F43">POLRELOC</a>                              <span class="co">#  DECREMENT THE TRANSLATION POLICY INDEX</span>
-023322,000332: 20,2377           10064                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4F50435452">LOOPCTR</a>                               <span class="co">#  AND THEN TEST LOOPCTR FOR CONTINUATION</span>
-023323,000333: 20,2400           12407                           <span class="op">TCF     </span> <a href="#54524E5245534554">TRNRESET</a>                              <span class="co">#  OF JET FAILURE TESTING.</span>
-023324,000334: 
-023325,000335:                                                                                                  <span class="co">#  IF NO TRANSLATION CAN BE FOUND FOR ROTATION POLICY, ALL IS NOT LOST, OTHERWISE, START JET FAILURE ABORT:</span>
-023326,000336: 
-023327,000337: 20,2401           10072                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452414E534E4F57">TRANSNOW</a>                              <span class="co">#  IF FAILURES STOP TRANSLATION DURING</span>
-023328,000338: 20,2402           12404                           <span class="op">TCF     </span> <a href="#5452414E534C4154">TRANSLAT</a>                              <span class="co">#  ROTATION' CONTINUE BY FINDING JTSATCHG.</span>
-023329,000339: 
-023330,000340: 20,2403           12243                           <span class="op">TCF     </span> <a href="#41424F52544A4554">ABORTJET</a>                              <span class="co">#  TURN OFF JETS AND ABORT.</span>
-023331,000341: 
-023332,000342:                                                                                                  <span class="co">#  BEGIN SEARCH FOR JTSATCHG POLICY:</span>
-023333,000343: 
-<a name="5452414E534C4154"></a>023334,000344: 20,2404           37761        <span class="sm">TRANSLAT</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  SET VOLATILE FLAG TO INDICATE SEARCH IS</span>
-023335,000345: 20,2405           54072                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452414E534E4F57">TRANSNOW</a>                              <span class="co">#  FOR JTSATCHG, AFTER TRANSNOW DONE.</span>
-023336,000346: 
-023337,000347: 20,2406           12316                           <span class="op">TCF     </span> <a href="#2B2F2D585452414E">+/-XTRAN</a>                              <span class="co">#  GO TO RE-INITIALIZE LOOP FROM SCRATCH.</span>
-023338,000348: 
-023339,000349:                                                                                                  <span class="co">#  "TOP OF LOOP" (FOR ALL BUT FIRST PASS):</span>
-023340,000350: 
-<a name="54524E5245534554"></a>023341,000351: 20,2407           54064        <span class="sm">TRNRESET</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4F50435452">LOOPCTR</a>                               <span class="co">#  RESET LOOP COUNTER TO CONTINUE LOOPING</span>
-023342,000352: 20,2410           12335                           <span class="op">TCF     </span> <a href="#5452414E4E455854">TRANNEXT</a>                              <span class="co">#  GO TO CONTINUATION OF LOOP (AT THE TOP).</span>
-023343,000353: 
-023344,000354:                                                                                                  <span class="co">#  RECONSTRUCT FLAGGED JET POLICY:</span>
-023345,000355: 
-<a name="5452414E55534544"></a>023346,000356: 20,2411           67755        <span class="sm">TRANUSED</span>           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4F4E45">ONE</a>                                   <span class="co">#  RESET POLICY THAT WAS POSITIVE AND CCSED</span>
-<a name="4C415445524A4554"></a>023347,000357: 20,2412           67737        <span class="sm">LATERJET</span>           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4249543135">BIT15</a>                                 <span class="co">#  SET BIT 15 TO INDICATE Q,R-AXES POLICY.</span>
-023348,000358: 20,2413           55472                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A54534154434847">JTSATCHG</a>                              <span class="co">#  USE FOR JTSATCHG TRANSLATION POLICY.</span>
-023349,000359: 
-023350,000360:                                                                                                  <span class="co">#  TRANSFORM INITIAL POINTER TO 2-JET POLICY:</span>
-023351,000361: 
-023352,000362: 20,2414           37755                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4F4E45">ONE</a>                                   <span class="co">#  FROM THE INDEX VALUE INDICATING NUMBER</span>
-023353,000363: 20,2415           70061                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E455441434E4458">NETACNDX</a>                              <span class="co">#  OF JETS, DIRECTION, AND AXIS' COMPUTE</span>
-023354,000364: 20,2416           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  THE INDEX VALUE FOR 2 JETS ABOUT THAT</span>
-023355,000365: 20,2417           12422                           <span class="op">TCF     </span> +3                                    <span class="co">#  AXIS (IN THAT DIRECTION).  CONTRIVANCE</span>
-023356,000366: 20,2420           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  MAKES THIS EQUIVALENT TO  IF BIT1 IS ON.</span>
-023357,000367: 20,2421           24061                           <span class="op">AUG     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E455441434E4458">NETACNDX</a>                              <span class="co">#  (INDEP. OF SIGN)  AUGMENT  NETACNDX.</span>
-023358,000368: 
-023359,000369:                                                                                                  <span class="co">#  TRANSFORM POINTER TO CORRESPOND TO JETS ACTUALLY CHOSEN.</span>
-023360,000370: 
-023361,000371: 20,2422           11606                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F2E514A455453">NO.QJETS</a>                              <span class="co">#  TRANSFORM INDEX TO APPROPRIATE VALUE FOR</span>
-023362,000372: 20,2423           12425                           <span class="op">TCF     </span> +2                                    <span class="co">#  THE NUMBER OF JETS SELECTED.</span>
-023363,000373: 20,2424           12436                           <span class="op">TCF     </span> <a href="#414C4C524A455453">ALLRJETS</a>                              <span class="co">#  IF NO.QJETS ZERO, NO.RJETS IS NONZERO.</span>
-023364,000374: 
-023365,000375: 20,2425           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IF NO.QJETS +/-1, NO.RJETS IS +/-1 (BY</span>
-023366,000376: 20,2426           12430                           <span class="op">TCF     </span> +2                                    <span class="co">#  DEFINITION)  SO SUBTRACT ONE FROM INDEX.</span>
-023367,000377: 20,2427           12433                           <span class="op">TCF     </span> <a href="#534D414C41584953">SMALAXIS</a>                              <span class="co">#  GO TRANSFORM FOR 1 U,V-AXIS JET.</span>
-023368,000378: 20,2430           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IF STILL NONZERO ON THIRD CCS, NO.QJETS</span>
-023369,000379: 20,2431           24061                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E455441434E4458">NETACNDX</a>                              <span class="co">#  MUST HAVE BEEN +/-4, SO ADD ONE TO THE</span>
-023370,000380: 20,2432           12445                           <span class="op">TCF     </span> <a href="#4E45544143474554">NETACGET</a>                              <span class="co">#  INDEX, OTHERWISE, NO CHANGE (2 JETS).</span>
-023371,000381: 
+023328,000331: 20,2376           26063                           <span class="op">DIM     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F4C52454C4F43">POLRELOC</a>                              <span class="co">#  DECREMENT THE TRANSLATION POLICY INDEX</span>
+023329,000332: 20,2377           10064                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4F50435452">LOOPCTR</a>                               <span class="co">#  AND THEN TEST LOOPCTR FOR CONTINUATION</span>
+023330,000333: 20,2400           12407                           <span class="op">TCF     </span> <a href="#54524E5245534554">TRNRESET</a>                              <span class="co">#  OF JET FAILURE TESTING.</span>
+023331,000334: 
+023332,000335:                                                                                                  <span class="co">#  IF NO TRANSLATION CAN BE FOUND FOR ROTATION POLICY, ALL IS NOT LOST, OTHERWISE, START JET FAILURE ABORT:</span>
+023333,000336: 
+023334,000337: 20,2401           10072                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452414E534E4F57">TRANSNOW</a>                              <span class="co">#  IF FAILURES STOP TRANSLATION DURING</span>
+023335,000338: 20,2402           12404                           <span class="op">TCF     </span> <a href="#5452414E534C4154">TRANSLAT</a>                              <span class="co">#  ROTATION' CONTINUE BY FINDING JTSATCHG.</span>
+023336,000339: 
+023337,000340: 20,2403           12243                           <span class="op">TCF     </span> <a href="#41424F52544A4554">ABORTJET</a>                              <span class="co">#  TURN OFF JETS AND ABORT.</span>
+023338,000341: 
+023339,000342:                                                                                                  <span class="co">#  BEGIN SEARCH FOR JTSATCHG POLICY:</span>
+023340,000343: 
+<a name="5452414E534C4154"></a>023341,000344: 20,2404           37761        <span class="sm">TRANSLAT</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  SET VOLATILE FLAG TO INDICATE SEARCH IS</span>
+023342,000345: 20,2405           54072                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452414E534E4F57">TRANSNOW</a>                              <span class="co">#  FOR JTSATCHG, AFTER TRANSNOW DONE.</span>
+023343,000346: 
+023344,000347: 20,2406           12316                           <span class="op">TCF     </span> <a href="#2B2F2D585452414E">+/-XTRAN</a>                              <span class="co">#  GO TO RE-INITIALIZE LOOP FROM SCRATCH.</span>
+023345,000348: 
+023346,000349:                                                                                                  <span class="co">#  "TOP OF LOOP" (FOR ALL BUT FIRST PASS):</span>
+023347,000350: 
+<a name="54524E5245534554"></a>023348,000351: 20,2407           54064        <span class="sm">TRNRESET</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4F50435452">LOOPCTR</a>                               <span class="co">#  RESET LOOP COUNTER TO CONTINUE LOOPING</span>
+023349,000352: 20,2410           12335                           <span class="op">TCF     </span> <a href="#5452414E4E455854">TRANNEXT</a>                              <span class="co">#  GO TO CONTINUATION OF LOOP (AT THE TOP).</span>
+023350,000353: 
+023351,000354:                                                                                                  <span class="co">#  RECONSTRUCT FLAGGED JET POLICY:</span>
+023352,000355: 
+<a name="5452414E55534544"></a>023353,000356: 20,2411           67755        <span class="sm">TRANUSED</span>           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4F4E45">ONE</a>                                   <span class="co">#  RESET POLICY THAT WAS POSITIVE AND CCSED</span>
+<a name="4C415445524A4554"></a>023354,000357: 20,2412           67737        <span class="sm">LATERJET</span>           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4249543135">BIT15</a>                                 <span class="co">#  SET BIT 15 TO INDICATE Q,R-AXES POLICY.</span>
+023355,000358: 20,2413           55472                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A54534154434847">JTSATCHG</a>                              <span class="co">#  USE FOR JTSATCHG TRANSLATION POLICY.</span>
+023356,000359: 
+023357,000360:                                                                                                  <span class="co">#  TRANSFORM INITIAL POINTER TO 2-JET POLICY:</span>
+023358,000361: 
+023359,000362: 20,2414           37755                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4F4E45">ONE</a>                                   <span class="co">#  FROM THE INDEX VALUE INDICATING NUMBER</span>
+023360,000363: 20,2415           70061                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E455441434E4458">NETACNDX</a>                              <span class="co">#  OF JETS, DIRECTION, AND AXIS' COMPUTE</span>
+023361,000364: 20,2416           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  THE INDEX VALUE FOR 2 JETS ABOUT THAT</span>
+023362,000365: 20,2417           12422                           <span class="op">TCF     </span> +3                                    <span class="co">#  AXIS (IN THAT DIRECTION).  CONTRIVANCE</span>
+023363,000366: 20,2420           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  MAKES THIS EQUIVALENT TO  IF BIT1 IS ON.</span>
+023364,000367: 20,2421           24061                           <span class="op">AUG     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E455441434E4458">NETACNDX</a>                              <span class="co">#  (INDEP. OF SIGN)  AUGMENT  NETACNDX.</span>
+023365,000368: 
+023366,000369:                                                                                                  <span class="co">#  TRANSFORM POINTER TO CORRESPOND TO JETS ACTUALLY CHOSEN.</span>
+023367,000370: 
+023368,000371: 20,2422           11606                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F2E514A455453">NO.QJETS</a>                              <span class="co">#  TRANSFORM INDEX TO APPROPRIATE VALUE FOR</span>
+023369,000372: 20,2423           12425                           <span class="op">TCF     </span> +2                                    <span class="co">#  THE NUMBER OF JETS SELECTED.</span>
+023370,000373: 20,2424           12436                           <span class="op">TCF     </span> <a href="#414C4C524A455453">ALLRJETS</a>                              <span class="co">#  IF NO.QJETS ZERO, NO.RJETS IS NONZERO.</span>
+023371,000374: 
+023372,000375: 20,2425           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IF NO.QJETS +/-1, NO.RJETS IS +/-1 (BY</span>
+023373,000376: 20,2426           12430                           <span class="op">TCF     </span> +2                                    <span class="co">#  DEFINITION)  SO SUBTRACT ONE FROM INDEX.</span>
+023374,000377: 20,2427           12433                           <span class="op">TCF     </span> <a href="#534D414C41584953">SMALAXIS</a>                              <span class="co">#  GO TRANSFORM FOR 1 U,V-AXIS JET.</span>
+023375,000378: 20,2430           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IF STILL NONZERO ON THIRD CCS, NO.QJETS</span>
+023376,000379: 20,2431           24061                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E455441434E4458">NETACNDX</a>                              <span class="co">#  MUST HAVE BEEN +/-4, SO ADD ONE TO THE</span>
+023377,000380: 20,2432           12445                           <span class="op">TCF     </span> <a href="#4E45544143474554">NETACGET</a>                              <span class="co">#  INDEX, OTHERWISE, NO CHANGE (2 JETS).</span>
+023378,000381: 
 </pre>
 </span>
 </p>
@@ -597,37 +597,37 @@ Page 528
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="534D414C41584953"></a>023373,000383: 20,2433           00006        <span class="sm">SMALAXIS</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  DECREMENT INDEX FOR 1 JET AROUND EITHER</span>
-023374,000384: 20,2434           26061                           <span class="op">DIM     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E455441434E4458">NETACNDX</a>                              <span class="co">#  THE U- OR V- AXIS.</span>
-023375,000385: 
-023376,000386: 20,2435           12445                           <span class="op">TCF     </span> <a href="#4E45544143474554">NETACGET</a>                              <span class="co">#  (GO PICK UP INVERSE OF NET ACCELERATION)</span>
-023377,000387: 
-<a name="414C4C524A455453"></a>023378,000388: 20,2436           11607        <span class="sm">ALLRJETS</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F2E524A455453">NO.RJETS</a>                              <span class="co">#  WHEN NO.QJETS ZERO, TEST NO.RJETS WHICH</span>
-023379,000389: 20,2437           77754                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#54574F">TWO</a>                                   <span class="co">#  IS ONLY +/-2 OR +/-4.  NOTE LAST THREE</span>
-023380,000390: 20,2440           12442                           <span class="op">TCF     </span> +2                                    <span class="co">#  BITS OF THESE AFTER CCS  001 OR 011.</span>
-023381,000391: 20,2441           77754                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#54574F">TWO</a>                                   <span class="co">#  ONLY BIT2 DISTINGUISHES BETWEEN THE TWO.</span>
-023382,000392: 20,2442           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  IF BIT2 = 0, THEN TWO JETS, NO CHANGE.</span>
-023383,000393: 20,2443           12445                           <span class="op">BZF     </span> +2                                    <span class="co">#  IF BIT2 = 1, THEN FOUR JETS, SO THE</span>
-023384,000394: 20,2444           24061                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E455441434E4458">NETACNDX</a>                              <span class="co">#  INDEX MUST BE INCREMENTED.</span>
-023385,000395: 
-023386,000396:                                                                                                  <span class="co">#  PICK UP AND SAVE 1/NETACC FOR TJETLAW:</span>
-023387,000397: 
-<a name="4E45544143474554"></a>023388,000398: 20,2445           50061        <span class="sm">NETACGET</span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E455441434E4458">NETACNDX</a>                              <span class="co">#  USE THE INDEX VALUE FOR THE EXACT JETS</span>
-023389,000399: 20,2446           31700                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E4554414353">1/NETACS</a>                              <span class="co">#  USED, PICK UP THE APPROPRIATE 1/NETACC</span>
-023390,000400: 20,2447           54066                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E4554414343">1/NETACC</a>                              <span class="co">#  AND SAVE FOR USE BY THE TJETLAW.</span>
-023391,000401: 
-023392,000402:                                                                                                  <span class="co">#  RETURN TO APPROPRIATE TJETLAW:</span>
-023393,000403: 
-023394,000404: 20,2450           32454                           <span class="op">CAF     </span> <a href="#4242414E4B534554">BBANKSET</a>                              <span class="co">#  ALWAYS RETURN TO THE FIXED BANK OF THE</span>
-023395,000405: 20,2451           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  Q,R-AXES REACTION CONTROL SYSTEM LM DAP.</span>
-023396,000406: 20,2452           30062                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A4554414452">TJETADR</a>                               <span class="co">#  USE VARIABLE GENADR WITH WHICH TO</span>
-023397,000407: 20,2453           52006                           <span class="op">DTCB    </span>                                       <span class="co">#  CROSS BANKS TO RETURN.</span>
-023398,000408: 
-023399,000409: 20,2454  E6,1417                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474151">OMEGAQ</a>                                
-<a name="4242414E4B534554"></a>023400,000410: 20,2454           36006        <span class="sm">BBANKSET</span>           <span class="ps">BBCON   </span> <a href="Q,R-AXES_REACTION_CONTROL_SYSTEM_AUTOPILOT.agc.html#515241584953">QRAXIS</a>                                <span class="co">#  BBCON OF Q,R-AXES RCS LM DAP.</span>
-023401,000411: 
-<a name="42495453362638"></a>023402,000412: 20,2455           00240        <span class="sm">BITS6&amp;8 </span>           <span class="ps">OCTAL   </span> 00240                                 <span class="co">#  ULLAGE AND ASCENT BURN DAPBOOLS BITS.</span>
-023403,000413: 
+<a name="534D414C41584953"></a>023380,000383: 20,2433           00006        <span class="sm">SMALAXIS</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  DECREMENT INDEX FOR 1 JET AROUND EITHER</span>
+023381,000384: 20,2434           26061                           <span class="op">DIM     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E455441434E4458">NETACNDX</a>                              <span class="co">#  THE U- OR V- AXIS.</span>
+023382,000385: 
+023383,000386: 20,2435           12445                           <span class="op">TCF     </span> <a href="#4E45544143474554">NETACGET</a>                              <span class="co">#  (GO PICK UP INVERSE OF NET ACCELERATION)</span>
+023384,000387: 
+<a name="414C4C524A455453"></a>023385,000388: 20,2436           11607        <span class="sm">ALLRJETS</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F2E524A455453">NO.RJETS</a>                              <span class="co">#  WHEN NO.QJETS ZERO, TEST NO.RJETS WHICH</span>
+023386,000389: 20,2437           77754                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#54574F">TWO</a>                                   <span class="co">#  IS ONLY +/-2 OR +/-4.  NOTE LAST THREE</span>
+023387,000390: 20,2440           12442                           <span class="op">TCF     </span> +2                                    <span class="co">#  BITS OF THESE AFTER CCS  001 OR 011.</span>
+023388,000391: 20,2441           77754                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#54574F">TWO</a>                                   <span class="co">#  ONLY BIT2 DISTINGUISHES BETWEEN THE TWO.</span>
+023389,000392: 20,2442           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  IF BIT2 = 0, THEN TWO JETS, NO CHANGE.</span>
+023390,000393: 20,2443           12445                           <span class="op">BZF     </span> +2                                    <span class="co">#  IF BIT2 = 1, THEN FOUR JETS, SO THE</span>
+023391,000394: 20,2444           24061                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E455441434E4458">NETACNDX</a>                              <span class="co">#  INDEX MUST BE INCREMENTED.</span>
+023392,000395: 
+023393,000396:                                                                                                  <span class="co">#  PICK UP AND SAVE 1/NETACC FOR TJETLAW:</span>
+023394,000397: 
+<a name="4E45544143474554"></a>023395,000398: 20,2445           50061        <span class="sm">NETACGET</span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E455441434E4458">NETACNDX</a>                              <span class="co">#  USE THE INDEX VALUE FOR THE EXACT JETS</span>
+023396,000399: 20,2446           31700                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E4554414353">1/NETACS</a>                              <span class="co">#  USED, PICK UP THE APPROPRIATE 1/NETACC</span>
+023397,000400: 20,2447           54066                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E4554414343">1/NETACC</a>                              <span class="co">#  AND SAVE FOR USE BY THE TJETLAW.</span>
+023398,000401: 
+023399,000402:                                                                                                  <span class="co">#  RETURN TO APPROPRIATE TJETLAW:</span>
+023400,000403: 
+023401,000404: 20,2450           32454                           <span class="op">CAF     </span> <a href="#4242414E4B534554">BBANKSET</a>                              <span class="co">#  ALWAYS RETURN TO THE FIXED BANK OF THE</span>
+023402,000405: 20,2451           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  Q,R-AXES REACTION CONTROL SYSTEM LM DAP.</span>
+023403,000406: 20,2452           30062                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A4554414452">TJETADR</a>                               <span class="co">#  USE VARIABLE GENADR WITH WHICH TO</span>
+023404,000407: 20,2453           52006                           <span class="op">DTCB    </span>                                       <span class="co">#  CROSS BANKS TO RETURN.</span>
+023405,000408: 
+023406,000409: 20,2454  E6,1417                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474151">OMEGAQ</a>                                
+<a name="4242414E4B534554"></a>023407,000410: 20,2454           36006        <span class="sm">BBANKSET</span>           <span class="ps">BBCON   </span> <a href="Q,R-AXES_REACTION_CONTROL_SYSTEM_AUTOPILOT.agc.html#515241584953">QRAXIS</a>                                <span class="co">#  BBCON OF Q,R-AXES RCS LM DAP.</span>
+023408,000411: 
+<a name="42495453362638"></a>023409,000412: 20,2455           00240        <span class="sm">BITS6&amp;8 </span>           <span class="ps">OCTAL   </span> 00240                                 <span class="co">#  ULLAGE AND ASCENT BURN DAPBOOLS BITS.</span>
+023410,000413: 
 </pre>
 </span>
 </p>
@@ -643,43 +643,43 @@ Page 529
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023405,000415: 
-023406,000416:                                                                                                  <span class="co">#  TABLE OF Q,R-JET NUMBERS AND DIRECTIONS:</span>
-023407,000417: 
-<a name="544F524B5441424C"></a>023408,000418: 20,2456           00000        <span class="sm">TORKTABL</span>           <span class="ps">DEC     </span> 0          B-14                       <span class="co">#  FROM THE 3 PACKED BITS IN A WORD FROM</span>
-023409,000419: 20,2457           00001                           <span class="ps">DEC     </span> +1         B-14                       <span class="co">#  POLTABLE, THE POLTYPEP PROGRAM SELECTS</span>
-023410,000420: 20,2460           77776                           <span class="ps">DEC     </span> -1         B-14                       <span class="co">#  THE APPROPRIATE NO.QJETS OR NO.RJETS</span>
-023411,000421: 20,2461           00002                           <span class="ps">DEC     </span> +2         B-14                       <span class="co">#  AS FOLLOWS:</span>
-023412,000422: 20,2462           77775                           <span class="ps">DEC     </span> -2         B-14                       <span class="co">#  000: NO JETS</span>
-023413,000423: 20,2463           00004                           <span class="ps">DEC     </span> +4         B-14                       <span class="co">#  001: +1 JET   011: +2 JETS  101: +4 JETS</span>
-023414,000424: 
-023415,000425: 20,2464           77773                           <span class="ps">DEC     </span> -4         B-14                       <span class="co">#  010: -1 JET   100: -2 JETS  110: -4 JETS</span>
-023416,000426: 
-023417,000427: 
-023418,000428:                                                                                                  <span class="co">#  RELATIVE ADDRESSES AND NUMBER OF ALTERNATE POLICIES ARE LISTED IN THE FOLLOWING TABLES.  EACH ENTRY HAS THE FORM</span>
-023419,000429:                                                                                                  <span class="co">#           0XYYY  WHERE   X INDICATES THE NUMBER OF ALTERNATE POLICIES AND</span>
-023420,000430:                                                                                                  <span class="co">#                        YYY IS THE RELATIVE ADDRESS IN POLTABLE OF THE "OPTIMAL" POLICY.</span>
-023421,000431: 
-023422,000432:                                                                                                  <span class="co">#  FORCE-COUPLE POLICIES:</span>
-023423,000433: 
-023424,000434: 20,2465           03003                           <span class="ps">OCTAL   </span> 03003                                 <span class="co">#  +2 Q-AXIS JETS</span>
-023425,000435: 20,2466           04004                           <span class="ps">OCTAL   </span> 04004                                 <span class="co">#  +4 Q-AXIS JETS</span>
-023426,000436: 20,2467           03010                           <span class="ps">OCTAL   </span> 03010                                 <span class="co">#  -2 Q-AXIS JETS</span>
-023427,000437: 20,2470           04011                           <span class="ps">OCTAL   </span> 04011                                 <span class="co">#  -4 Q-AXIS JETS</span>
-023428,000438: 20,2471           03015                           <span class="ps">OCTAL   </span> 03015                                 <span class="co">#  +2 R-AXIS JETS</span>
-023429,000439: 20,2472           04016                           <span class="ps">OCTAL   </span> 04016                                 <span class="co">#  +4 R-AXIS JETS</span>
-023430,000440: 20,2473           03022                           <span class="ps">OCTAL   </span> 03022                                 <span class="co">#  -2 R-AXIS JETS</span>
-023431,000441: 20,2474           04023                           <span class="ps">OCTAL   </span> 04023                                 <span class="co">#  -4 R-AXIS JETS</span>
-<a name="4E4F524D4C504F4C"></a>023432,000442: 20,2475           02026        <span class="sm">NORMLPOL</span>           <span class="ps">OCTAL   </span> 02026                                 <span class="co">#  +2 U-AXIS JETS</span>
-023433,000443: 20,2476           02026                           <span class="ps">OCTAL   </span> 02026                                 <span class="co">#  +2 U-AXIS JETS</span>
-023434,000444: 20,2477           02031                           <span class="ps">OCTAL   </span> 02031                                 <span class="co">#  -2 U-AXIS JETS</span>
-023435,000445: 20,2500           02031                           <span class="ps">OCTAL   </span> 02031                                 <span class="co">#  -2 U-AXIS JETS</span>
-023436,000446: 20,2501           02034                           <span class="ps">OCTAL   </span> 02034                                 <span class="co">#  +2 V-AXIS JETS</span>
-023437,000447: 
-023438,000448: 20,2502           02034                           <span class="ps">OCTAL   </span> 02034                                 <span class="co">#  +2 V-AXIS JETS</span>
-023439,000449: 20,2503           02037                           <span class="ps">OCTAL   </span> 02037                                 <span class="co">#  -2 V-AXIS JETS</span>
-023440,000450: 20,2504           02037                           <span class="ps">OCTAL   </span> 02037                                 <span class="co">#  -2 V-AXIS JETS</span>
-023441,000451: 
+023412,000415: 
+023413,000416:                                                                                                  <span class="co">#  TABLE OF Q,R-JET NUMBERS AND DIRECTIONS:</span>
+023414,000417: 
+<a name="544F524B5441424C"></a>023415,000418: 20,2456           00000        <span class="sm">TORKTABL</span>           <span class="ps">DEC     </span> 0          B-14                       <span class="co">#  FROM THE 3 PACKED BITS IN A WORD FROM</span>
+023416,000419: 20,2457           00001                           <span class="ps">DEC     </span> +1         B-14                       <span class="co">#  POLTABLE, THE POLTYPEP PROGRAM SELECTS</span>
+023417,000420: 20,2460           77776                           <span class="ps">DEC     </span> -1         B-14                       <span class="co">#  THE APPROPRIATE NO.QJETS OR NO.RJETS</span>
+023418,000421: 20,2461           00002                           <span class="ps">DEC     </span> +2         B-14                       <span class="co">#  AS FOLLOWS:</span>
+023419,000422: 20,2462           77775                           <span class="ps">DEC     </span> -2         B-14                       <span class="co">#  000: NO JETS</span>
+023420,000423: 20,2463           00004                           <span class="ps">DEC     </span> +4         B-14                       <span class="co">#  001: +1 JET   011: +2 JETS  101: +4 JETS</span>
+023421,000424: 
+023422,000425: 20,2464           77773                           <span class="ps">DEC     </span> -4         B-14                       <span class="co">#  010: -1 JET   100: -2 JETS  110: -4 JETS</span>
+023423,000426: 
+023424,000427: 
+023425,000428:                                                                                                  <span class="co">#  RELATIVE ADDRESSES AND NUMBER OF ALTERNATE POLICIES ARE LISTED IN THE FOLLOWING TABLES.  EACH ENTRY HAS THE FORM</span>
+023426,000429:                                                                                                  <span class="co">#           0XYYY  WHERE   X INDICATES THE NUMBER OF ALTERNATE POLICIES AND</span>
+023427,000430:                                                                                                  <span class="co">#                        YYY IS THE RELATIVE ADDRESS IN POLTABLE OF THE "OPTIMAL" POLICY.</span>
+023428,000431: 
+023429,000432:                                                                                                  <span class="co">#  FORCE-COUPLE POLICIES:</span>
+023430,000433: 
+023431,000434: 20,2465           03003                           <span class="ps">OCTAL   </span> 03003                                 <span class="co">#  +2 Q-AXIS JETS</span>
+023432,000435: 20,2466           04004                           <span class="ps">OCTAL   </span> 04004                                 <span class="co">#  +4 Q-AXIS JETS</span>
+023433,000436: 20,2467           03010                           <span class="ps">OCTAL   </span> 03010                                 <span class="co">#  -2 Q-AXIS JETS</span>
+023434,000437: 20,2470           04011                           <span class="ps">OCTAL   </span> 04011                                 <span class="co">#  -4 Q-AXIS JETS</span>
+023435,000438: 20,2471           03015                           <span class="ps">OCTAL   </span> 03015                                 <span class="co">#  +2 R-AXIS JETS</span>
+023436,000439: 20,2472           04016                           <span class="ps">OCTAL   </span> 04016                                 <span class="co">#  +4 R-AXIS JETS</span>
+023437,000440: 20,2473           03022                           <span class="ps">OCTAL   </span> 03022                                 <span class="co">#  -2 R-AXIS JETS</span>
+023438,000441: 20,2474           04023                           <span class="ps">OCTAL   </span> 04023                                 <span class="co">#  -4 R-AXIS JETS</span>
+<a name="4E4F524D4C504F4C"></a>023439,000442: 20,2475           02026        <span class="sm">NORMLPOL</span>           <span class="ps">OCTAL   </span> 02026                                 <span class="co">#  +2 U-AXIS JETS</span>
+023440,000443: 20,2476           02026                           <span class="ps">OCTAL   </span> 02026                                 <span class="co">#  +2 U-AXIS JETS</span>
+023441,000444: 20,2477           02031                           <span class="ps">OCTAL   </span> 02031                                 <span class="co">#  -2 U-AXIS JETS</span>
+023442,000445: 20,2500           02031                           <span class="ps">OCTAL   </span> 02031                                 <span class="co">#  -2 U-AXIS JETS</span>
+023443,000446: 20,2501           02034                           <span class="ps">OCTAL   </span> 02034                                 <span class="co">#  +2 V-AXIS JETS</span>
+023444,000447: 
+023445,000448: 20,2502           02034                           <span class="ps">OCTAL   </span> 02034                                 <span class="co">#  +2 V-AXIS JETS</span>
+023446,000449: 20,2503           02037                           <span class="ps">OCTAL   </span> 02037                                 <span class="co">#  -2 V-AXIS JETS</span>
+023447,000450: 20,2504           02037                           <span class="ps">OCTAL   </span> 02037                                 <span class="co">#  -2 V-AXIS JETS</span>
+023448,000451: 
 </pre>
 </span>
 </p>
@@ -695,46 +695,46 @@ Page 530
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023443,000453: 
-023444,000454:                                                                                                  <span class="co">#  +X SENSE POLICIES:</span>
-023445,000455: 
-023446,000456: 20,2505           03043                           <span class="ps">OCTAL   </span> 03043                                 <span class="co">#  +2 Q-AXIS JETS</span>
-023447,000457: 20,2506           04044                           <span class="ps">OCTAL   </span> 04044                                 <span class="co">#  +4 Q-AXIS JETS</span>
-023448,000458: 20,2507           03050                           <span class="ps">OCTAL   </span> 03050                                 <span class="co">#  -2 Q-AXIS JETS</span>
-023449,000459: 20,2510           04051                           <span class="ps">OCTAL   </span> 04051                                 <span class="co">#  -4 Q-AXIS JETS</span>
-023450,000460: 20,2511           03055                           <span class="ps">OCTAL   </span> 03055                                 <span class="co">#  +2 R-AXIS JETS</span>
-023451,000461: 20,2512           04056                           <span class="ps">OCTAL   </span> 04056                                 <span class="co">#  +4 R-AXIS JETS</span>
-023452,000462: 20,2513           03062                           <span class="ps">OCTAL   </span> 03062                                 <span class="co">#  -2 R-AXIS JETS</span>
-023453,000463: 20,2514           04063                           <span class="ps">OCTAL   </span> 04063                                 <span class="co">#  -4 R-AXIS JETS</span>
-<a name="2B53454E53544142"></a>023454,000464: 20,2515           01024        <span class="sm">+SENSTAB</span>           <span class="ps">OCTAL   </span> 01024                                 <span class="co">#  +1 U-AXIS JETS</span>
-023455,000465: 20,2516           02025                           <span class="ps">OCTAL   </span> 02025                                 <span class="co">#  +2 U-AXIS JETS</span>
-023456,000466: 20,2517           01027                           <span class="ps">OCTAL   </span> 01027                                 <span class="co">#  -1 U-AXIS JETS</span>
-023457,000467: 20,2520           02030                           <span class="ps">OCTAL   </span> 02030                                 <span class="co">#  -2 U-AXIS JETS</span>
-023458,000468: 
-023459,000469: 20,2521           01032                           <span class="ps">OCTAL   </span> 01032                                 <span class="co">#  +1 V-AXIS JETS</span>
-023460,000470: 20,2522           02033                           <span class="ps">OCTAL   </span> 02033                                 <span class="co">#  +2 V-AXIS JETS</span>
-023461,000471: 20,2523           01036                           <span class="ps">OCTAL   </span> 01036                                 <span class="co">#  -1 V-AXIS JETS</span>
-023462,000472: 20,2524           02037                           <span class="ps">OCTAL   </span> 02037                                 <span class="co">#  -2 V-AXIS JETS</span>
-023463,000473: 
-023464,000474:                                                                                                  <span class="co">#  -X SENSE POLICIES:</span>
-023465,000475: 
-023466,000476: 20,2525           03067                           <span class="ps">OCTAL   </span> 03067                                 <span class="co">#  +2 Q-AXIS JETS</span>
-023467,000477: 20,2526           04070                           <span class="ps">OCTAL   </span> 04070                                 <span class="co">#  +4 Q-AXIS JETS</span>
-023468,000478: 20,2527           03074                           <span class="ps">OCTAL   </span> 03074                                 <span class="co">#  -2 Q-AXIS JETS</span>
-023469,000479: 20,2530           04075                           <span class="ps">OCTAL   </span> 04075                                 <span class="co">#  -4 Q-AXIS JETS</span>
-023470,000480: 20,2531           03101                           <span class="ps">OCTAL   </span> 03101                                 <span class="co">#  +2 R-AXIS JETS</span>
-023471,000481: 20,2532           04102                           <span class="ps">OCTAL   </span> 04102                                 <span class="co">#  +4 R-AXIS JETS</span>
-023472,000482: 20,2533           03106                           <span class="ps">OCTAL   </span> 03106                                 <span class="co">#  -2 R-AXIS JETS</span>
-023473,000483: 20,2534           04107                           <span class="ps">OCTAL   </span> 04107                                 <span class="co">#  -4 R-AXIS JETS</span>
-<a name="2D53454E53544142"></a>023474,000484: 20,2535           01111        <span class="sm">-SENSTAB</span>           <span class="ps">OCTAL   </span> 01111                                 <span class="co">#  +1 U-AXIS JETS</span>
-023475,000485: 20,2536           02112                           <span class="ps">OCTAL   </span> 02112                                 <span class="co">#  +2 U-AXIS JETS</span>
-023476,000486: 20,2537           01114                           <span class="ps">OCTAL   </span> 01114                                 <span class="co">#  -1 U-AXIS JETS</span>
-023477,000487: 20,2540           02115                           <span class="ps">OCTAL   </span> 02115                                 <span class="co">#  -2 U-AXIS JETS</span>
-023478,000488: 20,2541           01117                           <span class="ps">OCTAL   </span> 01117                                 <span class="co">#  +1 V-AXIS JETS</span>
-023479,000489: 20,2542           02120                           <span class="ps">OCTAL   </span> 02120                                 <span class="co">#  +2 V-AXIS JETS</span>
-023480,000490: 20,2543           01122                           <span class="ps">OCTAL   </span> 01122                                 <span class="co">#  -1 V-AXIS JETS</span>
-023481,000491: 20,2544           02123                           <span class="ps">OCTAL   </span> 02123                                 <span class="co">#  -2 V AXIS JETS</span>
-023482,000492: 
+023450,000453: 
+023451,000454:                                                                                                  <span class="co">#  +X SENSE POLICIES:</span>
+023452,000455: 
+023453,000456: 20,2505           03043                           <span class="ps">OCTAL   </span> 03043                                 <span class="co">#  +2 Q-AXIS JETS</span>
+023454,000457: 20,2506           04044                           <span class="ps">OCTAL   </span> 04044                                 <span class="co">#  +4 Q-AXIS JETS</span>
+023455,000458: 20,2507           03050                           <span class="ps">OCTAL   </span> 03050                                 <span class="co">#  -2 Q-AXIS JETS</span>
+023456,000459: 20,2510           04051                           <span class="ps">OCTAL   </span> 04051                                 <span class="co">#  -4 Q-AXIS JETS</span>
+023457,000460: 20,2511           03055                           <span class="ps">OCTAL   </span> 03055                                 <span class="co">#  +2 R-AXIS JETS</span>
+023458,000461: 20,2512           04056                           <span class="ps">OCTAL   </span> 04056                                 <span class="co">#  +4 R-AXIS JETS</span>
+023459,000462: 20,2513           03062                           <span class="ps">OCTAL   </span> 03062                                 <span class="co">#  -2 R-AXIS JETS</span>
+023460,000463: 20,2514           04063                           <span class="ps">OCTAL   </span> 04063                                 <span class="co">#  -4 R-AXIS JETS</span>
+<a name="2B53454E53544142"></a>023461,000464: 20,2515           01024        <span class="sm">+SENSTAB</span>           <span class="ps">OCTAL   </span> 01024                                 <span class="co">#  +1 U-AXIS JETS</span>
+023462,000465: 20,2516           02025                           <span class="ps">OCTAL   </span> 02025                                 <span class="co">#  +2 U-AXIS JETS</span>
+023463,000466: 20,2517           01027                           <span class="ps">OCTAL   </span> 01027                                 <span class="co">#  -1 U-AXIS JETS</span>
+023464,000467: 20,2520           02030                           <span class="ps">OCTAL   </span> 02030                                 <span class="co">#  -2 U-AXIS JETS</span>
+023465,000468: 
+023466,000469: 20,2521           01032                           <span class="ps">OCTAL   </span> 01032                                 <span class="co">#  +1 V-AXIS JETS</span>
+023467,000470: 20,2522           02033                           <span class="ps">OCTAL   </span> 02033                                 <span class="co">#  +2 V-AXIS JETS</span>
+023468,000471: 20,2523           01036                           <span class="ps">OCTAL   </span> 01036                                 <span class="co">#  -1 V-AXIS JETS</span>
+023469,000472: 20,2524           02037                           <span class="ps">OCTAL   </span> 02037                                 <span class="co">#  -2 V-AXIS JETS</span>
+023470,000473: 
+023471,000474:                                                                                                  <span class="co">#  -X SENSE POLICIES:</span>
+023472,000475: 
+023473,000476: 20,2525           03067                           <span class="ps">OCTAL   </span> 03067                                 <span class="co">#  +2 Q-AXIS JETS</span>
+023474,000477: 20,2526           04070                           <span class="ps">OCTAL   </span> 04070                                 <span class="co">#  +4 Q-AXIS JETS</span>
+023475,000478: 20,2527           03074                           <span class="ps">OCTAL   </span> 03074                                 <span class="co">#  -2 Q-AXIS JETS</span>
+023476,000479: 20,2530           04075                           <span class="ps">OCTAL   </span> 04075                                 <span class="co">#  -4 Q-AXIS JETS</span>
+023477,000480: 20,2531           03101                           <span class="ps">OCTAL   </span> 03101                                 <span class="co">#  +2 R-AXIS JETS</span>
+023478,000481: 20,2532           04102                           <span class="ps">OCTAL   </span> 04102                                 <span class="co">#  +4 R-AXIS JETS</span>
+023479,000482: 20,2533           03106                           <span class="ps">OCTAL   </span> 03106                                 <span class="co">#  -2 R-AXIS JETS</span>
+023480,000483: 20,2534           04107                           <span class="ps">OCTAL   </span> 04107                                 <span class="co">#  -4 R-AXIS JETS</span>
+<a name="2D53454E53544142"></a>023481,000484: 20,2535           01111        <span class="sm">-SENSTAB</span>           <span class="ps">OCTAL   </span> 01111                                 <span class="co">#  +1 U-AXIS JETS</span>
+023482,000485: 20,2536           02112                           <span class="ps">OCTAL   </span> 02112                                 <span class="co">#  +2 U-AXIS JETS</span>
+023483,000486: 20,2537           01114                           <span class="ps">OCTAL   </span> 01114                                 <span class="co">#  -1 U-AXIS JETS</span>
+023484,000487: 20,2540           02115                           <span class="ps">OCTAL   </span> 02115                                 <span class="co">#  -2 U-AXIS JETS</span>
+023485,000488: 20,2541           01117                           <span class="ps">OCTAL   </span> 01117                                 <span class="co">#  +1 V-AXIS JETS</span>
+023486,000489: 20,2542           02120                           <span class="ps">OCTAL   </span> 02120                                 <span class="co">#  +2 V-AXIS JETS</span>
+023487,000490: 20,2543           01122                           <span class="ps">OCTAL   </span> 01122                                 <span class="co">#  -1 V-AXIS JETS</span>
+023488,000491: 20,2544           02123                           <span class="ps">OCTAL   </span> 02123                                 <span class="co">#  -2 V AXIS JETS</span>
+023489,000492: 
 </pre>
 </span>
 </p>
@@ -750,17 +750,17 @@ Page 531
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023484,000494: 
-023485,000495:                                                                                                  <span class="co">#  X-AXIS TRANSLATION POLICIES:</span>
-023486,000496: 
-<a name="5452414E504F4C59"></a>023487,000497: 20,2545           00042        <span class="sm">TRANPOLY</span>           <span class="ps">OCTAL   </span> +00042                                <span class="co">#   2 10       * +X TRANSLATION JETS     0</span>
-023488,000498: 20,2546           00210                           <span class="ps">OCTAL   </span> +00210                                <span class="co">#   6 14       *                         1</span>
-023489,000499: 20,2547           00252                           <span class="ps">OCTAL   </span> +00252                                <span class="co">#   2  6 10 14 *                         2</span>
-023490,000500: 
-023491,000501: 20,2550           00104                           <span class="ps">OCTAL   </span> +00104                                <span class="co">#   3 13       * -X TRANSLATION JETS     3</span>
-023492,000502: 20,2551           00021                           <span class="ps">OCTAL   </span> +00021                                <span class="co">#   1  9       *                         4</span>
-023493,000503: 20,2552           00125                           <span class="ps">OCTAL   </span> +00125                                <span class="co">#   1  5  9 13 *                         5</span>
-023494,000504: 
+023491,000494: 
+023492,000495:                                                                                                  <span class="co">#  X-AXIS TRANSLATION POLICIES:</span>
+023493,000496: 
+<a name="5452414E504F4C59"></a>023494,000497: 20,2545           00042        <span class="sm">TRANPOLY</span>           <span class="ps">OCTAL   </span> +00042                                <span class="co">#   2 10       * +X TRANSLATION JETS     0</span>
+023495,000498: 20,2546           00210                           <span class="ps">OCTAL   </span> +00210                                <span class="co">#   6 14       *                         1</span>
+023496,000499: 20,2547           00252                           <span class="ps">OCTAL   </span> +00252                                <span class="co">#   2  6 10 14 *                         2</span>
+023497,000500: 
+023498,000501: 20,2550           00104                           <span class="ps">OCTAL   </span> +00104                                <span class="co">#   3 13       * -X TRANSLATION JETS     3</span>
+023499,000502: 20,2551           00021                           <span class="ps">OCTAL   </span> +00021                                <span class="co">#   1  9       *                         4</span>
+023500,000503: 20,2552           00125                           <span class="ps">OCTAL   </span> +00125                                <span class="co">#   1  5  9 13 *                         5</span>
+023501,000504: 
 </pre>
 </span>
 </p>
@@ -776,54 +776,54 @@ Page 532
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023496,000506: 
-023497,000507:                                                                                                  <span class="co">#  ROTATION JET POLICIES;</span>
-023498,000508: 
-023499,000509:                                                                                                  <span class="co">#  FORCE COUPLE POLICIES:</span>
-023500,000510: 
-<a name="504F4C5441424C45"></a>023501,000511: 20,2553           14025        <span class="sm">POLTABLE</span>           <span class="ps">OCTAL   </span> +14025                                <span class="co">#   5  9       * +Q-AXIS FORCE COUPLES    0</span>
-023502,000512: 20,2554           14203                           <span class="ps">OCTAL   </span> +14203                                <span class="co">#   2 14       *                          1</span>
-023503,000513: 20,2555           14221                           <span class="ps">OCTAL   </span> +14221                                <span class="co">#   9 14       *                          2</span>
-023504,000514: 20,2556           14007                           <span class="ps">OCTAL   </span> +14007                                <span class="co">#   2  5       *                          3</span>
-023505,000515: 20,2557           24227                           <span class="ps">OCTAL   </span> +24227                                <span class="co">#   2  5  9 14 *                          4</span>
-023506,000516: 
-023507,000517: 20,2560           20051                           <span class="ps">OCTAL   </span> +20051                                <span class="co">#   6 10       * -Q-AXIS FORCE-COUPLES    5</span>
-023508,000518: 20,2561           20102                           <span class="ps">OCTAL   </span> +20102                                <span class="co">#   1 13       *                          6</span>
-023509,000519: 20,2562           20141                           <span class="ps">OCTAL   </span> +20141                                <span class="co">#  10 13       *                          7</span>
-023510,000520: 20,2563           20012                           <span class="ps">OCTAL   </span> +20012                                <span class="co">#   1  6       *                         10</span>
-023511,000521: 20,2564           30152                           <span class="ps">OCTAL   </span> +30152                                <span class="co">#   1  6 10 13 *                         11</span>
-023512,000522: 
-023513,000523: 20,2565           01641                           <span class="ps">OCTAL   </span> +01641                                <span class="co">#  10 14       * +R-AXIS FORCE-COUPLES   12</span>
-023514,000524: 20,2566           01406                           <span class="ps">OCTAL   </span> +01406                                <span class="co">#   1  5       *                         13</span>
-023515,000525: 20,2567           01445                           <span class="ps">OCTAL   </span> +01445                                <span class="co">#   5 10       *                         14</span>
-023516,000526: 20,2570           01602                           <span class="ps">OCTAL   </span> +01602                                <span class="co">#   1 14       *                         15</span>
-023517,000527: 20,2571           02646                           <span class="ps">OCTAL   </span> +02646                                <span class="co">#   1  5 10 14 *                         16</span>
-023518,000528: 
-023519,000529: 20,2572           02121                           <span class="ps">OCTAL   </span> +02121                                <span class="co">#   9 13       * -R-AXIS FORCE-COUPLES   17</span>
-023520,000530: 20,2573           02013                           <span class="ps">OCTAL   </span> +02013                                <span class="co">#   2  6       *                         20</span>
-023521,000531: 20,2574           02103                           <span class="ps">OCTAL   </span> +02103                                <span class="co">#   2 13       *                         21</span>
-023522,000532: 20,2575           02031                           <span class="ps">OCTAL   </span> +02031                                <span class="co">#   6  9       *                         22</span>
-023523,000533: 
-023524,000534: 20,2576           03133                           <span class="ps">OCTAL   </span> +03133                                <span class="co">#   2  6  9 13 *                         23</span>
-023525,000535: 
-023526,000536:                                                                                                  <span class="co">#  FORCE COUPLE AND +X SENSE POLICIES:</span>
-023527,000537: 
-023528,000538: 20,2577           73372                           <span class="ps">OCTAL   </span> -04405                                <span class="co">#   5          * +U-AXIS FORCE-COUPLES   24</span>
-023529,000539: 20,2600           73176                           <span class="ps">OCTAL   </span> -04601                                <span class="co">#  14          *     AND +X SENSE        25</span>
-023530,000540: 20,2601           62172                           <span class="ps">OCTAL   </span> -15605                                <span class="co">#   5 14       *                         26</span>
-023531,000541: 
-023532,000542: 20,2602           66676                           <span class="ps">OCTAL   </span> -11101                                <span class="co">#  13          * -U-AXIS FORCE-COUPLES   27</span>
-023533,000543: 20,2603           66766                           <span class="ps">OCTAL   </span> -11011                                <span class="co">#   6          *     AND +X SENSE        30</span>
-023534,000544: 20,2604           55666                           <span class="ps">OCTAL   </span> -22111                                <span class="co">#   6 13       *                         31</span>
-023535,000545: 
-023536,000546: 20,2605           67375                           <span class="ps">OCTAL   </span> -10402                                <span class="co">#   1          * +V-AXIS FORCE-COUPLES   32</span>
-023537,000547: 20,2606           67336                           <span class="ps">OCTAL   </span> -10441                                <span class="co">#  10          *     AND +X SENSE        33</span>
-023538,000548: 20,2607           56335                           <span class="ps">OCTAL   </span> -21442                                <span class="co">#   1 10       *                         34</span>
-023539,000549: 
-023540,000550: 20,2610           72756                           <span class="ps">OCTAL   </span> -05021                                <span class="co">#   9          * -V-AXIS FORCE-COUPLES   35</span>
-023541,000551: 20,2611           72774                           <span class="ps">OCTAL   </span> -05003                                <span class="co">#   2          *     AND +X SENSE        36</span>
-023542,000552: 20,2612           61754                           <span class="ps">OCTAL   </span> -16023                                <span class="co">#   2  9       *                         37</span>
-023543,000553: 
+023503,000506: 
+023504,000507:                                                                                                  <span class="co">#  ROTATION JET POLICIES;</span>
+023505,000508: 
+023506,000509:                                                                                                  <span class="co">#  FORCE COUPLE POLICIES:</span>
+023507,000510: 
+<a name="504F4C5441424C45"></a>023508,000511: 20,2553           14025        <span class="sm">POLTABLE</span>           <span class="ps">OCTAL   </span> +14025                                <span class="co">#   5  9       * +Q-AXIS FORCE COUPLES    0</span>
+023509,000512: 20,2554           14203                           <span class="ps">OCTAL   </span> +14203                                <span class="co">#   2 14       *                          1</span>
+023510,000513: 20,2555           14221                           <span class="ps">OCTAL   </span> +14221                                <span class="co">#   9 14       *                          2</span>
+023511,000514: 20,2556           14007                           <span class="ps">OCTAL   </span> +14007                                <span class="co">#   2  5       *                          3</span>
+023512,000515: 20,2557           24227                           <span class="ps">OCTAL   </span> +24227                                <span class="co">#   2  5  9 14 *                          4</span>
+023513,000516: 
+023514,000517: 20,2560           20051                           <span class="ps">OCTAL   </span> +20051                                <span class="co">#   6 10       * -Q-AXIS FORCE-COUPLES    5</span>
+023515,000518: 20,2561           20102                           <span class="ps">OCTAL   </span> +20102                                <span class="co">#   1 13       *                          6</span>
+023516,000519: 20,2562           20141                           <span class="ps">OCTAL   </span> +20141                                <span class="co">#  10 13       *                          7</span>
+023517,000520: 20,2563           20012                           <span class="ps">OCTAL   </span> +20012                                <span class="co">#   1  6       *                         10</span>
+023518,000521: 20,2564           30152                           <span class="ps">OCTAL   </span> +30152                                <span class="co">#   1  6 10 13 *                         11</span>
+023519,000522: 
+023520,000523: 20,2565           01641                           <span class="ps">OCTAL   </span> +01641                                <span class="co">#  10 14       * +R-AXIS FORCE-COUPLES   12</span>
+023521,000524: 20,2566           01406                           <span class="ps">OCTAL   </span> +01406                                <span class="co">#   1  5       *                         13</span>
+023522,000525: 20,2567           01445                           <span class="ps">OCTAL   </span> +01445                                <span class="co">#   5 10       *                         14</span>
+023523,000526: 20,2570           01602                           <span class="ps">OCTAL   </span> +01602                                <span class="co">#   1 14       *                         15</span>
+023524,000527: 20,2571           02646                           <span class="ps">OCTAL   </span> +02646                                <span class="co">#   1  5 10 14 *                         16</span>
+023525,000528: 
+023526,000529: 20,2572           02121                           <span class="ps">OCTAL   </span> +02121                                <span class="co">#   9 13       * -R-AXIS FORCE-COUPLES   17</span>
+023527,000530: 20,2573           02013                           <span class="ps">OCTAL   </span> +02013                                <span class="co">#   2  6       *                         20</span>
+023528,000531: 20,2574           02103                           <span class="ps">OCTAL   </span> +02103                                <span class="co">#   2 13       *                         21</span>
+023529,000532: 20,2575           02031                           <span class="ps">OCTAL   </span> +02031                                <span class="co">#   6  9       *                         22</span>
+023530,000533: 
+023531,000534: 20,2576           03133                           <span class="ps">OCTAL   </span> +03133                                <span class="co">#   2  6  9 13 *                         23</span>
+023532,000535: 
+023533,000536:                                                                                                  <span class="co">#  FORCE COUPLE AND +X SENSE POLICIES:</span>
+023534,000537: 
+023535,000538: 20,2577           73372                           <span class="ps">OCTAL   </span> -04405                                <span class="co">#   5          * +U-AXIS FORCE-COUPLES   24</span>
+023536,000539: 20,2600           73176                           <span class="ps">OCTAL   </span> -04601                                <span class="co">#  14          *     AND +X SENSE        25</span>
+023537,000540: 20,2601           62172                           <span class="ps">OCTAL   </span> -15605                                <span class="co">#   5 14       *                         26</span>
+023538,000541: 
+023539,000542: 20,2602           66676                           <span class="ps">OCTAL   </span> -11101                                <span class="co">#  13          * -U-AXIS FORCE-COUPLES   27</span>
+023540,000543: 20,2603           66766                           <span class="ps">OCTAL   </span> -11011                                <span class="co">#   6          *     AND +X SENSE        30</span>
+023541,000544: 20,2604           55666                           <span class="ps">OCTAL   </span> -22111                                <span class="co">#   6 13       *                         31</span>
+023542,000545: 
+023543,000546: 20,2605           67375                           <span class="ps">OCTAL   </span> -10402                                <span class="co">#   1          * +V-AXIS FORCE-COUPLES   32</span>
+023544,000547: 20,2606           67336                           <span class="ps">OCTAL   </span> -10441                                <span class="co">#  10          *     AND +X SENSE        33</span>
+023545,000548: 20,2607           56335                           <span class="ps">OCTAL   </span> -21442                                <span class="co">#   1 10       *                         34</span>
+023546,000549: 
+023547,000550: 20,2610           72756                           <span class="ps">OCTAL   </span> -05021                                <span class="co">#   9          * -V-AXIS FORCE-COUPLES   35</span>
+023548,000551: 20,2611           72774                           <span class="ps">OCTAL   </span> -05003                                <span class="co">#   2          *     AND +X SENSE        36</span>
+023549,000552: 20,2612           61754                           <span class="ps">OCTAL   </span> -16023                                <span class="co">#   2  9       *                         37</span>
+023550,000553: 
 </pre>
 </span>
 </p>
@@ -839,33 +839,33 @@ Page 533
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023545,000555: 
-023546,000556:                                                                                                  <span class="co">#  +X SENSE POLICIES:</span>
-023547,000557: 
-023548,000558: 20,2613           14025                           <span class="ps">OCTAL   </span> +14025                                <span class="co">#   5  9       * +Q-AXIS +X SENSE JETS   40</span>
-023549,000559: 20,2614           14221                           <span class="ps">OCTAL   </span> +14221                                <span class="co">#   9 14       *                         41</span>
-023550,000560: 20,2615           14007                           <span class="ps">OCTAL   </span> +14007                                <span class="co">#   2  5       *                         42</span>
-023551,000561: 20,2616           14203                           <span class="ps">OCTAL   </span> +14203                                <span class="co">#   2 14       *                         43</span>
-023552,000562: 20,2617           24227                           <span class="ps">OCTAL   </span> +24227                                <span class="co">#   2  5  9 14 *                         44</span>
-023553,000563: 
-023554,000564: 20,2620           20102                           <span class="ps">OCTAL   </span> +20102                                <span class="co">#   1 13       * -Q-AXIS +X SENSE JETS   45</span>
-023555,000565: 20,2621           20141                           <span class="ps">OCTAL   </span> +20141                                <span class="co">#  10 13       *                         46</span>
-023556,000566: 20,2622           20012                           <span class="ps">OCTAL   </span> +20012                                <span class="co">#   1  6       *                         47</span>
-023557,000567: 20,2623           20051                           <span class="ps">OCTAL   </span> +20051                                <span class="co">#   6 10       *                         50</span>
-023558,000568: 20,2624           30152                           <span class="ps">OCTAL   </span> +30152                                <span class="co">#   1  6 10 13 *                         51</span>
-023559,000569: 
-023560,000570: 20,2625           01406                           <span class="ps">OCTAL   </span> +01406                                <span class="co">#   1  5       * +R-AXIS +X SENSE JETS   52</span>
-023561,000571: 20,2626           01445                           <span class="ps">OCTAL   </span> +01445                                <span class="co">#   5 10       *                         53</span>
-023562,000572: 20,2627           01602                           <span class="ps">OCTAL   </span> +01602                                <span class="co">#   1 14       *                         54</span>
-023563,000573: 20,2630           01641                           <span class="ps">OCTAL   </span> +01641                                <span class="co">#  10 14       *                         55</span>
-023564,000574: 20,2631           02646                           <span class="ps">OCTAL   </span> +02646                                <span class="co">#   1  5 10 14 *                         56</span>
-023565,000575: 
-023566,000576: 20,2632           02121                           <span class="ps">OCTAL   </span> +02121                                <span class="co">#   9 13       * -R-AXIS +X SENSE JETS   57</span>
-023567,000577: 20,2633           02103                           <span class="ps">OCTAL   </span> +02103                                <span class="co">#   2 13       *                         60</span>
-023568,000578: 20,2634           02031                           <span class="ps">OCTAL   </span> +02031                                <span class="co">#   6  9       *                         61</span>
-023569,000579: 20,2635           02013                           <span class="ps">OCTAL   </span> +02013                                <span class="co">#   2  6       *                         62</span>
-023570,000580: 20,2636           03133                           <span class="ps">OCTAL   </span> +03133                                <span class="co">#   2  6  9 13 *                         63</span>
-023571,000581: 
+023552,000555: 
+023553,000556:                                                                                                  <span class="co">#  +X SENSE POLICIES:</span>
+023554,000557: 
+023555,000558: 20,2613           14025                           <span class="ps">OCTAL   </span> +14025                                <span class="co">#   5  9       * +Q-AXIS +X SENSE JETS   40</span>
+023556,000559: 20,2614           14221                           <span class="ps">OCTAL   </span> +14221                                <span class="co">#   9 14       *                         41</span>
+023557,000560: 20,2615           14007                           <span class="ps">OCTAL   </span> +14007                                <span class="co">#   2  5       *                         42</span>
+023558,000561: 20,2616           14203                           <span class="ps">OCTAL   </span> +14203                                <span class="co">#   2 14       *                         43</span>
+023559,000562: 20,2617           24227                           <span class="ps">OCTAL   </span> +24227                                <span class="co">#   2  5  9 14 *                         44</span>
+023560,000563: 
+023561,000564: 20,2620           20102                           <span class="ps">OCTAL   </span> +20102                                <span class="co">#   1 13       * -Q-AXIS +X SENSE JETS   45</span>
+023562,000565: 20,2621           20141                           <span class="ps">OCTAL   </span> +20141                                <span class="co">#  10 13       *                         46</span>
+023563,000566: 20,2622           20012                           <span class="ps">OCTAL   </span> +20012                                <span class="co">#   1  6       *                         47</span>
+023564,000567: 20,2623           20051                           <span class="ps">OCTAL   </span> +20051                                <span class="co">#   6 10       *                         50</span>
+023565,000568: 20,2624           30152                           <span class="ps">OCTAL   </span> +30152                                <span class="co">#   1  6 10 13 *                         51</span>
+023566,000569: 
+023567,000570: 20,2625           01406                           <span class="ps">OCTAL   </span> +01406                                <span class="co">#   1  5       * +R-AXIS +X SENSE JETS   52</span>
+023568,000571: 20,2626           01445                           <span class="ps">OCTAL   </span> +01445                                <span class="co">#   5 10       *                         53</span>
+023569,000572: 20,2627           01602                           <span class="ps">OCTAL   </span> +01602                                <span class="co">#   1 14       *                         54</span>
+023570,000573: 20,2630           01641                           <span class="ps">OCTAL   </span> +01641                                <span class="co">#  10 14       *                         55</span>
+023571,000574: 20,2631           02646                           <span class="ps">OCTAL   </span> +02646                                <span class="co">#   1  5 10 14 *                         56</span>
+023572,000575: 
+023573,000576: 20,2632           02121                           <span class="ps">OCTAL   </span> +02121                                <span class="co">#   9 13       * -R-AXIS +X SENSE JETS   57</span>
+023574,000577: 20,2633           02103                           <span class="ps">OCTAL   </span> +02103                                <span class="co">#   2 13       *                         60</span>
+023575,000578: 20,2634           02031                           <span class="ps">OCTAL   </span> +02031                                <span class="co">#   6  9       *                         61</span>
+023576,000579: 20,2635           02013                           <span class="ps">OCTAL   </span> +02013                                <span class="co">#   2  6       *                         62</span>
+023577,000580: 20,2636           03133                           <span class="ps">OCTAL   </span> +03133                                <span class="co">#   2  6  9 13 *                         63</span>
+023578,000581: 
 </pre>
 </span>
 </p>
@@ -881,48 +881,48 @@ Page 534
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023573,000583: 
-023574,000584:                                                                                                  <span class="co">#  -X SENSE POLICIES:</span>
-023575,000585: 
-023576,000586: 20,2637           14203                           <span class="ps">OCTAL   </span> +14203                                <span class="co">#   2 14       * +Q-AXIS -X SENSE JETS   64</span>
-023577,000587: 20,2640           14221                           <span class="ps">OCTAL   </span> +14221                                <span class="co">#   9 14       *                         65</span>
-023578,000588: 20,2641           14007                           <span class="ps">OCTAL   </span> +14007                                <span class="co">#   2  5       *                         66</span>
-023579,000589: 20,2642           14025                           <span class="ps">OCTAL   </span> +14025                                <span class="co">#   5  9       *                         67</span>
-023580,000590: 20,2643           24227                           <span class="ps">OCTAL   </span> +24227                                <span class="co">#   2  5  9 14 *                         70</span>
-023581,000591: 
-023582,000592: 20,2644           20051                           <span class="ps">OCTAL   </span> +20051                                <span class="co">#   6 10       * -Q-AXIS -X SENSE JETS   71</span>
-023583,000593: 20,2645           20141                           <span class="ps">OCTAL   </span> +20141                                <span class="co">#  10 13       *                         72</span>
-023584,000594: 20,2646           20012                           <span class="ps">OCTAL   </span> +20012                                <span class="co">#   1  6       *                         73</span>
-023585,000595: 20,2647           20102                           <span class="ps">OCTAL   </span> +20102                                <span class="co">#   1 13       *                         74</span>
-023586,000596: 20,2650           30152                           <span class="ps">OCTAL   </span> +30152                                <span class="co">#   1  6 10 13 *                         75</span>
-023587,000597: 
-023588,000598: 20,2651           01641                           <span class="ps">OCTAL   </span> +01641                                <span class="co">#  10 14       * +R-AXIS -X SENSE JETS   76</span>
-023589,000599: 20,2652           01445                           <span class="ps">OCTAL   </span> +01445                                <span class="co">#   5 10       *                         77</span>
-023590,000600: 20,2653           01602                           <span class="ps">OCTAL   </span> +01602                                <span class="co">#   1 14       *                        100</span>
-023591,000601: 20,2654           01406                           <span class="ps">OCTAL   </span> +01406                                <span class="co">#   1  5       *                        101</span>
-023592,000602: 20,2655           02646                           <span class="ps">OCTAL   </span> +02646                                <span class="co">#   1  5 10 14 *                        102</span>
-023593,000603: 
-023594,000604: 20,2656           02013                           <span class="ps">OCTAL   </span> +02013                                <span class="co">#   2  6       * -R-AXIS -X SENSE JETS  103</span>
-023595,000605: 20,2657           02103                           <span class="ps">OCTAL   </span> +02103                                <span class="co">#   2 13       *                        104</span>
-023596,000606: 20,2660           02031                           <span class="ps">OCTAL   </span> +02031                                <span class="co">#   6  9       *                        105</span>
-023597,000607: 20,2661           02121                           <span class="ps">OCTAL   </span> +02121                                <span class="co">#   9  13      *                        106</span>
-023598,000608: 20,2662           03133                           <span class="ps">OCTAL   </span> +03133                                <span class="co">#   2  6  9 13 *                        107</span>
-023599,000609: 
-023600,000610: 20,2663           73176                           <span class="ps">OCTAL   </span> -04601                                <span class="co">#  14          * +U-AXIS -X SENSE JETS  110</span>
-023601,000611: 20,2664           73372                           <span class="ps">OCTAL   </span> -04405                                <span class="co">#   5          *                        111</span>
-023602,000612: 20,2665           62172                           <span class="ps">OCTAL   </span> -15605                                <span class="co">#   5 14       *                        112</span>
-023603,000613: 
-023604,000614: 20,2666           66766                           <span class="ps">OCTAL   </span> -11011                                <span class="co">#   6          * -U-AXIS -X SENSE JETS  113</span>
-023605,000615: 20,2667           66676                           <span class="ps">OCTAL   </span> -11101                                <span class="co">#  13          *                        114</span>
-023606,000616: 20,2670           55666                           <span class="ps">OCTAL   </span> -22111                                <span class="co">#   6 13       *                        115</span>
-023607,000617: 
-023608,000618: 20,2671           67336                           <span class="ps">OCTAL   </span> -10441                                <span class="co">#  10          * +V-AXIS -X SENSE JETS  116</span>
-023609,000619: 20,2672           67375                           <span class="ps">OCTAL   </span> -10402                                <span class="co">#   1          *                        117</span>
-023610,000620: 20,2673           56335                           <span class="ps">OCTAL   </span> -21442                                <span class="co">#   1 10       *                        120</span>
-023611,000621: 
-023612,000622: 20,2674           72774                           <span class="ps">OCTAL   </span> -05003                                <span class="co">#   2          * -V-AXIS -X SENSE JETS  121</span>
-023613,000623: 20,2675           72756                           <span class="ps">OCTAL   </span> -05021                                <span class="co">#   9          *                        122</span>
-023614,000624: 20,2676           61754                           <span class="ps">OCTAL   </span> -16023                                <span class="co">#   2  9       *                        123</span>
+023580,000583: 
+023581,000584:                                                                                                  <span class="co">#  -X SENSE POLICIES:</span>
+023582,000585: 
+023583,000586: 20,2637           14203                           <span class="ps">OCTAL   </span> +14203                                <span class="co">#   2 14       * +Q-AXIS -X SENSE JETS   64</span>
+023584,000587: 20,2640           14221                           <span class="ps">OCTAL   </span> +14221                                <span class="co">#   9 14       *                         65</span>
+023585,000588: 20,2641           14007                           <span class="ps">OCTAL   </span> +14007                                <span class="co">#   2  5       *                         66</span>
+023586,000589: 20,2642           14025                           <span class="ps">OCTAL   </span> +14025                                <span class="co">#   5  9       *                         67</span>
+023587,000590: 20,2643           24227                           <span class="ps">OCTAL   </span> +24227                                <span class="co">#   2  5  9 14 *                         70</span>
+023588,000591: 
+023589,000592: 20,2644           20051                           <span class="ps">OCTAL   </span> +20051                                <span class="co">#   6 10       * -Q-AXIS -X SENSE JETS   71</span>
+023590,000593: 20,2645           20141                           <span class="ps">OCTAL   </span> +20141                                <span class="co">#  10 13       *                         72</span>
+023591,000594: 20,2646           20012                           <span class="ps">OCTAL   </span> +20012                                <span class="co">#   1  6       *                         73</span>
+023592,000595: 20,2647           20102                           <span class="ps">OCTAL   </span> +20102                                <span class="co">#   1 13       *                         74</span>
+023593,000596: 20,2650           30152                           <span class="ps">OCTAL   </span> +30152                                <span class="co">#   1  6 10 13 *                         75</span>
+023594,000597: 
+023595,000598: 20,2651           01641                           <span class="ps">OCTAL   </span> +01641                                <span class="co">#  10 14       * +R-AXIS -X SENSE JETS   76</span>
+023596,000599: 20,2652           01445                           <span class="ps">OCTAL   </span> +01445                                <span class="co">#   5 10       *                         77</span>
+023597,000600: 20,2653           01602                           <span class="ps">OCTAL   </span> +01602                                <span class="co">#   1 14       *                        100</span>
+023598,000601: 20,2654           01406                           <span class="ps">OCTAL   </span> +01406                                <span class="co">#   1  5       *                        101</span>
+023599,000602: 20,2655           02646                           <span class="ps">OCTAL   </span> +02646                                <span class="co">#   1  5 10 14 *                        102</span>
+023600,000603: 
+023601,000604: 20,2656           02013                           <span class="ps">OCTAL   </span> +02013                                <span class="co">#   2  6       * -R-AXIS -X SENSE JETS  103</span>
+023602,000605: 20,2657           02103                           <span class="ps">OCTAL   </span> +02103                                <span class="co">#   2 13       *                        104</span>
+023603,000606: 20,2660           02031                           <span class="ps">OCTAL   </span> +02031                                <span class="co">#   6  9       *                        105</span>
+023604,000607: 20,2661           02121                           <span class="ps">OCTAL   </span> +02121                                <span class="co">#   9  13      *                        106</span>
+023605,000608: 20,2662           03133                           <span class="ps">OCTAL   </span> +03133                                <span class="co">#   2  6  9 13 *                        107</span>
+023606,000609: 
+023607,000610: 20,2663           73176                           <span class="ps">OCTAL   </span> -04601                                <span class="co">#  14          * +U-AXIS -X SENSE JETS  110</span>
+023608,000611: 20,2664           73372                           <span class="ps">OCTAL   </span> -04405                                <span class="co">#   5          *                        111</span>
+023609,000612: 20,2665           62172                           <span class="ps">OCTAL   </span> -15605                                <span class="co">#   5 14       *                        112</span>
+023610,000613: 
+023611,000614: 20,2666           66766                           <span class="ps">OCTAL   </span> -11011                                <span class="co">#   6          * -U-AXIS -X SENSE JETS  113</span>
+023612,000615: 20,2667           66676                           <span class="ps">OCTAL   </span> -11101                                <span class="co">#  13          *                        114</span>
+023613,000616: 20,2670           55666                           <span class="ps">OCTAL   </span> -22111                                <span class="co">#   6 13       *                        115</span>
+023614,000617: 
+023615,000618: 20,2671           67336                           <span class="ps">OCTAL   </span> -10441                                <span class="co">#  10          * +V-AXIS -X SENSE JETS  116</span>
+023616,000619: 20,2672           67375                           <span class="ps">OCTAL   </span> -10402                                <span class="co">#   1          *                        117</span>
+023617,000620: 20,2673           56335                           <span class="ps">OCTAL   </span> -21442                                <span class="co">#   1 10       *                        120</span>
+023618,000621: 
+023619,000622: 20,2674           72774                           <span class="ps">OCTAL   </span> -05003                                <span class="co">#   2          * -V-AXIS -X SENSE JETS  121</span>
+023620,000623: 20,2675           72756                           <span class="ps">OCTAL   </span> -05021                                <span class="co">#   9          *                        122</span>
+023621,000624: 20,2676           61754                           <span class="ps">OCTAL   </span> -16023                                <span class="co">#   2  9       *                        123</span>
 
 End of include-file Q,R-AXES_JET_SELECT_AND_FAILURE_CONTROL_LOGIC.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

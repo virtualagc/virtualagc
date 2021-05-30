@@ -88,26 +88,26 @@ project's GitHub repository</a>.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042065,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-042066,000003:                                                                                                  <span class="co">## Filename:    LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc</span>
-042067,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 97.</span>
-042068,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the</span>
-042069,000006:                                                                                                  <span class="co">##              original release of the flight software for the Lunar </span>
-042070,000007:                                                                                                  <span class="co">##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 11.</span>
-042071,000008:                                                                                                  <span class="co">##              The code has been recreated from a copy of Luminary 99</span>
-042072,000009:                                                                                                  <span class="co">##              revision 001, using asterisks indicating changed lines in</span>
-042073,000010:                                                                                                  <span class="co">##              the listing and Luminary Memos #83 and #85, which list </span>
-042074,000011:                                                                                                  <span class="co">##              changes between Luminary 97 and 98, and 98 and 99. The</span>
-042075,000012:                                                                                                  <span class="co">##              code has been adapted such that the resulting bugger words</span>
-042076,000013:                                                                                                  <span class="co">##              exactly match those specified for Luminary 97 in NASA drawing</span>
-042077,000014:                                                                                                  <span class="co">##              2021152D, which gives relatively high confidence that the</span>
-042078,000015:                                                                                                  <span class="co">##              reconstruction is correct.</span>
-042079,000016:                                                                                                  <span class="co">## Reference:   pp. 984-987</span>
-042080,000017:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-042081,000018:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-042082,000019:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-042083,000020:                                                                                                  <span class="co">## Mod history: 2019-07-28 MAS  Created from Luminary 99.</span>
-042084,000021: 
+042077,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+042078,000003:                                                                                                  <span class="co">## Filename:    LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc</span>
+042079,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 97.</span>
+042080,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the</span>
+042081,000006:                                                                                                  <span class="co">##              original release of the flight software for the Lunar </span>
+042082,000007:                                                                                                  <span class="co">##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 11.</span>
+042083,000008:                                                                                                  <span class="co">##              The code has been recreated from a copy of Luminary 99</span>
+042084,000009:                                                                                                  <span class="co">##              revision 001, using asterisks indicating changed lines in</span>
+042085,000010:                                                                                                  <span class="co">##              the listing and Luminary Memos #83 and #85, which list </span>
+042086,000011:                                                                                                  <span class="co">##              changes between Luminary 97 and 98, and 98 and 99. The</span>
+042087,000012:                                                                                                  <span class="co">##              code has been adapted such that the resulting bugger words</span>
+042088,000013:                                                                                                  <span class="co">##              exactly match those specified for Luminary 97 in NASA drawing</span>
+042089,000014:                                                                                                  <span class="co">##              2021152D, which gives relatively high confidence that the</span>
+042090,000015:                                                                                                  <span class="co">##              reconstruction is correct.</span>
+042091,000016:                                                                                                  <span class="co">## Reference:   pp. 984-987</span>
+042092,000017:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+042093,000018:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+042094,000019:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+042095,000020:                                                                                                  <span class="co">## Mod history: 2019-07-28 MAS  Created from Luminary 99.</span>
+042096,000021: 
 </pre>
 </span>
 </p>
@@ -123,58 +123,58 @@ Page 984
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042086,000023:                                                                                                  <span class="co">#  NAME - LSPOS - LOCATE SUN AND MOON                    DATE - 25 OCT 67</span>
-042087,000024:                                                                                                  <span class="co">#  MOD NO. 1</span>
-042088,000025:                                                                                                  <span class="co">#  MOD BY NEVILLE                                        ASSEMBLY SUNDANCE</span>
-042089,000026: 
-042090,000027:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION</span>
-042091,000028: 
-042092,000029:                                                                                                  <span class="co">#         COMPUTES UNIT POSITION VECTOR OF THE SUN AND MOON IN THE BASIC REFERENCE SYSTEM. THE SUN VECTOR S IS</span>
-042093,000030:                                                                                                  <span class="co">#  LOCATED VIA TWO ANGLES. THE FIRST ANGLE(OBLIQUITY) IS THE ANGLE BETWEEN THE EARTH EQUATOR AND THE ECLIPTIC. THE</span>
-042094,000031:                                                                                                  <span class="co">#  SECOND ANGLE IS THE LONGITUDE OF THE SUN MEASURED IN THE ECLIPTIC.</span>
-042095,000032:                                                                                                  <span class="co">#  THE POSITION VECTOR OF THE SUN IS</span>
-042096,000033:                                                                                                  <span class="co">#        -</span>
-042097,000034:                                                                                                  <span class="co">#        S = (COS(LOS), COS(OBL)*SIN(LOS), SIN(OBL)*SIN(LOS)), WHERE</span>
-042098,000035: 
-042099,000036:                                                                                                  <span class="co">#        LOS = LOS +LOS *T-(C *SIN(2PI*T)/365.24 +C *COS(2PI*T)/365.24)</span>
-042100,000037:                                                                                                  <span class="co">#                 0    R     0                     1</span>
-042101,000038:                                                                                                  <span class="co">#        LOS  (RAD) IS THE LONGITUDE OF THE SUN FOR MIDNIGHT JUNE 30TH OF THE PARTICULAR YEAR.</span>
-042102,000039:                                                                                                  <span class="co">#           0</span>
-042103,000040:                                                                                                  <span class="co">#        LOS  (RAD/DAY) IS THE MEAN RATE FOR THE PARTICULAR YEAR.</span>
-042104,000041:                                                                                                  <span class="co">#           R</span>
-042105,000042: 
-042106,000043:                                                                                                  <span class="co">#  LOS  AND LOS  ARE STORED AS LOSC AND LOSR IN RATESP.</span>
-042107,000044:                                                                                                  <span class="co">#     0        R</span>
-042108,000045:                                                                                                  <span class="co">#  COS(OBL) AND SIN(OBL) ARE STORED IN THE MATRIX KONMAT.</span>
-042109,000046: 
-042110,000047:                                                                                                  <span class="co">#  T, TIME MEASURED IN DAYS (24 HOURS), IS STORED IN TIMEP.</span>
-042111,000048: 
-042112,000049:                                                                                                  <span class="co">#  C  AND C  ARE FUDGE FACTORS TO MINIMIZE THE DEVIATION.  THEY ARE STORED AS ONE CONSTANT (CMOD), SINCE</span>
-042113,000050:                                                                                                  <span class="co">#   0      1                               2  2 1/2</span>
-042114,000051:                                                                                                  <span class="co">#  C *SIN(X)+C *COS(X) CAN BE WRITTEN AS (C +C )   *SIN(X+PHI), WHERE PHI=ARCTAN(C /C ).</span>
-042115,000052:                                                                                                  <span class="co">#   0         1                            0  1                                   1  0</span>
-042116,000053: 
-042117,000054:                                                                                                  <span class="co">#  THE MOON IS LOCATED VIA FOUR ANGLES. THE FIRST IS THE OBLIQUITY. THE SECOND IS THE MEAN LONGITUDE OF THE MOON,</span>
-042118,000055:                                                                                                  <span class="co">#  MEASURED IN THE ECLIPTIC FROM THE MEAN EQUINOX TO THE MEAN ASCENDING NODE OF THE LUNAR ORBIT, AND THEN ALONG THE</span>
-042119,000056:                                                                                                  <span class="co">#  ORBIT.  THE THIRD ANGLE IS THE ANGLE BETWEEN THE ECLIPTIC AND THE LUNAR ORBIT.  THE FOURTH ANGLE IS THE LONGITUDE</span>
-042120,000057:                                                                                                  <span class="co">#  OF THE NODE OF THE MOON, MEASURED IN THE LUNAR ORBIT.  LET THESE ANGLES BE OBL,LOM,IM, AND LON RESPECTIVELY.</span>
-042121,000058: 
-042122,000059:                                                                                                  <span class="co">#  THE SIMPLIFIED POSITION VECTOR OF THE MOON IS</span>
-042123,000060:                                                                                                  <span class="co">#        -</span>
-042124,000061:                                                                                                  <span class="co">#        M=(COS(LOM), COS(OBL)*SIN(LOM)-SIN(OBL)*SIN(IM)*SIN(LOM-LON), SIN(OBL)*SIN(LOM)+COS(OBL)*SIN(IM)*SIN(LOM-LON))</span>
-042125,000062: 
-042126,000063:                                                                                                  <span class="co">#  WHERE</span>
-042127,000064:                                                                                                  <span class="co">#        LOM=LOM +LOM *T-(A *SIN 2PI*T/27.5545+A *COS(2PI*T/27.5545)+B *SIN 2PI*T/32+B *COS(2PI*T/32)), AND</span>
-042128,000065:                                                                                                  <span class="co">#               0    R     0                    1                     0               1</span>
-042129,000066:                                                                                                  <span class="co">#        LON=LON +LON</span>
-042130,000067:                                                                                                  <span class="co">#               0    R</span>
-042131,000068:                                                                                                  <span class="co">#  A , A , B  AND B  ARE STORED AS AMOD AND BMOD (SEE DESCRIPTION OF CMOD, ABOVE).  COS(OBL), SIN(OBL)*SIN(IM),</span>
-042132,000069:                                                                                                  <span class="co">#   0   1   0      1</span>
-042133,000070:                                                                                                  <span class="co">#  SIN(OBL), AND COS(OBL)*SIN(IM) ARE STORED IN KONMAT AS K1, K2, K3 AND K4, RESPECTIVELY.  LOM , LOM , LON , LON                                   </span>
-042134,000071:                                                                                                  <span class="co">#  ARE STORED AS LOMO, LOMR, LONO, AND LONR IN RATESP.                                         0     R     0     R</span>
-042135,000072:                                                                                                  <span class="co">#  THE THREE PHIS ARE STORED AS AARG, BARG, AND CARG(SUN).  ALL CONSTANTS ARE UPDATED BY YEAR.</span>
-042136,000073: 
-042137,000074:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
+042098,000023:                                                                                                  <span class="co">#  NAME - LSPOS - LOCATE SUN AND MOON                    DATE - 25 OCT 67</span>
+042099,000024:                                                                                                  <span class="co">#  MOD NO. 1</span>
+042100,000025:                                                                                                  <span class="co">#  MOD BY NEVILLE                                        ASSEMBLY SUNDANCE</span>
+042101,000026: 
+042102,000027:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION</span>
+042103,000028: 
+042104,000029:                                                                                                  <span class="co">#         COMPUTES UNIT POSITION VECTOR OF THE SUN AND MOON IN THE BASIC REFERENCE SYSTEM. THE SUN VECTOR S IS</span>
+042105,000030:                                                                                                  <span class="co">#  LOCATED VIA TWO ANGLES. THE FIRST ANGLE(OBLIQUITY) IS THE ANGLE BETWEEN THE EARTH EQUATOR AND THE ECLIPTIC. THE</span>
+042106,000031:                                                                                                  <span class="co">#  SECOND ANGLE IS THE LONGITUDE OF THE SUN MEASURED IN THE ECLIPTIC.</span>
+042107,000032:                                                                                                  <span class="co">#  THE POSITION VECTOR OF THE SUN IS</span>
+042108,000033:                                                                                                  <span class="co">#        -</span>
+042109,000034:                                                                                                  <span class="co">#        S = (COS(LOS), COS(OBL)*SIN(LOS), SIN(OBL)*SIN(LOS)), WHERE</span>
+042110,000035: 
+042111,000036:                                                                                                  <span class="co">#        LOS = LOS +LOS *T-(C *SIN(2PI*T)/365.24 +C *COS(2PI*T)/365.24)</span>
+042112,000037:                                                                                                  <span class="co">#                 0    R     0                     1</span>
+042113,000038:                                                                                                  <span class="co">#        LOS  (RAD) IS THE LONGITUDE OF THE SUN FOR MIDNIGHT JUNE 30TH OF THE PARTICULAR YEAR.</span>
+042114,000039:                                                                                                  <span class="co">#           0</span>
+042115,000040:                                                                                                  <span class="co">#        LOS  (RAD/DAY) IS THE MEAN RATE FOR THE PARTICULAR YEAR.</span>
+042116,000041:                                                                                                  <span class="co">#           R</span>
+042117,000042: 
+042118,000043:                                                                                                  <span class="co">#  LOS  AND LOS  ARE STORED AS LOSC AND LOSR IN RATESP.</span>
+042119,000044:                                                                                                  <span class="co">#     0        R</span>
+042120,000045:                                                                                                  <span class="co">#  COS(OBL) AND SIN(OBL) ARE STORED IN THE MATRIX KONMAT.</span>
+042121,000046: 
+042122,000047:                                                                                                  <span class="co">#  T, TIME MEASURED IN DAYS (24 HOURS), IS STORED IN TIMEP.</span>
+042123,000048: 
+042124,000049:                                                                                                  <span class="co">#  C  AND C  ARE FUDGE FACTORS TO MINIMIZE THE DEVIATION.  THEY ARE STORED AS ONE CONSTANT (CMOD), SINCE</span>
+042125,000050:                                                                                                  <span class="co">#   0      1                               2  2 1/2</span>
+042126,000051:                                                                                                  <span class="co">#  C *SIN(X)+C *COS(X) CAN BE WRITTEN AS (C +C )   *SIN(X+PHI), WHERE PHI=ARCTAN(C /C ).</span>
+042127,000052:                                                                                                  <span class="co">#   0         1                            0  1                                   1  0</span>
+042128,000053: 
+042129,000054:                                                                                                  <span class="co">#  THE MOON IS LOCATED VIA FOUR ANGLES. THE FIRST IS THE OBLIQUITY. THE SECOND IS THE MEAN LONGITUDE OF THE MOON,</span>
+042130,000055:                                                                                                  <span class="co">#  MEASURED IN THE ECLIPTIC FROM THE MEAN EQUINOX TO THE MEAN ASCENDING NODE OF THE LUNAR ORBIT, AND THEN ALONG THE</span>
+042131,000056:                                                                                                  <span class="co">#  ORBIT.  THE THIRD ANGLE IS THE ANGLE BETWEEN THE ECLIPTIC AND THE LUNAR ORBIT.  THE FOURTH ANGLE IS THE LONGITUDE</span>
+042132,000057:                                                                                                  <span class="co">#  OF THE NODE OF THE MOON, MEASURED IN THE LUNAR ORBIT.  LET THESE ANGLES BE OBL,LOM,IM, AND LON RESPECTIVELY.</span>
+042133,000058: 
+042134,000059:                                                                                                  <span class="co">#  THE SIMPLIFIED POSITION VECTOR OF THE MOON IS</span>
+042135,000060:                                                                                                  <span class="co">#        -</span>
+042136,000061:                                                                                                  <span class="co">#        M=(COS(LOM), COS(OBL)*SIN(LOM)-SIN(OBL)*SIN(IM)*SIN(LOM-LON), SIN(OBL)*SIN(LOM)+COS(OBL)*SIN(IM)*SIN(LOM-LON))</span>
+042137,000062: 
+042138,000063:                                                                                                  <span class="co">#  WHERE</span>
+042139,000064:                                                                                                  <span class="co">#        LOM=LOM +LOM *T-(A *SIN 2PI*T/27.5545+A *COS(2PI*T/27.5545)+B *SIN 2PI*T/32+B *COS(2PI*T/32)), AND</span>
+042140,000065:                                                                                                  <span class="co">#               0    R     0                    1                     0               1</span>
+042141,000066:                                                                                                  <span class="co">#        LON=LON +LON</span>
+042142,000067:                                                                                                  <span class="co">#               0    R</span>
+042143,000068:                                                                                                  <span class="co">#  A , A , B  AND B  ARE STORED AS AMOD AND BMOD (SEE DESCRIPTION OF CMOD, ABOVE).  COS(OBL), SIN(OBL)*SIN(IM),</span>
+042144,000069:                                                                                                  <span class="co">#   0   1   0      1</span>
+042145,000070:                                                                                                  <span class="co">#  SIN(OBL), AND COS(OBL)*SIN(IM) ARE STORED IN KONMAT AS K1, K2, K3 AND K4, RESPECTIVELY.  LOM , LOM , LON , LON                                   </span>
+042146,000071:                                                                                                  <span class="co">#  ARE STORED AS LOMO, LOMR, LONO, AND LONR IN RATESP.                                         0     R     0     R</span>
+042147,000072:                                                                                                  <span class="co">#  THE THREE PHIS ARE STORED AS AARG, BARG, AND CARG(SUN).  ALL CONSTANTS ARE UPDATED BY YEAR.</span>
+042148,000073: 
+042149,000074:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
 </pre>
 </span>
 </p>
@@ -190,39 +190,39 @@ Page 985
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042139,000076:                                                                                                  <span class="co">#        CALL LSPOS.  RETURN IS VIA CPRET.</span>
-042140,000077: 
-042141,000078:                                                                                                  <span class="co">#  ALARMS OR ABORTS</span>
-042142,000079:                                                                                                  <span class="co">#        NONE</span>
-042143,000080: 
-042144,000081:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED</span>
-042145,000082:                                                                                                  <span class="co">#        TEPHEM - TIME FROM MIDNIGHT 1 JULY PRECEDING THE LAUNCH TO THE TIME OF THE LAUNCH (WHEN THE AGC CLOCK WENT</span>
-042146,000083:                                                                                                  <span class="co">#        TO ZERO).  TEPHEM IS TP WITH UNITS OF CENTI-SECONDS.</span>
-042147,000084: 
-042148,000085:                                                                                                  <span class="co">#        TIME2 AND TIME1 ARE IN MPAC AND MPAC +1 WHEN PROGRAM IS CALLED.</span>
-042149,000086: 
-042150,000087:                                                                                                  <span class="co">#  OUTPUT</span>
-042151,000088:                                                                                                  <span class="co">#        UNIT POSITIONAL VECTOR OF SUN IN VSUN.  (SCALED B-1)</span>
-042152,000089:                                                                                                  <span class="co">#        UNIT POSITIONAL VECTOR OF MOON IN VMOON.  (SCALED B-1)</span>
-042153,000090: 
-042154,000091:                                                                                                  <span class="co">#  SUBROUTINES USED</span>
-042155,000092:                                                                                                  <span class="co">#        NONE</span>
-042156,000093: 
-042157,000094:                                                                                                  <span class="co">#  DEBRIS</span>
-042158,000095:                                                                                                  <span class="co">#        CURRENT CORE SET, WORK AREA AND FREEFLAG</span>
-042159,000096: 
-042160,000097: 04,3027                                           <span class="ps">BANK    </span> 04                                    
-042161,000098: 15,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#455048454D">EPHEM</a>                                 
-042162,000099: 15,2000                                           <span class="ps">BANK    </span>                                       
-042163,000100: 
-042164,000101: 15,3664  E5,1714                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5653554E">VSUN</a>                                  
-042165,000102: 15,3664                                           <span class="ps">COUNT*  </span> $$/<a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#455048454D">EPHEM</a>                              
-<a name="4C554E504F53"></a>042166,000103: 15,3664  15,3664               <span class="sm">LUNPOS  </span>           <span class="ps">EQUALS  </span> <a href="#4C53504F53">LSPOS</a>                                 
-042167,000104: 
-<a name="4C53504F53"></a>042168,000105: 15,3664           54201        <span class="sm">LSPOS   </span>           <span class="in">SETPD   </span> <span class="in">SR        </span>                            
-042169,000106: 15,3665           00001                                    0                                     
-042170,000107: 15,3666           20617                                    14D                                   <span class="co">#  TP</span>
-042171,000108: 15,3667           56371                           <span class="in">TAD     </span> <span class="in">DDV       </span>                            
+042151,000076:                                                                                                  <span class="co">#        CALL LSPOS.  RETURN IS VIA CPRET.</span>
+042152,000077: 
+042153,000078:                                                                                                  <span class="co">#  ALARMS OR ABORTS</span>
+042154,000079:                                                                                                  <span class="co">#        NONE</span>
+042155,000080: 
+042156,000081:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED</span>
+042157,000082:                                                                                                  <span class="co">#        TEPHEM - TIME FROM MIDNIGHT 1 JULY PRECEDING THE LAUNCH TO THE TIME OF THE LAUNCH (WHEN THE AGC CLOCK WENT</span>
+042158,000083:                                                                                                  <span class="co">#        TO ZERO).  TEPHEM IS TP WITH UNITS OF CENTI-SECONDS.</span>
+042159,000084: 
+042160,000085:                                                                                                  <span class="co">#        TIME2 AND TIME1 ARE IN MPAC AND MPAC +1 WHEN PROGRAM IS CALLED.</span>
+042161,000086: 
+042162,000087:                                                                                                  <span class="co">#  OUTPUT</span>
+042163,000088:                                                                                                  <span class="co">#        UNIT POSITIONAL VECTOR OF SUN IN VSUN.  (SCALED B-1)</span>
+042164,000089:                                                                                                  <span class="co">#        UNIT POSITIONAL VECTOR OF MOON IN VMOON.  (SCALED B-1)</span>
+042165,000090: 
+042166,000091:                                                                                                  <span class="co">#  SUBROUTINES USED</span>
+042167,000092:                                                                                                  <span class="co">#        NONE</span>
+042168,000093: 
+042169,000094:                                                                                                  <span class="co">#  DEBRIS</span>
+042170,000095:                                                                                                  <span class="co">#        CURRENT CORE SET, WORK AREA AND FREEFLAG</span>
+042171,000096: 
+042172,000097: 04,3027                                           <span class="ps">BANK    </span> 04                                    
+042173,000098: 15,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#455048454D">EPHEM</a>                                 
+042174,000099: 15,2000                                           <span class="ps">BANK    </span>                                       
+042175,000100: 
+042176,000101: 15,3664  E5,1714                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5653554E">VSUN</a>                                  
+042177,000102: 15,3664                                           <span class="ps">COUNT*  </span> $$/<a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#455048454D">EPHEM</a>                              
+<a name="4C554E504F53"></a>042178,000103: 15,3664  15,3664               <span class="sm">LUNPOS  </span>           <span class="ps">EQUALS  </span> <a href="#4C53504F53">LSPOS</a>                                 
+042179,000104: 
+<a name="4C53504F53"></a>042180,000105: 15,3664           54201        <span class="sm">LSPOS   </span>           <span class="in">SETPD   </span> <span class="in">SR        </span>                            
+042181,000106: 15,3665           00001                                    0                                     
+042182,000107: 15,3666           20617                                    14D                                   <span class="co">#  TP</span>
+042183,000108: 15,3667           56371                           <span class="in">TAD     </span> <span class="in">DDV       </span>                            
 </pre>
 </span>
 </p>
@@ -238,8 +238,8 @@ The hand-written notation "in centisec B 42" appears to the right.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042173,000110: 15,3670           01707                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                <span class="co">#  TIME OF LAUNCH</span>
-042174,000111: 15,3671           12024                                    <a href="CONTROLLED_CONSTANTS.agc.html#4353544F444159">CSTODAY</a>                               <span class="co">#  24 HOURS-8640000 CENTI-SECS/DAY B-33</span>
+042185,000110: 15,3670           01707                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                <span class="co">#  TIME OF LAUNCH</span>
+042186,000111: 15,3671           12024                                    <a href="CONTROLLED_CONSTANTS.agc.html#4353544F444159">CSTODAY</a>                               <span class="co">#  24 HOURS-8640000 CENTI-SECS/DAY B-33</span>
 </pre>
 </span>
 </p>
@@ -255,7 +255,7 @@ The hand-written notation "@ B 9 = 512 days" appears to the right.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042176,000113: 15,3672           00031                           <span class="in">STORE   </span> <a href="#54494D4550">TIMEP</a>                                 <span class="co">#  T IN DAYS</span>
+042188,000113: 15,3672           00031                           <span class="in">STORE   </span> <a href="#54494D4550">TIMEP</a>                                 <span class="co">#  T IN DAYS</span>
 </pre>
 </span>
 </p>
@@ -271,17 +271,17 @@ The hand-written notation "&there4; granularity &asymp; 0.164 sec" appears to th
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042178,000115: 15,3673           77170                           <span class="in">AXT,1   </span> <span class="in">AXT,2     </span>                            
-042179,000116: 15,3674           00000                                    0                                     
-042180,000117: 15,3675           00000                                    0                                     
-042181,000118: 15,3676           77614                           <span class="in">CLEAR   </span>                                       
-042182,000119: 15,3677           00274                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#46524545464C4147">FREEFLAG</a>                              <span class="co">#  SWITCH BIT</span>
-<a name="504F53495441"></a>042183,000120: 15,3700           77745        <span class="sm">POSITA  </span>           <span class="in">DLOAD   </span>                                       
-042184,000121: 15,3701           12004                                    <a href="CONTROLLED_CONSTANTS.agc.html#4B4F4E4D4154">KONMAT</a>     +2                         <span class="co">#  ZEROS</span>
-042185,000122: 15,3702           00027                           <span class="in">STORE   </span> <a href="#47544D50">GTMP</a>                                  
-<a name="504F53495442"></a>042186,000123: 15,3703           40745        <span class="sm">POSITB  </span>           <span class="in">DLOAD   </span> <span class="in">DMP*      </span>                            
-042187,000124: 15,3704           00031                                    <a href="#54494D4550">TIMEP</a>                                 <span class="co">#  T</span>
-042188,000125: 15,3705           12050                                    <a href="CONTROLLED_CONSTANTS.agc.html#56414C3637">VAL67</a>      +4,1                       <span class="co">#  1/27 OR 1/32 OR 1/365</span>
+042190,000115: 15,3673           77170                           <span class="in">AXT,1   </span> <span class="in">AXT,2     </span>                            
+042191,000116: 15,3674           00000                                    0                                     
+042192,000117: 15,3675           00000                                    0                                     
+042193,000118: 15,3676           77614                           <span class="in">CLEAR   </span>                                       
+042194,000119: 15,3677           00274                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#46524545464C4147">FREEFLAG</a>                              <span class="co">#  SWITCH BIT</span>
+<a name="504F53495441"></a>042195,000120: 15,3700           77745        <span class="sm">POSITA  </span>           <span class="in">DLOAD   </span>                                       
+042196,000121: 15,3701           12004                                    <a href="CONTROLLED_CONSTANTS.agc.html#4B4F4E4D4154">KONMAT</a>     +2                         <span class="co">#  ZEROS</span>
+042197,000122: 15,3702           00027                           <span class="in">STORE   </span> <a href="#47544D50">GTMP</a>                                  
+<a name="504F53495442"></a>042198,000123: 15,3703           40745        <span class="sm">POSITB  </span>           <span class="in">DLOAD   </span> <span class="in">DMP*      </span>                            
+042199,000124: 15,3704           00031                                    <a href="#54494D4550">TIMEP</a>                                 <span class="co">#  T</span>
+042200,000125: 15,3705           12050                                    <a href="CONTROLLED_CONSTANTS.agc.html#56414C3637">VAL67</a>      +4,1                       <span class="co">#  1/27 OR 1/32 OR 1/365</span>
 </pre>
 </span>
 </p>
@@ -297,56 +297,56 @@ Page 986
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042190,000127: 15,3706           42661                           <span class="in">SL      </span> <span class="in">DAD*      </span>                            
-042191,000128: 15,3707           20211                                    8D                                    
-042192,000129: 15,3710           12046                                    <a href="CONTROLLED_CONSTANTS.agc.html#56414C3637">VAL67</a>      +2,1                       <span class="co">#  AARG</span>
-042193,000130: 15,3711           40756                           <span class="in">SIN     </span> <span class="in">DMP*      </span>                            <span class="co">#  SIN(T/27+PHI) OR T/32 OR T/365</span>
-042194,000131: 15,3712           12044                                    VAL67,1                               <span class="co">#  (A0**2+A1**2)**1/2 SIN(X+PHIA)</span>
-042195,000132: 15,3713           62015                           <span class="in">DAD     </span> <span class="in">INCR,1    </span>                            <span class="co">#  PLUS</span>
-042196,000133: 15,3714           00027                                    <a href="#47544D50">GTMP</a>                                  <span class="co">#  (B0**2+B1**2)**1/2 SIN(X+PHIB)</span>
-042197,000134: 15,3715           77771                           <span class="ps">DEC     </span> -6         B-14                       
-042198,000135: 15,3716           00027                           <span class="in">STORE   </span> <a href="#47544D50">GTMP</a>                                  <span class="co">#  OR (C0**2+C1**2)**1/2 SIN(X+PHIC)</span>
-042199,000136: 15,3717           77614                           <span class="in">BOFSET  </span>                                       
-042200,000137: 15,3720           00054                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#46524545464C4147">FREEFLAG</a>                              
-042201,000138: 15,3721           33703                                    <a href="#504F53495442">POSITB</a>                                
-<a name="504F53495444"></a>042202,000139: 15,3722           40745        <span class="sm">POSITD  </span>           <span class="in">DLOAD   </span> <span class="in">DMP*      </span>                            
-042203,000140: 15,3723           00031                                    <a href="#54494D4550">TIMEP</a>                                 <span class="co">#  T</span>
-042204,000141: 15,3724           65747                                    RATESP,2                              <span class="co">#  LOMR,LOSR,LONR</span>
-042205,000142: 15,3725           42661                           <span class="in">SL      </span> <span class="in">DAD*      </span>                            
-042206,000143: 15,3726           20206                                    5D                                    
-042207,000144: 15,3727           65741                                    <a href="CONTROLLED_CONSTANTS.agc.html#524154455350">RATESP</a>     +6,2                       <span class="co">#  LOMO,LOSO,LONO</span>
-042208,000145: 15,3730           77625                           <span class="in">DSU     </span>                                       
-042209,000146: 15,3731           00027                                    <a href="#47544D50">GTMP</a>                                  
-042210,000147: 15,3732           10021                           <span class="in">STORE   </span> STMP,2                                <span class="co">#  LOM,LOS,LON</span>
-042211,000148: 15,3733           63135                           <span class="in">SLOAD   </span> <span class="in">INCR,2    </span>                            
-042212,000149: 15,3734           00050                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5832">X2</a>                                    
-042213,000150: 15,3735           77775                           <span class="ps">DEC     </span> -2         B-14                       
-042214,000151: 15,3736           53015                           <span class="in">DAD     </span> <span class="in">BZE       </span>                            
-042215,000152: 15,3737           12026                                    <a href="CONTROLLED_CONSTANTS.agc.html#5243422D3133">RCB-13</a>                                <span class="co">#  PLUS 2</span>
-042216,000153: 15,3740           33770                                    <a href="#504F53495445">POSITE</a>                                <span class="co">#  2ND</span>
-042217,000154: 15,3741           77644                           <span class="in">BPL     </span>                                       
-042218,000155: 15,3742           33700                                    <a href="#504F53495441">POSITA</a>                                <span class="co">#  1ST</span>
-<a name="504F53495446"></a>042219,000156: 15,3743           45345        <span class="sm">POSITF  </span>           <span class="in">DLOAD   </span> <span class="in">DSU       </span>                            <span class="co">#  3RD</span>
-042220,000157: 15,3744           00021                                    <a href="#53544D50">STMP</a>                                  <span class="co">#  LOM</span>
-042221,000158: 15,3745           00025                                    <a href="#53544D50">STMP</a>       +4                         <span class="co">#  LON</span>
-042222,000159: 15,3746           65356                           <span class="in">SIN     </span> <span class="in">PDDL      </span>                            <span class="co">#  SIN(LOM-LON)</span>
-042223,000160: 15,3747           00021                                    <a href="#53544D50">STMP</a>                                  
-042224,000161: 15,3750           65356                           <span class="in">SIN     </span> <span class="in">PDDL      </span>                            <span class="co">#  SIN LOM</span>
-042225,000162: 15,3751           00021                                    <a href="#53544D50">STMP</a>                                  
-042226,000163: 15,3752           55546                           <span class="in">COS     </span> <span class="in">VDEF      </span>                            <span class="co">#  COS LOM</span>
-042227,000164: 15,3753           53521                           <span class="in">MXV     </span> <span class="in">UNIT      </span>                            
-042228,000165: 15,3754           12002                                    <a href="CONTROLLED_CONSTANTS.agc.html#4B4F4E4D4154">KONMAT</a>                                <span class="co">#  K1,K2,K3,K4,</span>
-042229,000166: 15,3755           02723                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564D4F4F4E">VMOON</a>                                 
-042230,000167: 15,3756           65345                           <span class="in">DLOAD   </span> <span class="in">PDDL      </span>                            
-042231,000168: 15,3757           12004                                    <a href="CONTROLLED_CONSTANTS.agc.html#4B4F4E4D4154">KONMAT</a>     +2                         <span class="co">#  ZERO</span>
-042232,000169: 15,3760           00023                                    <a href="#53544D50">STMP</a>       +2                         
-042233,000170: 15,3761           65356                           <span class="in">SIN     </span> <span class="in">PDDL      </span>                            <span class="co">#  SIN LOS</span>
-042234,000171: 15,3762           00023                                    <a href="#53544D50">STMP</a>       +2                         
-042235,000172: 15,3763           55546                           <span class="in">COS     </span> <span class="in">VDEF      </span>                            <span class="co">#  COS LOS</span>
-042236,000173: 15,3764           53521                           <span class="in">MXV     </span> <span class="in">UNIT      </span>                            
-042237,000174: 15,3765           12002                                    <a href="CONTROLLED_CONSTANTS.agc.html#4B4F4E4D4154">KONMAT</a>                                
-042238,000175: 15,3766           02715                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5653554E">VSUN</a>                                  
-042239,000176: 15,3767           77616                           <span class="in">RVQ     </span>                                       
+042202,000127: 15,3706           42661                           <span class="in">SL      </span> <span class="in">DAD*      </span>                            
+042203,000128: 15,3707           20211                                    8D                                    
+042204,000129: 15,3710           12046                                    <a href="CONTROLLED_CONSTANTS.agc.html#56414C3637">VAL67</a>      +2,1                       <span class="co">#  AARG</span>
+042205,000130: 15,3711           40756                           <span class="in">SIN     </span> <span class="in">DMP*      </span>                            <span class="co">#  SIN(T/27+PHI) OR T/32 OR T/365</span>
+042206,000131: 15,3712           12044                                    VAL67,1                               <span class="co">#  (A0**2+A1**2)**1/2 SIN(X+PHIA)</span>
+042207,000132: 15,3713           62015                           <span class="in">DAD     </span> <span class="in">INCR,1    </span>                            <span class="co">#  PLUS</span>
+042208,000133: 15,3714           00027                                    <a href="#47544D50">GTMP</a>                                  <span class="co">#  (B0**2+B1**2)**1/2 SIN(X+PHIB)</span>
+042209,000134: 15,3715           77771                           <span class="ps">DEC     </span> -6         B-14                       
+042210,000135: 15,3716           00027                           <span class="in">STORE   </span> <a href="#47544D50">GTMP</a>                                  <span class="co">#  OR (C0**2+C1**2)**1/2 SIN(X+PHIC)</span>
+042211,000136: 15,3717           77614                           <span class="in">BOFSET  </span>                                       
+042212,000137: 15,3720           00054                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#46524545464C4147">FREEFLAG</a>                              
+042213,000138: 15,3721           33703                                    <a href="#504F53495442">POSITB</a>                                
+<a name="504F53495444"></a>042214,000139: 15,3722           40745        <span class="sm">POSITD  </span>           <span class="in">DLOAD   </span> <span class="in">DMP*      </span>                            
+042215,000140: 15,3723           00031                                    <a href="#54494D4550">TIMEP</a>                                 <span class="co">#  T</span>
+042216,000141: 15,3724           65747                                    RATESP,2                              <span class="co">#  LOMR,LOSR,LONR</span>
+042217,000142: 15,3725           42661                           <span class="in">SL      </span> <span class="in">DAD*      </span>                            
+042218,000143: 15,3726           20206                                    5D                                    
+042219,000144: 15,3727           65741                                    <a href="CONTROLLED_CONSTANTS.agc.html#524154455350">RATESP</a>     +6,2                       <span class="co">#  LOMO,LOSO,LONO</span>
+042220,000145: 15,3730           77625                           <span class="in">DSU     </span>                                       
+042221,000146: 15,3731           00027                                    <a href="#47544D50">GTMP</a>                                  
+042222,000147: 15,3732           10021                           <span class="in">STORE   </span> STMP,2                                <span class="co">#  LOM,LOS,LON</span>
+042223,000148: 15,3733           63135                           <span class="in">SLOAD   </span> <span class="in">INCR,2    </span>                            
+042224,000149: 15,3734           00050                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5832">X2</a>                                    
+042225,000150: 15,3735           77775                           <span class="ps">DEC     </span> -2         B-14                       
+042226,000151: 15,3736           53015                           <span class="in">DAD     </span> <span class="in">BZE       </span>                            
+042227,000152: 15,3737           12026                                    <a href="CONTROLLED_CONSTANTS.agc.html#5243422D3133">RCB-13</a>                                <span class="co">#  PLUS 2</span>
+042228,000153: 15,3740           33770                                    <a href="#504F53495445">POSITE</a>                                <span class="co">#  2ND</span>
+042229,000154: 15,3741           77644                           <span class="in">BPL     </span>                                       
+042230,000155: 15,3742           33700                                    <a href="#504F53495441">POSITA</a>                                <span class="co">#  1ST</span>
+<a name="504F53495446"></a>042231,000156: 15,3743           45345        <span class="sm">POSITF  </span>           <span class="in">DLOAD   </span> <span class="in">DSU       </span>                            <span class="co">#  3RD</span>
+042232,000157: 15,3744           00021                                    <a href="#53544D50">STMP</a>                                  <span class="co">#  LOM</span>
+042233,000158: 15,3745           00025                                    <a href="#53544D50">STMP</a>       +4                         <span class="co">#  LON</span>
+042234,000159: 15,3746           65356                           <span class="in">SIN     </span> <span class="in">PDDL      </span>                            <span class="co">#  SIN(LOM-LON)</span>
+042235,000160: 15,3747           00021                                    <a href="#53544D50">STMP</a>                                  
+042236,000161: 15,3750           65356                           <span class="in">SIN     </span> <span class="in">PDDL      </span>                            <span class="co">#  SIN LOM</span>
+042237,000162: 15,3751           00021                                    <a href="#53544D50">STMP</a>                                  
+042238,000163: 15,3752           55546                           <span class="in">COS     </span> <span class="in">VDEF      </span>                            <span class="co">#  COS LOM</span>
+042239,000164: 15,3753           53521                           <span class="in">MXV     </span> <span class="in">UNIT      </span>                            
+042240,000165: 15,3754           12002                                    <a href="CONTROLLED_CONSTANTS.agc.html#4B4F4E4D4154">KONMAT</a>                                <span class="co">#  K1,K2,K3,K4,</span>
+042241,000166: 15,3755           02723                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564D4F4F4E">VMOON</a>                                 
+042242,000167: 15,3756           65345                           <span class="in">DLOAD   </span> <span class="in">PDDL      </span>                            
+042243,000168: 15,3757           12004                                    <a href="CONTROLLED_CONSTANTS.agc.html#4B4F4E4D4154">KONMAT</a>     +2                         <span class="co">#  ZERO</span>
+042244,000169: 15,3760           00023                                    <a href="#53544D50">STMP</a>       +2                         
+042245,000170: 15,3761           65356                           <span class="in">SIN     </span> <span class="in">PDDL      </span>                            <span class="co">#  SIN LOS</span>
+042246,000171: 15,3762           00023                                    <a href="#53544D50">STMP</a>       +2                         
+042247,000172: 15,3763           55546                           <span class="in">COS     </span> <span class="in">VDEF      </span>                            <span class="co">#  COS LOS</span>
+042248,000173: 15,3764           53521                           <span class="in">MXV     </span> <span class="in">UNIT      </span>                            
+042249,000174: 15,3765           12002                                    <a href="CONTROLLED_CONSTANTS.agc.html#4B4F4E4D4154">KONMAT</a>                                
+042250,000175: 15,3766           02715                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5653554E">VSUN</a>                                  
+042251,000176: 15,3767           77616                           <span class="in">RVQ     </span>                                       
 </pre>
 </span>
 </p>
@@ -362,20 +362,20 @@ Page 987
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="504F53495445"></a>042241,000178: 15,3770           77745        <span class="sm">POSITE  </span>           <span class="in">DLOAD   </span>                                       
-042242,000179: 15,3771           12004                                    <a href="CONTROLLED_CONSTANTS.agc.html#4B4F4E4D4154">KONMAT</a>     +2                         <span class="co">#  ZEROS</span>
-042243,000180: 15,3772           00027                           <span class="in">STORE   </span> <a href="#47544D50">GTMP</a>                                  
-042244,000181: 15,3773           77650                           <span class="in">GOTO    </span>                                       
-042245,000182: 15,3774           33722                                    <a href="#504F53495444">POSITD</a>                                
-<a name="4C554E56454C"></a>042246,000183: 15,3775           77616        <span class="sm">LUNVEL  </span>           <span class="in">RVQ     </span>                                       <span class="co">#         TO FOOL INTEGRATION</span>
-042247,000184: 05,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#455048454D31">EPHEM1</a>                                
-042248,000185: 05,2000                                           <span class="ps">BANK    </span>                                       
-042249,000186: 
-042250,000187: 05,3506                                           <span class="ps">COUNT*  </span> $$/<a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#455048454D">EPHEM</a>                              
-<a name="53544D50"></a>042251,000188: 05,3506                        <span class="sm">STMP    </span>           <span class="ps">EQUALS  </span> 16D                                   
-<a name="47544D50"></a>042252,000189: 05,3506                        <span class="sm">GTMP    </span>           <span class="ps">EQUALS  </span> 22D                                   
-<a name="54494D4550"></a>042253,000190: 05,3506                        <span class="sm">TIMEP   </span>           <span class="ps">EQUALS  </span> 24D                                   
-042254,000191: 
+<a name="504F53495445"></a>042253,000178: 15,3770           77745        <span class="sm">POSITE  </span>           <span class="in">DLOAD   </span>                                       
+042254,000179: 15,3771           12004                                    <a href="CONTROLLED_CONSTANTS.agc.html#4B4F4E4D4154">KONMAT</a>     +2                         <span class="co">#  ZEROS</span>
+042255,000180: 15,3772           00027                           <span class="in">STORE   </span> <a href="#47544D50">GTMP</a>                                  
+042256,000181: 15,3773           77650                           <span class="in">GOTO    </span>                                       
+042257,000182: 15,3774           33722                                    <a href="#504F53495444">POSITD</a>                                
+<a name="4C554E56454C"></a>042258,000183: 15,3775           77616        <span class="sm">LUNVEL  </span>           <span class="in">RVQ     </span>                                       <span class="co">#         TO FOOL INTEGRATION</span>
+042259,000184: 05,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#455048454D31">EPHEM1</a>                                
+042260,000185: 05,2000                                           <span class="ps">BANK    </span>                                       
+042261,000186: 
+042262,000187: 05,3506                                           <span class="ps">COUNT*  </span> $$/<a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#455048454D">EPHEM</a>                              
+<a name="53544D50"></a>042263,000188: 05,3506                        <span class="sm">STMP    </span>           <span class="ps">EQUALS  </span> 16D                                   
+<a name="47544D50"></a>042264,000189: 05,3506                        <span class="sm">GTMP    </span>           <span class="ps">EQUALS  </span> 22D                                   
+<a name="54494D4550"></a>042265,000190: 05,3506                        <span class="sm">TIMEP   </span>           <span class="ps">EQUALS  </span> 24D                                   
+042266,000191: 
 
 End of include-file LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

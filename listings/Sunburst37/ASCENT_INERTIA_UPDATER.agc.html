@@ -90,28 +90,28 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023768,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-023769,000003:                                                                                                  <span class="co">## Filename:    ASCENT_INERTIA_UPDATER.agc</span>
-023770,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
-023771,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
-023772,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
-023773,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
-023774,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
-023775,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
-023776,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
-023777,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-023778,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-023779,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-023780,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
-023781,000015:                                                                                                  <span class="co">## Reference:   pp. 538-540</span>
-023782,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-023783,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-023784,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-023785,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
-023786,000020:                                                                                                  <span class="co">##              2017-06-05 HG   Transcribed</span>
-023787,000021:                                                                                                  <span class="co">##              2017-06-22 RSB  Proofed comment text with</span>
-023788,000022:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
-023789,000023: 
+023775,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+023776,000003:                                                                                                  <span class="co">## Filename:    ASCENT_INERTIA_UPDATER.agc</span>
+023777,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
+023778,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
+023779,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
+023780,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
+023781,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
+023782,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
+023783,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
+023784,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+023785,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+023786,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+023787,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
+023788,000015:                                                                                                  <span class="co">## Reference:   pp. 538-540</span>
+023789,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+023790,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+023791,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+023792,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
+023793,000020:                                                                                                  <span class="co">##              2017-06-05 HG   Transcribed</span>
+023794,000021:                                                                                                  <span class="co">##              2017-06-22 RSB  Proofed comment text with</span>
+023795,000022:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
+023796,000023: 
 </pre>
 </span>
 </p>
@@ -127,58 +127,58 @@ Page 538
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023791,000025: 26,2441                                           <span class="ps">BANK    </span> 26                                    
-023792,000026: 26,2441  E6,1541                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
-<a name="4958585441534B"></a>023793,000027: 26,2441           02504        <span class="sm">IXXTASK </span>           <span class="op">TC      </span> <a href="#4A41434345535450">JACCESTP</a>                              
-023794,000028: 
-023795,000029: 26,2442           02477                           <span class="op">TC      </span> <a href="#415343454E474F4E">ASCENGON</a>                              
-023796,000030: 
-023797,000031: 26,2443           00006                           <span class="op">EXTEND  </span>                                       
-023798,000032: 26,2444           27452                           <span class="op">DIM     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#495858">IXX</a>                                   
-023799,000033: 26,2445           32474                           <span class="op">CAF     </span> <a href="#49585854494D45">IXXTIME</a>                               
-023800,000034: 26,2446           05701                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-023801,000035: 26,2447  E6,1541                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
-023802,000036: 26,2447           02441 54006                     <span class="ps">2CADR   </span> <a href="#4958585441534B">IXXTASK</a>                               
-023803,000037: 
-023804,000038: 26,2451           15745                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-023805,000039: 
-<a name="4959595441534B"></a>023806,000040: 26,2452           02520        <span class="sm">IYYTASK </span>           <span class="op">TC      </span> <a href="#4A41434345535451">JACCESTQ</a>                              
-023807,000041: 
-023808,000042: 26,2453           02477                           <span class="op">TC      </span> <a href="#415343454E474F4E">ASCENGON</a>                              
-023809,000043: 
-023810,000044: 26,2454           00006                           <span class="op">EXTEND  </span>                                       
-023811,000045: 26,2455           27453                           <span class="op">DIM     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#495959">IYY</a>                                   
-023812,000046: 26,2456           32475                           <span class="op">CAF     </span> <a href="#49595954494D45">IYYTIME</a>                               
-023813,000047: 26,2457           05701                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-023814,000048: 26,2460  E6,1541                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
-023815,000049: 26,2460           02452 54006                     <span class="ps">2CADR   </span> <a href="#4959595441534B">IYYTASK</a>                               
-023816,000050: 
-023817,000051: 26,2462           15745                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-023818,000052: 
-<a name="495A5A5441534B"></a>023819,000053: 26,2463           02541        <span class="sm">IZZTASK </span>           <span class="op">TC      </span> <a href="#4A41434345535452">JACCESTR</a>                              
-023820,000054: 
-023821,000055: 26,2464           02477                           <span class="op">TC      </span> <a href="#415343454E474F4E">ASCENGON</a>                              
-023822,000056: 
-023823,000057: 26,2465           00006                           <span class="op">EXTEND  </span>                                       
-023824,000058: 26,2466           27454                           <span class="op">DIM     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#495A5A">IZZ</a>                                   
-023825,000059: 26,2467           32476                           <span class="op">CAF     </span> <a href="#495A5A54494D45">IZZTIME</a>                               
-023826,000060: 26,2470           05701                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-023827,000061: 26,2471  E6,1541                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
-023828,000062: 26,2471           02463 54006                     <span class="ps">2CADR   </span> <a href="#495A5A5441534B">IZZTASK</a>                               
-023829,000063: 
-023830,000064: 
-023831,000065: 26,2473           15745                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-023832,000066: 
-<a name="49585854494D45"></a>023833,000067: 26,2474           00310        <span class="sm">IXXTIME </span>           <span class="ps">DEC     </span> 200        B-14                       
-<a name="49595954494D45"></a>023834,000068: 26,2475           02424        <span class="sm">IYYTIME </span>           <span class="ps">DEC     </span> 1300       B-14                       
-<a name="495A5A54494D45"></a>023835,000069: 26,2476           00264        <span class="sm">IZZTIME </span>           <span class="ps">DEC     </span> 180        B-14                       
-023836,000070: 
-<a name="415343454E474F4E"></a>023837,000071: 26,2477           37746        <span class="sm">ASCENGON</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495438">BIT8</a>                                  
-023838,000072: 26,2500           70077                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              
-023839,000073: 26,2501           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-023840,000074: 26,2502           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-023841,000075: 26,2503           15745                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-023842,000076: 
+023798,000025: 26,2441                                           <span class="ps">BANK    </span> 26                                    
+023799,000026: 26,2441  E6,1541                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
+<a name="4958585441534B"></a>023800,000027: 26,2441           02504        <span class="sm">IXXTASK </span>           <span class="op">TC      </span> <a href="#4A41434345535450">JACCESTP</a>                              
+023801,000028: 
+023802,000029: 26,2442           02477                           <span class="op">TC      </span> <a href="#415343454E474F4E">ASCENGON</a>                              
+023803,000030: 
+023804,000031: 26,2443           00006                           <span class="op">EXTEND  </span>                                       
+023805,000032: 26,2444           27452                           <span class="op">DIM     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#495858">IXX</a>                                   
+023806,000033: 26,2445           32474                           <span class="op">CAF     </span> <a href="#49585854494D45">IXXTIME</a>                               
+023807,000034: 26,2446           05701                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+023808,000035: 26,2447  E6,1541                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
+023809,000036: 26,2447           02441 54006                     <span class="ps">2CADR   </span> <a href="#4958585441534B">IXXTASK</a>                               
+023810,000037: 
+023811,000038: 26,2451           15745                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+023812,000039: 
+<a name="4959595441534B"></a>023813,000040: 26,2452           02520        <span class="sm">IYYTASK </span>           <span class="op">TC      </span> <a href="#4A41434345535451">JACCESTQ</a>                              
+023814,000041: 
+023815,000042: 26,2453           02477                           <span class="op">TC      </span> <a href="#415343454E474F4E">ASCENGON</a>                              
+023816,000043: 
+023817,000044: 26,2454           00006                           <span class="op">EXTEND  </span>                                       
+023818,000045: 26,2455           27453                           <span class="op">DIM     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#495959">IYY</a>                                   
+023819,000046: 26,2456           32475                           <span class="op">CAF     </span> <a href="#49595954494D45">IYYTIME</a>                               
+023820,000047: 26,2457           05701                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+023821,000048: 26,2460  E6,1541                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
+023822,000049: 26,2460           02452 54006                     <span class="ps">2CADR   </span> <a href="#4959595441534B">IYYTASK</a>                               
+023823,000050: 
+023824,000051: 26,2462           15745                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+023825,000052: 
+<a name="495A5A5441534B"></a>023826,000053: 26,2463           02541        <span class="sm">IZZTASK </span>           <span class="op">TC      </span> <a href="#4A41434345535452">JACCESTR</a>                              
+023827,000054: 
+023828,000055: 26,2464           02477                           <span class="op">TC      </span> <a href="#415343454E474F4E">ASCENGON</a>                              
+023829,000056: 
+023830,000057: 26,2465           00006                           <span class="op">EXTEND  </span>                                       
+023831,000058: 26,2466           27454                           <span class="op">DIM     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#495A5A">IZZ</a>                                   
+023832,000059: 26,2467           32476                           <span class="op">CAF     </span> <a href="#495A5A54494D45">IZZTIME</a>                               
+023833,000060: 26,2470           05701                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+023834,000061: 26,2471  E6,1541                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
+023835,000062: 26,2471           02463 54006                     <span class="ps">2CADR   </span> <a href="#495A5A5441534B">IZZTASK</a>                               
+023836,000063: 
+023837,000064: 
+023838,000065: 26,2473           15745                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+023839,000066: 
+<a name="49585854494D45"></a>023840,000067: 26,2474           00310        <span class="sm">IXXTIME </span>           <span class="ps">DEC     </span> 200        B-14                       
+<a name="49595954494D45"></a>023841,000068: 26,2475           02424        <span class="sm">IYYTIME </span>           <span class="ps">DEC     </span> 1300       B-14                       
+<a name="495A5A54494D45"></a>023842,000069: 26,2476           00264        <span class="sm">IZZTIME </span>           <span class="ps">DEC     </span> 180        B-14                       
+023843,000070: 
+<a name="415343454E474F4E"></a>023844,000071: 26,2477           37746        <span class="sm">ASCENGON</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495438">BIT8</a>                                  
+023845,000072: 26,2500           70077                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              
+023846,000073: 26,2501           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+023847,000074: 26,2502           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+023848,000075: 26,2503           15745                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+023849,000076: 
 </pre>
 </span>
 </p>
@@ -194,59 +194,59 @@ Page 539
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="4A41434345535450"></a>023844,000078: 26,2504           31452        <span class="sm">JACCESTP</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#495858">IXX</a>                                   
-023845,000079: 26,2505           22007                           <span class="op">ZL      </span>                                       
-023846,000080: 26,2506           00006                           <span class="op">EXTEND  </span>                                       
-023847,000081: 26,2507           11455                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#344A4554544F524B">4JETTORK</a>                              
-023848,000082: 26,2510           60000                           <span class="op">DOUBLE  </span>                                       
-023849,000083: 26,2511           55441                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F324A545350">1/2JTSP</a>                               
-023850,000084: 
-023851,000085: 26,2512           32606                           <span class="op">CAF     </span> <a href="#4A4554544F524B">JETTORK</a>                               
-023852,000086: 26,2513           22007                           <span class="op">ZL      </span>                                       
-023853,000087: 26,2514           00006                           <span class="op">EXTEND  </span>                                       
-023854,000088: 26,2515           11452                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#495858">IXX</a>                                   
-023855,000089: 26,2516           55612                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#314A414343">1JACC</a>                                 
-023856,000090: 
-023857,000091: 26,2517           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-023858,000092: 
-<a name="4A41434345535451"></a>023859,000093: 26,2520           31453        <span class="sm">JACCESTQ</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#495959">IYY</a>                                   
-023860,000094: 26,2521           22007                           <span class="op">ZL      </span>                                       
-023861,000095: 26,2522           00006                           <span class="op">EXTEND  </span>                                       
-023862,000096: 26,2523           11456                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A4554544F524B34">JETTORK4</a>                              
-023863,000097: 26,2524           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  INCLUDE INVISIBLE FACTOR OF (1/2).</span>
-023864,000098: 
-023865,000099: 26,2525           77740                           <span class="op">MP      </span> <a href="INTERPRETER.agc.html#4249543134">BIT14</a>                                 
-023866,000100: 26,2526           55671                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542B3451">1/NET+4Q</a>                              
-023867,000101: 26,2527           55673                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542D3451">1/NET-4Q</a>                              
-023868,000102: 
-023869,000103: 
-023870,000104: 26,2530           60000                           <span class="op">DOUBLE  </span>                                       
-023871,000105: 26,2531           55670                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542B3251">1/NET+2Q</a>                              
-023872,000106: 26,2532           55672                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542D3251">1/NET-2Q</a>                              
-023873,000107: 
-023874,000108: 26,2533           32607                           <span class="op">CAF     </span> <a href="#4A4554544F524B31">JETTORK1</a>                              
-023875,000109: 26,2534           22007                           <span class="op">ZL      </span>                                       
-023876,000110: 26,2535           00006                           <span class="op">EXTEND  </span>                                       
-023877,000111: 26,2536           11453                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#495959">IYY</a>                                   
-023878,000112: 26,2537           55613                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#314A41434351">1JACCQ</a>                                
-023879,000113: 
-023880,000114: 26,2540           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-<a name="4A41434345535452"></a>023881,000115: 26,2541           31454        <span class="sm">JACCESTR</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#495A5A">IZZ</a>                                   
-023882,000116: 26,2542           22007                           <span class="op">ZL      </span>                                       
-023883,000117: 26,2543           00006                           <span class="op">EXTEND  </span>                                       
-023884,000118: 26,2544           11456                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A4554544F524B34">JETTORK4</a>                              
-023885,000119: 26,2545           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  INCLUDE INVISIBLE FACTOR OF (1/2).</span>
-023886,000120: 26,2546           77740                           <span class="op">MP      </span> <a href="INTERPRETER.agc.html#4249543134">BIT14</a>                                 
-023887,000121: 26,2547           55675                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542B3452">1/NET+4R</a>                              
-023888,000122: 26,2550           55677                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542D3452">1/NET-4R</a>                              
-023889,000123: 
-023890,000124: 26,2551           60000                           <span class="op">DOUBLE  </span>                                       
-023891,000125: 26,2552           55674                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542B3252">1/NET+2R</a>                              
-023892,000126: 26,2553           55676                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542D3252">1/NET-2R</a>                              
-023893,000127: 
-023894,000128: 26,2554           32607                           <span class="op">CAF     </span> <a href="#4A4554544F524B31">JETTORK1</a>                              
-023895,000129: 26,2555           22007                           <span class="op">ZL      </span>                                       
-023896,000130: 
+<a name="4A41434345535450"></a>023851,000078: 26,2504           31452        <span class="sm">JACCESTP</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#495858">IXX</a>                                   
+023852,000079: 26,2505           22007                           <span class="op">ZL      </span>                                       
+023853,000080: 26,2506           00006                           <span class="op">EXTEND  </span>                                       
+023854,000081: 26,2507           11455                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#344A4554544F524B">4JETTORK</a>                              
+023855,000082: 26,2510           60000                           <span class="op">DOUBLE  </span>                                       
+023856,000083: 26,2511           55441                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F324A545350">1/2JTSP</a>                               
+023857,000084: 
+023858,000085: 26,2512           32606                           <span class="op">CAF     </span> <a href="#4A4554544F524B">JETTORK</a>                               
+023859,000086: 26,2513           22007                           <span class="op">ZL      </span>                                       
+023860,000087: 26,2514           00006                           <span class="op">EXTEND  </span>                                       
+023861,000088: 26,2515           11452                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#495858">IXX</a>                                   
+023862,000089: 26,2516           55612                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#314A414343">1JACC</a>                                 
+023863,000090: 
+023864,000091: 26,2517           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+023865,000092: 
+<a name="4A41434345535451"></a>023866,000093: 26,2520           31453        <span class="sm">JACCESTQ</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#495959">IYY</a>                                   
+023867,000094: 26,2521           22007                           <span class="op">ZL      </span>                                       
+023868,000095: 26,2522           00006                           <span class="op">EXTEND  </span>                                       
+023869,000096: 26,2523           11456                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A4554544F524B34">JETTORK4</a>                              
+023870,000097: 26,2524           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  INCLUDE INVISIBLE FACTOR OF (1/2).</span>
+023871,000098: 
+023872,000099: 26,2525           77740                           <span class="op">MP      </span> <a href="INTERPRETER.agc.html#4249543134">BIT14</a>                                 
+023873,000100: 26,2526           55671                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542B3451">1/NET+4Q</a>                              
+023874,000101: 26,2527           55673                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542D3451">1/NET-4Q</a>                              
+023875,000102: 
+023876,000103: 
+023877,000104: 26,2530           60000                           <span class="op">DOUBLE  </span>                                       
+023878,000105: 26,2531           55670                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542B3251">1/NET+2Q</a>                              
+023879,000106: 26,2532           55672                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542D3251">1/NET-2Q</a>                              
+023880,000107: 
+023881,000108: 26,2533           32607                           <span class="op">CAF     </span> <a href="#4A4554544F524B31">JETTORK1</a>                              
+023882,000109: 26,2534           22007                           <span class="op">ZL      </span>                                       
+023883,000110: 26,2535           00006                           <span class="op">EXTEND  </span>                                       
+023884,000111: 26,2536           11453                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#495959">IYY</a>                                   
+023885,000112: 26,2537           55613                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#314A41434351">1JACCQ</a>                                
+023886,000113: 
+023887,000114: 26,2540           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+<a name="4A41434345535452"></a>023888,000115: 26,2541           31454        <span class="sm">JACCESTR</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#495A5A">IZZ</a>                                   
+023889,000116: 26,2542           22007                           <span class="op">ZL      </span>                                       
+023890,000117: 26,2543           00006                           <span class="op">EXTEND  </span>                                       
+023891,000118: 26,2544           11456                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A4554544F524B34">JETTORK4</a>                              
+023892,000119: 26,2545           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  INCLUDE INVISIBLE FACTOR OF (1/2).</span>
+023893,000120: 26,2546           77740                           <span class="op">MP      </span> <a href="INTERPRETER.agc.html#4249543134">BIT14</a>                                 
+023894,000121: 26,2547           55675                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542B3452">1/NET+4R</a>                              
+023895,000122: 26,2550           55677                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542D3452">1/NET-4R</a>                              
+023896,000123: 
+023897,000124: 26,2551           60000                           <span class="op">DOUBLE  </span>                                       
+023898,000125: 26,2552           55674                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542B3252">1/NET+2R</a>                              
+023899,000126: 26,2553           55676                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542D3252">1/NET-2R</a>                              
+023900,000127: 
+023901,000128: 26,2554           32607                           <span class="op">CAF     </span> <a href="#4A4554544F524B31">JETTORK1</a>                              
+023902,000129: 26,2555           22007                           <span class="op">ZL      </span>                                       
+023903,000130: 
 </pre>
 </span>
 </p>
@@ -262,39 +262,39 @@ Page 540
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023898,000132: 26,2556           00006                           <span class="op">EXTEND  </span>                                       
-023899,000133: 26,2557           11454                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#495A5A">IZZ</a>                                   
-023900,000134: 
-023901,000135: 26,2560           55614                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#314A41434352">1JACCR</a>                                
-023902,000136: 
-<a name="434F4D4D4F4E5152"></a>023903,000137: 26,2561           31670        <span class="sm">COMMONQR</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F324A545351">1/2JTSQ</a>                               
-023904,000138: 26,2562           61674                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F324A545352">1/2JTSR</a>                               
-023905,000139: 26,2563           00006                           <span class="op">EXTEND  </span>                                       
-023906,000140: 26,2564           72605                           <span class="op">MP      </span> <a href="#2E373037424B3236">.707BK26</a>                              
-023907,000141: 26,2565           55701                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F324A45545355">1/2JETSU</a>                              <span class="co">#  TEMP</span>
-023908,000142: 
-023909,000143: 26,2566           31670                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F324A545351">1/2JTSQ</a>                               
-023910,000144: 26,2567           00006                           <span class="op">EXTEND  </span>                                       
-023911,000145: 26,2570           71674                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F324A545352">1/2JTSR</a>                               
-023912,000146: 26,2571           00006                           <span class="op">EXTEND  </span>                                       
-023913,000147: 26,2572           11701                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F324A45545355">1/2JETSU</a>                              <span class="co">#  TEMP</span>
-023914,000148: 26,2573           55701                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542B3255">1/NET+2U</a>                              
-023915,000149: 26,2574           55703                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542D3255">1/NET-2U</a>                              
-023916,000150: 26,2575           55705                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542B3256">1/NET+2V</a>                              
-023917,000151: 26,2576           55707                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542D3256">1/NET-2V</a>                              
-023918,000152: 
-023919,000153: 26,2577           60000                           <span class="op">DOUBLE  </span>                                       
-023920,000154: 26,2600           55700                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542B3155">1/NET+1U</a>                              
-023921,000155: 26,2601           55702                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542D3155">1/NET-1U</a>                              
-023922,000156: 26,2602           55704                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542B3156">1/NET+1V</a>                              
-023923,000157: 26,2603           55706                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542D3156">1/NET-1V</a>                              
-023924,000158: 
-023925,000159: 26,2604           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-023926,000160: 
-<a name="2E373037424B3236"></a>023927,000161: 26,2605           26501        <span class="sm">.707BK26</span>           <span class="ps">DEC     </span> <a href="AOSTASK_AND_AOSJOB.agc.html#302E3730373131">0.70711</a>                               
-<a name="4A4554544F524B"></a>023928,000162: 26,2606           00050        <span class="sm">JETTORK </span>           <span class="ps">DEC     </span> 0.00243                               <span class="co">#  500 FT LBS. SCALED AT PI*2(+16)</span>
-<a name="4A4554544F524B31"></a>023929,000163: 26,2607           00054        <span class="sm">JETTORK1</span>           <span class="ps">DEC     </span> 0.00267                               <span class="co">#  550 FT LBS. SCALED AT PI*2(+16)</span>
-<a name="302E3335333536"></a>023930,000164: 26,2610           13241        <span class="sm">0.35356 </span>           <span class="ps">DEC     </span> <a href="#302E3335333536">0.35356</a>                               
+023905,000132: 26,2556           00006                           <span class="op">EXTEND  </span>                                       
+023906,000133: 26,2557           11454                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#495A5A">IZZ</a>                                   
+023907,000134: 
+023908,000135: 26,2560           55614                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#314A41434352">1JACCR</a>                                
+023909,000136: 
+<a name="434F4D4D4F4E5152"></a>023910,000137: 26,2561           31670        <span class="sm">COMMONQR</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F324A545351">1/2JTSQ</a>                               
+023911,000138: 26,2562           61674                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F324A545352">1/2JTSR</a>                               
+023912,000139: 26,2563           00006                           <span class="op">EXTEND  </span>                                       
+023913,000140: 26,2564           72605                           <span class="op">MP      </span> <a href="#2E373037424B3236">.707BK26</a>                              
+023914,000141: 26,2565           55701                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F324A45545355">1/2JETSU</a>                              <span class="co">#  TEMP</span>
+023915,000142: 
+023916,000143: 26,2566           31670                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F324A545351">1/2JTSQ</a>                               
+023917,000144: 26,2567           00006                           <span class="op">EXTEND  </span>                                       
+023918,000145: 26,2570           71674                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F324A545352">1/2JTSR</a>                               
+023919,000146: 26,2571           00006                           <span class="op">EXTEND  </span>                                       
+023920,000147: 26,2572           11701                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F324A45545355">1/2JETSU</a>                              <span class="co">#  TEMP</span>
+023921,000148: 26,2573           55701                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542B3255">1/NET+2U</a>                              
+023922,000149: 26,2574           55703                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542D3255">1/NET-2U</a>                              
+023923,000150: 26,2575           55705                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542B3256">1/NET+2V</a>                              
+023924,000151: 26,2576           55707                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542D3256">1/NET-2V</a>                              
+023925,000152: 
+023926,000153: 26,2577           60000                           <span class="op">DOUBLE  </span>                                       
+023927,000154: 26,2600           55700                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542B3155">1/NET+1U</a>                              
+023928,000155: 26,2601           55702                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542D3155">1/NET-1U</a>                              
+023929,000156: 26,2602           55704                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542B3156">1/NET+1V</a>                              
+023930,000157: 26,2603           55706                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F4E45542D3156">1/NET-1V</a>                              
+023931,000158: 
+023932,000159: 26,2604           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+023933,000160: 
+<a name="2E373037424B3236"></a>023934,000161: 26,2605           26501        <span class="sm">.707BK26</span>           <span class="ps">DEC     </span> <a href="AOSTASK_AND_AOSJOB.agc.html#302E3730373131">0.70711</a>                               
+<a name="4A4554544F524B"></a>023935,000162: 26,2606           00050        <span class="sm">JETTORK </span>           <span class="ps">DEC     </span> 0.00243                               <span class="co">#  500 FT LBS. SCALED AT PI*2(+16)</span>
+<a name="4A4554544F524B31"></a>023936,000163: 26,2607           00054        <span class="sm">JETTORK1</span>           <span class="ps">DEC     </span> 0.00267                               <span class="co">#  550 FT LBS. SCALED AT PI*2(+16)</span>
+<a name="302E3335333536"></a>023937,000164: 26,2610           13241        <span class="sm">0.35356 </span>           <span class="ps">DEC     </span> <a href="#302E3335333536">0.35356</a>                               
 
 End of include-file ASCENT_INERTIA_UPDATER.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

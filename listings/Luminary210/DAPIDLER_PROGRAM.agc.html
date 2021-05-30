@@ -89,26 +89,26 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-060814,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-060815,000003:                                                                                                  <span class="co">## Filename:    DAPIDLER_PROGRAM.agc</span>
-060816,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 210.</span>
-060817,000005:                                                                                                  <span class="co">##              It is part of the source code for the Lunar Module's (LM)</span>
-060818,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 15-17.</span>
-060819,000007:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-060820,000008:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-060821,000009:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-060822,000010:                                                                                                  <span class="co">##              original YUL assembler.</span>
-060823,000011:                                                                                                  <span class="co">## Reference:   pp. 1407-1418</span>
-060824,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-060825,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-060826,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-060827,000015:                                                                                                  <span class="co">## Mod history: 2016-11-17 JL   Created from Luminary131 version.</span>
-060828,000016:                                                                                                  <span class="co">##              2016-12-07 RRB  Transcribed from Luminary210.</span>
-060829,000017:                                                                                                  <span class="co">##              2016-12-08 HG   Fix operand AGCINDIC -> AGSINDIC</span>
-060830,000018:                                                                                                  <span class="co">##              2016-12-11 HG   fix operand MOREIDLE -> NONEEDLE</span>
-060831,000019:                                                                                                  <span class="co">##              2016-12-26 RSB  Comment-text proofed using ProoferComments</span>
-060832,000020:                                                                                                  <span class="co">##                              and corrected errors found.</span>
-060833,000021: 
+060828,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+060829,000003:                                                                                                  <span class="co">## Filename:    DAPIDLER_PROGRAM.agc</span>
+060830,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 210.</span>
+060831,000005:                                                                                                  <span class="co">##              It is part of the source code for the Lunar Module's (LM)</span>
+060832,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 15-17.</span>
+060833,000007:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+060834,000008:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+060835,000009:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+060836,000010:                                                                                                  <span class="co">##              original YUL assembler.</span>
+060837,000011:                                                                                                  <span class="co">## Reference:   pp. 1407-1418</span>
+060838,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+060839,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+060840,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+060841,000015:                                                                                                  <span class="co">## Mod history: 2016-11-17 JL   Created from Luminary131 version.</span>
+060842,000016:                                                                                                  <span class="co">##              2016-12-07 RRB  Transcribed from Luminary210.</span>
+060843,000017:                                                                                                  <span class="co">##              2016-12-08 HG   Fix operand AGCINDIC -> AGSINDIC</span>
+060844,000018:                                                                                                  <span class="co">##              2016-12-11 HG   fix operand MOREIDLE -> NONEEDLE</span>
+060845,000019:                                                                                                  <span class="co">##              2016-12-26 RSB  Comment-text proofed using ProoferComments</span>
+060846,000020:                                                                                                  <span class="co">##                              and corrected errors found.</span>
+060847,000021: 
 </pre>
 </span>
 </p>
@@ -124,56 +124,56 @@ Page 1407
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-060835,000023:                                                                                                  <span class="co">#  THE DAPIDLER PROGRAM IS STARTED BY FRESH START AND RESTART.  THE DAPIDLER PROGRAM IS DONE 10 TIMES</span>
-060836,000024:                                                                                                  <span class="co">#  PER SECOND UNTIL THE ASTRONAUT DESIRES THE DAP TO WAKE UP, AND THE IMU AND CDUS ARE READY FOR USE BY THE DAP.</span>
-060837,000025:                                                                                                  <span class="co">#  THE NECESSARY INITIALIZATION OF THE DAP IS DONE BY THE DAPIDLER PROGRAM.</span>
-060838,000026: 
-060839,000027: 16,2000                                           <span class="ps">BANK    </span> 16                                    
-060840,000028: 16,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4441505331">DAPS1</a>                                 
-060841,000029: 16,2000                                           <span class="ps">BANK    </span>                                       
-060842,000030: 
-060843,000031: 16,2000  E6,1536                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5351">AOSQ</a>                                  
-060844,000032: 
-060845,000033: 16,2000                                           <span class="ps">COUNT*  </span> $$/DAPID                              
-060846,000034:                                                                                                  <span class="co">#        CHEKBITS IS CALLED EVERY 0.1 SEC AT THE BEGINNING OF THE DAP PASS, WHETHER THE AUTOPILOT IS ACTIVE OR IDLING.</span>
-060847,000035:                                                                                                  <span class="co">#  IT CHECKS FOR THE FOLLOWING</span>
-060848,000036:                                                                                                  <span class="co">#                A. IS THE PGNCS MODE SELECT SWITCH TURNED TO "OFF"?</span>
-060849,000037:                                                                                                  <span class="co">#                B. IS THE IMU UNAVAILABLE AS AN ATTITUDE REFERENCE?</span>
-060850,000038:                                                                                                  <span class="co">#                C. HAS THE INDICATION GONE FROM AGS TO PGNCS SINCE LAST CHECKED</span>
-060851,000039:                                                                                                  <span class="co">#        IF EITHER A OR B HOLD, THE FDAI ERROR NEEDLES MUST NOT BE UPDATED (TOAVOID CONFLICT OVER USE OF THE DACS WITH</span>
-060852,000040:                                                                                                  <span class="co">#  V43 OR COARSE ALIGN) AND THE DAP MUST IDLE.  A BIT IS SET TO CAUSE  NEEDLER TO INITIALIZE ITSELF WHEN IT IS NEXT</span>
-060853,000041:                                                                                                  <span class="co">#  CALLED AND CONTROL IS TRANSFERRED TO A SHORT IDLING ROUTINE.  OTHERWISE, THE NEEDLES ARE UPDATED AND CONDITION</span>
-060854,000042:                                                                                                  <span class="co">#  "C" IS TESTED.</span>
-060855,000043: 
-060856,000044:                                                                                                  <span class="co">#        IF C HOLDS, THE DAP IS REINITIALIZED.  OTHERWISE, THE DAP SHOULD BE ACTIVE AND CONTROL IS TRANSFERRED BACK TO</span>
-060857,000045:                                                                                                  <span class="co">#  THE CALLER OF CHEKBITS.</span>
-060858,000046: 
-<a name="4348454B42495453"></a>060859,000047: 16,2000           00006        <span class="sm">CHEKBITS</span>           <span class="op">EXTEND  </span>                                       
-060860,000048: 16,2001           00031                           <span class="op">READ    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3331">CHAN31</a>                                <span class="co">#  IF BOTH BIT13 AND BIT14 ARE ONE, THEN</span>
-060861,000049: 16,2002           40000                           <span class="op">COM     </span>                                       <span class="co">#  THE MODE SELECT SWITCH IS IN THE OFF</span>
-060862,000050: 16,2003           74346                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431332D3134">BIT13-14</a>                              <span class="co">#  POSITION, AND SO THE DAP SHOULD BE OFF,</span>
-060863,000051: 16,2004           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  WITH NO ATTITUDE ERROR DISPLAY.</span>
-060864,000052: 16,2005           12012                           <span class="op">BZF     </span> <a href="#4E4F4E4545444C45">NONEEDLE</a>                              
-060865,000053: 
-060866,000054: 16,2006           41300                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533333">IMODES33</a>                              <span class="co">#  IF IMU NOT USABLE, DAP SHOULD IDLE WITH</span>
-060867,000055: 16,2007           74737                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  <span class="co">#   NO FDAI NEEDLE DISPLAY.</span>
-060868,000056: 16,2010           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-060869,000057: 16,2011           12212                           <span class="op">TCF     </span> <a href="#4A554D50445350">JUMPDSP</a>                               
-<a name="4E4F4E4545444C45"></a>060870,000058: 16,2012           41774        <span class="sm">NONEEDLE</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              <span class="co">#  SET FLAG TO INITIALIZE NEEDLE DISPLAY.</span>
-060871,000059: 16,2013           74742                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495433">BIT3</a>                                  
-060872,000060: 16,2014           27774                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              
-060873,000061: 16,2015           12164                           <span class="op">TCF     </span> <a href="#53485554444F574E">SHUTDOWN</a>                              
-060874,000062: 
-<a name="4348454B4D4F5245"></a>060875,000063: 16,2016           34733        <span class="sm">CHEKMORE</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543130">BIT10</a>                                 <span class="co">#  BIT 10 OF 30 IS PGNCS CONTROL OF S/C</span>
-060876,000064: 16,2017           00006                           <span class="op">EXTEND  </span>                                       
-060877,000065: 16,2020           02030                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3330">CHAN30</a>                                <span class="co">#  BITS IN 30 ARE INVERTED</span>
-060878,000066: 16,2021           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-060879,000067: 16,2022           12033                           <span class="op">TCF     </span> <a href="#414753494E444943">AGSINDIC</a>                              <span class="co">#  AGS: GO SET NPGNCSFL BUT CONTROL ANYHOW.</span>
-060880,000068: 16,2023           40106                           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C475752443130">FLGWRD10</a>                              
-060881,000069: 16,2024           74744                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#4E50474E43534254">NPGNCSBT</a>                              
-060882,000070: 16,2025           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-060883,000071: 16,2026           00002                           <span class="op">RETURN  </span>                                       <span class="co">#  PGNCS BOTH LAST TIME &amp; THIS: GO CONTROL.</span>
-060884,000072: 
+060849,000023:                                                                                                  <span class="co">#  THE DAPIDLER PROGRAM IS STARTED BY FRESH START AND RESTART.  THE DAPIDLER PROGRAM IS DONE 10 TIMES</span>
+060850,000024:                                                                                                  <span class="co">#  PER SECOND UNTIL THE ASTRONAUT DESIRES THE DAP TO WAKE UP, AND THE IMU AND CDUS ARE READY FOR USE BY THE DAP.</span>
+060851,000025:                                                                                                  <span class="co">#  THE NECESSARY INITIALIZATION OF THE DAP IS DONE BY THE DAPIDLER PROGRAM.</span>
+060852,000026: 
+060853,000027: 16,2000                                           <span class="ps">BANK    </span> 16                                    
+060854,000028: 16,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4441505331">DAPS1</a>                                 
+060855,000029: 16,2000                                           <span class="ps">BANK    </span>                                       
+060856,000030: 
+060857,000031: 16,2000  E6,1536                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5351">AOSQ</a>                                  
+060858,000032: 
+060859,000033: 16,2000                                           <span class="ps">COUNT*  </span> $$/DAPID                              
+060860,000034:                                                                                                  <span class="co">#        CHEKBITS IS CALLED EVERY 0.1 SEC AT THE BEGINNING OF THE DAP PASS, WHETHER THE AUTOPILOT IS ACTIVE OR IDLING.</span>
+060861,000035:                                                                                                  <span class="co">#  IT CHECKS FOR THE FOLLOWING</span>
+060862,000036:                                                                                                  <span class="co">#                A. IS THE PGNCS MODE SELECT SWITCH TURNED TO "OFF"?</span>
+060863,000037:                                                                                                  <span class="co">#                B. IS THE IMU UNAVAILABLE AS AN ATTITUDE REFERENCE?</span>
+060864,000038:                                                                                                  <span class="co">#                C. HAS THE INDICATION GONE FROM AGS TO PGNCS SINCE LAST CHECKED</span>
+060865,000039:                                                                                                  <span class="co">#        IF EITHER A OR B HOLD, THE FDAI ERROR NEEDLES MUST NOT BE UPDATED (TOAVOID CONFLICT OVER USE OF THE DACS WITH</span>
+060866,000040:                                                                                                  <span class="co">#  V43 OR COARSE ALIGN) AND THE DAP MUST IDLE.  A BIT IS SET TO CAUSE  NEEDLER TO INITIALIZE ITSELF WHEN IT IS NEXT</span>
+060867,000041:                                                                                                  <span class="co">#  CALLED AND CONTROL IS TRANSFERRED TO A SHORT IDLING ROUTINE.  OTHERWISE, THE NEEDLES ARE UPDATED AND CONDITION</span>
+060868,000042:                                                                                                  <span class="co">#  "C" IS TESTED.</span>
+060869,000043: 
+060870,000044:                                                                                                  <span class="co">#        IF C HOLDS, THE DAP IS REINITIALIZED.  OTHERWISE, THE DAP SHOULD BE ACTIVE AND CONTROL IS TRANSFERRED BACK TO</span>
+060871,000045:                                                                                                  <span class="co">#  THE CALLER OF CHEKBITS.</span>
+060872,000046: 
+<a name="4348454B42495453"></a>060873,000047: 16,2000           00006        <span class="sm">CHEKBITS</span>           <span class="op">EXTEND  </span>                                       
+060874,000048: 16,2001           00031                           <span class="op">READ    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3331">CHAN31</a>                                <span class="co">#  IF BOTH BIT13 AND BIT14 ARE ONE, THEN</span>
+060875,000049: 16,2002           40000                           <span class="op">COM     </span>                                       <span class="co">#  THE MODE SELECT SWITCH IS IN THE OFF</span>
+060876,000050: 16,2003           74346                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431332D3134">BIT13-14</a>                              <span class="co">#  POSITION, AND SO THE DAP SHOULD BE OFF,</span>
+060877,000051: 16,2004           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  WITH NO ATTITUDE ERROR DISPLAY.</span>
+060878,000052: 16,2005           12012                           <span class="op">BZF     </span> <a href="#4E4F4E4545444C45">NONEEDLE</a>                              
+060879,000053: 
+060880,000054: 16,2006           41300                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533333">IMODES33</a>                              <span class="co">#  IF IMU NOT USABLE, DAP SHOULD IDLE WITH</span>
+060881,000055: 16,2007           74737                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  <span class="co">#   NO FDAI NEEDLE DISPLAY.</span>
+060882,000056: 16,2010           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+060883,000057: 16,2011           12212                           <span class="op">TCF     </span> <a href="#4A554D50445350">JUMPDSP</a>                               
+<a name="4E4F4E4545444C45"></a>060884,000058: 16,2012           41774        <span class="sm">NONEEDLE</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              <span class="co">#  SET FLAG TO INITIALIZE NEEDLE DISPLAY.</span>
+060885,000059: 16,2013           74742                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495433">BIT3</a>                                  
+060886,000060: 16,2014           27774                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              
+060887,000061: 16,2015           12164                           <span class="op">TCF     </span> <a href="#53485554444F574E">SHUTDOWN</a>                              
+060888,000062: 
+<a name="4348454B4D4F5245"></a>060889,000063: 16,2016           34733        <span class="sm">CHEKMORE</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543130">BIT10</a>                                 <span class="co">#  BIT 10 OF 30 IS PGNCS CONTROL OF S/C</span>
+060890,000064: 16,2017           00006                           <span class="op">EXTEND  </span>                                       
+060891,000065: 16,2020           02030                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3330">CHAN30</a>                                <span class="co">#  BITS IN 30 ARE INVERTED</span>
+060892,000066: 16,2021           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+060893,000067: 16,2022           12033                           <span class="op">TCF     </span> <a href="#414753494E444943">AGSINDIC</a>                              <span class="co">#  AGS: GO SET NPGNCSFL BUT CONTROL ANYHOW.</span>
+060894,000068: 16,2023           40106                           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C475752443130">FLGWRD10</a>                              
+060895,000069: 16,2024           74744                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#4E50474E43534254">NPGNCSBT</a>                              
+060896,000070: 16,2025           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+060897,000071: 16,2026           00002                           <span class="op">RETURN  </span>                                       <span class="co">#  PGNCS BOTH LAST TIME &amp; THIS: GO CONTROL.</span>
+060898,000072: 
 </pre>
 </span>
 </p>
@@ -189,16 +189,16 @@ Page 1408
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-060886,000074: 16,2027           44744                           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#4E50474E43534254">NPGNCSBT</a>                              <span class="co">#  PGNCS THIS TIME BUT AGS LAST: CLEAR</span>
-060887,000075: 16,2030           70106                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C475752443130">FLGWRD10</a>                              <span class="co">#    NPGNCSFL AND GO INITIALIZE DAP.</span>
-060888,000076: 16,2031           54106                           <span class="op">TS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C475752443130">FLGWRD10</a>                              
-060889,000077: 16,2032           12043                           <span class="op">TCF     </span> <a href="#5354415254445031">STARTDP1</a>                              
-060890,000078: 
-<a name="414753494E444943"></a>060891,000079: 16,2033           40106        <span class="sm">AGSINDIC</span>           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C475752443130">FLGWRD10</a>                              
-060892,000080: 16,2034           74744                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#4E50474E43534254">NPGNCSBT</a>                              
-060893,000081: 16,2035           26106                           <span class="op">ADS     </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C475752443130">FLGWRD10</a>                              
-060894,000082: 16,2036           00002                           <span class="op">RETURN  </span>                                       
-060895,000083: 
+060900,000074: 16,2027           44744                           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#4E50474E43534254">NPGNCSBT</a>                              <span class="co">#  PGNCS THIS TIME BUT AGS LAST: CLEAR</span>
+060901,000075: 16,2030           70106                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C475752443130">FLGWRD10</a>                              <span class="co">#    NPGNCSFL AND GO INITIALIZE DAP.</span>
+060902,000076: 16,2031           54106                           <span class="op">TS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C475752443130">FLGWRD10</a>                              
+060903,000077: 16,2032           12043                           <span class="op">TCF     </span> <a href="#5354415254445031">STARTDP1</a>                              
+060904,000078: 
+<a name="414753494E444943"></a>060905,000079: 16,2033           40106        <span class="sm">AGSINDIC</span>           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C475752443130">FLGWRD10</a>                              
+060906,000080: 16,2034           74744                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#4E50474E43534254">NPGNCSBT</a>                              
+060907,000081: 16,2035           26106                           <span class="op">ADS     </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C475752443130">FLGWRD10</a>                              
+060908,000082: 16,2036           00002                           <span class="op">RETURN  </span>                                       
+060909,000083: 
 </pre>
 </span>
 </p>
@@ -214,57 +214,57 @@ Page 1409
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-060897,000085: 
-060898,000086:                                                                                                  <span class="co">#  DAPIDLER ENTRY.</span>
-060899,000087: 
-<a name="44415049444C4552"></a>060900,000088: 16,2037           22016        <span class="sm">DAPIDLER</span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              <span class="co">#  INTERRUPT LEAD INS (CONTINUED)</span>
-060901,000089: 16,2040           00006                           <span class="op">EXTEND  </span>                                       
-060902,000090: 16,2041           22012                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152555054">QRUPT</a>                                 
-060903,000091: 
-<a name="434845434B5550"></a>060904,000092: 16,2042           02000        <span class="sm">CHECKUP </span>           <span class="op">TC      </span> <a href="#4348454B42495453">CHEKBITS</a>                              <span class="co">#  CHECK TO SEE IF LM DAP IS TO GO ON AND</span>
-060905,000093:                                                                                                  <span class="co">#        DO ERROR DISPLAY.</span>
-060906,000094: 
-<a name="5354415254445031"></a>060907,000095: 16,2043           30111        <span class="sm">STARTDP1</span>           <span class="op">CAE     </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              <span class="co">#  IF 1/ACCS HAS NOT BEEN COMPLETED, IDLE.</span>
-060908,000096: 16,2044           74742                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#414343534F4B4159">ACCSOKAY</a>                              <span class="co">#        NOTE:   ONLY FRESH START AND RESTART</span>
-060909,000097: 16,2045           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#                KNOCK THIS BIT DOWN.</span>
-060910,000098: 16,2046           12160                           <span class="op">BZF     </span> <a href="#4D4F524549444C45">MOREIDLE</a>                              
-060911,000099: 
-<a name="5354415254444150"></a>060912,000100: 16,2047           04665        <span class="sm">STARTDAP</span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              <span class="co">#  ZERO ATTITUDE ERROR AND DESIRED RATES.</span>
-060913,000101: 16,2050           40154                           <span class="ps">FCADR   </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#5A41545445524F52">ZATTEROR</a>                              
-060914,000102: 16,2051           34746                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  ********** INITIALIZE: **********</span>
-060915,000103: 16,2052           55524                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A50">TJP</a>                                   
-060916,000104: 16,2053           55525                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A55">TJU</a>                                   
-060917,000105: 16,2054           55526                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A56">TJV</a>                                   
-060918,000106: 16,2055           55421                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474150">OMEGAP</a>                                <span class="co">#  RATES IN BODY (PILOT) COORDINATES.</span>
-060919,000107: 16,2056           55422                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474151">OMEGAQ</a>                                
-060920,000108: 16,2057           55423                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474152">OMEGAR</a>                                
-060921,000109: 16,2060           55430                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54524150454450">TRAPEDP</a>                               
-060922,000110: 16,2061           55431                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54524150454451">TRAPEDQ</a>                               
-060923,000111: 16,2062           55432                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54524150454452">TRAPEDR</a>                               
-060924,000112: 16,2063           55536                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5351">AOSQ</a>                                  <span class="co">#  OFFSET ACCELERATION ESTIMATES.</span>
-060925,000113: 16,2064           55537                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5351">AOSQ</a>       +1                         
-060926,000114: 16,2065           55540                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5352">AOSR</a>                                  
-060927,000115: 16,2066           55541                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5352">AOSR</a>       +1                         
-060928,000116: 16,2067           55424                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484151">ALPHAQ</a>                                <span class="co">#  COPIES OF OFFSET ESTIMATES FOR DOWNLIST.</span>
-060929,000117: 16,2070           55425                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484152">ALPHAR</a>                                
-060930,000118: 16,2071           55501                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45475551">NEGUQ</a>                                 
-060931,000119: 16,2072           55503                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45475552">NEGUR</a>                                 
-060932,000120: 16,2073           55544                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F53515445524D">AOSQTERM</a>                              <span class="co">#  QRAXIS RATE DERIVATION TERMS AND KALMAN</span>
-060933,000121: 16,2074           55545                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F53525445524D">AOSRTERM</a>                              <span class="co">#  FILTER INITIALIZATION TERMS.</span>
-060934,000122: 16,2075           55510                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51414343444F54">QACCDOT</a>                               <span class="co">#  DESCENT ACCELERATION DERIVATIVE EST.</span>
-060935,000123: 16,2076           55512                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52414343444F54">RACCDOT</a>                               
-060936,000124: 16,2077           55502                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4C4F57475453">ALLOWGTS</a>                              <span class="co">#  AOSTASK FLAG FOR QRAXIS RCS CONTROL USE.</span>
-060937,000125: 16,2100           55630                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F54524F4C4552">COTROLER</a>                              <span class="co">#  DO TRYGTS ON FIRST PASS (WILL GO TO RCS)</span>
-060938,000126: 16,2101           55632                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494E475453">INGTS</a>                                 <span class="co">#  RECOGNIZE FIRST GTS PASS AS SUCH.</span>
-060939,000127: 16,2102           55631                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5147494D54494D52">QGIMTIMR</a>                              <span class="co">#  STOP GIMBAL DRIVES.  (PROBABLY WOULD BE</span>
-060940,000128: 16,2103           55633                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5247494D54494D52">RGIMTIMR</a>                              <span class="co">#        GOOD ENOUGH JUST TO INACTIVATE TIMERS)</span>
-060941,000129: 16,2104           55460                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4C44504D494E">OLDPMIN</a>                               <span class="co">#  MINIMUM IMPULSE MODE ERASABLES</span>
-060942,000130: 16,2105           55461                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4C4451524D494E">OLDQRMIN</a>                              
-060943,000131: 16,2106           55766                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504A4554435452">PJETCTR</a>                               <span class="co">#  INITIALIZE DOCKED JET INHIBITION</span>
-060944,000132: 16,2107           55767                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#554A4554435452">UJETCTR</a>                               <span class="co">#  COUNTERS</span>
-060945,000133: 16,2110           55770                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564A4554435452">VJETCTR</a>                               
-<a name="43414C4C474D424C"></a>060946,000134: 16,2111     4740               <span class="sm">CALLGMBL</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495435">BIT5</a>                                  <span class="co">#  RCSFLAGS INITIALIZATION.</span>
-060947,000135: 16,2111           42206                           <span class="op">CS      </span> <a href="#4D414E464C4147">MANFLAG</a>                               
+060911,000085: 
+060912,000086:                                                                                                  <span class="co">#  DAPIDLER ENTRY.</span>
+060913,000087: 
+<a name="44415049444C4552"></a>060914,000088: 16,2037           22016        <span class="sm">DAPIDLER</span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              <span class="co">#  INTERRUPT LEAD INS (CONTINUED)</span>
+060915,000089: 16,2040           00006                           <span class="op">EXTEND  </span>                                       
+060916,000090: 16,2041           22012                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152555054">QRUPT</a>                                 
+060917,000091: 
+<a name="434845434B5550"></a>060918,000092: 16,2042           02000        <span class="sm">CHECKUP </span>           <span class="op">TC      </span> <a href="#4348454B42495453">CHEKBITS</a>                              <span class="co">#  CHECK TO SEE IF LM DAP IS TO GO ON AND</span>
+060919,000093:                                                                                                  <span class="co">#        DO ERROR DISPLAY.</span>
+060920,000094: 
+<a name="5354415254445031"></a>060921,000095: 16,2043           30111        <span class="sm">STARTDP1</span>           <span class="op">CAE     </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              <span class="co">#  IF 1/ACCS HAS NOT BEEN COMPLETED, IDLE.</span>
+060922,000096: 16,2044           74742                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#414343534F4B4159">ACCSOKAY</a>                              <span class="co">#        NOTE:   ONLY FRESH START AND RESTART</span>
+060923,000097: 16,2045           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#                KNOCK THIS BIT DOWN.</span>
+060924,000098: 16,2046           12160                           <span class="op">BZF     </span> <a href="#4D4F524549444C45">MOREIDLE</a>                              
+060925,000099: 
+<a name="5354415254444150"></a>060926,000100: 16,2047           04665        <span class="sm">STARTDAP</span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              <span class="co">#  ZERO ATTITUDE ERROR AND DESIRED RATES.</span>
+060927,000101: 16,2050           40154                           <span class="ps">FCADR   </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#5A41545445524F52">ZATTEROR</a>                              
+060928,000102: 16,2051           34746                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  ********** INITIALIZE: **********</span>
+060929,000103: 16,2052           55524                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A50">TJP</a>                                   
+060930,000104: 16,2053           55525                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A55">TJU</a>                                   
+060931,000105: 16,2054           55526                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A56">TJV</a>                                   
+060932,000106: 16,2055           55421                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474150">OMEGAP</a>                                <span class="co">#  RATES IN BODY (PILOT) COORDINATES.</span>
+060933,000107: 16,2056           55422                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474151">OMEGAQ</a>                                
+060934,000108: 16,2057           55423                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474152">OMEGAR</a>                                
+060935,000109: 16,2060           55430                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54524150454450">TRAPEDP</a>                               
+060936,000110: 16,2061           55431                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54524150454451">TRAPEDQ</a>                               
+060937,000111: 16,2062           55432                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54524150454452">TRAPEDR</a>                               
+060938,000112: 16,2063           55536                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5351">AOSQ</a>                                  <span class="co">#  OFFSET ACCELERATION ESTIMATES.</span>
+060939,000113: 16,2064           55537                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5351">AOSQ</a>       +1                         
+060940,000114: 16,2065           55540                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5352">AOSR</a>                                  
+060941,000115: 16,2066           55541                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5352">AOSR</a>       +1                         
+060942,000116: 16,2067           55424                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484151">ALPHAQ</a>                                <span class="co">#  COPIES OF OFFSET ESTIMATES FOR DOWNLIST.</span>
+060943,000117: 16,2070           55425                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484152">ALPHAR</a>                                
+060944,000118: 16,2071           55501                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45475551">NEGUQ</a>                                 
+060945,000119: 16,2072           55503                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45475552">NEGUR</a>                                 
+060946,000120: 16,2073           55544                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F53515445524D">AOSQTERM</a>                              <span class="co">#  QRAXIS RATE DERIVATION TERMS AND KALMAN</span>
+060947,000121: 16,2074           55545                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F53525445524D">AOSRTERM</a>                              <span class="co">#  FILTER INITIALIZATION TERMS.</span>
+060948,000122: 16,2075           55510                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51414343444F54">QACCDOT</a>                               <span class="co">#  DESCENT ACCELERATION DERIVATIVE EST.</span>
+060949,000123: 16,2076           55512                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52414343444F54">RACCDOT</a>                               
+060950,000124: 16,2077           55502                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4C4F57475453">ALLOWGTS</a>                              <span class="co">#  AOSTASK FLAG FOR QRAXIS RCS CONTROL USE.</span>
+060951,000125: 16,2100           55630                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F54524F4C4552">COTROLER</a>                              <span class="co">#  DO TRYGTS ON FIRST PASS (WILL GO TO RCS)</span>
+060952,000126: 16,2101           55632                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494E475453">INGTS</a>                                 <span class="co">#  RECOGNIZE FIRST GTS PASS AS SUCH.</span>
+060953,000127: 16,2102           55631                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5147494D54494D52">QGIMTIMR</a>                              <span class="co">#  STOP GIMBAL DRIVES.  (PROBABLY WOULD BE</span>
+060954,000128: 16,2103           55633                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5247494D54494D52">RGIMTIMR</a>                              <span class="co">#        GOOD ENOUGH JUST TO INACTIVATE TIMERS)</span>
+060955,000129: 16,2104           55460                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4C44504D494E">OLDPMIN</a>                               <span class="co">#  MINIMUM IMPULSE MODE ERASABLES</span>
+060956,000130: 16,2105           55461                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4C4451524D494E">OLDQRMIN</a>                              
+060957,000131: 16,2106           55766                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504A4554435452">PJETCTR</a>                               <span class="co">#  INITIALIZE DOCKED JET INHIBITION</span>
+060958,000132: 16,2107           55767                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#554A4554435452">UJETCTR</a>                               <span class="co">#  COUNTERS</span>
+060959,000133: 16,2110           55770                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564A4554435452">VJETCTR</a>                               
+<a name="43414C4C474D424C"></a>060960,000134: 16,2111     4740               <span class="sm">CALLGMBL</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495435">BIT5</a>                                  <span class="co">#  RCSFLAGS INITIALIZATION.</span>
+060961,000135: 16,2111           42206                           <span class="op">CS      </span> <a href="#4D414E464C4147">MANFLAG</a>                               
 </pre>
 </span>
 </p>
@@ -280,56 +280,56 @@ Page 1410
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-060949,000137: 16,2112           71774                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              <span class="co">#  NEGUQ(R) HAVE BEEN GENERATED.</span>
-060950,000138: 16,2113           55774                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              
-060951,000139: 
-060952,000140:                                                                                                  <span class="co">#  SET UP "OLD" MEASURED CDU ANGLES:</span>
-060953,000141: 
-060954,000142: 16,2114           00006                           <span class="op">EXTEND  </span>                                       
-060955,000143: 16,2115           30033                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  <span class="co">#  OLDXFORP AND OLDYFORP</span>
-060956,000144: 16,2116           53441                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4C4458464F5250">OLDXFORP</a>                              
-060957,000145: 16,2117           30034                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
-060958,000146: 16,2120           55442                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4C445A464F5251">OLDZFORQ</a>                              
-060959,000147: 16,2121           41774                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              
-060960,000148: 16,2122           74731                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543132">BIT12</a>                                 
-060961,000149: 16,2123           27774                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              <span class="co">#  BIT 12 SET TO 1.</span>
-060962,000150: 16,2124           34742                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#464F5552">FOUR</a>                                  
-060963,000151: 16,2125           55534                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B495055">SKIPU</a>                                 
-060964,000152: 16,2126           55535                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B495056">SKIPV</a>                                 
-060965,000153: 16,2127           34724                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                
-060966,000154: 16,2130           54031                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4536">TIME6</a>                                 
-060967,000155: 16,2131           55466                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364E455854">T6NEXT</a>                                
-060968,000156: 16,2132           55470                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5436465552544841">T6FURTHA</a>                              
-060969,000157: 16,2133           34746                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-060970,000158: 16,2134           55467                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364E455854">T6NEXT</a>     +1                         
-060971,000159: 16,2135           55471                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5436465552544841">T6FURTHA</a>   +1                         
-060972,000160: 16,2136           55465                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E585436414452">NXT6ADR</a>                               
-060973,000161: 16,2137           55472                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45585450">NEXTP</a>                                 
-060974,000162: 16,2140           55473                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45585455">NEXTU</a>                                 
-060975,000163: 16,2141           55474                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45585456">NEXTV</a>                                 
-060976,000164: 16,2142           44354                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54454E">TEN</a>                                   
-060977,000165: 16,2143           55756                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441505A52555054">DAPZRUPT</a>                              <span class="co">#  JASK NOT IN PROGRESS, INITIALIZE NEG.</span>
-060978,000166: 16,2144           34743                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   
-060979,000167: 16,2145           55433                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E505452415053">NPTRAPS</a>                               
-060980,000168: 16,2146           55434                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E515452415053">NQTRAPS</a>                               
-060981,000169: 16,2147           55435                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E525452415053">NRTRAPS</a>                               
-060982,000170: 16,2150           00006                           <span class="op">EXTEND  </span>                                       
-060983,000171: 16,2151           32211                           <span class="op">DCA     </span> <a href="#504158414449444C">PAXADIDL</a>                              
-060984,000172: 16,2152           53263                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5435414452">T5ADR</a>                                 
-<a name="53455454494D4535"></a>060985,000173: 16,2153           37750        <span class="sm">SETTIME5</span>           <span class="op">CAF     </span> <a href="#4D53313030">MS100</a>                                 
-060986,000174: 16,2154           54030                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4535">TIME5</a>                                 
-060987,000175: 16,2155           15272                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
-060988,000176: 16,2156  E6,1536                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5351">AOSQ</a>                                  
-<a name="49444C4552414452"></a>060989,000177: 16,2156           02037 34106  <span class="sm">IDLERADR</span>           <span class="ps">2CADR   </span> <a href="#44415049444C4552">DAPIDLER</a>                              
-060990,000178: 
-<a name="4D4F524549444C45"></a>060991,000179: 16,2160           04665        <span class="sm">MOREIDLE</span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              <span class="co">#  CALCULATE Q,R-AXES ATTITUDE ERRORS.</span>
-060992,000180: 16,2161           36655                           <span class="ps">CADR    </span> <a href="Q,R-AXES_RCS_AUTOPILOT.agc.html#5145525243414C43">QERRCALC</a>                              
-060993,000181: 
-060994,000182: 16,2162           04665                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              
-060995,000183: 16,2163           35447                           <span class="ps">CADR    </span> <a href="P-AXIS_RCS_AUTOPILOT.agc.html#43414C4350455252">CALCPERR</a>                              <span class="co">#  CALCULATE P AXIS ATTITUDE ERRORS.</span>
-060996,000184: 
-<a name="53485554444F574E"></a>060997,000185: 16,2164           00006        <span class="sm">SHUTDOWN</span>           <span class="op">EXTEND  </span>                                       
-060998,000186: 16,2165           32157                           <span class="op">DCA     </span> <a href="#49444C4552414452">IDLERADR</a>                              
+060963,000137: 16,2112           71774                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              <span class="co">#  NEGUQ(R) HAVE BEEN GENERATED.</span>
+060964,000138: 16,2113           55774                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              
+060965,000139: 
+060966,000140:                                                                                                  <span class="co">#  SET UP "OLD" MEASURED CDU ANGLES:</span>
+060967,000141: 
+060968,000142: 16,2114           00006                           <span class="op">EXTEND  </span>                                       
+060969,000143: 16,2115           30033                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  <span class="co">#  OLDXFORP AND OLDYFORP</span>
+060970,000144: 16,2116           53441                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4C4458464F5250">OLDXFORP</a>                              
+060971,000145: 16,2117           30034                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
+060972,000146: 16,2120           55442                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4C445A464F5251">OLDZFORQ</a>                              
+060973,000147: 16,2121           41774                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              
+060974,000148: 16,2122           74731                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543132">BIT12</a>                                 
+060975,000149: 16,2123           27774                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              <span class="co">#  BIT 12 SET TO 1.</span>
+060976,000150: 16,2124           34742                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#464F5552">FOUR</a>                                  
+060977,000151: 16,2125           55534                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B495055">SKIPU</a>                                 
+060978,000152: 16,2126           55535                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B495056">SKIPV</a>                                 
+060979,000153: 16,2127           34724                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                
+060980,000154: 16,2130           54031                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4536">TIME6</a>                                 
+060981,000155: 16,2131           55466                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364E455854">T6NEXT</a>                                
+060982,000156: 16,2132           55470                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5436465552544841">T6FURTHA</a>                              
+060983,000157: 16,2133           34746                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+060984,000158: 16,2134           55467                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364E455854">T6NEXT</a>     +1                         
+060985,000159: 16,2135           55471                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5436465552544841">T6FURTHA</a>   +1                         
+060986,000160: 16,2136           55465                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E585436414452">NXT6ADR</a>                               
+060987,000161: 16,2137           55472                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45585450">NEXTP</a>                                 
+060988,000162: 16,2140           55473                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45585455">NEXTU</a>                                 
+060989,000163: 16,2141           55474                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45585456">NEXTV</a>                                 
+060990,000164: 16,2142           44354                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54454E">TEN</a>                                   
+060991,000165: 16,2143           55756                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441505A52555054">DAPZRUPT</a>                              <span class="co">#  JASK NOT IN PROGRESS, INITIALIZE NEG.</span>
+060992,000166: 16,2144           34743                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   
+060993,000167: 16,2145           55433                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E505452415053">NPTRAPS</a>                               
+060994,000168: 16,2146           55434                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E515452415053">NQTRAPS</a>                               
+060995,000169: 16,2147           55435                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E525452415053">NRTRAPS</a>                               
+060996,000170: 16,2150           00006                           <span class="op">EXTEND  </span>                                       
+060997,000171: 16,2151           32211                           <span class="op">DCA     </span> <a href="#504158414449444C">PAXADIDL</a>                              
+060998,000172: 16,2152           53263                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5435414452">T5ADR</a>                                 
+<a name="53455454494D4535"></a>060999,000173: 16,2153           37750        <span class="sm">SETTIME5</span>           <span class="op">CAF     </span> <a href="#4D53313030">MS100</a>                                 
+061000,000174: 16,2154           54030                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4535">TIME5</a>                                 
+061001,000175: 16,2155           15272                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
+061002,000176: 16,2156  E6,1536                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5351">AOSQ</a>                                  
+<a name="49444C4552414452"></a>061003,000177: 16,2156           02037 34106  <span class="sm">IDLERADR</span>           <span class="ps">2CADR   </span> <a href="#44415049444C4552">DAPIDLER</a>                              
+061004,000178: 
+<a name="4D4F524549444C45"></a>061005,000179: 16,2160           04665        <span class="sm">MOREIDLE</span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              <span class="co">#  CALCULATE Q,R-AXES ATTITUDE ERRORS.</span>
+061006,000180: 16,2161           36655                           <span class="ps">CADR    </span> <a href="Q,R-AXES_RCS_AUTOPILOT.agc.html#5145525243414C43">QERRCALC</a>                              
+061007,000181: 
+061008,000182: 16,2162           04665                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              
+061009,000183: 16,2163           35447                           <span class="ps">CADR    </span> <a href="P-AXIS_RCS_AUTOPILOT.agc.html#43414C4350455252">CALCPERR</a>                              <span class="co">#  CALCULATE P AXIS ATTITUDE ERRORS.</span>
+061010,000184: 
+<a name="53485554444F574E"></a>061011,000185: 16,2164           00006        <span class="sm">SHUTDOWN</span>           <span class="op">EXTEND  </span>                                       
+061012,000186: 16,2165           32157                           <span class="op">DCA     </span> <a href="#49444C4552414452">IDLERADR</a>                              
 </pre>
 </span>
 </p>
@@ -345,38 +345,38 @@ Page 1411
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061000,000188: 16,2166           53263                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5435414452">T5ADR</a>                                 
-061001,000189: 
-061002,000190: 16,2167           34746                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  KILL ANY POSSIBLE JET REQUESTS</span>
-061003,000191: 16,2170           55472                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45585450">NEXTP</a>                                 
-061004,000192: 16,2171           55473                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45585455">NEXTU</a>                                 
-061005,000193: 16,2172           55474                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45585456">NEXTV</a>                                 
-061006,000194: 16,2173           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  COMMAND JETS OFF.</span>
-061007,000195: 16,2174           01005                           <span class="op">WRITE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E35">CHAN5</a>                                 
-061008,000196: 16,2175           00006                           <span class="op">EXTEND  </span>                                       
-061009,000197: 16,2176           01006                           <span class="op">WRITE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E36">CHAN6</a>                                 
-061010,000198: 16,2177           42207                           <span class="op">CS      </span> <a href="#4247494D3233">BGIM23</a>                                <span class="co">#  TURN TRIM GIMBAL OFF</span>
-061011,000199: 16,2200           00006                           <span class="op">EXTEND  </span>                                       
-061012,000200: 16,2201           03012                           <span class="op">WAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3132">CHAN12</a>                                
-061013,000201: 16,2202           44743                           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#434F4E54524C4254">CONTRLBT</a>                              
-061014,000202: 16,2203           70106                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C475752443130">FLGWRD10</a>                              <span class="co">#  CLEAR FLAG TO CAUSE THE NO CONTROL DSKY</span>
-061015,000203: 16,2204           54106                           <span class="op">TS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C475752443130">FLGWRD10</a>                              <span class="co">#   LIGHT TO BE LIT BY T4RUPT.</span>
-061016,000204: 16,2205           12153                           <span class="op">TCF     </span> <a href="#53455454494D4535">SETTIME5</a>                              <span class="co">#  RETURN IN 100 MSEC.</span>
-061017,000205: 
-<a name="4D414E464C4147"></a>061018,000206: 16,2206           03021        <span class="sm">MANFLAG </span>           <span class="ps">OCT     </span> 03021                                 
-<a name="4247494D3233"></a>061019,000207: 16,2207           07400        <span class="sm">BGIM23  </span>           <span class="ps">OCTAL   </span> 07400                                 
-061020,000208: 16,2210  E6,1421                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474150">OMEGAP</a>                                
-<a name="504158414449444C"></a>061021,000209: 16,2210           02217 34106  <span class="sm">PAXADIDL</span>           <span class="ps">2CADR   </span> <a href="P-AXIS_RCS_AUTOPILOT.agc.html#5041584953">PAXIS</a>                                 
-061022,000210: 
-<a name="4D53313030"></a>061023,000211: 16,2212     7750               <span class="sm">MS100   </span>           <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543337373636">OCT37766</a>                              
-<a name="434F534D47"></a>061024,000212: 16,2212     0061               <span class="sm">COSMG   </span>           <span class="ps">=       </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-<a name="4A554D50445350"></a>061025,000213: 16,2212           00006        <span class="sm">JUMPDSP </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  TRANSFER TO BANK 20</span>
-061026,000214: 16,2213           32216                           <span class="op">DCA     </span> <a href="#44535043414452">DSPCADR</a>                               <span class="co">#  FOR ATTITUDE ERROR DISPLAYS</span>
-061027,000215: 16,2214           52006                           <span class="op">DTCB    </span>                                       
-061028,000216: 
-061029,000217: 16,2215  E6,1760                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    
-<a name="44535043414452"></a>061030,000218: 16,2215           02227 40106  <span class="sm">DSPCADR </span>           <span class="ps">2CADR   </span> <a href="#414C544453504C59">ALTDSPLY</a>                              
-061031,000219: 
+061014,000188: 16,2166           53263                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5435414452">T5ADR</a>                                 
+061015,000189: 
+061016,000190: 16,2167           34746                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  KILL ANY POSSIBLE JET REQUESTS</span>
+061017,000191: 16,2170           55472                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45585450">NEXTP</a>                                 
+061018,000192: 16,2171           55473                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45585455">NEXTU</a>                                 
+061019,000193: 16,2172           55474                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45585456">NEXTV</a>                                 
+061020,000194: 16,2173           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  COMMAND JETS OFF.</span>
+061021,000195: 16,2174           01005                           <span class="op">WRITE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E35">CHAN5</a>                                 
+061022,000196: 16,2175           00006                           <span class="op">EXTEND  </span>                                       
+061023,000197: 16,2176           01006                           <span class="op">WRITE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E36">CHAN6</a>                                 
+061024,000198: 16,2177           42207                           <span class="op">CS      </span> <a href="#4247494D3233">BGIM23</a>                                <span class="co">#  TURN TRIM GIMBAL OFF</span>
+061025,000199: 16,2200           00006                           <span class="op">EXTEND  </span>                                       
+061026,000200: 16,2201           03012                           <span class="op">WAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3132">CHAN12</a>                                
+061027,000201: 16,2202           44743                           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#434F4E54524C4254">CONTRLBT</a>                              
+061028,000202: 16,2203           70106                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C475752443130">FLGWRD10</a>                              <span class="co">#  CLEAR FLAG TO CAUSE THE NO CONTROL DSKY</span>
+061029,000203: 16,2204           54106                           <span class="op">TS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C475752443130">FLGWRD10</a>                              <span class="co">#   LIGHT TO BE LIT BY T4RUPT.</span>
+061030,000204: 16,2205           12153                           <span class="op">TCF     </span> <a href="#53455454494D4535">SETTIME5</a>                              <span class="co">#  RETURN IN 100 MSEC.</span>
+061031,000205: 
+<a name="4D414E464C4147"></a>061032,000206: 16,2206           03021        <span class="sm">MANFLAG </span>           <span class="ps">OCT     </span> 03021                                 
+<a name="4247494D3233"></a>061033,000207: 16,2207           07400        <span class="sm">BGIM23  </span>           <span class="ps">OCTAL   </span> 07400                                 
+061034,000208: 16,2210  E6,1421                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474150">OMEGAP</a>                                
+<a name="504158414449444C"></a>061035,000209: 16,2210           02217 34106  <span class="sm">PAXADIDL</span>           <span class="ps">2CADR   </span> <a href="P-AXIS_RCS_AUTOPILOT.agc.html#5041584953">PAXIS</a>                                 
+061036,000210: 
+<a name="4D53313030"></a>061037,000211: 16,2212     7750               <span class="sm">MS100   </span>           <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543337373636">OCT37766</a>                              
+<a name="434F534D47"></a>061038,000212: 16,2212     0061               <span class="sm">COSMG   </span>           <span class="ps">=       </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+<a name="4A554D50445350"></a>061039,000213: 16,2212           00006        <span class="sm">JUMPDSP </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  TRANSFER TO BANK 20</span>
+061040,000214: 16,2213           32216                           <span class="op">DCA     </span> <a href="#44535043414452">DSPCADR</a>                               <span class="co">#  FOR ATTITUDE ERROR DISPLAYS</span>
+061041,000215: 16,2214           52006                           <span class="op">DTCB    </span>                                       
+061042,000216: 
+061043,000217: 16,2215  E6,1760                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    
+<a name="44535043414452"></a>061044,000218: 16,2215           02227 40106  <span class="sm">DSPCADR </span>           <span class="ps">2CADR   </span> <a href="#414C544453504C59">ALTDSPLY</a>                              
+061045,000219: 
 </pre>
 </span>
 </p>
@@ -392,51 +392,51 @@ Page 1412
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061033,000221: 20,2227                                           <span class="ps">BANK    </span> 20                                    
-061034,000222: 20,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4441505333">DAPS3</a>                                 
-061035,000223: 20,2000                                           <span class="ps">BANK    </span>                                       
-061036,000224: 20,2227                                           <span class="ps">COUNT*  </span> $$/NEEDL                              
-061037,000225: 
-061038,000226:                                                                                                  <span class="co">#  PROGRAM:      ALTDSPLY</span>
-061039,000227:                                                                                                  <span class="co">#  MOD 0.        6 DEC 1967</span>
-061040,000228:                                                                                                  <span class="co">#  AUTHOR:       CRAIG WORK, DON KEENE, MIT IL</span>
-061041,000229:                                                                                                  <span class="co">#  MOD 3 BY DON KEENE AUG 1, 1968 MOVED PROGRAM TO BANK 20</span>
-061042,000230: 
-061043,000231:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION:</span>
-061044,000232:                                                                                                  <span class="co">#  ALTDSPLY REVERSES THE DSPLYALT BIT OF RCSFLAGS EACH TIME IT IS CALLED, WHICH IS PRESUMABLY EVERY 100 MS.</span>
-061045,000233:                                                                                                  <span class="co">#  IF THE REVERSED BIT IS ONE, NEEDLER IS CALLED TO DISPLAY ATTITUDE ERRORS.  IF THE BIT IS ZERO, THE ATTITUDE ERR-</span>
-061046,000234:                                                                                                  <span class="co">#  ORS ARE CALCULATED AS 1) ESTIMATED RATES (FOLLOWING) IF NEED2FLG = 1, OTHERWISE AS 2) DAP FOLLOWING ERRORS FOR</span>
-061047,000235:                                                                                                  <span class="co">#  NEEDLFLG = 0 AND 3) TOTAL ATTITUDE ERRORS FOR NEEDLFLG = 1.</span>
-061048,000236: 
-061049,000237:                                                                                                  <span class="co">#  WARNING:      ALTDSPLY MAY ONLY BE CALLED WITH INTERRUPT INHIBITED.</span>
-061050,000238: 
-061051,000239:                                                                                                  <span class="co">#  WARNING:      EBANK MUST BE SET TO 6 WHEN USING THIS ROUTINE.</span>
-061052,000240: 
-061053,000241:                                                                                                  <span class="co">#  INPUT:        RCSFLAGS AND    1) IF NEEDLFLG = 0, INPUT PERROR, QERROR, RERROR.</span>
-061054,000242:                                                                                                  <span class="co">#                                2) IF NEEDLFLG = 1, INPUT CPHI,CTHETA,CPSI,CDUX,CDUY,CDUZ,M11,M21,M32,M22,M32.  (GPMATRIX)</span>
-061055,000243:                                                                                                  <span class="co">#                        3) IF NEED2FLG = 1, INPUT OMEGAP, OMEGAQ, AND OMEGAR.</span>
-061056,000244: 
-061057,000245:                                                                                                  <span class="co">#  OUTPUTS:      RCSFLAGS WITH DSPLYALT REVERSED,AK,AK1,AK2,+ NEEDLER OUTPUTS.</span>
-061058,000246: 
-061059,000247:                                                                                                  <span class="co">#  ENTRY:        TCF     ALTDSPLY</span>
-061060,000248: 
-061061,000249:                                                                                                  <span class="co">#  EXIT:         TCF     CHEKMORE</span>
-061062,000250: 
-061063,000251:                                                                                                  <span class="co">#  ALARM OR ABORT EXITS:  NONE</span>
-061064,000252: 
-061065,000253:                                                                                                  <span class="co">#  SUBPROGRAMS CALLED:  NEEDLER, OVERSUB2</span>
-061066,000254: 
-061067,000255:                                                                                                  <span class="co">#  DEBRIS:       A, L, AND NEEDLER DEBRIS.</span>
-061068,000256: 
-<a name="414C544453504C59"></a>061069,000257: 20,2227           31774        <span class="sm">ALTDSPLY</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              <span class="co">#  INVERT THE DISPLAY ALTERNATION BIT.</span>
-061070,000258: 20,2230           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-061071,000259: 20,2231           34741                           <span class="op">CA      </span> <a href="#4453504C59414C54">DSPLYALT</a>                              
-061072,000260: 20,2232           00006                           <span class="op">EXTEND  </span>                                       
-061073,000261: 20,2233           06001                           <span class="op">RXOR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4348414E">LCHAN</a>                                 
-061074,000262: 20,2234           55774                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              
-061075,000263: 
-061076,000264: 20,2235           74741                           <span class="op">MASK    </span> <a href="#4453504C59414C54">DSPLYALT</a>                              
-061077,000265: 20,2236           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IS ALTERNATION FLAG ZERO?</span>
+061047,000221: 20,2227                                           <span class="ps">BANK    </span> 20                                    
+061048,000222: 20,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4441505333">DAPS3</a>                                 
+061049,000223: 20,2000                                           <span class="ps">BANK    </span>                                       
+061050,000224: 20,2227                                           <span class="ps">COUNT*  </span> $$/NEEDL                              
+061051,000225: 
+061052,000226:                                                                                                  <span class="co">#  PROGRAM:      ALTDSPLY</span>
+061053,000227:                                                                                                  <span class="co">#  MOD 0.        6 DEC 1967</span>
+061054,000228:                                                                                                  <span class="co">#  AUTHOR:       CRAIG WORK, DON KEENE, MIT IL</span>
+061055,000229:                                                                                                  <span class="co">#  MOD 3 BY DON KEENE AUG 1, 1968 MOVED PROGRAM TO BANK 20</span>
+061056,000230: 
+061057,000231:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION:</span>
+061058,000232:                                                                                                  <span class="co">#  ALTDSPLY REVERSES THE DSPLYALT BIT OF RCSFLAGS EACH TIME IT IS CALLED, WHICH IS PRESUMABLY EVERY 100 MS.</span>
+061059,000233:                                                                                                  <span class="co">#  IF THE REVERSED BIT IS ONE, NEEDLER IS CALLED TO DISPLAY ATTITUDE ERRORS.  IF THE BIT IS ZERO, THE ATTITUDE ERR-</span>
+061060,000234:                                                                                                  <span class="co">#  ORS ARE CALCULATED AS 1) ESTIMATED RATES (FOLLOWING) IF NEED2FLG = 1, OTHERWISE AS 2) DAP FOLLOWING ERRORS FOR</span>
+061061,000235:                                                                                                  <span class="co">#  NEEDLFLG = 0 AND 3) TOTAL ATTITUDE ERRORS FOR NEEDLFLG = 1.</span>
+061062,000236: 
+061063,000237:                                                                                                  <span class="co">#  WARNING:      ALTDSPLY MAY ONLY BE CALLED WITH INTERRUPT INHIBITED.</span>
+061064,000238: 
+061065,000239:                                                                                                  <span class="co">#  WARNING:      EBANK MUST BE SET TO 6 WHEN USING THIS ROUTINE.</span>
+061066,000240: 
+061067,000241:                                                                                                  <span class="co">#  INPUT:        RCSFLAGS AND    1) IF NEEDLFLG = 0, INPUT PERROR, QERROR, RERROR.</span>
+061068,000242:                                                                                                  <span class="co">#                                2) IF NEEDLFLG = 1, INPUT CPHI,CTHETA,CPSI,CDUX,CDUY,CDUZ,M11,M21,M32,M22,M32.  (GPMATRIX)</span>
+061069,000243:                                                                                                  <span class="co">#                        3) IF NEED2FLG = 1, INPUT OMEGAP, OMEGAQ, AND OMEGAR.</span>
+061070,000244: 
+061071,000245:                                                                                                  <span class="co">#  OUTPUTS:      RCSFLAGS WITH DSPLYALT REVERSED,AK,AK1,AK2,+ NEEDLER OUTPUTS.</span>
+061072,000246: 
+061073,000247:                                                                                                  <span class="co">#  ENTRY:        TCF     ALTDSPLY</span>
+061074,000248: 
+061075,000249:                                                                                                  <span class="co">#  EXIT:         TCF     CHEKMORE</span>
+061076,000250: 
+061077,000251:                                                                                                  <span class="co">#  ALARM OR ABORT EXITS:  NONE</span>
+061078,000252: 
+061079,000253:                                                                                                  <span class="co">#  SUBPROGRAMS CALLED:  NEEDLER, OVERSUB2</span>
+061080,000254: 
+061081,000255:                                                                                                  <span class="co">#  DEBRIS:       A, L, AND NEEDLER DEBRIS.</span>
+061082,000256: 
+<a name="414C544453504C59"></a>061083,000257: 20,2227           31774        <span class="sm">ALTDSPLY</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              <span class="co">#  INVERT THE DISPLAY ALTERNATION BIT.</span>
+061084,000258: 20,2230           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+061085,000259: 20,2231           34741                           <span class="op">CA      </span> <a href="#4453504C59414C54">DSPLYALT</a>                              
+061086,000260: 20,2232           00006                           <span class="op">EXTEND  </span>                                       
+061087,000261: 20,2233           06001                           <span class="op">RXOR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4348414E">LCHAN</a>                                 
+061088,000262: 20,2234           55774                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              
+061089,000263: 
+061090,000264: 20,2235           74741                           <span class="op">MASK    </span> <a href="#4453504C59414C54">DSPLYALT</a>                              
+061091,000265: 20,2236           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IS ALTERNATION FLAG ZERO?</span>
 </pre>
 </span>
 </p>
@@ -452,57 +452,57 @@ Page 1413
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061079,000267: 20,2237           12336                           <span class="op">TCF     </span> <a href="#4E4545444C4552">NEEDLER</a>                               
-061080,000268: 
-061081,000269: 20,2240           40074                           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524430">FLAGWRD0</a>                              <span class="co">#  CHECK FOR RATE DISPLAY TO ERROR NEEDLES</span>
-061082,000270: 20,2241           74726                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#4E45454432424954">NEED2BIT</a>                              <span class="co">#  VIA EXTENDED VERB 60</span>
-061083,000271: 20,2242           00006                           <span class="op">EXTEND  </span>                                       
-061084,000272: 20,2243           12257                           <span class="op">BZF     </span> <a href="#4449535052415445">DISPRATE</a>                              
-061085,000273: 
-061086,000274: 20,2244           30074                           <span class="op">CAE     </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524430">FLAGWRD0</a>                              <span class="co">#  NEEDLFLG WILL INDICATE TOTAL OR DAP AT-</span>
-061087,000275: 20,2245           74741                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#4E4545444C424954">NEEDLBIT</a>                              <span class="co">#  TITUDE ERROR DISPLAY REQUEST.</span>
-061088,000276: 20,2246           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-061089,000277: 20,2247           12266                           <span class="op">TCF     </span> <a href="#4453504C59544F54">DSPLYTOT</a>                              <span class="co">#  TOTAL ERROR IS NEEDED IN AK,AK +1,AK +2</span>
-061090,000278: 
-061091,000279: 20,2250           41450                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#514552524F52">QERROR</a>                                <span class="co">#  YES. DISPLAY ATT ERRORS ON THE ,-BALL.</span>
-061092,000280: 20,2251           55761                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>         +1                         <span class="co">#  ERROR COMPLEMENTS ARE INPUT TO NEEDLER.</span>
-061093,000281: 20,2252           41452                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524552524F52">RERROR</a>                                
-061094,000282: 20,2253           55762                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>         +2                         
-061095,000283: 20,2254           41464                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504552524F52">PERROR</a>                                
-061096,000284: 20,2255           57760                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    
-061097,000285: 
-061098,000286: 20,2256           12456                           <span class="op">TCF     </span> <a href="#5245544E4D4F5245">RETNMORE</a>                              <span class="co">#  DISPLAY THESE THE NEXT TIME THROUGH</span>
-061099,000287: 
-<a name="4449535052415445"></a>061100,000288: 20,2257           41422        <span class="sm">DISPRATE</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474151">OMEGAQ</a>                                <span class="co">#  LOAD ESTIMATED RATES (FOLLOWING)</span>
-061101,000289: 20,2260           55761                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>         +1                         
-061102,000290: 20,2261           41423                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474152">OMEGAR</a>                                
-061103,000291: 20,2262           55762                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>         +2                         
-061104,000292: 20,2263           41421                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474150">OMEGAP</a>                                
-061105,000293: 20,2264           57760                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    
-061106,000294: 20,2265           12456                           <span class="op">TCF     </span> <a href="#5245544E4D4F5245">RETNMORE</a>                              
-061107,000295: 
-061108,000296:                                                                                                  <span class="co">#  CALCULATE GIMBAL ANGLE TOTAL ERRORS, RESOLVE INTO PILOT AXES, STORE TOTAL ERRORS FOR NEEDLER.  Q-AXIS FIRST.</span>
-061109,000297: 
-<a name="4453504C59544F54"></a>061110,000298: 20,2266           00006        <span class="sm">DSPLYTOT</span>           <span class="op">EXTEND  </span>                                       
-061111,000299: 20,2267           22061                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                <span class="co">#  SAVE Q FOR CHEKBITS RETURN.</span>
-061112,000300: 
-061113,000301: 20,2270           30322                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#435448455441">CTHETA</a>                                <span class="co">#  DESIRED ATTITUDE, Y-AXIS, 2'S COMP.</span>
-061114,000302: 20,2271           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  SUBTRACT CURRENT ATTITUDE.</span>
-061115,000303: 20,2272           20033                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445559">CDUY</a>                                  <span class="co">#  DIFFERENCE SCALED AT PI, 1'S COMP.</span>
-061116,000304: 20,2273           55760                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    <span class="co">#  SAVE FOR R-ERROR CALCULATION.</span>
-061117,000305: 20,2274           00006                           <span class="op">EXTEND  </span>                                       
-061118,000306: 20,2275           71415                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3231">M21</a>                                   <span class="co">#  (CHTETA-CDUY)*M21 SCALED AT PI RADIANS.</span>
-061119,000307: 20,2276           57761                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>         +1                         <span class="co">#  STORE FIRST TERM OF Q ERROR.</span>
-061120,000308: 20,2277           30323                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43505349">CPSI</a>                                  <span class="co">#  DESIRED ATTITUDE, Z-AXIS, 2'S COMP.</span>
-061121,000309: 20,2300           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  SUBTRACT CURRENT ATTITUDE.</span>
-061122,000310: 20,2301           20034                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  <span class="co">#  DIFFERENCE SCALED AT PI, 1'S COMP.</span>
-061123,000311: 20,2302           55762                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>         +2                         <span class="co">#  SAVE Z-AXIS TERM FOR R ERROR CALCULATION</span>
-061124,000312: 20,2303           00006                           <span class="op">EXTEND  </span>                                       
-061125,000313: 20,2304           71417                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3232">M22</a>                                   <span class="co">#  (CPSI-CDUZ)*M22, SCALED AT PI RADIANS.</span>
-061126,000314: 20,2305           61761                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>         +1                         <span class="co">#  Q ERROR COMPLETE         , AT PI RAD.</span>
-061127,000315: 20,2306           02451                           <span class="op">TC      </span> <a href="#4F56455253554232">OVERSUB2</a>                              <span class="co">#  PIN NEEDLES IN CASE OF OVERFLOW.</span>
-061128,000316: 20,2307           55761                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>         +1                         
-061129,000317: 
+061093,000267: 20,2237           12336                           <span class="op">TCF     </span> <a href="#4E4545444C4552">NEEDLER</a>                               
+061094,000268: 
+061095,000269: 20,2240           40074                           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524430">FLAGWRD0</a>                              <span class="co">#  CHECK FOR RATE DISPLAY TO ERROR NEEDLES</span>
+061096,000270: 20,2241           74726                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#4E45454432424954">NEED2BIT</a>                              <span class="co">#  VIA EXTENDED VERB 60</span>
+061097,000271: 20,2242           00006                           <span class="op">EXTEND  </span>                                       
+061098,000272: 20,2243           12257                           <span class="op">BZF     </span> <a href="#4449535052415445">DISPRATE</a>                              
+061099,000273: 
+061100,000274: 20,2244           30074                           <span class="op">CAE     </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524430">FLAGWRD0</a>                              <span class="co">#  NEEDLFLG WILL INDICATE TOTAL OR DAP AT-</span>
+061101,000275: 20,2245           74741                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#4E4545444C424954">NEEDLBIT</a>                              <span class="co">#  TITUDE ERROR DISPLAY REQUEST.</span>
+061102,000276: 20,2246           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+061103,000277: 20,2247           12266                           <span class="op">TCF     </span> <a href="#4453504C59544F54">DSPLYTOT</a>                              <span class="co">#  TOTAL ERROR IS NEEDED IN AK,AK +1,AK +2</span>
+061104,000278: 
+061105,000279: 20,2250           41450                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#514552524F52">QERROR</a>                                <span class="co">#  YES. DISPLAY ATT ERRORS ON THE ,-BALL.</span>
+061106,000280: 20,2251           55761                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>         +1                         <span class="co">#  ERROR COMPLEMENTS ARE INPUT TO NEEDLER.</span>
+061107,000281: 20,2252           41452                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524552524F52">RERROR</a>                                
+061108,000282: 20,2253           55762                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>         +2                         
+061109,000283: 20,2254           41464                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504552524F52">PERROR</a>                                
+061110,000284: 20,2255           57760                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    
+061111,000285: 
+061112,000286: 20,2256           12456                           <span class="op">TCF     </span> <a href="#5245544E4D4F5245">RETNMORE</a>                              <span class="co">#  DISPLAY THESE THE NEXT TIME THROUGH</span>
+061113,000287: 
+<a name="4449535052415445"></a>061114,000288: 20,2257           41422        <span class="sm">DISPRATE</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474151">OMEGAQ</a>                                <span class="co">#  LOAD ESTIMATED RATES (FOLLOWING)</span>
+061115,000289: 20,2260           55761                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>         +1                         
+061116,000290: 20,2261           41423                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474152">OMEGAR</a>                                
+061117,000291: 20,2262           55762                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>         +2                         
+061118,000292: 20,2263           41421                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474150">OMEGAP</a>                                
+061119,000293: 20,2264           57760                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    
+061120,000294: 20,2265           12456                           <span class="op">TCF     </span> <a href="#5245544E4D4F5245">RETNMORE</a>                              
+061121,000295: 
+061122,000296:                                                                                                  <span class="co">#  CALCULATE GIMBAL ANGLE TOTAL ERRORS, RESOLVE INTO PILOT AXES, STORE TOTAL ERRORS FOR NEEDLER.  Q-AXIS FIRST.</span>
+061123,000297: 
+<a name="4453504C59544F54"></a>061124,000298: 20,2266           00006        <span class="sm">DSPLYTOT</span>           <span class="op">EXTEND  </span>                                       
+061125,000299: 20,2267           22061                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                <span class="co">#  SAVE Q FOR CHEKBITS RETURN.</span>
+061126,000300: 
+061127,000301: 20,2270           30322                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#435448455441">CTHETA</a>                                <span class="co">#  DESIRED ATTITUDE, Y-AXIS, 2'S COMP.</span>
+061128,000302: 20,2271           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  SUBTRACT CURRENT ATTITUDE.</span>
+061129,000303: 20,2272           20033                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445559">CDUY</a>                                  <span class="co">#  DIFFERENCE SCALED AT PI, 1'S COMP.</span>
+061130,000304: 20,2273           55760                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    <span class="co">#  SAVE FOR R-ERROR CALCULATION.</span>
+061131,000305: 20,2274           00006                           <span class="op">EXTEND  </span>                                       
+061132,000306: 20,2275           71415                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3231">M21</a>                                   <span class="co">#  (CHTETA-CDUY)*M21 SCALED AT PI RADIANS.</span>
+061133,000307: 20,2276           57761                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>         +1                         <span class="co">#  STORE FIRST TERM OF Q ERROR.</span>
+061134,000308: 20,2277           30323                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43505349">CPSI</a>                                  <span class="co">#  DESIRED ATTITUDE, Z-AXIS, 2'S COMP.</span>
+061135,000309: 20,2300           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  SUBTRACT CURRENT ATTITUDE.</span>
+061136,000310: 20,2301           20034                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  <span class="co">#  DIFFERENCE SCALED AT PI, 1'S COMP.</span>
+061137,000311: 20,2302           55762                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>         +2                         <span class="co">#  SAVE Z-AXIS TERM FOR R ERROR CALCULATION</span>
+061138,000312: 20,2303           00006                           <span class="op">EXTEND  </span>                                       
+061139,000313: 20,2304           71417                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3232">M22</a>                                   <span class="co">#  (CPSI-CDUZ)*M22, SCALED AT PI RADIANS.</span>
+061140,000314: 20,2305           61761                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>         +1                         <span class="co">#  Q ERROR COMPLETE         , AT PI RAD.</span>
+061141,000315: 20,2306           02451                           <span class="op">TC      </span> <a href="#4F56455253554232">OVERSUB2</a>                              <span class="co">#  PIN NEEDLES IN CASE OF OVERFLOW.</span>
+061142,000316: 20,2307           55761                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>         +1                         
+061143,000317: 
 </pre>
 </span>
 </p>
@@ -518,42 +518,42 @@ Page 1414
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061131,000319:                                                                                                  <span class="co">#  R ERROR CALCULATION NEXT.</span>
-061132,000320: 
-061133,000321: 20,2310           31760                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    <span class="co">#  Y-AXIS DIFFERENCE STORED BY Q-AXIS CALC.</span>
-061134,000322: 20,2311           00006                           <span class="op">EXTEND  </span>                                       
-061135,000323: 20,2312           71416                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3331">M31</a>                                   <span class="co">#  (CTHETA-CDUY)*M31, SCALED AT PI RADIANS.</span>
-061136,000324: 20,2313           57762                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>         +2                         <span class="co">#  FIRST TERM OF R ERROR.</span>
-061137,000325:                                                                                                  <span class="co">#  Z-AXIS DIFFERENCE, STORED BY A CALC. IS</span>
-061138,000326: 20,2314           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  RECOVERED BY THE EXCHANGE.</span>
-061139,000327: 20,2315           71420                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3332">M32</a>                                   <span class="co">#  (CPSI-CDUZ)*M32, SCALED AT PI RADIANS.</span>
-061140,000328: 20,2316           61762                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>         +2                         <span class="co">#  R ERROR COMPLETE         , AT PI RAD.</span>
-061141,000329: 20,2317           02451                           <span class="op">TC      </span> <a href="#4F56455253554232">OVERSUB2</a>                              <span class="co">#  PIN NEEDLES IN CASE OF OVERFLOW.</span>
-061142,000330: 20,2320           55762                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>         +2                         
-061143,000331: 
-061144,000332:                                                                                                  <span class="co">#  NOW CALCULATE P ERROR.  (NOTE THAT M13 = 1, SCALED AT 1, SO THE MULTIPLICATION IS BY-PASSED.)</span>
-061145,000333: 
-061146,000334: 20,2321           31760                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    <span class="co">#  Y-AXIS DIFFERENCE STORED BY Q AXIS CALC.</span>
-061147,000335: 20,2322           00006                           <span class="op">EXTEND  </span>                                       
-061148,000336: 20,2323           71414                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3131">M11</a>                                   <span class="co">#  (CTHETA-CDUY)*M11 SCALED AT PI RADIANS.</span>
-061149,000337: 20,2324           57760                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    <span class="co">#  FIRST TERM OF P ERROR IN AK, AT PI RAD.</span>
-061150,000338: 20,2325           30321                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43504849">CPHI</a>                                  <span class="co">#  DESIRED ATTITUDE, X-AXIS, 2'S COMP.</span>
-061151,000339: 20,2326           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  SUBTRACT CURRENT X ATTITUDE.</span>
-061152,000340: 20,2327           20032                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  <span class="co">#  X-AXIS DIFFERENCE, 1'S COMP, AT PI RAD.</span>
-061153,000341: 
-061154,000342:                                                                                                  <span class="co">#  M13 = 1, SO BYPASS THE MULTIPLICATION.</span>
-061155,000343:                                                                                                  <span class="co">#                EXTEND</span>
-061156,000344:                                                                                                  <span class="co">#                MP      M13             (CPHI-CDUX)*M13 SCALED AT PI RADIANS.</span>
-061157,000345: 
-061158,000346: 20,2330           61760                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    <span class="co">#  P ERROR COMPLETE      , SCALED AT PI RAD</span>
-061159,000347: 20,2331           02451                           <span class="op">TC      </span> <a href="#4F56455253554232">OVERSUB2</a>                              <span class="co">#  PIN NEEDLES IN CASE OF OVERFLOW.</span>
-061160,000348: 20,2332           55760                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    
-061161,000349: 
-061162,000350: 20,2333           00006                           <span class="op">EXTEND  </span>                                       
-061163,000351: 20,2334           22061                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                <span class="co">#  RESTORE Q FOR CHEKBITS RETURN.</span>
-061164,000352: 
-061165,000353: 20,2335           12456                           <span class="op">TCF     </span> <a href="#5245544E4D4F5245">RETNMORE</a>                              <span class="co">#  DISPLAY THESE THE NEXT TIME THROUGH</span>
-061166,000354: 
+061145,000319:                                                                                                  <span class="co">#  R ERROR CALCULATION NEXT.</span>
+061146,000320: 
+061147,000321: 20,2310           31760                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    <span class="co">#  Y-AXIS DIFFERENCE STORED BY Q-AXIS CALC.</span>
+061148,000322: 20,2311           00006                           <span class="op">EXTEND  </span>                                       
+061149,000323: 20,2312           71416                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3331">M31</a>                                   <span class="co">#  (CTHETA-CDUY)*M31, SCALED AT PI RADIANS.</span>
+061150,000324: 20,2313           57762                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>         +2                         <span class="co">#  FIRST TERM OF R ERROR.</span>
+061151,000325:                                                                                                  <span class="co">#  Z-AXIS DIFFERENCE, STORED BY A CALC. IS</span>
+061152,000326: 20,2314           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  RECOVERED BY THE EXCHANGE.</span>
+061153,000327: 20,2315           71420                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3332">M32</a>                                   <span class="co">#  (CPSI-CDUZ)*M32, SCALED AT PI RADIANS.</span>
+061154,000328: 20,2316           61762                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>         +2                         <span class="co">#  R ERROR COMPLETE         , AT PI RAD.</span>
+061155,000329: 20,2317           02451                           <span class="op">TC      </span> <a href="#4F56455253554232">OVERSUB2</a>                              <span class="co">#  PIN NEEDLES IN CASE OF OVERFLOW.</span>
+061156,000330: 20,2320           55762                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>         +2                         
+061157,000331: 
+061158,000332:                                                                                                  <span class="co">#  NOW CALCULATE P ERROR.  (NOTE THAT M13 = 1, SCALED AT 1, SO THE MULTIPLICATION IS BY-PASSED.)</span>
+061159,000333: 
+061160,000334: 20,2321           31760                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    <span class="co">#  Y-AXIS DIFFERENCE STORED BY Q AXIS CALC.</span>
+061161,000335: 20,2322           00006                           <span class="op">EXTEND  </span>                                       
+061162,000336: 20,2323           71414                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3131">M11</a>                                   <span class="co">#  (CTHETA-CDUY)*M11 SCALED AT PI RADIANS.</span>
+061163,000337: 20,2324           57760                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    <span class="co">#  FIRST TERM OF P ERROR IN AK, AT PI RAD.</span>
+061164,000338: 20,2325           30321                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43504849">CPHI</a>                                  <span class="co">#  DESIRED ATTITUDE, X-AXIS, 2'S COMP.</span>
+061165,000339: 20,2326           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  SUBTRACT CURRENT X ATTITUDE.</span>
+061166,000340: 20,2327           20032                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  <span class="co">#  X-AXIS DIFFERENCE, 1'S COMP, AT PI RAD.</span>
+061167,000341: 
+061168,000342:                                                                                                  <span class="co">#  M13 = 1, SO BYPASS THE MULTIPLICATION.</span>
+061169,000343:                                                                                                  <span class="co">#                EXTEND</span>
+061170,000344:                                                                                                  <span class="co">#                MP      M13             (CPHI-CDUX)*M13 SCALED AT PI RADIANS.</span>
+061171,000345: 
+061172,000346: 20,2330           61760                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    <span class="co">#  P ERROR COMPLETE      , SCALED AT PI RAD</span>
+061173,000347: 20,2331           02451                           <span class="op">TC      </span> <a href="#4F56455253554232">OVERSUB2</a>                              <span class="co">#  PIN NEEDLES IN CASE OF OVERFLOW.</span>
+061174,000348: 20,2332           55760                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    
+061175,000349: 
+061176,000350: 20,2333           00006                           <span class="op">EXTEND  </span>                                       
+061177,000351: 20,2334           22061                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                <span class="co">#  RESTORE Q FOR CHEKBITS RETURN.</span>
+061178,000352: 
+061179,000353: 20,2335           12456                           <span class="op">TCF     </span> <a href="#5245544E4D4F5245">RETNMORE</a>                              <span class="co">#  DISPLAY THESE THE NEXT TIME THROUGH</span>
+061180,000354: 
 </pre>
 </span>
 </p>
@@ -569,46 +569,46 @@ Page 1415
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061168,000356:                                                                                                  <span class="co">#  FDAI ATTITUDE ERROR DISPLAY SUBROUTINE</span>
-061169,000357: 
-061170,000358:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION:          D. KEENE        5/24/67</span>
-061171,000359:                                                                                                  <span class="co">#  MOD 1 BY CRAIG WORK, 12 DEC 67</span>
-061172,000360:                                                                                                  <span class="co">#  MOD 2 BY CRAIG WORK, 6 APRIL 68 CONVERTS ATTITUDE ERROR DISPLAY SCALING FROM 16 7/8 DEG. TO 42 3/16 DEGREES.</span>
-061173,000361: 
-061174,000362:                                                                                                  <span class="co">#        THIS SUBROUTINE IS USED TO DISPLAY ATTITUDE ERRORS ON THE FDAI VIA THE DIGITAL TO ANALOG CONVERTERS (DACS)</span>
-061175,000363:                                                                                                  <span class="co">#  IN THE CDUS.  CARE IS TAKEN TO METER OUT THE APPROPRIATE NUMBER OF PULSES TO THE IMU ERROR COUNTERS AND PREVENT</span>
-061176,000364:                                                                                                  <span class="co">#  OVERFLOW, TO CONTROL THE RELAY SEQUENCING, AND TO AVOID INTERFERENCE WITH THE COARSE ALIGN LOOP WHICH ALSO USES</span>
-061177,000365:                                                                                                  <span class="co">#  THE DACS.</span>
-061178,000366: 
-061179,000367:                                                                                                  <span class="co">#  CALLING SEQUENCE:</span>
-061180,000368:                                                                                                  <span class="co">#        DURING THE INITIALIZATION SECTION OF THE USER'S PROGRAM, BIT3 OF RCSFLAGS SHOULD BE SET TO INITIATE THE</span>
-061181,000369:                                                                                                  <span class="co">#  TURN-ON SEQUENCE WITHIN THE NEEDLES PROGRAM:</span>
-061182,000370:                                                                                                  <span class="co">#                CS      RCSFLAGS        IN EBANK6</span>
-061183,000371:                                                                                                  <span class="co">#                MASK    BIT3</span>
-061184,000372:                                                                                                  <span class="co">#                ADS     RCSFLAGS</span>
-061185,000373:                                                                                                  <span class="co">#  THEREAFTER, THE ATTITUDE ERRORS GENERATED BY THE USER SHOULD BE TRANSFERED TO THE FOLLOWING LOCATIONS IN EBANK6:</span>
-061186,000374:                                                                                                  <span class="co">#                AK      SCALED 180 DEGREES      NOTE:   THESE LOCATIONS ARE SUBJECT</span>
-061187,000375:                                                                                                  <span class="co">#                AK1     SCALED 180 DEGREES              TO CHANGE</span>
-061188,000376:                                                                                                  <span class="co">#                AK2     SCALED 180 DEGREES</span>
-061189,000377:                                                                                                  <span class="co">#  FULL SCALED DEFLECTION OF THE NEEDLES CORRESPONDS TO 5 1/16 DEGREES, WHILE 384 BITS IN THE IMU ERROR COUNTER</span>
-061190,000378:                                                                                                  <span class="co">#  CORRESPONDS TO 42 3/16 DEGREES.  (DAC MAXIMUM CAPACITY IS 384 BITS.)  46 BITS EFFECTIVELY PIN THE NEEDLES.</span>
-061191,000379: 
-061192,000380:                                                                                                  <span class="co">#  FOR RATE DISPLAY, FULL SCALE NEEDLE DEFLECTION IS 1 17/64 DEG/SEC, AND A FULL COUNTER IS ABOUT 10.5 DEG/SEC.</span>
-061193,000381:                                                                                                  <span class="co">#  A CALL TO NEEDLER WILL THEN UPDATE THE DISPLAY:</span>
-061194,000382:                                                                                                  <span class="co">#                INHINT</span>
-061195,000383:                                                                                                  <span class="co">#                TC      IBNKCALL        NOTE:  EBANK SHOULD BE SET TO E6</span>
-061196,000384:                                                                                                  <span class="co">#                CADR    NEEDLER</span>
-061197,000385:                                                                                                  <span class="co">#                RELINT</span>
-061198,000386:                                                                                                  <span class="co">#        THIS PROCESS SHOULD BE REPEATED EACH TIME THE ERRORS ARE UPDATED.  AT LEAST 3 PASSES THRU THE PROGRAM ARE</span>
-061199,000387:                                                                                                  <span class="co">#  REQUIRED BEFORE ANYTHING IS ACTUALLY DISPLAYED ON THE ERROR METERS.</span>
-061200,000388:                                                                                                  <span class="co">#  NOTE:  EACH CALL TO NEEDLER MUST BE SEPARATED BY AT LEAST 50 MS TO ASSURE PROPER RELAY SEQUENCING.</span>
-061201,000389: 
-061202,000390:                                                                                                  <span class="co">#  ERASABLE USED:</span>
-061203,000391:                                                                                                  <span class="co">#                                AK              CDUXCMD</span>
-061204,000392:                                                                                                  <span class="co">#                                AK1             CDUYCMD</span>
-061205,000393:                                                                                                  <span class="co">#                                AK2             CDUZCMD</span>
-061206,000394:                                                                                                  <span class="co">#                                EDRIVEX         A,L,Q</span>
-061207,000395:                                                                                                  <span class="co">#                                EDRIVEY         T5TEMP</span>
+061182,000356:                                                                                                  <span class="co">#  FDAI ATTITUDE ERROR DISPLAY SUBROUTINE</span>
+061183,000357: 
+061184,000358:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION:          D. KEENE        5/24/67</span>
+061185,000359:                                                                                                  <span class="co">#  MOD 1 BY CRAIG WORK, 12 DEC 67</span>
+061186,000360:                                                                                                  <span class="co">#  MOD 2 BY CRAIG WORK, 6 APRIL 68 CONVERTS ATTITUDE ERROR DISPLAY SCALING FROM 16 7/8 DEG. TO 42 3/16 DEGREES.</span>
+061187,000361: 
+061188,000362:                                                                                                  <span class="co">#        THIS SUBROUTINE IS USED TO DISPLAY ATTITUDE ERRORS ON THE FDAI VIA THE DIGITAL TO ANALOG CONVERTERS (DACS)</span>
+061189,000363:                                                                                                  <span class="co">#  IN THE CDUS.  CARE IS TAKEN TO METER OUT THE APPROPRIATE NUMBER OF PULSES TO THE IMU ERROR COUNTERS AND PREVENT</span>
+061190,000364:                                                                                                  <span class="co">#  OVERFLOW, TO CONTROL THE RELAY SEQUENCING, AND TO AVOID INTERFERENCE WITH THE COARSE ALIGN LOOP WHICH ALSO USES</span>
+061191,000365:                                                                                                  <span class="co">#  THE DACS.</span>
+061192,000366: 
+061193,000367:                                                                                                  <span class="co">#  CALLING SEQUENCE:</span>
+061194,000368:                                                                                                  <span class="co">#        DURING THE INITIALIZATION SECTION OF THE USER'S PROGRAM, BIT3 OF RCSFLAGS SHOULD BE SET TO INITIATE THE</span>
+061195,000369:                                                                                                  <span class="co">#  TURN-ON SEQUENCE WITHIN THE NEEDLES PROGRAM:</span>
+061196,000370:                                                                                                  <span class="co">#                CS      RCSFLAGS        IN EBANK6</span>
+061197,000371:                                                                                                  <span class="co">#                MASK    BIT3</span>
+061198,000372:                                                                                                  <span class="co">#                ADS     RCSFLAGS</span>
+061199,000373:                                                                                                  <span class="co">#  THEREAFTER, THE ATTITUDE ERRORS GENERATED BY THE USER SHOULD BE TRANSFERED TO THE FOLLOWING LOCATIONS IN EBANK6:</span>
+061200,000374:                                                                                                  <span class="co">#                AK      SCALED 180 DEGREES      NOTE:   THESE LOCATIONS ARE SUBJECT</span>
+061201,000375:                                                                                                  <span class="co">#                AK1     SCALED 180 DEGREES              TO CHANGE</span>
+061202,000376:                                                                                                  <span class="co">#                AK2     SCALED 180 DEGREES</span>
+061203,000377:                                                                                                  <span class="co">#  FULL SCALED DEFLECTION OF THE NEEDLES CORRESPONDS TO 5 1/16 DEGREES, WHILE 384 BITS IN THE IMU ERROR COUNTER</span>
+061204,000378:                                                                                                  <span class="co">#  CORRESPONDS TO 42 3/16 DEGREES.  (DAC MAXIMUM CAPACITY IS 384 BITS.)  46 BITS EFFECTIVELY PIN THE NEEDLES.</span>
+061205,000379: 
+061206,000380:                                                                                                  <span class="co">#  FOR RATE DISPLAY, FULL SCALE NEEDLE DEFLECTION IS 1 17/64 DEG/SEC, AND A FULL COUNTER IS ABOUT 10.5 DEG/SEC.</span>
+061207,000381:                                                                                                  <span class="co">#  A CALL TO NEEDLER WILL THEN UPDATE THE DISPLAY:</span>
+061208,000382:                                                                                                  <span class="co">#                INHINT</span>
+061209,000383:                                                                                                  <span class="co">#                TC      IBNKCALL        NOTE:  EBANK SHOULD BE SET TO E6</span>
+061210,000384:                                                                                                  <span class="co">#                CADR    NEEDLER</span>
+061211,000385:                                                                                                  <span class="co">#                RELINT</span>
+061212,000386:                                                                                                  <span class="co">#        THIS PROCESS SHOULD BE REPEATED EACH TIME THE ERRORS ARE UPDATED.  AT LEAST 3 PASSES THRU THE PROGRAM ARE</span>
+061213,000387:                                                                                                  <span class="co">#  REQUIRED BEFORE ANYTHING IS ACTUALLY DISPLAYED ON THE ERROR METERS.</span>
+061214,000388:                                                                                                  <span class="co">#  NOTE:  EACH CALL TO NEEDLER MUST BE SEPARATED BY AT LEAST 50 MS TO ASSURE PROPER RELAY SEQUENCING.</span>
+061215,000389: 
+061216,000390:                                                                                                  <span class="co">#  ERASABLE USED:</span>
+061217,000391:                                                                                                  <span class="co">#                                AK              CDUXCMD</span>
+061218,000392:                                                                                                  <span class="co">#                                AK1             CDUYCMD</span>
+061219,000393:                                                                                                  <span class="co">#                                AK2             CDUZCMD</span>
+061220,000394:                                                                                                  <span class="co">#                                EDRIVEX         A,L,Q</span>
+061221,000395:                                                                                                  <span class="co">#                                EDRIVEY         T5TEMP</span>
 </pre>
 </span>
 </p>
@@ -624,54 +624,54 @@ Page 1416
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061209,000397:                                                                                                  <span class="co">#                                EDRIVEZ         DINDX</span>
-061210,000398: 
-061211,000399:                                                                                                  <span class="co">#  SWITCHES:                     RCSFLAGS  BITS 3,2</span>
-061212,000400: 
-061213,000401:                                                                                                  <span class="co">#  I/O CHANNELS:                 CHAN12  BIT 4 (COARSE ALIGN - READ ONLY)</span>
-061214,000402:                                                                                                  <span class="co">#                                CHAN12  BIT 6 (IMU ERROR COUNTER ENABLE)</span>
-061215,000403:                                                                                                  <span class="co">#                                CHAN14  BIT 13,14,15 (DAC ACTIVITY)</span>
-061216,000404: 
-061217,000405:                                                                                                  <span class="co">#  SIGN CONVENTION&lt;      AK = THETAC - THETA</span>
-061218,000406:                                                                                                  <span class="co">#                WHERE   THETAC = COMMAND ANGLE</span>
-061219,000407:                                                                                                  <span class="co">#                        THETA = PRESENT ANGLE</span>
-061220,000408: 
-<a name="4E4545444C4552"></a>061221,000409: 20,2336           31774        <span class="sm">NEEDLER </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              
-061222,000410: 20,2337           76263                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   
-061223,000411: 20,2340           00006                           <span class="op">EXTEND  </span>                                       
-061224,000412: 20,2341           12376                           <span class="op">BZF     </span> <a href="#4E4545444C455333">NEEDLES3</a>                              
-061225,000413: 20,2342           74742                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495433">BIT3</a>                                  
-061226,000414: 20,2343           00006                           <span class="op">EXTEND  </span>                                       
-061227,000415: 20,2344           12367                           <span class="op">BZF     </span> <a href="#4E4545444C455232">NEEDLER2</a>                              <span class="co">#  BIT3 = 0, BIT2 = 1</span>
-061228,000416: 
-061229,000417: 20,2345           44737                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  <span class="co">#  FIRST PASS BIT3 = 1</span>
-061230,000418: 20,2346           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  DISABLE IMU ERROR COUNTER TO ZERO DACS</span>
-061231,000419: 20,2347           03012                           <span class="op">WAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3132">CHAN12</a>                                <span class="co">#  MUST WAIT AT LEAST 60 MS BEFORE</span>
-<a name="4E4545444C453131"></a>061232,000420: 20,2350           44746        <span class="sm">NEEDLE11</span>           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  ENABLING COUNTERS.</span>
-061233,000421: 20,2351           55760                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    <span class="co">#  ZERO THE INPUTS ON FIRST PASS</span>
-061234,000422: 20,2352           55761                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B31">AK1</a>                                   
-061235,000423: 20,2353           55762                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B32">AK2</a>                                   
-061236,000424: 20,2354           55763                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45445249564558">EDRIVEX</a>                               <span class="co">#  ZERO THE DISPLAY REGISTERS</span>
-061237,000425: 20,2355           55764                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45445249564559">EDRIVEY</a>                               
-061238,000426: 20,2356           55765                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4544524956455A">EDRIVEZ</a>                               
-061239,000427: 20,2357           54050                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558434D44">CDUXCMD</a>                               <span class="co">#  ZERO THE OUT COUNTERS</span>
-061240,000428: 20,2360           54051                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445559434D44">CDUYCMD</a>                               
-061241,000429: 20,2361           54052                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A434D44">CDUZCMD</a>                               
-061242,000430: 20,2362           46263                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   <span class="co">#  RESET RCSFLAGS FOR PASS2</span>
-061243,000431: 20,2363           71774                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              
-061244,000432: 20,2364           64743                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  
-061245,000433: 20,2365           55774                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              
-061246,000434: 20,2366           12456                           <span class="op">TCF     </span> <a href="#5245544E4D4F5245">RETNMORE</a>                              
-061247,000435: 
-<a name="4E4545444C455232"></a>061248,000436: 20,2367           34737        <span class="sm">NEEDLER2</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  <span class="co">#  ENABLE IMU ERROR COUNTERS</span>
-061249,000437: 20,2370           00006                           <span class="op">EXTEND  </span>                                       
-061250,000438: 20,2371           05012                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3132">CHAN12</a>                                
-061251,000439: 20,2372           46263                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   <span class="co">#  RESET RCSFLAGS TO DISPLAY ATTITUDE</span>
-061252,000440: 20,2373           71774                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              <span class="co">#  ERRORS    WAIT AT LEAST 4 MS FOR</span>
-061253,000441: 20,2374           55774                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              <span class="co">#  RELAY CLOSURE</span>
-061254,000442: 20,2375           12456                           <span class="op">TCF     </span> <a href="#5245544E4D4F5245">RETNMORE</a>                              
-061255,000443: 
-<a name="4E4545444C455333"></a>061256,000444: 20,2376           34737        <span class="sm">NEEDLES3</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  <span class="co">#  CHECK TO SEE IF IMU ERROR COUNTER</span>
+061223,000397:                                                                                                  <span class="co">#                                EDRIVEZ         DINDX</span>
+061224,000398: 
+061225,000399:                                                                                                  <span class="co">#  SWITCHES:                     RCSFLAGS  BITS 3,2</span>
+061226,000400: 
+061227,000401:                                                                                                  <span class="co">#  I/O CHANNELS:                 CHAN12  BIT 4 (COARSE ALIGN - READ ONLY)</span>
+061228,000402:                                                                                                  <span class="co">#                                CHAN12  BIT 6 (IMU ERROR COUNTER ENABLE)</span>
+061229,000403:                                                                                                  <span class="co">#                                CHAN14  BIT 13,14,15 (DAC ACTIVITY)</span>
+061230,000404: 
+061231,000405:                                                                                                  <span class="co">#  SIGN CONVENTION&lt;      AK = THETAC - THETA</span>
+061232,000406:                                                                                                  <span class="co">#                WHERE   THETAC = COMMAND ANGLE</span>
+061233,000407:                                                                                                  <span class="co">#                        THETA = PRESENT ANGLE</span>
+061234,000408: 
+<a name="4E4545444C4552"></a>061235,000409: 20,2336           31774        <span class="sm">NEEDLER </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              
+061236,000410: 20,2337           76263                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   
+061237,000411: 20,2340           00006                           <span class="op">EXTEND  </span>                                       
+061238,000412: 20,2341           12376                           <span class="op">BZF     </span> <a href="#4E4545444C455333">NEEDLES3</a>                              
+061239,000413: 20,2342           74742                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495433">BIT3</a>                                  
+061240,000414: 20,2343           00006                           <span class="op">EXTEND  </span>                                       
+061241,000415: 20,2344           12367                           <span class="op">BZF     </span> <a href="#4E4545444C455232">NEEDLER2</a>                              <span class="co">#  BIT3 = 0, BIT2 = 1</span>
+061242,000416: 
+061243,000417: 20,2345           44737                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  <span class="co">#  FIRST PASS BIT3 = 1</span>
+061244,000418: 20,2346           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  DISABLE IMU ERROR COUNTER TO ZERO DACS</span>
+061245,000419: 20,2347           03012                           <span class="op">WAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3132">CHAN12</a>                                <span class="co">#  MUST WAIT AT LEAST 60 MS BEFORE</span>
+<a name="4E4545444C453131"></a>061246,000420: 20,2350           44746        <span class="sm">NEEDLE11</span>           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  ENABLING COUNTERS.</span>
+061247,000421: 20,2351           55760                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    <span class="co">#  ZERO THE INPUTS ON FIRST PASS</span>
+061248,000422: 20,2352           55761                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B31">AK1</a>                                   
+061249,000423: 20,2353           55762                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B32">AK2</a>                                   
+061250,000424: 20,2354           55763                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45445249564558">EDRIVEX</a>                               <span class="co">#  ZERO THE DISPLAY REGISTERS</span>
+061251,000425: 20,2355           55764                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45445249564559">EDRIVEY</a>                               
+061252,000426: 20,2356           55765                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4544524956455A">EDRIVEZ</a>                               
+061253,000427: 20,2357           54050                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558434D44">CDUXCMD</a>                               <span class="co">#  ZERO THE OUT COUNTERS</span>
+061254,000428: 20,2360           54051                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445559434D44">CDUYCMD</a>                               
+061255,000429: 20,2361           54052                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A434D44">CDUZCMD</a>                               
+061256,000430: 20,2362           46263                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   <span class="co">#  RESET RCSFLAGS FOR PASS2</span>
+061257,000431: 20,2363           71774                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              
+061258,000432: 20,2364           64743                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  
+061259,000433: 20,2365           55774                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              
+061260,000434: 20,2366           12456                           <span class="op">TCF     </span> <a href="#5245544E4D4F5245">RETNMORE</a>                              
+061261,000435: 
+<a name="4E4545444C455232"></a>061262,000436: 20,2367           34737        <span class="sm">NEEDLER2</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  <span class="co">#  ENABLE IMU ERROR COUNTERS</span>
+061263,000437: 20,2370           00006                           <span class="op">EXTEND  </span>                                       
+061264,000438: 20,2371           05012                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3132">CHAN12</a>                                
+061265,000439: 20,2372           46263                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   <span class="co">#  RESET RCSFLAGS TO DISPLAY ATTITUDE</span>
+061266,000440: 20,2373           71774                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              <span class="co">#  ERRORS    WAIT AT LEAST 4 MS FOR</span>
+061267,000441: 20,2374           55774                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              <span class="co">#  RELAY CLOSURE</span>
+061268,000442: 20,2375           12456                           <span class="op">TCF     </span> <a href="#5245544E4D4F5245">RETNMORE</a>                              
+061269,000443: 
+<a name="4E4545444C455333"></a>061270,000444: 20,2376           34737        <span class="sm">NEEDLES3</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  <span class="co">#  CHECK TO SEE IF IMU ERROR COUNTER</span>
 </pre>
 </span>
 </p>
@@ -687,55 +687,55 @@ Page 1417
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061258,000446: 20,2377           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  IS ENABLED</span>
-061259,000447: 20,2400           02012                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3132">CHAN12</a>                                
-061260,000448: 20,2401           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IF NOT, RE-INITIALIZE NEEDLER.</span>
-061261,000449: 20,2402           12407                           <span class="op">TCF     </span> <a href="#4E4545444C4553">NEEDLES</a>                               
-061262,000450: 
-061263,000451: 20,2403           41774                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              <span class="co">#  SET UP INITIALIZATION FLAG IN RCSFLAGS.</span>
-061264,000452: 20,2404           74742                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495433">BIT3</a>                                  
-061265,000453: 20,2405           27774                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              
-061266,000454: 20,2406           12456                           <span class="op">TCF     </span> <a href="#5245544E4D4F5245">RETNMORE</a>                              
-061267,000455: 
-<a name="4E4545444C4553"></a>061268,000456: 20,2407           34743        <span class="sm">NEEDLES </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   
-<a name="4441434C4F4F50"></a>061269,000457: 20,2410           54063        <span class="sm">DACLOOP </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44494E4458">DINDX</a>                                 
-061270,000458: 20,2411           42450                           <span class="op">CS      </span> <a href="#4F4E4554454E5448">ONETENTH</a>                              <span class="co">#  RESCALE INPUTS TO + OR - 1800 DEGREES.</span>
-061271,000459: 20,2412           00006                           <span class="op">EXTEND  </span>                                       
-061272,000460: 20,2413           50063                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44494E4458">DINDX</a>                                 
-061273,000461: 20,2414           71760                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    
-061274,000462: 20,2415           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-061275,000463: 20,2416           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-061276,000464: 20,2417           32446                           <span class="op">CA      </span> <a href="#4441434C494D4954">DACLIMIT</a>                              
-061277,000465: 20,2420           12422                           <span class="op">TCF     </span> +2                                    
-061278,000466: 20,2421           42446                           <span class="op">CS      </span> <a href="#4441434C494D4954">DACLIMIT</a>                              
-061279,000467: 20,2422           60001                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-061280,000468: 20,2423           54061                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#543554454D50">T5TEMP</a>                                <span class="co">#  OVFLO CHK</span>
-061281,000469: 20,2424           12430                           <span class="op">TCF     </span> +4                                    
-061282,000470: 20,2425           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  ON OVERFLOW LIMIT OUTPUT TO +-384</span>
-061283,000471: 20,2426           32446                           <span class="op">CAF     </span> <a href="#4441434C494D4954">DACLIMIT</a>                              
-061284,000472: 20,2427           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-061285,000473: 20,2430           50063                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44494E4458">DINDX</a>                                 
-061286,000474: 20,2431           41763                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45445249564558">EDRIVEX</a>                               <span class="co">#  CURRENT VALUE OF DAC</span>
-061287,000475: 20,2432           60001                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-061288,000476: 20,2433           50063                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44494E4458">DINDX</a>                                 
-061289,000477: 20,2434           26050                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558434D44">CDUXCMD</a>                               
-061290,000478: 20,2435           50063                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44494E4458">DINDX</a>                                 
-061291,000479: 20,2436           23763                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45445249564558">EDRIVEX</a>                               
-061292,000480: 20,2437           10063                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44494E4458">DINDX</a>                                 
-061293,000481: 20,2440           12410                           <span class="op">TCF     </span> <a href="#4441434C4F4F50">DACLOOP</a>                               
-061294,000482: 20,2441           37761                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#31332C31342C3135">13,14,15</a>                              
-061295,000483: 20,2442           00006                           <span class="op">EXTEND  </span>                                       
-061296,000484: 20,2443           05014                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3134">CHAN14</a>                                <span class="co">#  SET DAC ACTIVITY BITS</span>
-061297,000485: 20,2444           12456                           <span class="op">TCF     </span> <a href="#5245544E4D4F5245">RETNMORE</a>                              
-061298,000486: 
-061299,000487: 20,2445           77177                           <span class="ps">DEC     </span> -384       B-14                       
-<a name="4441434C494D4954"></a>061300,000488: 20,2446           37200        <span class="sm">DACLIMIT</span>           <span class="ps">DEC     </span> 16000      B-14                       
-061301,000489: 20,2447           00600                           <span class="ps">DEC     </span> 384        B-14                       
-061302,000490: 
-<a name="4F4E4554454E5448"></a>061303,000491: 20,2450           03146        <span class="sm">ONETENTH</span>           <span class="ps">OCT     </span> 03146                                 <span class="co">#  DECIMAL +0.1, SCALED AT 1.</span>
-<a name="4453504C59414C54"></a>061304,000492: 20,2451     4741               <span class="sm">DSPLYALT</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495434">BIT4</a>                                  <span class="co">#  100 MS ALTERNATION BIT IN RCSFLAGS</span>
-061305,000493: 
-<a name="4F56455253554232"></a>061306,000494: 20,2451           54007        <span class="sm">OVERSUB2</span>           <span class="op">TS      </span> 7                                     <span class="co">#  RETURNS A UNCHANGED OR LIMITED TO</span>
+061272,000446: 20,2377           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  IS ENABLED</span>
+061273,000447: 20,2400           02012                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3132">CHAN12</a>                                
+061274,000448: 20,2401           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IF NOT, RE-INITIALIZE NEEDLER.</span>
+061275,000449: 20,2402           12407                           <span class="op">TCF     </span> <a href="#4E4545444C4553">NEEDLES</a>                               
+061276,000450: 
+061277,000451: 20,2403           41774                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              <span class="co">#  SET UP INITIALIZATION FLAG IN RCSFLAGS.</span>
+061278,000452: 20,2404           74742                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495433">BIT3</a>                                  
+061279,000453: 20,2405           27774                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              
+061280,000454: 20,2406           12456                           <span class="op">TCF     </span> <a href="#5245544E4D4F5245">RETNMORE</a>                              
+061281,000455: 
+<a name="4E4545444C4553"></a>061282,000456: 20,2407           34743        <span class="sm">NEEDLES </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   
+<a name="4441434C4F4F50"></a>061283,000457: 20,2410           54063        <span class="sm">DACLOOP </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44494E4458">DINDX</a>                                 
+061284,000458: 20,2411           42450                           <span class="op">CS      </span> <a href="#4F4E4554454E5448">ONETENTH</a>                              <span class="co">#  RESCALE INPUTS TO + OR - 1800 DEGREES.</span>
+061285,000459: 20,2412           00006                           <span class="op">EXTEND  </span>                                       
+061286,000460: 20,2413           50063                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44494E4458">DINDX</a>                                 
+061287,000461: 20,2414           71760                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    
+061288,000462: 20,2415           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+061289,000463: 20,2416           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+061290,000464: 20,2417           32446                           <span class="op">CA      </span> <a href="#4441434C494D4954">DACLIMIT</a>                              
+061291,000465: 20,2420           12422                           <span class="op">TCF     </span> +2                                    
+061292,000466: 20,2421           42446                           <span class="op">CS      </span> <a href="#4441434C494D4954">DACLIMIT</a>                              
+061293,000467: 20,2422           60001                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+061294,000468: 20,2423           54061                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#543554454D50">T5TEMP</a>                                <span class="co">#  OVFLO CHK</span>
+061295,000469: 20,2424           12430                           <span class="op">TCF     </span> +4                                    
+061296,000470: 20,2425           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  ON OVERFLOW LIMIT OUTPUT TO +-384</span>
+061297,000471: 20,2426           32446                           <span class="op">CAF     </span> <a href="#4441434C494D4954">DACLIMIT</a>                              
+061298,000472: 20,2427           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+061299,000473: 20,2430           50063                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44494E4458">DINDX</a>                                 
+061300,000474: 20,2431           41763                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45445249564558">EDRIVEX</a>                               <span class="co">#  CURRENT VALUE OF DAC</span>
+061301,000475: 20,2432           60001                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+061302,000476: 20,2433           50063                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44494E4458">DINDX</a>                                 
+061303,000477: 20,2434           26050                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558434D44">CDUXCMD</a>                               
+061304,000478: 20,2435           50063                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44494E4458">DINDX</a>                                 
+061305,000479: 20,2436           23763                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45445249564558">EDRIVEX</a>                               
+061306,000480: 20,2437           10063                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44494E4458">DINDX</a>                                 
+061307,000481: 20,2440           12410                           <span class="op">TCF     </span> <a href="#4441434C4F4F50">DACLOOP</a>                               
+061308,000482: 20,2441           37761                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#31332C31342C3135">13,14,15</a>                              
+061309,000483: 20,2442           00006                           <span class="op">EXTEND  </span>                                       
+061310,000484: 20,2443           05014                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3134">CHAN14</a>                                <span class="co">#  SET DAC ACTIVITY BITS</span>
+061311,000485: 20,2444           12456                           <span class="op">TCF     </span> <a href="#5245544E4D4F5245">RETNMORE</a>                              
+061312,000486: 
+061313,000487: 20,2445           77177                           <span class="ps">DEC     </span> -384       B-14                       
+<a name="4441434C494D4954"></a>061314,000488: 20,2446           37200        <span class="sm">DACLIMIT</span>           <span class="ps">DEC     </span> 16000      B-14                       
+061315,000489: 20,2447           00600                           <span class="ps">DEC     </span> 384        B-14                       
+061316,000490: 
+<a name="4F4E4554454E5448"></a>061317,000491: 20,2450           03146        <span class="sm">ONETENTH</span>           <span class="ps">OCT     </span> 03146                                 <span class="co">#  DECIMAL +0.1, SCALED AT 1.</span>
+<a name="4453504C59414C54"></a>061318,000492: 20,2451     4741               <span class="sm">DSPLYALT</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495434">BIT4</a>                                  <span class="co">#  100 MS ALTERNATION BIT IN RCSFLAGS</span>
+061319,000493: 
+<a name="4F56455253554232"></a>061320,000494: 20,2451           54007        <span class="sm">OVERSUB2</span>           <span class="op">TS      </span> 7                                     <span class="co">#  RETURNS A UNCHANGED OR LIMITED TO</span>
 </pre>
 </span>
 </p>
@@ -751,21 +751,21 @@ Page 1418
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061308,000496: 20,2452           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  POSMAX OR NEGMAX IF A HAS OVERFLOW</span>
-061309,000497: 20,2453           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-061310,000498: 20,2454           44725                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C494D495453">LIMITS</a>                                <span class="co">#  DUPLICATE CODING IN BANK 16</span>
-061311,000499: 20,2455           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-061312,000500: 
-<a name="5245544E4D4F5245"></a>061313,000501: 20,2456           00006        <span class="sm">RETNMORE</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  RETURN TO CHEKMORE</span>
-061314,000502: 20,2457           32462                           <span class="op">DCA     </span> <a href="#4D4F524543414452">MORECADR</a>                              
-061315,000503: 20,2460           52006                           <span class="op">DTCB    </span>                                       
-061316,000504: 
-061317,000505: 20,2461  E6,1536                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5351">AOSQ</a>                                  
-<a name="4D4F524543414452"></a>061318,000506: 20,2461           02016 34106  <span class="sm">MORECADR</span>           <span class="ps">2CADR   </span> <a href="#4348454B4D4F5245">CHEKMORE</a>                              
-061319,000507: 
-061320,000508: 
-061321,000509: 
-061322,000510: 
+061322,000496: 20,2452           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  POSMAX OR NEGMAX IF A HAS OVERFLOW</span>
+061323,000497: 20,2453           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+061324,000498: 20,2454           44725                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C494D495453">LIMITS</a>                                <span class="co">#  DUPLICATE CODING IN BANK 16</span>
+061325,000499: 20,2455           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+061326,000500: 
+<a name="5245544E4D4F5245"></a>061327,000501: 20,2456           00006        <span class="sm">RETNMORE</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  RETURN TO CHEKMORE</span>
+061328,000502: 20,2457           32462                           <span class="op">DCA     </span> <a href="#4D4F524543414452">MORECADR</a>                              
+061329,000503: 20,2460           52006                           <span class="op">DTCB    </span>                                       
+061330,000504: 
+061331,000505: 20,2461  E6,1536                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5351">AOSQ</a>                                  
+<a name="4D4F524543414452"></a>061332,000506: 20,2461           02016 34106  <span class="sm">MORECADR</span>           <span class="ps">2CADR   </span> <a href="#4348454B4D4F5245">CHEKMORE</a>                              
+061333,000507: 
+061334,000508: 
+061335,000509: 
+061336,000510: 
 
 End of include-file DAPIDLER_PROGRAM.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

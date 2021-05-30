@@ -89,25 +89,25 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-008540,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-008541,000003:                                                                                                  <span class="co">## Filename:    RCS_FAILURE_MONITOR.agc</span>
-008542,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 210.</span>
-008543,000005:                                                                                                  <span class="co">##              It is part of the source code for the Lunar Module's (LM)</span>
-008544,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 15-17.</span>
-008545,000007:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-008546,000008:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-008547,000009:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-008548,000010:                                                                                                  <span class="co">##              original YUL assembler.</span>
-008549,000011:                                                                                                  <span class="co">## Reference:   pp. 201-203</span>
-008550,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-008551,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-008552,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-008553,000015:                                                                                                  <span class="co">## Mod history: 2016-11-17 JL   Created from Luminary131 version.</span>
-008554,000016:                                                                                                  <span class="co">##              2016-11-21 HG   Transcribed</span>
-008555,000017:                                                                                                  <span class="co">##              2016-12-23 RSB  Proofed comment text with octopus/ProoferComments</span>
-008556,000018:                                                                                                  <span class="co">##                              and fixed all errors found.</span>
-008557,000019:                                                                                                  <span class="co">##              2017-08-18 RSB  Comment-text bug identified in ZERLINA 56.</span>
-008558,000020: 
+008542,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+008543,000003:                                                                                                  <span class="co">## Filename:    RCS_FAILURE_MONITOR.agc</span>
+008544,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 210.</span>
+008545,000005:                                                                                                  <span class="co">##              It is part of the source code for the Lunar Module's (LM)</span>
+008546,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 15-17.</span>
+008547,000007:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+008548,000008:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+008549,000009:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+008550,000010:                                                                                                  <span class="co">##              original YUL assembler.</span>
+008551,000011:                                                                                                  <span class="co">## Reference:   pp. 201-203</span>
+008552,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+008553,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+008554,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+008555,000015:                                                                                                  <span class="co">## Mod history: 2016-11-17 JL   Created from Luminary131 version.</span>
+008556,000016:                                                                                                  <span class="co">##              2016-11-21 HG   Transcribed</span>
+008557,000017:                                                                                                  <span class="co">##              2016-12-23 RSB  Proofed comment text with octopus/ProoferComments</span>
+008558,000018:                                                                                                  <span class="co">##                              and fixed all errors found.</span>
+008559,000019:                                                                                                  <span class="co">##              2017-08-18 RSB  Comment-text bug identified in ZERLINA 56.</span>
+008560,000020: 
 </pre>
 </span>
 </p>
@@ -123,57 +123,57 @@ Page 201
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-008560,000022:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION</span>
-008561,000023: 
-008562,000024:                                                                                                  <span class="co">#  AUTHOR: J S MILLER</span>
-008563,000025: 
-008564,000026:                                                                                                  <span class="co">#  MODIFIED 6 MARCH 1968 BY P S WEISSMAN TO SET UP JOB FOR 1/ACCS WHEN THE MASKS ARE CHANGED.</span>
-008565,000027: 
-008566,000028:                                                                                                  <span class="co">#       THIS ROUTINE IS ATTACHED TO T4RUPT, AND IS ENTERED EVERY 480 MS.  ITS FUNCTION IS TO EXAMINE THE LOW 8 BITS</span>
-008567,000029:                                                                                                  <span class="co">#  OF CHANNEL 32 TO SEE IF ANY ISOLATION-VALVE CLOSURE BITS HAVE APPEARED OR DISAPPEARED (THE CREW IS WARNED OF JET</span>
-008568,000030:                                                                                                  <span class="co">#  FAILURES BY LAMPS LIT BY THE GRUMMAN FAILURE-DETECTION CIRCUITRY; THEY MAY RESPOND BY OPERATING SWITCHES WHICH</span>
-008569,000031:                                                                                                  <span class="co">#  ISOLATE PAIRS OF JETS FROM THE PROPELLANT TANKS AND SET BITS IN CHANNEL 32).  IN THE EVENT THAT CHANNEL 32 BITS</span>
-008570,000032:                                                                                                  <span class="co">#  DIFFER FROM 'PVALVEST', THE RECORD OF ACTIONS TAKEN BY THIS ROUTINE, THE APPROPRIATE BITS IN 'CH5MASK' &amp;</span>
-008571,000033:                                                                                                  <span class="co">#  'CH6MASK', USED BY THE DAP JET-SELECTION LOGIC, ARE UPDATED, AS IS 'PVALVEST'.  TO SPEED UP &amp; SHORTEN THE</span>
-008572,000034:                                                                                                  <span class="co">#  ROUTINE, NO MORE THAN ONE CHANGE IS ACCEPTED PER ENTRY.  THE HIGHEST-NUMBERED BIT IN CHANNEL 32 WHICH REQUIRES</span>
-008573,000035:                                                                                                  <span class="co">#  ACTION IS THE ONE PROCESSED.</span>
-008574,000036: 
-008575,000037:                                                                                                  <span class="co">#       THE CODING IN THE FAILURE MONITOR HAS BEEN WRITTEN SO AS TO HAVE ALMOST COMPLETE RESTART PROTECTION.  FOR</span>
-008576,000038:                                                                                                  <span class="co">#  EXAMPLE, NO ASSUMPTION IS MADE WHEN SETTING A 'CH5MASK' BIT TO 1 THAT THE PREVIOUS STATE IS 0, ALTHOUGH IT OF</span>
-008577,000039:                                                                                                  <span class="co">#  COURSE SHOULD BE.  ONE CASE WHICH MAY BE SEEN TO EVADE PROTECTION IS THE OCCURRENCE OF A RESTART AFTER UPDATING</span>
-008578,000040:                                                                                                  <span class="co">#  ONE OR BOTH DAP MASK-WORDS BUT BEFORE UPDATING 'PVALVEST', COUPLED WITH A CHANGE IN THE VALVE-BIT BACK TO ITS</span>
-008579,000041:                                                                                                  <span class="co">#  FORMER STATE.  THE CONSEQUENCE OF THIS IS THAT THE NEXT ENTRY WOULD NOT SEE THE CHANGE INCOMPLETELY INCORP-</span>
-008580,000042:                                                                                                  <span class="co">#  ORATED BY THE LAST PASS (BECAUSE IT WENT AWAY AT JUST THE RIGHT TIME), BUT THE DAP MASK-WORDS WILL BE INCORRECT.</span>
-008581,000043:                                                                                                  <span class="co">#  THIS COMBINATION OF EVENTS SEEMS QUITE REMOTE, BUT NOT IMPOSSIBLE UNLESS THE CREW OPERATES THE SWITCHES AT HALF-</span>
-008582,000044:                                                                                                  <span class="co">#  SECOND INTERVALS OR LONGER.  IN ANY EVENT, A DISAGREEMENT BETWEEN REALITY AND THE DAP MASKS WILL BE CURED IF</span>
-008583,000045:                                                                                                  <span class="co">#  THE MISINTERPRETED SWITCH IS REVERSED AND THEN RESTORED TO ITS CORRECT POSITION (SLOWLY).</span>
-008584,000046: 
-008585,000047:                                                                                                  <span class="co">#  CALLING SEQUENCE:</span>
-008586,000048: 
-008587,000049:                                                                                                  <span class="co">#           TCF    RCSMONIT        (IN INTERRUPT MODE, EVERY 480 MS.)</span>
-008588,000050: 
-008589,000051:                                                                                                  <span class="co">#  EXIT:  TCF  RCSMONEX  (ALL PATHS EXIT VIA SUCH AN INSTRUCTION)</span>
-<a name="5243534D4F4E4558"></a>008590,000052: 06,3213     5272               <span class="sm">RCSMONEX</span>           <span class="ps">EQUALS  </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
-008591,000053: 
-008592,000054:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED:</span>
-008593,000055: 
-008594,000056:                                                                                                  <span class="co">#           VIA FRESH START:  PVALVEST          = +0  (ALL JETS ENABLED)</span>
-008595,000057:                                                                                                  <span class="co">#                             CH5MASK,CH6MASK   = +0  (ALL JETS OK)</span>
-008596,000058: 
-008597,000059:                                                                                                  <span class="co">#  OUTPUT:  CH5MASK &amp; CH6MASK UPDATED  (1'S WHERE JETS NOT TO BE USED, IN CHANNEL 5 &amp; 6 FORMAT)</span>
-008598,000060:                                                                                                  <span class="co">#           PVALTEST UPDATED  (1,S WHEN VALVE CLOSURES HAVE BEEN TRANSLATED INTO CH5MASK &amp; CH6MASK; CHAN 32 FORMAT)</span>
-008599,000061:                                                                                                  <span class="co">#           JOB TO DO 1/ACCS.</span>
-008600,000062: 
-008601,000063:                                                                                                  <span class="co">#  DEBRIS:  A, L, Q AND DEBRIS OF NOVAC.</span>
-008602,000064: 
-008603,000065:                                                                                                  <span class="co">#  SUBROUTINE CALLED:  NOVAC.</span>
-008604,000066: 
-008605,000067: 06,3213     1257                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
-008606,000068: 
-008607,000069: 23,2000                                           <span class="ps">BANK    </span> 23                                    
-008608,000070: 06,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#5243534D4F4E54">RCSMONT</a>                               
-008609,000071: 06,2000                                           <span class="ps">BANK    </span>                                       
-008610,000072: 
+008562,000022:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION</span>
+008563,000023: 
+008564,000024:                                                                                                  <span class="co">#  AUTHOR: J S MILLER</span>
+008565,000025: 
+008566,000026:                                                                                                  <span class="co">#  MODIFIED 6 MARCH 1968 BY P S WEISSMAN TO SET UP JOB FOR 1/ACCS WHEN THE MASKS ARE CHANGED.</span>
+008567,000027: 
+008568,000028:                                                                                                  <span class="co">#       THIS ROUTINE IS ATTACHED TO T4RUPT, AND IS ENTERED EVERY 480 MS.  ITS FUNCTION IS TO EXAMINE THE LOW 8 BITS</span>
+008569,000029:                                                                                                  <span class="co">#  OF CHANNEL 32 TO SEE IF ANY ISOLATION-VALVE CLOSURE BITS HAVE APPEARED OR DISAPPEARED (THE CREW IS WARNED OF JET</span>
+008570,000030:                                                                                                  <span class="co">#  FAILURES BY LAMPS LIT BY THE GRUMMAN FAILURE-DETECTION CIRCUITRY; THEY MAY RESPOND BY OPERATING SWITCHES WHICH</span>
+008571,000031:                                                                                                  <span class="co">#  ISOLATE PAIRS OF JETS FROM THE PROPELLANT TANKS AND SET BITS IN CHANNEL 32).  IN THE EVENT THAT CHANNEL 32 BITS</span>
+008572,000032:                                                                                                  <span class="co">#  DIFFER FROM 'PVALVEST', THE RECORD OF ACTIONS TAKEN BY THIS ROUTINE, THE APPROPRIATE BITS IN 'CH5MASK' &amp;</span>
+008573,000033:                                                                                                  <span class="co">#  'CH6MASK', USED BY THE DAP JET-SELECTION LOGIC, ARE UPDATED, AS IS 'PVALVEST'.  TO SPEED UP &amp; SHORTEN THE</span>
+008574,000034:                                                                                                  <span class="co">#  ROUTINE, NO MORE THAN ONE CHANGE IS ACCEPTED PER ENTRY.  THE HIGHEST-NUMBERED BIT IN CHANNEL 32 WHICH REQUIRES</span>
+008575,000035:                                                                                                  <span class="co">#  ACTION IS THE ONE PROCESSED.</span>
+008576,000036: 
+008577,000037:                                                                                                  <span class="co">#       THE CODING IN THE FAILURE MONITOR HAS BEEN WRITTEN SO AS TO HAVE ALMOST COMPLETE RESTART PROTECTION.  FOR</span>
+008578,000038:                                                                                                  <span class="co">#  EXAMPLE, NO ASSUMPTION IS MADE WHEN SETTING A 'CH5MASK' BIT TO 1 THAT THE PREVIOUS STATE IS 0, ALTHOUGH IT OF</span>
+008579,000039:                                                                                                  <span class="co">#  COURSE SHOULD BE.  ONE CASE WHICH MAY BE SEEN TO EVADE PROTECTION IS THE OCCURRENCE OF A RESTART AFTER UPDATING</span>
+008580,000040:                                                                                                  <span class="co">#  ONE OR BOTH DAP MASK-WORDS BUT BEFORE UPDATING 'PVALVEST', COUPLED WITH A CHANGE IN THE VALVE-BIT BACK TO ITS</span>
+008581,000041:                                                                                                  <span class="co">#  FORMER STATE.  THE CONSEQUENCE OF THIS IS THAT THE NEXT ENTRY WOULD NOT SEE THE CHANGE INCOMPLETELY INCORP-</span>
+008582,000042:                                                                                                  <span class="co">#  ORATED BY THE LAST PASS (BECAUSE IT WENT AWAY AT JUST THE RIGHT TIME), BUT THE DAP MASK-WORDS WILL BE INCORRECT.</span>
+008583,000043:                                                                                                  <span class="co">#  THIS COMBINATION OF EVENTS SEEMS QUITE REMOTE, BUT NOT IMPOSSIBLE UNLESS THE CREW OPERATES THE SWITCHES AT HALF-</span>
+008584,000044:                                                                                                  <span class="co">#  SECOND INTERVALS OR LONGER.  IN ANY EVENT, A DISAGREEMENT BETWEEN REALITY AND THE DAP MASKS WILL BE CURED IF</span>
+008585,000045:                                                                                                  <span class="co">#  THE MISINTERPRETED SWITCH IS REVERSED AND THEN RESTORED TO ITS CORRECT POSITION (SLOWLY).</span>
+008586,000046: 
+008587,000047:                                                                                                  <span class="co">#  CALLING SEQUENCE:</span>
+008588,000048: 
+008589,000049:                                                                                                  <span class="co">#           TCF    RCSMONIT        (IN INTERRUPT MODE, EVERY 480 MS.)</span>
+008590,000050: 
+008591,000051:                                                                                                  <span class="co">#  EXIT:  TCF  RCSMONEX  (ALL PATHS EXIT VIA SUCH AN INSTRUCTION)</span>
+<a name="5243534D4F4E4558"></a>008592,000052: 06,3213     5272               <span class="sm">RCSMONEX</span>           <span class="ps">EQUALS  </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
+008593,000053: 
+008594,000054:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED:</span>
+008595,000055: 
+008596,000056:                                                                                                  <span class="co">#           VIA FRESH START:  PVALVEST          = +0  (ALL JETS ENABLED)</span>
+008597,000057:                                                                                                  <span class="co">#                             CH5MASK,CH6MASK   = +0  (ALL JETS OK)</span>
+008598,000058: 
+008599,000059:                                                                                                  <span class="co">#  OUTPUT:  CH5MASK &amp; CH6MASK UPDATED  (1'S WHERE JETS NOT TO BE USED, IN CHANNEL 5 &amp; 6 FORMAT)</span>
+008600,000060:                                                                                                  <span class="co">#           PVALTEST UPDATED  (1,S WHEN VALVE CLOSURES HAVE BEEN TRANSLATED INTO CH5MASK &amp; CH6MASK; CHAN 32 FORMAT)</span>
+008601,000061:                                                                                                  <span class="co">#           JOB TO DO 1/ACCS.</span>
+008602,000062: 
+008603,000063:                                                                                                  <span class="co">#  DEBRIS:  A, L, Q AND DEBRIS OF NOVAC.</span>
+008604,000064: 
+008605,000065:                                                                                                  <span class="co">#  SUBROUTINE CALLED:  NOVAC.</span>
+008606,000066: 
+008607,000067: 06,3213     1257                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
+008608,000068: 
+008609,000069: 23,2000                                           <span class="ps">BANK    </span> 23                                    
+008610,000070: 06,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#5243534D4F4E54">RCSMONT</a>                               
+008611,000071: 06,2000                                           <span class="ps">BANK    </span>                                       
+008612,000072: 
 </pre>
 </span>
 </p>
@@ -189,57 +189,57 @@ Page 202
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-008612,000074: 06,3213                                           <span class="ps">COUNT*  </span> $$/T4RCS                              
-008613,000075: 
-<a name="5243534D4F4E4954"></a>008614,000076: 06,3213  06,3213               <span class="sm">RCSMONIT</span>           <span class="ps">EQUALS  </span> <a href="#5243534D4F4E">RCSMON</a>                                
-008615,000077: 
-<a name="5243534D4F4E"></a>008616,000078: 06,3213           44746        <span class="sm">RCSMON  </span>           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-008617,000079: 06,3214           00006                           <span class="op">EXTEND  </span>                                       
-008618,000080: 06,3215           06032                           <span class="op">RXOR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3332">CHAN32</a>                                <span class="co">#  PICK UP + INVERT INVERTED CHANNEL 32.</span>
-008619,000081: 06,3216           74350                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  <span class="co">#  KEEP JET-FAIL BITS ONLY.</span>
-008620,000082: 06,3217           54002                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-008621,000083: 
-008622,000084: 06,3220           41273                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5056414C56455354">PVALVEST</a>                              <span class="co">#        -   -</span>
-008623,000085: 06,3221           70002                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  FORM PC + PC.</span>
-008624,000086: 06,3222           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#    (P = PREVIOUS ISOLATION VALVE STATE,</span>
-008625,000087: 06,3223           40002                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#     C = CURRENT VALVE STATE (CH 32)).</span>
-008626,000088: 06,3224           71273                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5056414C56455354">PVALVEST</a>                              
-008627,000089: 06,3225           26001                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  RESULT NZ INDICATES ACTION REQUIRED.</span>
-008628,000090: 
-008629,000091: 06,3226           00006                           <span class="op">EXTEND  </span>                                       
-008630,000092: 06,3227           15272                           <span class="op">BZF     </span> <a href="#5243534D4F4E4558">RCSMONEX</a>                              <span class="co">#  QUIT IF NO ACTION REQUIRED.</span>
-008631,000093: 
-008632,000094: 06,3230           00006                           <span class="op">EXTEND  </span>                                       
-008633,000095: 06,3231           74736                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495437">BIT7</a>                                  <span class="co">#  MOVE BITS 8 - 1 OF A TO 14 - 7 OF L.</span>
-008634,000096: 06,3232           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  ZERO TO L IN THE PROCESS.</span>
-008635,000097: 
-008636,000098: 06,3233           24001                 -3        <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-008637,000099: 06,3234           60000                           <span class="op">DOUBLE  </span>                                       <span class="co">#  BOUND TO GET OVERFLOW IN THIS LOOP,</span>
-008638,000100: 06,3235           54000                           <span class="op">OVSK    </span>                                       <span class="co">#  SINCE WE ASSURED INITIAL NZ IN A.</span>
-008639,000101: 06,3236           13233                           <span class="op">TCF     </span> -3                                    
-008640,000102: 
-008641,000103: 06,3237           50001                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-008642,000104: 06,3240           34734                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>       -1                         <span class="co">#  SAVE THE RELEVANT BIT (8 - 1).</span>
-008643,000105: 06,3241           54002                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-008644,000106: 06,3242           71273                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5056414C56455354">PVALVEST</a>                              <span class="co">#  LOOK AT PREVIOUS VALVE STATE BIT.</span>
-008645,000107: 06,3243           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-008646,000108: 06,3244           13260                           <span class="op">TCF     </span> <a href="#564F50454E4544">VOPENED</a>                               <span class="co">#  THE VALVE HAS JUST BEEN OPENED.</span>
-008647,000109: 
-008648,000110: 06,3245           41257                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               <span class="co">#  THE VALVE HAS JUST BEEN CLOSED.</span>
-008649,000111: 06,3246           50001                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-008650,000112: 06,3247           73277                           <span class="op">MASK    </span> <a href="#354641494C544142">5FAILTAB</a>                              
-008651,000113: 06,3250           27257                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               <span class="co">#  SET INHIBIT BIT FOR CHANNEL 5 JET.</span>
-008652,000114: 
-008653,000115: 06,3251           41260                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
-008654,000116: 06,3252           50001                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-008655,000117: 06,3253           73307                           <span class="op">MASK    </span> <a href="#364641494C544142">6FAILTAB</a>                              
-008656,000118: 06,3254           27260                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               <span class="co">#  SET INGIBIT BIT FOR CHANNEL 6 JET.</span>
-008657,000119: 
-008658,000120: 06,3255           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-008659,000121: 06,3256           27273                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5056414C56455354">PVALVEST</a>                              <span class="co">#  RECORD ACTION TAKEN.</span>
-008660,000122: 
-008661,000123: 06,3257           13273                           <span class="op">TCF     </span> <a href="#312F414343464958">1/ACCFIX</a>                              <span class="co">#  SET UP 1/ACCJOB AND EXIT.</span>
-008662,000124: 
+008614,000074: 06,3213                                           <span class="ps">COUNT*  </span> $$/T4RCS                              
+008615,000075: 
+<a name="5243534D4F4E4954"></a>008616,000076: 06,3213  06,3213               <span class="sm">RCSMONIT</span>           <span class="ps">EQUALS  </span> <a href="#5243534D4F4E">RCSMON</a>                                
+008617,000077: 
+<a name="5243534D4F4E"></a>008618,000078: 06,3213           44746        <span class="sm">RCSMON  </span>           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+008619,000079: 06,3214           00006                           <span class="op">EXTEND  </span>                                       
+008620,000080: 06,3215           06032                           <span class="op">RXOR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3332">CHAN32</a>                                <span class="co">#  PICK UP + INVERT INVERTED CHANNEL 32.</span>
+008621,000081: 06,3216           74350                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  <span class="co">#  KEEP JET-FAIL BITS ONLY.</span>
+008622,000082: 06,3217           54002                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+008623,000083: 
+008624,000084: 06,3220           41273                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5056414C56455354">PVALVEST</a>                              <span class="co">#        -   -</span>
+008625,000085: 06,3221           70002                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  FORM PC + PC.</span>
+008626,000086: 06,3222           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#    (P = PREVIOUS ISOLATION VALVE STATE,</span>
+008627,000087: 06,3223           40002                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#     C = CURRENT VALVE STATE (CH 32)).</span>
+008628,000088: 06,3224           71273                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5056414C56455354">PVALVEST</a>                              
+008629,000089: 06,3225           26001                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  RESULT NZ INDICATES ACTION REQUIRED.</span>
+008630,000090: 
+008631,000091: 06,3226           00006                           <span class="op">EXTEND  </span>                                       
+008632,000092: 06,3227           15272                           <span class="op">BZF     </span> <a href="#5243534D4F4E4558">RCSMONEX</a>                              <span class="co">#  QUIT IF NO ACTION REQUIRED.</span>
+008633,000093: 
+008634,000094: 06,3230           00006                           <span class="op">EXTEND  </span>                                       
+008635,000095: 06,3231           74736                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495437">BIT7</a>                                  <span class="co">#  MOVE BITS 8 - 1 OF A TO 14 - 7 OF L.</span>
+008636,000096: 06,3232           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  ZERO TO L IN THE PROCESS.</span>
+008637,000097: 
+008638,000098: 06,3233           24001                 -3        <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+008639,000099: 06,3234           60000                           <span class="op">DOUBLE  </span>                                       <span class="co">#  BOUND TO GET OVERFLOW IN THIS LOOP,</span>
+008640,000100: 06,3235           54000                           <span class="op">OVSK    </span>                                       <span class="co">#  SINCE WE ASSURED INITIAL NZ IN A.</span>
+008641,000101: 06,3236           13233                           <span class="op">TCF     </span> -3                                    
+008642,000102: 
+008643,000103: 06,3237           50001                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+008644,000104: 06,3240           34734                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>       -1                         <span class="co">#  SAVE THE RELEVANT BIT (8 - 1).</span>
+008645,000105: 06,3241           54002                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+008646,000106: 06,3242           71273                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5056414C56455354">PVALVEST</a>                              <span class="co">#  LOOK AT PREVIOUS VALVE STATE BIT.</span>
+008647,000107: 06,3243           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+008648,000108: 06,3244           13260                           <span class="op">TCF     </span> <a href="#564F50454E4544">VOPENED</a>                               <span class="co">#  THE VALVE HAS JUST BEEN OPENED.</span>
+008649,000109: 
+008650,000110: 06,3245           41257                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               <span class="co">#  THE VALVE HAS JUST BEEN CLOSED.</span>
+008651,000111: 06,3246           50001                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+008652,000112: 06,3247           73277                           <span class="op">MASK    </span> <a href="#354641494C544142">5FAILTAB</a>                              
+008653,000113: 06,3250           27257                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               <span class="co">#  SET INHIBIT BIT FOR CHANNEL 5 JET.</span>
+008654,000114: 
+008655,000115: 06,3251           41260                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
+008656,000116: 06,3252           50001                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+008657,000117: 06,3253           73307                           <span class="op">MASK    </span> <a href="#364641494C544142">6FAILTAB</a>                              
+008658,000118: 06,3254           27260                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               <span class="co">#  SET INGIBIT BIT FOR CHANNEL 6 JET.</span>
+008659,000119: 
+008660,000120: 06,3255           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+008661,000121: 06,3256           27273                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5056414C56455354">PVALVEST</a>                              <span class="co">#  RECORD ACTION TAKEN.</span>
+008662,000122: 
+008663,000123: 06,3257           13273                           <span class="op">TCF     </span> <a href="#312F414343464958">1/ACCFIX</a>                              <span class="co">#  SET UP 1/ACCJOB AND EXIT.</span>
+008664,000124: 
 </pre>
 </span>
 </p>
@@ -255,46 +255,46 @@ Page 203
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="564F50454E4544"></a>008664,000126: 06,3260           50001        <span class="sm">VOPENED </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  A VALVE HAS JUST BEEN OPENED.</span>
-008665,000127: 06,3261           43277                           <span class="op">CS      </span> <a href="#354641494C544142">5FAILTAB</a>                              
-008666,000128: 06,3262           71257                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
-008667,000129: 06,3263           55257                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               <span class="co">#  REMOVE INHIBIT BIT FOR CHANNEL 5 JET.</span>
-008668,000130: 
-008669,000131: 06,3264           50001                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-008670,000132: 06,3265           43307                           <span class="op">CS      </span> <a href="#364641494C544142">6FAILTAB</a>                              
-008671,000133: 06,3266           71260                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
-008672,000134: 06,3267           55260                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               <span class="co">#  REMOVE INHIBIT BIT FOR CHANNEL 6 JET.</span>
-008673,000135: 
-008674,000136: 06,3270           40002                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-008675,000137: 06,3271           71273                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5056414C56455354">PVALVEST</a>                              
-008676,000138: 06,3272           55273                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5056414C56455354">PVALVEST</a>                              <span class="co">#  RECORD ACTION TAKEN.</span>
-008677,000139: 
-<a name="312F414343464958"></a>008678,000140: 06,3273           37736        <span class="sm">1/ACCFIX</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3237">PRIO27</a>                                <span class="co">#  SET UP 1/ACCS SO THAT THE SWITCH CURVES</span>
-008679,000141: 06,3274           05063                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 <span class="co">#    FOR TJETLAW CAN BE MODIFIED IF CH5MASK</span>
-008680,000142: 06,3275  E6,1536                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5351">AOSQ</a>                                  <span class="co">#    HAS BEEN ALTERED.</span>
-008681,000143: 06,3275           03603 42106                     <span class="ps">2CADR   </span> <a href="AOSTASK_AND_AOSJOB.agc.html#312F4143434A4F42">1/ACCJOB</a>                              
-008682,000144: 
-008683,000145: 06,3277           15272                           <span class="op">TCF     </span> <a href="#5243534D4F4E4558">RCSMONEX</a>                              <span class="co">#  EXIT.</span>
-008684,000146: 
-<a name="354641494C544142"></a>008685,000147: 06,3300                        <span class="sm">5FAILTAB</span>           <span class="ps">EQUALS  </span> -1                                    <span class="co">#  CH 5 JET BIT CORRESPONDING TO CH 32 BIT:</span>
-008686,000148: 06,3300           00040                           <span class="ps">OCT     </span> 00040                                 <span class="co">#  8</span>
-008687,000149: 06,3301           00020                           <span class="ps">OCT     </span> 00020                                 <span class="co">#  7</span>
-008688,000150: 06,3302           00100                           <span class="ps">OCT     </span> 00100                                 <span class="co">#  6</span>
-008689,000151: 06,3303           00200                           <span class="ps">OCT     </span> 00200                                 <span class="co">#  5</span>
-008690,000152: 06,3304           00010                           <span class="ps">OCT     </span> 00010                                 <span class="co">#  4</span>
-008691,000153: 06,3305           00001                           <span class="ps">OCT     </span> 00001                                 <span class="co">#  3</span>
-008692,000154: 06,3306           00004                           <span class="ps">OCT     </span> 00004                                 <span class="co">#  2</span>
-008693,000155: 06,3307           00002                           <span class="ps">OCT     </span> 00002                                 <span class="co">#  1</span>
-008694,000156: 
-<a name="364641494C544142"></a>008695,000157: 06,3310                        <span class="sm">6FAILTAB</span>           <span class="ps">EQUALS  </span> -1                                    <span class="co">#  CH 6 JET BIT CORRESPONDING TO CH 32 BIT:</span>
-008696,000158: 06,3310           00010                           <span class="ps">OCT     </span> 00010                                 <span class="co">#  8</span>
-008697,000159: 06,3311           00020                           <span class="ps">OCT     </span> 00020                                 <span class="co">#  7</span>
-008698,000160: 06,3312           00004                           <span class="ps">OCT     </span> 00004                                 <span class="co">#  6</span>
-008699,000161: 06,3313           00200                           <span class="ps">OCT     </span> 00200                                 <span class="co">#  5</span>
-008700,000162: 06,3314           00001                           <span class="ps">OCT     </span> 00001                                 <span class="co">#  4</span>
-008701,000163: 06,3315           00002                           <span class="ps">OCT     </span> 00002                                 <span class="co">#  3</span>
-008702,000164: 06,3316           00040                           <span class="ps">OCT     </span> 00040                                 <span class="co">#  2</span>
-008703,000165: 06,3317           00100                           <span class="ps">OCT     </span> 00100                                 <span class="co">#  1</span>
+<a name="564F50454E4544"></a>008666,000126: 06,3260           50001        <span class="sm">VOPENED </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  A VALVE HAS JUST BEEN OPENED.</span>
+008667,000127: 06,3261           43277                           <span class="op">CS      </span> <a href="#354641494C544142">5FAILTAB</a>                              
+008668,000128: 06,3262           71257                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
+008669,000129: 06,3263           55257                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               <span class="co">#  REMOVE INHIBIT BIT FOR CHANNEL 5 JET.</span>
+008670,000130: 
+008671,000131: 06,3264           50001                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+008672,000132: 06,3265           43307                           <span class="op">CS      </span> <a href="#364641494C544142">6FAILTAB</a>                              
+008673,000133: 06,3266           71260                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
+008674,000134: 06,3267           55260                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               <span class="co">#  REMOVE INHIBIT BIT FOR CHANNEL 6 JET.</span>
+008675,000135: 
+008676,000136: 06,3270           40002                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+008677,000137: 06,3271           71273                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5056414C56455354">PVALVEST</a>                              
+008678,000138: 06,3272           55273                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5056414C56455354">PVALVEST</a>                              <span class="co">#  RECORD ACTION TAKEN.</span>
+008679,000139: 
+<a name="312F414343464958"></a>008680,000140: 06,3273           37736        <span class="sm">1/ACCFIX</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3237">PRIO27</a>                                <span class="co">#  SET UP 1/ACCS SO THAT THE SWITCH CURVES</span>
+008681,000141: 06,3274           05063                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 <span class="co">#    FOR TJETLAW CAN BE MODIFIED IF CH5MASK</span>
+008682,000142: 06,3275  E6,1536                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5351">AOSQ</a>                                  <span class="co">#    HAS BEEN ALTERED.</span>
+008683,000143: 06,3275           03603 42106                     <span class="ps">2CADR   </span> <a href="AOSTASK_AND_AOSJOB.agc.html#312F4143434A4F42">1/ACCJOB</a>                              
+008684,000144: 
+008685,000145: 06,3277           15272                           <span class="op">TCF     </span> <a href="#5243534D4F4E4558">RCSMONEX</a>                              <span class="co">#  EXIT.</span>
+008686,000146: 
+<a name="354641494C544142"></a>008687,000147: 06,3300                        <span class="sm">5FAILTAB</span>           <span class="ps">EQUALS  </span> -1                                    <span class="co">#  CH 5 JET BIT CORRESPONDING TO CH 32 BIT:</span>
+008688,000148: 06,3300           00040                           <span class="ps">OCT     </span> 00040                                 <span class="co">#  8</span>
+008689,000149: 06,3301           00020                           <span class="ps">OCT     </span> 00020                                 <span class="co">#  7</span>
+008690,000150: 06,3302           00100                           <span class="ps">OCT     </span> 00100                                 <span class="co">#  6</span>
+008691,000151: 06,3303           00200                           <span class="ps">OCT     </span> 00200                                 <span class="co">#  5</span>
+008692,000152: 06,3304           00010                           <span class="ps">OCT     </span> 00010                                 <span class="co">#  4</span>
+008693,000153: 06,3305           00001                           <span class="ps">OCT     </span> 00001                                 <span class="co">#  3</span>
+008694,000154: 06,3306           00004                           <span class="ps">OCT     </span> 00004                                 <span class="co">#  2</span>
+008695,000155: 06,3307           00002                           <span class="ps">OCT     </span> 00002                                 <span class="co">#  1</span>
+008696,000156: 
+<a name="364641494C544142"></a>008697,000157: 06,3310                        <span class="sm">6FAILTAB</span>           <span class="ps">EQUALS  </span> -1                                    <span class="co">#  CH 6 JET BIT CORRESPONDING TO CH 32 BIT:</span>
+008698,000158: 06,3310           00010                           <span class="ps">OCT     </span> 00010                                 <span class="co">#  8</span>
+008699,000159: 06,3311           00020                           <span class="ps">OCT     </span> 00020                                 <span class="co">#  7</span>
+008700,000160: 06,3312           00004                           <span class="ps">OCT     </span> 00004                                 <span class="co">#  6</span>
+008701,000161: 06,3313           00200                           <span class="ps">OCT     </span> 00200                                 <span class="co">#  5</span>
+008702,000162: 06,3314           00001                           <span class="ps">OCT     </span> 00001                                 <span class="co">#  4</span>
+008703,000163: 06,3315           00002                           <span class="ps">OCT     </span> 00002                                 <span class="co">#  3</span>
+008704,000164: 06,3316           00040                           <span class="ps">OCT     </span> 00040                                 <span class="co">#  2</span>
+008705,000165: 06,3317           00100                           <span class="ps">OCT     </span> 00100                                 <span class="co">#  1</span>
 
 End of include-file RCS_FAILURE_MONITOR.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

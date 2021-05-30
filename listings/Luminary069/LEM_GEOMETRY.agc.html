@@ -91,27 +91,28 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-014515,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-014516,000003:                                                                                                  <span class="co">## Filename:    LEM_GEOMETRY.agc</span>
-014517,000004:                                                                                                  <span class="co">## Purpose:     The main source file for Luminary revision 069.</span>
-014518,000005:                                                                                                  <span class="co">##              It is part of the source code for the original release</span>
-014519,000006:                                                                                                  <span class="co">##              of the flight software for the Lunar Module's (LM) Apollo</span>
-014520,000007:                                                                                                  <span class="co">##              Guidance Computer (AGC) for Apollo 10. The actual flown</span>
-014521,000008:                                                                                                  <span class="co">##              version was Luminary 69 revision 2, which included a</span>
-014522,000009:                                                                                                  <span class="co">##              newer lunar gravity model and only affected module 2.</span>
-014523,000010:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-014524,000011:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-014525,000012:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-014526,000013:                                                                                                  <span class="co">##              original YUL assembler.</span>
-014527,000014:                                                                                                  <span class="co">## Reference:   pp. 334-338</span>
-014528,000015:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-014529,000016:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-014530,000017:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-014531,000018:                                                                                                  <span class="co">## Mod history: 2016-12-13 MAS  Created from Luminary 99.</span>
-014532,000019:                                                                                                  <span class="co">##              2017-01-14 RRB  Updated for Luminary 69.</span>
-014533,000020:                                                                                                  <span class="co">##              2017-01-25 RSB  Proofed comment text using octopus/prooferComments</span>
-014534,000021:                                                                                                  <span class="co">##                              and fixed errors found.</span>
-014535,000022: 
+014518,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+014519,000003:                                                                                                  <span class="co">## Filename:    LEM_GEOMETRY.agc</span>
+014520,000004:                                                                                                  <span class="co">## Purpose:     The main source file for Luminary revision 069.</span>
+014521,000005:                                                                                                  <span class="co">##              It is part of the source code for the original release</span>
+014522,000006:                                                                                                  <span class="co">##              of the flight software for the Lunar Module's (LM) Apollo</span>
+014523,000007:                                                                                                  <span class="co">##              Guidance Computer (AGC) for Apollo 10. The actual flown</span>
+014524,000008:                                                                                                  <span class="co">##              version was Luminary 69 revision 2, which included a</span>
+014525,000009:                                                                                                  <span class="co">##              newer lunar gravity model and only affected module 2.</span>
+014526,000010:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+014527,000011:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+014528,000012:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+014529,000013:                                                                                                  <span class="co">##              original YUL assembler.</span>
+014530,000014:                                                                                                  <span class="co">## Reference:   pp. 334-338</span>
+014531,000015:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+014532,000016:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+014533,000017:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+014534,000018:                                                                                                  <span class="co">## Mod history: 2016-12-13 MAS  Created from Luminary 99.</span>
+014535,000019:                                                                                                  <span class="co">##              2017-01-14 RRB  Updated for Luminary 69.</span>
+014536,000020:                                                                                                  <span class="co">##              2017-01-25 RSB  Proofed comment text using octopus/prooferComments</span>
+014537,000021:                                                                                                  <span class="co">##                              and fixed errors found.</span>
+014538,000022:                                                                                                  <span class="co">##              2021-05-30 ABS  Replaced use of ANTENBIT with BIT12 to match scans.</span>
+014539,000023: 
 </pre>
 </span>
 </p>
@@ -127,52 +128,52 @@ Page 334
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-014537,000024: 23,2041                                           <span class="ps">BANK    </span> 23                                    
-014538,000025: 13,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4C454D47454F4D">LEMGEOM</a>                               
-014539,000026: 13,2000                                           <span class="ps">BANK    </span>                                       
-014540,000027: 
-014541,000028: 13,2070  30,2000                                  <span class="ps">SBANK=  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4C4F575355504552">LOWSUPER</a>                              
-014542,000029: 13,2070  E5,1642                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
-014543,000030: 
-014544,000031:                                                                                                  <span class="co">#  THESE TWO ROUTINES COMPUTE THE ACTUAL STATE VECTOR FOR LM,CSM BY ADDING</span>
-014545,000032:                                                                                                  <span class="co">#  THE CONIC R,V AND THE DEVIATIONSR,V. THE STATE VECTORS ARE CONVERTED TO</span>
-014546,000033:                                                                                                  <span class="co">#  METERS B-29 AND METERS/CSEC B-7 AND STORED APPROPRIATELY IN RN,VN OR</span>
-014547,000034:                                                                                                  <span class="co">#  R-OTHER , V-OTHER FOR DOWNLINK. THE ROUTINES NAMES ARE SWITCHED IN THE</span>
-014548,000035:                                                                                                  <span class="co">#  OTHER VEHICLES COMPUTER.</span>
-014549,000036: 
-014550,000037:                                                                                                  <span class="co">#  INPUT</span>
-014551,000038:                                                                                                  <span class="co">#    STATE VECTOR IN TEMPORARY STORAGE AREA</span>
-014552,000039:                                                                                                  <span class="co">#    IF STATE VECTOR IS SCALED POS B27 AND VEL B5</span>
-014553,000040:                                                                                                  <span class="co">#       SET X2 TO +2</span>
-014554,000041:                                                                                                  <span class="co">#    IF STATE VECTOR IS SCALED POS B29 AND VEL B7</span>
-014555,000042:                                                                                                  <span class="co">#       SET X2 TO 0</span>
-014556,000043: 
-014557,000044:                                                                                                  <span class="co">#  OUTPUT</span>
-014558,000045:                                                                                                  <span class="co">#    R(T) IN RN, V(T) IN VN, T IN PIPTIME</span>
-014559,000046:                                                                                                  <span class="co">#  OR</span>
-014560,000047:                                                                                                  <span class="co">#    R(T) IN R-OTHER, V(T) IN V-OTHER   (T IS DEFINED BY T-OTHER)</span>
-014561,000048: 
-014562,000049: 13,2070                                           <span class="ps">COUNT*  </span> $$/<a href="CONIC_SUBROUTINES.agc.html#47454F4D">GEOM</a>                               
-<a name="535644574E32"></a>014563,000050: 13,2070           43414        <span class="sm">SVDWN2  </span>           <span class="in">BOF     </span> <span class="in">RVQ       </span>                            <span class="co">#  SW=1=AVETOMID DOING W-MATRIX INTEG.</span>
-014564,000051: 13,2071           04756                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#4156454D49445357">AVEMIDSW</a>                              
-014565,000052: 13,2072           26073                                    +1                                    
-014566,000053: 13,2073           53775                           <span class="in">VLOAD   </span> <span class="in">VSL*      </span>                            
-014567,000054: 13,2074           01521                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5444454C544156">TDELTAV</a>                               
-014568,000055: 13,2075           57605                                    0          -7,2                       
-014569,000056: 13,2076           53655                           <span class="in">VAD     </span> <span class="in">VSL*      </span>                            
-014570,000057: 13,2077           01535                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524356">RCV</a>                                   
-014571,000058: 13,2100           57576                                    0,2                                   
-014572,000059: 13,2101           25221                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524E">RN</a>                                    
-014573,000060: 13,2102           01527                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#544E5556">TNUV</a>                                  
-014574,000061: 13,2103           53257                           <span class="in">VSL*    </span> <span class="in">VAD       </span>                            
-014575,000062: 13,2104           57602                                    0          -4,2                       
-014576,000063: 13,2105           01543                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564356">VCV</a>                                   
-014577,000064: 13,2106           77657                           <span class="in">VSL*    </span>                                       
-014578,000065: 13,2107           57576                                    0,2                                   
-014579,000066: 13,2110           15227                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564E">VN</a>                                    
-014580,000067: 13,2111           01517                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#544554">TET</a>                                   
-014581,000068: 13,2112           01235                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50495054494D45">PIPTIME</a>                               
-014582,000069: 13,2113           77616                           <span class="in">RVQ     </span>                                       
+014541,000025: 23,2041                                           <span class="ps">BANK    </span> 23                                    
+014542,000026: 13,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4C454D47454F4D">LEMGEOM</a>                               
+014543,000027: 13,2000                                           <span class="ps">BANK    </span>                                       
+014544,000028: 
+014545,000029: 13,2070  30,2000                                  <span class="ps">SBANK=  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4C4F575355504552">LOWSUPER</a>                              
+014546,000030: 13,2070  E5,1642                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
+014547,000031: 
+014548,000032:                                                                                                  <span class="co">#  THESE TWO ROUTINES COMPUTE THE ACTUAL STATE VECTOR FOR LM,CSM BY ADDING</span>
+014549,000033:                                                                                                  <span class="co">#  THE CONIC R,V AND THE DEVIATIONSR,V. THE STATE VECTORS ARE CONVERTED TO</span>
+014550,000034:                                                                                                  <span class="co">#  METERS B-29 AND METERS/CSEC B-7 AND STORED APPROPRIATELY IN RN,VN OR</span>
+014551,000035:                                                                                                  <span class="co">#  R-OTHER , V-OTHER FOR DOWNLINK. THE ROUTINES NAMES ARE SWITCHED IN THE</span>
+014552,000036:                                                                                                  <span class="co">#  OTHER VEHICLES COMPUTER.</span>
+014553,000037: 
+014554,000038:                                                                                                  <span class="co">#  INPUT</span>
+014555,000039:                                                                                                  <span class="co">#    STATE VECTOR IN TEMPORARY STORAGE AREA</span>
+014556,000040:                                                                                                  <span class="co">#    IF STATE VECTOR IS SCALED POS B27 AND VEL B5</span>
+014557,000041:                                                                                                  <span class="co">#       SET X2 TO +2</span>
+014558,000042:                                                                                                  <span class="co">#    IF STATE VECTOR IS SCALED POS B29 AND VEL B7</span>
+014559,000043:                                                                                                  <span class="co">#       SET X2 TO 0</span>
+014560,000044: 
+014561,000045:                                                                                                  <span class="co">#  OUTPUT</span>
+014562,000046:                                                                                                  <span class="co">#    R(T) IN RN, V(T) IN VN, T IN PIPTIME</span>
+014563,000047:                                                                                                  <span class="co">#  OR</span>
+014564,000048:                                                                                                  <span class="co">#    R(T) IN R-OTHER, V(T) IN V-OTHER   (T IS DEFINED BY T-OTHER)</span>
+014565,000049: 
+014566,000050: 13,2070                                           <span class="ps">COUNT*  </span> $$/<a href="CONIC_SUBROUTINES.agc.html#47454F4D">GEOM</a>                               
+<a name="535644574E32"></a>014567,000051: 13,2070           43414        <span class="sm">SVDWN2  </span>           <span class="in">BOF     </span> <span class="in">RVQ       </span>                            <span class="co">#  SW=1=AVETOMID DOING W-MATRIX INTEG.</span>
+014568,000052: 13,2071           04756                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#4156454D49445357">AVEMIDSW</a>                              
+014569,000053: 13,2072           26073                                    +1                                    
+014570,000054: 13,2073           53775                           <span class="in">VLOAD   </span> <span class="in">VSL*      </span>                            
+014571,000055: 13,2074           01521                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5444454C544156">TDELTAV</a>                               
+014572,000056: 13,2075           57605                                    0          -7,2                       
+014573,000057: 13,2076           53655                           <span class="in">VAD     </span> <span class="in">VSL*      </span>                            
+014574,000058: 13,2077           01535                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524356">RCV</a>                                   
+014575,000059: 13,2100           57576                                    0,2                                   
+014576,000060: 13,2101           25221                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524E">RN</a>                                    
+014577,000061: 13,2102           01527                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#544E5556">TNUV</a>                                  
+014578,000062: 13,2103           53257                           <span class="in">VSL*    </span> <span class="in">VAD       </span>                            
+014579,000063: 13,2104           57602                                    0          -4,2                       
+014580,000064: 13,2105           01543                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564356">VCV</a>                                   
+014581,000065: 13,2106           77657                           <span class="in">VSL*    </span>                                       
+014582,000066: 13,2107           57576                                    0,2                                   
+014583,000067: 13,2110           15227                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564E">VN</a>                                    
+014584,000068: 13,2111           01517                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#544554">TET</a>                                   
+014585,000069: 13,2112           01235                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50495054494D45">PIPTIME</a>                               
+014586,000070: 13,2113           77616                           <span class="in">RVQ     </span>                                       
 </pre>
 </span>
 </p>
@@ -188,22 +189,22 @@ Page 335
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="535644574E31"></a>014584,000071: 13,2114           53775        <span class="sm">SVDWN1  </span>           <span class="in">VLOAD   </span> <span class="in">VSL*      </span>                            
-014585,000072: 13,2115           01521                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5444454C544156">TDELTAV</a>                               
-014586,000073: 13,2116           57605                                    0          -7,2                       
-014587,000074: 13,2117           53655                           <span class="in">VAD     </span> <span class="in">VSL*      </span>                            
-014588,000075: 13,2120           01535                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524356">RCV</a>                                   
-014589,000076: 13,2121           57576                                    0,2                                   
-014590,000077: 13,2122           25720                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#522D4F54484552">R-OTHER</a>                               
-014591,000078: 13,2123           01527                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#544E5556">TNUV</a>                                  
-014592,000079: 13,2124           53257                           <span class="in">VSL*    </span> <span class="in">VAD       </span>                            
-014593,000080: 13,2125           57602                                    0          -4,2                       
-014594,000081: 13,2126           01543                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564356">VCV</a>                                   
-014595,000082: 13,2127           77657                           <span class="in">VSL*    </span>                                       
-014596,000083: 13,2130           57576                                    0,2                                   
-014597,000084: 13,2131           01726                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#562D4F54484552">V-OTHER</a>                               
-014598,000085: 13,2132           77616                           <span class="in">RVQ     </span>                                       
-014599,000086: 
+<a name="535644574E31"></a>014588,000072: 13,2114           53775        <span class="sm">SVDWN1  </span>           <span class="in">VLOAD   </span> <span class="in">VSL*      </span>                            
+014589,000073: 13,2115           01521                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5444454C544156">TDELTAV</a>                               
+014590,000074: 13,2116           57605                                    0          -7,2                       
+014591,000075: 13,2117           53655                           <span class="in">VAD     </span> <span class="in">VSL*      </span>                            
+014592,000076: 13,2120           01535                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524356">RCV</a>                                   
+014593,000077: 13,2121           57576                                    0,2                                   
+014594,000078: 13,2122           25720                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#522D4F54484552">R-OTHER</a>                               
+014595,000079: 13,2123           01527                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#544E5556">TNUV</a>                                  
+014596,000080: 13,2124           53257                           <span class="in">VSL*    </span> <span class="in">VAD       </span>                            
+014597,000081: 13,2125           57602                                    0          -4,2                       
+014598,000082: 13,2126           01543                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564356">VCV</a>                                   
+014599,000083: 13,2127           77657                           <span class="in">VSL*    </span>                                       
+014600,000084: 13,2130           57576                                    0,2                                   
+014601,000085: 13,2131           01726                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#562D4F54484552">V-OTHER</a>                               
+014602,000086: 13,2132           77616                           <span class="in">RVQ     </span>                                       
+014603,000087: 
 </pre>
 </span>
 </p>
@@ -219,42 +220,42 @@ Page 336
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-014601,000088:                                                                                                  <span class="co">#           THE FOLLOWING ROUTINE TAKES A HALF UNIT TARGET VECTOR REFERRED TO NAV BASE COORDINATES AND FINDS BOTH</span>
-014602,000089:                                                                                                  <span class="co">#  GIMBAL ORIENTATIONS AT WHICH THE RR MIGHT SIGHT THE TARGET. THE GIMBAL ANGLES CORRESPONDING TO THE PRESENT MODE</span>
-014603,000090:                                                                                                  <span class="co">#  ARE LEFT IN MODEA AND THOSE WHICH WOULD BE USED AFTER A REMODE IN MODEB. THIS ROUTINE ASSUMES MODE 1 IS TRUNNION</span>
-014604,000091:                                                                                                  <span class="co">#  ANGLE LESS THAN 90 DEGS IN ABS VALUE WITH ARBITRARY SHAFT, WITH A CORRESPONDING DEFINITION FOR MODE 2. MODE</span>
-014605,000092:                                                                                                  <span class="co">#  SELECTION AND LIMIT CHECKING ARE DONE ELSEWHERE.</span>
-014606,000093: 
-014607,000094:                                                                                                  <span class="co">#           THE MODE 1 CONFIGURATION IS CALCULATED FROM THE VECTOR AND THEN MODE 2 IS FOUND USING THE RELATIONS</span>
-014608,000095: 
-014609,000096:                                                                                                  <span class="co">#           S(2) = 180 + S(1)</span>
-014610,000097:                                                                                                  <span class="co">#           T(2) = 180 - T(1)</span>
-014611,000098: 
-014612,000099:                                                                                                  <span class="co">#      THE VECTOR ARRIVES IN MPAC WHERE TRG*SMNG OR *SMNB* WILL HAVE LEFT IT.</span>
-014613,000100: 
-<a name="5252414E474C4553"></a>014614,000101: 13,2133           00041        <span class="sm">RRANGLES</span>           <span class="in">STORE   </span> 32D                                   
-014615,000102: 13,2134           57545                           <span class="in">DLOAD   </span> <span class="in">DCOMP     </span>                            <span class="co">#  SINCE WE WILL FIND THE MODE 1 SHAFT</span>
-014616,000103: 13,2135           00043                                    34D                                   <span class="co">#  ANGLE LATER, WE CAN FIND THE MODE 1</span>
-014617,000104: 13,2136           67401                           <span class="in">SETPD   </span> <span class="in">ASIN      </span>                            <span class="co">#  TRUNNION BY SIMPLY TAKING THE ARCSIN OF</span>
-014618,000105: 13,2137           00001                                    0                                     <span class="co">#  THE Y COMPONENT, THE ASIN GIVING AN</span>
-014619,000106: 13,2140           44206                           <span class="in">PUSH    </span> <span class="in">BDSU      </span>                            <span class="co">#  ANSWER WHOSE ABS VAL IS LESS THAN 90 DEG</span>
-014620,000107: 13,2141           22273                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4C4F445048414C46">LODPHALF</a>                              
-014621,000108: 13,2142           14005                           <span class="in">STODL   </span> 4                                     <span class="co">#  MODE 2 TRUNNION TO 4.</span>
-014622,000109: 
-014623,000110: 13,2143           22275                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4C4F365A45524F53">LO6ZEROS</a>                              
-014624,000111: 13,2144           24043                           <span class="in">STOVL   </span> 34D                                   <span class="co">#  UNIT THE PROJECTION OF THE VECTOR</span>
-014625,000112: 13,2145           00041                                    32D                                   <span class="co">#    IN THE X-Z PLANE</span>
-014626,000113: 13,2146           41056                           <span class="in">UNIT    </span> <span class="in">BOVB      </span>                            <span class="co">#  IF OVERFLOW, TARGET VECTOR IS ALONG Y</span>
-014627,000114: 13,2147           52421                                    <a href="P20-P25.agc.html#4C554E4445534348">LUNDESCH</a>                              <span class="co">#  CALL FOR MANEUVER UNLESS ON LUNAR SURF</span>
-014628,000115: 13,2150           14041                           <span class="in">STODL   </span> 32D                                   <span class="co">#  PROJECTION VECTOR.</span>
-014629,000116: 13,2151           00041                                    32D                                   
-014630,000117: 13,2152           44142                           <span class="in">SR1     </span> <span class="in">STQ       </span>                            
-014631,000118: 13,2153           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
-014632,000119: 13,2154           14023                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 <span class="co">#  USE ARCTRIG SINCE SHAFT COULD BE ARB.</span>
-014633,000120: 13,2155           00045                                    36D                                   
-014634,000121: 13,2156           77742                           <span class="in">SR1     </span>                                       
-014635,000122: 13,2157           34021                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 
-014636,000123: 13,2160           47222                                    <a href="INFLIGHT_ALIGNMENT_ROUTINES.agc.html#41524354524947">ARCTRIG</a>                               
+014605,000089:                                                                                                  <span class="co">#           THE FOLLOWING ROUTINE TAKES A HALF UNIT TARGET VECTOR REFERRED TO NAV BASE COORDINATES AND FINDS BOTH</span>
+014606,000090:                                                                                                  <span class="co">#  GIMBAL ORIENTATIONS AT WHICH THE RR MIGHT SIGHT THE TARGET. THE GIMBAL ANGLES CORRESPONDING TO THE PRESENT MODE</span>
+014607,000091:                                                                                                  <span class="co">#  ARE LEFT IN MODEA AND THOSE WHICH WOULD BE USED AFTER A REMODE IN MODEB. THIS ROUTINE ASSUMES MODE 1 IS TRUNNION</span>
+014608,000092:                                                                                                  <span class="co">#  ANGLE LESS THAN 90 DEGS IN ABS VALUE WITH ARBITRARY SHAFT, WITH A CORRESPONDING DEFINITION FOR MODE 2. MODE</span>
+014609,000093:                                                                                                  <span class="co">#  SELECTION AND LIMIT CHECKING ARE DONE ELSEWHERE.</span>
+014610,000094: 
+014611,000095:                                                                                                  <span class="co">#           THE MODE 1 CONFIGURATION IS CALCULATED FROM THE VECTOR AND THEN MODE 2 IS FOUND USING THE RELATIONS</span>
+014612,000096: 
+014613,000097:                                                                                                  <span class="co">#           S(2) = 180 + S(1)</span>
+014614,000098:                                                                                                  <span class="co">#           T(2) = 180 - T(1)</span>
+014615,000099: 
+014616,000100:                                                                                                  <span class="co">#      THE VECTOR ARRIVES IN MPAC WHERE TRG*SMNG OR *SMNB* WILL HAVE LEFT IT.</span>
+014617,000101: 
+<a name="5252414E474C4553"></a>014618,000102: 13,2133           00041        <span class="sm">RRANGLES</span>           <span class="in">STORE   </span> 32D                                   
+014619,000103: 13,2134           57545                           <span class="in">DLOAD   </span> <span class="in">DCOMP     </span>                            <span class="co">#  SINCE WE WILL FIND THE MODE 1 SHAFT</span>
+014620,000104: 13,2135           00043                                    34D                                   <span class="co">#  ANGLE LATER, WE CAN FIND THE MODE 1</span>
+014621,000105: 13,2136           67401                           <span class="in">SETPD   </span> <span class="in">ASIN      </span>                            <span class="co">#  TRUNNION BY SIMPLY TAKING THE ARCSIN OF</span>
+014622,000106: 13,2137           00001                                    0                                     <span class="co">#  THE Y COMPONENT, THE ASIN GIVING AN</span>
+014623,000107: 13,2140           44206                           <span class="in">PUSH    </span> <span class="in">BDSU      </span>                            <span class="co">#  ANSWER WHOSE ABS VAL IS LESS THAN 90 DEG</span>
+014624,000108: 13,2141           22273                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4C4F445048414C46">LODPHALF</a>                              
+014625,000109: 13,2142           14005                           <span class="in">STODL   </span> 4                                     <span class="co">#  MODE 2 TRUNNION TO 4.</span>
+014626,000110: 
+014627,000111: 13,2143           22275                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4C4F365A45524F53">LO6ZEROS</a>                              
+014628,000112: 13,2144           24043                           <span class="in">STOVL   </span> 34D                                   <span class="co">#  UNIT THE PROJECTION OF THE VECTOR</span>
+014629,000113: 13,2145           00041                                    32D                                   <span class="co">#    IN THE X-Z PLANE</span>
+014630,000114: 13,2146           41056                           <span class="in">UNIT    </span> <span class="in">BOVB      </span>                            <span class="co">#  IF OVERFLOW, TARGET VECTOR IS ALONG Y</span>
+014631,000115: 13,2147           52421                                    <a href="P20-P25.agc.html#4C554E4445534348">LUNDESCH</a>                              <span class="co">#  CALL FOR MANEUVER UNLESS ON LUNAR SURF</span>
+014632,000116: 13,2150           14041                           <span class="in">STODL   </span> 32D                                   <span class="co">#  PROJECTION VECTOR.</span>
+014633,000117: 13,2151           00041                                    32D                                   
+014634,000118: 13,2152           44142                           <span class="in">SR1     </span> <span class="in">STQ       </span>                            
+014635,000119: 13,2153           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
+014636,000120: 13,2154           14023                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 <span class="co">#  USE ARCTRIG SINCE SHAFT COULD BE ARB.</span>
+014637,000121: 13,2155           00045                                    36D                                   
+014638,000122: 13,2156           77742                           <span class="in">SR1     </span>                                       
+014639,000123: 13,2157           34021                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 
+014640,000124: 13,2160           47222                                    <a href="INFLIGHT_ALIGNMENT_ROUTINES.agc.html#41524354524947">ARCTRIG</a>                               
 </pre>
 </span>
 </p>
@@ -270,31 +271,31 @@ Page 337
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-014638,000125: 13,2161           43206                           <span class="in">PUSH    </span> <span class="in">DAD       </span>                            <span class="co">#  MODE 1 SHAFT TO 2.</span>
-014639,000126: 13,2162           22273                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4C4F445048414C46">LODPHALF</a>                              
-014640,000127: 13,2163           24007                           <span class="in">STOVL   </span> 6                                     
-014641,000128: 13,2164           00005                                    4                                     
-014642,000129: 13,2165           77634                           <span class="in">RTB     </span>                                       <span class="co">#  FIND MODE 2 CDU ANGLES.</span>
-014643,000130: 13,2166           21541                                    <a href="RTB_OP_CODES.agc.html#32563153544F3253">2V1STO2S</a>                              
-014644,000131: 13,2167           25112                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F444542">MODEB</a>                                 
-014645,000132: 13,2170           00001                                    0                                     
-014646,000133: 13,2171           77634                           <span class="in">RTB     </span>                                       <span class="co">#  MODE 1 ANGLES TO MODE A.</span>
-014647,000134: 13,2172           21541                                    <a href="RTB_OP_CODES.agc.html#32563153544F3253">2V1STO2S</a>                              
-014648,000135: 13,2173           01110                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F444541">MODEA</a>                                 
-014649,000136: 13,2174           77776                           <span class="in">EXIT    </span>                                       
-014650,000137: 
-014651,000138: 13,2175           40110                           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#5241444D4F444553">RADMODES</a>                              <span class="co">#  SWAP MODEA AND MODEB IF RR IN MODE 2.</span>
-014652,000139: 13,2176           74740                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#414E54454E424954">ANTENBIT</a>                              
-014653,000140: 13,2177           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-014654,000141: 13,2200           12204                           <span class="op">TCF     </span> +4                                    
-014655,000142: 
-014656,000143: 13,2201           53110                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F444541">MODEA</a>                                 
-014657,000144: 13,2202           53112                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F444542">MODEB</a>                                 
-014658,000145: 13,2203           53110                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F444541">MODEA</a>                                 
-014659,000146: 
-014660,000147: 13,2204           06036                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-014661,000148: 13,2205           77650                           <span class="in">GOTO    </span>                                       
-014662,000149: 13,2206           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
+014642,000126: 13,2161           43206                           <span class="in">PUSH    </span> <span class="in">DAD       </span>                            <span class="co">#  MODE 1 SHAFT TO 2.</span>
+014643,000127: 13,2162           22273                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4C4F445048414C46">LODPHALF</a>                              
+014644,000128: 13,2163           24007                           <span class="in">STOVL   </span> 6                                     
+014645,000129: 13,2164           00005                                    4                                     
+014646,000130: 13,2165           77634                           <span class="in">RTB     </span>                                       <span class="co">#  FIND MODE 2 CDU ANGLES.</span>
+014647,000131: 13,2166           21541                                    <a href="RTB_OP_CODES.agc.html#32563153544F3253">2V1STO2S</a>                              
+014648,000132: 13,2167           25112                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F444542">MODEB</a>                                 
+014649,000133: 13,2170           00001                                    0                                     
+014650,000134: 13,2171           77634                           <span class="in">RTB     </span>                                       <span class="co">#  MODE 1 ANGLES TO MODE A.</span>
+014651,000135: 13,2172           21541                                    <a href="RTB_OP_CODES.agc.html#32563153544F3253">2V1STO2S</a>                              
+014652,000136: 13,2173           01110                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F444541">MODEA</a>                                 
+014653,000137: 13,2174           77776                           <span class="in">EXIT    </span>                                       
+014654,000138: 
+014655,000139: 13,2175           40110                           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#5241444D4F444553">RADMODES</a>                              <span class="co">#  SWAP MODEA AND MODEB IF RR IN MODE 2.</span>
+014656,000140: 13,2176           74740                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543132">BIT12</a>                                 
+014657,000141: 13,2177           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+014658,000142: 13,2200           12204                           <span class="op">TCF     </span> +4                                    
+014659,000143: 
+014660,000144: 13,2201           53110                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F444541">MODEA</a>                                 
+014661,000145: 13,2202           53112                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F444542">MODEB</a>                                 
+014662,000146: 13,2203           53110                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F444541">MODEA</a>                                 
+014663,000147: 
+014664,000148: 13,2204           06036                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+014665,000149: 13,2205           77650                           <span class="in">GOTO    </span>                                       
+014666,000150: 13,2206           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
 </pre>
 </span>
 </p>
@@ -310,37 +311,37 @@ Page 338
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-014664,000151:                                                                                                  <span class="co">#  GIVEN RR TRUNNION AND SHAFT (T,S) IN TANGNB,+1, FIND THE ASSOCIATED</span>
-014665,000152:                                                                                                  <span class="co">#  LINE OF SIGHT IN NAV BASE AXES.  THE HALF UNIT VECTOR, .5(SIN(S)COS(T),</span>
-014666,000153:                                                                                                  <span class="co">#  -SIN(T),COS(S)COS(T)) IS LEFT IN MPAC AND 32D.</span>
-014667,000154: 
-014668,000155: 23,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#494E464C49474854">INFLIGHT</a>                              
-014669,000156: 23,2000                                           <span class="ps">BANK    </span>                                       
-014670,000157: 
-014671,000158: 23,2041                                           <span class="ps">COUNT*  </span> $$/<a href="CONIC_SUBROUTINES.agc.html#47454F4D">GEOM</a>                               
-014672,000159: 
-<a name="52524E42"></a>014673,000160: 23,2041           47135        <span class="sm">RRNB    </span>           <span class="in">SLOAD   </span> <span class="in">RTB       </span>                            
-014674,000161: 23,2042           03751                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54414E474E42">TANGNB</a>                                
-014675,000162: 23,2043           21465                                    <a href="RTB_OP_CODES.agc.html#4344554C4F474943">CDULOGIC</a>                              
-014676,000163: 23,2044           41401                           <span class="in">SETPD   </span> <span class="in">PUSH      </span>                            <span class="co">#  TRUNNION ANGLE TO 0</span>
-014677,000164: 23,2045           00001                                    0                                     
-014678,000165: 23,2046           57556                           <span class="in">SIN     </span> <span class="in">DCOMP     </span>                            
-014679,000166: 23,2047           14043                           <span class="in">STODL   </span> 34D                                   <span class="co">#  Y COMPONENT</span>
-014680,000167: 
-014681,000168: 23,2050           41546                           <span class="in">COS     </span> <span class="in">PUSH      </span>                            <span class="co">#  .5 COS(T) TO 0</span>
-014682,000169: 23,2051           47135                           <span class="in">SLOAD   </span> <span class="in">RTB       </span>                            
-014683,000170: 23,2052           03752                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54414E474E42">TANGNB</a>     +1                         
-014684,000171: 23,2053           21465                                    <a href="RTB_OP_CODES.agc.html#4344554C4F474943">CDULOGIC</a>                              
-014685,000172: 23,2054           71406                           <span class="in">PUSH    </span> <span class="in">COS       </span>                            <span class="co">#  SHAFT ANGLE TO 2</span>
-014686,000173: 23,2055           72405                           <span class="in">DMP     </span> <span class="in">SL1       </span>                            
-014687,000174: 23,2056           00001                                    0                                     
-014688,000175: 23,2057           14045                           <span class="in">STODL   </span> 36D                                   <span class="co">#  Z COMPONENT</span>
-014689,000176: 
-014690,000177: 23,2060           41356                           <span class="in">SIN     </span> <span class="in">DMP       </span>                            
-014691,000178: 23,2061           77752                           <span class="in">SL1     </span>                                       
-014692,000179: 23,2062           24041                           <span class="in">STOVL   </span> 32D                                   
-014693,000180: 23,2063           00041                                    32D                                   
-014694,000181: 23,2064           77616                           <span class="in">RVQ     </span>                                       
+014668,000152:                                                                                                  <span class="co">#  GIVEN RR TRUNNION AND SHAFT (T,S) IN TANGNB,+1, FIND THE ASSOCIATED</span>
+014669,000153:                                                                                                  <span class="co">#  LINE OF SIGHT IN NAV BASE AXES.  THE HALF UNIT VECTOR, .5(SIN(S)COS(T),</span>
+014670,000154:                                                                                                  <span class="co">#  -SIN(T),COS(S)COS(T)) IS LEFT IN MPAC AND 32D.</span>
+014671,000155: 
+014672,000156: 23,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#494E464C49474854">INFLIGHT</a>                              
+014673,000157: 23,2000                                           <span class="ps">BANK    </span>                                       
+014674,000158: 
+014675,000159: 23,2041                                           <span class="ps">COUNT*  </span> $$/<a href="CONIC_SUBROUTINES.agc.html#47454F4D">GEOM</a>                               
+014676,000160: 
+<a name="52524E42"></a>014677,000161: 23,2041           47135        <span class="sm">RRNB    </span>           <span class="in">SLOAD   </span> <span class="in">RTB       </span>                            
+014678,000162: 23,2042           03751                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54414E474E42">TANGNB</a>                                
+014679,000163: 23,2043           21465                                    <a href="RTB_OP_CODES.agc.html#4344554C4F474943">CDULOGIC</a>                              
+014680,000164: 23,2044           41401                           <span class="in">SETPD   </span> <span class="in">PUSH      </span>                            <span class="co">#  TRUNNION ANGLE TO 0</span>
+014681,000165: 23,2045           00001                                    0                                     
+014682,000166: 23,2046           57556                           <span class="in">SIN     </span> <span class="in">DCOMP     </span>                            
+014683,000167: 23,2047           14043                           <span class="in">STODL   </span> 34D                                   <span class="co">#  Y COMPONENT</span>
+014684,000168: 
+014685,000169: 23,2050           41546                           <span class="in">COS     </span> <span class="in">PUSH      </span>                            <span class="co">#  .5 COS(T) TO 0</span>
+014686,000170: 23,2051           47135                           <span class="in">SLOAD   </span> <span class="in">RTB       </span>                            
+014687,000171: 23,2052           03752                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54414E474E42">TANGNB</a>     +1                         
+014688,000172: 23,2053           21465                                    <a href="RTB_OP_CODES.agc.html#4344554C4F474943">CDULOGIC</a>                              
+014689,000173: 23,2054           71406                           <span class="in">PUSH    </span> <span class="in">COS       </span>                            <span class="co">#  SHAFT ANGLE TO 2</span>
+014690,000174: 23,2055           72405                           <span class="in">DMP     </span> <span class="in">SL1       </span>                            
+014691,000175: 23,2056           00001                                    0                                     
+014692,000176: 23,2057           14045                           <span class="in">STODL   </span> 36D                                   <span class="co">#  Z COMPONENT</span>
+014693,000177: 
+014694,000178: 23,2060           41356                           <span class="in">SIN     </span> <span class="in">DMP       </span>                            
+014695,000179: 23,2061           77752                           <span class="in">SL1     </span>                                       
+014696,000180: 23,2062           24041                           <span class="in">STOVL   </span> 32D                                   
+014697,000181: 23,2063           00041                                    32D                                   
+014698,000182: 23,2064           77616                           <span class="in">RVQ     </span>                                       
 
 End of include-file LEM_GEOMETRY.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

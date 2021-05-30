@@ -90,28 +90,28 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-026245,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-026246,000003:                                                                                                  <span class="co">## Filename:    SPS_BACK-UP_RCS_CONTROL.agc</span>
-026247,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
-026248,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
-026249,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
-026250,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
-026251,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
-026252,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
-026253,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
-026254,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-026255,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-026256,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-026257,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
-026258,000015:                                                                                                  <span class="co">## Reference:   pp. 591-594</span>
-026259,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-026260,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-026261,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-026262,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
-026263,000020:                                                                                                  <span class="co">##              2017-06-03 HG   Transribed</span>
-026264,000021:                                                                                                  <span class="co">##              2017-06-22 RSB  Proofed comment text with</span>
-026265,000022:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
-026266,000023: 
+026252,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+026253,000003:                                                                                                  <span class="co">## Filename:    SPS_BACK-UP_RCS_CONTROL.agc</span>
+026254,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
+026255,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
+026256,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
+026257,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
+026258,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
+026259,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
+026260,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
+026261,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+026262,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+026263,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+026264,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
+026265,000015:                                                                                                  <span class="co">## Reference:   pp. 591-594</span>
+026266,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+026267,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+026268,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+026269,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
+026270,000020:                                                                                                  <span class="co">##              2017-06-03 HG   Transribed</span>
+026271,000021:                                                                                                  <span class="co">##              2017-06-22 RSB  Proofed comment text with</span>
+026272,000022:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
+026273,000023: 
 </pre>
 </span>
 </p>
@@ -127,58 +127,58 @@ Page 591
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-026268,000025: 21,3536                                           <span class="ps">BANK    </span> 21                                    
-026269,000026: 21,3536  E6,1541                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
-026270,000027: 
-<a name="535053524353"></a>026271,000028: 21,3536           40775        <span class="sm">SPSRCS  </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547415144">OMEGAQD</a>                               
-026272,000029: 21,3537           61417                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474151">OMEGAQ</a>                                
-026273,000030: 21,3540           55424                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5451">EDOTQ</a>                                 <span class="co">#   EDOT = OMEGAQ - OMEGAQD</span>
-026274,000031: 
-026275,000032: 21,3541           33727                           <span class="op">CAF     </span> <a href="#534C4F50454D51">SLOPEMQ</a>                               
-026276,000033: 21,3542           00006                           <span class="op">EXTEND  </span>                                       
-026277,000034: 21,3543           71413                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552">ER</a>                                    
-026278,000035: 21,3544           61424                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5451">EDOTQ</a>                                 
-026279,000036: 21,3545           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  F = SLOPE M * E + EDOT</span>
-026280,000037: 21,3546           63605                           <span class="op">BZMF    </span> <a href="#504C555344">PLUSD</a>                                 <span class="co">#  DQ NEGATIVE FOR POSITIVE F</span>
-026281,000038: 
-026282,000039: 21,3547           33741                           <span class="op">CAF     </span> <a href="#4E454744">NEGD</a>                                  <span class="co">#  STORE DIRECTION TO THRUST IN ITEMP3</span>
-026283,000040: 
-<a name="47434F4D50555445"></a>026284,000041: 21,3550           54063        <span class="sm">GCOMPUTE</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5033">ITEMP3</a>                                
-026285,000042: 21,3551           31424                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5451">EDOTQ</a>                                 
-026286,000043: 21,3552           00006                           <span class="op">EXTEND  </span>                                       
-026287,000044: 
-026288,000045: 21,3553           70000                           <span class="op">SQUARE  </span>                                       
-026289,000046: 21,3554           00006                           <span class="op">EXTEND  </span>                                       
-026290,000047: 21,3555           73732                           <span class="op">MP      </span> <a href="#312F324151">1/2AQ</a>                                 
-026291,000048: 21,3556           54062                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                <span class="co">#  ITEMP2 = (1/2A) EDOT**2</span>
-026292,000049: 
-026293,000050: 21,3557           61413                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552">ER</a>                                    
-026294,000051: 21,3560           63741                           <span class="op">AD      </span> <a href="#4E454744">NEGD</a>                                  <span class="co">#  DB IS SPECIFIED BY NEGD IN SPS MODE</span>
-026295,000052: 
-026296,000053: 21,3561           00006                           <span class="op">EXTEND  </span>                                       
-026297,000054: 21,3562           63613                           <span class="op">BZMF    </span> <a href="#555A45524F">UZERO</a>                                 
-026298,000055: 
-026299,000056: 21,3563           31424                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5451">EDOTQ</a>                                 <span class="co">#  G WAS POSITIVE, NOW TEST EDOT</span>
-026300,000057: 
-026301,000058: 21,3564           00006                           <span class="op">EXTEND  </span>                                       
-026302,000059: 21,3565           63576                           <span class="op">BZMF    </span> <a href="#554C4F57">ULOW</a>                                  
-026303,000060: 
-026304,000061: 21,3566           60062                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                <span class="co">#  EDOT WAS POSITIVE, CALCULATE HIGH U CASE</span>
-026305,000062: 21,3567           00006                           <span class="op">EXTEND  </span>                                       
-026306,000063: 21,3570           73727                           <span class="op">MP      </span> <a href="#534C4F50454D51">SLOPEMQ</a>                               
-026307,000064: 21,3571           61413                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552">ER</a>                                    
-026308,000065: 21,3572           00006                           <span class="op">EXTEND  </span>                                       
-026309,000066: 21,3573           73733                           <span class="op">MP      </span> <a href="#312F4151">1/AQ</a>                                  
-026310,000067: 21,3574           55504                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435951">URGENCYQ</a>                              
-026311,000068: 
-026312,000069: 21,3575           13615                           <span class="op">TCF     </span> <a href="#5243414C43">RCALC</a>                                 
-026313,000070: 
-<a name="554C4F57"></a>026314,000071: 21,3576           00006        <span class="sm">ULOW    </span>           <span class="op">EXTEND  </span>                                       
-026315,000072: 21,3577           73727                           <span class="op">MP      </span> <a href="#534C4F50454D51">SLOPEMQ</a>                               
-026316,000073: 21,3600           61413                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552">ER</a>                                    <span class="co">#  EDOT WAS NEGATIVE, CALCULATE LOW U CASE</span>
-026317,000074: 21,3601           00006                           <span class="op">EXTEND  </span>                                       
-026318,000075: 21,3602           73733                           <span class="op">MP      </span> <a href="#312F4151">1/AQ</a>                                  
-026319,000076: 
+026275,000025: 21,3536                                           <span class="ps">BANK    </span> 21                                    
+026276,000026: 21,3536  E6,1541                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
+026277,000027: 
+<a name="535053524353"></a>026278,000028: 21,3536           40775        <span class="sm">SPSRCS  </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547415144">OMEGAQD</a>                               
+026279,000029: 21,3537           61417                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474151">OMEGAQ</a>                                
+026280,000030: 21,3540           55424                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5451">EDOTQ</a>                                 <span class="co">#   EDOT = OMEGAQ - OMEGAQD</span>
+026281,000031: 
+026282,000032: 21,3541           33727                           <span class="op">CAF     </span> <a href="#534C4F50454D51">SLOPEMQ</a>                               
+026283,000033: 21,3542           00006                           <span class="op">EXTEND  </span>                                       
+026284,000034: 21,3543           71413                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552">ER</a>                                    
+026285,000035: 21,3544           61424                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5451">EDOTQ</a>                                 
+026286,000036: 21,3545           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  F = SLOPE M * E + EDOT</span>
+026287,000037: 21,3546           63605                           <span class="op">BZMF    </span> <a href="#504C555344">PLUSD</a>                                 <span class="co">#  DQ NEGATIVE FOR POSITIVE F</span>
+026288,000038: 
+026289,000039: 21,3547           33741                           <span class="op">CAF     </span> <a href="#4E454744">NEGD</a>                                  <span class="co">#  STORE DIRECTION TO THRUST IN ITEMP3</span>
+026290,000040: 
+<a name="47434F4D50555445"></a>026291,000041: 21,3550           54063        <span class="sm">GCOMPUTE</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5033">ITEMP3</a>                                
+026292,000042: 21,3551           31424                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5451">EDOTQ</a>                                 
+026293,000043: 21,3552           00006                           <span class="op">EXTEND  </span>                                       
+026294,000044: 
+026295,000045: 21,3553           70000                           <span class="op">SQUARE  </span>                                       
+026296,000046: 21,3554           00006                           <span class="op">EXTEND  </span>                                       
+026297,000047: 21,3555           73732                           <span class="op">MP      </span> <a href="#312F324151">1/2AQ</a>                                 
+026298,000048: 21,3556           54062                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                <span class="co">#  ITEMP2 = (1/2A) EDOT**2</span>
+026299,000049: 
+026300,000050: 21,3557           61413                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552">ER</a>                                    
+026301,000051: 21,3560           63741                           <span class="op">AD      </span> <a href="#4E454744">NEGD</a>                                  <span class="co">#  DB IS SPECIFIED BY NEGD IN SPS MODE</span>
+026302,000052: 
+026303,000053: 21,3561           00006                           <span class="op">EXTEND  </span>                                       
+026304,000054: 21,3562           63613                           <span class="op">BZMF    </span> <a href="#555A45524F">UZERO</a>                                 
+026305,000055: 
+026306,000056: 21,3563           31424                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5451">EDOTQ</a>                                 <span class="co">#  G WAS POSITIVE, NOW TEST EDOT</span>
+026307,000057: 
+026308,000058: 21,3564           00006                           <span class="op">EXTEND  </span>                                       
+026309,000059: 21,3565           63576                           <span class="op">BZMF    </span> <a href="#554C4F57">ULOW</a>                                  
+026310,000060: 
+026311,000061: 21,3566           60062                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                <span class="co">#  EDOT WAS POSITIVE, CALCULATE HIGH U CASE</span>
+026312,000062: 21,3567           00006                           <span class="op">EXTEND  </span>                                       
+026313,000063: 21,3570           73727                           <span class="op">MP      </span> <a href="#534C4F50454D51">SLOPEMQ</a>                               
+026314,000064: 21,3571           61413                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552">ER</a>                                    
+026315,000065: 21,3572           00006                           <span class="op">EXTEND  </span>                                       
+026316,000066: 21,3573           73733                           <span class="op">MP      </span> <a href="#312F4151">1/AQ</a>                                  
+026317,000067: 21,3574           55504                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435951">URGENCYQ</a>                              
+026318,000068: 
+026319,000069: 21,3575           13615                           <span class="op">TCF     </span> <a href="#5243414C43">RCALC</a>                                 
+026320,000070: 
+<a name="554C4F57"></a>026321,000071: 21,3576           00006        <span class="sm">ULOW    </span>           <span class="op">EXTEND  </span>                                       
+026322,000072: 21,3577           73727                           <span class="op">MP      </span> <a href="#534C4F50454D51">SLOPEMQ</a>                               
+026323,000073: 21,3600           61413                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552">ER</a>                                    <span class="co">#  EDOT WAS NEGATIVE, CALCULATE LOW U CASE</span>
+026324,000074: 21,3601           00006                           <span class="op">EXTEND  </span>                                       
+026325,000075: 21,3602           73733                           <span class="op">MP      </span> <a href="#312F4151">1/AQ</a>                                  
+026326,000076: 
 </pre>
 </span>
 </p>
@@ -194,57 +194,57 @@ Page 592
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-026321,000078: 21,3603           55504                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435951">URGENCYQ</a>                              
-026322,000079: 
-026323,000080: 21,3604           13615                           <span class="op">TCF     </span> <a href="#5243414C43">RCALC</a>                                 
-026324,000081: 
-<a name="504C555344"></a>026325,000082: 21,3605           41413        <span class="sm">PLUSD   </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552">ER</a>                                    
-026326,000083: 21,3606           57413                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552">ER</a>                                    
-026327,000084: 21,3607           41424                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5451">EDOTQ</a>                                 
-026328,000085: 21,3610           57424                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5451">EDOTQ</a>                                 
-026329,000086: 21,3611           43741                           <span class="op">CS      </span> <a href="#4E454744">NEGD</a>                                  
-026330,000087: 21,3612           13550                           <span class="op">TCF     </span> <a href="#47434F4D50555445">GCOMPUTE</a>                              
-026331,000088: 
-<a name="555A45524F"></a>026332,000089: 21,3613           37761        <span class="sm">UZERO   </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  G = 0, NO URGENCY</span>
-026333,000090: 21,3614           55504                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435951">URGENCYQ</a>                              
-026334,000091: 
-<a name="5243414C43"></a>026335,000092: 21,3615           40776        <span class="sm">RCALC   </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547415244">OMEGARD</a>                               <span class="co">#  REPEAT CALCULATIONS FOR R-AXIS</span>
-026336,000093: 21,3616           61421                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474152">OMEGAR</a>                                
-026337,000094: 21,3617           55425                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5452">EDOTR</a>                                 
-026338,000095: 
-026339,000096: 21,3620           33730                           <span class="op">CAF     </span> <a href="#534C4F50454D52">SLOPEMR</a>                               
-026340,000097: 21,3621           00006                           <span class="op">EXTEND  </span>                                       
-026341,000098: 21,3622           71411                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     
-026342,000099: 21,3623           61425                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5452">EDOTR</a>                                 
-026343,000100: 21,3624           00006                           <span class="op">EXTEND  </span>                                       
-026344,000101: 21,3625           63664                           <span class="op">BZMF    </span> <a href="#504C55534452">PLUSDR</a>                                
-026345,000102: 
-026346,000103: 21,3626           33741                           <span class="op">CAF     </span> <a href="#4E454744">NEGD</a>                                  
-026347,000104: 
-<a name="47434F4D50555452"></a>026348,000105: 21,3627           54064        <span class="sm">GCOMPUTR</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5034">ITEMP4</a>                                
-026349,000106: 21,3630           31425                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5452">EDOTR</a>                                 
-026350,000107: 21,3631           00006                           <span class="op">EXTEND  </span>                                       
-026351,000108: 21,3632           70000                           <span class="op">SQUARE  </span>                                       
-026352,000109: 21,3633           00006                           <span class="op">EXTEND  </span>                                       
-026353,000110: 21,3634           73731                           <span class="op">MP      </span> <a href="#312F324152">1/2AR</a>                                 
-026354,000111: 21,3635           54062                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
-026355,000112: 
-026356,000113: 21,3636           61411                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     
-026357,000114: 21,3637           63741                           <span class="op">AD      </span> <a href="#4E454744">NEGD</a>                                  
-026358,000115: 
-026359,000116: 21,3640           00006                           <span class="op">EXTEND  </span>                                       
-026360,000117: 21,3641           63672                           <span class="op">BZMF    </span> <a href="#555A45524F52">UZEROR</a>                                
-026361,000118: 
-026362,000119: 21,3642           31425                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5452">EDOTR</a>                                 
-026363,000120: 
-026364,000121: 21,3643           00006                           <span class="op">EXTEND  </span>                                       
-026365,000122: 21,3644           63655                           <span class="op">BZMF    </span> <a href="#554C4F5752">ULOWR</a>                                 
-026366,000123: 
-026367,000124: 21,3645           60062                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                <span class="co">#  EDOT WAS POSITIVE, CALCULATE HIGH U CASE</span>
-026368,000125: 21,3646           00006                           <span class="op">EXTEND  </span>                                       
-026369,000126: 21,3647           73730                           <span class="op">MP      </span> <a href="#534C4F50454D52">SLOPEMR</a>                               
-026370,000127: 21,3650           61411                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     
-026371,000128: 
+026328,000078: 21,3603           55504                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435951">URGENCYQ</a>                              
+026329,000079: 
+026330,000080: 21,3604           13615                           <span class="op">TCF     </span> <a href="#5243414C43">RCALC</a>                                 
+026331,000081: 
+<a name="504C555344"></a>026332,000082: 21,3605           41413        <span class="sm">PLUSD   </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552">ER</a>                                    
+026333,000083: 21,3606           57413                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552">ER</a>                                    
+026334,000084: 21,3607           41424                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5451">EDOTQ</a>                                 
+026335,000085: 21,3610           57424                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5451">EDOTQ</a>                                 
+026336,000086: 21,3611           43741                           <span class="op">CS      </span> <a href="#4E454744">NEGD</a>                                  
+026337,000087: 21,3612           13550                           <span class="op">TCF     </span> <a href="#47434F4D50555445">GCOMPUTE</a>                              
+026338,000088: 
+<a name="555A45524F"></a>026339,000089: 21,3613           37761        <span class="sm">UZERO   </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  G = 0, NO URGENCY</span>
+026340,000090: 21,3614           55504                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435951">URGENCYQ</a>                              
+026341,000091: 
+<a name="5243414C43"></a>026342,000092: 21,3615           40776        <span class="sm">RCALC   </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547415244">OMEGARD</a>                               <span class="co">#  REPEAT CALCULATIONS FOR R-AXIS</span>
+026343,000093: 21,3616           61421                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474152">OMEGAR</a>                                
+026344,000094: 21,3617           55425                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5452">EDOTR</a>                                 
+026345,000095: 
+026346,000096: 21,3620           33730                           <span class="op">CAF     </span> <a href="#534C4F50454D52">SLOPEMR</a>                               
+026347,000097: 21,3621           00006                           <span class="op">EXTEND  </span>                                       
+026348,000098: 21,3622           71411                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     
+026349,000099: 21,3623           61425                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5452">EDOTR</a>                                 
+026350,000100: 21,3624           00006                           <span class="op">EXTEND  </span>                                       
+026351,000101: 21,3625           63664                           <span class="op">BZMF    </span> <a href="#504C55534452">PLUSDR</a>                                
+026352,000102: 
+026353,000103: 21,3626           33741                           <span class="op">CAF     </span> <a href="#4E454744">NEGD</a>                                  
+026354,000104: 
+<a name="47434F4D50555452"></a>026355,000105: 21,3627           54064        <span class="sm">GCOMPUTR</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5034">ITEMP4</a>                                
+026356,000106: 21,3630           31425                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5452">EDOTR</a>                                 
+026357,000107: 21,3631           00006                           <span class="op">EXTEND  </span>                                       
+026358,000108: 21,3632           70000                           <span class="op">SQUARE  </span>                                       
+026359,000109: 21,3633           00006                           <span class="op">EXTEND  </span>                                       
+026360,000110: 21,3634           73731                           <span class="op">MP      </span> <a href="#312F324152">1/2AR</a>                                 
+026361,000111: 21,3635           54062                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
+026362,000112: 
+026363,000113: 21,3636           61411                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     
+026364,000114: 21,3637           63741                           <span class="op">AD      </span> <a href="#4E454744">NEGD</a>                                  
+026365,000115: 
+026366,000116: 21,3640           00006                           <span class="op">EXTEND  </span>                                       
+026367,000117: 21,3641           63672                           <span class="op">BZMF    </span> <a href="#555A45524F52">UZEROR</a>                                
+026368,000118: 
+026369,000119: 21,3642           31425                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5452">EDOTR</a>                                 
+026370,000120: 
+026371,000121: 21,3643           00006                           <span class="op">EXTEND  </span>                                       
+026372,000122: 21,3644           63655                           <span class="op">BZMF    </span> <a href="#554C4F5752">ULOWR</a>                                 
+026373,000123: 
+026374,000124: 21,3645           60062                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                <span class="co">#  EDOT WAS POSITIVE, CALCULATE HIGH U CASE</span>
+026375,000125: 21,3646           00006                           <span class="op">EXTEND  </span>                                       
+026376,000126: 21,3647           73730                           <span class="op">MP      </span> <a href="#534C4F50454D52">SLOPEMR</a>                               
+026377,000127: 21,3650           61411                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     
+026378,000128: 
 </pre>
 </span>
 </p>
@@ -260,59 +260,59 @@ Page 593
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-026373,000130: 21,3651           00006                           <span class="op">EXTEND  </span>                                       
-026374,000131: 21,3652           73734                           <span class="op">MP      </span> <a href="#312F4152">1/AR</a>                                  
-026375,000132: 21,3653           55506                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435952">URGENCYR</a>                              
-026376,000133: 
-026377,000134: 21,3654           13673                           <span class="op">TCF     </span> <a href="#43484E4C54455354">CHNLTEST</a>                              
-026378,000135: 
-<a name="554C4F5752"></a>026379,000136: 21,3655           00006        <span class="sm">ULOWR   </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  EODT WAS NEGATIVE, CALCULATE LOW U CASE</span>
-026380,000137: 21,3656           73730                           <span class="op">MP      </span> <a href="#534C4F50454D52">SLOPEMR</a>                               
-026381,000138: 
-026382,000139: 21,3657           61411                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     
-026383,000140: 21,3660           00006                           <span class="op">EXTEND  </span>                                       
-026384,000141: 21,3661           73734                           <span class="op">MP      </span> <a href="#312F4152">1/AR</a>                                  
-026385,000142: 21,3662           55506                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435952">URGENCYR</a>                              
-026386,000143: 
-026387,000144: 21,3663           13673                           <span class="op">TCF     </span> <a href="#43484E4C54455354">CHNLTEST</a>                              
-026388,000145: 
-<a name="504C55534452"></a>026389,000146: 21,3664           41411        <span class="sm">PLUSDR  </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     
-026390,000147: 21,3665           57411                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     
-026391,000148: 21,3666           41425                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5452">EDOTR</a>                                 
-026392,000149: 21,3667           57425                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5452">EDOTR</a>                                 
-026393,000150: 21,3670           43741                           <span class="op">CS      </span> <a href="#4E454744">NEGD</a>                                  
-026394,000151: 21,3671           13627                           <span class="op">TCF     </span> <a href="#47434F4D50555452">GCOMPUTR</a>                              
-026395,000152: 
-<a name="555A45524F52"></a>026396,000153: 21,3672           37761        <span class="sm">UZEROR  </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
-<a name="43484E4C54455354"></a>026397,000154: 21,3673           00006        <span class="sm">CHNLTEST</span>           <span class="op">EXTEND  </span>                                       
-026398,000155: 21,3674           61504                           <span class="op">SU      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435951">URGENCYQ</a>                              <span class="co">#  TEST = URGENCYR - URGENCYQ</span>
-026399,000156: 21,3675           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-026400,000157: 21,3676           13714                           <span class="op">TCF     </span> <a href="#445254455354">DRTEST</a>                                
-026401,000158: 21,3677           13701                           <span class="op">TCF     </span> <a href="#555254455354">URTEST</a>                                
-026402,000159: 21,3700           13705                           <span class="op">TCF     </span> <a href="#445154455354">DQTEST</a>                                
-<a name="555254455354"></a>026403,000160: 21,3701           31504        <span class="sm">URTEST  </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435951">URGENCYQ</a>                              
-026404,000161: 21,3702           00006                           <span class="op">EXTEND  </span>                                       
-026405,000162: 
-026406,000163: 21,3703           13723                           <span class="op">BZF     </span> <a href="#4E4F4A4554">NOJET</a>                                 
-026407,000164: 21,3704           13714                           <span class="op">TCF     </span> <a href="#445254455354">DRTEST</a>                                
-026408,000165: 
-<a name="445154455354"></a>026409,000166: 21,3705           30063        <span class="sm">DQTEST  </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5033">ITEMP3</a>                                
-026410,000167: 21,3706           00006                           <span class="op">EXTEND  </span>                                       
-026411,000168: 21,3707           63712                           <span class="op">BZMF    </span> <a href="#4E454751">NEGQ</a>                                  
-026412,000169: 21,3710           33736                           <span class="op">CAF     </span> <a href="#504F5351">POSQ</a>                                  
-026413,000170: 21,3711           13724                           <span class="op">TCF     </span> <a href="#4A4554434D44">JETCMD</a>                                
-026414,000171: 
-<a name="4E454751"></a>026415,000172: 21,3712           33735        <span class="sm">NEGQ    </span>           <span class="op">CAF     </span> <a href="#4E45475154">NEGQT</a>                                 
-026416,000173: 21,3713           13724                           <span class="op">TCF     </span> <a href="#4A4554434D44">JETCMD</a>                                
-026417,000174: 
-<a name="445254455354"></a>026418,000175: 21,3714           30064        <span class="sm">DRTEST  </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5034">ITEMP4</a>                                
-026419,000176: 21,3715           00006                           <span class="op">EXTEND  </span>                                       
-026420,000177: 21,3716           63721                           <span class="op">BZMF    </span> <a href="#4E454752">NEGR</a>                                  
-026421,000178: 21,3717           33737                           <span class="op">CAF     </span> <a href="#504F5352">POSR</a>                                  
-026422,000179: 21,3720           13724                           <span class="op">TCF     </span> <a href="#4A4554434D44">JETCMD</a>                                
-026423,000180: 
-<a name="4E454752"></a>026424,000181: 21,3721           33740        <span class="sm">NEGR    </span>           <span class="op">CAF     </span> <a href="#4E45475254">NEGRT</a>                                 
-026425,000182: 
+026380,000130: 21,3651           00006                           <span class="op">EXTEND  </span>                                       
+026381,000131: 21,3652           73734                           <span class="op">MP      </span> <a href="#312F4152">1/AR</a>                                  
+026382,000132: 21,3653           55506                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435952">URGENCYR</a>                              
+026383,000133: 
+026384,000134: 21,3654           13673                           <span class="op">TCF     </span> <a href="#43484E4C54455354">CHNLTEST</a>                              
+026385,000135: 
+<a name="554C4F5752"></a>026386,000136: 21,3655           00006        <span class="sm">ULOWR   </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  EODT WAS NEGATIVE, CALCULATE LOW U CASE</span>
+026387,000137: 21,3656           73730                           <span class="op">MP      </span> <a href="#534C4F50454D52">SLOPEMR</a>                               
+026388,000138: 
+026389,000139: 21,3657           61411                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     
+026390,000140: 21,3660           00006                           <span class="op">EXTEND  </span>                                       
+026391,000141: 21,3661           73734                           <span class="op">MP      </span> <a href="#312F4152">1/AR</a>                                  
+026392,000142: 21,3662           55506                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435952">URGENCYR</a>                              
+026393,000143: 
+026394,000144: 21,3663           13673                           <span class="op">TCF     </span> <a href="#43484E4C54455354">CHNLTEST</a>                              
+026395,000145: 
+<a name="504C55534452"></a>026396,000146: 21,3664           41411        <span class="sm">PLUSDR  </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     
+026397,000147: 21,3665           57411                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     
+026398,000148: 21,3666           41425                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5452">EDOTR</a>                                 
+026399,000149: 21,3667           57425                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5452">EDOTR</a>                                 
+026400,000150: 21,3670           43741                           <span class="op">CS      </span> <a href="#4E454744">NEGD</a>                                  
+026401,000151: 21,3671           13627                           <span class="op">TCF     </span> <a href="#47434F4D50555452">GCOMPUTR</a>                              
+026402,000152: 
+<a name="555A45524F52"></a>026403,000153: 21,3672           37761        <span class="sm">UZEROR  </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
+<a name="43484E4C54455354"></a>026404,000154: 21,3673           00006        <span class="sm">CHNLTEST</span>           <span class="op">EXTEND  </span>                                       
+026405,000155: 21,3674           61504                           <span class="op">SU      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435951">URGENCYQ</a>                              <span class="co">#  TEST = URGENCYR - URGENCYQ</span>
+026406,000156: 21,3675           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+026407,000157: 21,3676           13714                           <span class="op">TCF     </span> <a href="#445254455354">DRTEST</a>                                
+026408,000158: 21,3677           13701                           <span class="op">TCF     </span> <a href="#555254455354">URTEST</a>                                
+026409,000159: 21,3700           13705                           <span class="op">TCF     </span> <a href="#445154455354">DQTEST</a>                                
+<a name="555254455354"></a>026410,000160: 21,3701           31504        <span class="sm">URTEST  </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435951">URGENCYQ</a>                              
+026411,000161: 21,3702           00006                           <span class="op">EXTEND  </span>                                       
+026412,000162: 
+026413,000163: 21,3703           13723                           <span class="op">BZF     </span> <a href="#4E4F4A4554">NOJET</a>                                 
+026414,000164: 21,3704           13714                           <span class="op">TCF     </span> <a href="#445254455354">DRTEST</a>                                
+026415,000165: 
+<a name="445154455354"></a>026416,000166: 21,3705           30063        <span class="sm">DQTEST  </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5033">ITEMP3</a>                                
+026417,000167: 21,3706           00006                           <span class="op">EXTEND  </span>                                       
+026418,000168: 21,3707           63712                           <span class="op">BZMF    </span> <a href="#4E454751">NEGQ</a>                                  
+026419,000169: 21,3710           33736                           <span class="op">CAF     </span> <a href="#504F5351">POSQ</a>                                  
+026420,000170: 21,3711           13724                           <span class="op">TCF     </span> <a href="#4A4554434D44">JETCMD</a>                                
+026421,000171: 
+<a name="4E454751"></a>026422,000172: 21,3712           33735        <span class="sm">NEGQ    </span>           <span class="op">CAF     </span> <a href="#4E45475154">NEGQT</a>                                 
+026423,000173: 21,3713           13724                           <span class="op">TCF     </span> <a href="#4A4554434D44">JETCMD</a>                                
+026424,000174: 
+<a name="445254455354"></a>026425,000175: 21,3714           30064        <span class="sm">DRTEST  </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5034">ITEMP4</a>                                
+026426,000176: 21,3715           00006                           <span class="op">EXTEND  </span>                                       
+026427,000177: 21,3716           63721                           <span class="op">BZMF    </span> <a href="#4E454752">NEGR</a>                                  
+026428,000178: 21,3717           33737                           <span class="op">CAF     </span> <a href="#504F5352">POSR</a>                                  
+026429,000179: 21,3720           13724                           <span class="op">TCF     </span> <a href="#4A4554434D44">JETCMD</a>                                
+026430,000180: 
+<a name="4E454752"></a>026431,000181: 21,3721           33740        <span class="sm">NEGR    </span>           <span class="op">CAF     </span> <a href="#4E45475254">NEGRT</a>                                 
+026432,000182: 
 </pre>
 </span>
 </p>
@@ -328,26 +328,26 @@ Page 594
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-026427,000184: 21,3722           13724                           <span class="op">TCF     </span> <a href="#4A4554434D44">JETCMD</a>                                
-026428,000185: 
-<a name="4E4F4A4554"></a>026429,000186: 21,3723           37761        <span class="sm">NOJET   </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
-<a name="4A4554434D44"></a>026430,000187: 21,3724           00006        <span class="sm">JETCMD  </span>           <span class="op">EXTEND  </span>                                       
-026431,000188: 21,3725           01005                           <span class="op">WRITE   </span> 5                                     
-026432,000189: 21,3726           15751                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
-026433,000190: 
-026434,000191: 
-<a name="534C4F50454D51"></a>026435,000192: 21,3727           37777        <span class="sm">SLOPEMQ </span>           <span class="ps">OCT     </span> 37777                                 
-<a name="534C4F50454D52"></a>026436,000193: 21,3730           37777        <span class="sm">SLOPEMR </span>           <span class="ps">OCT     </span> 37777                                 
-<a name="312F324152"></a>026437,000194: 21,3731           06743        <span class="sm">1/2AR   </span>           <span class="ps">DEC     </span> 0.2170                                
-<a name="312F324151"></a>026438,000195: 21,3732           06743        <span class="sm">1/2AQ   </span>           <span class="ps">DEC     </span> 0.217                                 
-<a name="312F4151"></a>026439,000196: 21,3733           15707        <span class="sm">1/AQ    </span>           <span class="ps">DEC     </span> 0.434                                 
-026440,000197: 
-<a name="312F4152"></a>026441,000198: 21,3734           15707        <span class="sm">1/AR    </span>           <span class="ps">DEC     </span> 0.434                                 <span class="co">#  DESCENT STAGE ACC CONST SCALED AT 16/PI</span>
-<a name="4E45475154"></a>026442,000199: 21,3735           00011        <span class="sm">NEGQT   </span>           <span class="ps">OCT     </span> 00011                                 
-<a name="504F5351"></a>026443,000200: 21,3736           00006        <span class="sm">POSQ    </span>           <span class="ps">OCT     </span> 00006                                 
-<a name="504F5352"></a>026444,000201: 21,3737           00201        <span class="sm">POSR    </span>           <span class="ps">OCT     </span> 00201                                 
-<a name="4E45475254"></a>026445,000202: 21,3740           00102        <span class="sm">NEGRT   </span>           <span class="ps">OCT     </span> 00102                                 
-<a name="4E454744"></a>026446,000203: 21,3741           77644        <span class="sm">NEGD    </span>           <span class="ps">DEC     </span> -0.00555                              
+026434,000184: 21,3722           13724                           <span class="op">TCF     </span> <a href="#4A4554434D44">JETCMD</a>                                
+026435,000185: 
+<a name="4E4F4A4554"></a>026436,000186: 21,3723           37761        <span class="sm">NOJET   </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
+<a name="4A4554434D44"></a>026437,000187: 21,3724           00006        <span class="sm">JETCMD  </span>           <span class="op">EXTEND  </span>                                       
+026438,000188: 21,3725           01005                           <span class="op">WRITE   </span> 5                                     
+026439,000189: 21,3726           15751                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
+026440,000190: 
+026441,000191: 
+<a name="534C4F50454D51"></a>026442,000192: 21,3727           37777        <span class="sm">SLOPEMQ </span>           <span class="ps">OCT     </span> 37777                                 
+<a name="534C4F50454D52"></a>026443,000193: 21,3730           37777        <span class="sm">SLOPEMR </span>           <span class="ps">OCT     </span> 37777                                 
+<a name="312F324152"></a>026444,000194: 21,3731           06743        <span class="sm">1/2AR   </span>           <span class="ps">DEC     </span> 0.2170                                
+<a name="312F324151"></a>026445,000195: 21,3732           06743        <span class="sm">1/2AQ   </span>           <span class="ps">DEC     </span> 0.217                                 
+<a name="312F4151"></a>026446,000196: 21,3733           15707        <span class="sm">1/AQ    </span>           <span class="ps">DEC     </span> 0.434                                 
+026447,000197: 
+<a name="312F4152"></a>026448,000198: 21,3734           15707        <span class="sm">1/AR    </span>           <span class="ps">DEC     </span> 0.434                                 <span class="co">#  DESCENT STAGE ACC CONST SCALED AT 16/PI</span>
+<a name="4E45475154"></a>026449,000199: 21,3735           00011        <span class="sm">NEGQT   </span>           <span class="ps">OCT     </span> 00011                                 
+<a name="504F5351"></a>026450,000200: 21,3736           00006        <span class="sm">POSQ    </span>           <span class="ps">OCT     </span> 00006                                 
+<a name="504F5352"></a>026451,000201: 21,3737           00201        <span class="sm">POSR    </span>           <span class="ps">OCT     </span> 00201                                 
+<a name="4E45475254"></a>026452,000202: 21,3740           00102        <span class="sm">NEGRT   </span>           <span class="ps">OCT     </span> 00102                                 
+<a name="4E454744"></a>026453,000203: 21,3741           77644        <span class="sm">NEGD    </span>           <span class="ps">DEC     </span> -0.00555                              
 
 End of include-file SPS_BACK-UP_RCS_CONTROL.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

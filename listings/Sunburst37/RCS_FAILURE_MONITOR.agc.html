@@ -90,29 +90,29 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023617,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-023618,000003:                                                                                                  <span class="co">## Filename:    RCS_FAILURE_MONITOR.agc</span>
-023619,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
-023620,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
-023621,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
-023622,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
-023623,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
-023624,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
-023625,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
-023626,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-023627,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-023628,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-023629,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
-023630,000015:                                                                                                  <span class="co">## Reference:   pp. 535-537</span>
-023631,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-023632,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-023633,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-023634,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
-023635,000020:                                                                                                  <span class="co">##              2017-05-31 HG   Transcribed</span>
-023636,000021:                                                                                                  <span class="co">##              2017-06-15 HG   Fix operand BIT6 -> BIT8</span>
-023637,000022:                                                                                                  <span class="co">##              2017-06-22 RSB  Proofed comment text with</span>
-023638,000023:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
-023639,000024: 
+023624,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+023625,000003:                                                                                                  <span class="co">## Filename:    RCS_FAILURE_MONITOR.agc</span>
+023626,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
+023627,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
+023628,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
+023629,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
+023630,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
+023631,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
+023632,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
+023633,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+023634,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+023635,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+023636,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
+023637,000015:                                                                                                  <span class="co">## Reference:   pp. 535-537</span>
+023638,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+023639,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+023640,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+023641,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
+023642,000020:                                                                                                  <span class="co">##              2017-05-31 HG   Transcribed</span>
+023643,000021:                                                                                                  <span class="co">##              2017-06-15 HG   Fix operand BIT6 -> BIT8</span>
+023644,000022:                                                                                                  <span class="co">##              2017-06-22 RSB  Proofed comment text with</span>
+023645,000023:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
+023646,000024: 
 </pre>
 </span>
 </p>
@@ -128,57 +128,57 @@ Page 535
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023641,000026:                                                                                                  <span class="co">#  FAILURE MONITOR FOR LM RCS JETS (4 TIMES A SECOND).</span>
-023642,000027: 
-023643,000028:                                                                                                  <span class="co">#  *** FAILSW CAPABILITY FOR CHECKOUT ONLY ***</span>
-023644,000029: 
-023645,000030: 20,2677  E6,1541                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
-023646,000031: 12,3203                                           <span class="ps">BANK    </span> 12                                    
-023647,000032: 
-<a name="5243534D4F4E4954"></a>023648,000033: 12,3203           15751        <span class="sm">RCSMONIT</span>           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  *** TO STOP ENDLESS LOOPS. ***</span>
-023649,000034: 
-023650,000035: 
-023651,000036: 
-023652,000037: 12,3204           15751                           <span class="op">TCF     </span> <a href="#454E44524353464C">ENDRCSFL</a>                              <span class="co">#  DO NOTHING IF POSITIVE</span>
-023653,000038: 
-023654,000039: 12,3205           31501                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4153544641494C">LASTFAIL</a>                              <span class="co">#  LAST FAILURE CHANNEL VALUE</span>
-023655,000040: 12,3206           00006                           <span class="op">EXTEND  </span>                                       
-023656,000041: 12,3207           06032                           <span class="op">RXOR    </span> 32                                    
-023657,000042: 12,3210           74553                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  
-023658,000043: 12,3211           00006                           <span class="op">EXTEND  </span>                                       
-023659,000044: 12,3212           15751                           <span class="op">BZF     </span> <a href="#4E4F5354434847">NOSTCHG</a>                               <span class="co">#  NO STATUS CHANGE, FINISHED</span>
-023660,000045: 
-023661,000046: 12,3213           00006                           <span class="op">EXTEND  </span>                                       
-023662,000047: 12,3214           33217                           <span class="op">DCA     </span> <a href="#4D4E54524353">MNTRCS</a>                                
-023663,000048: 12,3215           52006                           <span class="op">DTCB    </span>                                       
-023664,000049: 12,3216  E6,1541                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
-<a name="4D4E54524353"></a>023665,000050: 12,3216           02677 40006  <span class="sm">MNTRCS  </span>           <span class="ps">2CADR   </span> <a href="#5243534D4E5452">RCSMNTR</a>                               
-<a name="454E44543453"></a>023666,000051: 12,3220                        <span class="sm">ENDT4S  </span>           <span class="ps">EQUALS  </span>                                       
-023667,000052: 
-023668,000053: 
-023669,000054: 20,2677                                           <span class="ps">BANK    </span> 20                                    
-023670,000055: 20,2677  E6,1541                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
-<a name="5243534D4E5452"></a>023671,000056: 20,2677           37761        <span class="sm">RCSMNTR </span>           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  THERE IS A DIFFERENCE, CLEAR MASKS</span>
-023672,000057: 20,2700           55502                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
-023673,000058: 20,2701           55503                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
-023674,000059: 
-023675,000060: 20,2702           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  READ PRESENT FAILURES</span>
-023676,000061: 20,2703           00032                           <span class="op">READ    </span> 32                                    
-023677,000062: 20,2704           55501                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4153544641494C">LASTFAIL</a>                              <span class="co">#  SAVE FOR NEXT PASS</span>
-023678,000063: 
-023679,000064: 20,2705           40000                           <span class="op">COM     </span>                                       <span class="co">#  FAILURES NOW ONES</span>
-023680,000065: 20,2706           00006                           <span class="op">EXTEND  </span>                                       
-023681,000066: 20,2707           77747                           <span class="op">MP      </span> <a href="INTERPRETER.agc.html#42495437">BIT7</a>                                  <span class="co">#  SHIFT TO TEST LOW 8 BITS</span>
-023682,000067: 20,2710           37761                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
-023683,000068: 
-023684,000069: 20,2711           54061                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C435452">FAILCTR</a>                               <span class="co">#  INITIALIZE COUNTER</span>
-023685,000070: 20,2712           30001                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-023686,000071: 20,2713           12716                           <span class="op">TCF     </span> <a href="#4E58545243535052">NXTRCSPR</a>   +1                         
-023687,000072: 
-023688,000073: 20,2714           67755                 -1        <span class="op">AD      </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  
-<a name="4E58545243535052"></a>023689,000074: 20,2715           24061        <span class="sm">NXTRCSPR</span>           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C435452">FAILCTR</a>                               
-023690,000075: 20,2716           60000                 +1        <span class="op">DOUBLE  </span>                                       
-023691,000076: 
+023648,000026:                                                                                                  <span class="co">#  FAILURE MONITOR FOR LM RCS JETS (4 TIMES A SECOND).</span>
+023649,000027: 
+023650,000028:                                                                                                  <span class="co">#  *** FAILSW CAPABILITY FOR CHECKOUT ONLY ***</span>
+023651,000029: 
+023652,000030: 20,2677  E6,1541                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
+023653,000031: 12,3203                                           <span class="ps">BANK    </span> 12                                    
+023654,000032: 
+<a name="5243534D4F4E4954"></a>023655,000033: 12,3203           15751        <span class="sm">RCSMONIT</span>           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  *** TO STOP ENDLESS LOOPS. ***</span>
+023656,000034: 
+023657,000035: 
+023658,000036: 
+023659,000037: 12,3204           15751                           <span class="op">TCF     </span> <a href="#454E44524353464C">ENDRCSFL</a>                              <span class="co">#  DO NOTHING IF POSITIVE</span>
+023660,000038: 
+023661,000039: 12,3205           31501                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4153544641494C">LASTFAIL</a>                              <span class="co">#  LAST FAILURE CHANNEL VALUE</span>
+023662,000040: 12,3206           00006                           <span class="op">EXTEND  </span>                                       
+023663,000041: 12,3207           06032                           <span class="op">RXOR    </span> 32                                    
+023664,000042: 12,3210           74553                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  
+023665,000043: 12,3211           00006                           <span class="op">EXTEND  </span>                                       
+023666,000044: 12,3212           15751                           <span class="op">BZF     </span> <a href="#4E4F5354434847">NOSTCHG</a>                               <span class="co">#  NO STATUS CHANGE, FINISHED</span>
+023667,000045: 
+023668,000046: 12,3213           00006                           <span class="op">EXTEND  </span>                                       
+023669,000047: 12,3214           33217                           <span class="op">DCA     </span> <a href="#4D4E54524353">MNTRCS</a>                                
+023670,000048: 12,3215           52006                           <span class="op">DTCB    </span>                                       
+023671,000049: 12,3216  E6,1541                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
+<a name="4D4E54524353"></a>023672,000050: 12,3216           02677 40006  <span class="sm">MNTRCS  </span>           <span class="ps">2CADR   </span> <a href="#5243534D4E5452">RCSMNTR</a>                               
+<a name="454E44543453"></a>023673,000051: 12,3220                        <span class="sm">ENDT4S  </span>           <span class="ps">EQUALS  </span>                                       
+023674,000052: 
+023675,000053: 
+023676,000054: 20,2677                                           <span class="ps">BANK    </span> 20                                    
+023677,000055: 20,2677  E6,1541                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
+<a name="5243534D4E5452"></a>023678,000056: 20,2677           37761        <span class="sm">RCSMNTR </span>           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  THERE IS A DIFFERENCE, CLEAR MASKS</span>
+023679,000057: 20,2700           55502                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
+023680,000058: 20,2701           55503                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
+023681,000059: 
+023682,000060: 20,2702           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  READ PRESENT FAILURES</span>
+023683,000061: 20,2703           00032                           <span class="op">READ    </span> 32                                    
+023684,000062: 20,2704           55501                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4153544641494C">LASTFAIL</a>                              <span class="co">#  SAVE FOR NEXT PASS</span>
+023685,000063: 
+023686,000064: 20,2705           40000                           <span class="op">COM     </span>                                       <span class="co">#  FAILURES NOW ONES</span>
+023687,000065: 20,2706           00006                           <span class="op">EXTEND  </span>                                       
+023688,000066: 20,2707           77747                           <span class="op">MP      </span> <a href="INTERPRETER.agc.html#42495437">BIT7</a>                                  <span class="co">#  SHIFT TO TEST LOW 8 BITS</span>
+023689,000067: 20,2710           37761                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
+023690,000068: 
+023691,000069: 20,2711           54061                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C435452">FAILCTR</a>                               <span class="co">#  INITIALIZE COUNTER</span>
+023692,000070: 20,2712           30001                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+023693,000071: 20,2713           12716                           <span class="op">TCF     </span> <a href="#4E58545243535052">NXTRCSPR</a>   +1                         
+023694,000072: 
+023695,000073: 20,2714           67755                 -1        <span class="op">AD      </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  
+<a name="4E58545243535052"></a>023696,000074: 20,2715           24061        <span class="sm">NXTRCSPR</span>           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C435452">FAILCTR</a>                               
+023697,000075: 20,2716           60000                 +1        <span class="op">DOUBLE  </span>                                       
+023698,000076: 
 </pre>
 </span>
 </p>
@@ -194,58 +194,58 @@ Page 536
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023693,000078: 20,2717           54062                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C54454D50">FAILTEMP</a>                              <span class="co">#  OVERFLOW CHECK</span>
-023694,000079: 20,2720           12715                           <span class="op">TCF     </span> <a href="#4E58545243535052">NXTRCSPR</a>                              
-023695,000080: 
-023696,000081: 20,2721           50061                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C435452">FAILCTR</a>                               
-023697,000082: 20,2722           02726                           <span class="op">TC      </span> <a href="#524353464A554D50">RCSFJUMP</a>                              <span class="co">#  GO THROUGH JUMP TABLE</span>
-023698,000083: 
-023699,000084: 20,2723           10062                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C54454D50">FAILTEMP</a>                              
-023700,000085: 20,2724           12714                           <span class="op">TCF     </span> <a href="#4E58545243535052">NXTRCSPR</a>   -1                         <span class="co">#  FINISH EARLY, OR MORE TO DO</span>
-023701,000086: 
-023702,000087: 20,2725           15751                           <span class="op">TCF     </span> <a href="#454E44524353464C">ENDRCSFL</a>                              
-<a name="524353464A554D50"></a>023703,000088: 20,2726           12736        <span class="sm">RCSFJUMP</span>           <span class="op">TCF     </span> <a href="#464D31302F3131">FM10/11</a>                               
-023704,000089: 20,2727           12743                           <span class="op">TCF     </span> <a href="#464D392F3132">FM9/12</a>                                
-023705,000090: 20,2730           12750                           <span class="op">TCF     </span> <a href="#464D31332F3135">FM13/15</a>                               
-023706,000091: 20,2731           12755                           <span class="op">TCF     </span> <a href="#464D31342F3136">FM14/16</a>                               
-023707,000092: 20,2732           12762                           <span class="op">TCF     </span> <a href="#464D362F37">FM6/7</a>                                 
-023708,000093: 20,2733           12767                           <span class="op">TCF     </span> <a href="#464D312F33">FM1/3</a>                                 
-023709,000094: 20,2734           12774                           <span class="op">TCF     </span> <a href="#464D352F38">FM5/8</a>                                 
-023710,000095: 20,2735           13001                           <span class="op">TCF     </span> <a href="#464D322F34">FM2/4</a>                                 
-023711,000096: 
-<a name="464D31302F3131"></a>023712,000097: 20,2736           37750        <span class="sm">FM10/11 </span>           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495436">BIT6</a>                                  
-023713,000098: 20,2737           27502                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
-023714,000099: 20,2740           37752                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495434">BIT4</a>                                  
-023715,000100: 20,2741           27503                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
-023716,000101: 20,2742           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-023717,000102: 
-<a name="464D392F3132"></a>023718,000103: 20,2743           37751        <span class="sm">FM9/12  </span>           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495435">BIT5</a>                                  
-023719,000104: 
-023720,000105: 20,2744           27502                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
-023721,000106: 20,2745           37751                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495435">BIT5</a>                                  
-023722,000107: 20,2746           27503                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
-023723,000108: 20,2747           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-023724,000109: 
-<a name="464D31332F3135"></a>023725,000110: 20,2750           37747        <span class="sm">FM13/15 </span>           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495437">BIT7</a>                                  
-023726,000111: 20,2751           27502                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
-023727,000112: 20,2752           37753                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495433">BIT3</a>                                  
-023728,000113: 20,2753           27503                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
-023729,000114: 20,2754           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-023730,000115: 
-<a name="464D31342F3136"></a>023731,000116: 20,2755           37746        <span class="sm">FM14/16 </span>           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495438">BIT8</a>                                  
-023732,000117: 20,2756           27502                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
-023733,000118: 20,2757           37746                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495438">BIT8</a>                                  
-023734,000119: 20,2760           27503                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
-023735,000120: 20,2761           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-023736,000121: 
-<a name="464D362F37"></a>023737,000122: 20,2762           37752        <span class="sm">FM6/7   </span>           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495434">BIT4</a>                                  
-023738,000123: 20,2763           27502                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
-023739,000124: 20,2764           37755                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  
-023740,000125: 20,2765           27503                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
-023741,000126: 20,2766           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-023742,000127: 
-<a name="464D312F33"></a>023743,000128: 20,2767           37755        <span class="sm">FM1/3   </span>           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  
-023744,000129: 
+023700,000078: 20,2717           54062                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C54454D50">FAILTEMP</a>                              <span class="co">#  OVERFLOW CHECK</span>
+023701,000079: 20,2720           12715                           <span class="op">TCF     </span> <a href="#4E58545243535052">NXTRCSPR</a>                              
+023702,000080: 
+023703,000081: 20,2721           50061                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C435452">FAILCTR</a>                               
+023704,000082: 20,2722           02726                           <span class="op">TC      </span> <a href="#524353464A554D50">RCSFJUMP</a>                              <span class="co">#  GO THROUGH JUMP TABLE</span>
+023705,000083: 
+023706,000084: 20,2723           10062                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C54454D50">FAILTEMP</a>                              
+023707,000085: 20,2724           12714                           <span class="op">TCF     </span> <a href="#4E58545243535052">NXTRCSPR</a>   -1                         <span class="co">#  FINISH EARLY, OR MORE TO DO</span>
+023708,000086: 
+023709,000087: 20,2725           15751                           <span class="op">TCF     </span> <a href="#454E44524353464C">ENDRCSFL</a>                              
+<a name="524353464A554D50"></a>023710,000088: 20,2726           12736        <span class="sm">RCSFJUMP</span>           <span class="op">TCF     </span> <a href="#464D31302F3131">FM10/11</a>                               
+023711,000089: 20,2727           12743                           <span class="op">TCF     </span> <a href="#464D392F3132">FM9/12</a>                                
+023712,000090: 20,2730           12750                           <span class="op">TCF     </span> <a href="#464D31332F3135">FM13/15</a>                               
+023713,000091: 20,2731           12755                           <span class="op">TCF     </span> <a href="#464D31342F3136">FM14/16</a>                               
+023714,000092: 20,2732           12762                           <span class="op">TCF     </span> <a href="#464D362F37">FM6/7</a>                                 
+023715,000093: 20,2733           12767                           <span class="op">TCF     </span> <a href="#464D312F33">FM1/3</a>                                 
+023716,000094: 20,2734           12774                           <span class="op">TCF     </span> <a href="#464D352F38">FM5/8</a>                                 
+023717,000095: 20,2735           13001                           <span class="op">TCF     </span> <a href="#464D322F34">FM2/4</a>                                 
+023718,000096: 
+<a name="464D31302F3131"></a>023719,000097: 20,2736           37750        <span class="sm">FM10/11 </span>           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495436">BIT6</a>                                  
+023720,000098: 20,2737           27502                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
+023721,000099: 20,2740           37752                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495434">BIT4</a>                                  
+023722,000100: 20,2741           27503                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
+023723,000101: 20,2742           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+023724,000102: 
+<a name="464D392F3132"></a>023725,000103: 20,2743           37751        <span class="sm">FM9/12  </span>           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495435">BIT5</a>                                  
+023726,000104: 
+023727,000105: 20,2744           27502                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
+023728,000106: 20,2745           37751                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495435">BIT5</a>                                  
+023729,000107: 20,2746           27503                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
+023730,000108: 20,2747           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+023731,000109: 
+<a name="464D31332F3135"></a>023732,000110: 20,2750           37747        <span class="sm">FM13/15 </span>           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495437">BIT7</a>                                  
+023733,000111: 20,2751           27502                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
+023734,000112: 20,2752           37753                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495433">BIT3</a>                                  
+023735,000113: 20,2753           27503                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
+023736,000114: 20,2754           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+023737,000115: 
+<a name="464D31342F3136"></a>023738,000116: 20,2755           37746        <span class="sm">FM14/16 </span>           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495438">BIT8</a>                                  
+023739,000117: 20,2756           27502                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
+023740,000118: 20,2757           37746                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495438">BIT8</a>                                  
+023741,000119: 20,2760           27503                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
+023742,000120: 20,2761           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+023743,000121: 
+<a name="464D362F37"></a>023744,000122: 20,2762           37752        <span class="sm">FM6/7   </span>           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495434">BIT4</a>                                  
+023745,000123: 20,2763           27502                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
+023746,000124: 20,2764           37755                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  
+023747,000125: 20,2765           27503                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
+023748,000126: 20,2766           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+023749,000127: 
+<a name="464D312F33"></a>023750,000128: 20,2767           37755        <span class="sm">FM1/3   </span>           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  
+023751,000129: 
 </pre>
 </span>
 </p>
@@ -261,26 +261,26 @@ Page 537
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023746,000131: 20,2770           27502                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
-023747,000132: 20,2771           37754                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495432">BIT2</a>                                  
-023748,000133: 20,2772           27503                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
-023749,000134: 20,2773           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-023750,000135: 
-<a name="464D352F38"></a>023751,000136: 20,2774           37753        <span class="sm">FM5/8   </span>           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495433">BIT3</a>                                  
-023752,000137: 20,2775           27502                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
-023753,000138: 20,2776           37750                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495436">BIT6</a>                                  
-023754,000139: 
-023755,000140: 20,2777           27503                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
-023756,000141: 20,3000           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-023757,000142: 
-<a name="464D322F34"></a>023758,000143: 20,3001           37754        <span class="sm">FM2/4   </span>           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495432">BIT2</a>                                  
-023759,000144: 20,3002           27502                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
-023760,000145: 20,3003           37747                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495437">BIT7</a>                                  
-023761,000146: 20,3004           27503                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
-023762,000147: 20,3005           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-023763,000148: 
-<a name="454E44524353464C"></a>023764,000149: 20,3006     5751               <span class="sm">ENDRCSFL</span>           <span class="ps">EQUALS  </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
-<a name="4E4F5354434847"></a>023765,000150: 20,3006     5751               <span class="sm">NOSTCHG </span>           <span class="ps">EQUALS  </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
+023753,000131: 20,2770           27502                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
+023754,000132: 20,2771           37754                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495432">BIT2</a>                                  
+023755,000133: 20,2772           27503                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
+023756,000134: 20,2773           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+023757,000135: 
+<a name="464D352F38"></a>023758,000136: 20,2774           37753        <span class="sm">FM5/8   </span>           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495433">BIT3</a>                                  
+023759,000137: 20,2775           27502                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
+023760,000138: 20,2776           37750                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495436">BIT6</a>                                  
+023761,000139: 
+023762,000140: 20,2777           27503                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
+023763,000141: 20,3000           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+023764,000142: 
+<a name="464D322F34"></a>023765,000143: 20,3001           37754        <span class="sm">FM2/4   </span>           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495432">BIT2</a>                                  
+023766,000144: 20,3002           27502                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
+023767,000145: 20,3003           37747                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495437">BIT7</a>                                  
+023768,000146: 20,3004           27503                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
+023769,000147: 20,3005           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+023770,000148: 
+<a name="454E44524353464C"></a>023771,000149: 20,3006     5751               <span class="sm">ENDRCSFL</span>           <span class="ps">EQUALS  </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
+<a name="4E4F5354434847"></a>023772,000150: 20,3006     5751               <span class="sm">NOSTCHG </span>           <span class="ps">EQUALS  </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
 
 End of include-file RCS_FAILURE_MONITOR.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

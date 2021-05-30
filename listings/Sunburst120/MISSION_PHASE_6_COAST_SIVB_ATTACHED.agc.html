@@ -95,19 +95,19 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-030319,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
-030320,000003:                                                                                                  <span class="co">## Filename:     MISSION_PHASE_6_COAST_SIVB_ATTACHED.agc</span>
-030321,000004:                                                                                                  <span class="co">## Purpose:      A module for revision 0 of BURST120 (Sunburst). It </span>
-030322,000005:                                                                                                  <span class="co">##               is part of the source code for the Lunar Module's</span>
-030323,000006:                                                                                                  <span class="co">##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
-030324,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
-030325,000008:                                                                                                  <span class="co">## Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
-030326,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
-030327,000010:                                                                                                  <span class="co">## Mod history:  2016-09-30 RSB  Created draft version.</span>
-030328,000011:                                                                                                  <span class="co">##               2016-10-25 MAS  Transcribed.</span>
-030329,000012:                                                                                                  <span class="co">##               2016-12-06 RSB  Comments proofed using octopus/ProoferComments,</span>
-030330,000013:                                                                                                  <span class="co">##                               no changes made.</span>
-030331,000014: 
+030325,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
+030326,000003:                                                                                                  <span class="co">## Filename:     MISSION_PHASE_6_COAST_SIVB_ATTACHED.agc</span>
+030327,000004:                                                                                                  <span class="co">## Purpose:      A module for revision 0 of BURST120 (Sunburst). It </span>
+030328,000005:                                                                                                  <span class="co">##               is part of the source code for the Lunar Module's</span>
+030329,000006:                                                                                                  <span class="co">##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
+030330,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
+030331,000008:                                                                                                  <span class="co">## Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
+030332,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
+030333,000010:                                                                                                  <span class="co">## Mod history:  2016-09-30 RSB  Created draft version.</span>
+030334,000011:                                                                                                  <span class="co">##               2016-10-25 MAS  Transcribed.</span>
+030335,000012:                                                                                                  <span class="co">##               2016-12-06 RSB  Comments proofed using octopus/ProoferComments,</span>
+030336,000013:                                                                                                  <span class="co">##                               no changes made.</span>
+030337,000014: 
 </pre>
 </span>
 </p>
@@ -123,56 +123,56 @@ Page 709
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-030333,000016:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION</span>
-030334,000017:                                                                                                  <span class="co">#     COAST SIVB ATTACHED</span>
-030335,000018: 
-030336,000019:                                                                                                  <span class="co">#  MOD NO   1      DATE - 4 NOV 66</span>
-030337,000020: 
-030338,000021:                                                                                                  <span class="co">#  MOD BY - OVERBAUGH</span>
-030339,000022:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION</span>
-030340,000023:                                                                                                  <span class="co">#     WHEN THE DV MONITOR DETECTS SIVB SHUTDOWN THE</span>
-030341,000024:                                                                                                  <span class="co">#     THRUST MISSION CONTROL PROGRAM INITIATES MP6.</span>
-030342,000025:                                                                                                  <span class="co">#     DURING THIS PHASE THE ABORT COMMAND MONITOR AND</span>
-030343,000026:                                                                                                  <span class="co">#     THE TUMBLE MONITOR ARE TERMINATED AND THE C-BAND</span>
-030344,000027:                                                                                                  <span class="co">#     XPONDER IS SET TO ON*.  WHEN THRUST DUE TO</span>
-030345,000028:                                                                                                  <span class="co">#     VENTING BECOMES NEGLIGIBLE READING OF</span>
-030346,000029:                                                                                                  <span class="co">#     THE PIPAS IS TERMINATED.</span>
-030347,000030: 
-030348,000031:                                                                                                  <span class="co">#  NORMAL EXIT MODES -</span>
-030349,000032:                                                                                                  <span class="co">#     TC   TASKOVER</span>
-030350,000033: 
-030351,000034:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED</span>
-030352,000035:                                                                                                  <span class="co">#     MP6TO7</span>
-030353,000036: 
-030354,000037:                                                                                                  <span class="co">#  OUTPUT</span>
-030355,000038:                                                                                                  <span class="co">#     UPDATE MODREG</span>
-030356,000039:                                                                                                  <span class="co">#     TERMINATE ABORT COMMAND MONITOR</span>
-030357,000040:                                                                                                  <span class="co">#     TERMINATE TUMBLE MONITOR</span>
-030358,000041:                                                                                                  <span class="co">#     MISSION SCHEDULING REGISTERS SET TO CALL MP7</span>
-030359,000042: 
-030360,000043:                                                                                                  <span class="co">#  DEBRIS</span>
-030361,000044:                                                                                                  <span class="co">#     CENTRALS,A,Q,Z</span>
-030362,000045: 
-030363,000046:                                                                                                  <span class="co">#  SUBROUTINES CALLED</span>
-030364,000047:                                                                                                  <span class="co">#     EXECUTIVE(ENDOFJOB)</span>
-030365,000048:                                                                                                  <span class="co">#     WAITLIST</span>
-030366,000049:                                                                                                  <span class="co">#     LONGCALL</span>
-030367,000050:                                                                                                  <span class="co">#     NEWMODEX</span>
-030368,000051:                                                                                                  <span class="co">#     1LMP</span>
-030369,000052:                                                                                                  <span class="co">#     FLAG1DWN</span>
-030370,000053:                                                                                                  <span class="co">#     FLAG2DWN</span>
-030371,000054:                                                                                                  <span class="co">#     SCHEDULE ENTRY ROUTINE(MPENTRY)</span>
-030372,000055: 
-030373,000056: 27,2504                                           <span class="ps">BANK    </span> 27                                    
-030374,000057: 27,2504  E3,1772                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D5036544F37">MP6TO7</a>                                
-030375,000058: 
-<a name="4D50364A4F42"></a>030376,000059: 27,2504           04117        <span class="sm">MP6JOB  </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              <span class="co">#  UPDATE MODREG</span>
-030377,000060: 27,2505           00013                           <span class="ps">OCT     </span> 13                                    
-030378,000061: 
-030379,000062: 27,2506           36306                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#534958">SIX</a>                                   
-030380,000063: 27,2507           54764                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50484153454E554D">PHASENUM</a>                              
-030381,000064: 
-030382,000065: 27,2510           04161                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
+030339,000016:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION</span>
+030340,000017:                                                                                                  <span class="co">#     COAST SIVB ATTACHED</span>
+030341,000018: 
+030342,000019:                                                                                                  <span class="co">#  MOD NO   1      DATE - 4 NOV 66</span>
+030343,000020: 
+030344,000021:                                                                                                  <span class="co">#  MOD BY - OVERBAUGH</span>
+030345,000022:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION</span>
+030346,000023:                                                                                                  <span class="co">#     WHEN THE DV MONITOR DETECTS SIVB SHUTDOWN THE</span>
+030347,000024:                                                                                                  <span class="co">#     THRUST MISSION CONTROL PROGRAM INITIATES MP6.</span>
+030348,000025:                                                                                                  <span class="co">#     DURING THIS PHASE THE ABORT COMMAND MONITOR AND</span>
+030349,000026:                                                                                                  <span class="co">#     THE TUMBLE MONITOR ARE TERMINATED AND THE C-BAND</span>
+030350,000027:                                                                                                  <span class="co">#     XPONDER IS SET TO ON*.  WHEN THRUST DUE TO</span>
+030351,000028:                                                                                                  <span class="co">#     VENTING BECOMES NEGLIGIBLE READING OF</span>
+030352,000029:                                                                                                  <span class="co">#     THE PIPAS IS TERMINATED.</span>
+030353,000030: 
+030354,000031:                                                                                                  <span class="co">#  NORMAL EXIT MODES -</span>
+030355,000032:                                                                                                  <span class="co">#     TC   TASKOVER</span>
+030356,000033: 
+030357,000034:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED</span>
+030358,000035:                                                                                                  <span class="co">#     MP6TO7</span>
+030359,000036: 
+030360,000037:                                                                                                  <span class="co">#  OUTPUT</span>
+030361,000038:                                                                                                  <span class="co">#     UPDATE MODREG</span>
+030362,000039:                                                                                                  <span class="co">#     TERMINATE ABORT COMMAND MONITOR</span>
+030363,000040:                                                                                                  <span class="co">#     TERMINATE TUMBLE MONITOR</span>
+030364,000041:                                                                                                  <span class="co">#     MISSION SCHEDULING REGISTERS SET TO CALL MP7</span>
+030365,000042: 
+030366,000043:                                                                                                  <span class="co">#  DEBRIS</span>
+030367,000044:                                                                                                  <span class="co">#     CENTRALS,A,Q,Z</span>
+030368,000045: 
+030369,000046:                                                                                                  <span class="co">#  SUBROUTINES CALLED</span>
+030370,000047:                                                                                                  <span class="co">#     EXECUTIVE(ENDOFJOB)</span>
+030371,000048:                                                                                                  <span class="co">#     WAITLIST</span>
+030372,000049:                                                                                                  <span class="co">#     LONGCALL</span>
+030373,000050:                                                                                                  <span class="co">#     NEWMODEX</span>
+030374,000051:                                                                                                  <span class="co">#     1LMP</span>
+030375,000052:                                                                                                  <span class="co">#     FLAG1DWN</span>
+030376,000053:                                                                                                  <span class="co">#     FLAG2DWN</span>
+030377,000054:                                                                                                  <span class="co">#     SCHEDULE ENTRY ROUTINE(MPENTRY)</span>
+030378,000055: 
+030379,000056: 27,2504                                           <span class="ps">BANK    </span> 27                                    
+030380,000057: 27,2504  E3,1772                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D5036544F37">MP6TO7</a>                                
+030381,000058: 
+<a name="4D50364A4F42"></a>030382,000059: 27,2504           04117        <span class="sm">MP6JOB  </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              <span class="co">#  UPDATE MODREG</span>
+030383,000060: 27,2505           00013                           <span class="ps">OCT     </span> 13                                    
+030384,000061: 
+030385,000062: 27,2506           36306                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#534958">SIX</a>                                   
+030386,000063: 27,2507           54764                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50484153454E554D">PHASENUM</a>                              
+030387,000064: 
+030388,000065: 27,2510           04161                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
 </pre>
 </span>
 </p>
@@ -188,57 +188,57 @@ Page 710
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-030384,000067: 27,2511           47012                           <span class="ps">OCT     </span> 47012                                 
-030385,000068: 27,2512           13560                           <span class="ps">DEC     </span> 6000       B-14                       
-030386,000069: 27,2513  E3,1772                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D5036544F37">MP6TO7</a>                                
-030387,000070: 27,2513           02526 56063                     <span class="ps">2CADR   </span> <a href="#4D503641">MP6A</a>                                  
-030388,000071: 
-030389,000072: 27,2515           37756                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495436">BIT6</a>                                  
-030390,000073: 27,2516           04105                           <span class="op">TC      </span> <a href="RESTART_TABLES_AND_RESTARTS_ROUTINE.agc.html#5345545253545254">SETRSTRT</a>                              <span class="co">#  SET RESTART FLAG</span>
-030391,000074: 
-030392,000075: 27,2517           32525                           <span class="op">CAF     </span> <a href="#44454336303030">DEC6000</a>                               <span class="co">#  INITIALIZE 1 MIN DELAY</span>
-030393,000076: 27,2520           00004                           <span class="op">INHINT  </span>                                       
-030394,000077: 27,2521           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-030395,000078: 27,2522  E3,1772                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D5036544F37">MP6TO7</a>                                
-030396,000079: 27,2522           02526 56063                     <span class="ps">2CADR   </span> <a href="#4D503641">MP6A</a>                                  
-030397,000080: 
-030398,000081: 27,2524           15567                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-<a name="44454336303030"></a>030399,000082: 27,2525           13560        <span class="sm">DEC6000 </span>           <span class="ps">DEC     </span> 6000       B-14                       
-030400,000083: 
-<a name="4D503641"></a>030401,000084: 27,2526           06076        <span class="sm">MP6A    </span>           <span class="op">TC      </span> <a href="206_SERVICE_ROUTINES.agc.html#464C41473244574E">FLAG2DWN</a>                              <span class="co">#  TERMINATE ABORT COMMAND MONITOR</span>
-030402,000085: 27,2527           00400                           <span class="ps">OCT     </span> 00400                                 <span class="co">#  BIT 9</span>
-030403,000086: 
-030404,000087:                                                                                                  <span class="co">#                                    TERMINATE TUMBLE MONITOR</span>
-030405,000088: 
-030406,000089: 27,2530           06067                           <span class="op">TC      </span> <a href="206_SERVICE_ROUTINES.agc.html#464C41473144574E">FLAG1DWN</a>                              
-030407,000090: 27,2531           20000                           <span class="ps">OCT     </span> 20000                                 <span class="co">#  BIT14</span>
-<a name="4D503642"></a>030408,000091: 27,2532           04161        <span class="sm">MP6B    </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
-030409,000092: 27,2533           27042                           <span class="ps">OCT     </span> 27042                                 
-030410,000093: 27,2534           75232                           <span class="ps">-GENADR </span> <a href="#363536534543">656SEC</a>                                
-030411,000094: 27,2535  E3,1772                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D5036544F37">MP6TO7</a>                                
-030412,000095: 27,2535           02547 56063                     <span class="ps">2CADR   </span> <a href="#434258504E4452">CBXPNDR</a>                               
-030413,000096:                                                                                                  <span class="co">#  REF   1       27,2536   56063 1  CALL C-BAND TRANSPONDER-ON*</span>
-030414,000097: 
-030415,000098: 27,2537           00006                           <span class="op">EXTEND  </span>                                       
-030416,000099: 27,2540           32546                           <span class="op">DCA     </span> <a href="#363536534543">656SEC</a>                                <span class="co">#  LONGCALL 10 M 56 S</span>
-030417,000100: 27,2541           05741                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#4C4F4E4743414C4C">LONGCALL</a>                              <span class="co">#  FOR C-BAND TRANSPONDER-ON*</span>
-030418,000101: 27,2542  E3,1772                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D5036544F37">MP6TO7</a>                                
-030419,000102: 27,2542           02547 56063                     <span class="ps">2CADR   </span> <a href="#434258504E4452">CBXPNDR</a>                               
-030420,000103: 
-030421,000104: 27,2544           15727                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-<a name="363536534543"></a>030422,000105: 27,2545           00004 00100  <span class="sm">656SEC  </span>           <span class="ps">2DEC    </span> 65600      B-28                       
-030423,000106:                                                                                                  <span class="co">#                27,2546   00100 0  C-BAND TRANSPONDER-ON*</span>
-030424,000107: 
-<a name="434258504E4452"></a>030425,000108: 27,2547           05060        <span class="sm">CBXPNDR </span>           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D50">1LMP</a>                                  
-030426,000109: 27,2550           00152                           <span class="ps">DEC     </span> 106        B-14                       
-030427,000110: 
-030428,000111: 27,2551           04141                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#3250485343484E47">2PHSCHNG</a>                              
-030429,000112: 27,2552           00002                           <span class="ps">OCT     </span> 00002                                 
-030430,000113: 27,2553           05013                           <span class="ps">OCT     </span> 05013                                 
-030431,000114: 27,2554           77777                           <span class="ps">OCT     </span> 77777                                 
-030432,000115: 
-030433,000116:                                                                                                  <span class="co">#                                    CALL SCHEDULE ENTRY ROUTINE</span>
-030434,000117: 
+030390,000067: 27,2511           47012                           <span class="ps">OCT     </span> 47012                                 
+030391,000068: 27,2512           13560                           <span class="ps">DEC     </span> 6000       B-14                       
+030392,000069: 27,2513  E3,1772                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D5036544F37">MP6TO7</a>                                
+030393,000070: 27,2513           02526 56063                     <span class="ps">2CADR   </span> <a href="#4D503641">MP6A</a>                                  
+030394,000071: 
+030395,000072: 27,2515           37756                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495436">BIT6</a>                                  
+030396,000073: 27,2516           04105                           <span class="op">TC      </span> <a href="RESTART_TABLES_AND_RESTARTS_ROUTINE.agc.html#5345545253545254">SETRSTRT</a>                              <span class="co">#  SET RESTART FLAG</span>
+030397,000074: 
+030398,000075: 27,2517           32525                           <span class="op">CAF     </span> <a href="#44454336303030">DEC6000</a>                               <span class="co">#  INITIALIZE 1 MIN DELAY</span>
+030399,000076: 27,2520           00004                           <span class="op">INHINT  </span>                                       
+030400,000077: 27,2521           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+030401,000078: 27,2522  E3,1772                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D5036544F37">MP6TO7</a>                                
+030402,000079: 27,2522           02526 56063                     <span class="ps">2CADR   </span> <a href="#4D503641">MP6A</a>                                  
+030403,000080: 
+030404,000081: 27,2524           15567                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+<a name="44454336303030"></a>030405,000082: 27,2525           13560        <span class="sm">DEC6000 </span>           <span class="ps">DEC     </span> 6000       B-14                       
+030406,000083: 
+<a name="4D503641"></a>030407,000084: 27,2526           06076        <span class="sm">MP6A    </span>           <span class="op">TC      </span> <a href="206_SERVICE_ROUTINES.agc.html#464C41473244574E">FLAG2DWN</a>                              <span class="co">#  TERMINATE ABORT COMMAND MONITOR</span>
+030408,000085: 27,2527           00400                           <span class="ps">OCT     </span> 00400                                 <span class="co">#  BIT 9</span>
+030409,000086: 
+030410,000087:                                                                                                  <span class="co">#                                    TERMINATE TUMBLE MONITOR</span>
+030411,000088: 
+030412,000089: 27,2530           06067                           <span class="op">TC      </span> <a href="206_SERVICE_ROUTINES.agc.html#464C41473144574E">FLAG1DWN</a>                              
+030413,000090: 27,2531           20000                           <span class="ps">OCT     </span> 20000                                 <span class="co">#  BIT14</span>
+<a name="4D503642"></a>030414,000091: 27,2532           04161        <span class="sm">MP6B    </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
+030415,000092: 27,2533           27042                           <span class="ps">OCT     </span> 27042                                 
+030416,000093: 27,2534           75232                           <span class="ps">-GENADR </span> <a href="#363536534543">656SEC</a>                                
+030417,000094: 27,2535  E3,1772                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D5036544F37">MP6TO7</a>                                
+030418,000095: 27,2535           02547 56063                     <span class="ps">2CADR   </span> <a href="#434258504E4452">CBXPNDR</a>                               
+030419,000096:                                                                                                  <span class="co">#  REF   1       27,2536   56063 1  CALL C-BAND TRANSPONDER-ON*</span>
+030420,000097: 
+030421,000098: 27,2537           00006                           <span class="op">EXTEND  </span>                                       
+030422,000099: 27,2540           32546                           <span class="op">DCA     </span> <a href="#363536534543">656SEC</a>                                <span class="co">#  LONGCALL 10 M 56 S</span>
+030423,000100: 27,2541           05741                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#4C4F4E4743414C4C">LONGCALL</a>                              <span class="co">#  FOR C-BAND TRANSPONDER-ON*</span>
+030424,000101: 27,2542  E3,1772                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D5036544F37">MP6TO7</a>                                
+030425,000102: 27,2542           02547 56063                     <span class="ps">2CADR   </span> <a href="#434258504E4452">CBXPNDR</a>                               
+030426,000103: 
+030427,000104: 27,2544           15727                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+<a name="363536534543"></a>030428,000105: 27,2545           00004 00100  <span class="sm">656SEC  </span>           <span class="ps">2DEC    </span> 65600      B-28                       
+030429,000106:                                                                                                  <span class="co">#                27,2546   00100 0  C-BAND TRANSPONDER-ON*</span>
+030430,000107: 
+<a name="434258504E4452"></a>030431,000108: 27,2547           05060        <span class="sm">CBXPNDR </span>           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D50">1LMP</a>                                  
+030432,000109: 27,2550           00152                           <span class="ps">DEC     </span> 106        B-14                       
+030433,000110: 
+030434,000111: 27,2551           04141                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#3250485343484E47">2PHSCHNG</a>                              
+030435,000112: 27,2552           00002                           <span class="ps">OCT     </span> 00002                                 
+030436,000113: 27,2553           05013                           <span class="ps">OCT     </span> 05013                                 
+030437,000114: 27,2554           77777                           <span class="ps">OCT     </span> 77777                                 
+030438,000115: 
+030439,000116:                                                                                                  <span class="co">#                                    CALL SCHEDULE ENTRY ROUTINE</span>
+030440,000117: 
 </pre>
 </span>
 </p>
@@ -254,20 +254,20 @@ Page 711
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-030436,000119: 27,2555           05126                           <span class="op">TC      </span> <a href="AS206_MISSION_SCHEDULING_PACKAGE.agc.html#4D50454E545259">MPENTRY</a>                               
-030437,000120: 27,2556           00001                           <span class="ps">DEC     </span> 1          B-14                       <span class="co">#  J=1</span>
-030438,000121: 27,2557           00007                           <span class="ps">DEC     </span> 7          B-14                       <span class="co">#  MP=7</span>
-030439,000122: 27,2560           01772                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D5036544F37">MP6TO7</a>                                <span class="co">#  DT = 28 MIN</span>
-030440,000123: 
-030441,000124:                                                                                                  <span class="co">#                                    TERMINATE READING OF PIPAS.</span>
-030442,000125:                                                                                                  <span class="co">#                                    THRUST DUE TO VENTING AFTER SIVB</span>
-030443,000126:                                                                                                  <span class="co">#                                    SHUTDOWN HAS BECOME NEGLIGIBLE.</span>
-030444,000127: 
-030445,000128: 27,2561           06067                           <span class="op">TC      </span> <a href="206_SERVICE_ROUTINES.agc.html#464C41473144574E">FLAG1DWN</a>                              <span class="co">#  TERMINATE SERVICER</span>
-030446,000129: 27,2562           00001                           <span class="ps">OCT     </span> 1                                     
-030447,000130: 27,2563           15727                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-030448,000131: 
-030449,000132:                                                                                                  <span class="co">#  END OF MISSION PHASE 6</span>
+030442,000119: 27,2555           05126                           <span class="op">TC      </span> <a href="AS206_MISSION_SCHEDULING_PACKAGE.agc.html#4D50454E545259">MPENTRY</a>                               
+030443,000120: 27,2556           00001                           <span class="ps">DEC     </span> 1          B-14                       <span class="co">#  J=1</span>
+030444,000121: 27,2557           00007                           <span class="ps">DEC     </span> 7          B-14                       <span class="co">#  MP=7</span>
+030445,000122: 27,2560           01772                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D5036544F37">MP6TO7</a>                                <span class="co">#  DT = 28 MIN</span>
+030446,000123: 
+030447,000124:                                                                                                  <span class="co">#                                    TERMINATE READING OF PIPAS.</span>
+030448,000125:                                                                                                  <span class="co">#                                    THRUST DUE TO VENTING AFTER SIVB</span>
+030449,000126:                                                                                                  <span class="co">#                                    SHUTDOWN HAS BECOME NEGLIGIBLE.</span>
+030450,000127: 
+030451,000128: 27,2561           06067                           <span class="op">TC      </span> <a href="206_SERVICE_ROUTINES.agc.html#464C41473144574E">FLAG1DWN</a>                              <span class="co">#  TERMINATE SERVICER</span>
+030452,000129: 27,2562           00001                           <span class="ps">OCT     </span> 1                                     
+030453,000130: 27,2563           15727                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+030454,000131: 
+030455,000132:                                                                                                  <span class="co">#  END OF MISSION PHASE 6</span>
 
 End of include-file MISSION_PHASE_6_COAST_SIVB_ATTACHED.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

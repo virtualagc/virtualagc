@@ -107,24 +107,25 @@ project's GitHub repository</a>.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-031197,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-031198,000003:                                                                                                  <span class="co">## Filename:    R30.agc</span>
-031199,000004:                                                                                                  <span class="co">## Purpose:     A section of LUM69 revision 2.</span>
-031200,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the flown</span>
-031201,000006:                                                                                                  <span class="co">##              version of the flight software for the Lunar Module's (LM)</span>
-031202,000007:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 10. The code has</span>
-031203,000008:                                                                                                  <span class="co">##              been recreated from a copy of Luminary revsion 069, using</span>
-031204,000009:                                                                                                  <span class="co">##              changes present in Luminary 099 which were described in</span>
-031205,000010:                                                                                                  <span class="co">##              Luminary memos 75 and 78. The code has been adapted such</span>
-031206,000011:                                                                                                  <span class="co">##              that the resulting bugger words exactly match those specified</span>
-031207,000012:                                                                                                  <span class="co">##              for LUM69 revision 2 in NASA drawing 2021152B, which gives</span>
-031208,000013:                                                                                                  <span class="co">##              relatively high confidence that the reconstruction is correct.</span>
-031209,000014:                                                                                                  <span class="co">## Reference:   pp. 720-730</span>
-031210,000015:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-031211,000016:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-031212,000017:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-031213,000018:                                                                                                  <span class="co">## Mod history: 2019-07-27 MAS  Created from Luminary 69.</span>
-031214,000019: 
+031212,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+031213,000003:                                                                                                  <span class="co">## Filename:    R30.agc</span>
+031214,000004:                                                                                                  <span class="co">## Purpose:     A section of LUM69 revision 2.</span>
+031215,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the flown</span>
+031216,000006:                                                                                                  <span class="co">##              version of the flight software for the Lunar Module's (LM)</span>
+031217,000007:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 10. The code has</span>
+031218,000008:                                                                                                  <span class="co">##              been recreated from a copy of Luminary revsion 069, using</span>
+031219,000009:                                                                                                  <span class="co">##              changes present in Luminary 099 which were described in</span>
+031220,000010:                                                                                                  <span class="co">##              Luminary memos 75 and 78. The code has been adapted such</span>
+031221,000011:                                                                                                  <span class="co">##              that the resulting bugger words exactly match those specified</span>
+031222,000012:                                                                                                  <span class="co">##              for LUM69 revision 2 in NASA drawing 2021152B, which gives</span>
+031223,000013:                                                                                                  <span class="co">##              relatively high confidence that the reconstruction is correct.</span>
+031224,000014:                                                                                                  <span class="co">## Reference:   pp. 720-730</span>
+031225,000015:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+031226,000016:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+031227,000017:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+031228,000018:                                                                                                  <span class="co">## Mod history: 2019-07-27 MAS  Created from Luminary 69.</span>
+031229,000019:                                                                                                  <span class="co">##              2021-05-30 ABS  TICKTIFF -> TICKTFF</span>
+031230,000020: 
 </pre>
 </span>
 </p>
@@ -140,57 +141,57 @@ Page 720
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-031216,000021:                                                                                                  <span class="co">#  SUBROUTINE NAME:  V82CALL</span>
-031217,000022:                                                                                                  <span class="co">#  MOD NO: 0                                                             DATE: 16 FEB 67</span>
-031218,000023:                                                                                                  <span class="co">#  MOD BY: RR BAIRNSFATHER                                               LOG SECTION:  R30</span>
-031219,000024:                                                                                                  <span class="co">#  MOD NO: 1     MOD BY:  RR BAIRNSFATHER        DATE: 11 APR 67         SR30.1 CHANGED TO ALLOW MONITOR OPERN</span>
-031220,000025:                                                                                                  <span class="co">#  MOD NO: 2     MOD BY  ALONSO                  DATE: 11 DEC 67         VB82 PROGRAM REWRITTEN</span>
-031221,000026:                                                                                                  <span class="co">#  MOD NO: 3     MOD BY  ALONSO                  DATE: 26 MAR 68         PROG MOD TO HANDLE DIF EARTH/MOON SCALE</span>
-031222,000027: 
-031223,000028:                                                                                                  <span class="co">#  NEW FUNCTIONAL DESCRIPTION:   CALLED BY VERB 82 ENTER.  PRIORITY 10</span>
-031224,000029:                                                                                                  <span class="co">#  USED THROUGHOUT.              CALCULATE AND DISPLAY ORBITAL PARAMETERS</span>
-031225,000030: 
-031226,000031:                                                                                                  <span class="co">#  1.    IF AVERAGE G IS OFF:</span>
-031227,000032:                                                                                                  <span class="co">#                FLASH DISPLAY V04N06.  R2 INDICATES WHICH SHIP'S STATE VECTOR IS</span>
-031228,000033:                                                                                                  <span class="co">#                        TO BE UPDATED.  INITIAL CHOICE IS THIS SHIP (R2=1).  ASTRONAUT</span>
-031229,000034:                                                                                                  <span class="co">#                        CAN CHANGE TO OTHER SHIP BY V22EXE, WHERE X NOT EQ 1.</span>
-031230,000035:                                                                                                  <span class="co">#                SELECTED STATE VECTOR UPDATED BY THISPREC (OTHPREC).</span>
-031231,000036:                                                                                                  <span class="co">#                CALLS SR30.1 (WHICH CALLS TFFCONMU + TFFRP/RA) TO CALCULATE</span>
-031232,000037:                                                                                                  <span class="co">#                        RPER (PERIGEE RADIUS), RAPO (APOGEE RADIUS), HPER (PERIGEE</span>
-031233,000038:                                                                                                  <span class="co">#                        HEIGHT ABOVE LAUNCH PAD OR LUNAR LANDING SITE), HAPO (APOGEE</span>
-031234,000039:                                                                                                  <span class="co">#                        HEIGHT AS ABOVE), TPER (TIME TO PERIGEE), TFF (TIME TO</span>
-031235,000040:                                                                                                  <span class="co">#                        INTERSECT 300 KFT ABOVE PAD OR 35KFT ABOVE LANDING SITE).</span>
-031236,000041:                                                                                                  <span class="co">#                FLASH MONITOR V16N44 (HAPO, HPER, TFF).  TFF IS -59M59S IF IT WAS</span>
-031237,000042:                                                                                                  <span class="co">#                        NOT COMPUTABLE, OTHERWISE IT INCREMENTS ONCE PER SECOND.</span>
-031238,000043:                                                                                                  <span class="co">#                        ASTRONAUT HAS OPTION TO MONITOR TPER BY KEYING IN N 32 E.</span>
-031239,000044:                                                                                                  <span class="co">#                        DISPLAY IS IN HMS, IS NEGATIVE (AS WAS TFF), AND INCREMENTS</span>
-031240,000045:                                                                                                  <span class="co">#                        ONCE PER SECOND ONLY IF TFF DISPLAY WAS -59M59S.</span>
-031241,000046:                                                                                                  <span class="co">#        2.      IF AVERAGE G IS ON:</span>
-031242,000047:                                                                                                  <span class="co">#                        CALLS SR30.1 APPROX EVERY TWO SECS.  STATE VECTOR IS ALWAYS</span>
-031243,000048:                                                                                                  <span class="co">#                                FOR THIS VEHICLE.  V82 DOES NOT DISTURB STATE VECTOR.  RESULTS</span>
-031244,000049:                                                                                                  <span class="co">#                                OF SR30.1 ARE RAPO, RPER, HAPO, HPER, TPER, TFF.</span>
-031245,000050:                                                                                                  <span class="co">#                        FLASH MONITOR V16N44 (HAPO, HPER, TFF).</span>
-031246,000051:                                                                                                  <span class="co">#        ADDENDUM:  HAPO AND HPER SHOULD BE CHANGED TO READ HAPOX AND HPERX IN THE</span>
-031247,000052:                                                                                                  <span class="co">#                ABOVE REMARKS.</span>
-031248,000053: 
-031249,000054:                                                                                                  <span class="co">#  CALLING SEQUENCE: VERB 82 ENTER.</span>
-031250,000055: 
-031251,000056:                                                                                                  <span class="co">#  SUBROUTINES CALLED:   SR30.1, GOXDSPF</span>
-031252,000057:                                                                                                  <span class="co">#                        MAYBE - THISPREC, OTHPREC, LOADTIME, DELRSPL</span>
-031253,000058: 
-031254,000059:                                                                                                  <span class="co">#  NORMAL EXIT MODES:  TC ENDEXT</span>
-031255,000060: 
-031256,000061:                                                                                                  <span class="co">#  ALARMS:  NONE</span>
-031257,000062: 
-031258,000063:                                                                                                  <span class="co">#  OUTPUT:       HAPOX   (-29) M</span>
-031259,000064:                                                                                                  <span class="co">#                HPERX   (-29) M</span>
-031260,000065:                                                                                                  <span class="co">#                RAPO    (-29) M EARTH</span>
-031261,000066:                                                                                                  <span class="co">#                        (-27) M MOON</span>
-031262,000067:                                                                                                  <span class="co">#                RPER    (-29) M EARTH</span>
-031263,000068:                                                                                                  <span class="co">#                        (-27) M MOON</span>
-031264,000069:                                                                                                  <span class="co">#                TFF     (-28) CS        CONTAINS NEGATIVE QUANTITY</span>
-031265,000070:                                                                                                  <span class="co">#                -TPER   (-28) CS        CONTAINS NEGATIVE QUANTITY</span>
-031266,000071: 
+031232,000022:                                                                                                  <span class="co">#  SUBROUTINE NAME:  V82CALL</span>
+031233,000023:                                                                                                  <span class="co">#  MOD NO: 0                                                             DATE: 16 FEB 67</span>
+031234,000024:                                                                                                  <span class="co">#  MOD BY: RR BAIRNSFATHER                                               LOG SECTION:  R30</span>
+031235,000025:                                                                                                  <span class="co">#  MOD NO: 1     MOD BY:  RR BAIRNSFATHER        DATE: 11 APR 67         SR30.1 CHANGED TO ALLOW MONITOR OPERN</span>
+031236,000026:                                                                                                  <span class="co">#  MOD NO: 2     MOD BY  ALONSO                  DATE: 11 DEC 67         VB82 PROGRAM REWRITTEN</span>
+031237,000027:                                                                                                  <span class="co">#  MOD NO: 3     MOD BY  ALONSO                  DATE: 26 MAR 68         PROG MOD TO HANDLE DIF EARTH/MOON SCALE</span>
+031238,000028: 
+031239,000029:                                                                                                  <span class="co">#  NEW FUNCTIONAL DESCRIPTION:   CALLED BY VERB 82 ENTER.  PRIORITY 10</span>
+031240,000030:                                                                                                  <span class="co">#  USED THROUGHOUT.              CALCULATE AND DISPLAY ORBITAL PARAMETERS</span>
+031241,000031: 
+031242,000032:                                                                                                  <span class="co">#  1.    IF AVERAGE G IS OFF:</span>
+031243,000033:                                                                                                  <span class="co">#                FLASH DISPLAY V04N06.  R2 INDICATES WHICH SHIP'S STATE VECTOR IS</span>
+031244,000034:                                                                                                  <span class="co">#                        TO BE UPDATED.  INITIAL CHOICE IS THIS SHIP (R2=1).  ASTRONAUT</span>
+031245,000035:                                                                                                  <span class="co">#                        CAN CHANGE TO OTHER SHIP BY V22EXE, WHERE X NOT EQ 1.</span>
+031246,000036:                                                                                                  <span class="co">#                SELECTED STATE VECTOR UPDATED BY THISPREC (OTHPREC).</span>
+031247,000037:                                                                                                  <span class="co">#                CALLS SR30.1 (WHICH CALLS TFFCONMU + TFFRP/RA) TO CALCULATE</span>
+031248,000038:                                                                                                  <span class="co">#                        RPER (PERIGEE RADIUS), RAPO (APOGEE RADIUS), HPER (PERIGEE</span>
+031249,000039:                                                                                                  <span class="co">#                        HEIGHT ABOVE LAUNCH PAD OR LUNAR LANDING SITE), HAPO (APOGEE</span>
+031250,000040:                                                                                                  <span class="co">#                        HEIGHT AS ABOVE), TPER (TIME TO PERIGEE), TFF (TIME TO</span>
+031251,000041:                                                                                                  <span class="co">#                        INTERSECT 300 KFT ABOVE PAD OR 35KFT ABOVE LANDING SITE).</span>
+031252,000042:                                                                                                  <span class="co">#                FLASH MONITOR V16N44 (HAPO, HPER, TFF).  TFF IS -59M59S IF IT WAS</span>
+031253,000043:                                                                                                  <span class="co">#                        NOT COMPUTABLE, OTHERWISE IT INCREMENTS ONCE PER SECOND.</span>
+031254,000044:                                                                                                  <span class="co">#                        ASTRONAUT HAS OPTION TO MONITOR TPER BY KEYING IN N 32 E.</span>
+031255,000045:                                                                                                  <span class="co">#                        DISPLAY IS IN HMS, IS NEGATIVE (AS WAS TFF), AND INCREMENTS</span>
+031256,000046:                                                                                                  <span class="co">#                        ONCE PER SECOND ONLY IF TFF DISPLAY WAS -59M59S.</span>
+031257,000047:                                                                                                  <span class="co">#        2.      IF AVERAGE G IS ON:</span>
+031258,000048:                                                                                                  <span class="co">#                        CALLS SR30.1 APPROX EVERY TWO SECS.  STATE VECTOR IS ALWAYS</span>
+031259,000049:                                                                                                  <span class="co">#                                FOR THIS VEHICLE.  V82 DOES NOT DISTURB STATE VECTOR.  RESULTS</span>
+031260,000050:                                                                                                  <span class="co">#                                OF SR30.1 ARE RAPO, RPER, HAPO, HPER, TPER, TFF.</span>
+031261,000051:                                                                                                  <span class="co">#                        FLASH MONITOR V16N44 (HAPO, HPER, TFF).</span>
+031262,000052:                                                                                                  <span class="co">#        ADDENDUM:  HAPO AND HPER SHOULD BE CHANGED TO READ HAPOX AND HPERX IN THE</span>
+031263,000053:                                                                                                  <span class="co">#                ABOVE REMARKS.</span>
+031264,000054: 
+031265,000055:                                                                                                  <span class="co">#  CALLING SEQUENCE: VERB 82 ENTER.</span>
+031266,000056: 
+031267,000057:                                                                                                  <span class="co">#  SUBROUTINES CALLED:   SR30.1, GOXDSPF</span>
+031268,000058:                                                                                                  <span class="co">#                        MAYBE - THISPREC, OTHPREC, LOADTIME, DELRSPL</span>
+031269,000059: 
+031270,000060:                                                                                                  <span class="co">#  NORMAL EXIT MODES:  TC ENDEXT</span>
+031271,000061: 
+031272,000062:                                                                                                  <span class="co">#  ALARMS:  NONE</span>
+031273,000063: 
+031274,000064:                                                                                                  <span class="co">#  OUTPUT:       HAPOX   (-29) M</span>
+031275,000065:                                                                                                  <span class="co">#                HPERX   (-29) M</span>
+031276,000066:                                                                                                  <span class="co">#                RAPO    (-29) M EARTH</span>
+031277,000067:                                                                                                  <span class="co">#                        (-27) M MOON</span>
+031278,000068:                                                                                                  <span class="co">#                RPER    (-29) M EARTH</span>
+031279,000069:                                                                                                  <span class="co">#                        (-27) M MOON</span>
+031280,000070:                                                                                                  <span class="co">#                TFF     (-28) CS        CONTAINS NEGATIVE QUANTITY</span>
+031281,000071:                                                                                                  <span class="co">#                -TPER   (-28) CS        CONTAINS NEGATIVE QUANTITY</span>
+031282,000072: 
 </pre>
 </span>
 </p>
@@ -206,53 +207,53 @@ Page 721
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-031268,000073:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED:  STATE VECTOR.</span>
-031269,000074: 
-031270,000075:                                                                                                  <span class="co">#  DEBRIS:       QPRET, RONE, VONE, TFF/RTMU, HPERMIN, RPADTEM, V82EMFLG.</span>
-031271,000076:                                                                                                  <span class="co">#                MAYBE:  TSTART82, V82FLAGS, TDEC1.</span>
-031272,000077: 
-031273,000078: 13,2351  E4,1517                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4841504F58">HAPOX</a>                                 
-031274,000079: 31,2172                                           <span class="ps">BANK    </span> 31                                    
-031275,000080: 22,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#5233304C4F43">R30LOC</a>                                
-031276,000081: 22,2000                                           <span class="ps">BANK    </span>                                       
-031277,000082: 22,3242                                           <span class="ps">COUNT*  </span> $$/R30                                
-031278,000083: 
-<a name="56383243414C4C"></a>031279,000084: 22,3242           06036        <span class="sm">V82CALL </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-031280,000085: 22,3243           52014                           <span class="in">BON     </span> <span class="in">GOTO      </span>                            
-031281,000086: 22,3244           03712                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#41564547464C4147">AVEGFLAG</a>                              
-031282,000087: 22,3245           45465                                    <a href="#563832474F4E">V82GON</a>                                <span class="co">#  IF AVERAGE G ON</span>
-031283,000088: 22,3246           45247                                    <a href="#563832474F4646">V82GOFF</a>                               <span class="co">#  IF AVERAGE G OFF</span>
-031284,000089: 
-<a name="563832474F4646"></a>031285,000090: 22,3247           77776        <span class="sm">V82GOFF </span>           <span class="in">EXIT    </span>                                       <span class="co">#  ALLOW ASTRONAUT TO SELECT VEHICLE</span>
-031286,000091: 22,3250           34752                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  DESIRED FOR ORBITAL PARAMETERS</span>
-031287,000092: 22,3251           55051                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494F4E58">OPTIONX</a>                               <span class="co">#  CALCULATION AND DISPLAY.</span>
-031288,000093: 22,3252           34753                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-031289,000094: 22,3253           55052                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494F4E58">OPTIONX</a>    +1                         
-031290,000095: 22,3254           33316                           <span class="op">CAF     </span> <a href="#4F5054494F4E564E">OPTIONVN</a>                              <span class="co">#  V 04 N 06</span>
-031291,000096: 22,3255           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-031292,000097: 22,3256           20212                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5844535046">GOXDSPF</a>                               
-031293,000098: 22,3257           05472                           <span class="op">TC      </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                <span class="co">#  TERMINATE</span>
-031294,000099: 22,3260           03262                           <span class="op">TC      </span> +2                                    <span class="co">#  PROCEED</span>
-031295,000100: 22,3261           03254                           <span class="op">TC      </span> -5                                    <span class="co">#  DATA IN.  OPTION1+1 = 1 FOR THIS VEHICLE.</span>
-031296,000101:                                                                                                  <span class="co">#                UNEQ 1 FOR OTHER VEHICLE.</span>
-031297,000102: 22,3262           34750                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495434">BIT4</a>                                  <span class="co">#  80 MS</span>
-031298,000103: 22,3263           05203                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-031299,000104: 22,3264  E4,1540                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544646">TFF</a>                                   
-031300,000105: 22,3264           03430 44064                     <span class="ps">2CADR   </span> <a href="#5449434B54455354">TICKTEST</a>                              
-031301,000106: 
-031302,000107: 22,3266           00003                           <span class="op">RELINT  </span>                                       
-<a name="563832474F464C50"></a>031303,000108: 22,3267           33320        <span class="sm">V82GOFLP</span>           <span class="op">CAF     </span> <a href="#54464642414E4B">TFFBANK</a>                               <span class="co">#  MAJOR RECYCLE LOOP ENTRY</span>
-031304,000109: 22,3270           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
-031305,000110: 22,3271           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-031306,000111: 22,3272           55537                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#563832464C414753">V82FLAGS</a>                              <span class="co">#  ZERO FLAGS FOR TICKTEST. INHIBITS</span>
-031307,000112:                                                                                                  <span class="co">#  DECREMENTING OF TFF AND -TPER.</span>
-031308,000113: 22,3273           35021                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F37">PRIO7</a>                                 
-031309,000114: 22,3274           05105                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               <span class="co">#  V82GOFF1 WILL EXECUTE STATE VECTOR</span>
-031310,000115: 22,3275  E4,1540                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544646">TFF</a>                                   <span class="co">#  UPDATE AND ORBIT CALCULATIONS FOR</span>
-031311,000116: 22,3275           03321 44064                     <span class="ps">2CADR   </span> <a href="#563832474F464631">V82GOFF1</a>                              <span class="co">#  SELECTED VEHICLE ABOUT PROPER BODY.</span>
-031312,000117: 
-031313,000118: 22,3277           00003                           <span class="op">RELINT  </span>                                       
-<a name="5638325354414C4C"></a>031314,000119: 22,3300           36244        <span class="sm">V82STALL</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5448524545">THREE</a>                                 <span class="co">#  STALL IN THIS LOOP AND WITHOLD V 16 N 44</span>
+031284,000074:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED:  STATE VECTOR.</span>
+031285,000075: 
+031286,000076:                                                                                                  <span class="co">#  DEBRIS:       QPRET, RONE, VONE, TFF/RTMU, HPERMIN, RPADTEM, V82EMFLG.</span>
+031287,000077:                                                                                                  <span class="co">#                MAYBE:  TSTART82, V82FLAGS, TDEC1.</span>
+031288,000078: 
+031289,000079: 13,2351  E4,1517                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4841504F58">HAPOX</a>                                 
+031290,000080: 31,2172                                           <span class="ps">BANK    </span> 31                                    
+031291,000081: 22,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#5233304C4F43">R30LOC</a>                                
+031292,000082: 22,2000                                           <span class="ps">BANK    </span>                                       
+031293,000083: 22,3242                                           <span class="ps">COUNT*  </span> $$/R30                                
+031294,000084: 
+<a name="56383243414C4C"></a>031295,000085: 22,3242           06036        <span class="sm">V82CALL </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+031296,000086: 22,3243           52014                           <span class="in">BON     </span> <span class="in">GOTO      </span>                            
+031297,000087: 22,3244           03712                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#41564547464C4147">AVEGFLAG</a>                              
+031298,000088: 22,3245           45465                                    <a href="#563832474F4E">V82GON</a>                                <span class="co">#  IF AVERAGE G ON</span>
+031299,000089: 22,3246           45247                                    <a href="#563832474F4646">V82GOFF</a>                               <span class="co">#  IF AVERAGE G OFF</span>
+031300,000090: 
+<a name="563832474F4646"></a>031301,000091: 22,3247           77776        <span class="sm">V82GOFF </span>           <span class="in">EXIT    </span>                                       <span class="co">#  ALLOW ASTRONAUT TO SELECT VEHICLE</span>
+031302,000092: 22,3250           34752                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  DESIRED FOR ORBITAL PARAMETERS</span>
+031303,000093: 22,3251           55051                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494F4E58">OPTIONX</a>                               <span class="co">#  CALCULATION AND DISPLAY.</span>
+031304,000094: 22,3252           34753                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+031305,000095: 22,3253           55052                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494F4E58">OPTIONX</a>    +1                         
+031306,000096: 22,3254           33316                           <span class="op">CAF     </span> <a href="#4F5054494F4E564E">OPTIONVN</a>                              <span class="co">#  V 04 N 06</span>
+031307,000097: 22,3255           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+031308,000098: 22,3256           20212                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5844535046">GOXDSPF</a>                               
+031309,000099: 22,3257           05472                           <span class="op">TC      </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                <span class="co">#  TERMINATE</span>
+031310,000100: 22,3260           03262                           <span class="op">TC      </span> +2                                    <span class="co">#  PROCEED</span>
+031311,000101: 22,3261           03254                           <span class="op">TC      </span> -5                                    <span class="co">#  DATA IN.  OPTION1+1 = 1 FOR THIS VEHICLE.</span>
+031312,000102:                                                                                                  <span class="co">#                UNEQ 1 FOR OTHER VEHICLE.</span>
+031313,000103: 22,3262           34750                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495434">BIT4</a>                                  <span class="co">#  80 MS</span>
+031314,000104: 22,3263           05203                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+031315,000105: 22,3264  E4,1540                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544646">TFF</a>                                   
+031316,000106: 22,3264           03430 44064                     <span class="ps">2CADR   </span> <a href="#5449434B54455354">TICKTEST</a>                              
+031317,000107: 
+031318,000108: 22,3266           00003                           <span class="op">RELINT  </span>                                       
+<a name="563832474F464C50"></a>031319,000109: 22,3267           33320        <span class="sm">V82GOFLP</span>           <span class="op">CAF     </span> <a href="#54464642414E4B">TFFBANK</a>                               <span class="co">#  MAJOR RECYCLE LOOP ENTRY</span>
+031320,000110: 22,3270           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
+031321,000111: 22,3271           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+031322,000112: 22,3272           55537                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#563832464C414753">V82FLAGS</a>                              <span class="co">#  ZERO FLAGS FOR TICKTEST. INHIBITS</span>
+031323,000113:                                                                                                  <span class="co">#  DECREMENTING OF TFF AND -TPER.</span>
+031324,000114: 22,3273           35021                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F37">PRIO7</a>                                 
+031325,000115: 22,3274           05105                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               <span class="co">#  V82GOFF1 WILL EXECUTE STATE VECTOR</span>
+031326,000116: 22,3275  E4,1540                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544646">TFF</a>                                   <span class="co">#  UPDATE AND ORBIT CALCULATIONS FOR</span>
+031327,000117: 22,3275           03321 44064                     <span class="ps">2CADR   </span> <a href="#563832474F464631">V82GOFF1</a>                              <span class="co">#  SELECTED VEHICLE ABOUT PROPER BODY.</span>
+031328,000118: 
+031329,000119: 22,3277           00003                           <span class="op">RELINT  </span>                                       
+<a name="5638325354414C4C"></a>031330,000120: 22,3300           36244        <span class="sm">V82STALL</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5448524545">THREE</a>                                 <span class="co">#  STALL IN THIS LOOP AND WITHOLD V 16 N 44</span>
 </pre>
 </span>
 </p>
@@ -268,54 +269,54 @@ Page 722
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-031316,000121: 22,3301           71537                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#563832464C414753">V82FLAGS</a>                              <span class="co">#  UNTIL STATE VECTOR UPDATE SETS ONE OF</span>
-031317,000122: 22,3302           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  OUR FLAG BITS.</span>
-031318,000123: 22,3303           03310                           <span class="op">TC      </span> <a href="#464C4147474F4E">FLAGGON</a>                               <span class="co">#  EXIT FROM STALL LOOP.</span>
-031319,000124: 22,3304           34777                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#31534543">1SEC</a>                                  
-031320,000125: 22,3305           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-031321,000126: 22,3306           01735                           <span class="ps">CADR    </span> <a href="SERVICE_ROUTINES.agc.html#44454C41594A4F42">DELAYJOB</a>                              
-031322,000127: 22,3307           03300                           <span class="op">TC      </span> <a href="#5638325354414C4C">V82STALL</a>                              
-031323,000128: 
-<a name="464C4147474F4E"></a>031324,000129: 22,3310           33317        <span class="sm">FLAGGON </span>           <span class="op">CAF     </span> <a href="#5631364E3434">V16N44</a>                                <span class="co">#  MONITOR HAPO,HPER,TFF.</span>
-031325,000130: 22,3311           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-031326,000131: 22,3312           20212                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5844535046">GOXDSPF</a>                               
-031327,000132: 22,3313           05563                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#42354F4646">B5OFF</a>                                 <span class="co">#  TERM  THIS TELLS TICKTEST TO KILL ITSELF</span>
-031328,000133: 22,3314           05563                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#42354F4646">B5OFF</a>                                 <span class="co">#  PROCEED   DITTO</span>
-031329,000134: 22,3315           03267                           <span class="op">TC      </span> <a href="#563832474F464C50">V82GOFLP</a>                              <span class="co">#  RECYCLE   RECOMPUTE STATE VECT + DISPLAY</span>
-031330,000135: 
-<a name="4F5054494F4E564E"></a>031331,000136: 22,3316           01014        <span class="sm">OPTIONVN</span>           <span class="ps">VN      </span> 412                                   
-<a name="5631364E3434"></a>031332,000137: 22,3317           04054        <span class="sm">V16N44  </span>           <span class="ps">VN      </span> 1644                                  
-<a name="54464642414E4B"></a>031333,000138: 22,3320           02140        <span class="sm">TFFBANK </span>           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544646">TFF</a>                                   
-031334,000139: 
-<a name="563832474F464631"></a>031335,000140: 22,3321           06036        <span class="sm">V82GOFF1</span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-031336,000141: 22,3322           77634                           <span class="in">RTB     </span>                                       
-031337,000142: 22,3323           21462                                    <a href="RTB_OP_CODES.agc.html#4C4F414454494D45">LOADTIME</a>                              
-031338,000143: 22,3324           00041                           <span class="in">STORE   </span> <a href="ORBITAL_INTEGRATION.agc.html#5444454331">TDEC1</a>                                 <span class="co">#  TIME FOR STATE VECTOR UPDATE.</span>
-031339,000144: 22,3325           02211                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5453544152543832">TSTART82</a>                              <span class="co">#  TIME FOR INTERNAL USE.</span>
-031340,000145: 22,3326           77776                           <span class="in">EXIT    </span>                                       
-031341,000146: 22,3327           41052                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494F4E58">OPTIONX</a>    +1                         <span class="co">#  1 FOR THIS VEHICLE, NOT 1 FOR OTHER.</span>
-031342,000147: 22,3330           64753                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-031343,000148: 22,3331           00006                           <span class="op">EXTEND  </span>                                       
-031344,000149: 22,3332           13356                           <span class="op">BZF     </span> <a href="#5448495353484950">THISSHIP</a>                              
-<a name="4F544853484950"></a>031345,000150: 22,3333           06036        <span class="sm">OTHSHIP </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-031346,000151: 22,3334           77624                           <span class="in">CALL    </span>                                       <span class="co">#  CALL STATE VECTOR UPDATE FOR OTHER SHIP.</span>
-031347,000152: 22,3335           27043                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4F544850524543">OTHPREC</a>                               
-<a name="424F544853484950"></a>031348,000153: 22,3336           77775        <span class="sm">BOTHSHIP</span>           <span class="in">VLOAD   </span>                                       <span class="co">#  MOVE RESULTS INTO TFFCONIC STORAGE AREAS</span>
-031349,000154: 22,3337           00001                                    <a href="ORBITAL_INTEGRATION.agc.html#52415454">RATT</a>                                  <span class="co">#  TO BE CALLED BY SR30.1.</span>
-031350,000155: 22,3340           26213                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4E45">RONE</a>                                  <span class="co">#  RATT AT (-29)M FOR EARTH OR MOON</span>
-031351,000156: 22,3341           00007                                    <a href="ORBITAL_INTEGRATION.agc.html#56415454">VATT</a>                                  
-031352,000157: 22,3342           02221                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564F4E45">VONE</a>                                  <span class="co">#  VATT AT (-7)M/CS FOR EARTH OR MOON</span>
-031353,000158: 22,3343           77743                           <span class="in">DLOAD*  </span>                                       
-031354,000159: 22,3344           73774                                    1/RTMUE,2                             <span class="co">#  X2 IS 0 FOR EARTH CENTERED STATE VEC</span>
-031355,000160: 22,3345           00037                           <span class="in">STORE   </span> <a href="TIME_OF_FREE_FALL.agc.html#5446462F52544D55">TFF/RTMU</a>                              <span class="co">#  X2 IS 2 FOR MOON</span>
-031356,000161: 22,3346           77743                           <span class="in">DLOAD*  </span>                                       <span class="co">#  AS LEFT BY THISPREC OR OTHPREC.</span>
-031357,000162: 22,3347           72411                                    MINPERE,2                             
-031358,000163: 22,3350           02205                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#485045524D494E">HPERMIN</a>                               <span class="co">#  TFFRTMU, HPERMIN AND RPADTEM ARE ALL</span>
-031359,000164: 22,3351           46135                           <span class="in">SLOAD   </span> <span class="in">BHIZ      </span>                            <span class="co">#  EARTH/MOON PARAMETERS AS SET HERE.</span>
-031360,000165: 22,3352           00050                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5832">X2</a>                                    
-031361,000166: 22,3353           45367                                    <a href="#4541525448504144">EARTHPAD</a>                              
-031362,000167: 22,3354           77650                           <span class="in">GOTO    </span>                                       
-031363,000168: 22,3355           45373                                    <a href="#4D4F4F4E504144">MOONPAD</a>                               
+031332,000122: 22,3301           71537                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#563832464C414753">V82FLAGS</a>                              <span class="co">#  UNTIL STATE VECTOR UPDATE SETS ONE OF</span>
+031333,000123: 22,3302           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  OUR FLAG BITS.</span>
+031334,000124: 22,3303           03310                           <span class="op">TC      </span> <a href="#464C4147474F4E">FLAGGON</a>                               <span class="co">#  EXIT FROM STALL LOOP.</span>
+031335,000125: 22,3304           34777                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#31534543">1SEC</a>                                  
+031336,000126: 22,3305           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+031337,000127: 22,3306           01735                           <span class="ps">CADR    </span> <a href="SERVICE_ROUTINES.agc.html#44454C41594A4F42">DELAYJOB</a>                              
+031338,000128: 22,3307           03300                           <span class="op">TC      </span> <a href="#5638325354414C4C">V82STALL</a>                              
+031339,000129: 
+<a name="464C4147474F4E"></a>031340,000130: 22,3310           33317        <span class="sm">FLAGGON </span>           <span class="op">CAF     </span> <a href="#5631364E3434">V16N44</a>                                <span class="co">#  MONITOR HAPO,HPER,TFF.</span>
+031341,000131: 22,3311           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+031342,000132: 22,3312           20212                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5844535046">GOXDSPF</a>                               
+031343,000133: 22,3313           05563                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#42354F4646">B5OFF</a>                                 <span class="co">#  TERM  THIS TELLS TICKTEST TO KILL ITSELF</span>
+031344,000134: 22,3314           05563                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#42354F4646">B5OFF</a>                                 <span class="co">#  PROCEED   DITTO</span>
+031345,000135: 22,3315           03267                           <span class="op">TC      </span> <a href="#563832474F464C50">V82GOFLP</a>                              <span class="co">#  RECYCLE   RECOMPUTE STATE VECT + DISPLAY</span>
+031346,000136: 
+<a name="4F5054494F4E564E"></a>031347,000137: 22,3316           01014        <span class="sm">OPTIONVN</span>           <span class="ps">VN      </span> 412                                   
+<a name="5631364E3434"></a>031348,000138: 22,3317           04054        <span class="sm">V16N44  </span>           <span class="ps">VN      </span> 1644                                  
+<a name="54464642414E4B"></a>031349,000139: 22,3320           02140        <span class="sm">TFFBANK </span>           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544646">TFF</a>                                   
+031350,000140: 
+<a name="563832474F464631"></a>031351,000141: 22,3321           06036        <span class="sm">V82GOFF1</span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+031352,000142: 22,3322           77634                           <span class="in">RTB     </span>                                       
+031353,000143: 22,3323           21462                                    <a href="RTB_OP_CODES.agc.html#4C4F414454494D45">LOADTIME</a>                              
+031354,000144: 22,3324           00041                           <span class="in">STORE   </span> <a href="ORBITAL_INTEGRATION.agc.html#5444454331">TDEC1</a>                                 <span class="co">#  TIME FOR STATE VECTOR UPDATE.</span>
+031355,000145: 22,3325           02211                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5453544152543832">TSTART82</a>                              <span class="co">#  TIME FOR INTERNAL USE.</span>
+031356,000146: 22,3326           77776                           <span class="in">EXIT    </span>                                       
+031357,000147: 22,3327           41052                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494F4E58">OPTIONX</a>    +1                         <span class="co">#  1 FOR THIS VEHICLE, NOT 1 FOR OTHER.</span>
+031358,000148: 22,3330           64753                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+031359,000149: 22,3331           00006                           <span class="op">EXTEND  </span>                                       
+031360,000150: 22,3332           13356                           <span class="op">BZF     </span> <a href="#5448495353484950">THISSHIP</a>                              
+<a name="4F544853484950"></a>031361,000151: 22,3333           06036        <span class="sm">OTHSHIP </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+031362,000152: 22,3334           77624                           <span class="in">CALL    </span>                                       <span class="co">#  CALL STATE VECTOR UPDATE FOR OTHER SHIP.</span>
+031363,000153: 22,3335           27043                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4F544850524543">OTHPREC</a>                               
+<a name="424F544853484950"></a>031364,000154: 22,3336           77775        <span class="sm">BOTHSHIP</span>           <span class="in">VLOAD   </span>                                       <span class="co">#  MOVE RESULTS INTO TFFCONIC STORAGE AREAS</span>
+031365,000155: 22,3337           00001                                    <a href="ORBITAL_INTEGRATION.agc.html#52415454">RATT</a>                                  <span class="co">#  TO BE CALLED BY SR30.1.</span>
+031366,000156: 22,3340           26213                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4E45">RONE</a>                                  <span class="co">#  RATT AT (-29)M FOR EARTH OR MOON</span>
+031367,000157: 22,3341           00007                                    <a href="ORBITAL_INTEGRATION.agc.html#56415454">VATT</a>                                  
+031368,000158: 22,3342           02221                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564F4E45">VONE</a>                                  <span class="co">#  VATT AT (-7)M/CS FOR EARTH OR MOON</span>
+031369,000159: 22,3343           77743                           <span class="in">DLOAD*  </span>                                       
+031370,000160: 22,3344           73774                                    1/RTMUE,2                             <span class="co">#  X2 IS 0 FOR EARTH CENTERED STATE VEC</span>
+031371,000161: 22,3345           00037                           <span class="in">STORE   </span> <a href="TIME_OF_FREE_FALL.agc.html#5446462F52544D55">TFF/RTMU</a>                              <span class="co">#  X2 IS 2 FOR MOON</span>
+031372,000162: 22,3346           77743                           <span class="in">DLOAD*  </span>                                       <span class="co">#  AS LEFT BY THISPREC OR OTHPREC.</span>
+031373,000163: 22,3347           72411                                    MINPERE,2                             
+031374,000164: 22,3350           02205                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#485045524D494E">HPERMIN</a>                               <span class="co">#  TFFRTMU, HPERMIN AND RPADTEM ARE ALL</span>
+031375,000165: 22,3351           46135                           <span class="in">SLOAD   </span> <span class="in">BHIZ      </span>                            <span class="co">#  EARTH/MOON PARAMETERS AS SET HERE.</span>
+031376,000166: 22,3352           00050                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5832">X2</a>                                    
+031377,000167: 22,3353           45367                                    <a href="#4541525448504144">EARTHPAD</a>                              
+031378,000168: 22,3354           77650                           <span class="in">GOTO    </span>                                       
+031379,000169: 22,3355           45373                                    <a href="#4D4F4F4E504144">MOONPAD</a>                               
 </pre>
 </span>
 </p>
@@ -331,54 +332,54 @@ Page 723
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="5448495353484950"></a>031365,000170: 22,3356           06036        <span class="sm">THISSHIP</span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-031366,000171: 22,3357           77624                           <span class="in">CALL    </span>                                       <span class="co">#  CALL STATE VECTOR UPDATE FOR THIS SHIP.</span>
-031367,000172: 22,3360           27057                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#5448495350524543">THISPREC</a>                              
-031368,000173: 22,3361           77650                           <span class="in">GOTO    </span>                                       
-031369,000174: 22,3362           45336                                    <a href="#424F544853484950">BOTHSHIP</a>                              
-031370,000175: 
-031371,000176:                                                                                                  <span class="co">#  THE FOLLOWING CONSTANTS ARE PAIRWISE INDEXED.  DO NOT SEPARATE PAIRS.</span>
-031372,000177: 
-<a name="4D494E5045524D"></a>031373,000178: 22,3363           00001 11530  <span class="sm">MINPERM </span>           <span class="ps">2DEC    </span> 10668      B-27                       <span class="co">#  35 KFT MIN PERIGEE HEIGHT FOR MOON(-27)M</span>
-031374,000179: 
-<a name="4D494E50455245"></a>031375,000180: 22,3365           00002 31230  <span class="sm">MINPERE </span>           <span class="ps">2DEC    </span> 91440      B-29                       <span class="co">#  300 KFT (-29)M FOR EARTH</span>
-031376,000181: 
-<a name="4541525448504144"></a>031377,000182: 22,3367           43145        <span class="sm">EARTHPAD</span>           <span class="in">DLOAD   </span> <span class="in">CLRGO     </span>                            <span class="co">#  PAD 37-B RADIUS.  SCALED AT (-29)M.</span>
-031378,000183: 22,3370           06276                                    <a href="P34-P35,_P74-P75.agc.html#52504144">RPAD</a>                                  
-031379,000184: 22,3371           03635                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#563832454D464C47">V82EMFLG</a>                              <span class="co">#  INDICATE EARTH SCALING FOR SR30.1</span>
-031380,000185: 22,3372           45377                                    <a href="#424F5448504144">BOTHPAD</a>                               
-031381,000186: 
-<a name="4D4F4F4E504144"></a>031382,000187: 22,3373           51575        <span class="sm">MOONPAD </span>           <span class="in">VLOAD   </span> <span class="in">ABVAL     </span>                            <span class="co">#  COMPUTE MOON PAD RADIUS FROM RLS VECTOR.</span>
-031383,000188: 22,3374           02023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C53">RLS</a>                                   <span class="co">#  SCALED AT (-27)M.</span>
-031384,000189: 22,3375           77614                           <span class="in">SET     </span>                                       
-031385,000190: 22,3376           03475                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#563832454D464C47">V82EMFLG</a>                              <span class="co">#  INDICATE MOON  SCALING FOR SR30.1</span>
-<a name="424F5448504144"></a>031386,000191: 22,3377           36207        <span class="sm">BOTHPAD </span>           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5250414454454D">RPADTEM</a>                               
-031387,000192: 22,3400           45551                                    <a href="#535233302E31">SR30.1</a>                                <span class="co">#  CALCULATE ORBITAL PARAMETERS</span>
-031388,000193: 22,3401           45234                           <span class="in">RTB     </span> <span class="in">DSU       </span>                            
-031389,000194: 22,3402           21462                                    <a href="RTB_OP_CODES.agc.html#4C4F414454494D45">LOADTIME</a>                              
-031390,000195: 22,3403           02211                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5453544152543832">TSTART82</a>                              <span class="co">#  PRESENT TIME - TIME V82GOFF1 BEGAN</span>
-031391,000196: 22,3404           02211                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5453544152543832">TSTART82</a>                              <span class="co">#                  SAVE IT</span>
-031392,000197: 22,3405           53145                           <span class="in">DLOAD   </span> <span class="in">BZE       </span>                            <span class="co">#  SR30.1 SETS -TPER=0 IF HPER L/</span>
-031393,000198: 22,3406           02143                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#2D54504552">-TPER</a>                                 <span class="co">#  HPERMIN (300 OR 35) KFT.</span>
-031394,000199: 22,3407           45420                                    <a href="#5449434B54494646">TICKTIFF</a>                              <span class="co">#  (-TPER = 0)</span>
-<a name="5449434B54504552"></a>031395,000200: 22,3410           43345        <span class="sm">TICKTPER</span>           <span class="in">DLOAD   </span> <span class="in">DAD       </span>                            <span class="co">#  (-TPER NON ZERO) TFF WAS NOT COMPUTED,</span>
-031396,000201: 22,3411           02143                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#2D54504552">-TPER</a>                                 <span class="co">#  BUT WAS SET TO 59M59S.  DONT TICK TFF, DO</span>
-031397,000202: 22,3412           02211                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5453544152543832">TSTART82</a>                              <span class="co">#  TICK -TPER.  DISPLAY BOTH.</span>
-031398,000203: 22,3413           02143                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D54504552">-TPER</a>                                 <span class="co">#  -TPER CORRECTED FOR TIME SINCE V82GOFF1</span>
-031399,000204: 22,3414           77776                           <span class="in">EXIT    </span>                                       <span class="co">#  BEGAN.</span>
-031400,000205: 22,3415           34753                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  
-031401,000206: 22,3416           55537                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#563832464C414753">V82FLAGS</a>                              <span class="co">#  INFORMS TICKTEST TO INCREMENT ONLY -TPER</span>
-031402,000207: 22,3417           05155                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-031403,000208: 
-<a name="5449434B54494646"></a>031404,000209: 22,3420           43345        <span class="sm">TICKTIFF</span>           <span class="in">DLOAD   </span> <span class="in">DAD       </span>                            <span class="co">#  (-TPER=0) TFF WAS COMPUTED.  TICK TFF.</span>
-031405,000210: 22,3421           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#544646">TFF</a>                                   <span class="co">#  DO NOT TICK -TPER.  DISPLAY TFF, BUT NOT</span>
-031406,000211: 22,3422           02211                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5453544152543832">TSTART82</a>                              <span class="co">#  -TPER.</span>
-031407,000212: 22,3423           02141                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544646">TFF</a>                                   <span class="co">#  TFF CORRECTED FOR TIME SINCE V82GOFF1</span>
-031408,000213: 22,3424           77776                           <span class="in">EXIT    </span>                                       <span class="co">#  BEGAN.</span>
-031409,000214: 22,3425           34752                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  
-031410,000215: 22,3426           55537                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#563832464C414753">V82FLAGS</a>                              <span class="co">#  INFORMS TICKTEST TO INCREMENT ONLY TFF.</span>
-031411,000216: 22,3427           05155                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-031412,000217: 
+<a name="5448495353484950"></a>031381,000171: 22,3356           06036        <span class="sm">THISSHIP</span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+031382,000172: 22,3357           77624                           <span class="in">CALL    </span>                                       <span class="co">#  CALL STATE VECTOR UPDATE FOR THIS SHIP.</span>
+031383,000173: 22,3360           27057                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#5448495350524543">THISPREC</a>                              
+031384,000174: 22,3361           77650                           <span class="in">GOTO    </span>                                       
+031385,000175: 22,3362           45336                                    <a href="#424F544853484950">BOTHSHIP</a>                              
+031386,000176: 
+031387,000177:                                                                                                  <span class="co">#  THE FOLLOWING CONSTANTS ARE PAIRWISE INDEXED.  DO NOT SEPARATE PAIRS.</span>
+031388,000178: 
+<a name="4D494E5045524D"></a>031389,000179: 22,3363           00001 11530  <span class="sm">MINPERM </span>           <span class="ps">2DEC    </span> 10668      B-27                       <span class="co">#  35 KFT MIN PERIGEE HEIGHT FOR MOON(-27)M</span>
+031390,000180: 
+<a name="4D494E50455245"></a>031391,000181: 22,3365           00002 31230  <span class="sm">MINPERE </span>           <span class="ps">2DEC    </span> 91440      B-29                       <span class="co">#  300 KFT (-29)M FOR EARTH</span>
+031392,000182: 
+<a name="4541525448504144"></a>031393,000183: 22,3367           43145        <span class="sm">EARTHPAD</span>           <span class="in">DLOAD   </span> <span class="in">CLRGO     </span>                            <span class="co">#  PAD 37-B RADIUS.  SCALED AT (-29)M.</span>
+031394,000184: 22,3370           06276                                    <a href="P34-P35,_P74-P75.agc.html#52504144">RPAD</a>                                  
+031395,000185: 22,3371           03635                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#563832454D464C47">V82EMFLG</a>                              <span class="co">#  INDICATE EARTH SCALING FOR SR30.1</span>
+031396,000186: 22,3372           45377                                    <a href="#424F5448504144">BOTHPAD</a>                               
+031397,000187: 
+<a name="4D4F4F4E504144"></a>031398,000188: 22,3373           51575        <span class="sm">MOONPAD </span>           <span class="in">VLOAD   </span> <span class="in">ABVAL     </span>                            <span class="co">#  COMPUTE MOON PAD RADIUS FROM RLS VECTOR.</span>
+031399,000189: 22,3374           02023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C53">RLS</a>                                   <span class="co">#  SCALED AT (-27)M.</span>
+031400,000190: 22,3375           77614                           <span class="in">SET     </span>                                       
+031401,000191: 22,3376           03475                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#563832454D464C47">V82EMFLG</a>                              <span class="co">#  INDICATE MOON  SCALING FOR SR30.1</span>
+<a name="424F5448504144"></a>031402,000192: 22,3377           36207        <span class="sm">BOTHPAD </span>           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5250414454454D">RPADTEM</a>                               
+031403,000193: 22,3400           45551                                    <a href="#535233302E31">SR30.1</a>                                <span class="co">#  CALCULATE ORBITAL PARAMETERS</span>
+031404,000194: 22,3401           45234                           <span class="in">RTB     </span> <span class="in">DSU       </span>                            
+031405,000195: 22,3402           21462                                    <a href="RTB_OP_CODES.agc.html#4C4F414454494D45">LOADTIME</a>                              
+031406,000196: 22,3403           02211                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5453544152543832">TSTART82</a>                              <span class="co">#  PRESENT TIME - TIME V82GOFF1 BEGAN</span>
+031407,000197: 22,3404           02211                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5453544152543832">TSTART82</a>                              <span class="co">#                  SAVE IT</span>
+031408,000198: 22,3405           53145                           <span class="in">DLOAD   </span> <span class="in">BZE       </span>                            <span class="co">#  SR30.1 SETS -TPER=0 IF HPER L/</span>
+031409,000199: 22,3406           02143                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#2D54504552">-TPER</a>                                 <span class="co">#  HPERMIN (300 OR 35) KFT.</span>
+031410,000200: 22,3407           45420                                    <a href="#5449434B544646">TICKTFF</a>                               <span class="co">#  (-TPER = 0)</span>
+<a name="5449434B54504552"></a>031411,000201: 22,3410           43345        <span class="sm">TICKTPER</span>           <span class="in">DLOAD   </span> <span class="in">DAD       </span>                            <span class="co">#  (-TPER NON ZERO) TFF WAS NOT COMPUTED,</span>
+031412,000202: 22,3411           02143                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#2D54504552">-TPER</a>                                 <span class="co">#  BUT WAS SET TO 59M59S.  DONT TICK TFF, DO</span>
+031413,000203: 22,3412           02211                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5453544152543832">TSTART82</a>                              <span class="co">#  TICK -TPER.  DISPLAY BOTH.</span>
+031414,000204: 22,3413           02143                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D54504552">-TPER</a>                                 <span class="co">#  -TPER CORRECTED FOR TIME SINCE V82GOFF1</span>
+031415,000205: 22,3414           77776                           <span class="in">EXIT    </span>                                       <span class="co">#  BEGAN.</span>
+031416,000206: 22,3415           34753                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  
+031417,000207: 22,3416           55537                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#563832464C414753">V82FLAGS</a>                              <span class="co">#  INFORMS TICKTEST TO INCREMENT ONLY -TPER</span>
+031418,000208: 22,3417           05155                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+031419,000209: 
+<a name="5449434B544646"></a>031420,000210: 22,3420           43345        <span class="sm">TICKTFF </span>           <span class="in">DLOAD   </span> <span class="in">DAD       </span>                            <span class="co">#  (-TPER=0) TFF WAS COMPUTED.  TICK TFF.</span>
+031421,000211: 22,3421           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#544646">TFF</a>                                   <span class="co">#  DO NOT TICK -TPER.  DISPLAY TFF, BUT NOT</span>
+031422,000212: 22,3422           02211                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5453544152543832">TSTART82</a>                              <span class="co">#  -TPER.</span>
+031423,000213: 22,3423           02141                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544646">TFF</a>                                   <span class="co">#  TFF CORRECTED FOR TIME SINCE V82GOFF1</span>
+031424,000214: 22,3424           77776                           <span class="in">EXIT    </span>                                       <span class="co">#  BEGAN.</span>
+031425,000215: 22,3425           34752                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  
+031426,000216: 22,3426           55537                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#563832464C414753">V82FLAGS</a>                              <span class="co">#  INFORMS TICKTEST TO INCREMENT ONLY TFF.</span>
+031427,000217: 22,3427           05155                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+031428,000218: 
 </pre>
 </span>
 </p>
@@ -394,39 +395,39 @@ Page 724
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="5449434B54455354"></a>031414,000219: 22,3430           34747        <span class="sm">TICKTEST</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495435">BIT5</a>                                  <span class="co">#  THIS WAITLIST PROGRAM PERPETUATES ITSELF</span>
-031415,000220: 22,3431           71044                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558545642414354">EXTVBACT</a>                              <span class="co">#  ONCE A SEC UNTIL BIT 5 OF EXTVBACT =0.</span>
-031416,000221: 22,3432           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-031417,000222: 22,3433           03441                           <span class="op">TC      </span> <a href="#444F5449434B">DOTICK</a>                                
-031418,000223: 22,3434           37712                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3235">PRIO25</a>                                
-031419,000224: 22,3435           05072                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 <span class="co">#  TERMINATE V 82.  CANT CALL ENDEXT IN RUPT.</span>
-031420,000225: 22,3436     1044                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558545642414354">EXTVBACT</a>                              
-031421,000226: 22,3436           05472 04062                     <span class="ps">2CADR   </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                
-031422,000227: 
-031423,000228: 22,3440           05261                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-<a name="444F5449434B"></a>031424,000229: 22,3441           34777        <span class="sm">DOTICK  </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#31534543">1SEC</a>                                  <span class="co">#  RE-REQUEST TICKTEST.</span>
-031425,000230: 22,3442           05203                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-031426,000231: 22,3443  E4,1540                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544646">TFF</a>                                   
-031427,000232: 22,3443           03430 44064                     <span class="ps">2CADR   </span> <a href="#5449434B54455354">TICKTEST</a>                              
-031428,000233: 
-031429,000234: 22,3445           36244                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5448524545">THREE</a>                                 
-031430,000235: 22,3446           71537                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#563832464C414753">V82FLAGS</a>                              
-031431,000236: 22,3447           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-031432,000237: 22,3450           03451                           <span class="op">TC      </span> +1                                    
-031433,000238: 22,3451           05261                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  IF NO FLAGBITS SET DONT CHANGE TFF OR</span>
-031434,000239:                                                                                                  <span class="co">#  -TPER, BUT CONTINUE LOOP.</span>
-031435,000240: 22,3452           03460                           <span class="op">TC      </span> <a href="#545045525449434B">TPERTICK</a>                              <span class="co">#  ONLY BIT 1 SET.  INCR -TPER BY 1 SEC.</span>
-<a name="5446465449434B"></a>031436,000241: 22,3453           34777        <span class="sm">TFFTICK </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#31534543">1SEC</a>                                  <span class="co">#  ONLY BIT 2 SET.  INCR TFF BY 1 SEC.</span>
-031437,000242: 22,3454           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-031438,000243: 22,3455           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-031439,000244: 22,3456           21541                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544646">TFF</a>                                   
-031440,000245: 22,3457           05261                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-<a name="545045525449434B"></a>031441,000246: 22,3460           34777        <span class="sm">TPERTICK</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#31534543">1SEC</a>                                  
-031442,000247: 22,3461           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-031443,000248: 22,3462           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-031444,000249: 22,3463           21543                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D54504552">-TPER</a>                                 
-031445,000250: 22,3464           05261                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-031446,000251: 
+<a name="5449434B54455354"></a>031430,000220: 22,3430           34747        <span class="sm">TICKTEST</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495435">BIT5</a>                                  <span class="co">#  THIS WAITLIST PROGRAM PERPETUATES ITSELF</span>
+031431,000221: 22,3431           71044                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558545642414354">EXTVBACT</a>                              <span class="co">#  ONCE A SEC UNTIL BIT 5 OF EXTVBACT =0.</span>
+031432,000222: 22,3432           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+031433,000223: 22,3433           03441                           <span class="op">TC      </span> <a href="#444F5449434B">DOTICK</a>                                
+031434,000224: 22,3434           37712                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3235">PRIO25</a>                                
+031435,000225: 22,3435           05072                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 <span class="co">#  TERMINATE V 82.  CANT CALL ENDEXT IN RUPT.</span>
+031436,000226: 22,3436     1044                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558545642414354">EXTVBACT</a>                              
+031437,000227: 22,3436           05472 04062                     <span class="ps">2CADR   </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                
+031438,000228: 
+031439,000229: 22,3440           05261                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+<a name="444F5449434B"></a>031440,000230: 22,3441           34777        <span class="sm">DOTICK  </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#31534543">1SEC</a>                                  <span class="co">#  RE-REQUEST TICKTEST.</span>
+031441,000231: 22,3442           05203                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+031442,000232: 22,3443  E4,1540                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544646">TFF</a>                                   
+031443,000233: 22,3443           03430 44064                     <span class="ps">2CADR   </span> <a href="#5449434B54455354">TICKTEST</a>                              
+031444,000234: 
+031445,000235: 22,3445           36244                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5448524545">THREE</a>                                 
+031446,000236: 22,3446           71537                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#563832464C414753">V82FLAGS</a>                              
+031447,000237: 22,3447           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+031448,000238: 22,3450           03451                           <span class="op">TC      </span> +1                                    
+031449,000239: 22,3451           05261                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  IF NO FLAGBITS SET DONT CHANGE TFF OR</span>
+031450,000240:                                                                                                  <span class="co">#  -TPER, BUT CONTINUE LOOP.</span>
+031451,000241: 22,3452           03460                           <span class="op">TC      </span> <a href="#545045525449434B">TPERTICK</a>                              <span class="co">#  ONLY BIT 1 SET.  INCR -TPER BY 1 SEC.</span>
+<a name="5446465449434B"></a>031452,000242: 22,3453           34777        <span class="sm">TFFTICK </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#31534543">1SEC</a>                                  <span class="co">#  ONLY BIT 2 SET.  INCR TFF BY 1 SEC.</span>
+031453,000243: 22,3454           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+031454,000244: 22,3455           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+031455,000245: 22,3456           21541                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544646">TFF</a>                                   
+031456,000246: 22,3457           05261                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+<a name="545045525449434B"></a>031457,000247: 22,3460           34777        <span class="sm">TPERTICK</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#31534543">1SEC</a>                                  
+031458,000248: 22,3461           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+031459,000249: 22,3462           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+031460,000250: 22,3463           21543                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D54504552">-TPER</a>                                 
+031461,000251: 22,3464           05261                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+031462,000252: 
 </pre>
 </span>
 </p>
@@ -442,56 +443,56 @@ Page 725
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="563832474F4E"></a>031448,000253: 22,3465           77776        <span class="sm">V82GON  </span>           <span class="in">EXIT    </span>                                       <span class="co">#  AVERAGE G ON.  USE CURRENT STATE VECTOR</span>
-031449,000254:                                                                                                  <span class="co">#  FOR ORBITAL PARAMETER CALCULATIONS.</span>
-031450,000255: 22,3466           35021                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F37">PRIO7</a>                                 <span class="co">#  LESS THAN LAMBERT</span>
-031451,000256: 22,3467           05105                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               <span class="co">#  V82GON1 WILL PERFORM ORBIT CALCULATIONS</span>
-031452,000257: 22,3470  E4,1540                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544646">TFF</a>                                   <span class="co">#  ABOUT PROPER BODY APPROX ONCE PER SEC.</span>
-031453,000258: 22,3470           03503 44064                     <span class="ps">2CADR   </span> <a href="#563832474F4E31">V82GON1</a>                               
-031454,000259: 
-031455,000260: 22,3472           00003                           <span class="op">RELINT  </span>                                       
-031456,000261: 22,3473           10067                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                <span class="co">#  WITHOLD V16 N44 UNTIL FIRST ORBIT CALC</span>
-031457,000262: 22,3474           05122                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4348414E4731">CHANG1</a>                                <span class="co">#  IS DONE.  NOTE:  V82GON1 (PRIO7, FINDVAC</span>
-031458,000263:                                                                                                  <span class="co">#  JOB) IS COMPLETED BEFORE V82GON (PRIO7,</span>
-031459,000264:                                                                                                  <span class="co">#  NOVAC JOB).</span>
-<a name="5638325245445350"></a>031460,000265: 22,3475           33317        <span class="sm">V82REDSP</span>           <span class="op">CAF     </span> <a href="#5631364E3434">V16N44</a>                                <span class="co">#  MONITOR HAPO, HPER, TFF</span>
-031461,000266: 22,3476           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-031462,000267: 22,3477           20212                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5844535046">GOXDSPF</a>                               
-031463,000268: 22,3500           05563                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#42354F4646">B5OFF</a>                                 <span class="co">#  TERM THIS TELLS V82GON1 TO KILL ITSELF.</span>
-031464,000269: 22,3501           05563                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#42354F4646">B5OFF</a>                                 <span class="co">#  PROC DITTO.</span>
-031465,000270: 22,3502           03475                           <span class="op">TC      </span> <a href="#5638325245445350">V82REDSP</a>                              <span class="co">#  RECYCLE</span>
-031466,000271: 
-<a name="563832474F4E31"></a>031467,000272: 22,3503           06036        <span class="sm">V82GON1 </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               <span class="co">#  THIS EXEC PROGRAM PERPETUATES ITSELF</span>
-031468,000273:                                                                                                  <span class="co">#  ONCE A SEC UNTIL BIT 5 OF EXTVBACT =0.</span>
-031469,000274: 22,3504           52175                           <span class="in">VLOAD   </span> <span class="in">GOTO      </span>                            <span class="co">#  HOLDS OFF CCS NEWJOB BETWEEN RN AND</span>
-031470,000275: 22,3505           01221                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524E">RN</a>                                    <span class="co">#  VN FETCH SO RN, VN ARE FROM SAME</span>
-031471,000276: 22,3506           45507                                    <a href="#4E4558544C494E45">NEXTLINE</a>                              <span class="co">#  STATE VECTOR UPDATE.</span>
-<a name="4E4558544C494E45"></a>031472,000277: 22,3507           26213        <span class="sm">NEXTLINE</span>           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4E45">RONE</a>                                  <span class="co">#  RN AT (-29)M FOR EARTH OR MOON</span>
-031473,000278: 22,3510           01227                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564E">VN</a>                                    
-031474,000279: 22,3511           02221                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564F4E45">VONE</a>                                  <span class="co">#  VN AT (-7)M/CS FOR EARTH OR MOON</span>
-031475,000280: 22,3512           52014                           <span class="in">BON     </span> <span class="in">GOTO      </span>                            
-031476,000281: 22,3513           04304                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4D4F4F4E54484953">MOONTHIS</a>                              <span class="co">#  FLAG INDICATES BODY ABOUT WHICH ORBITAL</span>
-031477,000282: 22,3514           45516                                    <a href="#4D4F4F4E474F4E">MOONGON</a>                               <span class="co">#  CALCULATIONS ARE TO BE PERFORMED.</span>
-031478,000283: 22,3515           45527                                    <a href="#4541525448474F4E">EARTHGON</a>                              <span class="co">#  IF SET - MOON, IF RESET - EARTH.</span>
-031479,000284: 
-<a name="4D4F4F4E474F4E"></a>031480,000285: 22,3516           71214        <span class="sm">MOONGON </span>           <span class="in">SET     </span> <span class="in">DLOAD     </span>                            
-031481,000286: 22,3517           03475                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#563832454D464C47">V82EMFLG</a>                              <span class="co">#  INDICATE MOON SCALING FOR SR30.1</span>
-031482,000287: 22,3520           04001                                    <a href="CONTROLLED_CONSTANTS.agc.html#312F52544D554D">1/RTMUM</a>                               <span class="co">#  LUNAR PARAMETERS LOADED HERE FOR SR30.1</span>
-031483,000288: 22,3521           14037                           <span class="in">STODL   </span> <a href="TIME_OF_FREE_FALL.agc.html#5446462F52544D55">TFF/RTMU</a>                              
-031484,000289: 22,3522           05364                                    <a href="#4D494E5045524D">MINPERM</a>                               
-031485,000290: 22,3523           26205                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#485045524D494E">HPERMIN</a>                               
-031486,000291: 22,3524           02023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C53">RLS</a>                                   <span class="co">#  SCALED AT (-27)M.</span>
-031487,000292: 22,3525           52046                           <span class="in">ABVAL   </span> <span class="in">GOTO      </span>                            
-031488,000293: 22,3526           45536                                    <a href="#563832474F4E32">V82GON2</a>                               
-<a name="4541525448474F4E"></a>031489,000294: 22,3527           71214        <span class="sm">EARTHGON</span>           <span class="in">CLEAR   </span> <span class="in">DLOAD     </span>                            
-031490,000295: 22,3530           03675                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#563832454D464C47">V82EMFLG</a>                              <span class="co">#  INDICATE EARTH SCALING FOR SR30.1</span>
-031491,000296: 22,3531           04003                                    <a href="CONTROLLED_CONSTANTS.agc.html#312F52544D5545">1/RTMUE</a>                               <span class="co">#  EARTH PARAMETERS LOADED HERE FOR SR30.1</span>
-031492,000297: 22,3532           14037                           <span class="in">STODL   </span> <a href="TIME_OF_FREE_FALL.agc.html#5446462F52544D55">TFF/RTMU</a>                              
-031493,000298: 22,3533           05366                                    <a href="#4D494E50455245">MINPERE</a>                               
-031494,000299: 22,3534           16205                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#485045524D494E">HPERMIN</a>                               
-031495,000300: 22,3535           06276                                    <a href="P34-P35,_P74-P75.agc.html#52504144">RPAD</a>                                  
-<a name="563832474F4E32"></a>031496,000301: 22,3536           36207        <span class="sm">V82GON2 </span>           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5250414454454D">RPADTEM</a>                               <span class="co">#  COMMON CODE FOR EARTH &amp; MOON.</span>
-031497,000302: 22,3537           45551                                    <a href="#535233302E31">SR30.1</a>                                
+<a name="563832474F4E"></a>031464,000254: 22,3465           77776        <span class="sm">V82GON  </span>           <span class="in">EXIT    </span>                                       <span class="co">#  AVERAGE G ON.  USE CURRENT STATE VECTOR</span>
+031465,000255:                                                                                                  <span class="co">#  FOR ORBITAL PARAMETER CALCULATIONS.</span>
+031466,000256: 22,3466           35021                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F37">PRIO7</a>                                 <span class="co">#  LESS THAN LAMBERT</span>
+031467,000257: 22,3467           05105                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               <span class="co">#  V82GON1 WILL PERFORM ORBIT CALCULATIONS</span>
+031468,000258: 22,3470  E4,1540                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544646">TFF</a>                                   <span class="co">#  ABOUT PROPER BODY APPROX ONCE PER SEC.</span>
+031469,000259: 22,3470           03503 44064                     <span class="ps">2CADR   </span> <a href="#563832474F4E31">V82GON1</a>                               
+031470,000260: 
+031471,000261: 22,3472           00003                           <span class="op">RELINT  </span>                                       
+031472,000262: 22,3473           10067                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                <span class="co">#  WITHOLD V16 N44 UNTIL FIRST ORBIT CALC</span>
+031473,000263: 22,3474           05122                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4348414E4731">CHANG1</a>                                <span class="co">#  IS DONE.  NOTE:  V82GON1 (PRIO7, FINDVAC</span>
+031474,000264:                                                                                                  <span class="co">#  JOB) IS COMPLETED BEFORE V82GON (PRIO7,</span>
+031475,000265:                                                                                                  <span class="co">#  NOVAC JOB).</span>
+<a name="5638325245445350"></a>031476,000266: 22,3475           33317        <span class="sm">V82REDSP</span>           <span class="op">CAF     </span> <a href="#5631364E3434">V16N44</a>                                <span class="co">#  MONITOR HAPO, HPER, TFF</span>
+031477,000267: 22,3476           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+031478,000268: 22,3477           20212                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5844535046">GOXDSPF</a>                               
+031479,000269: 22,3500           05563                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#42354F4646">B5OFF</a>                                 <span class="co">#  TERM THIS TELLS V82GON1 TO KILL ITSELF.</span>
+031480,000270: 22,3501           05563                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#42354F4646">B5OFF</a>                                 <span class="co">#  PROC DITTO.</span>
+031481,000271: 22,3502           03475                           <span class="op">TC      </span> <a href="#5638325245445350">V82REDSP</a>                              <span class="co">#  RECYCLE</span>
+031482,000272: 
+<a name="563832474F4E31"></a>031483,000273: 22,3503           06036        <span class="sm">V82GON1 </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               <span class="co">#  THIS EXEC PROGRAM PERPETUATES ITSELF</span>
+031484,000274:                                                                                                  <span class="co">#  ONCE A SEC UNTIL BIT 5 OF EXTVBACT =0.</span>
+031485,000275: 22,3504           52175                           <span class="in">VLOAD   </span> <span class="in">GOTO      </span>                            <span class="co">#  HOLDS OFF CCS NEWJOB BETWEEN RN AND</span>
+031486,000276: 22,3505           01221                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524E">RN</a>                                    <span class="co">#  VN FETCH SO RN, VN ARE FROM SAME</span>
+031487,000277: 22,3506           45507                                    <a href="#4E4558544C494E45">NEXTLINE</a>                              <span class="co">#  STATE VECTOR UPDATE.</span>
+<a name="4E4558544C494E45"></a>031488,000278: 22,3507           26213        <span class="sm">NEXTLINE</span>           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4E45">RONE</a>                                  <span class="co">#  RN AT (-29)M FOR EARTH OR MOON</span>
+031489,000279: 22,3510           01227                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564E">VN</a>                                    
+031490,000280: 22,3511           02221                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564F4E45">VONE</a>                                  <span class="co">#  VN AT (-7)M/CS FOR EARTH OR MOON</span>
+031491,000281: 22,3512           52014                           <span class="in">BON     </span> <span class="in">GOTO      </span>                            
+031492,000282: 22,3513           04304                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4D4F4F4E54484953">MOONTHIS</a>                              <span class="co">#  FLAG INDICATES BODY ABOUT WHICH ORBITAL</span>
+031493,000283: 22,3514           45516                                    <a href="#4D4F4F4E474F4E">MOONGON</a>                               <span class="co">#  CALCULATIONS ARE TO BE PERFORMED.</span>
+031494,000284: 22,3515           45527                                    <a href="#4541525448474F4E">EARTHGON</a>                              <span class="co">#  IF SET - MOON, IF RESET - EARTH.</span>
+031495,000285: 
+<a name="4D4F4F4E474F4E"></a>031496,000286: 22,3516           71214        <span class="sm">MOONGON </span>           <span class="in">SET     </span> <span class="in">DLOAD     </span>                            
+031497,000287: 22,3517           03475                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#563832454D464C47">V82EMFLG</a>                              <span class="co">#  INDICATE MOON SCALING FOR SR30.1</span>
+031498,000288: 22,3520           04001                                    <a href="CONTROLLED_CONSTANTS.agc.html#312F52544D554D">1/RTMUM</a>                               <span class="co">#  LUNAR PARAMETERS LOADED HERE FOR SR30.1</span>
+031499,000289: 22,3521           14037                           <span class="in">STODL   </span> <a href="TIME_OF_FREE_FALL.agc.html#5446462F52544D55">TFF/RTMU</a>                              
+031500,000290: 22,3522           05364                                    <a href="#4D494E5045524D">MINPERM</a>                               
+031501,000291: 22,3523           26205                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#485045524D494E">HPERMIN</a>                               
+031502,000292: 22,3524           02023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C53">RLS</a>                                   <span class="co">#  SCALED AT (-27)M.</span>
+031503,000293: 22,3525           52046                           <span class="in">ABVAL   </span> <span class="in">GOTO      </span>                            
+031504,000294: 22,3526           45536                                    <a href="#563832474F4E32">V82GON2</a>                               
+<a name="4541525448474F4E"></a>031505,000295: 22,3527           71214        <span class="sm">EARTHGON</span>           <span class="in">CLEAR   </span> <span class="in">DLOAD     </span>                            
+031506,000296: 22,3530           03675                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#563832454D464C47">V82EMFLG</a>                              <span class="co">#  INDICATE EARTH SCALING FOR SR30.1</span>
+031507,000297: 22,3531           04003                                    <a href="CONTROLLED_CONSTANTS.agc.html#312F52544D5545">1/RTMUE</a>                               <span class="co">#  EARTH PARAMETERS LOADED HERE FOR SR30.1</span>
+031508,000298: 22,3532           14037                           <span class="in">STODL   </span> <a href="TIME_OF_FREE_FALL.agc.html#5446462F52544D55">TFF/RTMU</a>                              
+031509,000299: 22,3533           05366                                    <a href="#4D494E50455245">MINPERE</a>                               
+031510,000300: 22,3534           16205                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#485045524D494E">HPERMIN</a>                               
+031511,000301: 22,3535           06276                                    <a href="P34-P35,_P74-P75.agc.html#52504144">RPAD</a>                                  
+<a name="563832474F4E32"></a>031512,000302: 22,3536           36207        <span class="sm">V82GON2 </span>           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5250414454454D">RPADTEM</a>                               <span class="co">#  COMMON CODE FOR EARTH &amp; MOON.</span>
+031513,000303: 22,3537           45551                                    <a href="#535233302E31">SR30.1</a>                                
 </pre>
 </span>
 </p>
@@ -507,18 +508,18 @@ Page 726
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-031499,000304: 22,3540           77776                           <span class="in">EXIT    </span>                                       
-<a name="563832474F4E33"></a>031500,000305: 22,3541           34747        <span class="sm">V82GON3 </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495435">BIT5</a>                                  
-031501,000306: 22,3542           71044                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558545642414354">EXTVBACT</a>                              <span class="co">#  SEE IF ASTRONAUT HAS SIGNALLED TERMINATE</span>
-031502,000307: 22,3543           00006                           <span class="op">EXTEND  </span>                                       
-031503,000308: 22,3544           15472                           <span class="op">BZF     </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                <span class="co">#  YES, TERMINATE VB 82 LOOP</span>
-031504,000309: 22,3545           34777                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#31534543">1SEC</a>                                  
-031505,000310: 22,3546           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  WAIT ONE SECOND BEFORE REPEATING</span>
-031506,000311: 22,3547           01735                           <span class="ps">CADR    </span> <a href="SERVICE_ROUTINES.agc.html#44454C41594A4F42">DELAYJOB</a>                              <span class="co">#  ORBITAL PARAMETER COMPUTATION.</span>
-031507,000312: 22,3550           03503                           <span class="op">TC      </span> <a href="#563832474F4E31">V82GON1</a>                               
-031508,000313: 
-<a name="53504C524554"></a>031509,000314: 22,3551  22,3541               <span class="sm">SPLRET  </span>           <span class="ps">=       </span> <a href="#563832474F4E33">V82GON3</a>                               
-031510,000315: 
+031515,000305: 22,3540           77776                           <span class="in">EXIT    </span>                                       
+<a name="563832474F4E33"></a>031516,000306: 22,3541           34747        <span class="sm">V82GON3 </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495435">BIT5</a>                                  
+031517,000307: 22,3542           71044                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558545642414354">EXTVBACT</a>                              <span class="co">#  SEE IF ASTRONAUT HAS SIGNALLED TERMINATE</span>
+031518,000308: 22,3543           00006                           <span class="op">EXTEND  </span>                                       
+031519,000309: 22,3544           15472                           <span class="op">BZF     </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                <span class="co">#  YES, TERMINATE VB 82 LOOP</span>
+031520,000310: 22,3545           34777                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#31534543">1SEC</a>                                  
+031521,000311: 22,3546           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  WAIT ONE SECOND BEFORE REPEATING</span>
+031522,000312: 22,3547           01735                           <span class="ps">CADR    </span> <a href="SERVICE_ROUTINES.agc.html#44454C41594A4F42">DELAYJOB</a>                              <span class="co">#  ORBITAL PARAMETER COMPUTATION.</span>
+031523,000313: 22,3550           03503                           <span class="op">TC      </span> <a href="#563832474F4E31">V82GON1</a>                               
+031524,000314: 
+<a name="53504C524554"></a>031525,000315: 22,3551  22,3541               <span class="sm">SPLRET  </span>           <span class="ps">=       </span> <a href="#563832474F4E33">V82GON3</a>                               
+031526,000316: 
 </pre>
 </span>
 </p>
@@ -534,59 +535,59 @@ Page 727
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-031512,000317:                                                                                                  <span class="co">#  SUBROUTINE NAME: SR30.1</span>
-031513,000318:                                                                                                  <span class="co">#  MOD NO: 0                                                             DATE: 16 FEB 67</span>
-031514,000319:                                                                                                  <span class="co">#  MOD BY: RR BAIRNSFATHER                                               LOG SECTION: R32</span>
-031515,000320:                                                                                                  <span class="co">#  MOD NO: 1     MOD BY: RR BAIRNSFATHER         DATE: 11 APR 67         SR30.1 CHANGED TO ALLOW MONITOR OPERN</span>
-031516,000321:                                                                                                  <span class="co">#  MOD NO: 2     MOD BY: RR BAIRNSFATHER         DATE: 14 APR 67         ADD OVFL CK FOR RAPO</span>
-031517,000322:                                                                                                  <span class="co">#  MOD NO: 3     MOD BY ALONSO                   DATE: 11 DEC 67         SUBROUTINE REWRITTEN</span>
-031518,000323:                                                                                                  <span class="co">#  MOD NO: 4     MOD BY ALONSO                   DATE: 26 MAR 68         PROG MOD TO HANDLE DIF EARTH/MOON SCALE</span>
-031519,000324:                                                                                                  <span class="co">#  MOD NO: 5     MOD BY: RR BAIRNSFATHER         DATE: 6 AUG 68          OVFL CK FOR HAPO &amp; HPER. VOIDS MOD #2.</span>
-031520,000325: 
-031521,000326:                                                                                                  <span class="co">#  NEW FUNCTIONAL DESCRIPTION:  ORBITAL PARAMETERS DISPLAY FOR NOUNS 32 AND 44.</span>
-031522,000327:                                                                                                  <span class="co">#  SR30.1 CALLS TFFCONMU AND TFFRP/RA TO CALCULATE RPER (PERIGEE RADIUS),</span>
-031523,000328:                                                                                                  <span class="co">#  RAPO (APOGEE RADIUS), HPER (PERIGEE HEIGHT ABOVE LAUNCH PAD OR LUNAR</span>
-031524,000329:                                                                                                  <span class="co">#  LANDING SITE), HAPO (APOGEE HEIGHT AS ABOVE), TPER (TIME TO PERIGEE),</span>
-031525,000330:                                                                                                  <span class="co">#  TFF (TIME TO INTERSECT 300 KFT ABOVE PAD OR 35KFT ABOVE LANDING SITE).</span>
-031526,000331:                                                                                                  <span class="co">#  IF HPER IS GREATER THAN OR EQUAL TO HPERMIN, CALCULATES TPER AND STORES</span>
-031527,000332:                                                                                                  <span class="co">#  NEGATIVE IN -TPER.  OTHERWISE STORES +0 IN -TPER.  WHENEVER TPER IS</span>
-031528,000333:                                                                                                  <span class="co">#  CALCULATED, TFF IS NOT COMPUTABLE AND DEFAULTS TO -59MIN 59SEC.  IF HAPO</span>
-031529,000334:                                                                                                  <span class="co">#  WOULD EXCEED 9999.9 NM, IT IS LIMITED TO THAT VALUE FOR DISPLAY.</span>
-031530,000335: 
-031531,000336:                                                                                                  <span class="co">#  ADDENDUM:     HAPO AND HPER SHOULD BE CHANGED TO READ HAPOX AND HPERX IN THE</span>
-031532,000337:                                                                                                  <span class="co">#                ABOVE REMARKS.</span>
-031533,000338: 
-031534,000339:                                                                                                  <span class="co">#  CALLING SEQUENCE:     CALL</span>
-031535,000340:                                                                                                  <span class="co">#                                SR30.1</span>
-031536,000341: 
-031537,000342:                                                                                                  <span class="co">#  SUBROUTINES CALLED:   TFFCONMU, TFFRP/RA, CALCTPER, CALCTFF</span>
-031538,000343: 
-031539,000344:                                                                                                  <span class="co">#  NORMAL EXIT MODE:     CALLING LINE +1 (STILL IN INTERPRETIVE MODE)</span>
-031540,000345: 
-031541,000346:                                                                                                  <span class="co">#  ALARMS:       NONE</span>
-031542,000347: 
-031543,000348:                                                                                                  <span class="co">#  OUTPUT:       RAPO    (-29) M EARTH   APOGEE RADIUS   EARTH CENTERED COORD.</span>
-031544,000349:                                                                                                  <span class="co">#                        (-27) M MOON                    MOON CENTERED COORD.</span>
-031545,000350:                                                                                                  <span class="co">#                RPER    (-29) M EARTH   PERIGEE RADIUS  EARTH CENTERED COORD.</span>
-031546,000351:                                                                                                  <span class="co">#                        (-27) M MOON                    MOON CENTERED COORD.</span>
-031547,000352:                                                                                                  <span class="co">#                HAPOX   (-29) M         APOGEE ALTITUDE ABOVE PAD OR LAND. SITE MAX VALUE LIMITED TO 9999.9 NM.</span>
-031548,000353:                                                                                                  <span class="co">#                HPERX   (-29) M         PERIGEE ALT. ABOVE PAD OR LAND. SITE    MAX VALUE LIMITED TO 9999.9 NM.</span>
-031549,000354:                                                                                                  <span class="co">#                TFF     (-28) CS        TIME TO 300KFT OR 35KFT ALTITUDE</span>
-031550,000355:                                                                                                  <span class="co">#                -TPER   (-28) CS        TIME TO PERIGEE</span>
-031551,000356: 
-031552,000357:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED -</span>
-031553,000358:                                                                                                  <span class="co">#        TFF/RTMU        (+17) EARTH     RECIPROCAL OF PROPER GRAV CONSTANT FOR</span>
-031554,000359:                                                                                                  <span class="co">#                        (+14) MOON      EARTH OR MOON = 1/SQRT(MU).</span>
-031555,000360:                                                                                                  <span class="co">#        RONE            (-29) M         STATE VECTOR</span>
-031556,000361:                                                                                                  <span class="co">#        VONE            (-7)  M/CS      STATE VECTOR</span>
-031557,000362:                                                                                                  <span class="co">#        RPADTEM         (-29) M EARTH   RADIUS OF LAUNCH PAD OR LUNAR LANDING</span>
-031558,000363:                                                                                                  <span class="co">#                        (-27) M MOON    SITE.</span>
-031559,000364:                                                                                                  <span class="co">#        HPERMIN         (-29) M EARTH   (300 OR 35) KFT MINIMUM PERIGEE ALTITUDE</span>
-031560,000365:                                                                                                  <span class="co">#                        (-27) M MOON    ABOVE LAUNCH PAD OR LUNAR LANDING SITE.</span>
-031561,000366:                                                                                                  <span class="co">#        V82EMFLG        (INT SW BIT)    RESET FOR EARTH, SET FOR MOON.</span>
-031562,000367: 
-031563,000368:                                                                                                  <span class="co">#  DEBRIS:       QPRET, PDL, S2</span>
-031564,000369: 
+031528,000318:                                                                                                  <span class="co">#  SUBROUTINE NAME: SR30.1</span>
+031529,000319:                                                                                                  <span class="co">#  MOD NO: 0                                                             DATE: 16 FEB 67</span>
+031530,000320:                                                                                                  <span class="co">#  MOD BY: RR BAIRNSFATHER                                               LOG SECTION: R32</span>
+031531,000321:                                                                                                  <span class="co">#  MOD NO: 1     MOD BY: RR BAIRNSFATHER         DATE: 11 APR 67         SR30.1 CHANGED TO ALLOW MONITOR OPERN</span>
+031532,000322:                                                                                                  <span class="co">#  MOD NO: 2     MOD BY: RR BAIRNSFATHER         DATE: 14 APR 67         ADD OVFL CK FOR RAPO</span>
+031533,000323:                                                                                                  <span class="co">#  MOD NO: 3     MOD BY ALONSO                   DATE: 11 DEC 67         SUBROUTINE REWRITTEN</span>
+031534,000324:                                                                                                  <span class="co">#  MOD NO: 4     MOD BY ALONSO                   DATE: 26 MAR 68         PROG MOD TO HANDLE DIF EARTH/MOON SCALE</span>
+031535,000325:                                                                                                  <span class="co">#  MOD NO: 5     MOD BY: RR BAIRNSFATHER         DATE: 6 AUG 68          OVFL CK FOR HAPO &amp; HPER. VOIDS MOD #2.</span>
+031536,000326: 
+031537,000327:                                                                                                  <span class="co">#  NEW FUNCTIONAL DESCRIPTION:  ORBITAL PARAMETERS DISPLAY FOR NOUNS 32 AND 44.</span>
+031538,000328:                                                                                                  <span class="co">#  SR30.1 CALLS TFFCONMU AND TFFRP/RA TO CALCULATE RPER (PERIGEE RADIUS),</span>
+031539,000329:                                                                                                  <span class="co">#  RAPO (APOGEE RADIUS), HPER (PERIGEE HEIGHT ABOVE LAUNCH PAD OR LUNAR</span>
+031540,000330:                                                                                                  <span class="co">#  LANDING SITE), HAPO (APOGEE HEIGHT AS ABOVE), TPER (TIME TO PERIGEE),</span>
+031541,000331:                                                                                                  <span class="co">#  TFF (TIME TO INTERSECT 300 KFT ABOVE PAD OR 35KFT ABOVE LANDING SITE).</span>
+031542,000332:                                                                                                  <span class="co">#  IF HPER IS GREATER THAN OR EQUAL TO HPERMIN, CALCULATES TPER AND STORES</span>
+031543,000333:                                                                                                  <span class="co">#  NEGATIVE IN -TPER.  OTHERWISE STORES +0 IN -TPER.  WHENEVER TPER IS</span>
+031544,000334:                                                                                                  <span class="co">#  CALCULATED, TFF IS NOT COMPUTABLE AND DEFAULTS TO -59MIN 59SEC.  IF HAPO</span>
+031545,000335:                                                                                                  <span class="co">#  WOULD EXCEED 9999.9 NM, IT IS LIMITED TO THAT VALUE FOR DISPLAY.</span>
+031546,000336: 
+031547,000337:                                                                                                  <span class="co">#  ADDENDUM:     HAPO AND HPER SHOULD BE CHANGED TO READ HAPOX AND HPERX IN THE</span>
+031548,000338:                                                                                                  <span class="co">#                ABOVE REMARKS.</span>
+031549,000339: 
+031550,000340:                                                                                                  <span class="co">#  CALLING SEQUENCE:     CALL</span>
+031551,000341:                                                                                                  <span class="co">#                                SR30.1</span>
+031552,000342: 
+031553,000343:                                                                                                  <span class="co">#  SUBROUTINES CALLED:   TFFCONMU, TFFRP/RA, CALCTPER, CALCTFF</span>
+031554,000344: 
+031555,000345:                                                                                                  <span class="co">#  NORMAL EXIT MODE:     CALLING LINE +1 (STILL IN INTERPRETIVE MODE)</span>
+031556,000346: 
+031557,000347:                                                                                                  <span class="co">#  ALARMS:       NONE</span>
+031558,000348: 
+031559,000349:                                                                                                  <span class="co">#  OUTPUT:       RAPO    (-29) M EARTH   APOGEE RADIUS   EARTH CENTERED COORD.</span>
+031560,000350:                                                                                                  <span class="co">#                        (-27) M MOON                    MOON CENTERED COORD.</span>
+031561,000351:                                                                                                  <span class="co">#                RPER    (-29) M EARTH   PERIGEE RADIUS  EARTH CENTERED COORD.</span>
+031562,000352:                                                                                                  <span class="co">#                        (-27) M MOON                    MOON CENTERED COORD.</span>
+031563,000353:                                                                                                  <span class="co">#                HAPOX   (-29) M         APOGEE ALTITUDE ABOVE PAD OR LAND. SITE MAX VALUE LIMITED TO 9999.9 NM.</span>
+031564,000354:                                                                                                  <span class="co">#                HPERX   (-29) M         PERIGEE ALT. ABOVE PAD OR LAND. SITE    MAX VALUE LIMITED TO 9999.9 NM.</span>
+031565,000355:                                                                                                  <span class="co">#                TFF     (-28) CS        TIME TO 300KFT OR 35KFT ALTITUDE</span>
+031566,000356:                                                                                                  <span class="co">#                -TPER   (-28) CS        TIME TO PERIGEE</span>
+031567,000357: 
+031568,000358:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED -</span>
+031569,000359:                                                                                                  <span class="co">#        TFF/RTMU        (+17) EARTH     RECIPROCAL OF PROPER GRAV CONSTANT FOR</span>
+031570,000360:                                                                                                  <span class="co">#                        (+14) MOON      EARTH OR MOON = 1/SQRT(MU).</span>
+031571,000361:                                                                                                  <span class="co">#        RONE            (-29) M         STATE VECTOR</span>
+031572,000362:                                                                                                  <span class="co">#        VONE            (-7)  M/CS      STATE VECTOR</span>
+031573,000363:                                                                                                  <span class="co">#        RPADTEM         (-29) M EARTH   RADIUS OF LAUNCH PAD OR LUNAR LANDING</span>
+031574,000364:                                                                                                  <span class="co">#                        (-27) M MOON    SITE.</span>
+031575,000365:                                                                                                  <span class="co">#        HPERMIN         (-29) M EARTH   (300 OR 35) KFT MINIMUM PERIGEE ALTITUDE</span>
+031576,000366:                                                                                                  <span class="co">#                        (-27) M MOON    ABOVE LAUNCH PAD OR LUNAR LANDING SITE.</span>
+031577,000367:                                                                                                  <span class="co">#        V82EMFLG        (INT SW BIT)    RESET FOR EARTH, SET FOR MOON.</span>
+031578,000368: 
+031579,000369:                                                                                                  <span class="co">#  DEBRIS:       QPRET, PDL, S2</span>
+031580,000370: 
 </pre>
 </span>
 </p>
@@ -602,56 +603,56 @@ Page 728
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-031566,000371: 22,3551                                           <span class="ps">COUNT*  </span> $$/SR30S                              
-031567,000372: 
-<a name="535233302E31"></a>031568,000373: 22,3551           44001        <span class="sm">SR30.1  </span>           <span class="in">SETPD   </span> <span class="in">STQ       </span>                            <span class="co">#  INITIALIZE PUSHDOWN LIST.</span>
-031569,000374: 22,3552           00001                                    0                                     
-031570,000375: 22,3553           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
-031571,000376:                                                                                                  <span class="co">#  SR30.1 INPUT: RONE AT (-29)M EARTH/MOON</span>
-031572,000377:                                                                                                  <span class="co">#                VONE AT (-7)M/CS</span>
-031573,000378:                                                                                                  <span class="co">#  TFFCONMU, TFFRP/RA, CALCTPER AND CALCTFF</span>
-031574,000379:                                                                                                  <span class="co">#  CALLS REQUIRE:</span>
-031575,000380:                                                                                                  <span class="co">#  EARTH CENTERED (NO RESCALING REQUIRED)</span>
-031576,000381:                                                                                                  <span class="co">#        RONE SCALED TO B-29 M</span>
-031577,000382:                                                                                                  <span class="co">#        VONE SCALED TO B-7  M/CS</span>
-031578,000383:                                                                                                  <span class="co">#  MOON CENTERED (RESCALING REQUIRED)</span>
-031579,000384:                                                                                                  <span class="co">#        RONE SCALED TO B-27 M</span>
-031580,000385:                                                                                                  <span class="co">#        VONE SCALED TO B-5  M/CS</span>
-031581,000386: 22,3554           77214                           <span class="in">BOFF    </span> <span class="in">VLOAD     </span>                            
-031582,000387: 22,3555           03755                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#563832454D464C47">V82EMFLG</a>                              <span class="co">#  OFF FOR EARTH, ON FOR MOON.</span>
-031583,000388: 22,3556           45565                                    <a href="#54464643414C4C53">TFFCALLS</a>                              
-031584,000389: 22,3557           02213                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4E45">RONE</a>                                  
-031585,000390: 22,3560           77752                           <span class="in">VSL2    </span>                                       
-031586,000391: 22,3561           26213                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4E45">RONE</a>                                  
-031587,000392: 22,3562           02221                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564F4E45">VONE</a>                                  
-031588,000393: 22,3563           77752                           <span class="in">VSL2    </span>                                       
-031589,000394: 22,3564           02221                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564F4E45">VONE</a>                                  
-<a name="54464643414C4C53"></a>031590,000395: 22,3565           77624        <span class="sm">TFFCALLS</span>           <span class="in">CALL    </span>                                       
-031591,000396: 22,3566           57333                                    <a href="TIME_OF_FREE_FALL.agc.html#544646434F4E4D55">TFFCONMU</a>                              
-031592,000397: 22,3567           77624                           <span class="in">CALL    </span>                                       <span class="co">#  TFFRP/RA COMPUTES RAPO,RPER.</span>
-031593,000398: 22,3570           57401                                    <a href="TIME_OF_FREE_FALL.agc.html#54464652502F5241">TFFRP/RA</a>                              
-031594,000399:                                                                                                  <span class="co">#  RETURNS WITH RAPO IN D(MPAC).</span>
-031595,000400: 22,3571           77625                           <span class="in">DSU     </span>                                       
-031596,000401: 22,3572           02207                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5250414454454D">RPADTEM</a>                               
-031597,000402: 22,3573           64414                           <span class="in">BOFF    </span> <span class="in">SR2R      </span>                            <span class="co">#  NEED HAPO AT (-29)M FOR DISPLAY.</span>
-031598,000403:                                                                                                  <span class="co">#  IF MOON CENTERED, RESCALE FROM (-27)M.</span>
-031599,000404:                                                                                                  <span class="co">#  IF EARTH CENTERED ALREADY AT (-29)M.</span>
-031600,000405: 22,3574           03755                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#563832454D464C47">V82EMFLG</a>                              <span class="co">#  OFF FOR EARTH, ON FOR MOON.</span>
-031601,000406: 22,3575           45576                                    +1                                    
-031602,000407: 22,3576           77624                           <span class="in">CALL    </span>                                       <span class="co">#  IF HAPO > MAXNM, SET HAPO =9999.9 NM.</span>
-031603,000408: 22,3577           45636                                    <a href="#4D415843484B">MAXCHK</a>                                <span class="co">#  OTHERWISE STORE (RAPO-RPADTEM) IN HAPO.</span>
-<a name="53544F524841504F"></a>031604,000409: 22,3600           16120        <span class="sm">STORHAPO</span>           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4841504F58">HAPOX</a>                                 
-031605,000410: 22,3601           00017                                    <a href="TIME_OF_FREE_FALL.agc.html#52504552">RPER</a>                                  
-031606,000411: 22,3602           77625                           <span class="in">DSU     </span>                                       
-031607,000412: 22,3603           02207                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5250414454454D">RPADTEM</a>                               <span class="co">#  GIVES HPER AT (-29)M EARTH, (-27)M MOON.</span>
-031608,000413: 22,3604           00161                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +4                         <span class="co">#  SAVE THIS FOR COMPARISON TO HPERMIN.</span>
-031609,000414: 22,3605           64414                           <span class="in">BOFF    </span> <span class="in">SR2R      </span>                            <span class="co">#  NEED HPER AT (-29)M FOR DISPLAY.</span>
-031610,000415:                                                                                                  <span class="co">#  IF MOON CENTERED, RESCALE FROM (-27)M.</span>
-031611,000416:                                                                                                  <span class="co">#  IF EARTH CENTERED ALREADY AT (-29)M.</span>
-031612,000417: 22,3606           03755                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#563832454D464C47">V82EMFLG</a>                              <span class="co">#  OFF FOR EARTH, ON FOR MOON.</span>
-031613,000418: 22,3607           45610                                    +1                                    
-031614,000419: 22,3610           77624                           <span class="in">CALL    </span>                                       <span class="co">#  IF HPER > MAXNM, SET HPER = 9999.9 NM.</span>
-031615,000420: 22,3611           45636                                    <a href="#4D415843484B">MAXCHK</a>                                
+031582,000372: 22,3551                                           <span class="ps">COUNT*  </span> $$/SR30S                              
+031583,000373: 
+<a name="535233302E31"></a>031584,000374: 22,3551           44001        <span class="sm">SR30.1  </span>           <span class="in">SETPD   </span> <span class="in">STQ       </span>                            <span class="co">#  INITIALIZE PUSHDOWN LIST.</span>
+031585,000375: 22,3552           00001                                    0                                     
+031586,000376: 22,3553           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
+031587,000377:                                                                                                  <span class="co">#  SR30.1 INPUT: RONE AT (-29)M EARTH/MOON</span>
+031588,000378:                                                                                                  <span class="co">#                VONE AT (-7)M/CS</span>
+031589,000379:                                                                                                  <span class="co">#  TFFCONMU, TFFRP/RA, CALCTPER AND CALCTFF</span>
+031590,000380:                                                                                                  <span class="co">#  CALLS REQUIRE:</span>
+031591,000381:                                                                                                  <span class="co">#  EARTH CENTERED (NO RESCALING REQUIRED)</span>
+031592,000382:                                                                                                  <span class="co">#        RONE SCALED TO B-29 M</span>
+031593,000383:                                                                                                  <span class="co">#        VONE SCALED TO B-7  M/CS</span>
+031594,000384:                                                                                                  <span class="co">#  MOON CENTERED (RESCALING REQUIRED)</span>
+031595,000385:                                                                                                  <span class="co">#        RONE SCALED TO B-27 M</span>
+031596,000386:                                                                                                  <span class="co">#        VONE SCALED TO B-5  M/CS</span>
+031597,000387: 22,3554           77214                           <span class="in">BOFF    </span> <span class="in">VLOAD     </span>                            
+031598,000388: 22,3555           03755                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#563832454D464C47">V82EMFLG</a>                              <span class="co">#  OFF FOR EARTH, ON FOR MOON.</span>
+031599,000389: 22,3556           45565                                    <a href="#54464643414C4C53">TFFCALLS</a>                              
+031600,000390: 22,3557           02213                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4E45">RONE</a>                                  
+031601,000391: 22,3560           77752                           <span class="in">VSL2    </span>                                       
+031602,000392: 22,3561           26213                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4E45">RONE</a>                                  
+031603,000393: 22,3562           02221                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564F4E45">VONE</a>                                  
+031604,000394: 22,3563           77752                           <span class="in">VSL2    </span>                                       
+031605,000395: 22,3564           02221                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564F4E45">VONE</a>                                  
+<a name="54464643414C4C53"></a>031606,000396: 22,3565           77624        <span class="sm">TFFCALLS</span>           <span class="in">CALL    </span>                                       
+031607,000397: 22,3566           57333                                    <a href="TIME_OF_FREE_FALL.agc.html#544646434F4E4D55">TFFCONMU</a>                              
+031608,000398: 22,3567           77624                           <span class="in">CALL    </span>                                       <span class="co">#  TFFRP/RA COMPUTES RAPO,RPER.</span>
+031609,000399: 22,3570           57401                                    <a href="TIME_OF_FREE_FALL.agc.html#54464652502F5241">TFFRP/RA</a>                              
+031610,000400:                                                                                                  <span class="co">#  RETURNS WITH RAPO IN D(MPAC).</span>
+031611,000401: 22,3571           77625                           <span class="in">DSU     </span>                                       
+031612,000402: 22,3572           02207                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5250414454454D">RPADTEM</a>                               
+031613,000403: 22,3573           64414                           <span class="in">BOFF    </span> <span class="in">SR2R      </span>                            <span class="co">#  NEED HAPO AT (-29)M FOR DISPLAY.</span>
+031614,000404:                                                                                                  <span class="co">#  IF MOON CENTERED, RESCALE FROM (-27)M.</span>
+031615,000405:                                                                                                  <span class="co">#  IF EARTH CENTERED ALREADY AT (-29)M.</span>
+031616,000406: 22,3574           03755                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#563832454D464C47">V82EMFLG</a>                              <span class="co">#  OFF FOR EARTH, ON FOR MOON.</span>
+031617,000407: 22,3575           45576                                    +1                                    
+031618,000408: 22,3576           77624                           <span class="in">CALL    </span>                                       <span class="co">#  IF HAPO > MAXNM, SET HAPO =9999.9 NM.</span>
+031619,000409: 22,3577           45636                                    <a href="#4D415843484B">MAXCHK</a>                                <span class="co">#  OTHERWISE STORE (RAPO-RPADTEM) IN HAPO.</span>
+<a name="53544F524841504F"></a>031620,000410: 22,3600           16120        <span class="sm">STORHAPO</span>           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4841504F58">HAPOX</a>                                 
+031621,000411: 22,3601           00017                                    <a href="TIME_OF_FREE_FALL.agc.html#52504552">RPER</a>                                  
+031622,000412: 22,3602           77625                           <span class="in">DSU     </span>                                       
+031623,000413: 22,3603           02207                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5250414454454D">RPADTEM</a>                               <span class="co">#  GIVES HPER AT (-29)M EARTH, (-27)M MOON.</span>
+031624,000414: 22,3604           00161                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +4                         <span class="co">#  SAVE THIS FOR COMPARISON TO HPERMIN.</span>
+031625,000415: 22,3605           64414                           <span class="in">BOFF    </span> <span class="in">SR2R      </span>                            <span class="co">#  NEED HPER AT (-29)M FOR DISPLAY.</span>
+031626,000416:                                                                                                  <span class="co">#  IF MOON CENTERED, RESCALE FROM (-27)M.</span>
+031627,000417:                                                                                                  <span class="co">#  IF EARTH CENTERED ALREADY AT (-29)M.</span>
+031628,000418: 22,3606           03755                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#563832454D464C47">V82EMFLG</a>                              <span class="co">#  OFF FOR EARTH, ON FOR MOON.</span>
+031629,000419: 22,3607           45610                                    +1                                    
+031630,000420: 22,3610           77624                           <span class="in">CALL    </span>                                       <span class="co">#  IF HPER > MAXNM, SET HPER = 9999.9 NM.</span>
+031631,000421: 22,3611           45636                                    <a href="#4D415843484B">MAXCHK</a>                                
 </pre>
 </span>
 </p>
@@ -667,37 +668,37 @@ Page 729
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="53544F5248504552"></a>031617,000422: 22,3612           16122        <span class="sm">STORHPER</span>           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4850455258">HPERX</a>                                 <span class="co">#  STORE (RPER - RPADTEM) INTO HPERX.</span>
-031618,000423: 22,3613           00161                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +4                         
-031619,000424: 22,3614           51025                           <span class="in">DSU     </span> <span class="in">BPL       </span>                            <span class="co">#  HPERMIN AT (-29)M FOR EARTH, (-27)M MOON</span>
-031620,000425: 22,3615           02205                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#485045524D494E">HPERMIN</a>                               <span class="co">#  IF HPER L/ HPERMIN (300 OR 35) KFT,</span>
-031621,000426: 22,3616           45622                                    <a href="#444F54504552">DOTPER</a>                                <span class="co">#  THEN ZERO INTO -TPER.</span>
-031622,000427: 22,3617           52145                           <span class="in">DLOAD   </span> <span class="in">GOTO      </span>                            <span class="co">#  OTHERWISE CALCULATE TPER.</span>
-031623,000428: 22,3620           06424                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849365A45524F53">HI6ZEROS</a>                              
-031624,000429: 22,3621           45626                                    <a href="#534B495054504552">SKIPTPER</a>                              
-<a name="444F54504552"></a>031625,000430: 22,3622           45145        <span class="sm">DOTPER  </span>           <span class="in">DLOAD   </span> <span class="in">CALL      </span>                            
-031626,000431: 22,3623           00017                                    <a href="TIME_OF_FREE_FALL.agc.html#52504552">RPER</a>                                  
-031627,000432: 22,3624           57437                                    <a href="TIME_OF_FREE_FALL.agc.html#43414C4354504552">CALCTPER</a>                              
-031628,000433: 22,3625           77676                           <span class="in">DCOMP   </span>                                       <span class="co">#  TPER IS PUT NEG INTO -TPER.</span>
-<a name="534B495054504552"></a>031629,000434: 22,3626           16143        <span class="sm">SKIPTPER</span>           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D54504552">-TPER</a>                                 
-031630,000435: 22,3627           02205                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#485045524D494E">HPERMIN</a>                               <span class="co">#  HPERMIN AT (-29)M FOR EARTH, (-27)M MOON</span>
-031631,000436: 22,3630           45015                           <span class="in">DAD     </span> <span class="in">CALL      </span>                            
-031632,000437: 22,3631           02207                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5250414454454D">RPADTEM</a>                               <span class="co">#  RPADTEM AT (-29)M FOR EARTH, (-27)M MOON</span>
-031633,000438: 22,3632           57442                                    <a href="TIME_OF_FREE_FALL.agc.html#43414C43544646">CALCTFF</a>                               <span class="co">#  GIVES 59M59S FOR TFF IF RPER G/</span>
-031634,000439: 22,3633           77676                           <span class="in">DCOMP   </span>                                       <span class="co">#  HPERMIN + RPADTEM.  (TPER WAS NON ZERO)</span>
-031635,000440: 22,3634           36141                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544646">TFF</a>                                   <span class="co">#  OTHERWISE COMPUTES TFF.       (GOTO)</span>
-031636,000441: 22,3635           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
-031637,000442: 
-<a name="4D415843484B"></a>031638,000443: 22,3636           51025        <span class="sm">MAXCHK  </span>           <span class="in">DSU     </span> <span class="in">BPL       </span>                            <span class="co">#  IF C(MPAC) > 9999.9 NM, MPAC = 9999.9 NM</span>
-031639,000444: 22,3637           05646                                    <a href="#4D41584E4D">MAXNM</a>                                 
-031640,000445: 22,3640           45643                                    +3                                    <span class="co">#  OTHERWISE C(MPAC) = B(MPAC).</span>
-031641,000446: 22,3641           43415                           <span class="in">DAD     </span> <span class="in">RVQ       </span>                            
-031642,000447: 22,3642           05646                                    <a href="#4D41584E4D">MAXNM</a>                                 
-031643,000448: 22,3643           43545                 +3        <span class="in">DLOAD   </span> <span class="in">RVQ       </span>                            <span class="co">#  (USED BY P30 - P37 ALSO)</span>
-031644,000449: 22,3644           05646                                    <a href="#4D41584E4D">MAXNM</a>                                 
-031645,000450: 
-<a name="4D41584E4D"></a>031646,000451: 22,3645           01065 05603  <span class="sm">MAXNM   </span>           <span class="ps">2OCT    </span> 01065      05603                      
-031647,000452: 
+<a name="53544F5248504552"></a>031633,000423: 22,3612           16122        <span class="sm">STORHPER</span>           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4850455258">HPERX</a>                                 <span class="co">#  STORE (RPER - RPADTEM) INTO HPERX.</span>
+031634,000424: 22,3613           00161                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +4                         
+031635,000425: 22,3614           51025                           <span class="in">DSU     </span> <span class="in">BPL       </span>                            <span class="co">#  HPERMIN AT (-29)M FOR EARTH, (-27)M MOON</span>
+031636,000426: 22,3615           02205                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#485045524D494E">HPERMIN</a>                               <span class="co">#  IF HPER L/ HPERMIN (300 OR 35) KFT,</span>
+031637,000427: 22,3616           45622                                    <a href="#444F54504552">DOTPER</a>                                <span class="co">#  THEN ZERO INTO -TPER.</span>
+031638,000428: 22,3617           52145                           <span class="in">DLOAD   </span> <span class="in">GOTO      </span>                            <span class="co">#  OTHERWISE CALCULATE TPER.</span>
+031639,000429: 22,3620           06424                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849365A45524F53">HI6ZEROS</a>                              
+031640,000430: 22,3621           45626                                    <a href="#534B495054504552">SKIPTPER</a>                              
+<a name="444F54504552"></a>031641,000431: 22,3622           45145        <span class="sm">DOTPER  </span>           <span class="in">DLOAD   </span> <span class="in">CALL      </span>                            
+031642,000432: 22,3623           00017                                    <a href="TIME_OF_FREE_FALL.agc.html#52504552">RPER</a>                                  
+031643,000433: 22,3624           57437                                    <a href="TIME_OF_FREE_FALL.agc.html#43414C4354504552">CALCTPER</a>                              
+031644,000434: 22,3625           77676                           <span class="in">DCOMP   </span>                                       <span class="co">#  TPER IS PUT NEG INTO -TPER.</span>
+<a name="534B495054504552"></a>031645,000435: 22,3626           16143        <span class="sm">SKIPTPER</span>           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D54504552">-TPER</a>                                 
+031646,000436: 22,3627           02205                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#485045524D494E">HPERMIN</a>                               <span class="co">#  HPERMIN AT (-29)M FOR EARTH, (-27)M MOON</span>
+031647,000437: 22,3630           45015                           <span class="in">DAD     </span> <span class="in">CALL      </span>                            
+031648,000438: 22,3631           02207                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5250414454454D">RPADTEM</a>                               <span class="co">#  RPADTEM AT (-29)M FOR EARTH, (-27)M MOON</span>
+031649,000439: 22,3632           57442                                    <a href="TIME_OF_FREE_FALL.agc.html#43414C43544646">CALCTFF</a>                               <span class="co">#  GIVES 59M59S FOR TFF IF RPER G/</span>
+031650,000440: 22,3633           77676                           <span class="in">DCOMP   </span>                                       <span class="co">#  HPERMIN + RPADTEM.  (TPER WAS NON ZERO)</span>
+031651,000441: 22,3634           36141                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544646">TFF</a>                                   <span class="co">#  OTHERWISE COMPUTES TFF.       (GOTO)</span>
+031652,000442: 22,3635           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
+031653,000443: 
+<a name="4D415843484B"></a>031654,000444: 22,3636           51025        <span class="sm">MAXCHK  </span>           <span class="in">DSU     </span> <span class="in">BPL       </span>                            <span class="co">#  IF C(MPAC) > 9999.9 NM, MPAC = 9999.9 NM</span>
+031655,000445: 22,3637           05646                                    <a href="#4D41584E4D">MAXNM</a>                                 
+031656,000446: 22,3640           45643                                    +3                                    <span class="co">#  OTHERWISE C(MPAC) = B(MPAC).</span>
+031657,000447: 22,3641           43415                           <span class="in">DAD     </span> <span class="in">RVQ       </span>                            
+031658,000448: 22,3642           05646                                    <a href="#4D41584E4D">MAXNM</a>                                 
+031659,000449: 22,3643           43545                 +3        <span class="in">DLOAD   </span> <span class="in">RVQ       </span>                            <span class="co">#  (USED BY P30 - P37 ALSO)</span>
+031660,000450: 22,3644           05646                                    <a href="#4D41584E4D">MAXNM</a>                                 
+031661,000451: 
+<a name="4D41584E4D"></a>031662,000452: 22,3645           01065 05603  <span class="sm">MAXNM   </span>           <span class="ps">2OCT    </span> 01065      05603                      
+031663,000453: 
 </pre>
 </span>
 </p>
@@ -714,7 +715,7 @@ Empty page.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-031650,000455: 
+031666,000456: 
 
 End of include-file R30.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

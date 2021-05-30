@@ -90,28 +90,28 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-039212,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-039213,000003:                                                                                                  <span class="co">## Filename:    LOGSUB_ROUTINE.agc</span>
-039214,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
-039215,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
-039216,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
-039217,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
-039218,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
-039219,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
-039220,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
-039221,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-039222,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-039223,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-039224,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
-039225,000015:                                                                                                  <span class="co">## Reference:   p.  864</span>
-039226,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-039227,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-039228,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-039229,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
-039230,000020:                                                                                                  <span class="co">##              2017-06-13 HG   Transcribed</span>
-039231,000021:                                                                                                  <span class="co">##              2017-06-23 RSB  Proofed comment text with</span>
-039232,000022:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
-039233,000023: 
+039220,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+039221,000003:                                                                                                  <span class="co">## Filename:    LOGSUB_ROUTINE.agc</span>
+039222,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
+039223,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
+039224,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
+039225,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
+039226,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
+039227,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
+039228,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
+039229,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+039230,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+039231,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+039232,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
+039233,000015:                                                                                                  <span class="co">## Reference:   p.  864</span>
+039234,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+039235,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+039236,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+039237,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
+039238,000020:                                                                                                  <span class="co">##              2017-06-13 HG   Transcribed</span>
+039239,000021:                                                                                                  <span class="co">##              2017-06-23 RSB  Proofed comment text with</span>
+039240,000022:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
+039241,000023: 
 </pre>
 </span>
 </p>
@@ -127,53 +127,53 @@ Page 864
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-039235,000025:                                                                                                  <span class="co">#  INPUT....X IN MPAC</span>
-039236,000026:                                                                                                  <span class="co">#  OUTPUT...-LOG(X)/32 IN MPAC</span>
-039237,000027: 
-039238,000028: 
-039239,000029: 32,2771                                           <span class="ps">BANK    </span> 32                                    
-<a name="4C4F47535542"></a>039240,000030: 32,2771           44301        <span class="sm">LOGSUB  </span>           <span class="in">NORM    </span> <span class="in">BDSU      </span>                            
-039241,000031: 32,2772           00121                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-039242,000032: 32,2773           25040                                    <a href="#414C4D4F535431">ALMOST1</a>                               
-039243,000033: 32,2774           77776                           <span class="in">EXIT    </span>                                       
-039244,000034: 32,2775           07265                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#504F4C59">POLY</a>                                  
-039245,000035: 32,2776           00006                           <span class="ps">DEC     </span> 6          B-14                       
-039246,000036: 32,2777           00000 00002                     <span class="ps">2DEC    </span> .0000000060                            
-039247,000037: 
-039248,000038: 
-039249,000039: 32,3001           76777 77175                     <span class="ps">2DEC    </span> -.0312514377                            
-039250,000040: 
-039251,000041: 32,3003           77400 75416                     <span class="ps">2DEC    </span> -.0155686771                            
-039252,000042: 
-039253,000043: 32,3005           77507 65515                     <span class="ps">2DEC    </span> -.0112502068                            
-039254,000044: 
-039255,000045: 32,3007           77741 63547                     <span class="ps">2DEC    </span> -.0018545108                            
-039256,000046: 
-039257,000047: 32,3011           77052 55373                     <span class="ps">2DEC    </span> -.0286607906                            
-039258,000048: 
-039259,000049: 32,3013           01167 30361                     <span class="ps">2DEC    </span> .0385598563                            
-039260,000050: 
-039261,000051: 
-039262,000052: 32,3015           76520 75267                     <span class="ps">2DEC    </span> -.0419361902                            
-039263,000053: 
-039264,000054: 32,3017           37761                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
-039265,000055: 32,3020           54146                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
-039266,000056: 32,3021           00006                           <span class="op">EXTEND  </span>                                       
-039267,000057: 32,3022           33036                           <span class="op">DCA     </span> <a href="#434C4F47322F3332">CLOG2/32</a>                              
-039268,000058: 32,3023           52145                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-039269,000059: 32,3024           52122                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         
-039270,000060: 32,3025           30120                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-039271,000061: 32,3026           07351                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#53484F52544D50">SHORTMP</a>                               
-039272,000062: 
-039273,000063: 32,3027           52146                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
-039274,000064: 32,3030           52145                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-039275,000065: 32,3031           52122                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         
-039276,000066: 32,3032           20145                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-039277,000067: 32,3033           06103                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-039278,000068: 32,3034           43476                           <span class="in">DCOMP   </span> <span class="in">RVQ       </span>                            
-<a name="434C4F47322F3332"></a>039279,000069: 32,3035           00542 34414  <span class="sm">CLOG2/32</span>           <span class="ps">2DEC    </span> .0216608494                            
-039280,000070: 
-<a name="414C4D4F535431"></a>039281,000071: 32,3037           37777 37777  <span class="sm">ALMOST1 </span>           <span class="ps">2DEC    </span> .999999999                            
+039243,000025:                                                                                                  <span class="co">#  INPUT....X IN MPAC</span>
+039244,000026:                                                                                                  <span class="co">#  OUTPUT...-LOG(X)/32 IN MPAC</span>
+039245,000027: 
+039246,000028: 
+039247,000029: 32,2771                                           <span class="ps">BANK    </span> 32                                    
+<a name="4C4F47535542"></a>039248,000030: 32,2771           44301        <span class="sm">LOGSUB  </span>           <span class="in">NORM    </span> <span class="in">BDSU      </span>                            
+039249,000031: 32,2772           00121                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+039250,000032: 32,2773           25040                                    <a href="#414C4D4F535431">ALMOST1</a>                               
+039251,000033: 32,2774           77776                           <span class="in">EXIT    </span>                                       
+039252,000034: 32,2775           07265                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#504F4C59">POLY</a>                                  
+039253,000035: 32,2776           00006                           <span class="ps">DEC     </span> 6          B-14                       
+039254,000036: 32,2777           00000 00002                     <span class="ps">2DEC    </span> .0000000060                            
+039255,000037: 
+039256,000038: 
+039257,000039: 32,3001           76777 77175                     <span class="ps">2DEC    </span> -.0312514377                            
+039258,000040: 
+039259,000041: 32,3003           77400 75416                     <span class="ps">2DEC    </span> -.0155686771                            
+039260,000042: 
+039261,000043: 32,3005           77507 65515                     <span class="ps">2DEC    </span> -.0112502068                            
+039262,000044: 
+039263,000045: 32,3007           77741 63547                     <span class="ps">2DEC    </span> -.0018545108                            
+039264,000046: 
+039265,000047: 32,3011           77052 55373                     <span class="ps">2DEC    </span> -.0286607906                            
+039266,000048: 
+039267,000049: 32,3013           01167 30361                     <span class="ps">2DEC    </span> .0385598563                            
+039268,000050: 
+039269,000051: 
+039270,000052: 32,3015           76520 75267                     <span class="ps">2DEC    </span> -.0419361902                            
+039271,000053: 
+039272,000054: 32,3017           37761                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
+039273,000055: 32,3020           54146                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
+039274,000056: 32,3021           00006                           <span class="op">EXTEND  </span>                                       
+039275,000057: 32,3022           33036                           <span class="op">DCA     </span> <a href="#434C4F47322F3332">CLOG2/32</a>                              
+039276,000058: 32,3023           52145                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+039277,000059: 32,3024           52122                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         
+039278,000060: 32,3025           30120                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+039279,000061: 32,3026           07351                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#53484F52544D50">SHORTMP</a>                               
+039280,000062: 
+039281,000063: 32,3027           52146                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
+039282,000064: 32,3030           52145                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+039283,000065: 32,3031           52122                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         
+039284,000066: 32,3032           20145                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+039285,000067: 32,3033           06103                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+039286,000068: 32,3034           43476                           <span class="in">DCOMP   </span> <span class="in">RVQ       </span>                            
+<a name="434C4F47322F3332"></a>039287,000069: 32,3035           00542 34414  <span class="sm">CLOG2/32</span>           <span class="ps">2DEC    </span> .0216608494                            
+039288,000070: 
+<a name="414C4D4F535431"></a>039289,000071: 32,3037           37777 37777  <span class="sm">ALMOST1 </span>           <span class="ps">2DEC    </span> .999999999                            
 
 End of include-file LOGSUB_ROUTINE.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

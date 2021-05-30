@@ -89,29 +89,29 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047958,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-047959,000003:                                                                                                  <span class="co">## Filename:    WAITLIST.agc</span>
-047960,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 210.</span>
-047961,000005:                                                                                                  <span class="co">##              It is part of the source code for the Lunar Module's (LM)</span>
-047962,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 15-17.</span>
-047963,000007:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-047964,000008:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-047965,000009:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-047966,000010:                                                                                                  <span class="co">##              original YUL assembler.</span>
-047967,000011:                                                                                                  <span class="co">## Reference:   pp. 1115-1130</span>
-047968,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-047969,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-047970,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-047971,000015:                                                                                                  <span class="co">## Mod history: 2016-11-17 JL   Created from Luminary131 version.</span>
-047972,000016:                                                                                                  <span class="co">##              2016-11-18 MAS  Transcribed. Mostly just comment corrections.</span>
-047973,000017:                                                                                                  <span class="co">##              2016-12-07 HG   Fix P00 -> POO</span>
-047974,000018:                                                                                                  <span class="co">##              2016-12-26 RSB  Comment-text proofed using ProoferComments</span>
-047975,000019:                                                                                                  <span class="co">##                              and corrected errors found.</span>
-047976,000020:                                                                                                  <span class="co">##              2017-01-28 RSB  WTIH -> WITH.</span>
-047977,000021:                                                                                                  <span class="co">##              2017-03-14 RSB  Comment-text fixes noted in proofing Luminary 116.</span>
-047978,000022:                                                                                                  <span class="co">##              2017-03-16 RSB  Comment-text fixes identified in 5-way</span>
-047979,000023:                                                                                                  <span class="co">##                              side-by-side diff of Luminary 69/99/116/131/210.</span>
-047980,000024: 
+047969,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+047970,000003:                                                                                                  <span class="co">## Filename:    WAITLIST.agc</span>
+047971,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 210.</span>
+047972,000005:                                                                                                  <span class="co">##              It is part of the source code for the Lunar Module's (LM)</span>
+047973,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 15-17.</span>
+047974,000007:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+047975,000008:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+047976,000009:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+047977,000010:                                                                                                  <span class="co">##              original YUL assembler.</span>
+047978,000011:                                                                                                  <span class="co">## Reference:   pp. 1115-1130</span>
+047979,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+047980,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+047981,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+047982,000015:                                                                                                  <span class="co">## Mod history: 2016-11-17 JL   Created from Luminary131 version.</span>
+047983,000016:                                                                                                  <span class="co">##              2016-11-18 MAS  Transcribed. Mostly just comment corrections.</span>
+047984,000017:                                                                                                  <span class="co">##              2016-12-07 HG   Fix P00 -> POO</span>
+047985,000018:                                                                                                  <span class="co">##              2016-12-26 RSB  Comment-text proofed using ProoferComments</span>
+047986,000019:                                                                                                  <span class="co">##                              and corrected errors found.</span>
+047987,000020:                                                                                                  <span class="co">##              2017-01-28 RSB  WTIH -> WITH.</span>
+047988,000021:                                                                                                  <span class="co">##              2017-03-14 RSB  Comment-text fixes noted in proofing Luminary 116.</span>
+047989,000022:                                                                                                  <span class="co">##              2017-03-16 RSB  Comment-text fixes identified in 5-way</span>
+047990,000023:                                                                                                  <span class="co">##                              side-by-side diff of Luminary 69/99/116/131/210.</span>
+047991,000024: 
 </pre>
 </span>
 </p>
@@ -127,55 +127,55 @@ Page 1115
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047982,000026:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION                                                                     DATE - 10 OCTOBER 1966</span>
-047983,000027:                                                                                                  <span class="co">#  MOD NO - 2                                                                              LOG SECTION - WAITLIST</span>
-047984,000028:                                                                                                  <span class="co">#  MOD BY - MILLER   (DTMAX INCREASED TO 162.5 SEC)                                        ASSEMBLY SUNBURST REV 5</span>
-047985,000029:                                                                                                  <span class="co">#  MOD 3 BY KERNAN  (INHINT INSERTED AT WAITLIST)  2/28/68 SKIPPER REV 4</span>
-047986,000030: 
-047987,000031:                                                                                                  <span class="co">#  MOD 4BY KERNAN (TWIDDLE IN 54)  3/28/68 SKIPPER REV 13.</span>
-047988,000032: 
-047989,000033:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION-</span>
-047990,000034:                                                                                                  <span class="co">#          PART OF A SECTION OF PROGRAMS,-WAITLIST, TASKOVER, T3RUPT, USED  TO CALL A PROGRAM, (CALLED A TASK),</span>
-047991,000035:                                                                                                  <span class="co">#     WHICH IS TO BEGIN IN C(A) CENTISECONDS.  WAITLIST UPDATES TIME3, LST1 AND LST2. THE MEANING OF THESE LISTS</span>
-047992,000036:                                                                                                  <span class="co">#     FOLLOW.</span>
-047993,000037: 
-047994,000038:                                                                                                  <span class="co">#                  C(TIME3)  = 16384 -(T1-T) CENTISECONDS, (T=PRESENT TIME, T1-TIME FOR TASK1)</span>
-047995,000039: 
-047996,000040: 
-047997,000041:                                                                                                  <span class="co">#                               C(LST1)    = -(T2-T1)+1</span>
-047998,000042:                                                                                                  <span class="co">#                               C(LST1 +1) = -(T3-T2)+1</span>
-047999,000043:                                                                                                  <span class="co">#                               C(LST1 +2) = -(T4-T3)+1</span>
-048000,000044:                                                                                                  <span class="co">#                                          .</span>
-048001,000045:                                                                                                  <span class="co">#                                          .</span>
-048002,000046:                                                                                                  <span class="co">#                               C(LST1 +6) = -(T8-T7)+1</span>
-048003,000047:                                                                                                  <span class="co">#                               C(LST1 +7) = -(T9-T8)+1</span>
-048004,000048: 
-048005,000049:                                                                                                  <span class="co">#                               C(LST2)    = 2CADR OF TASK1</span>
-048006,000050:                                                                                                  <span class="co">#                               C(LST2 +2) = 2CADR OF TASK2</span>
-048007,000051:                                                                                                  <span class="co">#                                          .</span>
-048008,000052:                                                                                                  <span class="co">#                                          .</span>
-048009,000053:                                                                                                  <span class="co">#                               C(LST2 +14)= 2CADR OF TASK8</span>
-048010,000054:                                                                                                  <span class="co">#                               C(LST2 +16)= 2CADR OF TASK9</span>
-048011,000055: 
-048012,000056:                                                                                                  <span class="co">#  WARNINGS-</span>
-048013,000057:                                                                                                  <span class="co">#  --------</span>
-048014,000058:                                                                                                  <span class="co">#               1) 1 &lt;= C(A) &lt;= 16250D (1 CENTISECOND TO 162.5 SEC)</span>
-048015,000059:                                                                                                  <span class="co">#               2) 9 TASKS MAXIMUM</span>
-048016,000060:                                                                                                  <span class="co">#               3) TASKS CALLED UNDER INTERRUPT INHIBITED</span>
-048017,000061:                                                                                                  <span class="co">#               4) TASKS END BY TC TASKOVER</span>
-048018,000062: 
-048019,000063:                                                                                                  <span class="co">#  CALLING SEQUENCE-</span>
-048020,000064: 
-048021,000065:                                                                                                  <span class="co">#               L-1    CA     DELTAT   (TIME IN CENTISECONDS TO TASK START)</span>
-048022,000066:                                                                                                  <span class="co">#               L      TC     WAITLIST</span>
-048023,000067:                                                                                                  <span class="co">#               L+1    2CADR  DESIRED TASK</span>
-048024,000068:                                                                                                  <span class="co">#               L+2    (MINOR OF 2CADR)</span>
-048025,000069:                                                                                                  <span class="co">#               L+3    RELINT          (RETURNS HERE)</span>
-048026,000070: 
-048027,000071:                                                                                                  <span class="co">#  TWIDDLE -</span>
-048028,000072:                                                                                                  <span class="co">#  -------</span>
-048029,000073:                                                                                                  <span class="co">#               TWIDDLE IS FOR USE WHEN THE TASK BEING SET UP IS IN THE SAME EBANK AND FBANK AS THE USER.   IN</span>
-048030,000074:                                                                                                  <span class="co">#               SUCH CASES, IT IMPROVES UPON WAITLIST BY ELIMINATING THE NEED FOR THE BBCON HALF OF THE 2CADR,</span>
+047993,000026:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION                                                                     DATE - 10 OCTOBER 1966</span>
+047994,000027:                                                                                                  <span class="co">#  MOD NO - 2                                                                              LOG SECTION - WAITLIST</span>
+047995,000028:                                                                                                  <span class="co">#  MOD BY - MILLER   (DTMAX INCREASED TO 162.5 SEC)                                        ASSEMBLY SUNBURST REV 5</span>
+047996,000029:                                                                                                  <span class="co">#  MOD 3 BY KERNAN  (INHINT INSERTED AT WAITLIST)  2/28/68 SKIPPER REV 4</span>
+047997,000030: 
+047998,000031:                                                                                                  <span class="co">#  MOD 4BY KERNAN (TWIDDLE IN 54)  3/28/68 SKIPPER REV 13.</span>
+047999,000032: 
+048000,000033:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION-</span>
+048001,000034:                                                                                                  <span class="co">#          PART OF A SECTION OF PROGRAMS,-WAITLIST, TASKOVER, T3RUPT, USED  TO CALL A PROGRAM, (CALLED A TASK),</span>
+048002,000035:                                                                                                  <span class="co">#     WHICH IS TO BEGIN IN C(A) CENTISECONDS.  WAITLIST UPDATES TIME3, LST1 AND LST2. THE MEANING OF THESE LISTS</span>
+048003,000036:                                                                                                  <span class="co">#     FOLLOW.</span>
+048004,000037: 
+048005,000038:                                                                                                  <span class="co">#                  C(TIME3)  = 16384 -(T1-T) CENTISECONDS, (T=PRESENT TIME, T1-TIME FOR TASK1)</span>
+048006,000039: 
+048007,000040: 
+048008,000041:                                                                                                  <span class="co">#                               C(LST1)    = -(T2-T1)+1</span>
+048009,000042:                                                                                                  <span class="co">#                               C(LST1 +1) = -(T3-T2)+1</span>
+048010,000043:                                                                                                  <span class="co">#                               C(LST1 +2) = -(T4-T3)+1</span>
+048011,000044:                                                                                                  <span class="co">#                                          .</span>
+048012,000045:                                                                                                  <span class="co">#                                          .</span>
+048013,000046:                                                                                                  <span class="co">#                               C(LST1 +6) = -(T8-T7)+1</span>
+048014,000047:                                                                                                  <span class="co">#                               C(LST1 +7) = -(T9-T8)+1</span>
+048015,000048: 
+048016,000049:                                                                                                  <span class="co">#                               C(LST2)    = 2CADR OF TASK1</span>
+048017,000050:                                                                                                  <span class="co">#                               C(LST2 +2) = 2CADR OF TASK2</span>
+048018,000051:                                                                                                  <span class="co">#                                          .</span>
+048019,000052:                                                                                                  <span class="co">#                                          .</span>
+048020,000053:                                                                                                  <span class="co">#                               C(LST2 +14)= 2CADR OF TASK8</span>
+048021,000054:                                                                                                  <span class="co">#                               C(LST2 +16)= 2CADR OF TASK9</span>
+048022,000055: 
+048023,000056:                                                                                                  <span class="co">#  WARNINGS-</span>
+048024,000057:                                                                                                  <span class="co">#  --------</span>
+048025,000058:                                                                                                  <span class="co">#               1) 1 &lt;= C(A) &lt;= 16250D (1 CENTISECOND TO 162.5 SEC)</span>
+048026,000059:                                                                                                  <span class="co">#               2) 9 TASKS MAXIMUM</span>
+048027,000060:                                                                                                  <span class="co">#               3) TASKS CALLED UNDER INTERRUPT INHIBITED</span>
+048028,000061:                                                                                                  <span class="co">#               4) TASKS END BY TC TASKOVER</span>
+048029,000062: 
+048030,000063:                                                                                                  <span class="co">#  CALLING SEQUENCE-</span>
+048031,000064: 
+048032,000065:                                                                                                  <span class="co">#               L-1    CA     DELTAT   (TIME IN CENTISECONDS TO TASK START)</span>
+048033,000066:                                                                                                  <span class="co">#               L      TC     WAITLIST</span>
+048034,000067:                                                                                                  <span class="co">#               L+1    2CADR  DESIRED TASK</span>
+048035,000068:                                                                                                  <span class="co">#               L+2    (MINOR OF 2CADR)</span>
+048036,000069:                                                                                                  <span class="co">#               L+3    RELINT          (RETURNS HERE)</span>
+048037,000070: 
+048038,000071:                                                                                                  <span class="co">#  TWIDDLE -</span>
+048039,000072:                                                                                                  <span class="co">#  -------</span>
+048040,000073:                                                                                                  <span class="co">#               TWIDDLE IS FOR USE WHEN THE TASK BEING SET UP IS IN THE SAME EBANK AND FBANK AS THE USER.   IN</span>
+048041,000074:                                                                                                  <span class="co">#               SUCH CASES, IT IMPROVES UPON WAITLIST BY ELIMINATING THE NEED FOR THE BBCON HALF OF THE 2CADR,</span>
 </pre>
 </span>
 </p>
@@ -191,57 +191,57 @@ Page 1116
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-048032,000076:                                                                                                  <span class="co">#               SAVING A WORD.   TWIDDLE IS LIKE WAITLIST IN EVERY RESPECT EXCEPT CALLING SEQUENCE, TO WIT-</span>
-048033,000077: 
-048034,000078:                                                                                                  <span class="co">#               L-1    CA     DELTAT</span>
-048035,000079:                                                                                                  <span class="co">#               L      TC     TWIDDLE</span>
-048036,000080:                                                                                                  <span class="co">#               L+1    ADRES  DESIRED TASK</span>
-048037,000081:                                                                                                  <span class="co">#               L+2    RELINT               (RETURNS HERE)</span>
-048038,000082: 
-048039,000083:                                                                                                  <span class="co">#  NORMAL EXIT MODES-</span>
-048040,000084: 
-048041,000085:                                                                                                  <span class="co">#               AT L+3 OF CALLING SEQUENCE</span>
-048042,000086: 
-048043,000087:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODES-</span>
-048044,000088: 
-048045,000089:                                                                                                  <span class="co">#               TC     ABORT</span>
-048046,000090:                                                                                                  <span class="co">#               OCT    1203   (WAITLIST OVERFLOW - TOO MANY TASKS)</span>
-048047,000091: 
-048048,000092:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED-</span>
-048049,000093: 
-048050,000094:                                                                                                  <span class="co">#               ACCOMPLISHED BY FRESH START,--LST2,..., LST2 +16 =ENDTASK</span>
-048051,000095:                                                                                                  <span class="co">#                                             LST1,..., LST1 +7  =NEG1/2</span>
-048052,000096: 
-048053,000097:                                                                                                  <span class="co">#  OUTPUT--</span>
-048054,000098: 
-048055,000099:                                                                                                  <span class="co">#               LST1 AND LST2 UPDATED WITH NEW TASK AND ASSOCIATED TIME.</span>
-048056,000100: 
-048057,000101:                                                                                                  <span class="co">#  DEBRIS-</span>
-048058,000102: 
-048059,000103:                                                                                                  <span class="co">#               CENTRALS- A,Q,L</span>
-048060,000104:                                                                                                  <span class="co">#               OTHER   - WAITEXIT, WAITADR, WAITTEMP, WAITBANK</span>
-048061,000105:                                                                                                  <span class="co">#  DETAILED ANALYSIS OF TIMING-</span>
-048062,000106: 
-048063,000107:                                                                                                  <span class="co">#          CONTROL WILL NOT BE RETURNED TO THE SPECIFIED ADDRESS (2CADR)   IN EXACTLY DELTA T CENTISECONDS.</span>
-048064,000108:                                                                                                  <span class="co">#     THE APPROXIMATE TIME MAY BE CALCULATED AS FOLLOWS</span>
-048065,000109: 
-048066,000110:                                                                                                  <span class="co">#               LET TO = THE TIME OF THE TC WAITLIST</span>
-048067,000111:                                                                                                  <span class="co">#               LET TS = TO +147U + COUNTER INCREMENTS (SET UP TIME)</span>
-048068,000112:                                                                                                  <span class="co">#               LET X  = TS -(100TS)/100  (VARIANCE FROM COUNTERS)</span>
-048069,000113:                                                                                                  <span class="co">#               LET Y  = LENGTH OF TIME OF INHIBIT INTERRUPT AFTER T3RUPT</span>
-048070,000114:                                                                                                  <span class="co">#               LET Z  = LENGTH OF TIME TO PROCESS TASKS WHICH ARE DUE THIS T3RUPT BUT DISPATCHED EARLIER.</span>
-048071,000115:                                                                                                  <span class="co">#     (Z=0, USUALLY)</span>
-048072,000116:                                                                                                  <span class="co">#               LET DELTD = THE ACTUAL TIME TAKEN TO GIVE CONTROL TO 2CADR</span>
-048073,000117:                                                                                                  <span class="co">#            THEN   DELTD = TS+DELTA T -X +Y +Z +1.05MS* +COUNTERS*</span>
-048074,000118:                                                                                                  <span class="co">#     *-THE TIME TAKEN BY WAITLIST ITSELF AND THE COUNTER TICKING DURING THIS WAITLIST TIME.</span>
-048075,000119: 
-048076,000120: 
-048077,000121:                                                                                                  <span class="co">#          IN SHORT, THE ACTUAL TIME TO RETURN CONTROL TO A 2CADR IS AUGMENTED BY THE TIME TO SET UP THE TASK:S</span>
-048078,000122:                                                                                                  <span class="co">#     INTERRUPT, ALL COUNTERS TICKING, THE T3RUPT PROCESSING TIME, THE WAITLIST PROCESSING TIME AND THE POSSIBILITY</span>
-048079,000123:                                                                                                  <span class="co">#     OF OTHER TASKS INHIBITING THE INTERRUPT.</span>
-048080,000124: 
-048081,000125: 
-048082,000126:    5175                                           <span class="ps">BLOCK   </span> 02                                    
+048043,000076:                                                                                                  <span class="co">#               SAVING A WORD.   TWIDDLE IS LIKE WAITLIST IN EVERY RESPECT EXCEPT CALLING SEQUENCE, TO WIT-</span>
+048044,000077: 
+048045,000078:                                                                                                  <span class="co">#               L-1    CA     DELTAT</span>
+048046,000079:                                                                                                  <span class="co">#               L      TC     TWIDDLE</span>
+048047,000080:                                                                                                  <span class="co">#               L+1    ADRES  DESIRED TASK</span>
+048048,000081:                                                                                                  <span class="co">#               L+2    RELINT               (RETURNS HERE)</span>
+048049,000082: 
+048050,000083:                                                                                                  <span class="co">#  NORMAL EXIT MODES-</span>
+048051,000084: 
+048052,000085:                                                                                                  <span class="co">#               AT L+3 OF CALLING SEQUENCE</span>
+048053,000086: 
+048054,000087:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODES-</span>
+048055,000088: 
+048056,000089:                                                                                                  <span class="co">#               TC     ABORT</span>
+048057,000090:                                                                                                  <span class="co">#               OCT    1203   (WAITLIST OVERFLOW - TOO MANY TASKS)</span>
+048058,000091: 
+048059,000092:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED-</span>
+048060,000093: 
+048061,000094:                                                                                                  <span class="co">#               ACCOMPLISHED BY FRESH START,--LST2,..., LST2 +16 =ENDTASK</span>
+048062,000095:                                                                                                  <span class="co">#                                             LST1,..., LST1 +7  =NEG1/2</span>
+048063,000096: 
+048064,000097:                                                                                                  <span class="co">#  OUTPUT--</span>
+048065,000098: 
+048066,000099:                                                                                                  <span class="co">#               LST1 AND LST2 UPDATED WITH NEW TASK AND ASSOCIATED TIME.</span>
+048067,000100: 
+048068,000101:                                                                                                  <span class="co">#  DEBRIS-</span>
+048069,000102: 
+048070,000103:                                                                                                  <span class="co">#               CENTRALS- A,Q,L</span>
+048071,000104:                                                                                                  <span class="co">#               OTHER   - WAITEXIT, WAITADR, WAITTEMP, WAITBANK</span>
+048072,000105:                                                                                                  <span class="co">#  DETAILED ANALYSIS OF TIMING-</span>
+048073,000106: 
+048074,000107:                                                                                                  <span class="co">#          CONTROL WILL NOT BE RETURNED TO THE SPECIFIED ADDRESS (2CADR)   IN EXACTLY DELTA T CENTISECONDS.</span>
+048075,000108:                                                                                                  <span class="co">#     THE APPROXIMATE TIME MAY BE CALCULATED AS FOLLOWS</span>
+048076,000109: 
+048077,000110:                                                                                                  <span class="co">#               LET TO = THE TIME OF THE TC WAITLIST</span>
+048078,000111:                                                                                                  <span class="co">#               LET TS = TO +147U + COUNTER INCREMENTS (SET UP TIME)</span>
+048079,000112:                                                                                                  <span class="co">#               LET X  = TS -(100TS)/100  (VARIANCE FROM COUNTERS)</span>
+048080,000113:                                                                                                  <span class="co">#               LET Y  = LENGTH OF TIME OF INHIBIT INTERRUPT AFTER T3RUPT</span>
+048081,000114:                                                                                                  <span class="co">#               LET Z  = LENGTH OF TIME TO PROCESS TASKS WHICH ARE DUE THIS T3RUPT BUT DISPATCHED EARLIER.</span>
+048082,000115:                                                                                                  <span class="co">#     (Z=0, USUALLY)</span>
+048083,000116:                                                                                                  <span class="co">#               LET DELTD = THE ACTUAL TIME TAKEN TO GIVE CONTROL TO 2CADR</span>
+048084,000117:                                                                                                  <span class="co">#            THEN   DELTD = TS+DELTA T -X +Y +Z +1.05MS* +COUNTERS*</span>
+048085,000118:                                                                                                  <span class="co">#     *-THE TIME TAKEN BY WAITLIST ITSELF AND THE COUNTER TICKING DURING THIS WAITLIST TIME.</span>
+048086,000119: 
+048087,000120: 
+048088,000121:                                                                                                  <span class="co">#          IN SHORT, THE ACTUAL TIME TO RETURN CONTROL TO A 2CADR IS AUGMENTED BY THE TIME TO SET UP THE TASK:S</span>
+048089,000122:                                                                                                  <span class="co">#     INTERRUPT, ALL COUNTERS TICKING, THE T3RUPT PROCESSING TIME, THE WAITLIST PROCESSING TIME AND THE POSSIBILITY</span>
+048090,000123:                                                                                                  <span class="co">#     OF OTHER TASKS INHIBITING THE INTERRUPT.</span>
+048091,000124: 
+048092,000125: 
+048093,000126:    5175                                           <span class="ps">BLOCK   </span> 02                                    
 </pre>
 </span>
 </p>
@@ -257,56 +257,56 @@ Page 1117
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-048084,000128:    5175  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  <span class="co">#  TASK  LISTS IN SWITCHED E BANK.</span>
-048085,000129: 
-048086,000130:    5175                                           <span class="ps">COUNT*  </span> $$/WAIT                               
-<a name="54574944444C45"></a>048087,000131:    5175           00004        <span class="sm">TWIDDLE </span>           <span class="op">INHINT  </span>                                       
-048088,000132:    5176           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  SAVE DELAY TIME IN L</span>
-048089,000133:    5177           34724                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                
-048090,000134:    5200           26002                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  CREATING OVERFLOW AND Q-1 IN Q</span>
-048091,000135:    5201           30006                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-048092,000136:    5202           00006                           <span class="op">EXTEND  </span>                                       
-048093,000137:    5203           04007                           <span class="op">ROR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5355504552424E4B">SUPERBNK</a>                              
-048094,000138:    5204           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-048095,000139: 
-<a name="574149544C495354"></a>048096,000140:    5205           00004        <span class="sm">WAITLIST</span>           <span class="op">INHINT  </span>                                       
-048097,000141:    5206           56002                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  SAVE DELTA T IN Q AND RETURN IN</span>
-048098,000142:    5207           54061                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5741495445584954">WAITEXIT</a>                              <span class="co">#  WAITEXIT.</span>
-048099,000143:    5210           00006                           <span class="op">EXTEND  </span>                                       
-048100,000144:    5211           50061                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5741495445584954">WAITEXIT</a>                              <span class="co">#  IF TWIDDLING, THE TS SKIPS TO HERE</span>
-048101,000145:    5212           30001                           <span class="op">DCA     </span> 0                                     <span class="co">#  PICK UP 2CADR OF TASK.</span>
-048102,000146:    5213           54063                 -1        <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57414954414452">WAITADR</a>                               <span class="co">#  BBCON WILL REMAIN IN L</span>
-<a name="444C5932"></a>048103,000147:    5214           35222        <span class="sm">DLY2    </span>           <span class="op">CAF     </span> <a href="#574149544242">WAITBB</a>                                <span class="co">#  ENTRY FROM FIXDELAY AND VARDELAY.</span>
-048104,000148:    5215           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-048105,000149:    5216           13234                           <span class="op">TCF     </span> <a href="#5741495432">WAIT2</a>                                 
-048106,000150: 
-048107,000151:                                                                                                  <span class="co">#           RETURN TO CALLER AFTER TASK INSERTION:</span>
-048108,000152: 
-<a name="4C5657544C495354"></a>048109,000153:    5217           52062        <span class="sm">LVWTLIST</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5741495445584954">WAITEXIT</a>                              
-048110,000154:    5220           64743                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   
-048111,000155:    5221           52006                           <span class="op">DTCB    </span>                                       
-048112,000156: 
-048113,000157:    5222  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
-<a name="574149544242"></a>048114,000158:    5222           02063        <span class="sm">WAITBB  </span>           <span class="ps">BBCON   </span> <a href="#5741495432">WAIT2</a>                                 
-048115,000159: 
-048116,000160:                                                                                                  <span class="co">#           RETURN TO CALLER +2 AFTER WAITING DT SPECIFIED AT CALLER +1.</span>
-048117,000161: 
-<a name="46495844454C4159"></a>048118,000162:    5223           50002        <span class="sm">FIXDELAY</span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  BOTH ROUTINES MUST BE CALLED UNDER</span>
-048119,000163:    5224           30000                           <span class="op">CAF     </span> 0                                     <span class="co">#  WAITLIST CONTROL AND TERMINATE THE TASK</span>
-048120,000164:    5225           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  IN WHICH THEY WERE CALLED.</span>
-048121,000165: 
-048122,000166:                                                                                                  <span class="co">#           RETURN TO CALLER +1 AFTER WAITING THE DT AS ARRIVING IN A.</span>
-048123,000167: 
-<a name="56415244454C4159"></a>048124,000168:    5226           56002        <span class="sm">VARDELAY</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  DT TO Q. TASK ADRES TO WAITADR.</span>
-048125,000169:    5227           54063                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57414954414452">WAITADR</a>                               
-048126,000170:    5230           30006                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 <span class="co">#  BBANK IS SAVED DURING DELAY.</span>
-048127,000171:    5231           00006                           <span class="op">EXTEND  </span>                                       
-048128,000172:    5232           04007                           <span class="op">ROR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5355504552424E4B">SUPERBNK</a>                              <span class="co">#  ADD SBANK TO BBCON.</span>
-048129,000173:    5233           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-048130,000174:    5234           35237                           <span class="op">CAF     </span> <a href="#44454C41594558">DELAYEX</a>                               
-048131,000175:    5235           54061                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5741495445584954">WAITEXIT</a>                              <span class="co">#  GO TO TASKOVER AFTER TASK ENTRY.</span>
-048132,000176:    5236           15214                           <span class="op">TCF     </span> <a href="#444C5932">DLY2</a>                                  
-048133,000177: 
+048095,000128:    5175  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  <span class="co">#  TASK  LISTS IN SWITCHED E BANK.</span>
+048096,000129: 
+048097,000130:    5175                                           <span class="ps">COUNT*  </span> $$/WAIT                               
+<a name="54574944444C45"></a>048098,000131:    5175           00004        <span class="sm">TWIDDLE </span>           <span class="op">INHINT  </span>                                       
+048099,000132:    5176           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  SAVE DELAY TIME IN L</span>
+048100,000133:    5177           34724                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                
+048101,000134:    5200           26002                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  CREATING OVERFLOW AND Q-1 IN Q</span>
+048102,000135:    5201           30006                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+048103,000136:    5202           00006                           <span class="op">EXTEND  </span>                                       
+048104,000137:    5203           04007                           <span class="op">ROR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5355504552424E4B">SUPERBNK</a>                              
+048105,000138:    5204           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+048106,000139: 
+<a name="574149544C495354"></a>048107,000140:    5205           00004        <span class="sm">WAITLIST</span>           <span class="op">INHINT  </span>                                       
+048108,000141:    5206           56002                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  SAVE DELTA T IN Q AND RETURN IN</span>
+048109,000142:    5207           54061                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5741495445584954">WAITEXIT</a>                              <span class="co">#  WAITEXIT.</span>
+048110,000143:    5210           00006                           <span class="op">EXTEND  </span>                                       
+048111,000144:    5211           50061                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5741495445584954">WAITEXIT</a>                              <span class="co">#  IF TWIDDLING, THE TS SKIPS TO HERE</span>
+048112,000145:    5212           30001                           <span class="op">DCA     </span> 0                                     <span class="co">#  PICK UP 2CADR OF TASK.</span>
+048113,000146:    5213           54063                 -1        <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57414954414452">WAITADR</a>                               <span class="co">#  BBCON WILL REMAIN IN L</span>
+<a name="444C5932"></a>048114,000147:    5214           35222        <span class="sm">DLY2    </span>           <span class="op">CAF     </span> <a href="#574149544242">WAITBB</a>                                <span class="co">#  ENTRY FROM FIXDELAY AND VARDELAY.</span>
+048115,000148:    5215           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+048116,000149:    5216           13234                           <span class="op">TCF     </span> <a href="#5741495432">WAIT2</a>                                 
+048117,000150: 
+048118,000151:                                                                                                  <span class="co">#           RETURN TO CALLER AFTER TASK INSERTION:</span>
+048119,000152: 
+<a name="4C5657544C495354"></a>048120,000153:    5217           52062        <span class="sm">LVWTLIST</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5741495445584954">WAITEXIT</a>                              
+048121,000154:    5220           64743                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   
+048122,000155:    5221           52006                           <span class="op">DTCB    </span>                                       
+048123,000156: 
+048124,000157:    5222  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
+<a name="574149544242"></a>048125,000158:    5222           02063        <span class="sm">WAITBB  </span>           <span class="ps">BBCON   </span> <a href="#5741495432">WAIT2</a>                                 
+048126,000159: 
+048127,000160:                                                                                                  <span class="co">#           RETURN TO CALLER +2 AFTER WAITING DT SPECIFIED AT CALLER +1.</span>
+048128,000161: 
+<a name="46495844454C4159"></a>048129,000162:    5223           50002        <span class="sm">FIXDELAY</span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  BOTH ROUTINES MUST BE CALLED UNDER</span>
+048130,000163:    5224           30000                           <span class="op">CAF     </span> 0                                     <span class="co">#  WAITLIST CONTROL AND TERMINATE THE TASK</span>
+048131,000164:    5225           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  IN WHICH THEY WERE CALLED.</span>
+048132,000165: 
+048133,000166:                                                                                                  <span class="co">#           RETURN TO CALLER +1 AFTER WAITING THE DT AS ARRIVING IN A.</span>
+048134,000167: 
+<a name="56415244454C4159"></a>048135,000168:    5226           56002        <span class="sm">VARDELAY</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  DT TO Q. TASK ADRES TO WAITADR.</span>
+048136,000169:    5227           54063                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57414954414452">WAITADR</a>                               
+048137,000170:    5230           30006                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 <span class="co">#  BBANK IS SAVED DURING DELAY.</span>
+048138,000171:    5231           00006                           <span class="op">EXTEND  </span>                                       
+048139,000172:    5232           04007                           <span class="op">ROR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5355504552424E4B">SUPERBNK</a>                              <span class="co">#  ADD SBANK TO BBCON.</span>
+048140,000173:    5233           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+048141,000174:    5234           35237                           <span class="op">CAF     </span> <a href="#44454C41594558">DELAYEX</a>                               
+048142,000175:    5235           54061                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5741495445584954">WAITEXIT</a>                              <span class="co">#  GO TO TASKOVER AFTER TASK ENTRY.</span>
+048143,000176:    5236           15214                           <span class="op">TCF     </span> <a href="#444C5932">DLY2</a>                                  
+048144,000177: 
 </pre>
 </span>
 </p>
@@ -322,8 +322,8 @@ Page 1118
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="44454C41594558"></a>048135,000179:    5237           15261        <span class="sm">DELAYEX </span>           <span class="op">TCF     </span> <a href="#5441534B4F564552">TASKOVER</a>   -2                         <span class="co">#  RETURNS TO TASKOVER</span>
-048136,000180: 
+<a name="44454C41594558"></a>048146,000179:    5237           15261        <span class="sm">DELAYEX </span>           <span class="op">TCF     </span> <a href="#5441534B4F564552">TASKOVER</a>   -2                         <span class="co">#  RETURNS TO TASKOVER</span>
+048147,000180: 
 </pre>
 </span>
 </p>
@@ -339,33 +339,33 @@ Page 1119
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-048138,000182:                                                                                                  <span class="co">#  ENDTASK MUST BE ENTERED IN FIXED-FIXED SO IT IS DISTINGUISHABLE BY ITS ADRES ALONE.</span>
-048139,000183: 
-048140,000184:    5240  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
-<a name="454E445441534B"></a>048141,000185:    5240           72535 73714  <span class="sm">ENDTASK </span>           <span class="ps">-2CADR  </span> <a href="#5356435433">SVCT3</a>                                 
-048142,000186: 
-<a name="5356435433"></a>048143,000187:    5242           10076        <span class="sm">SVCT3   </span>           <span class="op">CCS     </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              <span class="co">#  DRIFT FLAG</span>
-048144,000188:    5243           15263                           <span class="op">TCF     </span> <a href="#5441534B4F564552">TASKOVER</a>                              
-048145,000189:    5244           15263                           <span class="op">TCF     </span> <a href="#5441534B4F564552">TASKOVER</a>                              
-048146,000190:    5245           15246                           <span class="op">TCF     </span> +1                                    
-048147,000191: 
-<a name="434B494D555345"></a>048148,000192:    5246           11301        <span class="sm">CKIMUSE </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D5543414452">IMUCADR</a>                               <span class="co">#  DON'T DO NBDONLY IF SOMEONE ELSE IS IN</span>
-048149,000193:    5247           15260                           <span class="op">TCF     </span> <a href="#535643543358">SVCT3X</a>                                <span class="co">#  IMUSTALL.</span>
-048150,000194:    5250           15253                           <span class="op">TCF     </span> +3                                    
-048151,000195:    5251           15260                           <span class="op">TCF     </span> <a href="#535643543358">SVCT3X</a>                                
-048152,000196:    5252           15260                           <span class="op">TCF     </span> <a href="#535643543358">SVCT3X</a>                                
-048153,000197: 
-048154,000198:    5253           37744                 +3        <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3335">PRIO35</a>                                <span class="co">#  COMPENSATE FOR NBD COEFFICIENTS ONLY.</span>
-048155,000199:    5254           05063                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 <span class="co">#      ENABLE EVERY 81.93 SECONDS</span>
-048156,000200:    5255  E3,1460                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E424458">NBDX</a>                                  
-048157,000201:    5255           03625 14063                     <span class="ps">2CADR   </span> <a href="IMU_COMPENSATION_PACKAGE.agc.html#4E42444F4E4C59">NBDONLY</a>                               
-048158,000202: 
-048159,000203:    5257           15263                           <span class="op">TCF     </span> <a href="#5441534B4F564552">TASKOVER</a>                              
-048160,000204: 
-<a name="535643543358"></a>048161,000205:    5260           05223        <span class="sm">SVCT3X  </span>           <span class="op">TC      </span> <a href="#46495844454C4159">FIXDELAY</a>                              <span class="co">#  DELAY MAX OF 2 TIMES FOR IMUZERO.</span>
-048162,000206:    5261           00764                           <span class="ps">DEC     </span> 500        B-14                       
-048163,000207:    5262           05242                           <span class="op">TC      </span> <a href="#5356435433">SVCT3</a>                                 <span class="co">#  CHECK DRIFT FLAG AGAIN.</span>
-048164,000208: 
+048149,000182:                                                                                                  <span class="co">#  ENDTASK MUST BE ENTERED IN FIXED-FIXED SO IT IS DISTINGUISHABLE BY ITS ADRES ALONE.</span>
+048150,000183: 
+048151,000184:    5240  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
+<a name="454E445441534B"></a>048152,000185:    5240           72535 73714  <span class="sm">ENDTASK </span>           <span class="ps">-2CADR  </span> <a href="#5356435433">SVCT3</a>                                 
+048153,000186: 
+<a name="5356435433"></a>048154,000187:    5242           10076        <span class="sm">SVCT3   </span>           <span class="op">CCS     </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              <span class="co">#  DRIFT FLAG</span>
+048155,000188:    5243           15263                           <span class="op">TCF     </span> <a href="#5441534B4F564552">TASKOVER</a>                              
+048156,000189:    5244           15263                           <span class="op">TCF     </span> <a href="#5441534B4F564552">TASKOVER</a>                              
+048157,000190:    5245           15246                           <span class="op">TCF     </span> +1                                    
+048158,000191: 
+<a name="434B494D555345"></a>048159,000192:    5246           11301        <span class="sm">CKIMUSE </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D5543414452">IMUCADR</a>                               <span class="co">#  DON'T DO NBDONLY IF SOMEONE ELSE IS IN</span>
+048160,000193:    5247           15260                           <span class="op">TCF     </span> <a href="#535643543358">SVCT3X</a>                                <span class="co">#  IMUSTALL.</span>
+048161,000194:    5250           15253                           <span class="op">TCF     </span> +3                                    
+048162,000195:    5251           15260                           <span class="op">TCF     </span> <a href="#535643543358">SVCT3X</a>                                
+048163,000196:    5252           15260                           <span class="op">TCF     </span> <a href="#535643543358">SVCT3X</a>                                
+048164,000197: 
+048165,000198:    5253           37744                 +3        <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3335">PRIO35</a>                                <span class="co">#  COMPENSATE FOR NBD COEFFICIENTS ONLY.</span>
+048166,000199:    5254           05063                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 <span class="co">#      ENABLE EVERY 81.93 SECONDS</span>
+048167,000200:    5255  E3,1460                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E424458">NBDX</a>                                  
+048168,000201:    5255           03625 14063                     <span class="ps">2CADR   </span> <a href="IMU_COMPENSATION_PACKAGE.agc.html#4E42444F4E4C59">NBDONLY</a>                               
+048169,000202: 
+048170,000203:    5257           15263                           <span class="op">TCF     </span> <a href="#5441534B4F564552">TASKOVER</a>                              
+048171,000204: 
+<a name="535643543358"></a>048172,000205:    5260           05223        <span class="sm">SVCT3X  </span>           <span class="op">TC      </span> <a href="#46495844454C4159">FIXDELAY</a>                              <span class="co">#  DELAY MAX OF 2 TIMES FOR IMUZERO.</span>
+048173,000206:    5261           00764                           <span class="ps">DEC     </span> 500        B-14                       
+048174,000207:    5262           05242                           <span class="op">TC      </span> <a href="#5356435433">SVCT3</a>                                 <span class="co">#  CHECK DRIFT FLAG AGAIN.</span>
+048175,000208: 
 </pre>
 </span>
 </p>
@@ -381,51 +381,51 @@ Page 1120
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-048166,000210:                                                                                                  <span class="co">#           BEGIN TASK INSERTION.</span>
-048167,000211: 
-048168,000212: 01,3234                                           <span class="ps">BANK    </span> 01                                    
-048169,000213: 01,3234                                           <span class="ps">COUNT*  </span> $$/WAIT                               
-<a name="5741495432"></a>048170,000214: 01,3234           54062        <span class="sm">WAIT2   </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5741495442414E4B">WAITBANK</a>                              <span class="co">#  BBANK OF CALLING PROGRAM.</span>
-048171,000215: 01,3235           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-048172,000216: 01,3236           00006                           <span class="op">EXTEND  </span>                                       
-048173,000217: 01,3237           63525                           <span class="op">BZMF    </span> <a href="#57414954504F4F48">WAITPOOH</a>                              
-048174,000218: 
-048175,000219: 01,3240           40026                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4533">TIME3</a>                                 
-048176,000220: 01,3241           64735                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  <span class="co">#  BIT 8 = OCT 200</span>
-048177,000221: 01,3242           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  TEST 200 - C(TIME3).  IF POSITIVE,</span>
-048178,000222:                                                                                                  <span class="co">#  IT MEANS THAT TIME3 OVERFLOW HAS OCCURRED PRIOR TO CS  TIME3 AND THAT</span>
-048179,000223:                                                                                                  <span class="co">#  C(TIME3) = T - T1, INSTEAD OF 1.0 - (T1 - T).  THE FOLLOWING FOUR</span>
-048180,000224:                                                                                                  <span class="co">#  ORDERS SET C(A) = TD - T1 + 1 IN EITHER CASE.</span>
-048181,000225: 
-048182,000226: 01,3243           66130                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4F43543430303031">OCT40001</a>                              <span class="co">#  OVERFLOW HAS OCCURRED.  SET C(A) =</span>
-048183,000227: 01,3244           40000                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  T - T1 + 1.0 - 201</span>
-048184,000228: 
-048185,000229:                                                                                                  <span class="co">#  NORMAL CASE (C(A) NNZ) YIELDS SAME C(A):  -( -(1.0-(T1-T)) + 200) - 1</span>
-048186,000230: 
-048187,000231: 01,3245           63373                           <span class="op">AD      </span> <a href="#4F43543430323031">OCT40201</a>                              
-048188,000232: 01,3246           60002                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RESULT = TD - T1 + 1.</span>
-048189,000233: 
-048190,000234: 01,3247           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  TEST TD - T1 + 1</span>
-048191,000235: 
-048192,000236: 01,3250           61400                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  <span class="co">#  IF TD - T1 POS, GO TO WTLST5 WITH</span>
-048193,000237: 01,3251           13313                           <span class="op">TCF     </span> <a href="#57544C535435">WTLST5</a>                                <span class="co">#  C(A) = (TD - T1) + C(LST1) = TD-T2+1</span>
-048194,000238: 
-048195,000239: 01,3252           13253                           <span class="op">NOOP    </span>                                       
-048196,000240: 01,3253           40002                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-048197,000241: 
-048198,000242:                                                                                                  <span class="co">#  NOTE THAT THIS PROGRAM SECTION IS NEVER ENTERED WHEN T-T1 G/E -1,</span>
-048199,000243:                                                                                                  <span class="co">#  SINCE TD-T1+1 = (TD-T) + (T-T1+1), AND DELTA T = TD-T G/E +1 .  (G/E</span>
-048200,000244:                                                                                                  <span class="co">#  SYMBOL MEANS GREATER THAN OR EQUAL TO).  THUS THERE NEED BE NO CON-</span>
-048201,000245:                                                                                                  <span class="co">#  CERN OVER A PREVIOUS OR IMMINENT OVERFLOW OF TIME3 HERE.</span>
-048202,000246: 
-048203,000247: 01,3254           64727                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F53312F32">POS1/2</a>                                <span class="co">#  WHEN TD IS NEXT, FORM QUANTITY</span>
-048204,000248: 01,3255           64727                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F53312F32">POS1/2</a>                                <span class="co">#    1.0 - DELTA T = 1.0 - (TD - T)</span>
-048205,000249: 01,3256           56026                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4533">TIME3</a>                                 
-048206,000250: 01,3257           64726                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474D4158">NEGMAX</a>                                
-048207,000251: 01,3260           60002                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  1.0 - DELTAT T NOW COMPLETE.</span>
-048208,000252: 01,3261           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  ZERO INDEX Q.</span>
-048209,000253: 01,3262           22007                           <span class="op">QXCH    </span> 7                                     <span class="co">#  (ZQ)</span>
-048210,000254: 
+048177,000210:                                                                                                  <span class="co">#           BEGIN TASK INSERTION.</span>
+048178,000211: 
+048179,000212: 01,3234                                           <span class="ps">BANK    </span> 01                                    
+048180,000213: 01,3234                                           <span class="ps">COUNT*  </span> $$/WAIT                               
+<a name="5741495432"></a>048181,000214: 01,3234           54062        <span class="sm">WAIT2   </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5741495442414E4B">WAITBANK</a>                              <span class="co">#  BBANK OF CALLING PROGRAM.</span>
+048182,000215: 01,3235           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+048183,000216: 01,3236           00006                           <span class="op">EXTEND  </span>                                       
+048184,000217: 01,3237           63525                           <span class="op">BZMF    </span> <a href="#57414954504F4F48">WAITPOOH</a>                              
+048185,000218: 
+048186,000219: 01,3240           40026                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4533">TIME3</a>                                 
+048187,000220: 01,3241           64735                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  <span class="co">#  BIT 8 = OCT 200</span>
+048188,000221: 01,3242           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  TEST 200 - C(TIME3).  IF POSITIVE,</span>
+048189,000222:                                                                                                  <span class="co">#  IT MEANS THAT TIME3 OVERFLOW HAS OCCURRED PRIOR TO CS  TIME3 AND THAT</span>
+048190,000223:                                                                                                  <span class="co">#  C(TIME3) = T - T1, INSTEAD OF 1.0 - (T1 - T).  THE FOLLOWING FOUR</span>
+048191,000224:                                                                                                  <span class="co">#  ORDERS SET C(A) = TD - T1 + 1 IN EITHER CASE.</span>
+048192,000225: 
+048193,000226: 01,3243           66130                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4F43543430303031">OCT40001</a>                              <span class="co">#  OVERFLOW HAS OCCURRED.  SET C(A) =</span>
+048194,000227: 01,3244           40000                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  T - T1 + 1.0 - 201</span>
+048195,000228: 
+048196,000229:                                                                                                  <span class="co">#  NORMAL CASE (C(A) NNZ) YIELDS SAME C(A):  -( -(1.0-(T1-T)) + 200) - 1</span>
+048197,000230: 
+048198,000231: 01,3245           63373                           <span class="op">AD      </span> <a href="#4F43543430323031">OCT40201</a>                              
+048199,000232: 01,3246           60002                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RESULT = TD - T1 + 1.</span>
+048200,000233: 
+048201,000234: 01,3247           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  TEST TD - T1 + 1</span>
+048202,000235: 
+048203,000236: 01,3250           61400                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  <span class="co">#  IF TD - T1 POS, GO TO WTLST5 WITH</span>
+048204,000237: 01,3251           13313                           <span class="op">TCF     </span> <a href="#57544C535435">WTLST5</a>                                <span class="co">#  C(A) = (TD - T1) + C(LST1) = TD-T2+1</span>
+048205,000238: 
+048206,000239: 01,3252           13253                           <span class="op">NOOP    </span>                                       
+048207,000240: 01,3253           40002                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+048208,000241: 
+048209,000242:                                                                                                  <span class="co">#  NOTE THAT THIS PROGRAM SECTION IS NEVER ENTERED WHEN T-T1 G/E -1,</span>
+048210,000243:                                                                                                  <span class="co">#  SINCE TD-T1+1 = (TD-T) + (T-T1+1), AND DELTA T = TD-T G/E +1 .  (G/E</span>
+048211,000244:                                                                                                  <span class="co">#  SYMBOL MEANS GREATER THAN OR EQUAL TO).  THUS THERE NEED BE NO CON-</span>
+048212,000245:                                                                                                  <span class="co">#  CERN OVER A PREVIOUS OR IMMINENT OVERFLOW OF TIME3 HERE.</span>
+048213,000246: 
+048214,000247: 01,3254           64727                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F53312F32">POS1/2</a>                                <span class="co">#  WHEN TD IS NEXT, FORM QUANTITY</span>
+048215,000248: 01,3255           64727                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F53312F32">POS1/2</a>                                <span class="co">#    1.0 - DELTA T = 1.0 - (TD - T)</span>
+048216,000249: 01,3256           56026                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4533">TIME3</a>                                 
+048217,000250: 01,3257           64726                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474D4158">NEGMAX</a>                                
+048218,000251: 01,3260           60002                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  1.0 - DELTAT T NOW COMPLETE.</span>
+048219,000252: 01,3261           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  ZERO INDEX Q.</span>
+048220,000253: 01,3262           22007                           <span class="op">QXCH    </span> 7                                     <span class="co">#  (ZQ)</span>
+048221,000254: 
 </pre>
 </span>
 </p>
@@ -441,34 +441,34 @@ Page 1121
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="57544C535434"></a>048212,000256: 01,3263           57400        <span class="sm">WTLST4  </span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
-048213,000257: 01,3264           57401                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +1                         
-048214,000258: 01,3265           57402                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +2                         
-048215,000259: 01,3266           57403                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +3                         
-048216,000260: 01,3267           57404                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +4                         
-048217,000261: 01,3270           57405                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +5                         
-048218,000262: 01,3271           57406                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +6                         
-048219,000263: 01,3272           57407                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +7                         
-048220,000264: 
-048221,000265: 01,3273           30063                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57414954414452">WAITADR</a>                               <span class="co">#  (MINOR PART OF TASK CADR HAS BEEN IN L.)</span>
-048222,000266: 01,3274           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-048223,000267: 01,3275           13276                           <span class="op">TCF     </span> +1                                    
-048224,000268: 
-048225,000269: 01,3276           53411                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>                                  
-048226,000270: 01,3277           53413                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +2                         
-048227,000271: 01,3300           53415                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +4                         
-048228,000272: 01,3301           53417                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +6                         
-048229,000273: 01,3302           53421                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +8D                        
-048230,000274: 01,3303           53423                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +10D                       <span class="co">#  AT END, CHECK THAT C(LST2+10) IS STD</span>
-048231,000275: 01,3304           53425                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +12D                       
-048232,000276: 01,3305           53427                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +14D                       
-048233,000277: 01,3306           53431                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +16D                       
-048234,000278: 01,3307           65240                           <span class="op">AD      </span> <a href="#454E445441534B">ENDTASK</a>                               <span class="co">#    END ITEM, AS CHECK FOR EXCEEDING</span>
-048235,000279:                                                                                                  <span class="co">#    THE LENGTH OF THE LIST.</span>
-048236,000280: 01,3310           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  DUMMY TASK ADRES SHOULD BE IN FIXED-</span>
-048237,000281: 01,3311           15217                           <span class="op">BZF     </span> <a href="#4C5657544C495354">LVWTLIST</a>                              <span class="co">#  FIXED SO ITS ADRES ALONE DISTINGUISHES</span>
-048238,000282: 01,3312           13366                           <span class="op">TCF     </span> <a href="#575441424F5254">WTABORT</a>                               <span class="co">#  IT.</span>
-048239,000283: 
+<a name="57544C535434"></a>048223,000256: 01,3263           57400        <span class="sm">WTLST4  </span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
+048224,000257: 01,3264           57401                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +1                         
+048225,000258: 01,3265           57402                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +2                         
+048226,000259: 01,3266           57403                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +3                         
+048227,000260: 01,3267           57404                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +4                         
+048228,000261: 01,3270           57405                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +5                         
+048229,000262: 01,3271           57406                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +6                         
+048230,000263: 01,3272           57407                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +7                         
+048231,000264: 
+048232,000265: 01,3273           30063                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57414954414452">WAITADR</a>                               <span class="co">#  (MINOR PART OF TASK CADR HAS BEEN IN L.)</span>
+048233,000266: 01,3274           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+048234,000267: 01,3275           13276                           <span class="op">TCF     </span> +1                                    
+048235,000268: 
+048236,000269: 01,3276           53411                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>                                  
+048237,000270: 01,3277           53413                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +2                         
+048238,000271: 01,3300           53415                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +4                         
+048239,000272: 01,3301           53417                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +6                         
+048240,000273: 01,3302           53421                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +8D                        
+048241,000274: 01,3303           53423                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +10D                       <span class="co">#  AT END, CHECK THAT C(LST2+10) IS STD</span>
+048242,000275: 01,3304           53425                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +12D                       
+048243,000276: 01,3305           53427                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +14D                       
+048244,000277: 01,3306           53431                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +16D                       
+048245,000278: 01,3307           65240                           <span class="op">AD      </span> <a href="#454E445441534B">ENDTASK</a>                               <span class="co">#    END ITEM, AS CHECK FOR EXCEEDING</span>
+048246,000279:                                                                                                  <span class="co">#    THE LENGTH OF THE LIST.</span>
+048247,000280: 01,3310           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  DUMMY TASK ADRES SHOULD BE IN FIXED-</span>
+048248,000281: 01,3311           15217                           <span class="op">BZF     </span> <a href="#4C5657544C495354">LVWTLIST</a>                              <span class="co">#  FIXED SO ITS ADRES ALONE DISTINGUISHES</span>
+048249,000282: 01,3312           13366                           <span class="op">TCF     </span> <a href="#575441424F5254">WTABORT</a>                               <span class="co">#  IT.</span>
+048250,000283: 
 </pre>
 </span>
 </p>
@@ -484,48 +484,48 @@ Page 1122
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="57544C535435"></a>048241,000285: 01,3313           10000        <span class="sm">WTLST5  </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  TEST  TD - T2 + 1</span>
-048242,000286: 01,3314           61401                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +1                         
-048243,000287: 01,3315           13321                           <span class="op">TCF     </span> +4                                    
-048244,000288: 01,3316           64744                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-048245,000289: 01,3317           03377                           <span class="op">TC      </span> <a href="#57544C535432">WTLST2</a>                                
-048246,000290: 01,3320           00001                           <span class="ps">OCT     </span> 1                                     
-048247,000291: 
-048248,000292: 01,3321           10000                 +4        <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  TEST  TD - T3 + 1</span>
-048249,000293: 01,3322           61402                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +2                         
-048250,000294: 01,3323           13327                           <span class="op">TCF     </span> +4                                    
-048251,000295: 01,3324           64744                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-048252,000296: 01,3325           03377                           <span class="op">TC      </span> <a href="#57544C535432">WTLST2</a>                                
-048253,000297: 01,3326           00002                           <span class="ps">OCT     </span> 2                                     
-048254,000298: 
-048255,000299: 01,3327           10000                 +4        <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  TEST  TD - T4 + 1</span>
-048256,000300: 01,3330           61403                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +3                         
-048257,000301: 01,3331           13335                           <span class="op">TCF     </span> +4                                    
-048258,000302: 01,3332           64744                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-048259,000303: 01,3333           03377                           <span class="op">TC      </span> <a href="#57544C535432">WTLST2</a>                                
-048260,000304: 01,3334           00003                           <span class="ps">OCT     </span> 3                                     
-048261,000305: 
-048262,000306: 01,3335           10000                 +4        <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  TEST  TD - T5 + 1</span>
-048263,000307: 01,3336           61404                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +4                         
-048264,000308: 01,3337           13343                           <span class="op">TCF     </span> +4                                    
-048265,000309: 01,3340           64744                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-048266,000310: 01,3341           03377                           <span class="op">TC      </span> <a href="#57544C535432">WTLST2</a>                                
-048267,000311: 01,3342           00004                           <span class="ps">OCT     </span> 4                                     
-048268,000312: 
-048269,000313: 01,3343           10000                 +4        <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  TEST  TD - T6 + 1</span>
-048270,000314: 01,3344           61405                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +5                         
-048271,000315: 01,3345           13351                           <span class="op">TCF     </span> +4                                    
-048272,000316: 01,3346           64744                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-048273,000317: 01,3347           03377                           <span class="op">TC      </span> <a href="#57544C535432">WTLST2</a>                                
-048274,000318: 01,3350           00005                           <span class="ps">OCT     </span> 5                                     
-048275,000319: 
-048276,000320: 01,3351           10000                 +4        <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  TEST  TD - T7 + 1</span>
-048277,000321: 01,3352           61406                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +6                         
-048278,000322: 01,3353           13357                           <span class="op">TCF     </span> +4                                    
-048279,000323: 01,3354           64744                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-048280,000324: 01,3355           03377                           <span class="op">TC      </span> <a href="#57544C535432">WTLST2</a>                                
-048281,000325: 01,3356           00006                           <span class="ps">OCT     </span> 6                                     
-048282,000326: 
+<a name="57544C535435"></a>048252,000285: 01,3313           10000        <span class="sm">WTLST5  </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  TEST  TD - T2 + 1</span>
+048253,000286: 01,3314           61401                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +1                         
+048254,000287: 01,3315           13321                           <span class="op">TCF     </span> +4                                    
+048255,000288: 01,3316           64744                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+048256,000289: 01,3317           03377                           <span class="op">TC      </span> <a href="#57544C535432">WTLST2</a>                                
+048257,000290: 01,3320           00001                           <span class="ps">OCT     </span> 1                                     
+048258,000291: 
+048259,000292: 01,3321           10000                 +4        <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  TEST  TD - T3 + 1</span>
+048260,000293: 01,3322           61402                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +2                         
+048261,000294: 01,3323           13327                           <span class="op">TCF     </span> +4                                    
+048262,000295: 01,3324           64744                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+048263,000296: 01,3325           03377                           <span class="op">TC      </span> <a href="#57544C535432">WTLST2</a>                                
+048264,000297: 01,3326           00002                           <span class="ps">OCT     </span> 2                                     
+048265,000298: 
+048266,000299: 01,3327           10000                 +4        <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  TEST  TD - T4 + 1</span>
+048267,000300: 01,3330           61403                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +3                         
+048268,000301: 01,3331           13335                           <span class="op">TCF     </span> +4                                    
+048269,000302: 01,3332           64744                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+048270,000303: 01,3333           03377                           <span class="op">TC      </span> <a href="#57544C535432">WTLST2</a>                                
+048271,000304: 01,3334           00003                           <span class="ps">OCT     </span> 3                                     
+048272,000305: 
+048273,000306: 01,3335           10000                 +4        <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  TEST  TD - T5 + 1</span>
+048274,000307: 01,3336           61404                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +4                         
+048275,000308: 01,3337           13343                           <span class="op">TCF     </span> +4                                    
+048276,000309: 01,3340           64744                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+048277,000310: 01,3341           03377                           <span class="op">TC      </span> <a href="#57544C535432">WTLST2</a>                                
+048278,000311: 01,3342           00004                           <span class="ps">OCT     </span> 4                                     
+048279,000312: 
+048280,000313: 01,3343           10000                 +4        <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  TEST  TD - T6 + 1</span>
+048281,000314: 01,3344           61405                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +5                         
+048282,000315: 01,3345           13351                           <span class="op">TCF     </span> +4                                    
+048283,000316: 01,3346           64744                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+048284,000317: 01,3347           03377                           <span class="op">TC      </span> <a href="#57544C535432">WTLST2</a>                                
+048285,000318: 01,3350           00005                           <span class="ps">OCT     </span> 5                                     
+048286,000319: 
+048287,000320: 01,3351           10000                 +4        <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  TEST  TD - T7 + 1</span>
+048288,000321: 01,3352           61406                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +6                         
+048289,000322: 01,3353           13357                           <span class="op">TCF     </span> +4                                    
+048290,000323: 01,3354           64744                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+048291,000324: 01,3355           03377                           <span class="op">TC      </span> <a href="#57544C535432">WTLST2</a>                                
+048292,000325: 01,3356           00006                           <span class="ps">OCT     </span> 6                                     
+048293,000326: 
 </pre>
 </span>
 </p>
@@ -541,22 +541,22 @@ Page 1123
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-048284,000328: 01,3357           10000                 +4        <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-048285,000329: 01,3360           61407                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +7                         
-048286,000330: 01,3361           13365                           <span class="op">TCF     </span> +4                                    
-048287,000331: 01,3362           64744                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-048288,000332: 01,3363           03377                           <span class="op">TC      </span> <a href="#57544C535432">WTLST2</a>                                
-048289,000333: 01,3364           00007                           <span class="ps">OCT     </span> 7                                     
-048290,000334: 
-048291,000335: 01,3365           10000                 +4        <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-<a name="575441424F5254"></a>048292,000336: 01,3366           03374        <span class="sm">WTABORT </span>           <span class="op">TC      </span> <a href="#46494C4C4544">FILLED</a>                                
-048293,000337: 01,3367           13370                           <span class="op">NOOP    </span>                                       <span class="co">#  CAN'T GET HERE</span>
-048294,000338: 01,3370           64744                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-048295,000339: 01,3371           03377                           <span class="op">TC      </span> <a href="#57544C535432">WTLST2</a>                                
-048296,000340: 01,3372           00010                           <span class="ps">OCT     </span> 10                                    
-048297,000341: 
-<a name="4F43543430323031"></a>048298,000342: 01,3373           40201        <span class="sm">OCT40201</span>           <span class="ps">OCT     </span> 40201                                 
-048299,000343: 
+048295,000328: 01,3357           10000                 +4        <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+048296,000329: 01,3360           61407                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +7                         
+048297,000330: 01,3361           13365                           <span class="op">TCF     </span> +4                                    
+048298,000331: 01,3362           64744                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+048299,000332: 01,3363           03377                           <span class="op">TC      </span> <a href="#57544C535432">WTLST2</a>                                
+048300,000333: 01,3364           00007                           <span class="ps">OCT     </span> 7                                     
+048301,000334: 
+048302,000335: 01,3365           10000                 +4        <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+<a name="575441424F5254"></a>048303,000336: 01,3366           03374        <span class="sm">WTABORT </span>           <span class="op">TC      </span> <a href="#46494C4C4544">FILLED</a>                                
+048304,000337: 01,3367           13370                           <span class="op">NOOP    </span>                                       <span class="co">#  CAN'T GET HERE</span>
+048305,000338: 01,3370           64744                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+048306,000339: 01,3371           03377                           <span class="op">TC      </span> <a href="#57544C535432">WTLST2</a>                                
+048307,000340: 01,3372           00010                           <span class="ps">OCT     </span> 10                                    
+048308,000341: 
+<a name="4F43543430323031"></a>048309,000342: 01,3373           40201        <span class="sm">OCT40201</span>           <span class="ps">OCT     </span> 40201                                 
+048310,000343: 
 </pre>
 </span>
 </p>
@@ -572,10 +572,10 @@ Page 1124
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="46494C4C4544"></a>048301,000345: 01,3374           52062        <span class="sm">FILLED  </span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5741495445584954">WAITEXIT</a>                              
-048302,000346: 01,3375           05712                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#4241494C4F555431">BAILOUT1</a>                              <span class="co">#  NO ROOM IN THE INN</span>
-048303,000347: 01,3376           31203                           <span class="ps">OCT     </span> 31203                                 
-048304,000348: 
+<a name="46494C4C4544"></a>048312,000345: 01,3374           52062        <span class="sm">FILLED  </span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5741495445584954">WAITEXIT</a>                              
+048313,000346: 01,3375           05712                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#4241494C4F555431">BAILOUT1</a>                              <span class="co">#  NO ROOM IN THE INN</span>
+048314,000347: 01,3376           31203                           <span class="ps">OCT     </span> 31203                                 
+048315,000348: 
 </pre>
 </span>
 </p>
@@ -591,47 +591,47 @@ Page 1125
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-048306,000350:                                                                                                  <span class="co">#  THE ENTRY TO WTLST2 JUST PRECEDING OCT  N  IS FOR T  LE TD LE T   -1.</span>
-048307,000351:                                                                                                  <span class="co">#                                                     N           N+1</span>
-048308,000352: 
-048309,000353:                                                                                                  <span class="co">#  (LE MEANS LESS THAN OR EQUAL TO).  AT ENTRY, C(A) = -(TD - T   + 1)</span>
-048310,000354:                                                                                                  <span class="co">#                                                              N+1</span>
-048311,000355: 
-048312,000356:                                                                                                  <span class="co">#  THE LST1 ENTRY -(T   - T +1) IS TO BE REPLACED BY -(TD - T + 1), AND</span>
-048313,000357:                                                                                                  <span class="co">#                    N+1   N                                 N</span>
-048314,000358: 
-048315,000359:                                                                                                  <span class="co">#  THE ENTRY -(T   - TD + 1) IS TO BE INSERTED IMMEDIATELY FOLLOWING.</span>
-048316,000360:                                                                                                  <span class="co">#               N+1</span>
-048317,000361: 
-<a name="57544C535432"></a>048318,000362: 01,3377           54064        <span class="sm">WTLST2  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5741495454454D50">WAITTEMP</a>                              <span class="co">#      C(A) = -(TD - T   + 1)</span>
-048319,000363: 01,3400           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-048320,000364: 01,3401           30000                           <span class="op">CAF     </span> 0                                     
-048321,000365: 01,3402           54002                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  INDEX VALUE INTO Q.</span>
-048322,000366: 
-048323,000367: 01,3403           34744                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-048324,000368: 01,3404           60064                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5741495454454D50">WAITTEMP</a>                              
-048325,000369: 01,3405           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  C(A) = -(TD - T ) + 1.</span>
-048326,000370: 01,3406           27377                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       -1                         <span class="co">#                 N</span>
-048327,000371: 
-048328,000372: 01,3407           40064                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5741495454454D50">WAITTEMP</a>                              
-048329,000373: 01,3410           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-048330,000374: 01,3411           13263                           <span class="op">TCF     </span> <a href="#57544C535434">WTLST4</a>                                
-048331,000375: 
-048332,000376:                                                                                                  <span class="co">#  C(TIME3) = 1.0 - (T1 - T)</span>
-048333,000377: 
-048334,000378:                                                                                                  <span class="co">#  C(LST1  ) = - (T2 - T1) + 1</span>
-048335,000379:                                                                                                  <span class="co">#  C(LST1+1) = - (T3 - T2) + 1</span>
-048336,000380:                                                                                                  <span class="co">#  C(LST1+2) = - (T4 - T3) + 1</span>
-048337,000381:                                                                                                  <span class="co">#  C(LST1+3) = - (T5 - T4) + 1</span>
-048338,000382:                                                                                                  <span class="co">#  C(LST1+4) = - (T6 - T5) + 1</span>
-048339,000383: 
-048340,000384:                                                                                                  <span class="co">#  C(LST2   ) = 2CADR  TASK1</span>
-048341,000385:                                                                                                  <span class="co">#  C(LST2+2 ) = 2CADR  TASK2</span>
-048342,000386:                                                                                                  <span class="co">#  C(LST2+4 ) = 2CADR  TASK3</span>
-048343,000387:                                                                                                  <span class="co">#  C(LST2+6 ) = 2CADR  TASK4</span>
-048344,000388:                                                                                                  <span class="co">#  C(LST2+8 ) = 2CADR  TASK5</span>
-048345,000389:                                                                                                  <span class="co">#  C(LST2+10) = 2CADR  TASK6</span>
-048346,000390: 
+048317,000350:                                                                                                  <span class="co">#  THE ENTRY TO WTLST2 JUST PRECEDING OCT  N  IS FOR T  LE TD LE T   -1.</span>
+048318,000351:                                                                                                  <span class="co">#                                                     N           N+1</span>
+048319,000352: 
+048320,000353:                                                                                                  <span class="co">#  (LE MEANS LESS THAN OR EQUAL TO).  AT ENTRY, C(A) = -(TD - T   + 1)</span>
+048321,000354:                                                                                                  <span class="co">#                                                              N+1</span>
+048322,000355: 
+048323,000356:                                                                                                  <span class="co">#  THE LST1 ENTRY -(T   - T +1) IS TO BE REPLACED BY -(TD - T + 1), AND</span>
+048324,000357:                                                                                                  <span class="co">#                    N+1   N                                 N</span>
+048325,000358: 
+048326,000359:                                                                                                  <span class="co">#  THE ENTRY -(T   - TD + 1) IS TO BE INSERTED IMMEDIATELY FOLLOWING.</span>
+048327,000360:                                                                                                  <span class="co">#               N+1</span>
+048328,000361: 
+<a name="57544C535432"></a>048329,000362: 01,3377           54064        <span class="sm">WTLST2  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5741495454454D50">WAITTEMP</a>                              <span class="co">#      C(A) = -(TD - T   + 1)</span>
+048330,000363: 01,3400           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+048331,000364: 01,3401           30000                           <span class="op">CAF     </span> 0                                     
+048332,000365: 01,3402           54002                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  INDEX VALUE INTO Q.</span>
+048333,000366: 
+048334,000367: 01,3403           34744                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+048335,000368: 01,3404           60064                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5741495454454D50">WAITTEMP</a>                              
+048336,000369: 01,3405           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  C(A) = -(TD - T ) + 1.</span>
+048337,000370: 01,3406           27377                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       -1                         <span class="co">#                 N</span>
+048338,000371: 
+048339,000372: 01,3407           40064                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5741495454454D50">WAITTEMP</a>                              
+048340,000373: 01,3410           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+048341,000374: 01,3411           13263                           <span class="op">TCF     </span> <a href="#57544C535434">WTLST4</a>                                
+048342,000375: 
+048343,000376:                                                                                                  <span class="co">#  C(TIME3) = 1.0 - (T1 - T)</span>
+048344,000377: 
+048345,000378:                                                                                                  <span class="co">#  C(LST1  ) = - (T2 - T1) + 1</span>
+048346,000379:                                                                                                  <span class="co">#  C(LST1+1) = - (T3 - T2) + 1</span>
+048347,000380:                                                                                                  <span class="co">#  C(LST1+2) = - (T4 - T3) + 1</span>
+048348,000381:                                                                                                  <span class="co">#  C(LST1+3) = - (T5 - T4) + 1</span>
+048349,000382:                                                                                                  <span class="co">#  C(LST1+4) = - (T6 - T5) + 1</span>
+048350,000383: 
+048351,000384:                                                                                                  <span class="co">#  C(LST2   ) = 2CADR  TASK1</span>
+048352,000385:                                                                                                  <span class="co">#  C(LST2+2 ) = 2CADR  TASK2</span>
+048353,000386:                                                                                                  <span class="co">#  C(LST2+4 ) = 2CADR  TASK3</span>
+048354,000387:                                                                                                  <span class="co">#  C(LST2+6 ) = 2CADR  TASK4</span>
+048355,000388:                                                                                                  <span class="co">#  C(LST2+8 ) = 2CADR  TASK5</span>
+048356,000389:                                                                                                  <span class="co">#  C(LST2+10) = 2CADR  TASK6</span>
+048357,000390: 
 </pre>
 </span>
 </p>
@@ -647,47 +647,47 @@ Page 1126
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-048348,000392:                                                                                                  <span class="co">#           ENTERS HERE ON T3 RUPT TO DISPATCH WAITLISTED TASK.</span>
-048349,000393: 
-<a name="543352555054"></a>048350,000394: 01,3412           00006        <span class="sm">T3RUPT  </span>           <span class="op">EXTEND  </span>                                       
-048351,000395: 01,3413           04007                           <span class="op">ROR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5355504552424E4B">SUPERBNK</a>                              <span class="co">#  READ CURRENT SUPERBANK VALUE AND</span>
-048352,000396: 01,3414           54016                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              <span class="co">#  SAVE WITH E AND F BANK VALUES.</span>
-048353,000397: 01,3415           00006                           <span class="op">EXTEND  </span>                                       
-048354,000398: 01,3416           22012                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152555054">QRUPT</a>                                 
-048355,000399: 
-<a name="54335255505432"></a>048356,000400: 01,3417           34725        <span class="sm">T3RUPT2 </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E4547312F32">NEG1/2</a>                                <span class="co">#  DISPATCH WAITLIST TASK.</span>
-048357,000401: 01,3420           57407                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +7                         
-048358,000402: 01,3421           57406                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +6                         
-048359,000403: 01,3422           57405                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +5                         
-048360,000404: 01,3423           57404                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +4                         <span class="co">#  1.  MOVE UP LST1 CONTENTS, ENTERING</span>
-048361,000405: 01,3424           57403                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +3                         <span class="co">#      A VALUE OF 1/2 +1 AT THE BOTTOM</span>
-048362,000406: 01,3425           57402                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +2                         <span class="co">#      FOR T6-T5, CORRESPONDING TO THE</span>
-048363,000407: 01,3426           57401                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +1                         <span class="co">#      INTERVAL 81.91 SEC FOR ENDTASK.</span>
-048364,000408: 01,3427           57400                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
-048365,000409: 01,3430           64724                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#  2. SET T3 = 1.0 - T2 -T USING LIST 1.</span>
-048366,000410: 01,3431           26026                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4533">TIME3</a>                                 <span class="co">#  SO T3 WONT TICK DURING UPDATE.</span>
-048367,000411: 01,3432           54332                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505441474E">RUPTAGN</a>                               
-048368,000412: 01,3433           44746                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-048369,000413: 01,3434           54332                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505441474E">RUPTAGN</a>                               <span class="co">#  SETS RUPTAGN TO +1 ON OVERFLOW.</span>
-048370,000414: 
-048371,000415: 01,3435           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  DISPATCH TASK.</span>
-048372,000416: 01,3436           45241                           <span class="op">DCS     </span> <a href="#454E445441534B">ENDTASK</a>                               
-048373,000417: 01,3437           53431                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +16D                       
-048374,000418: 01,3440           53427                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +14D                       
-048375,000419: 01,3441           53425                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +12D                       
-048376,000420: 01,3442           53423                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +10D                       
-048377,000421: 01,3443           53421                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +8D                        
-048378,000422: 01,3444           53417                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +6                         
-048379,000423: 01,3445           53415                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +4                         
-048380,000424: 01,3446           53413                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +2                         
-048381,000425: 01,3447           53411                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>                                  
-048382,000426: 
-048383,000427: 01,3450           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-048384,000428: 01,3451           00006                           <span class="op">EXTEND  </span>                                       
-048385,000429: 01,3452           01007                           <span class="op">WRITE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5355504552424E4B">SUPERBNK</a>                              <span class="co">#  SET SUPERBANK FROM BBCON OF 2CADR</span>
-048386,000430: 01,3453           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  RESTORE TO L FOR DXCH Z.</span>
-048387,000431: 01,3454           52006                           <span class="op">DTCB    </span>                                       
-048388,000432: 
+048359,000392:                                                                                                  <span class="co">#           ENTERS HERE ON T3 RUPT TO DISPATCH WAITLISTED TASK.</span>
+048360,000393: 
+<a name="543352555054"></a>048361,000394: 01,3412           00006        <span class="sm">T3RUPT  </span>           <span class="op">EXTEND  </span>                                       
+048362,000395: 01,3413           04007                           <span class="op">ROR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5355504552424E4B">SUPERBNK</a>                              <span class="co">#  READ CURRENT SUPERBANK VALUE AND</span>
+048363,000396: 01,3414           54016                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              <span class="co">#  SAVE WITH E AND F BANK VALUES.</span>
+048364,000397: 01,3415           00006                           <span class="op">EXTEND  </span>                                       
+048365,000398: 01,3416           22012                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152555054">QRUPT</a>                                 
+048366,000399: 
+<a name="54335255505432"></a>048367,000400: 01,3417           34725        <span class="sm">T3RUPT2 </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E4547312F32">NEG1/2</a>                                <span class="co">#  DISPATCH WAITLIST TASK.</span>
+048368,000401: 01,3420           57407                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +7                         
+048369,000402: 01,3421           57406                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +6                         
+048370,000403: 01,3422           57405                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +5                         
+048371,000404: 01,3423           57404                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +4                         <span class="co">#  1.  MOVE UP LST1 CONTENTS, ENTERING</span>
+048372,000405: 01,3424           57403                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +3                         <span class="co">#      A VALUE OF 1/2 +1 AT THE BOTTOM</span>
+048373,000406: 01,3425           57402                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +2                         <span class="co">#      FOR T6-T5, CORRESPONDING TO THE</span>
+048374,000407: 01,3426           57401                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +1                         <span class="co">#      INTERVAL 81.91 SEC FOR ENDTASK.</span>
+048375,000408: 01,3427           57400                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
+048376,000409: 01,3430           64724                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#  2. SET T3 = 1.0 - T2 -T USING LIST 1.</span>
+048377,000410: 01,3431           26026                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4533">TIME3</a>                                 <span class="co">#  SO T3 WONT TICK DURING UPDATE.</span>
+048378,000411: 01,3432           54332                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505441474E">RUPTAGN</a>                               
+048379,000412: 01,3433           44746                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+048380,000413: 01,3434           54332                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505441474E">RUPTAGN</a>                               <span class="co">#  SETS RUPTAGN TO +1 ON OVERFLOW.</span>
+048381,000414: 
+048382,000415: 01,3435           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  DISPATCH TASK.</span>
+048383,000416: 01,3436           45241                           <span class="op">DCS     </span> <a href="#454E445441534B">ENDTASK</a>                               
+048384,000417: 01,3437           53431                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +16D                       
+048385,000418: 01,3440           53427                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +14D                       
+048386,000419: 01,3441           53425                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +12D                       
+048387,000420: 01,3442           53423                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +10D                       
+048388,000421: 01,3443           53421                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +8D                        
+048389,000422: 01,3444           53417                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +6                         
+048390,000423: 01,3445           53415                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +4                         
+048391,000424: 01,3446           53413                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +2                         
+048392,000425: 01,3447           53411                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>                                  
+048393,000426: 
+048394,000427: 01,3450           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+048395,000428: 01,3451           00006                           <span class="op">EXTEND  </span>                                       
+048396,000429: 01,3452           01007                           <span class="op">WRITE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5355504552424E4B">SUPERBNK</a>                              <span class="co">#  SET SUPERBANK FROM BBCON OF 2CADR</span>
+048397,000430: 01,3453           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  RESTORE TO L FOR DXCH Z.</span>
+048398,000431: 01,3454           52006                           <span class="op">DTCB    </span>                                       
+048399,000432: 
 </pre>
 </span>
 </p>
@@ -703,27 +703,27 @@ Page 1127
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-048390,000434:                                                                                                  <span class="co">#           RETURN, AFTER EXECUTION OF T3 OVERFLOW TASK:</span>
-048391,000435: 
-048392,000436:    5263                                           <span class="ps">BLOCK   </span> 02                                    
-048393,000437:    5263                                           <span class="ps">COUNT*  </span> $$/WAIT                               
-<a name="5441534B4F564552"></a>048394,000438:    5263           10332        <span class="sm">TASKOVER</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505441474E">RUPTAGN</a>                               <span class="co">#  IF +1 RETURN TO T3RUPT, IF -0 RESUME.</span>
-048395,000439:    5264           35222                           <span class="op">CAF     </span> <a href="#574149544242">WAITBB</a>                                
-048396,000440:    5265           54006                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-048397,000441:    5266           13417                           <span class="op">TCF     </span> <a href="#54335255505432">T3RUPT2</a>                               <span class="co">#  DISPATCH NEXT TASK IF IT WAS DUE.</span>
-048398,000442: 
-048399,000443:    5267           30016                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              
-048400,000444:    5270           00006                           <span class="op">EXTEND  </span>                                       
-048401,000445:    5271           01007                           <span class="op">WRITE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5355504552424E4B">SUPERBNK</a>                              <span class="co">#  RESTORE SUPERBANK BEFORE RESUME IS DONE</span>
-048402,000446: 
-<a name="524553554D45"></a>048403,000447:    5272           00006        <span class="sm">RESUME  </span>           <span class="op">EXTEND  </span>                                       
-048404,000448:    5273           22012                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152555054">QRUPT</a>                                 
-<a name="4E4F5152534D"></a>048405,000449:    5274           30016        <span class="sm">NOQRSM  </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              
-048406,000450:    5275           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-<a name="4E4F514252534D"></a>048407,000451:    5276           52011        <span class="sm">NOQBRSM </span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 
-048408,000452:    5277           00003                           <span class="op">RELINT  </span>                                       
-048409,000453:    5300           50017                           <span class="op">RESUME  </span>                                       
-048410,000454: 
+048401,000434:                                                                                                  <span class="co">#           RETURN, AFTER EXECUTION OF T3 OVERFLOW TASK:</span>
+048402,000435: 
+048403,000436:    5263                                           <span class="ps">BLOCK   </span> 02                                    
+048404,000437:    5263                                           <span class="ps">COUNT*  </span> $$/WAIT                               
+<a name="5441534B4F564552"></a>048405,000438:    5263           10332        <span class="sm">TASKOVER</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505441474E">RUPTAGN</a>                               <span class="co">#  IF +1 RETURN TO T3RUPT, IF -0 RESUME.</span>
+048406,000439:    5264           35222                           <span class="op">CAF     </span> <a href="#574149544242">WAITBB</a>                                
+048407,000440:    5265           54006                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+048408,000441:    5266           13417                           <span class="op">TCF     </span> <a href="#54335255505432">T3RUPT2</a>                               <span class="co">#  DISPATCH NEXT TASK IF IT WAS DUE.</span>
+048409,000442: 
+048410,000443:    5267           30016                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              
+048411,000444:    5270           00006                           <span class="op">EXTEND  </span>                                       
+048412,000445:    5271           01007                           <span class="op">WRITE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5355504552424E4B">SUPERBNK</a>                              <span class="co">#  RESTORE SUPERBANK BEFORE RESUME IS DONE</span>
+048413,000446: 
+<a name="524553554D45"></a>048414,000447:    5272           00006        <span class="sm">RESUME  </span>           <span class="op">EXTEND  </span>                                       
+048415,000448:    5273           22012                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152555054">QRUPT</a>                                 
+<a name="4E4F5152534D"></a>048416,000449:    5274           30016        <span class="sm">NOQRSM  </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              
+048417,000450:    5275           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+<a name="4E4F514252534D"></a>048418,000451:    5276           52011        <span class="sm">NOQBRSM </span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 
+048419,000452:    5277           00003                           <span class="op">RELINT  </span>                                       
+048420,000453:    5300           50017                           <span class="op">RESUME  </span>                                       
+048421,000454: 
 </pre>
 </span>
 </p>
@@ -739,56 +739,56 @@ Page 1128
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-048412,000456:                                                                                                  <span class="co">#  LONGCALL</span>
-048413,000457: 
-048414,000458:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION                                  DATE- 17 MARCH 1967</span>
-048415,000459:                                                                                                  <span class="co">#  PROGRAM WRITTEN BY W.H. VANDEVER                    LOG SECTION WAITLIST</span>
-048416,000460:                                                                                                  <span class="co">#  MOD BY- R. MELANSON TO ADD DOCUMENTATION       ASSEMBLY SUNDISK REV. 100</span>
-048417,000461: 
-048418,000462:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION-</span>
-048419,000463:                                                                                                  <span class="co">#  LONGCALL IS CALLED WITH THE DELTA TIME ARRIVING IN A,L SCALED AS TIME2,TIME1 WITH THE 2CADR OF THE TASK</span>
-048420,000464:                                                                                                  <span class="co">#  IMMEDIATELY FOLLOWING THE TC LONGCALL.  FOR EXAMPLE, IT MIGHT BE DONE AS FOLLOWS WHERE TIMELOC IS THE NAME OF</span>
-048421,000465:                                                                                                  <span class="co">#  A DP REGISTER CONTAINING A DELTA TIME AND WHERE TASKTODO IS THE NAME OF THE LOCATION AT WHICH LONGCALL IS TO</span>
-048422,000466:                                                                                                  <span class="co">#  START</span>
-048423,000467: 
-048424,000468:                                                                                                  <span class="co">#  CALLING SEQUENCE-</span>
-048425,000469:                                                                                                  <span class="co">#                                                   EXTEND</span>
-048426,000470:                                                                                                  <span class="co">#                                                   DCA    TIMELOC</span>
-048427,000471:                                                                                                  <span class="co">#                                                   TC     LONGCALL</span>
-048428,000472:                                                                                                  <span class="co">#                                                   2CADR  TASKTODO</span>
-048429,000473: 
-048430,000474:                                                                                                  <span class="co">#  NORMAL EXIT MODE-</span>
-048431,000475:                                                                                                  <span class="co">#     1). TC    WAITLIST</span>
-048432,000476:                                                                                                  <span class="co">#     2). DTCB  (TO L+3 OF CALLING ROUTINE 1ST PASS THRU LONGCYCL)</span>
-048433,000477:                                                                                                  <span class="co">#     3). DTCB  (TO TASKOVER ON SUBSEQUENT PASSES THRU LONGCYCL)</span>
-048434,000478: 
-048435,000479:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODE-</span>
-048436,000480:                                                                                                  <span class="co">#     NONE</span>
-048437,000481: 
-048438,000482:                                                                                                  <span class="co">#  OUTPUT-</span>
-048439,000483:                                                                                                  <span class="co">#     LONGTIME AND LONGTIME+1 = DELTA TIME</span>
-048440,000484:                                                                                                  <span class="co">#     LONGEXIT AND LONGEXIT+1 = RETURN 2CADR</span>
-048441,000485:                                                                                                  <span class="co">#     LONGCADR AND LONGCADR+1 = TASK 2CADR</span>
-048442,000486:                                                                                                  <span class="co">#     A = SINGLE PRECISION TIME FOR WAITLIST</span>
-048443,000487: 
-048444,000488:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION-</span>
-048445,000489:                                                                                                  <span class="co">#     A = MOST SIGNIFICANT PART OF DELTA TIME</span>
-048446,000490:                                                                                                  <span class="co">#     L = LEAST SIGNIFICANT PART OF DELTA TIME</span>
-048447,000491:                                                                                                  <span class="co">#     Q = ADDRESS OF 2CADR TASK VALUE</span>
-048448,000492: 
-048449,000493:                                                                                                  <span class="co">#  DEBRIS-</span>
-048450,000494:                                                                                                  <span class="co">#     A,Q,L</span>
-048451,000495:                                                                                                  <span class="co">#     LONGCADR AND LONGCADR+1</span>
-048452,000496:                                                                                                  <span class="co">#     LONGEXIT AND LONGEXIT+1</span>
-048453,000497:                                                                                                  <span class="co">#     LONGTIME AND LONGTIME+1</span>
-048454,000498: 
-048455,000499:                                                                                                  <span class="co">#  *** THE FOLLOWING IS TO BE IN FIXED-FIXED AND UNSWITCHED ERRASIBLE ***</span>
-048456,000500: 
-048457,000501:    5301                                           <span class="ps">BLOCK   </span> 02                                    
-048458,000502:    5301  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
-<a name="4C4F4E4743414C4C"></a>048459,000503:    5301           53153        <span class="sm">LONGCALL</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>                              <span class="co">#  OBTAIN THE DELTA TIME</span>
-048460,000504: 
-048461,000505:    5302           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  OBTAIN THE 2CADR</span>
+048423,000456:                                                                                                  <span class="co">#  LONGCALL</span>
+048424,000457: 
+048425,000458:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION                                  DATE- 17 MARCH 1967</span>
+048426,000459:                                                                                                  <span class="co">#  PROGRAM WRITTEN BY W.H. VANDEVER                    LOG SECTION WAITLIST</span>
+048427,000460:                                                                                                  <span class="co">#  MOD BY- R. MELANSON TO ADD DOCUMENTATION       ASSEMBLY SUNDISK REV. 100</span>
+048428,000461: 
+048429,000462:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION-</span>
+048430,000463:                                                                                                  <span class="co">#  LONGCALL IS CALLED WITH THE DELTA TIME ARRIVING IN A,L SCALED AS TIME2,TIME1 WITH THE 2CADR OF THE TASK</span>
+048431,000464:                                                                                                  <span class="co">#  IMMEDIATELY FOLLOWING THE TC LONGCALL.  FOR EXAMPLE, IT MIGHT BE DONE AS FOLLOWS WHERE TIMELOC IS THE NAME OF</span>
+048432,000465:                                                                                                  <span class="co">#  A DP REGISTER CONTAINING A DELTA TIME AND WHERE TASKTODO IS THE NAME OF THE LOCATION AT WHICH LONGCALL IS TO</span>
+048433,000466:                                                                                                  <span class="co">#  START</span>
+048434,000467: 
+048435,000468:                                                                                                  <span class="co">#  CALLING SEQUENCE-</span>
+048436,000469:                                                                                                  <span class="co">#                                                   EXTEND</span>
+048437,000470:                                                                                                  <span class="co">#                                                   DCA    TIMELOC</span>
+048438,000471:                                                                                                  <span class="co">#                                                   TC     LONGCALL</span>
+048439,000472:                                                                                                  <span class="co">#                                                   2CADR  TASKTODO</span>
+048440,000473: 
+048441,000474:                                                                                                  <span class="co">#  NORMAL EXIT MODE-</span>
+048442,000475:                                                                                                  <span class="co">#     1). TC    WAITLIST</span>
+048443,000476:                                                                                                  <span class="co">#     2). DTCB  (TO L+3 OF CALLING ROUTINE 1ST PASS THRU LONGCYCL)</span>
+048444,000477:                                                                                                  <span class="co">#     3). DTCB  (TO TASKOVER ON SUBSEQUENT PASSES THRU LONGCYCL)</span>
+048445,000478: 
+048446,000479:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODE-</span>
+048447,000480:                                                                                                  <span class="co">#     NONE</span>
+048448,000481: 
+048449,000482:                                                                                                  <span class="co">#  OUTPUT-</span>
+048450,000483:                                                                                                  <span class="co">#     LONGTIME AND LONGTIME+1 = DELTA TIME</span>
+048451,000484:                                                                                                  <span class="co">#     LONGEXIT AND LONGEXIT+1 = RETURN 2CADR</span>
+048452,000485:                                                                                                  <span class="co">#     LONGCADR AND LONGCADR+1 = TASK 2CADR</span>
+048453,000486:                                                                                                  <span class="co">#     A = SINGLE PRECISION TIME FOR WAITLIST</span>
+048454,000487: 
+048455,000488:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION-</span>
+048456,000489:                                                                                                  <span class="co">#     A = MOST SIGNIFICANT PART OF DELTA TIME</span>
+048457,000490:                                                                                                  <span class="co">#     L = LEAST SIGNIFICANT PART OF DELTA TIME</span>
+048458,000491:                                                                                                  <span class="co">#     Q = ADDRESS OF 2CADR TASK VALUE</span>
+048459,000492: 
+048460,000493:                                                                                                  <span class="co">#  DEBRIS-</span>
+048461,000494:                                                                                                  <span class="co">#     A,Q,L</span>
+048462,000495:                                                                                                  <span class="co">#     LONGCADR AND LONGCADR+1</span>
+048463,000496:                                                                                                  <span class="co">#     LONGEXIT AND LONGEXIT+1</span>
+048464,000497:                                                                                                  <span class="co">#     LONGTIME AND LONGTIME+1</span>
+048465,000498: 
+048466,000499:                                                                                                  <span class="co">#  *** THE FOLLOWING IS TO BE IN FIXED-FIXED AND UNSWITCHED ERRASIBLE ***</span>
+048467,000500: 
+048468,000501:    5301                                           <span class="ps">BLOCK   </span> 02                                    
+048469,000502:    5301  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
+<a name="4C4F4E4743414C4C"></a>048470,000503:    5301           53153        <span class="sm">LONGCALL</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>                              <span class="co">#  OBTAIN THE DELTA TIME</span>
+048471,000504: 
+048472,000505:    5302           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  OBTAIN THE 2CADR</span>
 </pre>
 </span>
 </p>
@@ -804,55 +804,55 @@ Page 1129
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-048463,000507:    5303           50002                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-048464,000508:    5304           30001                           <span class="op">DCA     </span> 0                                     
-048465,000509:    5305           53147                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4743414452">LONGCADR</a>                              
-048466,000510: 
-048467,000511:    5306           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  NOW GO TO THE APPROPRIATE SWITCHED BANK</span>
-048468,000512:    5307           35312                           <span class="op">DCA     </span> <a href="#4C47434C32434452">LGCL2CDR</a>                              <span class="co">#  FOR THE REST OF LONGCALL</span>
-048469,000513:    5310           52006                           <span class="op">DTCB    </span>                                       
-048470,000514: 
-048471,000515:    5311  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
-<a name="4C47434C32434452"></a>048472,000516:    5311           03455 02063  <span class="sm">LGCL2CDR</span>           <span class="ps">2CADR   </span> <a href="#4C4E4743414C4C32">LNGCALL2</a>                              
-048473,000517: 
-048474,000518:                                                                                                  <span class="co">#  *** THE FOLLOWING MAY BE IN A SWITCHED BANK, INCLUDING ITS ERASABLE ***</span>
-048475,000519: 
-048476,000520: 01,3455                                           <span class="ps">BANK    </span> 01                                    
-048477,000521: 01,3455                                           <span class="ps">COUNT*  </span> $$/WAIT                               
-<a name="4C4E4743414C4C32"></a>048478,000522: 01,3455           23435        <span class="sm">LNGCALL2</span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4745584954">LONGEXIT</a>   +1                         <span class="co">#  SAVE THE CORRECT BB FOR RETURN</span>
-048479,000523: 01,3456           34743                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  OBTAIN THE RETURN ADDRESS</span>
-048480,000524: 01,3457           26002                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-048481,000525: 01,3460           55434                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4745584954">LONGEXIT</a>                              
-048482,000526: 
-048483,000527: 01,3461           31152                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>                              <span class="co">#  CHECK FOR LEGITIMATE DELTA-TIME</span>
-048484,000528: 01,3462           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-048485,000529: 01,3463           13471                           <span class="op">TCF     </span> <a href="#4C4F4E474359434C">LONGCYCL</a>                              <span class="co">#  HI-ORDER OK --> ALL IS OK.</span>
-048486,000530: 01,3464           13466                           <span class="op">TCF     </span> +2                                    <span class="co">#  HI-ORDER ZERO --> CHECK LO-ORDER.</span>
-048487,000531: 01,3465           13523                           <span class="op">TCF     </span> <a href="#4C4F4E47504F4F48">LONGPOOH</a>                              <span class="co">#  HI-ORDER NEG. --> NEG. DT</span>
-048488,000532: 01,3466           31153                 +2        <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>   +1                         <span class="co">#  CHECK LO-ORDER FOR ZERO OR NEGATIVE.</span>
-048489,000533: 01,3467           00006                           <span class="op">EXTEND  </span>                                       
-048490,000534: 01,3470           63523                           <span class="op">BZMF    </span> <a href="#4C4F4E47504F4F48">LONGPOOH</a>                              <span class="co">#  BAD DELTA-TIME.  ABORT</span>
-048491,000535: 
-048492,000536:                                                                                                  <span class="co">#           *** WAITLIST TASK LONGCYCL ***</span>
-<a name="4C4F4E474359434C"></a>048493,000537: 01,3471           00006        <span class="sm">LONGCYCL</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  CAN WE SUCCESFULLY TAKE ABOUT 1.25</span>
-048494,000538: 01,3472           43503                           <span class="op">DCS     </span> <a href="#44504249543134">DPBIT14</a>                               <span class="co">#  MINUTES OFF OF LONGTIME</span>
-048495,000539: 01,3473           21153                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>                              
-048496,000540: 
-048497,000541: 01,3474           11153                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>   +1                         <span class="co">#  THE REASONIBG BEHIND THIS PART IS</span>
-048498,000542: 01,3475           13513                           <span class="op">TCF     </span> <a href="#4D55434854494D45">MUCHTIME</a>                              <span class="co">#  INVOLVED, TAKING INTO ACCOUNT THAT THE</span>
-048499,000543:                                                                                                  <span class="co">#  WORDS MAY NOT BE SIGNED CORRECTED (DP</span>
-048500,000544:                                                                                                  <span class="co">#  BASIC INSTRUCTIONS</span>
-048501,000545:                                                                                                  <span class="co">#  DO NOT SIGN CORRECT) AND THAT WE SUBTRAC</span>
-048502,000546:                                                                                                  <span class="co">#  TED BIT14 (1 OVER HALF THE POS. VALUE</span>
-048503,000547:                                                                                                  <span class="co">#  REPRESENTIBLE IN SINGLE WORD)</span>
-048504,000548: 01,3476           13477                           <span class="op">NOOP    </span>                                       <span class="co">#  CAN:T GET HERE    **********</span>
-048505,000549: 01,3477           13500                           <span class="op">TCF     </span> +1                                    
-048506,000550: 01,3500           11152                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>                              
-048507,000551: 01,3501           13513                           <span class="op">TCF     </span> <a href="#4D55434854494D45">MUCHTIME</a>                              
-<a name="44504249543134"></a>048508,000552: 01,3502           00000        <span class="sm">DPBIT14 </span>           <span class="ps">OCT     </span> 00000                                 
-048509,000553: 01,3503           20000                           <span class="ps">OCT     </span> 20000                                 
-048510,000554:                                                                                                  <span class="co">#  LONGCALL</span>
-048511,000555: 
+048474,000507:    5303           50002                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+048475,000508:    5304           30001                           <span class="op">DCA     </span> 0                                     
+048476,000509:    5305           53147                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4743414452">LONGCADR</a>                              
+048477,000510: 
+048478,000511:    5306           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  NOW GO TO THE APPROPRIATE SWITCHED BANK</span>
+048479,000512:    5307           35312                           <span class="op">DCA     </span> <a href="#4C47434C32434452">LGCL2CDR</a>                              <span class="co">#  FOR THE REST OF LONGCALL</span>
+048480,000513:    5310           52006                           <span class="op">DTCB    </span>                                       
+048481,000514: 
+048482,000515:    5311  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
+<a name="4C47434C32434452"></a>048483,000516:    5311           03455 02063  <span class="sm">LGCL2CDR</span>           <span class="ps">2CADR   </span> <a href="#4C4E4743414C4C32">LNGCALL2</a>                              
+048484,000517: 
+048485,000518:                                                                                                  <span class="co">#  *** THE FOLLOWING MAY BE IN A SWITCHED BANK, INCLUDING ITS ERASABLE ***</span>
+048486,000519: 
+048487,000520: 01,3455                                           <span class="ps">BANK    </span> 01                                    
+048488,000521: 01,3455                                           <span class="ps">COUNT*  </span> $$/WAIT                               
+<a name="4C4E4743414C4C32"></a>048489,000522: 01,3455           23435        <span class="sm">LNGCALL2</span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4745584954">LONGEXIT</a>   +1                         <span class="co">#  SAVE THE CORRECT BB FOR RETURN</span>
+048490,000523: 01,3456           34743                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  OBTAIN THE RETURN ADDRESS</span>
+048491,000524: 01,3457           26002                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+048492,000525: 01,3460           55434                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4745584954">LONGEXIT</a>                              
+048493,000526: 
+048494,000527: 01,3461           31152                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>                              <span class="co">#  CHECK FOR LEGITIMATE DELTA-TIME</span>
+048495,000528: 01,3462           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+048496,000529: 01,3463           13471                           <span class="op">TCF     </span> <a href="#4C4F4E474359434C">LONGCYCL</a>                              <span class="co">#  HI-ORDER OK --> ALL IS OK.</span>
+048497,000530: 01,3464           13466                           <span class="op">TCF     </span> +2                                    <span class="co">#  HI-ORDER ZERO --> CHECK LO-ORDER.</span>
+048498,000531: 01,3465           13523                           <span class="op">TCF     </span> <a href="#4C4F4E47504F4F48">LONGPOOH</a>                              <span class="co">#  HI-ORDER NEG. --> NEG. DT</span>
+048499,000532: 01,3466           31153                 +2        <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>   +1                         <span class="co">#  CHECK LO-ORDER FOR ZERO OR NEGATIVE.</span>
+048500,000533: 01,3467           00006                           <span class="op">EXTEND  </span>                                       
+048501,000534: 01,3470           63523                           <span class="op">BZMF    </span> <a href="#4C4F4E47504F4F48">LONGPOOH</a>                              <span class="co">#  BAD DELTA-TIME.  ABORT</span>
+048502,000535: 
+048503,000536:                                                                                                  <span class="co">#           *** WAITLIST TASK LONGCYCL ***</span>
+<a name="4C4F4E474359434C"></a>048504,000537: 01,3471           00006        <span class="sm">LONGCYCL</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  CAN WE SUCCESFULLY TAKE ABOUT 1.25</span>
+048505,000538: 01,3472           43503                           <span class="op">DCS     </span> <a href="#44504249543134">DPBIT14</a>                               <span class="co">#  MINUTES OFF OF LONGTIME</span>
+048506,000539: 01,3473           21153                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>                              
+048507,000540: 
+048508,000541: 01,3474           11153                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>   +1                         <span class="co">#  THE REASONIBG BEHIND THIS PART IS</span>
+048509,000542: 01,3475           13513                           <span class="op">TCF     </span> <a href="#4D55434854494D45">MUCHTIME</a>                              <span class="co">#  INVOLVED, TAKING INTO ACCOUNT THAT THE</span>
+048510,000543:                                                                                                  <span class="co">#  WORDS MAY NOT BE SIGNED CORRECTED (DP</span>
+048511,000544:                                                                                                  <span class="co">#  BASIC INSTRUCTIONS</span>
+048512,000545:                                                                                                  <span class="co">#  DO NOT SIGN CORRECT) AND THAT WE SUBTRAC</span>
+048513,000546:                                                                                                  <span class="co">#  TED BIT14 (1 OVER HALF THE POS. VALUE</span>
+048514,000547:                                                                                                  <span class="co">#  REPRESENTIBLE IN SINGLE WORD)</span>
+048515,000548: 01,3476           13477                           <span class="op">NOOP    </span>                                       <span class="co">#  CAN:T GET HERE    **********</span>
+048516,000549: 01,3477           13500                           <span class="op">TCF     </span> +1                                    
+048517,000550: 01,3500           11152                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>                              
+048518,000551: 01,3501           13513                           <span class="op">TCF     </span> <a href="#4D55434854494D45">MUCHTIME</a>                              
+<a name="44504249543134"></a>048519,000552: 01,3502           00000        <span class="sm">DPBIT14 </span>           <span class="ps">OCT     </span> 00000                                 
+048520,000553: 01,3503           20000                           <span class="ps">OCT     </span> 20000                                 
+048521,000554:                                                                                                  <span class="co">#  LONGCALL</span>
+048522,000555: 
 </pre>
 </span>
 </p>
@@ -868,32 +868,32 @@ Page 1130
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="4C41535454494D45"></a>048513,000557: 01,3504           34727        <span class="sm">LASTTIME</span>           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 <span class="co">#  GET BACK THE CORRECT DELTA TFOR WAITLIST</span>
-048514,000558: 01,3505           27153                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>   +1                         
-048515,000559: 01,3506           05175                           <span class="op">TC      </span> <a href="#54574944444C45">TWIDDLE</a>                               
-048516,000560: 01,3507  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
-048517,000561: 01,3507           03520                           <span class="ps">ADRES   </span> <a href="#47455443414452">GETCADR</a>                               
-<a name="4C4F4E475254524E"></a>048518,000562: 01,3510           33522        <span class="sm">LONGRTRN</span>           <span class="op">CA      </span> <a href="#54534B4F56434452">TSKOVCDR</a>                              <span class="co">#  SET IT UP SO THAT ONLY THE FIRST EXIT IS</span>
-048519,000563: 01,3511           53435                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4745584954">LONGEXIT</a>                              <span class="co">#  TO THE CALLER OF LONGCALL</span>
-048520,000564: 01,3512           52006                           <span class="op">DTCB    </span>                                       <span class="co">#  THE REST ARE TO TASKOVER</span>
-048521,000565: 
-<a name="4D55434854494D45"></a>048522,000566: 01,3513           34727        <span class="sm">MUCHTIME</span>           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 <span class="co">#  WE HAVE OVER OUR ABOUT 1.25 MINUTES</span>
-048523,000567: 01,3514           05205                           <span class="op">TC      </span> <a href="#574149544C495354">WAITLIST</a>                              <span class="co">#  SO SET UP FOR ANOTHER CYCLE THROUGH HERE</span>
-048524,000568: 01,3515  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
-048525,000569: 01,3515           03471 02063                     <span class="ps">2CADR   </span> <a href="#4C4F4E474359434C">LONGCYCL</a>                              
-048526,000570: 
-048527,000571: 
-048528,000572: 01,3517           13510                           <span class="op">TCF     </span> <a href="#4C4F4E475254524E">LONGRTRN</a>                              <span class="co">#  NOW EXIT PROPERLY</span>
-048529,000573: 
-048530,000574:                                                                                                  <span class="co">#           *** WAITLIST TASK GETCADR ***</span>
-<a name="47455443414452"></a>048531,000575: 01,3520           53147        <span class="sm">GETCADR </span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4743414452">LONGCADR</a>                              <span class="co">#  GET THE LONGCALL THAT WE WISHED TO START</span>
-048532,000576: 01,3521           15167                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#535550445843485A">SUPDXCHZ</a>                              <span class="co">#  AND TRANSFER CONTROL</span>
-<a name="54534B4F56434452"></a>048533,000577: 01,3522           05263        <span class="sm">TSKOVCDR</span>           <span class="ps">GENADR  </span> <a href="#5441534B4F564552">TASKOVER</a>                              
-<a name="4C4F4E47504F4F48"></a>048534,000578: 01,3523           53435        <span class="sm">LONGPOOH</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4745584954">LONGEXIT</a>                              
-048535,000579: 01,3524           13526                           <span class="op">TCF     </span> +2                                    
-<a name="57414954504F4F48"></a>048536,000580: 01,3525           52062        <span class="sm">WAITPOOH</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5741495445584954">WAITEXIT</a>                              
-048537,000581: 01,3526           05722                 +2        <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#504F4F444F4F31">POODOO1</a>                               
-048538,000582: 01,3527           21204                           <span class="ps">OCT     </span> 21204                                 
+<a name="4C41535454494D45"></a>048524,000557: 01,3504           34727        <span class="sm">LASTTIME</span>           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 <span class="co">#  GET BACK THE CORRECT DELTA TFOR WAITLIST</span>
+048525,000558: 01,3505           27153                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>   +1                         
+048526,000559: 01,3506           05175                           <span class="op">TC      </span> <a href="#54574944444C45">TWIDDLE</a>                               
+048527,000560: 01,3507  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
+048528,000561: 01,3507           03520                           <span class="ps">ADRES   </span> <a href="#47455443414452">GETCADR</a>                               
+<a name="4C4F4E475254524E"></a>048529,000562: 01,3510           33522        <span class="sm">LONGRTRN</span>           <span class="op">CA      </span> <a href="#54534B4F56434452">TSKOVCDR</a>                              <span class="co">#  SET IT UP SO THAT ONLY THE FIRST EXIT IS</span>
+048530,000563: 01,3511           53435                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4745584954">LONGEXIT</a>                              <span class="co">#  TO THE CALLER OF LONGCALL</span>
+048531,000564: 01,3512           52006                           <span class="op">DTCB    </span>                                       <span class="co">#  THE REST ARE TO TASKOVER</span>
+048532,000565: 
+<a name="4D55434854494D45"></a>048533,000566: 01,3513           34727        <span class="sm">MUCHTIME</span>           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 <span class="co">#  WE HAVE OVER OUR ABOUT 1.25 MINUTES</span>
+048534,000567: 01,3514           05205                           <span class="op">TC      </span> <a href="#574149544C495354">WAITLIST</a>                              <span class="co">#  SO SET UP FOR ANOTHER CYCLE THROUGH HERE</span>
+048535,000568: 01,3515  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
+048536,000569: 01,3515           03471 02063                     <span class="ps">2CADR   </span> <a href="#4C4F4E474359434C">LONGCYCL</a>                              
+048537,000570: 
+048538,000571: 
+048539,000572: 01,3517           13510                           <span class="op">TCF     </span> <a href="#4C4F4E475254524E">LONGRTRN</a>                              <span class="co">#  NOW EXIT PROPERLY</span>
+048540,000573: 
+048541,000574:                                                                                                  <span class="co">#           *** WAITLIST TASK GETCADR ***</span>
+<a name="47455443414452"></a>048542,000575: 01,3520           53147        <span class="sm">GETCADR </span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4743414452">LONGCADR</a>                              <span class="co">#  GET THE LONGCALL THAT WE WISHED TO START</span>
+048543,000576: 01,3521           15167                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#535550445843485A">SUPDXCHZ</a>                              <span class="co">#  AND TRANSFER CONTROL</span>
+<a name="54534B4F56434452"></a>048544,000577: 01,3522           05263        <span class="sm">TSKOVCDR</span>           <span class="ps">GENADR  </span> <a href="#5441534B4F564552">TASKOVER</a>                              
+<a name="4C4F4E47504F4F48"></a>048545,000578: 01,3523           53435        <span class="sm">LONGPOOH</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4745584954">LONGEXIT</a>                              
+048546,000579: 01,3524           13526                           <span class="op">TCF     </span> +2                                    
+<a name="57414954504F4F48"></a>048547,000580: 01,3525           52062        <span class="sm">WAITPOOH</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5741495445584954">WAITEXIT</a>                              
+048548,000581: 01,3526           05722                 +2        <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#504F4F444F4F31">POODOO1</a>                               
+048549,000582: 01,3527           21204                           <span class="ps">OCT     </span> 21204                                 
 
 End of include-file WAITLIST.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

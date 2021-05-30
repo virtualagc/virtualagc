@@ -89,24 +89,25 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-049230,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-049231,000003:                                                                                                  <span class="co">## Filename:    MEASUREMENT_INCORPORATION.agc</span>
-049232,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 210.</span>
-049233,000005:                                                                                                  <span class="co">##              It is part of the source code for the Lunar Module's (LM)</span>
-049234,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 15-17.</span>
-049235,000007:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-049236,000008:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-049237,000009:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-049238,000010:                                                                                                  <span class="co">##              original YUL assembler.</span>
-049239,000011:                                                                                                  <span class="co">## Reference:   pp. 1147-1156</span>
-049240,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-049241,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-049242,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-049243,000015:                                                                                                  <span class="co">## Mod history: 2016-11-17 JL   Created from Luminary131 version.</span>
-049244,000016:                                                                                                  <span class="co">##              2016-12-09 JS   Compared to Luminary210 images. Updated where needed.</span>
-049245,000017:                                                                                                  <span class="co">##              2016-12-26 RSB  Comment-text proofed using ProoferComments</span>
-049246,000018:                                                                                                  <span class="co">##                              and corrected errors found.</span>
-049247,000019: 
+049241,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+049242,000003:                                                                                                  <span class="co">## Filename:    MEASUREMENT_INCORPORATION.agc</span>
+049243,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 210.</span>
+049244,000005:                                                                                                  <span class="co">##              It is part of the source code for the Lunar Module's (LM)</span>
+049245,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 15-17.</span>
+049246,000007:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+049247,000008:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+049248,000009:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+049249,000010:                                                                                                  <span class="co">##              original YUL assembler.</span>
+049250,000011:                                                                                                  <span class="co">## Reference:   pp. 1147-1156</span>
+049251,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+049252,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+049253,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+049254,000015:                                                                                                  <span class="co">## Mod history: 2016-11-17 JL   Created from Luminary131 version.</span>
+049255,000016:                                                                                                  <span class="co">##              2016-12-09 JS   Compared to Luminary210 images. Updated where needed.</span>
+049256,000017:                                                                                                  <span class="co">##              2016-12-26 RSB  Comment-text proofed using ProoferComments</span>
+049257,000018:                                                                                                  <span class="co">##                              and corrected errors found.</span>
+049258,000019:                                                                                                  <span class="co">##              2021-05-30 ABS  ZEROD -> ZEROO</span>
+049259,000020: 
 </pre>
 </span>
 </p>
@@ -122,56 +123,56 @@ Page 1147
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-049249,000021:                                                                                                  <span class="co">#   INCORP1--PERFORMS THE SIX DIMENSIONAL STATE VECTOR DEVIATION FOR POSITI</span>
-049250,000022:                                                                                                  <span class="co">#  ON AND VELOCITY OR THE NINE DIMENSIONAL DEVIATION OF POSITION,VELOCITY,A</span>
-049251,000023:                                                                                                  <span class="co">#  ND RADAR OR LANDMARK BIAS.THE OUTPUT OF THE BVECTOR ROUTINE ALONG WITH T</span>
-049252,000024:                                                                                                  <span class="co">#  HE ERROR TRANSITION MATRIX(W) ARE USED AS INPUT TO THE ROUTINE.THE DEVIA</span>
-049253,000025:                                                                                                  <span class="co">#  TION IS OBTAINED BY COMPUTING AN ESTIMATED TRACKING MEASUREMENT FROM THE</span>
-049254,000026:                                                                                                  <span class="co">#  CURRENT STATE VECTOR AND COMPARING IT WITH AN ACTUAL TRACKING MEASUREMEN</span>
-049255,000027:                                                                                                  <span class="co">#  T AND APPLYING A STATISTICAL WEIGHTING VECTOR.</span>
-049256,000028:                                                                                                  <span class="co">#  INPUT</span>
-049257,000029:                                                                                                  <span class="co">#     DMENFLG = 0 6DIMENSIONAL BVECTOR  1= 9DIMENSIONAL</span>
-049258,000030:                                                                                                  <span class="co">#            W = ERROR TRANSITION MATRIX 6X6 OR 9X9</span>
-049259,000031:                                                                                                  <span class="co">#     VARIANCE = VARIANCE (SCALAR)</span>
-049260,000032:                                                                                                  <span class="co">#       DELTAQ = MEASURED DEVIATION (SCALAR)</span>
-049261,000033:                                                                                                  <span class="co">#      BVECTOR = 6 OR 9 DIMENSIONAL BVECTOR</span>
-049262,000034: 
-049263,000035:                                                                                                  <span class="co">#  OUTPUT</span>
-049264,000036:                                                                                                  <span class="co">#       DELTAX = STATE VECTOR DEVIATIONS 6 OR 9 DIMENSIONAL</span>
-049265,000037:                                                                                                  <span class="co">#           ZI = VECTOR USED FOR THE INCORPORATION 6 OR 9 DIMENSIONAL</span>
-049266,000038:                                                                                                  <span class="co">#      GAMMA = SCALAR</span>
-049267,000039:                                                                                                  <span class="co">#      OMEGA = OMEGA WEIGHTING VECTOR 6 OR 9 DIMENTIONAL</span>
-049268,000040:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
-049269,000041:                                                                                                  <span class="co">#     L  CALL INCORP1</span>
-049270,000042: 
-049271,000043:                                                                                                  <span class="co">#  NORMAL EXIT</span>
-049272,000044:                                                                                                  <span class="co">#     L+1 OF CALLING SEQUENCE</span>
-049273,000045: 
-049274,000046: 37,3654                                           <span class="ps">BANK    </span> 37                                    
-049275,000047: 23,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4D454153494E43">MEASINC</a>                               
-049276,000048: 23,2000                                           <span class="ps">BANK    </span>                                       
-049277,000049: 
-049278,000050: 23,2514                                           <span class="ps">COUNT*  </span> $$/INCOR                              
-049279,000051: 
-049280,000052: 23,2514  E5,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>                                     
-049281,000053: 
-<a name="494E434F525031"></a>049282,000054: 23,2514           77620        <span class="sm">INCORP1 </span>           <span class="in">STQ     </span>                                       
-049283,000055: 23,2515           02767                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#454752455353">EGRESS</a>                                
-049284,000056: 23,2516           66370                           <span class="in">AXT,1   </span> <span class="in">SSP       </span>                            
-049285,000057: 23,2517           00066                                    54D                                   
-049286,000058: 23,2520           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
-049287,000059: 23,2521           00022                                    18D                                   <span class="co">#  IX1 = 54  S1= 18</span>
-049288,000060: 23,2522           66374                           <span class="in">AXT,2   </span> <span class="in">SSP       </span>                            
-049289,000061: 23,2523           00022                                    18D                                   
-049290,000062: 23,2524           00052                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
-049291,000063: 23,2525           00006                                    6                                     <span class="co">#  IX2 = 18  S2=6</span>
-<a name="5A313233"></a>049292,000064: 23,2526           63775        <span class="sm">Z123    </span>           <span class="in">VLOAD   </span> <span class="in">MXV*      </span>                            
-049293,000065: 23,2527           03525                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#42564543544F52">BVECTOR</a>                               <span class="co">#  BVECTOR (0)</span>
-049294,000066: 23,2530           02467                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>          +54D,1                     
-049295,000067: 23,2531           12665                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +18D,2                     
-049296,000068: 23,2532           77775                           <span class="in">VLOAD   </span>                                       
-049297,000069: 23,2533           03533                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#42564543544F52">BVECTOR</a>    +6                         <span class="co">#  BVECTOR (1)</span>
-049298,000070: 
+049261,000022:                                                                                                  <span class="co">#   INCORP1--PERFORMS THE SIX DIMENSIONAL STATE VECTOR DEVIATION FOR POSITI</span>
+049262,000023:                                                                                                  <span class="co">#  ON AND VELOCITY OR THE NINE DIMENSIONAL DEVIATION OF POSITION,VELOCITY,A</span>
+049263,000024:                                                                                                  <span class="co">#  ND RADAR OR LANDMARK BIAS.THE OUTPUT OF THE BVECTOR ROUTINE ALONG WITH T</span>
+049264,000025:                                                                                                  <span class="co">#  HE ERROR TRANSITION MATRIX(W) ARE USED AS INPUT TO THE ROUTINE.THE DEVIA</span>
+049265,000026:                                                                                                  <span class="co">#  TION IS OBTAINED BY COMPUTING AN ESTIMATED TRACKING MEASUREMENT FROM THE</span>
+049266,000027:                                                                                                  <span class="co">#  CURRENT STATE VECTOR AND COMPARING IT WITH AN ACTUAL TRACKING MEASUREMEN</span>
+049267,000028:                                                                                                  <span class="co">#  T AND APPLYING A STATISTICAL WEIGHTING VECTOR.</span>
+049268,000029:                                                                                                  <span class="co">#  INPUT</span>
+049269,000030:                                                                                                  <span class="co">#     DMENFLG = 0 6DIMENSIONAL BVECTOR  1= 9DIMENSIONAL</span>
+049270,000031:                                                                                                  <span class="co">#            W = ERROR TRANSITION MATRIX 6X6 OR 9X9</span>
+049271,000032:                                                                                                  <span class="co">#     VARIANCE = VARIANCE (SCALAR)</span>
+049272,000033:                                                                                                  <span class="co">#       DELTAQ = MEASURED DEVIATION (SCALAR)</span>
+049273,000034:                                                                                                  <span class="co">#      BVECTOR = 6 OR 9 DIMENSIONAL BVECTOR</span>
+049274,000035: 
+049275,000036:                                                                                                  <span class="co">#  OUTPUT</span>
+049276,000037:                                                                                                  <span class="co">#       DELTAX = STATE VECTOR DEVIATIONS 6 OR 9 DIMENSIONAL</span>
+049277,000038:                                                                                                  <span class="co">#           ZI = VECTOR USED FOR THE INCORPORATION 6 OR 9 DIMENSIONAL</span>
+049278,000039:                                                                                                  <span class="co">#      GAMMA = SCALAR</span>
+049279,000040:                                                                                                  <span class="co">#      OMEGA = OMEGA WEIGHTING VECTOR 6 OR 9 DIMENTIONAL</span>
+049280,000041:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
+049281,000042:                                                                                                  <span class="co">#     L  CALL INCORP1</span>
+049282,000043: 
+049283,000044:                                                                                                  <span class="co">#  NORMAL EXIT</span>
+049284,000045:                                                                                                  <span class="co">#     L+1 OF CALLING SEQUENCE</span>
+049285,000046: 
+049286,000047: 37,3654                                           <span class="ps">BANK    </span> 37                                    
+049287,000048: 23,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4D454153494E43">MEASINC</a>                               
+049288,000049: 23,2000                                           <span class="ps">BANK    </span>                                       
+049289,000050: 
+049290,000051: 23,2514                                           <span class="ps">COUNT*  </span> $$/INCOR                              
+049291,000052: 
+049292,000053: 23,2514  E5,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>                                     
+049293,000054: 
+<a name="494E434F525031"></a>049294,000055: 23,2514           77620        <span class="sm">INCORP1 </span>           <span class="in">STQ     </span>                                       
+049295,000056: 23,2515           02767                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#454752455353">EGRESS</a>                                
+049296,000057: 23,2516           66370                           <span class="in">AXT,1   </span> <span class="in">SSP       </span>                            
+049297,000058: 23,2517           00066                                    54D                                   
+049298,000059: 23,2520           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
+049299,000060: 23,2521           00022                                    18D                                   <span class="co">#  IX1 = 54  S1= 18</span>
+049300,000061: 23,2522           66374                           <span class="in">AXT,2   </span> <span class="in">SSP       </span>                            
+049301,000062: 23,2523           00022                                    18D                                   
+049302,000063: 23,2524           00052                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
+049303,000064: 23,2525           00006                                    6                                     <span class="co">#  IX2 = 18  S2=6</span>
+<a name="5A313233"></a>049304,000065: 23,2526           63775        <span class="sm">Z123    </span>           <span class="in">VLOAD   </span> <span class="in">MXV*      </span>                            
+049305,000066: 23,2527           03525                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#42564543544F52">BVECTOR</a>                               <span class="co">#  BVECTOR (0)</span>
+049306,000067: 23,2530           02467                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>          +54D,1                     
+049307,000068: 23,2531           12665                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +18D,2                     
+049308,000069: 23,2532           77775                           <span class="in">VLOAD   </span>                                       
+049309,000070: 23,2533           03533                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#42564543544F52">BVECTOR</a>    +6                         <span class="co">#  BVECTOR (1)</span>
+049310,000071: 
 </pre>
 </span>
 </p>
@@ -187,57 +188,57 @@ Page 1148
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-049300,000072: 23,2534           52717                           <span class="in">MXV*    </span> <span class="in">VAD*      </span>                            
-049301,000073: 23,2535           02555                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>          +108D,1                    
-049302,000074: 23,2536           75112                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +18D,2                     
-049303,000075: 23,2537           12665                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +18D,2                     
-049304,000076: 23,2540           77775                           <span class="in">VLOAD   </span>                                       
-049305,000077: 23,2541           03541                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#42564543544F52">BVECTOR</a>    +12D                       <span class="co">#  BVECTOR (2)</span>
-049306,000078: 23,2542           52717                           <span class="in">MXV*    </span> <span class="in">VAD*      </span>                            
-049307,000079: 23,2543           02643                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>          +162D,1                    
-049308,000080: 23,2544           75112                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +18D,2                     <span class="co">#  B(0)*W+B(1)*(W+54)+B(2)*(W+108)FIRST PAS</span>
-049309,000081: 23,2545           12665                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +18D,2                     <span class="co">#  ZI THEN Z2 THEN Z3</span>
-049310,000082: 23,2546           77700                           <span class="in">TIX,1   </span>                                       
-049311,000083: 23,2547           46550                                    <a href="#494E434F5231">INCOR1</a>                                
-<a name="494E434F5231"></a>049312,000084: 23,2550           43104        <span class="sm">INCOR1  </span>           <span class="in">TIX,2   </span> <span class="in">BON       </span>                            
-049313,000085: 23,2551           46526                                    <a href="#5A313233">Z123</a>                                  <span class="co">#  LOOP FOR Z1,Z2,Z3</span>
-049314,000086: 23,2552           02706                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#444D454E464C47">DMENFLG</a>                               
-049315,000087: 23,2553           46557                                    <a href="#494E434F523141">INCOR1A</a>                               
-049316,000088: 23,2554           77775                           <span class="in">VLOAD   </span>                                       
-049317,000089: 23,2555           06505                                    <a href="INTERPRETIVE_CONSTANTS.agc.html#5A45524F56454353">ZEROVECS</a>                              
-049318,000090: 23,2556           02657                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +12D                       
-<a name="494E434F523141"></a>049319,000091: 23,2557           77201        <span class="sm">INCOR1A </span>           <span class="in">SETPD   </span> <span class="in">VLOAD     </span>                            
-049320,000092: 23,2560           00001                                    0                                     
-049321,000093: 23,2561           02643                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>                                    
-049322,000094: 23,2562           47036                           <span class="in">VSQ     </span> <span class="in">RTB       </span>                            
-049323,000095: 23,2563           21643                                    <a href="RTB_OP_CODES.agc.html#54504D4F4445">TPMODE</a>                                
-049324,000096: 23,2564           47515                           <span class="in">PDVL    </span> <span class="in">VSQ       </span>                            
-049325,000097: 23,2565           02651                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +6                         
-049326,000098: 23,2566           76234                           <span class="in">RTB     </span> <span class="in">TAD       </span>                            
-049327,000099: 23,2567           21643                                    <a href="RTB_OP_CODES.agc.html#54504D4F4445">TPMODE</a>                                
-049328,000100: 23,2570           47515                           <span class="in">PDVL    </span> <span class="in">VSQ       </span>                            
-049329,000101: 23,2571           02657                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +12D                       
-049330,000102: 23,2572           76234                           <span class="in">RTB     </span> <span class="in">TAD       </span>                            
-049331,000103: 23,2573           21643                                    <a href="RTB_OP_CODES.agc.html#54504D4F4445">TPMODE</a>                                
-049332,000104: 23,2574           77171                           <span class="in">TAD     </span> <span class="in">AXT,2     </span>                            
-049333,000105: 23,2575           02707                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#56415249414E4345">VARIANCE</a>                              
-049334,000106: 23,2576           00000                                    0                                     
-049335,000107: 23,2577           02665                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452495041">TRIPA</a>                                 <span class="co">#  ZI*2 + Z2*2 + Z3*2 + VARIANCE</span>
-049336,000108: 23,2600           40151                           <span class="in">TLOAD   </span> <span class="in">BOV       </span>                            
-049337,000109: 23,2601           02707                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#56415249414E4345">VARIANCE</a>                              <span class="co">#  CLEAR OVFIND</span>
-049338,000110: 23,2602           46603                                    +1                                    
-049339,000111: 23,2603           02670                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D50564152">TEMPVAR</a>                               <span class="co">#  TEMP STORAGE FOR VARIANCE</span>
-049340,000112: 23,2604           77654                           <span class="in">BZE     </span>                                       
-049341,000113: 23,2605           46614                                    <a href="#494E434F523143">INCOR1C</a>                               
-<a name="494E434F523142"></a>049342,000114: 23,2606           40112        <span class="sm">INCOR1B </span>           <span class="in">SL2     </span> <span class="in">BOV       </span>                            
-049343,000115: 23,2607           46614                                    <a href="#494E434F523143">INCOR1C</a>                               
-049344,000116: 23,2610           02670                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D50564152">TEMPVAR</a>                               
-049345,000117: 23,2611           52114                           <span class="in">INCR,2  </span> <span class="in">GOTO      </span>                            
-049346,000118: 23,2612           00001                           <span class="ps">DEC     </span> 1          B-14                       
-049347,000119: 23,2613           46606                                    <a href="#494E434F523142">INCOR1B</a>                               
-<a name="494E434F523143"></a>049348,000120: 23,2614           61551        <span class="sm">INCOR1C </span>           <span class="in">TLOAD   </span> <span class="in">ROUND     </span>                            
-049349,000121: 23,2615           02665                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5452495041">TRIPA</a>                                 
-049350,000122: 
+049312,000073: 23,2534           52717                           <span class="in">MXV*    </span> <span class="in">VAD*      </span>                            
+049313,000074: 23,2535           02555                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>          +108D,1                    
+049314,000075: 23,2536           75112                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +18D,2                     
+049315,000076: 23,2537           12665                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +18D,2                     
+049316,000077: 23,2540           77775                           <span class="in">VLOAD   </span>                                       
+049317,000078: 23,2541           03541                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#42564543544F52">BVECTOR</a>    +12D                       <span class="co">#  BVECTOR (2)</span>
+049318,000079: 23,2542           52717                           <span class="in">MXV*    </span> <span class="in">VAD*      </span>                            
+049319,000080: 23,2543           02643                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>          +162D,1                    
+049320,000081: 23,2544           75112                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +18D,2                     <span class="co">#  B(0)*W+B(1)*(W+54)+B(2)*(W+108)FIRST PAS</span>
+049321,000082: 23,2545           12665                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +18D,2                     <span class="co">#  ZI THEN Z2 THEN Z3</span>
+049322,000083: 23,2546           77700                           <span class="in">TIX,1   </span>                                       
+049323,000084: 23,2547           46550                                    <a href="#494E434F5231">INCOR1</a>                                
+<a name="494E434F5231"></a>049324,000085: 23,2550           43104        <span class="sm">INCOR1  </span>           <span class="in">TIX,2   </span> <span class="in">BON       </span>                            
+049325,000086: 23,2551           46526                                    <a href="#5A313233">Z123</a>                                  <span class="co">#  LOOP FOR Z1,Z2,Z3</span>
+049326,000087: 23,2552           02706                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#444D454E464C47">DMENFLG</a>                               
+049327,000088: 23,2553           46557                                    <a href="#494E434F523141">INCOR1A</a>                               
+049328,000089: 23,2554           77775                           <span class="in">VLOAD   </span>                                       
+049329,000090: 23,2555           06505                                    <a href="INTERPRETIVE_CONSTANTS.agc.html#5A45524F56454353">ZEROVECS</a>                              
+049330,000091: 23,2556           02657                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +12D                       
+<a name="494E434F523141"></a>049331,000092: 23,2557           77201        <span class="sm">INCOR1A </span>           <span class="in">SETPD   </span> <span class="in">VLOAD     </span>                            
+049332,000093: 23,2560           00001                                    0                                     
+049333,000094: 23,2561           02643                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>                                    
+049334,000095: 23,2562           47036                           <span class="in">VSQ     </span> <span class="in">RTB       </span>                            
+049335,000096: 23,2563           21643                                    <a href="RTB_OP_CODES.agc.html#54504D4F4445">TPMODE</a>                                
+049336,000097: 23,2564           47515                           <span class="in">PDVL    </span> <span class="in">VSQ       </span>                            
+049337,000098: 23,2565           02651                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +6                         
+049338,000099: 23,2566           76234                           <span class="in">RTB     </span> <span class="in">TAD       </span>                            
+049339,000100: 23,2567           21643                                    <a href="RTB_OP_CODES.agc.html#54504D4F4445">TPMODE</a>                                
+049340,000101: 23,2570           47515                           <span class="in">PDVL    </span> <span class="in">VSQ       </span>                            
+049341,000102: 23,2571           02657                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +12D                       
+049342,000103: 23,2572           76234                           <span class="in">RTB     </span> <span class="in">TAD       </span>                            
+049343,000104: 23,2573           21643                                    <a href="RTB_OP_CODES.agc.html#54504D4F4445">TPMODE</a>                                
+049344,000105: 23,2574           77171                           <span class="in">TAD     </span> <span class="in">AXT,2     </span>                            
+049345,000106: 23,2575           02707                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#56415249414E4345">VARIANCE</a>                              
+049346,000107: 23,2576           00000                                    0                                     
+049347,000108: 23,2577           02665                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452495041">TRIPA</a>                                 <span class="co">#  ZI*2 + Z2*2 + Z3*2 + VARIANCE</span>
+049348,000109: 23,2600           40151                           <span class="in">TLOAD   </span> <span class="in">BOV       </span>                            
+049349,000110: 23,2601           02707                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#56415249414E4345">VARIANCE</a>                              <span class="co">#  CLEAR OVFIND</span>
+049350,000111: 23,2602           46603                                    +1                                    
+049351,000112: 23,2603           02670                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D50564152">TEMPVAR</a>                               <span class="co">#  TEMP STORAGE FOR VARIANCE</span>
+049352,000113: 23,2604           77654                           <span class="in">BZE     </span>                                       
+049353,000114: 23,2605           46614                                    <a href="#494E434F523143">INCOR1C</a>                               
+<a name="494E434F523142"></a>049354,000115: 23,2606           40112        <span class="sm">INCOR1B </span>           <span class="in">SL2     </span> <span class="in">BOV       </span>                            
+049355,000116: 23,2607           46614                                    <a href="#494E434F523143">INCOR1C</a>                               
+049356,000117: 23,2610           02670                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D50564152">TEMPVAR</a>                               
+049357,000118: 23,2611           52114                           <span class="in">INCR,2  </span> <span class="in">GOTO      </span>                            
+049358,000119: 23,2612           00001                           <span class="ps">DEC     </span> 1          B-14                       
+049359,000120: 23,2613           46606                                    <a href="#494E434F523142">INCOR1B</a>                               
+<a name="494E434F523143"></a>049360,000121: 23,2614           61551        <span class="sm">INCOR1C </span>           <span class="in">TLOAD   </span> <span class="in">ROUND     </span>                            
+049361,000122: 23,2615           02665                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5452495041">TRIPA</a>                                 
+049362,000123: 
 </pre>
 </span>
 </p>
@@ -253,57 +254,57 @@ Page 1149
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-049352,000124: 23,2616           75405                           <span class="in">DMP     </span> <span class="in">SQRT      </span>                            
-049353,000125: 23,2617           02670                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D50564152">TEMPVAR</a>                               
-049354,000126: 23,2620           76257                           <span class="in">SL*     </span> <span class="in">TAD       </span>                            
-049355,000127: 23,2621           57576                                    0,2                                   
-049356,000128: 23,2622           02665                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5452495041">TRIPA</a>                                 
-049357,000129: 23,2623           63101                           <span class="in">NORM    </span> <span class="in">INCR,2    </span>                            
-049358,000130: 23,2624           00050                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5832">X2</a>                                    
-049359,000131: 23,2625           77775                           <span class="ps">DEC     </span> -2         B-14                       
-049360,000132: 23,2626           77134                           <span class="in">SXA,2   </span> <span class="in">AXT,2     </span>                            
-049361,000133: 23,2627           02102                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F524D47414D">NORMGAM</a>                               <span class="co">#  NORMALIZATION COUNT -2 FOR GAMMA</span>
-049362,000134: 23,2630           00242                                    162D                                  
-049363,000135: 23,2631           40265                           <span class="in">BDDV    </span> <span class="in">SETPD     </span>                            
-049364,000136: 23,2632           06475                                    <a href="INTERPRETIVE_CONSTANTS.agc.html#4450312F345448">DP1/4TH</a>                               
-049365,000137: 23,2633           00001                                    0                                     
-049366,000138: 23,2634           03500                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47414D4D41">GAMMA</a>                                 
-049367,000139: 23,2635           60351                           <span class="in">TLOAD   </span> <span class="in">NORM      </span>                            
-049368,000140: 23,2636           02665                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5452495041">TRIPA</a>                                 
-049369,000141: 23,2637           00047                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5831">X1</a>                                    
-049370,000142: 23,2640           65345                           <span class="in">DLOAD   </span> <span class="in">PDDL      </span>                            <span class="co">#  PD 0-1 = NORM (A)</span>
-049371,000143: 23,2641           00155                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-049372,000144: 23,2642           03547                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C544151">DELTAQ</a>                                
-049373,000145: 23,2643           77701                           <span class="in">NORM    </span>                                       
-049374,000146: 23,2644           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
-049375,000147: 23,2645           70460                           <span class="in">XSU,1   </span> <span class="in">SR1       </span>                            
-049376,000148: 23,2646           00050                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
-049377,000149: 23,2647           41471                           <span class="in">DDV     </span> <span class="in">PUSH      </span>                            <span class="co">#  PD 0-1 = DELTAQ/A</span>
-049378,000150: 23,2650           77650                           <span class="in">GOTO    </span>                                       
-049379,000151: 23,2651           45712                                    <a href="#4E45575A434F4D50">NEWZCOMP</a>                              
-049380,000152: 23,2652           77731                 -3        <span class="in">SSP     </span>                                       
-049381,000153: 23,2653           00052                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
-049382,000154: 23,2654           00066                                    54D                                   
-<a name="494E434F5232"></a>049383,000155: 23,2655           60775        <span class="sm">INCOR2  </span>           <span class="in">VLOAD   </span> <span class="in">VXM*      </span>                            <span class="co">#  COMPUTE OMEGA1,2,3</span>
-049384,000156: 23,2656           02643                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>                                    
-049385,000157: 23,2657           75134                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>          +162D,2                    
-049386,000158: 23,2660           77206                           <span class="in">PUSH    </span> <span class="in">VLOAD     </span>                            
-049387,000159: 23,2661           02651                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +6                         
-049388,000160: 23,2662           53303                           <span class="in">VXM*    </span> <span class="in">VAD       </span>                            
-049389,000161: 23,2663           75112                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>          +180D,2                    
-049390,000162: 23,2664           77206                           <span class="in">PUSH    </span> <span class="in">VLOAD     </span>                            
-049391,000163: 23,2665           02657                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +12D                       
-049392,000164: 23,2666           53303                           <span class="in">VXM*    </span> <span class="in">VAD       </span>                            
-049393,000165: 23,2667           75070                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>          +198D,2                    
-049394,000166: 23,2670           61006                           <span class="in">PUSH    </span> <span class="in">TIX,2     </span>                            <span class="co">#  PD 2-7=OMEGA1,8-13=OMEGA2,14-19=OMEGA3</span>
-049395,000167: 23,2671           46655                                    <a href="#494E434F5232">INCOR2</a>                                
-049396,000168: 23,2672           45575                           <span class="in">VLOAD   </span> <span class="in">STADR     </span>                            
-049397,000169: 23,2673           74260                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>      +12D                       
-049398,000170: 23,2674           45575                           <span class="in">VLOAD   </span> <span class="in">STADR     </span>                            
-049399,000171: 23,2675           74266                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>      +6                         
-049400,000172: 23,2676           45575                           <span class="in">VLOAD   </span> <span class="in">STADR     </span>                            
-049401,000173: 23,2677           74274                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>                                 
-049402,000174: 
+049364,000125: 23,2616           75405                           <span class="in">DMP     </span> <span class="in">SQRT      </span>                            
+049365,000126: 23,2617           02670                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D50564152">TEMPVAR</a>                               
+049366,000127: 23,2620           76257                           <span class="in">SL*     </span> <span class="in">TAD       </span>                            
+049367,000128: 23,2621           57576                                    0,2                                   
+049368,000129: 23,2622           02665                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5452495041">TRIPA</a>                                 
+049369,000130: 23,2623           63101                           <span class="in">NORM    </span> <span class="in">INCR,2    </span>                            
+049370,000131: 23,2624           00050                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5832">X2</a>                                    
+049371,000132: 23,2625           77775                           <span class="ps">DEC     </span> -2         B-14                       
+049372,000133: 23,2626           77134                           <span class="in">SXA,2   </span> <span class="in">AXT,2     </span>                            
+049373,000134: 23,2627           02102                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F524D47414D">NORMGAM</a>                               <span class="co">#  NORMALIZATION COUNT -2 FOR GAMMA</span>
+049374,000135: 23,2630           00242                                    162D                                  
+049375,000136: 23,2631           40265                           <span class="in">BDDV    </span> <span class="in">SETPD     </span>                            
+049376,000137: 23,2632           06475                                    <a href="INTERPRETIVE_CONSTANTS.agc.html#4450312F345448">DP1/4TH</a>                               
+049377,000138: 23,2633           00001                                    0                                     
+049378,000139: 23,2634           03500                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47414D4D41">GAMMA</a>                                 
+049379,000140: 23,2635           60351                           <span class="in">TLOAD   </span> <span class="in">NORM      </span>                            
+049380,000141: 23,2636           02665                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5452495041">TRIPA</a>                                 
+049381,000142: 23,2637           00047                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5831">X1</a>                                    
+049382,000143: 23,2640           65345                           <span class="in">DLOAD   </span> <span class="in">PDDL      </span>                            <span class="co">#  PD 0-1 = NORM (A)</span>
+049383,000144: 23,2641           00155                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+049384,000145: 23,2642           03547                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C544151">DELTAQ</a>                                
+049385,000146: 23,2643           77701                           <span class="in">NORM    </span>                                       
+049386,000147: 23,2644           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
+049387,000148: 23,2645           70460                           <span class="in">XSU,1   </span> <span class="in">SR1       </span>                            
+049388,000149: 23,2646           00050                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
+049389,000150: 23,2647           41471                           <span class="in">DDV     </span> <span class="in">PUSH      </span>                            <span class="co">#  PD 0-1 = DELTAQ/A</span>
+049390,000151: 23,2650           77650                           <span class="in">GOTO    </span>                                       
+049391,000152: 23,2651           45712                                    <a href="#4E45575A434F4D50">NEWZCOMP</a>                              
+049392,000153: 23,2652           77731                 -3        <span class="in">SSP     </span>                                       
+049393,000154: 23,2653           00052                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
+049394,000155: 23,2654           00066                                    54D                                   
+<a name="494E434F5232"></a>049395,000156: 23,2655           60775        <span class="sm">INCOR2  </span>           <span class="in">VLOAD   </span> <span class="in">VXM*      </span>                            <span class="co">#  COMPUTE OMEGA1,2,3</span>
+049396,000157: 23,2656           02643                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>                                    
+049397,000158: 23,2657           75134                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>          +162D,2                    
+049398,000159: 23,2660           77206                           <span class="in">PUSH    </span> <span class="in">VLOAD     </span>                            
+049399,000160: 23,2661           02651                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +6                         
+049400,000161: 23,2662           53303                           <span class="in">VXM*    </span> <span class="in">VAD       </span>                            
+049401,000162: 23,2663           75112                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>          +180D,2                    
+049402,000163: 23,2664           77206                           <span class="in">PUSH    </span> <span class="in">VLOAD     </span>                            
+049403,000164: 23,2665           02657                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +12D                       
+049404,000165: 23,2666           53303                           <span class="in">VXM*    </span> <span class="in">VAD       </span>                            
+049405,000166: 23,2667           75070                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>          +198D,2                    
+049406,000167: 23,2670           61006                           <span class="in">PUSH    </span> <span class="in">TIX,2     </span>                            <span class="co">#  PD 2-7=OMEGA1,8-13=OMEGA2,14-19=OMEGA3</span>
+049407,000168: 23,2671           46655                                    <a href="#494E434F5232">INCOR2</a>                                
+049408,000169: 23,2672           45575                           <span class="in">VLOAD   </span> <span class="in">STADR     </span>                            
+049409,000170: 23,2673           74260                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>      +12D                       
+049410,000171: 23,2674           45575                           <span class="in">VLOAD   </span> <span class="in">STADR     </span>                            
+049411,000172: 23,2675           74266                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>      +6                         
+049412,000173: 23,2676           45575                           <span class="in">VLOAD   </span> <span class="in">STADR     </span>                            
+049413,000174: 23,2677           74274                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>                                 
+049414,000175: 
 </pre>
 </span>
 </p>
@@ -319,29 +320,29 @@ Page 1150
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-049404,000176: 23,2700           77214                           <span class="in">BON     </span> <span class="in">VLOAD     </span>                            
-049405,000177: 23,2701           02706                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#444D454E464C47">DMENFLG</a>                               
-049406,000178: 23,2702           46705                                    <a href="#494E434F52324142">INCOR2AB</a>                              
-049407,000179: 23,2703           06505                                    <a href="INTERPRETIVE_CONSTANTS.agc.html#5A45524F56454353">ZEROVECS</a>                              
-049408,000180: 23,2704           03517                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>      +12D                       
-<a name="494E434F52324142"></a>049409,000181: 23,2705           66374        <span class="sm">INCOR2AB</span>           <span class="in">AXT,2   </span> <span class="in">SSP       </span>                            
-049410,000182: 23,2706           00022                                    18D                                   
-049411,000183: 23,2707           00052                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
-049412,000184: 23,2710           00006                                    6                                     
-<a name="494E434F5233"></a>049413,000185: 23,2711           77773        <span class="sm">INCOR3  </span>           <span class="in">VLOAD*  </span>                                       
-049414,000186: 23,2712           74252                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>      +18D,2                     
-049415,000187: 23,2713           53761                           <span class="in">VXSC    </span> <span class="in">VSL*      </span>                            
-049416,000188: 23,2714           00001                                    0                                     <span class="co">#  DELTAQ/A</span>
-049417,000189: 23,2715           20201                                    0,1                                   
-049418,000190: 23,2716           12707                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C544158">DELTAX</a>     +18D,2                     
-049419,000191: 23,2717           77304                           <span class="in">TIX,2   </span> <span class="in">VLOAD     </span>                            
-049420,000192: 23,2720           46711                                    <a href="#494E434F5233">INCOR3</a>                                
-049421,000193: 23,2721           02673                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C544158">DELTAX</a>     +6                         
-049422,000194: 23,2722           77732                           <span class="in">VSL3    </span>                                       
-049423,000195: 23,2723           02673                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C544158">DELTAX</a>     +6                         
-049424,000196: 23,2724           77650                           <span class="in">GOTO    </span>                                       
-049425,000197: 23,2725           02767                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#454752455353">EGRESS</a>                                
-049426,000198: 
+049416,000177: 23,2700           77214                           <span class="in">BON     </span> <span class="in">VLOAD     </span>                            
+049417,000178: 23,2701           02706                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#444D454E464C47">DMENFLG</a>                               
+049418,000179: 23,2702           46705                                    <a href="#494E434F52324142">INCOR2AB</a>                              
+049419,000180: 23,2703           06505                                    <a href="INTERPRETIVE_CONSTANTS.agc.html#5A45524F56454353">ZEROVECS</a>                              
+049420,000181: 23,2704           03517                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>      +12D                       
+<a name="494E434F52324142"></a>049421,000182: 23,2705           66374        <span class="sm">INCOR2AB</span>           <span class="in">AXT,2   </span> <span class="in">SSP       </span>                            
+049422,000183: 23,2706           00022                                    18D                                   
+049423,000184: 23,2707           00052                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
+049424,000185: 23,2710           00006                                    6                                     
+<a name="494E434F5233"></a>049425,000186: 23,2711           77773        <span class="sm">INCOR3  </span>           <span class="in">VLOAD*  </span>                                       
+049426,000187: 23,2712           74252                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>      +18D,2                     
+049427,000188: 23,2713           53761                           <span class="in">VXSC    </span> <span class="in">VSL*      </span>                            
+049428,000189: 23,2714           00001                                    0                                     <span class="co">#  DELTAQ/A</span>
+049429,000190: 23,2715           20201                                    0,1                                   
+049430,000191: 23,2716           12707                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C544158">DELTAX</a>     +18D,2                     
+049431,000192: 23,2717           77304                           <span class="in">TIX,2   </span> <span class="in">VLOAD     </span>                            
+049432,000193: 23,2720           46711                                    <a href="#494E434F5233">INCOR3</a>                                
+049433,000194: 23,2721           02673                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C544158">DELTAX</a>     +6                         
+049434,000195: 23,2722           77732                           <span class="in">VSL3    </span>                                       
+049435,000196: 23,2723           02673                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C544158">DELTAX</a>     +6                         
+049436,000197: 23,2724           77650                           <span class="in">GOTO    </span>                                       
+049437,000198: 23,2725           02767                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#454752455353">EGRESS</a>                                
+049438,000199: 
 </pre>
 </span>
 </p>
@@ -357,59 +358,59 @@ Page 1151
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-049428,000200:                                                                                                  <span class="co">#   INCORP2 -INCORPORATES THE COMPUTED STATE VECTOR DEVIATIONS INTO THE</span>
-049429,000201:                                                                                                  <span class="co">#  ESTIMATED STATE VECTOR. THE STATE VECTOR UPDATED MAY BE FOR EITHER THE</span>
-049430,000202:                                                                                                  <span class="co">#  LEM OR THE CSM.DETERMINED BY FLAG VEHUPFLG.(ZERO = LEM) (1 = CSM)</span>
-049431,000203: 
-049432,000204:                                                                                                  <span class="co">#  INPUT</span>
-049433,000205:                                                                                                  <span class="co">#     PERMANENT STATE VECTOR FOR EITHER THE LEM OR CSM</span>
-049434,000206:                                                                                                  <span class="co">#     VEHUPFLG = UPDATE VEHICLE 0=LEM  1=CSM</span>
-049435,000207:                                                                                                  <span class="co">#     W =        ERROR TRANSITION MATRIX</span>
-049436,000208:                                                                                                  <span class="co">#     DELTAX  =  COMPUTED STATE VECTOR DEVIATIONS</span>
-049437,000209:                                                                                                  <span class="co">#     DMENFLG =  SIZE OF W MATRIX (ZERO =6X6) (1=9X9)</span>
-049438,000210:                                                                                                  <span class="co">#     GAMMA   =  SCALAR FOR INCORPORATION</span>
-049439,000211:                                                                                                  <span class="co">#     ZI      =  VECTOR USED IN INCORPORATION</span>
-049440,000212:                                                                                                  <span class="co">#     OMEGA  =  WEIGHTING VECTOR</span>
-049441,000213: 
-049442,000214:                                                                                                  <span class="co">#  OUTPUT</span>
-049443,000215:                                                                                                  <span class="co">#     UPDATED PERMANENT STATE VECTOR</span>
-049444,000216: 
-049445,000217:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
-049446,000218:                                                                                                  <span class="co">#     L  CALL INCORP2</span>
-049447,000219: 
-049448,000220:                                                                                                  <span class="co">#  NORMAL EXIT</span>
-049449,000221:                                                                                                  <span class="co">#     L+1 OF CALLING SEQUENCE</span>
-049450,000222: 
-049451,000223: 
-049452,000224: 23,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4D454153494E4331">MEASINC1</a>                              
-049453,000225: 23,2000                                           <span class="ps">BANK    </span>                                       
-049454,000226: 
-049455,000227: 23,2726                                           <span class="ps">COUNT*  </span> $$/INCOR                              
-049456,000228: 
-<a name="494E434F525032"></a>049457,000229: 23,2726           45020        <span class="sm">INCORP2 </span>           <span class="in">STQ     </span> <span class="in">CALL      </span>                            
-049458,000230: 23,2727           02767                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#454752455353">EGRESS</a>                                
-049459,000231: 23,2730           27447                                    <a href="INTEGRATION_INITIALIZATION.agc.html#494E545354414C4C">INTSTALL</a>                              
-049460,000232: 23,2731           74375                           <span class="in">VLOAD   </span> <span class="in">VXSC      </span>                            <span class="co">#  CALC. GAMMA * OMEGA1,2,3</span>
-049461,000233: 23,2732           03503                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>                                 
-049462,000234: 23,2733           03500                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#47414D4D41">GAMMA</a>                                 
-049463,000235: 23,2734           26713                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547414D31">OMEGAM1</a>                               
-049464,000236: 23,2735           03511                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>      +6                         
-049465,000237: 23,2736           77761                           <span class="in">VXSC    </span>                                       
-049466,000238: 23,2737           03500                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#47414D4D41">GAMMA</a>                                 
-049467,000239: 23,2740           26721                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547414D32">OMEGAM2</a>                               
-049468,000240: 23,2741           03517                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>      +12D                       
-049469,000241: 23,2742           77761                           <span class="in">VXSC    </span>                                       
-049470,000242: 23,2743           03500                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#47414D4D41">GAMMA</a>                                 
-049471,000243: 23,2744           02727                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547414D33">OMEGAM3</a>                               
-049472,000244: 23,2745           77776                           <span class="in">EXIT    </span>                                       
-049473,000245: 23,2746           33227                           <span class="op">CAF     </span> <a href="#35344444">54DD</a>                                  <span class="co">#  INITIAL IX 1 SETTING FOR W MATRIX</span>
-049474,000246: 23,2747           55315                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57495841">WIXA</a>                                  
-049475,000247: 23,2750           55316                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57495842">WIXB</a>                                  
-049476,000248: 23,2751           34746                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-049477,000249: 23,2752           55317                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A495841">ZIXA</a>                                  <span class="co">#  INITIAL IX 2 SETTING FOR Z COMPONENT</span>
-049478,000250: 23,2753           55320                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A495842">ZIXB</a>                                  
-<a name="46415A41"></a>049479,000251: 23,2754           05355        <span class="sm">FAZA    </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
-049480,000252: 
+049440,000201:                                                                                                  <span class="co">#   INCORP2 -INCORPORATES THE COMPUTED STATE VECTOR DEVIATIONS INTO THE</span>
+049441,000202:                                                                                                  <span class="co">#  ESTIMATED STATE VECTOR. THE STATE VECTOR UPDATED MAY BE FOR EITHER THE</span>
+049442,000203:                                                                                                  <span class="co">#  LEM OR THE CSM.DETERMINED BY FLAG VEHUPFLG.(ZERO = LEM) (1 = CSM)</span>
+049443,000204: 
+049444,000205:                                                                                                  <span class="co">#  INPUT</span>
+049445,000206:                                                                                                  <span class="co">#     PERMANENT STATE VECTOR FOR EITHER THE LEM OR CSM</span>
+049446,000207:                                                                                                  <span class="co">#     VEHUPFLG = UPDATE VEHICLE 0=LEM  1=CSM</span>
+049447,000208:                                                                                                  <span class="co">#     W =        ERROR TRANSITION MATRIX</span>
+049448,000209:                                                                                                  <span class="co">#     DELTAX  =  COMPUTED STATE VECTOR DEVIATIONS</span>
+049449,000210:                                                                                                  <span class="co">#     DMENFLG =  SIZE OF W MATRIX (ZERO =6X6) (1=9X9)</span>
+049450,000211:                                                                                                  <span class="co">#     GAMMA   =  SCALAR FOR INCORPORATION</span>
+049451,000212:                                                                                                  <span class="co">#     ZI      =  VECTOR USED IN INCORPORATION</span>
+049452,000213:                                                                                                  <span class="co">#     OMEGA  =  WEIGHTING VECTOR</span>
+049453,000214: 
+049454,000215:                                                                                                  <span class="co">#  OUTPUT</span>
+049455,000216:                                                                                                  <span class="co">#     UPDATED PERMANENT STATE VECTOR</span>
+049456,000217: 
+049457,000218:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
+049458,000219:                                                                                                  <span class="co">#     L  CALL INCORP2</span>
+049459,000220: 
+049460,000221:                                                                                                  <span class="co">#  NORMAL EXIT</span>
+049461,000222:                                                                                                  <span class="co">#     L+1 OF CALLING SEQUENCE</span>
+049462,000223: 
+049463,000224: 
+049464,000225: 23,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4D454153494E4331">MEASINC1</a>                              
+049465,000226: 23,2000                                           <span class="ps">BANK    </span>                                       
+049466,000227: 
+049467,000228: 23,2726                                           <span class="ps">COUNT*  </span> $$/INCOR                              
+049468,000229: 
+<a name="494E434F525032"></a>049469,000230: 23,2726           45020        <span class="sm">INCORP2 </span>           <span class="in">STQ     </span> <span class="in">CALL      </span>                            
+049470,000231: 23,2727           02767                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#454752455353">EGRESS</a>                                
+049471,000232: 23,2730           27447                                    <a href="INTEGRATION_INITIALIZATION.agc.html#494E545354414C4C">INTSTALL</a>                              
+049472,000233: 23,2731           74375                           <span class="in">VLOAD   </span> <span class="in">VXSC      </span>                            <span class="co">#  CALC. GAMMA * OMEGA1,2,3</span>
+049473,000234: 23,2732           03503                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>                                 
+049474,000235: 23,2733           03500                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#47414D4D41">GAMMA</a>                                 
+049475,000236: 23,2734           26713                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547414D31">OMEGAM1</a>                               
+049476,000237: 23,2735           03511                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>      +6                         
+049477,000238: 23,2736           77761                           <span class="in">VXSC    </span>                                       
+049478,000239: 23,2737           03500                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#47414D4D41">GAMMA</a>                                 
+049479,000240: 23,2740           26721                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547414D32">OMEGAM2</a>                               
+049480,000241: 23,2741           03517                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>      +12D                       
+049481,000242: 23,2742           77761                           <span class="in">VXSC    </span>                                       
+049482,000243: 23,2743           03500                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#47414D4D41">GAMMA</a>                                 
+049483,000244: 23,2744           02727                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547414D33">OMEGAM3</a>                               
+049484,000245: 23,2745           77776                           <span class="in">EXIT    </span>                                       
+049485,000246: 23,2746           33227                           <span class="op">CAF     </span> <a href="#35344444">54DD</a>                                  <span class="co">#  INITIAL IX 1 SETTING FOR W MATRIX</span>
+049486,000247: 23,2747           55315                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57495841">WIXA</a>                                  
+049487,000248: 23,2750           55316                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57495842">WIXB</a>                                  
+049488,000249: 23,2751           34746                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+049489,000250: 23,2752           55317                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A495841">ZIXA</a>                                  <span class="co">#  INITIAL IX 2 SETTING FOR Z COMPONENT</span>
+049490,000251: 23,2753           55320                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A495842">ZIXB</a>                                  
+<a name="46415A41"></a>049491,000252: 23,2754           05355        <span class="sm">FAZA    </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
+049492,000253: 
 </pre>
 </span>
 </p>
@@ -425,57 +426,57 @@ Page 1152
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-049482,000254: 23,2755           04022                           <span class="ps">OCT     </span> 04022                                 
-049483,000255: 23,2756           05506                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#5550464C4147">UPFLAG</a>                                
-049484,000256: 23,2757           00236                           <span class="ps">ADRES   </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#5245494E54464C47">REINTFLG</a>                              
-<a name="46415A4131"></a>049485,000257: 23,2760           31316        <span class="sm">FAZA1   </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57495842">WIXB</a>                                  <span class="co">#  START FIRST PHASE OF INCORP2</span>
-049486,000258: 23,2761           55315                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57495841">WIXA</a>                                  <span class="co">#   TO UPDATE 6 OR 9 DIM. W MATRIX IN TEMP</span>
-049487,000259: 23,2762           31320                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A495842">ZIXB</a>                                  
-049488,000260: 23,2763           55317                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A495841">ZIXA</a>                                  
-049489,000261: 23,2764           06060                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-049490,000262: 23,2765           73150                           <span class="in">LXA,1   </span> <span class="in">LXA,2     </span>                            
-049491,000263: 23,2766           01315                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#57495841">WIXA</a>                                  
-049492,000264: 23,2767           01317                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A495841">ZIXA</a>                                  
-049493,000265: 23,2770           70731                           <span class="in">SSP     </span> <span class="in">DLOAD*    </span>                            
-049494,000266: 23,2771           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
-049495,000267: 23,2772           00006                                    6                                     
-049496,000268: 23,2773           75134                                    ZI,2                                  
-049497,000269: 23,2774           60276                           <span class="in">DCOMP   </span> <span class="in">NORM      </span>                            <span class="co">#  CALC UPPER 3X9 PARTITION OF W MATRIX</span>
-049498,000270: 23,2775           00052                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
-049499,000271: 23,2776           65161                           <span class="in">VXSC    </span> <span class="in">XCHX,2    </span>                            
-049500,000272: 23,2777           02713                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547414D31">OMEGAM1</a>                               
-049501,000273: 23,3000           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
-049502,000274: 23,3001           57144                           <span class="in">LXC,2   </span> <span class="in">XAD,2     </span>                            
-049503,000275: 23,3002           00047                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5832">X2</a>                                    
-049504,000276: 23,3003           02102                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F524D47414D">NORMGAM</a>                               
-049505,000277: 23,3004           65057                           <span class="in">VSL*    </span> <span class="in">XCHX,2    </span>                            
-049506,000278: 23,3005           57576                                    0,2                                   
-049507,000279: 23,3006           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
-049508,000280: 23,3007           77653                           <span class="in">VAD*    </span>                                       
-049509,000281: 23,3010           02467                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>          +54D,1                     
-049510,000282: 23,3011           02735                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#484F4C4457">HOLDW</a>                                 
-049511,000283: 23,3012           57543                           <span class="in">DLOAD*  </span> <span class="in">DCOMP     </span>                            <span class="co">#  CALC MIDDLE 3X9 PARTITION OF W MATRIX</span>
-049512,000284: 23,3013           75134                                    ZI,2                                  
-049513,000285: 23,3014           74301                           <span class="in">NORM    </span> <span class="in">VXSC      </span>                            
-049514,000286: 23,3015           00052                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
-049515,000287: 23,3016           02721                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547414D32">OMEGAM2</a>                               
-049516,000288: 23,3017           71124                           <span class="in">XCHX,2  </span> <span class="in">LXC,2     </span>                            
-049517,000289: 23,3020           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
-049518,000290: 23,3021           00047                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5832">X2</a>                                    
-049519,000291: 23,3022           53674                           <span class="in">XAD,2   </span> <span class="in">VSL*      </span>                            
-049520,000292: 23,3023           02102                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F524D47414D">NORMGAM</a>                               
-049521,000293: 23,3024           57576                                    0,2                                   
-049522,000294: 23,3025           52724                           <span class="in">XCHX,2  </span> <span class="in">VAD*      </span>                            
-049523,000295: 23,3026           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
-049524,000296: 23,3027           02555                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>          +108D,1                    
-049525,000297: 23,3030           02743                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#484F4C4457">HOLDW</a>      +6                         
-049526,000298: 23,3031           77614                           <span class="in">BOFF    </span>                                       
-049527,000299: 23,3032           02746                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#444D454E464C47">DMENFLG</a>                               <span class="co">#  BRANCH IF 6 DIMENSIONAL</span>
-049528,000300: 23,3033           47053                                    <a href="#46415A42">FAZB</a>                                  
-049529,000301: 23,3034           57543                           <span class="in">DLOAD*  </span> <span class="in">DCOMP     </span>                            <span class="co">#  CALC LOWER 3X9 PARTITION OF W MATRIX</span>
-049530,000302: 23,3035           75134                                    ZI,2                                  
-049531,000303: 23,3036           74301                           <span class="in">NORM    </span> <span class="in">VXSC      </span>                            
-049532,000304: 
+049494,000255: 23,2755           04022                           <span class="ps">OCT     </span> 04022                                 
+049495,000256: 23,2756           05506                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#5550464C4147">UPFLAG</a>                                
+049496,000257: 23,2757           00236                           <span class="ps">ADRES   </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#5245494E54464C47">REINTFLG</a>                              
+<a name="46415A4131"></a>049497,000258: 23,2760           31316        <span class="sm">FAZA1   </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57495842">WIXB</a>                                  <span class="co">#  START FIRST PHASE OF INCORP2</span>
+049498,000259: 23,2761           55315                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57495841">WIXA</a>                                  <span class="co">#   TO UPDATE 6 OR 9 DIM. W MATRIX IN TEMP</span>
+049499,000260: 23,2762           31320                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A495842">ZIXB</a>                                  
+049500,000261: 23,2763           55317                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A495841">ZIXA</a>                                  
+049501,000262: 23,2764           06060                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+049502,000263: 23,2765           73150                           <span class="in">LXA,1   </span> <span class="in">LXA,2     </span>                            
+049503,000264: 23,2766           01315                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#57495841">WIXA</a>                                  
+049504,000265: 23,2767           01317                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A495841">ZIXA</a>                                  
+049505,000266: 23,2770           70731                           <span class="in">SSP     </span> <span class="in">DLOAD*    </span>                            
+049506,000267: 23,2771           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
+049507,000268: 23,2772           00006                                    6                                     
+049508,000269: 23,2773           75134                                    ZI,2                                  
+049509,000270: 23,2774           60276                           <span class="in">DCOMP   </span> <span class="in">NORM      </span>                            <span class="co">#  CALC UPPER 3X9 PARTITION OF W MATRIX</span>
+049510,000271: 23,2775           00052                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
+049511,000272: 23,2776           65161                           <span class="in">VXSC    </span> <span class="in">XCHX,2    </span>                            
+049512,000273: 23,2777           02713                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547414D31">OMEGAM1</a>                               
+049513,000274: 23,3000           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
+049514,000275: 23,3001           57144                           <span class="in">LXC,2   </span> <span class="in">XAD,2     </span>                            
+049515,000276: 23,3002           00047                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5832">X2</a>                                    
+049516,000277: 23,3003           02102                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F524D47414D">NORMGAM</a>                               
+049517,000278: 23,3004           65057                           <span class="in">VSL*    </span> <span class="in">XCHX,2    </span>                            
+049518,000279: 23,3005           57576                                    0,2                                   
+049519,000280: 23,3006           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
+049520,000281: 23,3007           77653                           <span class="in">VAD*    </span>                                       
+049521,000282: 23,3010           02467                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>          +54D,1                     
+049522,000283: 23,3011           02735                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#484F4C4457">HOLDW</a>                                 
+049523,000284: 23,3012           57543                           <span class="in">DLOAD*  </span> <span class="in">DCOMP     </span>                            <span class="co">#  CALC MIDDLE 3X9 PARTITION OF W MATRIX</span>
+049524,000285: 23,3013           75134                                    ZI,2                                  
+049525,000286: 23,3014           74301                           <span class="in">NORM    </span> <span class="in">VXSC      </span>                            
+049526,000287: 23,3015           00052                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
+049527,000288: 23,3016           02721                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547414D32">OMEGAM2</a>                               
+049528,000289: 23,3017           71124                           <span class="in">XCHX,2  </span> <span class="in">LXC,2     </span>                            
+049529,000290: 23,3020           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
+049530,000291: 23,3021           00047                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5832">X2</a>                                    
+049531,000292: 23,3022           53674                           <span class="in">XAD,2   </span> <span class="in">VSL*      </span>                            
+049532,000293: 23,3023           02102                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F524D47414D">NORMGAM</a>                               
+049533,000294: 23,3024           57576                                    0,2                                   
+049534,000295: 23,3025           52724                           <span class="in">XCHX,2  </span> <span class="in">VAD*      </span>                            
+049535,000296: 23,3026           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
+049536,000297: 23,3027           02555                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>          +108D,1                    
+049537,000298: 23,3030           02743                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#484F4C4457">HOLDW</a>      +6                         
+049538,000299: 23,3031           77614                           <span class="in">BOFF    </span>                                       
+049539,000300: 23,3032           02746                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#444D454E464C47">DMENFLG</a>                               <span class="co">#  BRANCH IF 6 DIMENSIONAL</span>
+049540,000301: 23,3033           47053                                    <a href="#46415A42">FAZB</a>                                  
+049541,000302: 23,3034           57543                           <span class="in">DLOAD*  </span> <span class="in">DCOMP     </span>                            <span class="co">#  CALC LOWER 3X9 PARTITION OF W MATRIX</span>
+049542,000303: 23,3035           75134                                    ZI,2                                  
+049543,000304: 23,3036           74301                           <span class="in">NORM    </span> <span class="in">VXSC      </span>                            
+049544,000305: 
 </pre>
 </span>
 </p>
@@ -491,57 +492,57 @@ Page 1153
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-049534,000306: 23,3037           00052                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
-049535,000307: 23,3040           02727                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547414D33">OMEGAM3</a>                               
-049536,000308: 23,3041           71124                           <span class="in">XCHX,2  </span> <span class="in">LXC,2     </span>                            
-049537,000309: 23,3042           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
-049538,000310: 23,3043           00047                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5832">X2</a>                                    
-049539,000311: 23,3044           53674                           <span class="in">XAD,2   </span> <span class="in">VSL*      </span>                            
-049540,000312: 23,3045           02102                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F524D47414D">NORMGAM</a>                               
-049541,000313: 23,3046           57576                                    0,2                                   
-049542,000314: 23,3047           52724                           <span class="in">XCHX,2  </span> <span class="in">VAD*      </span>                            
-049543,000315: 23,3050           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
-049544,000316: 23,3051           02643                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>          +162D,1                    
-049545,000317: 23,3052           02751                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#484F4C4457">HOLDW</a>      +12D                       
-<a name="46415A42"></a>049546,000318: 23,3053           77624        <span class="sm">FAZB    </span>           <span class="in">CALL    </span>                                       
-049547,000319: 23,3054           51770                                    <a href="INTEGRATION_INITIALIZATION.agc.html#475250325043">GRP2PC</a>                                
-049548,000320: 23,3055           77776                           <span class="in">EXIT    </span>                                       
-<a name="46415A4231"></a>049549,000321: 23,3056           31315        <span class="sm">FAZB1   </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57495841">WIXA</a>                                  <span class="co">#  START 2ND PHASE OF INCORP2 TO TRANSFER</span>
-049550,000322: 23,3057           63230                           <span class="op">AD      </span> <a href="#364444">6DD</a>                                   <span class="co">#      TEMP REG TO PERM W MATRIX</span>
-049551,000323: 23,3060           55316                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57495842">WIXB</a>                                  
-049552,000324: 23,3061           31317                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A495841">ZIXA</a>                                  
-049553,000325: 23,3062           67767                           <span class="op">AD      </span> <a href="RESTARTS_ROUTINE.agc.html#4D494E555332">MINUS2</a>                                
-049554,000326: 23,3063           55320                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A495842">ZIXB</a>                                  
-049555,000327: 23,3064           06060                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-049556,000328: 23,3065           66350                           <span class="in">LXA,1   </span> <span class="in">SSP       </span>                            
-049557,000329: 23,3066           01315                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#57495841">WIXA</a>                                  
-049558,000330: 23,3067           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
-049559,000331: 23,3070           00006                                    6                                     
-049560,000332: 23,3071           77775                           <span class="in">VLOAD   </span>                                       
-049561,000333: 23,3072           02735                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#484F4C4457">HOLDW</a>                                 
-049562,000334: 23,3073           06467                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>          +54D,1                     
-049563,000335: 23,3074           77775                           <span class="in">VLOAD   </span>                                       
-049564,000336: 23,3075           02743                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#484F4C4457">HOLDW</a>      +6                         
-049565,000337: 23,3076           06555                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>          +108D,1                    
-049566,000338: 23,3077           77214                           <span class="in">BOFF    </span> <span class="in">VLOAD     </span>                            
-049567,000339: 23,3100           02746                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#444D454E464C47">DMENFLG</a>                               
-049568,000340: 23,3101           47111                                    <a href="#46415A4235">FAZB5</a>                                 
-049569,000341: 23,3102           02751                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#484F4C4457">HOLDW</a>      +12D                       
-049570,000342: 23,3103           06643                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>          +162D,1                    
-<a name="46415A4232"></a>049571,000343: 23,3104           52100        <span class="sm">FAZB2   </span>           <span class="in">TIX,1   </span> <span class="in">GOTO      </span>                            
-049572,000344: 23,3105           47107                                    +2                                    
-049573,000345: 23,3106           47117                                    <a href="#46415A43">FAZC</a>                                  <span class="co">#  DONE WITH W MATRIX.  UPDATE STATE VECTOR</span>
-049574,000346: 23,3107           77634                           <span class="in">RTB     </span>                                       
-049575,000347: 23,3110           46754                                    <a href="#46415A41">FAZA</a>                                  
-<a name="46415A4235"></a>049576,000348: 23,3111           43335        <span class="sm">FAZB5   </span>           <span class="in">SLOAD   </span> <span class="in">DAD       </span>                            
-049577,000349: 23,3112           01321                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A495842">ZIXB</a>                                  
-049578,000350: 23,3113           07232                                    <a href="#31324444">12DD</a>                                  
-049579,000351: 23,3114           52030                           <span class="in">BHIZ    </span> <span class="in">GOTO      </span>                            
-049580,000352: 23,3115           47117                                    <a href="#46415A43">FAZC</a>                                  
-049581,000353: 23,3116           47104                                    <a href="#46415A4232">FAZB2</a>                                 
-<a name="46415A43"></a>049582,000354: 23,3117           77624        <span class="sm">FAZC    </span>           <span class="in">CALL    </span>                                       
-049583,000355: 23,3120           51770                                    <a href="INTEGRATION_INITIALIZATION.agc.html#475250325043">GRP2PC</a>                                
-049584,000356: 
+049546,000307: 23,3037           00052                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
+049547,000308: 23,3040           02727                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547414D33">OMEGAM3</a>                               
+049548,000309: 23,3041           71124                           <span class="in">XCHX,2  </span> <span class="in">LXC,2     </span>                            
+049549,000310: 23,3042           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
+049550,000311: 23,3043           00047                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5832">X2</a>                                    
+049551,000312: 23,3044           53674                           <span class="in">XAD,2   </span> <span class="in">VSL*      </span>                            
+049552,000313: 23,3045           02102                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F524D47414D">NORMGAM</a>                               
+049553,000314: 23,3046           57576                                    0,2                                   
+049554,000315: 23,3047           52724                           <span class="in">XCHX,2  </span> <span class="in">VAD*      </span>                            
+049555,000316: 23,3050           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
+049556,000317: 23,3051           02643                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>          +162D,1                    
+049557,000318: 23,3052           02751                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#484F4C4457">HOLDW</a>      +12D                       
+<a name="46415A42"></a>049558,000319: 23,3053           77624        <span class="sm">FAZB    </span>           <span class="in">CALL    </span>                                       
+049559,000320: 23,3054           51770                                    <a href="INTEGRATION_INITIALIZATION.agc.html#475250325043">GRP2PC</a>                                
+049560,000321: 23,3055           77776                           <span class="in">EXIT    </span>                                       
+<a name="46415A4231"></a>049561,000322: 23,3056           31315        <span class="sm">FAZB1   </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57495841">WIXA</a>                                  <span class="co">#  START 2ND PHASE OF INCORP2 TO TRANSFER</span>
+049562,000323: 23,3057           63230                           <span class="op">AD      </span> <a href="#364444">6DD</a>                                   <span class="co">#      TEMP REG TO PERM W MATRIX</span>
+049563,000324: 23,3060           55316                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57495842">WIXB</a>                                  
+049564,000325: 23,3061           31317                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A495841">ZIXA</a>                                  
+049565,000326: 23,3062           67767                           <span class="op">AD      </span> <a href="RESTARTS_ROUTINE.agc.html#4D494E555332">MINUS2</a>                                
+049566,000327: 23,3063           55320                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A495842">ZIXB</a>                                  
+049567,000328: 23,3064           06060                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+049568,000329: 23,3065           66350                           <span class="in">LXA,1   </span> <span class="in">SSP       </span>                            
+049569,000330: 23,3066           01315                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#57495841">WIXA</a>                                  
+049570,000331: 23,3067           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
+049571,000332: 23,3070           00006                                    6                                     
+049572,000333: 23,3071           77775                           <span class="in">VLOAD   </span>                                       
+049573,000334: 23,3072           02735                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#484F4C4457">HOLDW</a>                                 
+049574,000335: 23,3073           06467                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>          +54D,1                     
+049575,000336: 23,3074           77775                           <span class="in">VLOAD   </span>                                       
+049576,000337: 23,3075           02743                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#484F4C4457">HOLDW</a>      +6                         
+049577,000338: 23,3076           06555                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>          +108D,1                    
+049578,000339: 23,3077           77214                           <span class="in">BOFF    </span> <span class="in">VLOAD     </span>                            
+049579,000340: 23,3100           02746                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#444D454E464C47">DMENFLG</a>                               
+049580,000341: 23,3101           47111                                    <a href="#46415A4235">FAZB5</a>                                 
+049581,000342: 23,3102           02751                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#484F4C4457">HOLDW</a>      +12D                       
+049582,000343: 23,3103           06643                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57">W</a>          +162D,1                    
+<a name="46415A4232"></a>049583,000344: 23,3104           52100        <span class="sm">FAZB2   </span>           <span class="in">TIX,1   </span> <span class="in">GOTO      </span>                            
+049584,000345: 23,3105           47107                                    +2                                    
+049585,000346: 23,3106           47117                                    <a href="#46415A43">FAZC</a>                                  <span class="co">#  DONE WITH W MATRIX.  UPDATE STATE VECTOR</span>
+049586,000347: 23,3107           77634                           <span class="in">RTB     </span>                                       
+049587,000348: 23,3110           46754                                    <a href="#46415A41">FAZA</a>                                  
+<a name="46415A4235"></a>049588,000349: 23,3111           43335        <span class="sm">FAZB5   </span>           <span class="in">SLOAD   </span> <span class="in">DAD       </span>                            
+049589,000350: 23,3112           01321                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A495842">ZIXB</a>                                  
+049590,000351: 23,3113           07232                                    <a href="#31324444">12DD</a>                                  
+049591,000352: 23,3114           52030                           <span class="in">BHIZ    </span> <span class="in">GOTO      </span>                            
+049592,000353: 23,3115           47117                                    <a href="#46415A43">FAZC</a>                                  
+049593,000354: 23,3116           47104                                    <a href="#46415A4232">FAZB2</a>                                 
+<a name="46415A43"></a>049594,000355: 23,3117           77624        <span class="sm">FAZC    </span>           <span class="in">CALL    </span>                                       
+049595,000356: 23,3120           51770                                    <a href="INTEGRATION_INITIALIZATION.agc.html#475250325043">GRP2PC</a>                                
+049596,000357: 
 </pre>
 </span>
 </p>
@@ -557,57 +558,57 @@ Page 1154
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-049586,000358: 23,3121           53375                           <span class="in">VLOAD   </span> <span class="in">VAD       </span>                            <span class="co">#  START 3RD PHASE OF INCORP2</span>
-049587,000359: 23,3122           01701                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#58373839">X789</a>                                  <span class="co">#  7TH,8TH,9TH,COMPONENT OF STATE VECTOR</span>
-049588,000360: 23,3123           02701                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C544158">DELTAX</a>     +12D                       <span class="co">#  INCORPORATION FOR X789</span>
-049589,000361: 23,3124           03472                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5458373839">TX789</a>                                 
-049590,000362: 23,3125           47014                           <span class="in">BON     </span> <span class="in">RTB       </span>                            
-049591,000363: 23,3126           00707                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#5645485550464C47">VEHUPFLG</a>                              
-049592,000364: 23,3127           47217                                    <a href="#444F43534D">DOCSM</a>                                 
-049593,000365: 23,3130           27026                                    <a href="INTEGRATION_INITIALIZATION.agc.html#4D4F5645504C454D">MOVEPLEM</a>                              
-<a name="46415A4142"></a>049594,000366: 23,3131           77004        <span class="sm">FAZAB   </span>           <span class="in">BOVB    </span> <span class="in">AXT,2     </span>                            
-049595,000367: 23,3132           57756                                    <a href="TIME_OF_FREE_FALL.agc.html#544344414E5A4947">TCDANZIG</a>                              
-049596,000368: 23,3133           00000                                    0                                     
-049597,000369: 23,3134           77014                           <span class="in">BOFF    </span> <span class="in">AXT,2     </span>                            
-049598,000370: 23,3135           04344                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4D4F4F4E54484953">MOONTHIS</a>                              
-049599,000371: 23,3136           47140                                    +2                                    
-049600,000372: 23,3137           00002                                    2                                     
-049601,000373: 23,3140           53775                           <span class="in">VLOAD   </span> <span class="in">VSR*      </span>                            
-049602,000374: 23,3141           02665                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C544158">DELTAX</a>                                <span class="co">#  B27 IF MOON ORBIT, B29 IF EARTH</span>
-049603,000375: 23,3142           57205                                    0          -7,2                       
-049604,000376: 23,3143           40055                           <span class="in">VAD     </span> <span class="in">BOV       </span>                            
-049605,000377: 23,3144           01521                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5444454C544156">TDELTAV</a>                               
-049606,000378: 23,3145           47157                                    <a href="#46415A414231">FAZAB1</a>                                
-049607,000379: 23,3146           25521                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5444454C544156">TDELTAV</a>                               
-049608,000380: 23,3147           02673                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C544158">DELTAX</a>     +6                         <span class="co">#  B5 IF MOON ORBIT, B7 IF EARTH</span>
-049609,000381: 23,3150           53257                           <span class="in">VSR*    </span> <span class="in">VAD       </span>                            
-049610,000382: 23,3151           57202                                    0          -4,2                       
-049611,000383: 23,3152           01527                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#544E5556">TNUV</a>                                  
-049612,000384: 23,3153           77600                           <span class="in">BOV     </span>                                       
-049613,000385: 23,3154           47163                                    <a href="#46415A414232">FAZAB2</a>                                
-049614,000386: 23,3155           35527                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544E5556">TNUV</a>                                  
-049615,000387: 23,3156           47172                                    <a href="#46415A414233">FAZAB3</a>                                
-<a name="46415A414231"></a>049616,000388: 23,3157           53375        <span class="sm">FAZAB1  </span>           <span class="in">VLOAD   </span> <span class="in">VAD       </span>                            
-049617,000389: 23,3160           01535                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524356">RCV</a>                                   
-049618,000390: 23,3161           02665                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C544158">DELTAX</a>                                
-049619,000391: 23,3162           01535                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524356">RCV</a>                                   
-<a name="46415A414232"></a>049620,000392: 23,3163           53375        <span class="sm">FAZAB2  </span>           <span class="in">VLOAD   </span> <span class="in">VAD       </span>                            
-049621,000393: 23,3164           01543                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564356">VCV</a>                                   
-049622,000394: 23,3165           02673                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C544158">DELTAX</a>     +6                         
-049623,000395: 23,3166           01543                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564356">VCV</a>                                   
-049624,000396: 23,3167           45134                           <span class="in">SXA,2   </span> <span class="in">CALL      </span>                            
-049625,000397: 23,3170           02030                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#50424F4459">PBODY</a>                                 
-049626,000398: 23,3171           27720                                    <a href="ORBITAL_INTEGRATION.agc.html#52454354494659">RECTIFY</a>                               
-<a name="46415A414233"></a>049627,000399: 23,3172           77624        <span class="sm">FAZAB3  </span>           <span class="in">CALL    </span>                                       
-049628,000400: 23,3173           51770                                    <a href="INTEGRATION_INITIALIZATION.agc.html#475250325043">GRP2PC</a>                                
-049629,000401: 23,3174           47014                           <span class="in">BON     </span> <span class="in">RTB       </span>                            
-049630,000402: 23,3175           00707                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#5645485550464C47">VEHUPFLG</a>                              
-049631,000403: 23,3176           47222                                    <a href="#444F43534D31">DOCSM1</a>                                
-049632,000404: 23,3177           27005                                    <a href="INTEGRATION_INITIALIZATION.agc.html#4D4F5645414C454D">MOVEALEM</a>                              
-049633,000405: 23,3200           77624                           <span class="in">CALL    </span>                                       
-049634,000406: 23,3201           26070                                    <a href="LEM_GEOMETRY.agc.html#535644574E32">SVDWN2</a>                                <span class="co">#  STORE DOWNLINK STATE VECTOR</span>
-<a name="46415A414234"></a>049635,000407: 23,3202           77624        <span class="sm">FAZAB4  </span>           <span class="in">CALL    </span>                                       
-049636,000408: 
+049598,000359: 23,3121           53375                           <span class="in">VLOAD   </span> <span class="in">VAD       </span>                            <span class="co">#  START 3RD PHASE OF INCORP2</span>
+049599,000360: 23,3122           01701                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#58373839">X789</a>                                  <span class="co">#  7TH,8TH,9TH,COMPONENT OF STATE VECTOR</span>
+049600,000361: 23,3123           02701                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C544158">DELTAX</a>     +12D                       <span class="co">#  INCORPORATION FOR X789</span>
+049601,000362: 23,3124           03472                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5458373839">TX789</a>                                 
+049602,000363: 23,3125           47014                           <span class="in">BON     </span> <span class="in">RTB       </span>                            
+049603,000364: 23,3126           00707                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#5645485550464C47">VEHUPFLG</a>                              
+049604,000365: 23,3127           47217                                    <a href="#444F43534D">DOCSM</a>                                 
+049605,000366: 23,3130           27026                                    <a href="INTEGRATION_INITIALIZATION.agc.html#4D4F5645504C454D">MOVEPLEM</a>                              
+<a name="46415A4142"></a>049606,000367: 23,3131           77004        <span class="sm">FAZAB   </span>           <span class="in">BOVB    </span> <span class="in">AXT,2     </span>                            
+049607,000368: 23,3132           57756                                    <a href="TIME_OF_FREE_FALL.agc.html#544344414E5A4947">TCDANZIG</a>                              
+049608,000369: 23,3133           00000                                    0                                     
+049609,000370: 23,3134           77014                           <span class="in">BOFF    </span> <span class="in">AXT,2     </span>                            
+049610,000371: 23,3135           04344                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4D4F4F4E54484953">MOONTHIS</a>                              
+049611,000372: 23,3136           47140                                    +2                                    
+049612,000373: 23,3137           00002                                    2                                     
+049613,000374: 23,3140           53775                           <span class="in">VLOAD   </span> <span class="in">VSR*      </span>                            
+049614,000375: 23,3141           02665                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C544158">DELTAX</a>                                <span class="co">#  B27 IF MOON ORBIT, B29 IF EARTH</span>
+049615,000376: 23,3142           57205                                    0          -7,2                       
+049616,000377: 23,3143           40055                           <span class="in">VAD     </span> <span class="in">BOV       </span>                            
+049617,000378: 23,3144           01521                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5444454C544156">TDELTAV</a>                               
+049618,000379: 23,3145           47157                                    <a href="#46415A414231">FAZAB1</a>                                
+049619,000380: 23,3146           25521                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5444454C544156">TDELTAV</a>                               
+049620,000381: 23,3147           02673                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C544158">DELTAX</a>     +6                         <span class="co">#  B5 IF MOON ORBIT, B7 IF EARTH</span>
+049621,000382: 23,3150           53257                           <span class="in">VSR*    </span> <span class="in">VAD       </span>                            
+049622,000383: 23,3151           57202                                    0          -4,2                       
+049623,000384: 23,3152           01527                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#544E5556">TNUV</a>                                  
+049624,000385: 23,3153           77600                           <span class="in">BOV     </span>                                       
+049625,000386: 23,3154           47163                                    <a href="#46415A414232">FAZAB2</a>                                
+049626,000387: 23,3155           35527                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544E5556">TNUV</a>                                  
+049627,000388: 23,3156           47172                                    <a href="#46415A414233">FAZAB3</a>                                
+<a name="46415A414231"></a>049628,000389: 23,3157           53375        <span class="sm">FAZAB1  </span>           <span class="in">VLOAD   </span> <span class="in">VAD       </span>                            
+049629,000390: 23,3160           01535                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524356">RCV</a>                                   
+049630,000391: 23,3161           02665                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C544158">DELTAX</a>                                
+049631,000392: 23,3162           01535                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524356">RCV</a>                                   
+<a name="46415A414232"></a>049632,000393: 23,3163           53375        <span class="sm">FAZAB2  </span>           <span class="in">VLOAD   </span> <span class="in">VAD       </span>                            
+049633,000394: 23,3164           01543                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564356">VCV</a>                                   
+049634,000395: 23,3165           02673                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C544158">DELTAX</a>     +6                         
+049635,000396: 23,3166           01543                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564356">VCV</a>                                   
+049636,000397: 23,3167           45134                           <span class="in">SXA,2   </span> <span class="in">CALL      </span>                            
+049637,000398: 23,3170           02030                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#50424F4459">PBODY</a>                                 
+049638,000399: 23,3171           27720                                    <a href="ORBITAL_INTEGRATION.agc.html#52454354494659">RECTIFY</a>                               
+<a name="46415A414233"></a>049639,000400: 23,3172           77624        <span class="sm">FAZAB3  </span>           <span class="in">CALL    </span>                                       
+049640,000401: 23,3173           51770                                    <a href="INTEGRATION_INITIALIZATION.agc.html#475250325043">GRP2PC</a>                                
+049641,000402: 23,3174           47014                           <span class="in">BON     </span> <span class="in">RTB       </span>                            
+049642,000403: 23,3175           00707                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#5645485550464C47">VEHUPFLG</a>                              
+049643,000404: 23,3176           47222                                    <a href="#444F43534D31">DOCSM1</a>                                
+049644,000405: 23,3177           27005                                    <a href="INTEGRATION_INITIALIZATION.agc.html#4D4F5645414C454D">MOVEALEM</a>                              
+049645,000406: 23,3200           77624                           <span class="in">CALL    </span>                                       
+049646,000407: 23,3201           26070                                    <a href="LEM_GEOMETRY.agc.html#535644574E32">SVDWN2</a>                                <span class="co">#  STORE DOWNLINK STATE VECTOR</span>
+<a name="46415A414234"></a>049647,000408: 23,3202           77624        <span class="sm">FAZAB4  </span>           <span class="in">CALL    </span>                                       
+049648,000409: 
 </pre>
 </span>
 </p>
@@ -623,58 +624,58 @@ Page 1155
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-049638,000410: 23,3203           51770                                    <a href="INTEGRATION_INITIALIZATION.agc.html#475250325043">GRP2PC</a>                                <span class="co">#  PHASE CHANGE</span>
-049639,000411: 23,3204           77214                           <span class="in">BOFF    </span> <span class="in">VLOAD     </span>                            
-049640,000412: 23,3205           02746                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#444D454E464C47">DMENFLG</a>                               
-049641,000413: 23,3206           47211                                    <a href="#46415A414235">FAZAB5</a>                                <span class="co">#  6 DIMENSIONAL</span>
-049642,000414: 23,3207           03472                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5458373839">TX789</a>                                 <span class="co">#  9 DIMENSIONAL</span>
-049643,000415: 23,3210           01701                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58373839">X789</a>                                  
-<a name="46415A414235"></a>049644,000416: 23,3211           66150        <span class="sm">FAZAB5  </span>           <span class="in">LXA,1   </span> <span class="in">SXA,1     </span>                            
-049645,000417: 23,3212           02767                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#454752455353">EGRESS</a>                                
-049646,000418: 23,3213           00052                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5150524554">QPRET</a>                                 
-049647,000419: 23,3214           77776                           <span class="in">EXIT    </span>                                       
-049648,000420: 23,3215           04626                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              <span class="co">#  EXIT</span>
-049649,000421: 23,3216           27460                           <span class="ps">CADR    </span> <a href="INTEGRATION_INITIALIZATION.agc.html#494E5457414B45">INTWAKE</a>                               
-<a name="444F43534D"></a>049650,000422: 23,3217           52034        <span class="sm">DOCSM   </span>           <span class="in">RTB     </span> <span class="in">GOTO      </span>                            
-049651,000423: 23,3220           26761                                    <a href="INTEGRATION_INITIALIZATION.agc.html#4D4F56455043534D">MOVEPCSM</a>                              
-049652,000424: 23,3221           47131                                    <a href="#46415A4142">FAZAB</a>                                 
-<a name="444F43534D31"></a>049653,000425: 23,3222           45034        <span class="sm">DOCSM1  </span>           <span class="in">RTB     </span> <span class="in">CALL      </span>                            
-049654,000426: 23,3223           26732                                    <a href="INTEGRATION_INITIALIZATION.agc.html#4D4F56454143534D">MOVEACSM</a>                              
-049655,000427: 23,3224           26114                                    <a href="LEM_GEOMETRY.agc.html#535644574E31">SVDWN1</a>                                <span class="co">#  STORE DOWNLINK STATE VECTOR</span>
-049656,000428: 23,3225           77650                           <span class="in">GOTO    </span>                                       
-049657,000429: 23,3226           47202                                    <a href="#46415A414234">FAZAB4</a>                                
-<a name="5A45524F44"></a>049658,000430: 23,3227  23,2504               <span class="sm">ZEROD   </span>           <span class="ps">=       </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#5A45524F56454353">ZEROVECS</a>                              
-<a name="35344444"></a>049659,000431: 23,3227           00066        <span class="sm">54DD    </span>           <span class="ps">DEC     </span> 54         B-14                       
-<a name="364444"></a>049660,000432: 23,3230           77771        <span class="sm">6DD     </span>           <span class="ps">DEC     </span> -6         B-14                       
-<a name="31324444"></a>049661,000433: 23,3231           00014        <span class="sm">12DD    </span>           <span class="ps">DEC     </span> 12         B-14                       
-049662,000434: 
-049663,000435: 22,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#52454E44455A">RENDEZ</a>                                
-049664,000436: 22,2000                                           <span class="ps">BANK    </span>                                       
-049665,000437: 22,3712                                           <span class="ps">COUNT*  </span> $$/INCOR                              
-049666,000438: 
-<a name="4E45575A434F4D50"></a>049667,000439: 22,3712           51575        <span class="sm">NEWZCOMP</span>           <span class="in">VLOAD   </span> <span class="in">ABVAL     </span>                            
-049668,000440: 22,3713           02643                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>                                    
-049669,000441: 22,3714           24045                           <span class="in">STOVL   </span> <a href="#4E4F524D5A49">NORMZI</a>                                
-049670,000442: 22,3715           02651                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +6                         
-049671,000443: 22,3716           41446                           <span class="in">ABVAL   </span> <span class="in">PUSH      </span>                            
-049672,000444: 22,3717           50025                           <span class="in">DSU     </span> <span class="in">BMN       </span>                            
-049673,000445: 22,3720           00045                                    <a href="#4E4F524D5A49">NORMZI</a>                                
-049674,000446: 22,3721           45724                                    +3                                    
-049675,000447: 22,3722           45545                           <span class="in">DLOAD   </span> <span class="in">STADR     </span>                            
-049676,000448: 22,3723           77732                           <span class="in">STORE   </span> <a href="#4E4F524D5A49">NORMZI</a>                                
-049677,000449: 22,3724           51575                           <span class="in">VLOAD   </span> <span class="in">ABVAL     </span>                            
-049678,000450: 22,3725           02657                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +12D                       
-049679,000451: 22,3726           45206                           <span class="in">PUSH    </span> <span class="in">DSU       </span>                            
-049680,000452: 22,3727           00045                                    <a href="#4E4F524D5A49">NORMZI</a>                                
-049681,000453: 22,3730           71240                           <span class="in">BMN     </span> <span class="in">DLOAD     </span>                            
-049682,000454: 22,3731           45734                                    +3                                    
-049683,000455: 22,3732           77626                           <span class="in">STADR   </span>                                       
-049684,000456: 22,3733           77732                           <span class="in">STORE   </span> <a href="#4E4F524D5A49">NORMZI</a>                                <span class="co">#  LARGEST ABVAL</span>
-049685,000457: 22,3734           66145                           <span class="in">DLOAD   </span> <span class="in">SXA,1     </span>                            
-049686,000458: 22,3735           00045                                    <a href="#4E4F524D5A49">NORMZI</a>                                
-049687,000459: 22,3736           00044                                    <a href="#4E4F524D5A49">NORMZI</a>                                <span class="co">#  SAVE X1</span>
-049688,000460: 22,3737           62101                           <span class="in">NORM    </span> <span class="in">INCR,1    </span>                            
-049689,000461: 
+049650,000411: 23,3203           51770                                    <a href="INTEGRATION_INITIALIZATION.agc.html#475250325043">GRP2PC</a>                                <span class="co">#  PHASE CHANGE</span>
+049651,000412: 23,3204           77214                           <span class="in">BOFF    </span> <span class="in">VLOAD     </span>                            
+049652,000413: 23,3205           02746                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#444D454E464C47">DMENFLG</a>                               
+049653,000414: 23,3206           47211                                    <a href="#46415A414235">FAZAB5</a>                                <span class="co">#  6 DIMENSIONAL</span>
+049654,000415: 23,3207           03472                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5458373839">TX789</a>                                 <span class="co">#  9 DIMENSIONAL</span>
+049655,000416: 23,3210           01701                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58373839">X789</a>                                  
+<a name="46415A414235"></a>049656,000417: 23,3211           66150        <span class="sm">FAZAB5  </span>           <span class="in">LXA,1   </span> <span class="in">SXA,1     </span>                            
+049657,000418: 23,3212           02767                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#454752455353">EGRESS</a>                                
+049658,000419: 23,3213           00052                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5150524554">QPRET</a>                                 
+049659,000420: 23,3214           77776                           <span class="in">EXIT    </span>                                       
+049660,000421: 23,3215           04626                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              <span class="co">#  EXIT</span>
+049661,000422: 23,3216           27460                           <span class="ps">CADR    </span> <a href="INTEGRATION_INITIALIZATION.agc.html#494E5457414B45">INTWAKE</a>                               
+<a name="444F43534D"></a>049662,000423: 23,3217           52034        <span class="sm">DOCSM   </span>           <span class="in">RTB     </span> <span class="in">GOTO      </span>                            
+049663,000424: 23,3220           26761                                    <a href="INTEGRATION_INITIALIZATION.agc.html#4D4F56455043534D">MOVEPCSM</a>                              
+049664,000425: 23,3221           47131                                    <a href="#46415A4142">FAZAB</a>                                 
+<a name="444F43534D31"></a>049665,000426: 23,3222           45034        <span class="sm">DOCSM1  </span>           <span class="in">RTB     </span> <span class="in">CALL      </span>                            
+049666,000427: 23,3223           26732                                    <a href="INTEGRATION_INITIALIZATION.agc.html#4D4F56454143534D">MOVEACSM</a>                              
+049667,000428: 23,3224           26114                                    <a href="LEM_GEOMETRY.agc.html#535644574E31">SVDWN1</a>                                <span class="co">#  STORE DOWNLINK STATE VECTOR</span>
+049668,000429: 23,3225           77650                           <span class="in">GOTO    </span>                                       
+049669,000430: 23,3226           47202                                    <a href="#46415A414234">FAZAB4</a>                                
+<a name="5A45524F4F"></a>049670,000431: 23,3227  23,2504               <span class="sm">ZEROO   </span>           <span class="ps">=       </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#5A45524F56454353">ZEROVECS</a>                              
+<a name="35344444"></a>049671,000432: 23,3227           00066        <span class="sm">54DD    </span>           <span class="ps">DEC     </span> 54         B-14                       
+<a name="364444"></a>049672,000433: 23,3230           77771        <span class="sm">6DD     </span>           <span class="ps">DEC     </span> -6         B-14                       
+<a name="31324444"></a>049673,000434: 23,3231           00014        <span class="sm">12DD    </span>           <span class="ps">DEC     </span> 12         B-14                       
+049674,000435: 
+049675,000436: 22,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#52454E44455A">RENDEZ</a>                                
+049676,000437: 22,2000                                           <span class="ps">BANK    </span>                                       
+049677,000438: 22,3712                                           <span class="ps">COUNT*  </span> $$/INCOR                              
+049678,000439: 
+<a name="4E45575A434F4D50"></a>049679,000440: 22,3712           51575        <span class="sm">NEWZCOMP</span>           <span class="in">VLOAD   </span> <span class="in">ABVAL     </span>                            
+049680,000441: 22,3713           02643                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>                                    
+049681,000442: 22,3714           24045                           <span class="in">STOVL   </span> <a href="#4E4F524D5A49">NORMZI</a>                                
+049682,000443: 22,3715           02651                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +6                         
+049683,000444: 22,3716           41446                           <span class="in">ABVAL   </span> <span class="in">PUSH      </span>                            
+049684,000445: 22,3717           50025                           <span class="in">DSU     </span> <span class="in">BMN       </span>                            
+049685,000446: 22,3720           00045                                    <a href="#4E4F524D5A49">NORMZI</a>                                
+049686,000447: 22,3721           45724                                    +3                                    
+049687,000448: 22,3722           45545                           <span class="in">DLOAD   </span> <span class="in">STADR     </span>                            
+049688,000449: 22,3723           77732                           <span class="in">STORE   </span> <a href="#4E4F524D5A49">NORMZI</a>                                
+049689,000450: 22,3724           51575                           <span class="in">VLOAD   </span> <span class="in">ABVAL     </span>                            
+049690,000451: 22,3725           02657                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +12D                       
+049691,000452: 22,3726           45206                           <span class="in">PUSH    </span> <span class="in">DSU       </span>                            
+049692,000453: 22,3727           00045                                    <a href="#4E4F524D5A49">NORMZI</a>                                
+049693,000454: 22,3730           71240                           <span class="in">BMN     </span> <span class="in">DLOAD     </span>                            
+049694,000455: 22,3731           45734                                    +3                                    
+049695,000456: 22,3732           77626                           <span class="in">STADR   </span>                                       
+049696,000457: 22,3733           77732                           <span class="in">STORE   </span> <a href="#4E4F524D5A49">NORMZI</a>                                <span class="co">#  LARGEST ABVAL</span>
+049697,000458: 22,3734           66145                           <span class="in">DLOAD   </span> <span class="in">SXA,1     </span>                            
+049698,000459: 22,3735           00045                                    <a href="#4E4F524D5A49">NORMZI</a>                                
+049699,000460: 22,3736           00044                                    <a href="#4E4F524D5A49">NORMZI</a>                                <span class="co">#  SAVE X1</span>
+049700,000461: 22,3737           62101                           <span class="in">NORM    </span> <span class="in">INCR,1    </span>                            
+049701,000462: 
 </pre>
 </span>
 </p>
@@ -690,35 +691,35 @@ Page 1156
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-049691,000463: 22,3740           00047                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5831">X1</a>                                    
-049692,000464: 22,3741           00002                           <span class="ps">DEC     </span> 2          B-14                       
-049693,000465: 22,3742           53775                           <span class="in">VLOAD   </span> <span class="in">VSL*      </span>                            
-049694,000466: 22,3743           02643                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>                                    
-049695,000467: 22,3744           20201                                    0,1                                   
-049696,000468: 22,3745           26643                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>                                    
-049697,000469: 22,3746           02651                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +6                         
-049698,000470: 22,3747           77657                           <span class="in">VSL*    </span>                                       
-049699,000471: 22,3750           20201                                    0,1                                   
-049700,000472: 22,3751           26651                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +6                         
-049701,000473: 22,3752           02657                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +12D                       
-049702,000474: 22,3753           66057                           <span class="in">VSL*    </span> <span class="in">SXA,1     </span>                            
-049703,000475: 22,3754           20201                                    0,1                                   
-049704,000476: 22,3755           00045                                    <a href="#4E4F524D5A49">NORMZI</a>     +1                         <span class="co">#  SAVE SHIFT</span>
-049705,000477: 22,3756           02657                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +12D                       
-049706,000478: 22,3757           54150                           <span class="in">LXA,1   </span> <span class="in">XSU,1     </span>                            
-049707,000479: 22,3760           02102                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F524D47414D">NORMGAM</a>                               
-049708,000480: 22,3761           00045                                    <a href="#4E4F524D5A49">NORMZI</a>     +1                         
-049709,000481: 22,3762           77660                           <span class="in">XSU,1   </span>                                       
-049710,000482: 22,3763           00045                                    <a href="#4E4F524D5A49">NORMZI</a>     +1                         
-049711,000483: 22,3764           70130                           <span class="in">SXA,1   </span> <span class="in">LXC,1     </span>                            
-049712,000484: 22,3765           02102                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F524D47414D">NORMGAM</a>                               
-049713,000485: 22,3766           00045                                    <a href="#4E4F524D5A49">NORMZI</a>     +1                         
-049714,000486: 22,3767           40270                           <span class="in">XAD,1   </span> <span class="in">SETPD     </span>                            
-049715,000487: 22,3770           00044                                    <a href="#4E4F524D5A49">NORMZI</a>                                
-049716,000488: 22,3771           00003                                    2D                                    
-049717,000489: 22,3772           77650                           <span class="in">GOTO    </span>                                       
-049718,000490: 22,3773           46652                                    <a href="#494E434F5232">INCOR2</a>     -3                         
-<a name="4E4F524D5A49"></a>049719,000491: 22,3774                        <span class="sm">NORMZI  </span>           <span class="ps">=       </span> 36D                                   
+049703,000464: 22,3740           00047                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5831">X1</a>                                    
+049704,000465: 22,3741           00002                           <span class="ps">DEC     </span> 2          B-14                       
+049705,000466: 22,3742           53775                           <span class="in">VLOAD   </span> <span class="in">VSL*      </span>                            
+049706,000467: 22,3743           02643                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>                                    
+049707,000468: 22,3744           20201                                    0,1                                   
+049708,000469: 22,3745           26643                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>                                    
+049709,000470: 22,3746           02651                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +6                         
+049710,000471: 22,3747           77657                           <span class="in">VSL*    </span>                                       
+049711,000472: 22,3750           20201                                    0,1                                   
+049712,000473: 22,3751           26651                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +6                         
+049713,000474: 22,3752           02657                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +12D                       
+049714,000475: 22,3753           66057                           <span class="in">VSL*    </span> <span class="in">SXA,1     </span>                            
+049715,000476: 22,3754           20201                                    0,1                                   
+049716,000477: 22,3755           00045                                    <a href="#4E4F524D5A49">NORMZI</a>     +1                         <span class="co">#  SAVE SHIFT</span>
+049717,000478: 22,3756           02657                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A49">ZI</a>         +12D                       
+049718,000479: 22,3757           54150                           <span class="in">LXA,1   </span> <span class="in">XSU,1     </span>                            
+049719,000480: 22,3760           02102                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F524D47414D">NORMGAM</a>                               
+049720,000481: 22,3761           00045                                    <a href="#4E4F524D5A49">NORMZI</a>     +1                         
+049721,000482: 22,3762           77660                           <span class="in">XSU,1   </span>                                       
+049722,000483: 22,3763           00045                                    <a href="#4E4F524D5A49">NORMZI</a>     +1                         
+049723,000484: 22,3764           70130                           <span class="in">SXA,1   </span> <span class="in">LXC,1     </span>                            
+049724,000485: 22,3765           02102                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F524D47414D">NORMGAM</a>                               
+049725,000486: 22,3766           00045                                    <a href="#4E4F524D5A49">NORMZI</a>     +1                         
+049726,000487: 22,3767           40270                           <span class="in">XAD,1   </span> <span class="in">SETPD     </span>                            
+049727,000488: 22,3770           00044                                    <a href="#4E4F524D5A49">NORMZI</a>                                
+049728,000489: 22,3771           00003                                    2D                                    
+049729,000490: 22,3772           77650                           <span class="in">GOTO    </span>                                       
+049730,000491: 22,3773           46652                                    <a href="#494E434F5232">INCOR2</a>     -3                         
+<a name="4E4F524D5A49"></a>049731,000492: 22,3774                        <span class="sm">NORMZI  </span>           <span class="ps">=       </span> 36D                                   
 
 End of include-file MEASUREMENT_INCORPORATION.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

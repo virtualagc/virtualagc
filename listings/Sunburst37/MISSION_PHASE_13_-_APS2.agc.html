@@ -90,28 +90,28 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-031879,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-031880,000003:                                                                                                  <span class="co">## Filename:    MISSION_PHASE_13_-_APS2.agc</span>
-031881,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
-031882,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
-031883,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
-031884,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
-031885,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
-031886,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
-031887,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
-031888,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-031889,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-031890,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-031891,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
-031892,000015:                                                                                                  <span class="co">## Reference:   pp. 704-710</span>
-031893,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-031894,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-031895,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-031896,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
-031897,000020:                                                                                                  <span class="co">##              2017-06-14 HG   Transcribed</span>
-031898,000021:                                                                                                  <span class="co">##              2017-06-23 RSB  Proofed comment text with</span>
-031899,000022:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
-031900,000023: 
+031886,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+031887,000003:                                                                                                  <span class="co">## Filename:    MISSION_PHASE_13_-_APS2.agc</span>
+031888,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
+031889,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
+031890,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
+031891,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
+031892,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
+031893,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
+031894,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
+031895,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+031896,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+031897,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+031898,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
+031899,000015:                                                                                                  <span class="co">## Reference:   pp. 704-710</span>
+031900,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+031901,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+031902,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+031903,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
+031904,000020:                                                                                                  <span class="co">##              2017-06-14 HG   Transcribed</span>
+031905,000021:                                                                                                  <span class="co">##              2017-06-23 RSB  Proofed comment text with</span>
+031906,000022:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
+031907,000023: 
 </pre>
 </span>
 </p>
@@ -127,58 +127,58 @@ Page 704
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-031902,000025:                                                                                                  <span class="co">#  MISSION PHASE 13 EXERCISES THE ASCENT GUIDANCE EQUATIONS OF PROG 46</span>
-031903,000026:                                                                                                  <span class="co">#  THE PREREAD TASK IS SET TO OCCUR IN 140 SECS AT TIG-30 AND AVETOMID DONE</span>
-031904,000027:                                                                                                  <span class="co">#  THE PRE-APS2 PROG 34 IS EXECUTED AND KALCMANU JOB IS STARTED</span>
-031905,000028:                                                                                                  <span class="co">#  THE ENGINEON TASK IS STARTED AT TIG-30 AND IGN IS AT 170 SECS AFTER</span>
-031906,000029:                                                                                                  <span class="co">#  START OF MP13</span>
-031907,000030:                                                                                                  <span class="co">#  THE ASCENT GUIDANCE EQUATIONS START BETWEEN TIG+1 AND +2 SECS</span>
-031908,000031:                                                                                                  <span class="co">#  THE ASC FEED TEST STARTS AT TIG+9 AND TERMINATES 365 SECS LATER</span>
-031909,000032: 
-031910,000033: 27,3071                                           <span class="ps">BANK    </span> 27                                    
-031911,000034: 27,3071  E4,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D454D4F5259">AMEMORY</a>                               
-031912,000035: 
-<a name="4D5031334A4F42"></a>031913,000036: 27,3071           00006        <span class="sm">MP13JOB </span>           <span class="op">EXTEND  </span>                                       
-031914,000037: 27,3072           30025                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  PICK UP CURRENT TIME</span>
-031915,000038: 27,3073           53567                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
-031916,000039: 27,3074           04105                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              <span class="co">#  SET MODE</span>
-031917,000040: 27,3075           00034                           <span class="ps">OCT     </span> 34                                    
-031918,000041: 
-031919,000042: 27,3076           22007                           <span class="op">ZL      </span>                                       <span class="co">#  SET TDEC TO TIME AT TIG-30</span>
-031920,000043: 27,3077           33253                           <span class="op">CAF     </span> <a href="#31343053454353">140SECS</a>                               <span class="co">#  TIME TO TIGN-30</span>
-031921,000044: 27,3100           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-031922,000045: 27,3101           21567                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  <span class="co">#  TDEC =TIGN-30 FOR MIDTOAVE</span>
-031923,000046: 
-031924,000047: 27,3102           33253                           <span class="op">CAF     </span> <a href="#31343053454353">140SECS</a>                               
-031925,000048: 27,3103           00004                           <span class="op">INHINT  </span>                                       
-031926,000049: 27,3104           05701                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              <span class="co">#  SET TASK FOR TIGN-30</span>
-031927,000050: 27,3105  E4,1566                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
-031928,000051: 
-031929,000052: 27,3105           03142 56004                     <span class="ps">2CADR   </span> <a href="#54494731332D3330">TIG13-30</a>                              
-031930,000053: 
-031931,000054: 27,3107           00003                           <span class="op">RELINT  </span>                                       
-031932,000055: 
-031933,000056: 27,3110           00006                           <span class="op">EXTEND  </span>                                       
-031934,000057: 27,3111           32454                           <span class="op">DCA     </span> <a href="MISSION_PHASE_2_GUIDANCE_REFERENCE_RELEASE_PLUS_BOOST_MONITOR.agc.html#4D49444156454144">MIDAVEAD</a>                              <span class="co">#  DO MIDTOAVE COMPUTATION</span>
-031935,000058: 27,3112           52006                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A">Z</a>                                     
-031936,000059: 
-031937,000060: 27,3113           00006                           <span class="op">EXTEND  </span>                                       
-031938,000061: 27,3114           33260                           <span class="op">DCA     </span> <a href="#5052454150324144">PREAP2AD</a>                              <span class="co">#  DO PRE-APS2 TO GET DESIRED ATTITUDE</span>
-031939,000062: 27,3115           52006                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A">Z</a>                                     <span class="co">#  STORES VECTORS POINTVSM AND SCAXIS</span>
-031940,000063: 
-031941,000064: 27,3116           06103                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-031942,000065: 27,3117           43131                           <span class="in">SSP     </span> <span class="in">SET       </span>                            
-031943,000066: 27,3120           01653                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              <span class="co">#  SET KALCMANU FOR ANGULAR RATE OF 5DEG/S</span>
-031944,000067: 27,3121           00004                                    4                                     
-031945,000068: 27,3122           01063                                    33D                                   
-031946,000069: 27,3123           77776                           <span class="in">EXIT    </span>                                       
-031947,000070: 
-031948,000071: 27,3124           35226                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3330">PRIO30</a>                                <span class="co">#  SET ATTITUDE MANEUVER JOB</span>
-031949,000072: 27,3125           00004                           <span class="op">INHINT  </span>                                       
-031950,000073: 27,3126           05534                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               
-031951,000074: 27,3127  E3,1535                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4953">MIS</a>                                   
-031952,000075: 27,3127           02001 70063                     <span class="ps">2CADR   </span> <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#564543504F494E54">VECPOINT</a>                              
-031953,000076: 
+031909,000025:                                                                                                  <span class="co">#  MISSION PHASE 13 EXERCISES THE ASCENT GUIDANCE EQUATIONS OF PROG 46</span>
+031910,000026:                                                                                                  <span class="co">#  THE PREREAD TASK IS SET TO OCCUR IN 140 SECS AT TIG-30 AND AVETOMID DONE</span>
+031911,000027:                                                                                                  <span class="co">#  THE PRE-APS2 PROG 34 IS EXECUTED AND KALCMANU JOB IS STARTED</span>
+031912,000028:                                                                                                  <span class="co">#  THE ENGINEON TASK IS STARTED AT TIG-30 AND IGN IS AT 170 SECS AFTER</span>
+031913,000029:                                                                                                  <span class="co">#  START OF MP13</span>
+031914,000030:                                                                                                  <span class="co">#  THE ASCENT GUIDANCE EQUATIONS START BETWEEN TIG+1 AND +2 SECS</span>
+031915,000031:                                                                                                  <span class="co">#  THE ASC FEED TEST STARTS AT TIG+9 AND TERMINATES 365 SECS LATER</span>
+031916,000032: 
+031917,000033: 27,3071                                           <span class="ps">BANK    </span> 27                                    
+031918,000034: 27,3071  E4,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D454D4F5259">AMEMORY</a>                               
+031919,000035: 
+<a name="4D5031334A4F42"></a>031920,000036: 27,3071           00006        <span class="sm">MP13JOB </span>           <span class="op">EXTEND  </span>                                       
+031921,000037: 27,3072           30025                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  PICK UP CURRENT TIME</span>
+031922,000038: 27,3073           53567                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
+031923,000039: 27,3074           04105                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              <span class="co">#  SET MODE</span>
+031924,000040: 27,3075           00034                           <span class="ps">OCT     </span> 34                                    
+031925,000041: 
+031926,000042: 27,3076           22007                           <span class="op">ZL      </span>                                       <span class="co">#  SET TDEC TO TIME AT TIG-30</span>
+031927,000043: 27,3077           33253                           <span class="op">CAF     </span> <a href="#31343053454353">140SECS</a>                               <span class="co">#  TIME TO TIGN-30</span>
+031928,000044: 27,3100           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+031929,000045: 27,3101           21567                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  <span class="co">#  TDEC =TIGN-30 FOR MIDTOAVE</span>
+031930,000046: 
+031931,000047: 27,3102           33253                           <span class="op">CAF     </span> <a href="#31343053454353">140SECS</a>                               
+031932,000048: 27,3103           00004                           <span class="op">INHINT  </span>                                       
+031933,000049: 27,3104           05701                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              <span class="co">#  SET TASK FOR TIGN-30</span>
+031934,000050: 27,3105  E4,1566                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
+031935,000051: 
+031936,000052: 27,3105           03142 56004                     <span class="ps">2CADR   </span> <a href="#54494731332D3330">TIG13-30</a>                              
+031937,000053: 
+031938,000054: 27,3107           00003                           <span class="op">RELINT  </span>                                       
+031939,000055: 
+031940,000056: 27,3110           00006                           <span class="op">EXTEND  </span>                                       
+031941,000057: 27,3111           32454                           <span class="op">DCA     </span> <a href="MISSION_PHASE_2_GUIDANCE_REFERENCE_RELEASE_PLUS_BOOST_MONITOR.agc.html#4D49444156454144">MIDAVEAD</a>                              <span class="co">#  DO MIDTOAVE COMPUTATION</span>
+031942,000058: 27,3112           52006                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A">Z</a>                                     
+031943,000059: 
+031944,000060: 27,3113           00006                           <span class="op">EXTEND  </span>                                       
+031945,000061: 27,3114           33260                           <span class="op">DCA     </span> <a href="#5052454150324144">PREAP2AD</a>                              <span class="co">#  DO PRE-APS2 TO GET DESIRED ATTITUDE</span>
+031946,000062: 27,3115           52006                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A">Z</a>                                     <span class="co">#  STORES VECTORS POINTVSM AND SCAXIS</span>
+031947,000063: 
+031948,000064: 27,3116           06103                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+031949,000065: 27,3117           43131                           <span class="in">SSP     </span> <span class="in">SET       </span>                            
+031950,000066: 27,3120           01653                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              <span class="co">#  SET KALCMANU FOR ANGULAR RATE OF 5DEG/S</span>
+031951,000067: 27,3121           00004                                    4                                     
+031952,000068: 27,3122           01063                                    33D                                   
+031953,000069: 27,3123           77776                           <span class="in">EXIT    </span>                                       
+031954,000070: 
+031955,000071: 27,3124           35226                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3330">PRIO30</a>                                <span class="co">#  SET ATTITUDE MANEUVER JOB</span>
+031956,000072: 27,3125           00004                           <span class="op">INHINT  </span>                                       
+031957,000073: 27,3126           05534                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               
+031958,000074: 27,3127  E3,1535                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4953">MIS</a>                                   
+031959,000075: 27,3127           02001 70063                     <span class="ps">2CADR   </span> <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#564543504F494E54">VECPOINT</a>                              
+031960,000076: 
 </pre>
 </span>
 </p>
@@ -194,56 +194,56 @@ Page 705
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-031955,000078: 27,3131           37755                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  
-031956,000079: 27,3132           00004                           <span class="op">INHINT  </span>                                       
-031957,000080: 27,3133           05701                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              <span class="co">#  SET UP DFI T/M CALIBRATE TASK</span>
-031958,000081: 27,3134  E4,1566                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
-031959,000082: 27,3134           03274 56004                     <span class="ps">2CADR   </span> <a href="#44464943414C">DFICAL</a>                                <span class="co">#  DFICAL REQUIRES 14 SECS AND ENDS ITSELF</span>
-031960,000083: 
-031961,000084: 27,3136           05224                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  PUT MP13 TO SLEEP-KALCMANU WILL WAKE</span>
-031962,000085: 27,3137           26754                           <span class="ps">CADR    </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#4154545354414C4C">ATTSTALL</a>                              
-031963,000086: 27,3140           04732                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#4355525441494E53">CURTAINS</a>                              <span class="co">#  BAD END RETURN FROM KALCMANU</span>
-031964,000087: 
-031965,000088: 27,3141           05605                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              <span class="co">#  WAIT FOR TIG-30 TASK TO INTERUPT</span>
-031966,000089: 
-<a name="54494731332D3330"></a>031967,000090: 27,3142           37755        <span class="sm">TIG13-30</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  <span class="co">#  SET PREREAD FOR NOW</span>
-031968,000091: 27,3143           05701                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-031969,000092: 27,3144  E5,1506                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456544F54414C">DVTOTAL</a>                               
-031970,000093: 27,3144           02000 60065                     <span class="ps">2CADR   </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#50524552454144">PREREAD</a>                               
-031971,000094: 
-031972,000095: 27,3146           37743                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4249543131">BIT11</a>                                 <span class="co">#  SEE IF ATTITUDE MANEUVER DONE</span>
-031973,000096: 27,3147           70076                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              
-031974,000097: 27,3150           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-031975,000098: 27,3151           13267                           <span class="op">TCF     </span> <a href="#435552544A4F42">CURTJOB</a>                               <span class="co">#  NO-SET UP CURTAINS JOB</span>
-031976,000099: 
-031977,000100: 27,3152           04105                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              
-031978,000101: 27,3153           00046                           <span class="ps">OCT     </span> 46                                    <span class="co">#  SET MODE TO PROG46</span>
-031979,000102: 
-031980,000103: 27,3154           33256                           <span class="op">CAF     </span> <a href="#4156454731334144">AVEG13AD</a>                              <span class="co">#  GENADR OF AVEG IN DVSELECT</span>
-031981,000104: 27,3155           55322                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445653454C454354">DVSELECT</a>                              
-031982,000105: 
-031983,000106: 27,3156           00006                           <span class="op">EXTEND  </span>                                       
-031984,000107: 27,3157           33266                           <span class="op">DCA     </span> <a href="#5356455831334144">SVEX13AD</a>                              <span class="co">#  2CADR SERVEXIT IN AVEGEXIT</span>
-031985,000108: 27,3160           53073                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41564745584954">AVGEXIT</a>                               
-031986,000109: 
-031987,000110: 27,3161           00006                           <span class="op">EXTEND  </span>                                       
-031988,000111: 27,3162           33262                           <span class="op">DCA     </span> <a href="#4D503133544D4144">MP13TMAD</a>                              
-031989,000112: 27,3163           53075                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44564D4E45584954">DVMNEXIT</a>                              <span class="co">#  SET MP RETURN FOR ENGINE SHUT DOWN</span>
-031990,000113: 
-031991,000114: 27,3164           06074                           <span class="op">TC      </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#454E47494E4F4631">ENGINOF1</a>                              <span class="co">#  JUST TO ENSURE ENGINE OFF</span>
-031992,000115: 
-031993,000116: 27,3165           05114                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D502B4454">1LMP+DT</a>                               
-031994,000117: 27,3166           00206                           <span class="ps">DEC     </span> 134        B-14                       <span class="co">#  ENGINE SELECT-APS ARM</span>
-031995,000118: 27,3167           03326                           <span class="ps">DEC     </span> 1750       B-14                       <span class="co">#  DELAY 17.5 SECS</span>
-031996,000119: 
-031997,000120: 27,3170           05307                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              
-031998,000121: 27,3171           34024                           <span class="ps">CADR    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#554C4C414745">ULLAGE</a>                                <span class="co">#  COMMAND 4 JET ULLAGE-ON</span>
-031999,000122: 
-032000,000123: 27,3172           05717                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#46495844454C4159">FIXDELAY</a>                              
-032001,000124: 27,3173           02342                           <span class="ps">DEC     </span> 1250       B-14                       <span class="co">#  DELAY 12.5 SECS TO IGNITION</span>
-032002,000125: 
-<a name="5449473133"></a>032003,000126: 27,3174           06054        <span class="sm">TIG13   </span>           <span class="op">TC      </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#454E47494E454F4E">ENGINEON</a>                              <span class="co">#  FIRE UP APS ENGINE</span>
-032004,000127: 
+031962,000078: 27,3131           37755                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  
+031963,000079: 27,3132           00004                           <span class="op">INHINT  </span>                                       
+031964,000080: 27,3133           05701                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              <span class="co">#  SET UP DFI T/M CALIBRATE TASK</span>
+031965,000081: 27,3134  E4,1566                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
+031966,000082: 27,3134           03274 56004                     <span class="ps">2CADR   </span> <a href="#44464943414C">DFICAL</a>                                <span class="co">#  DFICAL REQUIRES 14 SECS AND ENDS ITSELF</span>
+031967,000083: 
+031968,000084: 27,3136           05224                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  PUT MP13 TO SLEEP-KALCMANU WILL WAKE</span>
+031969,000085: 27,3137           26754                           <span class="ps">CADR    </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#4154545354414C4C">ATTSTALL</a>                              
+031970,000086: 27,3140           04732                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#4355525441494E53">CURTAINS</a>                              <span class="co">#  BAD END RETURN FROM KALCMANU</span>
+031971,000087: 
+031972,000088: 27,3141           05605                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              <span class="co">#  WAIT FOR TIG-30 TASK TO INTERUPT</span>
+031973,000089: 
+<a name="54494731332D3330"></a>031974,000090: 27,3142           37755        <span class="sm">TIG13-30</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  <span class="co">#  SET PREREAD FOR NOW</span>
+031975,000091: 27,3143           05701                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+031976,000092: 27,3144  E5,1506                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456544F54414C">DVTOTAL</a>                               
+031977,000093: 27,3144           02000 60065                     <span class="ps">2CADR   </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#50524552454144">PREREAD</a>                               
+031978,000094: 
+031979,000095: 27,3146           37743                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4249543131">BIT11</a>                                 <span class="co">#  SEE IF ATTITUDE MANEUVER DONE</span>
+031980,000096: 27,3147           70076                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              
+031981,000097: 27,3150           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+031982,000098: 27,3151           13267                           <span class="op">TCF     </span> <a href="#435552544A4F42">CURTJOB</a>                               <span class="co">#  NO-SET UP CURTAINS JOB</span>
+031983,000099: 
+031984,000100: 27,3152           04105                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              
+031985,000101: 27,3153           00046                           <span class="ps">OCT     </span> 46                                    <span class="co">#  SET MODE TO PROG46</span>
+031986,000102: 
+031987,000103: 27,3154           33256                           <span class="op">CAF     </span> <a href="#4156454731334144">AVEG13AD</a>                              <span class="co">#  GENADR OF AVEG IN DVSELECT</span>
+031988,000104: 27,3155           55322                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445653454C454354">DVSELECT</a>                              
+031989,000105: 
+031990,000106: 27,3156           00006                           <span class="op">EXTEND  </span>                                       
+031991,000107: 27,3157           33266                           <span class="op">DCA     </span> <a href="#5356455831334144">SVEX13AD</a>                              <span class="co">#  2CADR SERVEXIT IN AVEGEXIT</span>
+031992,000108: 27,3160           53073                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41564745584954">AVGEXIT</a>                               
+031993,000109: 
+031994,000110: 27,3161           00006                           <span class="op">EXTEND  </span>                                       
+031995,000111: 27,3162           33262                           <span class="op">DCA     </span> <a href="#4D503133544D4144">MP13TMAD</a>                              
+031996,000112: 27,3163           53075                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44564D4E45584954">DVMNEXIT</a>                              <span class="co">#  SET MP RETURN FOR ENGINE SHUT DOWN</span>
+031997,000113: 
+031998,000114: 27,3164           06074                           <span class="op">TC      </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#454E47494E4F4631">ENGINOF1</a>                              <span class="co">#  JUST TO ENSURE ENGINE OFF</span>
+031999,000115: 
+032000,000116: 27,3165           05114                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D502B4454">1LMP+DT</a>                               
+032001,000117: 27,3166           00206                           <span class="ps">DEC     </span> 134        B-14                       <span class="co">#  ENGINE SELECT-APS ARM</span>
+032002,000118: 27,3167           03326                           <span class="ps">DEC     </span> 1750       B-14                       <span class="co">#  DELAY 17.5 SECS</span>
+032003,000119: 
+032004,000120: 27,3170           05307                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              
+032005,000121: 27,3171           34024                           <span class="ps">CADR    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#554C4C414745">ULLAGE</a>                                <span class="co">#  COMMAND 4 JET ULLAGE-ON</span>
+032006,000122: 
+032007,000123: 27,3172           05717                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#46495844454C4159">FIXDELAY</a>                              
+032008,000124: 27,3173           02342                           <span class="ps">DEC     </span> 1250       B-14                       <span class="co">#  DELAY 12.5 SECS TO IGNITION</span>
+032009,000125: 
+<a name="5449473133"></a>032010,000126: 27,3174           06054        <span class="sm">TIG13   </span>           <span class="op">TC      </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#454E47494E454F4E">ENGINEON</a>                              <span class="co">#  FIRE UP APS ENGINE</span>
+032011,000127: 
 </pre>
 </span>
 </p>
@@ -259,57 +259,57 @@ Page 706
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-032006,000129: 27,3175           05717                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#46495844454C4159">FIXDELAY</a>                              
-032007,000130: 27,3176           00062                           <span class="ps">DEC     </span> 50         B-14                       <span class="co">#  DELAY .5 SECS</span>
-032008,000131: 
-032009,000132: 27,3177           05307                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              
-032010,000133: 27,3200           34030                           <span class="ps">CADR    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#4E4F554C4C414745">NOULLAGE</a>                              <span class="co">#  ULLAGE JETS OFF AT TIG + .5</span>
-032011,000134: 
-032012,000135: 27,3201           05717                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#46495844454C4159">FIXDELAY</a>                              
-032013,000136: 27,3202           00062                           <span class="ps">DEC     </span> 50         B-14                       <span class="co">#  DELAY .5 SEC AND START ASCENT GUIDANCE</span>
-032014,000137: 27,3203           00006                           <span class="op">EXTEND  </span>                                       
-032015,000138: 27,3204           33264                           <span class="op">DCA     </span> <a href="#41544D41474144">ATMAGAD</a>                               
-032016,000139: 27,3205           53073                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41564745584954">AVGEXIT</a>                               <span class="co">#  SET AVEG LOOP TO THRUST MAGNITUDE FILTER</span>
-032017,000140: 
-032018,000141: 27,3206           05717                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#46495844454C4159">FIXDELAY</a>                              
-032019,000142: 27,3207           01440                           <span class="ps">DEC     </span> 800        B-14                       <span class="co">#  DELAY 8 SECS AND DO FEED TEST</span>
-032020,000143: 27,3210           03306                           <span class="op">TC      </span> <a href="#4645454454455354">FEEDTEST</a>                              <span class="co">#  START FEED TEST ROUTINE</span>
-032021,000144: 
-032022,000145: 27,3211           00006                           <span class="op">EXTEND  </span>                                       
-032023,000146: 27,3212           33255                           <span class="op">DCA     </span> <a href="#33343253454353">342SECS</a>                               
-032024,000147: 27,3213           05757                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#4C4F4E4743414C4C">LONGCALL</a>                              
-032025,000148: 27,3214  E4,1566                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
-032026,000149: 27,3214           03217 56004                     <span class="ps">2CADR   </span> <a href="#4D5031332B353434">MP13+544</a>                              
-032027,000150: 
-032028,000151: 27,3216           05745                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-032029,000152: 
-<a name="4D5031332B353434"></a>032030,000153: 27,3217           03343        <span class="sm">MP13+544</span>           <span class="op">TC      </span> <a href="#4645454452455354">FEEDREST</a>                              <span class="co">#  DO FEED TEST RESET ROUTINE</span>
-032031,000154: 
-032032,000155: 27,3220           05745                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  WAIT FOR GUIDANCE TO DO ENGINE OFF</span>
-032033,000156: 
-<a name="4D5031335445524D"></a>032034,000157: 27,3221           37755        <span class="sm">MP13TERM</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  <span class="co">#  SET MP13 TERMINAL TASKS</span>
-032035,000158: 27,3222           00004                           <span class="op">INHINT  </span>                                       
-032036,000159: 27,3223           05701                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-032037,000160: 27,3224  E4,1566                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
-032038,000161: 27,3224           03227 56004                     <span class="ps">2CADR   </span> <a href="#4D5031334F5554">MP13OUT</a>                               
-032039,000162: 
-032040,000163: 27,3226           05605                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              <span class="co">#  KILL JOB SET BY DVMON</span>
-032041,000164: 
-<a name="4D5031334F5554"></a>032042,000165: 27,3227           00006        <span class="sm">MP13OUT </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  APS ENGINE OFF-TERMINATE MP13</span>
-032043,000166: 27,3230           32456                           <span class="op">DCA     </span> <a href="MISSION_PHASE_2_GUIDANCE_REFERENCE_RELEASE_PLUS_BOOST_MONITOR.agc.html#5356455849544144">SVEXITAD</a>                              <span class="co">#  REMOVE ASCENT PROG FROM SERVICER</span>
-032044,000167: 27,3231           53073                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41564745584954">AVGEXIT</a>                               
-032045,000168: 
-032046,000169: 27,3232           05307                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              <span class="co">#  DEADBAND SELECT-MAX</span>
-032047,000170: 27,3233           34012                           <span class="ps">CADR    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#5345544D41584442">SETMAXDB</a>                              
-032048,000171: 
-032049,000172: 27,3234           05307                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              <span class="co">#  SET ATTITUDE HOLD</span>
-032050,000173: 27,3235           34057                           <span class="ps">CADR    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#53544F5052415445">STOPRATE</a>                              
-032051,000174: 
-032052,000175: 27,3236           03343                           <span class="op">TC      </span> <a href="#4645454452455354">FEEDREST</a>                              <span class="co">#  DO THIS IN CASE OF EARLY ENG SHUT DOWN</span>
-032053,000176: 
-032054,000177: 27,3237           05717                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#46495844454C4159">FIXDELAY</a>                              
-032055,000178: 27,3240           00144                           <span class="ps">DEC     </span> 100        B-14                       <span class="co">#  DELAY 1 SEC</span>
-032056,000179: 
+032013,000129: 27,3175           05717                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#46495844454C4159">FIXDELAY</a>                              
+032014,000130: 27,3176           00062                           <span class="ps">DEC     </span> 50         B-14                       <span class="co">#  DELAY .5 SECS</span>
+032015,000131: 
+032016,000132: 27,3177           05307                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              
+032017,000133: 27,3200           34030                           <span class="ps">CADR    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#4E4F554C4C414745">NOULLAGE</a>                              <span class="co">#  ULLAGE JETS OFF AT TIG + .5</span>
+032018,000134: 
+032019,000135: 27,3201           05717                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#46495844454C4159">FIXDELAY</a>                              
+032020,000136: 27,3202           00062                           <span class="ps">DEC     </span> 50         B-14                       <span class="co">#  DELAY .5 SEC AND START ASCENT GUIDANCE</span>
+032021,000137: 27,3203           00006                           <span class="op">EXTEND  </span>                                       
+032022,000138: 27,3204           33264                           <span class="op">DCA     </span> <a href="#41544D41474144">ATMAGAD</a>                               
+032023,000139: 27,3205           53073                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41564745584954">AVGEXIT</a>                               <span class="co">#  SET AVEG LOOP TO THRUST MAGNITUDE FILTER</span>
+032024,000140: 
+032025,000141: 27,3206           05717                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#46495844454C4159">FIXDELAY</a>                              
+032026,000142: 27,3207           01440                           <span class="ps">DEC     </span> 800        B-14                       <span class="co">#  DELAY 8 SECS AND DO FEED TEST</span>
+032027,000143: 27,3210           03306                           <span class="op">TC      </span> <a href="#4645454454455354">FEEDTEST</a>                              <span class="co">#  START FEED TEST ROUTINE</span>
+032028,000144: 
+032029,000145: 27,3211           00006                           <span class="op">EXTEND  </span>                                       
+032030,000146: 27,3212           33255                           <span class="op">DCA     </span> <a href="#33343253454353">342SECS</a>                               
+032031,000147: 27,3213           05757                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#4C4F4E4743414C4C">LONGCALL</a>                              
+032032,000148: 27,3214  E4,1566                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
+032033,000149: 27,3214           03217 56004                     <span class="ps">2CADR   </span> <a href="#4D5031332B353434">MP13+544</a>                              
+032034,000150: 
+032035,000151: 27,3216           05745                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+032036,000152: 
+<a name="4D5031332B353434"></a>032037,000153: 27,3217           03343        <span class="sm">MP13+544</span>           <span class="op">TC      </span> <a href="#4645454452455354">FEEDREST</a>                              <span class="co">#  DO FEED TEST RESET ROUTINE</span>
+032038,000154: 
+032039,000155: 27,3220           05745                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  WAIT FOR GUIDANCE TO DO ENGINE OFF</span>
+032040,000156: 
+<a name="4D5031335445524D"></a>032041,000157: 27,3221           37755        <span class="sm">MP13TERM</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  <span class="co">#  SET MP13 TERMINAL TASKS</span>
+032042,000158: 27,3222           00004                           <span class="op">INHINT  </span>                                       
+032043,000159: 27,3223           05701                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+032044,000160: 27,3224  E4,1566                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
+032045,000161: 27,3224           03227 56004                     <span class="ps">2CADR   </span> <a href="#4D5031334F5554">MP13OUT</a>                               
+032046,000162: 
+032047,000163: 27,3226           05605                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              <span class="co">#  KILL JOB SET BY DVMON</span>
+032048,000164: 
+<a name="4D5031334F5554"></a>032049,000165: 27,3227           00006        <span class="sm">MP13OUT </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  APS ENGINE OFF-TERMINATE MP13</span>
+032050,000166: 27,3230           32456                           <span class="op">DCA     </span> <a href="MISSION_PHASE_2_GUIDANCE_REFERENCE_RELEASE_PLUS_BOOST_MONITOR.agc.html#5356455849544144">SVEXITAD</a>                              <span class="co">#  REMOVE ASCENT PROG FROM SERVICER</span>
+032051,000167: 27,3231           53073                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41564745584954">AVGEXIT</a>                               
+032052,000168: 
+032053,000169: 27,3232           05307                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              <span class="co">#  DEADBAND SELECT-MAX</span>
+032054,000170: 27,3233           34012                           <span class="ps">CADR    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#5345544D41584442">SETMAXDB</a>                              
+032055,000171: 
+032056,000172: 27,3234           05307                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              <span class="co">#  SET ATTITUDE HOLD</span>
+032057,000173: 27,3235           34057                           <span class="ps">CADR    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#53544F5052415445">STOPRATE</a>                              
+032058,000174: 
+032059,000175: 27,3236           03343                           <span class="op">TC      </span> <a href="#4645454452455354">FEEDREST</a>                              <span class="co">#  DO THIS IN CASE OF EARLY ENG SHUT DOWN</span>
+032060,000176: 
+032061,000177: 27,3237           05717                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#46495844454C4159">FIXDELAY</a>                              
+032062,000178: 27,3240           00144                           <span class="ps">DEC     </span> 100        B-14                       <span class="co">#  DELAY 1 SEC</span>
+032063,000179: 
 </pre>
 </span>
 </p>
@@ -325,36 +325,36 @@ Page 707
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-032058,000181: 27,3241           05073                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D50">1LMP</a>                                  
-032059,000182: 27,3242           00207                           <span class="ps">DEC     </span> 135        B-14                       <span class="co">#  APS ARM OFF</span>
-032060,000183: 
-032061,000184: 27,3243           05717                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#46495844454C4159">FIXDELAY</a>                              
-032062,000185: 27,3244           05524                           <span class="ps">DEC     </span> 2900       B-14                       <span class="co">#  DELAY 29 SECS TO KILL AVEG</span>
-032063,000186: 
-032064,000187: 27,3245           06036                           <span class="op">TC      </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#464C41473144574E">FLAG1DWN</a>                              <span class="co">#  KILL AVE G</span>
-032065,000188: 27,3246           00001                           <span class="ps">OCT     </span> 1                                     
-032066,000189: 
-032067,000190: 27,3247           05745                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  MISSION PHASE 13 COMPLETE</span>
-032068,000191: 
-<a name="315345433133"></a>032069,000192: 27,3250           00144        <span class="sm">1SEC13  </span>           <span class="ps">DEC     </span> 100        B-14                       
-<a name="32534543533133"></a>032070,000193: 27,3251           00310        <span class="sm">2SECS13 </span>           <span class="ps">DEC     </span> 200        B-14                       
-<a name="3132534543533133"></a>032071,000194: 27,3252           02260        <span class="sm">12SECS13</span>           <span class="ps">DEC     </span> 1200       B-14                       
-<a name="31343053454353"></a>032072,000195: 27,3253           33260        <span class="sm">140SECS </span>           <span class="ps">DEC     </span> 14000      B-14                       
-<a name="33343253454353"></a>032073,000196: 27,3254           00002 02630  <span class="sm">342SECS </span>           <span class="ps">2DEC    </span> 34200      B-28                       <span class="co">#  342 SECONDS</span>
-032074,000197: 
-<a name="4156454731334144"></a>032075,000198: 27,3256           02233        <span class="sm">AVEG13AD</span>           <span class="ps">GENADR  </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#4156455241474547">AVERAGEG</a>                              
-032076,000199: 27,3257  E4,1566                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
-<a name="5052454150324144"></a>032077,000200: 27,3257           02000 64064  <span class="sm">PREAP2AD</span>           <span class="ps">2CADR   </span> <a href="PREBURN_FOR_APS2.agc.html#50524541505332">PREAPS2</a>                               
-032078,000201: 
-032079,000202: 27,3261  E4,1566                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
-<a name="4D503133544D4144"></a>032080,000203: 27,3261           03221 56004  <span class="sm">MP13TMAD</span>           <span class="ps">2CADR   </span> <a href="#4D5031335445524D">MP13TERM</a>                              
-032081,000204: 
-032082,000205: 27,3263  E4,1566                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
-<a name="41544D41474144"></a>032083,000206: 27,3263           02713 64064  <span class="sm">ATMAGAD </span>           <span class="ps">2CADR   </span> <a href="THRUST_MAGNITUDE_FILTER.agc.html#41544D4147">ATMAG</a>                                 
-032084,000207: 
-032085,000208: 27,3265  E5,1506                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456544F54414C">DVTOTAL</a>                               
-<a name="5356455831334144"></a>032086,000209: 27,3265           02312 60065  <span class="sm">SVEX13AD</span>           <span class="ps">2CADR   </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#5345525645584954">SERVEXIT</a>                              
-032087,000210: 
+032065,000181: 27,3241           05073                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D50">1LMP</a>                                  
+032066,000182: 27,3242           00207                           <span class="ps">DEC     </span> 135        B-14                       <span class="co">#  APS ARM OFF</span>
+032067,000183: 
+032068,000184: 27,3243           05717                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#46495844454C4159">FIXDELAY</a>                              
+032069,000185: 27,3244           05524                           <span class="ps">DEC     </span> 2900       B-14                       <span class="co">#  DELAY 29 SECS TO KILL AVEG</span>
+032070,000186: 
+032071,000187: 27,3245           06036                           <span class="op">TC      </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#464C41473144574E">FLAG1DWN</a>                              <span class="co">#  KILL AVE G</span>
+032072,000188: 27,3246           00001                           <span class="ps">OCT     </span> 1                                     
+032073,000189: 
+032074,000190: 27,3247           05745                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  MISSION PHASE 13 COMPLETE</span>
+032075,000191: 
+<a name="315345433133"></a>032076,000192: 27,3250           00144        <span class="sm">1SEC13  </span>           <span class="ps">DEC     </span> 100        B-14                       
+<a name="32534543533133"></a>032077,000193: 27,3251           00310        <span class="sm">2SECS13 </span>           <span class="ps">DEC     </span> 200        B-14                       
+<a name="3132534543533133"></a>032078,000194: 27,3252           02260        <span class="sm">12SECS13</span>           <span class="ps">DEC     </span> 1200       B-14                       
+<a name="31343053454353"></a>032079,000195: 27,3253           33260        <span class="sm">140SECS </span>           <span class="ps">DEC     </span> 14000      B-14                       
+<a name="33343253454353"></a>032080,000196: 27,3254           00002 02630  <span class="sm">342SECS </span>           <span class="ps">2DEC    </span> 34200      B-28                       <span class="co">#  342 SECONDS</span>
+032081,000197: 
+<a name="4156454731334144"></a>032082,000198: 27,3256           02233        <span class="sm">AVEG13AD</span>           <span class="ps">GENADR  </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#4156455241474547">AVERAGEG</a>                              
+032083,000199: 27,3257  E4,1566                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
+<a name="5052454150324144"></a>032084,000200: 27,3257           02000 64064  <span class="sm">PREAP2AD</span>           <span class="ps">2CADR   </span> <a href="PREBURN_FOR_APS2.agc.html#50524541505332">PREAPS2</a>                               
+032085,000201: 
+032086,000202: 27,3261  E4,1566                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
+<a name="4D503133544D4144"></a>032087,000203: 27,3261           03221 56004  <span class="sm">MP13TMAD</span>           <span class="ps">2CADR   </span> <a href="#4D5031335445524D">MP13TERM</a>                              
+032088,000204: 
+032089,000205: 27,3263  E4,1566                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
+<a name="41544D41474144"></a>032090,000206: 27,3263           02713 64064  <span class="sm">ATMAGAD </span>           <span class="ps">2CADR   </span> <a href="THRUST_MAGNITUDE_FILTER.agc.html#41544D4147">ATMAG</a>                                 
+032091,000207: 
+032092,000208: 27,3265  E5,1506                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456544F54414C">DVTOTAL</a>                               
+<a name="5356455831334144"></a>032093,000209: 27,3265           02312 60065  <span class="sm">SVEX13AD</span>           <span class="ps">2CADR   </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#5345525645584954">SERVEXIT</a>                              
+032094,000210: 
 </pre>
 </span>
 </p>
@@ -370,26 +370,26 @@ Page 708
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="435552544A4F42"></a>032089,000212: 27,3267           35676        <span class="sm">CURTJOB </span>           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3337">PRIO37</a>                                <span class="co">#  SET UP JOB TO GO TO CURTAINS</span>
-032090,000213: 27,3270           05523                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
-032091,000214: 27,3271     1361                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534641494C">SFAIL</a>                                 
-032092,000215: 27,3271           04732 04002                     <span class="ps">2CADR   </span> <a href="ALARM_AND_ABORT.agc.html#4355525441494E53">CURTAINS</a>                              
-032093,000216: 
-032094,000217: 27,3273           05745                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-032095,000218: 
-<a name="44464943414C"></a>032096,000219: 27,3274           05114        <span class="sm">DFICAL  </span>           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D502B4454">1LMP+DT</a>                               <span class="co">#  LMP COMMAND</span>
-032097,000220: 27,3275           00354                           <span class="ps">DEC     </span> 236        B-14                       <span class="co">#  DFI T/M CALIBRATE - ON</span>
-032098,000221: 27,3276           02260                           <span class="ps">DEC     </span> 1200       B-14                       <span class="co">#  DELAY 12 SECS</span>
-032099,000222: 
-032100,000223: 27,3277           05106                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#324C4D502B4454">2LMP+DT</a>                               <span class="co">#  LMP COMMANDS</span>
-032101,000224: 27,3300           00355                           <span class="ps">DEC     </span> 237        B-14                       <span class="co">#  DFI T/M CALIBRATE - OFF</span>
-032102,000225: 27,3301           00306                           <span class="ps">DEC     </span> 198        B-14                       <span class="co">#  MASTER C+W ALARM RESET - COMMAND</span>
-032103,000226: 27,3302           00310                           <span class="ps">DEC     </span> 200        B-14                       <span class="co">#  DELAY 2.0 SECONDS</span>
-032104,000227: 
-032105,000228: 27,3303           05073                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D50">1LMP</a>                                  <span class="co">#  LMP COMMAND</span>
-032106,000229: 27,3304           00307                           <span class="ps">DEC     </span> 199        B-14                       <span class="co">#  MASTER C+W ALARM RESET - COMMAND RESET</span>
-032107,000230: 27,3305           05745                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  TERMINATE DFI CALIBRATE TASK</span>
-032108,000231: 
+<a name="435552544A4F42"></a>032096,000212: 27,3267           35676        <span class="sm">CURTJOB </span>           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3337">PRIO37</a>                                <span class="co">#  SET UP JOB TO GO TO CURTAINS</span>
+032097,000213: 27,3270           05523                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
+032098,000214: 27,3271     1361                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534641494C">SFAIL</a>                                 
+032099,000215: 27,3271           04732 04002                     <span class="ps">2CADR   </span> <a href="ALARM_AND_ABORT.agc.html#4355525441494E53">CURTAINS</a>                              
+032100,000216: 
+032101,000217: 27,3273           05745                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+032102,000218: 
+<a name="44464943414C"></a>032103,000219: 27,3274           05114        <span class="sm">DFICAL  </span>           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D502B4454">1LMP+DT</a>                               <span class="co">#  LMP COMMAND</span>
+032104,000220: 27,3275           00354                           <span class="ps">DEC     </span> 236        B-14                       <span class="co">#  DFI T/M CALIBRATE - ON</span>
+032105,000221: 27,3276           02260                           <span class="ps">DEC     </span> 1200       B-14                       <span class="co">#  DELAY 12 SECS</span>
+032106,000222: 
+032107,000223: 27,3277           05106                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#324C4D502B4454">2LMP+DT</a>                               <span class="co">#  LMP COMMANDS</span>
+032108,000224: 27,3300           00355                           <span class="ps">DEC     </span> 237        B-14                       <span class="co">#  DFI T/M CALIBRATE - OFF</span>
+032109,000225: 27,3301           00306                           <span class="ps">DEC     </span> 198        B-14                       <span class="co">#  MASTER C+W ALARM RESET - COMMAND</span>
+032110,000226: 27,3302           00310                           <span class="ps">DEC     </span> 200        B-14                       <span class="co">#  DELAY 2.0 SECONDS</span>
+032111,000227: 
+032112,000228: 27,3303           05073                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D50">1LMP</a>                                  <span class="co">#  LMP COMMAND</span>
+032113,000229: 27,3304           00307                           <span class="ps">DEC     </span> 199        B-14                       <span class="co">#  MASTER C+W ALARM RESET - COMMAND RESET</span>
+032114,000230: 27,3305           05745                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  TERMINATE DFI CALIBRATE TASK</span>
+032115,000231: 
 </pre>
 </span>
 </p>
@@ -405,44 +405,44 @@ Page 709
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="4645454454455354"></a>032110,000233: 27,3306           00006        <span class="sm">FEEDTEST</span>           <span class="op">EXTEND  </span>                                       
-032111,000234: 27,3307           23662                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D50524554524E">MPRETRN</a>                               
-032112,000235: 27,3310           06027                           <span class="op">TC      </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#464C4147325550">FLAG2UP</a>                               <span class="co">#  SET ASC FEED TEST FLAG</span>
-032113,000236: 27,3311           00200                           <span class="ps">OCT     </span> 200                                   
-032114,000237: 
-032115,000238: 27,3312           05114                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D502B4454">1LMP+DT</a>                               <span class="co">#  TIME T</span>
-032116,000239: 27,3313           00176                           <span class="ps">DEC     </span> 126        B-14                       <span class="co">#  RCS ASCENT FEED VALVE - ARM</span>
-032117,000240: 27,3314           00144                           <span class="ps">DEC     </span> 100        B-14                       <span class="co">#  DELAY 1 SEC</span>
-032118,000241: 
-032119,000242: 27,3315           05106                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#324C4D502B4454">2LMP+DT</a>                               <span class="co">#  T+1</span>
-032120,000243: 27,3316           00074                           <span class="ps">DEC     </span> 60         B-14                       <span class="co">#  RCS ASCENT FEED VALVES8 SYS A-OPEN</span>
-032121,000244: 27,3317           00254                           <span class="ps">DEC     </span> 172        B-14                       <span class="co">#  RCS MAIN S/O VALVES SYS A-CLOSE</span>
-032122,000245: 27,3320           00310                           <span class="ps">DEC     </span> 200        B-14                       <span class="co">#  DELAY FOR 2 SECS</span>
-032123,000246: 
-032124,000247: 27,3321           05106                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#324C4D502B4454">2LMP+DT</a>                               <span class="co">#  T+3</span>
-032125,000248: 27,3322           00075                           <span class="ps">DEC     </span> 61         B-14                       <span class="co">#  RCS ASCENT FEED VALVES SYS A-OPEN RESET</span>
-032126,000249: 27,3323           00255                           <span class="ps">DEC     </span> 173        B-14                       <span class="co">#  RCS MAIN S/O VALVES SYS A-CLOSE RESET</span>
-032127,000250: 27,3324           01440                           <span class="ps">DEC     </span> 800        B-14                       <span class="co">#  DELAY FOR 8 SECS</span>
-032128,000251: 
-032129,000252: 27,3325           05106                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#324C4D502B4454">2LMP+DT</a>                               <span class="co">#  T+11</span>
-032130,000253: 27,3326           00076                           <span class="ps">DEC     </span> 62         B-14                       <span class="co">#  RCS ASCENT FEED VALVES SYS B-OPEN</span>
-032131,000254: 27,3327           00256                           <span class="ps">DEC     </span> 174        B-14                       <span class="co">#  RCS MAIN S/O VALVES SYS B -CLOSE</span>
-032132,000255: 27,3330           00310                           <span class="ps">DEC     </span> 200        B-14                       <span class="co">#  DELAY FOR 2 SECS</span>
-032133,000256: 
-032134,000257: 27,3331           05106                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#324C4D502B4454">2LMP+DT</a>                               <span class="co">#  T+13</span>
-032135,000258: 27,3332           00077                           <span class="ps">DEC     </span> 63         B-14                       <span class="co">#  RCS ASCENT FEED VALVES SYS B-OPEN RESET</span>
-032136,000259: 27,3333           00257                           <span class="ps">DEC     </span> 175        B-14                       <span class="co">#  RCS MAIN S/O VALVES SYS B-CLOSE RESET</span>
-032137,000260: 27,3334           01440                           <span class="ps">DEC     </span> 800        B-14                       <span class="co">#  DELAY 8 SECS</span>
-032138,000261: 
-032139,000262: 27,3335           05114                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D502B4454">1LMP+DT</a>                               <span class="co">#  T+21</span>
-032140,000263: 27,3336           00374                           <span class="ps">DEC     </span> 252        B-14                       <span class="co">#  RCS MANIFOLD CROSSFEED VALVES-OPEN</span>
-032141,000264: 27,3337           00310                           <span class="ps">DEC     </span> 200        B-14                       <span class="co">#  DELAY FOR 2 SECS</span>
-032142,000265: 
-032143,000266: 27,3340           05073                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D50">1LMP</a>                                  <span class="co">#  T+23</span>
-032144,000267: 27,3341           00375                           <span class="ps">DEC     </span> 253        B-14                       <span class="co">#  RCS MANIFOLD CROSSFEED VALVES-OPEN RESET</span>
-032145,000268: 
-032146,000269: 27,3342           01662                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D50524554524E">MPRETRN</a>                               
-032147,000270: 
+<a name="4645454454455354"></a>032117,000233: 27,3306           00006        <span class="sm">FEEDTEST</span>           <span class="op">EXTEND  </span>                                       
+032118,000234: 27,3307           23662                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D50524554524E">MPRETRN</a>                               
+032119,000235: 27,3310           06027                           <span class="op">TC      </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#464C4147325550">FLAG2UP</a>                               <span class="co">#  SET ASC FEED TEST FLAG</span>
+032120,000236: 27,3311           00200                           <span class="ps">OCT     </span> 200                                   
+032121,000237: 
+032122,000238: 27,3312           05114                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D502B4454">1LMP+DT</a>                               <span class="co">#  TIME T</span>
+032123,000239: 27,3313           00176                           <span class="ps">DEC     </span> 126        B-14                       <span class="co">#  RCS ASCENT FEED VALVE - ARM</span>
+032124,000240: 27,3314           00144                           <span class="ps">DEC     </span> 100        B-14                       <span class="co">#  DELAY 1 SEC</span>
+032125,000241: 
+032126,000242: 27,3315           05106                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#324C4D502B4454">2LMP+DT</a>                               <span class="co">#  T+1</span>
+032127,000243: 27,3316           00074                           <span class="ps">DEC     </span> 60         B-14                       <span class="co">#  RCS ASCENT FEED VALVES8 SYS A-OPEN</span>
+032128,000244: 27,3317           00254                           <span class="ps">DEC     </span> 172        B-14                       <span class="co">#  RCS MAIN S/O VALVES SYS A-CLOSE</span>
+032129,000245: 27,3320           00310                           <span class="ps">DEC     </span> 200        B-14                       <span class="co">#  DELAY FOR 2 SECS</span>
+032130,000246: 
+032131,000247: 27,3321           05106                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#324C4D502B4454">2LMP+DT</a>                               <span class="co">#  T+3</span>
+032132,000248: 27,3322           00075                           <span class="ps">DEC     </span> 61         B-14                       <span class="co">#  RCS ASCENT FEED VALVES SYS A-OPEN RESET</span>
+032133,000249: 27,3323           00255                           <span class="ps">DEC     </span> 173        B-14                       <span class="co">#  RCS MAIN S/O VALVES SYS A-CLOSE RESET</span>
+032134,000250: 27,3324           01440                           <span class="ps">DEC     </span> 800        B-14                       <span class="co">#  DELAY FOR 8 SECS</span>
+032135,000251: 
+032136,000252: 27,3325           05106                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#324C4D502B4454">2LMP+DT</a>                               <span class="co">#  T+11</span>
+032137,000253: 27,3326           00076                           <span class="ps">DEC     </span> 62         B-14                       <span class="co">#  RCS ASCENT FEED VALVES SYS B-OPEN</span>
+032138,000254: 27,3327           00256                           <span class="ps">DEC     </span> 174        B-14                       <span class="co">#  RCS MAIN S/O VALVES SYS B -CLOSE</span>
+032139,000255: 27,3330           00310                           <span class="ps">DEC     </span> 200        B-14                       <span class="co">#  DELAY FOR 2 SECS</span>
+032140,000256: 
+032141,000257: 27,3331           05106                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#324C4D502B4454">2LMP+DT</a>                               <span class="co">#  T+13</span>
+032142,000258: 27,3332           00077                           <span class="ps">DEC     </span> 63         B-14                       <span class="co">#  RCS ASCENT FEED VALVES SYS B-OPEN RESET</span>
+032143,000259: 27,3333           00257                           <span class="ps">DEC     </span> 175        B-14                       <span class="co">#  RCS MAIN S/O VALVES SYS B-CLOSE RESET</span>
+032144,000260: 27,3334           01440                           <span class="ps">DEC     </span> 800        B-14                       <span class="co">#  DELAY 8 SECS</span>
+032145,000261: 
+032146,000262: 27,3335           05114                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D502B4454">1LMP+DT</a>                               <span class="co">#  T+21</span>
+032147,000263: 27,3336           00374                           <span class="ps">DEC     </span> 252        B-14                       <span class="co">#  RCS MANIFOLD CROSSFEED VALVES-OPEN</span>
+032148,000264: 27,3337           00310                           <span class="ps">DEC     </span> 200        B-14                       <span class="co">#  DELAY FOR 2 SECS</span>
+032149,000265: 
+032150,000266: 27,3340           05073                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D50">1LMP</a>                                  <span class="co">#  T+23</span>
+032151,000267: 27,3341           00375                           <span class="ps">DEC     </span> 253        B-14                       <span class="co">#  RCS MANIFOLD CROSSFEED VALVES-OPEN RESET</span>
+032152,000268: 
+032153,000269: 27,3342           01662                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D50524554524E">MPRETRN</a>                               
+032154,000270: 
 </pre>
 </span>
 </p>
@@ -458,50 +458,50 @@ Page 710
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="4645454452455354"></a>032149,000272: 27,3343           40076        <span class="sm">FEEDREST</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              <span class="co">#  CHECK FEED TEST FLAG</span>
-032150,000273: 27,3344           77746                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#42495438">BIT8</a>                                  
-032151,000274: 27,3345           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-032152,000275: 27,3346           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  FLAG DOWN-NO RESET</span>
-032153,000276: 
-032154,000277: 27,3347           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  FLAG UP - DO FEED TEST RESET</span>
-032155,000278: 27,3350           23662                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D50524554524E">MPRETRN</a>                               
-032156,000279: 
-032157,000280: 27,3351           06045                           <span class="op">TC      </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#464C41473244574E">FLAG2DWN</a>                              <span class="co">#  FEED TEST FLAG DOWN</span>
-032158,000281: 27,3352           00200                           <span class="ps">OCT     </span> 200                                   
-032159,000282: 
-032160,000283: 27,3353           05114                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D502B4454">1LMP+DT</a>                               <span class="co">#  TIME T</span>
-032161,000284: 27,3354           00376                           <span class="ps">DEC     </span> 254        B-14                       <span class="co">#  RCS MANIFOLD CROSSFEED VALVES -CLOSE</span>
-032162,000285: 27,3355           00144                           <span class="ps">DEC     </span> 100        B-14                       <span class="co">#  DELAY 1 SEC</span>
-032163,000286: 
-032164,000287: 27,3356           05106                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#324C4D502B4454">2LMP+DT</a>                               <span class="co">#  T+1</span>
-032165,000288: 27,3357           00274                           <span class="ps">DEC     </span> 188        B-14                       <span class="co">#  RCS MAIN S/O VALVES SYS A-OPEN</span>
-032166,000289: 27,3360           00114                           <span class="ps">DEC     </span> 76         B-14                       <span class="co">#  RCS ASCENT FEED VALVES SYS A-CLOSE</span>
-032167,000290: 27,3361           00144                           <span class="ps">DEC     </span> 100        B-14                       <span class="co">#  DELAY 1 SECS</span>
-032168,000291: 
-032169,000292: 27,3362           05114                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D502B4454">1LMP+DT</a>                               <span class="co">#  T+2</span>
-032170,000293: 27,3363           00377                           <span class="ps">DEC     </span> 255        B-14                       <span class="co">#  RCS MANIFOLD CROSSFEED VALVES-CLOSE RESE</span>
-032171,000294: 27,3364           00144                           <span class="ps">DEC     </span> 100        B-14                       <span class="co">#  DELAY 1 SEC</span>
-032172,000295: 
-032173,000296: 27,3365           05106                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#324C4D502B4454">2LMP+DT</a>                               <span class="co">#  T+3</span>
-032174,000297: 27,3366           00275                           <span class="ps">DEC     </span> 189        B-14                       <span class="co">#  RCS MAIN S/O VALVES SYS A-OPEN RESET</span>
-032175,000298: 27,3367           00115                           <span class="ps">DEC     </span> 77         B-14                       <span class="co">#  RCS ASCENT FEED VALVES SYS A-CLOSE RESET</span>
-032176,000299: 27,3370           01440                           <span class="ps">DEC     </span> 800        B-14                       <span class="co">#  DELAY 8 SECS</span>
-032177,000300: 
-032178,000301: 27,3371           05106                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#324C4D502B4454">2LMP+DT</a>                               <span class="co">#  T+11</span>
-032179,000302: 27,3372           00276                           <span class="ps">DEC     </span> 190        B-14                       <span class="co">#  RCS MAIN S/O VALVES SYS B-OPEN</span>
-032180,000303: 27,3373           00116                           <span class="ps">DEC     </span> 78         B-14                       <span class="co">#  RCS ASCENT FEED VALVES SYS B-CLOSE</span>
-032181,000304: 27,3374           00144                           <span class="ps">DEC     </span> 100        B-14                       <span class="co">#  DELAY 1 SEC</span>
-032182,000305: 
-032183,000306: 27,3375           05114                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D502B4454">1LMP+DT</a>                               <span class="co">#  T+12</span>
-032184,000307: 27,3376           00177                           <span class="ps">DEC     </span> 127        B-14                       <span class="co">#  RCS ASCENT FEED VALVE-SAFE</span>
-032185,000308: 27,3377           00144                           <span class="ps">DEC     </span> 100        B-14                       <span class="co">#  DELAY 1 SEC</span>
-032186,000309: 
-032187,000310: 27,3400           05065                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#324C4D50">2LMP</a>                                  <span class="co">#  T+13</span>
-032188,000311: 27,3401           00277                           <span class="ps">DEC     </span> 191        B-14                       <span class="co">#  RCS MAIN S/O VALVES SYS B-OPEN RESET</span>
-032189,000312: 27,3402           00117                           <span class="ps">DEC     </span> 79         B-14                       <span class="co">#  RCS ASCENT FEED VALVES SYS B-CLOSE RESET</span>
-032190,000313: 
-032191,000314: 27,3403           01662                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D50524554524E">MPRETRN</a>                               <span class="co">#  RETURN TO MISSION PROGRAM</span>
-032192,000315: 
+<a name="4645454452455354"></a>032156,000272: 27,3343           40076        <span class="sm">FEEDREST</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              <span class="co">#  CHECK FEED TEST FLAG</span>
+032157,000273: 27,3344           77746                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#42495438">BIT8</a>                                  
+032158,000274: 27,3345           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+032159,000275: 27,3346           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  FLAG DOWN-NO RESET</span>
+032160,000276: 
+032161,000277: 27,3347           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  FLAG UP - DO FEED TEST RESET</span>
+032162,000278: 27,3350           23662                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D50524554524E">MPRETRN</a>                               
+032163,000279: 
+032164,000280: 27,3351           06045                           <span class="op">TC      </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#464C41473244574E">FLAG2DWN</a>                              <span class="co">#  FEED TEST FLAG DOWN</span>
+032165,000281: 27,3352           00200                           <span class="ps">OCT     </span> 200                                   
+032166,000282: 
+032167,000283: 27,3353           05114                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D502B4454">1LMP+DT</a>                               <span class="co">#  TIME T</span>
+032168,000284: 27,3354           00376                           <span class="ps">DEC     </span> 254        B-14                       <span class="co">#  RCS MANIFOLD CROSSFEED VALVES -CLOSE</span>
+032169,000285: 27,3355           00144                           <span class="ps">DEC     </span> 100        B-14                       <span class="co">#  DELAY 1 SEC</span>
+032170,000286: 
+032171,000287: 27,3356           05106                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#324C4D502B4454">2LMP+DT</a>                               <span class="co">#  T+1</span>
+032172,000288: 27,3357           00274                           <span class="ps">DEC     </span> 188        B-14                       <span class="co">#  RCS MAIN S/O VALVES SYS A-OPEN</span>
+032173,000289: 27,3360           00114                           <span class="ps">DEC     </span> 76         B-14                       <span class="co">#  RCS ASCENT FEED VALVES SYS A-CLOSE</span>
+032174,000290: 27,3361           00144                           <span class="ps">DEC     </span> 100        B-14                       <span class="co">#  DELAY 1 SECS</span>
+032175,000291: 
+032176,000292: 27,3362           05114                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D502B4454">1LMP+DT</a>                               <span class="co">#  T+2</span>
+032177,000293: 27,3363           00377                           <span class="ps">DEC     </span> 255        B-14                       <span class="co">#  RCS MANIFOLD CROSSFEED VALVES-CLOSE RESE</span>
+032178,000294: 27,3364           00144                           <span class="ps">DEC     </span> 100        B-14                       <span class="co">#  DELAY 1 SEC</span>
+032179,000295: 
+032180,000296: 27,3365           05106                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#324C4D502B4454">2LMP+DT</a>                               <span class="co">#  T+3</span>
+032181,000297: 27,3366           00275                           <span class="ps">DEC     </span> 189        B-14                       <span class="co">#  RCS MAIN S/O VALVES SYS A-OPEN RESET</span>
+032182,000298: 27,3367           00115                           <span class="ps">DEC     </span> 77         B-14                       <span class="co">#  RCS ASCENT FEED VALVES SYS A-CLOSE RESET</span>
+032183,000299: 27,3370           01440                           <span class="ps">DEC     </span> 800        B-14                       <span class="co">#  DELAY 8 SECS</span>
+032184,000300: 
+032185,000301: 27,3371           05106                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#324C4D502B4454">2LMP+DT</a>                               <span class="co">#  T+11</span>
+032186,000302: 27,3372           00276                           <span class="ps">DEC     </span> 190        B-14                       <span class="co">#  RCS MAIN S/O VALVES SYS B-OPEN</span>
+032187,000303: 27,3373           00116                           <span class="ps">DEC     </span> 78         B-14                       <span class="co">#  RCS ASCENT FEED VALVES SYS B-CLOSE</span>
+032188,000304: 27,3374           00144                           <span class="ps">DEC     </span> 100        B-14                       <span class="co">#  DELAY 1 SEC</span>
+032189,000305: 
+032190,000306: 27,3375           05114                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D502B4454">1LMP+DT</a>                               <span class="co">#  T+12</span>
+032191,000307: 27,3376           00177                           <span class="ps">DEC     </span> 127        B-14                       <span class="co">#  RCS ASCENT FEED VALVE-SAFE</span>
+032192,000308: 27,3377           00144                           <span class="ps">DEC     </span> 100        B-14                       <span class="co">#  DELAY 1 SEC</span>
+032193,000309: 
+032194,000310: 27,3400           05065                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#324C4D50">2LMP</a>                                  <span class="co">#  T+13</span>
+032195,000311: 27,3401           00277                           <span class="ps">DEC     </span> 191        B-14                       <span class="co">#  RCS MAIN S/O VALVES SYS B-OPEN RESET</span>
+032196,000312: 27,3402           00117                           <span class="ps">DEC     </span> 79         B-14                       <span class="co">#  RCS ASCENT FEED VALVES SYS B-CLOSE RESET</span>
+032197,000313: 
+032198,000314: 27,3403           01662                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D50524554524E">MPRETRN</a>                               <span class="co">#  RETURN TO MISSION PROGRAM</span>
+032199,000315: 
 
 End of include-file MISSION_PHASE_13_-_APS2.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

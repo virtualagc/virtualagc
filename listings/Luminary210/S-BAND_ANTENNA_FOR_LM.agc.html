@@ -89,24 +89,24 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-022115,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-022116,000003:                                                                                                  <span class="co">## Filename:    S-BAND_ANTENNA_FOR_LM.agc</span>
-022117,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 210.</span>
-022118,000005:                                                                                                  <span class="co">##              It is part of the source code for the Lunar Module's (LM)</span>
-022119,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 15-17.</span>
-022120,000007:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-022121,000008:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-022122,000009:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-022123,000010:                                                                                                  <span class="co">##              original YUL assembler.</span>
-022124,000011:                                                                                                  <span class="co">## Reference:   pp. 501-504</span>
-022125,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-022126,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-022127,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-022128,000015:                                                                                                  <span class="co">## Mod history: 2016-11-17 JL   Created from Luminary131 version.</span>
-022129,000016:                                                                                                  <span class="co">##              2016-11-27 HG   Transcribed</span>
-022130,000017:                                                                                                  <span class="co">##              2016-12-25 RSB  Comment-text proofed using ProoferComments</span>
-022131,000018:                                                                                                  <span class="co">##                              and corrected errors found.</span>
-022132,000019: 
+022119,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+022120,000003:                                                                                                  <span class="co">## Filename:    S-BAND_ANTENNA_FOR_LM.agc</span>
+022121,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 210.</span>
+022122,000005:                                                                                                  <span class="co">##              It is part of the source code for the Lunar Module's (LM)</span>
+022123,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 15-17.</span>
+022124,000007:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+022125,000008:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+022126,000009:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+022127,000010:                                                                                                  <span class="co">##              original YUL assembler.</span>
+022128,000011:                                                                                                  <span class="co">## Reference:   pp. 501-504</span>
+022129,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+022130,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+022131,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+022132,000015:                                                                                                  <span class="co">## Mod history: 2016-11-17 JL   Created from Luminary131 version.</span>
+022133,000016:                                                                                                  <span class="co">##              2016-11-27 HG   Transcribed</span>
+022134,000017:                                                                                                  <span class="co">##              2016-12-25 RSB  Comment-text proofed using ProoferComments</span>
+022135,000018:                                                                                                  <span class="co">##                              and corrected errors found.</span>
+022136,000019: 
 </pre>
 </span>
 </p>
@@ -122,57 +122,57 @@ Page 501
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-022134,000021:                                                                                                  <span class="co">#  SUBROUTINE NAME: R05 - S-BAND ANTENNA FOR LM</span>
-022135,000022: 
-022136,000023:                                                                                                  <span class="co">#  MOD0 BY T. JAMES</span>
-022137,000024:                                                                                                  <span class="co">#  MOD1 BY P. SHAKIR</span>
-022138,000025: 
-022139,000026:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION</span>
-022140,000027: 
-022141,000028:                                                                                                  <span class="co">#      THE S-BAND ANTENNA ROUTINE, R05, COMPUTES AND DISPLAYS THE PITCH AND</span>
-022142,000029:                                                                                                  <span class="co">#  YAW ANTENNA GIMBAL ANGLES REQUIRED TO POINT THE LM STEERABLE ANTENNA</span>
-022143,000030:                                                                                                  <span class="co">#  TOWARD THE CENTER OF THE EARTH. THIS ROUTINE IS SELECTED BY THE ASTRO-</span>
-022144,000031:                                                                                                  <span class="co">#  NAUT VIA DSKY ENTRY DURING COASTING FLIGHT OR WHEN THE LM IS ON THE MOON</span>
-022145,000032:                                                                                                  <span class="co">#  SURFACE. THE EARTH OR MOON REFERENCE COORDINATE SYSTEM IS USED DEPENDING</span>
-022146,000033:                                                                                                  <span class="co">#  ON WHETHER THE LM IS ABOUT TO ENTER OR HAS ALREADY ENTERED THE MOON</span>
-022147,000034:                                                                                                  <span class="co">#  SPHERE OF INFLUENCE, RESPECTIVELY.  CAN BE CALLED ANY TIME EXCEPT WHEN</span>
-022148,000035:                                                                                                  <span class="co">#  ANOTHER EXTENDED VERB IS IN USE. DISPLAY IS MEANINGLESS WITH IMU OFF.</span>
-022149,000036: 
-022150,000037:                                                                                                  <span class="co">#  TO CALL SUBROUTINE, ASTRONAUT KEYS IN V 64 E</span>
-022151,000038: 
-022152,000039:                                                                                                  <span class="co">#  SUBROUTINES CALLED-</span>
-022153,000040: 
-022154,000041:                                                                                                  <span class="co">#      INTPRET</span>
-022155,000042:                                                                                                  <span class="co">#      LOADTIME</span>
-022156,000043:                                                                                                  <span class="co">#      LEMCONIC</span>
-022157,000044:                                                                                                  <span class="co">#      LUNPOS</span>
-022158,000045:                                                                                                  <span class="co">#      CDUTRIG</span>
-022159,000046:                                                                                                  <span class="co">#      *SMNB*</span>
-022160,000047:                                                                                                  <span class="co">#      BANKCALL</span>
-022161,000048:                                                                                                  <span class="co">#      B5OFF</span>
-022162,000049:                                                                                                  <span class="co">#      ENDOFJOB</span>
-022163,000050:                                                                                                  <span class="co">#      BLANKET</span>
-022164,000051: 
-022165,000052:                                                                                                  <span class="co">#  RETURNS WITH</span>
-022166,000053: 
-022167,000054:                                                                                                  <span class="co">#      PITCH ANGLE IN PITCHANG  REV. B0</span>
-022168,000055:                                                                                                  <span class="co">#      YAW ANGLE IN YAWANG  REV. B0</span>
-022169,000056: 
-022170,000057:                                                                                                  <span class="co">#  ERASABLES USED</span>
-022171,000058: 
-022172,000059:                                                                                                  <span class="co">#      PITCHANG</span>
-022173,000060:                                                                                                  <span class="co">#      YAWANG</span>
-022174,000061:                                                                                                  <span class="co">#      RLM</span>
-022175,000062:                                                                                                  <span class="co">#      VAC AREA</span>
-022176,000063: 
-022177,000064: 41,3777                                           <span class="ps">BANK    </span> 41                                    
-022178,000065: 42,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#5342414E44">SBAND</a>                                 
-022179,000066: 42,2000                                           <span class="ps">BANK    </span>                                       
-022180,000067: 
-022181,000068: 42,3617  E7,1471                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57484F4341524553">WHOCARES</a>                              
-022182,000069: 42,3617                                           <span class="ps">COUNT*  </span> $$/R05                                
-<a name="5342414E44414E54"></a>022183,000070: 42,3617           06060        <span class="sm">SBANDANT</span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-022184,000071: 
+022138,000021:                                                                                                  <span class="co">#  SUBROUTINE NAME: R05 - S-BAND ANTENNA FOR LM</span>
+022139,000022: 
+022140,000023:                                                                                                  <span class="co">#  MOD0 BY T. JAMES</span>
+022141,000024:                                                                                                  <span class="co">#  MOD1 BY P. SHAKIR</span>
+022142,000025: 
+022143,000026:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION</span>
+022144,000027: 
+022145,000028:                                                                                                  <span class="co">#      THE S-BAND ANTENNA ROUTINE, R05, COMPUTES AND DISPLAYS THE PITCH AND</span>
+022146,000029:                                                                                                  <span class="co">#  YAW ANTENNA GIMBAL ANGLES REQUIRED TO POINT THE LM STEERABLE ANTENNA</span>
+022147,000030:                                                                                                  <span class="co">#  TOWARD THE CENTER OF THE EARTH. THIS ROUTINE IS SELECTED BY THE ASTRO-</span>
+022148,000031:                                                                                                  <span class="co">#  NAUT VIA DSKY ENTRY DURING COASTING FLIGHT OR WHEN THE LM IS ON THE MOON</span>
+022149,000032:                                                                                                  <span class="co">#  SURFACE. THE EARTH OR MOON REFERENCE COORDINATE SYSTEM IS USED DEPENDING</span>
+022150,000033:                                                                                                  <span class="co">#  ON WHETHER THE LM IS ABOUT TO ENTER OR HAS ALREADY ENTERED THE MOON</span>
+022151,000034:                                                                                                  <span class="co">#  SPHERE OF INFLUENCE, RESPECTIVELY.  CAN BE CALLED ANY TIME EXCEPT WHEN</span>
+022152,000035:                                                                                                  <span class="co">#  ANOTHER EXTENDED VERB IS IN USE. DISPLAY IS MEANINGLESS WITH IMU OFF.</span>
+022153,000036: 
+022154,000037:                                                                                                  <span class="co">#  TO CALL SUBROUTINE, ASTRONAUT KEYS IN V 64 E</span>
+022155,000038: 
+022156,000039:                                                                                                  <span class="co">#  SUBROUTINES CALLED-</span>
+022157,000040: 
+022158,000041:                                                                                                  <span class="co">#      INTPRET</span>
+022159,000042:                                                                                                  <span class="co">#      LOADTIME</span>
+022160,000043:                                                                                                  <span class="co">#      LEMCONIC</span>
+022161,000044:                                                                                                  <span class="co">#      LUNPOS</span>
+022162,000045:                                                                                                  <span class="co">#      CDUTRIG</span>
+022163,000046:                                                                                                  <span class="co">#      *SMNB*</span>
+022164,000047:                                                                                                  <span class="co">#      BANKCALL</span>
+022165,000048:                                                                                                  <span class="co">#      B5OFF</span>
+022166,000049:                                                                                                  <span class="co">#      ENDOFJOB</span>
+022167,000050:                                                                                                  <span class="co">#      BLANKET</span>
+022168,000051: 
+022169,000052:                                                                                                  <span class="co">#  RETURNS WITH</span>
+022170,000053: 
+022171,000054:                                                                                                  <span class="co">#      PITCH ANGLE IN PITCHANG  REV. B0</span>
+022172,000055:                                                                                                  <span class="co">#      YAW ANGLE IN YAWANG  REV. B0</span>
+022173,000056: 
+022174,000057:                                                                                                  <span class="co">#  ERASABLES USED</span>
+022175,000058: 
+022176,000059:                                                                                                  <span class="co">#      PITCHANG</span>
+022177,000060:                                                                                                  <span class="co">#      YAWANG</span>
+022178,000061:                                                                                                  <span class="co">#      RLM</span>
+022179,000062:                                                                                                  <span class="co">#      VAC AREA</span>
+022180,000063: 
+022181,000064: 41,3777                                           <span class="ps">BANK    </span> 41                                    
+022182,000065: 42,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#5342414E44">SBAND</a>                                 
+022183,000066: 42,2000                                           <span class="ps">BANK    </span>                                       
+022184,000067: 
+022185,000068: 42,3617  E7,1471                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57484F4341524553">WHOCARES</a>                              
+022186,000069: 42,3617                                           <span class="ps">COUNT*  </span> $$/R05                                
+<a name="5342414E44414E54"></a>022187,000070: 42,3617           06060        <span class="sm">SBANDANT</span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+022188,000071: 
 </pre>
 </span>
 </p>
@@ -188,57 +188,57 @@ Page 502
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-022186,000073: 42,3620           47001                           <span class="in">SETPD   </span> <span class="in">RTB       </span>                            
-022187,000074: 42,3621           00001                                    0D                                    
-022188,000075: 42,3622           21603                                    <a href="RTB_OP_CODES.agc.html#4C4F414454494D45">LOADTIME</a>                              <span class="co">#  PICK UP CURRENT TIME</span>
-022189,000076: 42,3623           34041                           <span class="in">STCALL  </span> <a href="ORBITAL_INTEGRATION.agc.html#5444454331">TDEC1</a>                                 <span class="co">#  ADVANCE INTEGRATION TO TIME IN TDEC1</span>
-022190,000077: 42,3624           27136                                    <a href="INTEGRATION_INITIALIZATION.agc.html#4C454D434F4E4943">LEMCONIC</a>                              <span class="co">#  USING CONIC INTEGRATION</span>
-022191,000078: 42,3625           46135                           <span class="in">SLOAD   </span> <span class="in">BHIZ      </span>                            
-022192,000079: 42,3626           00050                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5832">X2</a>                                    <span class="co">#  X2 =0 EARTH SPHERE, X2 =2 MOON SPHERE</span>
-022193,000080: 42,3627           65645                                    <a href="#434F4E5634">CONV4</a>                                 
-022194,000081: 42,3630           77775                           <span class="in">VLOAD   </span>                                       
-022195,000082: 42,3631           00001                                    <a href="ORBITAL_INTEGRATION.agc.html#52415454">RATT</a>                                  
-022196,000083: 42,3632           16176                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   
-022197,000084: 42,3633           00015                                    <a href="ORBITAL_INTEGRATION.agc.html#544154">TAT</a>                                   
-<a name="434F4E5633"></a>022198,000085: 42,3634           77624        <span class="sm">CONV3   </span>           <span class="in">CALL    </span>                                       
-022199,000086: 42,3635           33646                                    <a href="LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc.html#4C554E504F53">LUNPOS</a>                                <span class="co">#  UNIT POSITION VECTOR FROM EARTH TO MOON</span>
-022200,000087: 42,3636           74375                           <span class="in">VLOAD   </span> <span class="in">VXSC      </span>                            
-022201,000088: 42,3637           02723                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564D4F4F4E">VMOON</a>                                 
-022202,000089: 42,3640           24001                                    <a href="CONTROLLED_CONSTANTS.agc.html#52454D44495354">REMDIST</a>                               <span class="co">#  MEAN DISTANCE FROM EARTH TO MOON</span>
-022203,000090: 42,3641           53372                           <span class="in">VSL1    </span> <span class="in">VAD       </span>                            
-022204,000091: 42,3642           02176                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   
-022205,000092: 42,3643           77650                           <span class="in">GOTO    </span>                                       
-022206,000093: 42,3644           65647                                    <a href="#434F4E5635">CONV5</a>                                 
-<a name="434F4E5634"></a>022207,000094: 42,3645           77775        <span class="sm">CONV4   </span>           <span class="in">VLOAD   </span>                                       
-022208,000095: 42,3646           00001                                    <a href="ORBITAL_INTEGRATION.agc.html#52415454">RATT</a>                                  <span class="co">#  UE = -UNIT(RATT)  EARTH SPHERE</span>
-<a name="434F4E5635"></a>022209,000096: 42,3647           53401        <span class="sm">CONV5   </span>           <span class="in">SETPD   </span> <span class="in">UNIT      </span>                            <span class="co">#  UE = -UNIT((REM)(UEM) + RL)  MOON SPHERE</span>
-022210,000097: 42,3650           00001                                    0D                                    <span class="co">#  SET PL POINTER TO 0</span>
-022211,000098: 42,3651           45076                           <span class="in">VCOMP   </span> <span class="in">CALL      </span>                            
-022212,000099: 42,3652           47522                                    <a href="POWERED_FLIGHT_SUBROUTINES.agc.html#43445554524947">CDUTRIG</a>                               <span class="co">#  COMPUTE SINES AND COSINES OF CDU ANGLES</span>
-022213,000100: 42,3653           76521                           <span class="in">MXV     </span> <span class="in">VSL1      </span>                            <span class="co">#  TRANSFORM REF. COORDINATE SYSTEM TO</span>
-022214,000101: 42,3654           01732                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              <span class="co">#  STABLE MEMBER B-1 X B-1 X B+1 = B-1</span>
-022215,000102: 42,3655           71206                           <span class="in">PUSH    </span> <span class="in">DLOAD     </span>                            <span class="co">#  8D</span>
-022216,000103: 42,3656           06505                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849365A45524F53">HI6ZEROS</a>                              
-022217,000104: 42,3657           02172                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049544348414E47">PITCHANG</a>                              
-022218,000105: 42,3660           26174                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#594157414E47">YAWANG</a>                                <span class="co">#  ZERO OUT ANGLES</span>
-022219,000106: 42,3661           77624                           <span class="in">CALL    </span>                                       
-022220,000107: 42,3662           47663                                    <a href="POWERED_FLIGHT_SUBROUTINES.agc.html#2A534D4E422A">*SMNB*</a>                                
-022221,000108: 42,3663           16176                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   <span class="co">#  PRE-MULTIPLY RLM BY (NBSA) MATRIX(B0)</span>
-022222,000109: 42,3664           02200                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>        +2                         
-022223,000110: 42,3665           45206                           <span class="in">PUSH    </span> <span class="in">DSU       </span>                            
-022224,000111: 42,3666           02176                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   
-022225,000112: 42,3667           77605                           <span class="in">DMP     </span>                                       
-022226,000113: 42,3670           21740                                    <a href="#314F565351525432">1OVSQRT2</a>                              
-022227,000114: 42,3671           16200                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>        +2                         
-022228,000115: 42,3672           41215                           <span class="in">DAD     </span> <span class="in">DMP       </span>                            
-022229,000116: 42,3673           02176                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   
-022230,000117: 42,3674           21740                                    <a href="#314F565351525432">1OVSQRT2</a>                              
-022231,000118: 42,3675           26176                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   <span class="co">#  R  B-1</span>
-022232,000119: 42,3676           02176                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   
-022233,000120: 42,3677           63256                           <span class="in">UNIT    </span> <span class="in">PDVL      </span>                            
-022234,000121: 42,3700           02176                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   
-022235,000122: 42,3701           72431                           <span class="in">VPROJ   </span> <span class="in">VSL2      </span>                            <span class="co">#  PROJECTION OF R ONTO LM XZ PLANE</span>
-022236,000123: 
+022190,000073: 42,3620           47001                           <span class="in">SETPD   </span> <span class="in">RTB       </span>                            
+022191,000074: 42,3621           00001                                    0D                                    
+022192,000075: 42,3622           21603                                    <a href="RTB_OP_CODES.agc.html#4C4F414454494D45">LOADTIME</a>                              <span class="co">#  PICK UP CURRENT TIME</span>
+022193,000076: 42,3623           34041                           <span class="in">STCALL  </span> <a href="ORBITAL_INTEGRATION.agc.html#5444454331">TDEC1</a>                                 <span class="co">#  ADVANCE INTEGRATION TO TIME IN TDEC1</span>
+022194,000077: 42,3624           27136                                    <a href="INTEGRATION_INITIALIZATION.agc.html#4C454D434F4E4943">LEMCONIC</a>                              <span class="co">#  USING CONIC INTEGRATION</span>
+022195,000078: 42,3625           46135                           <span class="in">SLOAD   </span> <span class="in">BHIZ      </span>                            
+022196,000079: 42,3626           00050                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5832">X2</a>                                    <span class="co">#  X2 =0 EARTH SPHERE, X2 =2 MOON SPHERE</span>
+022197,000080: 42,3627           65645                                    <a href="#434F4E5634">CONV4</a>                                 
+022198,000081: 42,3630           77775                           <span class="in">VLOAD   </span>                                       
+022199,000082: 42,3631           00001                                    <a href="ORBITAL_INTEGRATION.agc.html#52415454">RATT</a>                                  
+022200,000083: 42,3632           16176                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   
+022201,000084: 42,3633           00015                                    <a href="ORBITAL_INTEGRATION.agc.html#544154">TAT</a>                                   
+<a name="434F4E5633"></a>022202,000085: 42,3634           77624        <span class="sm">CONV3   </span>           <span class="in">CALL    </span>                                       
+022203,000086: 42,3635           33646                                    <a href="LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc.html#4C554E504F53">LUNPOS</a>                                <span class="co">#  UNIT POSITION VECTOR FROM EARTH TO MOON</span>
+022204,000087: 42,3636           74375                           <span class="in">VLOAD   </span> <span class="in">VXSC      </span>                            
+022205,000088: 42,3637           02723                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564D4F4F4E">VMOON</a>                                 
+022206,000089: 42,3640           24001                                    <a href="CONTROLLED_CONSTANTS.agc.html#52454D44495354">REMDIST</a>                               <span class="co">#  MEAN DISTANCE FROM EARTH TO MOON</span>
+022207,000090: 42,3641           53372                           <span class="in">VSL1    </span> <span class="in">VAD       </span>                            
+022208,000091: 42,3642           02176                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   
+022209,000092: 42,3643           77650                           <span class="in">GOTO    </span>                                       
+022210,000093: 42,3644           65647                                    <a href="#434F4E5635">CONV5</a>                                 
+<a name="434F4E5634"></a>022211,000094: 42,3645           77775        <span class="sm">CONV4   </span>           <span class="in">VLOAD   </span>                                       
+022212,000095: 42,3646           00001                                    <a href="ORBITAL_INTEGRATION.agc.html#52415454">RATT</a>                                  <span class="co">#  UE = -UNIT(RATT)  EARTH SPHERE</span>
+<a name="434F4E5635"></a>022213,000096: 42,3647           53401        <span class="sm">CONV5   </span>           <span class="in">SETPD   </span> <span class="in">UNIT      </span>                            <span class="co">#  UE = -UNIT((REM)(UEM) + RL)  MOON SPHERE</span>
+022214,000097: 42,3650           00001                                    0D                                    <span class="co">#  SET PL POINTER TO 0</span>
+022215,000098: 42,3651           45076                           <span class="in">VCOMP   </span> <span class="in">CALL      </span>                            
+022216,000099: 42,3652           47522                                    <a href="POWERED_FLIGHT_SUBROUTINES.agc.html#43445554524947">CDUTRIG</a>                               <span class="co">#  COMPUTE SINES AND COSINES OF CDU ANGLES</span>
+022217,000100: 42,3653           76521                           <span class="in">MXV     </span> <span class="in">VSL1      </span>                            <span class="co">#  TRANSFORM REF. COORDINATE SYSTEM TO</span>
+022218,000101: 42,3654           01732                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              <span class="co">#  STABLE MEMBER B-1 X B-1 X B+1 = B-1</span>
+022219,000102: 42,3655           71206                           <span class="in">PUSH    </span> <span class="in">DLOAD     </span>                            <span class="co">#  8D</span>
+022220,000103: 42,3656           06505                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849365A45524F53">HI6ZEROS</a>                              
+022221,000104: 42,3657           02172                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049544348414E47">PITCHANG</a>                              
+022222,000105: 42,3660           26174                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#594157414E47">YAWANG</a>                                <span class="co">#  ZERO OUT ANGLES</span>
+022223,000106: 42,3661           77624                           <span class="in">CALL    </span>                                       
+022224,000107: 42,3662           47663                                    <a href="POWERED_FLIGHT_SUBROUTINES.agc.html#2A534D4E422A">*SMNB*</a>                                
+022225,000108: 42,3663           16176                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   <span class="co">#  PRE-MULTIPLY RLM BY (NBSA) MATRIX(B0)</span>
+022226,000109: 42,3664           02200                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>        +2                         
+022227,000110: 42,3665           45206                           <span class="in">PUSH    </span> <span class="in">DSU       </span>                            
+022228,000111: 42,3666           02176                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   
+022229,000112: 42,3667           77605                           <span class="in">DMP     </span>                                       
+022230,000113: 42,3670           21740                                    <a href="#314F565351525432">1OVSQRT2</a>                              
+022231,000114: 42,3671           16200                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>        +2                         
+022232,000115: 42,3672           41215                           <span class="in">DAD     </span> <span class="in">DMP       </span>                            
+022233,000116: 42,3673           02176                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   
+022234,000117: 42,3674           21740                                    <a href="#314F565351525432">1OVSQRT2</a>                              
+022235,000118: 42,3675           26176                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   <span class="co">#  R  B-1</span>
+022236,000119: 42,3676           02176                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   
+022237,000120: 42,3677           63256                           <span class="in">UNIT    </span> <span class="in">PDVL      </span>                            
+022238,000121: 42,3700           02176                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   
+022239,000122: 42,3701           72431                           <span class="in">VPROJ   </span> <span class="in">VSL2      </span>                            <span class="co">#  PROJECTION OF R ONTO LM XZ PLANE</span>
+022240,000123: 
 </pre>
 </span>
 </p>
@@ -254,57 +254,57 @@ Page 503
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-022238,000125: 42,3702           06501                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849554E495459">HIUNITY</a>                               
-022239,000126: 42,3703           40045                           <span class="in">BVSU    </span> <span class="in">BOV       </span>                            <span class="co">#  CLEAR OVERFLOW INDICATOR IF ON</span>
-022240,000127: 42,3704           02176                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   
-022241,000128: 42,3705           65706                                    <a href="#434F56434E56">COVCNV</a>                                
-<a name="434F56434E56"></a>022242,000129: 42,3706           40056        <span class="sm">COVCNV  </span>           <span class="in">UNIT    </span> <span class="in">BOV       </span>                            <span class="co">#  EXIT ON OVERFLOW</span>
-022243,000130: 42,3707           65754                                    <a href="#5342414E444558">SBANDEX</a>                               
-022244,000131: 42,3710           47206                           <span class="in">PUSH    </span> <span class="in">VXV       </span>                            <span class="co">#  URP VECTOR  B-1</span>
-022245,000132: 42,3711           06477                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849554E49545A">HIUNITZ</a>                               
-022246,000133: 42,3712           57572                           <span class="in">VSL1    </span> <span class="in">VCOMP     </span>                            <span class="co">#  UZ X URP = -(URP X UZ)</span>
-022247,000134: 42,3713           02176                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   <span class="co">#  X VEC  B-1</span>
-022248,000135: 42,3714           63241                           <span class="in">DOT     </span> <span class="in">PDVL      </span>                            <span class="co">#  SGN(X.UY) UNSCALED</span>
-022249,000136: 42,3715           06501                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849554E495459">HIUNITY</a>                               
-022250,000137: 42,3716           02176                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   
-022251,000138: 42,3717           75246                           <span class="in">ABVAL   </span> <span class="in">SIGN      </span>                            
-022252,000139: 42,3720           77736                           <span class="in">ASIN    </span>                                       <span class="co">#  ASIN((SGN(X.UY))ABV(X)) REV B0</span>
-022253,000140: 42,3721           26172                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049544348414E47">PITCHANG</a>                              
-022254,000141: 42,3722           00007                                    <a href="#555250">URP</a>                                   
-022255,000142: 42,3723           51041                           <span class="in">DOT     </span> <span class="in">BPL       </span>                            
-022256,000143: 42,3724           06477                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849554E49545A">HIUNITZ</a>                               
-022257,000144: 42,3725           65732                                    <a href="#4E4F41444A555354">NOADJUST</a>                              <span class="co">#  YES, -90 TO +90</span>
-022258,000145: 42,3726           45345                           <span class="in">DLOAD   </span> <span class="in">DSU       </span>                            
-022259,000146: 42,3727           06503                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849445048414C46">HIDPHALF</a>                              
-022260,000147: 42,3730           02172                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5049544348414E47">PITCHANG</a>                              
-022261,000148: 42,3731           02172                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049544348414E47">PITCHANG</a>                              
-<a name="4E4F41444A555354"></a>022262,000149: 42,3732           47375        <span class="sm">NOADJUST</span>           <span class="in">VLOAD   </span> <span class="in">VXV       </span>                            
-022263,000150: 42,3733           00001                                    <a href="#5552">UR</a>                                    <span class="co">#  Z = (UR X URP)</span>
-022264,000151: 42,3734           00007                                    <a href="#555250">URP</a>                                   
-022265,000152: 42,3735           77772                           <span class="in">VSL1    </span>                                       
-022266,000153: 42,3736           16176                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   <span class="co">#  Z VEC  B-1</span>
-022267,000154: 42,3737           02172                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5049544348414E47">PITCHANG</a>                              
-022268,000155: 42,3740           74356                           <span class="in">SIN     </span> <span class="in">VXSC      </span>                            
-022269,000156: 42,3741           06477                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849554E49545A">HIUNITZ</a>                               
-022270,000157: 42,3742           71525                           <span class="in">PDDL    </span> <span class="in">COS       </span>                            
-022271,000158: 42,3743           02172                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5049544348414E47">PITCHANG</a>                              
-022272,000159: 42,3744           52361                           <span class="in">VXSC    </span> <span class="in">VSU       </span>                            
-022273,000160: 42,3745           06503                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849554E495458">HIUNITX</a>                               <span class="co">#  (UX COS ALPHA) - (UZ SIN ALPHA)</span>
-022274,000161: 42,3746           63241                           <span class="in">DOT     </span> <span class="in">PDVL      </span>                            <span class="co">#  YAW.Z</span>
-022275,000162: 42,3747           02176                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   
-022276,000163: 42,3750           02176                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   
-022277,000164: 42,3751           75246                           <span class="in">ABVAL   </span> <span class="in">SIGN      </span>                            
-022278,000165: 42,3752           77736                           <span class="in">ASIN    </span>                                       
-022279,000166: 42,3753           02174                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#594157414E47">YAWANG</a>                                
-<a name="5342414E444558"></a>022280,000167: 42,3754           77776        <span class="sm">SBANDEX </span>           <span class="in">EXIT    </span>                                       
-022281,000168: 42,3755           31043                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558545642414354">EXTVBACT</a>                              
-022282,000169: 42,3756           74740                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495435">BIT5</a>                                  <span class="co">#  IS BIT5 STILL ON</span>
-022283,000170: 42,3757           00006                           <span class="op">EXTEND  </span>                                       
-022284,000171: 42,3760           15474                           <span class="op">BZF     </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                <span class="co">#  NO</span>
-022285,000172: 42,3761           35010                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F35">PRIO5</a>                                 
-022286,000173: 42,3762           05137                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#5052494F43484E47">PRIOCHNG</a>                              
-022287,000174: 42,3763           33776                           <span class="op">CAF     </span> <a href="#5630364E3531">V06N51</a>                                <span class="co">#  DISPLAY ANGLES</span>
-022288,000175: 
+022242,000125: 42,3702           06501                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849554E495459">HIUNITY</a>                               
+022243,000126: 42,3703           40045                           <span class="in">BVSU    </span> <span class="in">BOV       </span>                            <span class="co">#  CLEAR OVERFLOW INDICATOR IF ON</span>
+022244,000127: 42,3704           02176                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   
+022245,000128: 42,3705           65706                                    <a href="#434F56434E56">COVCNV</a>                                
+<a name="434F56434E56"></a>022246,000129: 42,3706           40056        <span class="sm">COVCNV  </span>           <span class="in">UNIT    </span> <span class="in">BOV       </span>                            <span class="co">#  EXIT ON OVERFLOW</span>
+022247,000130: 42,3707           65754                                    <a href="#5342414E444558">SBANDEX</a>                               
+022248,000131: 42,3710           47206                           <span class="in">PUSH    </span> <span class="in">VXV       </span>                            <span class="co">#  URP VECTOR  B-1</span>
+022249,000132: 42,3711           06477                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849554E49545A">HIUNITZ</a>                               
+022250,000133: 42,3712           57572                           <span class="in">VSL1    </span> <span class="in">VCOMP     </span>                            <span class="co">#  UZ X URP = -(URP X UZ)</span>
+022251,000134: 42,3713           02176                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   <span class="co">#  X VEC  B-1</span>
+022252,000135: 42,3714           63241                           <span class="in">DOT     </span> <span class="in">PDVL      </span>                            <span class="co">#  SGN(X.UY) UNSCALED</span>
+022253,000136: 42,3715           06501                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849554E495459">HIUNITY</a>                               
+022254,000137: 42,3716           02176                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   
+022255,000138: 42,3717           75246                           <span class="in">ABVAL   </span> <span class="in">SIGN      </span>                            
+022256,000139: 42,3720           77736                           <span class="in">ASIN    </span>                                       <span class="co">#  ASIN((SGN(X.UY))ABV(X)) REV B0</span>
+022257,000140: 42,3721           26172                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049544348414E47">PITCHANG</a>                              
+022258,000141: 42,3722           00007                                    <a href="#555250">URP</a>                                   
+022259,000142: 42,3723           51041                           <span class="in">DOT     </span> <span class="in">BPL       </span>                            
+022260,000143: 42,3724           06477                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849554E49545A">HIUNITZ</a>                               
+022261,000144: 42,3725           65732                                    <a href="#4E4F41444A555354">NOADJUST</a>                              <span class="co">#  YES, -90 TO +90</span>
+022262,000145: 42,3726           45345                           <span class="in">DLOAD   </span> <span class="in">DSU       </span>                            
+022263,000146: 42,3727           06503                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849445048414C46">HIDPHALF</a>                              
+022264,000147: 42,3730           02172                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5049544348414E47">PITCHANG</a>                              
+022265,000148: 42,3731           02172                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049544348414E47">PITCHANG</a>                              
+<a name="4E4F41444A555354"></a>022266,000149: 42,3732           47375        <span class="sm">NOADJUST</span>           <span class="in">VLOAD   </span> <span class="in">VXV       </span>                            
+022267,000150: 42,3733           00001                                    <a href="#5552">UR</a>                                    <span class="co">#  Z = (UR X URP)</span>
+022268,000151: 42,3734           00007                                    <a href="#555250">URP</a>                                   
+022269,000152: 42,3735           77772                           <span class="in">VSL1    </span>                                       
+022270,000153: 42,3736           16176                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   <span class="co">#  Z VEC  B-1</span>
+022271,000154: 42,3737           02172                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5049544348414E47">PITCHANG</a>                              
+022272,000155: 42,3740           74356                           <span class="in">SIN     </span> <span class="in">VXSC      </span>                            
+022273,000156: 42,3741           06477                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849554E49545A">HIUNITZ</a>                               
+022274,000157: 42,3742           71525                           <span class="in">PDDL    </span> <span class="in">COS       </span>                            
+022275,000158: 42,3743           02172                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5049544348414E47">PITCHANG</a>                              
+022276,000159: 42,3744           52361                           <span class="in">VXSC    </span> <span class="in">VSU       </span>                            
+022277,000160: 42,3745           06503                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849554E495458">HIUNITX</a>                               <span class="co">#  (UX COS ALPHA) - (UZ SIN ALPHA)</span>
+022278,000161: 42,3746           63241                           <span class="in">DOT     </span> <span class="in">PDVL      </span>                            <span class="co">#  YAW.Z</span>
+022279,000162: 42,3747           02176                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   
+022280,000163: 42,3750           02176                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C4D">RLM</a>                                   
+022281,000164: 42,3751           75246                           <span class="in">ABVAL   </span> <span class="in">SIGN      </span>                            
+022282,000165: 42,3752           77736                           <span class="in">ASIN    </span>                                       
+022283,000166: 42,3753           02174                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#594157414E47">YAWANG</a>                                
+<a name="5342414E444558"></a>022284,000167: 42,3754           77776        <span class="sm">SBANDEX </span>           <span class="in">EXIT    </span>                                       
+022285,000168: 42,3755           31043                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558545642414354">EXTVBACT</a>                              
+022286,000169: 42,3756           74740                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495435">BIT5</a>                                  <span class="co">#  IS BIT5 STILL ON</span>
+022287,000170: 42,3757           00006                           <span class="op">EXTEND  </span>                                       
+022288,000171: 42,3760           15474                           <span class="op">BZF     </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                <span class="co">#  NO</span>
+022289,000172: 42,3761           35010                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F35">PRIO5</a>                                 
+022290,000173: 42,3762           05137                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#5052494F43484E47">PRIOCHNG</a>                              
+022291,000174: 42,3763           33776                           <span class="op">CAF     </span> <a href="#5630364E3531">V06N51</a>                                <span class="co">#  DISPLAY ANGLES</span>
+022292,000175: 
 </pre>
 </span>
 </p>
@@ -320,26 +320,26 @@ Page 504
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-022290,000177: 42,3764           04607                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-022291,000178: 42,3765           20345                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F4D41524B4652">GOMARKFR</a>                              
-022292,000179: 42,3766           05565                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#42354F4646">B5OFF</a>                                 <span class="co">#  TERMINATE</span>
-022293,000180: 42,3767           05565                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#42354F4646">B5OFF</a>                                 <span class="co">#  PROCEED</span>
-022294,000181: 42,3770           05146                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              <span class="co">#  RECYCLE</span>
-022295,000182: 42,3771           34742                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495433">BIT3</a>                                  <span class="co">#  IMMEDIATE RETURN</span>
-022296,000183: 42,3772           05466                           <span class="op">TC      </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#424C414E4B4554">BLANKET</a>                               <span class="co">#  BLANK R3</span>
-022297,000184: 42,3773           34731                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F34">PRIO4</a>                                 
-022298,000185: 42,3774           05137                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#5052494F43484E47">PRIOCHNG</a>                              
-022299,000186: 42,3775           03617                           <span class="op">TC      </span> <a href="#5342414E44414E54">SBANDANT</a>                              <span class="co">#  YES, CONTINUE DISPLAYING ANGLES.</span>
-<a name="5630364E3531"></a>022300,000187: 42,3776           01463        <span class="sm">V06N51  </span>           <span class="ps">VN      </span> 0651                                  
-022301,000188: 
-022302,000189: 40,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#5342414E443430">SBAND40</a>                               
-022303,000190: 40,2000                                           <span class="ps">BANK    </span>                                       
-022304,000191: 
-<a name="314F565351525432"></a>022305,000192: 40,3737           26501 07463  <span class="sm">1OVSQRT2</span>           <span class="ps">2DEC    </span> .7071067815                            <span class="co">#  1/SQRT(2)</span>
-022306,000193: 
-<a name="5552"></a>022307,000194: 40,3741                        <span class="sm">UR      </span>           <span class="ps">EQUALS  </span> 0D                                    
-<a name="555250"></a>022308,000195: 40,3741                        <span class="sm">URP     </span>           <span class="ps">EQUALS  </span> 6D                                    
-022309,000196: 40,3741  30,2000                                  <span class="ps">SBANK=  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4C4F575355504552">LOWSUPER</a>                              
+022294,000177: 42,3764           04607                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+022295,000178: 42,3765           20345                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F4D41524B4652">GOMARKFR</a>                              
+022296,000179: 42,3766           05565                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#42354F4646">B5OFF</a>                                 <span class="co">#  TERMINATE</span>
+022297,000180: 42,3767           05565                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#42354F4646">B5OFF</a>                                 <span class="co">#  PROCEED</span>
+022298,000181: 42,3770           05146                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              <span class="co">#  RECYCLE</span>
+022299,000182: 42,3771           34742                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495433">BIT3</a>                                  <span class="co">#  IMMEDIATE RETURN</span>
+022300,000183: 42,3772           05466                           <span class="op">TC      </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#424C414E4B4554">BLANKET</a>                               <span class="co">#  BLANK R3</span>
+022301,000184: 42,3773           34731                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F34">PRIO4</a>                                 
+022302,000185: 42,3774           05137                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#5052494F43484E47">PRIOCHNG</a>                              
+022303,000186: 42,3775           03617                           <span class="op">TC      </span> <a href="#5342414E44414E54">SBANDANT</a>                              <span class="co">#  YES, CONTINUE DISPLAYING ANGLES.</span>
+<a name="5630364E3531"></a>022304,000187: 42,3776           01463        <span class="sm">V06N51  </span>           <span class="ps">VN      </span> 0651                                  
+022305,000188: 
+022306,000189: 40,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#5342414E443430">SBAND40</a>                               
+022307,000190: 40,2000                                           <span class="ps">BANK    </span>                                       
+022308,000191: 
+<a name="314F565351525432"></a>022309,000192: 40,3737           26501 07463  <span class="sm">1OVSQRT2</span>           <span class="ps">2DEC    </span> .7071067815                            <span class="co">#  1/SQRT(2)</span>
+022310,000193: 
+<a name="5552"></a>022311,000194: 40,3741                        <span class="sm">UR      </span>           <span class="ps">EQUALS  </span> 0D                                    
+<a name="555250"></a>022312,000195: 40,3741                        <span class="sm">URP     </span>           <span class="ps">EQUALS  </span> 6D                                    
+022313,000196: 40,3741  30,2000                                  <span class="ps">SBANK=  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4C4F575355504552">LOWSUPER</a>                              
 
 End of include-file S-BAND_ANTENNA_FOR_LM.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

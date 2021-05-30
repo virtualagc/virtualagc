@@ -96,314 +96,314 @@ from scratch to match what we believe would have been in the original listing.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-050963,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-050964,000003:                                                                                                  <span class="co">## Filename:    RESTARTS_ROUTINE.agc</span>
-050965,000004:                                                                                                  <span class="co">## Purpose:     A section of a reconstructed, mixed version of Sundance</span>
-050966,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the Lunar</span>
-050967,000006:                                                                                                  <span class="co">##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 9.</span>
-050968,000007:                                                                                                  <span class="co">##              No original listings of this program are available;</span>
-050969,000008:                                                                                                  <span class="co">##              instead, this file was created via disassembly of dumps</span>
-050970,000009:                                                                                                  <span class="co">##              of various revisions of Sundance core rope modules.</span>
-050971,000010:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-050972,000011:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-050973,000012:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-050974,000013:                                                                                                  <span class="co">## Mod history: 2020-06-17 MAS  Created from Luminary 69.</span>
-050975,000014: 
-050976,000015:                                                                                                  <span class="co">## Sundance 292</span>
-050977,000016: 
-050978,000017: 01,3314                                           <span class="ps">BANK    </span> 01                                    
-050979,000018: 01,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#52455354415254">RESTART</a>                               
-050980,000019: 01,2000                                           <span class="ps">BANK    </span>                                       
-050981,000020: 
-050982,000021: 01,3314  E3,1436                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5048534E414D4531">PHSNAME1</a>                              <span class="co">#  GOPROG MUST SWITCH TO THIS EBANK</span>
-050983,000022: 
-050984,000023: 01,3314                                           <span class="ps">COUNT*  </span> $$/RSROU                              
-<a name="5245535441525453"></a>050985,000024: 01,3314           30161        <span class="sm">RESTARTS</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         <span class="co">#  GET GROUP NUMBER -1</span>
-050986,000025: 01,3315           60000                           <span class="op">DOUBLE  </span>                                       <span class="co">#  SAVE FOR INDEXING</span>
-050987,000026: 01,3316           54155                           <span class="op">TS      </span> <a href="#54454D503247">TEMP2G</a>                                
-050988,000027: 
-050989,000028: 01,3317           33556                           <span class="op">CA      </span> <a href="#5048533243414452">PHS2CADR</a>                              <span class="co">#  SET UP EXIT IN CASE IT IS AN EVEN</span>
-050990,000029: 01,3320           54157                           <span class="op">TS      </span> <a href="#54454D5053574348">TEMPSWCH</a>                              <span class="co">#  TABLE PHASE</span>
-050991,000030: 
-050992,000031: 01,3321           33353                           <span class="op">CA      </span> <a href="#5254524E43414452">RTRNCADR</a>                              <span class="co">#  TO SAVE TIME ASSUME IT WILL GET NEXT</span>
-050993,000032: 01,3322           54707                           <span class="op">TS      </span> <a href="#474F4C4F43">GOLOC</a>      +2                         <span class="co">#  GROUP AFTER THIS</span>
-050994,000033: 
-050995,000034: 01,3323           30154                           <span class="op">CA      </span> <a href="#54454D50504853">TEMPPHS</a>                               
-050996,000035: 01,3324           75057                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F435431343030">OCT1400</a>                               
-050997,000036: 01,3325           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IS IT A VARIABLE OR TABLE RESTART</span>
-050998,000037: 01,3326           13337                           <span class="op">TCF     </span> <a href="#49545341564152">ITSAVAR</a>                               <span class="co">#  IT:S A VARIABLE RESTART</span>
-050999,000038: 
-<a name="4745545041525432"></a>051000,000039: 01,3327           10154        <span class="sm">GETPART2</span>           <span class="op">CCS     </span> <a href="#54454D50504853">TEMPPHS</a>                               <span class="co">#  IS IT AN X.1 RESTART</span>
-051001,000040: 01,3330           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-051002,000041: 01,3331           13437                           <span class="op">TCF     </span> <a href="#4954534154424C">ITSATBL</a>                               <span class="co">#  NO, ITS A TABLE RESTART</span>
-051003,000042: 
-051004,000043: 01,3332           35074                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3134">PRIO14</a>                                <span class="co">#  IT IS AN X.1 RESTART, THEREFORE START</span>
-051005,000044: 01,3333           05155                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               <span class="co">#  THE DISPLAY RESTART JOB</span>
-051006,000045: 01,3334  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
-051007,000046: 01,3334           02735 20103                     <span class="ps">2CADR   </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#494E4954445350">INITDSP</a>                               
-051008,000047: 
-051009,000048: 01,3336           03353                           <span class="op">TC      </span> <a href="#5254524E43414452">RTRNCADR</a>                              <span class="co">#  FINISHED WITH THIS GROUP, GET NEXT ONE</span>
-051010,000049: 
-<a name="49545341564152"></a>051011,000050: 01,3337           75057        <span class="sm">ITSAVAR </span>           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F435431343030">OCT1400</a>                               <span class="co">#  IS IT TYPE B ?</span>
-051012,000051: 01,3340           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-051013,000052: 01,3341           13410                           <span class="op">TCF     </span> <a href="#4954534C494B4542">ITSLIKEB</a>                              <span class="co">#  YES, IT IS TYPE B</span>
-051014,000053: 
-051015,000054: 01,3342           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  STORE THE JOB (OR TASK) 2CADR FOR EXIT</span>
-051016,000055: 01,3343           50155                           <span class="op">NDX     </span> <a href="#54454D503247">TEMP2G</a>                                
-051017,000056: 01,3344           31437                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5048534E414D4531">PHSNAME1</a>                              
-051018,000057: 01,3345           52706                           <span class="op">DXCH    </span> <a href="#474F4C4F43">GOLOC</a>                                 
-051019,000058: 
-051020,000059: 01,3346           30154                           <span class="op">CA      </span> <a href="#54454D50504853">TEMPPHS</a>                               <span class="co">#  SEE IF THIS IS A JOB, TASK, OR A LONGCAL</span>
-051021,000060: 01,3347           75032                           <span class="op">MASK    </span> <a href="SERVICE_ROUTINES.agc.html#4F435437">OCT7</a>                                  
-051022,000061: 01,3350           67720                           <span class="op">AD      </span> <a href="#4D494E555332">MINUS2</a>                                
-051023,000062: 01,3351           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-051024,000063: 01,3352           13522                           <span class="op">TCF     </span> <a href="#4954534C4E47434C">ITSLNGCL</a>                              <span class="co">#  ITS A LONGCALL</span>
-051025,000064: 
-<a name="5254524E43414452"></a>051026,000065: 01,3353           04670        <span class="sm">RTRNCADR</span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#535752455455524E">SWRETURN</a>                              <span class="co">#  CANT GET HERE</span>
-051027,000066: 01,3354           13356                           <span class="op">TCF     </span> <a href="#4954534157414954">ITSAWAIT</a>                              
-051028,000067: 
-051029,000068: 01,3355           13423                           <span class="op">TCF     </span> <a href="#495453414A4F42">ITSAJOB</a>                               <span class="co">#  ITS A JOB</span>
-051030,000069: 
-<a name="4954534157414954"></a>051031,000070: 01,3356           33562        <span class="sm">ITSAWAIT</span>           <span class="op">CA      </span> <a href="#57544C5443414452">WTLTCADR</a>                              <span class="co">#  SET UP WAITLIST CALL</span>
-051032,000071: 01,3357           54704                           <span class="op">TS      </span> <a href="#474F4C4F43">GOLOC</a>      -1                         
-051033,000072: 
-051034,000073: 01,3360           50155                           <span class="op">NDX     </span> <a href="#54454D503247">TEMP2G</a>                                <span class="co">#  DIRECTLY STORED</span>
-051035,000074: 01,3361           31055                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5048535052445431">PHSPRDT1</a>                              
-<a name="54494D4554455354"></a>051036,000075: 01,3362           10000        <span class="sm">TIMETEST</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IS IT AN IMMEDIATE RESTART</span>
-051037,000076: 01,3363           24000                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  NO,</span>
-051038,000077: 01,3364           13367                           <span class="op">TCF     </span> <a href="#46494E4454494D45">FINDTIME</a>                              <span class="co">#  FIND OUT WHEN IT SHOULD BEGIN</span>
-051039,000078: 
-051040,000079: 01,3365           15525                           <span class="op">TCF     </span> <a href="#495453494E444952">ITSINDIR</a>                              <span class="co">#  STORED INDIRECTLY</span>
-051041,000080: 
-051042,000081: 01,3366           13406                           <span class="op">TCF     </span> <a href="#494D454449415445">IMEDIATE</a>                              <span class="co">#  IT WANTS AN IMMEDIATE RESTART</span>
-051043,000082: 
-051044,000083:                                                                                                  <span class="co">#  ***** THIS MUST BE IN FIXED FIXED *****</span>
-051045,000084: 
-051046,000085:    5525                                           <span class="ps">BLOCK   </span> 02                                    
-051047,000086:    4000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#464654414732">FFTAG2</a>                                
-051048,000087:    4000                                           <span class="ps">BANK    </span>                                       
-051049,000088: 
-051050,000089:    5525                                           <span class="ps">COUNT*  </span> $$/RSROU                              
-<a name="495453494E444952"></a>051051,000090:    5525           22706        <span class="sm">ITSINDIR</span>           <span class="op">LXCH    </span> <a href="#474F4C4F43">GOLOC</a>      +1                         <span class="co">#  GET THE CORRECT E BANK IN CASE THIS IS</span>
-051052,000091:    5526           22006                           <span class="op">LXCH    </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4242">BB</a>                                    <span class="co">#  SWITCHED ERRASIBLE</span>
-051053,000092: 
-051054,000093:    5527           50000                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  GET THE TIME INDIRECTLY</span>
-051055,000094:    5530           30001                           <span class="op">CA      </span> 1                                     
-051056,000095: 
-051057,000096:    5531           22006                           <span class="op">LXCH    </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4242">BB</a>                                    <span class="co">#  RESTORE THE BB AND GOLOC</span>
-051058,000097:    5532           22706                           <span class="op">LXCH    </span> <a href="#474F4C4F43">GOLOC</a>      +1                         
-051059,000098: 
-051060,000099:    5533           13367                           <span class="op">TCF     </span> <a href="#46494E4454494D45">FINDTIME</a>                              <span class="co">#  FIND OUT WHEN IT SHOULD BEGIN</span>
-051061,000100: 
-051062,000101:                                                                                                  <span class="co">#  ***** YOU MAY RETURN TO SWITCHED FIXED *****</span>
-051063,000102: 
-051064,000103: 01,3367                                           <span class="ps">BANK    </span> 01                                    
-051065,000104: 01,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#52455354415254">RESTART</a>                               
-051066,000105: 01,2000                                           <span class="ps">BANK    </span>                                       
-051067,000106: 
-051068,000107: 01,3367                                           <span class="ps">COUNT*  </span> $$/RSROU                              
-<a name="46494E4454494D45"></a>051069,000108: 01,3367           40000        <span class="sm">FINDTIME</span>           <span class="op">COM     </span>                                       <span class="co">#  MAKE NEGITIVE SINCE IT WILL BE SUBTRACTD</span>
-051070,000109: 01,3370           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  AND SAVE</span>
-051071,000110: 01,3371           50155                           <span class="op">NDX     </span> <a href="#54454D503247">TEMP2G</a>                                
-051072,000111: 01,3372           41054                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544241534531">TBASE1</a>                                
-051073,000112: 01,3373           00006                           <span class="op">EXTEND  </span>                                       
-051074,000113: 01,3374           60025                           <span class="op">SU      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 
-051075,000114: 01,3375           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-051076,000115: 01,3376           40000                           <span class="op">COM     </span>                                       
-051077,000116: 01,3377           67703                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543337373736">OCT37776</a>                              
-051078,000117: 01,3400           65026                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-051079,000118: 01,3401           60001                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-051080,000119: 01,3402           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-051081,000120: 01,3403           35030                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-051082,000121: 01,3404           13406                           <span class="op">TCF     </span> +2                                    
-051083,000122: 01,3405           13406                           <span class="op">TCF     </span> +1                                    
-<a name="494D454449415445"></a>051084,000123: 01,3406           65026        <span class="sm">IMEDIATE</span>           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-051085,000124: 01,3407           00704                           <span class="op">TC      </span> <a href="#474F4C4F43">GOLOC</a>      -1                         
-<a name="4954534C494B4542"></a>051086,000125: 01,3410           33353        <span class="sm">ITSLIKEB</span>           <span class="op">CA      </span> <a href="#5254524E43414452">RTRNCADR</a>                              <span class="co">#  TYPE B,             SO STORE RETURN IN</span>
-051087,000126: 01,3411           54157                           <span class="op">TS      </span> <a href="#54454D5053574348">TEMPSWCH</a>                              <span class="co">#  TEMPSWCH IN CASE OF AN EVEN PHASE</span>
-051088,000127: 
-051089,000128: 01,3412           33557                           <span class="op">CA      </span> <a href="#5052543243414452">PRT2CADR</a>                              <span class="co">#  SET UP EXIT TO GET TABLE PART OF THIS</span>
-051090,000129: 01,3413           54707                           <span class="op">TS      </span> <a href="#474F4C4F43">GOLOC</a>      +2                         <span class="co">#  VARIABLE TYPE OF PHASE</span>
-051091,000130: 
-051092,000131: 01,3414           30154                           <span class="op">CA      </span> <a href="#54454D50504853">TEMPPHS</a>                               <span class="co">#  MAKE THE PHASE LOOK RIGHT FOR THE TABLE</span>
-051093,000132: 01,3415           76050                           <span class="op">MASK    </span> <a href="#4F4354313737">OCT177</a>                                <span class="co">#  PART OF THIS VARIABLE PHASE</span>
-051094,000133: 01,3416           54154                           <span class="op">TS      </span> <a href="#54454D50504853">TEMPPHS</a>                               
-051095,000134: 
-051096,000135: 01,3417           00006                           <span class="op">EXTEND  </span>                                       
-051097,000136: 01,3420           50155                           <span class="op">NDX     </span> <a href="#54454D503247">TEMP2G</a>                                <span class="co">#  OBTAIN THE JOB:S 2CADR</span>
-051098,000137: 01,3421           31437                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5048534E414D4531">PHSNAME1</a>                              
-051099,000138: 01,3422           52706                           <span class="op">DXCH    </span> <a href="#474F4C4F43">GOLOC</a>                                 
-051100,000139: 
-<a name="495453414A4F42"></a>051101,000140: 01,3423           50155        <span class="sm">ITSAJOB </span>           <span class="op">NDX     </span> <a href="#54454D503247">TEMP2G</a>                                <span class="co">#  NOW ADD THE PRIORITY AND LET:S GO</span>
-051102,000141: 01,3424           31055                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5048535052445431">PHSPRDT1</a>                              
-<a name="43484B4E4F564143"></a>051103,000142: 01,3425           54704        <span class="sm">CHKNOVAC</span>           <span class="op">TS      </span> <a href="#474F4C4F43">GOLOC</a>      -1                         <span class="co">#  SAVE PRIO UNTIL WE SEE IF ITS</span>
-051104,000143: 01,3426           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  A FINDVAC OR A NOVAC</span>
-051105,000144: 01,3427           63433                           <span class="op">BZMF    </span> <a href="#4954534E4F564143">ITSNOVAC</a>                              
-051106,000145: 
-051107,000146: 01,3430           33561                           <span class="op">CAF     </span> <a href="#4656414343414452">FVACCADR</a>                              <span class="co">#  POSITIVE, SET UP FINDVAC CALL.</span>
-051108,000147: 01,3431           56704                           <span class="op">XCH     </span> <a href="#474F4C4F43">GOLOC</a>      -1                         <span class="co">#  PICK UP PRIO,</span>
-051109,000148: 01,3432           00704                           <span class="op">TC      </span> <a href="#474F4C4F43">GOLOC</a>      -1                         <span class="co">#  AND GO</span>
-051110,000149: 
-<a name="4954534E4F564143"></a>051111,000150: 01,3433           33563        <span class="sm">ITSNOVAC</span>           <span class="op">CAF     </span> <a href="#4E4F564143414452">NOVACADR</a>                              <span class="co">#  NEGATIVE,</span>
-051112,000151: 01,3434           56704                           <span class="op">XCH     </span> <a href="#474F4C4F43">GOLOC</a>      -1                         <span class="co">#  SET UP NOVAC CALL,</span>
-051113,000152: 01,3435           40000                           <span class="op">COM     </span>                                       <span class="co">#  CORRECT PRIO,</span>
-051114,000153: 01,3436           00704                           <span class="op">TC      </span> <a href="#474F4C4F43">GOLOC</a>      -1                         <span class="co">#  AND GO</span>
-051115,000154: 
-<a name="4954534154424C"></a>051116,000155: 01,3437           54020        <span class="sm">ITSATBL </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#435952">CYR</a>                                   <span class="co">#  FIND OUT IF THE PHASE IS ODD OR EVEN</span>
-051117,000156: 01,3440           10020                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#435952">CYR</a>                                   
-051118,000157: 01,3441           13442                           <span class="op">TCF     </span> +1                                    <span class="co">#  IT:S EVEN</span>
-051119,000158: 01,3442           13540                           <span class="op">TCF     </span> <a href="#4954534556454E">ITSEVEN</a>                               
-051120,000159: 
-051121,000160: 01,3443           33353                           <span class="op">CA      </span> <a href="#5254524E43414452">RTRNCADR</a>                              <span class="co">#  IN CASE THIS IS THE SECOND PART OF A</span>
-051122,000161: 01,3444           54707                           <span class="op">TS      </span> <a href="#474F4C4F43">GOLOC</a>      +2                         <span class="co">#  TYPE B RESTART, WE NEED PROPER EXIT</span>
-051123,000162: 
-051124,000163: 01,3445           30154                           <span class="op">CA      </span> <a href="#54454D50504853">TEMPPHS</a>                               <span class="co">#  SET UP POINTER FOR FINDING OUR PLACE IN</span>
-051125,000164: 01,3446           54021                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    <span class="co">#  THE RESTART TABLES</span>
-051126,000165: 01,3447           60021                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    
-051127,000166: 01,3450           50155                           <span class="op">NDX     </span> <a href="#54454D503247">TEMP2G</a>                                
-051128,000167: 01,3451           62001                           <span class="op">AD      </span> <a href="RESTART_TABLES.agc.html#53495A45544142">SIZETAB</a>    +1                         
-051129,000168: 01,3452           54156                           <span class="op">TS      </span> <a href="#504F494E544552">POINTER</a>                               
-051130,000169: 
-<a name="434F4E54424C32"></a>051131,000170: 01,3453           00006        <span class="sm">CONTBL2 </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  FIND OUT WHAT:S IN THE TABLE</span>
-051132,000171: 01,3454           50156                           <span class="op">NDX     </span> <a href="#504F494E544552">POINTER</a>                               
-051133,000172: 01,3455           32002                           <span class="op">DCA     </span> <a href="RESTART_TABLES.agc.html#43414452544142">CADRTAB</a>                               <span class="co">#  GET THE 2CADR</span>
-051134,000173: 
-051135,000174: 01,3456           22706                           <span class="op">LXCH    </span> <a href="#474F4C4F43">GOLOC</a>      +1                         <span class="co">#  STORE THE BB INFORMATION</span>
-051136,000175: 
-051137,000176: 01,3457           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IS IT A JOB OR IS IT  TIMED</span>
-051138,000177: 01,3460           24000                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  POSITIVE, MUST BE A JOB</span>
-051139,000178: 01,3461           13534                           <span class="op">TCF     </span> <a href="#495453414A4F4232">ITSAJOB2</a>                              
-051140,000179: 
-051141,000180: 01,3462           24000                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  MUST BE EITHER A WAITLIST OR LONGCALL</span>
-051142,000181: 01,3463           54705                           <span class="op">TS      </span> <a href="#474F4C4F43">GOLOC</a>                                 <span class="co">#  LET-S STORE THE CORRECT CADR</span>
-051143,000182: 
-051144,000183: 01,3464           33562                           <span class="op">CA      </span> <a href="#57544C5443414452">WTLTCADR</a>                              <span class="co">#  SET UP OUR EXIT TO WAITLIST</span>
-051145,000184: 01,3465           54704                           <span class="op">TS      </span> <a href="#474F4C4F43">GOLOC</a>      -1                         
-051146,000185: 
-051147,000186: 01,3466           30706                           <span class="op">CA      </span> <a href="#474F4C4F43">GOLOC</a>      +1                         <span class="co">#  NOW FIND OUT IF IT IS A WAITLIST CALL</span>
-051148,000187: 01,3467           75015                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543130">BIT10</a>                                 <span class="co">#  THIS SHOULD BE ONE IF WE HAVE -BB</span>
-051149,000188: 01,3470           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  FOR THAT MATTER SO SHOULD BE BITS 9,8,7,</span>
-051150,000189:                                                                                                  <span class="co">#  6,5, AND LAST BUT NOT LEAST (PERHAPS NOT</span>
-051151,000190:                                                                                                  <span class="co">#  IN IMPORTANCE ANYWAY.  BIT 4</span>
-051152,000191: 01,3471           13527                           <span class="op">TCF     </span> <a href="#49545357544C5354">ITSWTLST</a>                              <span class="co">#  IT IS A WAITLIST CALL</span>
-051153,000192: 
-051154,000193: 01,3472           50156                           <span class="op">NDX     </span> <a href="#504F494E544552">POINTER</a>                               <span class="co">#  OBTAIN THE ORIGINAL DELTA T</span>
-051155,000194: 01,3473           32000                           <span class="op">CA      </span> <a href="RESTART_TABLES.agc.html#50524454544142">PRDTTAB</a>                               <span class="co">#  ADDRESS FOR THIS LONGCALL</span>
-051156,000195: 
-051157,000196: 01,3474           15534                           <span class="op">TCF     </span> <a href="#4954534C47434C31">ITSLGCL1</a>                              <span class="co">#  NOW GO GET THE DELTA TIME</span>
-051158,000197: 
-051159,000198:                                                                                                  <span class="co">#  ***** THIS MUST BE IN FIXED FIXED *****</span>
-051160,000199: 
-051161,000200:    5534                                           <span class="ps">BLOCK   </span> 02                                    
-051162,000201:    4000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#464654414732">FFTAG2</a>                                
-051163,000202:    4000                                           <span class="ps">BANK    </span>                                       
-051164,000203: 
-051165,000204:    5534                                           <span class="ps">COUNT*  </span> $$/RSROU                              
-<a name="4954534C47434C31"></a>051166,000205:    5534           22706        <span class="sm">ITSLGCL1</span>           <span class="op">LXCH    </span> <a href="#474F4C4F43">GOLOC</a>      +1                         <span class="co">#  OBTAIN THE CORRECT E BANK</span>
-051167,000206:    5535           22006                           <span class="op">LXCH    </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4242">BB</a>                                    
-051168,000207:    5536           22706                           <span class="op">LXCH    </span> <a href="#474F4C4F43">GOLOC</a>      +1                         <span class="co">#  AND PRESERVE OUR E AND F BANKS</span>
-051169,000208: 
-051170,000209:    5537           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  GET THE DELTA TIME</span>
-051171,000210:    5540           50000                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-051172,000211:    5541           30001                           <span class="op">DCA     </span> 0                                     
-051173,000212: 
-051174,000213:    5542           22706                           <span class="op">LXCH    </span> <a href="#474F4C4F43">GOLOC</a>      +1                         <span class="co">#  RESTORE OUR E AND F BANK</span>
-051175,000214:    5543           22006                           <span class="op">LXCH    </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4242">BB</a>                                    <span class="co">#  RESTORE THE TASKS E AND F BANKS</span>
-051176,000215:    5544           22706                           <span class="op">LXCH    </span> <a href="#474F4C4F43">GOLOC</a>      +1                         <span class="co">#  AND PRESERVE OUR L</span>
-051177,000216:    5545           13475                           <span class="op">TCF     </span> <a href="#4954534C47434C32">ITSLGCL2</a>                              <span class="co">#  NOW LET:S PROCESS THIS LONGCALL</span>
-051178,000217: 
-051179,000218:                                                                                                  <span class="co">#  ***** YOU MAY RETURN TO SWITCHED FIXED *****</span>
-051180,000219: 
-051181,000220: 01,3475                                           <span class="ps">BANK    </span> 01                                    
-051182,000221: 01,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#52455354415254">RESTART</a>                               
-051183,000222: 01,2000                                           <span class="ps">BANK    </span>                                       
-051184,000223: 
-051185,000224: 01,3475                                           <span class="ps">COUNT*  </span> $$/RSROU                              
-<a name="4954534C47434C32"></a>051186,000225: 01,3475           53165        <span class="sm">ITSLGCL2</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>                              
-051187,000226: 
-051188,000227: 01,3476           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  CALCULATE TIME LEFT</span>
-051189,000228: 01,3477           40025                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 
-051190,000229: 01,3500           21165                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>                              
-051191,000230: 01,3501           00006                           <span class="op">EXTEND  </span>                                       
-051192,000231: 01,3502           31163                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4742415345">LONGBASE</a>                              
-051193,000232: 01,3503           21165                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>                              
-051194,000233: 
-051195,000234: 01,3504           11164                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>                              <span class="co">#  FIND OUT HOW THIS SHOULD BE RESTARTED</span>
-051196,000235: 01,3505           13515                           <span class="op">TCF     </span> <a href="#4C4F4E47434C434C">LONGCLCL</a>                              
-051197,000236: 01,3506           13510                           <span class="op">TCF     </span> +2                                    
-051198,000237: 01,3507           13403                           <span class="op">TCF     </span> <a href="#494D454449415445">IMEDIATE</a>   -3                         
-051199,000238: 01,3510           11165                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>   +1                         
-051200,000239: 01,3511           13515                           <span class="op">TCF     </span> <a href="#4C4F4E47434C434C">LONGCLCL</a>                              
-051201,000240: 01,3512           13513                           <span class="op">NOOP    </span>                                       <span class="co">#  CAN:T GET HERE *********</span>
-051202,000241: 01,3513           13403                           <span class="op">TCF     </span> <a href="#494D454449415445">IMEDIATE</a>   -3                         
-051203,000242: 01,3514           13406                           <span class="op">TCF     </span> <a href="#494D454449415445">IMEDIATE</a>                              
-051204,000243: 
-<a name="4C4F4E47434C434C"></a>051205,000244: 01,3515           33560        <span class="sm">LONGCLCL</span>           <span class="op">CA      </span> <a href="#4C47434C43414452">LGCLCADR</a>                              <span class="co">#  WE WILL GO TO LONGCALL</span>
-051206,000245: 01,3516           54704                           <span class="op">TS      </span> <a href="#474F4C4F43">GOLOC</a>      -1                         
-051207,000246: 
-051208,000247: 01,3517           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  PREPARE OUR ENTRY TO LONGCALL</span>
-051209,000248: 01,3520           31165                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>                              
-051210,000249: 01,3521           00704                           <span class="op">TC      </span> <a href="#474F4C4F43">GOLOC</a>      -1                         
-051211,000250: 
-<a name="4954534C4E47434C"></a>051212,000251: 01,3522           33562        <span class="sm">ITSLNGCL</span>           <span class="op">CA      </span> <a href="#57544C5443414452">WTLTCADR</a>                              <span class="co">#  ASSUME IT WILL GO TO WAITLIST</span>
-051213,000252: 01,3523           54704                           <span class="op">TS      </span> <a href="#474F4C4F43">GOLOC</a>      -1                         
-051214,000253: 
-051215,000254: 01,3524           50155                           <span class="op">NDX     </span> <a href="#54454D503247">TEMP2G</a>                                
-051216,000255: 01,3525           41055                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5048535052445431">PHSPRDT1</a>                              <span class="co">#  GET THE DELTA T ADDRESS</span>
-051217,000256: 
-051218,000257: 01,3526           15534                           <span class="op">TCF     </span> <a href="#4954534C47434C31">ITSLGCL1</a>                              <span class="co">#  NOW GET THE DELTA TIME</span>
-051219,000258: 
-<a name="49545357544C5354"></a>051220,000259: 01,3527           40706        <span class="sm">ITSWTLST</span>           <span class="op">CS      </span> <a href="#474F4C4F43">GOLOC</a>      +1                         <span class="co">#  CORRECT THE BBCON INFORMATION</span>
-051221,000260: 01,3530           54706                           <span class="op">TS      </span> <a href="#474F4C4F43">GOLOC</a>      +1                         
-051222,000261: 
-051223,000262: 01,3531           50156                           <span class="op">NDX     </span> <a href="#504F494E544552">POINTER</a>                               <span class="co">#  GET THE DT AND FIND OUT IF IT WAS STORED</span>
-051224,000263: 01,3532           32000                           <span class="op">CA      </span> <a href="RESTART_TABLES.agc.html#50524454544142">PRDTTAB</a>                               <span class="co">#  DIRECTLY OR INDIRECTLY</span>
-051225,000264: 
-051226,000265: 01,3533           13362                           <span class="op">TCF     </span> <a href="#54494D4554455354">TIMETEST</a>                              <span class="co">#  FIND OUT HOW THE TIME IS STORED</span>
-051227,000266: 
-<a name="495453414A4F4232"></a>051228,000267: 01,3534           56705        <span class="sm">ITSAJOB2</span>           <span class="op">XCH     </span> <a href="#474F4C4F43">GOLOC</a>                                 <span class="co">#  STORE THE CADR</span>
-051229,000268: 
-051230,000269: 01,3535           50156                           <span class="op">NDX     </span> <a href="#504F494E544552">POINTER</a>                               <span class="co">#  ADD THE PRIORITY AND LET:S GO</span>
-051231,000270: 01,3536           32000                           <span class="op">CA      </span> <a href="RESTART_TABLES.agc.html#50524454544142">PRDTTAB</a>                               
-051232,000271: 
-051233,000272: 01,3537           13425                           <span class="op">TCF     </span> <a href="#43484B4E4F564143">CHKNOVAC</a>                              
-051234,000273: 
-<a name="4954534556454E"></a>051235,000274: 01,3540           30157        <span class="sm">ITSEVEN </span>           <span class="op">CA      </span> <a href="#54454D5053574348">TEMPSWCH</a>                              <span class="co">#  SET UP FOR EITHER THE SECOND PART OF THE</span>
-051236,000275: 01,3541           54707                           <span class="op">TS      </span> <a href="#474F4C4F43">GOLOC</a>      +2                         <span class="co">#  TABLE, OR A RETURN FOR THE NEXT GROUP</span>
-051237,000276: 
-051238,000277: 01,3542           50155                           <span class="op">NDX     </span> <a href="#54454D503247">TEMP2G</a>                                <span class="co">#  SET UP POINTER FOR OUR LOCATION WITHIN</span>
-051239,000278: 01,3543           32000                           <span class="op">CA      </span> <a href="RESTART_TABLES.agc.html#53495A45544142">SIZETAB</a>                               <span class="co">#  THE TABLE</span>
-051240,000279: 01,3544           60154                           <span class="op">AD      </span> <a href="#54454D50504853">TEMPPHS</a>                               <span class="co">#  THIS MAY LOOK BAD BUT LET:S SEE YOU DO</span>
-051241,000280: 01,3545           60154                           <span class="op">AD      </span> <a href="#54454D50504853">TEMPPHS</a>                               <span class="co">#  BETTER IN TIME OR NUMBERR OF LOCATIONS</span>
-051242,000281: 01,3546           60154                           <span class="op">AD      </span> <a href="#54454D50504853">TEMPPHS</a>                               
-051243,000282: 01,3547           54156                           <span class="op">TS      </span> <a href="#504F494E544552">POINTER</a>                               
-051244,000283: 
-051245,000284: 01,3550           13453                           <span class="op">TCF     </span> <a href="#434F4E54424C32">CONTBL2</a>                               <span class="co">#  NOW PROCESS WHAT IS IN THE TABLE</span>
-051246,000285: 
-<a name="5048535041525432"></a>051247,000286: 01,3551           36221        <span class="sm">PHSPART2</span>           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5448524545">THREE</a>                                 <span class="co">#  SET THE POINTER FOR THE SECOND HALF OF</span>
-051248,000287: 01,3552           26156                           <span class="op">ADS     </span> <a href="#504F494E544552">POINTER</a>                               <span class="co">#  THE TABLE</span>
-051249,000288: 
-051250,000289: 01,3553           33353                           <span class="op">CA      </span> <a href="#5254524E43414452">RTRNCADR</a>                              <span class="co">#  THIS WILL BE OUR LAST TIME THROUGH THE</span>
-051251,000290: 01,3554           54707                           <span class="op">TS      </span> <a href="#474F4C4F43">GOLOC</a>      +2                         <span class="co">#  EVEN TABLE, SO AFTER IT GET THE NEXT</span>
-051252,000291:                                                                                                  <span class="co">#  GROUP</span>
-051253,000292: 01,3555           13453                           <span class="op">TCF     </span> <a href="#434F4E54424C32">CONTBL2</a>                               <span class="co">#  SO LET:S GET THE SECOND ENTRY IN THE TBL</span>
-051254,000293: 
-<a name="54454D50504853"></a>051255,000294: 01,3556     0154               <span class="sm">TEMPPHS </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-<a name="54454D503247"></a>051256,000295: 01,3556     0155               <span class="sm">TEMP2G  </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
-<a name="504F494E544552"></a>051257,000296: 01,3556     0156               <span class="sm">POINTER </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
-<a name="54454D5053574348"></a>051258,000297: 01,3556     0157               <span class="sm">TEMPSWCH</span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +3                         
-<a name="474F4C4F43"></a>051259,000298: 01,3556     0705               <span class="sm">GOLOC   </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56414335">VAC5</a>       +20D                       
-<a name="4D494E555332"></a>051260,000299: 01,3556     7720               <span class="sm">MINUS2  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454732">NEG2</a>                                  
-<a name="4F4354313737"></a>051261,000300: 01,3556     6050               <span class="sm">OCT177  </span>           <span class="ps">EQUALS  </span> <a href="INTERPRETER.agc.html#4C4F5737">LOW7</a>                                  
-051262,000301: 
-<a name="5048533243414452"></a>051263,000302: 01,3556           03551        <span class="sm">PHS2CADR</span>           <span class="ps">GENADR  </span> <a href="#5048535041525432">PHSPART2</a>                              
-<a name="5052543243414452"></a>051264,000303: 01,3557           03327        <span class="sm">PRT2CADR</span>           <span class="ps">GENADR  </span> <a href="#4745545041525432">GETPART2</a>                              
-<a name="4C47434C43414452"></a>051265,000304: 01,3560           05337        <span class="sm">LGCLCADR</span>           <span class="ps">GENADR  </span> <a href="WAITLIST.agc.html#4C4F4E4743414C4C">LONGCALL</a>                              
-<a name="4656414343414452"></a>051266,000305: 01,3561           05155        <span class="sm">FVACCADR</span>           <span class="ps">GENADR  </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               
-<a name="57544C5443414452"></a>051267,000306: 01,3562           05252        <span class="sm">WTLTCADR</span>           <span class="ps">GENADR  </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-<a name="4E4F564143414452"></a>051268,000307: 01,3563           05142        <span class="sm">NOVACADR</span>           <span class="ps">GENADR  </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
-051269,000308: 
-051270,000309: 
+050991,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+050992,000003:                                                                                                  <span class="co">## Filename:    RESTARTS_ROUTINE.agc</span>
+050993,000004:                                                                                                  <span class="co">## Purpose:     A section of a reconstructed, mixed version of Sundance</span>
+050994,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the Lunar</span>
+050995,000006:                                                                                                  <span class="co">##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 9.</span>
+050996,000007:                                                                                                  <span class="co">##              No original listings of this program are available;</span>
+050997,000008:                                                                                                  <span class="co">##              instead, this file was created via disassembly of dumps</span>
+050998,000009:                                                                                                  <span class="co">##              of various revisions of Sundance core rope modules.</span>
+050999,000010:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+051000,000011:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+051001,000012:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+051002,000013:                                                                                                  <span class="co">## Mod history: 2020-06-17 MAS  Created from Luminary 69.</span>
+051003,000014: 
+051004,000015:                                                                                                  <span class="co">## Sundance 292</span>
+051005,000016: 
+051006,000017: 01,3314                                           <span class="ps">BANK    </span> 01                                    
+051007,000018: 01,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#52455354415254">RESTART</a>                               
+051008,000019: 01,2000                                           <span class="ps">BANK    </span>                                       
+051009,000020: 
+051010,000021: 01,3314  E3,1436                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5048534E414D4531">PHSNAME1</a>                              <span class="co">#  GOPROG MUST SWITCH TO THIS EBANK</span>
+051011,000022: 
+051012,000023: 01,3314                                           <span class="ps">COUNT*  </span> $$/RSROU                              
+<a name="5245535441525453"></a>051013,000024: 01,3314           30161        <span class="sm">RESTARTS</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         <span class="co">#  GET GROUP NUMBER -1</span>
+051014,000025: 01,3315           60000                           <span class="op">DOUBLE  </span>                                       <span class="co">#  SAVE FOR INDEXING</span>
+051015,000026: 01,3316           54155                           <span class="op">TS      </span> <a href="#54454D503247">TEMP2G</a>                                
+051016,000027: 
+051017,000028: 01,3317           33556                           <span class="op">CA      </span> <a href="#5048533243414452">PHS2CADR</a>                              <span class="co">#  SET UP EXIT IN CASE IT IS AN EVEN</span>
+051018,000029: 01,3320           54157                           <span class="op">TS      </span> <a href="#54454D5053574348">TEMPSWCH</a>                              <span class="co">#  TABLE PHASE</span>
+051019,000030: 
+051020,000031: 01,3321           33353                           <span class="op">CA      </span> <a href="#5254524E43414452">RTRNCADR</a>                              <span class="co">#  TO SAVE TIME ASSUME IT WILL GET NEXT</span>
+051021,000032: 01,3322           54707                           <span class="op">TS      </span> <a href="#474F4C4F43">GOLOC</a>      +2                         <span class="co">#  GROUP AFTER THIS</span>
+051022,000033: 
+051023,000034: 01,3323           30154                           <span class="op">CA      </span> <a href="#54454D50504853">TEMPPHS</a>                               
+051024,000035: 01,3324           75057                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F435431343030">OCT1400</a>                               
+051025,000036: 01,3325           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IS IT A VARIABLE OR TABLE RESTART</span>
+051026,000037: 01,3326           13337                           <span class="op">TCF     </span> <a href="#49545341564152">ITSAVAR</a>                               <span class="co">#  IT:S A VARIABLE RESTART</span>
+051027,000038: 
+<a name="4745545041525432"></a>051028,000039: 01,3327           10154        <span class="sm">GETPART2</span>           <span class="op">CCS     </span> <a href="#54454D50504853">TEMPPHS</a>                               <span class="co">#  IS IT AN X.1 RESTART</span>
+051029,000040: 01,3330           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+051030,000041: 01,3331           13437                           <span class="op">TCF     </span> <a href="#4954534154424C">ITSATBL</a>                               <span class="co">#  NO, ITS A TABLE RESTART</span>
+051031,000042: 
+051032,000043: 01,3332           35074                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3134">PRIO14</a>                                <span class="co">#  IT IS AN X.1 RESTART, THEREFORE START</span>
+051033,000044: 01,3333           05155                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               <span class="co">#  THE DISPLAY RESTART JOB</span>
+051034,000045: 01,3334  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
+051035,000046: 01,3334           02735 20103                     <span class="ps">2CADR   </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#494E4954445350">INITDSP</a>                               
+051036,000047: 
+051037,000048: 01,3336           03353                           <span class="op">TC      </span> <a href="#5254524E43414452">RTRNCADR</a>                              <span class="co">#  FINISHED WITH THIS GROUP, GET NEXT ONE</span>
+051038,000049: 
+<a name="49545341564152"></a>051039,000050: 01,3337           75057        <span class="sm">ITSAVAR </span>           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F435431343030">OCT1400</a>                               <span class="co">#  IS IT TYPE B ?</span>
+051040,000051: 01,3340           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+051041,000052: 01,3341           13410                           <span class="op">TCF     </span> <a href="#4954534C494B4542">ITSLIKEB</a>                              <span class="co">#  YES, IT IS TYPE B</span>
+051042,000053: 
+051043,000054: 01,3342           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  STORE THE JOB (OR TASK) 2CADR FOR EXIT</span>
+051044,000055: 01,3343           50155                           <span class="op">NDX     </span> <a href="#54454D503247">TEMP2G</a>                                
+051045,000056: 01,3344           31437                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5048534E414D4531">PHSNAME1</a>                              
+051046,000057: 01,3345           52706                           <span class="op">DXCH    </span> <a href="#474F4C4F43">GOLOC</a>                                 
+051047,000058: 
+051048,000059: 01,3346           30154                           <span class="op">CA      </span> <a href="#54454D50504853">TEMPPHS</a>                               <span class="co">#  SEE IF THIS IS A JOB, TASK, OR A LONGCAL</span>
+051049,000060: 01,3347           75032                           <span class="op">MASK    </span> <a href="SERVICE_ROUTINES.agc.html#4F435437">OCT7</a>                                  
+051050,000061: 01,3350           67720                           <span class="op">AD      </span> <a href="#4D494E555332">MINUS2</a>                                
+051051,000062: 01,3351           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+051052,000063: 01,3352           13522                           <span class="op">TCF     </span> <a href="#4954534C4E47434C">ITSLNGCL</a>                              <span class="co">#  ITS A LONGCALL</span>
+051053,000064: 
+<a name="5254524E43414452"></a>051054,000065: 01,3353           04670        <span class="sm">RTRNCADR</span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#535752455455524E">SWRETURN</a>                              <span class="co">#  CANT GET HERE</span>
+051055,000066: 01,3354           13356                           <span class="op">TCF     </span> <a href="#4954534157414954">ITSAWAIT</a>                              
+051056,000067: 
+051057,000068: 01,3355           13423                           <span class="op">TCF     </span> <a href="#495453414A4F42">ITSAJOB</a>                               <span class="co">#  ITS A JOB</span>
+051058,000069: 
+<a name="4954534157414954"></a>051059,000070: 01,3356           33562        <span class="sm">ITSAWAIT</span>           <span class="op">CA      </span> <a href="#57544C5443414452">WTLTCADR</a>                              <span class="co">#  SET UP WAITLIST CALL</span>
+051060,000071: 01,3357           54704                           <span class="op">TS      </span> <a href="#474F4C4F43">GOLOC</a>      -1                         
+051061,000072: 
+051062,000073: 01,3360           50155                           <span class="op">NDX     </span> <a href="#54454D503247">TEMP2G</a>                                <span class="co">#  DIRECTLY STORED</span>
+051063,000074: 01,3361           31055                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5048535052445431">PHSPRDT1</a>                              
+<a name="54494D4554455354"></a>051064,000075: 01,3362           10000        <span class="sm">TIMETEST</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IS IT AN IMMEDIATE RESTART</span>
+051065,000076: 01,3363           24000                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  NO,</span>
+051066,000077: 01,3364           13367                           <span class="op">TCF     </span> <a href="#46494E4454494D45">FINDTIME</a>                              <span class="co">#  FIND OUT WHEN IT SHOULD BEGIN</span>
+051067,000078: 
+051068,000079: 01,3365           15525                           <span class="op">TCF     </span> <a href="#495453494E444952">ITSINDIR</a>                              <span class="co">#  STORED INDIRECTLY</span>
+051069,000080: 
+051070,000081: 01,3366           13406                           <span class="op">TCF     </span> <a href="#494D454449415445">IMEDIATE</a>                              <span class="co">#  IT WANTS AN IMMEDIATE RESTART</span>
+051071,000082: 
+051072,000083:                                                                                                  <span class="co">#  ***** THIS MUST BE IN FIXED FIXED *****</span>
+051073,000084: 
+051074,000085:    5525                                           <span class="ps">BLOCK   </span> 02                                    
+051075,000086:    4000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#464654414732">FFTAG2</a>                                
+051076,000087:    4000                                           <span class="ps">BANK    </span>                                       
+051077,000088: 
+051078,000089:    5525                                           <span class="ps">COUNT*  </span> $$/RSROU                              
+<a name="495453494E444952"></a>051079,000090:    5525           22706        <span class="sm">ITSINDIR</span>           <span class="op">LXCH    </span> <a href="#474F4C4F43">GOLOC</a>      +1                         <span class="co">#  GET THE CORRECT E BANK IN CASE THIS IS</span>
+051080,000091:    5526           22006                           <span class="op">LXCH    </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4242">BB</a>                                    <span class="co">#  SWITCHED ERRASIBLE</span>
+051081,000092: 
+051082,000093:    5527           50000                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  GET THE TIME INDIRECTLY</span>
+051083,000094:    5530           30001                           <span class="op">CA      </span> 1                                     
+051084,000095: 
+051085,000096:    5531           22006                           <span class="op">LXCH    </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4242">BB</a>                                    <span class="co">#  RESTORE THE BB AND GOLOC</span>
+051086,000097:    5532           22706                           <span class="op">LXCH    </span> <a href="#474F4C4F43">GOLOC</a>      +1                         
+051087,000098: 
+051088,000099:    5533           13367                           <span class="op">TCF     </span> <a href="#46494E4454494D45">FINDTIME</a>                              <span class="co">#  FIND OUT WHEN IT SHOULD BEGIN</span>
+051089,000100: 
+051090,000101:                                                                                                  <span class="co">#  ***** YOU MAY RETURN TO SWITCHED FIXED *****</span>
+051091,000102: 
+051092,000103: 01,3367                                           <span class="ps">BANK    </span> 01                                    
+051093,000104: 01,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#52455354415254">RESTART</a>                               
+051094,000105: 01,2000                                           <span class="ps">BANK    </span>                                       
+051095,000106: 
+051096,000107: 01,3367                                           <span class="ps">COUNT*  </span> $$/RSROU                              
+<a name="46494E4454494D45"></a>051097,000108: 01,3367           40000        <span class="sm">FINDTIME</span>           <span class="op">COM     </span>                                       <span class="co">#  MAKE NEGITIVE SINCE IT WILL BE SUBTRACTD</span>
+051098,000109: 01,3370           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  AND SAVE</span>
+051099,000110: 01,3371           50155                           <span class="op">NDX     </span> <a href="#54454D503247">TEMP2G</a>                                
+051100,000111: 01,3372           41054                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544241534531">TBASE1</a>                                
+051101,000112: 01,3373           00006                           <span class="op">EXTEND  </span>                                       
+051102,000113: 01,3374           60025                           <span class="op">SU      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 
+051103,000114: 01,3375           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+051104,000115: 01,3376           40000                           <span class="op">COM     </span>                                       
+051105,000116: 01,3377           67703                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543337373736">OCT37776</a>                              
+051106,000117: 01,3400           65026                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+051107,000118: 01,3401           60001                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+051108,000119: 01,3402           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+051109,000120: 01,3403           35030                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+051110,000121: 01,3404           13406                           <span class="op">TCF     </span> +2                                    
+051111,000122: 01,3405           13406                           <span class="op">TCF     </span> +1                                    
+<a name="494D454449415445"></a>051112,000123: 01,3406           65026        <span class="sm">IMEDIATE</span>           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+051113,000124: 01,3407           00704                           <span class="op">TC      </span> <a href="#474F4C4F43">GOLOC</a>      -1                         
+<a name="4954534C494B4542"></a>051114,000125: 01,3410           33353        <span class="sm">ITSLIKEB</span>           <span class="op">CA      </span> <a href="#5254524E43414452">RTRNCADR</a>                              <span class="co">#  TYPE B,             SO STORE RETURN IN</span>
+051115,000126: 01,3411           54157                           <span class="op">TS      </span> <a href="#54454D5053574348">TEMPSWCH</a>                              <span class="co">#  TEMPSWCH IN CASE OF AN EVEN PHASE</span>
+051116,000127: 
+051117,000128: 01,3412           33557                           <span class="op">CA      </span> <a href="#5052543243414452">PRT2CADR</a>                              <span class="co">#  SET UP EXIT TO GET TABLE PART OF THIS</span>
+051118,000129: 01,3413           54707                           <span class="op">TS      </span> <a href="#474F4C4F43">GOLOC</a>      +2                         <span class="co">#  VARIABLE TYPE OF PHASE</span>
+051119,000130: 
+051120,000131: 01,3414           30154                           <span class="op">CA      </span> <a href="#54454D50504853">TEMPPHS</a>                               <span class="co">#  MAKE THE PHASE LOOK RIGHT FOR THE TABLE</span>
+051121,000132: 01,3415           76050                           <span class="op">MASK    </span> <a href="#4F4354313737">OCT177</a>                                <span class="co">#  PART OF THIS VARIABLE PHASE</span>
+051122,000133: 01,3416           54154                           <span class="op">TS      </span> <a href="#54454D50504853">TEMPPHS</a>                               
+051123,000134: 
+051124,000135: 01,3417           00006                           <span class="op">EXTEND  </span>                                       
+051125,000136: 01,3420           50155                           <span class="op">NDX     </span> <a href="#54454D503247">TEMP2G</a>                                <span class="co">#  OBTAIN THE JOB:S 2CADR</span>
+051126,000137: 01,3421           31437                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5048534E414D4531">PHSNAME1</a>                              
+051127,000138: 01,3422           52706                           <span class="op">DXCH    </span> <a href="#474F4C4F43">GOLOC</a>                                 
+051128,000139: 
+<a name="495453414A4F42"></a>051129,000140: 01,3423           50155        <span class="sm">ITSAJOB </span>           <span class="op">NDX     </span> <a href="#54454D503247">TEMP2G</a>                                <span class="co">#  NOW ADD THE PRIORITY AND LET:S GO</span>
+051130,000141: 01,3424           31055                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5048535052445431">PHSPRDT1</a>                              
+<a name="43484B4E4F564143"></a>051131,000142: 01,3425           54704        <span class="sm">CHKNOVAC</span>           <span class="op">TS      </span> <a href="#474F4C4F43">GOLOC</a>      -1                         <span class="co">#  SAVE PRIO UNTIL WE SEE IF ITS</span>
+051132,000143: 01,3426           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  A FINDVAC OR A NOVAC</span>
+051133,000144: 01,3427           63433                           <span class="op">BZMF    </span> <a href="#4954534E4F564143">ITSNOVAC</a>                              
+051134,000145: 
+051135,000146: 01,3430           33561                           <span class="op">CAF     </span> <a href="#4656414343414452">FVACCADR</a>                              <span class="co">#  POSITIVE, SET UP FINDVAC CALL.</span>
+051136,000147: 01,3431           56704                           <span class="op">XCH     </span> <a href="#474F4C4F43">GOLOC</a>      -1                         <span class="co">#  PICK UP PRIO,</span>
+051137,000148: 01,3432           00704                           <span class="op">TC      </span> <a href="#474F4C4F43">GOLOC</a>      -1                         <span class="co">#  AND GO</span>
+051138,000149: 
+<a name="4954534E4F564143"></a>051139,000150: 01,3433           33563        <span class="sm">ITSNOVAC</span>           <span class="op">CAF     </span> <a href="#4E4F564143414452">NOVACADR</a>                              <span class="co">#  NEGATIVE,</span>
+051140,000151: 01,3434           56704                           <span class="op">XCH     </span> <a href="#474F4C4F43">GOLOC</a>      -1                         <span class="co">#  SET UP NOVAC CALL,</span>
+051141,000152: 01,3435           40000                           <span class="op">COM     </span>                                       <span class="co">#  CORRECT PRIO,</span>
+051142,000153: 01,3436           00704                           <span class="op">TC      </span> <a href="#474F4C4F43">GOLOC</a>      -1                         <span class="co">#  AND GO</span>
+051143,000154: 
+<a name="4954534154424C"></a>051144,000155: 01,3437           54020        <span class="sm">ITSATBL </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#435952">CYR</a>                                   <span class="co">#  FIND OUT IF THE PHASE IS ODD OR EVEN</span>
+051145,000156: 01,3440           10020                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#435952">CYR</a>                                   
+051146,000157: 01,3441           13442                           <span class="op">TCF     </span> +1                                    <span class="co">#  IT:S EVEN</span>
+051147,000158: 01,3442           13540                           <span class="op">TCF     </span> <a href="#4954534556454E">ITSEVEN</a>                               
+051148,000159: 
+051149,000160: 01,3443           33353                           <span class="op">CA      </span> <a href="#5254524E43414452">RTRNCADR</a>                              <span class="co">#  IN CASE THIS IS THE SECOND PART OF A</span>
+051150,000161: 01,3444           54707                           <span class="op">TS      </span> <a href="#474F4C4F43">GOLOC</a>      +2                         <span class="co">#  TYPE B RESTART, WE NEED PROPER EXIT</span>
+051151,000162: 
+051152,000163: 01,3445           30154                           <span class="op">CA      </span> <a href="#54454D50504853">TEMPPHS</a>                               <span class="co">#  SET UP POINTER FOR FINDING OUR PLACE IN</span>
+051153,000164: 01,3446           54021                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    <span class="co">#  THE RESTART TABLES</span>
+051154,000165: 01,3447           60021                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    
+051155,000166: 01,3450           50155                           <span class="op">NDX     </span> <a href="#54454D503247">TEMP2G</a>                                
+051156,000167: 01,3451           62001                           <span class="op">AD      </span> <a href="RESTART_TABLES.agc.html#53495A45544142">SIZETAB</a>    +1                         
+051157,000168: 01,3452           54156                           <span class="op">TS      </span> <a href="#504F494E544552">POINTER</a>                               
+051158,000169: 
+<a name="434F4E54424C32"></a>051159,000170: 01,3453           00006        <span class="sm">CONTBL2 </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  FIND OUT WHAT:S IN THE TABLE</span>
+051160,000171: 01,3454           50156                           <span class="op">NDX     </span> <a href="#504F494E544552">POINTER</a>                               
+051161,000172: 01,3455           32002                           <span class="op">DCA     </span> <a href="RESTART_TABLES.agc.html#43414452544142">CADRTAB</a>                               <span class="co">#  GET THE 2CADR</span>
+051162,000173: 
+051163,000174: 01,3456           22706                           <span class="op">LXCH    </span> <a href="#474F4C4F43">GOLOC</a>      +1                         <span class="co">#  STORE THE BB INFORMATION</span>
+051164,000175: 
+051165,000176: 01,3457           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IS IT A JOB OR IS IT  TIMED</span>
+051166,000177: 01,3460           24000                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  POSITIVE, MUST BE A JOB</span>
+051167,000178: 01,3461           13534                           <span class="op">TCF     </span> <a href="#495453414A4F4232">ITSAJOB2</a>                              
+051168,000179: 
+051169,000180: 01,3462           24000                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  MUST BE EITHER A WAITLIST OR LONGCALL</span>
+051170,000181: 01,3463           54705                           <span class="op">TS      </span> <a href="#474F4C4F43">GOLOC</a>                                 <span class="co">#  LET-S STORE THE CORRECT CADR</span>
+051171,000182: 
+051172,000183: 01,3464           33562                           <span class="op">CA      </span> <a href="#57544C5443414452">WTLTCADR</a>                              <span class="co">#  SET UP OUR EXIT TO WAITLIST</span>
+051173,000184: 01,3465           54704                           <span class="op">TS      </span> <a href="#474F4C4F43">GOLOC</a>      -1                         
+051174,000185: 
+051175,000186: 01,3466           30706                           <span class="op">CA      </span> <a href="#474F4C4F43">GOLOC</a>      +1                         <span class="co">#  NOW FIND OUT IF IT IS A WAITLIST CALL</span>
+051176,000187: 01,3467           75015                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543130">BIT10</a>                                 <span class="co">#  THIS SHOULD BE ONE IF WE HAVE -BB</span>
+051177,000188: 01,3470           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  FOR THAT MATTER SO SHOULD BE BITS 9,8,7,</span>
+051178,000189:                                                                                                  <span class="co">#  6,5, AND LAST BUT NOT LEAST (PERHAPS NOT</span>
+051179,000190:                                                                                                  <span class="co">#  IN IMPORTANCE ANYWAY.  BIT 4</span>
+051180,000191: 01,3471           13527                           <span class="op">TCF     </span> <a href="#49545357544C5354">ITSWTLST</a>                              <span class="co">#  IT IS A WAITLIST CALL</span>
+051181,000192: 
+051182,000193: 01,3472           50156                           <span class="op">NDX     </span> <a href="#504F494E544552">POINTER</a>                               <span class="co">#  OBTAIN THE ORIGINAL DELTA T</span>
+051183,000194: 01,3473           32000                           <span class="op">CA      </span> <a href="RESTART_TABLES.agc.html#50524454544142">PRDTTAB</a>                               <span class="co">#  ADDRESS FOR THIS LONGCALL</span>
+051184,000195: 
+051185,000196: 01,3474           15534                           <span class="op">TCF     </span> <a href="#4954534C47434C31">ITSLGCL1</a>                              <span class="co">#  NOW GO GET THE DELTA TIME</span>
+051186,000197: 
+051187,000198:                                                                                                  <span class="co">#  ***** THIS MUST BE IN FIXED FIXED *****</span>
+051188,000199: 
+051189,000200:    5534                                           <span class="ps">BLOCK   </span> 02                                    
+051190,000201:    4000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#464654414732">FFTAG2</a>                                
+051191,000202:    4000                                           <span class="ps">BANK    </span>                                       
+051192,000203: 
+051193,000204:    5534                                           <span class="ps">COUNT*  </span> $$/RSROU                              
+<a name="4954534C47434C31"></a>051194,000205:    5534           22706        <span class="sm">ITSLGCL1</span>           <span class="op">LXCH    </span> <a href="#474F4C4F43">GOLOC</a>      +1                         <span class="co">#  OBTAIN THE CORRECT E BANK</span>
+051195,000206:    5535           22006                           <span class="op">LXCH    </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4242">BB</a>                                    
+051196,000207:    5536           22706                           <span class="op">LXCH    </span> <a href="#474F4C4F43">GOLOC</a>      +1                         <span class="co">#  AND PRESERVE OUR E AND F BANKS</span>
+051197,000208: 
+051198,000209:    5537           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  GET THE DELTA TIME</span>
+051199,000210:    5540           50000                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+051200,000211:    5541           30001                           <span class="op">DCA     </span> 0                                     
+051201,000212: 
+051202,000213:    5542           22706                           <span class="op">LXCH    </span> <a href="#474F4C4F43">GOLOC</a>      +1                         <span class="co">#  RESTORE OUR E AND F BANK</span>
+051203,000214:    5543           22006                           <span class="op">LXCH    </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4242">BB</a>                                    <span class="co">#  RESTORE THE TASKS E AND F BANKS</span>
+051204,000215:    5544           22706                           <span class="op">LXCH    </span> <a href="#474F4C4F43">GOLOC</a>      +1                         <span class="co">#  AND PRESERVE OUR L</span>
+051205,000216:    5545           13475                           <span class="op">TCF     </span> <a href="#4954534C47434C32">ITSLGCL2</a>                              <span class="co">#  NOW LET:S PROCESS THIS LONGCALL</span>
+051206,000217: 
+051207,000218:                                                                                                  <span class="co">#  ***** YOU MAY RETURN TO SWITCHED FIXED *****</span>
+051208,000219: 
+051209,000220: 01,3475                                           <span class="ps">BANK    </span> 01                                    
+051210,000221: 01,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#52455354415254">RESTART</a>                               
+051211,000222: 01,2000                                           <span class="ps">BANK    </span>                                       
+051212,000223: 
+051213,000224: 01,3475                                           <span class="ps">COUNT*  </span> $$/RSROU                              
+<a name="4954534C47434C32"></a>051214,000225: 01,3475           53165        <span class="sm">ITSLGCL2</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>                              
+051215,000226: 
+051216,000227: 01,3476           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  CALCULATE TIME LEFT</span>
+051217,000228: 01,3477           40025                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 
+051218,000229: 01,3500           21165                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>                              
+051219,000230: 01,3501           00006                           <span class="op">EXTEND  </span>                                       
+051220,000231: 01,3502           31163                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4742415345">LONGBASE</a>                              
+051221,000232: 01,3503           21165                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>                              
+051222,000233: 
+051223,000234: 01,3504           11164                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>                              <span class="co">#  FIND OUT HOW THIS SHOULD BE RESTARTED</span>
+051224,000235: 01,3505           13515                           <span class="op">TCF     </span> <a href="#4C4F4E47434C434C">LONGCLCL</a>                              
+051225,000236: 01,3506           13510                           <span class="op">TCF     </span> +2                                    
+051226,000237: 01,3507           13403                           <span class="op">TCF     </span> <a href="#494D454449415445">IMEDIATE</a>   -3                         
+051227,000238: 01,3510           11165                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>   +1                         
+051228,000239: 01,3511           13515                           <span class="op">TCF     </span> <a href="#4C4F4E47434C434C">LONGCLCL</a>                              
+051229,000240: 01,3512           13513                           <span class="op">NOOP    </span>                                       <span class="co">#  CAN:T GET HERE *********</span>
+051230,000241: 01,3513           13403                           <span class="op">TCF     </span> <a href="#494D454449415445">IMEDIATE</a>   -3                         
+051231,000242: 01,3514           13406                           <span class="op">TCF     </span> <a href="#494D454449415445">IMEDIATE</a>                              
+051232,000243: 
+<a name="4C4F4E47434C434C"></a>051233,000244: 01,3515           33560        <span class="sm">LONGCLCL</span>           <span class="op">CA      </span> <a href="#4C47434C43414452">LGCLCADR</a>                              <span class="co">#  WE WILL GO TO LONGCALL</span>
+051234,000245: 01,3516           54704                           <span class="op">TS      </span> <a href="#474F4C4F43">GOLOC</a>      -1                         
+051235,000246: 
+051236,000247: 01,3517           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  PREPARE OUR ENTRY TO LONGCALL</span>
+051237,000248: 01,3520           31165                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4754494D45">LONGTIME</a>                              
+051238,000249: 01,3521           00704                           <span class="op">TC      </span> <a href="#474F4C4F43">GOLOC</a>      -1                         
+051239,000250: 
+<a name="4954534C4E47434C"></a>051240,000251: 01,3522           33562        <span class="sm">ITSLNGCL</span>           <span class="op">CA      </span> <a href="#57544C5443414452">WTLTCADR</a>                              <span class="co">#  ASSUME IT WILL GO TO WAITLIST</span>
+051241,000252: 01,3523           54704                           <span class="op">TS      </span> <a href="#474F4C4F43">GOLOC</a>      -1                         
+051242,000253: 
+051243,000254: 01,3524           50155                           <span class="op">NDX     </span> <a href="#54454D503247">TEMP2G</a>                                
+051244,000255: 01,3525           41055                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5048535052445431">PHSPRDT1</a>                              <span class="co">#  GET THE DELTA T ADDRESS</span>
+051245,000256: 
+051246,000257: 01,3526           15534                           <span class="op">TCF     </span> <a href="#4954534C47434C31">ITSLGCL1</a>                              <span class="co">#  NOW GET THE DELTA TIME</span>
+051247,000258: 
+<a name="49545357544C5354"></a>051248,000259: 01,3527           40706        <span class="sm">ITSWTLST</span>           <span class="op">CS      </span> <a href="#474F4C4F43">GOLOC</a>      +1                         <span class="co">#  CORRECT THE BBCON INFORMATION</span>
+051249,000260: 01,3530           54706                           <span class="op">TS      </span> <a href="#474F4C4F43">GOLOC</a>      +1                         
+051250,000261: 
+051251,000262: 01,3531           50156                           <span class="op">NDX     </span> <a href="#504F494E544552">POINTER</a>                               <span class="co">#  GET THE DT AND FIND OUT IF IT WAS STORED</span>
+051252,000263: 01,3532           32000                           <span class="op">CA      </span> <a href="RESTART_TABLES.agc.html#50524454544142">PRDTTAB</a>                               <span class="co">#  DIRECTLY OR INDIRECTLY</span>
+051253,000264: 
+051254,000265: 01,3533           13362                           <span class="op">TCF     </span> <a href="#54494D4554455354">TIMETEST</a>                              <span class="co">#  FIND OUT HOW THE TIME IS STORED</span>
+051255,000266: 
+<a name="495453414A4F4232"></a>051256,000267: 01,3534           56705        <span class="sm">ITSAJOB2</span>           <span class="op">XCH     </span> <a href="#474F4C4F43">GOLOC</a>                                 <span class="co">#  STORE THE CADR</span>
+051257,000268: 
+051258,000269: 01,3535           50156                           <span class="op">NDX     </span> <a href="#504F494E544552">POINTER</a>                               <span class="co">#  ADD THE PRIORITY AND LET:S GO</span>
+051259,000270: 01,3536           32000                           <span class="op">CA      </span> <a href="RESTART_TABLES.agc.html#50524454544142">PRDTTAB</a>                               
+051260,000271: 
+051261,000272: 01,3537           13425                           <span class="op">TCF     </span> <a href="#43484B4E4F564143">CHKNOVAC</a>                              
+051262,000273: 
+<a name="4954534556454E"></a>051263,000274: 01,3540           30157        <span class="sm">ITSEVEN </span>           <span class="op">CA      </span> <a href="#54454D5053574348">TEMPSWCH</a>                              <span class="co">#  SET UP FOR EITHER THE SECOND PART OF THE</span>
+051264,000275: 01,3541           54707                           <span class="op">TS      </span> <a href="#474F4C4F43">GOLOC</a>      +2                         <span class="co">#  TABLE, OR A RETURN FOR THE NEXT GROUP</span>
+051265,000276: 
+051266,000277: 01,3542           50155                           <span class="op">NDX     </span> <a href="#54454D503247">TEMP2G</a>                                <span class="co">#  SET UP POINTER FOR OUR LOCATION WITHIN</span>
+051267,000278: 01,3543           32000                           <span class="op">CA      </span> <a href="RESTART_TABLES.agc.html#53495A45544142">SIZETAB</a>                               <span class="co">#  THE TABLE</span>
+051268,000279: 01,3544           60154                           <span class="op">AD      </span> <a href="#54454D50504853">TEMPPHS</a>                               <span class="co">#  THIS MAY LOOK BAD BUT LET:S SEE YOU DO</span>
+051269,000280: 01,3545           60154                           <span class="op">AD      </span> <a href="#54454D50504853">TEMPPHS</a>                               <span class="co">#  BETTER IN TIME OR NUMBERR OF LOCATIONS</span>
+051270,000281: 01,3546           60154                           <span class="op">AD      </span> <a href="#54454D50504853">TEMPPHS</a>                               
+051271,000282: 01,3547           54156                           <span class="op">TS      </span> <a href="#504F494E544552">POINTER</a>                               
+051272,000283: 
+051273,000284: 01,3550           13453                           <span class="op">TCF     </span> <a href="#434F4E54424C32">CONTBL2</a>                               <span class="co">#  NOW PROCESS WHAT IS IN THE TABLE</span>
+051274,000285: 
+<a name="5048535041525432"></a>051275,000286: 01,3551           36221        <span class="sm">PHSPART2</span>           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5448524545">THREE</a>                                 <span class="co">#  SET THE POINTER FOR THE SECOND HALF OF</span>
+051276,000287: 01,3552           26156                           <span class="op">ADS     </span> <a href="#504F494E544552">POINTER</a>                               <span class="co">#  THE TABLE</span>
+051277,000288: 
+051278,000289: 01,3553           33353                           <span class="op">CA      </span> <a href="#5254524E43414452">RTRNCADR</a>                              <span class="co">#  THIS WILL BE OUR LAST TIME THROUGH THE</span>
+051279,000290: 01,3554           54707                           <span class="op">TS      </span> <a href="#474F4C4F43">GOLOC</a>      +2                         <span class="co">#  EVEN TABLE, SO AFTER IT GET THE NEXT</span>
+051280,000291:                                                                                                  <span class="co">#  GROUP</span>
+051281,000292: 01,3555           13453                           <span class="op">TCF     </span> <a href="#434F4E54424C32">CONTBL2</a>                               <span class="co">#  SO LET:S GET THE SECOND ENTRY IN THE TBL</span>
+051282,000293: 
+<a name="54454D50504853"></a>051283,000294: 01,3556     0154               <span class="sm">TEMPPHS </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+<a name="54454D503247"></a>051284,000295: 01,3556     0155               <span class="sm">TEMP2G  </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
+<a name="504F494E544552"></a>051285,000296: 01,3556     0156               <span class="sm">POINTER </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
+<a name="54454D5053574348"></a>051286,000297: 01,3556     0157               <span class="sm">TEMPSWCH</span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +3                         
+<a name="474F4C4F43"></a>051287,000298: 01,3556     0705               <span class="sm">GOLOC   </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56414335">VAC5</a>       +20D                       
+<a name="4D494E555332"></a>051288,000299: 01,3556     7720               <span class="sm">MINUS2  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454732">NEG2</a>                                  
+<a name="4F4354313737"></a>051289,000300: 01,3556     6050               <span class="sm">OCT177  </span>           <span class="ps">EQUALS  </span> <a href="INTERPRETER.agc.html#4C4F5737">LOW7</a>                                  
+051290,000301: 
+<a name="5048533243414452"></a>051291,000302: 01,3556           03551        <span class="sm">PHS2CADR</span>           <span class="ps">GENADR  </span> <a href="#5048535041525432">PHSPART2</a>                              
+<a name="5052543243414452"></a>051292,000303: 01,3557           03327        <span class="sm">PRT2CADR</span>           <span class="ps">GENADR  </span> <a href="#4745545041525432">GETPART2</a>                              
+<a name="4C47434C43414452"></a>051293,000304: 01,3560           05337        <span class="sm">LGCLCADR</span>           <span class="ps">GENADR  </span> <a href="WAITLIST.agc.html#4C4F4E4743414C4C">LONGCALL</a>                              
+<a name="4656414343414452"></a>051294,000305: 01,3561           05155        <span class="sm">FVACCADR</span>           <span class="ps">GENADR  </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               
+<a name="57544C5443414452"></a>051295,000306: 01,3562           05252        <span class="sm">WTLTCADR</span>           <span class="ps">GENADR  </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+<a name="4E4F564143414452"></a>051296,000307: 01,3563           05142        <span class="sm">NOVACADR</span>           <span class="ps">GENADR  </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
+051297,000308: 
+051298,000309: 
 
 End of include-file RESTARTS_ROUTINE.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

@@ -95,20 +95,20 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023817,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-023818,000003:                                                                                                  <span class="co">## Filename:    RCS_FAILURE_MONITOR.agc</span>
-023819,000004:                                                                                                  <span class="co">## Purpose:     A module for revision 0 of BURST120 (Sunburst). It</span>
-023820,000005:                                                                                                  <span class="co">##              is part of the source code for the Lunar Module's</span>
-023821,000006:                                                                                                  <span class="co">##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
-023822,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-023823,000008:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-023824,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-023825,000010:                                                                                                  <span class="co">## Mod history: 2016-09-30 RSB  Created draft version.</span>
-023826,000011:                                                                                                  <span class="co">##              2016-10-30 HG   Transcribed</span>
-023827,000012:                                                                                                  <span class="co">##              2016-10-31 RSB   Typos.</span>
-023828,000013:                                                                                                  <span class="co">##              2016-12-06 RSB  Comment proofing via octopus/ProoferComments</span>
-023829,000014:                                                                                                  <span class="co">##                              performed, and changes made.</span>
-023830,000015: 
+023823,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+023824,000003:                                                                                                  <span class="co">## Filename:    RCS_FAILURE_MONITOR.agc</span>
+023825,000004:                                                                                                  <span class="co">## Purpose:     A module for revision 0 of BURST120 (Sunburst). It</span>
+023826,000005:                                                                                                  <span class="co">##              is part of the source code for the Lunar Module's</span>
+023827,000006:                                                                                                  <span class="co">##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
+023828,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+023829,000008:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+023830,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+023831,000010:                                                                                                  <span class="co">## Mod history: 2016-09-30 RSB  Created draft version.</span>
+023832,000011:                                                                                                  <span class="co">##              2016-10-30 HG   Transcribed</span>
+023833,000012:                                                                                                  <span class="co">##              2016-10-31 RSB   Typos.</span>
+023834,000013:                                                                                                  <span class="co">##              2016-12-06 RSB  Comment proofing via octopus/ProoferComments</span>
+023835,000014:                                                                                                  <span class="co">##                              performed, and changes made.</span>
+023836,000015: 
 </pre>
 </span>
 </p>
@@ -124,55 +124,55 @@ Page 569
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023832,000017:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION                                     DATE: 7 JAN 67 </span>
-023833,000018: 
-023834,000019:                                                                                                  <span class="co">#           AUTHOR:  J S MILLER    (MIT INSTRUMENTATION LAB)</span>
-023835,000020: 
-023836,000021:                                                                                                  <span class="co">#           THIS ROUTINE IS ATTACHED TO T4RUPT, AND IS ENTERED EVERY 960 MS.  ITS FUNCTION IS TO EXAMINE THE STATE</span>
-023837,000022:                                                                                                  <span class="co">#  OF THE LOW 8 BITS OF CHAN 32 TO SEE IF RCS-JET FAILURE BITS HAVE APPEARED OR DISAPPEARED.  WHEN A STATE CHANGE</span>
-023838,000023:                                                                                                  <span class="co">#  IS DETECTED WHICH PERSISTS FOR 2 SAMPLES (TO FILTER OUT NOISY SIGNALS), AN LMP COMMAND IS SENT (BUT AT MOST ONE</span>
-023839,000024:                                                                                                  <span class="co">#  SUCH COMMAND PER SAMPLE) TO ISOLATE THE APPROPRIATE JET PAIR IF THE FAILURE SIGNAL HAS JUST APPEARED.  IF, ON</span>
-023840,000025:                                                                                                  <span class="co">#  THE OTHER HAND, THE DISAPPEARANCE OF A FAIL-BIT IS DETECTED, THE EVENT IS PRESUMED TO BE THE RESULT OF THE</span>
-023841,000026:                                                                                                  <span class="co">#  GROUND HAVING SENT AN LMP COMMAND TO OPEN THE ISOLATION VALVE AND NO SUBSEQUENT FAILURE HAVING BEEN DETECTED BY</span>
-023842,000027:                                                                                                  <span class="co">#  THE DETECTION CIRCUITRY.  IN EITHER CASE, THIS FAILURE-MONITOR PROGRAM RESPONDS BY UPDATING ITS RECORD OF THE</span>
-023843,000028:                                                                                                  <span class="co">#  STATE OF THE ISOLATION VALVES, AND ALSO THE PAIR OF WORDS IT MAINTAINS FOR USE BY THE DAP IN THE JET-POLICY</span>
-023844,000029:                                                                                                  <span class="co">#  SELECTION LOGIC.</span>
-023845,000030: 
-023846,000031:                                                                                                  <span class="co">#           A FEW WORDS ABOUT LMP-RESET COMMANDS:  IN THE CYCLE IN WHICH A VALVE-CLOSURE COMMAND IS ISSUED, THE</span>
-023847,000032:                                                                                                  <span class="co">#  CORRESPONDING RESET COMMAND IS STORED IN THE REGISTER "JETRESET".  THIS REGISTER IS EXAMINED AT THE BEGINNING OF</span>
-023848,000033:                                                                                                  <span class="co">#  EACH RCSMONIT CYCLE, AND IF A COMMAND IS WAITING, IT IS SENT IMMEDIATELY.  THIS CAUSES RESET COMMANDS TO BE</span>
-023849,000034:                                                                                                  <span class="co">#  ISSUED AT ABOUT 960 MS AFTER THE SET COMMANDS.  THIS TECHNIQUE ASSURES THAT NO MORE THAN ONE UN-RESET SET-</span>
-023850,000035:                                                                                                  <span class="co">#  COMMAND IS ON AT ANY TIME (ALTHOUGH GROUND ACTIONS WILL BE SUPERIMPOSED ON THIS, HOWEVER).</span>
-023851,000036: 
-023852,000037:                                                                                                  <span class="co">#  CALLING SEQUENCE:</span>
-023853,000038: 
-023854,000039:                                                                                                  <span class="co">#           TC     RCSMONIT        (IN INTERRUPT MODE, EVERY 960 MS.)</span>
-023855,000040:                                                                                                  <span class="co">#  EXIT:</span>
-023856,000041: 
-023857,000042:                                                                                                  <span class="co">#           TCF    RCSMONEX    (ALL PATHS EXIT VIA SUCH AN INSTRUCTION.  RCSMONEX IS PRESENTLY EQUATED TO RESUME.)</span>
-023858,000043: 
-023859,000044:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED:</span>
-023860,000045: 
-023861,000046:                                                                                                  <span class="co">#           VIA SLAP1:  JETRESET          = -0  (RESET-CMD BUFFER EMPTY)</span>
-023862,000047:                                                                                                  <span class="co">#                       THISCH32          = +0  (NO FAILURES SENSED YET)</span>
-023863,000048:                                                                                                  <span class="co">#                       CH5MASK, CH6MASK  = +0  (0'S IF JETS ARE OK)</span>
-023864,000049:                                                                                                  <span class="co">#                       LMPJFAIL          = +0  (ISOLATION VALVES ALL OPEN)</span>
-023865,000050: 
-023866,000051:                                                                                                  <span class="co">#  OUTPUT:</span>
-023867,000052: 
-023868,000053:                                                                                                  <span class="co">#           CH5MASK &amp; CH6MASK UPDATED  (1'S WHERE JETS NOT TO BE USED)</span>
-023869,000054:                                                                                                  <span class="co">#           THISCH32 SET TO INVERTED LOW 8 BITS OF CHAN 32 (HIGH 7 = 0)</span>
-023870,000055:                                                                                                  <span class="co">#           LMPJFAIL UPDATED  (1'S WHEN ISOLATION COMMANDS HAVE BEEN SENT)</span>
-023871,000056:                                                                                                  <span class="co">#           JETRESET CONTAINS RESET-COMMANDS TO BE SENT NEXT CYCLE THRU.</span>
-023872,000057: 
-023873,000058:                                                                                                  <span class="co">#  DEBRIS:</span>
-023874,000059: 
-023875,000060:                                                                                                  <span class="co">#           A, L, Q, &amp; RCSMONT1 - 4  (PRESENTLY EQUATED TO RUPTREG1 - 4)</span>
-023876,000061: 
-023877,000062:                                                                                                  <span class="co">#  SUBROUTINES CALLED:</span>
-023878,000063: 
-023879,000064:                                                                                                  <span class="co">#           STORCOM  (PART OF 1LMP ROUTINE)</span>
-023880,000065: 
+023838,000017:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION                                     DATE: 7 JAN 67 </span>
+023839,000018: 
+023840,000019:                                                                                                  <span class="co">#           AUTHOR:  J S MILLER    (MIT INSTRUMENTATION LAB)</span>
+023841,000020: 
+023842,000021:                                                                                                  <span class="co">#           THIS ROUTINE IS ATTACHED TO T4RUPT, AND IS ENTERED EVERY 960 MS.  ITS FUNCTION IS TO EXAMINE THE STATE</span>
+023843,000022:                                                                                                  <span class="co">#  OF THE LOW 8 BITS OF CHAN 32 TO SEE IF RCS-JET FAILURE BITS HAVE APPEARED OR DISAPPEARED.  WHEN A STATE CHANGE</span>
+023844,000023:                                                                                                  <span class="co">#  IS DETECTED WHICH PERSISTS FOR 2 SAMPLES (TO FILTER OUT NOISY SIGNALS), AN LMP COMMAND IS SENT (BUT AT MOST ONE</span>
+023845,000024:                                                                                                  <span class="co">#  SUCH COMMAND PER SAMPLE) TO ISOLATE THE APPROPRIATE JET PAIR IF THE FAILURE SIGNAL HAS JUST APPEARED.  IF, ON</span>
+023846,000025:                                                                                                  <span class="co">#  THE OTHER HAND, THE DISAPPEARANCE OF A FAIL-BIT IS DETECTED, THE EVENT IS PRESUMED TO BE THE RESULT OF THE</span>
+023847,000026:                                                                                                  <span class="co">#  GROUND HAVING SENT AN LMP COMMAND TO OPEN THE ISOLATION VALVE AND NO SUBSEQUENT FAILURE HAVING BEEN DETECTED BY</span>
+023848,000027:                                                                                                  <span class="co">#  THE DETECTION CIRCUITRY.  IN EITHER CASE, THIS FAILURE-MONITOR PROGRAM RESPONDS BY UPDATING ITS RECORD OF THE</span>
+023849,000028:                                                                                                  <span class="co">#  STATE OF THE ISOLATION VALVES, AND ALSO THE PAIR OF WORDS IT MAINTAINS FOR USE BY THE DAP IN THE JET-POLICY</span>
+023850,000029:                                                                                                  <span class="co">#  SELECTION LOGIC.</span>
+023851,000030: 
+023852,000031:                                                                                                  <span class="co">#           A FEW WORDS ABOUT LMP-RESET COMMANDS:  IN THE CYCLE IN WHICH A VALVE-CLOSURE COMMAND IS ISSUED, THE</span>
+023853,000032:                                                                                                  <span class="co">#  CORRESPONDING RESET COMMAND IS STORED IN THE REGISTER "JETRESET".  THIS REGISTER IS EXAMINED AT THE BEGINNING OF</span>
+023854,000033:                                                                                                  <span class="co">#  EACH RCSMONIT CYCLE, AND IF A COMMAND IS WAITING, IT IS SENT IMMEDIATELY.  THIS CAUSES RESET COMMANDS TO BE</span>
+023855,000034:                                                                                                  <span class="co">#  ISSUED AT ABOUT 960 MS AFTER THE SET COMMANDS.  THIS TECHNIQUE ASSURES THAT NO MORE THAN ONE UN-RESET SET-</span>
+023856,000035:                                                                                                  <span class="co">#  COMMAND IS ON AT ANY TIME (ALTHOUGH GROUND ACTIONS WILL BE SUPERIMPOSED ON THIS, HOWEVER).</span>
+023857,000036: 
+023858,000037:                                                                                                  <span class="co">#  CALLING SEQUENCE:</span>
+023859,000038: 
+023860,000039:                                                                                                  <span class="co">#           TC     RCSMONIT        (IN INTERRUPT MODE, EVERY 960 MS.)</span>
+023861,000040:                                                                                                  <span class="co">#  EXIT:</span>
+023862,000041: 
+023863,000042:                                                                                                  <span class="co">#           TCF    RCSMONEX    (ALL PATHS EXIT VIA SUCH AN INSTRUCTION.  RCSMONEX IS PRESENTLY EQUATED TO RESUME.)</span>
+023864,000043: 
+023865,000044:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED:</span>
+023866,000045: 
+023867,000046:                                                                                                  <span class="co">#           VIA SLAP1:  JETRESET          = -0  (RESET-CMD BUFFER EMPTY)</span>
+023868,000047:                                                                                                  <span class="co">#                       THISCH32          = +0  (NO FAILURES SENSED YET)</span>
+023869,000048:                                                                                                  <span class="co">#                       CH5MASK, CH6MASK  = +0  (0'S IF JETS ARE OK)</span>
+023870,000049:                                                                                                  <span class="co">#                       LMPJFAIL          = +0  (ISOLATION VALVES ALL OPEN)</span>
+023871,000050: 
+023872,000051:                                                                                                  <span class="co">#  OUTPUT:</span>
+023873,000052: 
+023874,000053:                                                                                                  <span class="co">#           CH5MASK &amp; CH6MASK UPDATED  (1'S WHERE JETS NOT TO BE USED)</span>
+023875,000054:                                                                                                  <span class="co">#           THISCH32 SET TO INVERTED LOW 8 BITS OF CHAN 32 (HIGH 7 = 0)</span>
+023876,000055:                                                                                                  <span class="co">#           LMPJFAIL UPDATED  (1'S WHEN ISOLATION COMMANDS HAVE BEEN SENT)</span>
+023877,000056:                                                                                                  <span class="co">#           JETRESET CONTAINS RESET-COMMANDS TO BE SENT NEXT CYCLE THRU.</span>
+023878,000057: 
+023879,000058:                                                                                                  <span class="co">#  DEBRIS:</span>
+023880,000059: 
+023881,000060:                                                                                                  <span class="co">#           A, L, Q, &amp; RCSMONT1 - 4  (PRESENTLY EQUATED TO RUPTREG1 - 4)</span>
+023882,000061: 
+023883,000062:                                                                                                  <span class="co">#  SUBROUTINES CALLED:</span>
+023884,000063: 
+023885,000064:                                                                                                  <span class="co">#           STORCOM  (PART OF 1LMP ROUTINE)</span>
+023886,000065: 
 </pre>
 </span>
 </p>
@@ -188,45 +188,45 @@ Page 570
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023882,000067: 12,3166                                           <span class="ps">BANK    </span> 12                                    
-023883,000068: 12,3166     0074                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415445">STATE</a>                                 <span class="co">#  NO SWITCHED ERASABLE USED.</span>
-023884,000069: 
-<a name="5243534D4F4E4954"></a>023885,000070: 12,3166           11162        <span class="sm">RCSMONIT</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A45545245534554">JETRESET</a>                              <span class="co">#  CHECK WHETHER A RESET IS WAITING.</span>
-023886,000071: 12,3167           05063                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#53544F52434F4D">STORCOM</a>    -1                         <span class="co">#  THERE IS A RESET TO SEND.  DO IT.</span>
-023887,000072: 12,3170           47767                           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
-023888,000073: 12,3171           55162                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A45545245534554">JETRESET</a>                              <span class="co">#  DEACTIVATE THE BUFFER.</span>
-023889,000074: 
-<a name="4146545245534554"></a>023890,000075: 12,3172           47767        <span class="sm">AFTRESET</span>           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
-023891,000076: 12,3173           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  PICK UP &amp; INVERT INVERTED CHANNEL 32.</span>
-023892,000077: 12,3174           06032                           <span class="op">RXOR    </span> 32                                    
-023893,000078: 12,3175           74564                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  <span class="co">#  KEEP JET-FAIL BITS ONLY.</span>
-023894,000079: 12,3176           57163                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448495343483332">THISCH32</a>                              
-023895,000080: 12,3177           54071                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5432">RCSMONT2</a>                              <span class="co">#  HANG ON TO PREVIOUS CH32 STATE.</span>
-023896,000081: 
-023897,000082: 12,3200           71163                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448495343483332">THISCH32</a>                              <span class="co">#         -   --</span>
-023898,000083: 12,3201           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  FORM PTL + PTL.</span>
-023899,000084: 12,3202           40101                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D504A4641494C">LMPJFAIL</a>                              <span class="co">#    (  P = PREVIOUS CH 32 STATE,</span>
-023900,000085: 12,3203           70001                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#       T = THIS CH 32 STATE,</span>
-023901,000086: 12,3204           54072                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5433">RCSMONT3</a>                              <span class="co">#       L = LMP ISOLATION VALVE CMD STATE )</span>
-023902,000087: 12,3205           40071                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5432">RCSMONT2</a>                              
-023903,000088: 12,3206           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-023904,000089: 12,3207           41163                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448495343483332">THISCH32</a>                              
-023905,000090: 12,3210           70001                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-023906,000091: 12,3211           70101                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D504A4641494C">LMPJFAIL</a>                              
-023907,000092: 12,3212           26072                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5433">RCSMONT3</a>                              <span class="co">#  BITS HERE NZ IF ACTION IS DUE NOW.</span>
-023908,000093: 
-023909,000094: 12,3213           00006                           <span class="op">EXTEND  </span>                                       
-023910,000095: 12,3214           15733                           <span class="op">BZF     </span> <a href="#5243534D4F4E4558">RCSMONEX</a>                              <span class="co">#  QUIT NOW IF NO ACTION REQUIRED.</span>
-023911,000096: 
-023912,000097: 12,3215           00006                           <span class="op">EXTEND  </span>                                       
-023913,000098: 12,3216           33221                           <span class="op">DCA     </span> <a href="#5243534D4F4E4144">RCSMONAD</a>                              
-023914,000099: 12,3217           52006                           <span class="op">DTCB    </span>                                       
-023915,000100: 
-023916,000101: 
-023917,000102: 
-023918,000103: 12,3220     0074                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415445">STATE</a>                                 <span class="co">#  NO SWITCHED ERASABLE USED.</span>
-<a name="5243534D4F4E4144"></a>023919,000104: 12,3220           02576 54060  <span class="sm">RCSMONAD</span>           <span class="ps">2CADR   </span> <a href="#5243534D4F4E">RCSMON</a>                                
-023920,000105: 
+023888,000067: 12,3166                                           <span class="ps">BANK    </span> 12                                    
+023889,000068: 12,3166     0074                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415445">STATE</a>                                 <span class="co">#  NO SWITCHED ERASABLE USED.</span>
+023890,000069: 
+<a name="5243534D4F4E4954"></a>023891,000070: 12,3166           11162        <span class="sm">RCSMONIT</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A45545245534554">JETRESET</a>                              <span class="co">#  CHECK WHETHER A RESET IS WAITING.</span>
+023892,000071: 12,3167           05063                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#53544F52434F4D">STORCOM</a>    -1                         <span class="co">#  THERE IS A RESET TO SEND.  DO IT.</span>
+023893,000072: 12,3170           47767                           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
+023894,000073: 12,3171           55162                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A45545245534554">JETRESET</a>                              <span class="co">#  DEACTIVATE THE BUFFER.</span>
+023895,000074: 
+<a name="4146545245534554"></a>023896,000075: 12,3172           47767        <span class="sm">AFTRESET</span>           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
+023897,000076: 12,3173           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  PICK UP &amp; INVERT INVERTED CHANNEL 32.</span>
+023898,000077: 12,3174           06032                           <span class="op">RXOR    </span> 32                                    
+023899,000078: 12,3175           74564                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  <span class="co">#  KEEP JET-FAIL BITS ONLY.</span>
+023900,000079: 12,3176           57163                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448495343483332">THISCH32</a>                              
+023901,000080: 12,3177           54071                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5432">RCSMONT2</a>                              <span class="co">#  HANG ON TO PREVIOUS CH32 STATE.</span>
+023902,000081: 
+023903,000082: 12,3200           71163                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448495343483332">THISCH32</a>                              <span class="co">#         -   --</span>
+023904,000083: 12,3201           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  FORM PTL + PTL.</span>
+023905,000084: 12,3202           40101                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D504A4641494C">LMPJFAIL</a>                              <span class="co">#    (  P = PREVIOUS CH 32 STATE,</span>
+023906,000085: 12,3203           70001                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#       T = THIS CH 32 STATE,</span>
+023907,000086: 12,3204           54072                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5433">RCSMONT3</a>                              <span class="co">#       L = LMP ISOLATION VALVE CMD STATE )</span>
+023908,000087: 12,3205           40071                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5432">RCSMONT2</a>                              
+023909,000088: 12,3206           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+023910,000089: 12,3207           41163                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448495343483332">THISCH32</a>                              
+023911,000090: 12,3210           70001                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+023912,000091: 12,3211           70101                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D504A4641494C">LMPJFAIL</a>                              
+023913,000092: 12,3212           26072                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5433">RCSMONT3</a>                              <span class="co">#  BITS HERE NZ IF ACTION IS DUE NOW.</span>
+023914,000093: 
+023915,000094: 12,3213           00006                           <span class="op">EXTEND  </span>                                       
+023916,000095: 12,3214           15733                           <span class="op">BZF     </span> <a href="#5243534D4F4E4558">RCSMONEX</a>                              <span class="co">#  QUIT NOW IF NO ACTION REQUIRED.</span>
+023917,000096: 
+023918,000097: 12,3215           00006                           <span class="op">EXTEND  </span>                                       
+023919,000098: 12,3216           33221                           <span class="op">DCA     </span> <a href="#5243534D4F4E4144">RCSMONAD</a>                              
+023920,000099: 12,3217           52006                           <span class="op">DTCB    </span>                                       
+023921,000100: 
+023922,000101: 
+023923,000102: 
+023924,000103: 12,3220     0074                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415445">STATE</a>                                 <span class="co">#  NO SWITCHED ERASABLE USED.</span>
+<a name="5243534D4F4E4144"></a>023925,000104: 12,3220           02576 54060  <span class="sm">RCSMONAD</span>           <span class="ps">2CADR   </span> <a href="#5243534D4F4E">RCSMON</a>                                
+023926,000105: 
 </pre>
 </span>
 </p>
@@ -242,50 +242,50 @@ Page 571
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023922,000107: 26,2576                                           <span class="ps">BANK    </span> 26                                    
-023923,000108: 
-<a name="5243534D4F4E"></a>023924,000109: 26,2576           30072        <span class="sm">RCSMON  </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5433">RCSMONT3</a>                              
-023925,000110: 26,2577           00006                           <span class="op">EXTEND  </span>                                       
-023926,000111: 26,2600           77755                           <span class="op">MP      </span> <a href="INTERPRETER.agc.html#42495437">BIT7</a>                                  <span class="co">#  MOVE BITS 8 - 1 OF A TO 14 - 7 OF L.</span>
-023927,000112: 26,2601           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  ZERO TO L IN THE PROCESS.</span>
-023928,000113: 
-023929,000114: 26,2602           24001                 -3        <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-023930,000115: 26,2603           60000                           <span class="op">DOUBLE  </span>                                       <span class="co">#  BOUND TO GET AN OVERFLOW, SINCE WE</span>
-023931,000116: 26,2604           54000                           <span class="op">OVSK    </span>                                       <span class="co">#  ASSURED INITIAL NZ IN A.</span>
-023932,000117: 26,2605           12602                           <span class="op">TCF     </span> -3                                    
-023933,000118: 
-023934,000119: 26,2606           10001                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  PICK UP C(L)-1.</span>
-023935,000120: 26,2607           60000                           <span class="op">DOUBLE  </span>                                       
-023936,000121: 26,2610           54073                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5434">RCSMONT4</a>                              <span class="co">#  STORE FOR LATER.</span>
-023937,000122: 
-023938,000123: 26,2611           50001                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-023939,000124: 26,2612           37753                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495438">BIT8</a>       -1                         
-023940,000125: 26,2613           54072                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5433">RCSMONT3</a>                              <span class="co">#  SAVE THE RELEVANT BIT (8 - 1)</span>
-023941,000126: 26,2614           70101                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D504A4641494C">LMPJFAIL</a>                              
-023942,000127: 26,2615           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-023943,000128: 26,2616           12637                           <span class="op">TCF     </span> <a href="#4C4D504249543D31">LMPBIT=1</a>                              
-023944,000129: 
-023945,000130: 26,2617           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  LMPBIT = 0.</span>
-023946,000131: 26,2620           50073                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5434">RCSMONT4</a>                              
-023947,000132: 26,2621           32654                           <span class="op">DCA     </span> <a href="#4B494C4C50414952">KILLPAIR</a>                              <span class="co">#  COMMAND TO ISOLATE A PAIR, &amp; ITS RESET.</span>
-023948,000133: 26,2622           23162                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A45545245534554">JETRESET</a>                              <span class="co">#  PUT THE RESET COMMAND AWAY FOR NEXT TIME</span>
-023949,000134: 26,2623           05064                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#53544F52434F4D">STORCOM</a>                               <span class="co">#  SEND THE ISOLATION COMMAND.</span>
-023950,000135: 
-023951,000136: 26,2624           30072                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5433">RCSMONT3</a>                              
-023952,000137: 26,2625           26101                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D504A4641494C">LMPJFAIL</a>                              <span class="co">#  SET THE BIT SHOWING COMMAND SENT.</span>
-023953,000138: 
-023954,000139: 26,2626           40102                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               <span class="co">#  SET THE JET-FAIL BITS IN CH5MASK &amp;</span>
-023955,000140: 26,2627           50073                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5434">RCSMONT4</a>                              <span class="co">#  CH6MASK.</span>
-023956,000141: 26,2630           72673                           <span class="op">MASK    </span> <a href="#4641494C5441424C">FAILTABL</a>                              
-023957,000142: 26,2631           26102                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
-023958,000143: 
-023959,000144: 26,2632           40103                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
-023960,000145: 26,2633           50073                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5434">RCSMONT4</a>                              
-023961,000146: 26,2634           72674                           <span class="op">MASK    </span> <a href="#4641494C5441424C">FAILTABL</a>   +1                         
-023962,000147: 26,2635           26103                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
-023963,000148: 
-023964,000149: 26,2636           15733                           <span class="op">TCF     </span> <a href="#5243534D4F4E4558">RCSMONEX</a>                              <span class="co">#  DONE.</span>
-023965,000150: 
+023928,000107: 26,2576                                           <span class="ps">BANK    </span> 26                                    
+023929,000108: 
+<a name="5243534D4F4E"></a>023930,000109: 26,2576           30072        <span class="sm">RCSMON  </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5433">RCSMONT3</a>                              
+023931,000110: 26,2577           00006                           <span class="op">EXTEND  </span>                                       
+023932,000111: 26,2600           77755                           <span class="op">MP      </span> <a href="INTERPRETER.agc.html#42495437">BIT7</a>                                  <span class="co">#  MOVE BITS 8 - 1 OF A TO 14 - 7 OF L.</span>
+023933,000112: 26,2601           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  ZERO TO L IN THE PROCESS.</span>
+023934,000113: 
+023935,000114: 26,2602           24001                 -3        <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+023936,000115: 26,2603           60000                           <span class="op">DOUBLE  </span>                                       <span class="co">#  BOUND TO GET AN OVERFLOW, SINCE WE</span>
+023937,000116: 26,2604           54000                           <span class="op">OVSK    </span>                                       <span class="co">#  ASSURED INITIAL NZ IN A.</span>
+023938,000117: 26,2605           12602                           <span class="op">TCF     </span> -3                                    
+023939,000118: 
+023940,000119: 26,2606           10001                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  PICK UP C(L)-1.</span>
+023941,000120: 26,2607           60000                           <span class="op">DOUBLE  </span>                                       
+023942,000121: 26,2610           54073                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5434">RCSMONT4</a>                              <span class="co">#  STORE FOR LATER.</span>
+023943,000122: 
+023944,000123: 26,2611           50001                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+023945,000124: 26,2612           37753                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495438">BIT8</a>       -1                         
+023946,000125: 26,2613           54072                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5433">RCSMONT3</a>                              <span class="co">#  SAVE THE RELEVANT BIT (8 - 1)</span>
+023947,000126: 26,2614           70101                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D504A4641494C">LMPJFAIL</a>                              
+023948,000127: 26,2615           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+023949,000128: 26,2616           12637                           <span class="op">TCF     </span> <a href="#4C4D504249543D31">LMPBIT=1</a>                              
+023950,000129: 
+023951,000130: 26,2617           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  LMPBIT = 0.</span>
+023952,000131: 26,2620           50073                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5434">RCSMONT4</a>                              
+023953,000132: 26,2621           32654                           <span class="op">DCA     </span> <a href="#4B494C4C50414952">KILLPAIR</a>                              <span class="co">#  COMMAND TO ISOLATE A PAIR, &amp; ITS RESET.</span>
+023954,000133: 26,2622           23162                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A45545245534554">JETRESET</a>                              <span class="co">#  PUT THE RESET COMMAND AWAY FOR NEXT TIME</span>
+023955,000134: 26,2623           05064                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#53544F52434F4D">STORCOM</a>                               <span class="co">#  SEND THE ISOLATION COMMAND.</span>
+023956,000135: 
+023957,000136: 26,2624           30072                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5433">RCSMONT3</a>                              
+023958,000137: 26,2625           26101                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D504A4641494C">LMPJFAIL</a>                              <span class="co">#  SET THE BIT SHOWING COMMAND SENT.</span>
+023959,000138: 
+023960,000139: 26,2626           40102                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               <span class="co">#  SET THE JET-FAIL BITS IN CH5MASK &amp;</span>
+023961,000140: 26,2627           50073                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5434">RCSMONT4</a>                              <span class="co">#  CH6MASK.</span>
+023962,000141: 26,2630           72673                           <span class="op">MASK    </span> <a href="#4641494C5441424C">FAILTABL</a>                              
+023963,000142: 26,2631           26102                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
+023964,000143: 
+023965,000144: 26,2632           40103                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
+023966,000145: 26,2633           50073                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5434">RCSMONT4</a>                              
+023967,000146: 26,2634           72674                           <span class="op">MASK    </span> <a href="#4641494C5441424C">FAILTABL</a>   +1                         
+023968,000147: 26,2635           26103                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
+023969,000148: 
+023970,000149: 26,2636           15733                           <span class="op">TCF     </span> <a href="#5243534D4F4E4558">RCSMONEX</a>                              <span class="co">#  DONE.</span>
+023971,000150: 
 </pre>
 </span>
 </p>
@@ -301,25 +301,25 @@ Page 572
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="4C4D504249543D31"></a>023967,000152: 26,2637           40072        <span class="sm">LMPBIT=1</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5433">RCSMONT3</a>                              <span class="co">#  THE GROUND HAS RE-ENABLED A PAIR.</span>
-023968,000153: 26,2640           70101                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D504A4641494C">LMPJFAIL</a>                              <span class="co">#  DON'T USE ADS BECAUSE OF THE -0 CASE.</span>
-023969,000154: 26,2641           54101                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D504A4641494C">LMPJFAIL</a>                              
-023970,000155: 
-023971,000156: 26,2642           50073                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5434">RCSMONT4</a>                              <span class="co">#  TURN OFF THE JET-FAIL BITS IN CH5MASK &amp;</span>
-023972,000157: 26,2643           42673                           <span class="op">CS      </span> <a href="#4641494C5441424C">FAILTABL</a>                              <span class="co">#  CH6MASK.</span>
-023973,000158: 26,2644           70102                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
-023974,000159: 26,2645           54102                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
-023975,000160: 
-023976,000161: 26,2646           50073                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5434">RCSMONT4</a>                              
-023977,000162: 26,2647           42674                           <span class="op">CS      </span> <a href="#4641494C5441424C">FAILTABL</a>   +1                         
-023978,000163: 26,2650           70103                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
-023979,000164: 26,2651           54103                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
-023980,000165: 26,2652           15733                           <span class="op">TCF     </span> <a href="#5243534D4F4E4558">RCSMONEX</a>                              <span class="co">#  DONE.</span>
-023981,000166: 
-023982,000167: 
-023983,000168: 
-<a name="5243534D4F4E4558"></a>023984,000169: 26,2653     5733               <span class="sm">RCSMONEX</span>           <span class="ps">EQUALS  </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  CHANGE THIS TO ATTACH SOMETHING ON.</span>
-023985,000170: 
+<a name="4C4D504249543D31"></a>023973,000152: 26,2637           40072        <span class="sm">LMPBIT=1</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5433">RCSMONT3</a>                              <span class="co">#  THE GROUND HAS RE-ENABLED A PAIR.</span>
+023974,000153: 26,2640           70101                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D504A4641494C">LMPJFAIL</a>                              <span class="co">#  DON'T USE ADS BECAUSE OF THE -0 CASE.</span>
+023975,000154: 26,2641           54101                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D504A4641494C">LMPJFAIL</a>                              
+023976,000155: 
+023977,000156: 26,2642           50073                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5434">RCSMONT4</a>                              <span class="co">#  TURN OFF THE JET-FAIL BITS IN CH5MASK &amp;</span>
+023978,000157: 26,2643           42673                           <span class="op">CS      </span> <a href="#4641494C5441424C">FAILTABL</a>                              <span class="co">#  CH6MASK.</span>
+023979,000158: 26,2644           70102                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
+023980,000159: 26,2645           54102                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348354D41534B">CH5MASK</a>                               
+023981,000160: 
+023982,000161: 26,2646           50073                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5243534D4F4E5434">RCSMONT4</a>                              
+023983,000162: 26,2647           42674                           <span class="op">CS      </span> <a href="#4641494C5441424C">FAILTABL</a>   +1                         
+023984,000163: 26,2650           70103                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
+023985,000164: 26,2651           54103                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348364D41534B">CH6MASK</a>                               
+023986,000165: 26,2652           15733                           <span class="op">TCF     </span> <a href="#5243534D4F4E4558">RCSMONEX</a>                              <span class="co">#  DONE.</span>
+023987,000166: 
+023988,000167: 
+023989,000168: 
+<a name="5243534D4F4E4558"></a>023990,000169: 26,2653     5733               <span class="sm">RCSMONEX</span>           <span class="ps">EQUALS  </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  CHANGE THIS TO ATTACH SOMETHING ON.</span>
+023991,000170: 
 </pre>
 </span>
 </p>
@@ -335,29 +335,29 @@ Page 573
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-023987,000172:                                                                                                  <span class="co">#           IN THE UPPER WORD OF EACH ENTRY OF THE KILLPAIR TABLE IS THE LMP COMMAND CODE TO ISOLATE A JET-PAIR.</span>
-023988,000173:                                                                                                  <span class="co">#  BIT 15 = 1 TO ALLOW USE OF THE "STORCOM" LMP ROUTINE.  THE LOWER WORD OF EACH ENTRY CONTAINS THE RESET-COMMAND</span>
-023989,000174:                                                                                                  <span class="co">#  CODE PLUS ONE, WHICH CORRESPONDS TO THE UPPER WORD.  (THE EXTRA +1 IS REMOVED BY THE CCS AT RCSMONIT.)</span>
-023990,000175: 
-<a name="4B494C4C50414952"></a>023991,000176: 26,2653           40250 00252  <span class="sm">KILLPAIR</span>           <span class="ps">2OCT    </span> 40250      00252                      <span class="co">#  2A. JETS 10 &amp; 11.  CMDS 168 &amp; 169.</span>
-023992,000177: 26,2655           40170 00172                     <span class="ps">2OCT    </span> 40170      00172                      <span class="co">#  2B. JETS  9 &amp; 12.  CMDS 120 &amp; 121.</span>
-023993,000178: 26,2657           40134 00136                     <span class="ps">2OCT    </span> 40134      00136                      <span class="co">#  1A. JETS 13 &amp; 15.  CMDS  92 &amp;  93.</span>
-023994,000179: 26,2661           40154 00156                     <span class="ps">2OCT    </span> 40154      00156                      <span class="co">#  1B. JETS 14 &amp; 16.  CMDS 108 &amp; 109.</span>
-023995,000180: 26,2663           40156 00160                     <span class="ps">2OCT    </span> 40156      00160                      <span class="co">#  3B. JETS  6 &amp;  7.  CMDS 110 &amp; 111.</span>
-023996,000181: 26,2665           40310 00312                     <span class="ps">2OCT    </span> 40310      00312                      <span class="co">#  4B. JETS  1 &amp;  3.  CMDS 200 &amp; 201.</span>
-023997,000182: 26,2667           40136 00140                     <span class="ps">2OCT    </span> 40136      00140                      <span class="co">#  3A. JETS  5 &amp;  8.  CMDS  94 &amp;  95.</span>
-023998,000183: 26,2671           40350 00352                     <span class="ps">2OCT    </span> 40350      00352                      <span class="co">#  4A. JETS  2 &amp;  4.  CMDS 232 &amp; 233.</span>
-023999,000184: 
-024000,000185:                                                                                                  <span class="co">#           FAILTABL ENTRIES CONTAIN THE BIT FOR CH5MASK IN THE UPPER WORD, AND THE BIT FOR CH6MASK IN THE LOWER.</span>
-024001,000186: 
-<a name="4641494C5441424C"></a>024002,000187: 26,2673           00040 00010  <span class="sm">FAILTABL</span>           <span class="ps">2OCT    </span> 00040      00010                      
-024003,000188: 26,2675           00020 00020                     <span class="ps">2OCT    </span> 00020      00020                      
-024004,000189: 26,2677           00100 00004                     <span class="ps">2OCT    </span> 00100      00004                      
-024005,000190: 26,2701           00200 00200                     <span class="ps">2OCT    </span> 00200      00200                      
-024006,000191: 26,2703           00010 00001                     <span class="ps">2OCT    </span> 00010      00001                      
-024007,000192: 26,2705           00001 00002                     <span class="ps">2OCT    </span> 00001      00002                      
-024008,000193: 26,2707           00004 00040                     <span class="ps">2OCT    </span> 00004      00040                      
-024009,000194: 26,2711           00002 00100                     <span class="ps">2OCT    </span> 00002      00100                      
+023993,000172:                                                                                                  <span class="co">#           IN THE UPPER WORD OF EACH ENTRY OF THE KILLPAIR TABLE IS THE LMP COMMAND CODE TO ISOLATE A JET-PAIR.</span>
+023994,000173:                                                                                                  <span class="co">#  BIT 15 = 1 TO ALLOW USE OF THE "STORCOM" LMP ROUTINE.  THE LOWER WORD OF EACH ENTRY CONTAINS THE RESET-COMMAND</span>
+023995,000174:                                                                                                  <span class="co">#  CODE PLUS ONE, WHICH CORRESPONDS TO THE UPPER WORD.  (THE EXTRA +1 IS REMOVED BY THE CCS AT RCSMONIT.)</span>
+023996,000175: 
+<a name="4B494C4C50414952"></a>023997,000176: 26,2653           40250 00252  <span class="sm">KILLPAIR</span>           <span class="ps">2OCT    </span> 40250      00252                      <span class="co">#  2A. JETS 10 &amp; 11.  CMDS 168 &amp; 169.</span>
+023998,000177: 26,2655           40170 00172                     <span class="ps">2OCT    </span> 40170      00172                      <span class="co">#  2B. JETS  9 &amp; 12.  CMDS 120 &amp; 121.</span>
+023999,000178: 26,2657           40134 00136                     <span class="ps">2OCT    </span> 40134      00136                      <span class="co">#  1A. JETS 13 &amp; 15.  CMDS  92 &amp;  93.</span>
+024000,000179: 26,2661           40154 00156                     <span class="ps">2OCT    </span> 40154      00156                      <span class="co">#  1B. JETS 14 &amp; 16.  CMDS 108 &amp; 109.</span>
+024001,000180: 26,2663           40156 00160                     <span class="ps">2OCT    </span> 40156      00160                      <span class="co">#  3B. JETS  6 &amp;  7.  CMDS 110 &amp; 111.</span>
+024002,000181: 26,2665           40310 00312                     <span class="ps">2OCT    </span> 40310      00312                      <span class="co">#  4B. JETS  1 &amp;  3.  CMDS 200 &amp; 201.</span>
+024003,000182: 26,2667           40136 00140                     <span class="ps">2OCT    </span> 40136      00140                      <span class="co">#  3A. JETS  5 &amp;  8.  CMDS  94 &amp;  95.</span>
+024004,000183: 26,2671           40350 00352                     <span class="ps">2OCT    </span> 40350      00352                      <span class="co">#  4A. JETS  2 &amp;  4.  CMDS 232 &amp; 233.</span>
+024005,000184: 
+024006,000185:                                                                                                  <span class="co">#           FAILTABL ENTRIES CONTAIN THE BIT FOR CH5MASK IN THE UPPER WORD, AND THE BIT FOR CH6MASK IN THE LOWER.</span>
+024007,000186: 
+<a name="4641494C5441424C"></a>024008,000187: 26,2673           00040 00010  <span class="sm">FAILTABL</span>           <span class="ps">2OCT    </span> 00040      00010                      
+024009,000188: 26,2675           00020 00020                     <span class="ps">2OCT    </span> 00020      00020                      
+024010,000189: 26,2677           00100 00004                     <span class="ps">2OCT    </span> 00100      00004                      
+024011,000190: 26,2701           00200 00200                     <span class="ps">2OCT    </span> 00200      00200                      
+024012,000191: 26,2703           00010 00001                     <span class="ps">2OCT    </span> 00010      00001                      
+024013,000192: 26,2705           00001 00002                     <span class="ps">2OCT    </span> 00001      00002                      
+024014,000193: 26,2707           00004 00040                     <span class="ps">2OCT    </span> 00004      00040                      
+024015,000194: 26,2711           00002 00100                     <span class="ps">2OCT    </span> 00002      00100                      
 
 End of include-file RCS_FAILURE_MONITOR.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

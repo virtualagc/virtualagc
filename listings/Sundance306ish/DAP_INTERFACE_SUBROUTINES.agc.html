@@ -92,186 +92,186 @@ from scratch to match what we believe would have been in the original listing.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-055614,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-055615,000003:                                                                                                  <span class="co">## Filename:    DAP_INTERFACE_SUBROUTINES.agc</span>
-055616,000004:                                                                                                  <span class="co">## Purpose:     A section of an attempt to reconstruct Sundance revision 306</span>
-055617,000005:                                                                                                  <span class="co">##              as closely as possible with available information. Sundance</span>
-055618,000006:                                                                                                  <span class="co">##              306 is the source code for the Lunar Module's (LM) Apollo</span>
-055619,000007:                                                                                                  <span class="co">##              Guidance Computer (AGC) for Apollo 9. This program was created</span>
-055620,000008:                                                                                                  <span class="co">##              using the mixed-revision SundanceXXX as a starting point, and</span>
-055621,000009:                                                                                                  <span class="co">##              pulling back features from Luminary 69 believed to have been</span>
-055622,000010:                                                                                                  <span class="co">##              added based on memos, checklists, observed address changes,</span>
-055623,000011:                                                                                                  <span class="co">##              or the Sundance GSOPs.</span>
-055624,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-055625,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-055626,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-055627,000015:                                                                                                  <span class="co">## Mod history: 2020-07-24 MAS  Created from SundanceXXX.</span>
-055628,000016: 
-055629,000017: 
-055630,000018: 
-055631,000019: 20,2204                                           <span class="ps">BANK    </span> 20                                    
-055632,000020: 20,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4441505333">DAPS3</a>                                 
-055633,000021: 20,2000                                           <span class="ps">BANK    </span>                                       
-055634,000022: 
-055635,000023: 20,2204  E6,1632                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555844">CDUXD</a>                                 
-055636,000024: 20,2204                                           <span class="ps">COUNT*  </span> $$/DAPIF                              
-055637,000025: 
-055638,000026:                                                                                                  <span class="co">#  MOD 0         DATE    11/15/66        BY GEORGE W. CHERRY</span>
-055639,000027:                                                                                                  <span class="co">#  MOD 1                  1/23/67        MODIFICATION BY PETER ADLER</span>
-055640,000028: 
-055641,000029:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION</span>
-055642,000030:                                                                                                  <span class="co">#        HEREIN ARE A COLLECTION OF SUBROUTINES WHICH ALLOW MISSION CONTROL PROGRAMS TO CONTROL THE MODE</span>
-055643,000031:                                                                                                  <span class="co">#        AND INTERFACE WITH THE DAP.</span>
-055644,000032: 
-055645,000033:                                                                                                  <span class="co">#  CALLING SEQUENCES</span>
-055646,000034:                                                                                                  <span class="co">#        IN INTERRUPT OR WITH INTERRUPT INHIBITED</span>
-055647,000035:                                                                                                  <span class="co">#                TC      IBNKCALL</span>
-055648,000036:                                                                                                  <span class="co">#                FCADR   ROUTINE</span>
-055649,000037:                                                                                                  <span class="co">#        IN A JOB WITHOUT INTERRUPT INHIBITED</span>
-055650,000038:                                                                                                  <span class="co">#                INHINT</span>
-055651,000039:                                                                                                  <span class="co">#                TC      IBNKCALL</span>
-055652,000040:                                                                                                  <span class="co">#                FCADR   ROUTINE</span>
-055653,000041:                                                                                                  <span class="co">#                RELINT</span>
-055654,000042: 
-055655,000043:                                                                                                  <span class="co">#  OUTPUT</span>
-055656,000044:                                                                                                  <span class="co">#        SEE INDIVIDUAL ROUTINES BELOW</span>
-055657,000045: 
-055658,000046:                                                                                                  <span class="co">#  DEBRIS</span>
-055659,000047:                                                                                                  <span class="co">#        A, L, AND SOMETIMES MDUETEMP                    ODE     NOT IN PULSES MODE</span>
-055660,000048: 
-055661,000049:                                                                                                  <span class="co">#  SUBROUTINE NAMES:</span>
-055662,000050:                                                                                                  <span class="co">#        SETMAXDB, SETMINDB, RESTORDB, PFLITEDB</span>
-055663,000051:                                                                                                  <span class="co">#  MODIFIED:     30 JANUARY 1968 BY P S WEISSMAN TO CREATE RESTORDB.</span>
-055664,000052:                                                                                                  <span class="co">#  MODIFIED:     1 MARCH 1968 BY P S WEISSMAN TO SAVE EBANK AND CREATE PFLITEDB</span>
-055665,000053: 
-055666,000054:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION:</span>
-055667,000055:                                                                                                  <span class="co">#        SETMAXDB - SET DEADBAND TO 5.0 DEGREES</span>
-055668,000056:                                                                                                  <span class="co">#        SETMINDB - SET DEADBAND TO 0.3 DEGREE</span>
-055669,000057:                                                                                                  <span class="co">#        RESTORDB - SET DEADBAND TO MAX OR MIN ACCORDING TO SETTING OF DBSELECT BIT OF DAPBOOLS</span>
-055670,000058:                                                                                                  <span class="co">#        PFLITEDB - SET DEADBAND TO 1.0 DEGREE AND ZERO THE COMMANDED ATTITUDE CHANGE AND COMMANDED RATE</span>
-055671,000059: 
-055672,000060:                                                                                                  <span class="co">#        ALL ENTRIES SET UP A NOVAC JOB TO DO 1/ACCS SO THAT THE TJETLAW SWITCH CURVES ARE POSITIONED TO</span>
-055673,000061:                                                                                                  <span class="co">#        REFLECT THE NEW DEADBAND.  IT SHOULD BE NOTED THAT THE DEADBAND REFERS TO THE ATTITUDE IN THE P-, U-, AND V-AXES.</span>
-055674,000062: 
-055675,000063:                                                                                                  <span class="co">#  SUBROUTINE CALLED:    NOVAC</span>
-055676,000064: 
-055677,000065:                                                                                                  <span class="co">#  CALLING SEQUENCE:     SAME AS ABOVE</span>
-055678,000066:                                                                                                  <span class="co">#                        OR      TC RESTORDB +1    FROM ALLCOAST</span>
-055679,000067: 
-055680,000068:                                                                                                  <span class="co">#  DEBRIS:               A, L, Q, RUPTREG1, (ITEMPS IN NOVAC)</span>
-055681,000069: 
-055682,000070:                                                                                                  <span class="co">#  DAPBOOLS BITS AND NAMES</span>
-055683,000071: 
-<a name="4155545241544531"></a>055684,000072: 20,2204     5026               <span class="sm">AUTRATE1</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  <span class="co">#  THESE FLAGS ARE USED TOGETHER TO INIDCAT</span>
-<a name="4155545241544532"></a>055685,000073: 20,2204     5025               <span class="sm">AUTRATE2</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  <span class="co">#  ASTRONAUT-CHOSEN KALCMANU MANEUVER RATES</span>
-055686,000074:                                                                                                  <span class="co">#  (0,0)=(BIT2,BIT1)= 0.2 DEG/SEC</span>
-055687,000075:                                                                                                  <span class="co">#  (0,1)=  0.5 DEG/SEC</span>
-<a name="414343534F4B4159"></a>055688,000076: 20,2204     5024               <span class="sm">ACCSOKAY</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495433">BIT3</a>                                  <span class="co">#  VALUES FROM 1/ACCS USABLE FLAG</span>
-<a name="444253454C454354"></a>055689,000077: 20,2204     5023               <span class="sm">DBSELECT</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495434">BIT4</a>                                  <span class="co">#  DAP DEADBAND SELECT FLAG</span>
-<a name="414F524253595354"></a>055690,000078: 20,2204     5022               <span class="sm">AORBSYST</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495435">BIT5</a>                                  <span class="co">#  P-AXIS ROTATION JET SYSTEM (A OR B) FLAG</span>
-<a name="554C4C41474552"></a>055691,000079: 20,2204     5021               <span class="sm">ULLAGER </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  <span class="co">#  INTERNAL ULLAGE REQUEST FLAG</span>
-<a name="5248435343414C45"></a>055692,000080: 20,2204     5020               <span class="sm">RHCSCALE</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495437">BIT7</a>                                  <span class="co">#  RHC SCALE SELECT FLAG</span>
-<a name="4452494654424954"></a>055693,000081: 20,2204     5017               <span class="sm">DRIFTBIT</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  <span class="co">#  USE OFFSET ACCELERATION FLAG</span>
-<a name="584F56494E484942"></a>055694,000082: 20,2204     5016               <span class="sm">XOVINHIB</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495439">BIT9</a>                                  <span class="co">#  X-AXIS OVERRIDE PERMITTED FLAG</span>
-<a name="414F52425452414E"></a>055695,000083: 20,2204     5015               <span class="sm">AORBTRAN</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543130">BIT10</a>                                 <span class="co">#  X-TRANSLATION JET SYSTEM (A OR B) FLAG</span>
-<a name="414343344F523258"></a>055696,000084: 20,2204     5014               <span class="sm">ACC4OR2X</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543131">BIT11</a>                                 <span class="co">#  2 OR 4 JET Z-TRANSLATION MODE FLAG</span>
-<a name="4F55525243424954"></a>055697,000085: 20,2204     5013               <span class="sm">OURRCBIT</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543132">BIT12</a>                                 <span class="co">#  INTERNAL DAP RATE COMMAND ACTIVITY FLAG</span>
-<a name="43534D444F434B44"></a>055698,000086: 20,2204     5012               <span class="sm">CSMDOCKD</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543133">BIT13</a>                                 <span class="co">#  CSM DOCKED TO LM FLAG</span>
-<a name="55534551524A5453"></a>055699,000087: 20,2204     5011               <span class="sm">USEQRJTS</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 <span class="co">#  TRIM GIMBAL FLAG</span>
-<a name="50554C534553"></a>055700,000088: 20,2204     5010               <span class="sm">PULSES  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543135">BIT15</a>                                 <span class="co">#  MINIMUM IMPULSE RHC MODE FLAG</span>
-055701,000089: 
-055702,000090: 
-<a name="524553544F524442"></a>055703,000091: 20,2204           31102        <span class="sm">RESTORDB</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              <span class="co">#  DETERMINE CREW-SELECTED DEADBAND.</span>
-055704,000092: 20,2205           75023                           <span class="op">MASK    </span> <a href="#444253454C454354">DBSELECT</a>                              
-055705,000093: 20,2206           00006                           <span class="op">EXTEND  </span>                                       
-055706,000094: 20,2207           12221                           <span class="op">BZF     </span> <a href="#5345544D494E4442">SETMINDB</a>                              
-055707,000095: 
-<a name="5345544D41584442"></a>055708,000096: 20,2210           35751        <span class="sm">SETMAXDB</span>           <span class="op">CAF     </span> <a href="T6-RUPT_PROGRAMS.agc.html#574944454442">WIDEDB</a>                                <span class="co">#  SET 5 DEGREE DEADBAND.</span>
-055709,000097: 20,2211           55356                 +1        <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4442">DB</a>                                    
-055710,000098: 
-055711,000099: 20,2212           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  SET UP JOB TO RE-POSITION SWITCH CURVES.</span>
-055712,000100: 20,2213           22070                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-<a name="43414C4C41434353"></a>055713,000101: 20,2214           37667        <span class="sm">CALLACCS</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3237">PRIO27</a>                                
-055714,000102: 20,2215           05142                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
-055715,000103: 20,2216  E6,1532                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5351">AOSQ</a>                                  
-055716,000104: 20,2216           02312 40106                     <span class="ps">2CADR   </span> <a href="AOSTASK_AND_AOSJOB.agc.html#312F4143434A4F42">1/ACCJOB</a>                              
-055717,000105: 
-055718,000106: 20,2220           00070                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  RETURN TO CALLER.</span>
-055719,000107: 
-<a name="5345544D494E4442"></a>055720,000108: 20,2221           35750        <span class="sm">SETMINDB</span>           <span class="op">CAF     </span> <a href="T6-RUPT_PROGRAMS.agc.html#4E4152524F574442">NARROWDB</a>                              <span class="co">#  SET 0.3 DEGREE DEADBAND.</span>
-055721,000109: 20,2222           12211                           <span class="op">TCF     </span> <a href="#5345544D41584442">SETMAXDB</a>   +1                         
-055722,000110: 
-<a name="50464C4954454442"></a>055723,000111: 20,2223           00006        <span class="sm">PFLITEDB</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  THE RETURN FROM CALLACCS IS TO RUPTREG1.</span>
-055724,000112: 20,2224           22070                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-055725,000113: 20,2225           02232                           <span class="op">TC      </span> <a href="#5A41545445524F52">ZATTEROR</a>                              <span class="co">#  ZERO THE ERRORS AND COMMANDED RATES.</span>
-055726,000114: 20,2226           32231                           <span class="op">CAF     </span> <a href="#504F5745524442">POWERDB</a>                               <span class="co">#  SET DB TO 1.0 DEG.</span>
-055727,000115: 20,2227           55356                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4442">DB</a>                                    
-055728,000116: 20,2230           12214                           <span class="op">TCF     </span> <a href="#43414C4C41434353">CALLACCS</a>                              <span class="co">#  SET UP 1/ACCS AND RETURN TO CALLER.</span>
-055729,000117: 
-<a name="504F5745524442"></a>055730,000118: 20,2231           00554        <span class="sm">POWERDB </span>           <span class="ps">DEC     </span> .02222                                <span class="co">#  1.0 DEGREE SCALED AT 45.</span>
-055731,000119: 
-<a name="5A41545445524F52"></a>055732,000120: 20,2232           35065        <span class="sm">ZATTEROR</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4542414E4B36">EBANK6</a>                                
-055733,000121: 20,2233           56003                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
-055734,000122: 20,2234           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  SAVE CALLERS EBANK IN L.</span>
-055735,000123: 20,2235           30032                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  
-055736,000124: 20,2236           55632                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555844">CDUXD</a>                                 
-055737,000125: 20,2237           30033                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445559">CDUY</a>                                  
-055738,000126: 20,2240           55633                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555944">CDUYD</a>                                 
-055739,000127: 20,2241           30034                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
-055740,000128: 20,2242           55634                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A44">CDUZD</a>                                 
-055741,000129: 20,2243           12247                           <span class="op">TCF     </span> <a href="#53544F5052415445">STOPRATE</a>   +3                         
-055742,000130: 
-<a name="53544F5052415445"></a>055743,000131: 20,2244           35065        <span class="sm">STOPRATE</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4542414E4B36">EBANK6</a>                                
-055744,000132: 20,2245           56003                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
-055745,000133: 20,2246           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  SAVE CALLERS EBANK IN L.</span>
-055746,000134: 20,2247           35030                 +3        <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-055747,000135: 20,2250           55640                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547415044">OMEGAPD</a>                               
-055748,000136: 20,2251           55641                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547415144">OMEGAQD</a>                               
-055749,000137: 20,2252           55642                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547415244">OMEGARD</a>                               
-055750,000138: 20,2253           55635                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C43445558">DELCDUX</a>                               
-055751,000139: 20,2254           55636                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C43445559">DELCDUY</a>                               
-055752,000140: 20,2255           55637                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4344555A">DELCDUZ</a>                               
-055753,000141: 20,2256           55301                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5045524F52">DELPEROR</a>                              
-055754,000142: 20,2257           55302                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5145524F52">DELQEROR</a>                              
-055755,000143: 20,2260           55303                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5245524F52">DELREROR</a>                              
-055756,000144: 20,2261           22003                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 <span class="co">#  RESTORE CALLERS EBANK.</span>
-055757,000145: 20,2262           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-055758,000146: 
-055759,000147:                                                                                                  <span class="co">#  SUBROUTINE NAME:      ALLCOAST</span>
-055760,000148:                                                                                                  <span class="co">#  WILL BE CALLED BY FRESH STARTS AND ENGINE OFF ROUTINES.               .</span>
-055761,000149: 
-055762,000150:                                                                                                  <span class="co">#  CALLING SEQUENCE:     (SAME AS ABOVE)</span>
-055763,000151: 
-055764,000152:                                                                                                  <span class="co">#  EXIT:                 RETURN TO Q.</span>
-055765,000153: 
-055766,000154:                                                                                                  <span class="co">#  SUBROUTINES CALLED:   STOPRATE, RESTORDB, NOVAC</span>
-055767,000155: 
-055768,000156:                                                                                                  <span class="co">#  ZERO:                 (FOR ALL AXES) AOS, ALPHA, AOSTERM, OMEGAD, DELCDU, DELEROR</span>
-055769,000157: 
-055770,000158:                                                                                                  <span class="co">#  OUTPUT:               DRIFTBIT/DAPBOOLS, DB, JOB TO DO 1/ACCS</span>
-055771,000159: 
-055772,000160:                                                                                                  <span class="co">#  DEBRIS:               A, L, Q, RUPTREG1, RUPTREG2, (ITEMPS IN NOVAC)</span>
-055773,000161: 
-<a name="414C4C434F415354"></a>055774,000162: 20,2263           35065        <span class="sm">ALLCOAST</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4542414E4B36">EBANK6</a>                                
-055775,000163: 20,2264           56003                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
-055776,000164: 20,2265           54066                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5036">ITEMP6</a>                                
-055777,000165: 20,2266           45030                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-055778,000166: 20,2267           55532                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5351">AOSQ</a>                                  
-055779,000167: 20,2270           55533                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5351">AOSQ</a>       +1                         
-055780,000168: 20,2271           55534                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5352">AOSR</a>                                  
-055781,000169: 20,2272           55535                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5352">AOSR</a>       +1                         
-055782,000170: 20,2273           55422                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484151">ALPHAQ</a>                                <span class="co">#  FOR DOWNLIST.</span>
-055783,000171: 20,2274           55423                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484152">ALPHAR</a>                                
-055784,000172: 20,2275           55540                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F53515445524D">AOSQTERM</a>                              
-055785,000173: 20,2276           55541                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F53525445524D">AOSRTERM</a>                              
-055786,000174: 20,2277           30066                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5036">ITEMP6</a>                                
-055787,000175: 20,2300           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 <span class="co">#  RESTORE EBANK (EBANK6 NO LONGER NEEDED)</span>
-055788,000176: 
-055789,000177: 20,2301           41102                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              <span class="co">#  SET UP DRIFTBIT</span>
-055790,000178: 20,2302           75017                           <span class="op">MASK    </span> <a href="#4452494654424954">DRIFTBIT</a>                              
-055791,000179: 20,2303           27102                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              
-055792,000180: 20,2304           12205                           <span class="op">TCF     </span> <a href="#524553544F524442">RESTORDB</a>   +1                         <span class="co">#  RESTORE DEADBANK TO CREW-SELECTED VALUE.</span>
-055793,000181: 
+055642,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+055643,000003:                                                                                                  <span class="co">## Filename:    DAP_INTERFACE_SUBROUTINES.agc</span>
+055644,000004:                                                                                                  <span class="co">## Purpose:     A section of an attempt to reconstruct Sundance revision 306</span>
+055645,000005:                                                                                                  <span class="co">##              as closely as possible with available information. Sundance</span>
+055646,000006:                                                                                                  <span class="co">##              306 is the source code for the Lunar Module's (LM) Apollo</span>
+055647,000007:                                                                                                  <span class="co">##              Guidance Computer (AGC) for Apollo 9. This program was created</span>
+055648,000008:                                                                                                  <span class="co">##              using the mixed-revision SundanceXXX as a starting point, and</span>
+055649,000009:                                                                                                  <span class="co">##              pulling back features from Luminary 69 believed to have been</span>
+055650,000010:                                                                                                  <span class="co">##              added based on memos, checklists, observed address changes,</span>
+055651,000011:                                                                                                  <span class="co">##              or the Sundance GSOPs.</span>
+055652,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+055653,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+055654,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+055655,000015:                                                                                                  <span class="co">## Mod history: 2020-07-24 MAS  Created from SundanceXXX.</span>
+055656,000016: 
+055657,000017: 
+055658,000018: 
+055659,000019: 20,2204                                           <span class="ps">BANK    </span> 20                                    
+055660,000020: 20,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4441505333">DAPS3</a>                                 
+055661,000021: 20,2000                                           <span class="ps">BANK    </span>                                       
+055662,000022: 
+055663,000023: 20,2204  E6,1632                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555844">CDUXD</a>                                 
+055664,000024: 20,2204                                           <span class="ps">COUNT*  </span> $$/DAPIF                              
+055665,000025: 
+055666,000026:                                                                                                  <span class="co">#  MOD 0         DATE    11/15/66        BY GEORGE W. CHERRY</span>
+055667,000027:                                                                                                  <span class="co">#  MOD 1                  1/23/67        MODIFICATION BY PETER ADLER</span>
+055668,000028: 
+055669,000029:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION</span>
+055670,000030:                                                                                                  <span class="co">#        HEREIN ARE A COLLECTION OF SUBROUTINES WHICH ALLOW MISSION CONTROL PROGRAMS TO CONTROL THE MODE</span>
+055671,000031:                                                                                                  <span class="co">#        AND INTERFACE WITH THE DAP.</span>
+055672,000032: 
+055673,000033:                                                                                                  <span class="co">#  CALLING SEQUENCES</span>
+055674,000034:                                                                                                  <span class="co">#        IN INTERRUPT OR WITH INTERRUPT INHIBITED</span>
+055675,000035:                                                                                                  <span class="co">#                TC      IBNKCALL</span>
+055676,000036:                                                                                                  <span class="co">#                FCADR   ROUTINE</span>
+055677,000037:                                                                                                  <span class="co">#        IN A JOB WITHOUT INTERRUPT INHIBITED</span>
+055678,000038:                                                                                                  <span class="co">#                INHINT</span>
+055679,000039:                                                                                                  <span class="co">#                TC      IBNKCALL</span>
+055680,000040:                                                                                                  <span class="co">#                FCADR   ROUTINE</span>
+055681,000041:                                                                                                  <span class="co">#                RELINT</span>
+055682,000042: 
+055683,000043:                                                                                                  <span class="co">#  OUTPUT</span>
+055684,000044:                                                                                                  <span class="co">#        SEE INDIVIDUAL ROUTINES BELOW</span>
+055685,000045: 
+055686,000046:                                                                                                  <span class="co">#  DEBRIS</span>
+055687,000047:                                                                                                  <span class="co">#        A, L, AND SOMETIMES MDUETEMP                    ODE     NOT IN PULSES MODE</span>
+055688,000048: 
+055689,000049:                                                                                                  <span class="co">#  SUBROUTINE NAMES:</span>
+055690,000050:                                                                                                  <span class="co">#        SETMAXDB, SETMINDB, RESTORDB, PFLITEDB</span>
+055691,000051:                                                                                                  <span class="co">#  MODIFIED:     30 JANUARY 1968 BY P S WEISSMAN TO CREATE RESTORDB.</span>
+055692,000052:                                                                                                  <span class="co">#  MODIFIED:     1 MARCH 1968 BY P S WEISSMAN TO SAVE EBANK AND CREATE PFLITEDB</span>
+055693,000053: 
+055694,000054:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION:</span>
+055695,000055:                                                                                                  <span class="co">#        SETMAXDB - SET DEADBAND TO 5.0 DEGREES</span>
+055696,000056:                                                                                                  <span class="co">#        SETMINDB - SET DEADBAND TO 0.3 DEGREE</span>
+055697,000057:                                                                                                  <span class="co">#        RESTORDB - SET DEADBAND TO MAX OR MIN ACCORDING TO SETTING OF DBSELECT BIT OF DAPBOOLS</span>
+055698,000058:                                                                                                  <span class="co">#        PFLITEDB - SET DEADBAND TO 1.0 DEGREE AND ZERO THE COMMANDED ATTITUDE CHANGE AND COMMANDED RATE</span>
+055699,000059: 
+055700,000060:                                                                                                  <span class="co">#        ALL ENTRIES SET UP A NOVAC JOB TO DO 1/ACCS SO THAT THE TJETLAW SWITCH CURVES ARE POSITIONED TO</span>
+055701,000061:                                                                                                  <span class="co">#        REFLECT THE NEW DEADBAND.  IT SHOULD BE NOTED THAT THE DEADBAND REFERS TO THE ATTITUDE IN THE P-, U-, AND V-AXES.</span>
+055702,000062: 
+055703,000063:                                                                                                  <span class="co">#  SUBROUTINE CALLED:    NOVAC</span>
+055704,000064: 
+055705,000065:                                                                                                  <span class="co">#  CALLING SEQUENCE:     SAME AS ABOVE</span>
+055706,000066:                                                                                                  <span class="co">#                        OR      TC RESTORDB +1    FROM ALLCOAST</span>
+055707,000067: 
+055708,000068:                                                                                                  <span class="co">#  DEBRIS:               A, L, Q, RUPTREG1, (ITEMPS IN NOVAC)</span>
+055709,000069: 
+055710,000070:                                                                                                  <span class="co">#  DAPBOOLS BITS AND NAMES</span>
+055711,000071: 
+<a name="4155545241544531"></a>055712,000072: 20,2204     5026               <span class="sm">AUTRATE1</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  <span class="co">#  THESE FLAGS ARE USED TOGETHER TO INIDCAT</span>
+<a name="4155545241544532"></a>055713,000073: 20,2204     5025               <span class="sm">AUTRATE2</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  <span class="co">#  ASTRONAUT-CHOSEN KALCMANU MANEUVER RATES</span>
+055714,000074:                                                                                                  <span class="co">#  (0,0)=(BIT2,BIT1)= 0.2 DEG/SEC</span>
+055715,000075:                                                                                                  <span class="co">#  (0,1)=  0.5 DEG/SEC</span>
+<a name="414343534F4B4159"></a>055716,000076: 20,2204     5024               <span class="sm">ACCSOKAY</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495433">BIT3</a>                                  <span class="co">#  VALUES FROM 1/ACCS USABLE FLAG</span>
+<a name="444253454C454354"></a>055717,000077: 20,2204     5023               <span class="sm">DBSELECT</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495434">BIT4</a>                                  <span class="co">#  DAP DEADBAND SELECT FLAG</span>
+<a name="414F524253595354"></a>055718,000078: 20,2204     5022               <span class="sm">AORBSYST</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495435">BIT5</a>                                  <span class="co">#  P-AXIS ROTATION JET SYSTEM (A OR B) FLAG</span>
+<a name="554C4C41474552"></a>055719,000079: 20,2204     5021               <span class="sm">ULLAGER </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  <span class="co">#  INTERNAL ULLAGE REQUEST FLAG</span>
+<a name="5248435343414C45"></a>055720,000080: 20,2204     5020               <span class="sm">RHCSCALE</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495437">BIT7</a>                                  <span class="co">#  RHC SCALE SELECT FLAG</span>
+<a name="4452494654424954"></a>055721,000081: 20,2204     5017               <span class="sm">DRIFTBIT</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  <span class="co">#  USE OFFSET ACCELERATION FLAG</span>
+<a name="584F56494E484942"></a>055722,000082: 20,2204     5016               <span class="sm">XOVINHIB</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495439">BIT9</a>                                  <span class="co">#  X-AXIS OVERRIDE PERMITTED FLAG</span>
+<a name="414F52425452414E"></a>055723,000083: 20,2204     5015               <span class="sm">AORBTRAN</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543130">BIT10</a>                                 <span class="co">#  X-TRANSLATION JET SYSTEM (A OR B) FLAG</span>
+<a name="414343344F523258"></a>055724,000084: 20,2204     5014               <span class="sm">ACC4OR2X</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543131">BIT11</a>                                 <span class="co">#  2 OR 4 JET Z-TRANSLATION MODE FLAG</span>
+<a name="4F55525243424954"></a>055725,000085: 20,2204     5013               <span class="sm">OURRCBIT</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543132">BIT12</a>                                 <span class="co">#  INTERNAL DAP RATE COMMAND ACTIVITY FLAG</span>
+<a name="43534D444F434B44"></a>055726,000086: 20,2204     5012               <span class="sm">CSMDOCKD</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543133">BIT13</a>                                 <span class="co">#  CSM DOCKED TO LM FLAG</span>
+<a name="55534551524A5453"></a>055727,000087: 20,2204     5011               <span class="sm">USEQRJTS</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 <span class="co">#  TRIM GIMBAL FLAG</span>
+<a name="50554C534553"></a>055728,000088: 20,2204     5010               <span class="sm">PULSES  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543135">BIT15</a>                                 <span class="co">#  MINIMUM IMPULSE RHC MODE FLAG</span>
+055729,000089: 
+055730,000090: 
+<a name="524553544F524442"></a>055731,000091: 20,2204           31102        <span class="sm">RESTORDB</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              <span class="co">#  DETERMINE CREW-SELECTED DEADBAND.</span>
+055732,000092: 20,2205           75023                           <span class="op">MASK    </span> <a href="#444253454C454354">DBSELECT</a>                              
+055733,000093: 20,2206           00006                           <span class="op">EXTEND  </span>                                       
+055734,000094: 20,2207           12221                           <span class="op">BZF     </span> <a href="#5345544D494E4442">SETMINDB</a>                              
+055735,000095: 
+<a name="5345544D41584442"></a>055736,000096: 20,2210           35751        <span class="sm">SETMAXDB</span>           <span class="op">CAF     </span> <a href="T6-RUPT_PROGRAMS.agc.html#574944454442">WIDEDB</a>                                <span class="co">#  SET 5 DEGREE DEADBAND.</span>
+055737,000097: 20,2211           55356                 +1        <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4442">DB</a>                                    
+055738,000098: 
+055739,000099: 20,2212           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  SET UP JOB TO RE-POSITION SWITCH CURVES.</span>
+055740,000100: 20,2213           22070                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+<a name="43414C4C41434353"></a>055741,000101: 20,2214           37667        <span class="sm">CALLACCS</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3237">PRIO27</a>                                
+055742,000102: 20,2215           05142                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
+055743,000103: 20,2216  E6,1532                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5351">AOSQ</a>                                  
+055744,000104: 20,2216           02312 40106                     <span class="ps">2CADR   </span> <a href="AOSTASK_AND_AOSJOB.agc.html#312F4143434A4F42">1/ACCJOB</a>                              
+055745,000105: 
+055746,000106: 20,2220           00070                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  RETURN TO CALLER.</span>
+055747,000107: 
+<a name="5345544D494E4442"></a>055748,000108: 20,2221           35750        <span class="sm">SETMINDB</span>           <span class="op">CAF     </span> <a href="T6-RUPT_PROGRAMS.agc.html#4E4152524F574442">NARROWDB</a>                              <span class="co">#  SET 0.3 DEGREE DEADBAND.</span>
+055749,000109: 20,2222           12211                           <span class="op">TCF     </span> <a href="#5345544D41584442">SETMAXDB</a>   +1                         
+055750,000110: 
+<a name="50464C4954454442"></a>055751,000111: 20,2223           00006        <span class="sm">PFLITEDB</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  THE RETURN FROM CALLACCS IS TO RUPTREG1.</span>
+055752,000112: 20,2224           22070                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+055753,000113: 20,2225           02232                           <span class="op">TC      </span> <a href="#5A41545445524F52">ZATTEROR</a>                              <span class="co">#  ZERO THE ERRORS AND COMMANDED RATES.</span>
+055754,000114: 20,2226           32231                           <span class="op">CAF     </span> <a href="#504F5745524442">POWERDB</a>                               <span class="co">#  SET DB TO 1.0 DEG.</span>
+055755,000115: 20,2227           55356                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4442">DB</a>                                    
+055756,000116: 20,2230           12214                           <span class="op">TCF     </span> <a href="#43414C4C41434353">CALLACCS</a>                              <span class="co">#  SET UP 1/ACCS AND RETURN TO CALLER.</span>
+055757,000117: 
+<a name="504F5745524442"></a>055758,000118: 20,2231           00554        <span class="sm">POWERDB </span>           <span class="ps">DEC     </span> .02222                                <span class="co">#  1.0 DEGREE SCALED AT 45.</span>
+055759,000119: 
+<a name="5A41545445524F52"></a>055760,000120: 20,2232           35065        <span class="sm">ZATTEROR</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4542414E4B36">EBANK6</a>                                
+055761,000121: 20,2233           56003                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
+055762,000122: 20,2234           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  SAVE CALLERS EBANK IN L.</span>
+055763,000123: 20,2235           30032                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  
+055764,000124: 20,2236           55632                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555844">CDUXD</a>                                 
+055765,000125: 20,2237           30033                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445559">CDUY</a>                                  
+055766,000126: 20,2240           55633                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555944">CDUYD</a>                                 
+055767,000127: 20,2241           30034                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
+055768,000128: 20,2242           55634                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A44">CDUZD</a>                                 
+055769,000129: 20,2243           12247                           <span class="op">TCF     </span> <a href="#53544F5052415445">STOPRATE</a>   +3                         
+055770,000130: 
+<a name="53544F5052415445"></a>055771,000131: 20,2244           35065        <span class="sm">STOPRATE</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4542414E4B36">EBANK6</a>                                
+055772,000132: 20,2245           56003                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
+055773,000133: 20,2246           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  SAVE CALLERS EBANK IN L.</span>
+055774,000134: 20,2247           35030                 +3        <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+055775,000135: 20,2250           55640                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547415044">OMEGAPD</a>                               
+055776,000136: 20,2251           55641                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547415144">OMEGAQD</a>                               
+055777,000137: 20,2252           55642                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547415244">OMEGARD</a>                               
+055778,000138: 20,2253           55635                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C43445558">DELCDUX</a>                               
+055779,000139: 20,2254           55636                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C43445559">DELCDUY</a>                               
+055780,000140: 20,2255           55637                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4344555A">DELCDUZ</a>                               
+055781,000141: 20,2256           55301                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5045524F52">DELPEROR</a>                              
+055782,000142: 20,2257           55302                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5145524F52">DELQEROR</a>                              
+055783,000143: 20,2260           55303                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5245524F52">DELREROR</a>                              
+055784,000144: 20,2261           22003                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 <span class="co">#  RESTORE CALLERS EBANK.</span>
+055785,000145: 20,2262           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+055786,000146: 
+055787,000147:                                                                                                  <span class="co">#  SUBROUTINE NAME:      ALLCOAST</span>
+055788,000148:                                                                                                  <span class="co">#  WILL BE CALLED BY FRESH STARTS AND ENGINE OFF ROUTINES.               .</span>
+055789,000149: 
+055790,000150:                                                                                                  <span class="co">#  CALLING SEQUENCE:     (SAME AS ABOVE)</span>
+055791,000151: 
+055792,000152:                                                                                                  <span class="co">#  EXIT:                 RETURN TO Q.</span>
+055793,000153: 
+055794,000154:                                                                                                  <span class="co">#  SUBROUTINES CALLED:   STOPRATE, RESTORDB, NOVAC</span>
+055795,000155: 
+055796,000156:                                                                                                  <span class="co">#  ZERO:                 (FOR ALL AXES) AOS, ALPHA, AOSTERM, OMEGAD, DELCDU, DELEROR</span>
+055797,000157: 
+055798,000158:                                                                                                  <span class="co">#  OUTPUT:               DRIFTBIT/DAPBOOLS, DB, JOB TO DO 1/ACCS</span>
+055799,000159: 
+055800,000160:                                                                                                  <span class="co">#  DEBRIS:               A, L, Q, RUPTREG1, RUPTREG2, (ITEMPS IN NOVAC)</span>
+055801,000161: 
+<a name="414C4C434F415354"></a>055802,000162: 20,2263           35065        <span class="sm">ALLCOAST</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4542414E4B36">EBANK6</a>                                
+055803,000163: 20,2264           56003                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
+055804,000164: 20,2265           54066                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5036">ITEMP6</a>                                
+055805,000165: 20,2266           45030                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+055806,000166: 20,2267           55532                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5351">AOSQ</a>                                  
+055807,000167: 20,2270           55533                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5351">AOSQ</a>       +1                         
+055808,000168: 20,2271           55534                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5352">AOSR</a>                                  
+055809,000169: 20,2272           55535                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F5352">AOSR</a>       +1                         
+055810,000170: 20,2273           55422                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484151">ALPHAQ</a>                                <span class="co">#  FOR DOWNLIST.</span>
+055811,000171: 20,2274           55423                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484152">ALPHAR</a>                                
+055812,000172: 20,2275           55540                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F53515445524D">AOSQTERM</a>                              
+055813,000173: 20,2276           55541                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F53525445524D">AOSRTERM</a>                              
+055814,000174: 20,2277           30066                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5036">ITEMP6</a>                                
+055815,000175: 20,2300           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 <span class="co">#  RESTORE EBANK (EBANK6 NO LONGER NEEDED)</span>
+055816,000176: 
+055817,000177: 20,2301           41102                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              <span class="co">#  SET UP DRIFTBIT</span>
+055818,000178: 20,2302           75017                           <span class="op">MASK    </span> <a href="#4452494654424954">DRIFTBIT</a>                              
+055819,000179: 20,2303           27102                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              
+055820,000180: 20,2304           12205                           <span class="op">TCF     </span> <a href="#524553544F524442">RESTORDB</a>   +1                         <span class="co">#  RESTORE DEADBANK TO CREW-SELECTED VALUE.</span>
+055821,000181: 
 
 End of include-file DAP_INTERFACE_SUBROUTINES.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

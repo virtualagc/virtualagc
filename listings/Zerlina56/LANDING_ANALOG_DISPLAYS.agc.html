@@ -87,26 +87,26 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-040049,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-040050,000003:                                                                                                  <span class="co">## Filename:    LANDING_ANALOG_DISPLAYS.agc</span>
-040051,000004:                                                                                                  <span class="co">## Purpose:     A log section of Zerlina 56, the final revision of</span>
-040052,000005:                                                                                                  <span class="co">##              Don Eyles's offline development program for the variable </span>
-040053,000006:                                                                                                  <span class="co">##              guidance period servicer. It also includes a new P66 with LPD </span>
-040054,000007:                                                                                                  <span class="co">##              (Landing Point Designator) capability, based on an idea of John </span>
-040055,000008:                                                                                                  <span class="co">##              Young's. Neither of these advanced features were actually flown,</span>
-040056,000009:                                                                                                  <span class="co">##              but Zerlina was also the birthplace of other big improvements to</span>
-040057,000010:                                                                                                  <span class="co">##              Luminary including the terrain model and new (Luminary 1E)</span>
-040058,000011:                                                                                                  <span class="co">##              analog display programs. Zerlina was branched off of Luminary 145,</span>
-040059,000012:                                                                                                  <span class="co">##              and revision 56 includes all changes up to and including Luminary</span>
-040060,000013:                                                                                                  <span class="co">##              183. It is therefore quite close to the Apollo 14 program,</span>
-040061,000014:                                                                                                  <span class="co">##              Luminary 178, where not modified with new features.</span>
-040062,000015:                                                                                                  <span class="co">## Reference:   pp. 890-898</span>
-040063,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-040064,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-040065,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-040066,000019:                                                                                                  <span class="co">## Mod history: 2017-07-28 MAS  Created from Luminary 210.</span>
-040067,000020:                                                                                                  <span class="co">##              2017-08-19 MAS  Updated for Zerlina 56.</span>
-040068,000021: 
+040058,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+040059,000003:                                                                                                  <span class="co">## Filename:    LANDING_ANALOG_DISPLAYS.agc</span>
+040060,000004:                                                                                                  <span class="co">## Purpose:     A log section of Zerlina 56, the final revision of</span>
+040061,000005:                                                                                                  <span class="co">##              Don Eyles's offline development program for the variable </span>
+040062,000006:                                                                                                  <span class="co">##              guidance period servicer. It also includes a new P66 with LPD </span>
+040063,000007:                                                                                                  <span class="co">##              (Landing Point Designator) capability, based on an idea of John </span>
+040064,000008:                                                                                                  <span class="co">##              Young's. Neither of these advanced features were actually flown,</span>
+040065,000009:                                                                                                  <span class="co">##              but Zerlina was also the birthplace of other big improvements to</span>
+040066,000010:                                                                                                  <span class="co">##              Luminary including the terrain model and new (Luminary 1E)</span>
+040067,000011:                                                                                                  <span class="co">##              analog display programs. Zerlina was branched off of Luminary 145,</span>
+040068,000012:                                                                                                  <span class="co">##              and revision 56 includes all changes up to and including Luminary</span>
+040069,000013:                                                                                                  <span class="co">##              183. It is therefore quite close to the Apollo 14 program,</span>
+040070,000014:                                                                                                  <span class="co">##              Luminary 178, where not modified with new features.</span>
+040071,000015:                                                                                                  <span class="co">## Reference:   pp. 890-898</span>
+040072,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+040073,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+040074,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+040075,000019:                                                                                                  <span class="co">## Mod history: 2017-07-28 MAS  Created from Luminary 210.</span>
+040076,000020:                                                                                                  <span class="co">##              2017-08-19 MAS  Updated for Zerlina 56.</span>
+040077,000021: 
 </pre>
 </span>
 </p>
@@ -122,55 +122,55 @@ Page 890
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-040070,000023:                                                                                                  <span class="co">#  ****************************************************************************************************************</span>
-040071,000024:                                                                                                  <span class="co">#  LANADISP:  DISPLAY INERTIAL DATA ROUTINE FOR DESCENT AND ABORTS                            THIS VERSION BY EYLES</span>
-040072,000025:                                                                                                  <span class="co">#  ****************************************************************************************************************</span>
-040073,000026: 
-040074,000027: 21,2334                                           <span class="ps">BANK    </span> 21                                    
-040075,000028: 21,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#523130">R10</a>                                   
-040076,000029: 21,2000                                           <span class="ps">BANK    </span>                                       
-040077,000030: 
-040078,000031: 21,2334  E7,1777                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E442D4537">END-E7</a>                                
-040079,000032: 21,2334                                           <span class="ps">COUNT*  </span> $$/<a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#523130">R10</a>                                
-040080,000033: 
-040081,000034:                                                                                                  <span class="co">#  ************************************************************************</span>
-040082,000035:                                                                                                  <span class="co">#  COMPUTE ALTITUDE AND ALTITUDE-RATE</span>
-040083,000036:                                                                                                  <span class="co">#  ************************************************************************</span>
-<a name="4C414E4144495350"></a>040084,000037: 21,2334           31722        <span class="sm">LANADISP</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52554E495458">RUNITX</a>                                <span class="co">#  COMPUTE RADIAL VELOCITY</span>
-040085,000038: 21,2335           00006                           <span class="op">EXTEND  </span>                                       
-040086,000039: 21,2336           71726                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#565645435458">VVECTX</a>                                
-040087,000040: 21,2337           53735                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C5452415445">ALTRATE</a>                               
-040088,000041: 21,2340           31722                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52554E495458">RUNITX</a>                                <span class="co">#  COMPUTE THE MORE SENSITIVE TERM IN DP</span>
-040089,000042: 21,2341           00006                           <span class="op">EXTEND  </span>                                       
-040090,000043: 21,2342           71727                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#565645435458">VVECTX</a>     +1                         
-040091,000044: 21,2343           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-040092,000045: 21,2344           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-040093,000046: 21,2345           21735                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C5452415445">ALTRATE</a>                               
-040094,000047: 21,2346           31723                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52554E495459">RUNITY</a>                                <span class="co">#  NOTE:  WITH NORMAL DESCENT IMU ALIGNMENT</span>
-040095,000048: 21,2347           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#    THIS TERM IS ALWAYS ZERO, BUT ALTRATE</span>
-040096,000049: 21,2350           71730                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#565645435459">VVECTY</a>                                <span class="co">#    CAN BE DISPLAYED DURING ASCENT TOO</span>
-040097,000050: 21,2351           21735                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C5452415445">ALTRATE</a>                               
-040098,000051: 21,2352           31724                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52554E49545A">RUNITZ</a>                                
-040099,000052: 21,2353           00006                           <span class="op">EXTEND  </span>                                       
-040100,000053: 21,2354           71732                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56564543545A">VVECTZ</a>                                
-040101,000054: 21,2355           21735                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C5452415445">ALTRATE</a>                               
-040102,000055: 
-040103,000056: 21,2356           31721                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44414C5452415445">DALTRATE</a>                              <span class="co">#  COMPENSATE FOR CHANGE IN DIRECTION OF R</span>
-040104,000057: 21,2357           00006                           <span class="op">EXTEND  </span>                                       
-040105,000058: 21,2360           71725                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
-040106,000059: 21,2361           21735                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C5452415445">ALTRATE</a>                               <span class="co">#  ALTRATE IN UNITS OF 2(5) M/CS</span>
-040107,000060: 
-040108,000061: 21,2362           00006                           <span class="op">EXTEND  </span>                                       
-040109,000062: 21,2363           31735                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C5452415445">ALTRATE</a>                               
-040110,000063: 21,2364           52064                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C545254454D50">ALTRTEMP</a>                              
-040111,000064: 21,2365           00006                           <span class="op">EXTEND  </span>                                       
-040112,000065: 21,2366           31720                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#48444F544C4144">HDOTLAD</a>                               
-040113,000066: 21,2367           20064                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C545254454D50">ALTRTEMP</a>                              <span class="co">#  AVERAGE ALTRATE IN UNITS OF 2(4) M/CS</span>
-040114,000067: 
-040115,000068:                                                                                                  <span class="co">#  THE FOLLOWING COMPUTATION FAILS IF DT EXCEEDS 20.47 SECONDS (UNLIKELY).</span>
-040116,000069: 
-040117,000070: 21,2370           31725                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
-040118,000071: 21,2371           00006                           <span class="op">EXTEND  </span>                                       
+040079,000023:                                                                                                  <span class="co">#  ****************************************************************************************************************</span>
+040080,000024:                                                                                                  <span class="co">#  LANADISP:  DISPLAY INERTIAL DATA ROUTINE FOR DESCENT AND ABORTS                            THIS VERSION BY EYLES</span>
+040081,000025:                                                                                                  <span class="co">#  ****************************************************************************************************************</span>
+040082,000026: 
+040083,000027: 21,2334                                           <span class="ps">BANK    </span> 21                                    
+040084,000028: 21,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#523130">R10</a>                                   
+040085,000029: 21,2000                                           <span class="ps">BANK    </span>                                       
+040086,000030: 
+040087,000031: 21,2334  E7,1777                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E442D4537">END-E7</a>                                
+040088,000032: 21,2334                                           <span class="ps">COUNT*  </span> $$/<a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#523130">R10</a>                                
+040089,000033: 
+040090,000034:                                                                                                  <span class="co">#  ************************************************************************</span>
+040091,000035:                                                                                                  <span class="co">#  COMPUTE ALTITUDE AND ALTITUDE-RATE</span>
+040092,000036:                                                                                                  <span class="co">#  ************************************************************************</span>
+<a name="4C414E4144495350"></a>040093,000037: 21,2334           31722        <span class="sm">LANADISP</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52554E495458">RUNITX</a>                                <span class="co">#  COMPUTE RADIAL VELOCITY</span>
+040094,000038: 21,2335           00006                           <span class="op">EXTEND  </span>                                       
+040095,000039: 21,2336           71726                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#565645435458">VVECTX</a>                                
+040096,000040: 21,2337           53735                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C5452415445">ALTRATE</a>                               
+040097,000041: 21,2340           31722                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52554E495458">RUNITX</a>                                <span class="co">#  COMPUTE THE MORE SENSITIVE TERM IN DP</span>
+040098,000042: 21,2341           00006                           <span class="op">EXTEND  </span>                                       
+040099,000043: 21,2342           71727                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#565645435458">VVECTX</a>     +1                         
+040100,000044: 21,2343           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+040101,000045: 21,2344           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+040102,000046: 21,2345           21735                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C5452415445">ALTRATE</a>                               
+040103,000047: 21,2346           31723                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52554E495459">RUNITY</a>                                <span class="co">#  NOTE:  WITH NORMAL DESCENT IMU ALIGNMENT</span>
+040104,000048: 21,2347           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#    THIS TERM IS ALWAYS ZERO, BUT ALTRATE</span>
+040105,000049: 21,2350           71730                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#565645435459">VVECTY</a>                                <span class="co">#    CAN BE DISPLAYED DURING ASCENT TOO</span>
+040106,000050: 21,2351           21735                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C5452415445">ALTRATE</a>                               
+040107,000051: 21,2352           31724                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52554E49545A">RUNITZ</a>                                
+040108,000052: 21,2353           00006                           <span class="op">EXTEND  </span>                                       
+040109,000053: 21,2354           71732                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56564543545A">VVECTZ</a>                                
+040110,000054: 21,2355           21735                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C5452415445">ALTRATE</a>                               
+040111,000055: 
+040112,000056: 21,2356           31721                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44414C5452415445">DALTRATE</a>                              <span class="co">#  COMPENSATE FOR CHANGE IN DIRECTION OF R</span>
+040113,000057: 21,2357           00006                           <span class="op">EXTEND  </span>                                       
+040114,000058: 21,2360           71725                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
+040115,000059: 21,2361           21735                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C5452415445">ALTRATE</a>                               <span class="co">#  ALTRATE IN UNITS OF 2(5) M/CS</span>
+040116,000060: 
+040117,000061: 21,2362           00006                           <span class="op">EXTEND  </span>                                       
+040118,000062: 21,2363           31735                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C5452415445">ALTRATE</a>                               
+040119,000063: 21,2364           52064                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C545254454D50">ALTRTEMP</a>                              
+040120,000064: 21,2365           00006                           <span class="op">EXTEND  </span>                                       
+040121,000065: 21,2366           31720                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#48444F544C4144">HDOTLAD</a>                               
+040122,000066: 21,2367           20064                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C545254454D50">ALTRTEMP</a>                              <span class="co">#  AVERAGE ALTRATE IN UNITS OF 2(4) M/CS</span>
+040123,000067: 
+040124,000068:                                                                                                  <span class="co">#  THE FOLLOWING COMPUTATION FAILS IF DT EXCEEDS 20.47 SECONDS (UNLIKELY).</span>
+040125,000069: 
+040126,000070: 21,2370           31725                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
+040127,000071: 21,2371           00006                           <span class="op">EXTEND  </span>                                       
 </pre>
 </span>
 </p>
@@ -186,56 +186,56 @@ Page 891
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-040120,000073: 21,2372           74750                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495434">BIT4</a>                                  
-040121,000074: 21,2373           30001                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  FETCH DT FROM L IN UNITS OF 2(11) CS</span>
-040122,000075: 21,2374           00006                           <span class="op">EXTEND  </span>                                       
-040123,000076: 21,2375           70063                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C545254454D50">ALTRTEMP</a>                              
-040124,000077: 21,2376           53737                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C544954554445">ALTITUDE</a>                              
-040125,000078: 21,2377           00006                           <span class="op">EXTEND  </span>                                       
-040126,000079: 21,2400           31716                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4843414C434C4144">HCALCLAD</a>                              
-040127,000080: 21,2401           21737                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C544954554445">ALTITUDE</a>                              <span class="co">#  ALTITUDE IN UNITS OF 2(15) METERS</span>
-040128,000081: 
-040129,000082:                                                                                                  <span class="co">#  ************************************************************************</span>
-040130,000083:                                                                                                  <span class="co">#  SEND OUT ALTITUDE-RATE IF POSSIBLE</span>
-040131,000084:                                                                                                  <span class="co">#  ************************************************************************</span>
-040132,000085: 
-<a name="4C414E41434F4E54"></a>040133,000086: 21,2402           34746        <span class="sm">LANACONT</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  <span class="co">#  IS THE METER MODE SWITCH IN PGNCS?</span>
-040134,000087: 21,2403           00006                           <span class="op">EXTEND  </span>                                       
-040135,000088: 21,2404           02030                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3330">CHAN30</a>                                
-040136,000089: 21,2405           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-040137,000090: 21,2406           12725                           <span class="op">TCF     </span> <a href="#4449535052534554">DISPRSET</a>                              <span class="co">#  NO:   GO RESET</span>
-040138,000091: 
-040139,000092: 21,2407           40075                           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524431">FLAGWRD1</a>                              <span class="co">#  YES:  IS INITIALIZATION IN ORDER?</span>
-040140,000093: 21,2410           74736                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#444944464C424954">DIDFLBIT</a>                              
-040141,000094: 21,2411           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-040142,000095: 21,2412           12700                           <span class="op">TCF     </span> <a href="#44495350494E4954">DISPINIT</a>                              <span class="co">#  YES:  THEN GO DO IT</span>
-040143,000096: 
-040144,000097: 21,2413           34752                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  <span class="co">#  NO:   ARE RR ERROR COUNTERS ENABLED?</span>
-040145,000098: 21,2414           00006                           <span class="op">EXTEND  </span>                                       
-040146,000099: 21,2415           02012                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3132">CHAN12</a>                                
-040147,000100: 21,2416           00006                           <span class="op">EXTEND  </span>                                       
-040148,000101: 21,2417           12725                           <span class="op">BZF     </span> <a href="#4449535052534554">DISPRSET</a>                              <span class="co">#  NO:   REINITIALIZE DISPLAYS</span>
-040149,000102: 
-<a name="414C5452524F5554"></a>040150,000103: 21,2420           00006        <span class="sm">ALTRROUT</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  YES:  SIGNIFY ALTITUDE-RATE (BIT2 IN A)</span>
-040151,000104: 21,2421           05014                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3134">CHAN14</a>                                
-040152,000105: 
-040153,000106: 21,2422           00006                           <span class="op">EXTEND  </span>                                       
-040154,000107: 21,2423           31735                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C5452415445">ALTRATE</a>                               
-040155,000108: 21,2424           20001                           <span class="op">DDOUBL  </span>                                       <span class="co">#  RESCALE ALTRATE TO UNITS OF 2(2) M/CS</span>
-040156,000109: 21,2425           20001                           <span class="op">DDOUBL  </span>                                       
-040157,000110: 21,2426           20001                           <span class="op">DDOUBL  </span>                                       
-040158,000111: 21,2427           00006                           <span class="op">EXTEND  </span>                                       
-040159,000112: 21,2430           72004                           <span class="op">MP      </span> <a href="CONTROLLED_CONSTANTS.agc.html#414C5452434F4E56">ALTRCONV</a>                              <span class="co">#  RESCALE TO UNITS OF .5 F/S/BIT</span>
-040160,000113: 
-040161,000114: 21,2431           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  ROUND TO NEAREST .5 F/S</span>
-040162,000115: 21,2432           60000                           <span class="op">DOUBLE  </span>                                       
-040163,000116: 21,2433           54002                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-040164,000117: 21,2434           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-040165,000118: 21,2435           26001                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-040166,000119: 
-040167,000120: 21,2436           64735                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474D4158">NEGMAX</a>                                
-040168,000121: 21,2437           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-040169,000122: 21,2440           12443                           <span class="op">TCF     </span> +3                                    
+040129,000073: 21,2372           74750                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495434">BIT4</a>                                  
+040130,000074: 21,2373           30001                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  FETCH DT FROM L IN UNITS OF 2(11) CS</span>
+040131,000075: 21,2374           00006                           <span class="op">EXTEND  </span>                                       
+040132,000076: 21,2375           70063                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C545254454D50">ALTRTEMP</a>                              
+040133,000077: 21,2376           53737                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C544954554445">ALTITUDE</a>                              
+040134,000078: 21,2377           00006                           <span class="op">EXTEND  </span>                                       
+040135,000079: 21,2400           31716                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4843414C434C4144">HCALCLAD</a>                              
+040136,000080: 21,2401           21737                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C544954554445">ALTITUDE</a>                              <span class="co">#  ALTITUDE IN UNITS OF 2(15) METERS</span>
+040137,000081: 
+040138,000082:                                                                                                  <span class="co">#  ************************************************************************</span>
+040139,000083:                                                                                                  <span class="co">#  SEND OUT ALTITUDE-RATE IF POSSIBLE</span>
+040140,000084:                                                                                                  <span class="co">#  ************************************************************************</span>
+040141,000085: 
+<a name="4C414E41434F4E54"></a>040142,000086: 21,2402           34746        <span class="sm">LANACONT</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  <span class="co">#  IS THE METER MODE SWITCH IN PGNCS?</span>
+040143,000087: 21,2403           00006                           <span class="op">EXTEND  </span>                                       
+040144,000088: 21,2404           02030                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3330">CHAN30</a>                                
+040145,000089: 21,2405           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+040146,000090: 21,2406           12725                           <span class="op">TCF     </span> <a href="#4449535052534554">DISPRSET</a>                              <span class="co">#  NO:   GO RESET</span>
+040147,000091: 
+040148,000092: 21,2407           40075                           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524431">FLAGWRD1</a>                              <span class="co">#  YES:  IS INITIALIZATION IN ORDER?</span>
+040149,000093: 21,2410           74736                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#444944464C424954">DIDFLBIT</a>                              
+040150,000094: 21,2411           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+040151,000095: 21,2412           12700                           <span class="op">TCF     </span> <a href="#44495350494E4954">DISPINIT</a>                              <span class="co">#  YES:  THEN GO DO IT</span>
+040152,000096: 
+040153,000097: 21,2413           34752                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  <span class="co">#  NO:   ARE RR ERROR COUNTERS ENABLED?</span>
+040154,000098: 21,2414           00006                           <span class="op">EXTEND  </span>                                       
+040155,000099: 21,2415           02012                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3132">CHAN12</a>                                
+040156,000100: 21,2416           00006                           <span class="op">EXTEND  </span>                                       
+040157,000101: 21,2417           12725                           <span class="op">BZF     </span> <a href="#4449535052534554">DISPRSET</a>                              <span class="co">#  NO:   REINITIALIZE DISPLAYS</span>
+040158,000102: 
+<a name="414C5452524F5554"></a>040159,000103: 21,2420           00006        <span class="sm">ALTRROUT</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  YES:  SIGNIFY ALTITUDE-RATE (BIT2 IN A)</span>
+040160,000104: 21,2421           05014                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3134">CHAN14</a>                                
+040161,000105: 
+040162,000106: 21,2422           00006                           <span class="op">EXTEND  </span>                                       
+040163,000107: 21,2423           31735                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C5452415445">ALTRATE</a>                               
+040164,000108: 21,2424           20001                           <span class="op">DDOUBL  </span>                                       <span class="co">#  RESCALE ALTRATE TO UNITS OF 2(2) M/CS</span>
+040165,000109: 21,2425           20001                           <span class="op">DDOUBL  </span>                                       
+040166,000110: 21,2426           20001                           <span class="op">DDOUBL  </span>                                       
+040167,000111: 21,2427           00006                           <span class="op">EXTEND  </span>                                       
+040168,000112: 21,2430           72004                           <span class="op">MP      </span> <a href="CONTROLLED_CONSTANTS.agc.html#414C5452434F4E56">ALTRCONV</a>                              <span class="co">#  RESCALE TO UNITS OF .5 F/S/BIT</span>
+040169,000113: 
+040170,000114: 21,2431           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  ROUND TO NEAREST .5 F/S</span>
+040171,000115: 21,2432           60000                           <span class="op">DOUBLE  </span>                                       
+040172,000116: 21,2433           54002                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+040173,000117: 21,2434           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+040174,000118: 21,2435           26001                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+040175,000119: 
+040176,000120: 21,2436           64735                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474D4158">NEGMAX</a>                                
+040177,000121: 21,2437           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+040178,000122: 21,2440           12443                           <span class="op">TCF     </span> +3                                    
 </pre>
 </span>
 </p>
@@ -251,56 +251,56 @@ Page 892
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-040171,000124: 21,2441           60001                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-040172,000125: 21,2442           40000                           <span class="op">COM     </span>                                       
-040173,000126: 21,2443           56060                 +3        <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C544D">ALTM</a>                                  
-040174,000127: 
-040175,000128: 21,2444           34751                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495433">BIT3</a>                                  
-040176,000129: 21,2445           00006                           <span class="op">EXTEND  </span>                                       
-040177,000130: 21,2446           05014                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3134">CHAN14</a>                                
-040178,000131: 
-040179,000132: 21,2447           35752                           <span class="op">CA      </span> <a href="TRIM_GIMBAL_CONTROL_SYSTEM.agc.html#5457454C5645">TWELVE</a>                                <span class="co">#  PAUSE 12 CS FOR ALTRATE TO BE READ OUT</span>
-040180,000133: 21,2450           05235                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#56415244454C4159">VARDELAY</a>                              <span class="co">#    (MUST BE > 100 MS TO WORK ON THE LMS)</span>
-040181,000134: 
-<a name="414C54524F5554"></a>040182,000135: 21,2451           44752        <span class="sm">ALTROUT </span>           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  <span class="co">#  SIGNIFY ALTITUDE</span>
-040183,000136: 21,2452           00006                           <span class="op">EXTEND  </span>                                       
-040184,000137: 21,2453           03014                           <span class="op">WAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3134">CHAN14</a>                                
-040185,000138: 
-040186,000139: 21,2454           31737                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C544954554445">ALTITUDE</a>   +1                         
-040187,000140: 21,2455           00006                           <span class="op">EXTEND  </span>                                       
-040188,000141: 21,2456           72005                           <span class="op">MP      </span> <a href="CONTROLLED_CONSTANTS.agc.html#414C54434F4E56">ALTCONV</a>                               
-040189,000142: 21,2457           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-040190,000143: 21,2460           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-040191,000144: 21,2461           52064                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C5454454D50">ALTTEMP</a>                               
-040192,000145: 21,2462           31736                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C544954554445">ALTITUDE</a>                              
-040193,000146: 21,2463           00006                           <span class="op">EXTEND  </span>                                       
-040194,000147: 21,2464           72005                           <span class="op">MP      </span> <a href="CONTROLLED_CONSTANTS.agc.html#414C54434F4E56">ALTCONV</a>                               
-040195,000148: 21,2465           20064                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C5454454D50">ALTTEMP</a>                               <span class="co">#  ALTITUDE IN UNITS OF 9.380 FEET/BIT</span>
-040196,000149: 
-040197,000150: 21,2466           52064                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C5454454D50">ALTTEMP</a>                               
-040198,000151: 21,2467           20001                           <span class="op">DDOUBL  </span>                                       
-040199,000152: 21,2470           20001                           <span class="op">DDOUBL  </span>                                       <span class="co">#  RESCALE TO UNITS OF 2.345 FEET/BIT</span>
-040200,000153: 21,2471           54000                           <span class="op">OVSK    </span>                                       
-040201,000154: 21,2472           12476                           <span class="op">TCF     </span> +4                                    <span class="co">#  NO OVERFLOW:  -38420 &lt; ALTITUDE &lt; +38420</span>
-040202,000155: 
-040203,000156: 21,2473           74733                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#  RESET OVERFLOW</span>
-040204,000157: 21,2474           64735                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543135">BIT15</a>                                 
-040205,000158: 21,2475           12502                           <span class="op">TCF     </span> +5                                    
-040206,000159: 
-040207,000160: 21,2476           10000                 +4        <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  APPLY LOWER LIMIT OF POSITIVE ZERO</span>
-040208,000161: 21,2477           64753                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-040209,000162: 21,2500           12502                           <span class="op">TCF     </span> +2                                    
-040210,000163: 21,2501           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-040211,000164: 
-040212,000165: 21,2502           56060                 +5        <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C544D">ALTM</a>                                  
-040213,000166: 21,2503           34751                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495433">BIT3</a>                                  
-040214,000167: 21,2504           00006                           <span class="op">EXTEND  </span>                                       
-040215,000168: 21,2505           05014                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3134">CHAN14</a>                                
-040216,000169: 
-040217,000170:                                                                                                  <span class="co">#  ************************************************************************</span>
-040218,000171:                                                                                                  <span class="co">#  SEND OUT FORWARD AND LATERAL VELOCITIES</span>
-040219,000172:                                                                                                  <span class="co">#  ************************************************************************</span>
-040220,000173: 
+040180,000124: 21,2441           60001                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+040181,000125: 21,2442           40000                           <span class="op">COM     </span>                                       
+040182,000126: 21,2443           56060                 +3        <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C544D">ALTM</a>                                  
+040183,000127: 
+040184,000128: 21,2444           34751                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495433">BIT3</a>                                  
+040185,000129: 21,2445           00006                           <span class="op">EXTEND  </span>                                       
+040186,000130: 21,2446           05014                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3134">CHAN14</a>                                
+040187,000131: 
+040188,000132: 21,2447           35752                           <span class="op">CA      </span> <a href="TRIM_GIMBAL_CONTROL_SYSTEM.agc.html#5457454C5645">TWELVE</a>                                <span class="co">#  PAUSE 12 CS FOR ALTRATE TO BE READ OUT</span>
+040189,000133: 21,2450           05235                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#56415244454C4159">VARDELAY</a>                              <span class="co">#    (MUST BE > 100 MS TO WORK ON THE LMS)</span>
+040190,000134: 
+<a name="414C54524F5554"></a>040191,000135: 21,2451           44752        <span class="sm">ALTROUT </span>           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  <span class="co">#  SIGNIFY ALTITUDE</span>
+040192,000136: 21,2452           00006                           <span class="op">EXTEND  </span>                                       
+040193,000137: 21,2453           03014                           <span class="op">WAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3134">CHAN14</a>                                
+040194,000138: 
+040195,000139: 21,2454           31737                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C544954554445">ALTITUDE</a>   +1                         
+040196,000140: 21,2455           00006                           <span class="op">EXTEND  </span>                                       
+040197,000141: 21,2456           72005                           <span class="op">MP      </span> <a href="CONTROLLED_CONSTANTS.agc.html#414C54434F4E56">ALTCONV</a>                               
+040198,000142: 21,2457           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+040199,000143: 21,2460           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+040200,000144: 21,2461           52064                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C5454454D50">ALTTEMP</a>                               
+040201,000145: 21,2462           31736                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C544954554445">ALTITUDE</a>                              
+040202,000146: 21,2463           00006                           <span class="op">EXTEND  </span>                                       
+040203,000147: 21,2464           72005                           <span class="op">MP      </span> <a href="CONTROLLED_CONSTANTS.agc.html#414C54434F4E56">ALTCONV</a>                               
+040204,000148: 21,2465           20064                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C5454454D50">ALTTEMP</a>                               <span class="co">#  ALTITUDE IN UNITS OF 9.380 FEET/BIT</span>
+040205,000149: 
+040206,000150: 21,2466           52064                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C5454454D50">ALTTEMP</a>                               
+040207,000151: 21,2467           20001                           <span class="op">DDOUBL  </span>                                       
+040208,000152: 21,2470           20001                           <span class="op">DDOUBL  </span>                                       <span class="co">#  RESCALE TO UNITS OF 2.345 FEET/BIT</span>
+040209,000153: 21,2471           54000                           <span class="op">OVSK    </span>                                       
+040210,000154: 21,2472           12476                           <span class="op">TCF     </span> +4                                    <span class="co">#  NO OVERFLOW:  -38420 &lt; ALTITUDE &lt; +38420</span>
+040211,000155: 
+040212,000156: 21,2473           74733                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#  RESET OVERFLOW</span>
+040213,000157: 21,2474           64735                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543135">BIT15</a>                                 
+040214,000158: 21,2475           12502                           <span class="op">TCF     </span> +5                                    
+040215,000159: 
+040216,000160: 21,2476           10000                 +4        <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  APPLY LOWER LIMIT OF POSITIVE ZERO</span>
+040217,000161: 21,2477           64753                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+040218,000162: 21,2500           12502                           <span class="op">TCF     </span> +2                                    
+040219,000163: 21,2501           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+040220,000164: 
+040221,000165: 21,2502           56060                 +5        <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C544D">ALTM</a>                                  
+040222,000166: 21,2503           34751                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495433">BIT3</a>                                  
+040223,000167: 21,2504           00006                           <span class="op">EXTEND  </span>                                       
+040224,000168: 21,2505           05014                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3134">CHAN14</a>                                
+040225,000169: 
+040226,000170:                                                                                                  <span class="co">#  ************************************************************************</span>
+040227,000171:                                                                                                  <span class="co">#  SEND OUT FORWARD AND LATERAL VELOCITIES</span>
+040228,000172:                                                                                                  <span class="co">#  ************************************************************************</span>
+040229,000173: 
 </pre>
 </span>
 </p>
@@ -316,57 +316,57 @@ Page 893
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-040222,000175: 21,2506           02565                           <span class="op">TC      </span> <a href="#43524F53434F4D50">CROSCOMP</a>                              <span class="co">#  FIRST CALL SUBROUTINE TO COMPUTE THEM</span>
-040223,000176: 
-040224,000177: 21,2507           34742                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543130">BIT10</a>                                 <span class="co">#  1/32 TO ITEMP2 FOR USE AS DIVISOR BELOW</span>
-040225,000178: 21,2510           54062                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
-040226,000179: 
-040227,000180: 21,2511           32001                           <span class="op">CAF     </span> <a href="CONTROLLED_CONSTANTS.agc.html#4D415856454C">MAXVEL</a>                                <span class="co">#  LIMIT COMMAND TO 198.645 F/S</span>
-040228,000181: 21,2512           22070                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F525654454D50">FORVTEMP</a>                              
-040229,000182: 21,2513           02745                           <span class="op">TC      </span> <a href="#4C41444C494D4954">LADLIMIT</a>                              
-040230,000183: 21,2514           22071                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F525654454D50">FORVTEMP</a>   +1                         
-040231,000184: 21,2515           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  RESCALE TO UNITS OF ONE M/CS</span>
-040232,000185: 21,2516           10062                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
-040233,000186: 21,2517           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  RESCALE TO UNITS OF .5571 F/S/BIT</span>
-040234,000187: 21,2520           72003                           <span class="op">MP      </span> <a href="CONTROLLED_CONSTANTS.agc.html#56454C434F4E56">VELCONV</a>                               
-040235,000188: 21,2521           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  ROUND TO NEAREST .5571 F/S</span>
-040236,000189: 21,2522           60000                           <span class="op">DOUBLE  </span>                                       
-040237,000190: 21,2523           54002                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-040238,000191: 21,2524           12526                           <span class="op">TCF     </span> <a href="#464F52564F5554">FORVOUT</a>                               
-040239,000192: 21,2525           26001                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-<a name="464F52564F5554"></a>040240,000193: 21,2526           41741        <span class="sm">FORVOUT </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F52564D455452">FORVMETR</a>                              <span class="co">#  SUBTRACT METER INDICATOR TO GET CHANGE</span>
-040241,000194: 21,2527           26001                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-040242,000195: 21,2530           32002                           <span class="op">CA      </span> <a href="CONTROLLED_CONSTANTS.agc.html#4D41584442495453">MAXDBITS</a>                              
-040243,000196: 21,2531           02745                           <span class="op">TC      </span> <a href="#4C41444C494D4954">LADLIMIT</a>                              <span class="co">#  LIMIT CHANGE TO ABOUT 300 F/S</span>
-040244,000197: 21,2532           64754                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454730">NEG0</a>                                  
-040245,000198: 21,2533           54054                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553434D44">CDUSCMD</a>                               
-040246,000199: 21,2534           27741                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F52564D455452">FORVMETR</a>                              <span class="co">#  UPDATE METER INDICATOR</span>
-040247,000200: 
-040248,000201: 21,2535           32001                           <span class="op">CAF     </span> <a href="CONTROLLED_CONSTANTS.agc.html#4D415856454C">MAXVEL</a>                                <span class="co">#  LIMIT COMMAND TO 198.645 F/S</span>
-040249,000202: 21,2536           22072                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C415456454C">LATVEL</a>                                
-040250,000203: 21,2537           02745                           <span class="op">TC      </span> <a href="#4C41444C494D4954">LADLIMIT</a>                              
-040251,000204: 21,2540           22073                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C415456454C">LATVEL</a>     +1                         
-040252,000205: 21,2541           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  RESCALE TO UNITS OF ONE M/CS</span>
-040253,000206: 21,2542           10062                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
-040254,000207: 21,2543           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  RESCALE TO UNITS OF .5571 F/S/BIT</span>
-040255,000208: 21,2544           72003                           <span class="op">MP      </span> <a href="CONTROLLED_CONSTANTS.agc.html#56454C434F4E56">VELCONV</a>                               
-040256,000209: 21,2545           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  ROUND TO NEAREST .5571 F/S</span>
-040257,000210: 21,2546           60000                           <span class="op">DOUBLE  </span>                                       
-040258,000211: 21,2547           54002                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-040259,000212: 21,2550           12552                           <span class="op">TCF     </span> <a href="#4C4154564F5554">LATVOUT</a>                               
-040260,000213: 21,2551           26001                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-<a name="4C4154564F5554"></a>040261,000214: 21,2552           41740        <span class="sm">LATVOUT </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4154564D455452">LATVMETR</a>                              <span class="co">#  SUBTRACT METER INDICATOR TO GET CHANGE</span>
-040262,000215: 21,2553           26001                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-040263,000216: 21,2554           32002                           <span class="op">CAF     </span> <a href="CONTROLLED_CONSTANTS.agc.html#4D41584442495453">MAXDBITS</a>                              
-040264,000217: 21,2555           02745                           <span class="op">TC      </span> <a href="#4C41444C494D4954">LADLIMIT</a>                              <span class="co">#  LIMIT CHANGE TO ABOUT 300 F/S</span>
-040265,000218: 21,2556           64754                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454730">NEG0</a>                                  
-040266,000219: 21,2557           54053                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554434D44">CDUTCMD</a>                               
-040267,000220: 21,2560           27740                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4154564D455452">LATVMETR</a>                              <span class="co">#  UPDATE METER INDICATOR</span>
-040268,000221: 
-040269,000222: 21,2561           35020                           <span class="op">CAF     </span> <a href="#424954534554">BITSET</a>                                <span class="co">#  SET DRIVE BITS</span>
-040270,000223: 21,2562           00006                           <span class="op">EXTEND  </span>                                       
-040271,000224: 21,2563           05014                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3134">CHAN14</a>                                
-040272,000225: 
+040231,000175: 21,2506           02565                           <span class="op">TC      </span> <a href="#43524F53434F4D50">CROSCOMP</a>                              <span class="co">#  FIRST CALL SUBROUTINE TO COMPUTE THEM</span>
+040232,000176: 
+040233,000177: 21,2507           34742                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543130">BIT10</a>                                 <span class="co">#  1/32 TO ITEMP2 FOR USE AS DIVISOR BELOW</span>
+040234,000178: 21,2510           54062                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
+040235,000179: 
+040236,000180: 21,2511           32001                           <span class="op">CAF     </span> <a href="CONTROLLED_CONSTANTS.agc.html#4D415856454C">MAXVEL</a>                                <span class="co">#  LIMIT COMMAND TO 198.645 F/S</span>
+040237,000181: 21,2512           22070                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F525654454D50">FORVTEMP</a>                              
+040238,000182: 21,2513           02745                           <span class="op">TC      </span> <a href="#4C41444C494D4954">LADLIMIT</a>                              
+040239,000183: 21,2514           22071                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F525654454D50">FORVTEMP</a>   +1                         
+040240,000184: 21,2515           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  RESCALE TO UNITS OF ONE M/CS</span>
+040241,000185: 21,2516           10062                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
+040242,000186: 21,2517           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  RESCALE TO UNITS OF .5571 F/S/BIT</span>
+040243,000187: 21,2520           72003                           <span class="op">MP      </span> <a href="CONTROLLED_CONSTANTS.agc.html#56454C434F4E56">VELCONV</a>                               
+040244,000188: 21,2521           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  ROUND TO NEAREST .5571 F/S</span>
+040245,000189: 21,2522           60000                           <span class="op">DOUBLE  </span>                                       
+040246,000190: 21,2523           54002                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+040247,000191: 21,2524           12526                           <span class="op">TCF     </span> <a href="#464F52564F5554">FORVOUT</a>                               
+040248,000192: 21,2525           26001                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+<a name="464F52564F5554"></a>040249,000193: 21,2526           41741        <span class="sm">FORVOUT </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F52564D455452">FORVMETR</a>                              <span class="co">#  SUBTRACT METER INDICATOR TO GET CHANGE</span>
+040250,000194: 21,2527           26001                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+040251,000195: 21,2530           32002                           <span class="op">CA      </span> <a href="CONTROLLED_CONSTANTS.agc.html#4D41584442495453">MAXDBITS</a>                              
+040252,000196: 21,2531           02745                           <span class="op">TC      </span> <a href="#4C41444C494D4954">LADLIMIT</a>                              <span class="co">#  LIMIT CHANGE TO ABOUT 300 F/S</span>
+040253,000197: 21,2532           64754                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454730">NEG0</a>                                  
+040254,000198: 21,2533           54054                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553434D44">CDUSCMD</a>                               
+040255,000199: 21,2534           27741                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F52564D455452">FORVMETR</a>                              <span class="co">#  UPDATE METER INDICATOR</span>
+040256,000200: 
+040257,000201: 21,2535           32001                           <span class="op">CAF     </span> <a href="CONTROLLED_CONSTANTS.agc.html#4D415856454C">MAXVEL</a>                                <span class="co">#  LIMIT COMMAND TO 198.645 F/S</span>
+040258,000202: 21,2536           22072                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C415456454C">LATVEL</a>                                
+040259,000203: 21,2537           02745                           <span class="op">TC      </span> <a href="#4C41444C494D4954">LADLIMIT</a>                              
+040260,000204: 21,2540           22073                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C415456454C">LATVEL</a>     +1                         
+040261,000205: 21,2541           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  RESCALE TO UNITS OF ONE M/CS</span>
+040262,000206: 21,2542           10062                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
+040263,000207: 21,2543           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  RESCALE TO UNITS OF .5571 F/S/BIT</span>
+040264,000208: 21,2544           72003                           <span class="op">MP      </span> <a href="CONTROLLED_CONSTANTS.agc.html#56454C434F4E56">VELCONV</a>                               
+040265,000209: 21,2545           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  ROUND TO NEAREST .5571 F/S</span>
+040266,000210: 21,2546           60000                           <span class="op">DOUBLE  </span>                                       
+040267,000211: 21,2547           54002                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+040268,000212: 21,2550           12552                           <span class="op">TCF     </span> <a href="#4C4154564F5554">LATVOUT</a>                               
+040269,000213: 21,2551           26001                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+<a name="4C4154564F5554"></a>040270,000214: 21,2552           41740        <span class="sm">LATVOUT </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4154564D455452">LATVMETR</a>                              <span class="co">#  SUBTRACT METER INDICATOR TO GET CHANGE</span>
+040271,000215: 21,2553           26001                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+040272,000216: 21,2554           32002                           <span class="op">CAF     </span> <a href="CONTROLLED_CONSTANTS.agc.html#4D41584442495453">MAXDBITS</a>                              
+040273,000217: 21,2555           02745                           <span class="op">TC      </span> <a href="#4C41444C494D4954">LADLIMIT</a>                              <span class="co">#  LIMIT CHANGE TO ABOUT 300 F/S</span>
+040274,000218: 21,2556           64754                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454730">NEG0</a>                                  
+040275,000219: 21,2557           54053                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554434D44">CDUTCMD</a>                               
+040276,000220: 21,2560           27740                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4154564D455452">LATVMETR</a>                              <span class="co">#  UPDATE METER INDICATOR</span>
+040277,000221: 
+040278,000222: 21,2561           35020                           <span class="op">CAF     </span> <a href="#424954534554">BITSET</a>                                <span class="co">#  SET DRIVE BITS</span>
+040279,000223: 21,2562           00006                           <span class="op">EXTEND  </span>                                       
+040280,000224: 21,2563           05014                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3134">CHAN14</a>                                
+040281,000225: 
 </pre>
 </span>
 </p>
@@ -382,57 +382,57 @@ Page 894
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="4C414E4144454E44"></a>040274,000227: 21,2564           05272        <span class="sm">LANADEND</span>           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-040275,000228: 
-040276,000229:                                                                                                  <span class="co">#  ************************************************************************</span>
-040277,000230:                                                                                                  <span class="co">#  SUBROUTINE TO COMPUTE FORWARD AND LATERAL VELOCITIES</span>
-040278,000231:                                                                                                  <span class="co">#  ************************************************************************</span>
-040279,000232: 
-040280,000233:                                                                                                  <span class="co">#      THE SCALARS VHY AND VHZ, COMPUTED NEXT, ARE THE VELOCITIES ALONG UNIT VECTORS UHYP AND UHZP. UHYP NORMAL</span>
-040281,000234:                                                                                                  <span class="co">#  TO THE PRE-PDI ORBITAL PLANE, UHZP IN TURN NORMAL TO UHYP AND THE POSITION VECTOR.  NOW SINCE FOR THE "LANDING</span>
-040282,000235:                                                                                                  <span class="co">#  ALIGNMENT" OF THE IMU THE STABLE-MEMBER Y-AXIS IS DEFINED THE SAME WAY AS UHYP, VVECTY IS PRECISELY VHY.</span>
-040283,000236:                                                                                                  <span class="co">#  FURTHERMORE, THE Y-TERM OF THE VHZ COMPUTATION DROPS OUT, AND THE FOLLOWING USEFUL EQUALITIES BECOME TRUE:</span>
-040284,000237:                                                                                                  <span class="co">#  UHZPX = - RUNITZ AND UHZPZ = RUNITX.  DRAW A PICTURE TO BE CONVINCED.</span>
-040285,000238: 
-040286,000239:                                                                                                  <span class="co">#      NOTE THAT IN THIS VERSION CROSS-POINTER DISPLAYS ARE OUTPUT DURING ASCENT AND ABORTS AS WELL AS DESCENT.</span>
-040287,000240: 
-<a name="43524F53434F4D50"></a>040288,000241: 21,2565           40074        <span class="sm">CROSCOMP</span>           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524430">FLAGWRD0</a>                              <span class="co">#  IS R10FLAG SET TO INDICATE ASCENT?</span>
-040289,000242: 21,2566           74752                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#523130464C424954">R10FLBIT</a>                              
-040290,000243: 21,2567           00006                           <span class="op">EXTEND  </span>                                       
-040291,000244: 21,2570           12667                           <span class="op">BZF     </span> <a href="#4150534C4144">APSLAD</a>                                <span class="co">#  YES:  DISPLAY LATVEL IN INERTIAL AXES</span>
-040292,000245: 
-040293,000246: 21,2571           41724                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52554E49545A">RUNITZ</a>                                <span class="co">#  NO:   COMPUTE DOWNRANGE VELOCITY</span>
-040294,000247: 21,2572           00006                           <span class="op">EXTEND  </span>                                       
-040295,000248: 21,2573           71726                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#565645435458">VVECTX</a>                                
-040296,000249: 21,2574           52066                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56485A">VHZ</a>                                   
-040297,000250: 21,2575           31722                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52554E495458">RUNITX</a>                                
-040298,000251: 21,2576           00006                           <span class="op">EXTEND  </span>                                       
-040299,000252: 21,2577           71732                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56564543545A">VVECTZ</a>                                
-040300,000253: 21,2600           20066                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56485A">VHZ</a>                                   
-040301,000254: 21,2601           31722                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52554E495458">RUNITX</a>                                <span class="co">#  COMPUTE THE MORE SENSITIVE TERM IN DP</span>
-040302,000255: 21,2602           00006                           <span class="op">EXTEND  </span>                                       
-040303,000256: 21,2603           71733                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56564543545A">VVECTZ</a>     +1                         
-040304,000257: 21,2604           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-040305,000258: 21,2605           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-040306,000259: 21,2606           20066                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56485A">VHZ</a>                                   <span class="co">#  VHZ IN UNITS OF 2(5) M/CS</span>
-040307,000260: 
-040308,000261: 21,2607           00006                           <span class="op">EXTEND  </span>                                       
-040309,000262: 21,2610           31731                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#565645435459">VVECTY</a>                                
-040310,000263: 21,2611           52064                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564859">VHY</a>                                   <span class="co">#  VHY IN UNITS OF 2(5) M/CS</span>
-040311,000264: 
-040312,000265: 21,2612           35015                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4542414E4B36">EBANK6</a>                                <span class="co">#  SWITCH TO DAP EBANK</span>
-040313,000266: 21,2613           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
-040314,000267: 21,2614  E6,1417                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3232">M22</a>                                   
-040315,000268: 
-040316,000269: 21,2614           31420                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3332">M32</a>                                   <span class="co">#  COS(AOG)</span>
-040317,000270: 21,2615           00006                           <span class="op">EXTEND  </span>                                       
-040318,000271: 21,2616           70065                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56485A">VHZ</a>                                   
-040319,000272: 21,2617           52071                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F525654454D50">FORVTEMP</a>                              
-040320,000273: 21,2620           41417                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3232">M22</a>                                   <span class="co">#  SIN(AOG)</span>
-040321,000274: 21,2621           00006                           <span class="op">EXTEND  </span>                                       
-040322,000275: 21,2622           70063                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564859">VHY</a>                                   
-040323,000276: 21,2623           20071                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F525654454D50">FORVTEMP</a>                              
-040324,000277: 
+<a name="4C414E4144454E44"></a>040283,000227: 21,2564           05272        <span class="sm">LANADEND</span>           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+040284,000228: 
+040285,000229:                                                                                                  <span class="co">#  ************************************************************************</span>
+040286,000230:                                                                                                  <span class="co">#  SUBROUTINE TO COMPUTE FORWARD AND LATERAL VELOCITIES</span>
+040287,000231:                                                                                                  <span class="co">#  ************************************************************************</span>
+040288,000232: 
+040289,000233:                                                                                                  <span class="co">#      THE SCALARS VHY AND VHZ, COMPUTED NEXT, ARE THE VELOCITIES ALONG UNIT VECTORS UHYP AND UHZP. UHYP NORMAL</span>
+040290,000234:                                                                                                  <span class="co">#  TO THE PRE-PDI ORBITAL PLANE, UHZP IN TURN NORMAL TO UHYP AND THE POSITION VECTOR.  NOW SINCE FOR THE "LANDING</span>
+040291,000235:                                                                                                  <span class="co">#  ALIGNMENT" OF THE IMU THE STABLE-MEMBER Y-AXIS IS DEFINED THE SAME WAY AS UHYP, VVECTY IS PRECISELY VHY.</span>
+040292,000236:                                                                                                  <span class="co">#  FURTHERMORE, THE Y-TERM OF THE VHZ COMPUTATION DROPS OUT, AND THE FOLLOWING USEFUL EQUALITIES BECOME TRUE:</span>
+040293,000237:                                                                                                  <span class="co">#  UHZPX = - RUNITZ AND UHZPZ = RUNITX.  DRAW A PICTURE TO BE CONVINCED.</span>
+040294,000238: 
+040295,000239:                                                                                                  <span class="co">#      NOTE THAT IN THIS VERSION CROSS-POINTER DISPLAYS ARE OUTPUT DURING ASCENT AND ABORTS AS WELL AS DESCENT.</span>
+040296,000240: 
+<a name="43524F53434F4D50"></a>040297,000241: 21,2565           40074        <span class="sm">CROSCOMP</span>           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524430">FLAGWRD0</a>                              <span class="co">#  IS R10FLAG SET TO INDICATE ASCENT?</span>
+040298,000242: 21,2566           74752                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#523130464C424954">R10FLBIT</a>                              
+040299,000243: 21,2567           00006                           <span class="op">EXTEND  </span>                                       
+040300,000244: 21,2570           12667                           <span class="op">BZF     </span> <a href="#4150534C4144">APSLAD</a>                                <span class="co">#  YES:  DISPLAY LATVEL IN INERTIAL AXES</span>
+040301,000245: 
+040302,000246: 21,2571           41724                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52554E49545A">RUNITZ</a>                                <span class="co">#  NO:   COMPUTE DOWNRANGE VELOCITY</span>
+040303,000247: 21,2572           00006                           <span class="op">EXTEND  </span>                                       
+040304,000248: 21,2573           71726                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#565645435458">VVECTX</a>                                
+040305,000249: 21,2574           52066                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56485A">VHZ</a>                                   
+040306,000250: 21,2575           31722                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52554E495458">RUNITX</a>                                
+040307,000251: 21,2576           00006                           <span class="op">EXTEND  </span>                                       
+040308,000252: 21,2577           71732                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56564543545A">VVECTZ</a>                                
+040309,000253: 21,2600           20066                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56485A">VHZ</a>                                   
+040310,000254: 21,2601           31722                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52554E495458">RUNITX</a>                                <span class="co">#  COMPUTE THE MORE SENSITIVE TERM IN DP</span>
+040311,000255: 21,2602           00006                           <span class="op">EXTEND  </span>                                       
+040312,000256: 21,2603           71733                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56564543545A">VVECTZ</a>     +1                         
+040313,000257: 21,2604           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+040314,000258: 21,2605           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+040315,000259: 21,2606           20066                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56485A">VHZ</a>                                   <span class="co">#  VHZ IN UNITS OF 2(5) M/CS</span>
+040316,000260: 
+040317,000261: 21,2607           00006                           <span class="op">EXTEND  </span>                                       
+040318,000262: 21,2610           31731                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#565645435459">VVECTY</a>                                
+040319,000263: 21,2611           52064                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564859">VHY</a>                                   <span class="co">#  VHY IN UNITS OF 2(5) M/CS</span>
+040320,000264: 
+040321,000265: 21,2612           35015                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4542414E4B36">EBANK6</a>                                <span class="co">#  SWITCH TO DAP EBANK</span>
+040322,000266: 21,2613           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
+040323,000267: 21,2614  E6,1417                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3232">M22</a>                                   
+040324,000268: 
+040325,000269: 21,2614           31420                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3332">M32</a>                                   <span class="co">#  COS(AOG)</span>
+040326,000270: 21,2615           00006                           <span class="op">EXTEND  </span>                                       
+040327,000271: 21,2616           70065                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56485A">VHZ</a>                                   
+040328,000272: 21,2617           52071                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F525654454D50">FORVTEMP</a>                              
+040329,000273: 21,2620           41417                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3232">M22</a>                                   <span class="co">#  SIN(AOG)</span>
+040330,000274: 21,2621           00006                           <span class="op">EXTEND  </span>                                       
+040331,000275: 21,2622           70063                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564859">VHY</a>                                   
+040332,000276: 21,2623           20071                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F525654454D50">FORVTEMP</a>                              
+040333,000277: 
 </pre>
 </span>
 </p>
@@ -448,56 +448,56 @@ Page 895
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-040326,000279: 21,2624           31420                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3332">M32</a>                                   <span class="co">#  COS(AOG)</span>
-040327,000280: 21,2625           00006                           <span class="op">EXTEND  </span>                                       
-040328,000281: 21,2626           70066                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56485A">VHZ</a>        +1                         
-040329,000282: 21,2627           54062                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
-040330,000283: 21,2630           41417                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3232">M22</a>                                   <span class="co">#  SIN(AOG)</span>
-040331,000284: 21,2631           00006                           <span class="op">EXTEND  </span>                                       
-040332,000285: 21,2632           70064                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564859">VHY</a>        +1                         
-040333,000286: 21,2633           60062                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
-040334,000287: 21,2634           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-040335,000288: 21,2635           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-040336,000289: 21,2636           20071                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F525654454D50">FORVTEMP</a>                              <span class="co">#  FORWARD VELOCITY IN UNITS OF 2(5) M/CS</span>
-040337,000290: 
-040338,000291: 21,2637           31417                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3232">M22</a>                                   <span class="co">#  SIN(AOG)</span>
-040339,000292: 21,2640           00006                           <span class="op">EXTEND  </span>                                       
-040340,000293: 21,2641           70065                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56485A">VHZ</a>                                   
-040341,000294: 21,2642           52073                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C415456454C">LATVEL</a>                                
-040342,000295: 21,2643           31420                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3332">M32</a>                                   <span class="co">#  COS(AOG)</span>
-040343,000296: 21,2644           00006                           <span class="op">EXTEND  </span>                                       
-040344,000297: 21,2645           70063                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564859">VHY</a>                                   
-040345,000298: 21,2646           20073                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C415456454C">LATVEL</a>                                
-040346,000299: 
-040347,000300: 21,2647           31417                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3232">M22</a>                                   <span class="co">#  SIN(AOG)</span>
-040348,000301: 21,2650           00006                           <span class="op">EXTEND  </span>                                       
-040349,000302: 21,2651           70066                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56485A">VHZ</a>        +1                         
-040350,000303: 21,2652           54062                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
-040351,000304: 21,2653           31420                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3332">M32</a>                                   <span class="co">#  COS(AOG)</span>
-040352,000305: 21,2654           00006                           <span class="op">EXTEND  </span>                                       
-040353,000306: 21,2655           70064                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564859">VHY</a>        +1                         
-040354,000307: 21,2656           60062                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
-040355,000308: 21,2657           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-040356,000309: 21,2660           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-040357,000310: 21,2661           20073                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C415456454C">LATVEL</a>                                <span class="co">#  LATERAL VELOCITY IN UNITS OF 2(5) M/CS</span>
-040358,000311: 
-040359,000312: 21,2662           24006                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 <span class="co">#  RETURN TO SERVICER EBANK</span>
-040360,000313: 21,2663  E7,1717                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#48444F544C4144">HDOTLAD</a>                               
-040361,000314: 
-<a name="43524F53534F5554"></a>040362,000315: 21,2663           00006        <span class="sm">CROSSOUT</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  MOVE FORVTEMP TO FORVEL FOR DSKY DISPLAY</span>
-040363,000316: 21,2664           30071                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F525654454D50">FORVTEMP</a>                              
-040364,000317: 21,2665           53743                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F5256454C">FORVEL</a>                                
-040365,000318: 
-040366,000319: 21,2666           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-040367,000320: 
-<a name="4150534C4144"></a>040368,000321: 21,2667           54070        <span class="sm">APSLAD  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F525654454D50">FORVTEMP</a>                              <span class="co">#  DURING ASCENT AND ABORTS COME HERE TO</span>
-040369,000322: 21,2670           54071                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F525654454D50">FORVTEMP</a>   +1                         <span class="co">#    DISPLAY LATVEL = SM Y-AXIS VELOCITY</span>
-040370,000323: 
-040371,000324: 21,2671           00006                           <span class="op">EXTEND  </span>                                       
-040372,000325: 21,2672           31731                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#565645435459">VVECTY</a>                                
-040373,000326: 21,2673           52073                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C415456454C">LATVEL</a>                                
-040374,000327: 21,2674           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  ADD SURFACE VELOCITY BACK IN SO APS</span>
-040375,000328: 21,2675           31712                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5653555246414345">VSURFACE</a>   +2                         <span class="co">#    LATVEL DISPLAY WILL BE IN TRUE</span>
+040335,000279: 21,2624           31420                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3332">M32</a>                                   <span class="co">#  COS(AOG)</span>
+040336,000280: 21,2625           00006                           <span class="op">EXTEND  </span>                                       
+040337,000281: 21,2626           70066                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56485A">VHZ</a>        +1                         
+040338,000282: 21,2627           54062                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
+040339,000283: 21,2630           41417                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3232">M22</a>                                   <span class="co">#  SIN(AOG)</span>
+040340,000284: 21,2631           00006                           <span class="op">EXTEND  </span>                                       
+040341,000285: 21,2632           70064                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564859">VHY</a>        +1                         
+040342,000286: 21,2633           60062                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
+040343,000287: 21,2634           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+040344,000288: 21,2635           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+040345,000289: 21,2636           20071                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F525654454D50">FORVTEMP</a>                              <span class="co">#  FORWARD VELOCITY IN UNITS OF 2(5) M/CS</span>
+040346,000290: 
+040347,000291: 21,2637           31417                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3232">M22</a>                                   <span class="co">#  SIN(AOG)</span>
+040348,000292: 21,2640           00006                           <span class="op">EXTEND  </span>                                       
+040349,000293: 21,2641           70065                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56485A">VHZ</a>                                   
+040350,000294: 21,2642           52073                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C415456454C">LATVEL</a>                                
+040351,000295: 21,2643           31420                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3332">M32</a>                                   <span class="co">#  COS(AOG)</span>
+040352,000296: 21,2644           00006                           <span class="op">EXTEND  </span>                                       
+040353,000297: 21,2645           70063                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564859">VHY</a>                                   
+040354,000298: 21,2646           20073                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C415456454C">LATVEL</a>                                
+040355,000299: 
+040356,000300: 21,2647           31417                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3232">M22</a>                                   <span class="co">#  SIN(AOG)</span>
+040357,000301: 21,2650           00006                           <span class="op">EXTEND  </span>                                       
+040358,000302: 21,2651           70066                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56485A">VHZ</a>        +1                         
+040359,000303: 21,2652           54062                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
+040360,000304: 21,2653           31420                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3332">M32</a>                                   <span class="co">#  COS(AOG)</span>
+040361,000305: 21,2654           00006                           <span class="op">EXTEND  </span>                                       
+040362,000306: 21,2655           70064                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564859">VHY</a>        +1                         
+040363,000307: 21,2656           60062                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
+040364,000308: 21,2657           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+040365,000309: 21,2660           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+040366,000310: 21,2661           20073                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C415456454C">LATVEL</a>                                <span class="co">#  LATERAL VELOCITY IN UNITS OF 2(5) M/CS</span>
+040367,000311: 
+040368,000312: 21,2662           24006                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 <span class="co">#  RETURN TO SERVICER EBANK</span>
+040369,000313: 21,2663  E7,1717                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#48444F544C4144">HDOTLAD</a>                               
+040370,000314: 
+<a name="43524F53534F5554"></a>040371,000315: 21,2663           00006        <span class="sm">CROSSOUT</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  MOVE FORVTEMP TO FORVEL FOR DSKY DISPLAY</span>
+040372,000316: 21,2664           30071                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F525654454D50">FORVTEMP</a>                              
+040373,000317: 21,2665           53743                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F5256454C">FORVEL</a>                                
+040374,000318: 
+040375,000319: 21,2666           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+040376,000320: 
+<a name="4150534C4144"></a>040377,000321: 21,2667           54070        <span class="sm">APSLAD  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F525654454D50">FORVTEMP</a>                              <span class="co">#  DURING ASCENT AND ABORTS COME HERE TO</span>
+040378,000322: 21,2670           54071                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F525654454D50">FORVTEMP</a>   +1                         <span class="co">#    DISPLAY LATVEL = SM Y-AXIS VELOCITY</span>
+040379,000323: 
+040380,000324: 21,2671           00006                           <span class="op">EXTEND  </span>                                       
+040381,000325: 21,2672           31731                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#565645435459">VVECTY</a>                                
+040382,000326: 21,2673           52073                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C415456454C">LATVEL</a>                                
+040383,000327: 21,2674           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  ADD SURFACE VELOCITY BACK IN SO APS</span>
+040384,000328: 21,2675           31712                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5653555246414345">VSURFACE</a>   +2                         <span class="co">#    LATVEL DISPLAY WILL BE IN TRUE</span>
 </pre>
 </span>
 </p>
@@ -513,56 +513,56 @@ Page 896
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-040377,000330: 21,2676           20073                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C415456454C">LATVEL</a>                                <span class="co">#    STABLE-MEMBER COORDINATES</span>
-040378,000331: 
-040379,000332: 21,2677           12663                           <span class="op">TCF     </span> <a href="#43524F53534F5554">CROSSOUT</a>                              <span class="co">#  REJOIN THE MAINSTREAM</span>
-040380,000333: 
-040381,000334:                                                                                                  <span class="co">#  ************************************************************************</span>
-040382,000335:                                                                                                  <span class="co">#  LANDING ANALOG DISPLAYS INITIALIZATION</span>
-040383,000336:                                                                                                  <span class="co">#  ************************************************************************</span>
-040384,000337: 
-<a name="44495350494E4954"></a>040385,000338: 21,2700           02565        <span class="sm">DISPINIT</span>           <span class="op">TC      </span> <a href="#43524F53434F4D50">CROSCOMP</a>                              <span class="co">#  FIRST COMPUTE BUT NOT OUTPUT VELOCITIES</span>
-040386,000339: 
-040387,000340: 21,2701           40075                           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524431">FLAGWRD1</a>                              <span class="co">#  SET DIDFLAG</span>
-040388,000341: 21,2702           74736                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#444944464C424954">DIDFLBIT</a>                              
-040389,000342: 21,2703           26075                           <span class="op">ADS     </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524431">FLAGWRD1</a>                              
-040390,000343: 
-040391,000344: 21,2704           34744                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  <span class="co">#  SET DISPLAY INERTIAL DATA OUTBIT</span>
-040392,000345: 21,2705           00006                           <span class="op">EXTEND  </span>                                       
-040393,000346: 21,2706           05012                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3132">CHAN12</a>                                
-040394,000347: 
-040395,000348: 21,2707           44755                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  ZERO METER INDICATORS</span>
-040396,000349: 21,2710           55740                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4154564D455452">LATVMETR</a>                              
-040397,000350: 21,2711           55741                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F52564D455452">FORVMETR</a>                              
-040398,000351: 
-040399,000352: 21,2712           34750                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495434">BIT4</a>                                  <span class="co">#  SET UP TASK TO FINISH INITIALIZATION</span>
-040400,000353: 21,2713           05204                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#54574944444C45">TWIDDLE</a>                               
-040401,000354: 21,2714           02716                           <span class="ps">ADRES   </span> <a href="#494E544C5A45">INTLZE</a>                                
-040402,000355: 21,2715           12564                           <span class="op">TCF     </span> <a href="#4C414E4144454E44">LANADEND</a>                              
-040403,000356: 
-<a name="494E544C5A45"></a>040404,000357: 21,2716           34752        <span class="sm">INTLZE  </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  <span class="co">#  ENABLE RR ERROR COUNTER</span>
-040405,000358: 21,2717           00006                           <span class="op">EXTEND  </span>                                       
-040406,000359: 21,2720           05012                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3132">CHAN12</a>                                
-040407,000360: 
-040408,000361: 21,2721           41300                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533333">IMODES33</a>                              <span class="co">#  SET INERTIAL DATA FLAG</span>
-040409,000362: 21,2722           74744                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  
-040410,000363: 21,2723           27300                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533333">IMODES33</a>                              
-040411,000364: 21,2724           05272                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-040412,000365: 
-040413,000366:                                                                                                  <span class="co">#  ************************************************************************</span>
-040414,000367:                                                                                                  <span class="co">#  LANDING ANALOG DISPLAYS RESET ROUTINE</span>
-040415,000368:                                                                                                  <span class="co">#  ************************************************************************</span>
-040416,000369: 
-<a name="4449535052534554"></a>040417,000370: 21,2725           02565        <span class="sm">DISPRSET</span>           <span class="op">TC      </span> <a href="#43524F53434F4D50">CROSCOMP</a>                              <span class="co">#  FIRST COMPUTE BUT NOT OUTPUT VELOCITIES</span>
-040418,000371: 
-040419,000372: 21,2726           44736                 +1        <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#444944464C424954">DIDFLBIT</a>                              <span class="co">#  RESET DIDFLAG</span>
-040420,000373: 21,2727           70075                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524431">FLAGWRD1</a>                              
-040421,000374: 21,2730           54075                           <span class="op">TS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524431">FLAGWRD1</a>                              
-040422,000375: 
-040423,000376: 21,2731           34744                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  <span class="co">#  WAS INERTIAL DATA JUST DISPLAYED?</span>
-040424,000377: 21,2732           71300                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533333">IMODES33</a>                              
-040425,000378: 21,2733           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-040426,000379: 21,2734           34752                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  <span class="co">#  YES:  DISABLE RR ERROR COUNTER AND</span>
+040386,000330: 21,2676           20073                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C415456454C">LATVEL</a>                                <span class="co">#    STABLE-MEMBER COORDINATES</span>
+040387,000331: 
+040388,000332: 21,2677           12663                           <span class="op">TCF     </span> <a href="#43524F53534F5554">CROSSOUT</a>                              <span class="co">#  REJOIN THE MAINSTREAM</span>
+040389,000333: 
+040390,000334:                                                                                                  <span class="co">#  ************************************************************************</span>
+040391,000335:                                                                                                  <span class="co">#  LANDING ANALOG DISPLAYS INITIALIZATION</span>
+040392,000336:                                                                                                  <span class="co">#  ************************************************************************</span>
+040393,000337: 
+<a name="44495350494E4954"></a>040394,000338: 21,2700           02565        <span class="sm">DISPINIT</span>           <span class="op">TC      </span> <a href="#43524F53434F4D50">CROSCOMP</a>                              <span class="co">#  FIRST COMPUTE BUT NOT OUTPUT VELOCITIES</span>
+040395,000339: 
+040396,000340: 21,2701           40075                           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524431">FLAGWRD1</a>                              <span class="co">#  SET DIDFLAG</span>
+040397,000341: 21,2702           74736                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#444944464C424954">DIDFLBIT</a>                              
+040398,000342: 21,2703           26075                           <span class="op">ADS     </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524431">FLAGWRD1</a>                              
+040399,000343: 
+040400,000344: 21,2704           34744                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  <span class="co">#  SET DISPLAY INERTIAL DATA OUTBIT</span>
+040401,000345: 21,2705           00006                           <span class="op">EXTEND  </span>                                       
+040402,000346: 21,2706           05012                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3132">CHAN12</a>                                
+040403,000347: 
+040404,000348: 21,2707           44755                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  ZERO METER INDICATORS</span>
+040405,000349: 21,2710           55740                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4154564D455452">LATVMETR</a>                              
+040406,000350: 21,2711           55741                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464F52564D455452">FORVMETR</a>                              
+040407,000351: 
+040408,000352: 21,2712           34750                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495434">BIT4</a>                                  <span class="co">#  SET UP TASK TO FINISH INITIALIZATION</span>
+040409,000353: 21,2713           05204                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#54574944444C45">TWIDDLE</a>                               
+040410,000354: 21,2714           02716                           <span class="ps">ADRES   </span> <a href="#494E544C5A45">INTLZE</a>                                
+040411,000355: 21,2715           12564                           <span class="op">TCF     </span> <a href="#4C414E4144454E44">LANADEND</a>                              
+040412,000356: 
+<a name="494E544C5A45"></a>040413,000357: 21,2716           34752        <span class="sm">INTLZE  </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  <span class="co">#  ENABLE RR ERROR COUNTER</span>
+040414,000358: 21,2717           00006                           <span class="op">EXTEND  </span>                                       
+040415,000359: 21,2720           05012                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3132">CHAN12</a>                                
+040416,000360: 
+040417,000361: 21,2721           41300                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533333">IMODES33</a>                              <span class="co">#  SET INERTIAL DATA FLAG</span>
+040418,000362: 21,2722           74744                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  
+040419,000363: 21,2723           27300                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533333">IMODES33</a>                              
+040420,000364: 21,2724           05272                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+040421,000365: 
+040422,000366:                                                                                                  <span class="co">#  ************************************************************************</span>
+040423,000367:                                                                                                  <span class="co">#  LANDING ANALOG DISPLAYS RESET ROUTINE</span>
+040424,000368:                                                                                                  <span class="co">#  ************************************************************************</span>
+040425,000369: 
+<a name="4449535052534554"></a>040426,000370: 21,2725           02565        <span class="sm">DISPRSET</span>           <span class="op">TC      </span> <a href="#43524F53434F4D50">CROSCOMP</a>                              <span class="co">#  FIRST COMPUTE BUT NOT OUTPUT VELOCITIES</span>
+040427,000371: 
+040428,000372: 21,2726           44736                 +1        <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#444944464C424954">DIDFLBIT</a>                              <span class="co">#  RESET DIDFLAG</span>
+040429,000373: 21,2727           70075                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524431">FLAGWRD1</a>                              
+040430,000374: 21,2730           54075                           <span class="op">TS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524431">FLAGWRD1</a>                              
+040431,000375: 
+040432,000376: 21,2731           34744                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  <span class="co">#  WAS INERTIAL DATA JUST DISPLAYED?</span>
+040433,000377: 21,2732           71300                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533333">IMODES33</a>                              
+040434,000378: 21,2733           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+040435,000379: 21,2734           34752                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  <span class="co">#  YES:  DISABLE RR ERROR COUNTER AND</span>
 </pre>
 </span>
 </p>
@@ -578,55 +578,55 @@ Page 897
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-040428,000381: 21,2735           64744                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  <span class="co">#  NO:   RESET DISPLAY INERTIAL DATA OUTBIT</span>
-040429,000382: 21,2736           40000                           <span class="op">COM     </span>                                       
-040430,000383: 21,2737           00006                           <span class="op">EXTEND  </span>                                       
-040431,000384: 21,2740           03012                           <span class="op">WAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3132">CHAN12</a>                                
-040432,000385: 
-040433,000386: 21,2741           44744                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  
-040434,000387: 21,2742           71300                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533333">IMODES33</a>                              
-040435,000388: 21,2743           55300                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533333">IMODES33</a>                              
-040436,000389: 21,2744           12564                           <span class="op">TCF     </span> <a href="#4C414E4144454E44">LANADEND</a>                              
-040437,000390: 
-040438,000391:                                                                                                  <span class="co">#  ************************************************************************</span>
-040439,000392:                                                                                                  <span class="co">#  CONSTANTS FOR LANDING ANALOG DISPLAYS</span>
-040440,000393:                                                                                                  <span class="co">#  ************************************************************************</span>
-040441,000394: 
-040442,000395:                                                                                                  <span class="co">#  CONSTANTS ON A-CARDS ARE FOUND IN THE CONTROLLED CONSTANTS SECTION</span>
-040443,000396: 
-040444,000397: 
-040445,000398:                                                                                                  <span class="co">#  LANAKPIP        DEC             .0512                 SCALES PIPAS TO UNITS OF 2(5) M/CS</span>
-040446,000399: 
-040447,000400: 
-040448,000401:                                                                                                  <span class="co">#  MAXVEL          OCT             00466                 198.645 F/S IN UNITS OF 2(5) M/CS</span>
-040449,000402: 
-040450,000403: 
-040451,000404:                                                                                                  <span class="co">#  MAXDBITS        OCT             01034                 ABOUT 300 F/S</span>
-040452,000405: 
-040453,000406: 
-040454,000407:                                                                                                  <span class="co">#  VELCONV         DEC             .03594                SCALES VEL AT ONE M/CS TO .5571 F/S/BIT</span>
-040455,000408: 
-040456,000409: 
-040457,000410:                                                                                                  <span class="co">#  ALTRCONV        DEC             .16020                SCALES ALTR AT 2(2) M/CS TO .5 F/S/BIT</span>
-040458,000411: 
-040459,000412: 
-040460,000413:                                                                                                  <span class="co">#  ALTCONV         DEC             .69954                SCALES ALTITUDE AT 2(15) M TO 9.38 F/BIT</span>
-040461,000414: 
-040462,000415: 
-<a name="424954534554"></a>040463,000416: 21,2745     5020               <span class="sm">BITSET  </span>           <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F36">PRIO6</a>                                 <span class="co">#  CROSS-POINTER DRIVE BITS</span>
-040464,000417: 
-040465,000418:                                                                                                  <span class="co">#  ************************************************************************</span>
-040466,000419:                                                                                                  <span class="co">#  SUBROUTINES</span>
-040467,000420:                                                                                                  <span class="co">#  ************************************************************************</span>
-040468,000421: 
-<a name="4C41444C494D4954"></a>040469,000422: 21,2745           54061        <span class="sm">LADLIMIT</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-040470,000423: 21,2746           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-040471,000424: 21,2747           00006                           <span class="op">EXTEND  </span>                                       
-040472,000425: 21,2750           10061                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-040473,000426: 21,2751           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-040474,000427: 21,2752           22061                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-040475,000428: 21,2753           12755                           <span class="op">TCF     </span> +2                                    
-040476,000429: 21,2754           12757                           <span class="op">TCF     </span> +3                                    
+040437,000381: 21,2735           64744                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  <span class="co">#  NO:   RESET DISPLAY INERTIAL DATA OUTBIT</span>
+040438,000382: 21,2736           40000                           <span class="op">COM     </span>                                       
+040439,000383: 21,2737           00006                           <span class="op">EXTEND  </span>                                       
+040440,000384: 21,2740           03012                           <span class="op">WAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3132">CHAN12</a>                                
+040441,000385: 
+040442,000386: 21,2741           44744                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  
+040443,000387: 21,2742           71300                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533333">IMODES33</a>                              
+040444,000388: 21,2743           55300                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533333">IMODES33</a>                              
+040445,000389: 21,2744           12564                           <span class="op">TCF     </span> <a href="#4C414E4144454E44">LANADEND</a>                              
+040446,000390: 
+040447,000391:                                                                                                  <span class="co">#  ************************************************************************</span>
+040448,000392:                                                                                                  <span class="co">#  CONSTANTS FOR LANDING ANALOG DISPLAYS</span>
+040449,000393:                                                                                                  <span class="co">#  ************************************************************************</span>
+040450,000394: 
+040451,000395:                                                                                                  <span class="co">#  CONSTANTS ON A-CARDS ARE FOUND IN THE CONTROLLED CONSTANTS SECTION</span>
+040452,000396: 
+040453,000397: 
+040454,000398:                                                                                                  <span class="co">#  LANAKPIP        DEC             .0512                 SCALES PIPAS TO UNITS OF 2(5) M/CS</span>
+040455,000399: 
+040456,000400: 
+040457,000401:                                                                                                  <span class="co">#  MAXVEL          OCT             00466                 198.645 F/S IN UNITS OF 2(5) M/CS</span>
+040458,000402: 
+040459,000403: 
+040460,000404:                                                                                                  <span class="co">#  MAXDBITS        OCT             01034                 ABOUT 300 F/S</span>
+040461,000405: 
+040462,000406: 
+040463,000407:                                                                                                  <span class="co">#  VELCONV         DEC             .03594                SCALES VEL AT ONE M/CS TO .5571 F/S/BIT</span>
+040464,000408: 
+040465,000409: 
+040466,000410:                                                                                                  <span class="co">#  ALTRCONV        DEC             .16020                SCALES ALTR AT 2(2) M/CS TO .5 F/S/BIT</span>
+040467,000411: 
+040468,000412: 
+040469,000413:                                                                                                  <span class="co">#  ALTCONV         DEC             .69954                SCALES ALTITUDE AT 2(15) M TO 9.38 F/BIT</span>
+040470,000414: 
+040471,000415: 
+<a name="424954534554"></a>040472,000416: 21,2745     5020               <span class="sm">BITSET  </span>           <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F36">PRIO6</a>                                 <span class="co">#  CROSS-POINTER DRIVE BITS</span>
+040473,000417: 
+040474,000418:                                                                                                  <span class="co">#  ************************************************************************</span>
+040475,000419:                                                                                                  <span class="co">#  SUBROUTINES</span>
+040476,000420:                                                                                                  <span class="co">#  ************************************************************************</span>
+040477,000421: 
+<a name="4C41444C494D4954"></a>040478,000422: 21,2745           54061        <span class="sm">LADLIMIT</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+040479,000423: 21,2746           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+040480,000424: 21,2747           00006                           <span class="op">EXTEND  </span>                                       
+040481,000425: 21,2750           10061                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+040482,000426: 21,2751           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+040483,000427: 21,2752           22061                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+040484,000428: 21,2753           12755                           <span class="op">TCF     </span> +2                                    
+040485,000429: 21,2754           12757                           <span class="op">TCF     </span> +3                                    
 </pre>
 </span>
 </p>
@@ -642,31 +642,31 @@ Page 898
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-040478,000431: 21,2755           30001                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-040479,000432: 21,2756           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-040480,000433: 21,2757           40061                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-040481,000434: 21,2760           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-040482,000435: 
-<a name="4E4F524D504950"></a>040483,000436: 21,2761           56061        <span class="sm">NORMPIP </span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-040484,000437: 21,2762           30061                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-040485,000438: 21,2763           74736                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 
-040486,000439: 21,2764           00006                           <span class="op">EXTEND  </span>                                       
-040487,000440: 21,2765           12772                           <span class="op">BZF     </span> +5                                    
-040488,000441: 21,2766           30061                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-040489,000442: 21,2767           64734                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E4547312F32">NEG1/2</a>                                
-040490,000443: 21,2770           64734                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E4547312F32">NEG1/2</a>                                
-040491,000444: 21,2771           12775                           <span class="op">TCF     </span> +4                                    
-040492,000445: 21,2772           30061                 +5        <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-040493,000446: 21,2773           64736                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#48414C46">HALF</a>                                  
-040494,000447: 21,2774           64736                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#48414C46">HALF</a>                                  
-040495,000448: 21,2775           22007                 +4        <span class="op">ZL      </span>                                       
-040496,000449: 21,2776           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-040497,000450: 21,2777           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-040498,000451: 21,3000           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-040499,000452: 
-040500,000453:                                                                                                  <span class="co">#  ************************************************************************</span>
-040501,000454:                                                                                                  <span class="co">#  THE END OF THE LANDING ANALOG DISPLAYS</span>
-040502,000455:                                                                                                  <span class="co">#  ************************************************************************</span>
+040487,000431: 21,2755           30001                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+040488,000432: 21,2756           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+040489,000433: 21,2757           40061                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+040490,000434: 21,2760           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+040491,000435: 
+<a name="4E4F524D504950"></a>040492,000436: 21,2761           56061        <span class="sm">NORMPIP </span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+040493,000437: 21,2762           30061                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+040494,000438: 21,2763           74736                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 
+040495,000439: 21,2764           00006                           <span class="op">EXTEND  </span>                                       
+040496,000440: 21,2765           12772                           <span class="op">BZF     </span> +5                                    
+040497,000441: 21,2766           30061                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+040498,000442: 21,2767           64734                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E4547312F32">NEG1/2</a>                                
+040499,000443: 21,2770           64734                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E4547312F32">NEG1/2</a>                                
+040500,000444: 21,2771           12775                           <span class="op">TCF     </span> +4                                    
+040501,000445: 21,2772           30061                 +5        <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+040502,000446: 21,2773           64736                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#48414C46">HALF</a>                                  
+040503,000447: 21,2774           64736                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#48414C46">HALF</a>                                  
+040504,000448: 21,2775           22007                 +4        <span class="op">ZL      </span>                                       
+040505,000449: 21,2776           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+040506,000450: 21,2777           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+040507,000451: 21,3000           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+040508,000452: 
+040509,000453:                                                                                                  <span class="co">#  ************************************************************************</span>
+040510,000454:                                                                                                  <span class="co">#  THE END OF THE LANDING ANALOG DISPLAYS</span>
+040511,000455:                                                                                                  <span class="co">#  ************************************************************************</span>
 
 End of include-file LANDING_ANALOG_DISPLAYS.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

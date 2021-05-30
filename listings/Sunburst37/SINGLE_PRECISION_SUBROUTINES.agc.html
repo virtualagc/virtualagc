@@ -90,28 +90,28 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-043823,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-043824,000003:                                                                                                  <span class="co">## Filename:    SINGLE_PRECISION_SUBROUTINES.agc</span>
-043825,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
-043826,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
-043827,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
-043828,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
-043829,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
-043830,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
-043831,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
-043832,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-043833,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-043834,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-043835,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
-043836,000015:                                                                                                  <span class="co">## Reference:   pp. 985-987</span>
-043837,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-043838,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-043839,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-043840,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
-043841,000020:                                                                                                  <span class="co">##              2017-06-17 NV   Updated for Sunburst 37</span>
-043842,000021:                                                                                                  <span class="co">##              2017-06-23 RSB  Proofed comment text with</span>
-043843,000022:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
-043844,000023: 
+043833,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+043834,000003:                                                                                                  <span class="co">## Filename:    SINGLE_PRECISION_SUBROUTINES.agc</span>
+043835,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
+043836,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
+043837,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
+043838,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
+043839,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
+043840,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
+043841,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
+043842,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+043843,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+043844,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+043845,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
+043846,000015:                                                                                                  <span class="co">## Reference:   pp. 985-987</span>
+043847,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+043848,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+043849,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+043850,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
+043851,000020:                                                                                                  <span class="co">##              2017-06-17 NV   Updated for Sunburst 37</span>
+043852,000021:                                                                                                  <span class="co">##              2017-06-23 RSB  Proofed comment text with</span>
+043853,000022:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
+043854,000023: 
 </pre>
 </span>
 </p>
@@ -127,44 +127,44 @@ Page 985
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-043846,000025:    5372                                           <span class="ps">BLOCK   </span> 02                                    
-043847,000026:                                                                                                  <span class="co">#  SINGLE PRECISION SINE AND COSINE</span>
-043848,000027: 
-<a name="5350434F53"></a>043849,000028:    5372           67740        <span class="sm">SPCOS   </span>           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#48414C46">HALF</a>                                  <span class="co">#  ARGUMENTS SCALED AT PI</span>
-<a name="535053494E"></a>043850,000029:    5373           55127        <span class="sm">SPSIN   </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-043851,000030:    5374           15376                           <span class="op">TCF     </span> <a href="#535054">SPT</a>                                   
-043852,000031:    5375           41127                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-<a name="535054"></a>043853,000032:    5376           60000        <span class="sm">SPT     </span>           <span class="op">DOUBLE  </span>                                       
-043854,000033:    5377           55127                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-043855,000034:    5400           15411                           <span class="op">TCF     </span> <a href="#504F4C4C4559">POLLEY</a>                                
-043856,000035:    5401           57127                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-043857,000036:    5402           51127                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-043858,000037:    5403           67736                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4C494D495453">LIMITS</a>                                
-043859,000038:    5404           40000                           <span class="op">COM     </span>                                       
-043860,000039:    5405           61127                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-043861,000040:    5406           55127                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-043862,000041:    5407           15411                           <span class="op">TCF     </span> <a href="#504F4C4C4559">POLLEY</a>                                
-043863,000042:    5410           15427                           <span class="op">TCF     </span> <a href="#4152473930">ARG90</a>                                 
-<a name="504F4C4C4559"></a>043864,000043:    5411           00006        <span class="sm">POLLEY  </span>           <span class="op">EXTEND  </span>                                       
-043865,000044:    5412           71127                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-043866,000045:    5413           55130                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5351">SQ</a>                                    
-043867,000046:    5414           00006                           <span class="op">EXTEND  </span>                                       
-043868,000047:    5415           75434                           <span class="op">MP      </span> <a href="#43352F32">C5/2</a>                                  
-043869,000048:    5416           65433                           <span class="op">AD      </span> <a href="#43332F32">C3/2</a>                                  
-043870,000049:    5417           00006                           <span class="op">EXTEND  </span>                                       
-043871,000050:    5420           71130                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5351">SQ</a>                                    
-043872,000051:    5421           65432                           <span class="op">AD      </span> <a href="#43312F32">C1/2</a>                                  
-043873,000052:    5422           00006                           <span class="op">EXTEND  </span>                                       
-043874,000053:    5423           71127                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-043875,000054:    5424           20001                           <span class="op">DDOUBL  </span>                                       
-043876,000055:    5425           55127                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-043877,000056:    5426           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-<a name="4152473930"></a>043878,000057:    5427           50000        <span class="sm">ARG90   </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-043879,000058:    5430           47736                           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#4C494D495453">LIMITS</a>                                
-043880,000059:    5431           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RESULT SCALED AT 1</span>
-<a name="43312F32"></a>043881,000060:    5432           31103        <span class="sm">C1/2    </span>           <span class="ps">DEC     </span> .7853134                              
-<a name="43332F32"></a>043882,000061:    5433           65552        <span class="sm">C3/2    </span>           <span class="ps">DEC     </span> -.3216146                             
-<a name="43352F32"></a>043883,000062:    5434           01124        <span class="sm">C5/2    </span>           <span class="ps">DEC     </span> .0363551                              
+043856,000025:    5372                                           <span class="ps">BLOCK   </span> 02                                    
+043857,000026:                                                                                                  <span class="co">#  SINGLE PRECISION SINE AND COSINE</span>
+043858,000027: 
+<a name="5350434F53"></a>043859,000028:    5372           67740        <span class="sm">SPCOS   </span>           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#48414C46">HALF</a>                                  <span class="co">#  ARGUMENTS SCALED AT PI</span>
+<a name="535053494E"></a>043860,000029:    5373           55127        <span class="sm">SPSIN   </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+043861,000030:    5374           15376                           <span class="op">TCF     </span> <a href="#535054">SPT</a>                                   
+043862,000031:    5375           41127                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+<a name="535054"></a>043863,000032:    5376           60000        <span class="sm">SPT     </span>           <span class="op">DOUBLE  </span>                                       
+043864,000033:    5377           55127                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+043865,000034:    5400           15411                           <span class="op">TCF     </span> <a href="#504F4C4C4559">POLLEY</a>                                
+043866,000035:    5401           57127                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+043867,000036:    5402           51127                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+043868,000037:    5403           67736                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4C494D495453">LIMITS</a>                                
+043869,000038:    5404           40000                           <span class="op">COM     </span>                                       
+043870,000039:    5405           61127                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+043871,000040:    5406           55127                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+043872,000041:    5407           15411                           <span class="op">TCF     </span> <a href="#504F4C4C4559">POLLEY</a>                                
+043873,000042:    5410           15427                           <span class="op">TCF     </span> <a href="#4152473930">ARG90</a>                                 
+<a name="504F4C4C4559"></a>043874,000043:    5411           00006        <span class="sm">POLLEY  </span>           <span class="op">EXTEND  </span>                                       
+043875,000044:    5412           71127                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+043876,000045:    5413           55130                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5351">SQ</a>                                    
+043877,000046:    5414           00006                           <span class="op">EXTEND  </span>                                       
+043878,000047:    5415           75434                           <span class="op">MP      </span> <a href="#43352F32">C5/2</a>                                  
+043879,000048:    5416           65433                           <span class="op">AD      </span> <a href="#43332F32">C3/2</a>                                  
+043880,000049:    5417           00006                           <span class="op">EXTEND  </span>                                       
+043881,000050:    5420           71130                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5351">SQ</a>                                    
+043882,000051:    5421           65432                           <span class="op">AD      </span> <a href="#43312F32">C1/2</a>                                  
+043883,000052:    5422           00006                           <span class="op">EXTEND  </span>                                       
+043884,000053:    5423           71127                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+043885,000054:    5424           20001                           <span class="op">DDOUBL  </span>                                       
+043886,000055:    5425           55127                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+043887,000056:    5426           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+<a name="4152473930"></a>043888,000057:    5427           50000        <span class="sm">ARG90   </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+043889,000058:    5430           47736                           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#4C494D495453">LIMITS</a>                                
+043890,000059:    5431           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RESULT SCALED AT 1</span>
+<a name="43312F32"></a>043891,000060:    5432           31103        <span class="sm">C1/2    </span>           <span class="ps">DEC     </span> .7853134                              
+<a name="43332F32"></a>043892,000061:    5433           65552        <span class="sm">C3/2    </span>           <span class="ps">DEC     </span> -.3216146                             
+<a name="43352F32"></a>043893,000062:    5434           01124        <span class="sm">C5/2    </span>           <span class="ps">DEC     </span> .0363551                              
 </pre>
 </span>
 </p>
@@ -180,56 +180,56 @@ Page 986
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-043885,000064:                                                                                                  <span class="co">#  ENTER WITH ARGUMENT IN A, EXIT WITH ROOT IN A.  IF GIVEN A NEGATIVE ARGUMENT, THE RETURN SKIPS WITH CCS RESULT.</span>
-043886,000065:                                                                                                  <span class="co">#  MINUS ZERO RETURNS LIKE PLUS ZERO.</span>
-043887,000066:                                                                                                  <span class="co">#  MAXIMUM ERROR IN ANSWER IS NO GREATER THAN 2 BITS.</span>
-043888,000067:                                                                                                  <span class="co">#  INTERRUPT PROGRAMS USING SPROOT MUST SAVE AND RESTORE SR.</span>
-043889,000068: 
-043890,000069: 
-043891,000070: 
-<a name="5350524F4F54"></a>043892,000071:    5435           55131        <span class="sm">SPROOT  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535152415247">SQRARG</a>                                <span class="co">#  ENTER WITH C(A) = Y</span>
-043893,000072:    5436           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-043894,000073:    5437           15443                           <span class="op">TCF     </span> <a href="#504F53415247">POSARG</a>                                <span class="co">#  IF PNZ, CONTINUE</span>
-043895,000074:    5440           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RETURN WITH 0 FOR +0</span>
-043896,000075:    5441           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-043897,000076:    5442           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RETURN WITH 0 FOR -0</span>
-043898,000077: 
-<a name="504F53415247"></a>043899,000078:    5443           00006        <span class="sm">POSARG  </span>           <span class="op">EXTEND  </span>                                       
-043900,000079:    5444           23130                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4F54524554">ROOTRET</a>                               <span class="co">#  WILL BE CALLING SPROOT1</span>
-043901,000080:    5445           65522                           <span class="op">AD      </span> <a href="#36332F36342B31">63/64+1</a>                               <span class="co">#  B(A) = Y - 1</span>
-043902,000081:    5446           54000                           <span class="op">OVSK    </span>                                       
-043903,000082:    5447           15511                           <span class="op">TCF     </span> <a href="#5350524F4F5432">SPROOT2</a>                               
-043904,000083:    5450           57131                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535152415247">SQRARG</a>                                <span class="co">#  ARG JUGGLING</span>
-043905,000084: 
-<a name="5350524F4F5433"></a>043906,000085:    5451           55131        <span class="sm">SPROOT3 </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535152415247">SQRARG</a>                                
-043907,000086:    5452           54021                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    <span class="co">#  C(A) = Y</span>
-043908,000087:    5453           56021                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    <span class="co">#  (LOSE 1 BIT)</span>
-043909,000088:    5454           55127                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#48414C4659">HALFY</a>                                 <span class="co">#  HALFY = Y/2</span>
-043910,000089:    5455           65520                           <span class="op">AD      </span> <a href="#2D312F38">-1/8</a>                                  <span class="co">#  FORM Y/2 - 1/8</span>
-043911,000090:    5456           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  TEST FOR FIRST GUESS</span>
-043912,000091:    5457           65521                           <span class="op">AD      </span> <a href="#352F382B31">5/8+1</a>                                 <span class="co">#  Y .G. 1/4, X = Y/2 + 1/2</span>
-043913,000092:    5460           05465                           <span class="op">TC      </span> <a href="#48494755455353">HIGUESS</a>                               <span class="co">#  +0 IMPOSSIBLE FROM ADDITION</span>
-043914,000093:    5461           15462                           <span class="op">NOOP    </span>                                       <span class="co">#  Y .LE. 1/4, X/2 = Y + 1/16</span>
-043915,000094:    5462           37743                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4249543131">BIT11</a>                                 <span class="co">#  1/16</span>
-043916,000095:    5463           61131                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535152415247">SQRARG</a>                                <span class="co">#  SQRARG = Y</span>
-043917,000096:    5464           60000                           <span class="op">DOUBLE  </span>                                       <span class="co">#  X FROM X/2</span>
-<a name="48494755455353"></a>043918,000097:    5465           05500        <span class="sm">HIGUESS </span>           <span class="op">TC      </span> <a href="#5350524F4F5431">SPROOT1</a>                               
-043919,000098:    5466           05500                           <span class="op">TC      </span> <a href="#5350524F4F5431">SPROOT1</a>                               <span class="co">#  ITERATE TWICE</span>
-043920,000099:    5467           57130                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4F54524554">ROOTRET</a>                               <span class="co">#  SAVE ANSWER AND GET Q</span>
-043921,000100:    5470           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-043922,000101:    5471           57130                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4F54524554">ROOTRET</a>                               <span class="co">#  NO SHIFT NEEDED</span>
-043923,000102:    5472           05476                           <span class="op">TC      </span> <a href="#524F4F5442434B">ROOTBCK</a>                               
-043924,000103:    5473           57130                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4F54524554">ROOTRET</a>                               <span class="co">#  Q NEG, SHIFT RIGHT THREE</span>
-043925,000104:    5474           00006                           <span class="op">EXTEND  </span>                                       
-043926,000105:    5475           77742                           <span class="op">MP      </span> <a href="INTERPRETER.agc.html#4249543132">BIT12</a>                                 <span class="co">#  EXP -3</span>
-<a name="524F4F5442434B"></a>043927,000106:    5476           51130        <span class="sm">ROOTBCK </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4F54524554">ROOTRET</a>                               <span class="co">#  ROOTRET = Q - 1</span>
-043928,000107:    5477           00001                           <span class="op">TC      </span> 1                                     <span class="co">#  RETURN, C(A) = SQRT(Y)</span>
-043929,000108: 
-<a name="5350524F4F5431"></a>043930,000109:    5500           56021        <span class="sm">SPROOT1 </span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    <span class="co">#  SR = X/2</span>
-043931,000110:    5501           41127                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#48414C4659">HALFY</a>                                 <span class="co">#  NEWTON ITER  X = X/2 + (Y/2 / X/2) / 2</span>
-043932,000111:    5502           22007                           <span class="op">ZL      </span>                                       
-043933,000112:    5503           00006                           <span class="op">EXTEND  </span>                                       
-043934,000113:    5504           10021                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    <span class="co">#  C(SR) = X/2 DV DOES NOT EDIT</span>
+043895,000064:                                                                                                  <span class="co">#  ENTER WITH ARGUMENT IN A, EXIT WITH ROOT IN A.  IF GIVEN A NEGATIVE ARGUMENT, THE RETURN SKIPS WITH CCS RESULT.</span>
+043896,000065:                                                                                                  <span class="co">#  MINUS ZERO RETURNS LIKE PLUS ZERO.</span>
+043897,000066:                                                                                                  <span class="co">#  MAXIMUM ERROR IN ANSWER IS NO GREATER THAN 2 BITS.</span>
+043898,000067:                                                                                                  <span class="co">#  INTERRUPT PROGRAMS USING SPROOT MUST SAVE AND RESTORE SR.</span>
+043899,000068: 
+043900,000069: 
+043901,000070: 
+<a name="5350524F4F54"></a>043902,000071:    5435           55131        <span class="sm">SPROOT  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535152415247">SQRARG</a>                                <span class="co">#  ENTER WITH C(A) = Y</span>
+043903,000072:    5436           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+043904,000073:    5437           15443                           <span class="op">TCF     </span> <a href="#504F53415247">POSARG</a>                                <span class="co">#  IF PNZ, CONTINUE</span>
+043905,000074:    5440           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RETURN WITH 0 FOR +0</span>
+043906,000075:    5441           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+043907,000076:    5442           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RETURN WITH 0 FOR -0</span>
+043908,000077: 
+<a name="504F53415247"></a>043909,000078:    5443           00006        <span class="sm">POSARG  </span>           <span class="op">EXTEND  </span>                                       
+043910,000079:    5444           23130                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4F54524554">ROOTRET</a>                               <span class="co">#  WILL BE CALLING SPROOT1</span>
+043911,000080:    5445           65522                           <span class="op">AD      </span> <a href="#36332F36342B31">63/64+1</a>                               <span class="co">#  B(A) = Y - 1</span>
+043912,000081:    5446           54000                           <span class="op">OVSK    </span>                                       
+043913,000082:    5447           15511                           <span class="op">TCF     </span> <a href="#5350524F4F5432">SPROOT2</a>                               
+043914,000083:    5450           57131                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535152415247">SQRARG</a>                                <span class="co">#  ARG JUGGLING</span>
+043915,000084: 
+<a name="5350524F4F5433"></a>043916,000085:    5451           55131        <span class="sm">SPROOT3 </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535152415247">SQRARG</a>                                
+043917,000086:    5452           54021                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    <span class="co">#  C(A) = Y</span>
+043918,000087:    5453           56021                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    <span class="co">#  (LOSE 1 BIT)</span>
+043919,000088:    5454           55127                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#48414C4659">HALFY</a>                                 <span class="co">#  HALFY = Y/2</span>
+043920,000089:    5455           65520                           <span class="op">AD      </span> <a href="#2D312F38">-1/8</a>                                  <span class="co">#  FORM Y/2 - 1/8</span>
+043921,000090:    5456           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  TEST FOR FIRST GUESS</span>
+043922,000091:    5457           65521                           <span class="op">AD      </span> <a href="#352F382B31">5/8+1</a>                                 <span class="co">#  Y .G. 1/4, X = Y/2 + 1/2</span>
+043923,000092:    5460           05465                           <span class="op">TC      </span> <a href="#48494755455353">HIGUESS</a>                               <span class="co">#  +0 IMPOSSIBLE FROM ADDITION</span>
+043924,000093:    5461           15462                           <span class="op">NOOP    </span>                                       <span class="co">#  Y .LE. 1/4, X/2 = Y + 1/16</span>
+043925,000094:    5462           37743                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4249543131">BIT11</a>                                 <span class="co">#  1/16</span>
+043926,000095:    5463           61131                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535152415247">SQRARG</a>                                <span class="co">#  SQRARG = Y</span>
+043927,000096:    5464           60000                           <span class="op">DOUBLE  </span>                                       <span class="co">#  X FROM X/2</span>
+<a name="48494755455353"></a>043928,000097:    5465           05500        <span class="sm">HIGUESS </span>           <span class="op">TC      </span> <a href="#5350524F4F5431">SPROOT1</a>                               
+043929,000098:    5466           05500                           <span class="op">TC      </span> <a href="#5350524F4F5431">SPROOT1</a>                               <span class="co">#  ITERATE TWICE</span>
+043930,000099:    5467           57130                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4F54524554">ROOTRET</a>                               <span class="co">#  SAVE ANSWER AND GET Q</span>
+043931,000100:    5470           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+043932,000101:    5471           57130                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4F54524554">ROOTRET</a>                               <span class="co">#  NO SHIFT NEEDED</span>
+043933,000102:    5472           05476                           <span class="op">TC      </span> <a href="#524F4F5442434B">ROOTBCK</a>                               
+043934,000103:    5473           57130                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4F54524554">ROOTRET</a>                               <span class="co">#  Q NEG, SHIFT RIGHT THREE</span>
+043935,000104:    5474           00006                           <span class="op">EXTEND  </span>                                       
+043936,000105:    5475           77742                           <span class="op">MP      </span> <a href="INTERPRETER.agc.html#4249543132">BIT12</a>                                 <span class="co">#  EXP -3</span>
+<a name="524F4F5442434B"></a>043937,000106:    5476           51130        <span class="sm">ROOTBCK </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4F54524554">ROOTRET</a>                               <span class="co">#  ROOTRET = Q - 1</span>
+043938,000107:    5477           00001                           <span class="op">TC      </span> 1                                     <span class="co">#  RETURN, C(A) = SQRT(Y)</span>
+043939,000108: 
+<a name="5350524F4F5431"></a>043940,000109:    5500           56021        <span class="sm">SPROOT1 </span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    <span class="co">#  SR = X/2</span>
+043941,000110:    5501           41127                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#48414C4659">HALFY</a>                                 <span class="co">#  NEWTON ITER  X = X/2 + (Y/2 / X/2) / 2</span>
+043942,000111:    5502           22007                           <span class="op">ZL      </span>                                       
+043943,000112:    5503           00006                           <span class="op">EXTEND  </span>                                       
+043944,000113:    5504           10021                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    <span class="co">#  C(SR) = X/2 DV DOES NOT EDIT</span>
 </pre>
 </span>
 </p>
@@ -245,23 +245,23 @@ Page 987
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-043936,000115:    5505           56021                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    
-043937,000116:    5506           00006                           <span class="op">EXTEND  </span>                                       
-043938,000117:    5507           60021                           <span class="op">SU      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    
-043939,000118:    5510           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  C(A) = X (NEXT)</span>
-043940,000119: 
-<a name="5350524F4F5432"></a>043941,000120:    5511           41130        <span class="sm">SPROOT2 </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4F54524554">ROOTRET</a>                               <span class="co">#  SET RETURN Q NEG, AS FLAG</span>
-043942,000121:    5512           55130                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4F54524554">ROOTRET</a>                               
-043943,000122:    5513           37747                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495437">BIT7</a>                                  <span class="co">#  SHIFT FOR SIGNIFCANCE</span>
-043944,000123:    5514           00006                           <span class="op">EXTEND  </span>                                       
-043945,000124:    5515           71131                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535152415247">SQRARG</a>                                
-043946,000125:    5516           30001                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  B(A) = 0</span>
-043947,000126:    5517           05451                           <span class="op">TC      </span> <a href="#5350524F4F5433">SPROOT3</a>                               
-043948,000127: 
-<a name="2D312F38"></a>043949,000128:    5520           73777        <span class="sm">-1/8    </span>           <span class="ps">OCTAL   </span> 73777                                 
-<a name="352F382B31"></a>043950,000129:    5521           24001        <span class="sm">5/8+1   </span>           <span class="ps">OCTAL   </span> 24001                                 
-<a name="36332F36342B31"></a>043951,000130:    5522           37401        <span class="sm">63/64+1 </span>           <span class="ps">OCTAL   </span> 37401                                 
-043952,000131: 
+043946,000115:    5505           56021                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    
+043947,000116:    5506           00006                           <span class="op">EXTEND  </span>                                       
+043948,000117:    5507           60021                           <span class="op">SU      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    
+043949,000118:    5510           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  C(A) = X (NEXT)</span>
+043950,000119: 
+<a name="5350524F4F5432"></a>043951,000120:    5511           41130        <span class="sm">SPROOT2 </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4F54524554">ROOTRET</a>                               <span class="co">#  SET RETURN Q NEG, AS FLAG</span>
+043952,000121:    5512           55130                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4F54524554">ROOTRET</a>                               
+043953,000122:    5513           37747                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495437">BIT7</a>                                  <span class="co">#  SHIFT FOR SIGNIFCANCE</span>
+043954,000123:    5514           00006                           <span class="op">EXTEND  </span>                                       
+043955,000124:    5515           71131                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535152415247">SQRARG</a>                                
+043956,000125:    5516           30001                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  B(A) = 0</span>
+043957,000126:    5517           05451                           <span class="op">TC      </span> <a href="#5350524F4F5433">SPROOT3</a>                               
+043958,000127: 
+<a name="2D312F38"></a>043959,000128:    5520           73777        <span class="sm">-1/8    </span>           <span class="ps">OCTAL   </span> 73777                                 
+<a name="352F382B31"></a>043960,000129:    5521           24001        <span class="sm">5/8+1   </span>           <span class="ps">OCTAL   </span> 24001                                 
+<a name="36332F36342B31"></a>043961,000130:    5522           37401        <span class="sm">63/64+1 </span>           <span class="ps">OCTAL   </span> 37401                                 
+043962,000131: 
 
 End of include-file SINGLE_PRECISION_SUBROUTINES.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

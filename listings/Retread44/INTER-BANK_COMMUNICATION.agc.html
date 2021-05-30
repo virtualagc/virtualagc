@@ -87,24 +87,24 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-003694,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-003695,000003:                                                                                                  <span class="co">## Filename:    INTER-BANK_COMMUNICATION.agc</span>
-003696,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Retread 44 (revision 0). It was</span>
-003697,000005:                                                                                                  <span class="co">##              the very first program for the Block II AGC, created as an</span>
-003698,000006:                                                                                                  <span class="co">##              extensive rewrite of the Block I program Sunrise.</span>
-003699,000007:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-003700,000008:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-003701,000009:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-003702,000010:                                                                                                  <span class="co">##              original YUL assembler.</span>
-003703,000011:                                                                                                  <span class="co">## Reference:   pp. 105-106</span>
-003704,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-003705,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-003706,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-003707,000015:                                                                                                  <span class="co">## Mod history: 2016-12-13 MAS  Created from Aurora 12 version.</span>
-003708,000016:                                                                                                  <span class="co">##              2016-12-17 MAS  Transcribed.</span>
-003709,000017:                                                                                                  <span class="co">##              2016-12-27 RSB  Proofed comment text using octopus/ProoferComments,</span>
-003710,000018:                                                                                                  <span class="co">##                              but no errors found.</span>
-003711,000019: 
+003695,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+003696,000003:                                                                                                  <span class="co">## Filename:    INTER-BANK_COMMUNICATION.agc</span>
+003697,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Retread 44 (revision 0). It was</span>
+003698,000005:                                                                                                  <span class="co">##              the very first program for the Block II AGC, created as an</span>
+003699,000006:                                                                                                  <span class="co">##              extensive rewrite of the Block I program Sunrise.</span>
+003700,000007:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+003701,000008:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+003702,000009:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+003703,000010:                                                                                                  <span class="co">##              original YUL assembler.</span>
+003704,000011:                                                                                                  <span class="co">## Reference:   pp. 105-106</span>
+003705,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+003706,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+003707,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+003708,000015:                                                                                                  <span class="co">## Mod history: 2016-12-13 MAS  Created from Aurora 12 version.</span>
+003709,000016:                                                                                                  <span class="co">##              2016-12-17 MAS  Transcribed.</span>
+003710,000017:                                                                                                  <span class="co">##              2016-12-27 RSB  Proofed comment text using octopus/ProoferComments,</span>
+003711,000018:                                                                                                  <span class="co">##                              but no errors found.</span>
+003712,000019: 
 </pre>
 </span>
 </p>
@@ -121,49 +121,49 @@ The log section name, INTER-BANK COMMUNICATION, is circled in red.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-003714,000022: 
-003715,000023:                                                                                                  <span class="co">#           THE FOLLOWING ROUTINE CAN BE USED TO CALL A SUBROUTINE IN ANOTHER BANK. IN THE BANKCALL VERSION, THE</span>
-003716,000024:                                                                                                  <span class="co">#  CADR OF THE SUBROUTINE IMMEDIATELY FOLLOWS THE  TC BANKCALL  INSTRUCTION, WITH C(A) AND C(L) PRESERVED.</span>
-003717,000025: 
-003718,000026:    4063                                           <span class="ps">SETLOC  </span> <a href="INTERRUPT_LEAD_INS.agc.html#454E44494E544646">ENDINTFF</a>                              
-003719,000027: 
-<a name="42414E4B43414C4C"></a>003720,000028:    4063           52120        <span class="sm">BANKCALL</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554632">BUF2</a>                                  <span class="co">#  SAVE INCOMING A,L.</span>
-003721,000029:    4064           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  PICK UP CADR.</span>
-003722,000030:    4065           30000                           <span class="op">CA      </span> 0                                     
-003723,000031:    4066           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  SO WE RETURN TO THE LOC. AFTER THE CADR.</span>
-003724,000032: 
-003725,000033:                                                                                                  <span class="co">#           SWCALL IS IDENTICAL TO BANKCALL, EXCEPT THAT THE CADR ARRIVES IN A.</span>
-003726,000034: 
-<a name="535743414C4C"></a>003727,000035:    4067           54001        <span class="sm">SWCALL  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-003728,000036:    4070           22004                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4642414E4B">FBANK</a>                                 <span class="co">#  SWITCH BANKS, SAVING RETURN.</span>
-003729,000037:    4071           76425                           <span class="op">MASK    </span> <a href="LIST-PROCESSING_INTERPRETER.agc.html#4C4F573130">LOW10</a>                                 <span class="co">#  GET SUB-ADDRESS OF CADR.</span>
-003730,000038:    4072           56002                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  A,L NOW CONTAINS DP RETURN.</span>
-003731,000039:    4073           52120                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554632">BUF2</a>                                  <span class="co">#  RESTORING INPUTS IF THIS IS A BANKCALL.</span>
-003732,000040:    4074           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-003733,000041:    4075           02000                           <span class="op">TC      </span> 10000                                 <span class="co">#  SETTING Q TO SWRETURN.</span>
-003734,000042: 
-<a name="535752455455524E"></a>003735,000043:    4076           56120        <span class="sm">SWRETURN</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554632">BUF2</a>       +1                         <span class="co">#  COMES HERE TO RETURN TO CALLER. C(A,L)</span>
-003736,000044:    4077           56004                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4642414E4B">FBANK</a>                                 <span class="co">#  ARE PRESERVED FOR RETURN.</span>
-003737,000045:    4100           56120                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554632">BUF2</a>       +1                         
-003738,000046:    4101           00117                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554632">BUF2</a>                                  
-003739,000047: 
-003740,000048: 
-003741,000049: 
-003742,000050:                                                                                                  <span class="co">#           THE FOLLOWING ROUTINE CAN BE USED AS A UNILATERAL JUMP WITH C(A,L) PRESERVED AND THE CADR IMMEDIATELY</span>
-003743,000051:                                                                                                  <span class="co">#  FOLLOWING THE TC POSTJUMP INSTRUCTION.</span>
-003744,000052: 
-<a name="504F53544A554D50"></a>003745,000053:    4102           56002        <span class="sm">POSTJUMP</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  SAVE INCOMING C(A).</span>
-003746,000054:    4103           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  GET CADR.</span>
-003747,000055:    4104           30000                           <span class="op">CA      </span> 0                                     
-003748,000056: 
-003749,000057:                                                                                                  <span class="co">#           BANKJUMP IS THE SAME AS POSTJUMP, EXCEPT THAT THE CADR ARRIVES IN A.</span>
-003750,000058: 
-<a name="42414E4B4A554D50"></a>003751,000059:    4105           54004        <span class="sm">BANKJUMP</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4642414E4B">FBANK</a>                                 
-003752,000060:    4106           76425                           <span class="op">MASK    </span> <a href="LIST-PROCESSING_INTERPRETER.agc.html#4C4F573130">LOW10</a>                                 
-003753,000061:    4107           56002                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RESTORING INPUT C(A) IF THIS WAS A</span>
-003754,000062:    4110           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  POSTJUMP.</span>
-003755,000063:    4111           12000                           <span class="op">TCF     </span> 10000                                 
-003756,000064: 
+003715,000022: 
+003716,000023:                                                                                                  <span class="co">#           THE FOLLOWING ROUTINE CAN BE USED TO CALL A SUBROUTINE IN ANOTHER BANK. IN THE BANKCALL VERSION, THE</span>
+003717,000024:                                                                                                  <span class="co">#  CADR OF THE SUBROUTINE IMMEDIATELY FOLLOWS THE  TC BANKCALL  INSTRUCTION, WITH C(A) AND C(L) PRESERVED.</span>
+003718,000025: 
+003719,000026:    4063                                           <span class="ps">SETLOC  </span> <a href="INTERRUPT_LEAD_INS.agc.html#454E44494E544646">ENDINTFF</a>                              
+003720,000027: 
+<a name="42414E4B43414C4C"></a>003721,000028:    4063           52120        <span class="sm">BANKCALL</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554632">BUF2</a>                                  <span class="co">#  SAVE INCOMING A,L.</span>
+003722,000029:    4064           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  PICK UP CADR.</span>
+003723,000030:    4065           30000                           <span class="op">CA      </span> 0                                     
+003724,000031:    4066           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  SO WE RETURN TO THE LOC. AFTER THE CADR.</span>
+003725,000032: 
+003726,000033:                                                                                                  <span class="co">#           SWCALL IS IDENTICAL TO BANKCALL, EXCEPT THAT THE CADR ARRIVES IN A.</span>
+003727,000034: 
+<a name="535743414C4C"></a>003728,000035:    4067           54001        <span class="sm">SWCALL  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+003729,000036:    4070           22004                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4642414E4B">FBANK</a>                                 <span class="co">#  SWITCH BANKS, SAVING RETURN.</span>
+003730,000037:    4071           76425                           <span class="op">MASK    </span> <a href="LIST-PROCESSING_INTERPRETER.agc.html#4C4F573130">LOW10</a>                                 <span class="co">#  GET SUB-ADDRESS OF CADR.</span>
+003731,000038:    4072           56002                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  A,L NOW CONTAINS DP RETURN.</span>
+003732,000039:    4073           52120                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554632">BUF2</a>                                  <span class="co">#  RESTORING INPUTS IF THIS IS A BANKCALL.</span>
+003733,000040:    4074           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+003734,000041:    4075           02000                           <span class="op">TC      </span> 10000                                 <span class="co">#  SETTING Q TO SWRETURN.</span>
+003735,000042: 
+<a name="535752455455524E"></a>003736,000043:    4076           56120        <span class="sm">SWRETURN</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554632">BUF2</a>       +1                         <span class="co">#  COMES HERE TO RETURN TO CALLER. C(A,L)</span>
+003737,000044:    4077           56004                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4642414E4B">FBANK</a>                                 <span class="co">#  ARE PRESERVED FOR RETURN.</span>
+003738,000045:    4100           56120                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554632">BUF2</a>       +1                         
+003739,000046:    4101           00117                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554632">BUF2</a>                                  
+003740,000047: 
+003741,000048: 
+003742,000049: 
+003743,000050:                                                                                                  <span class="co">#           THE FOLLOWING ROUTINE CAN BE USED AS A UNILATERAL JUMP WITH C(A,L) PRESERVED AND THE CADR IMMEDIATELY</span>
+003744,000051:                                                                                                  <span class="co">#  FOLLOWING THE TC POSTJUMP INSTRUCTION.</span>
+003745,000052: 
+<a name="504F53544A554D50"></a>003746,000053:    4102           56002        <span class="sm">POSTJUMP</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  SAVE INCOMING C(A).</span>
+003747,000054:    4103           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  GET CADR.</span>
+003748,000055:    4104           30000                           <span class="op">CA      </span> 0                                     
+003749,000056: 
+003750,000057:                                                                                                  <span class="co">#           BANKJUMP IS THE SAME AS POSTJUMP, EXCEPT THAT THE CADR ARRIVES IN A.</span>
+003751,000058: 
+<a name="42414E4B4A554D50"></a>003752,000059:    4105           54004        <span class="sm">BANKJUMP</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4642414E4B">FBANK</a>                                 
+003753,000060:    4106           76425                           <span class="op">MASK    </span> <a href="LIST-PROCESSING_INTERPRETER.agc.html#4C4F573130">LOW10</a>                                 
+003754,000061:    4107           56002                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RESTORING INPUT C(A) IF THIS WAS A</span>
+003755,000062:    4110           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  POSTJUMP.</span>
+003756,000063:    4111           12000                           <span class="op">TCF     </span> 10000                                 
+003757,000064: 
 </pre>
 </span>
 </p>
@@ -179,30 +179,30 @@ Page 106
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-003758,000066:                                                                                                  <span class="co">#           THE FOLLOWING ROUTINE GETS THE RETURN CADR SAVED BY SWCALL OR BANKCALL AND LEAVES IT IN A.</span>
-003759,000067: 
-<a name="4D414B4543414452"></a>003760,000068:    4112           36425        <span class="sm">MAKECADR</span>           <span class="op">CAF     </span> <a href="LIST-PROCESSING_INTERPRETER.agc.html#4C4F573130">LOW10</a>                                 
-003761,000069:    4113           70117                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554632">BUF2</a>                                  
-003762,000070:    4114           60120                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554632">BUF2</a>       +1                         
-003763,000071:    4115           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-003764,000072: 
-003765,000073:                                                                                                  <span class="co">#           THE FOLLOWING ROUTINE OBTAINS THE TWO WORDS BEGINNING AT THE ADDRESS ARRIVING IN A, AND LEAVES THEM IN</span>
-003766,000074:                                                                                                  <span class="co">#  A,L.</span>
-003767,000075: 
-<a name="4441544143414C4C"></a>003768,000076:    4116           54001        <span class="sm">DATACALL</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-003769,000077:    4117           22004                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4642414E4B">FBANK</a>                                 
-003770,000078:    4120           22121                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D5054454D50">MPTEMP</a>                                <span class="co">#  SAVE FORMER BANK.</span>
-003771,000079:    4121           76425                           <span class="op">MASK    </span> <a href="LIST-PROCESSING_INTERPRETER.agc.html#4C4F573130">LOW10</a>                                 
-003772,000080:    4122           00006                           <span class="op">EXTEND  </span>                                       
-003773,000081:    4123           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-003774,000082:    4124           32001                           <span class="op">DCA     </span> 10000                                 
-003775,000083: 
-003776,000084:    4125           56121                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D5054454D50">MPTEMP</a>                                
-003777,000085:    4126           54004                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4642414E4B">FBANK</a>                                 <span class="co">#  RESTORE FBANK.</span>
-003778,000086:    4127           30121                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D5054454D50">MPTEMP</a>                                
-003779,000087:    4130           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-003780,000088: 
-<a name="454E4449424E4B46"></a>003781,000089:    4131                        <span class="sm">ENDIBNKF</span>           <span class="ps">EQUALS  </span>                                       
+003759,000066:                                                                                                  <span class="co">#           THE FOLLOWING ROUTINE GETS THE RETURN CADR SAVED BY SWCALL OR BANKCALL AND LEAVES IT IN A.</span>
+003760,000067: 
+<a name="4D414B4543414452"></a>003761,000068:    4112           36425        <span class="sm">MAKECADR</span>           <span class="op">CAF     </span> <a href="LIST-PROCESSING_INTERPRETER.agc.html#4C4F573130">LOW10</a>                                 
+003762,000069:    4113           70117                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554632">BUF2</a>                                  
+003763,000070:    4114           60120                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554632">BUF2</a>       +1                         
+003764,000071:    4115           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+003765,000072: 
+003766,000073:                                                                                                  <span class="co">#           THE FOLLOWING ROUTINE OBTAINS THE TWO WORDS BEGINNING AT THE ADDRESS ARRIVING IN A, AND LEAVES THEM IN</span>
+003767,000074:                                                                                                  <span class="co">#  A,L.</span>
+003768,000075: 
+<a name="4441544143414C4C"></a>003769,000076:    4116           54001        <span class="sm">DATACALL</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+003770,000077:    4117           22004                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4642414E4B">FBANK</a>                                 
+003771,000078:    4120           22121                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D5054454D50">MPTEMP</a>                                <span class="co">#  SAVE FORMER BANK.</span>
+003772,000079:    4121           76425                           <span class="op">MASK    </span> <a href="LIST-PROCESSING_INTERPRETER.agc.html#4C4F573130">LOW10</a>                                 
+003773,000080:    4122           00006                           <span class="op">EXTEND  </span>                                       
+003774,000081:    4123           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+003775,000082:    4124           32001                           <span class="op">DCA     </span> 10000                                 
+003776,000083: 
+003777,000084:    4125           56121                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D5054454D50">MPTEMP</a>                                
+003778,000085:    4126           54004                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4642414E4B">FBANK</a>                                 <span class="co">#  RESTORE FBANK.</span>
+003779,000086:    4127           30121                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D5054454D50">MPTEMP</a>                                
+003780,000087:    4130           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+003781,000088: 
+<a name="454E4449424E4B46"></a>003782,000089:    4131                        <span class="sm">ENDIBNKF</span>           <span class="ps">EQUALS  </span>                                       
 
 End of include-file INTER-BANK_COMMUNICATION.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

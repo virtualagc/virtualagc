@@ -87,26 +87,26 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047798,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-047799,000003:                                                                                                  <span class="co">## Filename:    SINGLE_PRECISION_SUBROUTINES.agc</span>
-047800,000004:                                                                                                  <span class="co">## Purpose:     A log section of Zerlina 56, the final revision of</span>
-047801,000005:                                                                                                  <span class="co">##              Don Eyles's offline development program for the variable </span>
-047802,000006:                                                                                                  <span class="co">##              guidance period servicer. It also includes a new P66 with LPD </span>
-047803,000007:                                                                                                  <span class="co">##              (Landing Point Designator) capability, based on an idea of John </span>
-047804,000008:                                                                                                  <span class="co">##              Young's. Neither of these advanced features were actually flown,</span>
-047805,000009:                                                                                                  <span class="co">##              but Zerlina was also the birthplace of other big improvements to</span>
-047806,000010:                                                                                                  <span class="co">##              Luminary including the terrain model and new (Luminary 1E)</span>
-047807,000011:                                                                                                  <span class="co">##              analog display programs. Zerlina was branched off of Luminary 145,</span>
-047808,000012:                                                                                                  <span class="co">##              and revision 56 includes all changes up to and including Luminary</span>
-047809,000013:                                                                                                  <span class="co">##              183. It is therefore quite close to the Apollo 14 program,</span>
-047810,000014:                                                                                                  <span class="co">##              Luminary 178, where not modified with new features.</span>
-047811,000015:                                                                                                  <span class="co">## Reference:   p.  1093</span>
-047812,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-047813,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-047814,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-047815,000019:                                                                                                  <span class="co">## Mod history: 2017-07-28 MAS  Created from Luminary 210.</span>
-047816,000020:                                                                                                  <span class="co">##              2017-08-28 MAS  Updated for Zerlina 56.</span>
-047817,000021: 
+047810,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+047811,000003:                                                                                                  <span class="co">## Filename:    SINGLE_PRECISION_SUBROUTINES.agc</span>
+047812,000004:                                                                                                  <span class="co">## Purpose:     A log section of Zerlina 56, the final revision of</span>
+047813,000005:                                                                                                  <span class="co">##              Don Eyles's offline development program for the variable </span>
+047814,000006:                                                                                                  <span class="co">##              guidance period servicer. It also includes a new P66 with LPD </span>
+047815,000007:                                                                                                  <span class="co">##              (Landing Point Designator) capability, based on an idea of John </span>
+047816,000008:                                                                                                  <span class="co">##              Young's. Neither of these advanced features were actually flown,</span>
+047817,000009:                                                                                                  <span class="co">##              but Zerlina was also the birthplace of other big improvements to</span>
+047818,000010:                                                                                                  <span class="co">##              Luminary including the terrain model and new (Luminary 1E)</span>
+047819,000011:                                                                                                  <span class="co">##              analog display programs. Zerlina was branched off of Luminary 145,</span>
+047820,000012:                                                                                                  <span class="co">##              and revision 56 includes all changes up to and including Luminary</span>
+047821,000013:                                                                                                  <span class="co">##              183. It is therefore quite close to the Apollo 14 program,</span>
+047822,000014:                                                                                                  <span class="co">##              Luminary 178, where not modified with new features.</span>
+047823,000015:                                                                                                  <span class="co">## Reference:   p.  1093</span>
+047824,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+047825,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+047826,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+047827,000019:                                                                                                  <span class="co">## Mod history: 2017-07-28 MAS  Created from Luminary 210.</span>
+047828,000020:                                                                                                  <span class="co">##              2017-08-28 MAS  Updated for Zerlina 56.</span>
+047829,000021: 
 </pre>
 </span>
 </p>
@@ -122,42 +122,42 @@ Page 1093
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047819,000023:    5032                                           <span class="ps">BLOCK   </span> 02                                    
-047820,000024:                                                                                                  <span class="co">#  SINGLE PRECISION SINE AND COSINE</span>
-047821,000025: 
-047822,000026:    5032                                           <span class="ps">COUNT*  </span> $$/INTER                              
-<a name="5350434F53"></a>047823,000027:    5032           64736        <span class="sm">SPCOS   </span>           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#48414C46">HALF</a>                                  <span class="co">#  ARGUMENTS SCALED AT PI</span>
-<a name="535053494E"></a>047824,000028:    5033           55075        <span class="sm">SPSIN   </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-047825,000029:    5034           15036                           <span class="op">TCF     </span> <a href="#535054">SPT</a>                                   
-047826,000030:    5035           41075                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-<a name="535054"></a>047827,000031:    5036           60000        <span class="sm">SPT     </span>           <span class="op">DOUBLE  </span>                                       
-047828,000032:    5037           55075                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-047829,000033:    5040           15051                           <span class="op">TCF     </span> <a href="#504F4C4C4559">POLLEY</a>                                
-047830,000034:    5041           57075                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-047831,000035:    5042           51075                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-047832,000036:    5043           64734                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C494D495453">LIMITS</a>                                
-047833,000037:    5044           40000                           <span class="op">COM     </span>                                       
-047834,000038:    5045           61075                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-047835,000039:    5046           55075                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-047836,000040:    5047           15051                           <span class="op">TCF     </span> <a href="#504F4C4C4559">POLLEY</a>                                
-047837,000041:    5050           15067                           <span class="op">TCF     </span> <a href="#4152473930">ARG90</a>                                 
-<a name="504F4C4C4559"></a>047838,000042:    5051           00006        <span class="sm">POLLEY  </span>           <span class="op">EXTEND  </span>                                       
-047839,000043:    5052           71075                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-047840,000044:    5053           55076                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5351">SQ</a>                                    
-047841,000045:    5054           00006                           <span class="op">EXTEND  </span>                                       
-047842,000046:    5055           75005                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#43352F32">C5/2</a>                                  
-047843,000047:    5056           67751                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#43332F32">C3/2</a>                                  
-047844,000048:    5057           00006                           <span class="op">EXTEND  </span>                                       
-047845,000049:    5060           71076                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5351">SQ</a>                                    
-047846,000050:    5061           67731                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#43312F32">C1/2</a>                                  
-047847,000051:    5062           00006                           <span class="op">EXTEND  </span>                                       
-047848,000052:    5063           71075                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-047849,000053:    5064           20001                           <span class="op">DDOUBL  </span>                                       
-047850,000054:    5065           55075                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-047851,000055:    5066           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-<a name="4152473930"></a>047852,000056:    5067           50000        <span class="sm">ARG90   </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-047853,000057:    5070           44734                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C494D495453">LIMITS</a>                                
-047854,000058:    5071           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RESULT SCALED AT 1</span>
+047831,000023:    5032                                           <span class="ps">BLOCK   </span> 02                                    
+047832,000024:                                                                                                  <span class="co">#  SINGLE PRECISION SINE AND COSINE</span>
+047833,000025: 
+047834,000026:    5032                                           <span class="ps">COUNT*  </span> $$/INTER                              
+<a name="5350434F53"></a>047835,000027:    5032           64736        <span class="sm">SPCOS   </span>           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#48414C46">HALF</a>                                  <span class="co">#  ARGUMENTS SCALED AT PI</span>
+<a name="535053494E"></a>047836,000028:    5033           55075        <span class="sm">SPSIN   </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+047837,000029:    5034           15036                           <span class="op">TCF     </span> <a href="#535054">SPT</a>                                   
+047838,000030:    5035           41075                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+<a name="535054"></a>047839,000031:    5036           60000        <span class="sm">SPT     </span>           <span class="op">DOUBLE  </span>                                       
+047840,000032:    5037           55075                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+047841,000033:    5040           15051                           <span class="op">TCF     </span> <a href="#504F4C4C4559">POLLEY</a>                                
+047842,000034:    5041           57075                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+047843,000035:    5042           51075                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+047844,000036:    5043           64734                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C494D495453">LIMITS</a>                                
+047845,000037:    5044           40000                           <span class="op">COM     </span>                                       
+047846,000038:    5045           61075                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+047847,000039:    5046           55075                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+047848,000040:    5047           15051                           <span class="op">TCF     </span> <a href="#504F4C4C4559">POLLEY</a>                                
+047849,000041:    5050           15067                           <span class="op">TCF     </span> <a href="#4152473930">ARG90</a>                                 
+<a name="504F4C4C4559"></a>047850,000042:    5051           00006        <span class="sm">POLLEY  </span>           <span class="op">EXTEND  </span>                                       
+047851,000043:    5052           71075                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+047852,000044:    5053           55076                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5351">SQ</a>                                    
+047853,000045:    5054           00006                           <span class="op">EXTEND  </span>                                       
+047854,000046:    5055           75005                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#43352F32">C5/2</a>                                  
+047855,000047:    5056           67751                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#43332F32">C3/2</a>                                  
+047856,000048:    5057           00006                           <span class="op">EXTEND  </span>                                       
+047857,000049:    5060           71076                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5351">SQ</a>                                    
+047858,000050:    5061           67731                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#43312F32">C1/2</a>                                  
+047859,000051:    5062           00006                           <span class="op">EXTEND  </span>                                       
+047860,000052:    5063           71075                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+047861,000053:    5064           20001                           <span class="op">DDOUBL  </span>                                       
+047862,000054:    5065           55075                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+047863,000055:    5066           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+<a name="4152473930"></a>047864,000056:    5067           50000        <span class="sm">ARG90   </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+047865,000057:    5070           44734                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C494D495453">LIMITS</a>                                
+047866,000058:    5071           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RESULT SCALED AT 1</span>
 
 End of include-file SINGLE_PRECISION_SUBROUTINES.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

@@ -90,28 +90,28 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-032195,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-032196,000003:                                                                                                  <span class="co">## Filename:    MISSION_PHASE_16_-_RCS_COLD_SOAK.agc</span>
-032197,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
-032198,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
-032199,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
-032200,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
-032201,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
-032202,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
-032203,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
-032204,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-032205,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-032206,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-032207,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
-032208,000015:                                                                                                  <span class="co">## Reference:   pp. 711-712</span>
-032209,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-032210,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-032211,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-032212,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
-032213,000020:                                                                                                  <span class="co">##              2017-06-08 HG   Transcribed</span>
-032214,000021:                                                                                                  <span class="co">##              2017-06-23 RSB  Proofed comment text with</span>
-032215,000022:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
-032216,000023: 
+032202,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+032203,000003:                                                                                                  <span class="co">## Filename:    MISSION_PHASE_16_-_RCS_COLD_SOAK.agc</span>
+032204,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
+032205,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
+032206,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
+032207,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
+032208,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
+032209,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
+032210,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
+032211,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+032212,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+032213,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+032214,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
+032215,000015:                                                                                                  <span class="co">## Reference:   pp. 711-712</span>
+032216,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+032217,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+032218,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+032219,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
+032220,000020:                                                                                                  <span class="co">##              2017-06-08 HG   Transcribed</span>
+032221,000021:                                                                                                  <span class="co">##              2017-06-23 RSB  Proofed comment text with</span>
+032222,000022:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
+032223,000023: 
 </pre>
 </span>
 </p>
@@ -127,57 +127,57 @@ Page 711
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-032218,000025: 27,3404                                           <span class="ps">BANK    </span> 27                                    
-032219,000026: 27,3404  E6,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  
-032220,000027:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION</span>
-032221,000028:                                                                                                  <span class="co">#  MOD NO- 0                                           LOG SECTION-</span>
-032222,000029:                                                                                                  <span class="co">#  ******** NOTE-     MP16 NOT UP TO DATE ********</span>
-032223,000030:                                                                                                  <span class="co">#                                                      RCS COLD SOAK</span>
-032224,000031:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION-</span>
-032225,000032:                                                                                                  <span class="co">#           CHANGE ATTITUDE OF SPACECRAFT TO REQUIRED</span>
-032226,000033:                                                                                                  <span class="co">#           ATTITUDE FOR COLD SOAK PHASES.</span>
-032227,000034:                                                                                                  <span class="co">#           ISSUE LMP COMMANDS, ETC.</span>
-032228,000035:                                                                                                  <span class="co">#           ACCORDING TO GSOP.</span>
-032229,000036:                                                                                                  <span class="co">#  CALLING SEQUENCE-</span>
-032230,000037:                                                                                                  <span class="co">#           START MP 16 WHEN MISSION TIMER 4</span>
-032231,000038:                                                                                                  <span class="co">#           COUNTS TO ZERO.</span>
-032232,000039:                                                                                                  <span class="co">#  SUBROUTINES CALLED-</span>
-032233,000040:                                                                                                  <span class="co">#           BANKCALL</span>
-032234,000041:                                                                                                  <span class="co">#           DFI T/M CAL. ROUTINE</span>
-032235,000042:                                                                                                  <span class="co">#           EXECUTIVE</span>
-032236,000043:                                                                                                  <span class="co">#           LEM MISSION PROGRAMMER</span>
-032237,000044:                                                                                                  <span class="co">#           KALCMANU</span>
-032238,000045:                                                                                                  <span class="co">#           WAITLIST</span>
-032239,000046:                                                                                                  <span class="co">#  NORMAL EXIT MODES-</span>
-032240,000047:                                                                                                  <span class="co">#           TC    ENDOFJOB/TASKOVER</span>
-032241,000048:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODES-   NONE</span>
-032242,000049:                                                                                                  <span class="co">#  OUTPUT- (INTERFACE, DISPLAYS, MEANINGFUL INFORMATIONLEFT IN ERASABLE).</span>
-032243,000050:                                                                                                  <span class="co">#           SAME AS FOR KALCMANU EXCEPT-</span>
-032244,000051:                                                                                                  <span class="co">#           BIT 13 OF DAPBOOLS IS SET TO 1 BEFORE EXIT.</span>
-032245,000052:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED-</span>
-032246,000053:                                                                                                  <span class="co">#           TEPHEM   IN CENTISECONDS TRIPLE PRECISION</span>
-032247,000054:                                                                                                  <span class="co">#  DEBRIS- (ERASABLE LOCATIONS DESTROYED BY THIS PROGRAM)</span>
-032248,000055:                                                                                                  <span class="co">#           SAME AS FOR KALCMANU</span>
-032249,000056:                                                                                                  <span class="co">#  ORIENT THE LEM TO RCS COLD SOAK ATTITUDE</span>
-032250,000057:                                                                                                  <span class="co">#  (S/C X-AXIS NORMAL TO THE ECLIPTIC AND BISECTOR</span>
-032251,000058:                                                                                                  <span class="co">#  OF +Z/-Y AXES TOWARD THE SUN)</span>
-032252,000059: 
-032253,000060:                                                                                                  <span class="co">#  START MISSION PHASE 16 WHEN MP TIMER 4 COUNTS TO ZERO</span>
-032254,000061: 
-<a name="4D5031364A4F42"></a>032255,000062: 27,3404           04105        <span class="sm">MP16JOB </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              <span class="co">#  UPDATE PROGRAM NUMBER</span>
-032256,000063: 27,3405           00016                           <span class="ps">OCT     </span> 16                                    <span class="co">#  ON DSKY</span>
-032257,000064: 
-032258,000065: 27,3406           02655                           <span class="op">TC      </span> <a href="MISSION_PHASE_8_-_DPS_COLD_SOAK.agc.html#434F4C44534F414B">COLDSOAK</a>                              <span class="co">#  CALCULATE CDU ANGLES REQUIRED</span>
-032259,000066: 27,3407           37740                           <span class="op">CAF     </span> <a href="MISSION_PHASE_8_-_DPS_COLD_SOAK.agc.html#5052494F4B4D">PRIOKM</a>                                <span class="co">#  SCHEDULE KALCMANU</span>
-032260,000067: 27,3410           00004                           <span class="op">INHINT  </span>                                       
-032261,000068: 27,3411           05534                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               
-032262,000069: 27,3412  E6,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  
-032263,000070: 27,3412           02067 70066                     <span class="ps">2CADR   </span> <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#4B414C434D414E33">KALCMAN3</a>                              
-032264,000071: 
-032265,000072: 27,3414           00003                           <span class="op">RELINT  </span>                                       
-032266,000073: 27,3415           10067                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                <span class="co">#  FORCE KALCMANU JOB ON</span>
-032267,000074: 27,3416           05550                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4348414E4731">CHANG1</a>                                
-032268,000075: 
+032225,000025: 27,3404                                           <span class="ps">BANK    </span> 27                                    
+032226,000026: 27,3404  E6,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  
+032227,000027:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION</span>
+032228,000028:                                                                                                  <span class="co">#  MOD NO- 0                                           LOG SECTION-</span>
+032229,000029:                                                                                                  <span class="co">#  ******** NOTE-     MP16 NOT UP TO DATE ********</span>
+032230,000030:                                                                                                  <span class="co">#                                                      RCS COLD SOAK</span>
+032231,000031:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION-</span>
+032232,000032:                                                                                                  <span class="co">#           CHANGE ATTITUDE OF SPACECRAFT TO REQUIRED</span>
+032233,000033:                                                                                                  <span class="co">#           ATTITUDE FOR COLD SOAK PHASES.</span>
+032234,000034:                                                                                                  <span class="co">#           ISSUE LMP COMMANDS, ETC.</span>
+032235,000035:                                                                                                  <span class="co">#           ACCORDING TO GSOP.</span>
+032236,000036:                                                                                                  <span class="co">#  CALLING SEQUENCE-</span>
+032237,000037:                                                                                                  <span class="co">#           START MP 16 WHEN MISSION TIMER 4</span>
+032238,000038:                                                                                                  <span class="co">#           COUNTS TO ZERO.</span>
+032239,000039:                                                                                                  <span class="co">#  SUBROUTINES CALLED-</span>
+032240,000040:                                                                                                  <span class="co">#           BANKCALL</span>
+032241,000041:                                                                                                  <span class="co">#           DFI T/M CAL. ROUTINE</span>
+032242,000042:                                                                                                  <span class="co">#           EXECUTIVE</span>
+032243,000043:                                                                                                  <span class="co">#           LEM MISSION PROGRAMMER</span>
+032244,000044:                                                                                                  <span class="co">#           KALCMANU</span>
+032245,000045:                                                                                                  <span class="co">#           WAITLIST</span>
+032246,000046:                                                                                                  <span class="co">#  NORMAL EXIT MODES-</span>
+032247,000047:                                                                                                  <span class="co">#           TC    ENDOFJOB/TASKOVER</span>
+032248,000048:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODES-   NONE</span>
+032249,000049:                                                                                                  <span class="co">#  OUTPUT- (INTERFACE, DISPLAYS, MEANINGFUL INFORMATIONLEFT IN ERASABLE).</span>
+032250,000050:                                                                                                  <span class="co">#           SAME AS FOR KALCMANU EXCEPT-</span>
+032251,000051:                                                                                                  <span class="co">#           BIT 13 OF DAPBOOLS IS SET TO 1 BEFORE EXIT.</span>
+032252,000052:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED-</span>
+032253,000053:                                                                                                  <span class="co">#           TEPHEM   IN CENTISECONDS TRIPLE PRECISION</span>
+032254,000054:                                                                                                  <span class="co">#  DEBRIS- (ERASABLE LOCATIONS DESTROYED BY THIS PROGRAM)</span>
+032255,000055:                                                                                                  <span class="co">#           SAME AS FOR KALCMANU</span>
+032256,000056:                                                                                                  <span class="co">#  ORIENT THE LEM TO RCS COLD SOAK ATTITUDE</span>
+032257,000057:                                                                                                  <span class="co">#  (S/C X-AXIS NORMAL TO THE ECLIPTIC AND BISECTOR</span>
+032258,000058:                                                                                                  <span class="co">#  OF +Z/-Y AXES TOWARD THE SUN)</span>
+032259,000059: 
+032260,000060:                                                                                                  <span class="co">#  START MISSION PHASE 16 WHEN MP TIMER 4 COUNTS TO ZERO</span>
+032261,000061: 
+<a name="4D5031364A4F42"></a>032262,000062: 27,3404           04105        <span class="sm">MP16JOB </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              <span class="co">#  UPDATE PROGRAM NUMBER</span>
+032263,000063: 27,3405           00016                           <span class="ps">OCT     </span> 16                                    <span class="co">#  ON DSKY</span>
+032264,000064: 
+032265,000065: 27,3406           02655                           <span class="op">TC      </span> <a href="MISSION_PHASE_8_-_DPS_COLD_SOAK.agc.html#434F4C44534F414B">COLDSOAK</a>                              <span class="co">#  CALCULATE CDU ANGLES REQUIRED</span>
+032266,000066: 27,3407           37740                           <span class="op">CAF     </span> <a href="MISSION_PHASE_8_-_DPS_COLD_SOAK.agc.html#5052494F4B4D">PRIOKM</a>                                <span class="co">#  SCHEDULE KALCMANU</span>
+032267,000067: 27,3410           00004                           <span class="op">INHINT  </span>                                       
+032268,000068: 27,3411           05534                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               
+032269,000069: 27,3412  E6,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  
+032270,000070: 27,3412           02067 70066                     <span class="ps">2CADR   </span> <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#4B414C434D414E33">KALCMAN3</a>                              
+032271,000071: 
+032272,000072: 27,3414           00003                           <span class="op">RELINT  </span>                                       
+032273,000073: 27,3415           10067                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                <span class="co">#  FORCE KALCMANU JOB ON</span>
+032274,000074: 27,3416           05550                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4348414E4731">CHANG1</a>                                
+032275,000075: 
 </pre>
 </span>
 </p>
@@ -193,57 +193,57 @@ Page 712
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-032270,000077: 27,3417           05224                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  PUT JOB TO SLEEP TILL</span>
-032271,000078: 27,3420           26754                           <span class="ps">CADR    </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#4154545354414C4C">ATTSTALL</a>                              <span class="co">#  MANEUVER COMPLETED</span>
-032272,000079: 27,3421           13422                           <span class="op">NOOP    </span>                                       <span class="co">#  TC   BADATT-SICK RETURN- ***FIX THIS***</span>
-032273,000080: 
-032274,000081: 27,3422           33433                           <span class="op">CAF     </span> <a href="#44454331303030">DEC1000</a>                               <span class="co">#  GOOD RETURN--MAN. COMPLETED</span>
-032275,000082: 27,3423           00004                           <span class="op">INHINT  </span>                                       
-032276,000083: 27,3424           05701                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              <span class="co">#  WAIT 10 SECONDS</span>
-032277,000084: 27,3425  E6,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  
-032278,000085: 27,3425           03434 56006                     <span class="ps">2CADR   </span> <a href="#50484153313641">PHAS16A</a>                               
-032279,000086: 
-032280,000087: 27,3427           00003                           <span class="op">RELINT  </span>                                       
-032281,000088: 27,3430           33432                           <span class="op">CAF     </span> <a href="#50313657414B45">P16WAKE</a>                               <span class="co">#  PUT THIS JOB</span>
-032282,000089: 27,3431           05563                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4A4F42534C454550">JOBSLEEP</a>                              <span class="co">#  TO SLEEP</span>
-<a name="50313657414B45"></a>032283,000090: 27,3432           57441        <span class="sm">P16WAKE </span>           <span class="ps">CADR    </span> <a href="#50484153313642">PHAS16B</a>                               
-<a name="44454331303030"></a>032284,000091: 27,3433           01750        <span class="sm">DEC1000 </span>           <span class="ps">DEC     </span> 1000       B-14                       
-<a name="50484153313641"></a>032285,000092: 27,3434           33432        <span class="sm">PHAS16A </span>           <span class="op">CAF     </span> <a href="#50313657414B45">P16WAKE</a>                               <span class="co">#  REACTIVATE THE JOB</span>
-032286,000093: 27,3435           05567                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4A4F4257414B45">JOBWAKE</a>                               <span class="co">#  THAT WAS PUT TO SLEEP</span>
-032287,000094: 27,3436           05307                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              <span class="co">#  DO DFI T/M CALIBRATION ROUTINE</span>
-032288,000095: 27,3437           56211                           <span class="ps">CADR    </span> <a href="MISSION_PHASE_2_GUIDANCE_REFERENCE_RELEASE_PLUS_BOOST_MONITOR.agc.html#444649544D43414C">DFITMCAL</a>                              
-032289,000096: 
-032290,000097: 27,3440           05745                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-032291,000098: 
-032292,000099:                                                                                                  <span class="co">#                                          WAIT FOR COMPLETION OF CALIBRATION + 1 SECOND</span>
-032293,000100: 
-<a name="50484153313642"></a>032294,000101: 27,3441           33470        <span class="sm">PHAS16B </span>           <span class="op">CAF     </span> <a href="#44454331333030">DEC1300</a>                               <span class="co">#  13 SECONDS</span>
-032295,000102: 27,3442           00004                           <span class="op">INHINT  </span>                                       
-032296,000103: 
-032297,000104: 27,3443           05701                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-032298,000105: 27,3444  E6,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  
-032299,000106: 27,3444           03447 56006                     <span class="ps">2CADR   </span> <a href="#5031364D584442">P16MXDB</a>                               
-032300,000107: 
-032301,000108: 27,3446           05605                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-<a name="5031364D584442"></a>032302,000109: 27,3447           37741        <span class="sm">P16MXDB </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4249543133">BIT13</a>                                 <span class="co">#  SELECT MAX DEADBAND FOR DAP-</span>
-032303,000110: 27,3450           26077                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              <span class="co">#  SET BIT 13 OF DAPBOOLS =1</span>
-032304,000111: 27,3451           05073                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D50">1LMP</a>                                  <span class="co">#  THRUSTER ISOL VALVES PR 3A CLOSE</span>
-032305,000112: 27,3452           00136                           <span class="ps">DEC     </span> 94         B-14                       
-032306,000113: 27,3453           05073                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D50">1LMP</a>                                  <span class="co">#  THRUSTER ISOL VALVES 3B CLOSE</span>
-032307,000114: 27,3454           00156                           <span class="ps">DEC     </span> 110        B-14                       
-032308,000115: 27,3455           33462                           <span class="op">CAF     </span> <a href="#444543323030">DEC200</a>                                <span class="co">#  WAIT 2 SECS</span>
-032309,000116: 27,3456           05701                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-032310,000117: 27,3457  E6,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  
-032311,000118: 27,3457           03463 56006                     <span class="ps">2CADR   </span> <a href="#503136434C53">P16CLS</a>                                
-032312,000119: 
-032313,000120: 27,3461           05745                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-<a name="444543323030"></a>032314,000121: 27,3462           00310        <span class="sm">DEC200  </span>           <span class="ps">DEC     </span> 200        B-14                       
-<a name="503136434C53"></a>032315,000122: 27,3463           05073        <span class="sm">P16CLS  </span>           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D50">1LMP</a>                                  <span class="co">#  THRUSTER ISOL VALVES PR 3A-</span>
-032316,000123: 27,3464           00137                           <span class="ps">DEC     </span> 95         B-14                       <span class="co">#  CLOSE RESET</span>
-032317,000124: 27,3465           05073                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D50">1LMP</a>                                  <span class="co">#  THRUSTER ISOL VALVES PR 3B-</span>
-032318,000125: 27,3466           00157                           <span class="ps">DEC     </span> 111        B-14                       <span class="co">#  CLOSE RESET</span>
-032319,000126: 27,3467           05745                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-<a name="44454331333030"></a>032320,000127: 27,3470           02424        <span class="sm">DEC1300 </span>           <span class="ps">DEC     </span> 1300       B-14                       
+032277,000077: 27,3417           05224                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  PUT JOB TO SLEEP TILL</span>
+032278,000078: 27,3420           26754                           <span class="ps">CADR    </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#4154545354414C4C">ATTSTALL</a>                              <span class="co">#  MANEUVER COMPLETED</span>
+032279,000079: 27,3421           13422                           <span class="op">NOOP    </span>                                       <span class="co">#  TC   BADATT-SICK RETURN- ***FIX THIS***</span>
+032280,000080: 
+032281,000081: 27,3422           33433                           <span class="op">CAF     </span> <a href="#44454331303030">DEC1000</a>                               <span class="co">#  GOOD RETURN--MAN. COMPLETED</span>
+032282,000082: 27,3423           00004                           <span class="op">INHINT  </span>                                       
+032283,000083: 27,3424           05701                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              <span class="co">#  WAIT 10 SECONDS</span>
+032284,000084: 27,3425  E6,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  
+032285,000085: 27,3425           03434 56006                     <span class="ps">2CADR   </span> <a href="#50484153313641">PHAS16A</a>                               
+032286,000086: 
+032287,000087: 27,3427           00003                           <span class="op">RELINT  </span>                                       
+032288,000088: 27,3430           33432                           <span class="op">CAF     </span> <a href="#50313657414B45">P16WAKE</a>                               <span class="co">#  PUT THIS JOB</span>
+032289,000089: 27,3431           05563                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4A4F42534C454550">JOBSLEEP</a>                              <span class="co">#  TO SLEEP</span>
+<a name="50313657414B45"></a>032290,000090: 27,3432           57441        <span class="sm">P16WAKE </span>           <span class="ps">CADR    </span> <a href="#50484153313642">PHAS16B</a>                               
+<a name="44454331303030"></a>032291,000091: 27,3433           01750        <span class="sm">DEC1000 </span>           <span class="ps">DEC     </span> 1000       B-14                       
+<a name="50484153313641"></a>032292,000092: 27,3434           33432        <span class="sm">PHAS16A </span>           <span class="op">CAF     </span> <a href="#50313657414B45">P16WAKE</a>                               <span class="co">#  REACTIVATE THE JOB</span>
+032293,000093: 27,3435           05567                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4A4F4257414B45">JOBWAKE</a>                               <span class="co">#  THAT WAS PUT TO SLEEP</span>
+032294,000094: 27,3436           05307                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              <span class="co">#  DO DFI T/M CALIBRATION ROUTINE</span>
+032295,000095: 27,3437           56211                           <span class="ps">CADR    </span> <a href="MISSION_PHASE_2_GUIDANCE_REFERENCE_RELEASE_PLUS_BOOST_MONITOR.agc.html#444649544D43414C">DFITMCAL</a>                              
+032296,000096: 
+032297,000097: 27,3440           05745                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+032298,000098: 
+032299,000099:                                                                                                  <span class="co">#                                          WAIT FOR COMPLETION OF CALIBRATION + 1 SECOND</span>
+032300,000100: 
+<a name="50484153313642"></a>032301,000101: 27,3441           33470        <span class="sm">PHAS16B </span>           <span class="op">CAF     </span> <a href="#44454331333030">DEC1300</a>                               <span class="co">#  13 SECONDS</span>
+032302,000102: 27,3442           00004                           <span class="op">INHINT  </span>                                       
+032303,000103: 
+032304,000104: 27,3443           05701                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+032305,000105: 27,3444  E6,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  
+032306,000106: 27,3444           03447 56006                     <span class="ps">2CADR   </span> <a href="#5031364D584442">P16MXDB</a>                               
+032307,000107: 
+032308,000108: 27,3446           05605                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+<a name="5031364D584442"></a>032309,000109: 27,3447           37741        <span class="sm">P16MXDB </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4249543133">BIT13</a>                                 <span class="co">#  SELECT MAX DEADBAND FOR DAP-</span>
+032310,000110: 27,3450           26077                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              <span class="co">#  SET BIT 13 OF DAPBOOLS =1</span>
+032311,000111: 27,3451           05073                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D50">1LMP</a>                                  <span class="co">#  THRUSTER ISOL VALVES PR 3A CLOSE</span>
+032312,000112: 27,3452           00136                           <span class="ps">DEC     </span> 94         B-14                       
+032313,000113: 27,3453           05073                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D50">1LMP</a>                                  <span class="co">#  THRUSTER ISOL VALVES 3B CLOSE</span>
+032314,000114: 27,3454           00156                           <span class="ps">DEC     </span> 110        B-14                       
+032315,000115: 27,3455           33462                           <span class="op">CAF     </span> <a href="#444543323030">DEC200</a>                                <span class="co">#  WAIT 2 SECS</span>
+032316,000116: 27,3456           05701                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+032317,000117: 27,3457  E6,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  
+032318,000118: 27,3457           03463 56006                     <span class="ps">2CADR   </span> <a href="#503136434C53">P16CLS</a>                                
+032319,000119: 
+032320,000120: 27,3461           05745                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+<a name="444543323030"></a>032321,000121: 27,3462           00310        <span class="sm">DEC200  </span>           <span class="ps">DEC     </span> 200        B-14                       
+<a name="503136434C53"></a>032322,000122: 27,3463           05073        <span class="sm">P16CLS  </span>           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D50">1LMP</a>                                  <span class="co">#  THRUSTER ISOL VALVES PR 3A-</span>
+032323,000123: 27,3464           00137                           <span class="ps">DEC     </span> 95         B-14                       <span class="co">#  CLOSE RESET</span>
+032324,000124: 27,3465           05073                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D50">1LMP</a>                                  <span class="co">#  THRUSTER ISOL VALVES PR 3B-</span>
+032325,000125: 27,3466           00157                           <span class="ps">DEC     </span> 111        B-14                       <span class="co">#  CLOSE RESET</span>
+032326,000126: 27,3467           05745                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+<a name="44454331333030"></a>032327,000127: 27,3470           02424        <span class="sm">DEC1300 </span>           <span class="ps">DEC     </span> 1300       B-14                       
 
 End of include-file MISSION_PHASE_16_-_RCS_COLD_SOAK.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

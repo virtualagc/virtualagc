@@ -87,26 +87,26 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-056154,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-056155,000003:                                                                                                  <span class="co">## Filename:    PHASE_TABLE_MAINTENANCE.agc</span>
-056156,000004:                                                                                                  <span class="co">## Purpose:     A log section of Zerlina 56, the final revision of</span>
-056157,000005:                                                                                                  <span class="co">##              Don Eyles's offline development program for the variable </span>
-056158,000006:                                                                                                  <span class="co">##              guidance period servicer. It also includes a new P66 with LPD </span>
-056159,000007:                                                                                                  <span class="co">##              (Landing Point Designator) capability, based on an idea of John </span>
-056160,000008:                                                                                                  <span class="co">##              Young's. Neither of these advanced features were actually flown,</span>
-056161,000009:                                                                                                  <span class="co">##              but Zerlina was also the birthplace of other big improvements to</span>
-056162,000010:                                                                                                  <span class="co">##              Luminary including the terrain model and new (Luminary 1E)</span>
-056163,000011:                                                                                                  <span class="co">##              analog display programs. Zerlina was branched off of Luminary 145,</span>
-056164,000012:                                                                                                  <span class="co">##              and revision 56 includes all changes up to and including Luminary</span>
-056165,000013:                                                                                                  <span class="co">##              183. It is therefore quite close to the Apollo 14 program,</span>
-056166,000014:                                                                                                  <span class="co">##              Luminary 178, where not modified with new features.</span>
-056167,000015:                                                                                                  <span class="co">## Reference:   pp. 1283-1291</span>
-056168,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-056169,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-056170,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-056171,000019:                                                                                                  <span class="co">## Mod history: 2017-07-28 MAS  Created from Luminary 210.</span>
-056172,000020:                                                                                                  <span class="co">##              2017-08-20 MAS  Updated for Zerlina 56.</span>
-056173,000021: 
+056168,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+056169,000003:                                                                                                  <span class="co">## Filename:    PHASE_TABLE_MAINTENANCE.agc</span>
+056170,000004:                                                                                                  <span class="co">## Purpose:     A log section of Zerlina 56, the final revision of</span>
+056171,000005:                                                                                                  <span class="co">##              Don Eyles's offline development program for the variable </span>
+056172,000006:                                                                                                  <span class="co">##              guidance period servicer. It also includes a new P66 with LPD </span>
+056173,000007:                                                                                                  <span class="co">##              (Landing Point Designator) capability, based on an idea of John </span>
+056174,000008:                                                                                                  <span class="co">##              Young's. Neither of these advanced features were actually flown,</span>
+056175,000009:                                                                                                  <span class="co">##              but Zerlina was also the birthplace of other big improvements to</span>
+056176,000010:                                                                                                  <span class="co">##              Luminary including the terrain model and new (Luminary 1E)</span>
+056177,000011:                                                                                                  <span class="co">##              analog display programs. Zerlina was branched off of Luminary 145,</span>
+056178,000012:                                                                                                  <span class="co">##              and revision 56 includes all changes up to and including Luminary</span>
+056179,000013:                                                                                                  <span class="co">##              183. It is therefore quite close to the Apollo 14 program,</span>
+056180,000014:                                                                                                  <span class="co">##              Luminary 178, where not modified with new features.</span>
+056181,000015:                                                                                                  <span class="co">## Reference:   pp. 1283-1291</span>
+056182,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+056183,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+056184,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+056185,000019:                                                                                                  <span class="co">## Mod history: 2017-07-28 MAS  Created from Luminary 210.</span>
+056186,000020:                                                                                                  <span class="co">##              2017-08-20 MAS  Updated for Zerlina 56.</span>
+056187,000021: 
 </pre>
 </span>
 </p>
@@ -122,56 +122,56 @@ Page 1283
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-056175,000023:                                                                                                  <span class="co">#           SUBROUTINE TO UPDATE THE PROGRAM NUMBER DISPLAY ON THE DSKY.</span>
-056176,000024: 
-056177,000025: 43,3723                                           <span class="ps">COUNT*  </span> $$/PHASE                              
-056178,000026:    5322                                           <span class="ps">BLOCK   </span> 02                                    
-056179,000027:    4000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#464654414731">FFTAG1</a>                                
-056180,000028:    4000                                           <span class="ps">BANK    </span>                                       
-056181,000029: 
-<a name="4E45574D4F444558"></a>056182,000030:    5322           50002        <span class="sm">NEWMODEX</span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  UPDATE MODREG. ENTRY FOR MODE IN FIXED.</span>
-056183,000031:    5323           30000                           <span class="op">CAF     </span> 0                                     
-056184,000032:    5324           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-056185,000033: 
-<a name="4E45574D4F444541"></a>056186,000034:    5325           55010        <span class="sm">NEWMODEA</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F44524547">MODREG</a>                                <span class="co">#  ENTRY FOR MODE IN A.</span>
-<a name="4D4D4453504C4159"></a>056187,000035:    5326           35331        <span class="sm">MMDSPLAY</span>           <span class="op">CAF     </span> +3                                    <span class="co">#  DISPLAY MAJOR MODE.</span>
-<a name="505245424A554D50"></a>056188,000036:    5327           22006        <span class="sm">PREBJUMP</span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 <span class="co">#  PUTS BBANK IN L</span>
-056189,000037:    5330           14640                           <span class="op">TCF     </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B4A554D50">BANKJUMP</a>                              <span class="co">#  PUTS Q INTO A</span>
-056190,000038:    5331           20213                           <span class="ps">CADR    </span> <a href="#5345545550445350">SETUPDSP</a>                              
-056191,000039: 
-056192,000040:                                                                                                  <span class="co">#           RETURN TO CALLER +3 IF MODE = THAT AT CALLER +1. OTHERWISE RETURN TO CALLER +2.</span>
-056193,000041: 
-<a name="434845434B4D4D"></a>056194,000042:    5332           50002        <span class="sm">CHECKMM </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-056195,000043:    5333           40000                           <span class="op">CS      </span> 0                                     
-056196,000044:    5334           61010                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F44524547">MODREG</a>                                
-056197,000045:    5335           00006                           <span class="op">EXTEND  </span>                                       
-056198,000046:    5336           16753                           <span class="op">BZF     </span> <a href="INTERPRETER.agc.html#512B32">Q+2</a>                                   
-056199,000047:    5337           16751                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#512B31">Q+1</a>                                   <span class="co">#  NO MATCH</span>
-056200,000048: 
-<a name="544351"></a>056201,000049:    5340     6754               <span class="sm">TCQ     </span>           <span class="ps">=       </span> <a href="INTERPRETER.agc.html#512B32">Q+2</a>        +1                         
-056202,000050: 
-056203,000051: 14,3775                                           <span class="ps">BANK    </span> 14                                    
-056204,000052: 10,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#5048415345544142">PHASETAB</a>                              
-056205,000053: 10,2000                                           <span class="ps">BANK    </span>                                       
-056206,000054: 
-056207,000055: 10,2213                                           <span class="ps">COUNT*  </span> $$/PHASE                              
-<a name="5345545550445350"></a>056208,000056: 10,2213           00004        <span class="sm">SETUPDSP</span>           <span class="op">INHINT  </span>                                       
-056209,000057: 10,2214           52071                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  SAVE CALLER-S RETURN 2CADR</span>
-056210,000058: 10,2215           34355                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3330">PRIO30</a>                                <span class="co">#    EITHER A TASK OR JOB CAN COME TO</span>
-056211,000059: 10,2216           05072                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 <span class="co">#    NEWMODE X</span>
-056212,000060: 10,2217     1010                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F44524547">MODREG</a>                                
-056213,000061: 10,2217           03574 60102                     <span class="ps">2CADR   </span> <a href="#4453504D4D4A4F42">DSPMMJOB</a>                              
-056214,000062: 
-056215,000063: 10,2221           52071                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-056216,000064: 10,2222           00003                           <span class="op">RELINT  </span>                                       
-056217,000065: 10,2223           52006                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A">Z</a>                                     <span class="co">#  RETURN</span>
-056218,000066: 
-<a name="4453504D4D4A4F42"></a>056219,000067: 10,2224  40,3574               <span class="sm">DSPMMJOB</span>           <span class="ps">EQUALS  </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4453504D4D4A42">DSPMMJB</a>                               
-056220,000068: 
-056221,000069: 
-056222,000070:    5340                                           <span class="ps">BLOCK   </span> 02                                    
-056223,000071:    4000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#464654414731">FFTAG1</a>                                
-056224,000072:    4000                                           <span class="ps">BANK    </span>                                       
+056189,000023:                                                                                                  <span class="co">#           SUBROUTINE TO UPDATE THE PROGRAM NUMBER DISPLAY ON THE DSKY.</span>
+056190,000024: 
+056191,000025: 43,3723                                           <span class="ps">COUNT*  </span> $$/PHASE                              
+056192,000026:    5322                                           <span class="ps">BLOCK   </span> 02                                    
+056193,000027:    4000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#464654414731">FFTAG1</a>                                
+056194,000028:    4000                                           <span class="ps">BANK    </span>                                       
+056195,000029: 
+<a name="4E45574D4F444558"></a>056196,000030:    5322           50002        <span class="sm">NEWMODEX</span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  UPDATE MODREG. ENTRY FOR MODE IN FIXED.</span>
+056197,000031:    5323           30000                           <span class="op">CAF     </span> 0                                     
+056198,000032:    5324           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+056199,000033: 
+<a name="4E45574D4F444541"></a>056200,000034:    5325           55010        <span class="sm">NEWMODEA</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F44524547">MODREG</a>                                <span class="co">#  ENTRY FOR MODE IN A.</span>
+<a name="4D4D4453504C4159"></a>056201,000035:    5326           35331        <span class="sm">MMDSPLAY</span>           <span class="op">CAF     </span> +3                                    <span class="co">#  DISPLAY MAJOR MODE.</span>
+<a name="505245424A554D50"></a>056202,000036:    5327           22006        <span class="sm">PREBJUMP</span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 <span class="co">#  PUTS BBANK IN L</span>
+056203,000037:    5330           14640                           <span class="op">TCF     </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B4A554D50">BANKJUMP</a>                              <span class="co">#  PUTS Q INTO A</span>
+056204,000038:    5331           20213                           <span class="ps">CADR    </span> <a href="#5345545550445350">SETUPDSP</a>                              
+056205,000039: 
+056206,000040:                                                                                                  <span class="co">#           RETURN TO CALLER +3 IF MODE = THAT AT CALLER +1. OTHERWISE RETURN TO CALLER +2.</span>
+056207,000041: 
+<a name="434845434B4D4D"></a>056208,000042:    5332           50002        <span class="sm">CHECKMM </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+056209,000043:    5333           40000                           <span class="op">CS      </span> 0                                     
+056210,000044:    5334           61010                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F44524547">MODREG</a>                                
+056211,000045:    5335           00006                           <span class="op">EXTEND  </span>                                       
+056212,000046:    5336           16753                           <span class="op">BZF     </span> <a href="INTERPRETER.agc.html#512B32">Q+2</a>                                   
+056213,000047:    5337           16751                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#512B31">Q+1</a>                                   <span class="co">#  NO MATCH</span>
+056214,000048: 
+<a name="544351"></a>056215,000049:    5340     6754               <span class="sm">TCQ     </span>           <span class="ps">=       </span> <a href="INTERPRETER.agc.html#512B32">Q+2</a>        +1                         
+056216,000050: 
+056217,000051: 14,3775                                           <span class="ps">BANK    </span> 14                                    
+056218,000052: 10,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#5048415345544142">PHASETAB</a>                              
+056219,000053: 10,2000                                           <span class="ps">BANK    </span>                                       
+056220,000054: 
+056221,000055: 10,2213                                           <span class="ps">COUNT*  </span> $$/PHASE                              
+<a name="5345545550445350"></a>056222,000056: 10,2213           00004        <span class="sm">SETUPDSP</span>           <span class="op">INHINT  </span>                                       
+056223,000057: 10,2214           52071                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  SAVE CALLER-S RETURN 2CADR</span>
+056224,000058: 10,2215           34355                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3330">PRIO30</a>                                <span class="co">#    EITHER A TASK OR JOB CAN COME TO</span>
+056225,000059: 10,2216           05072                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 <span class="co">#    NEWMODE X</span>
+056226,000060: 10,2217     1010                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F44524547">MODREG</a>                                
+056227,000061: 10,2217           03574 60102                     <span class="ps">2CADR   </span> <a href="#4453504D4D4A4F42">DSPMMJOB</a>                              
+056228,000062: 
+056229,000063: 10,2221           52071                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+056230,000064: 10,2222           00003                           <span class="op">RELINT  </span>                                       
+056231,000065: 10,2223           52006                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A">Z</a>                                     <span class="co">#  RETURN</span>
+056232,000066: 
+<a name="4453504D4D4A4F42"></a>056233,000067: 10,2224  40,3574               <span class="sm">DSPMMJOB</span>           <span class="ps">EQUALS  </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4453504D4D4A42">DSPMMJB</a>                               
+056234,000068: 
+056235,000069: 
+056236,000070:    5340                                           <span class="ps">BLOCK   </span> 02                                    
+056237,000071:    4000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#464654414731">FFTAG1</a>                                
+056238,000072:    4000                                           <span class="ps">BANK    </span>                                       
 </pre>
 </span>
 </p>
@@ -187,56 +187,56 @@ Page 1284
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-056226,000074:                                                                                                  <span class="co">#  PHASCHNG IS THE MAIN WAY OF MAKING PHASE CHANGES FOR RESTARTS.  THERE ARE THREE FORMS OF PHASCHNG, KNOWN AS TYPE</span>
-056227,000075:                                                                                                  <span class="co">#  A, TYPE B, AND TYPE C. THEY ARE ALL CALLED AS FOLLOWS, WHERE OCT XXXXX   CONTAINS THE PHASE INFORMATION,</span>
-056228,000076: 
-056229,000077:                                                                                                  <span class="co">#                                                   TC     PHASCHNG</span>
-056230,000078:                                                                                                  <span class="co">#                                                   OCT    XXXXX</span>
-056231,000079: 
-056232,000080:                                                                                                  <span class="co">#  TYPE A IS CONCERNED WITH FIXED PHASE CHANGES, THAT IS, PHASE INFORMATIONTHAT IS STORED PERMANENTLY.  THESE</span>
-056233,000081:                                                                                                  <span class="co">#  OPTIONS ARE, WHERE G STANDS FOR A GROUP AND .X FOR THE PHASE,</span>
-056234,000082: 
-056235,000083:                                                                                                  <span class="co">#                  G.0             INACTIVE, WILLNOT PERMIT A GROUP G RESTART</span>
-056236,000084:                                                                                                  <span class="co">#                  G.1             WILL CAUSE THE LAST DISPLAY TO BE REACTIVATED, USED MAINLY IN MANNED FLIGHTS</span>
-056237,000085:                                                                                                  <span class="co">#                  G.EVEN          A DOUBLE TABLE RESTART, CAN CAUSE ANY COMBINATION OF TWO JOBS, TASKS, AND/OR</span>
-056238,000086:                                                                                                  <span class="co">#                                  LONGCALL TO BE RESTARTED.</span>
-056239,000087:                                                                                                  <span class="co">#                  G.ODD NOT .1    A SINGLE TABLE RESTART, CAN CAUSE EITHER A JOB, TASK, OR LONGCALL RESTART</span>
-056240,000088: 
-056241,000089:                                                                                                  <span class="co">#  THIS INFORMATION IS PUT INTO THE OCTAL WORD AFTER TC PHASCHNG AS FOLLOWS</span>
-056242,000090: 
-056243,000091:                                                                                                  <span class="co">#                  TL0 00P PPP PPP GGG                                     ,</span>
-056244,000092: 
-056245,000093:                                                                                                  <span class="co">#  WHERE EACH LETTER OR NUMBER STANDS FOR A BIT.  THE G:S STAND FOR THE GROUP, OCTAL 1 - 7, THE P:S FOR THE PHASE,</span>
-056246,000094:                                                                                                  <span class="co">#  OCTAL 0 - 127.  0:S MUST BE 0.              IF ONE WISHES TO HAVE THE TBASE OF GROUP G TO BE SET AT THIS TIME,</span>
-056247,000095:                                                                                                  <span class="co">#  T IS SET TO 1, OTHERWISE IT IS SET TO 0.  SIMIARLY IF ONE WISHES TO SET LONGBASE, THEN L IS SET TO 1, OTHERWISE</span>
-056248,000096:                                                                                                  <span class="co">#  IT IS SET TO 0.  SOME EXAMPLES,</span>
-056249,000097: 
-056250,000098:                                                                                                  <span class="co">#                                                   TC     PHASCHNG        THIS WILL CAUSE GROUP 3 TOBE SET TO 0,</span>
-056251,000099:                                                                                                  <span class="co">#                                                   OCT    00003           MAKING GROUP 3 INACTIVE</span>
-056252,000100: 
-056253,000101:                                                                                                  <span class="co">#                                                   TC     PHASCHNG        IF A RESTART OCCURS THIS WOULD CAUSE</span>
-056254,000102:                                                                                                  <span class="co">#                                                   OCT    00012           GROUP 2 TO RESTART THE LAST DISPLAY</span>
-056255,000103: 
-056256,000104:                                                                                                  <span class="co">#                                                   TC     PHASCHNG        THIS SETS THE TBASE OF GROUP 4 AND IN</span>
-056257,000105:                                                                                                  <span class="co">#                                                   OCT    40064           CASE OF A RESTART WOULD START UP THE TWO</span>
-056258,000106:                                                                                                  <span class="co">#                                                                          THINGS LOCATED IN THE DOUBLE 4.6 RESTART</span>
-056259,000107:                                                                                                  <span class="co">#                                                                          LOCATION</span>
-056260,000108:                                                                                                  <span class="co">#                                                   TC     PHASCHNG        THIS SETS LONGBASE AND UPON A RESTART</span>
-056261,000109:                                                                                                  <span class="co">#                                                   OCT    20135           CAUSES 5.13 TO BE RESTARTED  (SINCE</span>
-056262,000110:                                                                                                  <span class="co">#                                                                          LONGBASE WAS SET THIS SINGLE ENTRY</span>
-056263,000111:                                                                                                  <span class="co">#                                                                          SHOULD BE A LONGCALL)</span>
-056264,000112:                                                                                                  <span class="co">#                                                   TC     PHASCHNG        SINCE BOTH TBASE4 AND LONGBASE ARE SET,</span>
-056265,000113:                                                                                                  <span class="co">#                                                   OCT    60124           4.12 SHOULD CONTAIN BOTH A TASK AND A</span>
-056266,000114:                                                                                                  <span class="co">#                                                                          LONGCALL TO BE RESTARTED</span>
-056267,000115: 
-056268,000116:                                                                                                  <span class="co">#  TYPE C PHASCHNG CONTAINS THE VARIABLE TYPE OF PHASCHNG INFORMATION. INSTEAD OF THE INFORMATION BEING IN A</span>
-056269,000117:                                                                                                  <span class="co">#  PERMANENT FORM, ONE STORES THE DESIRED RESTART INFORMATION IN A VARIABKE LOCATION. THE BITS ARE AS FOLLOWS,</span>
-056270,000118: 
-056271,000119:                                                                                                  <span class="co">#                  TL0 1AD XXX CJW GGG</span>
-056272,000120: 
-056273,000121:                                                                                                  <span class="co">#  WHERE EACH LETTER OR NUMBER STANDS FOR A BIT.  THE G:S STAND FOR THE GROUP, OCTAL 1 - 7.  IF THE RESTART IS TO</span>
-056274,000122:                                                                                                  <span class="co">#  BE BY WAITLIST, W IS SET TO 1, IF IT IS A JOB, J IS SET TO 1, IF IT IS A LONGCALL, C IS SET TO 1. ONLY ONE OF</span>
-056275,000123:                                                                                                  <span class="co">#  THESE THREE BIT S MAY BE SET.  X:S ARE IGNORED  1 MUST BE 1, AND 0 MUST  BE 0.  AGAIN T STANDS FOR THE TBASE,</span>
+056240,000074:                                                                                                  <span class="co">#  PHASCHNG IS THE MAIN WAY OF MAKING PHASE CHANGES FOR RESTARTS.  THERE ARE THREE FORMS OF PHASCHNG, KNOWN AS TYPE</span>
+056241,000075:                                                                                                  <span class="co">#  A, TYPE B, AND TYPE C. THEY ARE ALL CALLED AS FOLLOWS, WHERE OCT XXXXX   CONTAINS THE PHASE INFORMATION,</span>
+056242,000076: 
+056243,000077:                                                                                                  <span class="co">#                                                   TC     PHASCHNG</span>
+056244,000078:                                                                                                  <span class="co">#                                                   OCT    XXXXX</span>
+056245,000079: 
+056246,000080:                                                                                                  <span class="co">#  TYPE A IS CONCERNED WITH FIXED PHASE CHANGES, THAT IS, PHASE INFORMATIONTHAT IS STORED PERMANENTLY.  THESE</span>
+056247,000081:                                                                                                  <span class="co">#  OPTIONS ARE, WHERE G STANDS FOR A GROUP AND .X FOR THE PHASE,</span>
+056248,000082: 
+056249,000083:                                                                                                  <span class="co">#                  G.0             INACTIVE, WILLNOT PERMIT A GROUP G RESTART</span>
+056250,000084:                                                                                                  <span class="co">#                  G.1             WILL CAUSE THE LAST DISPLAY TO BE REACTIVATED, USED MAINLY IN MANNED FLIGHTS</span>
+056251,000085:                                                                                                  <span class="co">#                  G.EVEN          A DOUBLE TABLE RESTART, CAN CAUSE ANY COMBINATION OF TWO JOBS, TASKS, AND/OR</span>
+056252,000086:                                                                                                  <span class="co">#                                  LONGCALL TO BE RESTARTED.</span>
+056253,000087:                                                                                                  <span class="co">#                  G.ODD NOT .1    A SINGLE TABLE RESTART, CAN CAUSE EITHER A JOB, TASK, OR LONGCALL RESTART</span>
+056254,000088: 
+056255,000089:                                                                                                  <span class="co">#  THIS INFORMATION IS PUT INTO THE OCTAL WORD AFTER TC PHASCHNG AS FOLLOWS</span>
+056256,000090: 
+056257,000091:                                                                                                  <span class="co">#                  TL0 00P PPP PPP GGG                                     ,</span>
+056258,000092: 
+056259,000093:                                                                                                  <span class="co">#  WHERE EACH LETTER OR NUMBER STANDS FOR A BIT.  THE G:S STAND FOR THE GROUP, OCTAL 1 - 7, THE P:S FOR THE PHASE,</span>
+056260,000094:                                                                                                  <span class="co">#  OCTAL 0 - 127.  0:S MUST BE 0.              IF ONE WISHES TO HAVE THE TBASE OF GROUP G TO BE SET AT THIS TIME,</span>
+056261,000095:                                                                                                  <span class="co">#  T IS SET TO 1, OTHERWISE IT IS SET TO 0.  SIMIARLY IF ONE WISHES TO SET LONGBASE, THEN L IS SET TO 1, OTHERWISE</span>
+056262,000096:                                                                                                  <span class="co">#  IT IS SET TO 0.  SOME EXAMPLES,</span>
+056263,000097: 
+056264,000098:                                                                                                  <span class="co">#                                                   TC     PHASCHNG        THIS WILL CAUSE GROUP 3 TOBE SET TO 0,</span>
+056265,000099:                                                                                                  <span class="co">#                                                   OCT    00003           MAKING GROUP 3 INACTIVE</span>
+056266,000100: 
+056267,000101:                                                                                                  <span class="co">#                                                   TC     PHASCHNG        IF A RESTART OCCURS THIS WOULD CAUSE</span>
+056268,000102:                                                                                                  <span class="co">#                                                   OCT    00012           GROUP 2 TO RESTART THE LAST DISPLAY</span>
+056269,000103: 
+056270,000104:                                                                                                  <span class="co">#                                                   TC     PHASCHNG        THIS SETS THE TBASE OF GROUP 4 AND IN</span>
+056271,000105:                                                                                                  <span class="co">#                                                   OCT    40064           CASE OF A RESTART WOULD START UP THE TWO</span>
+056272,000106:                                                                                                  <span class="co">#                                                                          THINGS LOCATED IN THE DOUBLE 4.6 RESTART</span>
+056273,000107:                                                                                                  <span class="co">#                                                                          LOCATION</span>
+056274,000108:                                                                                                  <span class="co">#                                                   TC     PHASCHNG        THIS SETS LONGBASE AND UPON A RESTART</span>
+056275,000109:                                                                                                  <span class="co">#                                                   OCT    20135           CAUSES 5.13 TO BE RESTARTED  (SINCE</span>
+056276,000110:                                                                                                  <span class="co">#                                                                          LONGBASE WAS SET THIS SINGLE ENTRY</span>
+056277,000111:                                                                                                  <span class="co">#                                                                          SHOULD BE A LONGCALL)</span>
+056278,000112:                                                                                                  <span class="co">#                                                   TC     PHASCHNG        SINCE BOTH TBASE4 AND LONGBASE ARE SET,</span>
+056279,000113:                                                                                                  <span class="co">#                                                   OCT    60124           4.12 SHOULD CONTAIN BOTH A TASK AND A</span>
+056280,000114:                                                                                                  <span class="co">#                                                                          LONGCALL TO BE RESTARTED</span>
+056281,000115: 
+056282,000116:                                                                                                  <span class="co">#  TYPE C PHASCHNG CONTAINS THE VARIABLE TYPE OF PHASCHNG INFORMATION. INSTEAD OF THE INFORMATION BEING IN A</span>
+056283,000117:                                                                                                  <span class="co">#  PERMANENT FORM, ONE STORES THE DESIRED RESTART INFORMATION IN A VARIABKE LOCATION. THE BITS ARE AS FOLLOWS,</span>
+056284,000118: 
+056285,000119:                                                                                                  <span class="co">#                  TL0 1AD XXX CJW GGG</span>
+056286,000120: 
+056287,000121:                                                                                                  <span class="co">#  WHERE EACH LETTER OR NUMBER STANDS FOR A BIT.  THE G:S STAND FOR THE GROUP, OCTAL 1 - 7.  IF THE RESTART IS TO</span>
+056288,000122:                                                                                                  <span class="co">#  BE BY WAITLIST, W IS SET TO 1, IF IT IS A JOB, J IS SET TO 1, IF IT IS A LONGCALL, C IS SET TO 1. ONLY ONE OF</span>
+056289,000123:                                                                                                  <span class="co">#  THESE THREE BIT S MAY BE SET.  X:S ARE IGNORED  1 MUST BE 1, AND 0 MUST  BE 0.  AGAIN T STANDS FOR THE TBASE,</span>
 </pre>
 </span>
 </p>
@@ -252,56 +252,56 @@ Page 1285
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-056277,000125:                                                                                                  <span class="co">#  AND L FOR LONGBASE.  THE BITS A AND D ARE CONCERNED WITH THE VARIABLE INFORMATION. IF D IS SET TO 1, A PRIORITY</span>
-056278,000126:                                                                                                  <span class="co">#  OR DELTA TIME WILL BE READ FROM THE NEXT LOCATION AFTER THE OCTAL INFORMATION, IF THIS IS TO BE INDIRECT, THAT</span>
-056279,000127:                                                                                                  <span class="co">#  IS, THE NAME OF A LOCATION COMT+INING THE INFORMATION (DELTA TIME ONLY), THEN THIS IS GIVEN AS THE -GENADR OF</span>
-056280,000128:                                                                                                  <span class="co">#  THAT LOCATION WHICH CONTAINS THE DELTA TIME.  IF THE OLD PRIORITY OR DELTA TIME IS TO BE USED, THAT WHICH IS</span>
-056281,000129:                                                                                                  <span class="co">#  ALREADY IN THE VARIABLE STORAGE, THEN D IS SET TO 0. NEXT THE A BIT IS USED.  IF IT IS SET TO 0, THE ADDRESS</span>
-056282,000130:                                                                                                  <span class="co">#  THAT WOULD BE RESTARTED DURING A RESTART IS THE NEXT LOCATION AFTER THE  PHASE INFORMATION, THAT IS, EITHER</span>
-056283,000131:                                                                                                  <span class="co">#  (TC PHASCHNG) +2 OR +3, DEPENDING ON WHETHER D HAD BEEN SET OR NOT.  IF A IS SET TO 1, THEN THE ADDRESS THAT</span>
-056284,000132:                                                                                                  <span class="co">#  WOULD BE RESTARTED IS THE 2CADR THAT IS READ FROM THE NEXT TWO LOCATIONS.  EXAMPLES,</span>
-056285,000133: 
-056286,000134:                                                                                                  <span class="co">#                                          AD       TC     PHASCHNG        THIS WOULD CAUSE LOCATION AD +3 TO BE</span>
-056287,000135:                                                                                                  <span class="co">#                                          AD+1     OCT    05023           RESTARTED BY GROUP THREE WITHA PRIORITY</span>
-056288,000136:                                                                                                  <span class="co">#                                          AD+2     OCT    23000           OF 23.  NOTE UPON RETURNING IT WOULD</span>
-056289,000137:                                                                                                  <span class="co">#                                          AD+3                            ALSO GO TO AD+3</span>
-056290,000138: 
-056291,000139:                                                                                                  <span class="co">#                                          AD       TC     PHASCHNG        GROUP  1 WOULD CAUSE CAUSE CALLCALL TO</span>
-056292,000140:                                                                                                  <span class="co">#                                          AD+1     OCT    27441           BE STARTED AS A LONGCALL FROM THE TIME</span>
-056293,000141:                                                                                                  <span class="co">#                                          AD+2    -GENADR DELTIME         STORED IN LONGBASE (LONGBASE WAS SET) BY</span>
-056294,000142:                                                                                                  <span class="co">#                                          AD+3     2CADR  CALLCALL        A DELTATIME STORED IN DELTIME.  THE</span>
-056295,000143:                                                                                                  <span class="co">#                                          AD+4                            BBCON OF THE 2CADR SHOULD CONTAIN THE E</span>
-056296,000144:                                                                                                  <span class="co">#                                          AD+5                            BANK OF DELTIME. PHASCHNG RETURNS TO</span>
-056297,000145:                                                                                                  <span class="co">#                                                                          LOCATION AD+5</span>
-056298,000146: 
-056299,000147:                                                                                                  <span class="co">#  NOTE THAT IF A VARIABLE PRIORITY IS GIVEN FOR A JOB, THE JOB WILL BE RESTARTED AS A NOVAC IF THE PRIORITY IS</span>
-056300,000148:                                                                                                  <span class="co">#  NEGATIVE, AS A FINDVAC IF THE PRIORITY IS POSITIVE.</span>
-056301,000149: 
-056302,000150: 
-056303,000151:                                                                                                  <span class="co">#  TYPE B PHASCHNG IS A COMBINATION OF VARIABLE AND FIXED PHASE CHANGES. IT WILL START UP A JOB AS INDICATED</span>
-056304,000152:                                                                                                  <span class="co">#  BELOW AND ALSO START UP ONE FIXED RESTART, THAT IS EITHER AN G.1 OR  A G.ODD OR THE FIRST ENTRY OF G.EVEN</span>
-056305,000153:                                                                                                  <span class="co">#  DOUBLE ENTRY.  THE BIT INFORMATION IS AS FOLLOWS,</span>
-056306,000154: 
-056307,000155:                                                                                                  <span class="co">#                  TL1 DAP PPP PPP GGG</span>
-056308,000156: 
-056309,000157:                                                                                                  <span class="co">#  WHERE EACH LETTER OR NUMBER STANDS FOR A BIT.  THE G:S STAND FOR THE GROUP, OCTAL 1 - 7. THE P:S FOR THE FIXED</span>
-056310,000158:                                                                                                  <span class="co">#  PHASE INFORMATION, OCTAL 0 - 127. 1 MUST BE 1.  AND AGAIN T STANDS FOR THE TBASE AND L FOR LONGBASE. D THIS</span>
-056311,000159:                                                                                                  <span class="co">#  TIME STANDS ONLY FOR PRIORITY SINCE THIS WILL BE CONSIDERED A JOB, AND IT MUST BE GIVEN DIRECTLY IF GIVEN.</span>
-056312,000160:                                                                                                  <span class="co">#  AGAIN A STANDS FOR THE ADDRESS OF THE LOCATION TO BE RESTARTED, 1 IF THE 2CADR IS GIVEN , OR 0 IF IT IS TO BE</span>
-056313,000161:                                                                                                  <span class="co">#  THE NEXT LOCATION.(THE RETURN LOCATION OF PHASCHNG) EXAMPLES,</span>
-056314,000162: 
-056315,000163:                                                                                                  <span class="co">#                                          AD       TC     PHASCHNG        TBASE IS SET AND ARESTART CAUSE GROUP 3</span>
-056316,000164:                                                                                                  <span class="co">#                                          AD+1     OCT    56043           TO START THE JOB AJOBAJOB WITH PRIORITY</span>
-056317,000165:                                                                                                  <span class="co">#                                          AD+2     OCT    31000           31 AND THE FIRST ENTRY OF 3.4SPOT(WE CAN</span>
-056318,000166:                                                                                                  <span class="co">#                                          AD+3     2CADR  AJOBAJOB        ASSUME IT IS A TASK SINCE WE SET TBASE3)</span>
-056319,000167:                                                                                                  <span class="co">#                                          AD+4                            UPON RETURN FROM PHASCHNG CONTROL WOULD</span>
-056320,000168:                                                                                                  <span class="co">#                                          AD+5                            GO TO AD+5</span>
-056321,000169: 
-056322,000170:                                                                                                  <span class="co">#                                          AD       TC     PHASCHNG        UPON A RESTART THE LAST DISPLAY WOULD BE</span>
-056323,000171:                                                                                                  <span class="co">#                                          AD+1     OCT    10015           RESTARTED AND A JOB WITH THE PREVIOUSLY</span>
-056324,000172:                                                                                                  <span class="co">#                                          AD+2                            STORED PRIORITY WOULD BE BEGUN AT AD+2</span>
-056325,000173:                                                                                                  <span class="co">#                                                                          BY MEANS OF GROUP 5</span>
-056326,000174: 
+056291,000125:                                                                                                  <span class="co">#  AND L FOR LONGBASE.  THE BITS A AND D ARE CONCERNED WITH THE VARIABLE INFORMATION. IF D IS SET TO 1, A PRIORITY</span>
+056292,000126:                                                                                                  <span class="co">#  OR DELTA TIME WILL BE READ FROM THE NEXT LOCATION AFTER THE OCTAL INFORMATION, IF THIS IS TO BE INDIRECT, THAT</span>
+056293,000127:                                                                                                  <span class="co">#  IS, THE NAME OF A LOCATION COMT+INING THE INFORMATION (DELTA TIME ONLY), THEN THIS IS GIVEN AS THE -GENADR OF</span>
+056294,000128:                                                                                                  <span class="co">#  THAT LOCATION WHICH CONTAINS THE DELTA TIME.  IF THE OLD PRIORITY OR DELTA TIME IS TO BE USED, THAT WHICH IS</span>
+056295,000129:                                                                                                  <span class="co">#  ALREADY IN THE VARIABLE STORAGE, THEN D IS SET TO 0. NEXT THE A BIT IS USED.  IF IT IS SET TO 0, THE ADDRESS</span>
+056296,000130:                                                                                                  <span class="co">#  THAT WOULD BE RESTARTED DURING A RESTART IS THE NEXT LOCATION AFTER THE  PHASE INFORMATION, THAT IS, EITHER</span>
+056297,000131:                                                                                                  <span class="co">#  (TC PHASCHNG) +2 OR +3, DEPENDING ON WHETHER D HAD BEEN SET OR NOT.  IF A IS SET TO 1, THEN THE ADDRESS THAT</span>
+056298,000132:                                                                                                  <span class="co">#  WOULD BE RESTARTED IS THE 2CADR THAT IS READ FROM THE NEXT TWO LOCATIONS.  EXAMPLES,</span>
+056299,000133: 
+056300,000134:                                                                                                  <span class="co">#                                          AD       TC     PHASCHNG        THIS WOULD CAUSE LOCATION AD +3 TO BE</span>
+056301,000135:                                                                                                  <span class="co">#                                          AD+1     OCT    05023           RESTARTED BY GROUP THREE WITHA PRIORITY</span>
+056302,000136:                                                                                                  <span class="co">#                                          AD+2     OCT    23000           OF 23.  NOTE UPON RETURNING IT WOULD</span>
+056303,000137:                                                                                                  <span class="co">#                                          AD+3                            ALSO GO TO AD+3</span>
+056304,000138: 
+056305,000139:                                                                                                  <span class="co">#                                          AD       TC     PHASCHNG        GROUP  1 WOULD CAUSE CAUSE CALLCALL TO</span>
+056306,000140:                                                                                                  <span class="co">#                                          AD+1     OCT    27441           BE STARTED AS A LONGCALL FROM THE TIME</span>
+056307,000141:                                                                                                  <span class="co">#                                          AD+2    -GENADR DELTIME         STORED IN LONGBASE (LONGBASE WAS SET) BY</span>
+056308,000142:                                                                                                  <span class="co">#                                          AD+3     2CADR  CALLCALL        A DELTATIME STORED IN DELTIME.  THE</span>
+056309,000143:                                                                                                  <span class="co">#                                          AD+4                            BBCON OF THE 2CADR SHOULD CONTAIN THE E</span>
+056310,000144:                                                                                                  <span class="co">#                                          AD+5                            BANK OF DELTIME. PHASCHNG RETURNS TO</span>
+056311,000145:                                                                                                  <span class="co">#                                                                          LOCATION AD+5</span>
+056312,000146: 
+056313,000147:                                                                                                  <span class="co">#  NOTE THAT IF A VARIABLE PRIORITY IS GIVEN FOR A JOB, THE JOB WILL BE RESTARTED AS A NOVAC IF THE PRIORITY IS</span>
+056314,000148:                                                                                                  <span class="co">#  NEGATIVE, AS A FINDVAC IF THE PRIORITY IS POSITIVE.</span>
+056315,000149: 
+056316,000150: 
+056317,000151:                                                                                                  <span class="co">#  TYPE B PHASCHNG IS A COMBINATION OF VARIABLE AND FIXED PHASE CHANGES. IT WILL START UP A JOB AS INDICATED</span>
+056318,000152:                                                                                                  <span class="co">#  BELOW AND ALSO START UP ONE FIXED RESTART, THAT IS EITHER AN G.1 OR  A G.ODD OR THE FIRST ENTRY OF G.EVEN</span>
+056319,000153:                                                                                                  <span class="co">#  DOUBLE ENTRY.  THE BIT INFORMATION IS AS FOLLOWS,</span>
+056320,000154: 
+056321,000155:                                                                                                  <span class="co">#                  TL1 DAP PPP PPP GGG</span>
+056322,000156: 
+056323,000157:                                                                                                  <span class="co">#  WHERE EACH LETTER OR NUMBER STANDS FOR A BIT.  THE G:S STAND FOR THE GROUP, OCTAL 1 - 7. THE P:S FOR THE FIXED</span>
+056324,000158:                                                                                                  <span class="co">#  PHASE INFORMATION, OCTAL 0 - 127. 1 MUST BE 1.  AND AGAIN T STANDS FOR THE TBASE AND L FOR LONGBASE. D THIS</span>
+056325,000159:                                                                                                  <span class="co">#  TIME STANDS ONLY FOR PRIORITY SINCE THIS WILL BE CONSIDERED A JOB, AND IT MUST BE GIVEN DIRECTLY IF GIVEN.</span>
+056326,000160:                                                                                                  <span class="co">#  AGAIN A STANDS FOR THE ADDRESS OF THE LOCATION TO BE RESTARTED, 1 IF THE 2CADR IS GIVEN , OR 0 IF IT IS TO BE</span>
+056327,000161:                                                                                                  <span class="co">#  THE NEXT LOCATION.(THE RETURN LOCATION OF PHASCHNG) EXAMPLES,</span>
+056328,000162: 
+056329,000163:                                                                                                  <span class="co">#                                          AD       TC     PHASCHNG        TBASE IS SET AND ARESTART CAUSE GROUP 3</span>
+056330,000164:                                                                                                  <span class="co">#                                          AD+1     OCT    56043           TO START THE JOB AJOBAJOB WITH PRIORITY</span>
+056331,000165:                                                                                                  <span class="co">#                                          AD+2     OCT    31000           31 AND THE FIRST ENTRY OF 3.4SPOT(WE CAN</span>
+056332,000166:                                                                                                  <span class="co">#                                          AD+3     2CADR  AJOBAJOB        ASSUME IT IS A TASK SINCE WE SET TBASE3)</span>
+056333,000167:                                                                                                  <span class="co">#                                          AD+4                            UPON RETURN FROM PHASCHNG CONTROL WOULD</span>
+056334,000168:                                                                                                  <span class="co">#                                          AD+5                            GO TO AD+5</span>
+056335,000169: 
+056336,000170:                                                                                                  <span class="co">#                                          AD       TC     PHASCHNG        UPON A RESTART THE LAST DISPLAY WOULD BE</span>
+056337,000171:                                                                                                  <span class="co">#                                          AD+1     OCT    10015           RESTARTED AND A JOB WITH THE PREVIOUSLY</span>
+056338,000172:                                                                                                  <span class="co">#                                          AD+2                            STORED PRIORITY WOULD BE BEGUN AT AD+2</span>
+056339,000173:                                                                                                  <span class="co">#                                                                          BY MEANS OF GROUP 5</span>
+056340,000174: 
 </pre>
 </span>
 </p>
@@ -317,17 +317,17 @@ Page 1286
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-056328,000176:                                                                                                  <span class="co">#  THE NOVAC-FINDVAC CHOICE FOR JOBS HOLDS HERE ALSO - NEGATIVE PRIORITY CAUSES A NOVAC CALL, POSITIVE A FINDVAC.</span>
-056329,000177: 
-056330,000178: 
-056331,000179:                                                                                                  <span class="co">#  SUMMARY OF BITS</span>
-056332,000180: 
-056333,000181:                                                                                                  <span class="co">#  TYPE A          TL0 00P PPP PPP GGG</span>
-056334,000182: 
-056335,000183:                                                                                                  <span class="co">#  TYPE B          TL1 DAP PPP PPP GGG</span>
-056336,000184: 
-056337,000185:                                                                                                  <span class="co">#  TYPE C          TL0 1AD XXX CJW GGG</span>
-056338,000186: 
+056342,000176:                                                                                                  <span class="co">#  THE NOVAC-FINDVAC CHOICE FOR JOBS HOLDS HERE ALSO - NEGATIVE PRIORITY CAUSES A NOVAC CALL, POSITIVE A FINDVAC.</span>
+056343,000177: 
+056344,000178: 
+056345,000179:                                                                                                  <span class="co">#  SUMMARY OF BITS</span>
+056346,000180: 
+056347,000181:                                                                                                  <span class="co">#  TYPE A          TL0 00P PPP PPP GGG</span>
+056348,000182: 
+056349,000183:                                                                                                  <span class="co">#  TYPE B          TL1 DAP PPP PPP GGG</span>
+056350,000184: 
+056351,000185:                                                                                                  <span class="co">#  TYPE C          TL0 1AD XXX CJW GGG</span>
+056352,000186: 
 </pre>
 </span>
 </p>
@@ -343,56 +343,56 @@ Page 1287
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-056340,000188:                                                                                                  <span class="co">#  2PHSCHNG IS USED WHEN ONE WISHES TO START UP A GROUP OR CHANGE A GROUP WHILE UNDER THE CONTROL OF A DIFFERENT</span>
-056341,000189:                                                                                                  <span class="co">#  GROUP. FOR EXAMPLE, CHANGE THE PHASE OF GROUP 3 WHILE THE PORTION OF THE PROGRAM IS UNDER GROUP 5. ALL 2PHSCHNG</span>
-056342,000190:                                                                                                  <span class="co">#  CALLS ARE MADE IN THE FOLLOWING MANNER,</span>
-056343,000191: 
-056344,000192:                                                                                                  <span class="co">#                                                   TC     2PHSCHNG</span>
-056345,000193:                                                                                                  <span class="co">#                                                   OCT    XXXXX</span>
-056346,000194:                                                                                                  <span class="co">#                                                   OCT    YYYYY</span>
-056347,000195: 
-056348,000196:                                                                                                  <span class="co">#  WHERE OCT XXXXX MUST BE OF TYPE A AND OCT YYYYY MAY BE OF EITHER TYPE A OR TYPE B OR TYPEC.  THERE IS ONE</span>
-056349,000197:                                                                                                  <span class="co">#  DIFFERENCE --- NOTE- IF LONGBASE IS TO BE SET THIS INFORMATION IS GIVEN IN THE OCT YYYYY INFORMATION, IT WILL</span>
-056350,000198:                                                                                                  <span class="co">#  BE DISREGARDED IF GIVEN WITH THE OCT XXXXX INFORMATION. A COUPLE OF EXAMPLES MAY HELP,</span>
-056351,000199: 
-056352,000200:                                                                                                  <span class="co">#                                          AD       TC     2PHSCHNG        SET TBASE3 AND IF A RESTART OCCURS START</span>
-056353,000201:                                                                                                  <span class="co">#                                          AD+1     OCT    40083           THE TWO ENTRIES IN 3.8 TABLE LOCATION</span>
-056354,000202:                                                                                                  <span class="co">#                                          AD+2     OCT    05025           THIS IS OF TYPE C, SET THE JOB TO BE</span>
-056355,000203:                                                                                                  <span class="co">#                                          AD+3     OCT    18000           TO BE LOCATION AD+4, WITH A PRIORITY 18,</span>
-056356,000204:                                                                                                  <span class="co">#                                          AD+4                            FOR GROUP 5 PHASE INFORMATION</span>
-056357,000205: 
-056358,000206:    5340                                           <span class="ps">COUNT*  </span> $$/PHASE                              
-<a name="3250485343484E47"></a>056359,000207:    5340           00004        <span class="sm">2PHSCHNG</span>           <span class="op">INHINT  </span>                                       <span class="co">#  THE ENTRY FOR A DOUBLE PHASE CHANGE</span>
-056360,000208:    5341           50002                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-056361,000209:    5342           30000                           <span class="op">CA      </span> 0                                     
-056362,000210:    5343           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-056363,000211:    5344           54072                           <span class="op">TS      </span> <a href="#54454D505032">TEMPP2</a>                                
-056364,000212: 
-056365,000213:    5345           74757                           <span class="op">MASK    </span> <a href="SERVICE_ROUTINES.agc.html#4F435437">OCT7</a>                                  
-056366,000214:    5346           60000                           <span class="op">DOUBLE  </span>                                       
-056367,000215:    5347           54071                           <span class="op">TS      </span> <a href="#54454D504732">TEMPG2</a>                                
-056368,000216: 
-056369,000217:    5350           30072                           <span class="op">CA      </span> <a href="#54454D505032">TEMPP2</a>                                
-056370,000218:    5351           75030                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543137373730">OCT17770</a>                              <span class="co">#  NEED ONLY 1770, BUT WHY GET A NEW CONST.</span>
-056371,000219:    5352           00006                           <span class="op">EXTEND  </span>                                       
-056372,000220:    5353           74740                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543132">BIT12</a>                                 
-056373,000221:    5354           56072                           <span class="op">XCH     </span> <a href="#54454D505032">TEMPP2</a>                                
-056374,000222: 
-056375,000223:    5355           74735                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543135">BIT15</a>                                 
-056376,000224:    5356           54066                           <span class="op">TS      </span> <a href="#54454D50535732">TEMPSW2</a>                               <span class="co">#  INDICATES WHETHER TO SET TBASE OR NOT</span>
-056377,000225: 
-056378,000226:    5357           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-056379,000227:    5360           30000                           <span class="op">CA      </span> 0                                     
-056380,000228:    5361           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-056381,000229:    5362           54065                           <span class="op">TS      </span> <a href="#54454D505357">TEMPSW</a>                                
-056382,000230: 
-056383,000231:    5363           15374                           <span class="op">TCF     </span> <a href="#504841534A554D50">PHASJUMP</a>                              
-056384,000232: 
-<a name="5048415343484E47"></a>056385,000233:    5364           00004        <span class="sm">PHASCHNG</span>           <span class="op">INHINT  </span>                                       <span class="co">#  NORMAL PHASCHNG ENTRY POINT.</span>
-056386,000234:    5365           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-056387,000235:    5366           30000                           <span class="op">CA      </span> 0                                     
-056388,000236:    5367           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-<a name="50485343484E4741"></a>056389,000237:    5370           00004        <span class="sm">PHSCHNGA</span>           <span class="op">INHINT  </span>                                       <span class="co">#  FIRST OCTAL PARAMETER IN A.</span>
+056354,000188:                                                                                                  <span class="co">#  2PHSCHNG IS USED WHEN ONE WISHES TO START UP A GROUP OR CHANGE A GROUP WHILE UNDER THE CONTROL OF A DIFFERENT</span>
+056355,000189:                                                                                                  <span class="co">#  GROUP. FOR EXAMPLE, CHANGE THE PHASE OF GROUP 3 WHILE THE PORTION OF THE PROGRAM IS UNDER GROUP 5. ALL 2PHSCHNG</span>
+056356,000190:                                                                                                  <span class="co">#  CALLS ARE MADE IN THE FOLLOWING MANNER,</span>
+056357,000191: 
+056358,000192:                                                                                                  <span class="co">#                                                   TC     2PHSCHNG</span>
+056359,000193:                                                                                                  <span class="co">#                                                   OCT    XXXXX</span>
+056360,000194:                                                                                                  <span class="co">#                                                   OCT    YYYYY</span>
+056361,000195: 
+056362,000196:                                                                                                  <span class="co">#  WHERE OCT XXXXX MUST BE OF TYPE A AND OCT YYYYY MAY BE OF EITHER TYPE A OR TYPE B OR TYPEC.  THERE IS ONE</span>
+056363,000197:                                                                                                  <span class="co">#  DIFFERENCE --- NOTE- IF LONGBASE IS TO BE SET THIS INFORMATION IS GIVEN IN THE OCT YYYYY INFORMATION, IT WILL</span>
+056364,000198:                                                                                                  <span class="co">#  BE DISREGARDED IF GIVEN WITH THE OCT XXXXX INFORMATION. A COUPLE OF EXAMPLES MAY HELP,</span>
+056365,000199: 
+056366,000200:                                                                                                  <span class="co">#                                          AD       TC     2PHSCHNG        SET TBASE3 AND IF A RESTART OCCURS START</span>
+056367,000201:                                                                                                  <span class="co">#                                          AD+1     OCT    40083           THE TWO ENTRIES IN 3.8 TABLE LOCATION</span>
+056368,000202:                                                                                                  <span class="co">#                                          AD+2     OCT    05025           THIS IS OF TYPE C, SET THE JOB TO BE</span>
+056369,000203:                                                                                                  <span class="co">#                                          AD+3     OCT    18000           TO BE LOCATION AD+4, WITH A PRIORITY 18,</span>
+056370,000204:                                                                                                  <span class="co">#                                          AD+4                            FOR GROUP 5 PHASE INFORMATION</span>
+056371,000205: 
+056372,000206:    5340                                           <span class="ps">COUNT*  </span> $$/PHASE                              
+<a name="3250485343484E47"></a>056373,000207:    5340           00004        <span class="sm">2PHSCHNG</span>           <span class="op">INHINT  </span>                                       <span class="co">#  THE ENTRY FOR A DOUBLE PHASE CHANGE</span>
+056374,000208:    5341           50002                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+056375,000209:    5342           30000                           <span class="op">CA      </span> 0                                     
+056376,000210:    5343           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+056377,000211:    5344           54072                           <span class="op">TS      </span> <a href="#54454D505032">TEMPP2</a>                                
+056378,000212: 
+056379,000213:    5345           74757                           <span class="op">MASK    </span> <a href="SERVICE_ROUTINES.agc.html#4F435437">OCT7</a>                                  
+056380,000214:    5346           60000                           <span class="op">DOUBLE  </span>                                       
+056381,000215:    5347           54071                           <span class="op">TS      </span> <a href="#54454D504732">TEMPG2</a>                                
+056382,000216: 
+056383,000217:    5350           30072                           <span class="op">CA      </span> <a href="#54454D505032">TEMPP2</a>                                
+056384,000218:    5351           75030                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543137373730">OCT17770</a>                              <span class="co">#  NEED ONLY 1770, BUT WHY GET A NEW CONST.</span>
+056385,000219:    5352           00006                           <span class="op">EXTEND  </span>                                       
+056386,000220:    5353           74740                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543132">BIT12</a>                                 
+056387,000221:    5354           56072                           <span class="op">XCH     </span> <a href="#54454D505032">TEMPP2</a>                                
+056388,000222: 
+056389,000223:    5355           74735                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543135">BIT15</a>                                 
+056390,000224:    5356           54066                           <span class="op">TS      </span> <a href="#54454D50535732">TEMPSW2</a>                               <span class="co">#  INDICATES WHETHER TO SET TBASE OR NOT</span>
+056391,000225: 
+056392,000226:    5357           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+056393,000227:    5360           30000                           <span class="op">CA      </span> 0                                     
+056394,000228:    5361           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+056395,000229:    5362           54065                           <span class="op">TS      </span> <a href="#54454D505357">TEMPSW</a>                                
+056396,000230: 
+056397,000231:    5363           15374                           <span class="op">TCF     </span> <a href="#504841534A554D50">PHASJUMP</a>                              
+056398,000232: 
+<a name="5048415343484E47"></a>056399,000233:    5364           00004        <span class="sm">PHASCHNG</span>           <span class="op">INHINT  </span>                                       <span class="co">#  NORMAL PHASCHNG ENTRY POINT.</span>
+056400,000234:    5365           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+056401,000235:    5366           30000                           <span class="op">CA      </span> 0                                     
+056402,000236:    5367           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+<a name="50485343484E4741"></a>056403,000237:    5370           00004        <span class="sm">PHSCHNGA</span>           <span class="op">INHINT  </span>                                       <span class="co">#  FIRST OCTAL PARAMETER IN A.</span>
 </pre>
 </span>
 </p>
@@ -408,56 +408,56 @@ Page 1288
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-056391,000239:    5371           54065                           <span class="op">TS      </span> <a href="#54454D505357">TEMPSW</a>                                
-056392,000240:    5372           34753                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-056393,000241:    5373           54066                           <span class="op">TS      </span> <a href="#54454D50535732">TEMPSW2</a>                               
-<a name="504841534A554D50"></a>056394,000242:    5374           00006        <span class="sm">PHASJUMP</span>           <span class="op">EXTEND  </span>                                       
-056395,000243:    5375           35400                           <span class="op">DCA     </span> <a href="#4144525043484E32">ADRPCHN2</a>                              <span class="co">#  OFF TO SWITCHED BANK</span>
-056396,000244:    5376           52006                           <span class="op">DTCB    </span>                                       
-056397,000245: 
-056398,000246:    5377  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
-<a name="4144525043484E32"></a>056399,000247:    5377           02224 20103  <span class="sm">ADRPCHN2</span>           <span class="ps">2CADR   </span> <a href="#50485343484E4732">PHSCHNG2</a>                              
-056400,000248: 
-056401,000249: 
-056402,000250: 
-<a name="4F4E454F5254574F"></a>056403,000251:    5401           22073        <span class="sm">ONEORTWO</span>           <span class="op">LXCH    </span> <a href="#54454D504242434E">TEMPBBCN</a>                              
-056404,000252:    5402           22006                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-056405,000253:    5403           22073                           <span class="op">LXCH    </span> <a href="#54454D504242434E">TEMPBBCN</a>                              
-056406,000254: 
-056407,000255:    5404           75024                           <span class="op">MASK    </span> <a href="#4F43543134303030">OCT14000</a>                              <span class="co">#  SEE WHAT KIND OF PHASE CHANGE IT IS</span>
-056408,000256:    5405           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-056409,000257:    5406           17762                           <span class="op">TCF     </span> <a href="#434845434B42">CHECKB</a>                                <span class="co">#   IT IS OF TYPE :B:</span>
-056410,000258: 
-056411,000259:    5407           30062                           <span class="op">CA      </span> <a href="#54454D5050">TEMPP</a>                                 
-056412,000260:    5410           74745                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495437">BIT7</a>                                  
-056413,000261:    5411           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#   SHALL WE USE THE OLD PRIORITY</span>
-056414,000262:    5412           15434                           <span class="op">TCF     </span> <a href="#4745545052494F">GETPRIO</a>                               <span class="co">#   NO GET A NEW PRIORITY (OR DELTA T)</span>
-056415,000263: 
-<a name="4F4C445052494F"></a>056416,000264:    5413           50061        <span class="sm">OLDPRIO </span>           <span class="op">NDX     </span> <a href="#54454D5047">TEMPG</a>                                 <span class="co">#   USE THE OLD PRIORITY (OR DELTA T)</span>
-056417,000265:    5414           31051                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5048535052445431">PHSPRDT1</a>   -2                         
-056418,000266:    5415           54070                           <span class="op">TS      </span> <a href="#54454D505052">TEMPPR</a>                                
-056419,000267: 
-<a name="434F4E31"></a>056420,000268:    5416           30062        <span class="sm">CON1    </span>           <span class="op">CA      </span> <a href="#54454D5050">TEMPP</a>                                 <span class="co">#  SEE IF A 2CADR IS GIVEN</span>
-056421,000269:    5417           74744                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  
-056422,000270:    5420           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-056423,000271:    5421           15440                           <span class="op">TCF     </span> <a href="#4745544E45574E4D">GETNEWNM</a>                              
-056424,000272: 
-056425,000273:    5422           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-056426,000274:    5423           54063                           <span class="op">TS      </span> <a href="#54454D504E4D">TEMPNM</a>                                
-056427,000275:    5424           30006                           <span class="op">CA      </span> <a href="#4242">BB</a>                                    
-056428,000276:    5425           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  PICK UP USERS SUPERBANK</span>
-056429,000277:    5426           04007                           <span class="op">ROR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5355504552424E4B">SUPERBNK</a>                              
-056430,000278:    5427           54064                           <span class="op">TS      </span> <a href="#54454D504242">TEMPBB</a>                                
-056431,000279: 
-<a name="544F434F4E32"></a>056432,000280:    5430           35433        <span class="sm">TOCON2  </span>           <span class="op">CA      </span> <a href="#434F4E32414452">CON2ADR</a>                               <span class="co">#  BACK TO SWITCHED BANK</span>
-056433,000281:    5431           22073                           <span class="op">LXCH    </span> <a href="#54454D504242434E">TEMPBBCN</a>                              
-056434,000282:    5432           52006                           <span class="op">DTCB    </span>                                       
-056435,000283: 
-<a name="434F4E32414452"></a>056436,000284:    5433           02312        <span class="sm">CON2ADR </span>           <span class="ps">GENADR  </span> <a href="#434F4E32">CON2</a>                                  
-056437,000285: 
-<a name="4745545052494F"></a>056438,000286:    5434           50002        <span class="sm">GETPRIO </span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  DON:T CARE IF DIRECT OR INDIRECT</span>
-056439,000287:    5435           30000                           <span class="op">CA      </span> 0                                     <span class="co">#  LEAVE THAT DECISION TO RESTARTS</span>
-056440,000288:    5436           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  OBTAIN RETURN ADDRESS</span>
+056405,000239:    5371           54065                           <span class="op">TS      </span> <a href="#54454D505357">TEMPSW</a>                                
+056406,000240:    5372           34753                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+056407,000241:    5373           54066                           <span class="op">TS      </span> <a href="#54454D50535732">TEMPSW2</a>                               
+<a name="504841534A554D50"></a>056408,000242:    5374           00006        <span class="sm">PHASJUMP</span>           <span class="op">EXTEND  </span>                                       
+056409,000243:    5375           35400                           <span class="op">DCA     </span> <a href="#4144525043484E32">ADRPCHN2</a>                              <span class="co">#  OFF TO SWITCHED BANK</span>
+056410,000244:    5376           52006                           <span class="op">DTCB    </span>                                       
+056411,000245: 
+056412,000246:    5377  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
+<a name="4144525043484E32"></a>056413,000247:    5377           02224 20103  <span class="sm">ADRPCHN2</span>           <span class="ps">2CADR   </span> <a href="#50485343484E4732">PHSCHNG2</a>                              
+056414,000248: 
+056415,000249: 
+056416,000250: 
+<a name="4F4E454F5254574F"></a>056417,000251:    5401           22073        <span class="sm">ONEORTWO</span>           <span class="op">LXCH    </span> <a href="#54454D504242434E">TEMPBBCN</a>                              
+056418,000252:    5402           22006                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+056419,000253:    5403           22073                           <span class="op">LXCH    </span> <a href="#54454D504242434E">TEMPBBCN</a>                              
+056420,000254: 
+056421,000255:    5404           75024                           <span class="op">MASK    </span> <a href="#4F43543134303030">OCT14000</a>                              <span class="co">#  SEE WHAT KIND OF PHASE CHANGE IT IS</span>
+056422,000256:    5405           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+056423,000257:    5406           17762                           <span class="op">TCF     </span> <a href="#434845434B42">CHECKB</a>                                <span class="co">#   IT IS OF TYPE :B:</span>
+056424,000258: 
+056425,000259:    5407           30062                           <span class="op">CA      </span> <a href="#54454D5050">TEMPP</a>                                 
+056426,000260:    5410           74745                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495437">BIT7</a>                                  
+056427,000261:    5411           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#   SHALL WE USE THE OLD PRIORITY</span>
+056428,000262:    5412           15434                           <span class="op">TCF     </span> <a href="#4745545052494F">GETPRIO</a>                               <span class="co">#   NO GET A NEW PRIORITY (OR DELTA T)</span>
+056429,000263: 
+<a name="4F4C445052494F"></a>056430,000264:    5413           50061        <span class="sm">OLDPRIO </span>           <span class="op">NDX     </span> <a href="#54454D5047">TEMPG</a>                                 <span class="co">#   USE THE OLD PRIORITY (OR DELTA T)</span>
+056431,000265:    5414           31051                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5048535052445431">PHSPRDT1</a>   -2                         
+056432,000266:    5415           54070                           <span class="op">TS      </span> <a href="#54454D505052">TEMPPR</a>                                
+056433,000267: 
+<a name="434F4E31"></a>056434,000268:    5416           30062        <span class="sm">CON1    </span>           <span class="op">CA      </span> <a href="#54454D5050">TEMPP</a>                                 <span class="co">#  SEE IF A 2CADR IS GIVEN</span>
+056435,000269:    5417           74744                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  
+056436,000270:    5420           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+056437,000271:    5421           15440                           <span class="op">TCF     </span> <a href="#4745544E45574E4D">GETNEWNM</a>                              
+056438,000272: 
+056439,000273:    5422           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+056440,000274:    5423           54063                           <span class="op">TS      </span> <a href="#54454D504E4D">TEMPNM</a>                                
+056441,000275:    5424           30006                           <span class="op">CA      </span> <a href="#4242">BB</a>                                    
+056442,000276:    5425           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  PICK UP USERS SUPERBANK</span>
+056443,000277:    5426           04007                           <span class="op">ROR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5355504552424E4B">SUPERBNK</a>                              
+056444,000278:    5427           54064                           <span class="op">TS      </span> <a href="#54454D504242">TEMPBB</a>                                
+056445,000279: 
+<a name="544F434F4E32"></a>056446,000280:    5430           35433        <span class="sm">TOCON2  </span>           <span class="op">CA      </span> <a href="#434F4E32414452">CON2ADR</a>                               <span class="co">#  BACK TO SWITCHED BANK</span>
+056447,000281:    5431           22073                           <span class="op">LXCH    </span> <a href="#54454D504242434E">TEMPBBCN</a>                              
+056448,000282:    5432           52006                           <span class="op">DTCB    </span>                                       
+056449,000283: 
+<a name="434F4E32414452"></a>056450,000284:    5433           02312        <span class="sm">CON2ADR </span>           <span class="ps">GENADR  </span> <a href="#434F4E32">CON2</a>                                  
+056451,000285: 
+<a name="4745545052494F"></a>056452,000286:    5434           50002        <span class="sm">GETPRIO </span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  DON:T CARE IF DIRECT OR INDIRECT</span>
+056453,000287:    5435           30000                           <span class="op">CA      </span> 0                                     <span class="co">#  LEAVE THAT DECISION TO RESTARTS</span>
+056454,000288:    5436           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  OBTAIN RETURN ADDRESS</span>
 </pre>
 </span>
 </p>
@@ -473,55 +473,55 @@ Page 1289
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-056442,000290:    5437           15415                           <span class="op">TCF     </span> <a href="#434F4E31">CON1</a>       -1                         
-056443,000291: 
-<a name="4745544E45574E4D"></a>056444,000292:    5440           00006        <span class="sm">GETNEWNM</span>           <span class="op">EXTEND  </span>                                       
-056445,000293:    5441           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-056446,000294:    5442           30001                           <span class="op">DCA     </span> 0                                     
-056447,000295:    5443           52064                           <span class="op">DXCH    </span> <a href="#54454D504E4D">TEMPNM</a>                                
-056448,000296:    5444           34752                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   
-056449,000297:    5445           26002                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  OBTAIN RETURN ADDRESS</span>
-056450,000298: 
-056451,000299:    5446           15430                           <span class="op">TCF     </span> <a href="#544F434F4E32">TOCON2</a>                                
-056452,000300: 
-<a name="4F43543134303030"></a>056453,000301:    5447     5024               <span class="sm">OCT14000</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3134">PRIO14</a>                                
-<a name="54454D5047"></a>056454,000302:    5447     0061               <span class="sm">TEMPG   </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-<a name="54454D5050"></a>056455,000303:    5447     0062               <span class="sm">TEMPP   </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
-<a name="54454D504E4D"></a>056456,000304:    5447     0063               <span class="sm">TEMPNM  </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5033">ITEMP3</a>                                
-<a name="54454D504242"></a>056457,000305:    5447     0064               <span class="sm">TEMPBB  </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5034">ITEMP4</a>                                
-<a name="54454D505357"></a>056458,000306:    5447     0065               <span class="sm">TEMPSW  </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5035">ITEMP5</a>                                
-<a name="54454D50535732"></a>056459,000307:    5447     0066               <span class="sm">TEMPSW2 </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5036">ITEMP6</a>                                
-<a name="54454D505052"></a>056460,000308:    5447     0070               <span class="sm">TEMPPR  </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-<a name="54454D504732"></a>056461,000309:    5447     0071               <span class="sm">TEMPG2  </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454732">RUPTREG2</a>                              
-<a name="54454D505032"></a>056462,000310:    5447     0072               <span class="sm">TEMPP2  </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454733">RUPTREG3</a>                              
-056463,000311: 
-<a name="54454D504242434E"></a>056464,000312:    5447     0073               <span class="sm">TEMPBBCN</span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454734">RUPTREG4</a>                              
-<a name="4242"></a>056465,000313:    5447  0000006               <span class="sm">BB      </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-056466,000314: 
-056467,000315: 
-056468,000316: 14,3775                                           <span class="ps">BANK    </span> 14                                    
-056469,000317: 10,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#5048415345544142">PHASETAB</a>                              
-056470,000318: 10,2000                                           <span class="ps">BANK    </span>                                       
-056471,000319: 
-056472,000320: 10,2224  E3,1436                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5048534E414D4531">PHSNAME1</a>                              
-056473,000321: 10,2224                                           <span class="ps">COUNT*  </span> $$/PHASE                              
-<a name="50485343484E4732"></a>056474,000322: 10,2224           22073        <span class="sm">PHSCHNG2</span>           <span class="op">LXCH    </span> <a href="#54454D504242434E">TEMPBBCN</a>                              
-056475,000323: 10,2225           30065                           <span class="op">CA      </span> <a href="#54454D505357">TEMPSW</a>                                
-056476,000324: 10,2226           74757                           <span class="op">MASK    </span> <a href="SERVICE_ROUTINES.agc.html#4F435437">OCT7</a>                                  
-056477,000325: 10,2227           60000                           <span class="op">DOUBLE  </span>                                       
-056478,000326: 10,2230           54061                           <span class="op">TS      </span> <a href="#54454D5047">TEMPG</a>                                 
-056479,000327: 
-056480,000328: 10,2231           30065                           <span class="op">CA      </span> <a href="#54454D505357">TEMPSW</a>                                
-056481,000329: 10,2232           75030                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543137373730">OCT17770</a>                              
-056482,000330: 10,2233           00006                           <span class="op">EXTEND  </span>                                       
-056483,000331: 10,2234           74740                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543132">BIT12</a>                                 
-056484,000332: 10,2235           54062                           <span class="op">TS      </span> <a href="#54454D5050">TEMPP</a>                                 
-056485,000333: 
-056486,000334: 10,2236           30065                           <span class="op">CA      </span> <a href="#54454D505357">TEMPSW</a>                                
-056487,000335: 10,2237           74101                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543630303030">OCT60000</a>                              
-056488,000336: 10,2240           56065                           <span class="op">XCH     </span> <a href="#54454D505357">TEMPSW</a>                                
-056489,000337: 10,2241           75024                           <span class="op">MASK    </span> <a href="#4F43543134303030">OCT14000</a>                              
-056490,000338: 10,2242           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+056456,000290:    5437           15415                           <span class="op">TCF     </span> <a href="#434F4E31">CON1</a>       -1                         
+056457,000291: 
+<a name="4745544E45574E4D"></a>056458,000292:    5440           00006        <span class="sm">GETNEWNM</span>           <span class="op">EXTEND  </span>                                       
+056459,000293:    5441           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+056460,000294:    5442           30001                           <span class="op">DCA     </span> 0                                     
+056461,000295:    5443           52064                           <span class="op">DXCH    </span> <a href="#54454D504E4D">TEMPNM</a>                                
+056462,000296:    5444           34752                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   
+056463,000297:    5445           26002                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  OBTAIN RETURN ADDRESS</span>
+056464,000298: 
+056465,000299:    5446           15430                           <span class="op">TCF     </span> <a href="#544F434F4E32">TOCON2</a>                                
+056466,000300: 
+<a name="4F43543134303030"></a>056467,000301:    5447     5024               <span class="sm">OCT14000</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3134">PRIO14</a>                                
+<a name="54454D5047"></a>056468,000302:    5447     0061               <span class="sm">TEMPG   </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+<a name="54454D5050"></a>056469,000303:    5447     0062               <span class="sm">TEMPP   </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
+<a name="54454D504E4D"></a>056470,000304:    5447     0063               <span class="sm">TEMPNM  </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5033">ITEMP3</a>                                
+<a name="54454D504242"></a>056471,000305:    5447     0064               <span class="sm">TEMPBB  </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5034">ITEMP4</a>                                
+<a name="54454D505357"></a>056472,000306:    5447     0065               <span class="sm">TEMPSW  </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5035">ITEMP5</a>                                
+<a name="54454D50535732"></a>056473,000307:    5447     0066               <span class="sm">TEMPSW2 </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5036">ITEMP6</a>                                
+<a name="54454D505052"></a>056474,000308:    5447     0070               <span class="sm">TEMPPR  </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+<a name="54454D504732"></a>056475,000309:    5447     0071               <span class="sm">TEMPG2  </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454732">RUPTREG2</a>                              
+<a name="54454D505032"></a>056476,000310:    5447     0072               <span class="sm">TEMPP2  </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454733">RUPTREG3</a>                              
+056477,000311: 
+<a name="54454D504242434E"></a>056478,000312:    5447     0073               <span class="sm">TEMPBBCN</span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454734">RUPTREG4</a>                              
+<a name="4242"></a>056479,000313:    5447  0000006               <span class="sm">BB      </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+056480,000314: 
+056481,000315: 
+056482,000316: 14,3775                                           <span class="ps">BANK    </span> 14                                    
+056483,000317: 10,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#5048415345544142">PHASETAB</a>                              
+056484,000318: 10,2000                                           <span class="ps">BANK    </span>                                       
+056485,000319: 
+056486,000320: 10,2224  E3,1436                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5048534E414D4531">PHSNAME1</a>                              
+056487,000321: 10,2224                                           <span class="ps">COUNT*  </span> $$/PHASE                              
+<a name="50485343484E4732"></a>056488,000322: 10,2224           22073        <span class="sm">PHSCHNG2</span>           <span class="op">LXCH    </span> <a href="#54454D504242434E">TEMPBBCN</a>                              
+056489,000323: 10,2225           30065                           <span class="op">CA      </span> <a href="#54454D505357">TEMPSW</a>                                
+056490,000324: 10,2226           74757                           <span class="op">MASK    </span> <a href="SERVICE_ROUTINES.agc.html#4F435437">OCT7</a>                                  
+056491,000325: 10,2227           60000                           <span class="op">DOUBLE  </span>                                       
+056492,000326: 10,2230           54061                           <span class="op">TS      </span> <a href="#54454D5047">TEMPG</a>                                 
+056493,000327: 
+056494,000328: 10,2231           30065                           <span class="op">CA      </span> <a href="#54454D505357">TEMPSW</a>                                
+056495,000329: 10,2232           75030                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543137373730">OCT17770</a>                              
+056496,000330: 10,2233           00006                           <span class="op">EXTEND  </span>                                       
+056497,000331: 10,2234           74740                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543132">BIT12</a>                                 
+056498,000332: 10,2235           54062                           <span class="op">TS      </span> <a href="#54454D5050">TEMPP</a>                                 
+056499,000333: 
+056500,000334: 10,2236           30065                           <span class="op">CA      </span> <a href="#54454D505357">TEMPSW</a>                                
+056501,000335: 10,2237           74101                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543630303030">OCT60000</a>                              
+056502,000336: 10,2240           56065                           <span class="op">XCH     </span> <a href="#54454D505357">TEMPSW</a>                                
+056503,000337: 10,2241           75024                           <span class="op">MASK    </span> <a href="#4F43543134303030">OCT14000</a>                              
+056504,000338: 10,2242           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
 </pre>
 </span>
 </p>
@@ -537,56 +537,56 @@ Page 1290
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-056492,000340: 10,2243           15401                           <span class="op">TCF     </span> <a href="#4F4E454F5254574F">ONEORTWO</a>                              
-056493,000341: 
-056494,000342: 10,2244           30062                           <span class="op">CA      </span> <a href="#54454D5050">TEMPP</a>                                 <span class="co">#  START STORING THE PHASE INFORMATION</span>
-056495,000343: 10,2245           50061                           <span class="op">NDX     </span> <a href="#54454D5047">TEMPG</a>                                 
-056496,000344: 10,2246           54750                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504841534531">PHASE1</a>     -2                         
-056497,000345: 
-<a name="42454C4F5731"></a>056498,000346: 10,2247           10066        <span class="sm">BELOW1  </span>           <span class="op">CCS     </span> <a href="#54454D50535732">TEMPSW2</a>                               <span class="co">#  IS IT A PHASCHNG OR A 2PHSCHNG</span>
-056499,000347: 10,2250           12264                           <span class="op">TCF     </span> <a href="#42454C4F5732">BELOW2</a>                                <span class="co">#  IT:S A PHASCHNG</span>
-056500,000348: 
-056501,000349: 10,2251           12252                           <span class="op">TCF     </span> +1                                    <span class="co">#  IT:S A 2PHSCHNG</span>
-056502,000350: 10,2252           40072                           <span class="op">CS      </span> <a href="#54454D505032">TEMPP2</a>                                
-056503,000351: 10,2253           22072                           <span class="op">LXCH    </span> <a href="#54454D505032">TEMPP2</a>                                
-056504,000352: 10,2254           50071                           <span class="op">NDX     </span> <a href="#54454D504732">TEMPG2</a>                                
-056505,000353: 10,2255           52750                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534531">-PHASE1</a>    -2                         
-056506,000354: 
-056507,000355: 10,2256           10066                           <span class="op">CCS     </span> <a href="#54454D50535732">TEMPSW2</a>                               
-056508,000356: 10,2257           12260                           <span class="op">NOOP    </span>                                       <span class="co">#  CAN:T GET HERE</span>
-056509,000357: 10,2260           12264                           <span class="op">TCF     </span> <a href="#42454C4F5732">BELOW2</a>                                
-056510,000358: 
-056511,000359: 10,2261           40025                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 
-056512,000360: 10,2262           50071                           <span class="op">NDX     </span> <a href="#54454D504732">TEMPG2</a>                                
-056513,000361: 10,2263           55050                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544241534531">TBASE1</a>     -2                         
-056514,000362: 
-<a name="42454C4F5732"></a>056515,000363: 10,2264           10065        <span class="sm">BELOW2  </span>           <span class="op">CCS     </span> <a href="#54454D505357">TEMPSW</a>                                <span class="co">#  SEE IF WE SHOULD SET TBASE OR LONGBASE</span>
-056516,000364: 10,2265           12300                           <span class="op">TCF     </span> <a href="#42454C4F5733">BELOW3</a>                                <span class="co">#  SET LONGBASE ONLY</span>
-056517,000365: 10,2266           12303                           <span class="op">TCF     </span> <a href="#42454C4F5734">BELOW4</a>                                <span class="co">#  SET NEITHER</span>
-056518,000366: 
-056519,000367: 10,2267           40025                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 <span class="co">#  SET TBASE TO BEGIN WITH</span>
-056520,000368: 10,2270           50061                           <span class="op">NDX     </span> <a href="#54454D5047">TEMPG</a>                                 
-056521,000369: 10,2271           55050                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544241534531">TBASE1</a>     -2                         
-056522,000370: 
-056523,000371: 10,2272           30065                           <span class="op">CA      </span> <a href="#54454D505357">TEMPSW</a>                                <span class="co">#   SHALL WE NOW SET LONGBASE</span>
-056524,000372: 10,2273           62276                           <span class="op">AD      </span> <a href="#4249543134434F4D">BIT14COM</a>                              
-056525,000373: 10,2274           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-056526,000374: 10,2275           12276                           <span class="op">NOOP    </span>                                       <span class="co">#  ***** CANT GET HERE *****</span>
-<a name="4249543134434F4D"></a>056527,000375: 10,2276           17777        <span class="sm">BIT14COM</span>           <span class="ps">OCT     </span> 17777                                 <span class="co">#  ***** CANT GET HERE *****</span>
-056528,000376: 10,2277           12303                           <span class="op">TCF     </span> <a href="#42454C4F5734">BELOW4</a>                                <span class="co">#  NO WE NEED ONLY SET TBASE</span>
-056529,000377: 
-<a name="42454C4F5733"></a>056530,000378: 10,2300           00006        <span class="sm">BELOW3  </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  SET LONGBASE</span>
-056531,000379: 10,2301           30025                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 
-056532,000380: 10,2302           53151                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4742415345">LONGBASE</a>                              
-056533,000381: 
-<a name="42454C4F5734"></a>056534,000382: 10,2303           40062        <span class="sm">BELOW4  </span>           <span class="op">CS      </span> <a href="#54454D5050">TEMPP</a>                                 <span class="co">#  AND STORE THE FINAL PART OF THE PHASE</span>
-056535,000383: 10,2304           50061                           <span class="op">NDX     </span> <a href="#54454D5047">TEMPG</a>                                 
-056536,000384: 10,2305           54747                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534531">-PHASE1</a>    -2                         
-056537,000385: 
-056538,000386: 10,2306           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-056539,000387: 10,2307           22073                           <span class="op">LXCH    </span> <a href="#54454D504242434E">TEMPBBCN</a>                              
-056540,000388: 10,2310           00003                           <span class="op">RELINT  </span>                                       
-056541,000389: 10,2311           52006                           <span class="op">DTCB    </span>                                       
+056506,000340: 10,2243           15401                           <span class="op">TCF     </span> <a href="#4F4E454F5254574F">ONEORTWO</a>                              
+056507,000341: 
+056508,000342: 10,2244           30062                           <span class="op">CA      </span> <a href="#54454D5050">TEMPP</a>                                 <span class="co">#  START STORING THE PHASE INFORMATION</span>
+056509,000343: 10,2245           50061                           <span class="op">NDX     </span> <a href="#54454D5047">TEMPG</a>                                 
+056510,000344: 10,2246           54750                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504841534531">PHASE1</a>     -2                         
+056511,000345: 
+<a name="42454C4F5731"></a>056512,000346: 10,2247           10066        <span class="sm">BELOW1  </span>           <span class="op">CCS     </span> <a href="#54454D50535732">TEMPSW2</a>                               <span class="co">#  IS IT A PHASCHNG OR A 2PHSCHNG</span>
+056513,000347: 10,2250           12264                           <span class="op">TCF     </span> <a href="#42454C4F5732">BELOW2</a>                                <span class="co">#  IT:S A PHASCHNG</span>
+056514,000348: 
+056515,000349: 10,2251           12252                           <span class="op">TCF     </span> +1                                    <span class="co">#  IT:S A 2PHSCHNG</span>
+056516,000350: 10,2252           40072                           <span class="op">CS      </span> <a href="#54454D505032">TEMPP2</a>                                
+056517,000351: 10,2253           22072                           <span class="op">LXCH    </span> <a href="#54454D505032">TEMPP2</a>                                
+056518,000352: 10,2254           50071                           <span class="op">NDX     </span> <a href="#54454D504732">TEMPG2</a>                                
+056519,000353: 10,2255           52750                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534531">-PHASE1</a>    -2                         
+056520,000354: 
+056521,000355: 10,2256           10066                           <span class="op">CCS     </span> <a href="#54454D50535732">TEMPSW2</a>                               
+056522,000356: 10,2257           12260                           <span class="op">NOOP    </span>                                       <span class="co">#  CAN:T GET HERE</span>
+056523,000357: 10,2260           12264                           <span class="op">TCF     </span> <a href="#42454C4F5732">BELOW2</a>                                
+056524,000358: 
+056525,000359: 10,2261           40025                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 
+056526,000360: 10,2262           50071                           <span class="op">NDX     </span> <a href="#54454D504732">TEMPG2</a>                                
+056527,000361: 10,2263           55050                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544241534531">TBASE1</a>     -2                         
+056528,000362: 
+<a name="42454C4F5732"></a>056529,000363: 10,2264           10065        <span class="sm">BELOW2  </span>           <span class="op">CCS     </span> <a href="#54454D505357">TEMPSW</a>                                <span class="co">#  SEE IF WE SHOULD SET TBASE OR LONGBASE</span>
+056530,000364: 10,2265           12300                           <span class="op">TCF     </span> <a href="#42454C4F5733">BELOW3</a>                                <span class="co">#  SET LONGBASE ONLY</span>
+056531,000365: 10,2266           12303                           <span class="op">TCF     </span> <a href="#42454C4F5734">BELOW4</a>                                <span class="co">#  SET NEITHER</span>
+056532,000366: 
+056533,000367: 10,2267           40025                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 <span class="co">#  SET TBASE TO BEGIN WITH</span>
+056534,000368: 10,2270           50061                           <span class="op">NDX     </span> <a href="#54454D5047">TEMPG</a>                                 
+056535,000369: 10,2271           55050                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544241534531">TBASE1</a>     -2                         
+056536,000370: 
+056537,000371: 10,2272           30065                           <span class="op">CA      </span> <a href="#54454D505357">TEMPSW</a>                                <span class="co">#   SHALL WE NOW SET LONGBASE</span>
+056538,000372: 10,2273           62276                           <span class="op">AD      </span> <a href="#4249543134434F4D">BIT14COM</a>                              
+056539,000373: 10,2274           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+056540,000374: 10,2275           12276                           <span class="op">NOOP    </span>                                       <span class="co">#  ***** CANT GET HERE *****</span>
+<a name="4249543134434F4D"></a>056541,000375: 10,2276           17777        <span class="sm">BIT14COM</span>           <span class="ps">OCT     </span> 17777                                 <span class="co">#  ***** CANT GET HERE *****</span>
+056542,000376: 10,2277           12303                           <span class="op">TCF     </span> <a href="#42454C4F5734">BELOW4</a>                                <span class="co">#  NO WE NEED ONLY SET TBASE</span>
+056543,000377: 
+<a name="42454C4F5733"></a>056544,000378: 10,2300           00006        <span class="sm">BELOW3  </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  SET LONGBASE</span>
+056545,000379: 10,2301           30025                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 
+056546,000380: 10,2302           53151                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E4742415345">LONGBASE</a>                              
+056547,000381: 
+<a name="42454C4F5734"></a>056548,000382: 10,2303           40062        <span class="sm">BELOW4  </span>           <span class="op">CS      </span> <a href="#54454D5050">TEMPP</a>                                 <span class="co">#  AND STORE THE FINAL PART OF THE PHASE</span>
+056549,000383: 10,2304           50061                           <span class="op">NDX     </span> <a href="#54454D5047">TEMPG</a>                                 
+056550,000384: 10,2305           54747                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534531">-PHASE1</a>    -2                         
+056551,000385: 
+056552,000386: 10,2306           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+056553,000387: 10,2307           22073                           <span class="op">LXCH    </span> <a href="#54454D504242434E">TEMPBBCN</a>                              
+056554,000388: 10,2310           00003                           <span class="op">RELINT  </span>                                       
+056555,000389: 10,2311           52006                           <span class="op">DTCB    </span>                                       
 </pre>
 </span>
 </p>
@@ -602,33 +602,33 @@ Page 1291
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="434F4E32"></a>056543,000391: 10,2312           22073        <span class="sm">CON2    </span>           <span class="op">LXCH    </span> <a href="#54454D504242434E">TEMPBBCN</a>                              
-056544,000392: 
-056545,000393: 10,2313           30062                           <span class="op">CA      </span> <a href="#54454D5050">TEMPP</a>                                 
-056546,000394: 10,2314           50061                           <span class="op">NDX     </span> <a href="#54454D5047">TEMPG</a>                                 
-056547,000395: 10,2315           54750                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504841534531">PHASE1</a>     -2                         
-056548,000396: 
-056549,000397: 10,2316           30070                           <span class="op">CA      </span> <a href="#54454D505052">TEMPPR</a>                                
-056550,000398: 10,2317           50061                           <span class="op">NDX     </span> <a href="#54454D5047">TEMPG</a>                                 
-056551,000399: 10,2320           55051                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5048535052445431">PHSPRDT1</a>   -2                         
-056552,000400: 
-056553,000401: 10,2321           00006                           <span class="op">EXTEND  </span>                                       
-056554,000402: 10,2322           30064                           <span class="op">DCA     </span> <a href="#54454D504E4D">TEMPNM</a>                                
-056555,000403: 10,2323           50061                           <span class="op">NDX     </span> <a href="#54454D5047">TEMPG</a>                                 
-056556,000404: 10,2324           53435                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5048534E414D4531">PHSNAME1</a>   -2                         
-056557,000405: 
-056558,000406: 10,2325           12247                           <span class="op">TCF     </span> <a href="#42454C4F5731">BELOW1</a>                                
-056559,000407: 
-056560,000408:    7762                                           <span class="ps">BLOCK   </span> 03                                    
-056561,000409:    6000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#464654414736">FFTAG6</a>                                
-056562,000410:    6000                                           <span class="ps">BANK    </span>                                       
-056563,000411: 
-056564,000412:    7762                                           <span class="ps">COUNT*  </span> $$/PHASE                              
-<a name="434845434B42"></a>056565,000413:    7762           74740        <span class="sm">CHECKB  </span>           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543132">BIT12</a>                                 <span class="co">#  SINCE THIS IS OF TYPE B, THIS BIT SHOULD</span>
-056566,000414:    7763           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#   BE HERE IF WE ARE TO GET A NEW PRIORITY</span>
-056567,000415:    7764           15434                           <span class="op">TCF     </span> <a href="#4745545052494F">GETPRIO</a>                               <span class="co">#  IT IS, SO GET NEW PRIORITY</span>
-056568,000416: 
-056569,000417:    7765           15413                           <span class="op">TCF     </span> <a href="#4F4C445052494F">OLDPRIO</a>                               <span class="co">#  IT ISN:T, USE THE OLD PRIORITY</span>
+<a name="434F4E32"></a>056557,000391: 10,2312           22073        <span class="sm">CON2    </span>           <span class="op">LXCH    </span> <a href="#54454D504242434E">TEMPBBCN</a>                              
+056558,000392: 
+056559,000393: 10,2313           30062                           <span class="op">CA      </span> <a href="#54454D5050">TEMPP</a>                                 
+056560,000394: 10,2314           50061                           <span class="op">NDX     </span> <a href="#54454D5047">TEMPG</a>                                 
+056561,000395: 10,2315           54750                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504841534531">PHASE1</a>     -2                         
+056562,000396: 
+056563,000397: 10,2316           30070                           <span class="op">CA      </span> <a href="#54454D505052">TEMPPR</a>                                
+056564,000398: 10,2317           50061                           <span class="op">NDX     </span> <a href="#54454D5047">TEMPG</a>                                 
+056565,000399: 10,2320           55051                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5048535052445431">PHSPRDT1</a>   -2                         
+056566,000400: 
+056567,000401: 10,2321           00006                           <span class="op">EXTEND  </span>                                       
+056568,000402: 10,2322           30064                           <span class="op">DCA     </span> <a href="#54454D504E4D">TEMPNM</a>                                
+056569,000403: 10,2323           50061                           <span class="op">NDX     </span> <a href="#54454D5047">TEMPG</a>                                 
+056570,000404: 10,2324           53435                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5048534E414D4531">PHSNAME1</a>   -2                         
+056571,000405: 
+056572,000406: 10,2325           12247                           <span class="op">TCF     </span> <a href="#42454C4F5731">BELOW1</a>                                
+056573,000407: 
+056574,000408:    7762                                           <span class="ps">BLOCK   </span> 03                                    
+056575,000409:    6000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#464654414736">FFTAG6</a>                                
+056576,000410:    6000                                           <span class="ps">BANK    </span>                                       
+056577,000411: 
+056578,000412:    7762                                           <span class="ps">COUNT*  </span> $$/PHASE                              
+<a name="434845434B42"></a>056579,000413:    7762           74740        <span class="sm">CHECKB  </span>           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543132">BIT12</a>                                 <span class="co">#  SINCE THIS IS OF TYPE B, THIS BIT SHOULD</span>
+056580,000414:    7763           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#   BE HERE IF WE ARE TO GET A NEW PRIORITY</span>
+056581,000415:    7764           15434                           <span class="op">TCF     </span> <a href="#4745545052494F">GETPRIO</a>                               <span class="co">#  IT IS, SO GET NEW PRIORITY</span>
+056582,000416: 
+056583,000417:    7765           15413                           <span class="op">TCF     </span> <a href="#4F4C445052494F">OLDPRIO</a>                               <span class="co">#  IT ISN:T, USE THE OLD PRIORITY</span>
 
 End of include-file PHASE_TABLE_MAINTENANCE.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

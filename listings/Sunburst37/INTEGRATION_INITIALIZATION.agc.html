@@ -90,28 +90,28 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-032323,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-032324,000003:                                                                                                  <span class="co">## Filename:    INTEGRATION_INITIALIZATION.agc</span>
-032325,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
-032326,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
-032327,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
-032328,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
-032329,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
-032330,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
-032331,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
-032332,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-032333,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-032334,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-032335,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
-032336,000015:                                                                                                  <span class="co">## Reference:   pp. 713-722</span>
-032337,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-032338,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-032339,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-032340,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
-032341,000020:                                                                                                  <span class="co">##              2017-06-13 HG   Transcribed</span>
-032342,000021:                                                                                                  <span class="co">##              2017-06-23 RSB  Proofed comment text with</span>
-032343,000022:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
-032344,000023: 
+032330,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+032331,000003:                                                                                                  <span class="co">## Filename:    INTEGRATION_INITIALIZATION.agc</span>
+032332,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
+032333,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
+032334,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
+032335,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
+032336,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
+032337,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
+032338,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
+032339,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+032340,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+032341,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+032342,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
+032343,000015:                                                                                                  <span class="co">## Reference:   pp. 713-722</span>
+032344,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+032345,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+032346,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+032347,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
+032348,000020:                                                                                                  <span class="co">##              2017-06-13 HG   Transcribed</span>
+032349,000021:                                                                                                  <span class="co">##              2017-06-23 RSB  Proofed comment text with</span>
+032350,000022:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
+032351,000023: 
 </pre>
 </span>
 </p>
@@ -127,57 +127,57 @@ Page 713
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-032346,000025:                                                                                                  <span class="co">#  AVETOMID PERFORMS THE TRANSITION FROM A THRUSTING PHASE TO A COASTING PHASE.  THE ROUTINE INITIALIZES THE</span>
-032347,000026:                                                                                                  <span class="co">#  ORBITAL INTEGRATION PROGRAM AND RESCALES AND TRANSFORMS LEMS STATE VECTOR FROM THE STABLE MEMBER COORDINATE</span>
-032348,000027:                                                                                                  <span class="co">#  SYSTEM USED IN AVERAGEG TO THE REFERENCE SYSTEM USED IN ORBITAL INTEGRATION DURING COAST</span>
-032349,000028:                                                                                                  <span class="co">#  INPUT - LEM STATE VECTOR IN SM COORDINATE SYSTEM AND TIME</span>
-032350,000029:                                                                                                  <span class="co">#     RN, POSITION IN METERS SCALED AT 2(+24)</span>
-032351,000030:                                                                                                  <span class="co">#     VN, VELOCITY IN M/CSEC SCALED AT 2(+7)</span>
-032352,000031:                                                                                                  <span class="co">#     PIPTIME, TIME IN CSEC CORRESPONDING TO RN, VN</span>
-032353,000032: 
-032354,000033:                                                                                                  <span class="co">#  OUTPUT - LEM STATE VECTOR IN REF. COORDINATE SYSTEM AND TIME</span>
-032355,000034:                                                                                                  <span class="co">#     RRECT AND RCV, POSITION IN KM SCALED AT 2(+14)</span>
-032356,000035:                                                                                                  <span class="co">#     VRECT AND VCV, VELOCITY IN 1/SQRT(KM) SCALED AT 2(-6)</span>
-032357,000036:                                                                                                  <span class="co">#     TET, TIME IN CSEC</span>
-032358,000037:                                                                                                  <span class="co">#     P-MEMORY (REFRRECT TO REFRRECT + 42)</span>
-032359,000038: 
-032360,000039:                                                                                                  <span class="co">#  AVETOMID CALLING SEQUENCE</span>
-032361,000040:                                                                                                  <span class="co">#     L-2   EXTEND</span>
-032362,000041:                                                                                                  <span class="co">#     L-1   DCA    (2CADR OF AVETOMID)</span>
-032363,000042:                                                                                                  <span class="co">#     L     DXCH   Z</span>
-032364,000043:                                                                                                  <span class="co">#           DELETE</span>
-032365,000044: 
-032366,000045:                                                                                                  <span class="co">#  NORMAL EXIT</span>
-032367,000046:                                                                                                  <span class="co">#     AT L+1 OF CALLING SEQUENCE</span>
-032368,000047: 
-032369,000048: 07,2073                                           <span class="ps">BANK    </span> 07                                    
-032370,000049: 07,2073  E4,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D454D4F5259">AMEMORY</a>                               
-<a name="415645544F4D4944"></a>032371,000050: 07,2073           53631        <span class="sm">AVETOMID</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41564D494452544E">AVMIDRTN</a>                              
-032372,000051: 07,2074           06103                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-032373,000052: 07,2075           77624                           <span class="in">CALL    </span>                                       <span class="co">#  ORBITAL INTEGRATION INITIALIZATION</span>
-032374,000053: 07,2076           16267                                    <a href="#494E4954494E54">INITINT</a>                               
-032375,000054: 07,2077           77775                           <span class="in">VLOAD   </span>                                       
-032376,000055: 07,2100           16175                                    <a href="#5A45524F564543">ZEROVEC</a>                               
-032377,000056: 07,2101           02015                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5444454C544156">TDELTAV</a>                               <span class="co">#  ZERO POS DEVIATIONS</span>
-032378,000057: 
-032379,000058: 07,2102           02023                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544E5556">TNUV</a>                                  <span class="co">#  ZERO VEL DEVIATIONS</span>
-032380,000059: 07,2103           02045                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5443">TC</a>                                    <span class="co">#  ALSO CLEARS TET AND XKEP</span>
-032381,000060: 
-<a name="534D544F524546"></a>032382,000061: 07,2104           66370        <span class="sm">SMTOREF </span>           <span class="in">AXT,1   </span> <span class="in">SSP       </span>                            <span class="co">#  SET UP TIX LOOP FOR STATE VEC TRANSFORM</span>
-032383,000062: 07,2105           00014                                    12D                                   
-032384,000063: 07,2106           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
-032385,000064: 07,2107           00006                                    6                                     
-<a name="534D544F52454631"></a>032386,000065: 07,2110           73773        <span class="sm">SMTOREF1</span>           <span class="in">VLOAD*  </span> <span class="in">VXSC*     </span>                            <span class="co">#  TRANSFORM STATE FROM SM TO REF SYSTEM</span>
-032387,000066: 07,2111           01025                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524E">RN</a>         +12D,1                     
-032388,000067: 07,2112           16217                                    <a href="#53434C5241564D44">SCLRAVMD</a>   +12D,1                     
-032389,000068: 07,2113           72505                           <span class="in">VXM     </span> <span class="in">VSL2      </span>                            
-032390,000069: 07,2114           01275                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
-032391,000070: 07,2115           06015                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5252454354">RRECT</a>      +12D,1                     
-032392,000071: 07,2116           06045                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524356">RCV</a>        +12D,1                     
-032393,000072: 
-032394,000073: 07,2117           77500                           <span class="in">TIX,1   </span> <span class="in">EXIT      </span>                            
-032395,000074: 07,2120           16110                                    <a href="#534D544F52454631">SMTOREF1</a>                              
-032396,000075: 07,2121           00006                           <span class="op">EXTEND  </span>                                       
+032353,000025:                                                                                                  <span class="co">#  AVETOMID PERFORMS THE TRANSITION FROM A THRUSTING PHASE TO A COASTING PHASE.  THE ROUTINE INITIALIZES THE</span>
+032354,000026:                                                                                                  <span class="co">#  ORBITAL INTEGRATION PROGRAM AND RESCALES AND TRANSFORMS LEMS STATE VECTOR FROM THE STABLE MEMBER COORDINATE</span>
+032355,000027:                                                                                                  <span class="co">#  SYSTEM USED IN AVERAGEG TO THE REFERENCE SYSTEM USED IN ORBITAL INTEGRATION DURING COAST</span>
+032356,000028:                                                                                                  <span class="co">#  INPUT - LEM STATE VECTOR IN SM COORDINATE SYSTEM AND TIME</span>
+032357,000029:                                                                                                  <span class="co">#     RN, POSITION IN METERS SCALED AT 2(+24)</span>
+032358,000030:                                                                                                  <span class="co">#     VN, VELOCITY IN M/CSEC SCALED AT 2(+7)</span>
+032359,000031:                                                                                                  <span class="co">#     PIPTIME, TIME IN CSEC CORRESPONDING TO RN, VN</span>
+032360,000032: 
+032361,000033:                                                                                                  <span class="co">#  OUTPUT - LEM STATE VECTOR IN REF. COORDINATE SYSTEM AND TIME</span>
+032362,000034:                                                                                                  <span class="co">#     RRECT AND RCV, POSITION IN KM SCALED AT 2(+14)</span>
+032363,000035:                                                                                                  <span class="co">#     VRECT AND VCV, VELOCITY IN 1/SQRT(KM) SCALED AT 2(-6)</span>
+032364,000036:                                                                                                  <span class="co">#     TET, TIME IN CSEC</span>
+032365,000037:                                                                                                  <span class="co">#     P-MEMORY (REFRRECT TO REFRRECT + 42)</span>
+032366,000038: 
+032367,000039:                                                                                                  <span class="co">#  AVETOMID CALLING SEQUENCE</span>
+032368,000040:                                                                                                  <span class="co">#     L-2   EXTEND</span>
+032369,000041:                                                                                                  <span class="co">#     L-1   DCA    (2CADR OF AVETOMID)</span>
+032370,000042:                                                                                                  <span class="co">#     L     DXCH   Z</span>
+032371,000043:                                                                                                  <span class="co">#           DELETE</span>
+032372,000044: 
+032373,000045:                                                                                                  <span class="co">#  NORMAL EXIT</span>
+032374,000046:                                                                                                  <span class="co">#     AT L+1 OF CALLING SEQUENCE</span>
+032375,000047: 
+032376,000048: 07,2073                                           <span class="ps">BANK    </span> 07                                    
+032377,000049: 07,2073  E4,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D454D4F5259">AMEMORY</a>                               
+<a name="415645544F4D4944"></a>032378,000050: 07,2073           53631        <span class="sm">AVETOMID</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41564D494452544E">AVMIDRTN</a>                              
+032379,000051: 07,2074           06103                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+032380,000052: 07,2075           77624                           <span class="in">CALL    </span>                                       <span class="co">#  ORBITAL INTEGRATION INITIALIZATION</span>
+032381,000053: 07,2076           16267                                    <a href="#494E4954494E54">INITINT</a>                               
+032382,000054: 07,2077           77775                           <span class="in">VLOAD   </span>                                       
+032383,000055: 07,2100           16175                                    <a href="#5A45524F564543">ZEROVEC</a>                               
+032384,000056: 07,2101           02015                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5444454C544156">TDELTAV</a>                               <span class="co">#  ZERO POS DEVIATIONS</span>
+032385,000057: 
+032386,000058: 07,2102           02023                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544E5556">TNUV</a>                                  <span class="co">#  ZERO VEL DEVIATIONS</span>
+032387,000059: 07,2103           02045                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5443">TC</a>                                    <span class="co">#  ALSO CLEARS TET AND XKEP</span>
+032388,000060: 
+<a name="534D544F524546"></a>032389,000061: 07,2104           66370        <span class="sm">SMTOREF </span>           <span class="in">AXT,1   </span> <span class="in">SSP       </span>                            <span class="co">#  SET UP TIX LOOP FOR STATE VEC TRANSFORM</span>
+032390,000062: 07,2105           00014                                    12D                                   
+032391,000063: 07,2106           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
+032392,000064: 07,2107           00006                                    6                                     
+<a name="534D544F52454631"></a>032393,000065: 07,2110           73773        <span class="sm">SMTOREF1</span>           <span class="in">VLOAD*  </span> <span class="in">VXSC*     </span>                            <span class="co">#  TRANSFORM STATE FROM SM TO REF SYSTEM</span>
+032394,000066: 07,2111           01025                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524E">RN</a>         +12D,1                     
+032395,000067: 07,2112           16217                                    <a href="#53434C5241564D44">SCLRAVMD</a>   +12D,1                     
+032396,000068: 07,2113           72505                           <span class="in">VXM     </span> <span class="in">VSL2      </span>                            
+032397,000069: 07,2114           01275                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
+032398,000070: 07,2115           06015                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5252454354">RRECT</a>      +12D,1                     
+032399,000071: 07,2116           06045                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524356">RCV</a>        +12D,1                     
+032400,000072: 
+032401,000073: 07,2117           77500                           <span class="in">TIX,1   </span> <span class="in">EXIT      </span>                            
+032402,000074: 07,2120           16110                                    <a href="#534D544F52454631">SMTOREF1</a>                              
+032403,000075: 07,2121           00006                           <span class="op">EXTEND  </span>                                       
 </pre>
 </span>
 </p>
@@ -193,59 +193,59 @@ Page 714
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-032398,000077: 07,2122           31321                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50495054494D45">PIPTIME</a>                               <span class="co">#  SAVE PIPTIME</span>
-032399,000078: 07,2123           53447                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544554">TET</a>                                   <span class="co">#  PIPTIME UN TET</span>
-032400,000079: 
-032401,000080: 07,2124           02245                           <span class="op">TC      </span> <a href="#4D4F564554454D50">MOVETEMP</a>                              <span class="co">#  TRANSFER STATE AND INIT. DATA TO P-MEM</span>
-032402,000081: 07,2125           53631                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41564D494452544E">AVMIDRTN</a>                              
-032403,000082: 07,2126           52006                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A">Z</a>                                     
-<a name="5049504542414E4B"></a>032404,000083: 07,2127           02400        <span class="sm">PIPEBANK</span>           <span class="ps">OCT     </span> 02400                                 <span class="co">#  EBANK 05</span>
-<a name="544553544C4F4F50"></a>032405,000084: 07,2130           77776        <span class="sm">TESTLOOP</span>           <span class="in">EXIT    </span>                                       <span class="co">#  FOR DUMP.</span>
-032406,000085: 
-032407,000086: 07,2131           06103                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-032408,000087: 
-032409,000088: 07,2132           40145                           <span class="in">DLOAD   </span> <span class="in">BOV       </span>                            
-032410,000089: 07,2133           02167                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
-032411,000090: 07,2134           16135                                    +1                                    <span class="co">#  CLEAR OVERFLOW INDICATOR</span>
-032412,000091: 
-032413,000092: 07,2135           47025                           <span class="in">DSU     </span> <span class="in">RTB       </span>                            
-032414,000093: 07,2136           02047                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#544554">TET</a>                                   
-032415,000094: 07,2137           33565                                    <a href="RTB_OP_CODES.agc.html#53474E4147524545">SGNAGREE</a>                              
-032416,000095: 07,2140           56261                           <span class="in">SL      </span> <span class="in">DDV       </span>                            
-032417,000096: 07,2141           20214                                    11D                                   
-032418,000097: 07,2142           17703                                    <a href="ORBITAL_INTEGRATION_PROGRAM.agc.html#4541525448544142">EARTHTAB</a>   +9D                        
-032419,000098: 07,2143           02163                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44542F32">DT/2</a>                                  
-032420,000099: 07,2144           51400                           <span class="in">BOV     </span> <span class="in">ABS       </span>                            
-032421,000100: 07,2145           16156                                    <a href="#5553454D41584454">USEMAXDT</a>                              
-032422,000101: 07,2146           50025                           <span class="in">DSU     </span> <span class="in">BMN       </span>                            
-032423,000102: 07,2147           16205                                    <a href="#44542F324D494E">DT/2MIN</a>                               
-032424,000103: 07,2150           16317                                    <a href="#4445434953494F4E">DECISION</a>                              <span class="co">#  INTEGRATION FINISHED-DECIDE WHERE TO GO</span>
-032425,000104: 07,2151           45215                           <span class="in">DAD     </span> <span class="in">DSU       </span>                            
-032426,000105: 07,2152           16205                                    <a href="#44542F324D494E">DT/2MIN</a>                               
-032427,000106: 07,2153           16213                                    <a href="#44542F324D4158">DT/2MAX</a>                               
-032428,000107: 07,2154           77640                           <span class="in">BMN     </span>                                       
-032429,000108: 07,2155           17376                                    <a href="ORBITAL_INTEGRATION_PROGRAM.agc.html#54494D4553544550">TIMESTEP</a>                              
-<a name="5553454D41584454"></a>032430,000109: 07,2156           75345        <span class="sm">USEMAXDT</span>           <span class="in">DLOAD   </span> <span class="in">SIGN      </span>                            
-032431,000110: 07,2157           16213                                    <a href="#44542F324D4158">DT/2MAX</a>                               
-032432,000111: 07,2160           02163                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44542F32">DT/2</a>                                  
-032433,000112: 07,2161           36163                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44542F32">DT/2</a>                                  
-032434,000113: 07,2162           17376                                    <a href="ORBITAL_INTEGRATION_PROGRAM.agc.html#54494D4553544550">TIMESTEP</a>                              
-<a name="5343414C4552"></a>032435,000114: 07,2163           00016        <span class="sm">SCALER  </span>           <span class="ps">DEC     </span> 14         B-14                       
-032436,000115: 
-<a name="5343414C44454C54"></a>032437,000116: 07,2164           00004        <span class="sm">SCALDELT</span>           <span class="ps">DEC     </span> 4          B-14                       
-<a name="5343414C454454"></a>032438,000117: 07,2165           00022        <span class="sm">SCALEDT </span>           <span class="ps">DEC     </span> 18         B-14                       
-<a name="323853454353"></a>032439,000118: 07,2166           00000 05360  <span class="sm">28SECS  </span>           <span class="ps">2DEC    </span> 2800       B-28                       
-032440,000119: 
-<a name="32373053454353"></a>032441,000120: 07,2170           00001 24570  <span class="sm">270SECS </span>           <span class="ps">2DEC    </span> 27000      B-28                       
-032442,000121: 
-<a name="3253454353"></a>032443,000122: 07,2172           00000 00310  <span class="sm">2SECS   </span>           <span class="ps">2DEC    </span> 200        B-28                       
-032444,000123: 
-<a name="5A45524F564543"></a>032445,000124: 07,2174           00000 00000  <span class="sm">ZEROVEC </span>           <span class="ps">2DEC    </span> 0          B-28                       
-032446,000125: 
-032447,000126: 07,2176           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       
-032448,000127: 
-032449,000128: 07,2200           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       
-032450,000129: 
+032405,000077: 07,2122           31321                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50495054494D45">PIPTIME</a>                               <span class="co">#  SAVE PIPTIME</span>
+032406,000078: 07,2123           53447                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544554">TET</a>                                   <span class="co">#  PIPTIME UN TET</span>
+032407,000079: 
+032408,000080: 07,2124           02245                           <span class="op">TC      </span> <a href="#4D4F564554454D50">MOVETEMP</a>                              <span class="co">#  TRANSFER STATE AND INIT. DATA TO P-MEM</span>
+032409,000081: 07,2125           53631                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41564D494452544E">AVMIDRTN</a>                              
+032410,000082: 07,2126           52006                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A">Z</a>                                     
+<a name="5049504542414E4B"></a>032411,000083: 07,2127           02400        <span class="sm">PIPEBANK</span>           <span class="ps">OCT     </span> 02400                                 <span class="co">#  EBANK 05</span>
+<a name="544553544C4F4F50"></a>032412,000084: 07,2130           77776        <span class="sm">TESTLOOP</span>           <span class="in">EXIT    </span>                                       <span class="co">#  FOR DUMP.</span>
+032413,000085: 
+032414,000086: 07,2131           06103                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+032415,000087: 
+032416,000088: 07,2132           40145                           <span class="in">DLOAD   </span> <span class="in">BOV       </span>                            
+032417,000089: 07,2133           02167                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
+032418,000090: 07,2134           16135                                    +1                                    <span class="co">#  CLEAR OVERFLOW INDICATOR</span>
+032419,000091: 
+032420,000092: 07,2135           47025                           <span class="in">DSU     </span> <span class="in">RTB       </span>                            
+032421,000093: 07,2136           02047                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#544554">TET</a>                                   
+032422,000094: 07,2137           33565                                    <a href="RTB_OP_CODES.agc.html#53474E4147524545">SGNAGREE</a>                              
+032423,000095: 07,2140           56261                           <span class="in">SL      </span> <span class="in">DDV       </span>                            
+032424,000096: 07,2141           20214                                    11D                                   
+032425,000097: 07,2142           17703                                    <a href="ORBITAL_INTEGRATION_PROGRAM.agc.html#4541525448544142">EARTHTAB</a>   +9D                        
+032426,000098: 07,2143           02163                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44542F32">DT/2</a>                                  
+032427,000099: 07,2144           51400                           <span class="in">BOV     </span> <span class="in">ABS       </span>                            
+032428,000100: 07,2145           16156                                    <a href="#5553454D41584454">USEMAXDT</a>                              
+032429,000101: 07,2146           50025                           <span class="in">DSU     </span> <span class="in">BMN       </span>                            
+032430,000102: 07,2147           16205                                    <a href="#44542F324D494E">DT/2MIN</a>                               
+032431,000103: 07,2150           16317                                    <a href="#4445434953494F4E">DECISION</a>                              <span class="co">#  INTEGRATION FINISHED-DECIDE WHERE TO GO</span>
+032432,000104: 07,2151           45215                           <span class="in">DAD     </span> <span class="in">DSU       </span>                            
+032433,000105: 07,2152           16205                                    <a href="#44542F324D494E">DT/2MIN</a>                               
+032434,000106: 07,2153           16213                                    <a href="#44542F324D4158">DT/2MAX</a>                               
+032435,000107: 07,2154           77640                           <span class="in">BMN     </span>                                       
+032436,000108: 07,2155           17376                                    <a href="ORBITAL_INTEGRATION_PROGRAM.agc.html#54494D4553544550">TIMESTEP</a>                              
+<a name="5553454D41584454"></a>032437,000109: 07,2156           75345        <span class="sm">USEMAXDT</span>           <span class="in">DLOAD   </span> <span class="in">SIGN      </span>                            
+032438,000110: 07,2157           16213                                    <a href="#44542F324D4158">DT/2MAX</a>                               
+032439,000111: 07,2160           02163                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44542F32">DT/2</a>                                  
+032440,000112: 07,2161           36163                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44542F32">DT/2</a>                                  
+032441,000113: 07,2162           17376                                    <a href="ORBITAL_INTEGRATION_PROGRAM.agc.html#54494D4553544550">TIMESTEP</a>                              
+<a name="5343414C4552"></a>032442,000114: 07,2163           00016        <span class="sm">SCALER  </span>           <span class="ps">DEC     </span> 14         B-14                       
+032443,000115: 
+<a name="5343414C44454C54"></a>032444,000116: 07,2164           00004        <span class="sm">SCALDELT</span>           <span class="ps">DEC     </span> 4          B-14                       
+<a name="5343414C454454"></a>032445,000117: 07,2165           00022        <span class="sm">SCALEDT </span>           <span class="ps">DEC     </span> 18         B-14                       
+<a name="323853454353"></a>032446,000118: 07,2166           00000 05360  <span class="sm">28SECS  </span>           <span class="ps">2DEC    </span> 2800       B-28                       
+032447,000119: 
+<a name="32373053454353"></a>032448,000120: 07,2170           00001 24570  <span class="sm">270SECS </span>           <span class="ps">2DEC    </span> 27000      B-28                       
+032449,000121: 
+<a name="3253454353"></a>032450,000122: 07,2172           00000 00310  <span class="sm">2SECS   </span>           <span class="ps">2DEC    </span> 200        B-28                       
+032451,000123: 
+<a name="5A45524F564543"></a>032452,000124: 07,2174           00000 00000  <span class="sm">ZEROVEC </span>           <span class="ps">2DEC    </span> 0          B-28                       
+032453,000125: 
+032454,000126: 07,2176           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       
+032455,000127: 
+032456,000128: 07,2200           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       
+032457,000129: 
 </pre>
 </span>
 </p>
@@ -261,20 +261,20 @@ Page 715
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-032452,000131:                                                                                                  <span class="co">#  THE ORDER OF THE SIX FOLLOWING CONSTANTS CANNOT BE CHANGED</span>
-032453,000132: 
-<a name="53434C5241564D44"></a>032454,000133: 07,2202           20304 23351  <span class="sm">SCLRAVMD</span>           <span class="ps">2DEC    </span> .512                                  <span class="co">#  METERS TO KM  1/2(1024/1000)</span>
-032455,000134: 
-<a name="44542F324D494E"></a>032456,000135: 07,2204           00000 17565  <span class="sm">DT/2MIN </span>           <span class="ps">2DEC    </span> .00003                                
-032457,000136: 
-<a name="53434C524D444156"></a>032458,000137: 07,2206           37200 00000  <span class="sm">SCLRMDAV</span>           <span class="ps">2DEC    </span> 1000       B-10                       <span class="co">#  KM TO METERS</span>
-032459,000138: 
-<a name="53434C5641564D44"></a>032460,000139: 07,2210           24605 15301  <span class="sm">SCLVAVMD</span>           <span class="ps">2DEC    </span> .64876819                             <span class="co">#  METERS/CSEC TO 1/SQR(KM)</span>
-032461,000140: 
-<a name="44542F324D4158"></a>032462,000141: 07,2212           12317 00451  <span class="sm">DT/2MAX </span>           <span class="ps">2DEC    </span> .65027077  B-1                        <span class="co">#  270 SEC MAX TIME STEP</span>
-032463,000142: 
-<a name="53434C564D444156"></a>032464,000143: 07,2214           30523 00147  <span class="sm">SCLVMDAV</span>           <span class="ps">2DEC    </span> .7706913                              <span class="co">#  1/SQR(KM) TO METERS/CSEC</span>
-032465,000144: 
+032459,000131:                                                                                                  <span class="co">#  THE ORDER OF THE SIX FOLLOWING CONSTANTS CANNOT BE CHANGED</span>
+032460,000132: 
+<a name="53434C5241564D44"></a>032461,000133: 07,2202           20304 23351  <span class="sm">SCLRAVMD</span>           <span class="ps">2DEC    </span> .512                                  <span class="co">#  METERS TO KM  1/2(1024/1000)</span>
+032462,000134: 
+<a name="44542F324D494E"></a>032463,000135: 07,2204           00000 17565  <span class="sm">DT/2MIN </span>           <span class="ps">2DEC    </span> .00003                                
+032464,000136: 
+<a name="53434C524D444156"></a>032465,000137: 07,2206           37200 00000  <span class="sm">SCLRMDAV</span>           <span class="ps">2DEC    </span> 1000       B-10                       <span class="co">#  KM TO METERS</span>
+032466,000138: 
+<a name="53434C5641564D44"></a>032467,000139: 07,2210           24605 15301  <span class="sm">SCLVAVMD</span>           <span class="ps">2DEC    </span> .64876819                             <span class="co">#  METERS/CSEC TO 1/SQR(KM)</span>
+032468,000140: 
+<a name="44542F324D4158"></a>032469,000141: 07,2212           12317 00451  <span class="sm">DT/2MAX </span>           <span class="ps">2DEC    </span> .65027077  B-1                        <span class="co">#  270 SEC MAX TIME STEP</span>
+032470,000142: 
+<a name="53434C564D444156"></a>032471,000143: 07,2214           30523 00147  <span class="sm">SCLVMDAV</span>           <span class="ps">2DEC    </span> .7706913                              <span class="co">#  1/SQR(KM) TO METERS/CSEC</span>
+032472,000144: 
 </pre>
 </span>
 </p>
@@ -290,42 +290,42 @@ Page 716
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-032467,000146:                                                                                                  <span class="co">#  STATEINT IS CALLED UP UNDER A JOB EVERY 539 SECONDS DURING A COASTING   PHASE BY THE MISSION SCHEDULING</span>
-032468,000147:                                                                                                  <span class="co">#  MAINTENANCE ROUTINE TO MAINTAIN THE LEMS STATE VECTOR WITHIN TWO INTEGRATION STEPS (540 SECONDS) OF THE CURRENT</span>
-032469,000148: 
-032470,000149:                                                                                                  <span class="co">#  TIME (TIME2).  THE ROUTINE COMPARES TIME2 WITH TET (THAT TIME CORRESPONDING TO THE STATE VECTOR IN STORAGE).</span>
-032471,000150:                                                                                                  <span class="co">#  IF TET LAGS BY 270 SECONDS OR MORE, THE ORBITAL INTEGRATION PROGRAM IS  CALLED UP AND THE STATE IS UPDATED TO</span>
-032472,000151:                                                                                                  <span class="co">#  TIME2.  IF TET DOES NOT LAG, STATEINT IS TERMINATED BY ENDOFJOB.</span>
-032473,000152: 
-032474,000153:                                                                                                  <span class="co">#  INPUT-STATEINT ASSUMES THAT THE COASTING IN PROGRESS WAS INITIALIZED BY</span>
-032475,000154:                                                                                                  <span class="co">#     THE AVETOMID ROUTINE.</span>
-032476,000155: 
-<a name="5354415445494E54"></a>032477,000156: 07,2216           00006        <span class="sm">STATEINT</span>           <span class="op">EXTEND  </span>                                       
-032478,000157: 07,2217           30025                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  GET CURRENT TIME IN TDEC</span>
-032479,000158: 07,2220           53567                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
-032480,000159: 07,2221           06027                           <span class="op">TC      </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#464C4147325550">FLAG2UP</a>                               <span class="co">#  SET ORBITAL INTEGRATION FLAG</span>
-032481,000160: 07,2222           00100                           <span class="ps">OCT     </span> 100                                   
-032482,000161: 07,2223           02256                           <span class="op">TC      </span> <a href="#4D4F56455045524D">MOVEPERM</a>                              <span class="co">#  BRING STATE FROM PMEMORY</span>
-032483,000162: 07,2224           06103                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-032484,000163: 
-032485,000164: 07,2225           45345                           <span class="in">DLOAD   </span> <span class="in">DSU       </span>                            <span class="co">#  FORM TDEC-TET</span>
-032486,000165: 07,2226           02167                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
-032487,000166: 07,2227           02047                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#544554">TET</a>                                   
-032488,000167: 07,2230           45240                           <span class="in">BMN     </span> <span class="in">DSU       </span>                            <span class="co">#  IS STATE LAGGING</span>
-032489,000168: 07,2231           16243                                    <a href="#4E4F494E54">NOINT</a>                                 <span class="co">#  NO, TET GREATER THAN TDEC</span>
-032490,000169: 07,2232           16171                                    <a href="#32373053454353">270SECS</a>                               
-032491,000170: 07,2233           66240                           <span class="in">BMN     </span> <span class="in">SSP       </span>                            
-032492,000171: 07,2234           16243                                    <a href="#4E4F494E54">NOINT</a>                                 <span class="co">#  NO, TET GREATER THAN TDEC-270 SECS.</span>
-032493,000172: 
-032494,000173: 07,2235           02201                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4541534D4F4445">MEASMODE</a>                              <span class="co">#  BRING TO CURRENT TIME-SET MEASMODE (-1)</span>
-032495,000174: 07,2236           77776                           <span class="ps">DEC     </span> -1         B-14                       
-032496,000175: 07,2237           77624                           <span class="in">CALL    </span>                                       
-032497,000176: 07,2240           16267                                    <a href="#494E4954494E54">INITINT</a>                               <span class="co">#  INITIALIZE BRANCH REGS</span>
-032498,000177: 07,2241           77650                           <span class="in">GOTO    </span>                                       
-032499,000178: 07,2242           16130                                    <a href="#544553544C4F4F50">TESTLOOP</a>                              <span class="co">#  START INTEGRATION FROM TET TO TDEC</span>
-<a name="4E4F494E54"></a>032500,000179: 07,2243           77776        <span class="sm">NOINT   </span>           <span class="in">EXIT    </span>                                       <span class="co">#  TEMPORARY STATEINT EXIT</span>
-032501,000180: 07,2244           12474                           <span class="op">TCF     </span> <a href="#494E544F5554">INTOUT</a>                                <span class="co">#  NO INTEGRATION, TERMINATE THIS JOB</span>
-032502,000181: 
+032474,000146:                                                                                                  <span class="co">#  STATEINT IS CALLED UP UNDER A JOB EVERY 539 SECONDS DURING A COASTING   PHASE BY THE MISSION SCHEDULING</span>
+032475,000147:                                                                                                  <span class="co">#  MAINTENANCE ROUTINE TO MAINTAIN THE LEMS STATE VECTOR WITHIN TWO INTEGRATION STEPS (540 SECONDS) OF THE CURRENT</span>
+032476,000148: 
+032477,000149:                                                                                                  <span class="co">#  TIME (TIME2).  THE ROUTINE COMPARES TIME2 WITH TET (THAT TIME CORRESPONDING TO THE STATE VECTOR IN STORAGE).</span>
+032478,000150:                                                                                                  <span class="co">#  IF TET LAGS BY 270 SECONDS OR MORE, THE ORBITAL INTEGRATION PROGRAM IS  CALLED UP AND THE STATE IS UPDATED TO</span>
+032479,000151:                                                                                                  <span class="co">#  TIME2.  IF TET DOES NOT LAG, STATEINT IS TERMINATED BY ENDOFJOB.</span>
+032480,000152: 
+032481,000153:                                                                                                  <span class="co">#  INPUT-STATEINT ASSUMES THAT THE COASTING IN PROGRESS WAS INITIALIZED BY</span>
+032482,000154:                                                                                                  <span class="co">#     THE AVETOMID ROUTINE.</span>
+032483,000155: 
+<a name="5354415445494E54"></a>032484,000156: 07,2216           00006        <span class="sm">STATEINT</span>           <span class="op">EXTEND  </span>                                       
+032485,000157: 07,2217           30025                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  GET CURRENT TIME IN TDEC</span>
+032486,000158: 07,2220           53567                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
+032487,000159: 07,2221           06027                           <span class="op">TC      </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#464C4147325550">FLAG2UP</a>                               <span class="co">#  SET ORBITAL INTEGRATION FLAG</span>
+032488,000160: 07,2222           00100                           <span class="ps">OCT     </span> 100                                   
+032489,000161: 07,2223           02256                           <span class="op">TC      </span> <a href="#4D4F56455045524D">MOVEPERM</a>                              <span class="co">#  BRING STATE FROM PMEMORY</span>
+032490,000162: 07,2224           06103                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+032491,000163: 
+032492,000164: 07,2225           45345                           <span class="in">DLOAD   </span> <span class="in">DSU       </span>                            <span class="co">#  FORM TDEC-TET</span>
+032493,000165: 07,2226           02167                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
+032494,000166: 07,2227           02047                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#544554">TET</a>                                   
+032495,000167: 07,2230           45240                           <span class="in">BMN     </span> <span class="in">DSU       </span>                            <span class="co">#  IS STATE LAGGING</span>
+032496,000168: 07,2231           16243                                    <a href="#4E4F494E54">NOINT</a>                                 <span class="co">#  NO, TET GREATER THAN TDEC</span>
+032497,000169: 07,2232           16171                                    <a href="#32373053454353">270SECS</a>                               
+032498,000170: 07,2233           66240                           <span class="in">BMN     </span> <span class="in">SSP       </span>                            
+032499,000171: 07,2234           16243                                    <a href="#4E4F494E54">NOINT</a>                                 <span class="co">#  NO, TET GREATER THAN TDEC-270 SECS.</span>
+032500,000172: 
+032501,000173: 07,2235           02201                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4541534D4F4445">MEASMODE</a>                              <span class="co">#  BRING TO CURRENT TIME-SET MEASMODE (-1)</span>
+032502,000174: 07,2236           77776                           <span class="ps">DEC     </span> -1         B-14                       
+032503,000175: 07,2237           77624                           <span class="in">CALL    </span>                                       
+032504,000176: 07,2240           16267                                    <a href="#494E4954494E54">INITINT</a>                               <span class="co">#  INITIALIZE BRANCH REGS</span>
+032505,000177: 07,2241           77650                           <span class="in">GOTO    </span>                                       
+032506,000178: 07,2242           16130                                    <a href="#544553544C4F4F50">TESTLOOP</a>                              <span class="co">#  START INTEGRATION FROM TET TO TDEC</span>
+<a name="4E4F494E54"></a>032507,000179: 07,2243           77776        <span class="sm">NOINT   </span>           <span class="in">EXIT    </span>                                       <span class="co">#  TEMPORARY STATEINT EXIT</span>
+032508,000180: 07,2244           12474                           <span class="op">TCF     </span> <a href="#494E544F5554">INTOUT</a>                                <span class="co">#  NO INTEGRATION, TERMINATE THIS JOB</span>
+032509,000181: 
 </pre>
 </span>
 </p>
@@ -341,47 +341,47 @@ Page 717
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-032504,000183:                                                                                                  <span class="co">#  MOVETEMP TRANSFERS RRECT TO RRECT +42 FROM A-MEMORY TO P-MEMORY</span>
-032505,000184: 
-032506,000185:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
-032507,000186:                                                                                                  <span class="co">#     L   TC   MOVETEMP</span>
-032508,000187: 
-032509,000188:                                                                                                  <span class="co">#  NORMAL EXIT AT L+1</span>
-<a name="4D4F564554454D50"></a>032510,000189: 07,2245           32333        <span class="sm">MOVETEMP</span>           <span class="op">CAF     </span> <a href="#464F52545954574F">FORTYTWO</a>                              
-032511,000190: 07,2246           55605                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4449464551434E54">DIFEQCNT</a>                              <span class="co">#  INITIALIZE INDEX</span>
-032512,000191: 
-032513,000192: 07,2247           51605                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4449464551434E54">DIFEQCNT</a>                              
-032514,000193: 07,2250           31400                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5252454354">RRECT</a>                                 <span class="co">#  PICK UP RRECT TO RRECT +42 FROM A-MEMORY</span>
-032515,000194: 07,2251           51605                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4449464551434E54">DIFEQCNT</a>                              
-032516,000195: 07,2252           55222                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5245465252454354">REFRRECT</a>                              <span class="co">#  STORE IN REFRRECT TO REFRRECT +42 IN P-M</span>
-032517,000196: 07,2253           11605                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4449464551434E54">DIFEQCNT</a>                              <span class="co">#  IS TRANSFER COMPLETE</span>
-032518,000197: 07,2254           12246                           <span class="op">TCF     </span> <a href="#4D4F564554454D50">MOVETEMP</a>   +1                         <span class="co">#  NO-LOOP AGAIN</span>
-032519,000198: 07,2255           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  TRANSFER COMPLETE-RETURN</span>
-032520,000199: 
-032521,000200:                                                                                                  <span class="co">#  MOVEPERM TRANSFERS REFRRECT TO REFRRECT +42 FROM PMEMORY TO A-MEMORY</span>
-032522,000201: 
-<a name="4D4F56455045524D"></a>032523,000202: 07,2256           32333        <span class="sm">MOVEPERM</span>           <span class="op">CAF     </span> <a href="#464F52545954574F">FORTYTWO</a>                              
-032524,000203: 07,2257           55605                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4449464551434E54">DIFEQCNT</a>                              
-032525,000204: 07,2260           51605                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4449464551434E54">DIFEQCNT</a>                              
-032526,000205: 07,2261           31222                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5245465252454354">REFRRECT</a>                              
-032527,000206: 07,2262           51605                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4449464551434E54">DIFEQCNT</a>                              
-032528,000207: 07,2263           55400                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5252454354">RRECT</a>                                 
-032529,000208: 07,2264           11605                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4449464551434E54">DIFEQCNT</a>                              
-032530,000209: 07,2265           12257                           <span class="op">TCF     </span> <a href="#4D4F56455045524D">MOVEPERM</a>   +1                         
-032531,000210: 07,2266           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-032532,000211: 
-<a name="494E4954494E54"></a>032533,000212: 07,2267           66331        <span class="sm">INITINT </span>           <span class="in">SSP     </span> <span class="in">SSP       </span>                            
-032534,000213: 07,2270           02230                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#50424F4459">PBODY</a>                                 <span class="co">#  EARTHTAB INTO PBOAY</span>
-032535,000214: 07,2271           17671                                    <a href="ORBITAL_INTEGRATION_PROGRAM.agc.html#4541525448544142">EARTHTAB</a>                              
-032536,000215: 
-032537,000216: 07,2272           02205                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5354455045584954">STEPEXIT</a>                              <span class="co">#  TESTLOOP INTO STEPEXIT</span>
-032538,000217: 07,2273           16130                                    <a href="#544553544C4F4F50">TESTLOOP</a>                              
-032539,000218: 07,2274           43014                           <span class="in">CLEAR   </span> <span class="in">CLEAR     </span>                            
-032540,000219: 07,2275           00262                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4944464C4147">MIDFLAG</a>                               <span class="co">#  ZERO ON 206</span>
-032541,000220: 07,2276           00263                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F4F4E464C4147">MOONFLAG</a>                              <span class="co">#  ZERO ON 206</span>
-032542,000221: 07,2277           43414                           <span class="in">CLEAR   </span> <span class="in">RVQ       </span>                            
-032543,000222: 07,2300           00260                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#574D4154464C4147">WMATFLAG</a>                              <span class="co">#  W-MATRIX NOT USED ON 206</span>
-032544,000223: 
+032511,000183:                                                                                                  <span class="co">#  MOVETEMP TRANSFERS RRECT TO RRECT +42 FROM A-MEMORY TO P-MEMORY</span>
+032512,000184: 
+032513,000185:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
+032514,000186:                                                                                                  <span class="co">#     L   TC   MOVETEMP</span>
+032515,000187: 
+032516,000188:                                                                                                  <span class="co">#  NORMAL EXIT AT L+1</span>
+<a name="4D4F564554454D50"></a>032517,000189: 07,2245           32333        <span class="sm">MOVETEMP</span>           <span class="op">CAF     </span> <a href="#464F52545954574F">FORTYTWO</a>                              
+032518,000190: 07,2246           55605                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4449464551434E54">DIFEQCNT</a>                              <span class="co">#  INITIALIZE INDEX</span>
+032519,000191: 
+032520,000192: 07,2247           51605                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4449464551434E54">DIFEQCNT</a>                              
+032521,000193: 07,2250           31400                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5252454354">RRECT</a>                                 <span class="co">#  PICK UP RRECT TO RRECT +42 FROM A-MEMORY</span>
+032522,000194: 07,2251           51605                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4449464551434E54">DIFEQCNT</a>                              
+032523,000195: 07,2252           55222                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5245465252454354">REFRRECT</a>                              <span class="co">#  STORE IN REFRRECT TO REFRRECT +42 IN P-M</span>
+032524,000196: 07,2253           11605                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4449464551434E54">DIFEQCNT</a>                              <span class="co">#  IS TRANSFER COMPLETE</span>
+032525,000197: 07,2254           12246                           <span class="op">TCF     </span> <a href="#4D4F564554454D50">MOVETEMP</a>   +1                         <span class="co">#  NO-LOOP AGAIN</span>
+032526,000198: 07,2255           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  TRANSFER COMPLETE-RETURN</span>
+032527,000199: 
+032528,000200:                                                                                                  <span class="co">#  MOVEPERM TRANSFERS REFRRECT TO REFRRECT +42 FROM PMEMORY TO A-MEMORY</span>
+032529,000201: 
+<a name="4D4F56455045524D"></a>032530,000202: 07,2256           32333        <span class="sm">MOVEPERM</span>           <span class="op">CAF     </span> <a href="#464F52545954574F">FORTYTWO</a>                              
+032531,000203: 07,2257           55605                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4449464551434E54">DIFEQCNT</a>                              
+032532,000204: 07,2260           51605                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4449464551434E54">DIFEQCNT</a>                              
+032533,000205: 07,2261           31222                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5245465252454354">REFRRECT</a>                              
+032534,000206: 07,2262           51605                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4449464551434E54">DIFEQCNT</a>                              
+032535,000207: 07,2263           55400                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5252454354">RRECT</a>                                 
+032536,000208: 07,2264           11605                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4449464551434E54">DIFEQCNT</a>                              
+032537,000209: 07,2265           12257                           <span class="op">TCF     </span> <a href="#4D4F56455045524D">MOVEPERM</a>   +1                         
+032538,000210: 07,2266           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+032539,000211: 
+<a name="494E4954494E54"></a>032540,000212: 07,2267           66331        <span class="sm">INITINT </span>           <span class="in">SSP     </span> <span class="in">SSP       </span>                            
+032541,000213: 07,2270           02230                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#50424F4459">PBODY</a>                                 <span class="co">#  EARTHTAB INTO PBOAY</span>
+032542,000214: 07,2271           17671                                    <a href="ORBITAL_INTEGRATION_PROGRAM.agc.html#4541525448544142">EARTHTAB</a>                              
+032543,000215: 
+032544,000216: 07,2272           02205                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5354455045584954">STEPEXIT</a>                              <span class="co">#  TESTLOOP INTO STEPEXIT</span>
+032545,000217: 07,2273           16130                                    <a href="#544553544C4F4F50">TESTLOOP</a>                              
+032546,000218: 07,2274           43014                           <span class="in">CLEAR   </span> <span class="in">CLEAR     </span>                            
+032547,000219: 07,2275           00262                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4944464C4147">MIDFLAG</a>                               <span class="co">#  ZERO ON 206</span>
+032548,000220: 07,2276           00263                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F4F4E464C4147">MOONFLAG</a>                              <span class="co">#  ZERO ON 206</span>
+032549,000221: 07,2277           43414                           <span class="in">CLEAR   </span> <span class="in">RVQ       </span>                            
+032550,000222: 07,2300           00260                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#574D4154464C4147">WMATFLAG</a>                              <span class="co">#  W-MATRIX NOT USED ON 206</span>
+032551,000223: 
 </pre>
 </span>
 </p>
@@ -397,59 +397,59 @@ Page 718
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-032546,000225:                                                                                                  <span class="co">#  MIDTOAVE PERFORMS THE STATE VECTOR TRANSITION FROM A COASTING PHASE</span>
-032547,000226:                                                                                                  <span class="co">#  USING THE ORBITAL INTEGRATION PROGRAMS TO A TRUSTING PHASE WHICH USES</span>
-032548,000227:                                                                                                  <span class="co">#  AVERAGEG INTEGRATION.  THE ROUTINE RESCALES AND TRANSFORMS THE STATE</span>
-032549,000228:                                                                                                  <span class="co">#  VECTOR AT TIGN-30, TIGN-2 AND TIGN FROM REFERENCE COORDINATES TO</span>
-032550,000229:                                                                                                  <span class="co">#  STABLE MEMBER COORDINATES AS DIRECTED BY THE DECISION ROUTINE</span>
-032551,000230: 
-032552,000231:                                                                                                  <span class="co">#  INPUT-MIDTOAVE ASSUMES THAT THE COASTING INTEGRATION WAS INITIALIZED</span>
-032553,000232:                                                                                                  <span class="co">#     BY THE AVETOMID ROUTINE,  STATE IN REF. COORD. IN PMEMORY.</span>
-032554,000233: 
-032555,000234:                                                                                                  <span class="co">#     RRECT, RCV-POSITION IN KM SCALED AT 2(+14)</span>
-032556,000235:                                                                                                  <span class="co">#     VRECT, VCV- VELOCITY IN 1/SQRT(KM) SCALED AT 2(-6)</span>
-032557,000236:                                                                                                  <span class="co">#     TET, TIME IN CSECS.</span>
-032558,000237: 
-032559,000238:                                                                                                  <span class="co">#  OUTPUT-STATE IN STABLE MEMBER COORDINATES</span>
-032560,000239: 
-032561,000240:                                                                                                  <span class="co">#  AT TIGN-30</span>
-032562,000241:                                                                                                  <span class="co">#     RAVEGON, POSITION IN METERS SCALED IN 2(+24)</span>
-032563,000242:                                                                                                  <span class="co">#     VAVEGON, VELOCITY IN METERS/CSEC SCALED AT 2(+7)</span>
-032564,000243: 
-032565,000244:                                                                                                  <span class="co">#  AT TIGN-2</span>
-032566,000245:                                                                                                  <span class="co">#     RIG-2SEC, POSITION IN METERS SCALED AT 2(+24)</span>
-032567,000246: 
-032568,000247:                                                                                                  <span class="co">#  AT TIGN</span>
-032569,000248: 
-032570,000249:                                                                                                  <span class="co">#     RIGNTION, POSITION IN METERS SCALED AT 2(+24)</span>
-032571,000250:                                                                                                  <span class="co">#     VIGNTION, VELOCITY IN METERS/CSEC SCALED AT 2(+7)</span>
-032572,000251: 
-032573,000252:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
-032574,000253:                                                                                                  <span class="co">#     (COMPUTE TDEC=TIME OF IGNITION-30 SECS.)</span>
-032575,000254:                                                                                                  <span class="co">#     L-2   EXTEND</span>
-032576,000255:                                                                                                  <span class="co">#     L-1   DCA    (2CADR OF MIDTOAVE)</span>
-032577,000256:                                                                                                  <span class="co">#     L     DXCH   Z</span>
-032578,000257: 
-032579,000258:                                                                                                  <span class="co">#  NORMAL EXIT</span>
-032580,000259:                                                                                                  <span class="co">#     L+1 OF CALLING SEQUENCE</span>
-032581,000260: 
-<a name="5256555044415445"></a>032582,000261: 07,2301           53631        <span class="sm">RVUPDATE</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41564D494452544E">AVMIDRTN</a>                              
-032583,000262: 07,2302           37755                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  <span class="co">#  SET MEASMODE TO +1 TO INTEGRATE STATE</span>
-032584,000263: 
-032585,000264: 07,2303           12306                           <span class="op">TCF     </span> <a href="#4D4944544F415645">MIDTOAVE</a>   +2                         <span class="co">#  TO TDEC AND STORED IN RIGNTION ONLY</span>
-032586,000265: 
-<a name="4D4944544F415645"></a>032587,000266: 07,2304           53631        <span class="sm">MIDTOAVE</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41564D494452544E">AVMIDRTN</a>                              
-032588,000267: 07,2305           37762                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#4E454730">NEG0</a>                                  
-032589,000268: 07,2306           55600                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4541534D4F4445">MEASMODE</a>                              <span class="co">#  SET MEASMODE (-0) TO INTEGRATE TO IG-30</span>
-032590,000269: 07,2307           06027                           <span class="op">TC      </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#464C4147325550">FLAG2UP</a>                               <span class="co">#  SET ORBITAL INTEGRATION FLAG</span>
-032591,000270: 07,2310           00100                           <span class="ps">OCT     </span> 100                                   
-032592,000271: 07,2311           02256                           <span class="op">TC      </span> <a href="#4D4F56455045524D">MOVEPERM</a>                              <span class="co">#  BRING STATE FROM PMEMORY</span>
-032593,000272: 07,2312           06103                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-032594,000273: 07,2313           77624                           <span class="in">CALL    </span>                                       <span class="co">#  INITIALIZE ORBITAL INTEGRATION REGS</span>
-032595,000274: 07,2314           16267                                    <a href="#494E4954494E54">INITINT</a>                               
-032596,000275: 07,2315           77650                           <span class="in">GOTO    </span>                                       
-032597,000276: 07,2316           16130                                    <a href="#544553544C4F4F50">TESTLOOP</a>                              <span class="co">#  GO TO ORBITAL INTEGRATION</span>
-032598,000277: 
+032553,000225:                                                                                                  <span class="co">#  MIDTOAVE PERFORMS THE STATE VECTOR TRANSITION FROM A COASTING PHASE</span>
+032554,000226:                                                                                                  <span class="co">#  USING THE ORBITAL INTEGRATION PROGRAMS TO A TRUSTING PHASE WHICH USES</span>
+032555,000227:                                                                                                  <span class="co">#  AVERAGEG INTEGRATION.  THE ROUTINE RESCALES AND TRANSFORMS THE STATE</span>
+032556,000228:                                                                                                  <span class="co">#  VECTOR AT TIGN-30, TIGN-2 AND TIGN FROM REFERENCE COORDINATES TO</span>
+032557,000229:                                                                                                  <span class="co">#  STABLE MEMBER COORDINATES AS DIRECTED BY THE DECISION ROUTINE</span>
+032558,000230: 
+032559,000231:                                                                                                  <span class="co">#  INPUT-MIDTOAVE ASSUMES THAT THE COASTING INTEGRATION WAS INITIALIZED</span>
+032560,000232:                                                                                                  <span class="co">#     BY THE AVETOMID ROUTINE,  STATE IN REF. COORD. IN PMEMORY.</span>
+032561,000233: 
+032562,000234:                                                                                                  <span class="co">#     RRECT, RCV-POSITION IN KM SCALED AT 2(+14)</span>
+032563,000235:                                                                                                  <span class="co">#     VRECT, VCV- VELOCITY IN 1/SQRT(KM) SCALED AT 2(-6)</span>
+032564,000236:                                                                                                  <span class="co">#     TET, TIME IN CSECS.</span>
+032565,000237: 
+032566,000238:                                                                                                  <span class="co">#  OUTPUT-STATE IN STABLE MEMBER COORDINATES</span>
+032567,000239: 
+032568,000240:                                                                                                  <span class="co">#  AT TIGN-30</span>
+032569,000241:                                                                                                  <span class="co">#     RAVEGON, POSITION IN METERS SCALED IN 2(+24)</span>
+032570,000242:                                                                                                  <span class="co">#     VAVEGON, VELOCITY IN METERS/CSEC SCALED AT 2(+7)</span>
+032571,000243: 
+032572,000244:                                                                                                  <span class="co">#  AT TIGN-2</span>
+032573,000245:                                                                                                  <span class="co">#     RIG-2SEC, POSITION IN METERS SCALED AT 2(+24)</span>
+032574,000246: 
+032575,000247:                                                                                                  <span class="co">#  AT TIGN</span>
+032576,000248: 
+032577,000249:                                                                                                  <span class="co">#     RIGNTION, POSITION IN METERS SCALED AT 2(+24)</span>
+032578,000250:                                                                                                  <span class="co">#     VIGNTION, VELOCITY IN METERS/CSEC SCALED AT 2(+7)</span>
+032579,000251: 
+032580,000252:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
+032581,000253:                                                                                                  <span class="co">#     (COMPUTE TDEC=TIME OF IGNITION-30 SECS.)</span>
+032582,000254:                                                                                                  <span class="co">#     L-2   EXTEND</span>
+032583,000255:                                                                                                  <span class="co">#     L-1   DCA    (2CADR OF MIDTOAVE)</span>
+032584,000256:                                                                                                  <span class="co">#     L     DXCH   Z</span>
+032585,000257: 
+032586,000258:                                                                                                  <span class="co">#  NORMAL EXIT</span>
+032587,000259:                                                                                                  <span class="co">#     L+1 OF CALLING SEQUENCE</span>
+032588,000260: 
+<a name="5256555044415445"></a>032589,000261: 07,2301           53631        <span class="sm">RVUPDATE</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41564D494452544E">AVMIDRTN</a>                              
+032590,000262: 07,2302           37755                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  <span class="co">#  SET MEASMODE TO +1 TO INTEGRATE STATE</span>
+032591,000263: 
+032592,000264: 07,2303           12306                           <span class="op">TCF     </span> <a href="#4D4944544F415645">MIDTOAVE</a>   +2                         <span class="co">#  TO TDEC AND STORED IN RIGNTION ONLY</span>
+032593,000265: 
+<a name="4D4944544F415645"></a>032594,000266: 07,2304           53631        <span class="sm">MIDTOAVE</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41564D494452544E">AVMIDRTN</a>                              
+032595,000267: 07,2305           37762                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#4E454730">NEG0</a>                                  
+032596,000268: 07,2306           55600                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4541534D4F4445">MEASMODE</a>                              <span class="co">#  SET MEASMODE (-0) TO INTEGRATE TO IG-30</span>
+032597,000269: 07,2307           06027                           <span class="op">TC      </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#464C4147325550">FLAG2UP</a>                               <span class="co">#  SET ORBITAL INTEGRATION FLAG</span>
+032598,000270: 07,2310           00100                           <span class="ps">OCT     </span> 100                                   
+032599,000271: 07,2311           02256                           <span class="op">TC      </span> <a href="#4D4F56455045524D">MOVEPERM</a>                              <span class="co">#  BRING STATE FROM PMEMORY</span>
+032600,000272: 07,2312           06103                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+032601,000273: 07,2313           77624                           <span class="in">CALL    </span>                                       <span class="co">#  INITIALIZE ORBITAL INTEGRATION REGS</span>
+032602,000274: 07,2314           16267                                    <a href="#494E4954494E54">INITINT</a>                               
+032603,000275: 07,2315           77650                           <span class="in">GOTO    </span>                                       
+032604,000276: 07,2316           16130                                    <a href="#544553544C4F4F50">TESTLOOP</a>                              <span class="co">#  GO TO ORBITAL INTEGRATION</span>
+032605,000277: 
 </pre>
 </span>
 </p>
@@ -465,59 +465,59 @@ Page 719
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-032600,000279:                                                                                                  <span class="co">#  THE DECISION ROUTINE DETERMINES THE ACTION TO BE TAKEN AFTER ORBITAL</span>
-032601,000280:                                                                                                  <span class="co">#  INTEGRATION HAS UPDATED THE STATE VECTOR TO THE TIME INDICATED</span>
-032602,000281:                                                                                                  <span class="co">#  BY TDEC.  THE ACTION TAKEN IS BASED ON THE CONTENTS OF MEASMODE,</span>
-032603,000282: 
-032604,000283:                                                                                                  <span class="co">#  C(MEASMODE)=(-0), STATE INTEGRATED (REF. COORD.) TO TIGN-30, SET</span>
-032605,000284:                                                                                                  <span class="co">#              MEASMODE=(+0), SET TDEC=TIGN-2SECS.</span>
-032606,000285:                                                                                                  <span class="co">#  C(MEASMODE)=(+0), POSITION VECTOR INTEGRATED TO TIGN-2, SET MEASMODE=,+1</span>
-032607,000286:                                                                                                  <span class="co">#              SET TDEC=TIGN</span>
-032608,000287:                                                                                                  <span class="co">#  C(MEASMODE)=(+1), STATE INTEGRATED TO TIGN, TRANSFORM STATE FROM REF TO</span>
-032609,000288:                                                                                                  <span class="co">#              SM COORD. SYSTEM AND RETURN TO MISSION PROGRAM</span>
-032610,000289:                                                                                                  <span class="co">#  C(MEASMODE)=(-1), STATE INTEGRATED TO TDEC DURING COAST PHASE, TERMINATE</span>
-032611,000290:                                                                                                  <span class="co">#              STATEINT JOB INITIATED BY MISSION SCHEDULING PACKAGE</span>
-032612,000291: 
-<a name="4445434953494F4E"></a>032613,000292: 07,2317           77776        <span class="sm">DECISION</span>           <span class="in">EXIT    </span>                                       
-032614,000293: 07,2320           11600                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4541534D4F4445">MEASMODE</a>                              
-032615,000294: 07,2321           12324                           <span class="op">TCF     </span> +3                                    <span class="co">#  STATE IN REF  COOR AT IGN</span>
-032616,000295: 07,2322           12324                           <span class="op">TCF     </span> +2                                    <span class="co">#  STATE IN REF COORD AT IGN-2</span>
-032617,000296: 07,2323           12427                           <span class="op">TCF     </span> <a href="#434F415354494E54">COASTINT</a>                              <span class="co">#  COAST INTEGRATION STEP COMPLETE</span>
-032618,000297: 07,2324           06103                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-032619,000298: 07,2325           77624                           <span class="in">CALL    </span>                                       
-032620,000299: 
-032621,000300: 07,2326           17426                                    <a href="ORBITAL_INTEGRATION_PROGRAM.agc.html#52454354494659">RECTIFY</a>                               <span class="co">#  RECTIFY AT IGN-30,IGN-2,IGN</span>
-032622,000301: 
-032623,000302: 07,2327           77776                           <span class="in">EXIT    </span>                                       
-032624,000303: 07,2330           11600                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4541534D4F4445">MEASMODE</a>                              
-032625,000304: 07,2331           12403                           <span class="op">TCF     </span> <a href="#524546544F534D">REFTOSM</a>                               <span class="co">#  STATE AT TIGN-FINISH UP MIDTOAVE</span>
-032626,000305: 07,2332           12364                           <span class="op">TCF     </span> <a href="#49474E2D32534543">IGN-2SEC</a>                              <span class="co">#  POS AT TIGN-2, DO TIGN NEXT</span>
-<a name="464F52545954574F"></a>032627,000306: 07,2333           00051        <span class="sm">FORTYTWO</span>           <span class="ps">DEC     </span> 41         B-14                       
-032628,000307: 07,2334           12335                           <span class="op">TCF     </span> <a href="#415645474F4E">AVEGON</a>                                <span class="co">#  STATE AT TIGN-30, DO TIGN-2 NEXT</span>
-032629,000308: 
-<a name="415645474F4E"></a>032630,000309: 07,2335           06103        <span class="sm">AVEGON  </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-032631,000310: 07,2336           66370                           <span class="in">AXT,1   </span> <span class="in">SSP       </span>                            <span class="co">#  SET LOOP</span>
-032632,000311: 07,2337           00014                                    12D                                   
-032633,000312: 07,2340           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
-032634,000313: 07,2341           00006                                    6                                     
-<a name="53504543504C5331"></a>032635,000314: 07,2342           73773        <span class="sm">SPECPLS1</span>           <span class="in">VLOAD*  </span> <span class="in">VXSC*     </span>                            
-032636,000315: 07,2343           02015                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5252454354">RRECT</a>      +12D,1                     
-032637,000316: 07,2344           16223                                    <a href="#53434C524D444156">SCLRMDAV</a>   +12D,1                     <span class="co">#    REF TO SM SCALE FACTOR</span>
-032638,000317: 07,2345           76521                           <span class="in">MXV     </span> <span class="in">VSL1      </span>                            
-032639,000318: 07,2346           01275                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
-032640,000319: 07,2347           06131                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52415645474F4E">RAVEGON</a>    +12D,1                     
-032641,000320: 07,2350           71300                           <span class="in">TIX,1   </span> <span class="in">DLOAD     </span>                            
-032642,000321: 07,2351           16342                                    <a href="#53504543504C5331">SPECPLS1</a>                              
-032643,000322: 07,2352           02167                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  <span class="co">#  TDEC NOW=TIGN-30</span>
-032644,000323: 
-032645,000324: 07,2353           01321                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50495054494D45">PIPTIME</a>                               <span class="co">#  SAVE TIGN-30 IN PIPTIME FOR AVERAGEG</span>
-032646,000325: 07,2354           02111                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54415645474F4E">TAVEGON</a>                               <span class="co">#  TIME TIG-30 FOR DWNLINK IN NORMLIZE</span>
-032647,000326: 07,2355           77615                           <span class="in">DAD     </span>                                       
-032648,000327: 07,2356           16167                                    <a href="#323853454353">28SECS</a>                                <span class="co">#  TDEC + 28SECS</span>
-032649,000328: 07,2357           02167                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  <span class="co">#  TDEC SET TIGN-2</span>
-032650,000329: 07,2360           52131                           <span class="in">SSP     </span> <span class="in">GOTO      </span>                            
-032651,000330: 07,2361           02201                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4541534D4F4445">MEASMODE</a>                              <span class="co">#  SET MEASMODE=(+0)</span>
-032652,000331: 
+032607,000279:                                                                                                  <span class="co">#  THE DECISION ROUTINE DETERMINES THE ACTION TO BE TAKEN AFTER ORBITAL</span>
+032608,000280:                                                                                                  <span class="co">#  INTEGRATION HAS UPDATED THE STATE VECTOR TO THE TIME INDICATED</span>
+032609,000281:                                                                                                  <span class="co">#  BY TDEC.  THE ACTION TAKEN IS BASED ON THE CONTENTS OF MEASMODE,</span>
+032610,000282: 
+032611,000283:                                                                                                  <span class="co">#  C(MEASMODE)=(-0), STATE INTEGRATED (REF. COORD.) TO TIGN-30, SET</span>
+032612,000284:                                                                                                  <span class="co">#              MEASMODE=(+0), SET TDEC=TIGN-2SECS.</span>
+032613,000285:                                                                                                  <span class="co">#  C(MEASMODE)=(+0), POSITION VECTOR INTEGRATED TO TIGN-2, SET MEASMODE=,+1</span>
+032614,000286:                                                                                                  <span class="co">#              SET TDEC=TIGN</span>
+032615,000287:                                                                                                  <span class="co">#  C(MEASMODE)=(+1), STATE INTEGRATED TO TIGN, TRANSFORM STATE FROM REF TO</span>
+032616,000288:                                                                                                  <span class="co">#              SM COORD. SYSTEM AND RETURN TO MISSION PROGRAM</span>
+032617,000289:                                                                                                  <span class="co">#  C(MEASMODE)=(-1), STATE INTEGRATED TO TDEC DURING COAST PHASE, TERMINATE</span>
+032618,000290:                                                                                                  <span class="co">#              STATEINT JOB INITIATED BY MISSION SCHEDULING PACKAGE</span>
+032619,000291: 
+<a name="4445434953494F4E"></a>032620,000292: 07,2317           77776        <span class="sm">DECISION</span>           <span class="in">EXIT    </span>                                       
+032621,000293: 07,2320           11600                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4541534D4F4445">MEASMODE</a>                              
+032622,000294: 07,2321           12324                           <span class="op">TCF     </span> +3                                    <span class="co">#  STATE IN REF  COOR AT IGN</span>
+032623,000295: 07,2322           12324                           <span class="op">TCF     </span> +2                                    <span class="co">#  STATE IN REF COORD AT IGN-2</span>
+032624,000296: 07,2323           12427                           <span class="op">TCF     </span> <a href="#434F415354494E54">COASTINT</a>                              <span class="co">#  COAST INTEGRATION STEP COMPLETE</span>
+032625,000297: 07,2324           06103                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+032626,000298: 07,2325           77624                           <span class="in">CALL    </span>                                       
+032627,000299: 
+032628,000300: 07,2326           17426                                    <a href="ORBITAL_INTEGRATION_PROGRAM.agc.html#52454354494659">RECTIFY</a>                               <span class="co">#  RECTIFY AT IGN-30,IGN-2,IGN</span>
+032629,000301: 
+032630,000302: 07,2327           77776                           <span class="in">EXIT    </span>                                       
+032631,000303: 07,2330           11600                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4541534D4F4445">MEASMODE</a>                              
+032632,000304: 07,2331           12403                           <span class="op">TCF     </span> <a href="#524546544F534D">REFTOSM</a>                               <span class="co">#  STATE AT TIGN-FINISH UP MIDTOAVE</span>
+032633,000305: 07,2332           12364                           <span class="op">TCF     </span> <a href="#49474E2D32534543">IGN-2SEC</a>                              <span class="co">#  POS AT TIGN-2, DO TIGN NEXT</span>
+<a name="464F52545954574F"></a>032634,000306: 07,2333           00051        <span class="sm">FORTYTWO</span>           <span class="ps">DEC     </span> 41         B-14                       
+032635,000307: 07,2334           12335                           <span class="op">TCF     </span> <a href="#415645474F4E">AVEGON</a>                                <span class="co">#  STATE AT TIGN-30, DO TIGN-2 NEXT</span>
+032636,000308: 
+<a name="415645474F4E"></a>032637,000309: 07,2335           06103        <span class="sm">AVEGON  </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+032638,000310: 07,2336           66370                           <span class="in">AXT,1   </span> <span class="in">SSP       </span>                            <span class="co">#  SET LOOP</span>
+032639,000311: 07,2337           00014                                    12D                                   
+032640,000312: 07,2340           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
+032641,000313: 07,2341           00006                                    6                                     
+<a name="53504543504C5331"></a>032642,000314: 07,2342           73773        <span class="sm">SPECPLS1</span>           <span class="in">VLOAD*  </span> <span class="in">VXSC*     </span>                            
+032643,000315: 07,2343           02015                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5252454354">RRECT</a>      +12D,1                     
+032644,000316: 07,2344           16223                                    <a href="#53434C524D444156">SCLRMDAV</a>   +12D,1                     <span class="co">#    REF TO SM SCALE FACTOR</span>
+032645,000317: 07,2345           76521                           <span class="in">MXV     </span> <span class="in">VSL1      </span>                            
+032646,000318: 07,2346           01275                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
+032647,000319: 07,2347           06131                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52415645474F4E">RAVEGON</a>    +12D,1                     
+032648,000320: 07,2350           71300                           <span class="in">TIX,1   </span> <span class="in">DLOAD     </span>                            
+032649,000321: 07,2351           16342                                    <a href="#53504543504C5331">SPECPLS1</a>                              
+032650,000322: 07,2352           02167                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  <span class="co">#  TDEC NOW=TIGN-30</span>
+032651,000323: 
+032652,000324: 07,2353           01321                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50495054494D45">PIPTIME</a>                               <span class="co">#  SAVE TIGN-30 IN PIPTIME FOR AVERAGEG</span>
+032653,000325: 07,2354           02111                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54415645474F4E">TAVEGON</a>                               <span class="co">#  TIME TIG-30 FOR DWNLINK IN NORMLIZE</span>
+032654,000326: 07,2355           77615                           <span class="in">DAD     </span>                                       
+032655,000327: 07,2356           16167                                    <a href="#323853454353">28SECS</a>                                <span class="co">#  TDEC + 28SECS</span>
+032656,000328: 07,2357           02167                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  <span class="co">#  TDEC SET TIGN-2</span>
+032657,000329: 07,2360           52131                           <span class="in">SSP     </span> <span class="in">GOTO      </span>                            
+032658,000330: 07,2361           02201                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4541534D4F4445">MEASMODE</a>                              <span class="co">#  SET MEASMODE=(+0)</span>
+032659,000331: 
 </pre>
 </span>
 </p>
@@ -533,25 +533,25 @@ Page 720
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-032654,000333: 07,2362           00000                                    0                                     
-032655,000334: 07,2363           16130                                    <a href="#544553544C4F4F50">TESTLOOP</a>                              <span class="co">#  GO INTEGRATE STATE TO IGN-2</span>
-032656,000335: 
-<a name="49474E2D32534543"></a>032657,000336: 07,2364           06103        <span class="sm">IGN-2SEC</span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-032658,000337: 07,2365           74375                           <span class="in">VLOAD   </span> <span class="in">VXSC      </span>                            <span class="co">#  TRANSFORM POS AT IGN-2 FROM REF TO SM</span>
-032659,000338: 07,2366           02001                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5252454354">RRECT</a>                                 
-032660,000339: 07,2367           16207                                    <a href="#53434C524D444156">SCLRMDAV</a>                              
-032661,000340: 07,2370           76521                           <span class="in">MXV     </span> <span class="in">VSL1      </span>                            
-032662,000341: 07,2371           01275                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
-032663,000342: 07,2372           16131                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5249472D32534543">RIG-2SEC</a>                              <span class="co">#  POS IN SM COORD. AT IGN-2</span>
-032664,000343: 07,2373           02167                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
-032665,000344: 07,2374           77615                           <span class="in">DAD     </span>                                       
-032666,000345: 07,2375           16173                                    <a href="#3253454353">2SECS</a>                                 
-032667,000346: 07,2376           02167                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  <span class="co">#  TDEC SET TIGN</span>
-032668,000347: 07,2377           52131                           <span class="in">SSP     </span> <span class="in">GOTO      </span>                            
-032669,000348: 07,2400           02201                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4541534D4F4445">MEASMODE</a>                              <span class="co">#  SET MEASMODE=(+1)</span>
-032670,000349: 07,2401           00001                                    1                                     
-032671,000350: 07,2402           16130                                    <a href="#544553544C4F4F50">TESTLOOP</a>                              <span class="co">#  GO INTEGRATE STATE TO TIGN</span>
-032672,000351: 
+032661,000333: 07,2362           00000                                    0                                     
+032662,000334: 07,2363           16130                                    <a href="#544553544C4F4F50">TESTLOOP</a>                              <span class="co">#  GO INTEGRATE STATE TO IGN-2</span>
+032663,000335: 
+<a name="49474E2D32534543"></a>032664,000336: 07,2364           06103        <span class="sm">IGN-2SEC</span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+032665,000337: 07,2365           74375                           <span class="in">VLOAD   </span> <span class="in">VXSC      </span>                            <span class="co">#  TRANSFORM POS AT IGN-2 FROM REF TO SM</span>
+032666,000338: 07,2366           02001                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5252454354">RRECT</a>                                 
+032667,000339: 07,2367           16207                                    <a href="#53434C524D444156">SCLRMDAV</a>                              
+032668,000340: 07,2370           76521                           <span class="in">MXV     </span> <span class="in">VSL1      </span>                            
+032669,000341: 07,2371           01275                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
+032670,000342: 07,2372           16131                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5249472D32534543">RIG-2SEC</a>                              <span class="co">#  POS IN SM COORD. AT IGN-2</span>
+032671,000343: 07,2373           02167                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
+032672,000344: 07,2374           77615                           <span class="in">DAD     </span>                                       
+032673,000345: 07,2375           16173                                    <a href="#3253454353">2SECS</a>                                 
+032674,000346: 07,2376           02167                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  <span class="co">#  TDEC SET TIGN</span>
+032675,000347: 07,2377           52131                           <span class="in">SSP     </span> <span class="in">GOTO      </span>                            
+032676,000348: 07,2400           02201                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4541534D4F4445">MEASMODE</a>                              <span class="co">#  SET MEASMODE=(+1)</span>
+032677,000349: 07,2401           00001                                    1                                     
+032678,000350: 07,2402           16130                                    <a href="#544553544C4F4F50">TESTLOOP</a>                              <span class="co">#  GO INTEGRATE STATE TO TIGN</span>
+032679,000351: 
 </pre>
 </span>
 </p>
@@ -567,60 +567,60 @@ Page 721
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-032674,000353: 
-<a name="524546544F534D"></a>032675,000354: 07,2403           06045        <span class="sm">REFTOSM </span>           <span class="op">TC      </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#464C41473244574E">FLAG2DWN</a>                              <span class="co">#  REMOVE ORBITAL INTEGRATION GLAG</span>
-032676,000355: 07,2404           00100                           <span class="ps">OCT     </span> 100                                   
-032677,000356: 07,2405           06103                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-032678,000357: 07,2406           66370                           <span class="in">AXT,1   </span> <span class="in">SSP       </span>                            <span class="co">#  SET UP TIX LOOP</span>
-032679,000358: 07,2407           00014                                    12D                                   <span class="co">#  12 IN X1</span>
-032680,000359: 07,2410           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    <span class="co">#  6 IN S1</span>
-032681,000360: 07,2411           00006                                    6                                     
-<a name="524546544F534D31"></a>032682,000361: 07,2412           73773        <span class="sm">REFTOSM1</span>           <span class="in">VLOAD*  </span> <span class="in">VXSC*     </span>                            <span class="co">#  TRANSFORM STATE AT TIGN FROM REF TO SM</span>
-032683,000362: 
-032684,000363: 07,2413           02015                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5252454354">RRECT</a>      +12D,1                     
-032685,000364: 07,2414           16223                                    <a href="#53434C524D444156">SCLRMDAV</a>   +12D,1                     <span class="co">#  REF TO SM SCALE FACTOR</span>
-032686,000365: 07,2415           76521                           <span class="in">MXV     </span> <span class="in">VSL1      </span>                            
-032687,000366: 07,2416           01275                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
-032688,000367: 07,2417           06015                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5249474E54494F4E">RIGNTION</a>   +12D,1                     <span class="co">#    STATE AT TIGN IN SM COORDINATES</span>
-032689,000368: 07,2420           77500                           <span class="in">TIX,1   </span> <span class="in">EXIT      </span>                            
-032690,000369: 07,2421           16412                                    <a href="#524546544F534D31">REFTOSM1</a>                              
-032691,000370: 07,2422           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  PLAY SAFE WITH BASIC********************</span>
-032692,000371: 07,2423           31447                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544554">TET</a>                                   <span class="co">#  ****************************************</span>
-032693,000372: 07,2424           53670                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5449474E">TIGN</a>                                  <span class="co">#  STATE TIME FOR DWNLINK IN VPATCHER</span>
-032694,000373: 07,2425           53631                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41564D494452544E">AVMIDRTN</a>                              
-032695,000374: 07,2426           52006                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A">Z</a>                                     
-032696,000375:                                                                                                  <span class="co">#  THE COASTINT ROUTINE TERMINATES THE ORBITAL INTEGRATION JOB SET BY</span>
-032697,000376:                                                                                                  <span class="co">#  MISSION SCHEDULING ROUTINE EVERY 539 SECONDS DURING COASTING PHASES.</span>
-032698,000377:                                                                                                  <span class="co">#  THE ROUTINE TRANSFERS THE STATE VECTOR AND ALL OTHER ORBITAL INTEGRATION</span>
-032699,000378:                                                                                                  <span class="co">#  QUANTITIES TO P-MEMORY.  IT FORMS A TOTAL STATE VECTOR AND TRANSFORMS IT</span>
-032700,000379:                                                                                                  <span class="co">#  TO STABLE MEMBER COORDINATES AND STORES IT WITH TIME IN RN, VN AND</span>
-032701,000380:                                                                                                  <span class="co">#  STATIME FOR DOWNLINK.  THE ROUTINE THEN REMOVES THE INTEGRATION FLAG</span>
-032702,000381:                                                                                                  <span class="co">#  TO ALLOW GROUND UPDATE OF THE STATE VECTOR AND DOES ENDOFJOB.</span>
-032703,000382: 
-<a name="434F415354494E54"></a>032704,000383: 07,2427           02245        <span class="sm">COASTINT</span>           <span class="op">TC      </span> <a href="#4D4F564554454D50">MOVETEMP</a>                              
-032705,000384: 07,2430           06103                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-032706,000385: 07,2431           40575                           <span class="in">VLOAD   </span> <span class="in">VSR8      </span>                            <span class="co">#  FORM TOTAL STATE VECTOR</span>
-032707,000386: 
-032708,000387: 07,2432           01237                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C544156">DELTAV</a>                                
-032709,000388: 07,2433           53342                           <span class="in">VSR2    </span> <span class="in">VAD       </span>                            
-032710,000389: 07,2434           01253                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546524356">REFRCV</a>                                
-032711,000390: 07,2435           26001                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5252454354">RRECT</a>                                 
-032712,000391: 07,2436           01245                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5556">NUV</a>                                   
-032713,000392: 07,2437           53202                           <span class="in">VSR8    </span> <span class="in">VAD       </span>                            
-032714,000393: 07,2440           01261                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546564356">REFVCV</a>                                
-032715,000394: 07,2441           02007                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5652454354">VRECT</a>                                 <span class="co">#  TOTAL VEL. VECTOR</span>
-032716,000395: 
-032717,000396: 07,2442           66370                           <span class="in">AXT,1   </span> <span class="in">SSP       </span>                            <span class="co">#  SET TIX LOOP TO TRANSFORM STATE TO SM</span>
-032718,000397: 07,2443           00014                                    12D                                   
-032719,000398: 07,2444           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
-032720,000399: 07,2445           00006                                    6                                     
-<a name="5452414E544F534D"></a>032721,000400: 07,2446           73773        <span class="sm">TRANTOSM</span>           <span class="in">VLOAD*  </span> <span class="in">VXSC*     </span>                            <span class="co">#  TRANSFORM STATE AND RE-STORE IN RRECT</span>
-032722,000401: 07,2447           02015                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5252454354">RRECT</a>      +12D,1                     
-032723,000402: 07,2450           16223                                    <a href="#53434C524D444156">SCLRMDAV</a>   +12D,1                     
-032724,000403: 07,2451           76521                           <span class="in">MXV     </span> <span class="in">VSL1      </span>                            
-032725,000404: 07,2452           01275                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
-032726,000405: 07,2453           06015                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5252454354">RRECT</a>      +12D,1                     <span class="co">#  STATE IN SM SYSTEM</span>
-032727,000406: 
+032681,000353: 
+<a name="524546544F534D"></a>032682,000354: 07,2403           06045        <span class="sm">REFTOSM </span>           <span class="op">TC      </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#464C41473244574E">FLAG2DWN</a>                              <span class="co">#  REMOVE ORBITAL INTEGRATION GLAG</span>
+032683,000355: 07,2404           00100                           <span class="ps">OCT     </span> 100                                   
+032684,000356: 07,2405           06103                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+032685,000357: 07,2406           66370                           <span class="in">AXT,1   </span> <span class="in">SSP       </span>                            <span class="co">#  SET UP TIX LOOP</span>
+032686,000358: 07,2407           00014                                    12D                                   <span class="co">#  12 IN X1</span>
+032687,000359: 07,2410           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    <span class="co">#  6 IN S1</span>
+032688,000360: 07,2411           00006                                    6                                     
+<a name="524546544F534D31"></a>032689,000361: 07,2412           73773        <span class="sm">REFTOSM1</span>           <span class="in">VLOAD*  </span> <span class="in">VXSC*     </span>                            <span class="co">#  TRANSFORM STATE AT TIGN FROM REF TO SM</span>
+032690,000362: 
+032691,000363: 07,2413           02015                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5252454354">RRECT</a>      +12D,1                     
+032692,000364: 07,2414           16223                                    <a href="#53434C524D444156">SCLRMDAV</a>   +12D,1                     <span class="co">#  REF TO SM SCALE FACTOR</span>
+032693,000365: 07,2415           76521                           <span class="in">MXV     </span> <span class="in">VSL1      </span>                            
+032694,000366: 07,2416           01275                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
+032695,000367: 07,2417           06015                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5249474E54494F4E">RIGNTION</a>   +12D,1                     <span class="co">#    STATE AT TIGN IN SM COORDINATES</span>
+032696,000368: 07,2420           77500                           <span class="in">TIX,1   </span> <span class="in">EXIT      </span>                            
+032697,000369: 07,2421           16412                                    <a href="#524546544F534D31">REFTOSM1</a>                              
+032698,000370: 07,2422           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  PLAY SAFE WITH BASIC********************</span>
+032699,000371: 07,2423           31447                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544554">TET</a>                                   <span class="co">#  ****************************************</span>
+032700,000372: 07,2424           53670                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5449474E">TIGN</a>                                  <span class="co">#  STATE TIME FOR DWNLINK IN VPATCHER</span>
+032701,000373: 07,2425           53631                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41564D494452544E">AVMIDRTN</a>                              
+032702,000374: 07,2426           52006                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A">Z</a>                                     
+032703,000375:                                                                                                  <span class="co">#  THE COASTINT ROUTINE TERMINATES THE ORBITAL INTEGRATION JOB SET BY</span>
+032704,000376:                                                                                                  <span class="co">#  MISSION SCHEDULING ROUTINE EVERY 539 SECONDS DURING COASTING PHASES.</span>
+032705,000377:                                                                                                  <span class="co">#  THE ROUTINE TRANSFERS THE STATE VECTOR AND ALL OTHER ORBITAL INTEGRATION</span>
+032706,000378:                                                                                                  <span class="co">#  QUANTITIES TO P-MEMORY.  IT FORMS A TOTAL STATE VECTOR AND TRANSFORMS IT</span>
+032707,000379:                                                                                                  <span class="co">#  TO STABLE MEMBER COORDINATES AND STORES IT WITH TIME IN RN, VN AND</span>
+032708,000380:                                                                                                  <span class="co">#  STATIME FOR DOWNLINK.  THE ROUTINE THEN REMOVES THE INTEGRATION FLAG</span>
+032709,000381:                                                                                                  <span class="co">#  TO ALLOW GROUND UPDATE OF THE STATE VECTOR AND DOES ENDOFJOB.</span>
+032710,000382: 
+<a name="434F415354494E54"></a>032711,000383: 07,2427           02245        <span class="sm">COASTINT</span>           <span class="op">TC      </span> <a href="#4D4F564554454D50">MOVETEMP</a>                              
+032712,000384: 07,2430           06103                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+032713,000385: 07,2431           40575                           <span class="in">VLOAD   </span> <span class="in">VSR8      </span>                            <span class="co">#  FORM TOTAL STATE VECTOR</span>
+032714,000386: 
+032715,000387: 07,2432           01237                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C544156">DELTAV</a>                                
+032716,000388: 07,2433           53342                           <span class="in">VSR2    </span> <span class="in">VAD       </span>                            
+032717,000389: 07,2434           01253                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546524356">REFRCV</a>                                
+032718,000390: 07,2435           26001                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5252454354">RRECT</a>                                 
+032719,000391: 07,2436           01245                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4E5556">NUV</a>                                   
+032720,000392: 07,2437           53202                           <span class="in">VSR8    </span> <span class="in">VAD       </span>                            
+032721,000393: 07,2440           01261                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546564356">REFVCV</a>                                
+032722,000394: 07,2441           02007                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5652454354">VRECT</a>                                 <span class="co">#  TOTAL VEL. VECTOR</span>
+032723,000395: 
+032724,000396: 07,2442           66370                           <span class="in">AXT,1   </span> <span class="in">SSP       </span>                            <span class="co">#  SET TIX LOOP TO TRANSFORM STATE TO SM</span>
+032725,000397: 07,2443           00014                                    12D                                   
+032726,000398: 07,2444           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
+032727,000399: 07,2445           00006                                    6                                     
+<a name="5452414E544F534D"></a>032728,000400: 07,2446           73773        <span class="sm">TRANTOSM</span>           <span class="in">VLOAD*  </span> <span class="in">VXSC*     </span>                            <span class="co">#  TRANSFORM STATE AND RE-STORE IN RRECT</span>
+032729,000401: 07,2447           02015                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5252454354">RRECT</a>      +12D,1                     
+032730,000402: 07,2450           16223                                    <a href="#53434C524D444156">SCLRMDAV</a>   +12D,1                     
+032731,000403: 07,2451           76521                           <span class="in">MXV     </span> <span class="in">VSL1      </span>                            
+032732,000404: 07,2452           01275                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
+032733,000405: 07,2453           06015                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5252454354">RRECT</a>      +12D,1                     <span class="co">#  STATE IN SM SYSTEM</span>
+032734,000406: 
 </pre>
 </span>
 </p>
@@ -636,29 +636,29 @@ Page 722
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-032729,000408: 07,2454           77700                           <span class="in">TIX,1   </span>                                       
-032730,000409: 07,2455           16446                                    <a href="#5452414E544F534D">TRANTOSM</a>                              
-032731,000410: 07,2456           77776                           <span class="in">EXIT    </span>                                       
-032732,000411: 
-032733,000412: 07,2457           00004                           <span class="op">INHINT  </span>                                       <span class="co">#  INHIBIT INTERUPT TO STORE STATE IN RN</span>
-032734,000413: 07,2460           37756                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#454C4556454E">ELEVEN</a>                                <span class="co">#  INITIALIZE INDEX TO DEC 11</span>
-<a name="535441544F524E"></a>032735,000414: 07,2461           54070        <span class="sm">STATORN </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-032736,000415: 07,2462           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-032737,000416: 07,2463           31400                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5252454354">RRECT</a>                                 <span class="co">#  PICK RRECT + NEXT 11 REGS</span>
-032738,000417: 07,2464           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-032739,000418: 07,2465           55010                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524E">RN</a>                                    <span class="co">#  JAM IN RN TO RN+11 FOR DOWNLINK</span>
-032740,000419: 07,2466           10070                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-032741,000420: 07,2467           12461                           <span class="op">TCF     </span> <a href="#535441544F524E">STATORN</a>                               
-032742,000421: 07,2470           00006                           <span class="op">EXTEND  </span>                                       
-032743,000422: 
-032744,000423: 07,2471           31271                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5445">TE</a>                                    <span class="co">#  GET STATE TIME</span>
-032745,000424: 07,2472           53341                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53544154494D45">STATIME</a>                               
-032746,000425: 07,2473           00003                           <span class="op">RELINT  </span>                                       <span class="co">#  STATE AND TIME IN DOWNLINK REGS</span>
-032747,000426: 
-<a name="494E544F5554"></a>032748,000427: 07,2474           06045        <span class="sm">INTOUT  </span>           <span class="op">TC      </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#464C41473244574E">FLAG2DWN</a>                              <span class="co">#  REMOVE ORBITAL INTEGRATION FLAG</span>
-032749,000428: 07,2475           00100                           <span class="ps">OCT     </span> 100                                   
-032750,000429: 
-032751,000430: 07,2476           05605                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+032736,000408: 07,2454           77700                           <span class="in">TIX,1   </span>                                       
+032737,000409: 07,2455           16446                                    <a href="#5452414E544F534D">TRANTOSM</a>                              
+032738,000410: 07,2456           77776                           <span class="in">EXIT    </span>                                       
+032739,000411: 
+032740,000412: 07,2457           00004                           <span class="op">INHINT  </span>                                       <span class="co">#  INHIBIT INTERUPT TO STORE STATE IN RN</span>
+032741,000413: 07,2460           37756                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#454C4556454E">ELEVEN</a>                                <span class="co">#  INITIALIZE INDEX TO DEC 11</span>
+<a name="535441544F524E"></a>032742,000414: 07,2461           54070        <span class="sm">STATORN </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+032743,000415: 07,2462           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+032744,000416: 07,2463           31400                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5252454354">RRECT</a>                                 <span class="co">#  PICK RRECT + NEXT 11 REGS</span>
+032745,000417: 07,2464           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+032746,000418: 07,2465           55010                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524E">RN</a>                                    <span class="co">#  JAM IN RN TO RN+11 FOR DOWNLINK</span>
+032747,000419: 07,2466           10070                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+032748,000420: 07,2467           12461                           <span class="op">TCF     </span> <a href="#535441544F524E">STATORN</a>                               
+032749,000421: 07,2470           00006                           <span class="op">EXTEND  </span>                                       
+032750,000422: 
+032751,000423: 07,2471           31271                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5445">TE</a>                                    <span class="co">#  GET STATE TIME</span>
+032752,000424: 07,2472           53341                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53544154494D45">STATIME</a>                               
+032753,000425: 07,2473           00003                           <span class="op">RELINT  </span>                                       <span class="co">#  STATE AND TIME IN DOWNLINK REGS</span>
+032754,000426: 
+<a name="494E544F5554"></a>032755,000427: 07,2474           06045        <span class="sm">INTOUT  </span>           <span class="op">TC      </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#464C41473244574E">FLAG2DWN</a>                              <span class="co">#  REMOVE ORBITAL INTEGRATION FLAG</span>
+032756,000428: 07,2475           00100                           <span class="ps">OCT     </span> 100                                   
+032757,000429: 
+032758,000430: 07,2476           05605                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
 
 End of include-file INTEGRATION_INITIALIZATION.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

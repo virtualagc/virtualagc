@@ -95,19 +95,19 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-037242,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-037243,000003:                                                                                                  <span class="co">## Filename:    DUMMY_206_INITIALIZATION.agc</span>
-037244,000004:                                                                                                  <span class="co">## Purpose:     A module for revision 0 of BURST120 (Sunburst). It </span>
-037245,000005:                                                                                                  <span class="co">##              is part of the source code for the Lunar Module's</span>
-037246,000006:                                                                                                  <span class="co">##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
-037247,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-037248,000008:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-037249,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-037250,000010:                                                                                                  <span class="co">## Mod history: 2016-09-30 RSB  Created draft version.</span>
-037251,000011:                                                                                                  <span class="co">##              2016-10-30 RSB  Finished transcription.</span>
-037252,000012:                                                                                                  <span class="co">##              2016-12-06 RSB  Proofed comments with octopus/ProoferComments,</span>
-037253,000013:                                                                                                  <span class="co">##                              changes were made.</span>
-037254,000014: 
+037248,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+037249,000003:                                                                                                  <span class="co">## Filename:    DUMMY_206_INITIALIZATION.agc</span>
+037250,000004:                                                                                                  <span class="co">## Purpose:     A module for revision 0 of BURST120 (Sunburst). It </span>
+037251,000005:                                                                                                  <span class="co">##              is part of the source code for the Lunar Module's</span>
+037252,000006:                                                                                                  <span class="co">##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
+037253,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+037254,000008:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+037255,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+037256,000010:                                                                                                  <span class="co">## Mod history: 2016-09-30 RSB  Created draft version.</span>
+037257,000011:                                                                                                  <span class="co">##              2016-10-30 RSB  Finished transcription.</span>
+037258,000012:                                                                                                  <span class="co">##              2016-12-06 RSB  Proofed comments with octopus/ProoferComments,</span>
+037259,000013:                                                                                                  <span class="co">##                              changes were made.</span>
+037260,000014: 
 </pre>
 </span>
 </p>
@@ -123,55 +123,55 @@ Page 869
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-037256,000016:                                                                                                  <span class="co">#  PROGRAM NAME - BEGIN206</span>
-037257,000017:                                                                                                  <span class="co">#  MOD. NO. 3</span>
-037258,000018:                                                                                                  <span class="co">#  MOD BY - D. LICKLY AND J. SAMPSON</span>
-037259,000019:                                                                                                  <span class="co">#  DATE - NOV. 22, 1966</span>
-037260,000020:                                                                                                  <span class="co">#  LOG SECTION - DUMMY 206 INITIALIZATION</span>
-037261,000021:                                                                                                  <span class="co">#  ASSEMBLY - SUNBURST REVISION 36</span>
-037262,000022: 
-037263,000023:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION - START UP TO TWO DELAYED JOBS OR TASKS AFTER SLAP1 FOR SIMULATION PURPOSES.</span>
-037264,000024: 
-037265,000025:                                                                                                  <span class="co">#  FIXED INITIALIZATION REQUIRED - PATCH STARTDT1 AND STARTDT2 TO REPRESENT THE TIME2,TIME1 VALUE AT THE TIME AT</span>
-037266,000026:                                                                                                  <span class="co">#                                    WHICH THE JOBS OR TASKS ARE TO BEGIN</span>
-037267,000027:                                                                                                  <span class="co">#                                  PATCH CADR1 AND CADR2 IF SOME OTHER TASKS THAN TASK1 AND TASK2 ARE TO BE USED</span>
-037268,000028:                                                                                                  <span class="co">#                                  PATCH CADR3 AND CADR4 TO THE 2CADR OF THE JOBS TO BE STARTED</span>
-037269,000029:                                                                                                  <span class="co">#                                  PATCH 206BEGIN TO TC ENDOFJOB IF ONLY ONLY ONE TASK OR JOB IS TO BE STARTED</span>
-037270,000030:                                                                                                  <span class="co">#                                  PATCH TASK1 AND TASK2 WITH DIFFERENT PRIORITIES IF DESIRED</span>
-037271,000031:                                                                                                  <span class="co">#  SUBROUTINES CALLED - FINDVAC, WAITLIST</span>
-037272,000032: 
-037273,000033:                                                                                                  <span class="co">#  NORMAL EXIT MODES - ENDOFJOB, TASKOVER</span>
-037274,000034: 
-037275,000035:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODES - NONE</span>
-037276,000036: 
-037277,000037:                                                                                                  <span class="co">#  OUTPUT - 2 WAITLIST OR FINDVAC CALLS FOR THE 2CADRS PATCHED IN</span>
-037278,000038: 
-037279,000039:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED - NONE</span>
-037280,000040: 
-037281,000041:                                                                                                  <span class="co">#  DEBRIS - ITEMP1, CENTRALS, ERASABLES IN SUBROUTINES CALLED</span>
-037282,000042: 
-037283,000043:                                                                                                  <span class="co">#  NOTES - SINCE ONLY THE LOW ORDER PART OF STARTDT1 AND STARTDT2 ARE USED OT COMPUTE THE DELTAT FOR WAITLIST, THE</span>
-037284,000044:                                                                                                  <span class="co">#    REQUIRED TASKS AND JOBS WILL BE CALLED WITHIN 163.84 SECONDS</span>
-037285,000045: 
-037286,000046: 
-037287,000047: 35,3546                                           <span class="ps">BANK    </span> 35                                    
-037288,000048: 
-<a name="424547494E323036"></a>037289,000049: 35,3546           00004        <span class="sm">BEGIN206</span>           <span class="op">INHINT  </span>                                       
-037290,000050: 
-037291,000051: 35,3547           40025                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 <span class="co">#  PATCH SLAP1 TO COME HERE TO START UP TWO</span>
-037292,000052: 35,3550           63573                           <span class="op">AD      </span> <a href="#5354415254445431">STARTDT1</a>   +1                         <span class="co">#    DELAYED TASKS OR JOBS FOR SIMULATIONS</span>
-037293,000053: 35,3551           67746                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4249543134">BIT14</a>                                 
-037294,000054: 35,3552           67746                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4249543134">BIT14</a>                                 
-037295,000055: 35,3553           56061                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-037296,000056: 
-037297,000057: 35,3554           30061                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-037298,000058: 35,3555           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-037299,000059: 35,3556     0061                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-<a name="4341445231"></a>037300,000060: 35,3556           03576 72060  <span class="sm">CADR1   </span>           <span class="ps">2CADR   </span> <a href="#5441534B31">TASK1</a>                                 <span class="co">#  MAY BE PATCHED FOR ANOTHER TASK</span>
-037301,000061: 
-<a name="323036424547494E"></a>037302,000062: 35,3560           40025        <span class="sm">206BEGIN</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 <span class="co">#  PATCH TO TC ENDOFJOB TO START 1 TASK</span>
-037303,000063: 35,3561           63575                           <span class="op">AD      </span> <a href="#5354415254445432">STARTDT2</a>   +1                         
-037304,000064: 35,3562           67746                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4249543134">BIT14</a>                                 
+037262,000016:                                                                                                  <span class="co">#  PROGRAM NAME - BEGIN206</span>
+037263,000017:                                                                                                  <span class="co">#  MOD. NO. 3</span>
+037264,000018:                                                                                                  <span class="co">#  MOD BY - D. LICKLY AND J. SAMPSON</span>
+037265,000019:                                                                                                  <span class="co">#  DATE - NOV. 22, 1966</span>
+037266,000020:                                                                                                  <span class="co">#  LOG SECTION - DUMMY 206 INITIALIZATION</span>
+037267,000021:                                                                                                  <span class="co">#  ASSEMBLY - SUNBURST REVISION 36</span>
+037268,000022: 
+037269,000023:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION - START UP TO TWO DELAYED JOBS OR TASKS AFTER SLAP1 FOR SIMULATION PURPOSES.</span>
+037270,000024: 
+037271,000025:                                                                                                  <span class="co">#  FIXED INITIALIZATION REQUIRED - PATCH STARTDT1 AND STARTDT2 TO REPRESENT THE TIME2,TIME1 VALUE AT THE TIME AT</span>
+037272,000026:                                                                                                  <span class="co">#                                    WHICH THE JOBS OR TASKS ARE TO BEGIN</span>
+037273,000027:                                                                                                  <span class="co">#                                  PATCH CADR1 AND CADR2 IF SOME OTHER TASKS THAN TASK1 AND TASK2 ARE TO BE USED</span>
+037274,000028:                                                                                                  <span class="co">#                                  PATCH CADR3 AND CADR4 TO THE 2CADR OF THE JOBS TO BE STARTED</span>
+037275,000029:                                                                                                  <span class="co">#                                  PATCH 206BEGIN TO TC ENDOFJOB IF ONLY ONLY ONE TASK OR JOB IS TO BE STARTED</span>
+037276,000030:                                                                                                  <span class="co">#                                  PATCH TASK1 AND TASK2 WITH DIFFERENT PRIORITIES IF DESIRED</span>
+037277,000031:                                                                                                  <span class="co">#  SUBROUTINES CALLED - FINDVAC, WAITLIST</span>
+037278,000032: 
+037279,000033:                                                                                                  <span class="co">#  NORMAL EXIT MODES - ENDOFJOB, TASKOVER</span>
+037280,000034: 
+037281,000035:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODES - NONE</span>
+037282,000036: 
+037283,000037:                                                                                                  <span class="co">#  OUTPUT - 2 WAITLIST OR FINDVAC CALLS FOR THE 2CADRS PATCHED IN</span>
+037284,000038: 
+037285,000039:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED - NONE</span>
+037286,000040: 
+037287,000041:                                                                                                  <span class="co">#  DEBRIS - ITEMP1, CENTRALS, ERASABLES IN SUBROUTINES CALLED</span>
+037288,000042: 
+037289,000043:                                                                                                  <span class="co">#  NOTES - SINCE ONLY THE LOW ORDER PART OF STARTDT1 AND STARTDT2 ARE USED OT COMPUTE THE DELTAT FOR WAITLIST, THE</span>
+037290,000044:                                                                                                  <span class="co">#    REQUIRED TASKS AND JOBS WILL BE CALLED WITHIN 163.84 SECONDS</span>
+037291,000045: 
+037292,000046: 
+037293,000047: 35,3546                                           <span class="ps">BANK    </span> 35                                    
+037294,000048: 
+<a name="424547494E323036"></a>037295,000049: 35,3546           00004        <span class="sm">BEGIN206</span>           <span class="op">INHINT  </span>                                       
+037296,000050: 
+037297,000051: 35,3547           40025                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 <span class="co">#  PATCH SLAP1 TO COME HERE TO START UP TWO</span>
+037298,000052: 35,3550           63573                           <span class="op">AD      </span> <a href="#5354415254445431">STARTDT1</a>   +1                         <span class="co">#    DELAYED TASKS OR JOBS FOR SIMULATIONS</span>
+037299,000053: 35,3551           67746                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4249543134">BIT14</a>                                 
+037300,000054: 35,3552           67746                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4249543134">BIT14</a>                                 
+037301,000055: 35,3553           56061                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+037302,000056: 
+037303,000057: 35,3554           30061                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+037304,000058: 35,3555           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+037305,000059: 35,3556     0061                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+<a name="4341445231"></a>037306,000060: 35,3556           03576 72060  <span class="sm">CADR1   </span>           <span class="ps">2CADR   </span> <a href="#5441534B31">TASK1</a>                                 <span class="co">#  MAY BE PATCHED FOR ANOTHER TASK</span>
+037307,000061: 
+<a name="323036424547494E"></a>037308,000062: 35,3560           40025        <span class="sm">206BEGIN</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 <span class="co">#  PATCH TO TC ENDOFJOB TO START 1 TASK</span>
+037309,000063: 35,3561           63575                           <span class="op">AD      </span> <a href="#5354415254445432">STARTDT2</a>   +1                         
+037310,000064: 35,3562           67746                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4249543134">BIT14</a>                                 
 </pre>
 </span>
 </p>
@@ -187,33 +187,33 @@ Page 870
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-037306,000066: 35,3563           67746                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4249543134">BIT14</a>                                 
-037307,000067: 35,3564           56061                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-037308,000068: 
-037309,000069: 35,3565           30061                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-037310,000070: 35,3566           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-037311,000071: 35,3567     0061                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-<a name="4341445232"></a>037312,000072: 35,3567           03603 72060  <span class="sm">CADR2   </span>           <span class="ps">2CADR   </span> <a href="#5441534B32">TASK2</a>                                 <span class="co">#  COULD BE PATCHED</span>
-037313,000073: 
-037314,000074: 35,3571           05567                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-037315,000075: 
-037316,000076: 
-<a name="5354415254445431"></a>037317,000077: 35,3572           00000 01130  <span class="sm">STARTDT1</span>           <span class="ps">2DEC    </span> 600        B-28                       <span class="co">#  PATCH</span>
-037318,000078: 
-<a name="5354415254445432"></a>037319,000079: 35,3574           00000 00310  <span class="sm">STARTDT2</span>           <span class="ps">2DEC    </span> 200        B-28                       <span class="co">#  PATCH</span>
-037320,000080: 
-<a name="5441534B31"></a>037321,000081: 35,3576           35641        <span class="sm">TASK1   </span>           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3135">PRIO15</a>                                <span class="co">#  ..OR YOUR OWN PRIORITY..</span>
-037322,000082: 35,3577           05516                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               
-<a name="4341445233"></a>037323,000083: 35,3600           77777        <span class="sm">CADR3   </span>           <span class="ps">OCT     </span> 77777                                 <span class="co">#  BETTER PATCH A 2CADR HERE</span>
-037324,000084: 35,3601           77777                           <span class="ps">OCT     </span> 77777                                 
-037325,000085: 35,3602           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-037326,000086: 
-<a name="5441534B32"></a>037327,000087: 35,3603           37746        <span class="sm">TASK2   </span>           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3230">PRIO20</a>                                
-037328,000088: 35,3604           05516                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               
-<a name="4341445234"></a>037329,000089: 35,3605           77777        <span class="sm">CADR4   </span>           <span class="ps">OCT     </span> 77777                                 <span class="co">#  ..HERE ALSO..</span>
-037330,000090: 35,3606           77777                           <span class="ps">OCT     </span> 77777                                 
-037331,000091: 35,3607           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-037332,000092: 
+037312,000066: 35,3563           67746                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4249543134">BIT14</a>                                 
+037313,000067: 35,3564           56061                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+037314,000068: 
+037315,000069: 35,3565           30061                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+037316,000070: 35,3566           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+037317,000071: 35,3567     0061                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+<a name="4341445232"></a>037318,000072: 35,3567           03603 72060  <span class="sm">CADR2   </span>           <span class="ps">2CADR   </span> <a href="#5441534B32">TASK2</a>                                 <span class="co">#  COULD BE PATCHED</span>
+037319,000073: 
+037320,000074: 35,3571           05567                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+037321,000075: 
+037322,000076: 
+<a name="5354415254445431"></a>037323,000077: 35,3572           00000 01130  <span class="sm">STARTDT1</span>           <span class="ps">2DEC    </span> 600        B-28                       <span class="co">#  PATCH</span>
+037324,000078: 
+<a name="5354415254445432"></a>037325,000079: 35,3574           00000 00310  <span class="sm">STARTDT2</span>           <span class="ps">2DEC    </span> 200        B-28                       <span class="co">#  PATCH</span>
+037326,000080: 
+<a name="5441534B31"></a>037327,000081: 35,3576           35641        <span class="sm">TASK1   </span>           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3135">PRIO15</a>                                <span class="co">#  ..OR YOUR OWN PRIORITY..</span>
+037328,000082: 35,3577           05516                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               
+<a name="4341445233"></a>037329,000083: 35,3600           77777        <span class="sm">CADR3   </span>           <span class="ps">OCT     </span> 77777                                 <span class="co">#  BETTER PATCH A 2CADR HERE</span>
+037330,000084: 35,3601           77777                           <span class="ps">OCT     </span> 77777                                 
+037331,000085: 35,3602           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+037332,000086: 
+<a name="5441534B32"></a>037333,000087: 35,3603           37746        <span class="sm">TASK2   </span>           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3230">PRIO20</a>                                
+037334,000088: 35,3604           05516                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               
+<a name="4341445234"></a>037335,000089: 35,3605           77777        <span class="sm">CADR4   </span>           <span class="ps">OCT     </span> 77777                                 <span class="co">#  ..HERE ALSO..</span>
+037336,000090: 35,3606           77777                           <span class="ps">OCT     </span> 77777                                 
+037337,000091: 35,3607           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+037338,000092: 
 
 End of include-file DUMMY_206_INITIALIZATION.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

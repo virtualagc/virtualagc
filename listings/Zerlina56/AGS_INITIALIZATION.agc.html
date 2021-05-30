@@ -87,26 +87,26 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009493,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-009494,000003:                                                                                                  <span class="co">## Filename:    AGS_INITIALIZATION.agc</span>
-009495,000004:                                                                                                  <span class="co">## Purpose:     A log section of Zerlina 56, the final revision of</span>
-009496,000005:                                                                                                  <span class="co">##              Don Eyles's offline development program for the variable </span>
-009497,000006:                                                                                                  <span class="co">##              guidance period servicer. It also includes a new P66 with LPD </span>
-009498,000007:                                                                                                  <span class="co">##              (Landing Point Designator) capability, based on an idea of John </span>
-009499,000008:                                                                                                  <span class="co">##              Young's. Neither of these advanced features were actually flown,</span>
-009500,000009:                                                                                                  <span class="co">##              but Zerlina was also the birthplace of other big improvements to</span>
-009501,000010:                                                                                                  <span class="co">##              Luminary including the terrain model and new (Luminary 1E)</span>
-009502,000011:                                                                                                  <span class="co">##              analog display programs. Zerlina was branched off of Luminary 145,</span>
-009503,000012:                                                                                                  <span class="co">##              and revision 56 includes all changes up to and including Luminary</span>
-009504,000013:                                                                                                  <span class="co">##              183. It is therefore quite close to the Apollo 14 program,</span>
-009505,000014:                                                                                                  <span class="co">##              Luminary 178, where not modified with new features.</span>
-009506,000015:                                                                                                  <span class="co">## Reference:   pp. 213-217</span>
-009507,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-009508,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-009509,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-009510,000019:                                                                                                  <span class="co">## Mod history: 2017-07-28 MAS  Created from Luminary 210.</span>
-009511,000020:                                                                                                  <span class="co">##              2017-08-26 TVB  Updated for Zerlina 56.</span>
-009512,000021: 
+009496,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+009497,000003:                                                                                                  <span class="co">## Filename:    AGS_INITIALIZATION.agc</span>
+009498,000004:                                                                                                  <span class="co">## Purpose:     A log section of Zerlina 56, the final revision of</span>
+009499,000005:                                                                                                  <span class="co">##              Don Eyles's offline development program for the variable </span>
+009500,000006:                                                                                                  <span class="co">##              guidance period servicer. It also includes a new P66 with LPD </span>
+009501,000007:                                                                                                  <span class="co">##              (Landing Point Designator) capability, based on an idea of John </span>
+009502,000008:                                                                                                  <span class="co">##              Young's. Neither of these advanced features were actually flown,</span>
+009503,000009:                                                                                                  <span class="co">##              but Zerlina was also the birthplace of other big improvements to</span>
+009504,000010:                                                                                                  <span class="co">##              Luminary including the terrain model and new (Luminary 1E)</span>
+009505,000011:                                                                                                  <span class="co">##              analog display programs. Zerlina was branched off of Luminary 145,</span>
+009506,000012:                                                                                                  <span class="co">##              and revision 56 includes all changes up to and including Luminary</span>
+009507,000013:                                                                                                  <span class="co">##              183. It is therefore quite close to the Apollo 14 program,</span>
+009508,000014:                                                                                                  <span class="co">##              Luminary 178, where not modified with new features.</span>
+009509,000015:                                                                                                  <span class="co">## Reference:   pp. 213-217</span>
+009510,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+009511,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+009512,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+009513,000019:                                                                                                  <span class="co">## Mod history: 2017-07-28 MAS  Created from Luminary 210.</span>
+009514,000020:                                                                                                  <span class="co">##              2017-08-26 TVB  Updated for Zerlina 56.</span>
+009515,000021: 
 </pre>
 </span>
 </p>
@@ -122,56 +122,56 @@ Page 213
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009514,000023:                                                                                                  <span class="co">#  PROGRAM NAME:   AGS INITIALIZATION (R47)</span>
-009515,000024: 
-009516,000025:                                                                                                  <span class="co">#  WRITTEN BY  :   RHODE/KILROY/FOLLETT</span>
-009517,000026: 
-009518,000027:                                                                                                  <span class="co">#  MOD NO. :       0</span>
-009519,000028:                                                                                                  <span class="co">#  DATE    :       23 MARCH 1967</span>
-009520,000029:                                                                                                  <span class="co">#  MOD BY  :       KILROY</span>
-009521,000030: 
-009522,000031:                                                                                                  <span class="co">#  MOD NO. :       1</span>
-009523,000032:                                                                                                  <span class="co">#  DATE    :       28 OCTOBER 1967</span>
-009524,000033:                                                                                                  <span class="co">#  MOD BY  :       FOLLETT</span>
-009525,000034: 
-009526,000035:                                                                                                  <span class="co">#  FUNCT. DESC.:   (1) TO PROVIDE THE AGS ABORT ELECTRONICS ASSEMBLY(AEA) WITH THE LEM AND CSM STATE VECTORS</span>
-009527,000036:                                                                                                  <span class="co">#                  (POSITION,VELOCITY,TIME) IN LEM IMU COORDINATES BY MEANS OF THE LGC DIGITAL DOWNLINK.</span>
-009528,000037: 
-009529,000038:                                                                                                  <span class="co">#                  (2) TO ZERO THE ICDU, LGC AND AEA GIMBAL ANGLE COUNTERS SIMULTANEOUSLY IN ORDER TO ESTABLISH A</span>
-009530,000039:                                                                                                  <span class="co">#                  COMMON ZERO REFERENCE FOR THE MEASUREMENT OF GIMBAL(EULER) ANGLES WHICH DEFINE LEM ATTITUDE</span>
-009531,000040:                                                                                                  <span class="co">#                  (3) TO ESTABLISH THE GROUND ELAPSED TIME OF AEA CLOCK ZERO.(IF AN AEA CLOCK ZERO IS</span>
-009532,000041:                                                                                                  <span class="co">#                  REQUESTED DURING THIS PROGRAM</span>
-009533,000042: 
-009534,000043:                                                                                                  <span class="co">#  LOG SECTION :   AGS INITIALIZATION</span>
-009535,000044: 
-009536,000045:                                                                                                  <span class="co">#  CALLING SEQ :   PROGRAM IS ENTERED WHEN ASTRONAUT KEYS V47E ON DSKY.</span>
-009537,000046:                                                                                                  <span class="co">#                  R47 MAY BE CALLED AT ANY TIME EXCEPT WHEN ANOTHER EXTENDED VERB IS IN PROGRESS</span>
-009538,000047: 
-009539,000048:                                                                                                  <span class="co">#  SUBROUTINES</span>
-009540,000049:                                                                                                  <span class="co">#  CALLED      :</span>
-009541,000050: 
-009542,000051:                                                                                                  <span class="co">#  NORMAL EXIT :  ENDEXT</span>
-009543,000052: 
-009544,000053:                                                                                                  <span class="co">#  ALARM/ABORT :  ALARM - BAD REFSMMAT - CODE:220</span>
-009545,000054:                                                                                                  <span class="co">#                 OPERATOR ERROR IF V47 SELECTED DURING ANOTHER EXTENDED VERB.</span>
-009546,000055: 
-009547,000056:                                                                                                  <span class="co">#  ERASABLES</span>
-009548,000057:                                                                                                  <span class="co">#  USED        :  SAMPTIME    (2) TIME OF :ENTER: KEYSTROKE</span>
-009549,000058:                                                                                                  <span class="co">#                 AGSK        (2) GROUND ELAPSED TIME OF THE AEA CLOCK :ZERO:</span>
-009550,000059:                                                                                                  <span class="co">#                 AGSBUFF   (140) CONTAINS AGS INITIALIZATION DATA (SEE :OUTPUT: BELOW)</span>
-009551,000060:                                                                                                  <span class="co">#                 AGSWORD     (1) PREVIOUS DOWNLIST SAVED HERE</span>
-009552,000061: 
-009553,000062: 05,2464  E6,1771                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4147534B">AGSK</a>                                  
-009554,000063: 40,2000                                           <span class="ps">BANK    </span> 40                                    
-009555,000064: 32,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#523437">R47</a>                                   
-009556,000065: 32,2000                                           <span class="ps">BANK    </span>                                       
-009557,000066: 
-009558,000067: 32,2005                                           <span class="ps">COUNT*  </span> $$/<a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#523437">R47</a>                                
-009559,000068: 
-<a name="414753494E4954"></a>009560,000069: 32,2005           34737        <span class="sm">AGSINIT </span>           <span class="op">CAF     </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#524546534D424954">REFSMBIT</a>                              
-009561,000070: 32,2006           70077                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524433">FLAGWRD3</a>                              <span class="co">#  CHECK REFSMFLG.</span>
-009562,000071: 32,2007           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-009563,000072: 32,2010           02017                           <span class="op">TC      </span> <a href="#524544535054454D">REDSPTEM</a>                              <span class="co">#  REFSMMAT IS OK</span>
+009517,000023:                                                                                                  <span class="co">#  PROGRAM NAME:   AGS INITIALIZATION (R47)</span>
+009518,000024: 
+009519,000025:                                                                                                  <span class="co">#  WRITTEN BY  :   RHODE/KILROY/FOLLETT</span>
+009520,000026: 
+009521,000027:                                                                                                  <span class="co">#  MOD NO. :       0</span>
+009522,000028:                                                                                                  <span class="co">#  DATE    :       23 MARCH 1967</span>
+009523,000029:                                                                                                  <span class="co">#  MOD BY  :       KILROY</span>
+009524,000030: 
+009525,000031:                                                                                                  <span class="co">#  MOD NO. :       1</span>
+009526,000032:                                                                                                  <span class="co">#  DATE    :       28 OCTOBER 1967</span>
+009527,000033:                                                                                                  <span class="co">#  MOD BY  :       FOLLETT</span>
+009528,000034: 
+009529,000035:                                                                                                  <span class="co">#  FUNCT. DESC.:   (1) TO PROVIDE THE AGS ABORT ELECTRONICS ASSEMBLY(AEA) WITH THE LEM AND CSM STATE VECTORS</span>
+009530,000036:                                                                                                  <span class="co">#                  (POSITION,VELOCITY,TIME) IN LEM IMU COORDINATES BY MEANS OF THE LGC DIGITAL DOWNLINK.</span>
+009531,000037: 
+009532,000038:                                                                                                  <span class="co">#                  (2) TO ZERO THE ICDU, LGC AND AEA GIMBAL ANGLE COUNTERS SIMULTANEOUSLY IN ORDER TO ESTABLISH A</span>
+009533,000039:                                                                                                  <span class="co">#                  COMMON ZERO REFERENCE FOR THE MEASUREMENT OF GIMBAL(EULER) ANGLES WHICH DEFINE LEM ATTITUDE</span>
+009534,000040:                                                                                                  <span class="co">#                  (3) TO ESTABLISH THE GROUND ELAPSED TIME OF AEA CLOCK ZERO.(IF AN AEA CLOCK ZERO IS</span>
+009535,000041:                                                                                                  <span class="co">#                  REQUESTED DURING THIS PROGRAM</span>
+009536,000042: 
+009537,000043:                                                                                                  <span class="co">#  LOG SECTION :   AGS INITIALIZATION</span>
+009538,000044: 
+009539,000045:                                                                                                  <span class="co">#  CALLING SEQ :   PROGRAM IS ENTERED WHEN ASTRONAUT KEYS V47E ON DSKY.</span>
+009540,000046:                                                                                                  <span class="co">#                  R47 MAY BE CALLED AT ANY TIME EXCEPT WHEN ANOTHER EXTENDED VERB IS IN PROGRESS</span>
+009541,000047: 
+009542,000048:                                                                                                  <span class="co">#  SUBROUTINES</span>
+009543,000049:                                                                                                  <span class="co">#  CALLED      :</span>
+009544,000050: 
+009545,000051:                                                                                                  <span class="co">#  NORMAL EXIT :  ENDEXT</span>
+009546,000052: 
+009547,000053:                                                                                                  <span class="co">#  ALARM/ABORT :  ALARM - BAD REFSMMAT - CODE:220</span>
+009548,000054:                                                                                                  <span class="co">#                 OPERATOR ERROR IF V47 SELECTED DURING ANOTHER EXTENDED VERB.</span>
+009549,000055: 
+009550,000056:                                                                                                  <span class="co">#  ERASABLES</span>
+009551,000057:                                                                                                  <span class="co">#  USED        :  SAMPTIME    (2) TIME OF :ENTER: KEYSTROKE</span>
+009552,000058:                                                                                                  <span class="co">#                 AGSK        (2) GROUND ELAPSED TIME OF THE AEA CLOCK :ZERO:</span>
+009553,000059:                                                                                                  <span class="co">#                 AGSBUFF   (140) CONTAINS AGS INITIALIZATION DATA (SEE :OUTPUT: BELOW)</span>
+009554,000060:                                                                                                  <span class="co">#                 AGSWORD     (1) PREVIOUS DOWNLIST SAVED HERE</span>
+009555,000061: 
+009556,000062: 05,2464  E6,1771                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4147534B">AGSK</a>                                  
+009557,000063: 40,2000                                           <span class="ps">BANK    </span> 40                                    
+009558,000064: 32,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#523437">R47</a>                                   
+009559,000065: 32,2000                                           <span class="ps">BANK    </span>                                       
+009560,000066: 
+009561,000067: 32,2005                                           <span class="ps">COUNT*  </span> $$/<a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#523437">R47</a>                                
+009562,000068: 
+<a name="414753494E4954"></a>009563,000069: 32,2005           34737        <span class="sm">AGSINIT </span>           <span class="op">CAF     </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#524546534D424954">REFSMBIT</a>                              
+009564,000070: 32,2006           70077                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524433">FLAGWRD3</a>                              <span class="co">#  CHECK REFSMFLG.</span>
+009565,000071: 32,2007           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+009566,000072: 32,2010           02017                           <span class="op">TC      </span> <a href="#524544535054454D">REDSPTEM</a>                              <span class="co">#  REFSMMAT IS OK</span>
 </pre>
 </span>
 </p>
@@ -187,56 +187,56 @@ Page 214
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009565,000074: 32,2011           05600                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#414C41524D">ALARM</a>                                 <span class="co">#  REFSMMAT IS BAD</span>
-009566,000075: 32,2012           00220                           <span class="ps">OCT     </span> 220                                   
-009567,000076: 32,2013           05503                           <span class="op">TC      </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                
-009568,000077: 
-<a name="4E4557414753"></a>009569,000078: 32,2014           00006        <span class="sm">NEWAGS  </span>           <span class="op">EXTEND  </span>                                       
-009570,000079: 32,2015           30014                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53414D5054494D45">SAMPTIME</a>                              <span class="co">#  TIME OF THE :ENTER: KEYSTROKE</span>
-009571,000080: 32,2016           53772                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4147534B">AGSK</a>                                  <span class="co">#  BECOMES NEW AEA CLOCK :ZERO:</span>
-009572,000081: 
-<a name="524544535054454D"></a>009573,000082: 32,2017           00006        <span class="sm">REDSPTEM</span>           <span class="op">EXTEND  </span>                                       
-009574,000083: 32,2020           31772                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4147534B">AGSK</a>                                  
-009575,000084: 32,2021           53051                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44535054454D58">DSPTEMX</a>                               
-<a name="414753444953504B"></a>009576,000085: 32,2022           32172        <span class="sm">AGSDISPK</span>           <span class="op">CAF     </span> <a href="#5630364E3136">V06N16</a>                                
-009577,000086: 32,2023           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  R1 = 00XXX. HRS., R2 = 000XX MIN.,</span>
-009578,000087: 32,2024           20334                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F4D41524B46">GOMARKF</a>                               <span class="co">#  R3 = 0XX.XX SEC.</span>
-009579,000088: 32,2025           05503                           <span class="op">TC      </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                <span class="co">#  TERMINATE RETURN</span>
-009580,000089: 32,2026           02036                           <span class="op">TC      </span> <a href="#4147535643414C43">AGSVCALC</a>                              <span class="co">#  PROCEED RETURN</span>
-009581,000090: 32,2027           44746                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  <span class="co">#  IS ENTER VIA A V32</span>
-009582,000091: 32,2030           60154                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-009583,000092: 32,2031           00006                           <span class="op">EXTEND  </span>                                       
-009584,000093: 32,2032           12014                           <span class="op">BZF     </span> <a href="#4E4557414753">NEWAGS</a>                                <span class="co">#  YES, USE KEYSTROKE TIME FOR NEW AGSK</span>
-009585,000094: 
-009586,000095: 32,2033           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  NO, NEW AGSK LOADED VIA V25</span>
-009587,000096: 32,2034           31051                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44535054454D58">DSPTEMX</a>                               <span class="co">#  LOADED INTO DSPTEMX BY KEYING</span>
-009588,000097: 32,2035           02016                           <span class="op">TC      </span> <a href="#524544535054454D">REDSPTEM</a>   -1                         <span class="co">#  V25E FOLLOWED BY HRS.,MINS.,SECS.</span>
-009589,000098:                                                                                                  <span class="co">#  DISPLAY THE NEW K</span>
-009590,000099: 
-<a name="4147535643414C43"></a>009591,000100: 32,2036           06051        <span class="sm">AGSVCALC</span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-009592,000101: 32,2037           77614                           <span class="in">SET     </span>                                       
-009593,000102: 32,2040           01076                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#4E4F444F464C4147">NODOFLAG</a>                              <span class="co">#  DONT ALLOW V37</span>
-009594,000103: 32,2041           77414                           <span class="in">SET     </span> <span class="in">EXIT      </span>                            
-009595,000104: 32,2042           02076                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#58445350464C4147">XDSPFLAG</a>                              
-009596,000105: 
-009597,000106: 32,2043           32172                           <span class="op">CAF     </span> <a href="#5630364E3136">V06N16</a>                                
-009598,000107: 32,2044           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-009599,000108: 32,2045           20621                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#4558445350524554">EXDSPRET</a>                              
-009600,000109: 
-009601,000110: 32,2046           06051                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               <span class="co">#  EXTRAPOLATE LEM AND CSM STATE VECTORS</span>
-009602,000111: 32,2047           77634                           <span class="in">RTB     </span>                                       <span class="co">#  TO THE PRESENT TIME</span>
-009603,000112: 32,2050           21555                                    <a href="RTB_OP_CODES.agc.html#4C4F414454494D45">LOADTIME</a>                              <span class="co">#  LOAD MPAC WITH TIME2,TIME1</span>
-009604,000113: 32,2051           34041                           <span class="in">STCALL  </span> <a href="ORBITAL_INTEGRATION.agc.html#5444454331">TDEC1</a>                                 <span class="co">#  CALCULATE LEM STATE VECTOR</span>
-009605,000114: 32,2052           27056                                    <a href="INTEGRATION_INITIALIZATION.agc.html#4C454D50524543">LEMPREC</a>                               
-009606,000115: 32,2053           77624                           <span class="in">CALL    </span>                                       <span class="co">#  CALL ROUTINE TO CONVERT TO SM COORDS AND</span>
-009607,000116: 32,2054           64132                                    <a href="#5343414C45564543">SCALEVEC</a>                              <span class="co">#  PROVIDE PROPER SCALING</span>
-009608,000117: 32,2055           16172                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41475342554646">AGSBUFF</a>                               <span class="co">#  (LEMPREC AND CSMPREC LEAVE TDEC1 IN TAT)</span>
-009609,000118: 32,2056           00015                                    <a href="ORBITAL_INTEGRATION.agc.html#544154">TAT</a>                                   <span class="co">#  TAT = TIME TO WHICH RATT1 AND VATT1 ARE</span>
-009610,000119: 32,2057           34041                           <span class="in">STCALL  </span> <a href="ORBITAL_INTEGRATION.agc.html#5444454331">TDEC1</a>                                 <span class="co">#  COMPUTED(CSEC SINCE CLOCK START B-28).</span>
-009611,000120: 32,2060           27042                                    <a href="INTEGRATION_INITIALIZATION.agc.html#43534D50524543">CSMPREC</a>                               <span class="co">#  CALCULATE CSM STATE VECTOR FOR SAME TIME</span>
-009612,000121: 32,2061           77624                           <span class="in">CALL    </span>                                       
-009613,000122: 32,2062           64132                                    <a href="#5343414C45564543">SCALEVEC</a>                              
-009614,000123: 32,2063           16200                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41475342554646">AGSBUFF</a>    +6                         
+009568,000074: 32,2011           05600                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#414C41524D">ALARM</a>                                 <span class="co">#  REFSMMAT IS BAD</span>
+009569,000075: 32,2012           00220                           <span class="ps">OCT     </span> 220                                   
+009570,000076: 32,2013           05503                           <span class="op">TC      </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                
+009571,000077: 
+<a name="4E4557414753"></a>009572,000078: 32,2014           00006        <span class="sm">NEWAGS  </span>           <span class="op">EXTEND  </span>                                       
+009573,000079: 32,2015           30014                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53414D5054494D45">SAMPTIME</a>                              <span class="co">#  TIME OF THE :ENTER: KEYSTROKE</span>
+009574,000080: 32,2016           53772                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4147534B">AGSK</a>                                  <span class="co">#  BECOMES NEW AEA CLOCK :ZERO:</span>
+009575,000081: 
+<a name="524544535054454D"></a>009576,000082: 32,2017           00006        <span class="sm">REDSPTEM</span>           <span class="op">EXTEND  </span>                                       
+009577,000083: 32,2020           31772                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4147534B">AGSK</a>                                  
+009578,000084: 32,2021           53051                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44535054454D58">DSPTEMX</a>                               
+<a name="414753444953504B"></a>009579,000085: 32,2022           32172        <span class="sm">AGSDISPK</span>           <span class="op">CAF     </span> <a href="#5630364E3136">V06N16</a>                                
+009580,000086: 32,2023           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  R1 = 00XXX. HRS., R2 = 000XX MIN.,</span>
+009581,000087: 32,2024           20334                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F4D41524B46">GOMARKF</a>                               <span class="co">#  R3 = 0XX.XX SEC.</span>
+009582,000088: 32,2025           05503                           <span class="op">TC      </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                <span class="co">#  TERMINATE RETURN</span>
+009583,000089: 32,2026           02036                           <span class="op">TC      </span> <a href="#4147535643414C43">AGSVCALC</a>                              <span class="co">#  PROCEED RETURN</span>
+009584,000090: 32,2027           44746                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  <span class="co">#  IS ENTER VIA A V32</span>
+009585,000091: 32,2030           60154                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+009586,000092: 32,2031           00006                           <span class="op">EXTEND  </span>                                       
+009587,000093: 32,2032           12014                           <span class="op">BZF     </span> <a href="#4E4557414753">NEWAGS</a>                                <span class="co">#  YES, USE KEYSTROKE TIME FOR NEW AGSK</span>
+009588,000094: 
+009589,000095: 32,2033           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  NO, NEW AGSK LOADED VIA V25</span>
+009590,000096: 32,2034           31051                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44535054454D58">DSPTEMX</a>                               <span class="co">#  LOADED INTO DSPTEMX BY KEYING</span>
+009591,000097: 32,2035           02016                           <span class="op">TC      </span> <a href="#524544535054454D">REDSPTEM</a>   -1                         <span class="co">#  V25E FOLLOWED BY HRS.,MINS.,SECS.</span>
+009592,000098:                                                                                                  <span class="co">#  DISPLAY THE NEW K</span>
+009593,000099: 
+<a name="4147535643414C43"></a>009594,000100: 32,2036           06051        <span class="sm">AGSVCALC</span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+009595,000101: 32,2037           77614                           <span class="in">SET     </span>                                       
+009596,000102: 32,2040           01076                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#4E4F444F464C4147">NODOFLAG</a>                              <span class="co">#  DONT ALLOW V37</span>
+009597,000103: 32,2041           77414                           <span class="in">SET     </span> <span class="in">EXIT      </span>                            
+009598,000104: 32,2042           02076                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#58445350464C4147">XDSPFLAG</a>                              
+009599,000105: 
+009600,000106: 32,2043           32172                           <span class="op">CAF     </span> <a href="#5630364E3136">V06N16</a>                                
+009601,000107: 32,2044           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+009602,000108: 32,2045           20621                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#4558445350524554">EXDSPRET</a>                              
+009603,000109: 
+009604,000110: 32,2046           06051                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               <span class="co">#  EXTRAPOLATE LEM AND CSM STATE VECTORS</span>
+009605,000111: 32,2047           77634                           <span class="in">RTB     </span>                                       <span class="co">#  TO THE PRESENT TIME</span>
+009606,000112: 32,2050           21555                                    <a href="RTB_OP_CODES.agc.html#4C4F414454494D45">LOADTIME</a>                              <span class="co">#  LOAD MPAC WITH TIME2,TIME1</span>
+009607,000113: 32,2051           34041                           <span class="in">STCALL  </span> <a href="ORBITAL_INTEGRATION.agc.html#5444454331">TDEC1</a>                                 <span class="co">#  CALCULATE LEM STATE VECTOR</span>
+009608,000114: 32,2052           27056                                    <a href="INTEGRATION_INITIALIZATION.agc.html#4C454D50524543">LEMPREC</a>                               
+009609,000115: 32,2053           77624                           <span class="in">CALL    </span>                                       <span class="co">#  CALL ROUTINE TO CONVERT TO SM COORDS AND</span>
+009610,000116: 32,2054           64132                                    <a href="#5343414C45564543">SCALEVEC</a>                              <span class="co">#  PROVIDE PROPER SCALING</span>
+009611,000117: 32,2055           16172                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41475342554646">AGSBUFF</a>                               <span class="co">#  (LEMPREC AND CSMPREC LEAVE TDEC1 IN TAT)</span>
+009612,000118: 32,2056           00015                                    <a href="ORBITAL_INTEGRATION.agc.html#544154">TAT</a>                                   <span class="co">#  TAT = TIME TO WHICH RATT1 AND VATT1 ARE</span>
+009613,000119: 32,2057           34041                           <span class="in">STCALL  </span> <a href="ORBITAL_INTEGRATION.agc.html#5444454331">TDEC1</a>                                 <span class="co">#  COMPUTED(CSEC SINCE CLOCK START B-28).</span>
+009614,000120: 32,2060           27042                                    <a href="INTEGRATION_INITIALIZATION.agc.html#43534D50524543">CSMPREC</a>                               <span class="co">#  CALCULATE CSM STATE VECTOR FOR SAME TIME</span>
+009615,000121: 32,2061           77624                           <span class="in">CALL    </span>                                       
+009616,000122: 32,2062           64132                                    <a href="#5343414C45564543">SCALEVEC</a>                              
+009617,000123: 32,2063           16200                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41475342554646">AGSBUFF</a>    +6                         
 </pre>
 </span>
 </p>
@@ -252,56 +252,56 @@ Page 215
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009616,000125: 32,2064           00015                                    <a href="ORBITAL_INTEGRATION.agc.html#544154">TAT</a>                                   
-009617,000126: 32,2065           56225                           <span class="in">DSU     </span> <span class="in">DDV       </span>                            <span class="co">#  CALCULATE AND STORE THE TIME</span>
-009618,000127: 
-009619,000128: 32,2066           03372                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4147534B">AGSK</a>                                  
-009620,000129: 32,2067           24175                                    <a href="#545343414C45">TSCALE</a>                                
-009621,000130: 32,2070           02206                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41475342554646">AGSBUFF</a>    +12D                       
-009622,000131: 32,2071           77776                           <span class="in">EXIT    </span>                                       
-009623,000132: 
-009624,000133: 32,2072           34753                           <span class="op">CAF     </span> <a href="#4C4147534C495354">LAGSLIST</a>                              
-009625,000134: 32,2073           54333                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5354434F44">DNLSTCOD</a>                              
-009626,000135: 
-009627,000136: 32,2074           32176                           <span class="op">CAF     </span> <a href="#3230534543">20SEC</a>                                 <span class="co">#  DELAY FOR 20 SEC WHILE THE AGS</span>
-009628,000137: 32,2075           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  DOWNLIST IS TRANSMITTED</span>
-009629,000138: 32,2076           01736                           <span class="ps">CADR    </span> <a href="SERVICE_ROUTINES.agc.html#44454C41594A4F42">DELAYJOB</a>                              
-009630,000139: 
-009631,000140: 32,2077           31321                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414753574F5244">AGSWORD</a>                               
-009632,000141: 32,2100           54333                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5354434F44">DNLSTCOD</a>                              <span class="co">#  RETURN TO THE OLD DOWNLIST</span>
-009633,000142: 32,2101           34744                           <span class="op">CAF     </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#494D555345424954">IMUSEBIT</a>                              
-009634,000143: 32,2102           70074                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524430">FLAGWRD0</a>                              <span class="co">#  CHECK IMUSE FLAG.</span>
-009635,000144: 32,2103           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-009636,000145: 32,2104           02122                           <span class="op">TC      </span> <a href="#414753454E44">AGSEND</a>                                <span class="co">#  IMU IS BEING USED - DO NOT ZERO</span>
-<a name="434B5354414C4C"></a>009637,000146: 32,2105           11301        <span class="sm">CKSTALL </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D5543414452">IMUCADR</a>                               <span class="co">#  CHECK FOR IMU USAGE WHICH AVOIDS THE</span>
-009638,000147: 32,2106           12111                           <span class="op">TCF     </span> +3                                    <span class="co">#  IMUSE BIT:  I.E., IMU COMPENSATION.</span>
-009639,000148: 32,2107           12115                           <span class="op">TCF     </span> +6                                    <span class="co">#  FREE.  GO AHEAD WITH THE IMU ZERO.</span>
-009640,000149: 32,2110           12111                           <span class="op">TCF     </span> +1                                    
-009641,000150: 32,2111           34363                 +3        <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54454E">TEN</a>                                   <span class="co">#  WAIT .1 SEC AND TRY AGAIN.</span>
-009642,000151: 32,2112           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-009643,000152: 32,2113           01736                           <span class="ps">CADR    </span> <a href="SERVICE_ROUTINES.agc.html#44454C41594A4F42">DELAYJOB</a>                              
-009644,000153: 32,2114           12105                           <span class="op">TCF     </span> <a href="#434B5354414C4C">CKSTALL</a>                               
-009645,000154: 
-009646,000155: 32,2115           04616                 +6        <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  IMU IS NOT IN USE</span>
-009647,000156: 32,2116           16661                           <span class="ps">CADR    </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#494D555A45524F">IMUZERO</a>                               <span class="co">#  SET IMU ZERO DISCRETE FOR 320 MSECS</span>
-009648,000157: 32,2117           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  WAIT 3 SEC FOR COUNTERS TO INCREMENT</span>
-009649,000158: 32,2120           17715                           <span class="ps">CADR    </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#494D555354414C4C">IMUSTALL</a>                              
-009650,000159: 32,2121           02122                           <span class="op">TC      </span> <a href="#414753454E44">AGSEND</a>                                
-<a name="414753454E44"></a>009651,000160: 32,2122           05527        <span class="sm">AGSEND  </span>           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              <span class="co">#  ALLOW V37</span>
-009652,000161: 32,2123           00054                           <span class="ps">ADRES   </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#4E4F444F464C4147">NODOFLAG</a>                              
-009653,000162: 32,2124           32173                           <span class="op">CAF     </span> <a href="#5635304E3136">V50N16</a>                                
-009654,000163: 32,2125           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-009655,000164: 32,2126           20342                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F4D41524B33">GOMARK3</a>                               
-009656,000165: 32,2127           15503                           <span class="op">TCF     </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                
-009657,000166: 32,2130           15503                           <span class="op">TCF     </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                
-009658,000167: 32,2131           05503                           <span class="op">TC      </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                
-009659,000168: 
-<a name="5343414C45564543"></a>009660,000169: 32,2132           64375        <span class="sm">SCALEVEC</span>           <span class="in">VLOAD   </span> <span class="in">MXV       </span>                            
-009661,000170: 32,2133           00025                                    <a href="ORBITAL_INTEGRATION.agc.html#5641545431">VATT1</a>                                 
-009662,000171: 32,2134           01732                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
-009663,000172: 32,2135           72561                           <span class="in">VXSC    </span> <span class="in">VSL2      </span>                            
-009664,000173: 32,2136           24202                                    <a href="#565343414C45">VSCALE</a>                                
-009665,000174: 32,2137           53255                           <span class="in">VAD     </span> <span class="in">VAD       </span>                            <span class="co">#  THIS SECTION ROUNDS THE VECTOR, AND</span>
+009619,000125: 32,2064           00015                                    <a href="ORBITAL_INTEGRATION.agc.html#544154">TAT</a>                                   
+009620,000126: 32,2065           56225                           <span class="in">DSU     </span> <span class="in">DDV       </span>                            <span class="co">#  CALCULATE AND STORE THE TIME</span>
+009621,000127: 
+009622,000128: 32,2066           03372                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4147534B">AGSK</a>                                  
+009623,000129: 32,2067           24175                                    <a href="#545343414C45">TSCALE</a>                                
+009624,000130: 32,2070           02206                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41475342554646">AGSBUFF</a>    +12D                       
+009625,000131: 32,2071           77776                           <span class="in">EXIT    </span>                                       
+009626,000132: 
+009627,000133: 32,2072           34753                           <span class="op">CAF     </span> <a href="#4C4147534C495354">LAGSLIST</a>                              
+009628,000134: 32,2073           54333                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5354434F44">DNLSTCOD</a>                              
+009629,000135: 
+009630,000136: 32,2074           32176                           <span class="op">CAF     </span> <a href="#3230534543">20SEC</a>                                 <span class="co">#  DELAY FOR 20 SEC WHILE THE AGS</span>
+009631,000137: 32,2075           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  DOWNLIST IS TRANSMITTED</span>
+009632,000138: 32,2076           01736                           <span class="ps">CADR    </span> <a href="SERVICE_ROUTINES.agc.html#44454C41594A4F42">DELAYJOB</a>                              
+009633,000139: 
+009634,000140: 32,2077           31321                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414753574F5244">AGSWORD</a>                               
+009635,000141: 32,2100           54333                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5354434F44">DNLSTCOD</a>                              <span class="co">#  RETURN TO THE OLD DOWNLIST</span>
+009636,000142: 32,2101           34744                           <span class="op">CAF     </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#494D555345424954">IMUSEBIT</a>                              
+009637,000143: 32,2102           70074                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524430">FLAGWRD0</a>                              <span class="co">#  CHECK IMUSE FLAG.</span>
+009638,000144: 32,2103           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+009639,000145: 32,2104           02122                           <span class="op">TC      </span> <a href="#414753454E44">AGSEND</a>                                <span class="co">#  IMU IS BEING USED - DO NOT ZERO</span>
+<a name="434B5354414C4C"></a>009640,000146: 32,2105           11301        <span class="sm">CKSTALL </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D5543414452">IMUCADR</a>                               <span class="co">#  CHECK FOR IMU USAGE WHICH AVOIDS THE</span>
+009641,000147: 32,2106           12111                           <span class="op">TCF     </span> +3                                    <span class="co">#  IMUSE BIT:  I.E., IMU COMPENSATION.</span>
+009642,000148: 32,2107           12115                           <span class="op">TCF     </span> +6                                    <span class="co">#  FREE.  GO AHEAD WITH THE IMU ZERO.</span>
+009643,000149: 32,2110           12111                           <span class="op">TCF     </span> +1                                    
+009644,000150: 32,2111           34363                 +3        <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54454E">TEN</a>                                   <span class="co">#  WAIT .1 SEC AND TRY AGAIN.</span>
+009645,000151: 32,2112           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+009646,000152: 32,2113           01736                           <span class="ps">CADR    </span> <a href="SERVICE_ROUTINES.agc.html#44454C41594A4F42">DELAYJOB</a>                              
+009647,000153: 32,2114           12105                           <span class="op">TCF     </span> <a href="#434B5354414C4C">CKSTALL</a>                               
+009648,000154: 
+009649,000155: 32,2115           04616                 +6        <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  IMU IS NOT IN USE</span>
+009650,000156: 32,2116           16661                           <span class="ps">CADR    </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#494D555A45524F">IMUZERO</a>                               <span class="co">#  SET IMU ZERO DISCRETE FOR 320 MSECS</span>
+009651,000157: 32,2117           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  WAIT 3 SEC FOR COUNTERS TO INCREMENT</span>
+009652,000158: 32,2120           17715                           <span class="ps">CADR    </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#494D555354414C4C">IMUSTALL</a>                              
+009653,000159: 32,2121           02122                           <span class="op">TC      </span> <a href="#414753454E44">AGSEND</a>                                
+<a name="414753454E44"></a>009654,000160: 32,2122           05527        <span class="sm">AGSEND  </span>           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              <span class="co">#  ALLOW V37</span>
+009655,000161: 32,2123           00054                           <span class="ps">ADRES   </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#4E4F444F464C4147">NODOFLAG</a>                              
+009656,000162: 32,2124           32173                           <span class="op">CAF     </span> <a href="#5635304E3136">V50N16</a>                                
+009657,000163: 32,2125           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+009658,000164: 32,2126           20342                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F4D41524B33">GOMARK3</a>                               
+009659,000165: 32,2127           15503                           <span class="op">TCF     </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                
+009660,000166: 32,2130           15503                           <span class="op">TCF     </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                
+009661,000167: 32,2131           05503                           <span class="op">TC      </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                
+009662,000168: 
+<a name="5343414C45564543"></a>009663,000169: 32,2132           64375        <span class="sm">SCALEVEC</span>           <span class="in">VLOAD   </span> <span class="in">MXV       </span>                            
+009664,000170: 32,2133           00025                                    <a href="ORBITAL_INTEGRATION.agc.html#5641545431">VATT1</a>                                 
+009665,000171: 32,2134           01732                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
+009666,000172: 32,2135           72561                           <span class="in">VXSC    </span> <span class="in">VSL2      </span>                            
+009667,000173: 32,2136           24202                                    <a href="#565343414C45">VSCALE</a>                                
+009668,000174: 32,2137           53255                           <span class="in">VAD     </span> <span class="in">VAD       </span>                            <span class="co">#  THIS SECTION ROUNDS THE VECTOR, AND</span>
 </pre>
 </span>
 </p>
@@ -317,48 +317,48 @@ Page 216
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009667,000176: 32,2140           24204                                    <a href="#414753524E4431">AGSRND1</a>                               <span class="co">#  CORRECTS FOR THE FACT THAT THE AGS</span>
-009668,000177: 32,2141           24212                                    <a href="#414753524E4432">AGSRND2</a>                               <span class="co">#  IS A 2 S COMPLIMENT MACHINE WHILE THE</span>
-009669,000178: 32,2142           77634                           <span class="in">RTB     </span>                                       <span class="co">#  LGC IS A 1 S COMPLIMENT MACHINE.</span>
-009670,000179: 32,2143           21754                                    <a href="RTB_OP_CODES.agc.html#56454353474E4147">VECSGNAG</a>                              
-009671,000180: 32,2144           24025                           <span class="in">STOVL   </span> <a href="ORBITAL_INTEGRATION.agc.html#5641545431">VATT1</a>                                 
-009672,000181: 32,2145           00017                                    <a href="ORBITAL_INTEGRATION.agc.html#5241545431">RATT1</a>                                 
-009673,000182: 32,2146           74321                           <span class="in">MXV     </span> <span class="in">VXSC      </span>                            
-009674,000183: 32,2147           01732                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
-009675,000184: 32,2150           24200                                    <a href="#525343414C45">RSCALE</a>                                
-009676,000185: 32,2151           53212                           <span class="in">VSL8    </span> <span class="in">VAD       </span>                            <span class="co">#  AGAIN THIS SECTION ROUNDS.  TWO VECTORS</span>
-009677,000186: 32,2152           24204                                    <a href="#414753524E4431">AGSRND1</a>                               <span class="co">#  ARE ADDED TO DEFEAT ALSIGNAG IN THE</span>
-009678,000187: 32,2153           47055                           <span class="in">VAD     </span> <span class="in">RTB       </span>                            <span class="co">#  CASE OF A HIGH-ORDER ZERO COUPLED WITH</span>
-009679,000188: 32,2154           24212                                    <a href="#414753524E4432">AGSRND2</a>                               <span class="co">#  A LOW ORDER NEGATIVE PART.</span>
-009680,000189: 32,2155           21754                                    <a href="RTB_OP_CODES.agc.html#56454353474E4147">VECSGNAG</a>                              
-009681,000190: 32,2156           77750                           <span class="in">LXA,1   </span>                                       
-009682,000191: 32,2157           00024                                    <a href="ORBITAL_INTEGRATION.agc.html#5641545431">VATT1</a>                                 
-009683,000192: 32,2160           72130                           <span class="in">SXA,1   </span> <span class="in">LXA,1     </span>                            
-009684,000193: 32,2161           00155                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
-009685,000194: 32,2162           00026                                    <a href="ORBITAL_INTEGRATION.agc.html#5641545431">VATT1</a>      +2                         
-009686,000195: 32,2163           72130                           <span class="in">SXA,1   </span> <span class="in">LXA,1     </span>                            
-009687,000196: 32,2164           00160                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +4                         
-009688,000197: 32,2165           00030                                    <a href="ORBITAL_INTEGRATION.agc.html#5641545431">VATT1</a>      +4                         
-009689,000198: 32,2166           43530                           <span class="in">SXA,1   </span> <span class="in">RVQ       </span>                            
-009690,000199: 32,2167           00162                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +6                         
-009691,000200: 
-<a name="4C4147534C495354"></a>009692,000201: 32,2170     4753               <span class="sm">LAGSLIST</span>           <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-<a name="5630314E3134"></a>009693,000202: 32,2170           00216        <span class="sm">V01N14  </span>           <span class="ps">VN      </span> 0114                                  
-<a name="5635304E303041"></a>009694,000203: 32,2171           14400        <span class="sm">V50N00A </span>           <span class="ps">VN      </span> 5000                                  
-<a name="5630304E3235"></a>009695,000204: 32,2172     6010               <span class="sm">V00N25  </span>           <span class="ps">EQUALS  </span> <a href="FRESH_START_AND_RESTART.agc.html#4F43543331">OCT31</a>                                 
-<a name="5630364E3136"></a>009696,000205: 32,2172           01420        <span class="sm">V06N16  </span>           <span class="ps">VN      </span> 0616                                  
-<a name="5630304E3334"></a>009697,000206: 32,2173     4242               <span class="sm">V00N34  </span>           <span class="ps">EQUALS  </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#3334444543">34DEC</a>                                 
-<a name="5635304E3136"></a>009698,000207: 32,2173           14420        <span class="sm">V50N16  </span>           <span class="ps">VN      </span> 5016                                  
-<a name="545343414C45"></a>009699,000208: 32,2174           03100 00000  <span class="sm">TSCALE  </span>           <span class="ps">2DEC    </span> 100        B-10                       <span class="co">#  CSEC TO SEC SCALE FACTOR</span>
-<a name="3230534543"></a>009700,000209: 32,2176           03720        <span class="sm">20SEC   </span>           <span class="ps">DEC     </span> 2000       B-14                       
-<a name="525343414C45"></a>009701,000210: 32,2177           15077 05041  <span class="sm">RSCALE  </span>           <span class="ps">2DEC    </span> 3.280839   B-3                        <span class="co">#  METERS TO FEET SCALE FACTOR</span>
-<a name="565343414C45"></a>009702,000211: 32,2201           24402 25724  <span class="sm">VSCALE  </span>           <span class="ps">2DEC    </span> 3.280839   E2         B-9             <span class="co">#  METERS/CS TO FEET/SEC SCALE FACTOR</span>
-<a name="414753524E4431"></a>009703,000212: 32,2203           00000 60000  <span class="sm">AGSRND1 </span>           <span class="ps">2OCT    </span> 0000060000                            
-009704,000213: 32,2205           00000 60000                     <span class="ps">2OCT    </span> 0000060000                            
-009705,000214: 32,2207           00000 60000                     <span class="ps">2OCT    </span> 0000060000                            
-<a name="414753524E4432"></a>009706,000215: 32,2211           00000 37777  <span class="sm">AGSRND2 </span>           <span class="ps">2OCT    </span> 0000037777                            
-009707,000216: 32,2213           00000 37777                     <span class="ps">2OCT    </span> 0000037777                            
-009708,000217: 32,2215           00000 37777                     <span class="ps">2OCT    </span> 0000037777                            
+009670,000176: 32,2140           24204                                    <a href="#414753524E4431">AGSRND1</a>                               <span class="co">#  CORRECTS FOR THE FACT THAT THE AGS</span>
+009671,000177: 32,2141           24212                                    <a href="#414753524E4432">AGSRND2</a>                               <span class="co">#  IS A 2 S COMPLIMENT MACHINE WHILE THE</span>
+009672,000178: 32,2142           77634                           <span class="in">RTB     </span>                                       <span class="co">#  LGC IS A 1 S COMPLIMENT MACHINE.</span>
+009673,000179: 32,2143           21754                                    <a href="RTB_OP_CODES.agc.html#56454353474E4147">VECSGNAG</a>                              
+009674,000180: 32,2144           24025                           <span class="in">STOVL   </span> <a href="ORBITAL_INTEGRATION.agc.html#5641545431">VATT1</a>                                 
+009675,000181: 32,2145           00017                                    <a href="ORBITAL_INTEGRATION.agc.html#5241545431">RATT1</a>                                 
+009676,000182: 32,2146           74321                           <span class="in">MXV     </span> <span class="in">VXSC      </span>                            
+009677,000183: 32,2147           01732                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
+009678,000184: 32,2150           24200                                    <a href="#525343414C45">RSCALE</a>                                
+009679,000185: 32,2151           53212                           <span class="in">VSL8    </span> <span class="in">VAD       </span>                            <span class="co">#  AGAIN THIS SECTION ROUNDS.  TWO VECTORS</span>
+009680,000186: 32,2152           24204                                    <a href="#414753524E4431">AGSRND1</a>                               <span class="co">#  ARE ADDED TO DEFEAT ALSIGNAG IN THE</span>
+009681,000187: 32,2153           47055                           <span class="in">VAD     </span> <span class="in">RTB       </span>                            <span class="co">#  CASE OF A HIGH-ORDER ZERO COUPLED WITH</span>
+009682,000188: 32,2154           24212                                    <a href="#414753524E4432">AGSRND2</a>                               <span class="co">#  A LOW ORDER NEGATIVE PART.</span>
+009683,000189: 32,2155           21754                                    <a href="RTB_OP_CODES.agc.html#56454353474E4147">VECSGNAG</a>                              
+009684,000190: 32,2156           77750                           <span class="in">LXA,1   </span>                                       
+009685,000191: 32,2157           00024                                    <a href="ORBITAL_INTEGRATION.agc.html#5641545431">VATT1</a>                                 
+009686,000192: 32,2160           72130                           <span class="in">SXA,1   </span> <span class="in">LXA,1     </span>                            
+009687,000193: 32,2161           00155                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
+009688,000194: 32,2162           00026                                    <a href="ORBITAL_INTEGRATION.agc.html#5641545431">VATT1</a>      +2                         
+009689,000195: 32,2163           72130                           <span class="in">SXA,1   </span> <span class="in">LXA,1     </span>                            
+009690,000196: 32,2164           00160                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +4                         
+009691,000197: 32,2165           00030                                    <a href="ORBITAL_INTEGRATION.agc.html#5641545431">VATT1</a>      +4                         
+009692,000198: 32,2166           43530                           <span class="in">SXA,1   </span> <span class="in">RVQ       </span>                            
+009693,000199: 32,2167           00162                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +6                         
+009694,000200: 
+<a name="4C4147534C495354"></a>009695,000201: 32,2170     4753               <span class="sm">LAGSLIST</span>           <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+<a name="5630314E3134"></a>009696,000202: 32,2170           00216        <span class="sm">V01N14  </span>           <span class="ps">VN      </span> 0114                                  
+<a name="5635304E303041"></a>009697,000203: 32,2171           14400        <span class="sm">V50N00A </span>           <span class="ps">VN      </span> 5000                                  
+<a name="5630304E3235"></a>009698,000204: 32,2172     6010               <span class="sm">V00N25  </span>           <span class="ps">EQUALS  </span> <a href="FRESH_START_AND_RESTART.agc.html#4F43543331">OCT31</a>                                 
+<a name="5630364E3136"></a>009699,000205: 32,2172           01420        <span class="sm">V06N16  </span>           <span class="ps">VN      </span> 0616                                  
+<a name="5630304E3334"></a>009700,000206: 32,2173     4242               <span class="sm">V00N34  </span>           <span class="ps">EQUALS  </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#3334444543">34DEC</a>                                 
+<a name="5635304E3136"></a>009701,000207: 32,2173           14420        <span class="sm">V50N16  </span>           <span class="ps">VN      </span> 5016                                  
+<a name="545343414C45"></a>009702,000208: 32,2174           03100 00000  <span class="sm">TSCALE  </span>           <span class="ps">2DEC    </span> 100        B-10                       <span class="co">#  CSEC TO SEC SCALE FACTOR</span>
+<a name="3230534543"></a>009703,000209: 32,2176           03720        <span class="sm">20SEC   </span>           <span class="ps">DEC     </span> 2000       B-14                       
+<a name="525343414C45"></a>009704,000210: 32,2177           15077 05041  <span class="sm">RSCALE  </span>           <span class="ps">2DEC    </span> 3.280839   B-3                        <span class="co">#  METERS TO FEET SCALE FACTOR</span>
+<a name="565343414C45"></a>009705,000211: 32,2201           24402 25724  <span class="sm">VSCALE  </span>           <span class="ps">2DEC    </span> 3.280839   E2         B-9             <span class="co">#  METERS/CS TO FEET/SEC SCALE FACTOR</span>
+<a name="414753524E4431"></a>009706,000212: 32,2203           00000 60000  <span class="sm">AGSRND1 </span>           <span class="ps">2OCT    </span> 0000060000                            
+009707,000213: 32,2205           00000 60000                     <span class="ps">2OCT    </span> 0000060000                            
+009708,000214: 32,2207           00000 60000                     <span class="ps">2OCT    </span> 0000060000                            
+<a name="414753524E4432"></a>009709,000215: 32,2211           00000 37777  <span class="sm">AGSRND2 </span>           <span class="ps">2OCT    </span> 0000037777                            
+009710,000216: 32,2213           00000 37777                     <span class="ps">2OCT    </span> 0000037777                            
+009711,000217: 32,2215           00000 37777                     <span class="ps">2OCT    </span> 0000037777                            
 </pre>
 </span>
 </p>
@@ -374,7 +374,7 @@ Page 217
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009710,000219: 32,2217  30,2000                                  <span class="ps">SBANK=  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4C4F575355504552">LOWSUPER</a>                              <span class="co">#  FOR SUBSEQUENT LOW 2CADRS.</span>
+009713,000219: 32,2217  30,2000                                  <span class="ps">SBANK=  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4C4F575355504552">LOWSUPER</a>                              <span class="co">#  FOR SUBSEQUENT LOW 2CADRS.</span>
 
 End of include-file AGS_INITIALIZATION.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

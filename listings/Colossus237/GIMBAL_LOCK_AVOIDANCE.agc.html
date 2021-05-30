@@ -86,22 +86,22 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-017756,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-017757,000003:                                                                                                  <span class="co">## Filename:    GIMBAL_LOCK_AVOIDANCE.agc</span>
-017758,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Colossus build 237.  </span>
-017759,000005:                                                                                                  <span class="co">##              This is for the Command Module's (CM) Apollo Guidance</span>
-017760,000006:                                                                                                  <span class="co">##              Computer (AGC), for Apollo 8.</span>
-017761,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-017762,000008:                                                                                                  <span class="co">## Contact:     Onno Hommes &lt;ohommes@alumni.cmu.edu></span>
-017763,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-017764,000010:                                                                                                  <span class="co">## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
-017765,000011:                                                                                                  <span class="co">## Mod history: 2010-06-01 OH   Adapted from corresponding Colossus 249 file.</span>
-017766,000012:                                                                                                  <span class="co">##              2010-12-04 JL   Remove Colossus 249 header comments. Change </span>
-017767,000013:                                                                                                  <span class="co">##                              to double-hash page numbers.</span>
-017768,000014:                                                                                                  <span class="co">##              2011-01-27 JL   Minor fixes.</span>
-017769,000015:                                                                                                  <span class="co">##              2016-12-30 RSB  Proofed comment text using octopus/ProoferComments,</span>
-017770,000016:                                                                                                  <span class="co">##                              and corrected errors found.</span>
-017771,000017: 
+017761,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+017762,000003:                                                                                                  <span class="co">## Filename:    GIMBAL_LOCK_AVOIDANCE.agc</span>
+017763,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Colossus build 237.  </span>
+017764,000005:                                                                                                  <span class="co">##              This is for the Command Module's (CM) Apollo Guidance</span>
+017765,000006:                                                                                                  <span class="co">##              Computer (AGC), for Apollo 8.</span>
+017766,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+017767,000008:                                                                                                  <span class="co">## Contact:     Onno Hommes &lt;ohommes@alumni.cmu.edu></span>
+017768,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+017769,000010:                                                                                                  <span class="co">## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
+017770,000011:                                                                                                  <span class="co">## Mod history: 2010-06-01 OH   Adapted from corresponding Colossus 249 file.</span>
+017771,000012:                                                                                                  <span class="co">##              2010-12-04 JL   Remove Colossus 249 header comments. Change </span>
+017772,000013:                                                                                                  <span class="co">##                              to double-hash page numbers.</span>
+017773,000014:                                                                                                  <span class="co">##              2011-01-27 JL   Minor fixes.</span>
+017774,000015:                                                                                                  <span class="co">##              2016-12-30 RSB  Proofed comment text using octopus/ProoferComments,</span>
+017775,000016:                                                                                                  <span class="co">##                              and corrected errors found.</span>
+017776,000017: 
 </pre>
 </span>
 </p>
@@ -117,52 +117,52 @@ Page 403
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-017773,000019: 15,2000                                           <span class="ps">BANK    </span> 15                                    
-017774,000020: 22,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4B414C434D4F4E31">KALCMON1</a>                              
-017775,000021: 22,2000                                           <span class="ps">BANK    </span>                                       
-017776,000022: 
-017777,000023: 22,2736  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42434455">BCDU</a>                                  
-017778,000024: 
-017779,000025:                                                                                                  <span class="co">#  DETECTING GIMBAL LOCK</span>
-<a name="4C4F43534B495254"></a>017780,000026: 22,2736  22,2736               <span class="sm">LOCSKIRT</span>           <span class="ps">EQUALS  </span> <a href="#4E4F47494D4C4F43">NOGIMLOC</a>                              
-017781,000027: 
-<a name="4E4F47494D4C4F43"></a>017782,000028: 22,2736           77614        <span class="sm">NOGIMLOC</span>           <span class="in">SET     </span>                                       
-017783,000029: 22,2737           01074                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43414C434D414E33">CALCMAN3</a>                              
-<a name="5743414C43"></a>017784,000030: 22,2740           70740        <span class="sm">WCALC   </span>           <span class="in">LXC,1   </span> <span class="in">DLOAD*    </span>                            
-017785,000031: 22,2741           01130                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              
-017786,000032: 22,2742           04772                                    ARATE,1                               
-017787,000033: 22,2743           45002                           <span class="in">SR4     </span> <span class="in">CALL      </span>                            <span class="co">#  COMPUTE THE INCREMENTAL ROTATION MATRIX</span>
-017788,000034: 22,2744           44530                                    <a href="ANGLFIND.agc.html#44454C434F4D50">DELCOMP</a>                               <span class="co">#  DEL CORRESPONDING TO A 1 SEC ROTATION</span>
-017789,000035:                                                                                                  <span class="co">#                                          ABOUT COF</span>
-017790,000036: 22,2745           74343                           <span class="in">DLOAD*  </span> <span class="in">VXSC      </span>                            
-017791,000037: 22,2746           04772                                    ARATE,1                               
-017792,000038: 22,2747           03343                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>                                   
-017793,000039: 22,2750           77721                           <span class="in">MXV     </span>                                       
-017794,000040: 22,2751           05004                                    <a href="#51554144524F54">QUADROT</a>                               
-017795,000041: 22,2752           17311                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4252415445">BRATE</a>                                 
-017796,000042: 22,2753           03365                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414D">AM</a>                                    
-017797,000043: 22,2754           55605                           <span class="in">DMP     </span> <span class="in">DDV*      </span>                            
-017798,000044: 22,2755           05002                                    <a href="#414E474C54494D45">ANGLTIME</a>                              
-017799,000045: 22,2756           04772                                    ARATE,1                               
-017800,000046: 22,2757           77661                           <span class="in">SR      </span>                                       
-017801,000047: 22,2760           20606                                    5                                     
-017802,000048: 22,2761           27317                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D">TM</a>                                    
-017803,000049: 22,2762           03311                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4252415445">BRATE</a>                                 
-017804,000050: 22,2763           77761                           <span class="in">VXSC    </span>                                       
-017805,000051: 22,2764           05026                                    <a href="#4249415343414C45">BIASCALE</a>                              
-017806,000052: 22,2765           03275                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4249415354454D50">BIASTEMP</a>                              <span class="co">#  ATTITUDE ERROR BIAS TO PREVENT OVERSHOOT</span>
-017807,000053:                                                                                                  <span class="co">#                                          IN SYSTEM</span>
-017808,000054: 22,2766           77614                           <span class="in">SETGO   </span>                                       <span class="co">#  STATE SWITCH CALCMAN2 (43D)</span>
-017809,000055: 22,2767           01035                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43414C434D414E32">CALCMAN2</a>                              <span class="co">#  0(OFF) = BYPASS STARTING PROCEDURE</span>
-017810,000056: 22,2770           45033                                    <a href="KALCMANU_STEERING.agc.html#4E4557414E474C">NEWANGL</a>    +1                         <span class="co">#  1(ON) = START MANEUVER</span>
-017811,000057: 
-017812,000058: 
-<a name="4152415445"></a>017813,000059: 22,2771           00044 15053  <span class="sm">ARATE   </span>           <span class="ps">2DEC    </span> .0022222222                            <span class="co">#  = .05 DEG/SEC</span>
-017814,000060: 22,2773           00221 24255                     <span class="ps">2DEC    </span> .0088888889                            <span class="co">#  = .2 DEG/SEC</span>
-017815,000061: 22,2775           00554 02660                     <span class="ps">2DEC    </span> .0222222222                            <span class="co">#  = .5 DEG/SEC</span>
-017816,000062: 22,2777           05540 26603                     <span class="ps">2DEC    </span> .1777777777                            <span class="co">#  = 4 DEG/SEC               $ 22.5 DEG/SEC</span>
-<a name="414E474C54494D45"></a>017817,000063: 22,3001           00003 04000  <span class="sm">ANGLTIME</span>           <span class="ps">2DEC    </span> .000190735                            <span class="co">#  = 100B - 19 </span>
-017818,000064:                                                                                                  <span class="co">#                                          MANEUVER ANGLE TO MANEUVER TIME</span>
+017778,000019: 15,2000                                           <span class="ps">BANK    </span> 15                                    
+017779,000020: 22,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4B414C434D4F4E31">KALCMON1</a>                              
+017780,000021: 22,2000                                           <span class="ps">BANK    </span>                                       
+017781,000022: 
+017782,000023: 22,2736  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42434455">BCDU</a>                                  
+017783,000024: 
+017784,000025:                                                                                                  <span class="co">#  DETECTING GIMBAL LOCK</span>
+<a name="4C4F43534B495254"></a>017785,000026: 22,2736  22,2736               <span class="sm">LOCSKIRT</span>           <span class="ps">EQUALS  </span> <a href="#4E4F47494D4C4F43">NOGIMLOC</a>                              
+017786,000027: 
+<a name="4E4F47494D4C4F43"></a>017787,000028: 22,2736           77614        <span class="sm">NOGIMLOC</span>           <span class="in">SET     </span>                                       
+017788,000029: 22,2737           01074                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43414C434D414E33">CALCMAN3</a>                              
+<a name="5743414C43"></a>017789,000030: 22,2740           70740        <span class="sm">WCALC   </span>           <span class="in">LXC,1   </span> <span class="in">DLOAD*    </span>                            
+017790,000031: 22,2741           01130                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              
+017791,000032: 22,2742           04772                                    ARATE,1                               
+017792,000033: 22,2743           45002                           <span class="in">SR4     </span> <span class="in">CALL      </span>                            <span class="co">#  COMPUTE THE INCREMENTAL ROTATION MATRIX</span>
+017793,000034: 22,2744           44530                                    <a href="ANGLFIND.agc.html#44454C434F4D50">DELCOMP</a>                               <span class="co">#  DEL CORRESPONDING TO A 1 SEC ROTATION</span>
+017794,000035:                                                                                                  <span class="co">#                                          ABOUT COF</span>
+017795,000036: 22,2745           74343                           <span class="in">DLOAD*  </span> <span class="in">VXSC      </span>                            
+017796,000037: 22,2746           04772                                    ARATE,1                               
+017797,000038: 22,2747           03343                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>                                   
+017798,000039: 22,2750           77721                           <span class="in">MXV     </span>                                       
+017799,000040: 22,2751           05004                                    <a href="#51554144524F54">QUADROT</a>                               
+017800,000041: 22,2752           17311                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4252415445">BRATE</a>                                 
+017801,000042: 22,2753           03365                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414D">AM</a>                                    
+017802,000043: 22,2754           55605                           <span class="in">DMP     </span> <span class="in">DDV*      </span>                            
+017803,000044: 22,2755           05002                                    <a href="#414E474C54494D45">ANGLTIME</a>                              
+017804,000045: 22,2756           04772                                    ARATE,1                               
+017805,000046: 22,2757           77661                           <span class="in">SR      </span>                                       
+017806,000047: 22,2760           20606                                    5                                     
+017807,000048: 22,2761           27317                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D">TM</a>                                    
+017808,000049: 22,2762           03311                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4252415445">BRATE</a>                                 
+017809,000050: 22,2763           77761                           <span class="in">VXSC    </span>                                       
+017810,000051: 22,2764           05026                                    <a href="#4249415343414C45">BIASCALE</a>                              
+017811,000052: 22,2765           03275                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4249415354454D50">BIASTEMP</a>                              <span class="co">#  ATTITUDE ERROR BIAS TO PREVENT OVERSHOOT</span>
+017812,000053:                                                                                                  <span class="co">#                                          IN SYSTEM</span>
+017813,000054: 22,2766           77614                           <span class="in">SETGO   </span>                                       <span class="co">#  STATE SWITCH CALCMAN2 (43D)</span>
+017814,000055: 22,2767           01035                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43414C434D414E32">CALCMAN2</a>                              <span class="co">#  0(OFF) = BYPASS STARTING PROCEDURE</span>
+017815,000056: 22,2770           45033                                    <a href="KALCMANU_STEERING.agc.html#4E4557414E474C">NEWANGL</a>    +1                         <span class="co">#  1(ON) = START MANEUVER</span>
+017816,000057: 
+017817,000058: 
+<a name="4152415445"></a>017818,000059: 22,2771           00044 15053  <span class="sm">ARATE   </span>           <span class="ps">2DEC    </span> .0022222222                            <span class="co">#  = .05 DEG/SEC</span>
+017819,000060: 22,2773           00221 24255                     <span class="ps">2DEC    </span> .0088888889                            <span class="co">#  = .2 DEG/SEC</span>
+017820,000061: 22,2775           00554 02660                     <span class="ps">2DEC    </span> .0222222222                            <span class="co">#  = .5 DEG/SEC</span>
+017821,000062: 22,2777           05540 26603                     <span class="ps">2DEC    </span> .1777777777                            <span class="co">#  = 4 DEG/SEC               $ 22.5 DEG/SEC</span>
+<a name="414E474C54494D45"></a>017822,000063: 22,3001           00003 04000  <span class="sm">ANGLTIME</span>           <span class="ps">2DEC    </span> .000190735                            <span class="co">#  = 100B - 19 </span>
+017823,000064:                                                                                                  <span class="co">#                                          MANEUVER ANGLE TO MANEUVER TIME</span>
 </pre>
 </span>
 </p>
@@ -178,16 +178,16 @@ Page 404
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="51554144524F54"></a>017820,000066: 22,3003           03146 14632  <span class="sm">QUADROT </span>           <span class="ps">2DEC    </span> .1                                    <span class="co">#  ROTATION MATRIX FROM S/C AXES TO CONTROL</span>
-017821,000067: 22,3005           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       <span class="co">#  AXES  (X ROT = -7.25 DEG)</span>
-017822,000068: 22,3007           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       
-017823,000069: 22,3011           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       
-017824,000070: 22,3013           03131 11275                     <span class="ps">2DEC    </span> .099200                               <span class="co">#  =(.1)COS7.25</span>
-017825,000071: 22,3015           77461 47370                     <span class="ps">2DEC    </span> -.012620                              <span class="co">#  =-(.1)SIN7.25</span>
-017826,000072: 22,3017           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       
-017827,000073: 22,3021           00316 30407                     <span class="ps">2DEC    </span> .012620                               <span class="co">#  (.1)SIN7.25</span>
-017828,000074: 22,3023           03131 11275                     <span class="ps">2DEC    </span> .099200                               <span class="co">#  (.1)COS7.25</span>
-<a name="4249415343414C45"></a>017829,000075: 22,3025           00004 05253  <span class="sm">BIASCALE</span>           <span class="ps">2DEC    </span> .0002543132                            <span class="co">#  = (450/180)(1/0.6)(1/16384)</span>
+<a name="51554144524F54"></a>017825,000066: 22,3003           03146 14632  <span class="sm">QUADROT </span>           <span class="ps">2DEC    </span> .1                                    <span class="co">#  ROTATION MATRIX FROM S/C AXES TO CONTROL</span>
+017826,000067: 22,3005           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       <span class="co">#  AXES  (X ROT = -7.25 DEG)</span>
+017827,000068: 22,3007           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       
+017828,000069: 22,3011           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       
+017829,000070: 22,3013           03131 11275                     <span class="ps">2DEC    </span> .099200                               <span class="co">#  =(.1)COS7.25</span>
+017830,000071: 22,3015           77461 47370                     <span class="ps">2DEC    </span> -.012620                              <span class="co">#  =-(.1)SIN7.25</span>
+017831,000072: 22,3017           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       
+017832,000073: 22,3021           00316 30407                     <span class="ps">2DEC    </span> .012620                               <span class="co">#  (.1)SIN7.25</span>
+017833,000074: 22,3023           03131 11275                     <span class="ps">2DEC    </span> .099200                               <span class="co">#  (.1)COS7.25</span>
+<a name="4249415343414C45"></a>017834,000075: 22,3025           00004 05253  <span class="sm">BIASCALE</span>           <span class="ps">2DEC    </span> .0002543132                            <span class="co">#  = (450/180)(1/0.6)(1/16384)</span>
 
 End of include-file GIMBAL_LOCK_AVOIDANCE.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

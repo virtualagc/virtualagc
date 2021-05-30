@@ -86,24 +86,25 @@ project's GitHub repository</a>.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-058765,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-058766,000003:                                                                                                  <span class="co">## Filename:    UPDATE_PROGRAM.agc</span>
-058767,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 173.</span>
-058768,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the second</span>
-058769,000006:                                                                                                  <span class="co">##              (unflown) release of the flight software for the Lunar</span>
-058770,000007:                                                                                                  <span class="co">##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 14.</span>
-058771,000008:                                                                                                  <span class="co">##              The code has been recreated from a reconstructed copy of</span>
-058772,000009:                                                                                                  <span class="co">##              Luminary 178, as well as Luminary memo 167 (revision 1).</span>
-058773,000010:                                                                                                  <span class="co">##              It has been adapted such that the resulting bugger words</span>
-058774,000011:                                                                                                  <span class="co">##              exactly match those specified for Luminary 173 in NASA</span>
-058775,000012:                                                                                                  <span class="co">##              drawing 2021152N, which gives relatively high confidence</span>
-058776,000013:                                                                                                  <span class="co">##              that the reconstruction is correct.</span>
-058777,000014:                                                                                                  <span class="co">## Reference:   pp. 1374-1384</span>
-058778,000015:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-058779,000016:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-058780,000017:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-058781,000018:                                                                                                  <span class="co">## Mod history: 2019-09-18 MAS  Created from Luminary 178.</span>
-058782,000019: 
+058780,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+058781,000003:                                                                                                  <span class="co">## Filename:    UPDATE_PROGRAM.agc</span>
+058782,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 173.</span>
+058783,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the second</span>
+058784,000006:                                                                                                  <span class="co">##              (unflown) release of the flight software for the Lunar</span>
+058785,000007:                                                                                                  <span class="co">##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 14.</span>
+058786,000008:                                                                                                  <span class="co">##              The code has been recreated from a reconstructed copy of</span>
+058787,000009:                                                                                                  <span class="co">##              Luminary 178, as well as Luminary memo 167 (revision 1).</span>
+058788,000010:                                                                                                  <span class="co">##              It has been adapted such that the resulting bugger words</span>
+058789,000011:                                                                                                  <span class="co">##              exactly match those specified for Luminary 173 in NASA</span>
+058790,000012:                                                                                                  <span class="co">##              drawing 2021152N, which gives relatively high confidence</span>
+058791,000013:                                                                                                  <span class="co">##              that the reconstruction is correct.</span>
+058792,000014:                                                                                                  <span class="co">## Reference:   pp. 1374-1384</span>
+058793,000015:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+058794,000016:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+058795,000017:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+058796,000018:                                                                                                  <span class="co">## Mod history: 2019-09-18 MAS  Created from Luminary 178.</span>
+058797,000019:                                                                                                  <span class="co">##              2021-05-30 ABS  DELTAOK -> DELTATOK</span>
+058798,000020: 
 </pre>
 </span>
 </p>
@@ -119,55 +120,55 @@ Page 1374
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-058784,000021:                                                                                                  <span class="co">#  PROGRAM NAME:   P27</span>
-058785,000022:                                                                                                  <span class="co">#  WRITTEN BY:     KILROY/ DE WOLF</span>
-058786,000023: 
-058787,000024:                                                                                                  <span class="co">#  MOD NO:         6</span>
-058788,000025:                                                                                                  <span class="co">#  MOD BY:         KILROY</span>
-058789,000026:                                                                                                  <span class="co">#  DATE:           01DEC67</span>
-058790,000027: 
-058791,000028:                                                                                                  <span class="co">#  LOG SECTION:    UPDATE PROGRAM.</span>
-058792,000029: 
-058793,000030:                                                                                                  <span class="co">#  FUNCT. DESCR:   P27 (THE UPDATE PROGRAM) PROCESSES COMMANDS AND DATA</span>
-058794,000031:                                                                                                  <span class="co">#                      INSERTIONS REQUESTED BY THE GROUND VIA UPLINK.</span>
-058795,000032:                                                                                                  <span class="co">#                      THE P27 PROGRAM WILL ACCEPT UPDATES</span>
-058796,000033:                                                                                                  <span class="co">#                      ONLY DURING P00 FOR THE LM, AND ONLY DURING P00,</span>
-058797,000034:                                                                                                  <span class="co">#                  P02, AND FRESH START FOR THE CSM</span>
-058798,000035: 
-058799,000036:                                                                                                  <span class="co">#  CALLING SEQ:    PROGRAM IS INITIATED BY UPLINK ENTRY OF VERBS 70, 71, 72 AND 73.</span>
-058800,000037: 
-058801,000038:                                                                                                  <span class="co">#  SUBROUTINES:    TESTXACT, NEWMODEX, NEWMODEX +3, GOXDSPF, BANKCALL, FINDVAC, INTPRET, INTSTALL, TPAGREE,</span>
-058802,000039:                                                                                                  <span class="co">#                  INTWAKEU, ENDEXT, POSTJUMP, FALTON, NEWPHASE, PHASCHNG</span>
-058803,000040: 
-058804,000041:                                                                                                  <span class="co">#  NORMAL EXIT:    TC ENDEXT</span>
-058805,000042: 
-058806,000043:                                                                                                  <span class="co">#  ALARM/ABORT:    TC FALTON FOLLOWED BY TC ENDEXT</span>
-058807,000044: 
-058808,000045:                                                                                                  <span class="co">#  RESTARTS:       P27 IS RESTART PROTECTED IN TWO WAYS...</span>
-058809,000046:                                                                                                  <span class="co">#                  1. PRIOR TO VERIFLAG INVERSION(WHICH IS CAUSED BY THE GROUND/ASTRONAUT'S VERIFICATION OF UPDATE</span>
-058810,000047:                                                                                                  <span class="co">#                     DATA BY SENDING A V33E WHEN V21N02 IS FLASHING)---</span>
-058811,000048:                                                                                                  <span class="co">#                     NO PROTECTION EXCEPT PRE-P27 MODE IS RESTORED, COAST + ALIGN DOWNLIST IS SELECTED AND UPLINK</span>
-058812,000049:                                                                                                  <span class="co">#                     ACTIVITY LIGHT IS TURNED OFF.(JUST AS IF A V34E WAS SENT DURING P27 DATA LOADS).</span>
-058813,000050:                                                                                                  <span class="co">#                     V70,V71,V72 OR V73 WILL HAVE TO BE COMPLETELY RESENT BY USER.</span>
-058814,000051:                                                                                                  <span class="co">#                  2. AFTER VERIFLAG INVERSION(WHEN UPDATE OF THE SPECIFIED ERASABLES IS BEING PERFORMED)---</span>
-058815,000052:                                                                                                  <span class="co">#                     PROTECTED AGAINST RESTARTS.</span>
-058816,000053: 
-058817,000054:                                                                                                  <span class="co">#  DEBRIS:         UPBUFF   (20D)  TEMP STORAGE FOR ADDRESSES AND CONTENTS.</span>
-058818,000055:                                                                                                  <span class="co">#                  UPVERB   (1)    VERB NUMBER MINUS 70D (E.G. FOR V72, UPVERB = 72D - 70D = 2)</span>
-058819,000056:                                                                                                  <span class="co">#                  UPOLDMOD (1)    FOR MAJOR MODE INTERRUPTED BY P27.</span>
-058820,000057:                                                                                                  <span class="co">#                  COMPNUMB (1)    TOTAL NUMBER OF COMPONENTS TO BE TRANSMITTED.</span>
-058821,000058:                                                                                                  <span class="co">#                  UPCOUNT  (1)    ACTUAL NUMBER OF COMPONENTS RECEIVED.</span>
-058822,000059:                                                                                                  <span class="co">#                  UPTEMP   (1)    SCRATCH, BUT USUALLY CONTAINS COMPONENT NUMBER TO BE CHANGED DURING VERIFY CYCLE</span>
-058823,000060: 
-058824,000061: 
-058825,000062:                                                                                                  <span class="co">#  INPUT:</span>
-058826,000063: 
-058827,000064:                                                                                                  <span class="co">#        ENTRY:      DESCRIPTION</span>
-058828,000065: 
-058829,000066:                                                                                                  <span class="co">#   V70EXXXXXEXXXXXE (LIFTOFF TIME INCREMENT) DOUBLE PRECISION OCTAL TIME INCREMENT, XXXXX XXXXX,</span>
-058830,000067:                                                                                                  <span class="co">#                    IS ADDED TO TEPHEM, SUBTRACTED FROM AGC CLOCK(TIME2,TIME1), SUBTRACTED FROM CSM STATE</span>
-058831,000068:                                                                                                  <span class="co">#                    VECTOR TIME(TETCSM) AND SUBTRACTED FROM LEM STATE VECTOR TIME(TETLEM).</span>
-058832,000069:                                                                                                  <span class="co">#                    THE DP OCTAL TIME INCREMENT IS SCALED AT 2(28).</span>
+058800,000022:                                                                                                  <span class="co">#  PROGRAM NAME:   P27</span>
+058801,000023:                                                                                                  <span class="co">#  WRITTEN BY:     KILROY/ DE WOLF</span>
+058802,000024: 
+058803,000025:                                                                                                  <span class="co">#  MOD NO:         6</span>
+058804,000026:                                                                                                  <span class="co">#  MOD BY:         KILROY</span>
+058805,000027:                                                                                                  <span class="co">#  DATE:           01DEC67</span>
+058806,000028: 
+058807,000029:                                                                                                  <span class="co">#  LOG SECTION:    UPDATE PROGRAM.</span>
+058808,000030: 
+058809,000031:                                                                                                  <span class="co">#  FUNCT. DESCR:   P27 (THE UPDATE PROGRAM) PROCESSES COMMANDS AND DATA</span>
+058810,000032:                                                                                                  <span class="co">#                      INSERTIONS REQUESTED BY THE GROUND VIA UPLINK.</span>
+058811,000033:                                                                                                  <span class="co">#                      THE P27 PROGRAM WILL ACCEPT UPDATES</span>
+058812,000034:                                                                                                  <span class="co">#                      ONLY DURING P00 FOR THE LM, AND ONLY DURING P00,</span>
+058813,000035:                                                                                                  <span class="co">#                  P02, AND FRESH START FOR THE CSM</span>
+058814,000036: 
+058815,000037:                                                                                                  <span class="co">#  CALLING SEQ:    PROGRAM IS INITIATED BY UPLINK ENTRY OF VERBS 70, 71, 72 AND 73.</span>
+058816,000038: 
+058817,000039:                                                                                                  <span class="co">#  SUBROUTINES:    TESTXACT, NEWMODEX, NEWMODEX +3, GOXDSPF, BANKCALL, FINDVAC, INTPRET, INTSTALL, TPAGREE,</span>
+058818,000040:                                                                                                  <span class="co">#                  INTWAKEU, ENDEXT, POSTJUMP, FALTON, NEWPHASE, PHASCHNG</span>
+058819,000041: 
+058820,000042:                                                                                                  <span class="co">#  NORMAL EXIT:    TC ENDEXT</span>
+058821,000043: 
+058822,000044:                                                                                                  <span class="co">#  ALARM/ABORT:    TC FALTON FOLLOWED BY TC ENDEXT</span>
+058823,000045: 
+058824,000046:                                                                                                  <span class="co">#  RESTARTS:       P27 IS RESTART PROTECTED IN TWO WAYS...</span>
+058825,000047:                                                                                                  <span class="co">#                  1. PRIOR TO VERIFLAG INVERSION(WHICH IS CAUSED BY THE GROUND/ASTRONAUT'S VERIFICATION OF UPDATE</span>
+058826,000048:                                                                                                  <span class="co">#                     DATA BY SENDING A V33E WHEN V21N02 IS FLASHING)---</span>
+058827,000049:                                                                                                  <span class="co">#                     NO PROTECTION EXCEPT PRE-P27 MODE IS RESTORED, COAST + ALIGN DOWNLIST IS SELECTED AND UPLINK</span>
+058828,000050:                                                                                                  <span class="co">#                     ACTIVITY LIGHT IS TURNED OFF.(JUST AS IF A V34E WAS SENT DURING P27 DATA LOADS).</span>
+058829,000051:                                                                                                  <span class="co">#                     V70,V71,V72 OR V73 WILL HAVE TO BE COMPLETELY RESENT BY USER.</span>
+058830,000052:                                                                                                  <span class="co">#                  2. AFTER VERIFLAG INVERSION(WHEN UPDATE OF THE SPECIFIED ERASABLES IS BEING PERFORMED)---</span>
+058831,000053:                                                                                                  <span class="co">#                     PROTECTED AGAINST RESTARTS.</span>
+058832,000054: 
+058833,000055:                                                                                                  <span class="co">#  DEBRIS:         UPBUFF   (20D)  TEMP STORAGE FOR ADDRESSES AND CONTENTS.</span>
+058834,000056:                                                                                                  <span class="co">#                  UPVERB   (1)    VERB NUMBER MINUS 70D (E.G. FOR V72, UPVERB = 72D - 70D = 2)</span>
+058835,000057:                                                                                                  <span class="co">#                  UPOLDMOD (1)    FOR MAJOR MODE INTERRUPTED BY P27.</span>
+058836,000058:                                                                                                  <span class="co">#                  COMPNUMB (1)    TOTAL NUMBER OF COMPONENTS TO BE TRANSMITTED.</span>
+058837,000059:                                                                                                  <span class="co">#                  UPCOUNT  (1)    ACTUAL NUMBER OF COMPONENTS RECEIVED.</span>
+058838,000060:                                                                                                  <span class="co">#                  UPTEMP   (1)    SCRATCH, BUT USUALLY CONTAINS COMPONENT NUMBER TO BE CHANGED DURING VERIFY CYCLE</span>
+058839,000061: 
+058840,000062: 
+058841,000063:                                                                                                  <span class="co">#  INPUT:</span>
+058842,000064: 
+058843,000065:                                                                                                  <span class="co">#        ENTRY:      DESCRIPTION</span>
+058844,000066: 
+058845,000067:                                                                                                  <span class="co">#   V70EXXXXXEXXXXXE (LIFTOFF TIME INCREMENT) DOUBLE PRECISION OCTAL TIME INCREMENT, XXXXX XXXXX,</span>
+058846,000068:                                                                                                  <span class="co">#                    IS ADDED TO TEPHEM, SUBTRACTED FROM AGC CLOCK(TIME2,TIME1), SUBTRACTED FROM CSM STATE</span>
+058847,000069:                                                                                                  <span class="co">#                    VECTOR TIME(TETCSM) AND SUBTRACTED FROM LEM STATE VECTOR TIME(TETLEM).</span>
+058848,000070:                                                                                                  <span class="co">#                    THE DP OCTAL TIME INCREMENT IS SCALED AT 2(28).</span>
 </pre>
 </span>
 </p>
@@ -183,56 +184,56 @@ Page 1375
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-058834,000071:                                                                                                  <span class="co">#   V71EIIEAAAAE     (CONTIGUOUS BLOCK UPDATE) II-2 OCTAL COMPONENTS,XXXXX,</span>
-058835,000072:                                                                                                  <span class="co">#   XXXXXE           ARE LOADED INTO ERASABLE STARTING AT ECADR, AAAA.</span>
-058836,000073:                                                                                                  <span class="co">#  XXXXXE            IT IS .GE. 3 .AND. .LE. 20D.,</span>
-058837,000074:                                                                                                  <span class="co">#                    AND (AAAA + II - 3) DOES NOT PRODUCE AN ADDRESS IN THE</span>
-058838,000075:                                                                                                  <span class="co">#  9 NEXT BANK</span>
-058839,000076:                                                                                                  <span class="co">#    .               SCALING IS SAME AS INTERNAL REGISTERS.</span>
-058840,000077: 
-058841,000078:                                                                                                  <span class="co">#   V72EIIE          (SCATTER UPDATE) (II-1)/2 OCTAL COMPONENTS,XXXXX, ARE</span>
-058842,000079:                                                                                                  <span class="co">#   AAAAEXXXXXE      LOADED INTO ERASABLE LOCATIONS, AAAA.</span>
-058843,000080:                                                                                                  <span class="co">#   AAAAEXXXXXE      II IS .GE. 3 .AND. .LE. 19D, AND MUST BE ODD.</span>
-058844,000081:                                                                                                  <span class="co">#    .               SCALING IS SAME AS INTERNAL REGISTERS.</span>
-058845,000082: 
-058846,000083:                                                                                                  <span class="co">#   V73EXXXXXEXXXXXE (OCTAL CLOCK INCREMENT) DOUBLE PRECISION OCTAL TIME</span>
-058847,000084:                                                                                                  <span class="co">#                    INCREMENT XXXXX XXXXX, IS ADDED TO THE AGC CLOCK, IN</span>
-058848,000085:                                                                                                  <span class="co">#                    CENTISECONDS SCALED AT (2)28.</span>
-058849,000086:                                                                                                  <span class="co">#                    THIS LOAD IS THE OCTAL EQUIVALENT OF V55.</span>
-058850,000087: 
-058851,000088: 
-058852,000089:                                                                                                  <span class="co">#  OUTPUT:         IN ADDITION TO THE ABOVE REGISTER LOADS, ALL UPDATES</span>
-058853,000090:                                                                                                  <span class="co">#                  COMPLEMENT BIT3 OF FLAGWORD7.</span>
-058854,000091: 
-058855,000092: 
-058856,000093:                                                                                                  <span class="co">#  ADDITIONAL NOTES: VERB 71, JUST DEFINED ABOVE WILL BE USED TO PERFORM BUT NOT LIMITED TO THE FOLLOWING UPDATES--</span>
-058857,000094: 
-058858,000095:                                                                                                  <span class="co">#                  1. CSM/LM STATE VECTOR UPDATE</span>
-058859,000096:                                                                                                  <span class="co">#                  2. REFSMMAT UPDATE</span>
-058860,000097: 
-058861,000098: 
-058862,000099:                                                                                                  <span class="co">#           THE FOLLOWING COMMENTS DELINEATE EACH SPECIAL UPDATE----</span>
-058863,000100: 
-058864,000101:                                                                                                  <span class="co">#  1. CSM/LM STATE VECTOR UPDATE(ALL DATA ENTRIES IN OCTAL)</span>
-058865,000102: 
-058866,000103:                                                                                                  <span class="co">#  ENTRIES:        DATA DEFINITION:                                        SCALE FACTORS:</span>
-058867,000104:                                                                                                  <span class="co">#  V71E            CONTIGUOUS BLOCK UPDATE VERB</span>
-058868,000105:                                                                                                  <span class="co">#     21E          NUMBER OF COMPONENTS FOR STATE VECTOR UPDATE</span>
-058869,000106:                                                                                                  <span class="co">#   AAAAE          ECADR OF 'UPSVFLAG'</span>
-058870,000107:                                                                                                  <span class="co">#  XXXXXE          STATE VECTOR IDENTIFIER: 00001 FOR CSM, 77776 FOR LEM - EARTH SPHERE OF INFLUENCE SCALING</span>
-058871,000108:                                                                                                  <span class="co">#                                           00002 FOR CSM, 77775 FOR LEM - LUNAR SPHERE OF INFLUENCE SCALING</span>
-058872,000109:                                                                                                  <span class="co">#  XXXXXEXXXXXE    X POSITION</span>
-058873,000110:                                                                                                  <span class="co">#  XXXXXEXXXXXE    Y POSITION</span>
-058874,000111:                                                                                                  <span class="co">#  XXXXXEXXXXXE    Z POSITION</span>
-058875,000112:                                                                                                  <span class="co">#  XXXXXEXXXXXE    X VELOCITY</span>
-058876,000113:                                                                                                  <span class="co">#  XXXXXEXXXXXE    Y VELOCITY</span>
-058877,000114:                                                                                                  <span class="co">#  XXXXXEXXXXXE    Z VELOCITY</span>
-058878,000115:                                                                                                  <span class="co">#  XXXXXEXXXXXE    TIME FROM AGC CLOCK ZERO</span>
-058879,000116:                                                                                                  <span class="co">#  V33E            VERB 33 TO SIGNAL THAT THE STATE VECTOR IS READY TO BE STORED.</span>
-058880,000117: 
-058881,000118: 
-058882,000119:                                                                                                  <span class="co">#  2. REFSMMAT(ALL DATA ENTRIES IN OCTAL)</span>
-058883,000120:                                                                                                  <span class="co">#  ENTRIES:        DATA DEFINITIONS:                                       SCALE FACTORS:</span>
+058850,000072:                                                                                                  <span class="co">#   V71EIIEAAAAE     (CONTIGUOUS BLOCK UPDATE) II-2 OCTAL COMPONENTS,XXXXX,</span>
+058851,000073:                                                                                                  <span class="co">#   XXXXXE           ARE LOADED INTO ERASABLE STARTING AT ECADR, AAAA.</span>
+058852,000074:                                                                                                  <span class="co">#  XXXXXE            IT IS .GE. 3 .AND. .LE. 20D.,</span>
+058853,000075:                                                                                                  <span class="co">#                    AND (AAAA + II - 3) DOES NOT PRODUCE AN ADDRESS IN THE</span>
+058854,000076:                                                                                                  <span class="co">#  9 NEXT BANK</span>
+058855,000077:                                                                                                  <span class="co">#    .               SCALING IS SAME AS INTERNAL REGISTERS.</span>
+058856,000078: 
+058857,000079:                                                                                                  <span class="co">#   V72EIIE          (SCATTER UPDATE) (II-1)/2 OCTAL COMPONENTS,XXXXX, ARE</span>
+058858,000080:                                                                                                  <span class="co">#   AAAAEXXXXXE      LOADED INTO ERASABLE LOCATIONS, AAAA.</span>
+058859,000081:                                                                                                  <span class="co">#   AAAAEXXXXXE      II IS .GE. 3 .AND. .LE. 19D, AND MUST BE ODD.</span>
+058860,000082:                                                                                                  <span class="co">#    .               SCALING IS SAME AS INTERNAL REGISTERS.</span>
+058861,000083: 
+058862,000084:                                                                                                  <span class="co">#   V73EXXXXXEXXXXXE (OCTAL CLOCK INCREMENT) DOUBLE PRECISION OCTAL TIME</span>
+058863,000085:                                                                                                  <span class="co">#                    INCREMENT XXXXX XXXXX, IS ADDED TO THE AGC CLOCK, IN</span>
+058864,000086:                                                                                                  <span class="co">#                    CENTISECONDS SCALED AT (2)28.</span>
+058865,000087:                                                                                                  <span class="co">#                    THIS LOAD IS THE OCTAL EQUIVALENT OF V55.</span>
+058866,000088: 
+058867,000089: 
+058868,000090:                                                                                                  <span class="co">#  OUTPUT:         IN ADDITION TO THE ABOVE REGISTER LOADS, ALL UPDATES</span>
+058869,000091:                                                                                                  <span class="co">#                  COMPLEMENT BIT3 OF FLAGWORD7.</span>
+058870,000092: 
+058871,000093: 
+058872,000094:                                                                                                  <span class="co">#  ADDITIONAL NOTES: VERB 71, JUST DEFINED ABOVE WILL BE USED TO PERFORM BUT NOT LIMITED TO THE FOLLOWING UPDATES--</span>
+058873,000095: 
+058874,000096:                                                                                                  <span class="co">#                  1. CSM/LM STATE VECTOR UPDATE</span>
+058875,000097:                                                                                                  <span class="co">#                  2. REFSMMAT UPDATE</span>
+058876,000098: 
+058877,000099: 
+058878,000100:                                                                                                  <span class="co">#           THE FOLLOWING COMMENTS DELINEATE EACH SPECIAL UPDATE----</span>
+058879,000101: 
+058880,000102:                                                                                                  <span class="co">#  1. CSM/LM STATE VECTOR UPDATE(ALL DATA ENTRIES IN OCTAL)</span>
+058881,000103: 
+058882,000104:                                                                                                  <span class="co">#  ENTRIES:        DATA DEFINITION:                                        SCALE FACTORS:</span>
+058883,000105:                                                                                                  <span class="co">#  V71E            CONTIGUOUS BLOCK UPDATE VERB</span>
+058884,000106:                                                                                                  <span class="co">#     21E          NUMBER OF COMPONENTS FOR STATE VECTOR UPDATE</span>
+058885,000107:                                                                                                  <span class="co">#   AAAAE          ECADR OF 'UPSVFLAG'</span>
+058886,000108:                                                                                                  <span class="co">#  XXXXXE          STATE VECTOR IDENTIFIER: 00001 FOR CSM, 77776 FOR LEM - EARTH SPHERE OF INFLUENCE SCALING</span>
+058887,000109:                                                                                                  <span class="co">#                                           00002 FOR CSM, 77775 FOR LEM - LUNAR SPHERE OF INFLUENCE SCALING</span>
+058888,000110:                                                                                                  <span class="co">#  XXXXXEXXXXXE    X POSITION</span>
+058889,000111:                                                                                                  <span class="co">#  XXXXXEXXXXXE    Y POSITION</span>
+058890,000112:                                                                                                  <span class="co">#  XXXXXEXXXXXE    Z POSITION</span>
+058891,000113:                                                                                                  <span class="co">#  XXXXXEXXXXXE    X VELOCITY</span>
+058892,000114:                                                                                                  <span class="co">#  XXXXXEXXXXXE    Y VELOCITY</span>
+058893,000115:                                                                                                  <span class="co">#  XXXXXEXXXXXE    Z VELOCITY</span>
+058894,000116:                                                                                                  <span class="co">#  XXXXXEXXXXXE    TIME FROM AGC CLOCK ZERO</span>
+058895,000117:                                                                                                  <span class="co">#  V33E            VERB 33 TO SIGNAL THAT THE STATE VECTOR IS READY TO BE STORED.</span>
+058896,000118: 
+058897,000119: 
+058898,000120:                                                                                                  <span class="co">#  2. REFSMMAT(ALL DATA ENTRIES IN OCTAL)</span>
+058899,000121:                                                                                                  <span class="co">#  ENTRIES:        DATA DEFINITIONS:                                       SCALE FACTORS:</span>
 </pre>
 </span>
 </p>
@@ -248,55 +249,55 @@ Page 1376
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-058885,000122:                                                                                                  <span class="co">#  V71E            CONTIGUOUS BLOCK UPDATE VERB</span>
-058886,000123:                                                                                                  <span class="co">#     24E          NUMBER OF COMPONENTS FOR REFSMMAT UPDATE</span>
-058887,000124:                                                                                                  <span class="co">#   AAAAE          ECADR OF 'REFSMMAT'</span>
-058888,000125:                                                                                                  <span class="co">#  XXXXXEXXXXXE    ROW 1 COLUMN 1                                          2(-1)</span>
-058889,000126:                                                                                                  <span class="co">#  XXXXXEXXXXXE    ROW 1 COLUMN 2                                          2(-1)</span>
-058890,000127:                                                                                                  <span class="co">#  XXXXXEXXXXXE    ROW 1 COLUMN 3                                          2(-1)</span>
-058891,000128:                                                                                                  <span class="co">#  XXXXXEXXXXXE    ROW 2 COLUMN 1                                          2(-1)</span>
-058892,000129:                                                                                                  <span class="co">#  XXXXXEXXXXXE    ROW 2 COLUMN 2                                          2(-1)</span>
-058893,000130:                                                                                                  <span class="co">#  XXXXXEXXXXXE    ROW 2 COLUMN 3                                          2(-1)</span>
-058894,000131:                                                                                                  <span class="co">#  XXXXXEXXXXXE    ROW 3 COLUMN 1                                          2(-1)</span>
-058895,000132:                                                                                                  <span class="co">#  XXXXXEXXXXXE    ROW 3 COLUMN 2                                          2(-1)</span>
-058896,000133:                                                                                                  <span class="co">#  XXXXXEXXXXXE    ROW 3 COLUMN 3                                          2(-1)</span>
-058897,000134:                                                                                                  <span class="co">#  V33E            VERB 33 TO SIGNAL THAT REFSMMAT IS READY TO BE STORED.</span>
-058898,000135: 
-058899,000136: 07,3776                                           <span class="ps">BANK    </span> 07                                    
-058900,000137: 43,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4558545645524253">EXTVERBS</a>                              
-058901,000138: 43,2000                                           <span class="ps">BANK    </span>                                       
-058902,000139: 
-058903,000140: 43,3757  E3,1706                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                
-058904,000141: 
-058905,000142: 43,3757                                           <span class="ps">COUNT*  </span> $$/P27                                
-<a name="5637305550444154"></a>058906,000143: 43,3757           34755        <span class="sm">V70UPDAT</span>           <span class="op">CAF     </span> <a href="#55503730">UP70</a>                                  <span class="co">#  COMES HERE ON V70E</span>
-058907,000144: 43,3760           13766                           <span class="op">TCF     </span> <a href="#5637335550444154">V73UPDAT</a>   +1                         
-058908,000145: 
-058909,000146: 
-<a name="5637315550444154"></a>058910,000147: 43,3761           34753        <span class="sm">V71UPDAT</span>           <span class="op">CAF     </span> <a href="#55503731">UP71</a>                                  <span class="co">#  COMES HERE ON V71E</span>
-058911,000148: 43,3762           13766                           <span class="op">TCF     </span> <a href="#5637335550444154">V73UPDAT</a>   +1                         
-058912,000149: 
-058913,000150: 
-<a name="5637325550444154"></a>058914,000151: 43,3763           34752        <span class="sm">V72UPDAT</span>           <span class="op">CAF     </span> <a href="#55503732">UP72</a>                                  <span class="co">#  COMES HERE ON V72E</span>
-058915,000152: 43,3764           13766                           <span class="op">TCF     </span> <a href="#5637335550444154">V73UPDAT</a>   +1                         
-058916,000153: 
-058917,000154: 
-<a name="5637335550444154"></a>058918,000155: 43,3765           36250        <span class="sm">V73UPDAT</span>           <span class="op">CAF     </span> <a href="#55503733">UP73</a>                                  <span class="co">#  COMES HERE ON V73E</span>
-058919,000156: 
-058920,000157: 43,3766           55165                 +1        <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550564552425356">UPVERBSV</a>                              <span class="co">#  SAVE UPVERB UNTIL IT'S OK TO ENTER P27</span>
-058921,000158: 
-058922,000159: 43,3767           02076                           <span class="op">TC      </span> <a href="EXTENDED_VERBS.agc.html#5445535458414354">TESTXACT</a>                              <span class="co">#  GRAB DISPLAY IF AVAILABLE, OTHERWISE</span>
-058923,000160:                                                                                                  <span class="co">#  TURN*OPERATOR ERROR* ON AND TERMINATEJOB</span>
-058924,000161: 
-058925,000162: 43,3770           04635                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              <span class="co">#  LEAVE EXTENDED VERB BANK AND</span>
-058926,000163: 43,3771           11374                           <span class="ps">CADR    </span> <a href="#55505041525432">UPPART2</a>                               <span class="co">#  GO TO UPDATE PROGRAM(P27) BANK.</span>
-058927,000164: 
-058928,000165: 
-<a name="55503730"></a>058929,000166: 43,3772     4755               <span class="sm">UP70    </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-<a name="55503731"></a>058930,000167: 43,3772     4753               <span class="sm">UP71    </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-<a name="55503732"></a>058931,000168: 43,3772     4752               <span class="sm">UP72    </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   
-<a name="55503733"></a>058932,000169: 43,3772     6250               <span class="sm">UP73    </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5448524545">THREE</a>                                 
-058933,000170: 
+058901,000123:                                                                                                  <span class="co">#  V71E            CONTIGUOUS BLOCK UPDATE VERB</span>
+058902,000124:                                                                                                  <span class="co">#     24E          NUMBER OF COMPONENTS FOR REFSMMAT UPDATE</span>
+058903,000125:                                                                                                  <span class="co">#   AAAAE          ECADR OF 'REFSMMAT'</span>
+058904,000126:                                                                                                  <span class="co">#  XXXXXEXXXXXE    ROW 1 COLUMN 1                                          2(-1)</span>
+058905,000127:                                                                                                  <span class="co">#  XXXXXEXXXXXE    ROW 1 COLUMN 2                                          2(-1)</span>
+058906,000128:                                                                                                  <span class="co">#  XXXXXEXXXXXE    ROW 1 COLUMN 3                                          2(-1)</span>
+058907,000129:                                                                                                  <span class="co">#  XXXXXEXXXXXE    ROW 2 COLUMN 1                                          2(-1)</span>
+058908,000130:                                                                                                  <span class="co">#  XXXXXEXXXXXE    ROW 2 COLUMN 2                                          2(-1)</span>
+058909,000131:                                                                                                  <span class="co">#  XXXXXEXXXXXE    ROW 2 COLUMN 3                                          2(-1)</span>
+058910,000132:                                                                                                  <span class="co">#  XXXXXEXXXXXE    ROW 3 COLUMN 1                                          2(-1)</span>
+058911,000133:                                                                                                  <span class="co">#  XXXXXEXXXXXE    ROW 3 COLUMN 2                                          2(-1)</span>
+058912,000134:                                                                                                  <span class="co">#  XXXXXEXXXXXE    ROW 3 COLUMN 3                                          2(-1)</span>
+058913,000135:                                                                                                  <span class="co">#  V33E            VERB 33 TO SIGNAL THAT REFSMMAT IS READY TO BE STORED.</span>
+058914,000136: 
+058915,000137: 07,3776                                           <span class="ps">BANK    </span> 07                                    
+058916,000138: 43,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4558545645524253">EXTVERBS</a>                              
+058917,000139: 43,2000                                           <span class="ps">BANK    </span>                                       
+058918,000140: 
+058919,000141: 43,3757  E3,1706                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                
+058920,000142: 
+058921,000143: 43,3757                                           <span class="ps">COUNT*  </span> $$/P27                                
+<a name="5637305550444154"></a>058922,000144: 43,3757           34755        <span class="sm">V70UPDAT</span>           <span class="op">CAF     </span> <a href="#55503730">UP70</a>                                  <span class="co">#  COMES HERE ON V70E</span>
+058923,000145: 43,3760           13766                           <span class="op">TCF     </span> <a href="#5637335550444154">V73UPDAT</a>   +1                         
+058924,000146: 
+058925,000147: 
+<a name="5637315550444154"></a>058926,000148: 43,3761           34753        <span class="sm">V71UPDAT</span>           <span class="op">CAF     </span> <a href="#55503731">UP71</a>                                  <span class="co">#  COMES HERE ON V71E</span>
+058927,000149: 43,3762           13766                           <span class="op">TCF     </span> <a href="#5637335550444154">V73UPDAT</a>   +1                         
+058928,000150: 
+058929,000151: 
+<a name="5637325550444154"></a>058930,000152: 43,3763           34752        <span class="sm">V72UPDAT</span>           <span class="op">CAF     </span> <a href="#55503732">UP72</a>                                  <span class="co">#  COMES HERE ON V72E</span>
+058931,000153: 43,3764           13766                           <span class="op">TCF     </span> <a href="#5637335550444154">V73UPDAT</a>   +1                         
+058932,000154: 
+058933,000155: 
+<a name="5637335550444154"></a>058934,000156: 43,3765           36250        <span class="sm">V73UPDAT</span>           <span class="op">CAF     </span> <a href="#55503733">UP73</a>                                  <span class="co">#  COMES HERE ON V73E</span>
+058935,000157: 
+058936,000158: 43,3766           55165                 +1        <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550564552425356">UPVERBSV</a>                              <span class="co">#  SAVE UPVERB UNTIL IT'S OK TO ENTER P27</span>
+058937,000159: 
+058938,000160: 43,3767           02076                           <span class="op">TC      </span> <a href="EXTENDED_VERBS.agc.html#5445535458414354">TESTXACT</a>                              <span class="co">#  GRAB DISPLAY IF AVAILABLE, OTHERWISE</span>
+058939,000161:                                                                                                  <span class="co">#  TURN*OPERATOR ERROR* ON AND TERMINATEJOB</span>
+058940,000162: 
+058941,000163: 43,3770           04635                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              <span class="co">#  LEAVE EXTENDED VERB BANK AND</span>
+058942,000164: 43,3771           11374                           <span class="ps">CADR    </span> <a href="#55505041525432">UPPART2</a>                               <span class="co">#  GO TO UPDATE PROGRAM(P27) BANK.</span>
+058943,000165: 
+058944,000166: 
+<a name="55503730"></a>058945,000167: 43,3772     4755               <span class="sm">UP70    </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+<a name="55503731"></a>058946,000168: 43,3772     4753               <span class="sm">UP71    </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+<a name="55503732"></a>058947,000169: 43,3772     4752               <span class="sm">UP72    </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   
+<a name="55503733"></a>058948,000170: 43,3772     6250               <span class="sm">UP73    </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5448524545">THREE</a>                                 
+058949,000171: 
 </pre>
 </span>
 </p>
@@ -312,56 +313,56 @@ Page 1377
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-058935,000172: 04,3374                                           <span class="ps">BANK    </span> 04                                    
-058936,000173: 04,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#55504441544532">UPDATE2</a>                               
-058937,000174: 04,2000                                           <span class="ps">BANK    </span>                                       
-058938,000175: 
-058939,000176: 04,3374                                           <span class="ps">COUNT*  </span> $$/P27                                
-058940,000177: 
-<a name="55505041525432"></a>058941,000178: 04,3374                        <span class="sm">UPPART2 </span>           <span class="ps">EQUALS  </span>                                       <span class="co">#  UPDATE PROGRAM - PART 2</span>
-058942,000179: 
-058943,000180: 04,3374           31010                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F44524547">MODREG</a>                                <span class="co">#  IS UPDATE ALLOWED AT THIS TIME?</span>
-058944,000181: 04,3375           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  IS MODREG +0 (POOH) OR -0 (FRESH START)?</span>
-058945,000182: 04,3376           13400                           <span class="op">BZF     </span> <a href="#55504441544F4B">UPDATOK</a>                               
-058946,000183: 
-<a name="55504552524F52"></a>058947,000184: 04,3377           03766        <span class="sm">UPERROR </span>           <span class="op">TC      </span> <a href="#55504552524F5554">UPERROUT</a>   +2                         <span class="co">#  TURN ON OPERATOR ERROR LIGHT AND EXIT</span>
-058948,000185: 
-<a name="55504441544F4B"></a>058949,000186: 04,3400           55170        <span class="sm">UPDATOK </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#55504F4C444D4F44">UPOLDMOD</a>                              
-058950,000187: 
-058951,000188: 04,3401           31165                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550564552425356">UPVERBSV</a>                              <span class="co">#  SET UPVERB TO TELL P27 WHICH EXTENDED</span>
-058952,000189: 04,3402           55171                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555056455242">UPVERB</a>                                <span class="co">#    VERB CALLED IT</span>
-058953,000190: 
-058954,000191: 04,3403           34753                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-058955,000192: 04,3404           55172                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550434F554E54">UPCOUNT</a>                               
-058956,000193: 
-058957,000194: 04,3405           05364                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              <span class="co">#  SET RESTART GROUP 6 TO RESTORE OLD MODE</span>
-058958,000195: 04,3406           07026                           <span class="ps">OCT     </span> 07026                                 <span class="co">#  AND DOWNLIST AND EXIT IF RESTART OCCURS.</span>
-058959,000196: 04,3407           30000                           <span class="ps">OCT     </span> 30000                                 <span class="co">#  PRIORITY SAME AS CHRPRIO</span>
-058960,000197: 04,3410     1173                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>                                
-058961,000198: 04,3410           03716 10102                     <span class="ps">2CADR   </span> <a href="#55504F5554">UPOUT</a>      +1                         
-058962,000199: 
-058963,000200: 
-058964,000201: 04,3412           34753                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-058965,000202: 04,3413           54333                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5354434F44">DNLSTCOD</a>                              <span class="co">#  DOWNLIST</span>
-058966,000203: 
-058967,000204: 04,3414           05322                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              <span class="co">#  SET MAJOR MODE = 27</span>
-058968,000205: 04,3415           00033                           <span class="ps">DEC     </span> 27         B-14                       
-058969,000206: 
-058970,000207: 04,3416           51171                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555056455242">UPVERB</a>                                <span class="co">#  BRANCH DEPENDING ON WHETHER THE UPDATE</span>
-058971,000208: 04,3417           13420                           <span class="op">TCF     </span> +1                                    <span class="co">#  VERB REQUIRES A FIXED OR VARIABLE NUMBER</span>
-058972,000209: 04,3420           13423                           <span class="op">TCF     </span> +3                                    <span class="co">#  V70 FIXED.               (OF COMPONENTS.</span>
-058973,000210: 04,3421           13426                           <span class="op">TCF     </span> <a href="#4F4857454C4C31">OHWELL1</a>                               <span class="co">#  V71 VARIABLE - GO GET NO. OF COMPONENTS</span>
-058974,000211: 04,3422           13426                           <span class="op">TCF     </span> <a href="#4F4857454C4C31">OHWELL1</a>                               <span class="co">#  V72 VARIABLE - GO GET NO. OF COMPONENTS</span>
-058975,000212: 04,3423           34752                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  V73 (AND V70) FIXED</span>
-058976,000213: 04,3424           55167                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F4D504E554D42">COMPNUMB</a>                              <span class="co">#  SET NUMBER OF COMPONENTS TO 2.</span>
-058977,000214: 04,3425           13451                           <span class="op">TCF     </span> <a href="#4F4857454C4C32">OHWELL2</a>                               <span class="co">#  GO GET THE TWO UPDATE COMPONENTS</span>
-058978,000215: 
-<a name="4F4857454C4C31"></a>058979,000216: 04,3426           33521        <span class="sm">OHWELL1 </span>           <span class="op">CAF     </span> <a href="#4144555042554646">ADUPBUFF</a>                              <span class="co">#  * REQUEST USER TO SEND NUMBER  *</span>
-058980,000217: 04,3427           54156                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         <span class="co">#  * OF COMPONENTS PARAMETER(II). *</span>
-058981,000218: 04,3430           33522                 +2        <span class="op">CAF     </span> <a href="#55504C4F41444E56">UPLOADNV</a>                              <span class="co">#  (CK4V32 RETURNS HERE IF V32 ENCOUNTERED)</span>
-058982,000219: 04,3431           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  DISPLAY A FLASHING V21N01</span>
-058983,000220: 04,3432           20334                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5844535046">GOXDSPF</a>                               <span class="co">#  TO REQUEST II.</span>
-058984,000221: 04,3433           13716                           <span class="op">TCF     </span> <a href="#55504F555434">UPOUT4</a>                                <span class="co">#  V34 TERMINATE UPDATE (P27) RETURN</span>
+058951,000173: 04,3374                                           <span class="ps">BANK    </span> 04                                    
+058952,000174: 04,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#55504441544532">UPDATE2</a>                               
+058953,000175: 04,2000                                           <span class="ps">BANK    </span>                                       
+058954,000176: 
+058955,000177: 04,3374                                           <span class="ps">COUNT*  </span> $$/P27                                
+058956,000178: 
+<a name="55505041525432"></a>058957,000179: 04,3374                        <span class="sm">UPPART2 </span>           <span class="ps">EQUALS  </span>                                       <span class="co">#  UPDATE PROGRAM - PART 2</span>
+058958,000180: 
+058959,000181: 04,3374           31010                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F44524547">MODREG</a>                                <span class="co">#  IS UPDATE ALLOWED AT THIS TIME?</span>
+058960,000182: 04,3375           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  IS MODREG +0 (POOH) OR -0 (FRESH START)?</span>
+058961,000183: 04,3376           13400                           <span class="op">BZF     </span> <a href="#55504441544F4B">UPDATOK</a>                               
+058962,000184: 
+<a name="55504552524F52"></a>058963,000185: 04,3377           03766        <span class="sm">UPERROR </span>           <span class="op">TC      </span> <a href="#55504552524F5554">UPERROUT</a>   +2                         <span class="co">#  TURN ON OPERATOR ERROR LIGHT AND EXIT</span>
+058964,000186: 
+<a name="55504441544F4B"></a>058965,000187: 04,3400           55170        <span class="sm">UPDATOK </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#55504F4C444D4F44">UPOLDMOD</a>                              
+058966,000188: 
+058967,000189: 04,3401           31165                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550564552425356">UPVERBSV</a>                              <span class="co">#  SET UPVERB TO TELL P27 WHICH EXTENDED</span>
+058968,000190: 04,3402           55171                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555056455242">UPVERB</a>                                <span class="co">#    VERB CALLED IT</span>
+058969,000191: 
+058970,000192: 04,3403           34753                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+058971,000193: 04,3404           55172                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550434F554E54">UPCOUNT</a>                               
+058972,000194: 
+058973,000195: 04,3405           05364                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              <span class="co">#  SET RESTART GROUP 6 TO RESTORE OLD MODE</span>
+058974,000196: 04,3406           07026                           <span class="ps">OCT     </span> 07026                                 <span class="co">#  AND DOWNLIST AND EXIT IF RESTART OCCURS.</span>
+058975,000197: 04,3407           30000                           <span class="ps">OCT     </span> 30000                                 <span class="co">#  PRIORITY SAME AS CHRPRIO</span>
+058976,000198: 04,3410     1173                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>                                
+058977,000199: 04,3410           03716 10102                     <span class="ps">2CADR   </span> <a href="#55504F5554">UPOUT</a>      +1                         
+058978,000200: 
+058979,000201: 
+058980,000202: 04,3412           34753                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+058981,000203: 04,3413           54333                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5354434F44">DNLSTCOD</a>                              <span class="co">#  DOWNLIST</span>
+058982,000204: 
+058983,000205: 04,3414           05322                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              <span class="co">#  SET MAJOR MODE = 27</span>
+058984,000206: 04,3415           00033                           <span class="ps">DEC     </span> 27         B-14                       
+058985,000207: 
+058986,000208: 04,3416           51171                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555056455242">UPVERB</a>                                <span class="co">#  BRANCH DEPENDING ON WHETHER THE UPDATE</span>
+058987,000209: 04,3417           13420                           <span class="op">TCF     </span> +1                                    <span class="co">#  VERB REQUIRES A FIXED OR VARIABLE NUMBER</span>
+058988,000210: 04,3420           13423                           <span class="op">TCF     </span> +3                                    <span class="co">#  V70 FIXED.               (OF COMPONENTS.</span>
+058989,000211: 04,3421           13426                           <span class="op">TCF     </span> <a href="#4F4857454C4C31">OHWELL1</a>                               <span class="co">#  V71 VARIABLE - GO GET NO. OF COMPONENTS</span>
+058990,000212: 04,3422           13426                           <span class="op">TCF     </span> <a href="#4F4857454C4C31">OHWELL1</a>                               <span class="co">#  V72 VARIABLE - GO GET NO. OF COMPONENTS</span>
+058991,000213: 04,3423           34752                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  V73 (AND V70) FIXED</span>
+058992,000214: 04,3424           55167                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F4D504E554D42">COMPNUMB</a>                              <span class="co">#  SET NUMBER OF COMPONENTS TO 2.</span>
+058993,000215: 04,3425           13451                           <span class="op">TCF     </span> <a href="#4F4857454C4C32">OHWELL2</a>                               <span class="co">#  GO GET THE TWO UPDATE COMPONENTS</span>
+058994,000216: 
+<a name="4F4857454C4C31"></a>058995,000217: 04,3426           33521        <span class="sm">OHWELL1 </span>           <span class="op">CAF     </span> <a href="#4144555042554646">ADUPBUFF</a>                              <span class="co">#  * REQUEST USER TO SEND NUMBER  *</span>
+058996,000218: 04,3427           54156                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         <span class="co">#  * OF COMPONENTS PARAMETER(II). *</span>
+058997,000219: 04,3430           33522                 +2        <span class="op">CAF     </span> <a href="#55504C4F41444E56">UPLOADNV</a>                              <span class="co">#  (CK4V32 RETURNS HERE IF V32 ENCOUNTERED)</span>
+058998,000220: 04,3431           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  DISPLAY A FLASHING V21N01</span>
+058999,000221: 04,3432           20334                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5844535046">GOXDSPF</a>                               <span class="co">#  TO REQUEST II.</span>
+059000,000222: 04,3433           13716                           <span class="op">TCF     </span> <a href="#55504F555434">UPOUT4</a>                                <span class="co">#  V34 TERMINATE UPDATE (P27) RETURN</span>
 </pre>
 </span>
 </p>
@@ -377,56 +378,56 @@ Page 1378
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-058986,000223: 04,3434           13430                           <span class="op">TCF     </span> <a href="#4F4857454C4C31">OHWELL1</a>    +2                         
-058987,000224: 04,3435           03512                           <span class="op">TC      </span> <a href="#434B34563332">CK4V32</a>                                <span class="co">#  DATA OR V32 RETURN</span>
-058988,000225: 04,3436           44752                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  
-058989,000226: 04,3437           61173                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>                                <span class="co">#  IS II(NUMBER OF COMPONENTS PARAMETER)</span>
-058990,000227: 04,3440           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  .GE. 3 AND .LE. 20D.</span>
-058991,000228: 04,3441           63430                           <span class="op">BZMF    </span> <a href="#4F4857454C4C31">OHWELL1</a>    +2                         
-058992,000229: 04,3442           41173                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>                                
-058993,000230: 04,3443           64362                           <span class="op">AD      </span> <a href="#55503231">UP21</a>                                  
-058994,000231: 04,3444           00006                           <span class="op">EXTEND  </span>                                       
-058995,000232: 04,3445           63430                           <span class="op">BZMF    </span> <a href="#4F4857454C4C31">OHWELL1</a>    +2                         
-058996,000233: 04,3446           31173                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>                                
-058997,000234: 04,3447           55167                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F4D504E554D42">COMPNUMB</a>                              <span class="co">#  SAVE II IN COMPNUMB</span>
-058998,000235: 
-058999,000236: 
-059000,000237:                                                                                                  <span class="co">#           UPBUFF LOADING SEQUENCE</span>
-059001,000238: 
-059002,000239: 04,3450           25172                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550434F554E54">UPCOUNT</a>                               <span class="co">#  INCREMENT COUNT OF COMPONENTS RECEIVED.</span>
-<a name="4F4857454C4C32"></a>059003,000240: 04,3451           33666        <span class="sm">OHWELL2 </span>           <span class="op">CAF     </span> <a href="#4144555042464D31">ADUPBFM1</a>                              <span class="co">#  CALCULATE LOCATION(ECADR) IN UPBUFF</span>
-059004,000241: 04,3452           61172                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550434F554E54">UPCOUNT</a>                               <span class="co">#  WHERE NEXT COMPONENT SHOULD BE STORED.</span>
-059005,000242: 04,3453           54156                 +2        <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         <span class="co">#  PLACE ECADR INTO R3.</span>
-059006,000243: 04,3454           33522                 +3        <span class="op">CAF     </span> <a href="#55504C4F41444E56">UPLOADNV</a>                              <span class="co">#  (CK4V32 RETURNS HERE IF V32 ENCOUNTERED)</span>
-059007,000244: 04,3455           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  DISPLAY A FLASHING V21N01</span>
-059008,000245: 04,3456           20334                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5844535046">GOXDSPF</a>                               <span class="co">#  TO REQUEST DATA.</span>
-059009,000246: 04,3457           13716                           <span class="op">TCF     </span> <a href="#55504F555434">UPOUT4</a>                                <span class="co">#  V34 TERMINATE UPDATE(P27) RETURN.</span>
-059010,000247: 04,3460           13454                           <span class="op">TCF     </span> <a href="#4F4857454C4C32">OHWELL2</a>    +3                         <span class="co">#  V33 PROCEED RETURN</span>
-059011,000248: 04,3461           03512                           <span class="op">TC      </span> <a href="#434B34563332">CK4V32</a>                                <span class="co">#  DATA OR V32 RETURN</span>
-059012,000249: 04,3462           41172                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550434F554E54">UPCOUNT</a>                               <span class="co">#  HAVE WE FINISHED RECEIVING ALL</span>
-059013,000250: 04,3463           61167                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F4D504E554D42">COMPNUMB</a>                              <span class="co">#  THE DATA WE EXPECTED.</span>
-059014,000251: 04,3464           00006                           <span class="op">EXTEND  </span>                                       
-059015,000252: 04,3465           63467                           <span class="op">BZMF    </span> <a href="#5550564552494659">UPVERIFY</a>                              <span class="co">#  YES- GO TO VERIFICATION SEQUENCE</span>
-059016,000253: 04,3466           13450                           <span class="op">TCF     </span> <a href="#4F4857454C4C32">OHWELL2</a>    -1                         <span class="co">#  NO- REQUEST ADDITIONAL DATA.</span>
-059017,000254: 
-059018,000255: 
-059019,000256:                                                                                                  <span class="co">#           VERIFY SEQUENCE</span>
-059020,000257: 
-<a name="5550564552494659"></a>059021,000258: 04,3467           33520        <span class="sm">UPVERIFY</span>           <span class="op">CAF     </span> <a href="#4144555054454D50">ADUPTEMP</a>                              <span class="co">#  PLACE ECADR WHERE COMPONENT NO. INDEX</span>
-059022,000259: 04,3470           54156                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         <span class="co">#  IS TO BE STORED INTO R3.</span>
-059023,000260: 04,3471           33523                           <span class="op">CAF     </span> <a href="#5550565246594E56">UPVRFYNV</a>                              <span class="co">#  (CK4V32 RETURNS HERE IF V32 ENCOUNTERED)</span>
-059024,000261: 04,3472           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  DISPLAY A FLASHING V21N02 TO REQUEST</span>
-059025,000262: 04,3473           20334                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5844535046">GOXDSPF</a>                               <span class="co">#  DATA CORRECTION OR VERIFICATION.</span>
-059026,000263: 04,3474           13716                           <span class="op">TCF     </span> <a href="#55504F555434">UPOUT4</a>                                <span class="co">#  V34 TERMINATE UPDATE(P27) RETURN</span>
-059027,000264: 04,3475           13524                           <span class="op">TCF     </span> <a href="#555053544F5245">UPSTORE</a>                               <span class="co">#  V33 DATA SENT IS GOOD. GO STORE IT.</span>
-059028,000265: 04,3476           03512                           <span class="op">TC      </span> <a href="#434B34563332">CK4V32</a>                                <span class="co">#  COMPONENT NO. INDEX OR V32 RETURN</span>
-059029,000266: 04,3477           31166                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555054454D50">UPTEMP</a>                                <span class="co">#  DOES THE COMPONENT NO. INDEX JUST SENT</span>
-059030,000267: 04,3500           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  SPECIFY A LEGAL COMPONENT NUMBER?</span>
-059031,000268: 04,3501           63467                           <span class="op">BZMF    </span> <a href="#5550564552494659">UPVERIFY</a>                              <span class="co">#  NO, IT IS NOT POSITIVE NONZERO</span>
-059032,000269: 04,3502           41166                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555054454D50">UPTEMP</a>                                
-059033,000270: 04,3503           61167                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F4D504E554D42">COMPNUMB</a>                              
-059034,000271: 04,3504           64753                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  
-059035,000272: 04,3505           00006                           <span class="op">EXTEND  </span>                                       
+059002,000224: 04,3434           13430                           <span class="op">TCF     </span> <a href="#4F4857454C4C31">OHWELL1</a>    +2                         
+059003,000225: 04,3435           03512                           <span class="op">TC      </span> <a href="#434B34563332">CK4V32</a>                                <span class="co">#  DATA OR V32 RETURN</span>
+059004,000226: 04,3436           44752                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  
+059005,000227: 04,3437           61173                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>                                <span class="co">#  IS II(NUMBER OF COMPONENTS PARAMETER)</span>
+059006,000228: 04,3440           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  .GE. 3 AND .LE. 20D.</span>
+059007,000229: 04,3441           63430                           <span class="op">BZMF    </span> <a href="#4F4857454C4C31">OHWELL1</a>    +2                         
+059008,000230: 04,3442           41173                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>                                
+059009,000231: 04,3443           64362                           <span class="op">AD      </span> <a href="#55503231">UP21</a>                                  
+059010,000232: 04,3444           00006                           <span class="op">EXTEND  </span>                                       
+059011,000233: 04,3445           63430                           <span class="op">BZMF    </span> <a href="#4F4857454C4C31">OHWELL1</a>    +2                         
+059012,000234: 04,3446           31173                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>                                
+059013,000235: 04,3447           55167                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F4D504E554D42">COMPNUMB</a>                              <span class="co">#  SAVE II IN COMPNUMB</span>
+059014,000236: 
+059015,000237: 
+059016,000238:                                                                                                  <span class="co">#           UPBUFF LOADING SEQUENCE</span>
+059017,000239: 
+059018,000240: 04,3450           25172                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550434F554E54">UPCOUNT</a>                               <span class="co">#  INCREMENT COUNT OF COMPONENTS RECEIVED.</span>
+<a name="4F4857454C4C32"></a>059019,000241: 04,3451           33666        <span class="sm">OHWELL2 </span>           <span class="op">CAF     </span> <a href="#4144555042464D31">ADUPBFM1</a>                              <span class="co">#  CALCULATE LOCATION(ECADR) IN UPBUFF</span>
+059020,000242: 04,3452           61172                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550434F554E54">UPCOUNT</a>                               <span class="co">#  WHERE NEXT COMPONENT SHOULD BE STORED.</span>
+059021,000243: 04,3453           54156                 +2        <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         <span class="co">#  PLACE ECADR INTO R3.</span>
+059022,000244: 04,3454           33522                 +3        <span class="op">CAF     </span> <a href="#55504C4F41444E56">UPLOADNV</a>                              <span class="co">#  (CK4V32 RETURNS HERE IF V32 ENCOUNTERED)</span>
+059023,000245: 04,3455           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  DISPLAY A FLASHING V21N01</span>
+059024,000246: 04,3456           20334                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5844535046">GOXDSPF</a>                               <span class="co">#  TO REQUEST DATA.</span>
+059025,000247: 04,3457           13716                           <span class="op">TCF     </span> <a href="#55504F555434">UPOUT4</a>                                <span class="co">#  V34 TERMINATE UPDATE(P27) RETURN.</span>
+059026,000248: 04,3460           13454                           <span class="op">TCF     </span> <a href="#4F4857454C4C32">OHWELL2</a>    +3                         <span class="co">#  V33 PROCEED RETURN</span>
+059027,000249: 04,3461           03512                           <span class="op">TC      </span> <a href="#434B34563332">CK4V32</a>                                <span class="co">#  DATA OR V32 RETURN</span>
+059028,000250: 04,3462           41172                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550434F554E54">UPCOUNT</a>                               <span class="co">#  HAVE WE FINISHED RECEIVING ALL</span>
+059029,000251: 04,3463           61167                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F4D504E554D42">COMPNUMB</a>                              <span class="co">#  THE DATA WE EXPECTED.</span>
+059030,000252: 04,3464           00006                           <span class="op">EXTEND  </span>                                       
+059031,000253: 04,3465           63467                           <span class="op">BZMF    </span> <a href="#5550564552494659">UPVERIFY</a>                              <span class="co">#  YES- GO TO VERIFICATION SEQUENCE</span>
+059032,000254: 04,3466           13450                           <span class="op">TCF     </span> <a href="#4F4857454C4C32">OHWELL2</a>    -1                         <span class="co">#  NO- REQUEST ADDITIONAL DATA.</span>
+059033,000255: 
+059034,000256: 
+059035,000257:                                                                                                  <span class="co">#           VERIFY SEQUENCE</span>
+059036,000258: 
+<a name="5550564552494659"></a>059037,000259: 04,3467           33520        <span class="sm">UPVERIFY</span>           <span class="op">CAF     </span> <a href="#4144555054454D50">ADUPTEMP</a>                              <span class="co">#  PLACE ECADR WHERE COMPONENT NO. INDEX</span>
+059038,000260: 04,3470           54156                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         <span class="co">#  IS TO BE STORED INTO R3.</span>
+059039,000261: 04,3471           33523                           <span class="op">CAF     </span> <a href="#5550565246594E56">UPVRFYNV</a>                              <span class="co">#  (CK4V32 RETURNS HERE IF V32 ENCOUNTERED)</span>
+059040,000262: 04,3472           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  DISPLAY A FLASHING V21N02 TO REQUEST</span>
+059041,000263: 04,3473           20334                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5844535046">GOXDSPF</a>                               <span class="co">#  DATA CORRECTION OR VERIFICATION.</span>
+059042,000264: 04,3474           13716                           <span class="op">TCF     </span> <a href="#55504F555434">UPOUT4</a>                                <span class="co">#  V34 TERMINATE UPDATE(P27) RETURN</span>
+059043,000265: 04,3475           13524                           <span class="op">TCF     </span> <a href="#555053544F5245">UPSTORE</a>                               <span class="co">#  V33 DATA SENT IS GOOD. GO STORE IT.</span>
+059044,000266: 04,3476           03512                           <span class="op">TC      </span> <a href="#434B34563332">CK4V32</a>                                <span class="co">#  COMPONENT NO. INDEX OR V32 RETURN</span>
+059045,000267: 04,3477           31166                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555054454D50">UPTEMP</a>                                <span class="co">#  DOES THE COMPONENT NO. INDEX JUST SENT</span>
+059046,000268: 04,3500           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  SPECIFY A LEGAL COMPONENT NUMBER?</span>
+059047,000269: 04,3501           63467                           <span class="op">BZMF    </span> <a href="#5550564552494659">UPVERIFY</a>                              <span class="co">#  NO, IT IS NOT POSITIVE NONZERO</span>
+059048,000270: 04,3502           41166                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555054454D50">UPTEMP</a>                                
+059049,000271: 04,3503           61167                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F4D504E554D42">COMPNUMB</a>                              
+059050,000272: 04,3504           64753                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  
+059051,000273: 04,3505           00006                           <span class="op">EXTEND  </span>                                       
 </pre>
 </span>
 </p>
@@ -442,56 +443,56 @@ Page 1379
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-059037,000274: 04,3506           63467                           <span class="op">BZMF    </span> <a href="#5550564552494659">UPVERIFY</a>                              <span class="co">#  NO</span>
-059038,000275: 04,3507           33666                           <span class="op">CAF     </span> <a href="#4144555042464D31">ADUPBFM1</a>                              <span class="co">#  YES- BASED ON THE COMPONENT NO. INDEX</span>
-059039,000276: 04,3510           61166                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555054454D50">UPTEMP</a>                                <span class="co">#  CALCULATE THE ECADR OF LOCATION IN</span>
-059040,000277: 04,3511           13453                           <span class="op">TCF     </span> <a href="#4F4857454C4C32">OHWELL2</a>    +2                         <span class="co">#  UPBUFF WHICH USER WANTS TO CHANGE.</span>
-059041,000278: 
-<a name="55504F555434"></a>059042,000279: 04,3512  04,3716               <span class="sm">UPOUT4  </span>           <span class="ps">EQUALS  </span> <a href="#55504F5554">UPOUT</a>      +1                         <span class="co">#  COMES HERE ON V34 TO TERMINATE UPDATE</span>
-059043,000280: 
-059044,000281: 
-059045,000282:                                                                                                  <span class="co">#           CHECK FOR VERB 32 SEQUENCE</span>
-059046,000283: 
-<a name="434B34563332"></a>059047,000284: 04,3512           40154        <span class="sm">CK4V32  </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  ON DATA RETURN FROM 'GOXDSPF'</span>
-059048,000285: 04,3513           74746                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  <span class="co">#  ON DATA RETURN FROM "GOXDSP"&amp; THE CON-</span>
-059049,000286: 04,3514           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  TENTS OF MPAC = VERB.  SO TEST FOR V32.</span>
-059050,000287: 04,3515           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  IT'S NOT A V32, IT'S DATA.  PROCEED.</span>
-059051,000288: 04,3516           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-059052,000289: 04,3517           77771                           <span class="op">TC      </span> 0          -6                         <span class="co">#  V32 ENCOUNTERED - GO BACK AND GET DATA</span>
-059053,000290: 
-<a name="4144555054454D50"></a>059054,000291: 04,3520           01166        <span class="sm">ADUPTEMP</span>           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555054454D50">UPTEMP</a>                                <span class="co">#  ADDRESS OF TEMP STORAGE FOR CORRECTIONS</span>
-<a name="4144555042554646"></a>059055,000292: 04,3521           01173        <span class="sm">ADUPBUFF</span>           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>                                <span class="co">#  ADDRESS OF UPDATE DATA STORAGE BUFFER</span>
-<a name="55504C4F41444E56"></a>059056,000293: 04,3522           05201        <span class="sm">UPLOADNV</span>           <span class="ps">VN      </span> 2101                                  <span class="co">#  VERB 21 NOUN 01</span>
-<a name="5550565246594E56"></a>059057,000294: 04,3523           05202        <span class="sm">UPVRFYNV</span>           <span class="ps">VN      </span> 2102                                  <span class="co">#  VERB 21 NOUN 02</span>
-<a name="55503231"></a>059058,000295: 04,3524     4362               <span class="sm">UP21    </span>           <span class="ps">=       </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4D4431">MD1</a>                                   <span class="co">#  DEC 21 = MAX NO OF COMPONENTS +1</span>
-<a name="5550445450484153"></a>059059,000296: 04,3524     4756               <span class="sm">UPDTPHAS</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#46495645">FIVE</a>                                  
-059060,000297: 
-059061,000298:                                                                                                  <span class="co">#           PRE-STORE AND FAN TO APPROPRIATE BRANCH SEQUENCE</span>
-059062,000299: 
-<a name="555053544F5245"></a>059063,000300: 04,3524                        <span class="sm">UPSTORE </span>           <span class="ps">EQUALS  </span>                                       <span class="co">#  GROUND HAS VERIFIED UPDATE. STORE DATA.</span>
-059064,000301: 
-059065,000302: 04,3524           00004                           <span class="op">INHINT  </span>                                       
-059066,000303: 
-059067,000304: 04,3525           30103                           <span class="op">CAE     </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524437">FLAGWRD7</a>                              <span class="co">#  INVERT VERIFLAG(BIT3 OF FLAGWRD7) TO</span>
-059068,000305: 04,3526           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  INDICATE TO THE GROUND(VIA DOWNLINK)</span>
-059069,000306: 04,3527           34751                           <span class="op">CAF     </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#5645524946424954">VERIFBIT</a>                              <span class="co">#  THAT THE V33 (WHICH THE GROUND SENT TO</span>
-059070,000307: 04,3530           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  VERIFY THE UPDATE) HAS BEEN SUCCESSFULLY</span>
-059071,000308: 04,3531           06001                           <span class="op">RXOR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4348414E">LCHAN</a>                                 <span class="co">#  RECEIVED BY THE UPDATE PROGRAM</span>
-059072,000309: 04,3532           54103                           <span class="op">TS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524437">FLAGWRD7</a>                              
-059073,000310: 
-059074,000311: 04,3533           05364                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              <span class="co">#  SET RESTART GROUP 6 TO REDO THE UPDATE</span>
-059075,000312: 04,3534           04026                           <span class="ps">OCT     </span> 04026                                 <span class="co">#  DATA STORE IF A RESTART OCCURS.</span>
-059076,000313: 04,3535           00004                           <span class="op">INHINT  </span>                                       <span class="co">#  (BECAUSE PHASCHNG DID A RELINT)</span>
-059077,000314: 
-059078,000315: 04,3536           44752                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  GO TO UPFNDVAC IF INSTALL IS REQUIRED,</span>
-059079,000316: 04,3537           61171                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555056455242">UPVERB</a>                                <span class="co">#  THAT IS, IF IT'S A V70 - V72.</span>
-059080,000317: 04,3540           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  GO TO UPEND73 IF IT'S A V73.</span>
-059081,000318: 04,3541           63550                           <span class="op">BZMF    </span> <a href="#5550464E44564143">UPFNDVAC</a>                              
-059082,000319: 
-059083,000320:                                                                                                  <span class="co">#           VERB 73 BRANCH</span>
-059084,000321: 
-<a name="5550454E443733"></a>059085,000322: 04,3542           00006        <span class="sm">UPEND73 </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  V73-PERFORM DP OCTAL AGC CLOCK INCREMENT</span>
-059086,000323: 04,3543           31174                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>                                
+059053,000275: 04,3506           63467                           <span class="op">BZMF    </span> <a href="#5550564552494659">UPVERIFY</a>                              <span class="co">#  NO</span>
+059054,000276: 04,3507           33666                           <span class="op">CAF     </span> <a href="#4144555042464D31">ADUPBFM1</a>                              <span class="co">#  YES- BASED ON THE COMPONENT NO. INDEX</span>
+059055,000277: 04,3510           61166                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555054454D50">UPTEMP</a>                                <span class="co">#  CALCULATE THE ECADR OF LOCATION IN</span>
+059056,000278: 04,3511           13453                           <span class="op">TCF     </span> <a href="#4F4857454C4C32">OHWELL2</a>    +2                         <span class="co">#  UPBUFF WHICH USER WANTS TO CHANGE.</span>
+059057,000279: 
+<a name="55504F555434"></a>059058,000280: 04,3512  04,3716               <span class="sm">UPOUT4  </span>           <span class="ps">EQUALS  </span> <a href="#55504F5554">UPOUT</a>      +1                         <span class="co">#  COMES HERE ON V34 TO TERMINATE UPDATE</span>
+059059,000281: 
+059060,000282: 
+059061,000283:                                                                                                  <span class="co">#           CHECK FOR VERB 32 SEQUENCE</span>
+059062,000284: 
+<a name="434B34563332"></a>059063,000285: 04,3512           40154        <span class="sm">CK4V32  </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  ON DATA RETURN FROM 'GOXDSPF'</span>
+059064,000286: 04,3513           74746                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  <span class="co">#  ON DATA RETURN FROM "GOXDSP"&amp; THE CON-</span>
+059065,000287: 04,3514           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  TENTS OF MPAC = VERB.  SO TEST FOR V32.</span>
+059066,000288: 04,3515           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  IT'S NOT A V32, IT'S DATA.  PROCEED.</span>
+059067,000289: 04,3516           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+059068,000290: 04,3517           77771                           <span class="op">TC      </span> 0          -6                         <span class="co">#  V32 ENCOUNTERED - GO BACK AND GET DATA</span>
+059069,000291: 
+<a name="4144555054454D50"></a>059070,000292: 04,3520           01166        <span class="sm">ADUPTEMP</span>           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555054454D50">UPTEMP</a>                                <span class="co">#  ADDRESS OF TEMP STORAGE FOR CORRECTIONS</span>
+<a name="4144555042554646"></a>059071,000293: 04,3521           01173        <span class="sm">ADUPBUFF</span>           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>                                <span class="co">#  ADDRESS OF UPDATE DATA STORAGE BUFFER</span>
+<a name="55504C4F41444E56"></a>059072,000294: 04,3522           05201        <span class="sm">UPLOADNV</span>           <span class="ps">VN      </span> 2101                                  <span class="co">#  VERB 21 NOUN 01</span>
+<a name="5550565246594E56"></a>059073,000295: 04,3523           05202        <span class="sm">UPVRFYNV</span>           <span class="ps">VN      </span> 2102                                  <span class="co">#  VERB 21 NOUN 02</span>
+<a name="55503231"></a>059074,000296: 04,3524     4362               <span class="sm">UP21    </span>           <span class="ps">=       </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4D4431">MD1</a>                                   <span class="co">#  DEC 21 = MAX NO OF COMPONENTS +1</span>
+<a name="5550445450484153"></a>059075,000297: 04,3524     4756               <span class="sm">UPDTPHAS</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#46495645">FIVE</a>                                  
+059076,000298: 
+059077,000299:                                                                                                  <span class="co">#           PRE-STORE AND FAN TO APPROPRIATE BRANCH SEQUENCE</span>
+059078,000300: 
+<a name="555053544F5245"></a>059079,000301: 04,3524                        <span class="sm">UPSTORE </span>           <span class="ps">EQUALS  </span>                                       <span class="co">#  GROUND HAS VERIFIED UPDATE. STORE DATA.</span>
+059080,000302: 
+059081,000303: 04,3524           00004                           <span class="op">INHINT  </span>                                       
+059082,000304: 
+059083,000305: 04,3525           30103                           <span class="op">CAE     </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524437">FLAGWRD7</a>                              <span class="co">#  INVERT VERIFLAG(BIT3 OF FLAGWRD7) TO</span>
+059084,000306: 04,3526           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  INDICATE TO THE GROUND(VIA DOWNLINK)</span>
+059085,000307: 04,3527           34751                           <span class="op">CAF     </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#5645524946424954">VERIFBIT</a>                              <span class="co">#  THAT THE V33 (WHICH THE GROUND SENT TO</span>
+059086,000308: 04,3530           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  VERIFY THE UPDATE) HAS BEEN SUCCESSFULLY</span>
+059087,000309: 04,3531           06001                           <span class="op">RXOR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4348414E">LCHAN</a>                                 <span class="co">#  RECEIVED BY THE UPDATE PROGRAM</span>
+059088,000310: 04,3532           54103                           <span class="op">TS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#464C414757524437">FLAGWRD7</a>                              
+059089,000311: 
+059090,000312: 04,3533           05364                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              <span class="co">#  SET RESTART GROUP 6 TO REDO THE UPDATE</span>
+059091,000313: 04,3534           04026                           <span class="ps">OCT     </span> 04026                                 <span class="co">#  DATA STORE IF A RESTART OCCURS.</span>
+059092,000314: 04,3535           00004                           <span class="op">INHINT  </span>                                       <span class="co">#  (BECAUSE PHASCHNG DID A RELINT)</span>
+059093,000315: 
+059094,000316: 04,3536           44752                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  GO TO UPFNDVAC IF INSTALL IS REQUIRED,</span>
+059095,000317: 04,3537           61171                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555056455242">UPVERB</a>                                <span class="co">#  THAT IS, IF IT'S A V70 - V72.</span>
+059096,000318: 04,3540           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  GO TO UPEND73 IF IT'S A V73.</span>
+059097,000319: 04,3541           63550                           <span class="op">BZMF    </span> <a href="#5550464E44564143">UPFNDVAC</a>                              
+059098,000320: 
+059099,000321:                                                                                                  <span class="co">#           VERB 73 BRANCH</span>
+059100,000322: 
+<a name="5550454E443733"></a>059101,000323: 04,3542           00006        <span class="sm">UPEND73 </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  V73-PERFORM DP OCTAL AGC CLOCK INCREMENT</span>
+059102,000324: 04,3543           31174                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>                                
 </pre>
 </span>
 </p>
@@ -507,55 +508,55 @@ Page 1380
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-059088,000325: 04,3544           53204                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +8D                        
-059089,000326: 04,3545           03573                           <span class="op">TC      </span> <a href="#54494D454449444C">TIMEDIDL</a>                              
-059090,000327: 04,3546           04364                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#46414C544F4E">FALTON</a>                                <span class="co">#  ERROR- TURN ON *OPERATOR ERROR* LIGHT</span>
-059091,000328: 04,3547           03716                           <span class="op">TC      </span> <a href="#55504F5554">UPOUT</a>      +1                         <span class="co">#  GO TO COMMON UPDATE PROGRAM EXIT</span>
-059092,000329: 
-<a name="5550464E44564143"></a>059093,000330: 04,3550           34355        <span class="sm">UPFNDVAC</span>           <span class="op">CAF     </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4348525052494F">CHRPRIO</a>                               <span class="co">#  (USE EXTENDED VERB PRIORITY)</span>
-059094,000331: 04,3551           05105                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               <span class="co">#  GET VAC AREA FOR 'CALL INTSTALL'</span>
-059095,000332: 04,3552  E3,1706                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                
-059096,000333: 04,3552           03555 10103                     <span class="ps">2CADR   </span> <a href="#55504A4F42">UPJOB</a>                                 <span class="co">#  (NOTE: THIS WILL ALSO SET EBANK FOR</span>
-059097,000334: 
-059098,000335: 04,3554           05155                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              <span class="co">#  'TEPHEM' UPDATE BY V70)</span>
-059099,000336: 
-<a name="55504A4F42"></a>059100,000337: 04,3555           06042        <span class="sm">UPJOB   </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               <span class="co">#  THIS COULD BE A STATE VECTOR UPDATE--SO</span>
-059101,000338: 04,3556           77624                           <span class="in">CALL    </span>                                       <span class="co">#  WAIT(PUT JOB TO SLEEP) IF ORBIT INT(OI)</span>
-059102,000339: 04,3557           27410                                    <a href="INTEGRATION_INITIALIZATION.agc.html#494E545354414C4C">INTSTALL</a>                              <span class="co">#  IS IN PROGRESS--OR--GRAB OI AND RETURN</span>
-059103,000340:                                                                                                  <span class="co">#  TO UPWAKE IF OI IS NOT IN PROGRESS.</span>
-059104,000341: 
-<a name="555057414B45"></a>059105,000342: 04,3560           77776        <span class="sm">UPWAKE  </span>           <span class="in">EXIT    </span>                                       
-059106,000343: 
-059107,000344: 04,3561           05364                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              <span class="co">#  RESTART PROTECT(GROUP 6)</span>
-059108,000345: 04,3562           04026                           <span class="ps">OCT     </span> 04026                                 
-059109,000346: 
-059110,000347: 04,3563           05515                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#5550464C4147">UPFLAG</a>                                <span class="co">#  SET INTEGRATION RESTART BIT</span>
-059111,000348: 04,3564           00236                           <span class="ps">ADRES   </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#5245494E54464C47">REINTFLG</a>                              
-059112,000349: 04,3565           00004                           <span class="op">INHINT  </span>                                       
-<a name="55505041525433"></a>059113,000350: 04,3566                        <span class="sm">UPPART3 </span>           <span class="ps">EQUALS  </span>                                       
-059114,000351: 
-059115,000352: 04,3566           51171                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555056455242">UPVERB</a>                                <span class="co">#  BRANCH TO THE APPROPRIATE UPDATE VERB</span>
-059116,000353: 04,3567           13570                           <span class="op">TCF     </span> +1                                    <span class="co">#  ROUTINE TO ACTUALLY PERFORM THE UPDATE</span>
-059117,000354: 04,3570           13727                           <span class="op">TCF     </span> <a href="#5550454E443730">UPEND70</a>                               <span class="co">#  V70</span>
-059118,000355: 04,3571           13636                           <span class="op">TCF     </span> <a href="#5550454E443731">UPEND71</a>                               <span class="co">#  V71</span>
-059119,000356: 04,3572           13670                           <span class="op">TCF     </span> <a href="#5550454E443732">UPEND72</a>                               <span class="co">#  V72</span>
-059120,000357: 
-059121,000358: 
-059122,000359:                                                                                                  <span class="co">#           ROUTINE TO INCREMENT CLOCK(TIME2,TIME1) WITH CONTENTS OF DP WORD AT UPBUFF.</span>
-059123,000360: 
-<a name="54494D454449444C"></a>059124,000361: 04,3573           00006        <span class="sm">TIMEDIDL</span>           <span class="op">EXTEND  </span>                                       
-059125,000362: 04,3574           23166                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555054454D50">UPTEMP</a>                                <span class="co">#  SAVE Q FOR RETURN</span>
-059126,000363: 04,3575           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  ZERO AND SAVE TIME2,TIME1</span>
-059127,000364: 04,3576           22007                           <span class="op">ZL      </span>                                       
-059128,000365: 04,3577           52025                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 
-059129,000366: 04,3600           53216                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +18D                       <span class="co">#  STORE IN CASE OF OVERFLOW</span>
-059130,000367: 
-059131,000368: 04,3601           34756                           <span class="op">CAF     </span> <a href="#5550445450484153">UPDTPHAS</a>                              <span class="co">#  DO</span>
-059132,000369: 04,3602           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  A</span>
-059133,000370: 04,3603           40000                           <span class="op">COM     </span>                                       <span class="co">#  QUICK</span>
-059134,000371: 04,3604           52764                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534536">-PHASE6</a>                               <span class="co">#  PHASCHNG</span>
-059135,000372: 
-<a name="54494D4544494452"></a>059136,000373: 04,3605           00004        <span class="sm">TIMEDIDR</span>           <span class="op">INHINT  </span>                                       
+059104,000326: 04,3544           53204                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +8D                        
+059105,000327: 04,3545           03573                           <span class="op">TC      </span> <a href="#54494D454449444C">TIMEDIDL</a>                              
+059106,000328: 04,3546           04364                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#46414C544F4E">FALTON</a>                                <span class="co">#  ERROR- TURN ON *OPERATOR ERROR* LIGHT</span>
+059107,000329: 04,3547           03716                           <span class="op">TC      </span> <a href="#55504F5554">UPOUT</a>      +1                         <span class="co">#  GO TO COMMON UPDATE PROGRAM EXIT</span>
+059108,000330: 
+<a name="5550464E44564143"></a>059109,000331: 04,3550           34355        <span class="sm">UPFNDVAC</span>           <span class="op">CAF     </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4348525052494F">CHRPRIO</a>                               <span class="co">#  (USE EXTENDED VERB PRIORITY)</span>
+059110,000332: 04,3551           05105                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               <span class="co">#  GET VAC AREA FOR 'CALL INTSTALL'</span>
+059111,000333: 04,3552  E3,1706                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                
+059112,000334: 04,3552           03555 10103                     <span class="ps">2CADR   </span> <a href="#55504A4F42">UPJOB</a>                                 <span class="co">#  (NOTE: THIS WILL ALSO SET EBANK FOR</span>
+059113,000335: 
+059114,000336: 04,3554           05155                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              <span class="co">#  'TEPHEM' UPDATE BY V70)</span>
+059115,000337: 
+<a name="55504A4F42"></a>059116,000338: 04,3555           06042        <span class="sm">UPJOB   </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               <span class="co">#  THIS COULD BE A STATE VECTOR UPDATE--SO</span>
+059117,000339: 04,3556           77624                           <span class="in">CALL    </span>                                       <span class="co">#  WAIT(PUT JOB TO SLEEP) IF ORBIT INT(OI)</span>
+059118,000340: 04,3557           27410                                    <a href="INTEGRATION_INITIALIZATION.agc.html#494E545354414C4C">INTSTALL</a>                              <span class="co">#  IS IN PROGRESS--OR--GRAB OI AND RETURN</span>
+059119,000341:                                                                                                  <span class="co">#  TO UPWAKE IF OI IS NOT IN PROGRESS.</span>
+059120,000342: 
+<a name="555057414B45"></a>059121,000343: 04,3560           77776        <span class="sm">UPWAKE  </span>           <span class="in">EXIT    </span>                                       
+059122,000344: 
+059123,000345: 04,3561           05364                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              <span class="co">#  RESTART PROTECT(GROUP 6)</span>
+059124,000346: 04,3562           04026                           <span class="ps">OCT     </span> 04026                                 
+059125,000347: 
+059126,000348: 04,3563           05515                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#5550464C4147">UPFLAG</a>                                <span class="co">#  SET INTEGRATION RESTART BIT</span>
+059127,000349: 04,3564           00236                           <span class="ps">ADRES   </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#5245494E54464C47">REINTFLG</a>                              
+059128,000350: 04,3565           00004                           <span class="op">INHINT  </span>                                       
+<a name="55505041525433"></a>059129,000351: 04,3566                        <span class="sm">UPPART3 </span>           <span class="ps">EQUALS  </span>                                       
+059130,000352: 
+059131,000353: 04,3566           51171                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555056455242">UPVERB</a>                                <span class="co">#  BRANCH TO THE APPROPRIATE UPDATE VERB</span>
+059132,000354: 04,3567           13570                           <span class="op">TCF     </span> +1                                    <span class="co">#  ROUTINE TO ACTUALLY PERFORM THE UPDATE</span>
+059133,000355: 04,3570           13727                           <span class="op">TCF     </span> <a href="#5550454E443730">UPEND70</a>                               <span class="co">#  V70</span>
+059134,000356: 04,3571           13636                           <span class="op">TCF     </span> <a href="#5550454E443731">UPEND71</a>                               <span class="co">#  V71</span>
+059135,000357: 04,3572           13670                           <span class="op">TCF     </span> <a href="#5550454E443732">UPEND72</a>                               <span class="co">#  V72</span>
+059136,000358: 
+059137,000359: 
+059138,000360:                                                                                                  <span class="co">#           ROUTINE TO INCREMENT CLOCK(TIME2,TIME1) WITH CONTENTS OF DP WORD AT UPBUFF.</span>
+059139,000361: 
+<a name="54494D454449444C"></a>059140,000362: 04,3573           00006        <span class="sm">TIMEDIDL</span>           <span class="op">EXTEND  </span>                                       
+059141,000363: 04,3574           23166                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555054454D50">UPTEMP</a>                                <span class="co">#  SAVE Q FOR RETURN</span>
+059142,000364: 04,3575           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  ZERO AND SAVE TIME2,TIME1</span>
+059143,000365: 04,3576           22007                           <span class="op">ZL      </span>                                       
+059144,000366: 04,3577           52025                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 
+059145,000367: 04,3600           53216                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +18D                       <span class="co">#  STORE IN CASE OF OVERFLOW</span>
+059146,000368: 
+059147,000369: 04,3601           34756                           <span class="op">CAF     </span> <a href="#5550445450484153">UPDTPHAS</a>                              <span class="co">#  DO</span>
+059148,000370: 04,3602           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  A</span>
+059149,000371: 04,3603           40000                           <span class="op">COM     </span>                                       <span class="co">#  QUICK</span>
+059150,000372: 04,3604           52764                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534536">-PHASE6</a>                               <span class="co">#  PHASCHNG</span>
+059151,000373: 
+<a name="54494D4544494452"></a>059152,000374: 04,3605           00004        <span class="sm">TIMEDIDR</span>           <span class="op">INHINT  </span>                                       
 </pre>
 </span>
 </p>
@@ -571,56 +572,56 @@ Page 1381
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-059138,000375: 04,3606           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-059139,000376: 04,3607           22007                           <span class="op">ZL      </span>                                       <span class="co">#  PICK UP INCREMENTER(AND ZERO</span>
-059140,000377: 04,3610           54156                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         <span class="co">#  IT IN CASE OF RESTARTS) AND</span>
-059141,000378: 04,3611           53204                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +8D                        <span class="co">#  STORE IT</span>
-059142,000379: 04,3612           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  INTO MPAC FOR TPAGREE.</span>
-059143,000380: 
-059144,000381: 04,3613           00006                           <span class="op">EXTEND  </span>                                       
-059145,000382: 04,3614           31216                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +18D                       
-059146,000383: 04,3615           20155                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  FORM SUM IN MPAC</span>
-059147,000384: 04,3616           00006                           <span class="op">EXTEND  </span>                                       
-059148,000385: 04,3617           13626                           <span class="op">BZF     </span> <a href="#44454C54414F4B">DELTAOK</a>                               <span class="co">#  TEST FOR OVERFLOW</span>
-059149,000386: 04,3620           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-059150,000387: 04,3621           53216                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +18D                       <span class="co">#  OVERFLOW, RESTORE OLD VALUE OF CLOCK</span>
-059151,000388: 04,3622           20025                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  AND TURN ON OPERATOR ERROR</span>
-059152,000389: 
-059153,000390: 04,3623           05364                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              <span class="co">#  RESTART PROTECT(GROUP 6)</span>
-059154,000391: 04,3624           04026                           <span class="ps">OCT     </span> 04026                                 
-059155,000392: 
-059156,000393: 04,3625           01166                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555054454D50">UPTEMP</a>                                <span class="co">#  GO TO ERROR EXIT</span>
-059157,000394: 
-<a name="44454C54414F4B"></a>059158,000395: 04,3626           07262        <span class="sm">DELTAOK </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#54504147524545">TPAGREE</a>                               <span class="co">#  FORCE SIGN AGREEMENT</span>
-059159,000396: 04,3627           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-059160,000397: 04,3630           20025                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  INCREMENT TIME2,TIME1</span>
-059161,000398: 
-059162,000399: 04,3631           05364                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              <span class="co">#  RESTART PROTECT(GROUP 6)</span>
-059163,000400: 04,3632           04026                           <span class="ps">OCT     </span> 04026                                 
-059164,000401: 
-059165,000402: 04,3633           00004                           <span class="op">INHINT  </span>                                       
-059166,000403: 04,3634           51166                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555054454D50">UPTEMP</a>                                <span class="co">#  (CODED THIS WAY FOR RESTART PROTECTION)</span>
-059167,000404: 04,3635           00001                           <span class="op">TC      </span> 1                                     <span class="co">#  NORMAL RETURN</span>
-059168,000405:                                                                                                  <span class="co">#           VERB 71 BRANCH</span>
-059169,000406: 
-<a name="5550454E443731"></a>059170,000407: 04,3636           31174        <span class="sm">UPEND71 </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +1                         <span class="co">#  SET EBANK</span>
-059171,000408: 04,3637           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 <span class="co">#     AND</span>
-059172,000409: 04,3640           74357                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  <span class="co">#  CALCULATE</span>
-059173,000410: 04,3641           55166                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555054454D50">UPTEMP</a>                                <span class="co">#  S-REG VALUE OF RECEIVING AREA</span>
-059174,000411: 
-059175,000412: 04,3642           67750                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454733">NEG3</a>                                  <span class="co">#  IN THE PROCESS OF</span>
-059176,000413: 04,3643           61167                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F4D504E554D42">COMPNUMB</a>                              <span class="co">#  PERFORMING</span>
-059177,000414: 04,3644           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  THIS UPDATE</span>
-059178,000415: 04,3645           13653                           <span class="op">BZF     </span> <a href="#53544F524C503731">STORLP71</a>                              <span class="co">#  WILL WE</span>
-059179,000416: 04,3646           74743                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495439">BIT9</a>                                  <span class="co">#  OVERFLOW</span>
-059180,000417: 04,3647           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  INTO THE NEXT EBANK....</span>
-059181,000418: 04,3650           13764                           <span class="op">TCF     </span> <a href="#55504552524F5554">UPERROUT</a>                              <span class="co">#  YES</span>
-059182,000419: 
-059183,000420: 04,3651           37750                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454733">NEG3</a>                                  <span class="co">#  NO- CALCULATE NUMBER OF</span>
-059184,000421: 04,3652           61167                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F4D504E554D42">COMPNUMB</a>                              <span class="co">#  WORDS TO BE STORED MINUS ONE</span>
-<a name="53544F524C503731"></a>059185,000422: 04,3653           54154        <span class="sm">STORLP71</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  SAVE NO. OF WORDS REMAINING MINUS ONE</span>
-059186,000423: 04,3654           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  TAKE NEXT UPDATE WORD FROM</span>
-059187,000424: 04,3655           31175                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +2                         <span class="co">#  UPBUFF AND</span>
+059154,000376: 04,3606           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+059155,000377: 04,3607           22007                           <span class="op">ZL      </span>                                       <span class="co">#  PICK UP INCREMENTER(AND ZERO</span>
+059156,000378: 04,3610           54156                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         <span class="co">#  IT IN CASE OF RESTARTS) AND</span>
+059157,000379: 04,3611           53204                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +8D                        <span class="co">#  STORE IT</span>
+059158,000380: 04,3612           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  INTO MPAC FOR TPAGREE.</span>
+059159,000381: 
+059160,000382: 04,3613           00006                           <span class="op">EXTEND  </span>                                       
+059161,000383: 04,3614           31216                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +18D                       
+059162,000384: 04,3615           20155                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  FORM SUM IN MPAC</span>
+059163,000385: 04,3616           00006                           <span class="op">EXTEND  </span>                                       
+059164,000386: 04,3617           13626                           <span class="op">BZF     </span> <a href="#44454C5441544F4B">DELTATOK</a>                              <span class="co">#  TEST FOR OVERFLOW</span>
+059165,000387: 04,3620           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+059166,000388: 04,3621           53216                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +18D                       <span class="co">#  OVERFLOW, RESTORE OLD VALUE OF CLOCK</span>
+059167,000389: 04,3622           20025                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  AND TURN ON OPERATOR ERROR</span>
+059168,000390: 
+059169,000391: 04,3623           05364                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              <span class="co">#  RESTART PROTECT(GROUP 6)</span>
+059170,000392: 04,3624           04026                           <span class="ps">OCT     </span> 04026                                 
+059171,000393: 
+059172,000394: 04,3625           01166                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555054454D50">UPTEMP</a>                                <span class="co">#  GO TO ERROR EXIT</span>
+059173,000395: 
+<a name="44454C5441544F4B"></a>059174,000396: 04,3626           07262        <span class="sm">DELTATOK</span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#54504147524545">TPAGREE</a>                               <span class="co">#  FORCE SIGN AGREEMENT</span>
+059175,000397: 04,3627           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+059176,000398: 04,3630           20025                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  INCREMENT TIME2,TIME1</span>
+059177,000399: 
+059178,000400: 04,3631           05364                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              <span class="co">#  RESTART PROTECT(GROUP 6)</span>
+059179,000401: 04,3632           04026                           <span class="ps">OCT     </span> 04026                                 
+059180,000402: 
+059181,000403: 04,3633           00004                           <span class="op">INHINT  </span>                                       
+059182,000404: 04,3634           51166                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555054454D50">UPTEMP</a>                                <span class="co">#  (CODED THIS WAY FOR RESTART PROTECTION)</span>
+059183,000405: 04,3635           00001                           <span class="op">TC      </span> 1                                     <span class="co">#  NORMAL RETURN</span>
+059184,000406:                                                                                                  <span class="co">#           VERB 71 BRANCH</span>
+059185,000407: 
+<a name="5550454E443731"></a>059186,000408: 04,3636           31174        <span class="sm">UPEND71 </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +1                         <span class="co">#  SET EBANK</span>
+059187,000409: 04,3637           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 <span class="co">#     AND</span>
+059188,000410: 04,3640           74357                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  <span class="co">#  CALCULATE</span>
+059189,000411: 04,3641           55166                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555054454D50">UPTEMP</a>                                <span class="co">#  S-REG VALUE OF RECEIVING AREA</span>
+059190,000412: 
+059191,000413: 04,3642           67750                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454733">NEG3</a>                                  <span class="co">#  IN THE PROCESS OF</span>
+059192,000414: 04,3643           61167                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F4D504E554D42">COMPNUMB</a>                              <span class="co">#  PERFORMING</span>
+059193,000415: 04,3644           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  THIS UPDATE</span>
+059194,000416: 04,3645           13653                           <span class="op">BZF     </span> <a href="#53544F524C503731">STORLP71</a>                              <span class="co">#  WILL WE</span>
+059195,000417: 04,3646           74743                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495439">BIT9</a>                                  <span class="co">#  OVERFLOW</span>
+059196,000418: 04,3647           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  INTO THE NEXT EBANK....</span>
+059197,000419: 04,3650           13764                           <span class="op">TCF     </span> <a href="#55504552524F5554">UPERROUT</a>                              <span class="co">#  YES</span>
+059198,000420: 
+059199,000421: 04,3651           37750                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454733">NEG3</a>                                  <span class="co">#  NO- CALCULATE NUMBER OF</span>
+059200,000422: 04,3652           61167                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F4D504E554D42">COMPNUMB</a>                              <span class="co">#  WORDS TO BE STORED MINUS ONE</span>
+<a name="53544F524C503731"></a>059201,000423: 04,3653           54154        <span class="sm">STORLP71</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  SAVE NO. OF WORDS REMAINING MINUS ONE</span>
+059202,000424: 04,3654           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  TAKE NEXT UPDATE WORD FROM</span>
+059203,000425: 04,3655           31175                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +2                         <span class="co">#  UPBUFF AND</span>
 </pre>
 </span>
 </p>
@@ -636,56 +637,56 @@ Page 1382
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-059189,000426: 04,3656           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  SAVE IT IN L</span>
-059190,000427: 04,3657           30154                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  CALCULATE NEXT</span>
-059191,000428: 04,3660           61166                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555054454D50">UPTEMP</a>                                <span class="co">#  RECEIVING ADDRESS</span>
-059192,000429: 04,3661           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-059193,000430: 04,3662  E3,1400                                  <span class="ps">EBANK=  </span> 1400                                  
-059194,000431: 04,3662           23400                           <span class="op">LXCH    </span> 1400                                  <span class="co">#  UPDATE THE REGISTER  BY CONTENTS OF L</span>
-059195,000432: 04,3663  E3,1706                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                
-059196,000433: 04,3663           10154                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  ARE THERE ANY WORDS LEFT TO BE STORED</span>
-059197,000434: 04,3664           13653                           <span class="op">TCF     </span> <a href="#53544F524C503731">STORLP71</a>                              <span class="co">#  YES</span>
-059198,000435: 04,3665           13715                           <span class="op">TCF     </span> <a href="#55504F5554">UPOUT</a>                                 <span class="co">#  NO- THEN EXIT UPDATE PROGRAM</span>
-<a name="4144555042464D31"></a>059199,000436: 04,3666           01172        <span class="sm">ADUPBFM1</span>           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     -1                         <span class="co">#  SAME AS ADUPBUFF BUT LESS 1 (DON'T MOVE)</span>
-059200,000437: 04,3667           13715                           <span class="op">TCF     </span> <a href="#55504F5554">UPOUT</a>                                 <span class="co">#  NO- EXIT UPDATE(HERE WHEN COMPNUMB = 3)</span>
-059201,000438: 
-059202,000439: 
-059203,000440:                                                                                                  <span class="co">#           VERB 72 BRANCH</span>
-059204,000441: 
-<a name="5550454E443732"></a>059205,000442: 04,3670           34753        <span class="sm">UPEND72 </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  <span class="co">#  HAVE AN ODD NO. OF COMPONENTS</span>
-059206,000443: 04,3671           71167                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F4D504E554D42">COMPNUMB</a>                              <span class="co">#  BEEN SENT FOR A V72 UPDATE...</span>
-059207,000444: 04,3672           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-059208,000445: 04,3673           13675                           <span class="op">TCF     </span> +2                                    <span class="co">#  YES</span>
-059209,000446: 04,3674           13764                           <span class="op">TCF     </span> <a href="#55504552524F5554">UPERROUT</a>                              <span class="co">#  ERROR- SHOULD BE ODD NO. OF COMPONENTS</span>
-059210,000447: 04,3675           44752                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  
-059211,000448: 04,3676           61167                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F4D504E554D42">COMPNUMB</a>                              
-<a name="4C444C4F4F503732"></a>059212,000449: 04,3677           54154        <span class="sm">LDLOOP72</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  NOW PERFORM THE UPDATE</span>
-059213,000450: 04,3700           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-059214,000451: 04,3701           31174                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +1                         <span class="co">#  PICK UP NEXT UPDATE WORD</span>
-059215,000452: 04,3702           22000                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-059216,000453: 04,3703           10154                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  SET POINTER TO ECADR(MUST BE CCS)</span>
-059217,000454: 04,3704           54154                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-059218,000455: 04,3705           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-059219,000456: 04,3706           31174                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +1                         <span class="co">#  PICK UP NEXT ECADR OF REG TO BE UPDATED</span>
-059220,000457: 04,3707           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 <span class="co">#  SET EBANK</span>
-059221,000458: 04,3710           74357                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  <span class="co">#  ISOLATE RELATIVE ADDRESS</span>
-059222,000459: 04,3711           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-059223,000460: 04,3712  E3,1400                                  <span class="ps">EBANK=  </span> 1400                                  
-059224,000461: 04,3712           23400                           <span class="op">LXCH    </span> 1400                                  <span class="co">#  UPDATE THE REGISTER BY CONTENTS OF L</span>
-059225,000462: 04,3713  E3,1706                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                
-059226,000463: 04,3713           10154                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  ARE WE THROUGH THE V72 UPDATE...</span>
-059227,000464: 04,3714           13677                           <span class="op">TCF     </span> <a href="#4C444C4F4F503732">LDLOOP72</a>                              <span class="co">#  NO</span>
-059228,000465: 
-059229,000466: 
-059230,000467:                                                                                                  <span class="co">#           NORMAL FINISH OF P27</span>
-059231,000468: 
-<a name="55504F5554"></a>059232,000469: 04,3715                        <span class="sm">UPOUT   </span>           <span class="ps">EQUALS  </span>                                       
-059233,000470: 04,3715           03137                           <span class="op">TC      </span> <a href="INTEGRATION_INITIALIZATION.agc.html#494E5457414B4555">INTWAKEU</a>                              <span class="co">#  RELEASE  GRAB  OF ORBITAL INTEGRATION</span>
-059234,000471: 04,3716           31170                 +1        <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#55504F4C444D4F44">UPOLDMOD</a>                              <span class="co">#  RESTORE PRIOR P27 MODE</span>
-059235,000472: 04,3717           05325                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>   +3                         
-059236,000473: 04,3720           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-059237,000474: 04,3721           54333                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5354434F44">DNLSTCOD</a>                              
-059238,000475: 04,3722           03771                           <span class="op">TC      </span> <a href="#55504143544F4646">UPACTOFF</a>                              <span class="co">#  TURN OFF 'UPLINK ACTIVITY' LIGHT</span>
+059205,000427: 04,3656           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  SAVE IT IN L</span>
+059206,000428: 04,3657           30154                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  CALCULATE NEXT</span>
+059207,000429: 04,3660           61166                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555054454D50">UPTEMP</a>                                <span class="co">#  RECEIVING ADDRESS</span>
+059208,000430: 04,3661           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+059209,000431: 04,3662  E3,1400                                  <span class="ps">EBANK=  </span> 1400                                  
+059210,000432: 04,3662           23400                           <span class="op">LXCH    </span> 1400                                  <span class="co">#  UPDATE THE REGISTER  BY CONTENTS OF L</span>
+059211,000433: 04,3663  E3,1706                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                
+059212,000434: 04,3663           10154                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  ARE THERE ANY WORDS LEFT TO BE STORED</span>
+059213,000435: 04,3664           13653                           <span class="op">TCF     </span> <a href="#53544F524C503731">STORLP71</a>                              <span class="co">#  YES</span>
+059214,000436: 04,3665           13715                           <span class="op">TCF     </span> <a href="#55504F5554">UPOUT</a>                                 <span class="co">#  NO- THEN EXIT UPDATE PROGRAM</span>
+<a name="4144555042464D31"></a>059215,000437: 04,3666           01172        <span class="sm">ADUPBFM1</span>           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     -1                         <span class="co">#  SAME AS ADUPBUFF BUT LESS 1 (DON'T MOVE)</span>
+059216,000438: 04,3667           13715                           <span class="op">TCF     </span> <a href="#55504F5554">UPOUT</a>                                 <span class="co">#  NO- EXIT UPDATE(HERE WHEN COMPNUMB = 3)</span>
+059217,000439: 
+059218,000440: 
+059219,000441:                                                                                                  <span class="co">#           VERB 72 BRANCH</span>
+059220,000442: 
+<a name="5550454E443732"></a>059221,000443: 04,3670           34753        <span class="sm">UPEND72 </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  <span class="co">#  HAVE AN ODD NO. OF COMPONENTS</span>
+059222,000444: 04,3671           71167                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F4D504E554D42">COMPNUMB</a>                              <span class="co">#  BEEN SENT FOR A V72 UPDATE...</span>
+059223,000445: 04,3672           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+059224,000446: 04,3673           13675                           <span class="op">TCF     </span> +2                                    <span class="co">#  YES</span>
+059225,000447: 04,3674           13764                           <span class="op">TCF     </span> <a href="#55504552524F5554">UPERROUT</a>                              <span class="co">#  ERROR- SHOULD BE ODD NO. OF COMPONENTS</span>
+059226,000448: 04,3675           44752                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  
+059227,000449: 04,3676           61167                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F4D504E554D42">COMPNUMB</a>                              
+<a name="4C444C4F4F503732"></a>059228,000450: 04,3677           54154        <span class="sm">LDLOOP72</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  NOW PERFORM THE UPDATE</span>
+059229,000451: 04,3700           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+059230,000452: 04,3701           31174                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +1                         <span class="co">#  PICK UP NEXT UPDATE WORD</span>
+059231,000453: 04,3702           22000                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+059232,000454: 04,3703           10154                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  SET POINTER TO ECADR(MUST BE CCS)</span>
+059233,000455: 04,3704           54154                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+059234,000456: 04,3705           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+059235,000457: 04,3706           31174                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +1                         <span class="co">#  PICK UP NEXT ECADR OF REG TO BE UPDATED</span>
+059236,000458: 04,3707           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 <span class="co">#  SET EBANK</span>
+059237,000459: 04,3710           74357                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  <span class="co">#  ISOLATE RELATIVE ADDRESS</span>
+059238,000460: 04,3711           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+059239,000461: 04,3712  E3,1400                                  <span class="ps">EBANK=  </span> 1400                                  
+059240,000462: 04,3712           23400                           <span class="op">LXCH    </span> 1400                                  <span class="co">#  UPDATE THE REGISTER BY CONTENTS OF L</span>
+059241,000463: 04,3713  E3,1706                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                
+059242,000464: 04,3713           10154                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  ARE WE THROUGH THE V72 UPDATE...</span>
+059243,000465: 04,3714           13677                           <span class="op">TCF     </span> <a href="#4C444C4F4F503732">LDLOOP72</a>                              <span class="co">#  NO</span>
+059244,000466: 
+059245,000467: 
+059246,000468:                                                                                                  <span class="co">#           NORMAL FINISH OF P27</span>
+059247,000469: 
+<a name="55504F5554"></a>059248,000470: 04,3715                        <span class="sm">UPOUT   </span>           <span class="ps">EQUALS  </span>                                       
+059249,000471: 04,3715           03137                           <span class="op">TC      </span> <a href="INTEGRATION_INITIALIZATION.agc.html#494E5457414B4555">INTWAKEU</a>                              <span class="co">#  RELEASE  GRAB  OF ORBITAL INTEGRATION</span>
+059250,000472: 04,3716           31170                 +1        <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#55504F4C444D4F44">UPOLDMOD</a>                              <span class="co">#  RESTORE PRIOR P27 MODE</span>
+059251,000473: 04,3717           05325                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>   +3                         
+059252,000474: 04,3720           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+059253,000475: 04,3721           54333                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5354434F44">DNLSTCOD</a>                              
+059254,000476: 04,3722           03771                           <span class="op">TC      </span> <a href="#55504143544F4646">UPACTOFF</a>                              <span class="co">#  TURN OFF 'UPLINK ACTIVITY' LIGHT</span>
 </pre>
 </span>
 </p>
@@ -701,56 +702,56 @@ Page 1383
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-059240,000477: 04,3723           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  KILL GROUP 6.</span>
-059241,000478: 04,3724           34755                           <span class="op">DCA     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454730">NEG0</a>                                  
-059242,000479: 04,3725           52764                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534536">-PHASE6</a>                               
-059243,000480: 
-059244,000481: 04,3726           05503                           <span class="op">TC      </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                <span class="co">#  EXTENDED VERB EXIT</span>
-059245,000482: 
-059246,000483: 
-059247,000484:                                                                                                  <span class="co">#           VERB 70 BRANCH</span>
-059248,000485: 
-<a name="5550454E443730"></a>059249,000486: 04,3727           00006        <span class="sm">UPEND70 </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  V70 DOES THE FOLLOWING WITH DP DELTA</span>
-059250,000487: 04,3730           41174                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>                                <span class="co">#  TIME IN UPBUFF</span>
-059251,000488: 04,3731           53204                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +8D                        
-059252,000489: 04,3732           03573                           <span class="op">TC      </span> <a href="#54494D454449444C">TIMEDIDL</a>                              <span class="co">#  DECREMENT AGC CLOCK</span>
-059253,000490: 
-059254,000491: 04,3733           03764                           <span class="op">TC      </span> <a href="#55504552524F5554">UPERROUT</a>                              <span class="co">#  ERROR WHILE DECREMENTING CLOCK -- EXIT</span>
-059255,000492: 
-059256,000493: 04,3734  E3,1706                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                
-059257,000494: 04,3734           00006                           <span class="op">EXTEND  </span>                                       
-059258,000495: 04,3735           41174                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>                                <span class="co">#  COPY DECREMENTERS FOR</span>
-059259,000496: 04,3736           53206                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +10D                       <span class="co">#  RESTART PROTECTION</span>
-059260,000497: 04,3737           00006                           <span class="op">EXTEND  </span>                                       
-059261,000498: 04,3740           41174                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>                                
-059262,000499: 04,3741           53210                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +12D                       
-059263,000500: 
-059264,000501: 04,3742           05364                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              <span class="co">#  RESTART PROTECT(GROUP 6)</span>
-059265,000502: 04,3743           04026                           <span class="ps">OCT     </span> 04026                                 
-059266,000503: 
-059267,000504: 04,3744           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-059268,000505: 04,3745           22007                           <span class="op">ZL      </span>                                       
-059269,000506: 04,3746           53206                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +10D                       <span class="co">#  DECREMENT CSM STATE VECTOR TIME</span>
-059270,000507: 04,3747           21571                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54455443534D">TETCSM</a>                                
-059271,000508: 
-059272,000509: 04,3750           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-059273,000510: 04,3751           22007                           <span class="op">ZL      </span>                                       
-059274,000511: 04,3752           53210                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +12D                       <span class="co">#  DECREMENT LEM STATE VECTOR TIME</span>
-059275,000512: 04,3753           21643                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5445544C454D">TETLEM</a>                                
-059276,000513: 
-059277,000514: 04,3754           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-059278,000515: 04,3755           22007                           <span class="op">ZL      </span>                                       
-059279,000516: 04,3756           53174                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>                                
-059280,000517: 04,3757           21710                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>     +1                         <span class="co">#  INCREMENT TP TEPHEM</span>
-059281,000518: 04,3760           27706                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                
-059282,000519: 
-059283,000520: 04,3761           05364                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              <span class="co">#  RESTART PROTECT(GROUP 6)</span>
-059284,000521: 04,3762           04026                           <span class="ps">OCT     </span> 04026                                 
-059285,000522: 
-059286,000523: 04,3763     1173                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>                                
-059287,000524: 
-059288,000525: 04,3763           03715                           <span class="op">TC      </span> <a href="#55504F5554">UPOUT</a>                                 <span class="co">#  GO TO STANDARD UPDATE PROGRAM EXIT</span>
-059289,000526: 
+059256,000478: 04,3723           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  KILL GROUP 6.</span>
+059257,000479: 04,3724           34755                           <span class="op">DCA     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454730">NEG0</a>                                  
+059258,000480: 04,3725           52764                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534536">-PHASE6</a>                               
+059259,000481: 
+059260,000482: 04,3726           05503                           <span class="op">TC      </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                <span class="co">#  EXTENDED VERB EXIT</span>
+059261,000483: 
+059262,000484: 
+059263,000485:                                                                                                  <span class="co">#           VERB 70 BRANCH</span>
+059264,000486: 
+<a name="5550454E443730"></a>059265,000487: 04,3727           00006        <span class="sm">UPEND70 </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  V70 DOES THE FOLLOWING WITH DP DELTA</span>
+059266,000488: 04,3730           41174                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>                                <span class="co">#  TIME IN UPBUFF</span>
+059267,000489: 04,3731           53204                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +8D                        
+059268,000490: 04,3732           03573                           <span class="op">TC      </span> <a href="#54494D454449444C">TIMEDIDL</a>                              <span class="co">#  DECREMENT AGC CLOCK</span>
+059269,000491: 
+059270,000492: 04,3733           03764                           <span class="op">TC      </span> <a href="#55504552524F5554">UPERROUT</a>                              <span class="co">#  ERROR WHILE DECREMENTING CLOCK -- EXIT</span>
+059271,000493: 
+059272,000494: 04,3734  E3,1706                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                
+059273,000495: 04,3734           00006                           <span class="op">EXTEND  </span>                                       
+059274,000496: 04,3735           41174                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>                                <span class="co">#  COPY DECREMENTERS FOR</span>
+059275,000497: 04,3736           53206                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +10D                       <span class="co">#  RESTART PROTECTION</span>
+059276,000498: 04,3737           00006                           <span class="op">EXTEND  </span>                                       
+059277,000499: 04,3740           41174                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>                                
+059278,000500: 04,3741           53210                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +12D                       
+059279,000501: 
+059280,000502: 04,3742           05364                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              <span class="co">#  RESTART PROTECT(GROUP 6)</span>
+059281,000503: 04,3743           04026                           <span class="ps">OCT     </span> 04026                                 
+059282,000504: 
+059283,000505: 04,3744           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+059284,000506: 04,3745           22007                           <span class="op">ZL      </span>                                       
+059285,000507: 04,3746           53206                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +10D                       <span class="co">#  DECREMENT CSM STATE VECTOR TIME</span>
+059286,000508: 04,3747           21571                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54455443534D">TETCSM</a>                                
+059287,000509: 
+059288,000510: 04,3750           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+059289,000511: 04,3751           22007                           <span class="op">ZL      </span>                                       
+059290,000512: 04,3752           53210                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +12D                       <span class="co">#  DECREMENT LEM STATE VECTOR TIME</span>
+059291,000513: 04,3753           21643                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5445544C454D">TETLEM</a>                                
+059292,000514: 
+059293,000515: 04,3754           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+059294,000516: 04,3755           22007                           <span class="op">ZL      </span>                                       
+059295,000517: 04,3756           53174                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>                                
+059296,000518: 04,3757           21710                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>     +1                         <span class="co">#  INCREMENT TP TEPHEM</span>
+059297,000519: 04,3760           27706                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                
+059298,000520: 
+059299,000521: 04,3761           05364                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              <span class="co">#  RESTART PROTECT(GROUP 6)</span>
+059300,000522: 04,3762           04026                           <span class="ps">OCT     </span> 04026                                 
+059301,000523: 
+059302,000524: 04,3763     1173                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>                                
+059303,000525: 
+059304,000526: 04,3763           03715                           <span class="op">TC      </span> <a href="#55504F5554">UPOUT</a>                                 <span class="co">#  GO TO STANDARD UPDATE PROGRAM EXIT</span>
+059305,000527: 
 </pre>
 </span>
 </p>
@@ -766,26 +767,26 @@ Page 1384
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-059291,000528:                                                                                                  <span class="co">#           ERROR SEQUENCE</span>
-059292,000529: 
-<a name="55504552524F5554"></a>059293,000530: 04,3764           04364        <span class="sm">UPERROUT</span>           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#46414C544F4E">FALTON</a>                                <span class="co">#  TURN ON *OPERATOR ERROR* LIGHT</span>
-059294,000531: 04,3765           13715                           <span class="op">TCF     </span> <a href="#55504F5554">UPOUT</a>                                 <span class="co">#  GO TO COMMON UPDATE PROGRAM EXIT</span>
-059295,000532: 
-059296,000533: 04,3766           04364                 +2        <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#46414C544F4E">FALTON</a>                                <span class="co">#  TURN ON 'OPERATOR ERROR' LIGHT</span>
-059297,000534: 04,3767           03771                           <span class="op">TC      </span> <a href="#55504143544F4646">UPACTOFF</a>                              <span class="co">#  TURN OFF'UPLINK ACTIVITY'LIGHT</span>
-059298,000535: 04,3770           05503                           <span class="op">TC      </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                <span class="co">#  EXTENDED VERB EXIT</span>
-059299,000536:                                                                                                  <span class="co">#  (THE PURPOSE OF UPERROUT +2 EXIT IS</span>
-059300,000537:                                                                                                  <span class="co">#  TO PROVIDE AN ERROR EXIT WHICH DOES NOT</span>
-059301,000538:                                                                                                  <span class="co">#  RESET ANY RESTART GROUPS)</span>
-059302,000539: 
-059303,000540: 
-059304,000541: 
-059305,000542:                                                                                                  <span class="co">#           :UPACTOFF: IS A ROUTINE TO TURN OFF UPLINK ACTIVITY LIGHT ON ALL EXITS FROM UPDATE PROGRAM(P27).</span>
-059306,000543: 
-<a name="55504143544F4646"></a>059307,000544: 04,3771           44751        <span class="sm">UPACTOFF</span>           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495433">BIT3</a>                                  
-059308,000545: 04,3772           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  TURN OFF UPLINK ACTIVITY LIGHT</span>
-059309,000546: 04,3773           03011                           <span class="op">WAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453414C4D4F5554">DSALMOUT</a>                              <span class="co">#  (BIT 3 OF CHANNEL 11)</span>
-059310,000547: 04,3774           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+059307,000529:                                                                                                  <span class="co">#           ERROR SEQUENCE</span>
+059308,000530: 
+<a name="55504552524F5554"></a>059309,000531: 04,3764           04364        <span class="sm">UPERROUT</span>           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#46414C544F4E">FALTON</a>                                <span class="co">#  TURN ON *OPERATOR ERROR* LIGHT</span>
+059310,000532: 04,3765           13715                           <span class="op">TCF     </span> <a href="#55504F5554">UPOUT</a>                                 <span class="co">#  GO TO COMMON UPDATE PROGRAM EXIT</span>
+059311,000533: 
+059312,000534: 04,3766           04364                 +2        <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#46414C544F4E">FALTON</a>                                <span class="co">#  TURN ON 'OPERATOR ERROR' LIGHT</span>
+059313,000535: 04,3767           03771                           <span class="op">TC      </span> <a href="#55504143544F4646">UPACTOFF</a>                              <span class="co">#  TURN OFF'UPLINK ACTIVITY'LIGHT</span>
+059314,000536: 04,3770           05503                           <span class="op">TC      </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                <span class="co">#  EXTENDED VERB EXIT</span>
+059315,000537:                                                                                                  <span class="co">#  (THE PURPOSE OF UPERROUT +2 EXIT IS</span>
+059316,000538:                                                                                                  <span class="co">#  TO PROVIDE AN ERROR EXIT WHICH DOES NOT</span>
+059317,000539:                                                                                                  <span class="co">#  RESET ANY RESTART GROUPS)</span>
+059318,000540: 
+059319,000541: 
+059320,000542: 
+059321,000543:                                                                                                  <span class="co">#           :UPACTOFF: IS A ROUTINE TO TURN OFF UPLINK ACTIVITY LIGHT ON ALL EXITS FROM UPDATE PROGRAM(P27).</span>
+059322,000544: 
+<a name="55504143544F4646"></a>059323,000545: 04,3771           44751        <span class="sm">UPACTOFF</span>           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495433">BIT3</a>                                  
+059324,000546: 04,3772           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  TURN OFF UPLINK ACTIVITY LIGHT</span>
+059325,000547: 04,3773           03011                           <span class="op">WAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453414C4D4F5554">DSALMOUT</a>                              <span class="co">#  (BIT 3 OF CHANNEL 11)</span>
+059326,000548: 04,3774           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
 
 End of include-file UPDATE_PROGRAM.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

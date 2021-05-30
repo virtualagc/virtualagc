@@ -90,30 +90,30 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-038476,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-038477,000003:                                                                                                  <span class="co">## Filename:    PREBURN_FOR_APS2.agc</span>
-038478,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
-038479,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
-038480,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
-038481,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
-038482,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
-038483,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
-038484,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
-038485,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-038486,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-038487,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-038488,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
-038489,000015:                                                                                                  <span class="co">## Reference:   pp. 851-852</span>
-038490,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-038491,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-038492,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-038493,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
-038494,000020:                                                                                                  <span class="co">##              2017-06-11 HG   Transcribed</span>
-038495,000021:                                                                                                  <span class="co">##              2017-06-15 HG   Fix interpretive operator STODL -> STORE</span>
-038496,000022:                                                                                                  <span class="co">##              2017-06-17 MAS  Split up an "E-4B9".</span>
-038497,000023:                                                                                                  <span class="co">##              2017-06-23 RSB  Proofed comment text with</span>
-038498,000024:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
-038499,000025: 
+038484,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+038485,000003:                                                                                                  <span class="co">## Filename:    PREBURN_FOR_APS2.agc</span>
+038486,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
+038487,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
+038488,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
+038489,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
+038490,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
+038491,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
+038492,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
+038493,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+038494,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+038495,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+038496,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
+038497,000015:                                                                                                  <span class="co">## Reference:   pp. 851-852</span>
+038498,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+038499,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+038500,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+038501,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
+038502,000020:                                                                                                  <span class="co">##              2017-06-11 HG   Transcribed</span>
+038503,000021:                                                                                                  <span class="co">##              2017-06-15 HG   Fix interpretive operator STODL -> STORE</span>
+038504,000022:                                                                                                  <span class="co">##              2017-06-17 MAS  Split up an "E-4B9".</span>
+038505,000023:                                                                                                  <span class="co">##              2017-06-23 RSB  Proofed comment text with</span>
+038506,000024:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
+038507,000025: 
 </pre>
 </span>
 </p>
@@ -129,61 +129,61 @@ Page 851
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-038501,000027:                                                                                                  <span class="co">#       PREAPS2 IS A PROGRAM WHICH INITIALIZES **ASCENT** FOR THE 2ND APS</span>
-038502,000028:                                                                                                  <span class="co">#  BURN. IT USES RN AND VN(TIG), PROVIDED BY MIDTOAVE THROUGH MP13, TO COM-</span>
-038503,000029:                                                                                                  <span class="co">#  PUTE THE P, Q, AND S AXES FOR TRANSFORMATIONS, SETS 3 SWITCHES FOR PRO-</span>
-038504,000030:                                                                                                  <span class="co">#  PER MODING OF ASCENT, AND TRANSFERS DATA FROM FIXED TO ERASABLE FOR USE</span>
-038505,000031:                                                                                                  <span class="co">#  AS NOMINALS AT TIG.</span>
-038506,000032:                                                                                                  <span class="co">#       IT CALLS ASCENT ONCE TO PROVIDE UT AT IGNITION, AND THEN RESETS THE</span>
-038507,000033: 
-038508,000034:                                                                                                  <span class="co">#  EXIT FROM ASCENT TO GO TO FINDCDUD ON SUBSEQUENT ASCENT ENTRIES.</span>
-038509,000035: 
-038510,000036: 32,2000                                           <span class="ps">BANK    </span> 32                                    
-038511,000037: 32,2000  E4,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504158495331">PAXIS1</a>                                
-<a name="50524541505332"></a>038512,000038: 32,2000           53447        <span class="sm">PREAPS2 </span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5252455455524E">RRETURN</a>                               
-038513,000039: 32,2001           35662                           <span class="op">CA      </span> <a href="EXECUTIVE.agc.html#5052494F3231">PRIO21</a>                                <span class="co">#  GIVE LAMBERT A HIGHER PRIORITY THAN</span>
-038514,000040: 32,2002           55451                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C414D5052494F">LAMPRIO</a>                               <span class="co">#  ASCENT, SO IT WILL FINISH.</span>
-038515,000041: 32,2003           06103                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-038516,000042: 32,2004           77624                           <span class="in">CALL    </span>                                       
-038517,000043: 32,2005           60347                                    <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#5650415443484552">VPATCHER</a>                              
-038518,000044: 32,2006           77775                           <span class="in">VLOAD   </span>                                       
-038519,000045: 32,2007           01011                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524E">RN</a>                                    <span class="co">#  LOAD RN*2(N-29)</span>
-038520,000046: 
-038521,000047: 32,2010           53435                           <span class="in">VXV     </span> <span class="in">UNIT      </span>                            <span class="co">#  RN X VN*2(N-36)</span>
-038522,000048: 32,2011           01017                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564E">VN</a>                                    <span class="co">#  SAXIS*2(-1)</span>
-038523,000049: 32,2012           02015                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5341584953">SAXIS</a>                                 <span class="co">#  STORE SAXIS</span>
-038524,000050: 32,2013           76435                           <span class="in">VXV     </span> <span class="in">VSL1      </span>                            <span class="co">#  S X UR*2(-2)=Q1*2(-2), NORM TO S AND R</span>
-038525,000051: 32,2014           01033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495452">UNITR</a>                                 <span class="co">#  Q1*2(-1)</span>
-038526,000052: 32,2015           63361                           <span class="in">VXSC    </span> <span class="in">PDVL      </span>                            <span class="co">#  Q1* COS27*2(-1)</span>
-038527,000053: 32,2016           24072                                    <a href="#434F533237">COS27</a>                                 <span class="co">#  IN PDL(0)*2(-1)                          2</span>
-038528,000054: 32,2017           01033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495452">UNITR</a>                                 <span class="co">#  LOAD UR*2(-1)</span>
-038529,000055: 32,2020           51361                           <span class="in">VXSC    </span> <span class="in">BVSU      </span>                            <span class="co">#  UR SIN27*2(-1)</span>
-038530,000056: 32,2021           24074                                    <a href="#53494E3237">SIN27</a>                                 <span class="co">#  Q1 COS27-UR SIN27 = Q</span>
-038531,000057: 
-038532,000058: 32,2022           77626                           <span class="in">STADR   </span>                                       <span class="co">#                                           0</span>
-038533,000059: 32,2023           75770                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5141584953">QAXIS</a>                                 <span class="co">#  STORE QAXIS</span>
-038534,000060: 32,2024           76435                           <span class="in">VXV     </span> <span class="in">VSL1      </span>                            <span class="co">#  Q X S*2(-2) = P*2(-2)</span>
-038535,000061: 32,2025           02015                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5341584953">SAXIS</a>                                 <span class="co">#  P*2(-1)</span>
-038536,000062: 32,2026           26001                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504158495331">PAXIS1</a>                                <span class="co">#  STORE PAXIS</span>
-038537,000063: 32,2027           24076                                    <a href="#454E474E4F4D">ENGNOM</a>                                <span class="co">#  LOAD NOMINAL AT, 1/VE, TBUP</span>
-038538,000064: 32,2030           26023                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4154">AT</a>                                    <span class="co">#  STORE IN ERASE</span>
-038539,000065: 32,2031           24104                                    <a href="#50524549474E">PREIGN</a>                                <span class="co">#  LOAD NOM, 1/DV2,1/DV1,KR</span>
-038540,000066: 32,2032           16031                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41544D454153">ATMEAS</a>                                <span class="co">#  STORE IN ERASE</span>
-038541,000067: 32,2033           26517                                    <a href="#445030">DP0</a>                                   <span class="co">#  LOAD 0</span>
-038542,000068: 32,2034           26037                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B5231">KR1</a>                                   <span class="co">#  STORE IN KR1</span>
-038543,000069: 32,2035           24112                                    <a href="#56434F4E4F4D">VCONOM</a>                                <span class="co">#  LOAD NOM. RDOTD,YDOTD,ZDOTD</span>
-038544,000070: 
-038545,000071: 32,2036           02041                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52444F5444">RDOTD</a>                                 <span class="co">#  STORE IN ERASE</span>
-038546,000072: 32,2037           77731                           <span class="in">SSP     </span>                                       
-038547,000073: 32,2040           02051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#415343524554">ASCRET</a>                                
-038548,000074: 32,2041           64053                                    <a href="#5052415053">PRAPS</a>                                 <span class="co">#  LOAD RETURN ADD. FROM ASCENT</span>
-038549,000075: 32,2042           43014                           <span class="in">SET     </span> <span class="in">CLEAR     </span>                            
-038550,000076: 32,2043           01474                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#444952454354">DIRECT</a>                                <span class="co">#  DIRECT=1</span>
-038551,000077: 32,2044           01675                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#50415353">PASS</a>                                  <span class="co">#  PASS=0</span>
-038552,000078: 32,2045           43014                           <span class="in">CLEAR   </span> <span class="in">SET       </span>                            <span class="co">#  CLEAR GUESSW FOR NO COGAVAIL</span>
-038553,000079: 32,2046           02263                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#475545535357">GUESSW</a>                                
-038554,000080: 32,2047           02061                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#444F4E455357">DONESW</a>                                <span class="co">#  TO START LAMBERT</span>
-038555,000081: 
+038509,000027:                                                                                                  <span class="co">#       PREAPS2 IS A PROGRAM WHICH INITIALIZES **ASCENT** FOR THE 2ND APS</span>
+038510,000028:                                                                                                  <span class="co">#  BURN. IT USES RN AND VN(TIG), PROVIDED BY MIDTOAVE THROUGH MP13, TO COM-</span>
+038511,000029:                                                                                                  <span class="co">#  PUTE THE P, Q, AND S AXES FOR TRANSFORMATIONS, SETS 3 SWITCHES FOR PRO-</span>
+038512,000030:                                                                                                  <span class="co">#  PER MODING OF ASCENT, AND TRANSFERS DATA FROM FIXED TO ERASABLE FOR USE</span>
+038513,000031:                                                                                                  <span class="co">#  AS NOMINALS AT TIG.</span>
+038514,000032:                                                                                                  <span class="co">#       IT CALLS ASCENT ONCE TO PROVIDE UT AT IGNITION, AND THEN RESETS THE</span>
+038515,000033: 
+038516,000034:                                                                                                  <span class="co">#  EXIT FROM ASCENT TO GO TO FINDCDUD ON SUBSEQUENT ASCENT ENTRIES.</span>
+038517,000035: 
+038518,000036: 32,2000                                           <span class="ps">BANK    </span> 32                                    
+038519,000037: 32,2000  E4,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504158495331">PAXIS1</a>                                
+<a name="50524541505332"></a>038520,000038: 32,2000           53447        <span class="sm">PREAPS2 </span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5252455455524E">RRETURN</a>                               
+038521,000039: 32,2001           35662                           <span class="op">CA      </span> <a href="EXECUTIVE.agc.html#5052494F3231">PRIO21</a>                                <span class="co">#  GIVE LAMBERT A HIGHER PRIORITY THAN</span>
+038522,000040: 32,2002           55451                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C414D5052494F">LAMPRIO</a>                               <span class="co">#  ASCENT, SO IT WILL FINISH.</span>
+038523,000041: 32,2003           06103                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+038524,000042: 32,2004           77624                           <span class="in">CALL    </span>                                       
+038525,000043: 32,2005           60347                                    <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#5650415443484552">VPATCHER</a>                              
+038526,000044: 32,2006           77775                           <span class="in">VLOAD   </span>                                       
+038527,000045: 32,2007           01011                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524E">RN</a>                                    <span class="co">#  LOAD RN*2(N-29)</span>
+038528,000046: 
+038529,000047: 32,2010           53435                           <span class="in">VXV     </span> <span class="in">UNIT      </span>                            <span class="co">#  RN X VN*2(N-36)</span>
+038530,000048: 32,2011           01017                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564E">VN</a>                                    <span class="co">#  SAXIS*2(-1)</span>
+038531,000049: 32,2012           02015                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5341584953">SAXIS</a>                                 <span class="co">#  STORE SAXIS</span>
+038532,000050: 32,2013           76435                           <span class="in">VXV     </span> <span class="in">VSL1      </span>                            <span class="co">#  S X UR*2(-2)=Q1*2(-2), NORM TO S AND R</span>
+038533,000051: 32,2014           01033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495452">UNITR</a>                                 <span class="co">#  Q1*2(-1)</span>
+038534,000052: 32,2015           63361                           <span class="in">VXSC    </span> <span class="in">PDVL      </span>                            <span class="co">#  Q1* COS27*2(-1)</span>
+038535,000053: 32,2016           24072                                    <a href="#434F533237">COS27</a>                                 <span class="co">#  IN PDL(0)*2(-1)                          2</span>
+038536,000054: 32,2017           01033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495452">UNITR</a>                                 <span class="co">#  LOAD UR*2(-1)</span>
+038537,000055: 32,2020           51361                           <span class="in">VXSC    </span> <span class="in">BVSU      </span>                            <span class="co">#  UR SIN27*2(-1)</span>
+038538,000056: 32,2021           24074                                    <a href="#53494E3237">SIN27</a>                                 <span class="co">#  Q1 COS27-UR SIN27 = Q</span>
+038539,000057: 
+038540,000058: 32,2022           77626                           <span class="in">STADR   </span>                                       <span class="co">#                                           0</span>
+038541,000059: 32,2023           75770                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5141584953">QAXIS</a>                                 <span class="co">#  STORE QAXIS</span>
+038542,000060: 32,2024           76435                           <span class="in">VXV     </span> <span class="in">VSL1      </span>                            <span class="co">#  Q X S*2(-2) = P*2(-2)</span>
+038543,000061: 32,2025           02015                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5341584953">SAXIS</a>                                 <span class="co">#  P*2(-1)</span>
+038544,000062: 32,2026           26001                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504158495331">PAXIS1</a>                                <span class="co">#  STORE PAXIS</span>
+038545,000063: 32,2027           24076                                    <a href="#454E474E4F4D">ENGNOM</a>                                <span class="co">#  LOAD NOMINAL AT, 1/VE, TBUP</span>
+038546,000064: 32,2030           26023                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4154">AT</a>                                    <span class="co">#  STORE IN ERASE</span>
+038547,000065: 32,2031           24104                                    <a href="#50524549474E">PREIGN</a>                                <span class="co">#  LOAD NOM, 1/DV2,1/DV1,KR</span>
+038548,000066: 32,2032           16031                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41544D454153">ATMEAS</a>                                <span class="co">#  STORE IN ERASE</span>
+038549,000067: 32,2033           26517                                    <a href="#445030">DP0</a>                                   <span class="co">#  LOAD 0</span>
+038550,000068: 32,2034           26037                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B5231">KR1</a>                                   <span class="co">#  STORE IN KR1</span>
+038551,000069: 32,2035           24112                                    <a href="#56434F4E4F4D">VCONOM</a>                                <span class="co">#  LOAD NOM. RDOTD,YDOTD,ZDOTD</span>
+038552,000070: 
+038553,000071: 32,2036           02041                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52444F5444">RDOTD</a>                                 <span class="co">#  STORE IN ERASE</span>
+038554,000072: 32,2037           77731                           <span class="in">SSP     </span>                                       
+038555,000073: 32,2040           02051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#415343524554">ASCRET</a>                                
+038556,000074: 32,2041           64053                                    <a href="#5052415053">PRAPS</a>                                 <span class="co">#  LOAD RETURN ADD. FROM ASCENT</span>
+038557,000075: 32,2042           43014                           <span class="in">SET     </span> <span class="in">CLEAR     </span>                            
+038558,000076: 32,2043           01474                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#444952454354">DIRECT</a>                                <span class="co">#  DIRECT=1</span>
+038559,000077: 32,2044           01675                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#50415353">PASS</a>                                  <span class="co">#  PASS=0</span>
+038560,000078: 32,2045           43014                           <span class="in">CLEAR   </span> <span class="in">SET       </span>                            <span class="co">#  CLEAR GUESSW FOR NO COGAVAIL</span>
+038561,000079: 32,2046           02263                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#475545535357">GUESSW</a>                                
+038562,000080: 32,2047           02061                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#444F4E455357">DONESW</a>                                <span class="co">#  TO START LAMBERT</span>
+038563,000081: 
 </pre>
 </span>
 </p>
@@ -199,42 +199,42 @@ Page 852
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-038557,000083: 32,2050           52014                           <span class="in">CLEAR   </span> <span class="in">GOTO      </span>                            
-038558,000084: 32,2051           01676                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4843">HC</a>                                    <span class="co">#  HC=0</span>
-038559,000085: 
-038560,000086: 32,2052           64120                                    <a href="ASCENT_STEERING.agc.html#415343454E54">ASCENT</a>                                <span class="co">#  GO TO ASCENT EQUATIONS</span>
-<a name="5052415053"></a>038561,000087: 32,2053           43175        <span class="sm">PRAPS   </span>           <span class="in">VLOAD   </span> <span class="in">SET       </span>                            
-038562,000088: 32,2054           02057                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5554">UT</a>                                    <span class="co">#  LOAD DES. THRUST VECTOR</span>
-038563,000089: 32,2055           02063                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#475545535357">GUESSW</a>                                <span class="co">#  SET GUESSW FOR COGAVAIL</span>
-038564,000090: 32,2056           25656                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F494E5456534D">POINTVSM</a>                              <span class="co">#  STORE FOR CALCMANU</span>
-038565,000091: 32,2057           26515                                    <a href="MP4-CONTINGENCY_ORBIT_INSERTION.agc.html#424F445956454354">BODYVECT</a>                              <span class="co">#  LOAD UNIT X-AXIS</span>
-038566,000092: 32,2060           01664                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534341584953">SCAXIS</a>                                <span class="co">#  STORE FOR CALCMANU</span>
-038567,000093: 32,2061           77776                           <span class="in">EXIT    </span>                                       
-038568,000094: 32,2062           32117                           <span class="op">CA      </span> <a href="#434455464144">CDUFAD</a>                                <span class="co">#  SET UP FOR NORMAL EXIT FROM ASCENT TO</span>
-038569,000095: 32,2063           55450                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415343524554">ASCRET</a>                                <span class="co">#  FINDCDUD</span>
-038570,000096: 
-038571,000097: 32,2064           35661                           <span class="op">CA      </span> <a href="EXECUTIVE.agc.html#5052494F3137">PRIO17</a>                                <span class="co">#  GIVE LAMBERT A LOWER PRIORITY</span>
-038572,000098: 32,2065           55451                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C414D5052494F">LAMPRIO</a>                               
-038573,000099: 32,2066           00006                           <span class="op">EXTEND  </span>                                       
-038574,000100: 32,2067           31447                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5252455455524E">RRETURN</a>                               <span class="co">#  GO BACK TO MP13</span>
-038575,000101: 32,2070           52006                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A">Z</a>                                     
-<a name="434F533237"></a>038576,000102: 32,2071           34406 10015  <span class="sm">COS27   </span>           <span class="ps">2DEC    </span> .89100652                             
-<a name="53494E3237"></a>038577,000103: 32,2073           16416 05613  <span class="sm">SIN27   </span>           <span class="ps">2DEC    </span> .45399050                             
-<a name="454E474E4F4D"></a>038578,000104: 32,2075           05204 04411  <span class="sm">ENGNOM  </span>           <span class="ps">2DEC    </span> 3.20928237 E-4        B9              <span class="co">#  AT*2(9)</span>
-038579,000105: 32,2077           20712 37674                     <span class="ps">2DEC    </span> .0330009301 B4                         <span class="co">#  (1/VE)*2(4)</span>
-038580,000106: 
-038581,000107: 32,2101           27032 21513                     <span class="ps">2DEC    </span> 94420.4114 B-17                       <span class="co">#  TBUP*2(-17)</span>
-<a name="50524549474E"></a>038582,000108: 32,2103           00000 00000  <span class="sm">PREIGN  </span>           <span class="ps">2DEC    </span> 0          B-28                       <span class="co">#  NOMINAL (1/DV2)*2( )</span>
-038583,000109: 32,2105           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       <span class="co">#  NOMINAL (1/DV1)*2( )</span>
-038584,000110: 32,2107           20000 00000                     <span class="ps">2DEC    </span> .5                                    <span class="co">#  KR*2(-1) FOR APS2</span>
-<a name="56434F4E4F4D"></a>038585,000111: 32,2111           00000 00000  <span class="sm">VCONOM  </span>           <span class="ps">2DEC    </span> 0          B-28                       <span class="co">#  RDOTD*2(-7)</span>
-038586,000112: 
-038587,000113: 32,2113           22363 06315                     <span class="ps">2DEC    </span> 73.9       B-7                        
-038588,000114: 32,2115           05000 00000                     <span class="ps">2DEC    </span> 20         B-7                        
-<a name="44502E35"></a>038589,000115: 32,2117  33,2514               <span class="sm">DP.5    </span>           <span class="ps">=       </span> <a href="MP4-CONTINGENCY_ORBIT_INSERTION.agc.html#424F445956454354">BODYVECT</a>                              
-<a name="445030"></a>038590,000116: 32,2117  33,2516               <span class="sm">DP0     </span>           <span class="ps">=       </span> <a href="MP4-CONTINGENCY_ORBIT_INSERTION.agc.html#424F445956454354">BODYVECT</a>   +2                         
-038591,000117: 32,2117  E4,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504158495331">PAXIS1</a>                                
-<a name="434455464144"></a>038592,000118: 32,2117           60643        <span class="sm">CDUFAD  </span>           <span class="ps">FCADR   </span> <a href="FIND_CDU_DESIRED.agc.html#46494E4443445544">FINDCDUD</a>                              
+038565,000083: 32,2050           52014                           <span class="in">CLEAR   </span> <span class="in">GOTO      </span>                            
+038566,000084: 32,2051           01676                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4843">HC</a>                                    <span class="co">#  HC=0</span>
+038567,000085: 
+038568,000086: 32,2052           64120                                    <a href="ASCENT_STEERING.agc.html#415343454E54">ASCENT</a>                                <span class="co">#  GO TO ASCENT EQUATIONS</span>
+<a name="5052415053"></a>038569,000087: 32,2053           43175        <span class="sm">PRAPS   </span>           <span class="in">VLOAD   </span> <span class="in">SET       </span>                            
+038570,000088: 32,2054           02057                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5554">UT</a>                                    <span class="co">#  LOAD DES. THRUST VECTOR</span>
+038571,000089: 32,2055           02063                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#475545535357">GUESSW</a>                                <span class="co">#  SET GUESSW FOR COGAVAIL</span>
+038572,000090: 32,2056           25656                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F494E5456534D">POINTVSM</a>                              <span class="co">#  STORE FOR CALCMANU</span>
+038573,000091: 32,2057           26515                                    <a href="MP4-CONTINGENCY_ORBIT_INSERTION.agc.html#424F445956454354">BODYVECT</a>                              <span class="co">#  LOAD UNIT X-AXIS</span>
+038574,000092: 32,2060           01664                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534341584953">SCAXIS</a>                                <span class="co">#  STORE FOR CALCMANU</span>
+038575,000093: 32,2061           77776                           <span class="in">EXIT    </span>                                       
+038576,000094: 32,2062           32117                           <span class="op">CA      </span> <a href="#434455464144">CDUFAD</a>                                <span class="co">#  SET UP FOR NORMAL EXIT FROM ASCENT TO</span>
+038577,000095: 32,2063           55450                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#415343524554">ASCRET</a>                                <span class="co">#  FINDCDUD</span>
+038578,000096: 
+038579,000097: 32,2064           35661                           <span class="op">CA      </span> <a href="EXECUTIVE.agc.html#5052494F3137">PRIO17</a>                                <span class="co">#  GIVE LAMBERT A LOWER PRIORITY</span>
+038580,000098: 32,2065           55451                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C414D5052494F">LAMPRIO</a>                               
+038581,000099: 32,2066           00006                           <span class="op">EXTEND  </span>                                       
+038582,000100: 32,2067           31447                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5252455455524E">RRETURN</a>                               <span class="co">#  GO BACK TO MP13</span>
+038583,000101: 32,2070           52006                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A">Z</a>                                     
+<a name="434F533237"></a>038584,000102: 32,2071           34406 10015  <span class="sm">COS27   </span>           <span class="ps">2DEC    </span> .89100652                             
+<a name="53494E3237"></a>038585,000103: 32,2073           16416 05613  <span class="sm">SIN27   </span>           <span class="ps">2DEC    </span> .45399050                             
+<a name="454E474E4F4D"></a>038586,000104: 32,2075           05204 04411  <span class="sm">ENGNOM  </span>           <span class="ps">2DEC    </span> 3.20928237 E-4        B9              <span class="co">#  AT*2(9)</span>
+038587,000105: 32,2077           20712 37674                     <span class="ps">2DEC    </span> .0330009301 B4                         <span class="co">#  (1/VE)*2(4)</span>
+038588,000106: 
+038589,000107: 32,2101           27032 21513                     <span class="ps">2DEC    </span> 94420.4114 B-17                       <span class="co">#  TBUP*2(-17)</span>
+<a name="50524549474E"></a>038590,000108: 32,2103           00000 00000  <span class="sm">PREIGN  </span>           <span class="ps">2DEC    </span> 0          B-28                       <span class="co">#  NOMINAL (1/DV2)*2( )</span>
+038591,000109: 32,2105           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       <span class="co">#  NOMINAL (1/DV1)*2( )</span>
+038592,000110: 32,2107           20000 00000                     <span class="ps">2DEC    </span> .5                                    <span class="co">#  KR*2(-1) FOR APS2</span>
+<a name="56434F4E4F4D"></a>038593,000111: 32,2111           00000 00000  <span class="sm">VCONOM  </span>           <span class="ps">2DEC    </span> 0          B-28                       <span class="co">#  RDOTD*2(-7)</span>
+038594,000112: 
+038595,000113: 32,2113           22363 06315                     <span class="ps">2DEC    </span> 73.9       B-7                        
+038596,000114: 32,2115           05000 00000                     <span class="ps">2DEC    </span> 20         B-7                        
+<a name="44502E35"></a>038597,000115: 32,2117  33,2514               <span class="sm">DP.5    </span>           <span class="ps">=       </span> <a href="MP4-CONTINGENCY_ORBIT_INSERTION.agc.html#424F445956454354">BODYVECT</a>                              
+<a name="445030"></a>038598,000116: 32,2117  33,2516               <span class="sm">DP0     </span>           <span class="ps">=       </span> <a href="MP4-CONTINGENCY_ORBIT_INSERTION.agc.html#424F445956454354">BODYVECT</a>   +2                         
+038599,000117: 32,2117  E4,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504158495331">PAXIS1</a>                                
+<a name="434455464144"></a>038600,000118: 32,2117           60643        <span class="sm">CDUFAD  </span>           <span class="ps">FCADR   </span> <a href="FIND_CDU_DESIRED.agc.html#46494E4443445544">FINDCDUD</a>                              
 
 End of include-file PREBURN_FOR_APS2.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

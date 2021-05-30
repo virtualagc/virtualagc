@@ -87,23 +87,23 @@ project's GitHub repository</a>.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-045403,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-045404,000003:                                                                                                  <span class="co">## Filename:    RCS-CSM_DAP_EXECUTIVE_PROGRAMS.agc</span>
-045405,000004:                                                                                                  <span class="co">## Purpose:     A section of Artemis revision 071.</span>
-045406,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the first</span>
-045407,000006:                                                                                                  <span class="co">##              release of the flight software for the Command Module's</span>
-045408,000007:                                                                                                  <span class="co">##              (CM) Apollo Guidance Computer (AGC) for Apollo 15 through</span>
-045409,000008:                                                                                                  <span class="co">##              17. The code has been recreated from a copy of Artemis 072.</span>
-045410,000009:                                                                                                  <span class="co">##              It has been adapted such that the resulting bugger words</span>
-045411,000010:                                                                                                  <span class="co">##              exactly match those specified for Artemis 071 in NASA</span>
-045412,000011:                                                                                                  <span class="co">##              drawing 2021154-, which gives relatively high confidence</span>
-045413,000012:                                                                                                  <span class="co">##              that the reconstruction is correct.</span>
-045414,000013:                                                                                                  <span class="co">## Reference:   1036</span>
-045415,000014:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-045416,000015:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-045417,000016:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-045418,000017:                                                                                                  <span class="co">## Mod history: 2019-08-14 MAS  Created from Artemis 072.</span>
-045419,000018: 
+045411,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+045412,000003:                                                                                                  <span class="co">## Filename:    RCS-CSM_DAP_EXECUTIVE_PROGRAMS.agc</span>
+045413,000004:                                                                                                  <span class="co">## Purpose:     A section of Artemis revision 071.</span>
+045414,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the first</span>
+045415,000006:                                                                                                  <span class="co">##              release of the flight software for the Command Module's</span>
+045416,000007:                                                                                                  <span class="co">##              (CM) Apollo Guidance Computer (AGC) for Apollo 15 through</span>
+045417,000008:                                                                                                  <span class="co">##              17. The code has been recreated from a copy of Artemis 072.</span>
+045418,000009:                                                                                                  <span class="co">##              It has been adapted such that the resulting bugger words</span>
+045419,000010:                                                                                                  <span class="co">##              exactly match those specified for Artemis 071 in NASA</span>
+045420,000011:                                                                                                  <span class="co">##              drawing 2021154-, which gives relatively high confidence</span>
+045421,000012:                                                                                                  <span class="co">##              that the reconstruction is correct.</span>
+045422,000013:                                                                                                  <span class="co">## Reference:   1036</span>
+045423,000014:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+045424,000015:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+045425,000016:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+045426,000017:                                                                                                  <span class="co">## Mod history: 2019-08-14 MAS  Created from Artemis 072.</span>
+045427,000018: 
 </pre>
 </span>
 </p>
@@ -119,55 +119,55 @@ Page 1036
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-045421,000020:                                                                                                  <span class="co">#  CALCULATION OF  AMGB, AMBG     ONCE EVERY SECOND</span>
-045422,000021: 
-045423,000022:                                                                                                  <span class="co">#   AMGB =  1    SIN(PSI)                0</span>
-045424,000023:                                                                                                  <span class="co">#           0    COS(PSI)COS(PHI)        SIN(PHI)</span>
-045425,000024:                                                                                                  <span class="co">#           0    -COS(PSI)SIN(PHI)       COS(PHI)</span>
-045426,000025: 
-045427,000026:                                                                                                  <span class="co">#   AMBG =  1    -TAN(PSI)COS(PHI)       TAN(PSI)SIN(PHI)</span>
-045428,000027:                                                                                                  <span class="co">#           0    COS(PHI)/COS(PSI)       -SIN(PHI)/COS(PSI)</span>
-045429,000028:                                                                                                  <span class="co">#           0    SIN(PHI)                COS(PHI)</span>
-045430,000029: 
-045431,000030:                                                                                                  <span class="co">#   WHERE PHI AND PSI ARE CDU ANGLES</span>
-045432,000031: 
-045433,000032: 22,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4441505338">DAPS8</a>                                 
-045434,000033: 22,2000                                           <span class="ps">BANK    </span>                                       
-045435,000034: 
-045436,000035: 22,3560                                           <span class="ps">COUNT*  </span> $$/DAPEX                              
-045437,000036: 22,3560  E6,1510                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>                                 
-<a name="414D424755504454"></a>045438,000037: 22,3560           30102        <span class="sm">AMBGUPDT</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524436">FLAGWRD6</a>                              <span class="co">#  CHECK FOR RCS AUTOPILOT</span>
-045439,000038: 22,3561           74076                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4450434F4E464947">DPCONFIG</a>                              
-045440,000039: 22,3562           00006                           <span class="op">EXTEND  </span>                                       
-045441,000040: 22,3563           65205                           <span class="op">BZMF    </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              <span class="co">#  BIT15 = 0, BIT14 = 1</span>
-045442,000041: 22,3564           74753                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415032424954">DAP2BIT</a>                               <span class="co">#  IF NOT RCS, EXIT</span>
-045443,000042: 22,3565           00006                           <span class="op">EXTEND  </span>                                       
-045444,000043: 22,3566           15205                           <span class="op">BZF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              <span class="co">#  TO PROTECT TVC DAP ON SWITCHOVER</span>
-045445,000044: 
-045446,000045: 22,3567           30034                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
-045447,000046: 22,3570           05061                           <span class="op">TC      </span> <a href="MYSUBS.agc.html#535053494E32">SPSIN2</a>                                
-045448,000047: 22,3571           55640                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D474231">AMGB1</a>                                 <span class="co">#  CALCULATE AMGB</span>
-045449,000048: 22,3572           30034                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
-045450,000049: 22,3573           05060                           <span class="op">TC      </span> <a href="MYSUBS.agc.html#5350434F5332">SPCOS2</a>                                
-045451,000050: 22,3574           55645                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341505349">CAPSI</a>                                 <span class="co">#  MUST CHECK FOR GIMBAL LOCK</span>
-045452,000051: 22,3575           34620                           <span class="op">CAF     </span> <a href="#51554144414E474C">QUADANGL</a>                              <span class="co">#  = 7.25  DEGREES JET QUAD ANGULAR OFFSET</span>
-045453,000052: 22,3576           00006                           <span class="op">EXTEND  </span>                                       
-045454,000053: 22,3577           20032                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  
-045455,000054: 22,3600           40000                           <span class="op">COM     </span>                                       <span class="co">#  CDUX - 7.25 DEG</span>
-045456,000055: 22,3601           05060                           <span class="op">TC      </span> <a href="MYSUBS.agc.html#5350434F5331">SPCOS1</a>                                
-045457,000056: 22,3602           55644                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D474238">AMGB8</a>                                 
-045458,000057: 22,3603           00006                           <span class="op">EXTEND  </span>                                       
-045459,000058: 22,3604           71645                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341505349">CAPSI</a>                                 
-045460,000059: 22,3605           55641                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D474234">AMGB4</a>                                 
-045461,000060: 22,3606           34620                           <span class="op">CAF     </span> <a href="#51554144414E474C">QUADANGL</a>                              
-045462,000061: 22,3607           00006                           <span class="op">EXTEND  </span>                                       
-045463,000062: 22,3610           20032                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  
-045464,000063: 22,3611           40000                           <span class="op">COM     </span>                                       <span class="co">#  CDUX - 7.25 DEG</span>
-045465,000064: 22,3612           05061                           <span class="op">TC      </span> <a href="MYSUBS.agc.html#535053494E31">SPSIN1</a>                                
-045466,000065: 22,3613           55642                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D474235">AMGB5</a>                                 
-045467,000066: 22,3614           00006                           <span class="op">EXTEND  </span>                                       
-045468,000067: 22,3615           71645                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341505349">CAPSI</a>                                 
-045469,000068: 22,3616           40000                           <span class="op">COM     </span>                                       
+045429,000020:                                                                                                  <span class="co">#  CALCULATION OF  AMGB, AMBG     ONCE EVERY SECOND</span>
+045430,000021: 
+045431,000022:                                                                                                  <span class="co">#   AMGB =  1    SIN(PSI)                0</span>
+045432,000023:                                                                                                  <span class="co">#           0    COS(PSI)COS(PHI)        SIN(PHI)</span>
+045433,000024:                                                                                                  <span class="co">#           0    -COS(PSI)SIN(PHI)       COS(PHI)</span>
+045434,000025: 
+045435,000026:                                                                                                  <span class="co">#   AMBG =  1    -TAN(PSI)COS(PHI)       TAN(PSI)SIN(PHI)</span>
+045436,000027:                                                                                                  <span class="co">#           0    COS(PHI)/COS(PSI)       -SIN(PHI)/COS(PSI)</span>
+045437,000028:                                                                                                  <span class="co">#           0    SIN(PHI)                COS(PHI)</span>
+045438,000029: 
+045439,000030:                                                                                                  <span class="co">#   WHERE PHI AND PSI ARE CDU ANGLES</span>
+045440,000031: 
+045441,000032: 22,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4441505338">DAPS8</a>                                 
+045442,000033: 22,2000                                           <span class="ps">BANK    </span>                                       
+045443,000034: 
+045444,000035: 22,3560                                           <span class="ps">COUNT*  </span> $$/DAPEX                              
+045445,000036: 22,3560  E6,1510                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>                                 
+<a name="414D424755504454"></a>045446,000037: 22,3560           30102        <span class="sm">AMBGUPDT</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524436">FLAGWRD6</a>                              <span class="co">#  CHECK FOR RCS AUTOPILOT</span>
+045447,000038: 22,3561           74076                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4450434F4E464947">DPCONFIG</a>                              
+045448,000039: 22,3562           00006                           <span class="op">EXTEND  </span>                                       
+045449,000040: 22,3563           65205                           <span class="op">BZMF    </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              <span class="co">#  BIT15 = 0, BIT14 = 1</span>
+045450,000041: 22,3564           74753                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415032424954">DAP2BIT</a>                               <span class="co">#  IF NOT RCS, EXIT</span>
+045451,000042: 22,3565           00006                           <span class="op">EXTEND  </span>                                       
+045452,000043: 22,3566           15205                           <span class="op">BZF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              <span class="co">#  TO PROTECT TVC DAP ON SWITCHOVER</span>
+045453,000044: 
+045454,000045: 22,3567           30034                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
+045455,000046: 22,3570           05061                           <span class="op">TC      </span> <a href="MYSUBS.agc.html#535053494E32">SPSIN2</a>                                
+045456,000047: 22,3571           55640                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D474231">AMGB1</a>                                 <span class="co">#  CALCULATE AMGB</span>
+045457,000048: 22,3572           30034                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
+045458,000049: 22,3573           05060                           <span class="op">TC      </span> <a href="MYSUBS.agc.html#5350434F5332">SPCOS2</a>                                
+045459,000050: 22,3574           55645                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341505349">CAPSI</a>                                 <span class="co">#  MUST CHECK FOR GIMBAL LOCK</span>
+045460,000051: 22,3575           34620                           <span class="op">CAF     </span> <a href="#51554144414E474C">QUADANGL</a>                              <span class="co">#  = 7.25  DEGREES JET QUAD ANGULAR OFFSET</span>
+045461,000052: 22,3576           00006                           <span class="op">EXTEND  </span>                                       
+045462,000053: 22,3577           20032                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  
+045463,000054: 22,3600           40000                           <span class="op">COM     </span>                                       <span class="co">#  CDUX - 7.25 DEG</span>
+045464,000055: 22,3601           05060                           <span class="op">TC      </span> <a href="MYSUBS.agc.html#5350434F5331">SPCOS1</a>                                
+045465,000056: 22,3602           55644                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D474238">AMGB8</a>                                 
+045466,000057: 22,3603           00006                           <span class="op">EXTEND  </span>                                       
+045467,000058: 22,3604           71645                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341505349">CAPSI</a>                                 
+045468,000059: 22,3605           55641                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D474234">AMGB4</a>                                 
+045469,000060: 22,3606           34620                           <span class="op">CAF     </span> <a href="#51554144414E474C">QUADANGL</a>                              
+045470,000061: 22,3607           00006                           <span class="op">EXTEND  </span>                                       
+045471,000062: 22,3610           20032                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  
+045472,000063: 22,3611           40000                           <span class="op">COM     </span>                                       <span class="co">#  CDUX - 7.25 DEG</span>
+045473,000064: 22,3612           05061                           <span class="op">TC      </span> <a href="MYSUBS.agc.html#535053494E31">SPSIN1</a>                                
+045474,000065: 22,3613           55642                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D474235">AMGB5</a>                                 
+045475,000066: 22,3614           00006                           <span class="op">EXTEND  </span>                                       
+045476,000067: 22,3615           71645                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341505349">CAPSI</a>                                 
+045477,000068: 22,3616           40000                           <span class="op">COM     </span>                                       
 </pre>
 </span>
 </p>
@@ -183,13 +183,13 @@ Page 1037
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-045471,000070: 22,3617           55643                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D474237">AMGB7</a>                                 
-045472,000071: 22,3620           15205                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-045473,000072:    4000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#46465441473132">FFTAG12</a>                               
-045474,000073:    4000                                           <span class="ps">BANK    </span>                                       
-045475,000074: 
-045476,000075:    4620                                           <span class="ps">COUNT*  </span> $$/DAPEX                              
-<a name="51554144414E474C"></a>045477,000076:    4620           01224        <span class="sm">QUADANGL</span>           <span class="ps">DEC     </span> 660        B-14                       <span class="co">#  = 7.25 DEGREES</span>
+045479,000070: 22,3617           55643                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D474237">AMGB7</a>                                 
+045480,000071: 22,3620           15205                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+045481,000072:    4000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#46465441473132">FFTAG12</a>                               
+045482,000073:    4000                                           <span class="ps">BANK    </span>                                       
+045483,000074: 
+045484,000075:    4620                                           <span class="ps">COUNT*  </span> $$/DAPEX                              
+<a name="51554144414E474C"></a>045485,000076:    4620           01224        <span class="sm">QUADANGL</span>           <span class="ps">DEC     </span> 660        B-14                       <span class="co">#  = 7.25 DEGREES</span>
 
 End of include-file RCS-CSM_DAP_EXECUTIVE_PROGRAMS.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

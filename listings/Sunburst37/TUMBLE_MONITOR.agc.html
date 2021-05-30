@@ -90,28 +90,28 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-034945,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-034946,000003:                                                                                                  <span class="co">## Filename:    TUMBLE_MONITOR.agc</span>
-034947,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
-034948,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
-034949,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
-034950,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
-034951,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
-034952,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
-034953,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
-034954,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-034955,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-034956,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-034957,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
-034958,000015:                                                                                                  <span class="co">## Reference:   pp. 777-779</span>
-034959,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-034960,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-034961,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-034962,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
-034963,000020:                                                                                                  <span class="co">##              2017-06-13 HG   Transcribed</span>
-034964,000021:                                                                                                  <span class="co">##              2017-06-23 RSB  Proofed comment text with</span>
-034965,000022:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
-034966,000023: 
+034952,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+034953,000003:                                                                                                  <span class="co">## Filename:    TUMBLE_MONITOR.agc</span>
+034954,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
+034955,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
+034956,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
+034957,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
+034958,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
+034959,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
+034960,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
+034961,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+034962,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+034963,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+034964,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
+034965,000015:                                                                                                  <span class="co">## Reference:   pp. 777-779</span>
+034966,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+034967,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+034968,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+034969,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
+034970,000020:                                                                                                  <span class="co">##              2017-06-13 HG   Transcribed</span>
+034971,000021:                                                                                                  <span class="co">##              2017-06-23 RSB  Proofed comment text with</span>
+034972,000022:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
+034973,000023: 
 </pre>
 </span>
 </p>
@@ -127,61 +127,61 @@ Page 777
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-034968,000025:                                                                                                  <span class="co">#  PROGRAM DETECTS SPIN ABOUT NAV.AXES AND SETS BIT 13 OF FLAGWORD1 ON IF SPIN IS IN EXCESS OF 2.99 DEGREES/SEC .</span>
-034969,000026:                                                                                                  <span class="co">#  NO CONTROL ACTION IS EXERTED . TO DISCONTINUE MONITORING , TURN BIT 14  OF FLAGWORD1 OFF . TO INITIATE MONITOR ,</span>
-034970,000027:                                                                                                  <span class="co">#  SET UP WAITLIST CALL FOR TUMTASK. IT IS ASSUMED THAT THE IMU,S ARE IN   FINE ALIGN .</span>
-034971,000028: 
-034972,000029: 
-034973,000030: 
-034974,000031:                                                                                                  <span class="co">#  NAME=                           DATE=</span>
-034975,000032:                                                                                                  <span class="co">#    TUMBLE MONITOR                  29 AUGUST 1966</span>
-034976,000033: 
-034977,000034:                                                                                                  <span class="co">#  PROGRAMMER=                     REVISIONS=</span>
-034978,000035:                                                                                                  <span class="co">#    G.MANSBACH EXT-182              NANSTONE/2</span>
-034979,000036:                                                                                                  <span class="co">#                                    NANSTONE/7</span>
-034980,000037:                                                                                                  <span class="co">#                                    NANSTONE/15   10/27/66</span>
-034981,000038:                                                                                                  <span class="co">#                                    NANSTONE/3    11/12/66</span>
-034982,000039:                                                                                                  <span class="co">#  CALLING SEQUENCE=               SUBROUTINES CALLED=</span>
-034983,000040:                                                                                                  <span class="co">#           CAF    (DT)              FLAG1UP</span>
-034984,000041:                                                                                                  <span class="co">#           TC     WAITLIST          FLAG1DOWN</span>
-034985,000042:                                                                                                  <span class="co">#           EBANK= OMEGA</span>
-034986,000043:                                                                                                  <span class="co">#           2CADR  TUMTASK</span>
-034987,000044: 
-034988,000045:                                                                                                  <span class="co">#  NORMAL EXIT MODES=              ABORT MODE=</span>
-034989,000046:                                                                                                  <span class="co">#           TC     TASKOVER          TURN BIT 14 OF FLAGWORD1 OFF</span>
-034990,000047:                                                                                                  <span class="co">#  OUTPUT=</span>
-034991,000048:                                                                                                  <span class="co">#    SET BIT 13 OF FLAGWORD1 ON/OFF</span>
-034992,000049:                                                                                                  <span class="co">#  DEBRIS=</span>
-034993,000050:                                                                                                  <span class="co">#    PCDUY,PCDUZ,PCDUX,DCDUY,DCDUZ,OMEGA</span>
-034994,000051: 30,2402                                           <span class="ps">BANK    </span> 30                                    
-034995,000052: 30,2402  E6,1423                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>                                 
-034996,000053:                                                                                                  <span class="co">#  INITIALIZATION ROUTINE FOR TUMBLE</span>
-034997,000054:                                                                                                  <span class="co">#  MONITOR</span>
-034998,000055: 
-<a name="54554D5441534B"></a>034999,000056: 30,2402           04147        <span class="sm">TUMTASK </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              <span class="co">#  IMMEDIATE RECALL</span>
-035000,000057: 
-035001,000058: 30,2403           05013                           <span class="ps">OCT     </span> 05013                                 <span class="co">#  *TUMTASK*</span>
-035002,000059: 30,2404           77777                           <span class="ps">OCT     </span> 77777                                 
-035003,000060: 30,2405           06020                           <span class="op">TC      </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#464C4147315550">FLAG1UP</a>                               <span class="co">#  TURN TUMBLE MONITOR ON</span>
-035004,000061: 30,2406           20000                           <span class="ps">OCT     </span> 20000                                 
-035005,000062: 30,2407           02461                           <span class="op">TC      </span> <a href="#5245534554">RESET</a>                                 
-035006,000063: 30,2410           05745                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-035007,000064: 
-035008,000065: 
-<a name="544D54534B"></a>035009,000066: 30,2411           37740        <span class="sm">TMTSK   </span>           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#4249543134">BIT14</a>                                 
-035010,000067: 30,2412           70075                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524431">FLAGWRD1</a>                              <span class="co">#  IS TUMBLE MONITOR STILL NEEDED</span>
-035011,000068: 
-035012,000069: 30,2413           00006                           <span class="op">EXTEND  </span>                                       
-035013,000070: 30,2414           12454                           <span class="op">BZF     </span> <a href="#454F54554D">EOTUM</a>                                 <span class="co">#  IT IS NOT.  DISCONTINUE MONITORING</span>
-035014,000071: 
-035015,000072: 30,2415           02461                           <span class="op">TC      </span> <a href="#5245534554">RESET</a>                                 <span class="co">#  IT IS.</span>
-035016,000073:                                                                                                  <span class="co">#  COMPUTE ROTATION RATE ABOUT PILOT AXES</span>
-035017,000074:                                                                                                  <span class="co">#  USING OUTPUT OF *TRANSFORMATION MATRIX</span>
-035018,000075:                                                                                                  <span class="co">#  CALCULATION* OF *TRUPT PROGRAM*</span>
-035019,000076: 
-035020,000077:                                                                                                  <span class="co">#  COMPUTE</span>
-035021,000078:                                                                                                  <span class="co">#         * OMEGAX *   *     *   * DCDUY *</span>
-035022,000079: 
+034975,000025:                                                                                                  <span class="co">#  PROGRAM DETECTS SPIN ABOUT NAV.AXES AND SETS BIT 13 OF FLAGWORD1 ON IF SPIN IS IN EXCESS OF 2.99 DEGREES/SEC .</span>
+034976,000026:                                                                                                  <span class="co">#  NO CONTROL ACTION IS EXERTED . TO DISCONTINUE MONITORING , TURN BIT 14  OF FLAGWORD1 OFF . TO INITIATE MONITOR ,</span>
+034977,000027:                                                                                                  <span class="co">#  SET UP WAITLIST CALL FOR TUMTASK. IT IS ASSUMED THAT THE IMU,S ARE IN   FINE ALIGN .</span>
+034978,000028: 
+034979,000029: 
+034980,000030: 
+034981,000031:                                                                                                  <span class="co">#  NAME=                           DATE=</span>
+034982,000032:                                                                                                  <span class="co">#    TUMBLE MONITOR                  29 AUGUST 1966</span>
+034983,000033: 
+034984,000034:                                                                                                  <span class="co">#  PROGRAMMER=                     REVISIONS=</span>
+034985,000035:                                                                                                  <span class="co">#    G.MANSBACH EXT-182              NANSTONE/2</span>
+034986,000036:                                                                                                  <span class="co">#                                    NANSTONE/7</span>
+034987,000037:                                                                                                  <span class="co">#                                    NANSTONE/15   10/27/66</span>
+034988,000038:                                                                                                  <span class="co">#                                    NANSTONE/3    11/12/66</span>
+034989,000039:                                                                                                  <span class="co">#  CALLING SEQUENCE=               SUBROUTINES CALLED=</span>
+034990,000040:                                                                                                  <span class="co">#           CAF    (DT)              FLAG1UP</span>
+034991,000041:                                                                                                  <span class="co">#           TC     WAITLIST          FLAG1DOWN</span>
+034992,000042:                                                                                                  <span class="co">#           EBANK= OMEGA</span>
+034993,000043:                                                                                                  <span class="co">#           2CADR  TUMTASK</span>
+034994,000044: 
+034995,000045:                                                                                                  <span class="co">#  NORMAL EXIT MODES=              ABORT MODE=</span>
+034996,000046:                                                                                                  <span class="co">#           TC     TASKOVER          TURN BIT 14 OF FLAGWORD1 OFF</span>
+034997,000047:                                                                                                  <span class="co">#  OUTPUT=</span>
+034998,000048:                                                                                                  <span class="co">#    SET BIT 13 OF FLAGWORD1 ON/OFF</span>
+034999,000049:                                                                                                  <span class="co">#  DEBRIS=</span>
+035000,000050:                                                                                                  <span class="co">#    PCDUY,PCDUZ,PCDUX,DCDUY,DCDUZ,OMEGA</span>
+035001,000051: 30,2402                                           <span class="ps">BANK    </span> 30                                    
+035002,000052: 30,2402  E6,1423                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>                                 
+035003,000053:                                                                                                  <span class="co">#  INITIALIZATION ROUTINE FOR TUMBLE</span>
+035004,000054:                                                                                                  <span class="co">#  MONITOR</span>
+035005,000055: 
+<a name="54554D5441534B"></a>035006,000056: 30,2402           04147        <span class="sm">TUMTASK </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              <span class="co">#  IMMEDIATE RECALL</span>
+035007,000057: 
+035008,000058: 30,2403           05013                           <span class="ps">OCT     </span> 05013                                 <span class="co">#  *TUMTASK*</span>
+035009,000059: 30,2404           77777                           <span class="ps">OCT     </span> 77777                                 
+035010,000060: 30,2405           06020                           <span class="op">TC      </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#464C4147315550">FLAG1UP</a>                               <span class="co">#  TURN TUMBLE MONITOR ON</span>
+035011,000061: 30,2406           20000                           <span class="ps">OCT     </span> 20000                                 
+035012,000062: 30,2407           02461                           <span class="op">TC      </span> <a href="#5245534554">RESET</a>                                 
+035013,000063: 30,2410           05745                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+035014,000064: 
+035015,000065: 
+<a name="544D54534B"></a>035016,000066: 30,2411           37740        <span class="sm">TMTSK   </span>           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#4249543134">BIT14</a>                                 
+035017,000067: 30,2412           70075                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524431">FLAGWRD1</a>                              <span class="co">#  IS TUMBLE MONITOR STILL NEEDED</span>
+035018,000068: 
+035019,000069: 30,2413           00006                           <span class="op">EXTEND  </span>                                       
+035020,000070: 30,2414           12454                           <span class="op">BZF     </span> <a href="#454F54554D">EOTUM</a>                                 <span class="co">#  IT IS NOT.  DISCONTINUE MONITORING</span>
+035021,000071: 
+035022,000072: 30,2415           02461                           <span class="op">TC      </span> <a href="#5245534554">RESET</a>                                 <span class="co">#  IT IS.</span>
+035023,000073:                                                                                                  <span class="co">#  COMPUTE ROTATION RATE ABOUT PILOT AXES</span>
+035024,000074:                                                                                                  <span class="co">#  USING OUTPUT OF *TRANSFORMATION MATRIX</span>
+035025,000075:                                                                                                  <span class="co">#  CALCULATION* OF *TRUPT PROGRAM*</span>
+035026,000076: 
+035027,000077:                                                                                                  <span class="co">#  COMPUTE</span>
+035028,000078:                                                                                                  <span class="co">#         * OMEGAX *   *     *   * DCDUY *</span>
+035029,000079: 
 </pre>
 </span>
 </p>
@@ -197,60 +197,60 @@ Page 778
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-035024,000081:                                                                                                  <span class="co">#         * OMEGAY * = * M   * X * DCDUZ *</span>
-035025,000082: 
-035026,000083:                                                                                                  <span class="co">#         * OMEGAZ *   *  GP *   *+DCDUX *</span>
-035027,000084: 
-035028,000085: 30,2416           55423                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>                                 <span class="co">#  COMPUTE OMEGAX</span>
-035029,000086: 30,2417           31404                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3131">M11</a>                                   
-035030,000087: 30,2420           02440                           <span class="op">TC      </span> <a href="#4556414C">EVAL</a>                                  
-035031,000088: 30,2421           31401                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3232">M22</a>                                   <span class="co">#  COMPUTE OMEGAY</span>
-035032,000089: 30,2422           00006                           <span class="op">EXTEND  </span>                                       
-035033,000090: 30,2423           71421                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444344555A">DCDUZ</a>                                 
-035034,000091: 30,2424           55423                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>                                 
-035035,000092: 30,2425           31405                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3231">M21</a>                                   
-035036,000093: 30,2426           02440                           <span class="op">TC      </span> <a href="#4556414C">EVAL</a>                                  
-035037,000094: 30,2427           31403                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3332">M32</a>                                   <span class="co">#  COMPUTE OMEGAZ</span>
-035038,000095: 
-035039,000096: 30,2430           00006                           <span class="op">EXTEND  </span>                                       
-035040,000097: 30,2431           71421                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444344555A">DCDUZ</a>                                 
-035041,000098: 30,2432           55423                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>                                 
-035042,000099: 30,2433           31406                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3331">M31</a>                                   
-035043,000100: 30,2434           02440                           <span class="op">TC      </span> <a href="#4556414C">EVAL</a>                                  
-035044,000101:                                                                                                  <span class="co">#  NO TUMBLE NOTED</span>
-035045,000102: 30,2435           06036                           <span class="op">TC      </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#464C41473144574E">FLAG1DWN</a>                              <span class="co">#  REMOVE TUMBLE FLAG</span>
-035046,000103: 30,2436           10000                           <span class="ps">OCT     </span> 10000                                 
-035047,000104: 30,2437           05745                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-<a name="4556414C"></a>035048,000105: 30,2440           00006        <span class="sm">EVAL    </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  COMPLETE OMEGA CALCULATION</span>
-035049,000106: 
-035050,000107: 30,2441           71417                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4443445559">DCDUY</a>                                 
-035051,000108: 30,2442           61423                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>                                 <span class="co">#  SCALE FACTOR OF PI</span>
-035052,000109:                                                                                                  <span class="co">#  EVALUATE TUMBLE RATE</span>
-035053,000110: 30,2443           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  SET ALL VALUES NEG.</span>
-035054,000111: 30,2444           62446                           <span class="op">BZMF    </span> +2                                    
-035055,000112: 30,2445           40000                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-035056,000113: 30,2446           62460                           <span class="op">AD      </span> <a href="#43524954">CRIT</a>                                  <span class="co">#  CAUSE UNDERFLOW IF OMEGA IS GREATER THAN</span>
-035057,000114: 30,2447           54000                           <span class="op">OVSK    </span>                                       <span class="co">#  OR = TO 2.99 DEGREES/SEC</span>
-035058,000115: 30,2450           00002                           <span class="op">RETURN  </span>                                       <span class="co">#  NO TUMBLE . EVALUATE NEXT AXIS</span>
-035059,000116: 
-035060,000117:                                                                                                  <span class="co">#  EXCESSIVE TUMBLE NOTED ABOUT AN AXIS</span>
-035061,000118: 30,2451           06020                           <span class="op">TC      </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#464C4147315550">FLAG1UP</a>                               <span class="co">#  SET TUMBLE FLAG AND DISCONTINUE CALCS.</span>
-035062,000119: 30,2452           10000                           <span class="ps">OCT     </span> 10000                                 
-035063,000120: 30,2453           05745                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-<a name="454F54554D"></a>035064,000121: 30,2454           04147        <span class="sm">EOTUM   </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
-035065,000122: 30,2455           00003                           <span class="ps">OCT     </span> 3                                     
-035066,000123: 30,2456           05745                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-<a name="31534543544D"></a>035067,000124: 30,2457           00144        <span class="sm">1SECTM  </span>           <span class="ps">DEC     </span> 100        B-14                       <span class="co">#  1 SECOND</span>
-<a name="43524954"></a>035068,000125: 30,2460           40417        <span class="sm">CRIT    </span>           <span class="ps">OCT     </span> 40417                                 <span class="co">#  NEGMAX + 00417   421 = 2.99 DEGREES</span>
-035069,000126: 
-035070,000127: 
-035071,000128:                                                                                                  <span class="co">#  RECALL MONITOR IN</span>
-035072,000129:                                                                                                  <span class="co">#     1 SECOND</span>
-<a name="5245534554"></a>035073,000130: 30,2461           00006        <span class="sm">RESET   </span>           <span class="op">EXTEND  </span>                                       
-035074,000131: 30,2462           23423                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>                                 
-035075,000132: 30,2463           32457                           <span class="op">CA      </span> <a href="#31534543544D">1SECTM</a>                                
-035076,000133: 30,2464           05701                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-035077,000134: 
+035031,000081:                                                                                                  <span class="co">#         * OMEGAY * = * M   * X * DCDUZ *</span>
+035032,000082: 
+035033,000083:                                                                                                  <span class="co">#         * OMEGAZ *   *  GP *   *+DCDUX *</span>
+035034,000084: 
+035035,000085: 30,2416           55423                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>                                 <span class="co">#  COMPUTE OMEGAX</span>
+035036,000086: 30,2417           31404                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3131">M11</a>                                   
+035037,000087: 30,2420           02440                           <span class="op">TC      </span> <a href="#4556414C">EVAL</a>                                  
+035038,000088: 30,2421           31401                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3232">M22</a>                                   <span class="co">#  COMPUTE OMEGAY</span>
+035039,000089: 30,2422           00006                           <span class="op">EXTEND  </span>                                       
+035040,000090: 30,2423           71421                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444344555A">DCDUZ</a>                                 
+035041,000091: 30,2424           55423                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>                                 
+035042,000092: 30,2425           31405                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3231">M21</a>                                   
+035043,000093: 30,2426           02440                           <span class="op">TC      </span> <a href="#4556414C">EVAL</a>                                  
+035044,000094: 30,2427           31403                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3332">M32</a>                                   <span class="co">#  COMPUTE OMEGAZ</span>
+035045,000095: 
+035046,000096: 30,2430           00006                           <span class="op">EXTEND  </span>                                       
+035047,000097: 30,2431           71421                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444344555A">DCDUZ</a>                                 
+035048,000098: 30,2432           55423                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>                                 
+035049,000099: 30,2433           31406                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D3331">M31</a>                                   
+035050,000100: 30,2434           02440                           <span class="op">TC      </span> <a href="#4556414C">EVAL</a>                                  
+035051,000101:                                                                                                  <span class="co">#  NO TUMBLE NOTED</span>
+035052,000102: 30,2435           06036                           <span class="op">TC      </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#464C41473144574E">FLAG1DWN</a>                              <span class="co">#  REMOVE TUMBLE FLAG</span>
+035053,000103: 30,2436           10000                           <span class="ps">OCT     </span> 10000                                 
+035054,000104: 30,2437           05745                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+<a name="4556414C"></a>035055,000105: 30,2440           00006        <span class="sm">EVAL    </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  COMPLETE OMEGA CALCULATION</span>
+035056,000106: 
+035057,000107: 30,2441           71417                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4443445559">DCDUY</a>                                 
+035058,000108: 30,2442           61423                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>                                 <span class="co">#  SCALE FACTOR OF PI</span>
+035059,000109:                                                                                                  <span class="co">#  EVALUATE TUMBLE RATE</span>
+035060,000110: 30,2443           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  SET ALL VALUES NEG.</span>
+035061,000111: 30,2444           62446                           <span class="op">BZMF    </span> +2                                    
+035062,000112: 30,2445           40000                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+035063,000113: 30,2446           62460                           <span class="op">AD      </span> <a href="#43524954">CRIT</a>                                  <span class="co">#  CAUSE UNDERFLOW IF OMEGA IS GREATER THAN</span>
+035064,000114: 30,2447           54000                           <span class="op">OVSK    </span>                                       <span class="co">#  OR = TO 2.99 DEGREES/SEC</span>
+035065,000115: 30,2450           00002                           <span class="op">RETURN  </span>                                       <span class="co">#  NO TUMBLE . EVALUATE NEXT AXIS</span>
+035066,000116: 
+035067,000117:                                                                                                  <span class="co">#  EXCESSIVE TUMBLE NOTED ABOUT AN AXIS</span>
+035068,000118: 30,2451           06020                           <span class="op">TC      </span> <a href="THRUST_MISSION_CONTROL_PROGRAM_TJS.agc.html#464C4147315550">FLAG1UP</a>                               <span class="co">#  SET TUMBLE FLAG AND DISCONTINUE CALCS.</span>
+035069,000119: 30,2452           10000                           <span class="ps">OCT     </span> 10000                                 
+035070,000120: 30,2453           05745                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+<a name="454F54554D"></a>035071,000121: 30,2454           04147        <span class="sm">EOTUM   </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
+035072,000122: 30,2455           00003                           <span class="ps">OCT     </span> 3                                     
+035073,000123: 30,2456           05745                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+<a name="31534543544D"></a>035074,000124: 30,2457           00144        <span class="sm">1SECTM  </span>           <span class="ps">DEC     </span> 100        B-14                       <span class="co">#  1 SECOND</span>
+<a name="43524954"></a>035075,000125: 30,2460           40417        <span class="sm">CRIT    </span>           <span class="ps">OCT     </span> 40417                                 <span class="co">#  NEGMAX + 00417   421 = 2.99 DEGREES</span>
+035076,000126: 
+035077,000127: 
+035078,000128:                                                                                                  <span class="co">#  RECALL MONITOR IN</span>
+035079,000129:                                                                                                  <span class="co">#     1 SECOND</span>
+<a name="5245534554"></a>035080,000130: 30,2461           00006        <span class="sm">RESET   </span>           <span class="op">EXTEND  </span>                                       
+035081,000131: 30,2462           23423                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>                                 
+035082,000132: 30,2463           32457                           <span class="op">CA      </span> <a href="#31534543544D">1SECTM</a>                                
+035083,000133: 30,2464           05701                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+035084,000134: 
 </pre>
 </span>
 </p>
@@ -266,28 +266,28 @@ Page 779
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-035079,000136: 30,2465  E6,1423                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>                                 
-035080,000137: 30,2465           02411 60066                     <span class="ps">2CADR   </span> <a href="#544D54534B">TMTSK</a>                                 
-035081,000138:                                                                                                  <span class="co">#  STORE PRESENT CDU(X,Y,Z) AND</span>
-035082,000139:                                                                                                  <span class="co">#  COMPUTE DELTA(CDU(X,Y,Z)/SEC =</span>
-035083,000140:                                                                                                  <span class="co">#  DCDU(X,Y,Z)</span>
-035084,000141: 30,2467           30033                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445559">CDUY</a>                                  <span class="co">#  FOR Y-AXIS</span>
-035085,000142: 
-035086,000143: 30,2470           57412                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5043445559">PCDUY</a>                                 <span class="co">#  STORE PRESENT VALUE AND RECOVER PREVIOUS</span>
-035087,000144: 30,2471           00006                           <span class="op">EXTEND  </span>                                       
-035088,000145: 30,2472           20033                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445559">CDUY</a>                                  
-035089,000146: 30,2473           55417                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4443445559">DCDUY</a>                                 <span class="co">#  = CDUX(T-1)-CDUX(T)</span>
-035090,000147: 30,2474           30034                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  <span class="co">#  FOR Z-AXIS</span>
-035091,000148: 30,2475           57413                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504344555A">PCDUZ</a>                                 
-035092,000149: 30,2476           00006                           <span class="op">EXTEND  </span>                                       
-035093,000150: 30,2477           20034                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
-035094,000151: 30,2500           55421                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444344555A">DCDUZ</a>                                 
-035095,000152: 30,2501           30032                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  <span class="co">#  FOR X-AXIS</span>
-035096,000153: 30,2502           57411                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5043445558">PCDUX</a>                                 
-035097,000154: 30,2503           00006                           <span class="op">EXTEND  </span>                                       
-035098,000155: 
-035099,000156: 30,2504           20032                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  
-035100,000157: 30,2505           01423                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>                                 
+035086,000136: 30,2465  E6,1423                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>                                 
+035087,000137: 30,2465           02411 60066                     <span class="ps">2CADR   </span> <a href="#544D54534B">TMTSK</a>                                 
+035088,000138:                                                                                                  <span class="co">#  STORE PRESENT CDU(X,Y,Z) AND</span>
+035089,000139:                                                                                                  <span class="co">#  COMPUTE DELTA(CDU(X,Y,Z)/SEC =</span>
+035090,000140:                                                                                                  <span class="co">#  DCDU(X,Y,Z)</span>
+035091,000141: 30,2467           30033                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445559">CDUY</a>                                  <span class="co">#  FOR Y-AXIS</span>
+035092,000142: 
+035093,000143: 30,2470           57412                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5043445559">PCDUY</a>                                 <span class="co">#  STORE PRESENT VALUE AND RECOVER PREVIOUS</span>
+035094,000144: 30,2471           00006                           <span class="op">EXTEND  </span>                                       
+035095,000145: 30,2472           20033                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445559">CDUY</a>                                  
+035096,000146: 30,2473           55417                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4443445559">DCDUY</a>                                 <span class="co">#  = CDUX(T-1)-CDUX(T)</span>
+035097,000147: 30,2474           30034                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  <span class="co">#  FOR Z-AXIS</span>
+035098,000148: 30,2475           57413                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504344555A">PCDUZ</a>                                 
+035099,000149: 30,2476           00006                           <span class="op">EXTEND  </span>                                       
+035100,000150: 30,2477           20034                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
+035101,000151: 30,2500           55421                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444344555A">DCDUZ</a>                                 
+035102,000152: 30,2501           30032                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  <span class="co">#  FOR X-AXIS</span>
+035103,000153: 30,2502           57411                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5043445558">PCDUX</a>                                 
+035104,000154: 30,2503           00006                           <span class="op">EXTEND  </span>                                       
+035105,000155: 
+035106,000156: 30,2504           20032                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  
+035107,000157: 30,2505           01423                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>                                 
 
 End of include-file TUMBLE_MONITOR.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

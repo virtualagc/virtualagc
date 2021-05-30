@@ -86,23 +86,23 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-041155,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-041156,000003:                                                                                                  <span class="co">## Filename:    TVCROLLDAP.agc</span>
-041157,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Colossus build 237.</span>
-041158,000005:                                                                                                  <span class="co">##              This is for the Command Module's (CM) Apollo Guidance</span>
-041159,000006:                                                                                                  <span class="co">##              Computer (AGC), for Apollo 8.</span>
-041160,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-041161,000008:                                                                                                  <span class="co">## Contact:     Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
-041162,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-041163,000010:                                                                                                  <span class="co">## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
-041164,000011:                                                                                                  <span class="co">## Mod history: 2011-03-12 JL   Adapted from corresponding Colossus 249 file.</span>
-041165,000012:                                                                                                  <span class="co">##              2017-01-01 RSB  Proofed comment text using octopus/ProoferComments,</span>
-041166,000013:                                                                                                  <span class="co">##                              and fixed  errors found.</span>
-041167,000014:                                                                                                  <span class="co">##              2017-01-20 RSB  Fixed comment-text errors noted while diff'ing</span>
-041168,000015:                                                                                                  <span class="co">##                              vs Colossus 249.</span>
-041169,000016:                                                                                                  <span class="co">##              2017-02-09 RSB  Fixed comment-text errors noted while proofing</span>
-041170,000017:                                                                                                  <span class="co">##                              Artemis 72.</span>
-041171,000018: 
+041162,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+041163,000003:                                                                                                  <span class="co">## Filename:    TVCROLLDAP.agc</span>
+041164,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Colossus build 237.</span>
+041165,000005:                                                                                                  <span class="co">##              This is for the Command Module's (CM) Apollo Guidance</span>
+041166,000006:                                                                                                  <span class="co">##              Computer (AGC), for Apollo 8.</span>
+041167,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+041168,000008:                                                                                                  <span class="co">## Contact:     Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
+041169,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+041170,000010:                                                                                                  <span class="co">## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
+041171,000011:                                                                                                  <span class="co">## Mod history: 2011-03-12 JL   Adapted from corresponding Colossus 249 file.</span>
+041172,000012:                                                                                                  <span class="co">##              2017-01-01 RSB  Proofed comment text using octopus/ProoferComments,</span>
+041173,000013:                                                                                                  <span class="co">##                              and fixed  errors found.</span>
+041174,000014:                                                                                                  <span class="co">##              2017-01-20 RSB  Fixed comment-text errors noted while diff'ing</span>
+041175,000015:                                                                                                  <span class="co">##                              vs Colossus 249.</span>
+041176,000016:                                                                                                  <span class="co">##              2017-02-09 RSB  Fixed comment-text errors noted while proofing</span>
+041177,000017:                                                                                                  <span class="co">##                              Artemis 72.</span>
+041178,000018: 
 </pre>
 </span>
 </p>
@@ -118,56 +118,56 @@ Page 945
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-041173,000020:                                                                                                  <span class="co">#  PROGRAM NAME....ROLL AUTOPILOT, CONSISTING OF ROLLDAP,DURATION,NOROLL1,E</span>
-041174,000021:                                                                                                  <span class="co">#  ORIGINAL CODING BY F.W.MARTIN, 1965 (SUNDIAL)                           TC.</span>
-041175,000022:                                                                                                  <span class="co">#  LOG SECTION....ROLL AUTOPILOT   SUBROUTINE....DAPCSM</span>
-041176,000023:                                                                                                  <span class="co">#  MOD BY ENGEL                    DATE 28 DEC, 1967 (SUNDISK TO COLOSSUS)</span>
-041177,000024:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION....</span>
-041178,000025: 
-041179,000026:                                                                                                  <span class="co">#      *AN ADAPTATION OF THE LEM P-AXIS CONTROLLER</span>
-041180,000027:                                                                                                  <span class="co">#      *MAINTAIN OGA WITHIN 5 DEG DEADBND OF OGAD, WHERE OGAD = OGA AS SEEN</span>
-041181,000028:                                                                                                  <span class="co">#       BY IGNOVER  (IGNITION)</span>
-041182,000029:                                                                                                  <span class="co">#      *MAINTAIN OGA RATE LESS THAN 0.1 DEG/SEC LIMIT CYCLE RATE</span>
-041183,000030:                                                                                                  <span class="co">#      *SWITCHING LOGIC IN PHASE PLANE.... SEE GSOP CHAPTER 3</span>
-041184,000031:                                                                                                  <span class="co">#      *USES T6 CLOCK TO TIME JET FIRINGS</span>
-041185,000032:                                                                                                  <span class="co">#      *MAXIMUM JET FIRING TIME = 2.56 SECONDS, LIMITED TO 2.5 IF GREATER</span>
-041186,000033:                                                                                                  <span class="co">#      *MINIMUM JET FIRING TIME = 15 MS</span>
-041187,000034:                                                                                                  <span class="co">#      *JET PAIRS FIRE ALTERNATELY</span>
-041188,000035:                                                                                                  <span class="co">#      *AT LEAST 1/2 SECOND DELAY BEFORE A NEW JET PAIR IS FIRED</span>
-041189,000036:                                                                                                  <span class="co">#      *JET FIRINGS MAY NOT BE EXTENDED, ONLY SHORTENED, WHEN RE-EVALUATION</span>
-041190,000037:                                                                                                  <span class="co">#       OF A JET FIRING TIME IS MADE ON A LATER PASS</span>
-041191,000038: 
-041192,000039:                                                                                                  <span class="co">#  CALLING SEQUENCE....</span>
-041193,000040: 
-041194,000041:                                                                                                  <span class="co">#      *ROLLDAP CALL VIA WAITLIST, IN PARTICULAR BY TVCEXEC (EVERY 1/2 SEC)</span>
-041195,000042:                                                                                                  <span class="co">#       WITH A 3CS DELAY TO ALLOW FREE TIME FOR OTHER RUPTS (DWNRPT, ETC.)</span>
-041196,000043: 
-041197,000044:                                                                                                  <span class="co">#  NORMAL EXIT MODES.... ENDOFJOB</span>
-041198,000045: 
-041199,000046:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODES.... NONE</span>
-041200,000047: 
-041201,000048:                                                                                                  <span class="co">#  SUBROUTINES CALLED.....NONE</span>
-041202,000049: 
-041203,000050:                                                                                                  <span class="co">#  OTHER INTERFACES....</span>
-041204,000051: 
-041205,000052:                                                                                                  <span class="co">#      *TVCEXEC SETS UP ROLLDAP TASK EVERY 1/2 SECOND AND UPDATES 1/CONACC</span>
-041206,000053:                                                                                                  <span class="co">#       EVERY 10 SECONDS (VIA MASSPROP AND S40.15)</span>
-041207,000054:                                                                                                  <span class="co">#      *TVCRESTART PACKAGE WILL RE-START ROLL DAP AFTER A RESTART (PICKING </span>
-041208,000055:                                                                                                  <span class="co">#       UP THE ORIGINAL OGAD)</span>
-041209,000056: 
-041210,000057:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED....</span>
-041211,000058: 
-041212,000059:                                                                                                  <span class="co">#      *1/CONACC   (S40.15)</span>
-041213,000060:                                                                                                  <span class="co">#      *OGAD (CDUX, AT IGNOVER)</span>
-041214,000061:                                                                                                  <span class="co">#      *OGANOW  (CDUX AT TVCINIT4 AND TVCEXECUTIVE)</span>
-041215,000062:                                                                                                  <span class="co">#      *OGAPAST  (OGANOW AT TVCEXECUTIVE)</span>
-041216,000063:                                                                                                  <span class="co">#      *ROLLFIRE = TEMREG = ROLLWORD = 0   (MRCLEAN LOOP IN TVCDAPON)</span>
-041217,000064:                                                                                                  <span class="co">#  OUTPUT....</span>
-041218,000065: 
-041219,000066:                                                                                                  <span class="co">#      *ROLL JET PAIR FIRINGS</span>
-041220,000067: 
-041221,000068:                                                                                                  <span class="co">#  DEBRIS.... MISCELLANEOUS, SHAREABLE WITH RCS/ENTRY, IN EBANK6 ONLY</span>
-041222,000069: 
+041180,000020:                                                                                                  <span class="co">#  PROGRAM NAME....ROLL AUTOPILOT, CONSISTING OF ROLLDAP,DURATION,NOROLL1,E</span>
+041181,000021:                                                                                                  <span class="co">#  ORIGINAL CODING BY F.W.MARTIN, 1965 (SUNDIAL)                           TC.</span>
+041182,000022:                                                                                                  <span class="co">#  LOG SECTION....ROLL AUTOPILOT   SUBROUTINE....DAPCSM</span>
+041183,000023:                                                                                                  <span class="co">#  MOD BY ENGEL                    DATE 28 DEC, 1967 (SUNDISK TO COLOSSUS)</span>
+041184,000024:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION....</span>
+041185,000025: 
+041186,000026:                                                                                                  <span class="co">#      *AN ADAPTATION OF THE LEM P-AXIS CONTROLLER</span>
+041187,000027:                                                                                                  <span class="co">#      *MAINTAIN OGA WITHIN 5 DEG DEADBND OF OGAD, WHERE OGAD = OGA AS SEEN</span>
+041188,000028:                                                                                                  <span class="co">#       BY IGNOVER  (IGNITION)</span>
+041189,000029:                                                                                                  <span class="co">#      *MAINTAIN OGA RATE LESS THAN 0.1 DEG/SEC LIMIT CYCLE RATE</span>
+041190,000030:                                                                                                  <span class="co">#      *SWITCHING LOGIC IN PHASE PLANE.... SEE GSOP CHAPTER 3</span>
+041191,000031:                                                                                                  <span class="co">#      *USES T6 CLOCK TO TIME JET FIRINGS</span>
+041192,000032:                                                                                                  <span class="co">#      *MAXIMUM JET FIRING TIME = 2.56 SECONDS, LIMITED TO 2.5 IF GREATER</span>
+041193,000033:                                                                                                  <span class="co">#      *MINIMUM JET FIRING TIME = 15 MS</span>
+041194,000034:                                                                                                  <span class="co">#      *JET PAIRS FIRE ALTERNATELY</span>
+041195,000035:                                                                                                  <span class="co">#      *AT LEAST 1/2 SECOND DELAY BEFORE A NEW JET PAIR IS FIRED</span>
+041196,000036:                                                                                                  <span class="co">#      *JET FIRINGS MAY NOT BE EXTENDED, ONLY SHORTENED, WHEN RE-EVALUATION</span>
+041197,000037:                                                                                                  <span class="co">#       OF A JET FIRING TIME IS MADE ON A LATER PASS</span>
+041198,000038: 
+041199,000039:                                                                                                  <span class="co">#  CALLING SEQUENCE....</span>
+041200,000040: 
+041201,000041:                                                                                                  <span class="co">#      *ROLLDAP CALL VIA WAITLIST, IN PARTICULAR BY TVCEXEC (EVERY 1/2 SEC)</span>
+041202,000042:                                                                                                  <span class="co">#       WITH A 3CS DELAY TO ALLOW FREE TIME FOR OTHER RUPTS (DWNRPT, ETC.)</span>
+041203,000043: 
+041204,000044:                                                                                                  <span class="co">#  NORMAL EXIT MODES.... ENDOFJOB</span>
+041205,000045: 
+041206,000046:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODES.... NONE</span>
+041207,000047: 
+041208,000048:                                                                                                  <span class="co">#  SUBROUTINES CALLED.....NONE</span>
+041209,000049: 
+041210,000050:                                                                                                  <span class="co">#  OTHER INTERFACES....</span>
+041211,000051: 
+041212,000052:                                                                                                  <span class="co">#      *TVCEXEC SETS UP ROLLDAP TASK EVERY 1/2 SECOND AND UPDATES 1/CONACC</span>
+041213,000053:                                                                                                  <span class="co">#       EVERY 10 SECONDS (VIA MASSPROP AND S40.15)</span>
+041214,000054:                                                                                                  <span class="co">#      *TVCRESTART PACKAGE WILL RE-START ROLL DAP AFTER A RESTART (PICKING </span>
+041215,000055:                                                                                                  <span class="co">#       UP THE ORIGINAL OGAD)</span>
+041216,000056: 
+041217,000057:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED....</span>
+041218,000058: 
+041219,000059:                                                                                                  <span class="co">#      *1/CONACC   (S40.15)</span>
+041220,000060:                                                                                                  <span class="co">#      *OGAD (CDUX, AT IGNOVER)</span>
+041221,000061:                                                                                                  <span class="co">#      *OGANOW  (CDUX AT TVCINIT4 AND TVCEXECUTIVE)</span>
+041222,000062:                                                                                                  <span class="co">#      *OGAPAST  (OGANOW AT TVCEXECUTIVE)</span>
+041223,000063:                                                                                                  <span class="co">#      *ROLLFIRE = TEMREG = ROLLWORD = 0   (MRCLEAN LOOP IN TVCDAPON)</span>
+041224,000064:                                                                                                  <span class="co">#  OUTPUT....</span>
+041225,000065: 
+041226,000066:                                                                                                  <span class="co">#      *ROLL JET PAIR FIRINGS</span>
+041227,000067: 
+041228,000068:                                                                                                  <span class="co">#  DEBRIS.... MISCELLANEOUS, SHAREABLE WITH RCS/ENTRY, IN EBANK6 ONLY</span>
+041229,000069: 
 </pre>
 </span>
 </p>
@@ -183,54 +183,54 @@ Page 946
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-041224,000071:                                                                                                  <span class="co">#  SOME NOTES ON THE ROLL AUTOPILOT, AND IN PARTICULAR, ON ITS SWITCHING</span>
-041225,000072:                                                                                                  <span class="co">#  LOGIC.  SEE SECTION THREE OF THE GSOP (SUNDISK/COLOSSUS) FOR DETAILS.</span>
-041226,000073: 
-041227,000074:                                                                                                  <span class="co">#  SWITCHING LOGIC IN THE PHASE PLANE....</span>
-041228,000075: 
-041229,000076:                                                                                                  <span class="co">#                               OGARATE</span>
-041230,000077:                                                                                                  <span class="co">#                                  *</span>
-041231,000078:                                                                                                  <span class="co">#                                  *</span>
-041232,000079:                                                                                                  <span class="co">#   * * * * * * * * * * *          *</span>
-041233,000080:                                                                                                  <span class="co">#                                  *     (REGION 1, SEE TEXT BELOW)</span>
-041234,000081:                                                                                                  <span class="co">#                             *    *</span>
-041235,000082:                                                                                                  <span class="co">#                                  *</span>
-041236,000083:                                                                                                  <span class="co">#  * * * * * * *     (COAST)       *     ...PARABOLA (SWITCHING = CONTROL)</span>
-041237,000084:                                                                                                  <span class="co">#                *                 *    .</span>
-041238,000085:                                                                                                  <span class="co">#                  *               *   *</span>
-041239,000086:                                                                                                  <span class="co">#                    *             *                (FIRE NEG ROLL JETS)</span>
-041240,000087:                                                                                                  <span class="co">#                      *           *      *</span>
-041241,000088:                                                                                                  <span class="co">#      (-DB,+LMCRATE)....*         *</span>
-041242,000089:                                                                                                  <span class="co">#                        *         *        *</span>
-041243,000090:                                                                                                  <span class="co">#                        *         *                              OGAERROR</span>
-041244,000091:                                                                                                  <span class="co">#  ************************************************************************</span>
-041245,000092:                                                                                                  <span class="co">#                                  *         *                (-AK, OGAERR)</span>
-041246,000093:                                                                                                  <span class="co">#                         *                  *      (REGION 6-PRIME)</span>
-041247,000094:                                                                                                  <span class="co">#                                            *      (SEE TEXT BELOW)</span>
-041248,000095:                                                                                                  <span class="co">#                           *      *           *</span>
-041249,000096:                                                                                                  <span class="co">#                                  *             *     ...STRAIGHT LINE</span>
-041250,000097:                                                                                                  <span class="co">#     (FIRE POS ROLL JETS)     *   *               *  .</span>
-041251,000098:                                                                                                  <span class="co">#                                  *   (COAST)       *</span>
-041252,000099:                                                                                                  <span class="co">#                                  *                   * * * * * * * * * *</span>
-041253,000100:                                                                                                  <span class="co">#                                  *                         -MINLIM</span>
-041254,000101:                                                                                                  <span class="co">#                                  *    *</span>
-041255,000102:                                                                                                  <span class="co">#                                  *</span>
-041256,000103:                                                                                                  <span class="co">#                                  *          * * * * * * * * * * * * * * *</span>
-041257,000104:                                                                                                  <span class="co">#                                  *                        -MAXLIM</span>
-041258,000105:                                                                                                  <span class="co">#                                  *</span>
-041259,000106:                                                                                                  <span class="co">#                                  *</span>
-041260,000107: 
-041261,000108:                                                                                                  <span class="co">#  SWITCHING PARABOLAS ARE CONTROL PARABOLAS, THUS REQUIRING KNOWLEDGE OF</span>
-041262,000109:                                                                                                  <span class="co">#       CONTROL ACCELERATION CONACC, OR ITS RECIPROCAL, 1/CONACC, THE TVC</span>
-041263,000110:                                                                                                  <span class="co">#       ROLL DAP GAIN  (SEE TVCEXECUTIVE VARIABLE GAIN PACKAGE).  JET</span>
-041264,000111:                                                                                                  <span class="co">#       FIRING TIME IS SIMPLY THAT REQUIRED TO ACHIEVE THE DESIRED OGARATE,</span>
-041265,000112:                                                                                                  <span class="co">#       SUBJECT TO THE LIMITATIONS DISCUSSED UNDER FUNCTIONAL DESCRIPTION,</span>
-041266,000113:                                                                                                  <span class="co">#       ABOVE.</span>
-041267,000114: 
-041268,000115:                                                                                                  <span class="co">#  THE THREE CONTROL REGIONS  (+, -, AND ZERO TORQUE) ARE COMPRIZED OF</span>
-041269,000116:                                                                                                  <span class="co">#       TWELVE SUBSET REGIONS  ( 1...6, AND THE CORRESPONDING 1-PRIME...</span>
-041270,000117:                                                                                                  <span class="co">#       6-PRIME )  SEE SECTION 3 OF THE GSOP  (SUNDISK OR COLOSSUS)</span>
-041271,000118: 
+041231,000071:                                                                                                  <span class="co">#  SOME NOTES ON THE ROLL AUTOPILOT, AND IN PARTICULAR, ON ITS SWITCHING</span>
+041232,000072:                                                                                                  <span class="co">#  LOGIC.  SEE SECTION THREE OF THE GSOP (SUNDISK/COLOSSUS) FOR DETAILS.</span>
+041233,000073: 
+041234,000074:                                                                                                  <span class="co">#  SWITCHING LOGIC IN THE PHASE PLANE....</span>
+041235,000075: 
+041236,000076:                                                                                                  <span class="co">#                               OGARATE</span>
+041237,000077:                                                                                                  <span class="co">#                                  *</span>
+041238,000078:                                                                                                  <span class="co">#                                  *</span>
+041239,000079:                                                                                                  <span class="co">#   * * * * * * * * * * *          *</span>
+041240,000080:                                                                                                  <span class="co">#                                  *     (REGION 1, SEE TEXT BELOW)</span>
+041241,000081:                                                                                                  <span class="co">#                             *    *</span>
+041242,000082:                                                                                                  <span class="co">#                                  *</span>
+041243,000083:                                                                                                  <span class="co">#  * * * * * * *     (COAST)       *     ...PARABOLA (SWITCHING = CONTROL)</span>
+041244,000084:                                                                                                  <span class="co">#                *                 *    .</span>
+041245,000085:                                                                                                  <span class="co">#                  *               *   *</span>
+041246,000086:                                                                                                  <span class="co">#                    *             *                (FIRE NEG ROLL JETS)</span>
+041247,000087:                                                                                                  <span class="co">#                      *           *      *</span>
+041248,000088:                                                                                                  <span class="co">#      (-DB,+LMCRATE)....*         *</span>
+041249,000089:                                                                                                  <span class="co">#                        *         *        *</span>
+041250,000090:                                                                                                  <span class="co">#                        *         *                              OGAERROR</span>
+041251,000091:                                                                                                  <span class="co">#  ************************************************************************</span>
+041252,000092:                                                                                                  <span class="co">#                                  *         *                (-AK, OGAERR)</span>
+041253,000093:                                                                                                  <span class="co">#                         *                  *      (REGION 6-PRIME)</span>
+041254,000094:                                                                                                  <span class="co">#                                            *      (SEE TEXT BELOW)</span>
+041255,000095:                                                                                                  <span class="co">#                           *      *           *</span>
+041256,000096:                                                                                                  <span class="co">#                                  *             *     ...STRAIGHT LINE</span>
+041257,000097:                                                                                                  <span class="co">#     (FIRE POS ROLL JETS)     *   *               *  .</span>
+041258,000098:                                                                                                  <span class="co">#                                  *   (COAST)       *</span>
+041259,000099:                                                                                                  <span class="co">#                                  *                   * * * * * * * * * *</span>
+041260,000100:                                                                                                  <span class="co">#                                  *                         -MINLIM</span>
+041261,000101:                                                                                                  <span class="co">#                                  *    *</span>
+041262,000102:                                                                                                  <span class="co">#                                  *</span>
+041263,000103:                                                                                                  <span class="co">#                                  *          * * * * * * * * * * * * * * *</span>
+041264,000104:                                                                                                  <span class="co">#                                  *                        -MAXLIM</span>
+041265,000105:                                                                                                  <span class="co">#                                  *</span>
+041266,000106:                                                                                                  <span class="co">#                                  *</span>
+041267,000107: 
+041268,000108:                                                                                                  <span class="co">#  SWITCHING PARABOLAS ARE CONTROL PARABOLAS, THUS REQUIRING KNOWLEDGE OF</span>
+041269,000109:                                                                                                  <span class="co">#       CONTROL ACCELERATION CONACC, OR ITS RECIPROCAL, 1/CONACC, THE TVC</span>
+041270,000110:                                                                                                  <span class="co">#       ROLL DAP GAIN  (SEE TVCEXECUTIVE VARIABLE GAIN PACKAGE).  JET</span>
+041271,000111:                                                                                                  <span class="co">#       FIRING TIME IS SIMPLY THAT REQUIRED TO ACHIEVE THE DESIRED OGARATE,</span>
+041272,000112:                                                                                                  <span class="co">#       SUBJECT TO THE LIMITATIONS DISCUSSED UNDER FUNCTIONAL DESCRIPTION,</span>
+041273,000113:                                                                                                  <span class="co">#       ABOVE.</span>
+041274,000114: 
+041275,000115:                                                                                                  <span class="co">#  THE THREE CONTROL REGIONS  (+, -, AND ZERO TORQUE) ARE COMPRIZED OF</span>
+041276,000116:                                                                                                  <span class="co">#       TWELVE SUBSET REGIONS  ( 1...6, AND THE CORRESPONDING 1-PRIME...</span>
+041277,000117:                                                                                                  <span class="co">#       6-PRIME )  SEE SECTION 3 OF THE GSOP  (SUNDISK OR COLOSSUS)</span>
+041278,000118: 
 </pre>
 </span>
 </p>
@@ -246,56 +246,56 @@ Page 947
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-041273,000120:                                                                                                  <span class="co">#  GIVEN THE OPERATING POINT NOT IN THE COAST REGION, THE DESIRED OGARATE</span>
-041274,000121:                                                                                                  <span class="co">#       IS AT THE POINT OF PENETRATION OF THE COAST REGION BY THE CONTROL</span>
-041275,000122:                                                                                                  <span class="co">#       PARABOLA WHICH PASSES THROUGH THE OPERATING POINT. FOR REGION 3</span>
-041276,000123:                                                                                                  <span class="co">#       DESIRED OGARATE IS SIMPLY +-MAXLIM. FOR REGIONS 1 OR 6 THE SOLUTION</span>
-041277,000124:                                                                                                  <span class="co">#       TO A QUADRATIC IS REQUIRED (THE PENETRATION IS ALONG THE STRAIGHT</span>
-041278,000125:                                                                                                  <span class="co">#       LINE OR MINLIM BOUNDRY SWITCH LINES). AN APPROXIMATION IS MADE</span>
-041279,000126:                                                                                                  <span class="co">#       INSTEAD. CONSIDER AN OPERATING POINT IN REGION 6. PASS A TANGENT TO</span>
-041280,000127:                                                                                                  <span class="co">#       THE CONTROL PARABOLA THROUGH THE OPERATING POINT, AND FIND ITS</span>
-041281,000128:                                                                                                  <span class="co">#       INTERSECTION WITH THE STRAIGHT LINE SECTION OF THE SWITCH CURVE...</span>
-041282,000129:                                                                                                  <span class="co">#       THE INTERSECTION DEFINES DESIRED OGARATE. IF THE OPERATING POINT IS</span>
-041283,000130:                                                                                                  <span class="co">#       CLOSE TO THE SWITCH LINE, THE APPROXIMATION IS QUITE GOOD (INDEED</span>
-041284,000131:                                                                                                  <span class="co">#       THE APPROXIMATE AND QUADRATIC SOLUTIONS CONVERGE IN THE LIMIT AS</span>
-041285,000132:                                                                                                  <span class="co">#       THE SWITCH LINE IS APPROACHED). IF THE OPERATING POINT IS NOT CLOSE</span>
-041286,000133:                                                                                                  <span class="co">#       TO THE SWITCH LINE, THE APPROXIMATE SOLUTION GIVES VALID TREND</span>
-041287,000134:                                                                                                  <span class="co">#       INFORMATION (DIRECTION OF DESIRED OGARATE) AT LEAST. THE </span>
-041288,000135:                                                                                                  <span class="co">#       RE-EVALUATION OF DESIRED OGARATE IN SUBSEQUENT ROLL DAP PASSES (1/2</span>
-041289,000136:                                                                                                  <span class="co">#       SECOND INTERVALS) WILL BENEFIT FROM THE CONVERGENT NATURE OF THE</span>
-041290,000137:                                                                                                  <span class="co">#       APPROXIMATION.</span>
-041291,000138: 
-041292,000139:                                                                                                  <span class="co">#  FOR LARGE OGAERROR THE TANGENT INTERSECTS +-MINLIM SWITCH BOUNDRY BEFORE</span>
-041293,000140:                                                                                                  <span class="co">#       INTERSECTING THE STRAIGHT LINE SWITCH. HOWEVER THE MINLIM IS</span>
-041294,000141:                                                                                                  <span class="co">#       IGNORED IN COMPUTING THE FIRING TIME, SO THAT THE EXTENSION (INTO</span>
-041295,000142:                                                                                                  <span class="co">#       THE COAST REGION) OF THE STRAIGHT LINE SWITCH IS WHAT IS FIRED TO.</span>
-041296,000143:                                                                                                  <span class="co">#       IF THE ROLL DAP FINDS ITSELF IN THE COAST REGION BEFORE REACHING</span>
-041297,000144:                                                                                                  <span class="co">#       THE DESIRED INTERSECTION (IE, IN THE REGION BETWEEN THE MINLIM</span>
-041298,000145:                                                                                                  <span class="co">#       AND THE STRAIGHT LINE SWITCH) IT WILL EXIBIT NORMAL COAST-REGION</span>
-041299,000146:                                                                                                  <span class="co">#       BEHAVIOR AND TURN OFF THE JETS. THE PURPOSE OF THIS FIRING POLICY</span>
-041300,000147:                                                                                                  <span class="co">#       IS TO MAINTAIN STATIC ROLL STABILITY IN THE EVENT OF A JET</span>
-041301,000148:                                                                                                  <span class="co">#       FAILED-ON.</span>
-041302,000149: 
-041303,000150:                                                                                                  <span class="co">#  WHEN THE OPERATING POINT IS IN REGION 1 THE SAME APPROXIMATION IS</span>
-041304,000151:                                                                                                  <span class="co">#       MADE, BUT AT AN ARTIFICIALLY-CREATED OR DUMMY OPERATING POINT,</span>
-041305,000152:                                                                                                  <span class="co">#       DEFINED BY.. OGAERROR = INTERSECTION OF CONTROL PARABOLA AND</span>
-041306,000153:                                                                                                  <span class="co">#       OGAERROR AXIS, OGARATE = +-LMCRATE WHERE SIGN IS OPPOSITE THAT OF</span>
-041307,000154:                                                                                                  <span class="co">#       REAL OPERATING POINT RATE.  WHEN THE OPERATING POINT HAS PASSED</span>
-041308,000155:                                                                                                  <span class="co">#       FROM REGION 1 TO REGION 6, THE DUMMY POINT IS NO LONGER REQUIRED,</span>
-041309,000156:                                                                                                  <span class="co">#       AND THE SOLUTION REVERTS TO THAT OF A REGULAR REGION 6 POINT.</span>
-041310,000157: 
-041311,000158: 
-041312,000159:                                                                                                  <span class="co">#  EQUATION FOR SWITCHING PARABOLA (SEE FIGURE ABOVE)....</span>
-041313,000160:                                                                                                  <span class="co">#                                  2</span>
-041314,000161:                                                                                                  <span class="co">#      SOGAERROR = (DB - (SOGARATE) (1/CONACC)/2) SGN(SOGARATE)</span>
-041315,000162: 
-041316,000163: 
-041317,000164:                                                                                                  <span class="co">#  EQUATION FOR SWITCHING STRAIGHT LINE SEGMENT....</span>
-041318,000165: 
-041319,000166:                                                                                                  <span class="co">#       SOGARATE = -(-SLOPE)(SOGAERROR) - SGN(SOGARATE) INTERCEP</span>
-041320,000167: 
-041321,000168:                                                                                                  <span class="co">#                WHERE  INTERCEP = DB(-SLOPE) - LMCRATE</span>
-041322,000169: 
+041280,000120:                                                                                                  <span class="co">#  GIVEN THE OPERATING POINT NOT IN THE COAST REGION, THE DESIRED OGARATE</span>
+041281,000121:                                                                                                  <span class="co">#       IS AT THE POINT OF PENETRATION OF THE COAST REGION BY THE CONTROL</span>
+041282,000122:                                                                                                  <span class="co">#       PARABOLA WHICH PASSES THROUGH THE OPERATING POINT. FOR REGION 3</span>
+041283,000123:                                                                                                  <span class="co">#       DESIRED OGARATE IS SIMPLY +-MAXLIM. FOR REGIONS 1 OR 6 THE SOLUTION</span>
+041284,000124:                                                                                                  <span class="co">#       TO A QUADRATIC IS REQUIRED (THE PENETRATION IS ALONG THE STRAIGHT</span>
+041285,000125:                                                                                                  <span class="co">#       LINE OR MINLIM BOUNDRY SWITCH LINES). AN APPROXIMATION IS MADE</span>
+041286,000126:                                                                                                  <span class="co">#       INSTEAD. CONSIDER AN OPERATING POINT IN REGION 6. PASS A TANGENT TO</span>
+041287,000127:                                                                                                  <span class="co">#       THE CONTROL PARABOLA THROUGH THE OPERATING POINT, AND FIND ITS</span>
+041288,000128:                                                                                                  <span class="co">#       INTERSECTION WITH THE STRAIGHT LINE SECTION OF THE SWITCH CURVE...</span>
+041289,000129:                                                                                                  <span class="co">#       THE INTERSECTION DEFINES DESIRED OGARATE. IF THE OPERATING POINT IS</span>
+041290,000130:                                                                                                  <span class="co">#       CLOSE TO THE SWITCH LINE, THE APPROXIMATION IS QUITE GOOD (INDEED</span>
+041291,000131:                                                                                                  <span class="co">#       THE APPROXIMATE AND QUADRATIC SOLUTIONS CONVERGE IN THE LIMIT AS</span>
+041292,000132:                                                                                                  <span class="co">#       THE SWITCH LINE IS APPROACHED). IF THE OPERATING POINT IS NOT CLOSE</span>
+041293,000133:                                                                                                  <span class="co">#       TO THE SWITCH LINE, THE APPROXIMATE SOLUTION GIVES VALID TREND</span>
+041294,000134:                                                                                                  <span class="co">#       INFORMATION (DIRECTION OF DESIRED OGARATE) AT LEAST. THE </span>
+041295,000135:                                                                                                  <span class="co">#       RE-EVALUATION OF DESIRED OGARATE IN SUBSEQUENT ROLL DAP PASSES (1/2</span>
+041296,000136:                                                                                                  <span class="co">#       SECOND INTERVALS) WILL BENEFIT FROM THE CONVERGENT NATURE OF THE</span>
+041297,000137:                                                                                                  <span class="co">#       APPROXIMATION.</span>
+041298,000138: 
+041299,000139:                                                                                                  <span class="co">#  FOR LARGE OGAERROR THE TANGENT INTERSECTS +-MINLIM SWITCH BOUNDRY BEFORE</span>
+041300,000140:                                                                                                  <span class="co">#       INTERSECTING THE STRAIGHT LINE SWITCH. HOWEVER THE MINLIM IS</span>
+041301,000141:                                                                                                  <span class="co">#       IGNORED IN COMPUTING THE FIRING TIME, SO THAT THE EXTENSION (INTO</span>
+041302,000142:                                                                                                  <span class="co">#       THE COAST REGION) OF THE STRAIGHT LINE SWITCH IS WHAT IS FIRED TO.</span>
+041303,000143:                                                                                                  <span class="co">#       IF THE ROLL DAP FINDS ITSELF IN THE COAST REGION BEFORE REACHING</span>
+041304,000144:                                                                                                  <span class="co">#       THE DESIRED INTERSECTION (IE, IN THE REGION BETWEEN THE MINLIM</span>
+041305,000145:                                                                                                  <span class="co">#       AND THE STRAIGHT LINE SWITCH) IT WILL EXIBIT NORMAL COAST-REGION</span>
+041306,000146:                                                                                                  <span class="co">#       BEHAVIOR AND TURN OFF THE JETS. THE PURPOSE OF THIS FIRING POLICY</span>
+041307,000147:                                                                                                  <span class="co">#       IS TO MAINTAIN STATIC ROLL STABILITY IN THE EVENT OF A JET</span>
+041308,000148:                                                                                                  <span class="co">#       FAILED-ON.</span>
+041309,000149: 
+041310,000150:                                                                                                  <span class="co">#  WHEN THE OPERATING POINT IS IN REGION 1 THE SAME APPROXIMATION IS</span>
+041311,000151:                                                                                                  <span class="co">#       MADE, BUT AT AN ARTIFICIALLY-CREATED OR DUMMY OPERATING POINT,</span>
+041312,000152:                                                                                                  <span class="co">#       DEFINED BY.. OGAERROR = INTERSECTION OF CONTROL PARABOLA AND</span>
+041313,000153:                                                                                                  <span class="co">#       OGAERROR AXIS, OGARATE = +-LMCRATE WHERE SIGN IS OPPOSITE THAT OF</span>
+041314,000154:                                                                                                  <span class="co">#       REAL OPERATING POINT RATE.  WHEN THE OPERATING POINT HAS PASSED</span>
+041315,000155:                                                                                                  <span class="co">#       FROM REGION 1 TO REGION 6, THE DUMMY POINT IS NO LONGER REQUIRED,</span>
+041316,000156:                                                                                                  <span class="co">#       AND THE SOLUTION REVERTS TO THAT OF A REGULAR REGION 6 POINT.</span>
+041317,000157: 
+041318,000158: 
+041319,000159:                                                                                                  <span class="co">#  EQUATION FOR SWITCHING PARABOLA (SEE FIGURE ABOVE)....</span>
+041320,000160:                                                                                                  <span class="co">#                                  2</span>
+041321,000161:                                                                                                  <span class="co">#      SOGAERROR = (DB - (SOGARATE) (1/CONACC)/2) SGN(SOGARATE)</span>
+041322,000162: 
+041323,000163: 
+041324,000164:                                                                                                  <span class="co">#  EQUATION FOR SWITCHING STRAIGHT LINE SEGMENT....</span>
+041325,000165: 
+041326,000166:                                                                                                  <span class="co">#       SOGARATE = -(-SLOPE)(SOGAERROR) - SGN(SOGARATE) INTERCEP</span>
+041327,000167: 
+041328,000168:                                                                                                  <span class="co">#                WHERE  INTERCEP = DB(-SLOPE) - LMCRATE</span>
+041329,000169: 
 </pre>
 </span>
 </p>
@@ -311,30 +311,30 @@ Page 948
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-041324,000171:                                                                                                  <span class="co">#  EQUATION FOR INTERSECTION, CONTROL PARABOLA AND STRAIGHT SWITCH LINE....</span>
-041325,000172: 
-041326,000173:                                                                                                  <span class="co">#       DOGADOT = NUM/DEN, WHERE</span>
-041327,000174:                                                                                                  <span class="co">#                                  2</span>
-041328,000175:                                                                                                  <span class="co">#           NUM = (-SLOPE)(OGARATE) (1/CONACC)</span>
-041329,000176:                                                                                                  <span class="co">#                   +SGN(DELOGA)(-SLOPE)(OGAERROR - SGN(DELOGA)(DB))</span>
-041330,000177:                                                                                                  <span class="co">#                   +LMCRATE</span>
-041331,000178: 
-041332,000179:                                                                                                  <span class="co">#           DEN = (-SLOPE)(OGARATE)(1/CONACC) - SGN(DELOGA)</span>
-041333,000180:                                                                                                  <span class="co">#                                             2</span>
-041334,000181:                                                                                                  <span class="co">#           DELOGA = OGAERROR - (DB - (OGADOT) (1/CONACC)/2)SGN(OGADOT)</span>
-041335,000182: 
-041336,000183: 
-041337,000184:                                                                                                  <span class="co">#  FOR REGIONS 6 AND 6-PRIME  USE ACTUAL OPERATING POINT  (OGA, OGARATE)</span>
-041338,000185:                                                                                                  <span class="co">#       FOR OGAERROR AND OGARATE IN THE INTERSECTION EQUATIONS ABOVE.</span>
-041339,000186:                                                                                                  <span class="co">#       FOR REGIONS 1 AND 1-PRIME  USE DUMMY OPERATING POINT FOR OGAERROR</span>
-041340,000187:                                                                                                  <span class="co">#       AND OGARATE,  WHERE THE DUMMY POINT IS GIVEN BY....</span>
-041341,000188:                                                                                                  <span class="co">#       OGAERROR= DELOGA + DB SGN(OGARATE)</span>
-041342,000189:                                                                                                  <span class="co">#       OGARATE= -LMCRATE SGN(OGARATE)</span>
-041343,000190: 
-041344,000191:                                                                                                  <span class="co">#  NOTE, OGAERROR = OGA - OGAD  USES DUMMY REGISTER  OGA IN ROLL DAP CODING</span>
-041345,000192:                                                                                                  <span class="co">#       ALSO,AT POINT WHERE DOGADOT IS COMPUTED, REGISTER DELOGA IS USED</span>
-041346,000193:                                                                                                  <span class="co">#       AS A DUMMY REGISTER FOR THE OGAERROR IN THE NUM EQUATION ABOVE</span>
-041347,000194: 
+041331,000171:                                                                                                  <span class="co">#  EQUATION FOR INTERSECTION, CONTROL PARABOLA AND STRAIGHT SWITCH LINE....</span>
+041332,000172: 
+041333,000173:                                                                                                  <span class="co">#       DOGADOT = NUM/DEN, WHERE</span>
+041334,000174:                                                                                                  <span class="co">#                                  2</span>
+041335,000175:                                                                                                  <span class="co">#           NUM = (-SLOPE)(OGARATE) (1/CONACC)</span>
+041336,000176:                                                                                                  <span class="co">#                   +SGN(DELOGA)(-SLOPE)(OGAERROR - SGN(DELOGA)(DB))</span>
+041337,000177:                                                                                                  <span class="co">#                   +LMCRATE</span>
+041338,000178: 
+041339,000179:                                                                                                  <span class="co">#           DEN = (-SLOPE)(OGARATE)(1/CONACC) - SGN(DELOGA)</span>
+041340,000180:                                                                                                  <span class="co">#                                             2</span>
+041341,000181:                                                                                                  <span class="co">#           DELOGA = OGAERROR - (DB - (OGADOT) (1/CONACC)/2)SGN(OGADOT)</span>
+041342,000182: 
+041343,000183: 
+041344,000184:                                                                                                  <span class="co">#  FOR REGIONS 6 AND 6-PRIME  USE ACTUAL OPERATING POINT  (OGA, OGARATE)</span>
+041345,000185:                                                                                                  <span class="co">#       FOR OGAERROR AND OGARATE IN THE INTERSECTION EQUATIONS ABOVE.</span>
+041346,000186:                                                                                                  <span class="co">#       FOR REGIONS 1 AND 1-PRIME  USE DUMMY OPERATING POINT FOR OGAERROR</span>
+041347,000187:                                                                                                  <span class="co">#       AND OGARATE,  WHERE THE DUMMY POINT IS GIVEN BY....</span>
+041348,000188:                                                                                                  <span class="co">#       OGAERROR= DELOGA + DB SGN(OGARATE)</span>
+041349,000189:                                                                                                  <span class="co">#       OGARATE= -LMCRATE SGN(OGARATE)</span>
+041350,000190: 
+041351,000191:                                                                                                  <span class="co">#  NOTE, OGAERROR = OGA - OGAD  USES DUMMY REGISTER  OGA IN ROLL DAP CODING</span>
+041352,000192:                                                                                                  <span class="co">#       ALSO,AT POINT WHERE DOGADOT IS COMPUTED, REGISTER DELOGA IS USED</span>
+041353,000193:                                                                                                  <span class="co">#       AS A DUMMY REGISTER FOR THE OGAERROR IN THE NUM EQUATION ABOVE</span>
+041354,000194: 
 </pre>
 </span>
 </p>
@@ -350,56 +350,56 @@ Page 949
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-041349,000196:                                                                                                  <span class="co">#  ROLLDAP CODING....</span>
-041350,000197: 
-041351,000198: 16,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#444150524F4C4C">DAPROLL</a>                               
-041352,000199: 16,2000                                           <span class="ps">BANK    </span>                                       
-041353,000200: 16,3312  E6,1672                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F47414E4F57">OGANOW</a>                                
-041354,000201: 16,3312                                           <span class="ps">COUNT*  </span> $$/ROLL                               
-<a name="524F4C4C444150"></a>041355,000202: 16,3312           31672        <span class="sm">ROLLDAP </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F47414E4F57">OGANOW</a>                                <span class="co">#  OGA RATE ESTIMATOR...SIMPLE FIRST-ORDER</span>
-041356,000203: 16,3313           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#       DIFFERENCE (SAMPLE TIME = 1/2 SEC)</span>
-041357,000204: 16,3314           21673                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F474150415354">OGAPAST</a>                               
-041358,000205: 16,3315           00006                           <span class="op">EXTEND  </span>                                       
-041359,000206: 16,3316           74706                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495435">BIT5</a>                                  
-041360,000207: 16,3317           22000                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-041361,000208: 16,3320           55533                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F474152415445">OGARATE</a>                               <span class="co">#  SC.AT B-4 REV/SEC</span>
-041362,000209: 
-041363,000210:                                                                                                  <span class="co">#  COMPUTATIONS WHICH FOLLOW USE OGA FOR OGAERR  (SAME REGISTER)</span>
-041364,000211:                                                                                                  <span class="co">#  EXAMINE DURATION OF LAST ROLL FIRING IF JETS ARE NOW ON.</span>
-<a name="4455524154494F4E"></a>041365,000212: 16,3321           31611        <span class="sm">DURATION</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C46495245">ROLLFIRE</a>                              <span class="co">#  SAME SGN AS PRESENT TORQ,MAGN=POSMAX</span>
-041366,000213: 16,3322           00006                           <span class="op">EXTEND  </span>                                       
-041367,000214: 16,3323           13325                           <span class="op">BZF     </span> +2                                    <span class="co">#  ROLL JETS ARE NOW OFF.</span>
-041368,000215: 16,3324           13333                           <span class="op">TCF     </span> <a href="#524F4C4C4F474943">ROLLOGIC</a>                              <span class="co">#  ENTER LOGIC, JETS NOW ON.</span>
-041369,000216: 
-041370,000217: 16,3325           31613                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  EXAMINE LAST FIRING INTERVAL</span>
-041371,000218: 16,3326           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  IF POSITIVE, DONT FIRE</span>
-041372,000219: 16,3327           13333                           <span class="op">BZF     </span> <a href="#524F4C4C4F474943">ROLLOGIC</a>                              <span class="co">#  ENTER LOGIC, JETS NOW OFF.</span>
-041373,000220: 
-041374,000221: 16,3330           34714                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  JETS HAVE NOT BEEN OFF FOR 1/2 SEC. WAIT</span>
-041375,000222: 16,3331           55613                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  RESET TEMREG</span>
-<a name="57414954312F32"></a>041376,000223: 16,3332           15213        <span class="sm">WAIT1/2 </span>           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  EXIT ROLL DAP</span>
-041377,000224: 
-041378,000225:                                                                                                  <span class="co">#  COMPUTE DB-(1/2 CONACC) (OGARATE)SQ  (1/2 IN THE SCALING)</span>
-<a name="524F4C4C4F474943"></a>041379,000226: 16,3333           41533        <span class="sm">ROLLOGIC</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F474152415445">OGARATE</a>                               <span class="co">#  SCALED AT 2(-4) REV/SEC</span>
-041380,000227: 16,3334           00006                           <span class="op">EXTEND  </span>                                       
-041381,000228: 16,3335           71650                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F434F4E414343">1/CONACC</a>                              <span class="co">#  SCALED AT 2(+9) SEC SQ /REV</span>
-041382,000229: 16,3336           00006                           <span class="op">EXTEND  </span>                                       
-041383,000230: 16,3337           71533                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F474152415445">OGARATE</a>                               
-041384,000231: 16,3340           63722                           <span class="op">AD      </span> <a href="#4442">DB</a>                                    <span class="co">#  SCALED AT 2(+0) REV</span>
-041385,000232: 16,3341           55613                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  QUANTITY SCALED AT 2(+0) REV.</span>
-041386,000233: 
-041387,000234:                                                                                                  <span class="co">#  GET SIGN OF OGARATE</span>
-041388,000235: 16,3342           31533                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F474152415445">OGARATE</a>                               
-041389,000236: 16,3343           00006                           <span class="op">EXTEND  </span>                                       
-041390,000237: 16,3344           63347                           <span class="op">BZMF    </span> +3                                    <span class="co">#  LET SGN(0) BE NEGATIVE</span>
-041391,000238: 16,3345           34712                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  
-041392,000239: 16,3346           13350                           <span class="op">TCF     </span> +2                                    
-041393,000240: 16,3347           44712                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  
-041394,000241: 16,3350           55676                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53474E5254">SGNRT</a>                                 <span class="co">#  + OR -  2(-14)</span>
-041395,000242: 
-041396,000243:                                                                                                  <span class="co">#  CALCULATE DISTANCE FROM SWITCH PARABOLA,DELOGA</span>
-041397,000244: 16,3351           00006                           <span class="op">EXTEND  </span>                                       
-041398,000245: 16,3352           71613                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  SGN(OGARATE) TEMREG NOW IN L  </span>
+041356,000196:                                                                                                  <span class="co">#  ROLLDAP CODING....</span>
+041357,000197: 
+041358,000198: 16,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#444150524F4C4C">DAPROLL</a>                               
+041359,000199: 16,2000                                           <span class="ps">BANK    </span>                                       
+041360,000200: 16,3312  E6,1672                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F47414E4F57">OGANOW</a>                                
+041361,000201: 16,3312                                           <span class="ps">COUNT*  </span> $$/ROLL                               
+<a name="524F4C4C444150"></a>041362,000202: 16,3312           31672        <span class="sm">ROLLDAP </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F47414E4F57">OGANOW</a>                                <span class="co">#  OGA RATE ESTIMATOR...SIMPLE FIRST-ORDER</span>
+041363,000203: 16,3313           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#       DIFFERENCE (SAMPLE TIME = 1/2 SEC)</span>
+041364,000204: 16,3314           21673                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F474150415354">OGAPAST</a>                               
+041365,000205: 16,3315           00006                           <span class="op">EXTEND  </span>                                       
+041366,000206: 16,3316           74706                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495435">BIT5</a>                                  
+041367,000207: 16,3317           22000                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+041368,000208: 16,3320           55533                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F474152415445">OGARATE</a>                               <span class="co">#  SC.AT B-4 REV/SEC</span>
+041369,000209: 
+041370,000210:                                                                                                  <span class="co">#  COMPUTATIONS WHICH FOLLOW USE OGA FOR OGAERR  (SAME REGISTER)</span>
+041371,000211:                                                                                                  <span class="co">#  EXAMINE DURATION OF LAST ROLL FIRING IF JETS ARE NOW ON.</span>
+<a name="4455524154494F4E"></a>041372,000212: 16,3321           31611        <span class="sm">DURATION</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C46495245">ROLLFIRE</a>                              <span class="co">#  SAME SGN AS PRESENT TORQ,MAGN=POSMAX</span>
+041373,000213: 16,3322           00006                           <span class="op">EXTEND  </span>                                       
+041374,000214: 16,3323           13325                           <span class="op">BZF     </span> +2                                    <span class="co">#  ROLL JETS ARE NOW OFF.</span>
+041375,000215: 16,3324           13333                           <span class="op">TCF     </span> <a href="#524F4C4C4F474943">ROLLOGIC</a>                              <span class="co">#  ENTER LOGIC, JETS NOW ON.</span>
+041376,000216: 
+041377,000217: 16,3325           31613                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  EXAMINE LAST FIRING INTERVAL</span>
+041378,000218: 16,3326           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  IF POSITIVE, DONT FIRE</span>
+041379,000219: 16,3327           13333                           <span class="op">BZF     </span> <a href="#524F4C4C4F474943">ROLLOGIC</a>                              <span class="co">#  ENTER LOGIC, JETS NOW OFF.</span>
+041380,000220: 
+041381,000221: 16,3330           34714                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  JETS HAVE NOT BEEN OFF FOR 1/2 SEC. WAIT</span>
+041382,000222: 16,3331           55613                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  RESET TEMREG</span>
+<a name="57414954312F32"></a>041383,000223: 16,3332           15213        <span class="sm">WAIT1/2 </span>           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  EXIT ROLL DAP</span>
+041384,000224: 
+041385,000225:                                                                                                  <span class="co">#  COMPUTE DB-(1/2 CONACC) (OGARATE)SQ  (1/2 IN THE SCALING)</span>
+<a name="524F4C4C4F474943"></a>041386,000226: 16,3333           41533        <span class="sm">ROLLOGIC</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F474152415445">OGARATE</a>                               <span class="co">#  SCALED AT 2(-4) REV/SEC</span>
+041387,000227: 16,3334           00006                           <span class="op">EXTEND  </span>                                       
+041388,000228: 16,3335           71650                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F434F4E414343">1/CONACC</a>                              <span class="co">#  SCALED AT 2(+9) SEC SQ /REV</span>
+041389,000229: 16,3336           00006                           <span class="op">EXTEND  </span>                                       
+041390,000230: 16,3337           71533                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F474152415445">OGARATE</a>                               
+041391,000231: 16,3340           63722                           <span class="op">AD      </span> <a href="#4442">DB</a>                                    <span class="co">#  SCALED AT 2(+0) REV</span>
+041392,000232: 16,3341           55613                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  QUANTITY SCALED AT 2(+0) REV.</span>
+041393,000233: 
+041394,000234:                                                                                                  <span class="co">#  GET SIGN OF OGARATE</span>
+041395,000235: 16,3342           31533                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F474152415445">OGARATE</a>                               
+041396,000236: 16,3343           00006                           <span class="op">EXTEND  </span>                                       
+041397,000237: 16,3344           63347                           <span class="op">BZMF    </span> +3                                    <span class="co">#  LET SGN(0) BE NEGATIVE</span>
+041398,000238: 16,3345           34712                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  
+041399,000239: 16,3346           13350                           <span class="op">TCF     </span> +2                                    
+041400,000240: 16,3347           44712                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  
+041401,000241: 16,3350           55676                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53474E5254">SGNRT</a>                                 <span class="co">#  + OR -  2(-14)</span>
+041402,000242: 
+041403,000243:                                                                                                  <span class="co">#  CALCULATE DISTANCE FROM SWITCH PARABOLA,DELOGA</span>
+041404,000244: 16,3351           00006                           <span class="op">EXTEND  </span>                                       
+041405,000245: 16,3352           71613                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  SGN(OGARATE) TEMREG NOW IN L  </span>
 </pre>
 </span>
 </p>
@@ -415,56 +415,56 @@ Page 950
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-041400,000247: 16,3353           40001                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-041401,000248: 16,3354           61674                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4741">OGA</a>                                   <span class="co">#  SCALED AT 2(+0) REV</span>
-<a name="44454C4F474143"></a>041402,000249: 16,3355           55677        <span class="sm">DELOGAC </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4F4741">DELOGA</a>                                <span class="co">#  SC.AT B+0 REV, PLUS TO RIGHT OF C-PARAB       </span>
-041403,000250:                                                                                                  <span class="co">#  EXAMINE SGN(DELOGA) AND CREATE CA OR CS INSTR. DEPENDING UPON SIGN.</span>
-041404,000251: 16,3356           00006                           <span class="op">EXTEND  </span>                                       
-041405,000252: 16,3357           63362                           <span class="op">BZMF    </span> +3                                    
-041406,000253: 16,3360           34371                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3330">PRIO30</a>                                <span class="co">#  =CA  (30000)</span>
-041407,000254: 16,3361           13363                           <span class="op">TCF     </span> +2                                    
-041408,000255: 16,3362           34674                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543135">BIT15</a>                                 <span class="co">#  =CS  (40000)</span>
-041409,000256: 16,3363           55700                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     
-041410,000257: 
-041411,000258: 16,3364           51700                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     <span class="co">#  TSET ON  I SGN(OGARATE)</span>
-041412,000259: 16,3365           01676                           0        <a href="ERASABLE_ASSIGNMENTS.agc.html#53474E5254">SGNRT</a>                                 <span class="co">#  CA OR CS</span>
-041413,000260: 16,3366           40000                           <span class="op">COM     </span>                                       
-041414,000261: 16,3367           00006                           <span class="op">EXTEND  </span>                                       
-<a name="52454731545354"></a>041415,000262: 16,3370           63441        <span class="sm">REG1TST </span>           <span class="op">BZMF    </span> <a href="#524F4C4C4F4E">ROLLON</a>                                <span class="co">#  IF REGION 1 (DELOGA OGARATE SAME SIGN)</span>
-041416,000263: 
-041417,000264:                                                                                                  <span class="co">#  NO JET FIRE YET,  TEST FOR MAX OGARATE</span>
-041418,000265: 16,3371           51700                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     
-041419,000266: 16,3372           01533                           0        <a href="ERASABLE_ASSIGNMENTS.agc.html#4F474152415445">OGARATE</a>                               <span class="co">#  CA OR CS...BOTH MUST BE NEG. HERE</span>
-041420,000267: 16,3373           55701                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494F474152415445">IOGARATE</a>                              <span class="co">#  I.E. I OGARATE</span>
-041421,000268: 16,3374           63730                           <span class="op">AD      </span> <a href="#4D41584C494D">MAXLIM</a>                                <span class="co">#  SCALED AT 2(-4) REV/SEC</span>
-041422,000269: 16,3375           00006                           <span class="op">EXTEND  </span>                                       
-<a name="52454733545354"></a>041423,000270: 16,3376           63520        <span class="sm">REG3TST </span>           <span class="op">BZMF    </span> <a href="#524154454C494D">RATELIM</a>                               <span class="co">#  IF REGION 3 (RATES TOO HIGH, FIRE JETS)</span>
-041424,000271: 
-041425,000272:                                                                                                  <span class="co">#  COMPUTATION OF I((-SLOPE)OGA + OGARATE) - INTERCEPT..NOTE THAT STR. LINE</span>
-041426,000273:                                                                                                  <span class="co">#  SWITCH SLOPE IS (SLOPE) DEG/SEC/DEG,A NEG. QUANTITY</span>
-041427,000274: 16,3377           31533                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F474152415445">OGARATE</a>                               
-041428,000275: 16,3400           00006                           <span class="op">EXTEND  </span>                                       
-041429,000276: 16,3401           74675                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 
-041430,000277: 16,3402           55613                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                
-041431,000278: 16,3403           31674                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4741">OGA</a>                                   
-041432,000279: 16,3404           00006                           <span class="op">EXTEND  </span>                                       
-041433,000280: 16,3405           73723                           <span class="op">MP      </span> <a href="#2D534C4F5045">-SLOPE</a>                                
-041434,000281: 16,3406           20001                           <span class="op">DDOUBL  </span>                                       
-041435,000282: 16,3407           20001                           <span class="op">DDOUBL  </span>                                       
-041436,000283: 16,3410           20001                           <span class="op">DDOUBL  </span>                                       <span class="co">#  (OGA ERROR MUST BE LESS THAN +-225 DEG)</span>
-041437,000284: 16,3411           61613                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                
-041438,000285: 
-041439,000286: 16,3412           51700                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     
-041440,000287: 16,3413           00000                           0        <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  I((-SLOPE)OGA+OGARATE) AT 2(-3)REV/SEC</span>
-041441,000288: 16,3414           40000                           <span class="op">COM     </span>                                       
-041442,000289: 16,3415           63725                           <span class="op">AD      </span> <a href="#494E544552434550">INTERCEP</a>                              <span class="co">#  SCALED AT 2(-3) REV.</span>
-041443,000290: 16,3416           40000                           <span class="op">COM     </span>                                       
-041444,000291: 16,3417           00006                           <span class="op">EXTEND  </span>                                       
-<a name="52454732545354"></a>041445,000292: 16,3420           63625        <span class="sm">REG2TST </span>           <span class="op">BZMF    </span> <a href="#4E4F524F4C4C">NOROLL</a>                                <span class="co">#  IF REGION 2 (COAST SIDE OF STRT LINE)</span>
-041446,000293: 
-041447,000294:                                                                                                  <span class="co">#  CHECK TO SEE IF OGARATE IS ABOVE MINLIM</span>
-041448,000295: 16,3421           31701                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494F474152415445">IOGARATE</a>                              <span class="co">#  ALWAYS NEGATIVE</span>
-041449,000296: 16,3422           63726                           <span class="op">AD      </span> <a href="#4D494E4C494D">MINLIM</a>                                <span class="co">#  SCALED AT 2(-4) REV/SEC</span>
+041407,000247: 16,3353           40001                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+041408,000248: 16,3354           61674                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4741">OGA</a>                                   <span class="co">#  SCALED AT 2(+0) REV</span>
+<a name="44454C4F474143"></a>041409,000249: 16,3355           55677        <span class="sm">DELOGAC </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4F4741">DELOGA</a>                                <span class="co">#  SC.AT B+0 REV, PLUS TO RIGHT OF C-PARAB       </span>
+041410,000250:                                                                                                  <span class="co">#  EXAMINE SGN(DELOGA) AND CREATE CA OR CS INSTR. DEPENDING UPON SIGN.</span>
+041411,000251: 16,3356           00006                           <span class="op">EXTEND  </span>                                       
+041412,000252: 16,3357           63362                           <span class="op">BZMF    </span> +3                                    
+041413,000253: 16,3360           34371                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3330">PRIO30</a>                                <span class="co">#  =CA  (30000)</span>
+041414,000254: 16,3361           13363                           <span class="op">TCF     </span> +2                                    
+041415,000255: 16,3362           34674                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543135">BIT15</a>                                 <span class="co">#  =CS  (40000)</span>
+041416,000256: 16,3363           55700                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     
+041417,000257: 
+041418,000258: 16,3364           51700                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     <span class="co">#  TSET ON  I SGN(OGARATE)</span>
+041419,000259: 16,3365           01676                           0        <a href="ERASABLE_ASSIGNMENTS.agc.html#53474E5254">SGNRT</a>                                 <span class="co">#  CA OR CS</span>
+041420,000260: 16,3366           40000                           <span class="op">COM     </span>                                       
+041421,000261: 16,3367           00006                           <span class="op">EXTEND  </span>                                       
+<a name="52454731545354"></a>041422,000262: 16,3370           63441        <span class="sm">REG1TST </span>           <span class="op">BZMF    </span> <a href="#524F4C4C4F4E">ROLLON</a>                                <span class="co">#  IF REGION 1 (DELOGA OGARATE SAME SIGN)</span>
+041423,000263: 
+041424,000264:                                                                                                  <span class="co">#  NO JET FIRE YET,  TEST FOR MAX OGARATE</span>
+041425,000265: 16,3371           51700                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     
+041426,000266: 16,3372           01533                           0        <a href="ERASABLE_ASSIGNMENTS.agc.html#4F474152415445">OGARATE</a>                               <span class="co">#  CA OR CS...BOTH MUST BE NEG. HERE</span>
+041427,000267: 16,3373           55701                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494F474152415445">IOGARATE</a>                              <span class="co">#  I.E. I OGARATE</span>
+041428,000268: 16,3374           63730                           <span class="op">AD      </span> <a href="#4D41584C494D">MAXLIM</a>                                <span class="co">#  SCALED AT 2(-4) REV/SEC</span>
+041429,000269: 16,3375           00006                           <span class="op">EXTEND  </span>                                       
+<a name="52454733545354"></a>041430,000270: 16,3376           63520        <span class="sm">REG3TST </span>           <span class="op">BZMF    </span> <a href="#524154454C494D">RATELIM</a>                               <span class="co">#  IF REGION 3 (RATES TOO HIGH, FIRE JETS)</span>
+041431,000271: 
+041432,000272:                                                                                                  <span class="co">#  COMPUTATION OF I((-SLOPE)OGA + OGARATE) - INTERCEPT..NOTE THAT STR. LINE</span>
+041433,000273:                                                                                                  <span class="co">#  SWITCH SLOPE IS (SLOPE) DEG/SEC/DEG,A NEG. QUANTITY</span>
+041434,000274: 16,3377           31533                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F474152415445">OGARATE</a>                               
+041435,000275: 16,3400           00006                           <span class="op">EXTEND  </span>                                       
+041436,000276: 16,3401           74675                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 
+041437,000277: 16,3402           55613                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                
+041438,000278: 16,3403           31674                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4741">OGA</a>                                   
+041439,000279: 16,3404           00006                           <span class="op">EXTEND  </span>                                       
+041440,000280: 16,3405           73723                           <span class="op">MP      </span> <a href="#2D534C4F5045">-SLOPE</a>                                
+041441,000281: 16,3406           20001                           <span class="op">DDOUBL  </span>                                       
+041442,000282: 16,3407           20001                           <span class="op">DDOUBL  </span>                                       
+041443,000283: 16,3410           20001                           <span class="op">DDOUBL  </span>                                       <span class="co">#  (OGA ERROR MUST BE LESS THAN +-225 DEG)</span>
+041444,000284: 16,3411           61613                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                
+041445,000285: 
+041446,000286: 16,3412           51700                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     
+041447,000287: 16,3413           00000                           0        <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  I((-SLOPE)OGA+OGARATE) AT 2(-3)REV/SEC</span>
+041448,000288: 16,3414           40000                           <span class="op">COM     </span>                                       
+041449,000289: 16,3415           63725                           <span class="op">AD      </span> <a href="#494E544552434550">INTERCEP</a>                              <span class="co">#  SCALED AT 2(-3) REV.</span>
+041450,000290: 16,3416           40000                           <span class="op">COM     </span>                                       
+041451,000291: 16,3417           00006                           <span class="op">EXTEND  </span>                                       
+<a name="52454732545354"></a>041452,000292: 16,3420           63625        <span class="sm">REG2TST </span>           <span class="op">BZMF    </span> <a href="#4E4F524F4C4C">NOROLL</a>                                <span class="co">#  IF REGION 2 (COAST SIDE OF STRT LINE)</span>
+041453,000293: 
+041454,000294:                                                                                                  <span class="co">#  CHECK TO SEE IF OGARATE IS ABOVE MINLIM</span>
+041455,000295: 16,3421           31701                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494F474152415445">IOGARATE</a>                              <span class="co">#  ALWAYS NEGATIVE</span>
+041456,000296: 16,3422           63726                           <span class="op">AD      </span> <a href="#4D494E4C494D">MINLIM</a>                                <span class="co">#  SCALED AT 2(-4) REV/SEC</span>
 </pre>
 </span>
 </p>
@@ -480,56 +480,56 @@ Page 951
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-041451,000298: 16,3423           00006                           <span class="op">EXTEND  </span>                                       
-<a name="52454734545354"></a>041452,000299: 16,3424           63625        <span class="sm">REG4TST </span>           <span class="op">BZMF    </span> <a href="#4E4F524F4C4C">NOROLL</a>                                <span class="co">#  IF REGION 4 (COAST SIDE OF MINLIM)</span>
-041453,000300: 
-041454,000301:                                                                                                  <span class="co">#  ALL AREAS CHECKED EXCEPT LAST AREA...NO FIRE IN THIS SMALL SEGMENT</span>
-041455,000302: 16,3425           51700                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     
-041456,000303: 16,3426           01674                           0        <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4741">OGA</a>                                   
-041457,000304: 16,3427           40000                           <span class="op">COM     </span>                                       
-041458,000305: 16,3430           63722                           <span class="op">AD      </span> <a href="#4442">DB</a>                                    
-041459,000306: 16,3431           40000                           <span class="op">COM     </span>                                       
-041460,000307: 16,3432           00006                           <span class="op">EXTEND  </span>                                       
-<a name="52454735545354"></a>041461,000308: 16,3433           63625        <span class="sm">REG5TST </span>           <span class="op">BZMF    </span> <a href="#4E4F524F4C4C">NOROLL</a>                                <span class="co">#  IF REGION 5 (COAST SIDE OF DB)</span>
-041462,000309: 
-041463,000310: 
-041464,000311:                                                                                                  <span class="co">#  JETS MUST FIRE NOW.OGARATE IS NEG.(OR VISA VERSA).USE DIRECT STR. LINE.</span>
-041465,000312:                                                                                                  <span class="co">#  DELOGA AND DELOGART ARE USED AS DUMMY VARIABLES IN THE SOLUTION OF A</span>
-041466,000313:                                                                                                  <span class="co">#  STRAIGHT LINE APPROXIMATION TO A QUADRATIC SOLUTION OF THE INTERSECTION</span>
-041467,000314:                                                                                                  <span class="co">#  OF THE CONTROL PARABOLA AND THE STRAIGHT-LINE SWITCH LINE. THE STRAIGHT</span>
-041468,000315:                                                                                                  <span class="co">#  LINE IS THE TANGENT TO THE CONTROL PARABOLA AT THE OPERATING POINT. (FOR</span>
-041469,000316:                                                                                                  <span class="co">#  OPERATING POINTS IN REGIONS 6 AND 6-PRIME)</span>
-<a name="524547494F4E36"></a>041470,000317: 16,3434           31674        <span class="sm">REGION6 </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4741">OGA</a>                                   <span class="co">#  USE ACTUAL OPERATING POINT FOR TANGENT</span>
-041471,000318: 16,3435           55677                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4F4741">DELOGA</a>                                <span class="co">#  ACTUAL STATE</span>
-041472,000319: 16,3436           31533                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F474152415445">OGARATE</a>                               
-041473,000320: 16,3437           55675                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4F47415254">DELOGART</a>                              <span class="co">#  ACTUAL STATE,I.E. DEL OGARATE</span>
-041474,000321: 16,3440           13450                           <span class="op">TCF     </span> <a href="#4F4E524F4C4C">ONROLL</a>                                
-041475,000322: 
-041476,000323:                                                                                                  <span class="co">#  JETS ALSO FIRE FROM HERE EXCEPT OGARATE IS POS(VISA VERSA),USE INDIRECT</span>
-041477,000324:                                                                                                  <span class="co">#  STRAIGHT LINE ESTABLISHED BY TANGENT TO A CONTROL PARABOLA AT   ((DELOGA</span>
-041478,000325:                                                                                                  <span class="co">#  + DB SGN(DELOGA) ), -LMCRATE SGN(DELOGA) )         (THIS IS THE DUMMY</span>
-041479,000326:                                                                                                  <span class="co">#  OPERATING POINT FOR OPERATING POINTS IN REGIONS 1 AND 1-PRIME )</span>
-<a name="524F4C4C4F4E"></a>041480,000327: 16,3441           51700        <span class="sm">ROLLON  </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     
-041481,000328: 16,3442           03722                           0        <a href="#4442">DB</a>                                    
-041482,000329: 16,3443           27677                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4F4741">DELOGA</a>                                <span class="co">#  DELOGA WAS DIST. FROM SWITCH PARABOLA</span>
-041483,000330: 
-041484,000331: 16,3444           43724                           <span class="op">CS      </span> <a href="#4C4D4352415445">LMCRATE</a>                               <span class="co">#  LIMIT CYCLE RATE AT 2(-4) REV/SEC</span>
-041485,000332: 16,3445           51700                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     
-041486,000333: 16,3446           00000                           0        <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-041487,000334: 16,3447           55675                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4F47415254">DELOGART</a>                              <span class="co">#  EVALUATE STATE FOR INDIRECT LINE.</span>
-041488,000335: 
-041489,000336:                                                                                                  <span class="co">#  SOLVE STRAIGHT LINES SIMULTANEOUSLY TO OBTAIN DESIRED OGARATE.</span>
-<a name="4F4E524F4C4C"></a>041490,000337: 16,3450           00006        <span class="sm">ONROLL  </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  DELOGART IN ACC. ON ARRIVAL</span>
-041491,000338: 16,3451           71650                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F434F4E414343">1/CONACC</a>                              
-041492,000339: 16,3452           60000                           <span class="op">DOUBLE  </span>                                       
-041493,000340: 16,3453           00006                           <span class="op">EXTEND  </span>                                       
-041494,000341: 16,3454           73723                           <span class="op">MP      </span> <a href="#2D534C4F5045">-SLOPE</a>                                
-041495,000342: 16,3455           55613                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  2(-SLOPE)RATE /CONACC</span>
-041496,000343: 16,3456           00006                           <span class="op">EXTEND  </span>                                       
-041497,000344: 16,3457           71675                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4F47415254">DELOGART</a>                              
-041498,000345: 16,3460           55675                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4F47415254">DELOGART</a>                              <span class="co">#  2(-SLOPE)(RATESQ)/CONACC</span>
-041499,000346: 16,3461           44700                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543131">BIT11</a>                                 
-041500,000347: 16,3462           51700                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     
+041458,000298: 16,3423           00006                           <span class="op">EXTEND  </span>                                       
+<a name="52454734545354"></a>041459,000299: 16,3424           63625        <span class="sm">REG4TST </span>           <span class="op">BZMF    </span> <a href="#4E4F524F4C4C">NOROLL</a>                                <span class="co">#  IF REGION 4 (COAST SIDE OF MINLIM)</span>
+041460,000300: 
+041461,000301:                                                                                                  <span class="co">#  ALL AREAS CHECKED EXCEPT LAST AREA...NO FIRE IN THIS SMALL SEGMENT</span>
+041462,000302: 16,3425           51700                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     
+041463,000303: 16,3426           01674                           0        <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4741">OGA</a>                                   
+041464,000304: 16,3427           40000                           <span class="op">COM     </span>                                       
+041465,000305: 16,3430           63722                           <span class="op">AD      </span> <a href="#4442">DB</a>                                    
+041466,000306: 16,3431           40000                           <span class="op">COM     </span>                                       
+041467,000307: 16,3432           00006                           <span class="op">EXTEND  </span>                                       
+<a name="52454735545354"></a>041468,000308: 16,3433           63625        <span class="sm">REG5TST </span>           <span class="op">BZMF    </span> <a href="#4E4F524F4C4C">NOROLL</a>                                <span class="co">#  IF REGION 5 (COAST SIDE OF DB)</span>
+041469,000309: 
+041470,000310: 
+041471,000311:                                                                                                  <span class="co">#  JETS MUST FIRE NOW.OGARATE IS NEG.(OR VISA VERSA).USE DIRECT STR. LINE.</span>
+041472,000312:                                                                                                  <span class="co">#  DELOGA AND DELOGART ARE USED AS DUMMY VARIABLES IN THE SOLUTION OF A</span>
+041473,000313:                                                                                                  <span class="co">#  STRAIGHT LINE APPROXIMATION TO A QUADRATIC SOLUTION OF THE INTERSECTION</span>
+041474,000314:                                                                                                  <span class="co">#  OF THE CONTROL PARABOLA AND THE STRAIGHT-LINE SWITCH LINE. THE STRAIGHT</span>
+041475,000315:                                                                                                  <span class="co">#  LINE IS THE TANGENT TO THE CONTROL PARABOLA AT THE OPERATING POINT. (FOR</span>
+041476,000316:                                                                                                  <span class="co">#  OPERATING POINTS IN REGIONS 6 AND 6-PRIME)</span>
+<a name="524547494F4E36"></a>041477,000317: 16,3434           31674        <span class="sm">REGION6 </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4741">OGA</a>                                   <span class="co">#  USE ACTUAL OPERATING POINT FOR TANGENT</span>
+041478,000318: 16,3435           55677                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4F4741">DELOGA</a>                                <span class="co">#  ACTUAL STATE</span>
+041479,000319: 16,3436           31533                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F474152415445">OGARATE</a>                               
+041480,000320: 16,3437           55675                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4F47415254">DELOGART</a>                              <span class="co">#  ACTUAL STATE,I.E. DEL OGARATE</span>
+041481,000321: 16,3440           13450                           <span class="op">TCF     </span> <a href="#4F4E524F4C4C">ONROLL</a>                                
+041482,000322: 
+041483,000323:                                                                                                  <span class="co">#  JETS ALSO FIRE FROM HERE EXCEPT OGARATE IS POS(VISA VERSA),USE INDIRECT</span>
+041484,000324:                                                                                                  <span class="co">#  STRAIGHT LINE ESTABLISHED BY TANGENT TO A CONTROL PARABOLA AT   ((DELOGA</span>
+041485,000325:                                                                                                  <span class="co">#  + DB SGN(DELOGA) ), -LMCRATE SGN(DELOGA) )         (THIS IS THE DUMMY</span>
+041486,000326:                                                                                                  <span class="co">#  OPERATING POINT FOR OPERATING POINTS IN REGIONS 1 AND 1-PRIME )</span>
+<a name="524F4C4C4F4E"></a>041487,000327: 16,3441           51700        <span class="sm">ROLLON  </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     
+041488,000328: 16,3442           03722                           0        <a href="#4442">DB</a>                                    
+041489,000329: 16,3443           27677                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4F4741">DELOGA</a>                                <span class="co">#  DELOGA WAS DIST. FROM SWITCH PARABOLA</span>
+041490,000330: 
+041491,000331: 16,3444           43724                           <span class="op">CS      </span> <a href="#4C4D4352415445">LMCRATE</a>                               <span class="co">#  LIMIT CYCLE RATE AT 2(-4) REV/SEC</span>
+041492,000332: 16,3445           51700                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     
+041493,000333: 16,3446           00000                           0        <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+041494,000334: 16,3447           55675                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4F47415254">DELOGART</a>                              <span class="co">#  EVALUATE STATE FOR INDIRECT LINE.</span>
+041495,000335: 
+041496,000336:                                                                                                  <span class="co">#  SOLVE STRAIGHT LINES SIMULTANEOUSLY TO OBTAIN DESIRED OGARATE.</span>
+<a name="4F4E524F4C4C"></a>041497,000337: 16,3450           00006        <span class="sm">ONROLL  </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  DELOGART IN ACC. ON ARRIVAL</span>
+041498,000338: 16,3451           71650                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F434F4E414343">1/CONACC</a>                              
+041499,000339: 16,3452           60000                           <span class="op">DOUBLE  </span>                                       
+041500,000340: 16,3453           00006                           <span class="op">EXTEND  </span>                                       
+041501,000341: 16,3454           73723                           <span class="op">MP      </span> <a href="#2D534C4F5045">-SLOPE</a>                                
+041502,000342: 16,3455           55613                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  2(-SLOPE)RATE /CONACC</span>
+041503,000343: 16,3456           00006                           <span class="op">EXTEND  </span>                                       
+041504,000344: 16,3457           71675                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4F47415254">DELOGART</a>                              
+041505,000345: 16,3460           55675                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4F47415254">DELOGART</a>                              <span class="co">#  2(-SLOPE)(RATESQ)/CONACC</span>
+041506,000346: 16,3461           44700                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543131">BIT11</a>                                 
+041507,000347: 16,3462           51700                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     
 </pre>
 </span>
 </p>
@@ -545,56 +545,56 @@ Page 952
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-041502,000349: 16,3463           00000                           0        <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-<a name="5241544544454E"></a>041503,000350: 16,3464           27613        <span class="sm">RATEDEN </span>           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  DENOMINATOR COMPLETED</span>
-041504,000351: 
-041505,000352: 16,3465           51700                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     
-041506,000353: 16,3466           01677                           0        <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4F4741">DELOGA</a>                                
-041507,000354: 16,3467           40000                           <span class="op">COM     </span>                                       
-041508,000355: 16,3470           63722                           <span class="op">AD      </span> <a href="#4442">DB</a>                                    
-041509,000356: 16,3471           40000                           <span class="op">COM     </span>                                       
-041510,000357: 16,3472           00006                           <span class="op">EXTEND  </span>                                       
-041511,000358: 16,3473           73723                           <span class="op">MP      </span> <a href="#2D534C4F5045">-SLOPE</a>                                
-041512,000359: 16,3474           27675                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4F47415254">DELOGART</a>                              
-041513,000360: 16,3475           33724                           <span class="op">CA      </span> <a href="#4C4D4352415445">LMCRATE</a>                               
-041514,000361: 16,3476           00006                           <span class="op">EXTEND  </span>                                       
-041515,000362: 16,3477           74700                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543131">BIT11</a>                                 
-<a name="524154454E554D"></a>041516,000363: 16,3500           61675        <span class="sm">RATENUM </span>           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4F47415254">DELOGART</a>                              <span class="co">#  NUMERATOR COMPLETED</span>
-041517,000364: 
-041518,000365: 16,3501           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  PLACE NUMERATOR IN L FOR OVERFL. CHECK</span>
-041519,000366: 16,3502           34714                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-041520,000367: 16,3503           00006                           <span class="op">EXTEND  </span>                                       
-041521,000368: 16,3504           11613                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  OVERFLOW, IF ANYTHING, NOW APPEARS IN A</span>
-041522,000369: 16,3505           00006                           <span class="op">EXTEND  </span>                                       
-041523,000370: 16,3506           13514                           <span class="op">BZF     </span> <a href="#44564F4B">DVOK</a>                                  <span class="co">#  NO OVERFLOW....(0,L)/TEMREG = 0,L</span>
-041524,000371: 
-<a name="4D494E4C494D4150"></a>041525,000372: 16,3507           10000        <span class="sm">MINLIMAP</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-041526,000373: 16,3510           34672                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#      POSITIVE OVERFLOW</span>
-041527,000374: 16,3511           13523                           <span class="op">TCF     </span> <a href="#524F4C4C534554">ROLLSET</a>                               
-041528,000375: 16,3512           44672                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#      NEGATIVE OVERFLOW</span>
-041529,000376: 16,3513           13523                           <span class="op">TCF     </span> <a href="#524F4C4C534554">ROLLSET</a>                               
-041530,000377: 
-<a name="44564F4B"></a>041531,000378: 16,3514           22000        <span class="sm">DVOK    </span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  PUT NUMERATOR BACK INTO A, 0 IN L</span>
-041532,000379: 16,3515           00006                           <span class="op">EXTEND  </span>                                       
-041533,000380: 16,3516           11613                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  RESULT OF DIVISION IS DESIRED OGARATE</span>
-041534,000381: 16,3517           13523                           <span class="op">TCF     </span> <a href="#524F4C4C534554">ROLLSET</a>                               <span class="co">#       ( SCALED AT B-4 REV/SEC )</span>
-041535,000382: 
-041536,000383: 
-<a name="524154454C494D"></a>041537,000384: 16,3520           43730        <span class="sm">RATELIM </span>           <span class="op">CS      </span> <a href="#4D41584C494D">MAXLIM</a>                                
-041538,000385: 16,3521           51700                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     
-041539,000386: 16,3522           00000                           0        <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IF I = CA, DESIRED RATE IS   -MAXLIM</span>
-041540,000387: 
-041541,000388:                                                                                                  <span class="co">#  BASED ON DESIRED RATE - PRESENT RATE, COMPUTE JET FIRE TIME</span>
-<a name="524F4C4C534554"></a>041542,000389: 16,3523           55613        <span class="sm">ROLLSET </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  STORE DESIRED OGARATE (SCALED B-4)</span>
-041543,000390: 16,3524           00006                           <span class="op">EXTEND  </span>                                       
-041544,000391: 16,3525           61533                           <span class="op">SU      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F474152415445">OGARATE</a>                               <span class="co">#  RATE DIFF. SCALED AT 2(-4) REV/SEC</span>
-041545,000392: 16,3526           54000                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#      OVERFLOW PROTECT</span>
-041546,000393: 16,3527           55613                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#          "       "</span>
-041547,000394: 16,3530           00006                           <span class="op">EXTEND  </span>                                       
-041548,000395: 16,3531           77665                           <span class="op">MP      </span> <a href="#54365343414C45">T6SCALE</a>                               <span class="co">#  T6SCALE = 8/10.24</span>
-041549,000396: 16,3532           00006                           <span class="op">EXTEND  </span>                                       
-041550,000397: 16,3533           71650                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F434F4E414343">1/CONACC</a>                              <span class="co">#  SCALED AT 2(+9) SECSQ/REV</span>
-041551,000398: 16,3534           20001                           <span class="op">DDOUBL  </span>                                       
+041509,000349: 16,3463           00000                           0        <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+<a name="5241544544454E"></a>041510,000350: 16,3464           27613        <span class="sm">RATEDEN </span>           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  DENOMINATOR COMPLETED</span>
+041511,000351: 
+041512,000352: 16,3465           51700                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     
+041513,000353: 16,3466           01677                           0        <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4F4741">DELOGA</a>                                
+041514,000354: 16,3467           40000                           <span class="op">COM     </span>                                       
+041515,000355: 16,3470           63722                           <span class="op">AD      </span> <a href="#4442">DB</a>                                    
+041516,000356: 16,3471           40000                           <span class="op">COM     </span>                                       
+041517,000357: 16,3472           00006                           <span class="op">EXTEND  </span>                                       
+041518,000358: 16,3473           73723                           <span class="op">MP      </span> <a href="#2D534C4F5045">-SLOPE</a>                                
+041519,000359: 16,3474           27675                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4F47415254">DELOGART</a>                              
+041520,000360: 16,3475           33724                           <span class="op">CA      </span> <a href="#4C4D4352415445">LMCRATE</a>                               
+041521,000361: 16,3476           00006                           <span class="op">EXTEND  </span>                                       
+041522,000362: 16,3477           74700                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543131">BIT11</a>                                 
+<a name="524154454E554D"></a>041523,000363: 16,3500           61675        <span class="sm">RATENUM </span>           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4F47415254">DELOGART</a>                              <span class="co">#  NUMERATOR COMPLETED</span>
+041524,000364: 
+041525,000365: 16,3501           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  PLACE NUMERATOR IN L FOR OVERFL. CHECK</span>
+041526,000366: 16,3502           34714                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+041527,000367: 16,3503           00006                           <span class="op">EXTEND  </span>                                       
+041528,000368: 16,3504           11613                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  OVERFLOW, IF ANYTHING, NOW APPEARS IN A</span>
+041529,000369: 16,3505           00006                           <span class="op">EXTEND  </span>                                       
+041530,000370: 16,3506           13514                           <span class="op">BZF     </span> <a href="#44564F4B">DVOK</a>                                  <span class="co">#  NO OVERFLOW....(0,L)/TEMREG = 0,L</span>
+041531,000371: 
+<a name="4D494E4C494D4150"></a>041532,000372: 16,3507           10000        <span class="sm">MINLIMAP</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+041533,000373: 16,3510           34672                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#      POSITIVE OVERFLOW</span>
+041534,000374: 16,3511           13523                           <span class="op">TCF     </span> <a href="#524F4C4C534554">ROLLSET</a>                               
+041535,000375: 16,3512           44672                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#      NEGATIVE OVERFLOW</span>
+041536,000376: 16,3513           13523                           <span class="op">TCF     </span> <a href="#524F4C4C534554">ROLLSET</a>                               
+041537,000377: 
+<a name="44564F4B"></a>041538,000378: 16,3514           22000        <span class="sm">DVOK    </span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  PUT NUMERATOR BACK INTO A, 0 IN L</span>
+041539,000379: 16,3515           00006                           <span class="op">EXTEND  </span>                                       
+041540,000380: 16,3516           11613                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  RESULT OF DIVISION IS DESIRED OGARATE</span>
+041541,000381: 16,3517           13523                           <span class="op">TCF     </span> <a href="#524F4C4C534554">ROLLSET</a>                               <span class="co">#       ( SCALED AT B-4 REV/SEC )</span>
+041542,000382: 
+041543,000383: 
+<a name="524154454C494D"></a>041544,000384: 16,3520           43730        <span class="sm">RATELIM </span>           <span class="op">CS      </span> <a href="#4D41584C494D">MAXLIM</a>                                
+041545,000385: 16,3521           51700                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     
+041546,000386: 16,3522           00000                           0        <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IF I = CA, DESIRED RATE IS   -MAXLIM</span>
+041547,000387: 
+041548,000388:                                                                                                  <span class="co">#  BASED ON DESIRED RATE - PRESENT RATE, COMPUTE JET FIRE TIME</span>
+<a name="524F4C4C534554"></a>041549,000389: 16,3523           55613        <span class="sm">ROLLSET </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  STORE DESIRED OGARATE (SCALED B-4)</span>
+041550,000390: 16,3524           00006                           <span class="op">EXTEND  </span>                                       
+041551,000391: 16,3525           61533                           <span class="op">SU      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F474152415445">OGARATE</a>                               <span class="co">#  RATE DIFF. SCALED AT 2(-4) REV/SEC</span>
+041552,000392: 16,3526           54000                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#      OVERFLOW PROTECT</span>
+041553,000393: 16,3527           55613                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#          "       "</span>
+041554,000394: 16,3530           00006                           <span class="op">EXTEND  </span>                                       
+041555,000395: 16,3531           77665                           <span class="op">MP      </span> <a href="#54365343414C45">T6SCALE</a>                               <span class="co">#  T6SCALE = 8/10.24</span>
+041556,000396: 16,3532           00006                           <span class="op">EXTEND  </span>                                       
+041557,000397: 16,3533           71650                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F434F4E414343">1/CONACC</a>                              <span class="co">#  SCALED AT 2(+9) SECSQ/REV</span>
+041558,000398: 16,3534           20001                           <span class="op">DDOUBL  </span>                                       
 </pre>
 </span>
 </p>
@@ -610,56 +610,56 @@ Page 953
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-041553,000400: 16,3535           55613                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#      OVERFLOW PROTECT</span>
-041554,000401: 16,3536           20001                           <span class="op">DDOUBL  </span>                                       
-041555,000402: 16,3537           54000                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#      OVERFLOW PROTECT</span>
-041556,000403: 16,3540           55613                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  JET FIRE TIME AT 625 MICROSEC/BIT</span>
-041557,000404: 16,3541           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  POS MEANS POSITIVE ROLL TORQUE.</span>
-041558,000405: 16,3542           13625                           <span class="op">BZF     </span> <a href="#4E4F524F4C4C">NOROLL</a>                                
-041559,000406: 
-041560,000407:                                                                                                  <span class="co">#  JET FIRE TIME IS NZ, ARE JETS ON NOW.</span>
-041561,000408: 16,3543           31613                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  DESIRED CHANGE IN OGARATE</span>
-041562,000409: 16,3544           00006                           <span class="op">EXTEND  </span>                                       
-041563,000410: 16,3545           71611                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C46495245">ROLLFIRE</a>                              <span class="co">#  (SGN OF TORQUE..ZERO IF JETS NOW OFF)</span>
-041564,000411: 16,3546           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-041565,000412: 16,3547           13553                           <span class="op">TCF     </span> <a href="#4D4F5245524F4C4C">MOREROLL</a>                              <span class="co">#  CONTINUE FIRING WITH PRESENT POLARITY</span>
-041566,000413: 16,3550           13556                           <span class="op">TCF     </span> <a href="#4E4557524F4C4C">NEWROLL</a>                               <span class="co">#  START NEW FIRING NOW, PLUS</span>
-041567,000414: 16,3551           13625                           <span class="op">TCF     </span> <a href="#4E4F524F4C4C">NOROLL</a>                                <span class="co">#  TERMINATE OLD FIRING, NEW SIGN REQUESTED</span>
-041568,000415: 16,3552           13556                           <span class="op">TCF     </span> <a href="#4E4557524F4C4C">NEWROLL</a>                               <span class="co">#  START NEW FIRING NOW, MINUS</span>
-041569,000416: 
-041570,000417:                                                                                                  <span class="co">#  CONTINUE PRESENT FIRING</span>
-<a name="4D4F5245524F4C4C"></a>041571,000418: 16,3553           34714        <span class="sm">MOREROLL</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-041572,000419: 16,3554           55700                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     <span class="co">#  USE TEMP. AS MOREROLL SWITCH</span>
-041573,000420: 16,3555           13567                           <span class="op">TCF     </span> <a href="#4D41585446495245">MAXTFIRE</a>                              
-041574,000421: 
-041575,000422:                                                                                                  <span class="co">#  START NEW FIRING BUT CHECK IF GREATER THAN MINIMUM FIRE TIME.</span>
-<a name="4E4557524F4C4C"></a>041576,000423: 16,3556           11613        <span class="sm">NEWROLL </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  CALL THIS T6FIRE</span>
-041577,000424: 16,3557           64712                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-041578,000425: 16,3560           13562                           <span class="op">TCF     </span> +2                                    
-041579,000426: 16,3561           64712                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-041580,000427: 16,3562           40000                           <span class="op">COM     </span>                                       <span class="co">#  -MAG(T6FIRE)</span>
-041581,000428: 16,3563           63731                           <span class="op">AD      </span> <a href="#544D494E46495245">TMINFIRE</a>                              <span class="co">#  TMINFIRE-MAG(T6FIRE)</span>
-041582,000429: 16,3564           40000                           <span class="op">COM     </span>                                       
-041583,000430: 16,3565           00006                           <span class="op">EXTEND  </span>                                       
-<a name="4D494E545354"></a>041584,000431: 16,3566           63625        <span class="sm">MINTST  </span>           <span class="op">BZMF    </span> <a href="#4E4F524F4C4C">NOROLL</a>                                <span class="co">#  IF NOT GREATER THAN TMINFIRE (NEW FIRE)</span>
-041585,000432: 
-041586,000433:                                                                                                  <span class="co">#  PROCEED WITH NEW FIRING BUT NOT LONGER THAN TMAXFIRE</span>
-<a name="4D41585446495245"></a>041587,000434: 16,3567           31613        <span class="sm">MAXTFIRE</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                
-041588,000435: 16,3570           00006                           <span class="op">EXTEND  </span>                                       
-041589,000436: 16,3571           74710                           <span class="op">MP      </span> <a href="#312F544D58464952">1/TMXFIR</a>                              <span class="co">#  I.E. 1/TMAXFIRE</span>
-041590,000437: 16,3572           00006                           <span class="op">EXTEND  </span>                                       
-<a name="4D4158545354"></a>041591,000438: 16,3573           13601        <span class="sm">MAXTST  </span>           <span class="op">BZF     </span> <a href="#4E4F4D5846495245">NOMXFIRE</a>                              <span class="co">#  IF LESS THAN TMAXFIRE</span>
-041592,000439: 
-041593,000440: 16,3574           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-041594,000441: 16,3575           33732                           <span class="op">CAF     </span> <a href="#544D415846495245">TMAXFIRE</a>                              <span class="co">#  USE MAXIMUM</span>
-041595,000442: 16,3576           13600                           <span class="op">TCF     </span> +2                                    
-041596,000443: 16,3577           43732                           <span class="op">CS      </span> <a href="#544D415846495245">TMAXFIRE</a>                              <span class="co">#  USE MAXIMUM</span>
-041597,000444: 16,3600           55613                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                
-041598,000445: 
-041599,000446:                                                                                                  <span class="co">#  SET UP SIGN OF REQUIRED TORQUE</span>
-<a name="4E4F4D5846495245"></a>041600,000447: 16,3601           11613        <span class="sm">NOMXFIRE</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  FOR TORQUE SIGN</span>
-041601,000448: 16,3602           34672                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#  POSITIVE TORQUE REQUIRED</span>
-041602,000449: 16,3603           13605                           <span class="op">TCF     </span> +2                                    
+041560,000400: 16,3535           55613                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#      OVERFLOW PROTECT</span>
+041561,000401: 16,3536           20001                           <span class="op">DDOUBL  </span>                                       
+041562,000402: 16,3537           54000                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#      OVERFLOW PROTECT</span>
+041563,000403: 16,3540           55613                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  JET FIRE TIME AT 625 MICROSEC/BIT</span>
+041564,000404: 16,3541           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  POS MEANS POSITIVE ROLL TORQUE.</span>
+041565,000405: 16,3542           13625                           <span class="op">BZF     </span> <a href="#4E4F524F4C4C">NOROLL</a>                                
+041566,000406: 
+041567,000407:                                                                                                  <span class="co">#  JET FIRE TIME IS NZ, ARE JETS ON NOW.</span>
+041568,000408: 16,3543           31613                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  DESIRED CHANGE IN OGARATE</span>
+041569,000409: 16,3544           00006                           <span class="op">EXTEND  </span>                                       
+041570,000410: 16,3545           71611                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C46495245">ROLLFIRE</a>                              <span class="co">#  (SGN OF TORQUE..ZERO IF JETS NOW OFF)</span>
+041571,000411: 16,3546           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+041572,000412: 16,3547           13553                           <span class="op">TCF     </span> <a href="#4D4F5245524F4C4C">MOREROLL</a>                              <span class="co">#  CONTINUE FIRING WITH PRESENT POLARITY</span>
+041573,000413: 16,3550           13556                           <span class="op">TCF     </span> <a href="#4E4557524F4C4C">NEWROLL</a>                               <span class="co">#  START NEW FIRING NOW, PLUS</span>
+041574,000414: 16,3551           13625                           <span class="op">TCF     </span> <a href="#4E4F524F4C4C">NOROLL</a>                                <span class="co">#  TERMINATE OLD FIRING, NEW SIGN REQUESTED</span>
+041575,000415: 16,3552           13556                           <span class="op">TCF     </span> <a href="#4E4557524F4C4C">NEWROLL</a>                               <span class="co">#  START NEW FIRING NOW, MINUS</span>
+041576,000416: 
+041577,000417:                                                                                                  <span class="co">#  CONTINUE PRESENT FIRING</span>
+<a name="4D4F5245524F4C4C"></a>041578,000418: 16,3553           34714        <span class="sm">MOREROLL</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+041579,000419: 16,3554           55700                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     <span class="co">#  USE TEMP. AS MOREROLL SWITCH</span>
+041580,000420: 16,3555           13567                           <span class="op">TCF     </span> <a href="#4D41585446495245">MAXTFIRE</a>                              
+041581,000421: 
+041582,000422:                                                                                                  <span class="co">#  START NEW FIRING BUT CHECK IF GREATER THAN MINIMUM FIRE TIME.</span>
+<a name="4E4557524F4C4C"></a>041583,000423: 16,3556           11613        <span class="sm">NEWROLL </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  CALL THIS T6FIRE</span>
+041584,000424: 16,3557           64712                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+041585,000425: 16,3560           13562                           <span class="op">TCF     </span> +2                                    
+041586,000426: 16,3561           64712                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+041587,000427: 16,3562           40000                           <span class="op">COM     </span>                                       <span class="co">#  -MAG(T6FIRE)</span>
+041588,000428: 16,3563           63731                           <span class="op">AD      </span> <a href="#544D494E46495245">TMINFIRE</a>                              <span class="co">#  TMINFIRE-MAG(T6FIRE)</span>
+041589,000429: 16,3564           40000                           <span class="op">COM     </span>                                       
+041590,000430: 16,3565           00006                           <span class="op">EXTEND  </span>                                       
+<a name="4D494E545354"></a>041591,000431: 16,3566           63625        <span class="sm">MINTST  </span>           <span class="op">BZMF    </span> <a href="#4E4F524F4C4C">NOROLL</a>                                <span class="co">#  IF NOT GREATER THAN TMINFIRE (NEW FIRE)</span>
+041592,000432: 
+041593,000433:                                                                                                  <span class="co">#  PROCEED WITH NEW FIRING BUT NOT LONGER THAN TMAXFIRE</span>
+<a name="4D41585446495245"></a>041594,000434: 16,3567           31613        <span class="sm">MAXTFIRE</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                
+041595,000435: 16,3570           00006                           <span class="op">EXTEND  </span>                                       
+041596,000436: 16,3571           74710                           <span class="op">MP      </span> <a href="#312F544D58464952">1/TMXFIR</a>                              <span class="co">#  I.E. 1/TMAXFIRE</span>
+041597,000437: 16,3572           00006                           <span class="op">EXTEND  </span>                                       
+<a name="4D4158545354"></a>041598,000438: 16,3573           13601        <span class="sm">MAXTST  </span>           <span class="op">BZF     </span> <a href="#4E4F4D5846495245">NOMXFIRE</a>                              <span class="co">#  IF LESS THAN TMAXFIRE</span>
+041599,000439: 
+041600,000440: 16,3574           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+041601,000441: 16,3575           33732                           <span class="op">CAF     </span> <a href="#544D415846495245">TMAXFIRE</a>                              <span class="co">#  USE MAXIMUM</span>
+041602,000442: 16,3576           13600                           <span class="op">TCF     </span> +2                                    
+041603,000443: 16,3577           43732                           <span class="op">CS      </span> <a href="#544D415846495245">TMAXFIRE</a>                              <span class="co">#  USE MAXIMUM</span>
+041604,000444: 16,3600           55613                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                
+041605,000445: 
+041606,000446:                                                                                                  <span class="co">#  SET UP SIGN OF REQUIRED TORQUE</span>
+<a name="4E4F4D5846495245"></a>041607,000447: 16,3601           11613        <span class="sm">NOMXFIRE</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  FOR TORQUE SIGN</span>
+041608,000448: 16,3602           34672                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#  POSITIVE TORQUE REQUIRED</span>
+041609,000449: 16,3603           13605                           <span class="op">TCF     </span> +2                                    
 </pre>
 </span>
 </p>
@@ -675,56 +675,56 @@ Page 954
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-041604,000451: 16,3604           34674                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474D4158">NEGMAX</a>                                <span class="co">#  NEGATIVE TORQUE REQUIRED</span>
-041605,000452: 16,3605           55611                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C46495245">ROLLFIRE</a>                              <span class="co">#  SET ROLLFIRE FOR + OR - TORQUE</span>
-041606,000453: 
-041607,000454: 16,3606           40000                           <span class="op">COM     </span>                                       <span class="co">#  COMPLEMENT... POS. FOR NEG. TORQUE</span>
-041608,000455: 16,3607           00006                           <span class="op">EXTEND  </span>                                       
-041609,000456: 16,3610           63613                           <span class="op">BZMF    </span> +3                                    <span class="co">#  POSITIVE TORQUE REQUIRED</span>
-041610,000457: 16,3611           41613                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                
-041611,000458: 16,3612           55613                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                
-041612,000459: 
-<a name="464952454C4F4F4B"></a>041613,000460: 16,3613           31700        <span class="sm">FIRELOOK</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     <span class="co">#  IS IT MOREROLL</span>
-041614,000461: 16,3614           00006                           <span class="op">EXTEND  </span>                                       
-041615,000462: 16,3615           13617                           <span class="op">BZF     </span> <a href="#46495245504C5547">FIREPLUG</a>                              <span class="co">#  YES</span>
-041616,000463: 16,3616           13630                           <span class="op">TCF     </span> <a href="#4A4554524F4C4C">JETROLL</a>                               <span class="co">#  MAG(T6FIRE) NOW IN TEMREG</span>
-041617,000464: 
-<a name="46495245504C5547"></a>041618,000465: 16,3617           30031        <span class="sm">FIREPLUG</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4536">TIME6</a>                                 <span class="co">#  CHECK FOR EXTENDED FIRING</span>
-041619,000466: 16,3620           00006                           <span class="op">EXTEND  </span>                                       
-041620,000467: 16,3621           61613                           <span class="op">SU      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                
-041621,000468: 16,3622           00006                           <span class="op">EXTEND  </span>                                       
-<a name="455854454E545354"></a>041622,000469: 16,3623           65213        <span class="sm">EXTENTST</span>           <span class="op">BZMF    </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  IF EXTENSION WANTED, DONT, EXIT ROLL DAP</span>
-041623,000470: 16,3624           13630                           <span class="op">TCF     </span> <a href="#4A4554524F4C4C">JETROLL</a>                               
-041624,000471: 
-<a name="4E4F524F4C4C"></a>041625,000472: 16,3625           44714        <span class="sm">NOROLL  </span>           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  COAST....(NEG ZERO FOR TIME6)</span>
-041626,000473: 16,3626           55611                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C46495245">ROLLFIRE</a>                              <span class="co">#  NOTE, JETS CAN FIRE NEXT PASS</span>
-041627,000474: 16,3627           55613                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                
-041628,000475: 
-<a name="4A4554524F4C4C"></a>041629,000476: 16,3630           00006        <span class="sm">JETROLL </span>           <span class="op">EXTEND  </span>                                       
-041630,000477: 16,3631           33721                           <span class="op">DCA     </span> <a href="#4E4F524F4C315436">NOROL1T6</a>                              
-041631,000478: 16,3632           53311                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364C4F43">T6LOC</a>                                 
-041632,000479: 16,3633           31613                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  ENTER JET FIRING TIME</span>
-041633,000480: 16,3634           54031                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4536">TIME6</a>                                 
-041634,000481: 
-041635,000482: 16,3635           31700                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     <span class="co">#  I=0 IF MOREROLL,KEEP SAME JETS ON</span>
-041636,000483: 16,3636           00006                           <span class="op">EXTEND  </span>                                       
-<a name="53414D454A455453"></a>041637,000484: 16,3637           15213        <span class="sm">SAMEJETS</span>           <span class="op">BZF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  IF JETS ON KEEP SAME JETS. EXIT ROLL DAP</span>
-041638,000485: 
-041639,000486: 16,3640           11611                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C46495245">ROLLFIRE</a>                              
-041640,000487: 16,3641           13645                           <span class="op">TCF     </span> <a href="#2B544F52515545">+TORQUE</a>                               
-041641,000488: 16,3642           13706                           <span class="op">TCF     </span> <a href="#5436454E41424C">T6ENABL</a>                               
-041642,000489: 16,3643           13666                           <span class="op">TCF     </span> <a href="#2D544F52515545">-TORQUE</a>                               
-041643,000490: 16,3644           13706                           <span class="op">TCF     </span> <a href="#5436454E41424C">T6ENABL</a>                               
-041644,000491: 
-041645,000492:                                                                                                  <span class="co">#  PROCEED WITH + TORQUE</span>
-<a name="2B544F52515545"></a>041646,000493: 16,3645           31612        <span class="sm">+TORQUE </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C574F5244">ROLLWORD</a>                              <span class="co">#   WHAT WAS THE LAST +TORQUE COMBINATION</span>
-041647,000494: 16,3646           74712                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  <span class="co">#  WAS IT NO.9-11</span>
-041648,000495: 16,3647           00006                           <span class="op">EXTEND  </span>                                       
-041649,000496: 16,3650           13660                           <span class="op">BZF     </span> <a href="#4E4F2E392D3131">NO.9-11</a>                               <span class="co">#  NOT 9-11, SO USE IT THIS TIME</span>
-041650,000497: 
-<a name="4E4F2E31332D3135"></a>041651,000498: 16,3651           44712        <span class="sm">NO.13-15</span>           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  
-041652,000499: 16,3652           71612                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C574F5244">ROLLWORD</a>                              
-041653,000500: 16,3653           55612                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C574F5244">ROLLWORD</a>                              <span class="co">#  CHANGE BIT 1 TO ZERO</span>
+041611,000451: 16,3604           34674                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474D4158">NEGMAX</a>                                <span class="co">#  NEGATIVE TORQUE REQUIRED</span>
+041612,000452: 16,3605           55611                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C46495245">ROLLFIRE</a>                              <span class="co">#  SET ROLLFIRE FOR + OR - TORQUE</span>
+041613,000453: 
+041614,000454: 16,3606           40000                           <span class="op">COM     </span>                                       <span class="co">#  COMPLEMENT... POS. FOR NEG. TORQUE</span>
+041615,000455: 16,3607           00006                           <span class="op">EXTEND  </span>                                       
+041616,000456: 16,3610           63613                           <span class="op">BZMF    </span> +3                                    <span class="co">#  POSITIVE TORQUE REQUIRED</span>
+041617,000457: 16,3611           41613                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                
+041618,000458: 16,3612           55613                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                
+041619,000459: 
+<a name="464952454C4F4F4B"></a>041620,000460: 16,3613           31700        <span class="sm">FIRELOOK</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     <span class="co">#  IS IT MOREROLL</span>
+041621,000461: 16,3614           00006                           <span class="op">EXTEND  </span>                                       
+041622,000462: 16,3615           13617                           <span class="op">BZF     </span> <a href="#46495245504C5547">FIREPLUG</a>                              <span class="co">#  YES</span>
+041623,000463: 16,3616           13630                           <span class="op">TCF     </span> <a href="#4A4554524F4C4C">JETROLL</a>                               <span class="co">#  MAG(T6FIRE) NOW IN TEMREG</span>
+041624,000464: 
+<a name="46495245504C5547"></a>041625,000465: 16,3617           30031        <span class="sm">FIREPLUG</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4536">TIME6</a>                                 <span class="co">#  CHECK FOR EXTENDED FIRING</span>
+041626,000466: 16,3620           00006                           <span class="op">EXTEND  </span>                                       
+041627,000467: 16,3621           61613                           <span class="op">SU      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                
+041628,000468: 16,3622           00006                           <span class="op">EXTEND  </span>                                       
+<a name="455854454E545354"></a>041629,000469: 16,3623           65213        <span class="sm">EXTENTST</span>           <span class="op">BZMF    </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  IF EXTENSION WANTED, DONT, EXIT ROLL DAP</span>
+041630,000470: 16,3624           13630                           <span class="op">TCF     </span> <a href="#4A4554524F4C4C">JETROLL</a>                               
+041631,000471: 
+<a name="4E4F524F4C4C"></a>041632,000472: 16,3625           44714        <span class="sm">NOROLL  </span>           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  COAST....(NEG ZERO FOR TIME6)</span>
+041633,000473: 16,3626           55611                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C46495245">ROLLFIRE</a>                              <span class="co">#  NOTE, JETS CAN FIRE NEXT PASS</span>
+041634,000474: 16,3627           55613                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                
+041635,000475: 
+<a name="4A4554524F4C4C"></a>041636,000476: 16,3630           00006        <span class="sm">JETROLL </span>           <span class="op">EXTEND  </span>                                       
+041637,000477: 16,3631           33721                           <span class="op">DCA     </span> <a href="#4E4F524F4C315436">NOROL1T6</a>                              
+041638,000478: 16,3632           53311                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364C4F43">T6LOC</a>                                 
+041639,000479: 16,3633           31613                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D524547">TEMREG</a>                                <span class="co">#  ENTER JET FIRING TIME</span>
+041640,000480: 16,3634           54031                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4536">TIME6</a>                                 
+041641,000481: 
+041642,000482: 16,3635           31700                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#49">I</a>                                     <span class="co">#  I=0 IF MOREROLL,KEEP SAME JETS ON</span>
+041643,000483: 16,3636           00006                           <span class="op">EXTEND  </span>                                       
+<a name="53414D454A455453"></a>041644,000484: 16,3637           15213        <span class="sm">SAMEJETS</span>           <span class="op">BZF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  IF JETS ON KEEP SAME JETS. EXIT ROLL DAP</span>
+041645,000485: 
+041646,000486: 16,3640           11611                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C46495245">ROLLFIRE</a>                              
+041647,000487: 16,3641           13645                           <span class="op">TCF     </span> <a href="#2B544F52515545">+TORQUE</a>                               
+041648,000488: 16,3642           13706                           <span class="op">TCF     </span> <a href="#5436454E41424C">T6ENABL</a>                               
+041649,000489: 16,3643           13666                           <span class="op">TCF     </span> <a href="#2D544F52515545">-TORQUE</a>                               
+041650,000490: 16,3644           13706                           <span class="op">TCF     </span> <a href="#5436454E41424C">T6ENABL</a>                               
+041651,000491: 
+041652,000492:                                                                                                  <span class="co">#  PROCEED WITH + TORQUE</span>
+<a name="2B544F52515545"></a>041653,000493: 16,3645           31612        <span class="sm">+TORQUE </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C574F5244">ROLLWORD</a>                              <span class="co">#   WHAT WAS THE LAST +TORQUE COMBINATION</span>
+041654,000494: 16,3646           74712                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  <span class="co">#  WAS IT NO.9-11</span>
+041655,000495: 16,3647           00006                           <span class="op">EXTEND  </span>                                       
+041656,000496: 16,3650           13660                           <span class="op">BZF     </span> <a href="#4E4F2E392D3131">NO.9-11</a>                               <span class="co">#  NOT 9-11, SO USE IT THIS TIME</span>
+041657,000497: 
+<a name="4E4F2E31332D3135"></a>041658,000498: 16,3651           44712        <span class="sm">NO.13-15</span>           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  
+041659,000499: 16,3652           71612                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C574F5244">ROLLWORD</a>                              
+041660,000500: 16,3653           55612                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C574F5244">ROLLWORD</a>                              <span class="co">#  CHANGE BIT 1 TO ZERO</span>
 </pre>
 </span>
 </p>
@@ -740,42 +740,42 @@ Page 955
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-041655,000502: 16,3654           34732                           <span class="op">CAF     </span> <a href="#2B524F4C4C32">+ROLL2</a>                                
-041656,000503: 16,3655           00006                           <span class="op">EXTEND  </span>                                       
-041657,000504: 16,3656           01006                           <span class="op">WRITE   </span> <a href="RCS-CSM_DIGITAL_AUTOPILOT.agc.html#4348414E36">CHAN6</a>                                 
-041658,000505: 16,3657           13706                           <span class="op">TCF     </span> <a href="#5436454E41424C">T6ENABL</a>                               
-041659,000506: 
-<a name="4E4F2E392D3131"></a>041660,000507: 16,3660           34712        <span class="sm">NO.9-11 </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  <span class="co">#  1ST + JETS TO FIRE (MRCLEAN OS ROLLWORD)</span>
-041661,000508: 16,3661           27612                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C574F5244">ROLLWORD</a>                              <span class="co">#  CHANGE BIT 1 TO ONE</span>
-041662,000509: 16,3662           34715                           <span class="op">CAF     </span> <a href="#2B524F4C4C31">+ROLL1</a>                                
-041663,000510: 16,3663           00006                           <span class="op">EXTEND  </span>                                       
-041664,000511: 16,3664           01006                           <span class="op">WRITE   </span> <a href="RCS-CSM_DIGITAL_AUTOPILOT.agc.html#4348414E36">CHAN6</a>                                 
-041665,000512: 16,3665           13706                           <span class="op">TCF     </span> <a href="#5436454E41424C">T6ENABL</a>                               
-041666,000513: 
-<a name="2D544F52515545"></a>041667,000514: 16,3666           31612        <span class="sm">-TORQUE </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C574F5244">ROLLWORD</a>                              <span class="co">#   WHAT WAS LAST -TORQUE COMBINATION</span>
-041668,000515: 16,3667           74711                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  <span class="co">#  WAS IT NO.12-10</span>
-041669,000516: 16,3670           00006                           <span class="op">EXTEND  </span>                                       
-041670,000517: 16,3671           13701                           <span class="op">BZF     </span> <a href="#4E4F2E31322D3130">NO.12-10</a>                              <span class="co">#  NOT 12-10, SO USE IT THIS TIME</span>
-041671,000518: 
-<a name="4E4F2E31362D3134"></a>041672,000519: 16,3672           44711        <span class="sm">NO.16-14</span>           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  
-041673,000520: 16,3673           71612                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C574F5244">ROLLWORD</a>                              
-041674,000521: 16,3674           55612                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C574F5244">ROLLWORD</a>                              <span class="co">#  CHANGE BIT 2 TO ZERO</span>
-041675,000522: 16,3675           33733                           <span class="op">CAF     </span> <a href="#2D524F4C4C32">-ROLL2</a>                                
-041676,000523: 16,3676           00006                           <span class="op">EXTEND  </span>                                       
-041677,000524: 16,3677           01006                           <span class="op">WRITE   </span> <a href="RCS-CSM_DIGITAL_AUTOPILOT.agc.html#4348414E36">CHAN6</a>                                 
-041678,000525: 16,3700           13706                           <span class="op">TCF     </span> <a href="#5436454E41424C">T6ENABL</a>                               
-041679,000526: 
-<a name="4E4F2E31322D3130"></a>041680,000527: 16,3701           34711        <span class="sm">NO.12-10</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  <span class="co">#  1ST -JETS TO FIRE (MRCLEAN OS ROLLWORD)</span>
-041681,000528: 16,3702           27612                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C574F5244">ROLLWORD</a>                              <span class="co">#  CHANGE BIT 2 TO ONE</span>
-041682,000529: 16,3703           34377                           <span class="op">CAF     </span> <a href="#2D524F4C4C31">-ROLL1</a>                                
-041683,000530: 16,3704           00006                           <span class="op">EXTEND  </span>                                       
-041684,000531: 16,3705           01006                           <span class="op">WRITE   </span> <a href="RCS-CSM_DIGITAL_AUTOPILOT.agc.html#4348414E36">CHAN6</a>                                 
-041685,000532: 
-<a name="5436454E41424C"></a>041686,000533: 16,3706           34674        <span class="sm">T6ENABL </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543135">BIT15</a>                                 
-041687,000534: 16,3707           00006                           <span class="op">EXTEND  </span>                                       
-041688,000535: 16,3710           05013                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3133">CHAN13</a>                                
-<a name="52444150454E44"></a>041689,000536: 16,3711           15213        <span class="sm">RDAPEND </span>           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  EXIT ROLL DAP</span>
-041690,000537: 
+041662,000502: 16,3654           34732                           <span class="op">CAF     </span> <a href="#2B524F4C4C32">+ROLL2</a>                                
+041663,000503: 16,3655           00006                           <span class="op">EXTEND  </span>                                       
+041664,000504: 16,3656           01006                           <span class="op">WRITE   </span> <a href="RCS-CSM_DIGITAL_AUTOPILOT.agc.html#4348414E36">CHAN6</a>                                 
+041665,000505: 16,3657           13706                           <span class="op">TCF     </span> <a href="#5436454E41424C">T6ENABL</a>                               
+041666,000506: 
+<a name="4E4F2E392D3131"></a>041667,000507: 16,3660           34712        <span class="sm">NO.9-11 </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  <span class="co">#  1ST + JETS TO FIRE (MRCLEAN OS ROLLWORD)</span>
+041668,000508: 16,3661           27612                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C574F5244">ROLLWORD</a>                              <span class="co">#  CHANGE BIT 1 TO ONE</span>
+041669,000509: 16,3662           34715                           <span class="op">CAF     </span> <a href="#2B524F4C4C31">+ROLL1</a>                                
+041670,000510: 16,3663           00006                           <span class="op">EXTEND  </span>                                       
+041671,000511: 16,3664           01006                           <span class="op">WRITE   </span> <a href="RCS-CSM_DIGITAL_AUTOPILOT.agc.html#4348414E36">CHAN6</a>                                 
+041672,000512: 16,3665           13706                           <span class="op">TCF     </span> <a href="#5436454E41424C">T6ENABL</a>                               
+041673,000513: 
+<a name="2D544F52515545"></a>041674,000514: 16,3666           31612        <span class="sm">-TORQUE </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C574F5244">ROLLWORD</a>                              <span class="co">#   WHAT WAS LAST -TORQUE COMBINATION</span>
+041675,000515: 16,3667           74711                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  <span class="co">#  WAS IT NO.12-10</span>
+041676,000516: 16,3670           00006                           <span class="op">EXTEND  </span>                                       
+041677,000517: 16,3671           13701                           <span class="op">BZF     </span> <a href="#4E4F2E31322D3130">NO.12-10</a>                              <span class="co">#  NOT 12-10, SO USE IT THIS TIME</span>
+041678,000518: 
+<a name="4E4F2E31362D3134"></a>041679,000519: 16,3672           44711        <span class="sm">NO.16-14</span>           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  
+041680,000520: 16,3673           71612                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C574F5244">ROLLWORD</a>                              
+041681,000521: 16,3674           55612                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C574F5244">ROLLWORD</a>                              <span class="co">#  CHANGE BIT 2 TO ZERO</span>
+041682,000522: 16,3675           33733                           <span class="op">CAF     </span> <a href="#2D524F4C4C32">-ROLL2</a>                                
+041683,000523: 16,3676           00006                           <span class="op">EXTEND  </span>                                       
+041684,000524: 16,3677           01006                           <span class="op">WRITE   </span> <a href="RCS-CSM_DIGITAL_AUTOPILOT.agc.html#4348414E36">CHAN6</a>                                 
+041685,000525: 16,3700           13706                           <span class="op">TCF     </span> <a href="#5436454E41424C">T6ENABL</a>                               
+041686,000526: 
+<a name="4E4F2E31322D3130"></a>041687,000527: 16,3701           34711        <span class="sm">NO.12-10</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  <span class="co">#  1ST -JETS TO FIRE (MRCLEAN OS ROLLWORD)</span>
+041688,000528: 16,3702           27612                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C574F5244">ROLLWORD</a>                              <span class="co">#  CHANGE BIT 2 TO ONE</span>
+041689,000529: 16,3703           34377                           <span class="op">CAF     </span> <a href="#2D524F4C4C31">-ROLL1</a>                                
+041690,000530: 16,3704           00006                           <span class="op">EXTEND  </span>                                       
+041691,000531: 16,3705           01006                           <span class="op">WRITE   </span> <a href="RCS-CSM_DIGITAL_AUTOPILOT.agc.html#4348414E36">CHAN6</a>                                 
+041692,000532: 
+<a name="5436454E41424C"></a>041693,000533: 16,3706           34674        <span class="sm">T6ENABL </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543135">BIT15</a>                                 
+041694,000534: 16,3707           00006                           <span class="op">EXTEND  </span>                                       
+041695,000535: 16,3710           05013                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3133">CHAN13</a>                                
+<a name="52444150454E44"></a>041696,000536: 16,3711           15213        <span class="sm">RDAPEND </span>           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  EXIT ROLL DAP</span>
+041697,000537: 
 </pre>
 </span>
 </p>
@@ -791,16 +791,16 @@ Page 956
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-041692,000539:                                                                                                  <span class="co">#  THIS T6 TASK SHUTS OFF ALL ROLL JETS</span>
-041693,000540: 
-041694,000541: 
-<a name="4E4F524F4C4C31"></a>041695,000542: 16,3712           22016        <span class="sm">NOROLL1 </span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              <span class="co">#  SHUT OFF ALL (ROLL) JETS, (A T6 TASK</span>
-041696,000543: 16,3713           34714                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#       CALLED BY ..JETROLL..)</span>
-041697,000544: 16,3714           55611                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C46495245">ROLLFIRE</a>                              <span class="co">#  ZERO INDICATES JETS NOW OFF</span>
-041698,000545: 16,3715           00006                           <span class="op">EXTEND  </span>                                       
-<a name="4B494C4C4A455453"></a>041699,000546: 16,3716           01006        <span class="sm">KILLJETS</span>           <span class="op">WRITE   </span> <a href="RCS-CSM_DIGITAL_AUTOPILOT.agc.html#4348414E36">CHAN6</a>                                 
-041700,000547: 16,3717           15224                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#4E4F5152534D">NOQRSM</a>                                
-041701,000548: 
+041699,000539:                                                                                                  <span class="co">#  THIS T6 TASK SHUTS OFF ALL ROLL JETS</span>
+041700,000540: 
+041701,000541: 
+<a name="4E4F524F4C4C31"></a>041702,000542: 16,3712           22016        <span class="sm">NOROLL1 </span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              <span class="co">#  SHUT OFF ALL (ROLL) JETS, (A T6 TASK</span>
+041703,000543: 16,3713           34714                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#       CALLED BY ..JETROLL..)</span>
+041704,000544: 16,3714           55611                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4C4C46495245">ROLLFIRE</a>                              <span class="co">#  ZERO INDICATES JETS NOW OFF</span>
+041705,000545: 16,3715           00006                           <span class="op">EXTEND  </span>                                       
+<a name="4B494C4C4A455453"></a>041706,000546: 16,3716           01006        <span class="sm">KILLJETS</span>           <span class="op">WRITE   </span> <a href="RCS-CSM_DIGITAL_AUTOPILOT.agc.html#4348414E36">CHAN6</a>                                 
+041707,000547: 16,3717           15224                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#4E4F5152534D">NOQRSM</a>                                
+041708,000548: 
 </pre>
 </span>
 </p>
@@ -816,37 +816,37 @@ Page 957
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-041703,000550:                                                                                                  <span class="co">#  CONSTANTS FOR ROLL AUTOPILOT....</span>
-041704,000551: 
-041705,000552: 16,3720  E6,1742                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425A45524F">BZERO</a>                                 
-<a name="4E4F524F4C315436"></a>041706,000553: 16,3720           03712 34066  <span class="sm">NOROL1T6</span>           <span class="ps">2CADR   </span> <a href="#4E4F524F4C4C31">NOROLL1</a>                               
-041707,000554: 
-<a name="4442"></a>041708,000555: 16,3722           00344        <span class="sm">DB      </span>           <span class="ps">DEC     </span> .01388889                             <span class="co">#  DEAD BAND (5 DEG), SC.AT B+0 REV</span>
-<a name="2D534C4F5045"></a>041709,000556: 16,3723           06315        <span class="sm">-SLOPE  </span>           <span class="ps">DEC     </span> 0.2                                   <span class="co">#  -SWITCHLINE SLOPE(0.2 PER SEC) SC.AT B+0</span>
-041710,000557:                                                                                                  <span class="co">#                                               PER SEC</span>
-<a name="4C4D4352415445"></a>041711,000558: 16,3724           00111        <span class="sm">LMCRATE </span>           <span class="ps">DEC     </span> .00027778  B+4                        <span class="co">#  LIMIT CYCLE RATE (0.1 DEG/SEC) SC.AT</span>
-041712,000559:                                                                                                  <span class="co">#                                               B-4 REV/SEC</span>
-<a name="494E544552434550"></a>041713,000560: 16,3725           00510        <span class="sm">INTERCEP</span>           <span class="ps">DEC     </span> .0025      B+3                        <span class="co">#  DB(-SLOPE) - LMCRATE, SC.AT B-3 REV/SC</span>
-041714,000561: 
-<a name="4D494E4C494D"></a>041715,000562: 16,3726           01330        <span class="sm">MINLIM  </span>           <span class="ps">DEC     </span> .00277778  B+4                        <span class="co">#  RATELIM,MIN (1DEG/SEC), SC.AT B-4 REV/SC</span>
-041716,000563: 
-<a name="312F4D494E4C494D"></a>041717,000564: 16,3727           00027        <span class="sm">1/MINLIM</span>           <span class="ps">DEC     </span> 360        B-18                       <span class="co">#  RECIPROCAL THEREOF, SHIFTED 14 RIGHT</span>
-041718,000565: 
-<a name="4D41584C494D"></a>041719,000566: 16,3730           07071        <span class="sm">MAXLIM  </span>           <span class="ps">DEC     </span> .01388889  B+4                        <span class="co">#  RATELIM,MAX (5DEG/SEC), SC.AT B-4 REV/SC</span>
-041720,000567: 
-<a name="544D494E46495245"></a>041721,000568: 16,3731           00030        <span class="sm">TMINFIRE</span>           <span class="ps">DEC     </span> 1.5        B+4                        <span class="co">#  15 MS  (14MIN),  SC.AT 16 BITS/CS</span>
-041722,000569: 
-<a name="544D415846495245"></a>041723,000570: 16,3732           07640        <span class="sm">TMAXFIRE</span>           <span class="ps">DEC     </span> 250        B+4                        <span class="co">#  2.5 SEC, SC.AT 16 BITS/CS</span>
-041724,000571: 
-<a name="312F544D58464952"></a>041725,000572: 16,3733     4710               <span class="sm">1/TMXFIR</span>           <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495433">BIT3</a>                                  <span class="co">#  RECIPROCAL THEREOF, SHIFTED 14 RIGHT,</span>
-041726,000573:                                                                                                  <span class="co">#                                               ROUNDS TO OCT00004, SO ALLOWS 2.56</span>
-041727,000574:                                                                                                  <span class="co">#                                               SEC FIRINGS BEFORE APPLYING LIMIT</span>
-<a name="54365343414C45"></a>041728,000575: 16,3733     7665               <span class="sm">T6SCALE </span>           <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3331">PRIO31</a>                                <span class="co">#  (B+3) (16 BITS/CS) (100CS/SEC)</span>
-041729,000576: 
-<a name="2B524F4C4C31"></a>041730,000577: 16,3733     4715               <span class="sm">+ROLL1  </span>           <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#46495645">FIVE</a>                                  <span class="co">#  ONBITS FOR JETS 9 AND 11</span>
-<a name="2B524F4C4C32"></a>041731,000578: 16,3733     4732               <span class="sm">+ROLL2  </span>           <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4354313230">OCT120</a>                                <span class="co">#  ONBITS FOR JETS 13 AND 15</span>
-<a name="2D524F4C4C31"></a>041732,000579: 16,3733     4377               <span class="sm">-ROLL1  </span>           <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54454E">TEN</a>                                   <span class="co">#  ONBITS FOR JETS 12 NAD 10</span>
-<a name="2D524F4C4C32"></a>041733,000580: 16,3733           00240        <span class="sm">-ROLL2  </span>           <span class="ps">OCT     </span> 240                                   <span class="co">#  ONBITS FOR JETS 16 AND 14</span>
+041710,000550:                                                                                                  <span class="co">#  CONSTANTS FOR ROLL AUTOPILOT....</span>
+041711,000551: 
+041712,000552: 16,3720  E6,1742                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425A45524F">BZERO</a>                                 
+<a name="4E4F524F4C315436"></a>041713,000553: 16,3720           03712 34066  <span class="sm">NOROL1T6</span>           <span class="ps">2CADR   </span> <a href="#4E4F524F4C4C31">NOROLL1</a>                               
+041714,000554: 
+<a name="4442"></a>041715,000555: 16,3722           00344        <span class="sm">DB      </span>           <span class="ps">DEC     </span> .01388889                             <span class="co">#  DEAD BAND (5 DEG), SC.AT B+0 REV</span>
+<a name="2D534C4F5045"></a>041716,000556: 16,3723           06315        <span class="sm">-SLOPE  </span>           <span class="ps">DEC     </span> 0.2                                   <span class="co">#  -SWITCHLINE SLOPE(0.2 PER SEC) SC.AT B+0</span>
+041717,000557:                                                                                                  <span class="co">#                                               PER SEC</span>
+<a name="4C4D4352415445"></a>041718,000558: 16,3724           00111        <span class="sm">LMCRATE </span>           <span class="ps">DEC     </span> .00027778  B+4                        <span class="co">#  LIMIT CYCLE RATE (0.1 DEG/SEC) SC.AT</span>
+041719,000559:                                                                                                  <span class="co">#                                               B-4 REV/SEC</span>
+<a name="494E544552434550"></a>041720,000560: 16,3725           00510        <span class="sm">INTERCEP</span>           <span class="ps">DEC     </span> .0025      B+3                        <span class="co">#  DB(-SLOPE) - LMCRATE, SC.AT B-3 REV/SC</span>
+041721,000561: 
+<a name="4D494E4C494D"></a>041722,000562: 16,3726           01330        <span class="sm">MINLIM  </span>           <span class="ps">DEC     </span> .00277778  B+4                        <span class="co">#  RATELIM,MIN (1DEG/SEC), SC.AT B-4 REV/SC</span>
+041723,000563: 
+<a name="312F4D494E4C494D"></a>041724,000564: 16,3727           00027        <span class="sm">1/MINLIM</span>           <span class="ps">DEC     </span> 360        B-18                       <span class="co">#  RECIPROCAL THEREOF, SHIFTED 14 RIGHT</span>
+041725,000565: 
+<a name="4D41584C494D"></a>041726,000566: 16,3730           07071        <span class="sm">MAXLIM  </span>           <span class="ps">DEC     </span> .01388889  B+4                        <span class="co">#  RATELIM,MAX (5DEG/SEC), SC.AT B-4 REV/SC</span>
+041727,000567: 
+<a name="544D494E46495245"></a>041728,000568: 16,3731           00030        <span class="sm">TMINFIRE</span>           <span class="ps">DEC     </span> 1.5        B+4                        <span class="co">#  15 MS  (14MIN),  SC.AT 16 BITS/CS</span>
+041729,000569: 
+<a name="544D415846495245"></a>041730,000570: 16,3732           07640        <span class="sm">TMAXFIRE</span>           <span class="ps">DEC     </span> 250        B+4                        <span class="co">#  2.5 SEC, SC.AT 16 BITS/CS</span>
+041731,000571: 
+<a name="312F544D58464952"></a>041732,000572: 16,3733     4710               <span class="sm">1/TMXFIR</span>           <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495433">BIT3</a>                                  <span class="co">#  RECIPROCAL THEREOF, SHIFTED 14 RIGHT,</span>
+041733,000573:                                                                                                  <span class="co">#                                               ROUNDS TO OCT00004, SO ALLOWS 2.56</span>
+041734,000574:                                                                                                  <span class="co">#                                               SEC FIRINGS BEFORE APPLYING LIMIT</span>
+<a name="54365343414C45"></a>041735,000575: 16,3733     7665               <span class="sm">T6SCALE </span>           <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3331">PRIO31</a>                                <span class="co">#  (B+3) (16 BITS/CS) (100CS/SEC)</span>
+041736,000576: 
+<a name="2B524F4C4C31"></a>041737,000577: 16,3733     4715               <span class="sm">+ROLL1  </span>           <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#46495645">FIVE</a>                                  <span class="co">#  ONBITS FOR JETS 9 AND 11</span>
+<a name="2B524F4C4C32"></a>041738,000578: 16,3733     4732               <span class="sm">+ROLL2  </span>           <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4354313230">OCT120</a>                                <span class="co">#  ONBITS FOR JETS 13 AND 15</span>
+<a name="2D524F4C4C31"></a>041739,000579: 16,3733     4377               <span class="sm">-ROLL1  </span>           <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54454E">TEN</a>                                   <span class="co">#  ONBITS FOR JETS 12 NAD 10</span>
+<a name="2D524F4C4C32"></a>041740,000580: 16,3733           00240        <span class="sm">-ROLL2  </span>           <span class="ps">OCT     </span> 240                                   <span class="co">#  ONBITS FOR JETS 16 AND 14</span>
 
 End of include-file TVCROLLDAP.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

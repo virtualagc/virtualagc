@@ -90,28 +90,28 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-019916,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-019917,000003:                                                                                                  <span class="co">## Filename:    T6-RUPT_PROGRAMS.agc</span>
-019918,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
-019919,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
-019920,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
-019921,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
-019922,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
-019923,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
-019924,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
-019925,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-019926,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-019927,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-019928,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
-019929,000015:                                                                                                  <span class="co">## Reference:   pp. 460-462</span>
-019930,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-019931,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-019932,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-019933,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
-019934,000020:                                                                                                  <span class="co">##              2017-05-30 HG   Transcribed</span>
-019935,000021:                                                                                                  <span class="co">##              2017-06-22 RSB  Proofed comment text with</span>
-019936,000022:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
-019937,000023: 
+019923,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+019924,000003:                                                                                                  <span class="co">## Filename:    T6-RUPT_PROGRAMS.agc</span>
+019925,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
+019926,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
+019927,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
+019928,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
+019929,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
+019930,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
+019931,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
+019932,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+019933,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+019934,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+019935,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
+019936,000015:                                                                                                  <span class="co">## Reference:   pp. 460-462</span>
+019937,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+019938,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+019939,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+019940,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
+019941,000020:                                                                                                  <span class="co">##              2017-05-30 HG   Transcribed</span>
+019942,000021:                                                                                                  <span class="co">##              2017-06-22 RSB  Proofed comment text with</span>
+019943,000022:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
+019944,000023: 
 </pre>
 </span>
 </p>
@@ -127,48 +127,48 @@ Page 460
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-019939,000025:                                                                                                  <span class="co">#  PROGRAM NAMES: (1) DOT6RUPT     MOD. NO. 2  DATE: NOVEMBER 15, 1966</span>
-019940,000026: 
-019941,000027:                                                                                                  <span class="co">#                 (2) T6JOBCHK</span>
-019942,000028: 
-019943,000029:                                                                                                  <span class="co">#  MODIFICATION BY: JONATHAN D. ADDELSTON (ADAMS ASSOCIATES)</span>
-019944,000030: 
-019945,000031:                                                                                                  <span class="co">#  THESE PROGRAMS ENABLE THE LM DAP TO CONTROL THE THRUST TIMES OF THE REACTION CONTROL SYSTEM JETS BY USING TIME6.</span>
-019946,000032:                                                                                                  <span class="co">#  SINCE THE LM DAP MAINTAINS EXCLUSIVE CONTROL OVER TIME6 AND ITS INTERRUPTS, THE FOLLOWING CONVENTIONS HAVE BEEN</span>
-019947,000033:                                                                                                  <span class="co">#  ESTABLISHED AND MUST NOT BE TAMPERED WITH:</span>
-019948,000034:                                                                                                  <span class="co">#           1. NO NUMBER IS EVER PLACED INTO TIME6 EXCEPT BY LM DAP.</span>
-019949,000035:                                                                                                  <span class="co">#           2. NO PROGRAM OTHER THAN LM DAP ENABLES THE TIME6 COUNTER.</span>
-019950,000036:                                                                                                  <span class="co">#           3. ONLY POSITIVE NUMBERS ARE ENTERED INTO TIME6, SO IT COUNTS DOWN TO -0 (MINUS ZERO) TO INTERRUPT.</span>
-019951,000037:                                                                                                  <span class="co">#           4. IF -0 IS NOT IN TIME6 WHEN THE INTERRUPT OCCURS, THEN THE INTERRUPT HAS ALREADY BEEN PROCESSED.</span>
-019952,000038:                                                                                                  <span class="co">#           5. ALL PROGRAMS WHICH OPERATE IN EITHER INTERRUPT MODE OR WITH INTERRUPT INHIBITED MUST CALL T6JOBCHK</span>
-019953,000039:                                                                                                  <span class="co">#              EVERY 6 MILLISECONDS TO PROCESS A POSSIBLE WAITING T6RUPT BEFORE IT CAN BE HONORED BY THE HARDWARE.</span>
-019954,000040: 
-019955,000041:                                                                                                  <span class="co">#  DOT6RUPT CALLING SEQUENCE:</span>
-019956,000042: 
-019957,000043:                                                                                                  <span class="co">#  REF   1                 4004  52 011 0           DXCH   ARUPT           T6RUPT</span>
-019958,000044:                                                                                                  <span class="co">#                          4005  0 0006 1           EXTEND</span>
-019959,000045:                                                                                                  <span class="co">#  REF   1                 4006  3 5045 0           DCA    T6ADR</span>
-019960,000046:                                                                                                  <span class="co">#                          4007  52 006 0           DTCB</span>
-019961,000047: 
-019962,000048:                                                                                                  <span class="co">#  T6JOBCHK CALLING SEQUENCE:</span>
-019963,000049: 
-019964,000050:                                                                                                  <span class="co">#  REF   0              23,1000  0 4200 1           TC     T6JOBCHK</span>
-019965,000051: 
-019966,000052:                                                                                                  <span class="co">#  SUBROUTINES CALLED:   DOT6RUPT CALLS T6JOBCHK.</span>
-019967,000053: 
-019968,000054:                                                                                                  <span class="co">#  NORMAL EXIT MODES:    DOT6RUPT TRANSFERS CONTROL TO RESUME.</span>
-019969,000055:                                                                                                  <span class="co">#                        T6JOBCHK TRANSFERS CONTROL TO CALLER AT LOCATION AFTER CALL.</span>
-019970,000056: 
-019971,000057:                                                                                                  <span class="co">#  ALARM/ABORT MODES:    NONE.</span>
-019972,000058: 
-019973,000059:                                                                                                  <span class="co">#  INPUT: TIME6,T6NEXT REGS,T6NEXTJT REGS.</span>
-019974,000060: 
-019975,000061:                                                                                                  <span class="co">#  OUTPUT: (SAME AS INPUT.)</span>
-019976,000062: 
-019977,000063:                                                                                                  <span class="co">#  DEBRIS: DOT6RUPT: NONE.  T6JOBCHK: A,L</span>
-019978,000064: 
-019979,000065:                                                                                                  <span class="co">#  *** NOTE: AS OF MOD. NO. 2, T6NEXT AND T6NEXTJT LISTS ARE IN UNSWITCHED ERASABLE. ***</span>
-019980,000066: 
+019946,000025:                                                                                                  <span class="co">#  PROGRAM NAMES: (1) DOT6RUPT     MOD. NO. 2  DATE: NOVEMBER 15, 1966</span>
+019947,000026: 
+019948,000027:                                                                                                  <span class="co">#                 (2) T6JOBCHK</span>
+019949,000028: 
+019950,000029:                                                                                                  <span class="co">#  MODIFICATION BY: JONATHAN D. ADDELSTON (ADAMS ASSOCIATES)</span>
+019951,000030: 
+019952,000031:                                                                                                  <span class="co">#  THESE PROGRAMS ENABLE THE LM DAP TO CONTROL THE THRUST TIMES OF THE REACTION CONTROL SYSTEM JETS BY USING TIME6.</span>
+019953,000032:                                                                                                  <span class="co">#  SINCE THE LM DAP MAINTAINS EXCLUSIVE CONTROL OVER TIME6 AND ITS INTERRUPTS, THE FOLLOWING CONVENTIONS HAVE BEEN</span>
+019954,000033:                                                                                                  <span class="co">#  ESTABLISHED AND MUST NOT BE TAMPERED WITH:</span>
+019955,000034:                                                                                                  <span class="co">#           1. NO NUMBER IS EVER PLACED INTO TIME6 EXCEPT BY LM DAP.</span>
+019956,000035:                                                                                                  <span class="co">#           2. NO PROGRAM OTHER THAN LM DAP ENABLES THE TIME6 COUNTER.</span>
+019957,000036:                                                                                                  <span class="co">#           3. ONLY POSITIVE NUMBERS ARE ENTERED INTO TIME6, SO IT COUNTS DOWN TO -0 (MINUS ZERO) TO INTERRUPT.</span>
+019958,000037:                                                                                                  <span class="co">#           4. IF -0 IS NOT IN TIME6 WHEN THE INTERRUPT OCCURS, THEN THE INTERRUPT HAS ALREADY BEEN PROCESSED.</span>
+019959,000038:                                                                                                  <span class="co">#           5. ALL PROGRAMS WHICH OPERATE IN EITHER INTERRUPT MODE OR WITH INTERRUPT INHIBITED MUST CALL T6JOBCHK</span>
+019960,000039:                                                                                                  <span class="co">#              EVERY 6 MILLISECONDS TO PROCESS A POSSIBLE WAITING T6RUPT BEFORE IT CAN BE HONORED BY THE HARDWARE.</span>
+019961,000040: 
+019962,000041:                                                                                                  <span class="co">#  DOT6RUPT CALLING SEQUENCE:</span>
+019963,000042: 
+019964,000043:                                                                                                  <span class="co">#  REF   1                 4004  52 011 0           DXCH   ARUPT           T6RUPT</span>
+019965,000044:                                                                                                  <span class="co">#                          4005  0 0006 1           EXTEND</span>
+019966,000045:                                                                                                  <span class="co">#  REF   1                 4006  3 5045 0           DCA    T6ADR</span>
+019967,000046:                                                                                                  <span class="co">#                          4007  52 006 0           DTCB</span>
+019968,000047: 
+019969,000048:                                                                                                  <span class="co">#  T6JOBCHK CALLING SEQUENCE:</span>
+019970,000049: 
+019971,000050:                                                                                                  <span class="co">#  REF   0              23,1000  0 4200 1           TC     T6JOBCHK</span>
+019972,000051: 
+019973,000052:                                                                                                  <span class="co">#  SUBROUTINES CALLED:   DOT6RUPT CALLS T6JOBCHK.</span>
+019974,000053: 
+019975,000054:                                                                                                  <span class="co">#  NORMAL EXIT MODES:    DOT6RUPT TRANSFERS CONTROL TO RESUME.</span>
+019976,000055:                                                                                                  <span class="co">#                        T6JOBCHK TRANSFERS CONTROL TO CALLER AT LOCATION AFTER CALL.</span>
+019977,000056: 
+019978,000057:                                                                                                  <span class="co">#  ALARM/ABORT MODES:    NONE.</span>
+019979,000058: 
+019980,000059:                                                                                                  <span class="co">#  INPUT: TIME6,T6NEXT REGS,T6NEXTJT REGS.</span>
+019981,000060: 
+019982,000061:                                                                                                  <span class="co">#  OUTPUT: (SAME AS INPUT.)</span>
+019983,000062: 
+019984,000063:                                                                                                  <span class="co">#  DEBRIS: DOT6RUPT: NONE.  T6JOBCHK: A,L</span>
+019985,000064: 
+019986,000065:                                                                                                  <span class="co">#  *** NOTE: AS OF MOD. NO. 2, T6NEXT AND T6NEXTJT LISTS ARE IN UNSWITCHED ERASABLE. ***</span>
+019987,000066: 
 </pre>
 </span>
 </p>
@@ -184,59 +184,59 @@ Page 461
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-019982,000068: 
-019983,000069:    5037                                           <span class="ps">BLOCK   </span> 02                                    
-019984,000070:    5037     1002                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364E455854">T6NEXT</a>                                
-019985,000071: 
-019986,000072:    5037     1002                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364E455854">T6NEXT</a>                                
-<a name="5436414452"></a>019987,000073:    5037           02077 34002  <span class="sm">T6ADR   </span>           <span class="ps">2CADR   </span> <a href="#444F543652555054">DOT6RUPT</a>                              <span class="co">#  2CADR OF INTERRUPT PROCESSOR.</span>
-019988,000074: 
-019989,000075: 16,2077                                           <span class="ps">BANK    </span> 16                                    
-019990,000076: 16,2077     1002                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364E455854">T6NEXT</a>                                
-019991,000077: 
-<a name="444F543652555054"></a>019992,000078: 16,2077           22016        <span class="sm">DOT6RUPT</span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              <span class="co">#  (INTERRUPT LEAD IN CONTINUED)</span>
-019993,000079: 16,2100           00006                           <span class="op">EXTEND  </span>                                       
-019994,000080: 16,2101           22012                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152555054">QRUPT</a>                                 
-019995,000081: 
-019996,000082: 16,2102           05041                           <span class="op">TC      </span> <a href="#54364A4F4243484B">T6JOBCHK</a>                              <span class="co">#  CALL T6JOBCHK</span>
-019997,000083: 
-019998,000084: 16,2103           15751                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  END TIME6 RUPT</span>
-019999,000085: 
-020000,000086: 
-020001,000087: 
-020002,000088:    5041                                           <span class="ps">BLOCK   </span> 02                                    
-020003,000089:    5041     1002                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364E455854">T6NEXT</a>                                
-020004,000090: 
-<a name="54364A4F4243484B"></a>020005,000091:    5041           10031        <span class="sm">T6JOBCHK</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4536">TIME6</a>                                 <span class="co">#  CHECK TIME6 FOR WAITING T6RUPT:</span>
-020006,000092:    5042           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  NONE: CLOCK COUTING DOWN.</span>
-020007,000093:    5043           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  NONE: T6RUPT ALREADY PROCESSED.</span>
-020008,000094:    5044           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  NONE: INVALID VALUE. (POSSIBLE ABORT.)</span>
-020009,000095: 
-020010,000096:                                                                                                  <span class="co">#  CONTROL PASSES TO T6JOB ONLY WHEN C(TIME6) = -0 (I.E. WHEN A T6RUPT MUST BE PROCESSED).</span>
-020011,000097: 
-<a name="54364A4F42"></a>020012,000098:    5045           37761        <span class="sm">T6JOB   </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  UPDATE ORDERED LIST OF TIME6 DT'S:</span>
-020013,000099:    5046           57003                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364E455854">T6NEXT</a>     +1                         <span class="co">#  1) PUSH FIRST ENTRY INTO TIME6.</span>
-020014,000100:    5047           57002                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364E455854">T6NEXT</a>                                <span class="co">#  2) PUSH SECOND ENTRY INTO FIRST PLACE.</span>
-020015,000101: 
-020016,000102:    5050           54031                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4536">TIME6</a>                                 <span class="co">#  3) ZERO LAST (SECOND) DT IN LIST.</span>
-020017,000103: 
-020018,000104:    5051           10031                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4536">TIME6</a>                                 <span class="co">#  TIME6 EITHER POSITIVE OR PLUS ZERO:</span>
-020019,000105:    5052           15055                           <span class="op">TCF     </span> <a href="#54364E5A45524F">T6NZERO</a>                               <span class="co">#  (BRANCH IF TIME6 STILL ACTIVE.)</span>
-020020,000106: 
-020021,000107:    5053           31004                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364E4558544A54">T6NEXTJT</a>                              <span class="co">#  THESE ARE TRANSLATION JETS (NO DT),</span>
-020022,000108:    5054           16010                           <span class="op">TCF     </span> <a href="#57524954454A5453">WRITEJTS</a>                              <span class="co">#  DETERMINE CHANNEL AND WRITE.</span>
-020023,000109: 
-<a name="54364E5A45524F"></a>020024,000110:    5055           37737        <span class="sm">T6NZERO </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4249543135">BIT15</a>                                 <span class="co">#  ENABLE TIME6 COUNTER TO START TIMING</span>
-020025,000111:    5056           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  THIS JET FIRING (PROPER JETS NOT YET</span>
-020026,000112:    5057           05013                           <span class="op">WOR     </span> 13                                    <span class="co">#  WRITTEN INTO CHANNEL, BUT WILL BE SOON).</span>
-020027,000113: 
-020028,000114:    5060           37761                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  UPDATE ORDERED LIST OF JET POLICIES:</span>
-020029,000115:    5061           57006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364E4558544A54">T6NEXTJT</a>   +2                         <span class="co">#  1) LEAVE JETS TO GO ON NOW IN A.</span>
-020030,000116:    5062           57005                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364E4558544A54">T6NEXTJT</a>   +1                         <span class="co">#  2) CYCLE LIST UP TOWARD TOP.</span>
-020031,000117:    5063           57004                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364E4558544A54">T6NEXTJT</a>                              <span class="co">#  3) ZERO LAST ENTRY IN LIST.</span>
-020032,000118: 
-020033,000119:    5064           16010                           <span class="op">TCF     </span> <a href="#57524954454A5453">WRITEJTS</a>                              <span class="co">#  TEMP. FIX UNTIL NEXT REV: JON A.</span>
-020034,000120: 
+019989,000068: 
+019990,000069:    5037                                           <span class="ps">BLOCK   </span> 02                                    
+019991,000070:    5037     1002                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364E455854">T6NEXT</a>                                
+019992,000071: 
+019993,000072:    5037     1002                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364E455854">T6NEXT</a>                                
+<a name="5436414452"></a>019994,000073:    5037           02077 34002  <span class="sm">T6ADR   </span>           <span class="ps">2CADR   </span> <a href="#444F543652555054">DOT6RUPT</a>                              <span class="co">#  2CADR OF INTERRUPT PROCESSOR.</span>
+019995,000074: 
+019996,000075: 16,2077                                           <span class="ps">BANK    </span> 16                                    
+019997,000076: 16,2077     1002                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364E455854">T6NEXT</a>                                
+019998,000077: 
+<a name="444F543652555054"></a>019999,000078: 16,2077           22016        <span class="sm">DOT6RUPT</span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              <span class="co">#  (INTERRUPT LEAD IN CONTINUED)</span>
+020000,000079: 16,2100           00006                           <span class="op">EXTEND  </span>                                       
+020001,000080: 16,2101           22012                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152555054">QRUPT</a>                                 
+020002,000081: 
+020003,000082: 16,2102           05041                           <span class="op">TC      </span> <a href="#54364A4F4243484B">T6JOBCHK</a>                              <span class="co">#  CALL T6JOBCHK</span>
+020004,000083: 
+020005,000084: 16,2103           15751                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  END TIME6 RUPT</span>
+020006,000085: 
+020007,000086: 
+020008,000087: 
+020009,000088:    5041                                           <span class="ps">BLOCK   </span> 02                                    
+020010,000089:    5041     1002                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364E455854">T6NEXT</a>                                
+020011,000090: 
+<a name="54364A4F4243484B"></a>020012,000091:    5041           10031        <span class="sm">T6JOBCHK</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4536">TIME6</a>                                 <span class="co">#  CHECK TIME6 FOR WAITING T6RUPT:</span>
+020013,000092:    5042           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  NONE: CLOCK COUTING DOWN.</span>
+020014,000093:    5043           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  NONE: T6RUPT ALREADY PROCESSED.</span>
+020015,000094:    5044           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  NONE: INVALID VALUE. (POSSIBLE ABORT.)</span>
+020016,000095: 
+020017,000096:                                                                                                  <span class="co">#  CONTROL PASSES TO T6JOB ONLY WHEN C(TIME6) = -0 (I.E. WHEN A T6RUPT MUST BE PROCESSED).</span>
+020018,000097: 
+<a name="54364A4F42"></a>020019,000098:    5045           37761        <span class="sm">T6JOB   </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  UPDATE ORDERED LIST OF TIME6 DT'S:</span>
+020020,000099:    5046           57003                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364E455854">T6NEXT</a>     +1                         <span class="co">#  1) PUSH FIRST ENTRY INTO TIME6.</span>
+020021,000100:    5047           57002                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364E455854">T6NEXT</a>                                <span class="co">#  2) PUSH SECOND ENTRY INTO FIRST PLACE.</span>
+020022,000101: 
+020023,000102:    5050           54031                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4536">TIME6</a>                                 <span class="co">#  3) ZERO LAST (SECOND) DT IN LIST.</span>
+020024,000103: 
+020025,000104:    5051           10031                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4536">TIME6</a>                                 <span class="co">#  TIME6 EITHER POSITIVE OR PLUS ZERO:</span>
+020026,000105:    5052           15055                           <span class="op">TCF     </span> <a href="#54364E5A45524F">T6NZERO</a>                               <span class="co">#  (BRANCH IF TIME6 STILL ACTIVE.)</span>
+020027,000106: 
+020028,000107:    5053           31004                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364E4558544A54">T6NEXTJT</a>                              <span class="co">#  THESE ARE TRANSLATION JETS (NO DT),</span>
+020029,000108:    5054           16010                           <span class="op">TCF     </span> <a href="#57524954454A5453">WRITEJTS</a>                              <span class="co">#  DETERMINE CHANNEL AND WRITE.</span>
+020030,000109: 
+<a name="54364E5A45524F"></a>020031,000110:    5055           37737        <span class="sm">T6NZERO </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4249543135">BIT15</a>                                 <span class="co">#  ENABLE TIME6 COUNTER TO START TIMING</span>
+020032,000111:    5056           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  THIS JET FIRING (PROPER JETS NOT YET</span>
+020033,000112:    5057           05013                           <span class="op">WOR     </span> 13                                    <span class="co">#  WRITTEN INTO CHANNEL, BUT WILL BE SOON).</span>
+020034,000113: 
+020035,000114:    5060           37761                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  UPDATE ORDERED LIST OF JET POLICIES:</span>
+020036,000115:    5061           57006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364E4558544A54">T6NEXTJT</a>   +2                         <span class="co">#  1) LEAVE JETS TO GO ON NOW IN A.</span>
+020037,000116:    5062           57005                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364E4558544A54">T6NEXTJT</a>   +1                         <span class="co">#  2) CYCLE LIST UP TOWARD TOP.</span>
+020038,000117:    5063           57004                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54364E4558544A54">T6NEXTJT</a>                              <span class="co">#  3) ZERO LAST ENTRY IN LIST.</span>
+020039,000118: 
+020040,000119:    5064           16010                           <span class="op">TCF     </span> <a href="#57524954454A5453">WRITEJTS</a>                              <span class="co">#  TEMP. FIX UNTIL NEXT REV: JON A.</span>
+020041,000120: 
 </pre>
 </span>
 </p>
@@ -252,29 +252,29 @@ Page 462
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-020036,000122:                                                                                                  <span class="co">#  THE FOLLOWING JET-ON LOGIC MAY BE USED AS A SUBROUTINE (3 ENTRY POINTS):</span>
-020037,000123: 
-020038,000124:                                                                                                  <span class="co">#  FIRST, LET SGN(A) DETERMINE THE JET CHANNEL:</span>
-020039,000125:                                                                                                  <span class="co">#           POSITIVE IMPLIES P-AXIS POLICY.</span>
-020040,000126:                                                                                                  <span class="co">#           NEGATIVE IMPLIES Q,R-AXES POLICY.</span>
-020041,000127: 
-020042,000128:    6010                                           <span class="ps">BLOCK   </span> 03                                    
-020043,000129: 
-<a name="57524954454A5453"></a>020044,000130:    6010           00006        <span class="sm">WRITEJTS</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  TEST FOR CHANNEL TO WRITE POLICY IN:</span>
-020045,000131:    6011           66015                           <span class="op">BZMF    </span> <a href="#57524954455152">WRITEQR</a>                               <span class="co">#  NEG: Q,R-AXES JETS IN CHANNEL 5</span>
-020046,000132: 
-020047,000133:                                                                                                  <span class="co">#  SECOND, FOR P-AXIS JET POLICIES:</span>
-020048,000134: 
-<a name="575249544550"></a>020049,000135:    6012           00006        <span class="sm">WRITEP  </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  POS: P-AXIS   JETS IN CHANNEL 6</span>
-020050,000136: 
-020051,000137:    6013           01006                           <span class="op">WRITE   </span> 6                                     
-020052,000138:    6014           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RETURN.</span>
-020053,000139: 
-020054,000140:                                                                                                  <span class="co">#  THIRD, FOR Q,R-AXES JET POLICIES:</span>
-020055,000141: 
-<a name="57524954455152"></a>020056,000142:    6015           00006        <span class="sm">WRITEQR </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  Q,R-AXES JETS IN CHANNEL 5</span>
-020057,000143:    6016           01005                           <span class="op">WRITE   </span> 5                                     
-020058,000144:    6017           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RETURN.</span>
+020043,000122:                                                                                                  <span class="co">#  THE FOLLOWING JET-ON LOGIC MAY BE USED AS A SUBROUTINE (3 ENTRY POINTS):</span>
+020044,000123: 
+020045,000124:                                                                                                  <span class="co">#  FIRST, LET SGN(A) DETERMINE THE JET CHANNEL:</span>
+020046,000125:                                                                                                  <span class="co">#           POSITIVE IMPLIES P-AXIS POLICY.</span>
+020047,000126:                                                                                                  <span class="co">#           NEGATIVE IMPLIES Q,R-AXES POLICY.</span>
+020048,000127: 
+020049,000128:    6010                                           <span class="ps">BLOCK   </span> 03                                    
+020050,000129: 
+<a name="57524954454A5453"></a>020051,000130:    6010           00006        <span class="sm">WRITEJTS</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  TEST FOR CHANNEL TO WRITE POLICY IN:</span>
+020052,000131:    6011           66015                           <span class="op">BZMF    </span> <a href="#57524954455152">WRITEQR</a>                               <span class="co">#  NEG: Q,R-AXES JETS IN CHANNEL 5</span>
+020053,000132: 
+020054,000133:                                                                                                  <span class="co">#  SECOND, FOR P-AXIS JET POLICIES:</span>
+020055,000134: 
+<a name="575249544550"></a>020056,000135:    6012           00006        <span class="sm">WRITEP  </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  POS: P-AXIS   JETS IN CHANNEL 6</span>
+020057,000136: 
+020058,000137:    6013           01006                           <span class="op">WRITE   </span> 6                                     
+020059,000138:    6014           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RETURN.</span>
+020060,000139: 
+020061,000140:                                                                                                  <span class="co">#  THIRD, FOR Q,R-AXES JET POLICIES:</span>
+020062,000141: 
+<a name="57524954455152"></a>020063,000142:    6015           00006        <span class="sm">WRITEQR </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  Q,R-AXES JETS IN CHANNEL 5</span>
+020064,000143:    6016           01005                           <span class="op">WRITE   </span> 5                                     
+020065,000144:    6017           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RETURN.</span>
 
 End of include-file T6-RUPT_PROGRAMS.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

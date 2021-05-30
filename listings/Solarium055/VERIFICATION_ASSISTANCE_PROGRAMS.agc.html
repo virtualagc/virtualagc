@@ -94,20 +94,20 @@ Apollo 6 missions.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-029959,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-029960,000003:                                                                                                  <span class="co">## Filename:    VERIFICATION_ASSISTANCE_PROGRAMS.agc</span>
-029961,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Solarium build 55. This</span>
-029962,000005:                                                                                                  <span class="co">##              is for the Command Module's (CM) Apollo Guidance</span>
-029963,000006:                                                                                                  <span class="co">##              Computer (AGC), for Apollo 6.</span>
-029964,000007:                                                                                                  <span class="co">## Assembler:   yaYUL --block1</span>
-029965,000008:                                                                                                  <span class="co">## Contact:     Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
-029966,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-029967,000010:                                                                                                  <span class="co">## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Solarium055/</span>
-029968,000011:                                                                                                  <span class="co">## Mod history: 2009-09-21 JL   Created.</span>
-029969,000012:                                                                                                  <span class="co">##              2016-08-20 RSB  Typo.</span>
-029970,000013:                                                                                                  <span class="co">##              2016-12-28 RSB  Proofed comment text using octopus/ProoferComments,</span>
-029971,000014:                                                                                                  <span class="co">##                              and fixed errors found.</span>
-029972,000015: 
+029963,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+029964,000003:                                                                                                  <span class="co">## Filename:    VERIFICATION_ASSISTANCE_PROGRAMS.agc</span>
+029965,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Solarium build 55. This</span>
+029966,000005:                                                                                                  <span class="co">##              is for the Command Module's (CM) Apollo Guidance</span>
+029967,000006:                                                                                                  <span class="co">##              Computer (AGC), for Apollo 6.</span>
+029968,000007:                                                                                                  <span class="co">## Assembler:   yaYUL --block1</span>
+029969,000008:                                                                                                  <span class="co">## Contact:     Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
+029970,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+029971,000010:                                                                                                  <span class="co">## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Solarium055/</span>
+029972,000011:                                                                                                  <span class="co">## Mod history: 2009-09-21 JL   Created.</span>
+029973,000012:                                                                                                  <span class="co">##              2016-08-20 RSB  Typo.</span>
+029974,000013:                                                                                                  <span class="co">##              2016-12-28 RSB  Proofed comment text using octopus/ProoferComments,</span>
+029975,000014:                                                                                                  <span class="co">##                              and fixed errors found.</span>
+029976,000015: 
 </pre>
 </span>
 </p>
@@ -123,45 +123,45 @@ Page 754
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-029974,000017: 
-029975,000018:                                                                                                  <span class="co">#        WAITLIST EXERCISE PROGRAM. TIMES ARE GIVEN IN THE FORM NN + NN/32 + YY, WHERE THE NS REFER TO TIME</span>
-029976,000019:                                                                                                  <span class="co">#  SINCE THE BEGINNING OF THE TEST, AND YS ADDITIONAL MCT.</span>
-029977,000020: 
-029978,000021: 13,7205                                           <span class="ps">BANK    </span> 13                                    
-<a name="574C54455354"></a>029979,000022: 13,7205           30006        <span class="sm">WLTEST  </span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494E32">IN2</a>                                   
-029980,000023: 13,7206           10006                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494E32">IN2</a>                                   <span class="co">#  GET IN PHASE WITH T3 INCREMENTS.</span>
-029981,000024: 13,7207           07211                           <span class="op">TC      </span> +2                                    
-029982,000025: 13,7210           07206                           <span class="op">TC      </span> -2                                    
-029983,000026: 
-029984,000027: 13,7211           10006                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494E32">IN2</a>                                   
-029985,000028: 13,7212           07211                           <span class="op">TC      </span> -1                                    
-029986,000029: 13,7213           50042                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5554435231">OUTCR1</a>                                <span class="co">#  TO INITIALIZE.</span>
-029987,000030: 
-029988,000031:                                                                                                  <span class="co">#        THE FIRST TASK IS ENTERED INTO SLOT 1 WITH A T3 INCREMENT BETWEEN THE TWO T3 REFERENCES. CALL AT</span>
-029989,000032:                                                                                                  <span class="co">#  10 +00/32 -25. SPECIFY WAIT TO 30/32.</span>
-029990,000033: 
-029991,000034: 13,7214           07310                           <span class="op">TC      </span> <a href="#4F55544352315754">OUTCR1WT</a>                              
-029992,000035: 13,7215           00035                           <span class="ps">DEC     </span> 29         B-14                       
-029993,000036: 
-029994,000037: 13,7216           07310                           <span class="op">TC      </span> <a href="#4F55544352315754">OUTCR1WT</a>                              <span class="co">#  GO WAIT FOR THIS AND SPECIFY RESET TO</span>
-029995,000038: 13,7217           00052                           <span class="ps">DEC     </span> 42         B-14                       <span class="co">#  20 +8/32.</span>
-029996,000039: 
-029997,000040:                                                                                                  <span class="co">#        AT 30/32 +16, WAIT 12 MCT BEFORE ENTERING TASK 1.</span>
-029998,000041: 
-029999,000042: 13,7220           35501                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  TUNING CONSTANT.</span>
-030000,000043: 13,7221           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-030001,000044: 13,7222           07221                           <span class="op">TC      </span> -1                                    
-030002,000045: 13,7223           34516                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   <span class="co">#  TASK ENTRY WITH T3 INC BETWEEN TWO T3</span>
-030003,000046: 13,7224           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              <span class="co">#  REFERENCES.</span>
-030004,000047: 13,7225           42240                           <span class="ps">CADR    </span> <a href="PRELAUNCH_ALIGNMENT_PROGRAM.agc.html#4E4F504C57414954">NOPLWAIT</a>   +2                         <span class="co">#  TASK IN HIGH SWITCHED BANK.</span>
-030005,000048: 
-030006,000049: 13,7226           07310                           <span class="op">TC      </span> <a href="#4F55544352315754">OUTCR1WT</a>                              <span class="co">#  WAIT FOR 20 +8/32. CALL FOR RESET TO</span>
-030007,000050: 13,7227           00027                           <span class="ps">DEC     </span> 23         B-14                       <span class="co">#  20 +31/32.</span>
-030008,000051: 
-030009,000052: 13,7230           34516                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   <span class="co">#  AT 20 +8/32 + 16, ENTER TASK 2 DUE AT</span>
-030010,000053: 13,7231           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              <span class="co">#  30.</span>
-030011,000054: 13,7232           27332                           <span class="ps">CADR    </span> <a href="#5154534B32">QTSK2</a>                                 
-030012,000055: 
+029978,000017: 
+029979,000018:                                                                                                  <span class="co">#        WAITLIST EXERCISE PROGRAM. TIMES ARE GIVEN IN THE FORM NN + NN/32 + YY, WHERE THE NS REFER TO TIME</span>
+029980,000019:                                                                                                  <span class="co">#  SINCE THE BEGINNING OF THE TEST, AND YS ADDITIONAL MCT.</span>
+029981,000020: 
+029982,000021: 13,7205                                           <span class="ps">BANK    </span> 13                                    
+<a name="574C54455354"></a>029983,000022: 13,7205           30006        <span class="sm">WLTEST  </span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494E32">IN2</a>                                   
+029984,000023: 13,7206           10006                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494E32">IN2</a>                                   <span class="co">#  GET IN PHASE WITH T3 INCREMENTS.</span>
+029985,000024: 13,7207           07211                           <span class="op">TC      </span> +2                                    
+029986,000025: 13,7210           07206                           <span class="op">TC      </span> -2                                    
+029987,000026: 
+029988,000027: 13,7211           10006                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494E32">IN2</a>                                   
+029989,000028: 13,7212           07211                           <span class="op">TC      </span> -1                                    
+029990,000029: 13,7213           50042                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5554435231">OUTCR1</a>                                <span class="co">#  TO INITIALIZE.</span>
+029991,000030: 
+029992,000031:                                                                                                  <span class="co">#        THE FIRST TASK IS ENTERED INTO SLOT 1 WITH A T3 INCREMENT BETWEEN THE TWO T3 REFERENCES. CALL AT</span>
+029993,000032:                                                                                                  <span class="co">#  10 +00/32 -25. SPECIFY WAIT TO 30/32.</span>
+029994,000033: 
+029995,000034: 13,7214           07310                           <span class="op">TC      </span> <a href="#4F55544352315754">OUTCR1WT</a>                              
+029996,000035: 13,7215           00035                           <span class="ps">DEC     </span> 29         B-14                       
+029997,000036: 
+029998,000037: 13,7216           07310                           <span class="op">TC      </span> <a href="#4F55544352315754">OUTCR1WT</a>                              <span class="co">#  GO WAIT FOR THIS AND SPECIFY RESET TO</span>
+029999,000038: 13,7217           00052                           <span class="ps">DEC     </span> 42         B-14                       <span class="co">#  20 +8/32.</span>
+030000,000039: 
+030001,000040:                                                                                                  <span class="co">#        AT 30/32 +16, WAIT 12 MCT BEFORE ENTERING TASK 1.</span>
+030002,000041: 
+030003,000042: 13,7220           35501                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  TUNING CONSTANT.</span>
+030004,000043: 13,7221           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+030005,000044: 13,7222           07221                           <span class="op">TC      </span> -1                                    
+030006,000045: 13,7223           34516                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   <span class="co">#  TASK ENTRY WITH T3 INC BETWEEN TWO T3</span>
+030007,000046: 13,7224           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              <span class="co">#  REFERENCES.</span>
+030008,000047: 13,7225           42240                           <span class="ps">CADR    </span> <a href="PRELAUNCH_ALIGNMENT_PROGRAM.agc.html#4E4F504C57414954">NOPLWAIT</a>   +2                         <span class="co">#  TASK IN HIGH SWITCHED BANK.</span>
+030009,000048: 
+030010,000049: 13,7226           07310                           <span class="op">TC      </span> <a href="#4F55544352315754">OUTCR1WT</a>                              <span class="co">#  WAIT FOR 20 +8/32. CALL FOR RESET TO</span>
+030011,000050: 13,7227           00027                           <span class="ps">DEC     </span> 23         B-14                       <span class="co">#  20 +31/32.</span>
+030012,000051: 
+030013,000052: 13,7230           34516                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   <span class="co">#  AT 20 +8/32 + 16, ENTER TASK 2 DUE AT</span>
+030014,000053: 13,7231           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              <span class="co">#  30.</span>
+030015,000054: 13,7232           27332                           <span class="ps">CADR    </span> <a href="#5154534B32">QTSK2</a>                                 
+030016,000055: 
 </pre>
 </span>
 </p>
@@ -177,40 +177,40 @@ Page 755
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-030014,000057: 
-030015,000058:                                                                                                  <span class="co">#        WAIT FOR 20 +31/32 +16 AND AT THAT TIME WAIT FOR T3 TO OVERFLOW BEFORE ENTERING TASK 3. REQUIRES RESET</span>
-030016,000059:                                                                                                  <span class="co">#  TO 30 +10/32.</span>
-030017,000060: 
-030018,000061: 13,7233           07310                           <span class="op">TC      </span> <a href="#4F55544352315754">OUTCR1WT</a>                              
-030019,000062: 13,7234           00013                           <span class="ps">DEC     </span> 11         B-14                       
-030020,000063: 13,7235           10037                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4533">TIME3</a>                                 
-030021,000064: 13,7236           07235                           <span class="op">TC      </span> -1                                    
-030022,000065: 13,7237           34516                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   <span class="co">#  ENTER TASK 3 AFTER T3 OVF.</span>
-030023,000066: 13,7240           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-030024,000067: 13,7241           27333                           <span class="ps">CADR    </span> <a href="#5154534B33">QTSK3</a>                                 
-030025,000068: 
-030026,000069: 13,7242           07310                           <span class="op">TC      </span> <a href="#4F55544352315754">OUTCR1WT</a>                              <span class="co">#  TASK 3 IS DUE AT 40. WAIT FOR 30 +10/32</span>
-030027,000070: 13,7243           00065                           <span class="ps">DEC     </span> 53         B-14                       <span class="co">#  CALLING FOR RESET TO 40 +31/32.</span>
-030028,000071: 
-030029,000072:                                                                                                  <span class="co">#        AT 30 +10/32 +16, ENTER TASKS 4 AND 5 DUE SAME RUPT AT 50. THEY WILL BE INHIBITED FOR 6 MS SO THAT T3</span>
-030030,000073:                                                                                                  <span class="co">#  WILL TICK WHILE IT IS BEING RESET IN THE DISPATCH OF 5.</span>
-030031,000074: 
-030032,000075: 13,7244           35503                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   <span class="co">#  ENTERED INTO SLOTS 2 AND 3.</span>
-030033,000076: 13,7245           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-030034,000077: 13,7246           27334                           <span class="ps">CADR    </span> <a href="#5154534B34">QTSK4</a>                                 
-030035,000078: 13,7247           35503                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   
-030036,000079: 13,7250           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-030037,000080: 13,7251           03225                           <span class="ps">CADR    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#544354534B4F5652">TCTSKOVR</a>                              <span class="co">#  TASK IN FIXED-FIXED.</span>
-030038,000081: 
-030039,000082: 13,7252           07310                           <span class="op">TC      </span> <a href="#4F55544352315754">OUTCR1WT</a>                              <span class="co">#  WAIT FOR 40 +31/32 +16, CALLING FOR</span>
-030040,000083: 13,7253           00023                           <span class="ps">DEC     </span> 19         B-14                       <span class="co">#  RESET TO 50 +18/32.</span>
-030041,000084: 
-030042,000085: 13,7254           07311                           <span class="op">TC      </span> <a href="#4F55544352315754">OUTCR1WT</a>   +1                         <span class="co">#  AT 40 +31/32 +16, INHIBIT UNTIL</span>
-030043,000086: 13,7255           00030                           <span class="ps">DEC     </span> 24         B-14                       <span class="co">#  50 +18/32 +16 AND RESET TO 60 +10/32.</span>
-030044,000087: 
-030045,000088: 13,7256           07310                           <span class="op">TC      </span> <a href="#4F55544352315754">OUTCR1WT</a>                              <span class="co">#  AT 50 +18/32 +16, WAIT UNTIL 60 10/32,</span>
-030046,000089: 13,7257           00025                           <span class="ps">DEC     </span> 21         B-14                       <span class="co">#  RESETTING TO 60 +31/32.</span>
-030047,000090: 
+030018,000057: 
+030019,000058:                                                                                                  <span class="co">#        WAIT FOR 20 +31/32 +16 AND AT THAT TIME WAIT FOR T3 TO OVERFLOW BEFORE ENTERING TASK 3. REQUIRES RESET</span>
+030020,000059:                                                                                                  <span class="co">#  TO 30 +10/32.</span>
+030021,000060: 
+030022,000061: 13,7233           07310                           <span class="op">TC      </span> <a href="#4F55544352315754">OUTCR1WT</a>                              
+030023,000062: 13,7234           00013                           <span class="ps">DEC     </span> 11         B-14                       
+030024,000063: 13,7235           10037                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4533">TIME3</a>                                 
+030025,000064: 13,7236           07235                           <span class="op">TC      </span> -1                                    
+030026,000065: 13,7237           34516                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   <span class="co">#  ENTER TASK 3 AFTER T3 OVF.</span>
+030027,000066: 13,7240           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+030028,000067: 13,7241           27333                           <span class="ps">CADR    </span> <a href="#5154534B33">QTSK3</a>                                 
+030029,000068: 
+030030,000069: 13,7242           07310                           <span class="op">TC      </span> <a href="#4F55544352315754">OUTCR1WT</a>                              <span class="co">#  TASK 3 IS DUE AT 40. WAIT FOR 30 +10/32</span>
+030031,000070: 13,7243           00065                           <span class="ps">DEC     </span> 53         B-14                       <span class="co">#  CALLING FOR RESET TO 40 +31/32.</span>
+030032,000071: 
+030033,000072:                                                                                                  <span class="co">#        AT 30 +10/32 +16, ENTER TASKS 4 AND 5 DUE SAME RUPT AT 50. THEY WILL BE INHIBITED FOR 6 MS SO THAT T3</span>
+030034,000073:                                                                                                  <span class="co">#  WILL TICK WHILE IT IS BEING RESET IN THE DISPATCH OF 5.</span>
+030035,000074: 
+030036,000075: 13,7244           35503                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   <span class="co">#  ENTERED INTO SLOTS 2 AND 3.</span>
+030037,000076: 13,7245           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+030038,000077: 13,7246           27334                           <span class="ps">CADR    </span> <a href="#5154534B34">QTSK4</a>                                 
+030039,000078: 13,7247           35503                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   
+030040,000079: 13,7250           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+030041,000080: 13,7251           03225                           <span class="ps">CADR    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#544354534B4F5652">TCTSKOVR</a>                              <span class="co">#  TASK IN FIXED-FIXED.</span>
+030042,000081: 
+030043,000082: 13,7252           07310                           <span class="op">TC      </span> <a href="#4F55544352315754">OUTCR1WT</a>                              <span class="co">#  WAIT FOR 40 +31/32 +16, CALLING FOR</span>
+030044,000083: 13,7253           00023                           <span class="ps">DEC     </span> 19         B-14                       <span class="co">#  RESET TO 50 +18/32.</span>
+030045,000084: 
+030046,000085: 13,7254           07311                           <span class="op">TC      </span> <a href="#4F55544352315754">OUTCR1WT</a>   +1                         <span class="co">#  AT 40 +31/32 +16, INHIBIT UNTIL</span>
+030047,000086: 13,7255           00030                           <span class="ps">DEC     </span> 24         B-14                       <span class="co">#  50 +18/32 +16 AND RESET TO 60 +10/32.</span>
+030048,000087: 
+030049,000088: 13,7256           07310                           <span class="op">TC      </span> <a href="#4F55544352315754">OUTCR1WT</a>                              <span class="co">#  AT 50 +18/32 +16, WAIT UNTIL 60 10/32,</span>
+030050,000089: 13,7257           00025                           <span class="ps">DEC     </span> 21         B-14                       <span class="co">#  RESETTING TO 60 +31/32.</span>
+030051,000090: 
 </pre>
 </span>
 </p>
@@ -226,39 +226,39 @@ Page 756
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-030049,000092: 
-030050,000093:                                                                                                  <span class="co">#        AT 60 +10/32 +16, ENTER TASKS 6 AND 7 DUE AT 70 AND 8 DUE AT 80. T3 WILL INCREMENT DURING TASK 7</span>
-030051,000094:                                                                                                  <span class="co">#  DISPATCH, MAKING TASK 8 DUE THAT INTERRUPT. </span>
-030052,000095: 
-030053,000096: 13,7260           34516                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   
-030054,000097: 13,7261           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              <span class="co">#  ENTER TWO TASKS DUE SAME T3 RUPT AND</span>
-030055,000098: 13,7262           27340                           <span class="ps">CADR    </span> <a href="#5154534B36">QTSK6</a>                                 <span class="co">#  ANOTHER DUE THE FOLLOWING RUPT.</span>
-030056,000099: 13,7263           34516                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   
-030057,000100: 13,7264           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-030058,000101: 13,7265           27342                           <span class="ps">CADR    </span> <a href="#5154534B37">QTSK7</a>                                 
-030059,000102: 13,7266           35503                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   <span class="co">#  A T3 INC WILL OCCUR WHILE TASK 7 IS</span>
-030060,000103: 13,7267           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              <span class="co">#  SETTING T3 FOR THIS TASK AND CAUSE IT TO</span>
-030061,000104: 13,7270           27343                           <span class="ps">CADR    </span> <a href="#5154534B38">QTSK8</a>                                 <span class="co">#  BE THE THIRD TASK DUE THAT RUPT.</span>
-030062,000105: 
-030063,000106: 13,7271           07310                           <span class="op">TC      </span> <a href="#4F55544352315754">OUTCR1WT</a>                              <span class="co">#  WAIT UNTIL 60 +31/32 +16, INHINTING</span>
-030064,000107: 13,7272           00023                           <span class="ps">DEC     </span> 19         B-14                       <span class="co">#  70 +18/32 +16.</span>
-030065,000108: 13,7273           07311                           <span class="op">TC      </span> <a href="#4F55544352315754">OUTCR1WT</a>   +1                         
-030066,000109: 13,7274           00001                           <span class="ps">DEC     </span> 1          B-14                       
-030067,000110: 
-030068,000111: 13,7275           34477                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#46495645">FIVE</a>                                  <span class="co">#  SYSTEMMATICALLY ENTER TASKS IN ALL 6</span>
-030069,000112: 13,7276           50115                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  SLOTS.</span>
-030070,000113: 
-<a name="5154534B4C4F4F50"></a>030071,000114: 13,7277           20016        <span class="sm">QTSKLOOP</span>           <span class="op">RELINT  </span>                                       
-030072,000115: 13,7300           20017                           <span class="op">INHINT  </span>                                       
-030073,000116: 13,7301           40115                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-030074,000117: 13,7302           65362                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#534556454E">SEVEN</a>                                 
-030075,000118: 13,7303           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-030076,000119: 13,7304           27344                           <span class="ps">CADR    </span> <a href="#5154534B3130">QTSK10</a>                                
-030077,000120: 13,7305           10115                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-030078,000121: 13,7306           07276                           <span class="op">TC      </span> <a href="#5154534B4C4F4F50">QTSKLOOP</a>   -1                         
-030079,000122: 
-<a name="51454E4454455354"></a>030080,000123: 13,7307           07307        <span class="sm">QENDTEST</span>           <span class="op">TC      </span> -0                                    
-030081,000124: 
+030053,000092: 
+030054,000093:                                                                                                  <span class="co">#        AT 60 +10/32 +16, ENTER TASKS 6 AND 7 DUE AT 70 AND 8 DUE AT 80. T3 WILL INCREMENT DURING TASK 7</span>
+030055,000094:                                                                                                  <span class="co">#  DISPATCH, MAKING TASK 8 DUE THAT INTERRUPT. </span>
+030056,000095: 
+030057,000096: 13,7260           34516                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   
+030058,000097: 13,7261           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              <span class="co">#  ENTER TWO TASKS DUE SAME T3 RUPT AND</span>
+030059,000098: 13,7262           27340                           <span class="ps">CADR    </span> <a href="#5154534B36">QTSK6</a>                                 <span class="co">#  ANOTHER DUE THE FOLLOWING RUPT.</span>
+030060,000099: 13,7263           34516                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   
+030061,000100: 13,7264           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+030062,000101: 13,7265           27342                           <span class="ps">CADR    </span> <a href="#5154534B37">QTSK7</a>                                 
+030063,000102: 13,7266           35503                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   <span class="co">#  A T3 INC WILL OCCUR WHILE TASK 7 IS</span>
+030064,000103: 13,7267           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              <span class="co">#  SETTING T3 FOR THIS TASK AND CAUSE IT TO</span>
+030065,000104: 13,7270           27343                           <span class="ps">CADR    </span> <a href="#5154534B38">QTSK8</a>                                 <span class="co">#  BE THE THIRD TASK DUE THAT RUPT.</span>
+030066,000105: 
+030067,000106: 13,7271           07310                           <span class="op">TC      </span> <a href="#4F55544352315754">OUTCR1WT</a>                              <span class="co">#  WAIT UNTIL 60 +31/32 +16, INHINTING</span>
+030068,000107: 13,7272           00023                           <span class="ps">DEC     </span> 19         B-14                       <span class="co">#  70 +18/32 +16.</span>
+030069,000108: 13,7273           07311                           <span class="op">TC      </span> <a href="#4F55544352315754">OUTCR1WT</a>   +1                         
+030070,000109: 13,7274           00001                           <span class="ps">DEC     </span> 1          B-14                       
+030071,000110: 
+030072,000111: 13,7275           34477                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#46495645">FIVE</a>                                  <span class="co">#  SYSTEMMATICALLY ENTER TASKS IN ALL 6</span>
+030073,000112: 13,7276           50115                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  SLOTS.</span>
+030074,000113: 
+<a name="5154534B4C4F4F50"></a>030075,000114: 13,7277           20016        <span class="sm">QTSKLOOP</span>           <span class="op">RELINT  </span>                                       
+030076,000115: 13,7300           20017                           <span class="op">INHINT  </span>                                       
+030077,000116: 13,7301           40115                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+030078,000117: 13,7302           65362                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#534556454E">SEVEN</a>                                 
+030079,000118: 13,7303           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+030080,000119: 13,7304           27344                           <span class="ps">CADR    </span> <a href="#5154534B3130">QTSK10</a>                                
+030081,000120: 13,7305           10115                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+030082,000121: 13,7306           07276                           <span class="op">TC      </span> <a href="#5154534B4C4F4F50">QTSKLOOP</a>   -1                         
+030083,000122: 
+<a name="51454E4454455354"></a>030084,000123: 13,7307           07307        <span class="sm">QENDTEST</span>           <span class="op">TC      </span> -0                                    
+030085,000124: 
 </pre>
 </span>
 </p>
@@ -274,31 +274,31 @@ Page 757
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-030083,000126: 
-030084,000127:                                                                                                  <span class="co">#        THE FOLLOWING SUBROUTINE USES OUTCR1 AS A FINE TIMER DURING THE WAITLIST TEST.</span>
-030085,000128: 
-<a name="4F55544352315754"></a>030086,000129: 13,7310           20016        <span class="sm">OUTCR1WT</span>           <span class="op">RELINT  </span>                                       
-030087,000130: 13,7311           30001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-030088,000131: 13,7312           50115                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-030089,000132: 13,7313           20000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-030090,000133: 13,7314           40000                           <span class="op">CS      </span> 0                                     <span class="co">#  NUMBER OF THIRTY-SECONDS OF 10MS TO WAIT</span>
-030091,000134: 13,7315           64522                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#48414C46">HALF</a>                                  
-030092,000135: 13,7316           64522                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#48414C46">HALF</a>                                  
-030093,000136: 13,7317           50116                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         <span class="co">#  NEW OUTCR SETTING.</span>
-030094,000137: 
-030095,000138: 13,7320           10042                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5554435231">OUTCR1</a>                                
-030096,000139: 13,7321           07320                           <span class="op">TC      </span> -1                                    
-030097,000140: 
-<a name="4F55544352315732"></a>030098,000141: 13,7322           30116        <span class="sm">OUTCR1W2</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
-030099,000142: 13,7323           50042                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5554435231">OUTCR1</a>                                
-030100,000143: 13,7324           37331                           <span class="op">CAF     </span> <a href="#315754434F4445">1WTCODE</a>                               
-030101,000144: 13,7325           50012                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F555432">OUT2</a>                                  
-030102,000145: 13,7326           20017                           <span class="op">INHINT  </span>                                       
-030103,000146: 13,7327           20115                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-030104,000147: 13,7330           00001                           <span class="op">TC      </span> 1                                     
-030105,000148: 
-<a name="315754434F4445"></a>030106,000149: 13,7331           26000        <span class="sm">1WTCODE </span>           <span class="ps">OCT     </span> 26000                                 
-030107,000150: 
+030087,000126: 
+030088,000127:                                                                                                  <span class="co">#        THE FOLLOWING SUBROUTINE USES OUTCR1 AS A FINE TIMER DURING THE WAITLIST TEST.</span>
+030089,000128: 
+<a name="4F55544352315754"></a>030090,000129: 13,7310           20016        <span class="sm">OUTCR1WT</span>           <span class="op">RELINT  </span>                                       
+030091,000130: 13,7311           30001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+030092,000131: 13,7312           50115                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+030093,000132: 13,7313           20000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+030094,000133: 13,7314           40000                           <span class="op">CS      </span> 0                                     <span class="co">#  NUMBER OF THIRTY-SECONDS OF 10MS TO WAIT</span>
+030095,000134: 13,7315           64522                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#48414C46">HALF</a>                                  
+030096,000135: 13,7316           64522                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#48414C46">HALF</a>                                  
+030097,000136: 13,7317           50116                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         <span class="co">#  NEW OUTCR SETTING.</span>
+030098,000137: 
+030099,000138: 13,7320           10042                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5554435231">OUTCR1</a>                                
+030100,000139: 13,7321           07320                           <span class="op">TC      </span> -1                                    
+030101,000140: 
+<a name="4F55544352315732"></a>030102,000141: 13,7322           30116        <span class="sm">OUTCR1W2</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
+030103,000142: 13,7323           50042                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5554435231">OUTCR1</a>                                
+030104,000143: 13,7324           37331                           <span class="op">CAF     </span> <a href="#315754434F4445">1WTCODE</a>                               
+030105,000144: 13,7325           50012                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F555432">OUT2</a>                                  
+030106,000145: 13,7326           20017                           <span class="op">INHINT  </span>                                       
+030107,000146: 13,7327           20115                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+030108,000147: 13,7330           00001                           <span class="op">TC      </span> 1                                     
+030109,000148: 
+<a name="315754434F4445"></a>030110,000149: 13,7331           26000        <span class="sm">1WTCODE </span>           <span class="ps">OCT     </span> 26000                                 
+030111,000150: 
 </pre>
 </span>
 </p>
@@ -314,25 +314,25 @@ Page 758
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-030109,000152: 
-030110,000153:                                                                                                  <span class="co">#        TASKS FOR WAITLIST TESTER.</span>
-030111,000154: 
-<a name="5154534B32"></a>030112,000155: 13,7332           02256        <span class="sm">QTSK2   </span>           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-<a name="5154534B33"></a>030113,000156: 13,7333           02256        <span class="sm">QTSK3   </span>           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-<a name="5154534B34"></a>030114,000157: 13,7334           37345        <span class="sm">QTSK4   </span>           <span class="op">CAF     </span> <a href="#5154534B3444454C">QTSK4DEL</a>                              <span class="co">#  WAIT SO THAT T3 WILL TICK DURING DISPTCH</span>
-030115,000158: 13,7335           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-030116,000159: 13,7336           07335                           <span class="op">TC      </span> -1                                    
-030117,000160: 13,7337           02256                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-030118,000161: 
-<a name="5154534B36"></a>030119,000162: 13,7340           37346        <span class="sm">QTSK6   </span>           <span class="op">CAF     </span> <a href="#5154534B3644454C">QTSK6DEL</a>                              
-030120,000163: 13,7341           07335                           <span class="op">TC      </span> <a href="#5154534B34">QTSK4</a>      +1                         
-030121,000164: 
-<a name="5154534B37"></a>030122,000165: 13,7342           02256        <span class="sm">QTSK7   </span>           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-<a name="5154534B38"></a>030123,000166: 13,7343           02256        <span class="sm">QTSK8   </span>           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-<a name="5154534B3130"></a>030124,000167: 13,7344           02256        <span class="sm">QTSK10  </span>           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-030125,000168: 
-<a name="5154534B3444454C"></a>030126,000169: 13,7345           00115        <span class="sm">QTSK4DEL</span>           <span class="ps">DEC     </span> 77         B-14                       <span class="co">#  TUNING CONSTANTS.</span>
-<a name="5154534B3644454C"></a>030127,000170: 13,7346           00116        <span class="sm">QTSK6DEL</span>           <span class="ps">DEC     </span> 78         B-14                       
+030113,000152: 
+030114,000153:                                                                                                  <span class="co">#        TASKS FOR WAITLIST TESTER.</span>
+030115,000154: 
+<a name="5154534B32"></a>030116,000155: 13,7332           02256        <span class="sm">QTSK2   </span>           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+<a name="5154534B33"></a>030117,000156: 13,7333           02256        <span class="sm">QTSK3   </span>           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+<a name="5154534B34"></a>030118,000157: 13,7334           37345        <span class="sm">QTSK4   </span>           <span class="op">CAF     </span> <a href="#5154534B3444454C">QTSK4DEL</a>                              <span class="co">#  WAIT SO THAT T3 WILL TICK DURING DISPTCH</span>
+030119,000158: 13,7335           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+030120,000159: 13,7336           07335                           <span class="op">TC      </span> -1                                    
+030121,000160: 13,7337           02256                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+030122,000161: 
+<a name="5154534B36"></a>030123,000162: 13,7340           37346        <span class="sm">QTSK6   </span>           <span class="op">CAF     </span> <a href="#5154534B3644454C">QTSK6DEL</a>                              
+030124,000163: 13,7341           07335                           <span class="op">TC      </span> <a href="#5154534B34">QTSK4</a>      +1                         
+030125,000164: 
+<a name="5154534B37"></a>030126,000165: 13,7342           02256        <span class="sm">QTSK7   </span>           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+<a name="5154534B38"></a>030127,000166: 13,7343           02256        <span class="sm">QTSK8   </span>           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+<a name="5154534B3130"></a>030128,000167: 13,7344           02256        <span class="sm">QTSK10  </span>           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+030129,000168: 
+<a name="5154534B3444454C"></a>030130,000169: 13,7345           00115        <span class="sm">QTSK4DEL</span>           <span class="ps">DEC     </span> 77         B-14                       <span class="co">#  TUNING CONSTANTS.</span>
+<a name="5154534B3644454C"></a>030131,000170: 13,7346           00116        <span class="sm">QTSK6DEL</span>           <span class="ps">DEC     </span> 78         B-14                       
 
 End of include-file VERIFICATION_ASSISTANCE_PROGRAMS.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

@@ -90,28 +90,28 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-027664,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-027665,000003:                                                                                                  <span class="co">## Filename:    GIMBAL_LOCK_AVOIDANCE.agc</span>
-027666,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
-027667,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
-027668,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
-027669,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
-027670,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
-027671,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
-027672,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
-027673,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-027674,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-027675,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-027676,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
-027677,000015:                                                                                                  <span class="co">## Reference:   pp. 620-626</span>
-027678,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-027679,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-027680,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-027681,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
-027682,000020:                                                                                                  <span class="co">##              2017-06-13 RSB  Transcribed.</span>
-027683,000021:                                                                                                  <span class="co">##              2017-06-22 RSB  Proofed comment text with</span>
-027684,000022:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
-027685,000023: 
+027671,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+027672,000003:                                                                                                  <span class="co">## Filename:    GIMBAL_LOCK_AVOIDANCE.agc</span>
+027673,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
+027674,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
+027675,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
+027676,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
+027677,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
+027678,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
+027679,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
+027680,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+027681,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+027682,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+027683,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
+027684,000015:                                                                                                  <span class="co">## Reference:   pp. 620-626</span>
+027685,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+027686,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+027687,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+027688,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
+027689,000020:                                                                                                  <span class="co">##              2017-06-13 RSB  Transcribed.</span>
+027690,000021:                                                                                                  <span class="co">##              2017-06-22 RSB  Proofed comment text with</span>
+027691,000022:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
+027692,000023: 
 </pre>
 </span>
 </p>
@@ -127,58 +127,58 @@ Page 620
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-027687,000025:                                                                                                  <span class="co">#  DETECTING GIMBAL LOCK</span>
-<a name="4C4F43534B495254"></a>027688,000026: 34,3024           51545        <span class="sm">LOCSKIRT</span>           <span class="in">DLOAD   </span> <span class="in">ABS       </span>                            
-027689,000027: 34,3025           01624                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>                                   
-027690,000028: 34,3026           51025                           <span class="in">DSU     </span> <span class="in">BPL       </span>                            <span class="co">#  IF (ABS(COF )-CNGL) POS, GO TO NOGIMLOC</span>
-027691,000029: 34,3027           30442                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#434E474C">CNGL</a>                                  <span class="co">#             0</span>
-027692,000030: 34,3030           71455                                    <a href="#4E4F47494D4C4F43">NOGIMLOC</a>                              
-027693,000031: 34,3031           41345                           <span class="in">DLOAD   </span> <span class="in">DMP       </span>                            
-027694,000032: 34,3032           01624                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>                                   
-027695,000033: 34,3033           01630                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>        +4                         
-027696,000034: 34,3034           65352                           <span class="in">SL1     </span> <span class="in">PDDL      </span>                            
-027697,000035: 34,3035           01624                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>                                   
-027698,000036: 
-027699,000037: 34,3036           72405                           <span class="in">DMP     </span> <span class="in">SL1       </span>                            
-027700,000038: 34,3037           01626                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>        +2                         
-027701,000039: 34,3040           63525                           <span class="in">PDDL    </span> <span class="in">DSQ       </span>                            
-027702,000040: 34,3041           01624                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>                                   
-027703,000041: 34,3042           55552                           <span class="in">SL1     </span> <span class="in">VDEF      </span>                            <span class="co">#            2</span>
-027704,000042: 34,3043           01602                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B31">K1</a>                                    <span class="co">#  V1 = (COF  , COF COF , COF COF )      $2</span>
-027705,000043: 34,3044           53276                           <span class="in">VCOMP   </span> <span class="in">VAD       </span>                            <span class="co">#           0      0   1     0   2</span>
-027706,000044: 34,3045           30414                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#48414C4641">HALFA</a>                                 <span class="co">#  -</span>
-027707,000045: 34,3046           15610                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B32">K2</a>                                    <span class="co">#  V2 = ((1-V1 ), -V1 , -V1 )            $2</span>
-027708,000046: 34,3047           01626                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>        +2                         <span class="co">#             0      1     2</span>
-027709,000047: 34,3050           65276                           <span class="in">DCOMP   </span> <span class="in">PDDL      </span>                            
-027710,000048: 34,3051           01630                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>        +4                         
-027711,000049: 
-027712,000050: 34,3052           55525                           <span class="in">PDDL    </span> <span class="in">VDEF      </span>                            <span class="co">#  -</span>
-027713,000051: 34,3053           30416                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#4E494C">NIL</a>                                   <span class="co">#  V3 = (0, COF , -COF )</span>
-027714,000052: 34,3054           25616                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B33">K3</a>                                    <span class="co">#              2      1</span>
-027715,000053: 34,3055           01544                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4953">MIS</a>        +6                         <span class="co">#  -    -</span>
-027716,000054: 34,3056           01635                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4947">IG</a>                                    <span class="co">#  IG = MIS                              $2</span>
-027717,000055: 34,3057           76521                           <span class="in">MXV     </span> <span class="in">VSL1      </span>                            <span class="co">#          3</span>
-027718,000056: 34,3060           01602                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4B31">K1</a>                                    <span class="co">#                     -   -   -   -</span>
-027719,000057: 34,3061           15602                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503231">P21</a>                                   <span class="co">#  (P21, D21, G21) = (V1, V2, V3) IG     $2</span>
-027720,000058: 34,3062           01606                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#473231">G21</a>                                   
-027721,000059: 34,3063           65316                           <span class="in">DSQ     </span> <span class="in">PDDL      </span>                            
-027722,000060: 34,3064           01604                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#443231">D21</a>                                   
-027723,000061: 34,3065           43316                           <span class="in">DSQ     </span> <span class="in">DAD       </span>                            
-027724,000062: 34,3066           77766                           <span class="in">SQRT    </span>                                       <span class="co">#                2      2</span>
-027725,000063: 34,3067           01647                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524144">RAD</a>                                   <span class="co">#  RAD = SQRT(D21 D21 + G21 G21)</span>
-027726,000064: 34,3070           50025                           <span class="in">DSU     </span> <span class="in">BMN       </span>                            
-027727,000065: 34,3071           30440                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#534E474C4344">SNGLCD</a>                                <span class="co">#  IF (RAD-SNGLCD) NEG, GO TO NOGIMLOC</span>
-027728,000066: 34,3072           71455                                    <a href="#4E4F47494D4C4F43">NOGIMLOC</a>                              
-027729,000067: 34,3073           51145                           <span class="in">DLOAD   </span> <span class="in">BPL       </span>                            
-027730,000068: 34,3074           01606                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#473231">G21</a>                                   
-027731,000069: 34,3075           71104                                    <a href="#4F4B473231">OKG21</a>                                 
-027732,000070: 34,3076           57575                           <span class="in">VLOAD   </span> <span class="in">VCOMP     </span>                            <span class="co">#  IF G21 IS NEG ...</span>
-027733,000071: 34,3077           01635                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4947">IG</a>                                    <span class="co">#     -    -</span>
-027734,000072: 34,3100           15635                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4947">IG</a>                                    <span class="co">#     IG =-IG, RAD =-RAD</span>
-027735,000073: 34,3101           01647                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524144">RAD</a>                                   
-027736,000074: 34,3102           77676                           <span class="in">DCOMP   </span>                                       
-027737,000075: 34,3103           01647                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524144">RAD</a>                                   
-027738,000076: 
+027694,000025:                                                                                                  <span class="co">#  DETECTING GIMBAL LOCK</span>
+<a name="4C4F43534B495254"></a>027695,000026: 34,3024           51545        <span class="sm">LOCSKIRT</span>           <span class="in">DLOAD   </span> <span class="in">ABS       </span>                            
+027696,000027: 34,3025           01624                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>                                   
+027697,000028: 34,3026           51025                           <span class="in">DSU     </span> <span class="in">BPL       </span>                            <span class="co">#  IF (ABS(COF )-CNGL) POS, GO TO NOGIMLOC</span>
+027698,000029: 34,3027           30442                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#434E474C">CNGL</a>                                  <span class="co">#             0</span>
+027699,000030: 34,3030           71455                                    <a href="#4E4F47494D4C4F43">NOGIMLOC</a>                              
+027700,000031: 34,3031           41345                           <span class="in">DLOAD   </span> <span class="in">DMP       </span>                            
+027701,000032: 34,3032           01624                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>                                   
+027702,000033: 34,3033           01630                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>        +4                         
+027703,000034: 34,3034           65352                           <span class="in">SL1     </span> <span class="in">PDDL      </span>                            
+027704,000035: 34,3035           01624                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>                                   
+027705,000036: 
+027706,000037: 34,3036           72405                           <span class="in">DMP     </span> <span class="in">SL1       </span>                            
+027707,000038: 34,3037           01626                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>        +2                         
+027708,000039: 34,3040           63525                           <span class="in">PDDL    </span> <span class="in">DSQ       </span>                            
+027709,000040: 34,3041           01624                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>                                   
+027710,000041: 34,3042           55552                           <span class="in">SL1     </span> <span class="in">VDEF      </span>                            <span class="co">#            2</span>
+027711,000042: 34,3043           01602                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B31">K1</a>                                    <span class="co">#  V1 = (COF  , COF COF , COF COF )      $2</span>
+027712,000043: 34,3044           53276                           <span class="in">VCOMP   </span> <span class="in">VAD       </span>                            <span class="co">#           0      0   1     0   2</span>
+027713,000044: 34,3045           30414                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#48414C4641">HALFA</a>                                 <span class="co">#  -</span>
+027714,000045: 34,3046           15610                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B32">K2</a>                                    <span class="co">#  V2 = ((1-V1 ), -V1 , -V1 )            $2</span>
+027715,000046: 34,3047           01626                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>        +2                         <span class="co">#             0      1     2</span>
+027716,000047: 34,3050           65276                           <span class="in">DCOMP   </span> <span class="in">PDDL      </span>                            
+027717,000048: 34,3051           01630                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>        +4                         
+027718,000049: 
+027719,000050: 34,3052           55525                           <span class="in">PDDL    </span> <span class="in">VDEF      </span>                            <span class="co">#  -</span>
+027720,000051: 34,3053           30416                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#4E494C">NIL</a>                                   <span class="co">#  V3 = (0, COF , -COF )</span>
+027721,000052: 34,3054           25616                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B33">K3</a>                                    <span class="co">#              2      1</span>
+027722,000053: 34,3055           01544                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4953">MIS</a>        +6                         <span class="co">#  -    -</span>
+027723,000054: 34,3056           01635                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4947">IG</a>                                    <span class="co">#  IG = MIS                              $2</span>
+027724,000055: 34,3057           76521                           <span class="in">MXV     </span> <span class="in">VSL1      </span>                            <span class="co">#          3</span>
+027725,000056: 34,3060           01602                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4B31">K1</a>                                    <span class="co">#                     -   -   -   -</span>
+027726,000057: 34,3061           15602                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503231">P21</a>                                   <span class="co">#  (P21, D21, G21) = (V1, V2, V3) IG     $2</span>
+027727,000058: 34,3062           01606                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#473231">G21</a>                                   
+027728,000059: 34,3063           65316                           <span class="in">DSQ     </span> <span class="in">PDDL      </span>                            
+027729,000060: 34,3064           01604                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#443231">D21</a>                                   
+027730,000061: 34,3065           43316                           <span class="in">DSQ     </span> <span class="in">DAD       </span>                            
+027731,000062: 34,3066           77766                           <span class="in">SQRT    </span>                                       <span class="co">#                2      2</span>
+027732,000063: 34,3067           01647                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524144">RAD</a>                                   <span class="co">#  RAD = SQRT(D21 D21 + G21 G21)</span>
+027733,000064: 34,3070           50025                           <span class="in">DSU     </span> <span class="in">BMN       </span>                            
+027734,000065: 34,3071           30440                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#534E474C4344">SNGLCD</a>                                <span class="co">#  IF (RAD-SNGLCD) NEG, GO TO NOGIMLOC</span>
+027735,000066: 34,3072           71455                                    <a href="#4E4F47494D4C4F43">NOGIMLOC</a>                              
+027736,000067: 34,3073           51145                           <span class="in">DLOAD   </span> <span class="in">BPL       </span>                            
+027737,000068: 34,3074           01606                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#473231">G21</a>                                   
+027738,000069: 34,3075           71104                                    <a href="#4F4B473231">OKG21</a>                                 
+027739,000070: 34,3076           57575                           <span class="in">VLOAD   </span> <span class="in">VCOMP     </span>                            <span class="co">#  IF G21 IS NEG ...</span>
+027740,000071: 34,3077           01635                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4947">IG</a>                                    <span class="co">#     -    -</span>
+027741,000072: 34,3100           15635                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4947">IG</a>                                    <span class="co">#     IG =-IG, RAD =-RAD</span>
+027742,000073: 34,3101           01647                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524144">RAD</a>                                   
+027743,000074: 34,3102           77676                           <span class="in">DCOMP   </span>                                       
+027744,000075: 34,3103           01647                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524144">RAD</a>                                   
+027745,000076: 
 </pre>
 </span>
 </p>
@@ -194,59 +194,59 @@ Page 621
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="4F4B473231"></a>027740,000078: 34,3104           43345        <span class="sm">OKG21   </span>           <span class="in">DLOAD   </span> <span class="in">DAD       </span>                            <span class="co">#  IF G21 IS POS....</span>
-027741,000079: 34,3105           01602                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#503231">P21</a>                                   
-027742,000080: 34,3106           01647                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524144">RAD</a>                                   <span class="co">#     IF (ABS(P21+RAD)-SD) NEG, GO NOGIMLOC</span>
-027743,000081: 34,3107           51400                           <span class="in">BOV     </span> <span class="in">ABS       </span>                            
-027744,000082: 34,3110           71114                                    <a href="#43424D43414C43">CBMCALC</a>                               
-027745,000083: 34,3111           50025                           <span class="in">DSU     </span> <span class="in">BMN       </span>                            <span class="co">#     CBM = D21/RAD                      $2</span>
-027746,000084: 34,3112           30430                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#5344">SD</a>                                    
-027747,000085: 34,3113           71455                                    <a href="#4E4F47494D4C4F43">NOGIMLOC</a>                              
-027748,000086: 
-<a name="43424D43414C43"></a>027749,000087: 34,3114           70545        <span class="sm">CBMCALC </span>           <span class="in">DLOAD   </span> <span class="in">SR1       </span>                            
-027750,000088: 34,3115           01604                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#443231">D21</a>                                   
-027751,000089: 34,3116           44271                           <span class="in">DDV     </span> <span class="in">BDSU      </span>                            
-027752,000090: 34,3117           01647                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524144">RAD</a>                                   
-027753,000091: 34,3120           01645                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43414D">CAM</a>                                   
-027754,000092: 34,3121           71244                           <span class="in">BPL     </span> <span class="in">DLOAD     </span>                            
-027755,000093: 34,3122           71455                                    <a href="#4E4F47494D4C4F43">NOGIMLOC</a>                              
-027756,000094: 34,3123           01574                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4649">MFI</a>        +12D                       
-027757,000095: 34,3124           65325                           <span class="in">PDDL    </span> <span class="in">PDDL      </span>                            
-027758,000096: 34,3125           01566                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4649">MFI</a>        +6                         
-027759,000097: 34,3126           01560                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4649">MFI</a>                                   <span class="co">#  -</span>
-027760,000098: 34,3127           76466                           <span class="in">VDEF    </span> <span class="in">VSL1      </span>                            <span class="co">#  OGF = (MFI , MFI , MFI )              $2</span>
-027761,000099: 34,3130           15616                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4746">OGF</a>                                   <span class="co">#            0     3     6</span>
-027762,000100: 34,3131           01616                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4746">OGF</a>                                   
-027763,000101: 34,3132           50015                           <span class="in">DAD     </span> <span class="in">BMN       </span>                            
-027764,000102: 34,3133           30442                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#434E474C">CNGL</a>                                  <span class="co">#  IF ((OGF ) + CNGL) NEG, GO TO ALTE</span>
-027765,000103: 34,3134           71152                                    <a href="#414C5445">ALTE</a>                                  <span class="co">#          0</span>
-027766,000104: 34,3135           47375                           <span class="in">VLOAD   </span> <span class="in">VXV       </span>                            
-027767,000105: 34,3136           30414                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#48414C4641">HALFA</a>                                 
-027768,000106: 34,3137           01616                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4746">OGF</a>                                   
-027769,000107: 34,3140           77656                           <span class="in">UNIT    </span>                                       
-027770,000108: 34,3141           25560                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4531">E1</a>                                    <span class="co">#  E1 = UNIT(OGI X OGF)</span>
-027771,000109: 34,3142           01616                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4746">OGF</a>                                   
-027772,000110: 
-027773,000111: 34,3143           53455                           <span class="in">VAD     </span> <span class="in">UNIT      </span>                            
-027774,000112: 34,3144           30414                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#48414C4641">HALFA</a>                                 
-027775,000113: 34,3145           77650                           <span class="in">GOTO    </span>                                       
-027776,000114: 34,3146           71166                                    <a href="#53544F524532">STORE2</a>                                <span class="co">#  E2 = UNIT(OGI X OGF)</span>
-<a name="5345544531"></a>027777,000115: 34,3147           52175        <span class="sm">SETE1   </span>           <span class="in">VLOAD   </span> <span class="in">GOTO      </span>                            
-027778,000116: 34,3150           30420                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#4E494C">NIL</a>        +2                         
-027779,000117: 34,3151           71157                                    <a href="#53544F52454531">STOREE1</a>                               <span class="co">#  E1 = (0,0,1)</span>
-<a name="414C5445"></a>027780,000118: 34,3152           47375        <span class="sm">ALTE    </span>           <span class="in">VLOAD   </span> <span class="in">VXV       </span>                            
-027781,000119: 34,3153           30414                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#48414C4641">HALFA</a>                                 
-027782,000120: 34,3154           01616                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4746">OGF</a>                                   
-027783,000121: 34,3155           40056                           <span class="in">UNIT    </span> <span class="in">BOV       </span>                            
-027784,000122: 34,3156           71147                                    <a href="#5345544531">SETE1</a>                                 
-<a name="53544F52454531"></a>027785,000123: 34,3157           01560        <span class="sm">STOREE1 </span>           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4531">E1</a>                                    
-027786,000124: 34,3160           77635                           <span class="in">VXV     </span>                                       
-027787,000125: 34,3161           30414                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#48414C4641">HALFA</a>                                 
-027788,000126: 34,3162           47315                           <span class="in">PDVL    </span> <span class="in">VXV       </span>                            
-027789,000127: 34,3163           01616                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4746">OGF</a>                                   
-027790,000128: 34,3164           01560                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4531">E1</a>                                    
-027791,000129: 34,3165           53455                           <span class="in">VAD     </span> <span class="in">UNIT      </span>                            <span class="co">#  E2 = UNIT(E1 X OGI + OGF X E1)</span>
-027792,000130: 
+<a name="4F4B473231"></a>027747,000078: 34,3104           43345        <span class="sm">OKG21   </span>           <span class="in">DLOAD   </span> <span class="in">DAD       </span>                            <span class="co">#  IF G21 IS POS....</span>
+027748,000079: 34,3105           01602                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#503231">P21</a>                                   
+027749,000080: 34,3106           01647                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524144">RAD</a>                                   <span class="co">#     IF (ABS(P21+RAD)-SD) NEG, GO NOGIMLOC</span>
+027750,000081: 34,3107           51400                           <span class="in">BOV     </span> <span class="in">ABS       </span>                            
+027751,000082: 34,3110           71114                                    <a href="#43424D43414C43">CBMCALC</a>                               
+027752,000083: 34,3111           50025                           <span class="in">DSU     </span> <span class="in">BMN       </span>                            <span class="co">#     CBM = D21/RAD                      $2</span>
+027753,000084: 34,3112           30430                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#5344">SD</a>                                    
+027754,000085: 34,3113           71455                                    <a href="#4E4F47494D4C4F43">NOGIMLOC</a>                              
+027755,000086: 
+<a name="43424D43414C43"></a>027756,000087: 34,3114           70545        <span class="sm">CBMCALC </span>           <span class="in">DLOAD   </span> <span class="in">SR1       </span>                            
+027757,000088: 34,3115           01604                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#443231">D21</a>                                   
+027758,000089: 34,3116           44271                           <span class="in">DDV     </span> <span class="in">BDSU      </span>                            
+027759,000090: 34,3117           01647                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524144">RAD</a>                                   
+027760,000091: 34,3120           01645                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43414D">CAM</a>                                   
+027761,000092: 34,3121           71244                           <span class="in">BPL     </span> <span class="in">DLOAD     </span>                            
+027762,000093: 34,3122           71455                                    <a href="#4E4F47494D4C4F43">NOGIMLOC</a>                              
+027763,000094: 34,3123           01574                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4649">MFI</a>        +12D                       
+027764,000095: 34,3124           65325                           <span class="in">PDDL    </span> <span class="in">PDDL      </span>                            
+027765,000096: 34,3125           01566                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4649">MFI</a>        +6                         
+027766,000097: 34,3126           01560                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4649">MFI</a>                                   <span class="co">#  -</span>
+027767,000098: 34,3127           76466                           <span class="in">VDEF    </span> <span class="in">VSL1      </span>                            <span class="co">#  OGF = (MFI , MFI , MFI )              $2</span>
+027768,000099: 34,3130           15616                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4746">OGF</a>                                   <span class="co">#            0     3     6</span>
+027769,000100: 34,3131           01616                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4746">OGF</a>                                   
+027770,000101: 34,3132           50015                           <span class="in">DAD     </span> <span class="in">BMN       </span>                            
+027771,000102: 34,3133           30442                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#434E474C">CNGL</a>                                  <span class="co">#  IF ((OGF ) + CNGL) NEG, GO TO ALTE</span>
+027772,000103: 34,3134           71152                                    <a href="#414C5445">ALTE</a>                                  <span class="co">#          0</span>
+027773,000104: 34,3135           47375                           <span class="in">VLOAD   </span> <span class="in">VXV       </span>                            
+027774,000105: 34,3136           30414                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#48414C4641">HALFA</a>                                 
+027775,000106: 34,3137           01616                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4746">OGF</a>                                   
+027776,000107: 34,3140           77656                           <span class="in">UNIT    </span>                                       
+027777,000108: 34,3141           25560                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4531">E1</a>                                    <span class="co">#  E1 = UNIT(OGI X OGF)</span>
+027778,000109: 34,3142           01616                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4746">OGF</a>                                   
+027779,000110: 
+027780,000111: 34,3143           53455                           <span class="in">VAD     </span> <span class="in">UNIT      </span>                            
+027781,000112: 34,3144           30414                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#48414C4641">HALFA</a>                                 
+027782,000113: 34,3145           77650                           <span class="in">GOTO    </span>                                       
+027783,000114: 34,3146           71166                                    <a href="#53544F524532">STORE2</a>                                <span class="co">#  E2 = UNIT(OGI X OGF)</span>
+<a name="5345544531"></a>027784,000115: 34,3147           52175        <span class="sm">SETE1   </span>           <span class="in">VLOAD   </span> <span class="in">GOTO      </span>                            
+027785,000116: 34,3150           30420                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#4E494C">NIL</a>        +2                         
+027786,000117: 34,3151           71157                                    <a href="#53544F52454531">STOREE1</a>                               <span class="co">#  E1 = (0,0,1)</span>
+<a name="414C5445"></a>027787,000118: 34,3152           47375        <span class="sm">ALTE    </span>           <span class="in">VLOAD   </span> <span class="in">VXV       </span>                            
+027788,000119: 34,3153           30414                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#48414C4641">HALFA</a>                                 
+027789,000120: 34,3154           01616                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4746">OGF</a>                                   
+027790,000121: 34,3155           40056                           <span class="in">UNIT    </span> <span class="in">BOV       </span>                            
+027791,000122: 34,3156           71147                                    <a href="#5345544531">SETE1</a>                                 
+<a name="53544F52454531"></a>027792,000123: 34,3157           01560        <span class="sm">STOREE1 </span>           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4531">E1</a>                                    
+027793,000124: 34,3160           77635                           <span class="in">VXV     </span>                                       
+027794,000125: 34,3161           30414                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#48414C4641">HALFA</a>                                 
+027795,000126: 34,3162           47315                           <span class="in">PDVL    </span> <span class="in">VXV       </span>                            
+027796,000127: 34,3163           01616                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4746">OGF</a>                                   
+027797,000128: 34,3164           01560                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4531">E1</a>                                    
+027798,000129: 34,3165           53455                           <span class="in">VAD     </span> <span class="in">UNIT      </span>                            <span class="co">#  E2 = UNIT(E1 X OGI + OGF X E1)</span>
+027799,000130: 
 </pre>
 </span>
 </p>
@@ -262,58 +262,58 @@ Page 622
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="53544F524532"></a>027794,000132: 34,3166           77626        <span class="sm">STORE2  </span>           <span class="in">STADR   </span>                                       <span class="co">#  -         -     -</span>
-027795,000133: 34,3167           76211                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4532">E2</a>                                    <span class="co">#  E2 = UNIT(OGI + OGF)                  $2</span>
-027796,000134: 34,3170           50201                           <span class="in">SETPD   </span> <span class="in">DOT       </span>                            
-027797,000135: 34,3171           00001                                    0                                     
-027798,000136: 34,3172           01635                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4947">IG</a>                                    <span class="co">#       -  -</span>
-027799,000137: 34,3173           41552                           <span class="in">SL1     </span> <span class="in">PUSH      </span>                            <span class="co">#  PD0 K2                                $2</span>
-027800,000138: 34,3174           72516                           <span class="in">DSQ     </span> <span class="in">SL1       </span>                            
-027801,000139: 34,3175           50315                           <span class="in">PDVL    </span> <span class="in">DOT       </span>                            <span class="co">#  PD2 (K2 K2)                           $2</span>
-027802,000140: 34,3176           01560                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4531">E1</a>                                    
-027803,000141: 34,3177           01635                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4947">IG</a>                                    
-027804,000142: 34,3200           41552                           <span class="in">SL1     </span> <span class="in">PUSH      </span>                            <span class="co">#  PD4 K1                                $2</span>
-027805,000143: 34,3201           72516                           <span class="in">DSQ     </span> <span class="in">SL1       </span>                            
-027806,000144: 34,3202           45325                           <span class="in">PDDL    </span> <span class="in">DSU       </span>                            <span class="co">#  PD6 (K1 K1)                           $2</span>
-027807,000145: 34,3203           30436                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#4B345351">K4SQ</a>                                  <span class="co">#  = COS(D)COS(D)                        $2</span>
-027808,000146: 
-027809,000147: 34,3204           00007                                    6                                     
-027810,000148: 34,3205           63406                           <span class="in">PUSH    </span> <span class="in">DSQ       </span>                            <span class="co">#  PD8 D1                                $2</span>
-027811,000149: 34,3206           41325                           <span class="in">PDDL    </span> <span class="in">DMP       </span>                            <span class="co">#  PD10 (D1 D1)                          $4</span>
-027812,000150: 34,3207           01566                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4532">E2</a>                                    <span class="co">#  (K5)</span>
-027813,000151: 34,3210           30432                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#4B335331">K3S1</a>                                  <span class="co">#  SIN(D)                                $1</span>
-027814,000152: 34,3211           62405                           <span class="in">DMP     </span> <span class="in">SL2       </span>                            
-027815,000153: 34,3212           00001                                    0                                     <span class="co">#  K2</span>
-027816,000154: 34,3213           63525                           <span class="in">PDDL    </span> <span class="in">DSQ       </span>                            <span class="co">#  PD12 2 K2 K3 K5                       $2</span>
-027817,000155: 34,3214           01566                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4532">E2</a>                                    
-027818,000156: 34,3215           44352                           <span class="in">SL1     </span> <span class="in">BDSU      </span>                            <span class="co">#  K5K5 $2   PUSH UP 2 K2 K3 K5          $2</span>
-027819,000157: 34,3216           43225                           <span class="in">DSU     </span> <span class="in">DAD       </span>                            
-027820,000158: 34,3217           00003                                    2                                     
-027821,000159: 34,3220           00007                                    6                                     
-027822,000160: 34,3221           63406                           <span class="in">PUSH    </span> <span class="in">DSQ       </span>                            <span class="co">#  PD12 D2                               $2</span>
-027823,000161: 34,3222           41325                           <span class="in">PDDL    </span> <span class="in">DMP       </span>                            <span class="co">#  PD14 (D2 D2)                          $4</span>
-027824,000162: 34,3223           01566                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4532">E2</a>                                    
-027825,000163: 34,3224           30432                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#4B335331">K3S1</a>                                  
-027826,000164: 34,3225           41421                           <span class="in">BDSU    </span> <span class="in">PUSH      </span>                            
-027827,000165: 34,3226           00001                                    0                                     <span class="co">#  PD16 B1                               $2</span>
-027828,000166: 34,3227           77605                           <span class="in">DMP     </span>                                       
-027829,000167: 34,3230           00005                                    4                                     <span class="co">#  B1 K1                                 $4</span>
-027830,000168: 34,3231           41552                           <span class="in">SL1     </span> <span class="in">PUSH      </span>                            <span class="co">#  PD18 B1 K1                            $2</span>
-027831,000169: 34,3232           65316                           <span class="in">DSQ     </span> <span class="in">PDDL      </span>                            <span class="co">#  PD22 B1 B1 K1 K1                      $4</span>
-027832,000170: 
-027833,000171: 34,3233           00011                                    8D                                    
-027834,000172: 34,3234           41405                           <span class="in">DMP     </span> <span class="in">PUSH      </span>                            <span class="co">#  PD22 D1 D2                            $4</span>
-027835,000173: 34,3235           00015                                    12D                                   
-027836,000174: 34,3236           45221                           <span class="in">BDSU    </span> <span class="in">DSU       </span>                            
-027837,000175: 34,3237           00025                                    20D                                   
-027838,000176: 34,3240           00013                                    10D                                   <span class="co">#  RSQ                                   $4</span>
-027839,000177: 34,3241           41366                           <span class="in">SQRT    </span> <span class="in">DMP       </span>                            
-027840,000178: 34,3242           00023                                    18D                                   
-027841,000179: 34,3243           70525                           <span class="in">PDDL    </span> <span class="in">SR1       </span>                            <span class="co">#  PD24 RADICAL                          $8</span>
-027842,000180: 34,3244           00017                                    14D                                   
-027843,000181: 34,3245           72525                           <span class="in">PDDL    </span> <span class="in">SL1       </span>                            <span class="co">#  PD26 (D2 D2)                          $8</span>
-027844,000182: 34,3246           00025                                    20D                                   <span class="co">#  4(B1 B1 K1 K1)                        $8</span>
-027845,000183: 34,3247           77615                           <span class="in">DAD     </span>                                       <span class="co">#  PUSH UP FOR (D2 D2)                   $8</span>
+<a name="53544F524532"></a>027801,000132: 34,3166           77626        <span class="sm">STORE2  </span>           <span class="in">STADR   </span>                                       <span class="co">#  -         -     -</span>
+027802,000133: 34,3167           76211                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4532">E2</a>                                    <span class="co">#  E2 = UNIT(OGI + OGF)                  $2</span>
+027803,000134: 34,3170           50201                           <span class="in">SETPD   </span> <span class="in">DOT       </span>                            
+027804,000135: 34,3171           00001                                    0                                     
+027805,000136: 34,3172           01635                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4947">IG</a>                                    <span class="co">#       -  -</span>
+027806,000137: 34,3173           41552                           <span class="in">SL1     </span> <span class="in">PUSH      </span>                            <span class="co">#  PD0 K2                                $2</span>
+027807,000138: 34,3174           72516                           <span class="in">DSQ     </span> <span class="in">SL1       </span>                            
+027808,000139: 34,3175           50315                           <span class="in">PDVL    </span> <span class="in">DOT       </span>                            <span class="co">#  PD2 (K2 K2)                           $2</span>
+027809,000140: 34,3176           01560                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4531">E1</a>                                    
+027810,000141: 34,3177           01635                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4947">IG</a>                                    
+027811,000142: 34,3200           41552                           <span class="in">SL1     </span> <span class="in">PUSH      </span>                            <span class="co">#  PD4 K1                                $2</span>
+027812,000143: 34,3201           72516                           <span class="in">DSQ     </span> <span class="in">SL1       </span>                            
+027813,000144: 34,3202           45325                           <span class="in">PDDL    </span> <span class="in">DSU       </span>                            <span class="co">#  PD6 (K1 K1)                           $2</span>
+027814,000145: 34,3203           30436                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#4B345351">K4SQ</a>                                  <span class="co">#  = COS(D)COS(D)                        $2</span>
+027815,000146: 
+027816,000147: 34,3204           00007                                    6                                     
+027817,000148: 34,3205           63406                           <span class="in">PUSH    </span> <span class="in">DSQ       </span>                            <span class="co">#  PD8 D1                                $2</span>
+027818,000149: 34,3206           41325                           <span class="in">PDDL    </span> <span class="in">DMP       </span>                            <span class="co">#  PD10 (D1 D1)                          $4</span>
+027819,000150: 34,3207           01566                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4532">E2</a>                                    <span class="co">#  (K5)</span>
+027820,000151: 34,3210           30432                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#4B335331">K3S1</a>                                  <span class="co">#  SIN(D)                                $1</span>
+027821,000152: 34,3211           62405                           <span class="in">DMP     </span> <span class="in">SL2       </span>                            
+027822,000153: 34,3212           00001                                    0                                     <span class="co">#  K2</span>
+027823,000154: 34,3213           63525                           <span class="in">PDDL    </span> <span class="in">DSQ       </span>                            <span class="co">#  PD12 2 K2 K3 K5                       $2</span>
+027824,000155: 34,3214           01566                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4532">E2</a>                                    
+027825,000156: 34,3215           44352                           <span class="in">SL1     </span> <span class="in">BDSU      </span>                            <span class="co">#  K5K5 $2   PUSH UP 2 K2 K3 K5          $2</span>
+027826,000157: 34,3216           43225                           <span class="in">DSU     </span> <span class="in">DAD       </span>                            
+027827,000158: 34,3217           00003                                    2                                     
+027828,000159: 34,3220           00007                                    6                                     
+027829,000160: 34,3221           63406                           <span class="in">PUSH    </span> <span class="in">DSQ       </span>                            <span class="co">#  PD12 D2                               $2</span>
+027830,000161: 34,3222           41325                           <span class="in">PDDL    </span> <span class="in">DMP       </span>                            <span class="co">#  PD14 (D2 D2)                          $4</span>
+027831,000162: 34,3223           01566                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4532">E2</a>                                    
+027832,000163: 34,3224           30432                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#4B335331">K3S1</a>                                  
+027833,000164: 34,3225           41421                           <span class="in">BDSU    </span> <span class="in">PUSH      </span>                            
+027834,000165: 34,3226           00001                                    0                                     <span class="co">#  PD16 B1                               $2</span>
+027835,000166: 34,3227           77605                           <span class="in">DMP     </span>                                       
+027836,000167: 34,3230           00005                                    4                                     <span class="co">#  B1 K1                                 $4</span>
+027837,000168: 34,3231           41552                           <span class="in">SL1     </span> <span class="in">PUSH      </span>                            <span class="co">#  PD18 B1 K1                            $2</span>
+027838,000169: 34,3232           65316                           <span class="in">DSQ     </span> <span class="in">PDDL      </span>                            <span class="co">#  PD22 B1 B1 K1 K1                      $4</span>
+027839,000170: 
+027840,000171: 34,3233           00011                                    8D                                    
+027841,000172: 34,3234           41405                           <span class="in">DMP     </span> <span class="in">PUSH      </span>                            <span class="co">#  PD22 D1 D2                            $4</span>
+027842,000173: 34,3235           00015                                    12D                                   
+027843,000174: 34,3236           45221                           <span class="in">BDSU    </span> <span class="in">DSU       </span>                            
+027844,000175: 34,3237           00025                                    20D                                   
+027845,000176: 34,3240           00013                                    10D                                   <span class="co">#  RSQ                                   $4</span>
+027846,000177: 34,3241           41366                           <span class="in">SQRT    </span> <span class="in">DMP       </span>                            
+027847,000178: 34,3242           00023                                    18D                                   
+027848,000179: 34,3243           70525                           <span class="in">PDDL    </span> <span class="in">SR1       </span>                            <span class="co">#  PD24 RADICAL                          $8</span>
+027849,000180: 34,3244           00017                                    14D                                   
+027850,000181: 34,3245           72525                           <span class="in">PDDL    </span> <span class="in">SL1       </span>                            <span class="co">#  PD26 (D2 D2)                          $8</span>
+027851,000182: 34,3246           00025                                    20D                                   <span class="co">#  4(B1 B1 K1 K1)                        $8</span>
+027852,000183: 34,3247           77615                           <span class="in">DAD     </span>                                       <span class="co">#  PUSH UP FOR (D2 D2)                   $8</span>
 </pre>
 </span>
 </p>
@@ -329,58 +329,58 @@ Page 623
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-027847,000185: 34,3250           70525                           <span class="in">PDDL    </span> <span class="in">SR1       </span>                            <span class="co">#  PD26 DENOMR (D2 D2)</span>
-027848,000186: 34,3251           00027                                    22D                                   
-027849,000187: 34,3252           41421                           <span class="in">BDSU    </span> <span class="in">PUSH      </span>                            <span class="co">#  PD28 NUM</span>
-027850,000188: 34,3253           00025                                    20D                                   
-027851,000189: 34,3254           56215                           <span class="in">DAD     </span> <span class="in">DDV       </span>                            <span class="co">#  NUM</span>
-027852,000190: 34,3255           00031                                    24D                                   <span class="co">#   + RADICAL</span>
-027853,000191: 34,3256           00033                                    26D                                   <span class="co">#  DENOM</span>
-027854,000192: 34,3257           60404                           <span class="in">BOVB    </span> <span class="in">SR2       </span>                            
-027855,000193: 34,3260           70445                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#5349474E4D504143">SIGNMPAC</a>                              
-027856,000194: 34,3261           01610                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4332535150">C2SQP</a>                                 <span class="co">#                                        $4</span>
-027857,000195: 34,3262           77766                           <span class="in">SQRT    </span>                                       
-027858,000196: 34,3263           15614                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43325050">C2PP</a>                                  <span class="co">#                                        $2</span>
-027859,000197: 34,3264           00031                                    24D                                   <span class="co">#  NUM</span>
-027860,000198: 34,3265           56221                           <span class="in">BDSU    </span> <span class="in">DDV       </span>                            <span class="co">#  PUSH UP FOR NUM, DENOM</span>
-027861,000199: 34,3266           60404                           <span class="in">BOVB    </span> <span class="in">SR2       </span>                            
-027862,000200: 34,3267           70445                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#5349474E4D504143">SIGNMPAC</a>                              
-027863,000201: 34,3270           01612                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#433253514D">C2SQM</a>                                 <span class="co">#                                        $4</span>
-027864,000202: 34,3271           77766                           <span class="in">SQRT    </span>                                       
-027865,000203: 34,3272           15616                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43324D50">C2MP</a>                                  <span class="co">#                                        $2</span>
-027866,000204: 
-027867,000205: 34,3273           30426                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#515541525441">QUARTA</a>                                <span class="co">#  1                                     $4</span>
-027868,000206: 34,3274           75425                           <span class="in">DSU     </span> <span class="in">SQRT      </span>                            
-027869,000207: 34,3275           01610                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4332535150">C2SQP</a>                                 
-027870,000208: 34,3276           15620                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43315050">C1PP</a>                                  <span class="co">#                                        $2</span>
-027871,000209: 34,3277           30426                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#515541525441">QUARTA</a>                                
-027872,000210: 34,3300           75425                           <span class="in">DSU     </span> <span class="in">SQRT      </span>                            
-027873,000211: 34,3301           01612                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#433253514D">C2SQM</a>                                 
-027874,000212: 34,3302           01622                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43314D50">C1MP</a>                                  <span class="co">#                                        $2</span>
-027875,000213: 34,3303           66370                           <span class="in">AXT,1   </span> <span class="in">SSP       </span>                            
-027876,000214: 34,3304           00004                                    4                                     
-027877,000215: 34,3305           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
-027878,000216: 34,3306           00002                                    2                                     
-<a name="4E4F524D"></a>027879,000217: 34,3307           71201        <span class="sm">NORM    </span>           <span class="in">SETPD   </span> <span class="in">DLOAD     </span>                            
-027880,000218: 34,3310           00023                                    18D                                   
-027881,000219: 34,3311           00021                                    16D                                   <span class="co">#  B1                                    $2</span>
-027882,000220: 34,3312           65203                           <span class="in">DMP*    </span> <span class="in">PDDL      </span>                            <span class="co">#  PD18 = -Q                             $4</span>
-027883,000221: 34,3313           01620                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43325050">C2PP</a>       +4,1                       
-027884,000222: 34,3314           01566                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4532">E2</a>                                    
-027885,000223: 34,3315           40716                           <span class="in">DSQ     </span> <span class="in">DMP*      </span>                            
-027886,000224: 34,3316           01614                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4332535150">C2SQP</a>      +4,1                       
-027887,000225: 34,3317           44312                           <span class="in">SL2     </span> <span class="in">BDSU      </span>                            
-027888,000226: 34,3320           30426                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#515541525441">QUARTA</a>                                
-027889,000227: 34,3321           41366                           <span class="in">SQRT    </span> <span class="in">DMP       </span>                            
-027890,000228: 
-027891,000229: 34,3322           30434                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#4B34">K4</a>                                    <span class="co">#  PD20 = -R                             $4</span>
-027892,000230: 34,3323           40725                           <span class="in">PDDL    </span> <span class="in">DMP*      </span>                            
-027893,000231: 34,3324           00005                                    4                                     <span class="co">#  K1                                    $2</span>
-027894,000232: 34,3325           01624                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43315050">C1PP</a>       +4,1                       
-027895,000233: 34,3326           65246                           <span class="in">ABS     </span> <span class="in">PDDL      </span>                            <span class="co">#  PD22 AC1                              $4</span>
-027896,000234: 34,3327           00023                                    18D                                   <span class="co">#  -Q</span>
-027897,000235: 34,3330           57415                           <span class="in">DAD     </span> <span class="in">DCOMP     </span>                            
-027898,000236: 34,3331           00025                                    20D                                   <span class="co">#  -R</span>
+027854,000185: 34,3250           70525                           <span class="in">PDDL    </span> <span class="in">SR1       </span>                            <span class="co">#  PD26 DENOMR (D2 D2)</span>
+027855,000186: 34,3251           00027                                    22D                                   
+027856,000187: 34,3252           41421                           <span class="in">BDSU    </span> <span class="in">PUSH      </span>                            <span class="co">#  PD28 NUM</span>
+027857,000188: 34,3253           00025                                    20D                                   
+027858,000189: 34,3254           56215                           <span class="in">DAD     </span> <span class="in">DDV       </span>                            <span class="co">#  NUM</span>
+027859,000190: 34,3255           00031                                    24D                                   <span class="co">#   + RADICAL</span>
+027860,000191: 34,3256           00033                                    26D                                   <span class="co">#  DENOM</span>
+027861,000192: 34,3257           60404                           <span class="in">BOVB    </span> <span class="in">SR2       </span>                            
+027862,000193: 34,3260           70445                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#5349474E4D504143">SIGNMPAC</a>                              
+027863,000194: 34,3261           01610                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4332535150">C2SQP</a>                                 <span class="co">#                                        $4</span>
+027864,000195: 34,3262           77766                           <span class="in">SQRT    </span>                                       
+027865,000196: 34,3263           15614                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43325050">C2PP</a>                                  <span class="co">#                                        $2</span>
+027866,000197: 34,3264           00031                                    24D                                   <span class="co">#  NUM</span>
+027867,000198: 34,3265           56221                           <span class="in">BDSU    </span> <span class="in">DDV       </span>                            <span class="co">#  PUSH UP FOR NUM, DENOM</span>
+027868,000199: 34,3266           60404                           <span class="in">BOVB    </span> <span class="in">SR2       </span>                            
+027869,000200: 34,3267           70445                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#5349474E4D504143">SIGNMPAC</a>                              
+027870,000201: 34,3270           01612                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#433253514D">C2SQM</a>                                 <span class="co">#                                        $4</span>
+027871,000202: 34,3271           77766                           <span class="in">SQRT    </span>                                       
+027872,000203: 34,3272           15616                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43324D50">C2MP</a>                                  <span class="co">#                                        $2</span>
+027873,000204: 
+027874,000205: 34,3273           30426                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#515541525441">QUARTA</a>                                <span class="co">#  1                                     $4</span>
+027875,000206: 34,3274           75425                           <span class="in">DSU     </span> <span class="in">SQRT      </span>                            
+027876,000207: 34,3275           01610                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4332535150">C2SQP</a>                                 
+027877,000208: 34,3276           15620                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43315050">C1PP</a>                                  <span class="co">#                                        $2</span>
+027878,000209: 34,3277           30426                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#515541525441">QUARTA</a>                                
+027879,000210: 34,3300           75425                           <span class="in">DSU     </span> <span class="in">SQRT      </span>                            
+027880,000211: 34,3301           01612                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#433253514D">C2SQM</a>                                 
+027881,000212: 34,3302           01622                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43314D50">C1MP</a>                                  <span class="co">#                                        $2</span>
+027882,000213: 34,3303           66370                           <span class="in">AXT,1   </span> <span class="in">SSP       </span>                            
+027883,000214: 34,3304           00004                                    4                                     
+027884,000215: 34,3305           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
+027885,000216: 34,3306           00002                                    2                                     
+<a name="4E4F524D"></a>027886,000217: 34,3307           71201        <span class="sm">NORM    </span>           <span class="in">SETPD   </span> <span class="in">DLOAD     </span>                            
+027887,000218: 34,3310           00023                                    18D                                   
+027888,000219: 34,3311           00021                                    16D                                   <span class="co">#  B1                                    $2</span>
+027889,000220: 34,3312           65203                           <span class="in">DMP*    </span> <span class="in">PDDL      </span>                            <span class="co">#  PD18 = -Q                             $4</span>
+027890,000221: 34,3313           01620                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43325050">C2PP</a>       +4,1                       
+027891,000222: 34,3314           01566                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4532">E2</a>                                    
+027892,000223: 34,3315           40716                           <span class="in">DSQ     </span> <span class="in">DMP*      </span>                            
+027893,000224: 34,3316           01614                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4332535150">C2SQP</a>      +4,1                       
+027894,000225: 34,3317           44312                           <span class="in">SL2     </span> <span class="in">BDSU      </span>                            
+027895,000226: 34,3320           30426                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#515541525441">QUARTA</a>                                
+027896,000227: 34,3321           41366                           <span class="in">SQRT    </span> <span class="in">DMP       </span>                            
+027897,000228: 
+027898,000229: 34,3322           30434                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#4B34">K4</a>                                    <span class="co">#  PD20 = -R                             $4</span>
+027899,000230: 34,3323           40725                           <span class="in">PDDL    </span> <span class="in">DMP*      </span>                            
+027900,000231: 34,3324           00005                                    4                                     <span class="co">#  K1                                    $2</span>
+027901,000232: 34,3325           01624                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43315050">C1PP</a>       +4,1                       
+027902,000233: 34,3326           65246                           <span class="in">ABS     </span> <span class="in">PDDL      </span>                            <span class="co">#  PD22 AC1                              $4</span>
+027903,000234: 34,3327           00023                                    18D                                   <span class="co">#  -Q</span>
+027904,000235: 34,3330           57415                           <span class="in">DAD     </span> <span class="in">DCOMP     </span>                            
+027905,000236: 34,3331           00025                                    20D                                   <span class="co">#  -R</span>
 </pre>
 </span>
 </p>
@@ -396,58 +396,58 @@ Page 624
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-027900,000238: 34,3332           45325                           <span class="in">PDDL    </span> <span class="in">DSU       </span>                            <span class="co">#  PD24 ANSW1 = Q + R                    $4</span>
-027901,000239: 34,3333           00023                                    18D                                   <span class="co">#  -Q</span>
-027902,000240: 
-027903,000241: 34,3334           00025                                    20D                                   <span class="co">#  +R</span>
-027904,000242: 34,3335           41476                           <span class="in">DCOMP   </span> <span class="in">PUSH      </span>                            <span class="co">#  PD26 ANSW2 = Q - R                    $4</span>
-027905,000243: 34,3336           45246                           <span class="in">ABS     </span> <span class="in">DSU       </span>                            
-027906,000244: 34,3337           00027                                    22D                                   <span class="co">#  AC1</span>
-027907,000245: 34,3340           65246                           <span class="in">ABS     </span> <span class="in">PDDL      </span>                            <span class="co">#  PD28 ABS(ABS(ANSW2) -AC1)</span>
-027908,000246: 34,3341           00031                                    24D                                   <span class="co">#  ANSW1</span>
-027909,000247: 34,3342           45246                           <span class="in">ABS     </span> <span class="in">DSU       </span>                            
-027910,000248: 34,3343           00027                                    22D                                   <span class="co">#  AC1</span>
-027911,000249: 34,3344           45246                           <span class="in">ABS     </span> <span class="in">DSU       </span>                            <span class="co">#  ABS(ABS(ANSW1)-AC1)</span>
-027912,000250: 34,3345           71244                           <span class="in">BPL     </span> <span class="in">DLOAD     </span>                            
-027913,000251: 34,3346           71371                                    <a href="#434B53474E414E32">CKSGNAN2</a>                              
-027914,000252: 34,3347           00031                                    24D                                   <span class="co">#  ANSW1</span>
-<a name="5349474E414E5357"></a>027915,000253: 34,3350           71244        <span class="sm">SIGNANSW</span>           <span class="in">BPL     </span> <span class="in">DLOAD     </span>                            
-027916,000254: 34,3351           71363                                    <a href="#53414D4541534B31">SAMEASK1</a>                              
-027917,000255: 34,3352           00005                                    4                                     <span class="co">#  K1</span>
-027918,000256: 34,3353           70640                           <span class="in">BMN     </span> <span class="in">DLOAD*    </span>                            
-027919,000257: 34,3354           71360                                    <a href="#4F4B4332">OKC2</a>                                  
-027920,000258: 34,3355           01620                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43325050">C2PP</a>       +4,1                       
-<a name="4F505053474E4332"></a>027921,000259: 34,3356           77676        <span class="sm">OPPSGNC2</span>           <span class="in">DCOMP   </span>                                       
-027922,000260: 34,3357           05620                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43325050">C2PP</a>       +4,1                       
-<a name="4F4B4332"></a>027923,000261: 34,3360           52100        <span class="sm">OKC2    </span>           <span class="in">TIX,1   </span> <span class="in">GOTO      </span>                            
-027924,000262: 34,3361           71307                                    <a href="#4E4F524D">NORM</a>                                  
-027925,000263: 34,3362           71374                                    <a href="#4F55544359434C45">OUTCYCLE</a>                              
-<a name="53414D4541534B31"></a>027926,000264: 34,3363           51145        <span class="sm">SAMEASK1</span>           <span class="in">DLOAD   </span> <span class="in">BPL       </span>                            
-027927,000265: 34,3364           00005                                    4                                     <span class="co">#  K1</span>
-027928,000266: 34,3365           71360                                    <a href="#4F4B4332">OKC2</a>                                  
-027929,000267: 34,3366           52143                           <span class="in">DLOAD*  </span> <span class="in">GOTO      </span>                            
-027930,000268: 34,3367           01620                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43325050">C2PP</a>       +4,1                       
-027931,000269: 34,3370           71356                                    <a href="#4F505053474E4332">OPPSGNC2</a>                              
-<a name="434B53474E414E32"></a>027932,000270: 34,3371           52145        <span class="sm">CKSGNAN2</span>           <span class="in">DLOAD   </span> <span class="in">GOTO      </span>                            
-027933,000271: 34,3372           00033                                    26D                                   <span class="co">#  ANSW2</span>
-027934,000272: 34,3373           71350                                    <a href="#5349474E414E5357">SIGNANSW</a>                              
-<a name="4F55544359434C45"></a>027935,000273: 34,3374           77201        <span class="sm">OUTCYCLE</span>           <span class="in">SETPD   </span> <span class="in">VLOAD     </span>                            
-027936,000274: 34,3375           00001                                    0                                     
-027937,000275: 34,3376           01624                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>                                   <span class="co">#           -   -</span>
-027938,000276: 34,3377           63241                           <span class="in">DOT     </span> <span class="in">PDVL      </span>                            <span class="co">#  PD0 U1 = COF.E1</span>
-027939,000277: 34,3400           01560                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4531">E1</a>                                    
-027940,000278: 34,3401           01624                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>                                   <span class="co">#           -   -</span>
-027941,000279: 34,3402           41441                           <span class="in">DOT     </span> <span class="in">PUSH      </span>                            <span class="co">#  PD2 U2 = COF.E2</span>
-027942,000280: 34,3403           01566                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4532">E2</a>                                    
-027943,000281:                                                                                                  <span class="co">#  PICK THE NEW U WHICH IS CLOSEST TO THE OLD U</span>
-027944,000282: 34,3404           41370                           <span class="in">AXT,1   </span> <span class="in">DMP       </span>                            
-027945,000283: 34,3405           00000                                    0                                     
-027946,000284: 34,3406           01614                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43325050">C2PP</a>                                  
-027947,000285: 34,3407           41325                           <span class="in">PDDL    </span> <span class="in">DMP       </span>                            <span class="co">#  PD4 U2 C2(0)</span>
-027948,000286: 34,3410           01620                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43315050">C1PP</a>                                  
-027949,000287: 34,3411           00001                                    0                                     <span class="co">#  U1 C1(0)</span>
-027950,000288: 
-027951,000289: 34,3412           51415                           <span class="in">DAD     </span> <span class="in">ABS       </span>                            
+027907,000238: 34,3332           45325                           <span class="in">PDDL    </span> <span class="in">DSU       </span>                            <span class="co">#  PD24 ANSW1 = Q + R                    $4</span>
+027908,000239: 34,3333           00023                                    18D                                   <span class="co">#  -Q</span>
+027909,000240: 
+027910,000241: 34,3334           00025                                    20D                                   <span class="co">#  +R</span>
+027911,000242: 34,3335           41476                           <span class="in">DCOMP   </span> <span class="in">PUSH      </span>                            <span class="co">#  PD26 ANSW2 = Q - R                    $4</span>
+027912,000243: 34,3336           45246                           <span class="in">ABS     </span> <span class="in">DSU       </span>                            
+027913,000244: 34,3337           00027                                    22D                                   <span class="co">#  AC1</span>
+027914,000245: 34,3340           65246                           <span class="in">ABS     </span> <span class="in">PDDL      </span>                            <span class="co">#  PD28 ABS(ABS(ANSW2) -AC1)</span>
+027915,000246: 34,3341           00031                                    24D                                   <span class="co">#  ANSW1</span>
+027916,000247: 34,3342           45246                           <span class="in">ABS     </span> <span class="in">DSU       </span>                            
+027917,000248: 34,3343           00027                                    22D                                   <span class="co">#  AC1</span>
+027918,000249: 34,3344           45246                           <span class="in">ABS     </span> <span class="in">DSU       </span>                            <span class="co">#  ABS(ABS(ANSW1)-AC1)</span>
+027919,000250: 34,3345           71244                           <span class="in">BPL     </span> <span class="in">DLOAD     </span>                            
+027920,000251: 34,3346           71371                                    <a href="#434B53474E414E32">CKSGNAN2</a>                              
+027921,000252: 34,3347           00031                                    24D                                   <span class="co">#  ANSW1</span>
+<a name="5349474E414E5357"></a>027922,000253: 34,3350           71244        <span class="sm">SIGNANSW</span>           <span class="in">BPL     </span> <span class="in">DLOAD     </span>                            
+027923,000254: 34,3351           71363                                    <a href="#53414D4541534B31">SAMEASK1</a>                              
+027924,000255: 34,3352           00005                                    4                                     <span class="co">#  K1</span>
+027925,000256: 34,3353           70640                           <span class="in">BMN     </span> <span class="in">DLOAD*    </span>                            
+027926,000257: 34,3354           71360                                    <a href="#4F4B4332">OKC2</a>                                  
+027927,000258: 34,3355           01620                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43325050">C2PP</a>       +4,1                       
+<a name="4F505053474E4332"></a>027928,000259: 34,3356           77676        <span class="sm">OPPSGNC2</span>           <span class="in">DCOMP   </span>                                       
+027929,000260: 34,3357           05620                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43325050">C2PP</a>       +4,1                       
+<a name="4F4B4332"></a>027930,000261: 34,3360           52100        <span class="sm">OKC2    </span>           <span class="in">TIX,1   </span> <span class="in">GOTO      </span>                            
+027931,000262: 34,3361           71307                                    <a href="#4E4F524D">NORM</a>                                  
+027932,000263: 34,3362           71374                                    <a href="#4F55544359434C45">OUTCYCLE</a>                              
+<a name="53414D4541534B31"></a>027933,000264: 34,3363           51145        <span class="sm">SAMEASK1</span>           <span class="in">DLOAD   </span> <span class="in">BPL       </span>                            
+027934,000265: 34,3364           00005                                    4                                     <span class="co">#  K1</span>
+027935,000266: 34,3365           71360                                    <a href="#4F4B4332">OKC2</a>                                  
+027936,000267: 34,3366           52143                           <span class="in">DLOAD*  </span> <span class="in">GOTO      </span>                            
+027937,000268: 34,3367           01620                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43325050">C2PP</a>       +4,1                       
+027938,000269: 34,3370           71356                                    <a href="#4F505053474E4332">OPPSGNC2</a>                              
+<a name="434B53474E414E32"></a>027939,000270: 34,3371           52145        <span class="sm">CKSGNAN2</span>           <span class="in">DLOAD   </span> <span class="in">GOTO      </span>                            
+027940,000271: 34,3372           00033                                    26D                                   <span class="co">#  ANSW2</span>
+027941,000272: 34,3373           71350                                    <a href="#5349474E414E5357">SIGNANSW</a>                              
+<a name="4F55544359434C45"></a>027942,000273: 34,3374           77201        <span class="sm">OUTCYCLE</span>           <span class="in">SETPD   </span> <span class="in">VLOAD     </span>                            
+027943,000274: 34,3375           00001                                    0                                     
+027944,000275: 34,3376           01624                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>                                   <span class="co">#           -   -</span>
+027945,000276: 34,3377           63241                           <span class="in">DOT     </span> <span class="in">PDVL      </span>                            <span class="co">#  PD0 U1 = COF.E1</span>
+027946,000277: 34,3400           01560                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4531">E1</a>                                    
+027947,000278: 34,3401           01624                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>                                   <span class="co">#           -   -</span>
+027948,000279: 34,3402           41441                           <span class="in">DOT     </span> <span class="in">PUSH      </span>                            <span class="co">#  PD2 U2 = COF.E2</span>
+027949,000280: 34,3403           01566                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4532">E2</a>                                    
+027950,000281:                                                                                                  <span class="co">#  PICK THE NEW U WHICH IS CLOSEST TO THE OLD U</span>
+027951,000282: 34,3404           41370                           <span class="in">AXT,1   </span> <span class="in">DMP       </span>                            
+027952,000283: 34,3405           00000                                    0                                     
+027953,000284: 34,3406           01614                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43325050">C2PP</a>                                  
+027954,000285: 34,3407           41325                           <span class="in">PDDL    </span> <span class="in">DMP       </span>                            <span class="co">#  PD4 U2 C2(0)</span>
+027955,000286: 34,3410           01620                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43315050">C1PP</a>                                  
+027956,000287: 34,3411           00001                                    0                                     <span class="co">#  U1 C1(0)</span>
+027957,000288: 
+027958,000289: 34,3412           51415                           <span class="in">DAD     </span> <span class="in">ABS       </span>                            
 </pre>
 </span>
 </p>
@@ -463,58 +463,58 @@ Page 625
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-027953,000291: 34,3413           41325                           <span class="in">PDDL    </span> <span class="in">DMP       </span>                            <span class="co">#  PD4 ABS(U1 C1(0) + U2 C2(0))</span>
-027954,000292: 34,3414           00003                                    2                                     
-027955,000293: 34,3415           01616                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43324D50">C2MP</a>                                  
-027956,000294: 34,3416           41325                           <span class="in">PDDL    </span> <span class="in">DMP       </span>                            <span class="co">#  PD6 U2 C2(1)</span>
-027957,000295: 34,3417           00001                                    0                                     
-027958,000296: 34,3420           01622                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43314D50">C1MP</a>                                  <span class="co">#  PUSH UP U2 C2(1)</span>
-027959,000297: 34,3421           51415                           <span class="in">DAD     </span> <span class="in">ABS       </span>                            <span class="co">#  ABS(U1 C1(1) + U2 C2(1))</span>
-027960,000298: 34,3422           77625                           <span class="in">DSU     </span>                                       <span class="co">#  PUSH UP 4</span>
-027961,000299: 
-027962,000300: 34,3423           74040                           <span class="in">BMN     </span> <span class="in">AXC,1     </span>                            
-027963,000301: 34,3424           71426                                    <a href="#4A5A45524F">JZERO</a>                                 
-027964,000302: 34,3425           00002                                    2                                     
-<a name="4A5A45524F"></a>027965,000303: 34,3426           74343        <span class="sm">JZERO   </span>           <span class="in">DLOAD*  </span> <span class="in">VXSC      </span>                            
-027966,000304: 34,3427           01620                                    C1PP,1                                
-027967,000305: 34,3430           01560                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4531">E1</a>                                    
-027968,000306: 34,3431           74323                           <span class="in">PDDL*   </span> <span class="in">VXSC      </span>                            
-027969,000307: 34,3432           01614                                    C2PP,1                                
-027970,000308: 34,3433           01566                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4532">E2</a>                                    
-027971,000309: 34,3434           77655                           <span class="in">VAD     </span>                                       
-027972,000310: 34,3435           77656                           <span class="in">UNIT    </span>                                       <span class="co">#  NEW COF  -       -</span>
-027973,000311: 34,3436           01624                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>                                   <span class="co">#  COF = C1 E1 + C2 E2</span>
-027974,000312:                                                                                                  <span class="co">#  NEW MANEUVER ANGLE IS</span>
-027975,000313: 34,3437           63545                           <span class="in">DLOAD   </span> <span class="in">DSQ       </span>                            
-027976,000314: 34,3440           01624                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>                                   
-027977,000315: 34,3441           44352                           <span class="in">SL1     </span> <span class="in">BDSU      </span>                            <span class="co">#            2</span>
-027978,000316: 34,3442           30414                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#48414C4641">HALFA</a>                                 <span class="co">#  (1 - COF )                            $2</span>
-027979,000317: 34,3443           63525                           <span class="in">PDDL    </span> <span class="in">DSQ       </span>                            <span class="co">#          0</span>
-027980,000318: 34,3444           01566                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4532">E2</a>                                    
-027981,000319: 34,3445           56221                           <span class="in">BDSU    </span> <span class="in">DDV       </span>                            <span class="co">#         2</span>
-027982,000320: 34,3446           30426                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#515541525441">QUARTA</a>                                <span class="co">#  (1 - K5 )                             $4</span>
-027983,000321: 34,3447           75542                           <span class="in">SR1     </span> <span class="in">SQRT      </span>                            
-027984,000322: 34,3450           72536                           <span class="in">ARCSIN  </span> <span class="in">SL1       </span>                            
-027985,000323: 
-027986,000324: 34,3451           01643                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D">AM</a>                                    
-027987,000325: 34,3452           77614                           <span class="in">CLRGO   </span>                                       <span class="co">#  STATE SWITCH NO. 31</span>
-027988,000326: 34,3453           01221                                    31D                                   <span class="co">#  0(OFF) = MANEUVER WENT THRU GIMBAL LOCK</span>
-027989,000327: 34,3454           71457                                    <a href="#5743414C43">WCALC</a>                                 <span class="co">#  1(ON) = MANEUVER DID NOT GO THRU GIMLOCK</span>
-<a name="4E4F47494D4C4F43"></a>027990,000328: 34,3455           77614        <span class="sm">NOGIMLOC</span>           <span class="in">SET     </span>                                       
-027991,000329: 34,3456           01061                                    31D                                   
-<a name="5743414C43"></a>027992,000330: 34,3457           70740        <span class="sm">WCALC   </span>           <span class="in">LXC,1   </span> <span class="in">DLOAD*    </span>                            
-027993,000331: 34,3460           01652                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              <span class="co">#  CHOOSE THE DESIRED MANEUVER RATE</span>
-027994,000332: 34,3461           31503                                    ARATE,1                               <span class="co">#  FROM A LIST OF FOUR</span>
-027995,000333: 34,3462           45002                           <span class="in">SR4     </span> <span class="in">CALL      </span>                            <span class="co">#  COMPUTE THE INCREMENTAL ROTATION MATRIX</span>
-027996,000334: 34,3463           70603                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#44454C434F4D50">DELCOMP</a>                               <span class="co">#  DEL CORRESPONDING TO A 1 SEC ROTATION</span>
-027997,000335:                                                                                                  <span class="co">#  ABOUT COF</span>
-027998,000336: 34,3464           74343                           <span class="in">DLOAD*  </span> <span class="in">VXSC      </span>                            
-027999,000337: 34,3465           31503                                    ARATE,1                               
-028000,000338: 34,3466           01624                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>                                   
-028001,000339: 34,3467           15635                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4252415445">BRATE</a>                                 <span class="co">#  COMPONENT MANEUVER RATES 45 DEG/SEC</span>
-028002,000340: 34,3470           01643                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414D">AM</a>                                    
-028003,000341: 34,3471           55605                           <span class="in">DMP     </span> <span class="in">DDV*      </span>                            
-028004,000342: 34,3472           31513                                    <a href="#414E474C54494D45">ANGLTIME</a>                              
+027960,000291: 34,3413           41325                           <span class="in">PDDL    </span> <span class="in">DMP       </span>                            <span class="co">#  PD4 ABS(U1 C1(0) + U2 C2(0))</span>
+027961,000292: 34,3414           00003                                    2                                     
+027962,000293: 34,3415           01616                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43324D50">C2MP</a>                                  
+027963,000294: 34,3416           41325                           <span class="in">PDDL    </span> <span class="in">DMP       </span>                            <span class="co">#  PD6 U2 C2(1)</span>
+027964,000295: 34,3417           00001                                    0                                     
+027965,000296: 34,3420           01622                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43314D50">C1MP</a>                                  <span class="co">#  PUSH UP U2 C2(1)</span>
+027966,000297: 34,3421           51415                           <span class="in">DAD     </span> <span class="in">ABS       </span>                            <span class="co">#  ABS(U1 C1(1) + U2 C2(1))</span>
+027967,000298: 34,3422           77625                           <span class="in">DSU     </span>                                       <span class="co">#  PUSH UP 4</span>
+027968,000299: 
+027969,000300: 34,3423           74040                           <span class="in">BMN     </span> <span class="in">AXC,1     </span>                            
+027970,000301: 34,3424           71426                                    <a href="#4A5A45524F">JZERO</a>                                 
+027971,000302: 34,3425           00002                                    2                                     
+<a name="4A5A45524F"></a>027972,000303: 34,3426           74343        <span class="sm">JZERO   </span>           <span class="in">DLOAD*  </span> <span class="in">VXSC      </span>                            
+027973,000304: 34,3427           01620                                    C1PP,1                                
+027974,000305: 34,3430           01560                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4531">E1</a>                                    
+027975,000306: 34,3431           74323                           <span class="in">PDDL*   </span> <span class="in">VXSC      </span>                            
+027976,000307: 34,3432           01614                                    C2PP,1                                
+027977,000308: 34,3433           01566                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4532">E2</a>                                    
+027978,000309: 34,3434           77655                           <span class="in">VAD     </span>                                       
+027979,000310: 34,3435           77656                           <span class="in">UNIT    </span>                                       <span class="co">#  NEW COF  -       -</span>
+027980,000311: 34,3436           01624                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>                                   <span class="co">#  COF = C1 E1 + C2 E2</span>
+027981,000312:                                                                                                  <span class="co">#  NEW MANEUVER ANGLE IS</span>
+027982,000313: 34,3437           63545                           <span class="in">DLOAD   </span> <span class="in">DSQ       </span>                            
+027983,000314: 34,3440           01624                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>                                   
+027984,000315: 34,3441           44352                           <span class="in">SL1     </span> <span class="in">BDSU      </span>                            <span class="co">#            2</span>
+027985,000316: 34,3442           30414                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#48414C4641">HALFA</a>                                 <span class="co">#  (1 - COF )                            $2</span>
+027986,000317: 34,3443           63525                           <span class="in">PDDL    </span> <span class="in">DSQ       </span>                            <span class="co">#          0</span>
+027987,000318: 34,3444           01566                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4532">E2</a>                                    
+027988,000319: 34,3445           56221                           <span class="in">BDSU    </span> <span class="in">DDV       </span>                            <span class="co">#         2</span>
+027989,000320: 34,3446           30426                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#515541525441">QUARTA</a>                                <span class="co">#  (1 - K5 )                             $4</span>
+027990,000321: 34,3447           75542                           <span class="in">SR1     </span> <span class="in">SQRT      </span>                            
+027991,000322: 34,3450           72536                           <span class="in">ARCSIN  </span> <span class="in">SL1       </span>                            
+027992,000323: 
+027993,000324: 34,3451           01643                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D">AM</a>                                    
+027994,000325: 34,3452           77614                           <span class="in">CLRGO   </span>                                       <span class="co">#  STATE SWITCH NO. 31</span>
+027995,000326: 34,3453           01221                                    31D                                   <span class="co">#  0(OFF) = MANEUVER WENT THRU GIMBAL LOCK</span>
+027996,000327: 34,3454           71457                                    <a href="#5743414C43">WCALC</a>                                 <span class="co">#  1(ON) = MANEUVER DID NOT GO THRU GIMLOCK</span>
+<a name="4E4F47494D4C4F43"></a>027997,000328: 34,3455           77614        <span class="sm">NOGIMLOC</span>           <span class="in">SET     </span>                                       
+027998,000329: 34,3456           01061                                    31D                                   
+<a name="5743414C43"></a>027999,000330: 34,3457           70740        <span class="sm">WCALC   </span>           <span class="in">LXC,1   </span> <span class="in">DLOAD*    </span>                            
+028000,000331: 34,3460           01652                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              <span class="co">#  CHOOSE THE DESIRED MANEUVER RATE</span>
+028001,000332: 34,3461           31503                                    ARATE,1                               <span class="co">#  FROM A LIST OF FOUR</span>
+028002,000333: 34,3462           45002                           <span class="in">SR4     </span> <span class="in">CALL      </span>                            <span class="co">#  COMPUTE THE INCREMENTAL ROTATION MATRIX</span>
+028003,000334: 34,3463           70603                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#44454C434F4D50">DELCOMP</a>                               <span class="co">#  DEL CORRESPONDING TO A 1 SEC ROTATION</span>
+028004,000335:                                                                                                  <span class="co">#  ABOUT COF</span>
+028005,000336: 34,3464           74343                           <span class="in">DLOAD*  </span> <span class="in">VXSC      </span>                            
+028006,000337: 34,3465           31503                                    ARATE,1                               
+028007,000338: 34,3466           01624                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>                                   
+028008,000339: 34,3467           15635                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4252415445">BRATE</a>                                 <span class="co">#  COMPONENT MANEUVER RATES 45 DEG/SEC</span>
+028009,000340: 34,3470           01643                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414D">AM</a>                                    
+028010,000341: 34,3471           55605                           <span class="in">DMP     </span> <span class="in">DDV*      </span>                            
+028011,000342: 34,3472           31513                                    <a href="#414E474C54494D45">ANGLTIME</a>                              
 </pre>
 </span>
 </p>
@@ -530,29 +530,29 @@ Page 626
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-028006,000344: 34,3473           31503                                    ARATE,1                               
-028007,000345: 34,3474           77661                           <span class="in">SR      </span>                                       
-028008,000346: 34,3475           20606                                    5                                     
-028009,000347: 34,3476           01645                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D">TM</a>                                    <span class="co">#  MANEUVER EXECUTION TIME SCALED AS T2</span>
-028010,000348: 34,3477           77614                           <span class="in">SETGO   </span>                                       <span class="co">#  STATE SWITCH NO. 32</span>
-028011,000349: 34,3500           01022                                    32D                                   <span class="co">#  0(OFF) = CONTINUE MANEUVER</span>
-028012,000350: 34,3501           71515                                    <a href="KALCMANU_STEERING.agc.html#4E455744454C4849">NEWDELHI</a>   +1                         <span class="co">#  1(ON) = START MANEUVER</span>
-028013,000351: 
-028014,000352: 
-028015,000353:                                                                                                  <span class="co">#           THE FOUR SELECTABLE FREE FALL MANEUVER RATES SELECTED BY</span>
-028016,000354:                                                                                                  <span class="co">#           LOADING RATEINDX WITH 0,2,4,6, RESPECTIVELY</span>
-028017,000355: 
-028018,000356: 
-<a name="4152415445"></a>028019,000357: 34,3502           00554 02660  <span class="sm">ARATE   </span>           <span class="ps">2DEC    </span> .0222222222                            <span class="co">#  =.5 DEG/SEC        $ 22.5DEG/SEC</span>
-028020,000358: 
-028021,000359: 34,3504           02660 13301                     <span class="ps">2DEC    </span> .0888888888                            <span class="co">#  = 2 DEG/SEC        $ 22.5DEG/SEC</span>
-028022,000360: 
-028023,000361: 34,3506           07070 34344                     <span class="ps">2DEC    </span> .2222222222                            <span class="co">#  = 5 DEG/SEC        $ 22.5DEG/SEC</span>
-028024,000362: 
-028025,000363: 34,3510           16161 30707                     <span class="ps">2DEC    </span> .4444444444                            <span class="co">#  =10 DEG/SEC        $ 22.5DEG/SEC</span>
-028026,000364: 
-<a name="414E474C54494D45"></a>028027,000365: 34,3512           00003 04000  <span class="sm">ANGLTIME</span>           <span class="ps">2DEC    </span> .0001907349                            <span class="co">#  = 100B-19     FUDGE FACTOR TO CONVERT</span>
-028028,000366:                                                                                                  <span class="co">#                       34,3513   04000 0                                    MANEUVER ANGLE TO MANEUVER TIME</span>
+028013,000344: 34,3473           31503                                    ARATE,1                               
+028014,000345: 34,3474           77661                           <span class="in">SR      </span>                                       
+028015,000346: 34,3475           20606                                    5                                     
+028016,000347: 34,3476           01645                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D">TM</a>                                    <span class="co">#  MANEUVER EXECUTION TIME SCALED AS T2</span>
+028017,000348: 34,3477           77614                           <span class="in">SETGO   </span>                                       <span class="co">#  STATE SWITCH NO. 32</span>
+028018,000349: 34,3500           01022                                    32D                                   <span class="co">#  0(OFF) = CONTINUE MANEUVER</span>
+028019,000350: 34,3501           71515                                    <a href="KALCMANU_STEERING.agc.html#4E455744454C4849">NEWDELHI</a>   +1                         <span class="co">#  1(ON) = START MANEUVER</span>
+028020,000351: 
+028021,000352: 
+028022,000353:                                                                                                  <span class="co">#           THE FOUR SELECTABLE FREE FALL MANEUVER RATES SELECTED BY</span>
+028023,000354:                                                                                                  <span class="co">#           LOADING RATEINDX WITH 0,2,4,6, RESPECTIVELY</span>
+028024,000355: 
+028025,000356: 
+<a name="4152415445"></a>028026,000357: 34,3502           00554 02660  <span class="sm">ARATE   </span>           <span class="ps">2DEC    </span> .0222222222                            <span class="co">#  =.5 DEG/SEC        $ 22.5DEG/SEC</span>
+028027,000358: 
+028028,000359: 34,3504           02660 13301                     <span class="ps">2DEC    </span> .0888888888                            <span class="co">#  = 2 DEG/SEC        $ 22.5DEG/SEC</span>
+028029,000360: 
+028030,000361: 34,3506           07070 34344                     <span class="ps">2DEC    </span> .2222222222                            <span class="co">#  = 5 DEG/SEC        $ 22.5DEG/SEC</span>
+028031,000362: 
+028032,000363: 34,3510           16161 30707                     <span class="ps">2DEC    </span> .4444444444                            <span class="co">#  =10 DEG/SEC        $ 22.5DEG/SEC</span>
+028033,000364: 
+<a name="414E474C54494D45"></a>028034,000365: 34,3512           00003 04000  <span class="sm">ANGLTIME</span>           <span class="ps">2DEC    </span> .0001907349                            <span class="co">#  = 100B-19     FUDGE FACTOR TO CONVERT</span>
+028035,000366:                                                                                                  <span class="co">#                       34,3513   04000 0                                    MANEUVER ANGLE TO MANEUVER TIME</span>
 
 End of include-file GIMBAL_LOCK_AVOIDANCE.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

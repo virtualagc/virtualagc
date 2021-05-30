@@ -95,19 +95,19 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-034231,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
-034232,000003:                                                                                                  <span class="co">## Filename:     AS206_MISSION_SCHEDULING_PACKAGE.agc</span>
-034233,000004:                                                                                                  <span class="co">## Purpose:      A module for revision 0 of BURST120 (Sunburst). It </span>
-034234,000005:                                                                                                  <span class="co">##               is part of the source code for the Lunar Module's</span>
-034235,000006:                                                                                                  <span class="co">##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
-034236,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
-034237,000008:                                                                                                  <span class="co">## Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
-034238,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
-034239,000010:                                                                                                  <span class="co">## Mod history:  2016-09-30 RSB  Created draft version.</span>
-034240,000011:                                                                                                  <span class="co">##               2016-10-29 MAS  Transcribed.</span>
-034241,000012:                                                                                                  <span class="co">##               2016-12-06 RSB  Comments proofed using octopus/ProoferComments,</span>
-034242,000013:                                                                                                  <span class="co">##                               changes made.</span>
-034243,000014: 
+034237,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
+034238,000003:                                                                                                  <span class="co">## Filename:     AS206_MISSION_SCHEDULING_PACKAGE.agc</span>
+034239,000004:                                                                                                  <span class="co">## Purpose:      A module for revision 0 of BURST120 (Sunburst). It </span>
+034240,000005:                                                                                                  <span class="co">##               is part of the source code for the Lunar Module's</span>
+034241,000006:                                                                                                  <span class="co">##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
+034242,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
+034243,000008:                                                                                                  <span class="co">## Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
+034244,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
+034245,000010:                                                                                                  <span class="co">## Mod history:  2016-09-30 RSB  Created draft version.</span>
+034246,000011:                                                                                                  <span class="co">##               2016-10-29 MAS  Transcribed.</span>
+034247,000012:                                                                                                  <span class="co">##               2016-12-06 RSB  Comments proofed using octopus/ProoferComments,</span>
+034248,000013:                                                                                                  <span class="co">##                               changes made.</span>
+034249,000014: 
 </pre>
 </span>
 </p>
@@ -123,56 +123,56 @@ Page 801
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-034245,000016:                                                                                                  <span class="co">#           THE FOLLOWING ROUTINES IMPLEMENT THE MISSION SCHEDULING LOGIC AS DESCRIBED IN CHAPTER 4 OF THE</span>
-034246,000017:                                                                                                  <span class="co">#  AS206 OPERATIONS PLAN. THE FOLLOWING ROUTINE IS ENTERED ONCE EACH SECOND FOR MOST OF THE DURATION OF THE</span>
-034247,000018:                                                                                                  <span class="co">#  FLIGHT, ONCE LIFT-OFF HAS OCCURRED. AN EXCEPTION TO THIS IS THE TIME-CRI</span>
-034248,000019: 
-034249,000020:                                                                                                  <span class="co">#  RESTART  GROUP  FOR MISSION SCHEDULING PACKAGE IS GROUP 3.</span>
-034250,000021: 
-034251,000022: 31,2000                                           <span class="ps">BANK    </span> 31                                    
-034252,000023: 31,2000     1164                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
-034253,000024: 
-<a name="4D4D41494E54"></a>034254,000025: 31,2000           36311        <span class="sm">MMAINT  </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5448524545">THREE</a>                                 <span class="co">#  LOOP TO PROCESS ALL FOUR TIMERS.</span>
-<a name="4D4C4F4F50"></a>034255,000026: 31,2001           54070        <span class="sm">MLOOP   </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-034256,000027: 
-034257,000028: 31,2002           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  LOOK AT TIMER.</span>
-034258,000029: 31,2003           11164                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
-034259,000030: 31,2004           12010                           <span class="op">TCF     </span> <a href="#4D434F554E54">MCOUNT</a>                                <span class="co">#  PNZ - ACTIVE AND COUNTING DOWN.</span>
-034260,000031: 31,2005           12055                           <span class="op">TCF     </span> <a href="#4D445545">MDUE</a>                                  <span class="co">#  +0 - MISSION PHASE DUE.</span>
-034261,000032: 31,2006           67763                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4F4E45">ONE</a>                                   <span class="co">#  NNZ - FREE BUT LOADED BY GROUND.</span>
-034262,000033: 31,2007           40000                           <span class="op">COM     </span>                                       <span class="co">#  -0 - FREE.</span>
-<a name="4D434F554E54"></a>034263,000034: 31,2010           50070        <span class="sm">MCOUNT  </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  PLACE UPDATED TIMERS AND PHASE REGISTERS</span>
-034264,000035: 31,2011           55174                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D45523454">MTIMER4T</a>                              <span class="co">#  INTO COPY BUFFER FOR RESTART PROTECTION.</span>
-034265,000036: 
-<a name="4D445545524554"></a>034266,000037: 31,2012           10070        <span class="sm">MDUERET </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-034267,000038: 31,2013           12001                           <span class="op">TCF     </span> <a href="#4D4C4F4F50">MLOOP</a>                                 
-034268,000039: 
-<a name="4D43484B5354"></a>034269,000040: 31,2014           11201        <span class="sm">MCHKST  </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415445435452">STATECTR</a>                              <span class="co">#  SEE IF POSSIBLY TIME FOR INTERNAL STATE</span>
-034270,000041: 31,2015           12034                           <span class="op">TCF     </span> <a href="#4D53544154454F4B">MSTATEOK</a>                              <span class="co">#  VECTOR EXTRAPOLATION.</span>
-034271,000042: 
-034272,000043: 31,2016           36311                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5448524545">THREE</a>                                 <span class="co">#  IF SO, DO UPDATE UNLESS WE ARE WITHIN 16</span>
-<a name="4D5354415445434B"></a>034273,000044: 31,2017           54070        <span class="sm">MSTATECK</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  SECONDS OF THE INITIATION OF ANY MISSION</span>
-034274,000045: 31,2020           45343                           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#4C4F5734">LOW4</a>                                  <span class="co">#  PHASE.</span>
-034275,000046: 31,2021           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-034276,000047: 31,2022           71164                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
-034277,000048: 31,2023           00006                           <span class="op">EXTEND  </span>                                       
-034278,000049: 31,2024           12033                           <span class="op">BZF     </span> <a href="#4D53544154454F4B">MSTATEOK</a>   -1                         <span class="co">#  BRANCH IF PHASE DUE WITHIN 16 SECS.</span>
-034279,000050: 
-034280,000051: 31,2025           10070                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-034281,000052: 31,2026           12017                           <span class="op">TCF     </span> <a href="#4D5354415445434B">MSTATECK</a>                              
-034282,000053: 
-034283,000054: 31,2027           35633                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F35">PRIO5</a>                                 
-034284,000055: 31,2030           05516                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               <span class="co">#  TO DO THE INTEGRATION.</span>
-034285,000056: 31,2031  E4,1566                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
-034286,000057: 31,2031           02247 16064                     <span class="ps">2CADR   </span> <a href="INTEGRATION_INITIALIZATION.agc.html#5354415445494E54">STATEINT</a>                              
-034287,000058: 
-034288,000059: 31,2033           35204                 -1        <span class="op">CAF     </span> <a href="#5354415445435249">STATECRI</a>                              
-<a name="4D53544154454F4B"></a>034289,000060: 31,2034           55201        <span class="sm">MSTATEOK</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415445435452">STATECTR</a>                              
-034290,000061: 
-034291,000062: 31,2035           04161                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
-034292,000063: 31,2036           00113                           <span class="ps">OCT     </span> 00113                                 
-034293,000064: 
-<a name="5245444F332E3131"></a>034294,000065: 31,2037           32054        <span class="sm">REDO3.11</span>           <span class="op">CAF     </span> <a href="#31534543">1SEC</a>                                  
+034251,000016:                                                                                                  <span class="co">#           THE FOLLOWING ROUTINES IMPLEMENT THE MISSION SCHEDULING LOGIC AS DESCRIBED IN CHAPTER 4 OF THE</span>
+034252,000017:                                                                                                  <span class="co">#  AS206 OPERATIONS PLAN. THE FOLLOWING ROUTINE IS ENTERED ONCE EACH SECOND FOR MOST OF THE DURATION OF THE</span>
+034253,000018:                                                                                                  <span class="co">#  FLIGHT, ONCE LIFT-OFF HAS OCCURRED. AN EXCEPTION TO THIS IS THE TIME-CRI</span>
+034254,000019: 
+034255,000020:                                                                                                  <span class="co">#  RESTART  GROUP  FOR MISSION SCHEDULING PACKAGE IS GROUP 3.</span>
+034256,000021: 
+034257,000022: 31,2000                                           <span class="ps">BANK    </span> 31                                    
+034258,000023: 31,2000     1164                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
+034259,000024: 
+<a name="4D4D41494E54"></a>034260,000025: 31,2000           36311        <span class="sm">MMAINT  </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5448524545">THREE</a>                                 <span class="co">#  LOOP TO PROCESS ALL FOUR TIMERS.</span>
+<a name="4D4C4F4F50"></a>034261,000026: 31,2001           54070        <span class="sm">MLOOP   </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+034262,000027: 
+034263,000028: 31,2002           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  LOOK AT TIMER.</span>
+034264,000029: 31,2003           11164                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
+034265,000030: 31,2004           12010                           <span class="op">TCF     </span> <a href="#4D434F554E54">MCOUNT</a>                                <span class="co">#  PNZ - ACTIVE AND COUNTING DOWN.</span>
+034266,000031: 31,2005           12055                           <span class="op">TCF     </span> <a href="#4D445545">MDUE</a>                                  <span class="co">#  +0 - MISSION PHASE DUE.</span>
+034267,000032: 31,2006           67763                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4F4E45">ONE</a>                                   <span class="co">#  NNZ - FREE BUT LOADED BY GROUND.</span>
+034268,000033: 31,2007           40000                           <span class="op">COM     </span>                                       <span class="co">#  -0 - FREE.</span>
+<a name="4D434F554E54"></a>034269,000034: 31,2010           50070        <span class="sm">MCOUNT  </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  PLACE UPDATED TIMERS AND PHASE REGISTERS</span>
+034270,000035: 31,2011           55174                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D45523454">MTIMER4T</a>                              <span class="co">#  INTO COPY BUFFER FOR RESTART PROTECTION.</span>
+034271,000036: 
+<a name="4D445545524554"></a>034272,000037: 31,2012           10070        <span class="sm">MDUERET </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+034273,000038: 31,2013           12001                           <span class="op">TCF     </span> <a href="#4D4C4F4F50">MLOOP</a>                                 
+034274,000039: 
+<a name="4D43484B5354"></a>034275,000040: 31,2014           11201        <span class="sm">MCHKST  </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415445435452">STATECTR</a>                              <span class="co">#  SEE IF POSSIBLY TIME FOR INTERNAL STATE</span>
+034276,000041: 31,2015           12034                           <span class="op">TCF     </span> <a href="#4D53544154454F4B">MSTATEOK</a>                              <span class="co">#  VECTOR EXTRAPOLATION.</span>
+034277,000042: 
+034278,000043: 31,2016           36311                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5448524545">THREE</a>                                 <span class="co">#  IF SO, DO UPDATE UNLESS WE ARE WITHIN 16</span>
+<a name="4D5354415445434B"></a>034279,000044: 31,2017           54070        <span class="sm">MSTATECK</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  SECONDS OF THE INITIATION OF ANY MISSION</span>
+034280,000045: 31,2020           45343                           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#4C4F5734">LOW4</a>                                  <span class="co">#  PHASE.</span>
+034281,000046: 31,2021           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+034282,000047: 31,2022           71164                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
+034283,000048: 31,2023           00006                           <span class="op">EXTEND  </span>                                       
+034284,000049: 31,2024           12033                           <span class="op">BZF     </span> <a href="#4D53544154454F4B">MSTATEOK</a>   -1                         <span class="co">#  BRANCH IF PHASE DUE WITHIN 16 SECS.</span>
+034285,000050: 
+034286,000051: 31,2025           10070                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+034287,000052: 31,2026           12017                           <span class="op">TCF     </span> <a href="#4D5354415445434B">MSTATECK</a>                              
+034288,000053: 
+034289,000054: 31,2027           35633                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F35">PRIO5</a>                                 
+034290,000055: 31,2030           05516                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               <span class="co">#  TO DO THE INTEGRATION.</span>
+034291,000056: 31,2031  E4,1566                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
+034292,000057: 31,2031           02247 16064                     <span class="ps">2CADR   </span> <a href="INTEGRATION_INITIALIZATION.agc.html#5354415445494E54">STATEINT</a>                              
+034293,000058: 
+034294,000059: 31,2033           35204                 -1        <span class="op">CAF     </span> <a href="#5354415445435249">STATECRI</a>                              
+<a name="4D53544154454F4B"></a>034295,000060: 31,2034           55201        <span class="sm">MSTATEOK</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415445435452">STATECTR</a>                              
+034296,000061: 
+034297,000062: 31,2035           04161                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
+034298,000063: 31,2036           00113                           <span class="ps">OCT     </span> 00113                                 
+034299,000064: 
+<a name="5245444F332E3131"></a>034300,000065: 31,2037           32054        <span class="sm">REDO3.11</span>           <span class="op">CAF     </span> <a href="#31534543">1SEC</a>                                  
 </pre>
 </span>
 </p>
@@ -188,24 +188,24 @@ Page 802
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-034296,000067: 31,2040           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-034297,000068: 31,2041     1164                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
-034298,000069: 31,2041           02000 62062                     <span class="ps">2CADR   </span> <a href="#4D4D41494E54">MMAINT</a>                                
-034299,000070: 
-034300,000071: 31,2043           00006                           <span class="op">EXTEND  </span>                                       
-034301,000072: 31,2044           31175                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D45523454">MTIMER4T</a>                              
-034302,000073: 31,2045           53165                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
-034303,000074: 31,2046           00006                           <span class="op">EXTEND  </span>                                       
-034304,000075: 31,2047           31177                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D45523454">MTIMER4T</a>   +2                         
-034305,000076: 31,2050           53167                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455232">MTIMER2</a>                               
-034306,000077: 
-034307,000078: 31,2051           04161                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
-034308,000079: 31,2052           40133                           <span class="ps">OCT     </span> 40133                                 
-034309,000080: 
-034310,000081: 31,2053           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-034311,000082: 
-<a name="31534543"></a>034312,000083: 31,2054           00144        <span class="sm">1SEC    </span>           <span class="ps">DEC     </span> 100        B-14                       
-034313,000084: 
+034302,000067: 31,2040           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+034303,000068: 31,2041     1164                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
+034304,000069: 31,2041           02000 62062                     <span class="ps">2CADR   </span> <a href="#4D4D41494E54">MMAINT</a>                                
+034305,000070: 
+034306,000071: 31,2043           00006                           <span class="op">EXTEND  </span>                                       
+034307,000072: 31,2044           31175                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D45523454">MTIMER4T</a>                              
+034308,000073: 31,2045           53165                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
+034309,000074: 31,2046           00006                           <span class="op">EXTEND  </span>                                       
+034310,000075: 31,2047           31177                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D45523454">MTIMER4T</a>   +2                         
+034311,000076: 31,2050           53167                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455232">MTIMER2</a>                               
+034312,000077: 
+034313,000078: 31,2051           04161                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
+034314,000079: 31,2052           40133                           <span class="ps">OCT     </span> 40133                                 
+034315,000080: 
+034316,000081: 31,2053           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+034317,000082: 
+<a name="31534543"></a>034318,000083: 31,2054           00144        <span class="sm">1SEC    </span>           <span class="ps">DEC     </span> 100        B-14                       
+034319,000084: 
 </pre>
 </span>
 </p>
@@ -221,57 +221,57 @@ Page 803
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-034315,000086:                                                                                                  <span class="co">#           THE FOLLOWING CODING DISPATCHES DUE MISSION PHASES VIA A TABLE OF EXECUTIVE PRIORITIES AND 2CADRS.</span>
-034316,000087: 
-<a name="4D445545"></a>034317,000088: 31,2055           30070        <span class="sm">MDUE    </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-034318,000089: 31,2056           55200                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D44554554454D50">MDUETEMP</a>                              <span class="co">#  COPY FOR RESTART PROTECTION</span>
-034319,000090: 
-034320,000091: 31,2057           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  GET NUMBER OF NEW PHASE AND MP BY NUMBER</span>
-034321,000092: 31,2060           31170                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504841534534">MPHASE4</a>                               <span class="co">#  OF TABLE ENTRIES PER PHASE TO GET ADDRES</span>
-034322,000093: 31,2061           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  OF TABLE ENTRY FOR THIS PHASE.</span>
-034323,000094: 31,2062           12410                           <span class="op">BZF     </span> <a href="#4241445048415345">BADPHASE</a>                              <span class="co">#  INACTIVE MPHASE HERE IS VERY BAD.</span>
-034324,000095: 31,2063           54764                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50484153454E554D">PHASENUM</a>                              <span class="co">#  HOLDS CURRENT MP NUMBER FOR DOWNLINK</span>
-034325,000096: 31,2064           00006                           <span class="op">EXTEND  </span>                                       
-034326,000097: 31,2065           76311                           <span class="op">MP      </span> <a href="INTERPRETER.agc.html#5448524545">THREE</a>                                 
-034327,000098: 31,2066           50001                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-034328,000099: 31,2067           32333                           <span class="op">CA      </span> <a href="#4D5441424C45">MTABLE</a>                                <span class="co">#  PRIO, INHIBIT/ENABLE INFO., ETC.</span>
-034329,000100: 31,2070           54071                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454732">RUPTREG2</a>                              
-034330,000101: 31,2071           77765                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#534556454E">SEVEN</a>                                 <span class="co">#  HONOR INHIBIT/ENABLE FUNCTION.</span>
-034331,000102: 31,2072           70076                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              
-034332,000103: 31,2073           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-034333,000104: 31,2074           12117                           <span class="op">TCF     </span> <a href="#4D425950415353">MBYPASS</a>                               
-034334,000105: 
-034335,000106: 31,2075           35660                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3337">PRIO37</a>                                
-034336,000107: 31,2076           70071                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454732">RUPTREG2</a>                              
-034337,000108: 31,2077           54063                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45575052494F">NEWPRIO</a>                               
-034338,000109: 31,2100           00006                           <span class="op">EXTEND  </span>                                       
-034339,000110: 31,2101           50001                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  PICK UP 2CADR AND DO FINDVAC.</span>
-034340,000111: 31,2102           32335                           <span class="op">DCA     </span> <a href="#4D5441424C45">MTABLE</a>     +1                         
-034341,000112: 31,2103           05526                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#5350564143">SPVAC</a>                                 
-034342,000113: 
-034343,000114: 31,2104           04141                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#3250485343484E47">2PHSCHNG</a>                              
-034344,000115: 31,2105           00032                           <span class="ps">OCT     </span> 32                                    <span class="co">#  2.3 SPOT FOR REDOMDUE</span>
-034345,000116: 31,2106           00003                           <span class="ps">OCT     </span> 3                                     <span class="co">#  GROUP 3 OFF</span>
-034346,000117: 
-<a name="4D54494D4544574E"></a>034347,000118: 31,2107           02121        <span class="sm">MTIMEDWN</span>           <span class="op">TC      </span> <a href="#4D54494D45464958">MTIMEFIX</a>                              
-034348,000119: 
-034349,000120: 31,2110           35210                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3330">PRIO30</a>                                
-034350,000121: 31,2111           05505                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
-034351,000122: 31,2112     1164                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
-034352,000123: 31,2112           02145 62062                     <span class="ps">2CADR   </span> <a href="#55504441544B494C">UPDATKIL</a>                              
-034353,000124: 
-034354,000125: 31,2114           06076                           <span class="op">TC      </span> <a href="206_SERVICE_ROUTINES.agc.html#464C41473244574E">FLAG2DWN</a>                              
-034355,000126: 31,2115           00020                           <span class="ps">OCT     </span> 20                                    
-034356,000127: 
-034357,000128: 31,2116           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-034358,000129: 
-<a name="4D425950415353"></a>034359,000130: 31,2117           02121        <span class="sm">MBYPASS </span>           <span class="op">TC      </span> <a href="#4D54494D45464958">MTIMEFIX</a>                              
-034360,000131: 31,2120           12012                           <span class="op">TCF     </span> <a href="#4D445545524554">MDUERET</a>                               
-034361,000132: 
-<a name="4D54494D45464958"></a>034362,000133: 31,2121           47767        <span class="sm">MTIMEFIX</span>           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
-034363,000134: 31,2122           51200                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D44554554454D50">MDUETEMP</a>                              <span class="co">#  MAKE THIS MTIMER/MPHASE PAIR AVAILABLE.</span>
-034364,000135: 31,2123           55164                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
-034365,000136: 
+034321,000086:                                                                                                  <span class="co">#           THE FOLLOWING CODING DISPATCHES DUE MISSION PHASES VIA A TABLE OF EXECUTIVE PRIORITIES AND 2CADRS.</span>
+034322,000087: 
+<a name="4D445545"></a>034323,000088: 31,2055           30070        <span class="sm">MDUE    </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+034324,000089: 31,2056           55200                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D44554554454D50">MDUETEMP</a>                              <span class="co">#  COPY FOR RESTART PROTECTION</span>
+034325,000090: 
+034326,000091: 31,2057           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  GET NUMBER OF NEW PHASE AND MP BY NUMBER</span>
+034327,000092: 31,2060           31170                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504841534534">MPHASE4</a>                               <span class="co">#  OF TABLE ENTRIES PER PHASE TO GET ADDRES</span>
+034328,000093: 31,2061           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  OF TABLE ENTRY FOR THIS PHASE.</span>
+034329,000094: 31,2062           12410                           <span class="op">BZF     </span> <a href="#4241445048415345">BADPHASE</a>                              <span class="co">#  INACTIVE MPHASE HERE IS VERY BAD.</span>
+034330,000095: 31,2063           54764                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50484153454E554D">PHASENUM</a>                              <span class="co">#  HOLDS CURRENT MP NUMBER FOR DOWNLINK</span>
+034331,000096: 31,2064           00006                           <span class="op">EXTEND  </span>                                       
+034332,000097: 31,2065           76311                           <span class="op">MP      </span> <a href="INTERPRETER.agc.html#5448524545">THREE</a>                                 
+034333,000098: 31,2066           50001                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+034334,000099: 31,2067           32333                           <span class="op">CA      </span> <a href="#4D5441424C45">MTABLE</a>                                <span class="co">#  PRIO, INHIBIT/ENABLE INFO., ETC.</span>
+034335,000100: 31,2070           54071                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454732">RUPTREG2</a>                              
+034336,000101: 31,2071           77765                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#534556454E">SEVEN</a>                                 <span class="co">#  HONOR INHIBIT/ENABLE FUNCTION.</span>
+034337,000102: 31,2072           70076                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              
+034338,000103: 31,2073           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+034339,000104: 31,2074           12117                           <span class="op">TCF     </span> <a href="#4D425950415353">MBYPASS</a>                               
+034340,000105: 
+034341,000106: 31,2075           35660                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3337">PRIO37</a>                                
+034342,000107: 31,2076           70071                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454732">RUPTREG2</a>                              
+034343,000108: 31,2077           54063                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45575052494F">NEWPRIO</a>                               
+034344,000109: 31,2100           00006                           <span class="op">EXTEND  </span>                                       
+034345,000110: 31,2101           50001                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  PICK UP 2CADR AND DO FINDVAC.</span>
+034346,000111: 31,2102           32335                           <span class="op">DCA     </span> <a href="#4D5441424C45">MTABLE</a>     +1                         
+034347,000112: 31,2103           05526                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#5350564143">SPVAC</a>                                 
+034348,000113: 
+034349,000114: 31,2104           04141                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#3250485343484E47">2PHSCHNG</a>                              
+034350,000115: 31,2105           00032                           <span class="ps">OCT     </span> 32                                    <span class="co">#  2.3 SPOT FOR REDOMDUE</span>
+034351,000116: 31,2106           00003                           <span class="ps">OCT     </span> 3                                     <span class="co">#  GROUP 3 OFF</span>
+034352,000117: 
+<a name="4D54494D4544574E"></a>034353,000118: 31,2107           02121        <span class="sm">MTIMEDWN</span>           <span class="op">TC      </span> <a href="#4D54494D45464958">MTIMEFIX</a>                              
+034354,000119: 
+034355,000120: 31,2110           35210                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3330">PRIO30</a>                                
+034356,000121: 31,2111           05505                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
+034357,000122: 31,2112     1164                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
+034358,000123: 31,2112           02145 62062                     <span class="ps">2CADR   </span> <a href="#55504441544B494C">UPDATKIL</a>                              
+034359,000124: 
+034360,000125: 31,2114           06076                           <span class="op">TC      </span> <a href="206_SERVICE_ROUTINES.agc.html#464C41473244574E">FLAG2DWN</a>                              
+034361,000126: 31,2115           00020                           <span class="ps">OCT     </span> 20                                    
+034362,000127: 
+034363,000128: 31,2116           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+034364,000129: 
+<a name="4D425950415353"></a>034365,000130: 31,2117           02121        <span class="sm">MBYPASS </span>           <span class="op">TC      </span> <a href="#4D54494D45464958">MTIMEFIX</a>                              
+034366,000131: 31,2120           12012                           <span class="op">TCF     </span> <a href="#4D445545524554">MDUERET</a>                               
+034367,000132: 
+<a name="4D54494D45464958"></a>034368,000133: 31,2121           47767        <span class="sm">MTIMEFIX</span>           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
+034369,000134: 31,2122           51200                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D44554554454D50">MDUETEMP</a>                              <span class="co">#  MAKE THIS MTIMER/MPHASE PAIR AVAILABLE.</span>
+034370,000135: 31,2123           55164                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
+034371,000136: 
 </pre>
 </span>
 </p>
@@ -287,12 +287,12 @@ Page 804
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-034367,000138: 31,2124           51200                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D44554554454D50">MDUETEMP</a>                              
-034368,000139: 31,2125           55170                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504841534534">MPHASE4</a>                               
-034369,000140: 31,2126           51200                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D44554554454D50">MDUETEMP</a>                              
-034370,000141: 31,2127           55174                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D45523454">MTIMER4T</a>                              
-034371,000142: 31,2130           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-034372,000143: 
+034373,000138: 31,2124           51200                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D44554554454D50">MDUETEMP</a>                              
+034374,000139: 31,2125           55170                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504841534534">MPHASE4</a>                               
+034375,000140: 31,2126           51200                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D44554554454D50">MDUETEMP</a>                              
+034376,000141: 31,2127           55174                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D45523454">MTIMER4T</a>                              
+034377,000142: 31,2130           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+034378,000143: 
 </pre>
 </span>
 </p>
@@ -308,33 +308,33 @@ Page 805
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-034374,000145:                                                                                                  <span class="co">#  RESTART  ROUTIN E TO RESCHEDULE MISSION PHASE</span>
-034375,000146: 
-<a name="5245444F4D445545"></a>034376,000147: 31,2131           30764        <span class="sm">REDOMDUE</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50484153454E554D">PHASENUM</a>                              <span class="co">#  FIND PRIO AND 2CADR OF NEW MP IN TABLE.</span>
-034377,000148: 31,2132           00006                           <span class="op">EXTEND  </span>                                       
-034378,000149: 31,2133           76311                           <span class="op">MP      </span> <a href="INTERPRETER.agc.html#5448524545">THREE</a>                                 
-034379,000150: 31,2134           50001                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-034380,000151: 31,2135           32333                           <span class="op">CA      </span> <a href="#4D5441424C45">MTABLE</a>                                
-034381,000152: 31,2136           75660                           <span class="op">MASK    </span> <a href="EXECUTIVE.agc.html#5052494F3337">PRIO37</a>                                
-034382,000153: 31,2137           54063                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45575052494F">NEWPRIO</a>                               
-034383,000154: 31,2140           00006                           <span class="op">EXTEND  </span>                                       
-034384,000155: 31,2141           50001                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-034385,000156: 31,2142           32335                           <span class="op">DCA     </span> <a href="#4D5441424C45">MTABLE</a>     +1                         
-034386,000157: 31,2143           05526                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#5350564143">SPVAC</a>                                 <span class="co">#  DO FINDVAC WITH 2CADR IN A +  L</span>
-034387,000158: 31,2144           12107                           <span class="op">TCF     </span> <a href="#4D54494D4544574E">MTIMEDWN</a>                              
-034388,000159: 
-034389,000160: 
-034390,000161: 
-034391,000162:                                                                                                  <span class="co">#  DO A PSEUDO VERB 34 ENTER TO KILL AN UPDATE IN PROGRESS, AND TO RELEASE THE DSKY.</span>
-034392,000163: 
-<a name="55504441544B494C"></a>034393,000164: 31,2145           32373        <span class="sm">UPDATKIL</span>           <span class="op">CAF     </span> <a href="#33344F4354">34OCT</a>                                 
-034394,000165: 31,2146           54304                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524551524554">REQRET</a>                                
-034395,000166: 31,2147           05206                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-034396,000167: 31,2150           12314                           <span class="ps">CADR    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#55504441545642">UPDATVB</a>    -1                         
-034397,000168: 
-034398,000169: 31,2151           05225                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              
-034399,000170: 31,2152           11333                           <span class="ps">CADR    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#56425445524D">VBTERM</a>                                <span class="co">#  GOES TO ENDOFJOB WHEN DONE</span>
-034400,000171: 
+034380,000145:                                                                                                  <span class="co">#  RESTART  ROUTIN E TO RESCHEDULE MISSION PHASE</span>
+034381,000146: 
+<a name="5245444F4D445545"></a>034382,000147: 31,2131           30764        <span class="sm">REDOMDUE</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50484153454E554D">PHASENUM</a>                              <span class="co">#  FIND PRIO AND 2CADR OF NEW MP IN TABLE.</span>
+034383,000148: 31,2132           00006                           <span class="op">EXTEND  </span>                                       
+034384,000149: 31,2133           76311                           <span class="op">MP      </span> <a href="INTERPRETER.agc.html#5448524545">THREE</a>                                 
+034385,000150: 31,2134           50001                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+034386,000151: 31,2135           32333                           <span class="op">CA      </span> <a href="#4D5441424C45">MTABLE</a>                                
+034387,000152: 31,2136           75660                           <span class="op">MASK    </span> <a href="EXECUTIVE.agc.html#5052494F3337">PRIO37</a>                                
+034388,000153: 31,2137           54063                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45575052494F">NEWPRIO</a>                               
+034389,000154: 31,2140           00006                           <span class="op">EXTEND  </span>                                       
+034390,000155: 31,2141           50001                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+034391,000156: 31,2142           32335                           <span class="op">DCA     </span> <a href="#4D5441424C45">MTABLE</a>     +1                         
+034392,000157: 31,2143           05526                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#5350564143">SPVAC</a>                                 <span class="co">#  DO FINDVAC WITH 2CADR IN A +  L</span>
+034393,000158: 31,2144           12107                           <span class="op">TCF     </span> <a href="#4D54494D4544574E">MTIMEDWN</a>                              
+034394,000159: 
+034395,000160: 
+034396,000161: 
+034397,000162:                                                                                                  <span class="co">#  DO A PSEUDO VERB 34 ENTER TO KILL AN UPDATE IN PROGRESS, AND TO RELEASE THE DSKY.</span>
+034398,000163: 
+<a name="55504441544B494C"></a>034399,000164: 31,2145           32373        <span class="sm">UPDATKIL</span>           <span class="op">CAF     </span> <a href="#33344F4354">34OCT</a>                                 
+034400,000165: 31,2146           54304                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524551524554">REQRET</a>                                
+034401,000166: 31,2147           05206                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+034402,000167: 31,2150           12314                           <span class="ps">CADR    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#55504441545642">UPDATVB</a>    -1                         
+034403,000168: 
+034404,000169: 31,2151           05225                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              
+034405,000170: 31,2152           11333                           <span class="ps">CADR    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#56425445524D">VBTERM</a>                                <span class="co">#  GOES TO ENDOFJOB WHEN DONE</span>
+034406,000171: 
 </pre>
 </span>
 </p>
@@ -350,52 +350,52 @@ Page 806
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-034402,000173:                                                                                                  <span class="co">#           THE FOLLOWING SUBROUTINE MAY BE USED BY MISSION PROGRAMS TO SET MISSION PHASE/TIMER PAIRS TO INITIATE</span>
-034403,000174:                                                                                                  <span class="co">#  THE VARIOUS MISSION PHASES (SEE CHAPTER 4 OF THE GSOP).</span>
-034404,000175: 
-034405,000176:                                                                                                  <span class="co">#           CALLING SEQUENCE IS AS FOLLOWS:</span>
-034406,000177: 
-034407,000178:                                                                                                  <span class="co">#                                                   TC     MPENTRY         UNDER CONTROL OF EXEC OR RUPT.</span>
-034408,000179:                                                                                                  <span class="co">#                                                   DEC    INDEX           INDEX OF TIMER (1 TO 4).</span>
-034409,000180:                                                                                                  <span class="co">#                                                   DEC    PHASE           MISSION PHASE NUMBER.</span>
-034410,000181:                                                                                                  <span class="co">#                                                   ADRES  DT              DT = TIME (SECONDS) TO INITIATION.</span>
-034411,000182:                                                                                                  <span class="co">#                                                                          (EBANK MUST ALREADY BE SET.)</span>
-034412,000183: 
-034413,000184:    5126                                           <span class="ps">BLOCK   </span> 02                                    
-<a name="4D50454E545259"></a>034414,000185:    5126           00004        <span class="sm">MPENTRY </span>           <span class="op">INHINT  </span>                                       
-034415,000186:    5127           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  MAKE INTERNAL INDEX.</span>
-034416,000187:    5130           40000                           <span class="op">CS      </span> 0                                     
-034417,000188:    5131           67761                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#464F5552">FOUR</a>                                  
-034418,000189:    5132           54070                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-034419,000190: 
-034420,000191:    5133           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IF THIS MISSION PHASE REGISTER IS NOT</span>
-034421,000192:    5134           11170                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504841534534">MPHASE4</a>                               <span class="co">#  -0, IT HAS BEEN CHANGED BY THE GROUND,</span>
-034422,000193:    5135           15144                           <span class="op">TCF     </span> <a href="#4D454E54525954">MENTRYT</a>                               <span class="co">#  SO LEAVE IT ALONE.</span>
-034423,000194:    5136           15144                           <span class="op">TCF     </span> <a href="#4D454E54525954">MENTRYT</a>                               
-034424,000195:    5137           15144                           <span class="op">TCF     </span> <a href="#4D454E54525954">MENTRYT</a>                               
-034425,000196: 
-034426,000197:    5140           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-034427,000198:    5141           30001                           <span class="op">CAF     </span> 1                                     
-034428,000199:    5142           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-034429,000200:    5143           55170                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504841534534">MPHASE4</a>                               
-034430,000201: 
-<a name="4D454E54525954"></a>034431,000202:    5144           50070        <span class="sm">MENTRYT </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  IF THE TIMER IS -0, SET IT TO THE INPUT</span>
-034432,000203:    5145           11164                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               <span class="co">#  VALUE, OTHERWISE, ASSUME IT HAS BEEN</span>
-034433,000204:    5146           67763                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4F4E45">ONE</a>                                   <span class="co">#  SET BY THE GROUND AND JUST FORCE IT POS.</span>
-034434,000205:    5147           15155                           <span class="op">TCF     </span> <a href="#4D454E54414253">MENTABS</a>                               
-034435,000206:    5150           15146                           <span class="op">TCF     </span> -2                                    
-034436,000207: 
-034437,000208:    5151           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-034438,000209:    5152           30002                           <span class="op">CAF     </span> 2                                     
-034439,000210:    5153           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-034440,000211:    5154           30000                           <span class="op">CA      </span> 0                                     
-<a name="4D454E54414253"></a>034441,000212:    5155           50070        <span class="sm">MENTABS </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-034442,000213:    5156           55164                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
-034443,000214: 
-034444,000215:    5157           36311                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5448524545">THREE</a>                                 <span class="co">#  MAKE UP RETURN SO COMMON ROUTINE CAN BE</span>
-034445,000216:    5160           60002                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  USED TO INITATE TIMER COUNTING.</span>
-034446,000217:    5161           55207                 -1        <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D52455455524E">MRETURN</a>                               
-034447,000218: 
+034408,000173:                                                                                                  <span class="co">#           THE FOLLOWING SUBROUTINE MAY BE USED BY MISSION PROGRAMS TO SET MISSION PHASE/TIMER PAIRS TO INITIATE</span>
+034409,000174:                                                                                                  <span class="co">#  THE VARIOUS MISSION PHASES (SEE CHAPTER 4 OF THE GSOP).</span>
+034410,000175: 
+034411,000176:                                                                                                  <span class="co">#           CALLING SEQUENCE IS AS FOLLOWS:</span>
+034412,000177: 
+034413,000178:                                                                                                  <span class="co">#                                                   TC     MPENTRY         UNDER CONTROL OF EXEC OR RUPT.</span>
+034414,000179:                                                                                                  <span class="co">#                                                   DEC    INDEX           INDEX OF TIMER (1 TO 4).</span>
+034415,000180:                                                                                                  <span class="co">#                                                   DEC    PHASE           MISSION PHASE NUMBER.</span>
+034416,000181:                                                                                                  <span class="co">#                                                   ADRES  DT              DT = TIME (SECONDS) TO INITIATION.</span>
+034417,000182:                                                                                                  <span class="co">#                                                                          (EBANK MUST ALREADY BE SET.)</span>
+034418,000183: 
+034419,000184:    5126                                           <span class="ps">BLOCK   </span> 02                                    
+<a name="4D50454E545259"></a>034420,000185:    5126           00004        <span class="sm">MPENTRY </span>           <span class="op">INHINT  </span>                                       
+034421,000186:    5127           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  MAKE INTERNAL INDEX.</span>
+034422,000187:    5130           40000                           <span class="op">CS      </span> 0                                     
+034423,000188:    5131           67761                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#464F5552">FOUR</a>                                  
+034424,000189:    5132           54070                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+034425,000190: 
+034426,000191:    5133           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IF THIS MISSION PHASE REGISTER IS NOT</span>
+034427,000192:    5134           11170                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504841534534">MPHASE4</a>                               <span class="co">#  -0, IT HAS BEEN CHANGED BY THE GROUND,</span>
+034428,000193:    5135           15144                           <span class="op">TCF     </span> <a href="#4D454E54525954">MENTRYT</a>                               <span class="co">#  SO LEAVE IT ALONE.</span>
+034429,000194:    5136           15144                           <span class="op">TCF     </span> <a href="#4D454E54525954">MENTRYT</a>                               
+034430,000195:    5137           15144                           <span class="op">TCF     </span> <a href="#4D454E54525954">MENTRYT</a>                               
+034431,000196: 
+034432,000197:    5140           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+034433,000198:    5141           30001                           <span class="op">CAF     </span> 1                                     
+034434,000199:    5142           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+034435,000200:    5143           55170                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504841534534">MPHASE4</a>                               
+034436,000201: 
+<a name="4D454E54525954"></a>034437,000202:    5144           50070        <span class="sm">MENTRYT </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  IF THE TIMER IS -0, SET IT TO THE INPUT</span>
+034438,000203:    5145           11164                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               <span class="co">#  VALUE, OTHERWISE, ASSUME IT HAS BEEN</span>
+034439,000204:    5146           67763                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4F4E45">ONE</a>                                   <span class="co">#  SET BY THE GROUND AND JUST FORCE IT POS.</span>
+034440,000205:    5147           15155                           <span class="op">TCF     </span> <a href="#4D454E54414253">MENTABS</a>                               
+034441,000206:    5150           15146                           <span class="op">TCF     </span> -2                                    
+034442,000207: 
+034443,000208:    5151           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+034444,000209:    5152           30002                           <span class="op">CAF     </span> 2                                     
+034445,000210:    5153           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+034446,000211:    5154           30000                           <span class="op">CA      </span> 0                                     
+<a name="4D454E54414253"></a>034447,000212:    5155           50070        <span class="sm">MENTABS </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+034448,000213:    5156           55164                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
+034449,000214: 
+034450,000215:    5157           36311                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5448524545">THREE</a>                                 <span class="co">#  MAKE UP RETURN SO COMMON ROUTINE CAN BE</span>
+034451,000216:    5160           60002                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  USED TO INITATE TIMER COUNTING.</span>
+034452,000217:    5161           55207                 -1        <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D52455455524E">MRETURN</a>                               
+034453,000218: 
 </pre>
 </span>
 </p>
@@ -411,36 +411,36 @@ Page 807
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-034449,000220:                                                                                                  <span class="co">#  SUBROUTINE TO START MISSION TIMERS IF THEY ARE NOT GOING ALREADY.</span>
-034450,000221: 
-<a name="4D5354415254"></a>034451,000222:    5162           30076        <span class="sm">MSTART  </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              <span class="co">#  SEE IF TIMERS ENABLED ALREADY.</span>
-034452,000223:    5163           77757                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#42495435">BIT5</a>                                  
-034453,000224:    5164           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-034454,000225:    5165           15202                           <span class="op">TCF     </span> <a href="#4D444F4E45">MDONE</a>                                 <span class="co">#  YES - RETURN.</span>
-034455,000226: 
-034456,000227:    5166           15171                           <span class="op">TCF     </span> +3                                    <span class="co">#  THERE USED TO BE A PHASE CHANGE HERE.</span>
-034457,000228:    5167           04736                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
-034458,000229:    5170           04736                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
-034459,000230: 
-034460,000231:    5171           06060                           <span class="op">TC      </span> <a href="206_SERVICE_ROUTINES.agc.html#464C4147325550">FLAG2UP</a>                               <span class="co">#  SHOW TIMERS ENABLED.</span>
-034461,000232:    5172           00020                           <span class="ps">OCT     </span> 20                                    
-034462,000233: 
-034463,000234:    5173           00004                           <span class="op">INHINT  </span>                                       
-034464,000235: 
-034465,000236:    5174           35204                           <span class="op">CAF     </span> <a href="#5354415445435249">STATECRI</a>                              <span class="co">#  INITIALIZE STATE VECTOR EXTRAPOLATION</span>
-034466,000237:    5175           55201                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415445435452">STATECTR</a>                              <span class="co">#  TIMER.</span>
-034467,000238: 
-034468,000239:    5176           37763                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4F4E45">ONE</a>                                   
-034469,000240:    5177           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-034470,000241:    5200     1164                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
-034471,000242:    5200           02000 62062                     <span class="ps">2CADR   </span> <a href="#4D4D41494E54">MMAINT</a>                                <span class="co">#  START COUNTER MAINTENANCE.</span>
-034472,000243: 
-<a name="4D444F4E45"></a>034473,000244:    5202           00003        <span class="sm">MDONE   </span>           <span class="op">RELINT  </span>                                       
-034474,000245:    5203           01207                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D52455455524E">MRETURN</a>                               
-034475,000246: 
-<a name="5354415445435249"></a>034476,000247:    5204           01033        <span class="sm">STATECRI</span>           <span class="ps">DEC     </span> 539        B-14                       <span class="co">#  CALLS FOR INTEGRATION EVERY 539 SEC.</span>
-<a name="315345432B31"></a>034477,000248:    5205           00145        <span class="sm">1SEC+1  </span>           <span class="ps">DEC     </span> 101        B-14                       
-034478,000249: 
+034455,000220:                                                                                                  <span class="co">#  SUBROUTINE TO START MISSION TIMERS IF THEY ARE NOT GOING ALREADY.</span>
+034456,000221: 
+<a name="4D5354415254"></a>034457,000222:    5162           30076        <span class="sm">MSTART  </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              <span class="co">#  SEE IF TIMERS ENABLED ALREADY.</span>
+034458,000223:    5163           77757                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#42495435">BIT5</a>                                  
+034459,000224:    5164           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+034460,000225:    5165           15202                           <span class="op">TCF     </span> <a href="#4D444F4E45">MDONE</a>                                 <span class="co">#  YES - RETURN.</span>
+034461,000226: 
+034462,000227:    5166           15171                           <span class="op">TCF     </span> +3                                    <span class="co">#  THERE USED TO BE A PHASE CHANGE HERE.</span>
+034463,000228:    5167           04736                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
+034464,000229:    5170           04736                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
+034465,000230: 
+034466,000231:    5171           06060                           <span class="op">TC      </span> <a href="206_SERVICE_ROUTINES.agc.html#464C4147325550">FLAG2UP</a>                               <span class="co">#  SHOW TIMERS ENABLED.</span>
+034467,000232:    5172           00020                           <span class="ps">OCT     </span> 20                                    
+034468,000233: 
+034469,000234:    5173           00004                           <span class="op">INHINT  </span>                                       
+034470,000235: 
+034471,000236:    5174           35204                           <span class="op">CAF     </span> <a href="#5354415445435249">STATECRI</a>                              <span class="co">#  INITIALIZE STATE VECTOR EXTRAPOLATION</span>
+034472,000237:    5175           55201                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415445435452">STATECTR</a>                              <span class="co">#  TIMER.</span>
+034473,000238: 
+034474,000239:    5176           37763                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4F4E45">ONE</a>                                   
+034475,000240:    5177           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+034476,000241:    5200     1164                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
+034477,000242:    5200           02000 62062                     <span class="ps">2CADR   </span> <a href="#4D4D41494E54">MMAINT</a>                                <span class="co">#  START COUNTER MAINTENANCE.</span>
+034478,000243: 
+<a name="4D444F4E45"></a>034479,000244:    5202           00003        <span class="sm">MDONE   </span>           <span class="op">RELINT  </span>                                       
+034480,000245:    5203           01207                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D52455455524E">MRETURN</a>                               
+034481,000246: 
+<a name="5354415445435249"></a>034482,000247:    5204           01033        <span class="sm">STATECRI</span>           <span class="ps">DEC     </span> 539        B-14                       <span class="co">#  CALLS FOR INTEGRATION EVERY 539 SEC.</span>
+<a name="315345432B31"></a>034483,000248:    5205           00145        <span class="sm">1SEC+1  </span>           <span class="ps">DEC     </span> 101        B-14                       
+034484,000249: 
 </pre>
 </span>
 </p>
@@ -456,22 +456,22 @@ Page 808
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-034480,000251:                                                                                                  <span class="co">#  SUBROUTINE CALLS FOR VARIOUS UPDATE OPTIONS (SEE GSOP).  ENTER UNDER EXEC WITH INTERRUPT INHIBITED.</span>
-034481,000252: 
-034482,000253: 31,2153                                           <span class="ps">BANK    </span> 31                                    
-<a name="444F563730"></a>034483,000254: 31,2153           02265        <span class="sm">DOV70   </span>           <span class="op">TC      </span> <a href="#4D54494D45525550">MTIMERUP</a>                              <span class="co">#  VERB 70</span>
-034484,000255: 31,2154           12351                           <span class="op">TCF     </span> <a href="#454E445550">ENDUP</a>                                 
-034485,000256: 
-<a name="444F563731"></a>034486,000257: 31,2155           02221        <span class="sm">DOV71   </span>           <span class="op">TC      </span> <a href="#4D50484153455550">MPHASEUP</a>                              <span class="co">#  VERB 71</span>
-034487,000258: 31,2156           12161                           <span class="op">TCF     </span> <a href="#444F563732">DOV72</a>      +2                         
-034488,000259: 
-<a name="444F563732"></a>034489,000260: 31,2157           02221        <span class="sm">DOV72   </span>           <span class="op">TC      </span> <a href="#4D50484153455550">MPHASEUP</a>                              <span class="co">#  VERB 72</span>
-034490,000261: 31,2160           02265                           <span class="op">TC      </span> <a href="#4D54494D45525550">MTIMERUP</a>                              
-034491,000262: 31,2161           31202                 +2        <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#55505048415345">UPPHASE</a>                               <span class="co">#  FOR V72, WE DON'T ALTER THE MPHASE</span>
-034492,000263: 31,2162           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  REGISTER UNTIL SURE THAT TIMER CHANGE</span>
-034493,000264: 31,2163           55170                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504841534534">MPHASE4</a>                               <span class="co">#  IS LEGAL.</span>
-<a name="544346454E445550"></a>034494,000265: 31,2164           12351        <span class="sm">TCFENDUP</span>           <span class="op">TCF     </span> <a href="#454E445550">ENDUP</a>                                 
-034495,000266: 
+034486,000251:                                                                                                  <span class="co">#  SUBROUTINE CALLS FOR VARIOUS UPDATE OPTIONS (SEE GSOP).  ENTER UNDER EXEC WITH INTERRUPT INHIBITED.</span>
+034487,000252: 
+034488,000253: 31,2153                                           <span class="ps">BANK    </span> 31                                    
+<a name="444F563730"></a>034489,000254: 31,2153           02265        <span class="sm">DOV70   </span>           <span class="op">TC      </span> <a href="#4D54494D45525550">MTIMERUP</a>                              <span class="co">#  VERB 70</span>
+034490,000255: 31,2154           12351                           <span class="op">TCF     </span> <a href="#454E445550">ENDUP</a>                                 
+034491,000256: 
+<a name="444F563731"></a>034492,000257: 31,2155           02221        <span class="sm">DOV71   </span>           <span class="op">TC      </span> <a href="#4D50484153455550">MPHASEUP</a>                              <span class="co">#  VERB 71</span>
+034493,000258: 31,2156           12161                           <span class="op">TCF     </span> <a href="#444F563732">DOV72</a>      +2                         
+034494,000259: 
+<a name="444F563732"></a>034495,000260: 31,2157           02221        <span class="sm">DOV72   </span>           <span class="op">TC      </span> <a href="#4D50484153455550">MPHASEUP</a>                              <span class="co">#  VERB 72</span>
+034496,000261: 31,2160           02265                           <span class="op">TC      </span> <a href="#4D54494D45525550">MTIMERUP</a>                              
+034497,000262: 31,2161           31202                 +2        <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#55505048415345">UPPHASE</a>                               <span class="co">#  FOR V72, WE DON'T ALTER THE MPHASE</span>
+034498,000263: 31,2162           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  REGISTER UNTIL SURE THAT TIMER CHANGE</span>
+034499,000264: 31,2163           55170                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504841534534">MPHASE4</a>                               <span class="co">#  IS LEGAL.</span>
+<a name="544346454E445550"></a>034500,000265: 31,2164           12351        <span class="sm">TCFENDUP</span>           <span class="op">TCF     </span> <a href="#454E445550">ENDUP</a>                                 
+034501,000266: 
 </pre>
 </span>
 </p>
@@ -487,45 +487,45 @@ Page 809
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-034497,000268:                                                                                                  <span class="co">#  INVERT INHIBIT/ENABLE SWITCH WHOSE INDEX IS IN UPINDEX (1 TO 3).  ENTER UNDER EXEC WITH INTERRUPT INHIBITED.</span>
-034498,000269: 
-<a name="444F563733"></a>034499,000270: 31,2165           47762        <span class="sm">DOV73   </span>           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#54574F">TWO</a>                                   
-034500,000271: 31,2166           61204                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550494E444558">UPINDEX</a>                               
-034501,000272: 31,2167           04323                           <span class="op">TC      </span> <a href="RADAR_LEADIN_ROUTINES.agc.html#4D4147535542">MAGSUB</a>                                <span class="co">#  SEE IF INDEX LEGIT.</span>
-034502,000273: 31,2170           77776                           <span class="ps">DEC     </span> -1         B-14                       
-034503,000274: 31,2171           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               
-034504,000275: 
-034505,000276: 31,2172           51204                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550494E444558">UPINDEX</a>                               
-034506,000277: 31,2173           37760                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495433">BIT3</a>       -1                         <span class="co">#  BITS IN POSITIONS 3, 2, AND 1 OF</span>
-034507,000278: 31,2174           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  FLAGWRD2 (SEE SWITCH ASSIGNMENTS).</span>
-034508,000279: 31,2175           30076                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              
-034509,000280: 31,2176           00006                           <span class="op">EXTEND  </span>                                       
-034510,000281: 31,2177           06001                           <span class="op">RXOR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-034511,000282: 31,2200           54076                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              
-034512,000283: 31,2201           12351                           <span class="op">TCF     </span> <a href="#454E445550">ENDUP</a>                                 
-034513,000284: 
-034514,000285:                                                                                                  <span class="co">#           THE FOLLOWING CODING ISSUES THE SINGLE LMP COMMAND FOUND IN UPINDEX PROVIDED THE TIMERS ARE ENABLED</span>
-034515,000286:                                                                                                  <span class="co">#  (NON TIME CRITICAL PHASE OF MISSION).</span>
-034516,000287: 
-<a name="444F563637"></a>034517,000288: 31,2202           40076        <span class="sm">DOV67   </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              
-034518,000289: 31,2203           77757                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#42495435">BIT5</a>                                  
-034519,000290: 31,2204           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-034520,000291: 31,2205           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               
-034521,000292: 
-034522,000293: 31,2206           47754                           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#42495438">BIT8</a>                                  <span class="co">#  COMMAND MUST BE BETWEEN 1 AND 255.</span>
-034523,000294: 31,2207           61204                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550494E444558">UPINDEX</a>                               
-034524,000295: 31,2210           04323                           <span class="op">TC      </span> <a href="RADAR_LEADIN_ROUTINES.agc.html#4D4147535542">MAGSUB</a>                                
-034525,000296: 31,2211           77600                           <span class="ps">DEC     </span> -127       B-14                       
-034526,000297: 31,2212           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               
-034527,000298: 
-034528,000299: 31,2213           32220                           <span class="op">CAF     </span> <a href="#5443314C4D50">TC1LMP</a>                                
-034529,000300: 31,2214           55203                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550494E444558">UPINDEX</a>    -1                         
-034530,000301: 31,2215           32164                           <span class="op">CAF     </span> <a href="#544346454E445550">TCFENDUP</a>                              
-034531,000302: 31,2216           55205                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550494E444558">UPINDEX</a>    +1                         
-034532,000303: 31,2217           01203                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550494E444558">UPINDEX</a>    -1                         
-034533,000304: 
-<a name="5443314C4D50"></a>034534,000305: 31,2220           05060        <span class="sm">TC1LMP  </span>           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D50">1LMP</a>                                  <span class="co">#  FOR ERASABLE CALL.</span>
-034535,000306: 
+034503,000268:                                                                                                  <span class="co">#  INVERT INHIBIT/ENABLE SWITCH WHOSE INDEX IS IN UPINDEX (1 TO 3).  ENTER UNDER EXEC WITH INTERRUPT INHIBITED.</span>
+034504,000269: 
+<a name="444F563733"></a>034505,000270: 31,2165           47762        <span class="sm">DOV73   </span>           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#54574F">TWO</a>                                   
+034506,000271: 31,2166           61204                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550494E444558">UPINDEX</a>                               
+034507,000272: 31,2167           04323                           <span class="op">TC      </span> <a href="RADAR_LEADIN_ROUTINES.agc.html#4D4147535542">MAGSUB</a>                                <span class="co">#  SEE IF INDEX LEGIT.</span>
+034508,000273: 31,2170           77776                           <span class="ps">DEC     </span> -1         B-14                       
+034509,000274: 31,2171           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               
+034510,000275: 
+034511,000276: 31,2172           51204                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550494E444558">UPINDEX</a>                               
+034512,000277: 31,2173           37760                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495433">BIT3</a>       -1                         <span class="co">#  BITS IN POSITIONS 3, 2, AND 1 OF</span>
+034513,000278: 31,2174           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  FLAGWRD2 (SEE SWITCH ASSIGNMENTS).</span>
+034514,000279: 31,2175           30076                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              
+034515,000280: 31,2176           00006                           <span class="op">EXTEND  </span>                                       
+034516,000281: 31,2177           06001                           <span class="op">RXOR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+034517,000282: 31,2200           54076                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              
+034518,000283: 31,2201           12351                           <span class="op">TCF     </span> <a href="#454E445550">ENDUP</a>                                 
+034519,000284: 
+034520,000285:                                                                                                  <span class="co">#           THE FOLLOWING CODING ISSUES THE SINGLE LMP COMMAND FOUND IN UPINDEX PROVIDED THE TIMERS ARE ENABLED</span>
+034521,000286:                                                                                                  <span class="co">#  (NON TIME CRITICAL PHASE OF MISSION).</span>
+034522,000287: 
+<a name="444F563637"></a>034523,000288: 31,2202           40076        <span class="sm">DOV67   </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              
+034524,000289: 31,2203           77757                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#42495435">BIT5</a>                                  
+034525,000290: 31,2204           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+034526,000291: 31,2205           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               
+034527,000292: 
+034528,000293: 31,2206           47754                           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#42495438">BIT8</a>                                  <span class="co">#  COMMAND MUST BE BETWEEN 1 AND 255.</span>
+034529,000294: 31,2207           61204                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550494E444558">UPINDEX</a>                               
+034530,000295: 31,2210           04323                           <span class="op">TC      </span> <a href="RADAR_LEADIN_ROUTINES.agc.html#4D4147535542">MAGSUB</a>                                
+034531,000296: 31,2211           77600                           <span class="ps">DEC     </span> -127       B-14                       
+034532,000297: 31,2212           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               
+034533,000298: 
+034534,000299: 31,2213           32220                           <span class="op">CAF     </span> <a href="#5443314C4D50">TC1LMP</a>                                
+034535,000300: 31,2214           55203                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550494E444558">UPINDEX</a>    -1                         
+034536,000301: 31,2215           32164                           <span class="op">CAF     </span> <a href="#544346454E445550">TCFENDUP</a>                              
+034537,000302: 31,2216           55205                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550494E444558">UPINDEX</a>    +1                         
+034538,000303: 31,2217           01203                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550494E444558">UPINDEX</a>    -1                         
+034539,000304: 
+<a name="5443314C4D50"></a>034540,000305: 31,2220           05060        <span class="sm">TC1LMP  </span>           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D50">1LMP</a>                                  <span class="co">#  FOR ERASABLE CALL.</span>
+034541,000306: 
 </pre>
 </span>
 </p>
@@ -541,57 +541,57 @@ Page 810
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-034537,000308:                                                                                                  <span class="co">#           THE FOLLOWING CODING UPDATES A MISSION PHASE NUMBER WHOSE INDEX IS IN UPINDEX TO THE VALUE FOUND</span>
-034538,000309:                                                                                                  <span class="co">#  IN UPPHASE. RETURN IS TO CALLER IF DATA OK, OR TO UPERROR IF DATA OUT OF RANGE.</span>
-034539,000310: 
-<a name="4D50484153455550"></a>034540,000311: 31,2221           30002        <span class="sm">MPHASEUP</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-034541,000312: 31,2222           02250                           <span class="op">TC      </span> <a href="#43484B5550444558">CHKUPDEX</a>                              <span class="co">#  CHECK INDEX VALUE AND MAKE INTERNAL NDX.</span>
-034542,000313: 
-034543,000314: 31,2223           11202                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#55505048415345">UPPHASE</a>                               <span class="co">#  CHECK ON SIZE OF PHASE.</span>
-034544,000315: 31,2224           12230                           <span class="op">TCF     </span> +4                                    
-034545,000316: 31,2225           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               
-034546,000317: 31,2226           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               
-034547,000318: 31,2227           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               
-034548,000319: 
-034549,000320: 31,2230           04323                 +4        <span class="op">TC      </span> <a href="RADAR_LEADIN_ROUTINES.agc.html#4D4147535542">MAGSUB</a>                                
-034550,000321: 31,2231           77756                           <span class="ps">OCT     </span> -21                                   <span class="co">#  ALLOW PHASES 1 - 18D ONLY.</span>
-034551,000322: 31,2232           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               <span class="co">#  FOR BAD RETURN FROM MAGSUB</span>
-034552,000323: 31,2233           41202                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#55505048415345">UPPHASE</a>                               <span class="co">#  CHECK LEGALITY OF UPPHASE</span>
-034553,000324: 31,2234           66306                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#534958">SIX</a>                                   
-034554,000325: 31,2235           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-034555,000326: 31,2236           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               
-<a name="4D504C4547414C"></a>034556,000327: 31,2237           72400        <span class="sm">MPLEGAL </span>           <span class="ps">OCT     </span> 72400                                 <span class="co">#  BITS 15 - 1 = 1 FOR MP 7 - 21 LEGAL</span>
-034557,000328: 31,2240           12242                           <span class="op">TCF     </span> +2                                    
-034558,000329: 31,2241           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               
-034559,000330: 
-034560,000331: 31,2242           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-034561,000332: 31,2243           37745                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#4249543135">BIT15</a>                                 
-034562,000333: 31,2244           72237                           <span class="op">MASK    </span> <a href="#4D504C4547414C">MPLEGAL</a>                               
-034563,000334: 31,2245           00006                           <span class="op">EXTEND  </span>                                       
-034564,000335: 31,2246           12356                           <span class="op">BZF     </span> <a href="#55504552524F52">UPERROR</a>                               
-034565,000336: 
-034566,000337: 31,2247           01207                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D52455455524E">MRETURN</a>                               
-034567,000338: 
-034568,000339:                                                                                                  <span class="co">#  MINOR SUBROUTINE TO CHECK MISSION TIMER/PHASE UPDATE INDEX AND LEAVE CORRESPONDING VALUE IN RUPTREG1.</span>
-034569,000340: 
-034570,000341:                                                                                                  <span class="co">#  TO BE ENTERED WITH INTERRUPT INHIBITED:</span>
-034571,000342: 
-<a name="43484B5550444558"></a>034572,000343: 31,2250           55207        <span class="sm">CHKUPDEX</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D52455455524E">MRETURN</a>                               <span class="co">#  CALLER'S RETURN ARRIVES IN A.</span>
-034573,000344: 31,2251           11204                 +1        <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550494E444558">UPINDEX</a>                               
-034574,000345: 31,2252           12256                           <span class="op">TCF     </span> +4                                    
-034575,000346: 31,2253           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               
-034576,000347: 31,2254           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               
-034577,000348: 31,2255           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               
-034578,000349: 
-034579,000350: 31,2256           75340                 +4        <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#4E454733">NEG3</a>                                  
-034580,000351: 31,2257           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-034581,000352: 31,2260           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               
-034582,000353: 
-034583,000354: 31,2261           41204                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550494E444558">UPINDEX</a>                               <span class="co">#  MAKE INTERNAL VALUE.</span>
-034584,000355: 31,2262           67761                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#464F5552">FOUR</a>                                  
-034585,000356: 31,2263           54070                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-034586,000357: 31,2264           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-034587,000358: 
+034543,000308:                                                                                                  <span class="co">#           THE FOLLOWING CODING UPDATES A MISSION PHASE NUMBER WHOSE INDEX IS IN UPINDEX TO THE VALUE FOUND</span>
+034544,000309:                                                                                                  <span class="co">#  IN UPPHASE. RETURN IS TO CALLER IF DATA OK, OR TO UPERROR IF DATA OUT OF RANGE.</span>
+034545,000310: 
+<a name="4D50484153455550"></a>034546,000311: 31,2221           30002        <span class="sm">MPHASEUP</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+034547,000312: 31,2222           02250                           <span class="op">TC      </span> <a href="#43484B5550444558">CHKUPDEX</a>                              <span class="co">#  CHECK INDEX VALUE AND MAKE INTERNAL NDX.</span>
+034548,000313: 
+034549,000314: 31,2223           11202                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#55505048415345">UPPHASE</a>                               <span class="co">#  CHECK ON SIZE OF PHASE.</span>
+034550,000315: 31,2224           12230                           <span class="op">TCF     </span> +4                                    
+034551,000316: 31,2225           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               
+034552,000317: 31,2226           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               
+034553,000318: 31,2227           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               
+034554,000319: 
+034555,000320: 31,2230           04323                 +4        <span class="op">TC      </span> <a href="RADAR_LEADIN_ROUTINES.agc.html#4D4147535542">MAGSUB</a>                                
+034556,000321: 31,2231           77756                           <span class="ps">OCT     </span> -21                                   <span class="co">#  ALLOW PHASES 1 - 18D ONLY.</span>
+034557,000322: 31,2232           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               <span class="co">#  FOR BAD RETURN FROM MAGSUB</span>
+034558,000323: 31,2233           41202                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#55505048415345">UPPHASE</a>                               <span class="co">#  CHECK LEGALITY OF UPPHASE</span>
+034559,000324: 31,2234           66306                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#534958">SIX</a>                                   
+034560,000325: 31,2235           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+034561,000326: 31,2236           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               
+<a name="4D504C4547414C"></a>034562,000327: 31,2237           72400        <span class="sm">MPLEGAL </span>           <span class="ps">OCT     </span> 72400                                 <span class="co">#  BITS 15 - 1 = 1 FOR MP 7 - 21 LEGAL</span>
+034563,000328: 31,2240           12242                           <span class="op">TCF     </span> +2                                    
+034564,000329: 31,2241           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               
+034565,000330: 
+034566,000331: 31,2242           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+034567,000332: 31,2243           37745                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#4249543135">BIT15</a>                                 
+034568,000333: 31,2244           72237                           <span class="op">MASK    </span> <a href="#4D504C4547414C">MPLEGAL</a>                               
+034569,000334: 31,2245           00006                           <span class="op">EXTEND  </span>                                       
+034570,000335: 31,2246           12356                           <span class="op">BZF     </span> <a href="#55504552524F52">UPERROR</a>                               
+034571,000336: 
+034572,000337: 31,2247           01207                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D52455455524E">MRETURN</a>                               
+034573,000338: 
+034574,000339:                                                                                                  <span class="co">#  MINOR SUBROUTINE TO CHECK MISSION TIMER/PHASE UPDATE INDEX AND LEAVE CORRESPONDING VALUE IN RUPTREG1.</span>
+034575,000340: 
+034576,000341:                                                                                                  <span class="co">#  TO BE ENTERED WITH INTERRUPT INHIBITED:</span>
+034577,000342: 
+<a name="43484B5550444558"></a>034578,000343: 31,2250           55207        <span class="sm">CHKUPDEX</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D52455455524E">MRETURN</a>                               <span class="co">#  CALLER'S RETURN ARRIVES IN A.</span>
+034579,000344: 31,2251           11204                 +1        <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550494E444558">UPINDEX</a>                               
+034580,000345: 31,2252           12256                           <span class="op">TCF     </span> +4                                    
+034581,000346: 31,2253           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               
+034582,000347: 31,2254           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               
+034583,000348: 31,2255           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               
+034584,000349: 
+034585,000350: 31,2256           75340                 +4        <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#4E454733">NEG3</a>                                  
+034586,000351: 31,2257           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+034587,000352: 31,2260           12356                           <span class="op">TCF     </span> <a href="#55504552524F52">UPERROR</a>                               
+034588,000353: 
+034589,000354: 31,2261           41204                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5550494E444558">UPINDEX</a>                               <span class="co">#  MAKE INTERNAL VALUE.</span>
+034590,000355: 31,2262           67761                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#464F5552">FOUR</a>                                  
+034591,000356: 31,2263           54070                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+034592,000357: 31,2264           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+034593,000358: 
 </pre>
 </span>
 </p>
@@ -607,49 +607,49 @@ Page 811
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-034589,000360:                                                                                                  <span class="co">#           THE FOLLOWING CODING UPDATES THE MISSION TIMER WHOSE INDEX IS IN UPINDEX BY ADDING THE CONTENTS OF UPDT</span>
-034590,000361:                                                                                                  <span class="co">#  TO IT. OUTCOMES DEPEND ON WHETHER THE TIMER WAS COUNTING AT THE TIME, AND THE SIGN OF THE RESULT (SEE GSOP).</span>
-034591,000362: 
-<a name="4D54494D45525550"></a>034592,000363: 31,2265           30002        <span class="sm">MTIMERUP</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  GO TO COMMON SUBROUTINE TO SAVE RETURN</span>
-034593,000364: 31,2266           02250                           <span class="op">TC      </span> <a href="#43484B5550444558">CHKUPDEX</a>                              <span class="co">#  AND CHECK INDEX.</span>
-034594,000365: 31,2267           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  SEE IF TIMER IS COUNTING NOW.</span>
-034595,000366: 31,2270           11164                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
-034596,000367: 31,2271           12276                           <span class="op">TCF     </span> <a href="#54555042555359">TUPBUSY</a>                               <span class="co">#  POS INDICATES IT IS.</span>
-034597,000368: 31,2272           12276                           <span class="op">TCF     </span> <a href="#54555042555359">TUPBUSY</a>                               
-034598,000369: 31,2273           12274                           <span class="op">NOOP    </span>                                       
-034599,000370: 
-034600,000371: 31,2274           31203                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#55504454">UPDT</a>                                  <span class="co">#  IF NOT BUSY, LOAD WITH DT DIRECTLY, WITH</span>
-034601,000372: 31,2275           12303                           <span class="op">TCF     </span> <a href="#435452414253">CTRABS</a>                                <span class="co">#  NO CHANGE TO THE MAINTENANCE FLAG STATE.</span>
-034602,000373: 
-<a name="54555042555359"></a>034603,000374: 31,2276           11203        <span class="sm">TUPBUSY </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#55504454">UPDT</a>                                  <span class="co">#  IF TIMER COUNTING, SEE IF DT ZERO.</span>
-034604,000375: 31,2277           12306                           <span class="op">TCF     </span> <a href="#4354524144">CTRAD</a>                                 <span class="co">#  NZ - DO ADD.</span>
-034605,000376: 31,2300           12303                           <span class="op">TCF     </span> <a href="#435452414253">CTRABS</a>                                <span class="co">#  +0 - PHASE DUE NEXT MAINTENANCE CYCLE.</span>
-034606,000377: 31,2301           12306                           <span class="op">TCF     </span> <a href="#4354524144">CTRAD</a>                                 
-034607,000378: 
-034608,000379: 31,2302           47767                           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  IF -0, DISABLE TIMER.</span>
-<a name="435452414253"></a>034609,000380: 31,2303           50070        <span class="sm">CTRABS  </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-034610,000381: 31,2304           55164                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
-034611,000382: 31,2305           01207                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D52455455524E">MRETURN</a>                               
-034612,000383: 
-<a name="4354524144"></a>034613,000384: 31,2306           02314        <span class="sm">CTRAD   </span>           <span class="op">TC      </span> <a href="#4354524144535542">CTRADSUB</a>                              
-034614,000385: 31,2307           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IF RESULT NEGATIVE OR ZERO, PHASE DUE</span>
-034615,000386: 31,2310           01207                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D52455455524E">MRETURN</a>                               <span class="co">#  NEXT MAINTENANCE CYCLE.</span>
-034616,000387: 31,2311           01207                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D52455455524E">MRETURN</a>                               
-034617,000388: 31,2312           37767                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
-034618,000389: 31,2313           12303                           <span class="op">TCF     </span> <a href="#435452414253">CTRABS</a>                                <span class="co">#  (THIS ALONE REVERTS -0 TO +0.)</span>
-034619,000390: 
-034620,000391: 
-034621,000392: 
-<a name="4354524144535542"></a>034622,000393: 31,2314           31203        <span class="sm">CTRADSUB</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#55504454">UPDT</a>                                  
-034623,000394: 31,2315           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-034624,000395: 31,2316           61164                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
-034625,000396: 31,2317           54000                           <span class="op">OVSK    </span>                                       
-034626,000397: 31,2320           12322                           <span class="op">TCF     </span> +2                                    <span class="co">#  NO OVERFLOW (NORMAL CASE).</span>
-034627,000398: 31,2321           02356                           <span class="op">TC      </span> <a href="#55504552524F52">UPERROR</a>                               <span class="co">#  IF OVFLO, GO TO UPERROR WITH TIMER</span>
-034628,000399: 31,2322           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  UNCHANGED.</span>
-034629,000400: 31,2323           55164                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
-034630,000401: 31,2324           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-034631,000402: 
+034595,000360:                                                                                                  <span class="co">#           THE FOLLOWING CODING UPDATES THE MISSION TIMER WHOSE INDEX IS IN UPINDEX BY ADDING THE CONTENTS OF UPDT</span>
+034596,000361:                                                                                                  <span class="co">#  TO IT. OUTCOMES DEPEND ON WHETHER THE TIMER WAS COUNTING AT THE TIME, AND THE SIGN OF THE RESULT (SEE GSOP).</span>
+034597,000362: 
+<a name="4D54494D45525550"></a>034598,000363: 31,2265           30002        <span class="sm">MTIMERUP</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  GO TO COMMON SUBROUTINE TO SAVE RETURN</span>
+034599,000364: 31,2266           02250                           <span class="op">TC      </span> <a href="#43484B5550444558">CHKUPDEX</a>                              <span class="co">#  AND CHECK INDEX.</span>
+034600,000365: 31,2267           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  SEE IF TIMER IS COUNTING NOW.</span>
+034601,000366: 31,2270           11164                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
+034602,000367: 31,2271           12276                           <span class="op">TCF     </span> <a href="#54555042555359">TUPBUSY</a>                               <span class="co">#  POS INDICATES IT IS.</span>
+034603,000368: 31,2272           12276                           <span class="op">TCF     </span> <a href="#54555042555359">TUPBUSY</a>                               
+034604,000369: 31,2273           12274                           <span class="op">NOOP    </span>                                       
+034605,000370: 
+034606,000371: 31,2274           31203                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#55504454">UPDT</a>                                  <span class="co">#  IF NOT BUSY, LOAD WITH DT DIRECTLY, WITH</span>
+034607,000372: 31,2275           12303                           <span class="op">TCF     </span> <a href="#435452414253">CTRABS</a>                                <span class="co">#  NO CHANGE TO THE MAINTENANCE FLAG STATE.</span>
+034608,000373: 
+<a name="54555042555359"></a>034609,000374: 31,2276           11203        <span class="sm">TUPBUSY </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#55504454">UPDT</a>                                  <span class="co">#  IF TIMER COUNTING, SEE IF DT ZERO.</span>
+034610,000375: 31,2277           12306                           <span class="op">TCF     </span> <a href="#4354524144">CTRAD</a>                                 <span class="co">#  NZ - DO ADD.</span>
+034611,000376: 31,2300           12303                           <span class="op">TCF     </span> <a href="#435452414253">CTRABS</a>                                <span class="co">#  +0 - PHASE DUE NEXT MAINTENANCE CYCLE.</span>
+034612,000377: 31,2301           12306                           <span class="op">TCF     </span> <a href="#4354524144">CTRAD</a>                                 
+034613,000378: 
+034614,000379: 31,2302           47767                           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  IF -0, DISABLE TIMER.</span>
+<a name="435452414253"></a>034615,000380: 31,2303           50070        <span class="sm">CTRABS  </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+034616,000381: 31,2304           55164                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
+034617,000382: 31,2305           01207                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D52455455524E">MRETURN</a>                               
+034618,000383: 
+<a name="4354524144"></a>034619,000384: 31,2306           02314        <span class="sm">CTRAD   </span>           <span class="op">TC      </span> <a href="#4354524144535542">CTRADSUB</a>                              
+034620,000385: 31,2307           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IF RESULT NEGATIVE OR ZERO, PHASE DUE</span>
+034621,000386: 31,2310           01207                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D52455455524E">MRETURN</a>                               <span class="co">#  NEXT MAINTENANCE CYCLE.</span>
+034622,000387: 31,2311           01207                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D52455455524E">MRETURN</a>                               
+034623,000388: 31,2312           37767                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
+034624,000389: 31,2313           12303                           <span class="op">TCF     </span> <a href="#435452414253">CTRABS</a>                                <span class="co">#  (THIS ALONE REVERTS -0 TO +0.)</span>
+034625,000390: 
+034626,000391: 
+034627,000392: 
+<a name="4354524144535542"></a>034628,000393: 31,2314           31203        <span class="sm">CTRADSUB</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#55504454">UPDT</a>                                  
+034629,000394: 31,2315           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+034630,000395: 31,2316           61164                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
+034631,000396: 31,2317           54000                           <span class="op">OVSK    </span>                                       
+034632,000397: 31,2320           12322                           <span class="op">TCF     </span> +2                                    <span class="co">#  NO OVERFLOW (NORMAL CASE).</span>
+034633,000398: 31,2321           02356                           <span class="op">TC      </span> <a href="#55504552524F52">UPERROR</a>                               <span class="co">#  IF OVFLO, GO TO UPERROR WITH TIMER</span>
+034634,000399: 31,2322           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  UNCHANGED.</span>
+034635,000400: 31,2323           55164                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               
+034636,000401: 31,2324           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+034637,000402: 
 </pre>
 </span>
 </p>
@@ -665,48 +665,48 @@ Page 812
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-034633,000404:                                                                                                  <span class="co">#           THE FOLLOWING CODING IS THE SAME AS MTIMERUP BUT ACCEPTS DP GET IN UPGET (SEE GSOP).</span>
-034634,000405: 
-<a name="4D4745545550"></a>034635,000406: 31,2325           06112        <span class="sm">MGETUP  </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               <span class="co">#  MAKE SURE THIS ENTERED WITH VAC AREA.</span>
-034636,000407: 
-034637,000408: 31,2326           44234                           <span class="in">RTB     </span> <span class="in">BDSU      </span>                            <span class="co">#  TIME IN CS.</span>
-034638,000409: 31,2327           33454                                    <a href="RTB_OP_CODES.agc.html#4C4F414454494D45">LOADTIME</a>                              
-034639,000410: 31,2330           01206                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5550474554">UPGET</a>                                 
-034640,000411: 31,2331           54205                           <span class="in">DMP     </span> <span class="in">SL        </span>                            <span class="co">#  CONVERT TO SEC &amp; MOVE TO MAJOR PART.</span>
-034641,000412: 31,2332           22372                                    <a href="#312F313030">1/100</a>                                 
-034642,000413: 31,2333           20217                                    14D                                   
-034643,000414: 31,2334           50004                           <span class="in">BOVB    </span> <span class="in">BMN       </span>                            
-034644,000415: 31,2335           62356                                    <a href="#55504552524F52">UPERROR</a>                               
-034645,000416: 31,2336           62355                                    <a href="#55504552524F52">UPERROR</a>    -1                         <span class="co">#  (DOES AN EXIT.)</span>
-034646,000417: 
-034647,000418: 31,2337           77776                           <span class="in">EXIT    </span>                                       
-034648,000419: 
-034649,000420: 31,2340           00004                           <span class="op">INHINT  </span>                                       
-034650,000421: 31,2341           37757                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495435">BIT5</a>                                  <span class="co">#  INSURE THAT MAINTENANCE IS STILL ENABLED</span>
-034651,000422: 31,2342           70076                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              
-034652,000423: 31,2343           00006                           <span class="op">EXTEND  </span>                                       
-034653,000424: 31,2344           12356                           <span class="op">BZF     </span> <a href="#55504552524F52">UPERROR</a>                               
-034654,000425: 
-034655,000426: 31,2345           02251                           <span class="op">TC      </span> <a href="#43484B5550444558">CHKUPDEX</a>   +1                         
-034656,000427: 31,2346           30144                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  CONTAINS DT IN SECONDS.</span>
-034657,000428: 31,2347           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-034658,000429: 31,2350           55164                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               <span class="co">#  INSERT DT DIRECTLY INTO TIMER.</span>
-034659,000430: 
-034660,000431:                                                                                                  <span class="co">#           GENERAL EXIT LOCATION FOR SUCCESSFULLY COMPLETED UPDATE:</span>
-034661,000432: 
-<a name="454E445550"></a>034662,000433: 31,2351           37767        <span class="sm">ENDUP   </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  TURN OFF GROUP 6.</span>
-034663,000434: 31,2352           04246                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45575048415345">NEWPHASE</a>                              
-034664,000435: 31,2353           00006                           <span class="ps">OCT     </span> 6                                     
-034665,000436: 
-034666,000437: 31,2354           15567                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-034667,000438: 
-034668,000439:                                                                                                  <span class="co">#           EXIT FOR GENERAL UPDATE ERRORS (RANGE OF DATA, ETC.)</span>
-034669,000440: 
-034670,000441: 31,2355           77776                 -1        <span class="in">EXIT    </span>                                       
-034671,000442: 
-<a name="55504552524F52"></a>034672,000443: 31,2356           04571        <span class="sm">UPERROR </span>           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#46414C544F4E">FALTON</a>                                
-034673,000444: 31,2357           12351                           <span class="op">TCF     </span> <a href="#454E445550">ENDUP</a>                                 <span class="co">#  RELINT, &amp; ENDOFJOB.</span>
-034674,000445: 
+034639,000404:                                                                                                  <span class="co">#           THE FOLLOWING CODING IS THE SAME AS MTIMERUP BUT ACCEPTS DP GET IN UPGET (SEE GSOP).</span>
+034640,000405: 
+<a name="4D4745545550"></a>034641,000406: 31,2325           06112        <span class="sm">MGETUP  </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               <span class="co">#  MAKE SURE THIS ENTERED WITH VAC AREA.</span>
+034642,000407: 
+034643,000408: 31,2326           44234                           <span class="in">RTB     </span> <span class="in">BDSU      </span>                            <span class="co">#  TIME IN CS.</span>
+034644,000409: 31,2327           33454                                    <a href="RTB_OP_CODES.agc.html#4C4F414454494D45">LOADTIME</a>                              
+034645,000410: 31,2330           01206                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5550474554">UPGET</a>                                 
+034646,000411: 31,2331           54205                           <span class="in">DMP     </span> <span class="in">SL        </span>                            <span class="co">#  CONVERT TO SEC &amp; MOVE TO MAJOR PART.</span>
+034647,000412: 31,2332           22372                                    <a href="#312F313030">1/100</a>                                 
+034648,000413: 31,2333           20217                                    14D                                   
+034649,000414: 31,2334           50004                           <span class="in">BOVB    </span> <span class="in">BMN       </span>                            
+034650,000415: 31,2335           62356                                    <a href="#55504552524F52">UPERROR</a>                               
+034651,000416: 31,2336           62355                                    <a href="#55504552524F52">UPERROR</a>    -1                         <span class="co">#  (DOES AN EXIT.)</span>
+034652,000417: 
+034653,000418: 31,2337           77776                           <span class="in">EXIT    </span>                                       
+034654,000419: 
+034655,000420: 31,2340           00004                           <span class="op">INHINT  </span>                                       
+034656,000421: 31,2341           37757                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495435">BIT5</a>                                  <span class="co">#  INSURE THAT MAINTENANCE IS STILL ENABLED</span>
+034657,000422: 31,2342           70076                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              
+034658,000423: 31,2343           00006                           <span class="op">EXTEND  </span>                                       
+034659,000424: 31,2344           12356                           <span class="op">BZF     </span> <a href="#55504552524F52">UPERROR</a>                               
+034660,000425: 
+034661,000426: 31,2345           02251                           <span class="op">TC      </span> <a href="#43484B5550444558">CHKUPDEX</a>   +1                         
+034662,000427: 31,2346           30144                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  CONTAINS DT IN SECONDS.</span>
+034663,000428: 31,2347           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+034664,000429: 31,2350           55164                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D54494D455234">MTIMER4</a>                               <span class="co">#  INSERT DT DIRECTLY INTO TIMER.</span>
+034665,000430: 
+034666,000431:                                                                                                  <span class="co">#           GENERAL EXIT LOCATION FOR SUCCESSFULLY COMPLETED UPDATE:</span>
+034667,000432: 
+<a name="454E445550"></a>034668,000433: 31,2351           37767        <span class="sm">ENDUP   </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  TURN OFF GROUP 6.</span>
+034669,000434: 31,2352           04246                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45575048415345">NEWPHASE</a>                              
+034670,000435: 31,2353           00006                           <span class="ps">OCT     </span> 6                                     
+034671,000436: 
+034672,000437: 31,2354           15567                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+034673,000438: 
+034674,000439:                                                                                                  <span class="co">#           EXIT FOR GENERAL UPDATE ERRORS (RANGE OF DATA, ETC.)</span>
+034675,000440: 
+034676,000441: 31,2355           77776                 -1        <span class="in">EXIT    </span>                                       
+034677,000442: 
+<a name="55504552524F52"></a>034678,000443: 31,2356           04571        <span class="sm">UPERROR </span>           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#46414C544F4E">FALTON</a>                                
+034679,000444: 31,2357           12351                           <span class="op">TCF     </span> <a href="#454E445550">ENDUP</a>                                 <span class="co">#  RELINT, &amp; ENDOFJOB.</span>
+034680,000445: 
 </pre>
 </span>
 </p>
@@ -722,56 +722,56 @@ Page 813
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-034676,000447:                                                                                                  <span class="co">#           THE FOLLOWING TABLE SPECIFIES STARTING LOCATIONS AND PRIORITIES OF ALL 206 MISSION PHASES INITIATED BY</span>
-034677,000448:                                                                                                  <span class="co">#  THE MISSION TIMERS (S4B-LEM SEP AND BEYOND). IT ALSO CONTAINS INHIBIT/ENABLE INFORMATION, ETC. EACH ENTRY</span>
-034678,000449:                                                                                                  <span class="co">#  CONSISTS OF THREE WORDS. THE FIRST IS PACKED WITH SEVERAL PIECES OF INFORMATION, AND THE SECOND TWO CONTAIN THE</span>
-034679,000450:                                                                                                  <span class="co">#  2CADR OF THE LOCATION AT WHICH THE PHASE IS TO BEGIN. THE INTERPRETATION OF WORD 1 IS AS FOLLOWS:</span>
-034680,000451: 
-034681,000452:                                                                                                  <span class="co">#           BIT15:         SPARE</span>
-034682,000453:                                                                                                  <span class="co">#           BITS 14-10:    JOB PRIORITY.</span>
-034683,000454:                                                                                                  <span class="co">#           BITS 9-5:      SPARE</span>
-034684,000455:                                                                                                  <span class="co">#           BIT4:          1 IF TIMERS TO BE DISABLED ON PHASE INITIATION.</span>
-034685,000456:                                                                                                  <span class="co">#           BIT3:          1 IF RCS TESTS (INHIBIT/ENABLE INFO).</span>
-034686,000457:                                                                                                  <span class="co">#           BIT2:                  1 IF DPS COLD SOAK</span>
-034687,000458:                                                                                                  <span class="co">#           BIT1:                  1 IF RCS COLD SOAK</span>
-034688,000459: 
-034689,000460:                                                                                                  <span class="co">#  NOTE SPARES COULD BE USED FOR SWITCHING DOWNLISTS, ETC.</span>
-034690,000461: 
-034691,000462:                                                                                                  <span class="co">#           PHASES 1 - 6 ARE NOT INCLUDED SINCE THEY ARE NOT INITIATED BY THE MISSION SCHEDULING ROUTINES.</span>
-<a name="4D5441424C4531"></a>034692,000463: 31,2360           20010        <span class="sm">MTABLE1 </span>           <span class="ps">OCT     </span> 20010                                 <span class="co">#  MP7</span>
-034693,000464: 31,2361  E4,1566                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
-034694,000465: 31,2361           02474 52064                     <span class="ps">2CADR   </span> <a href="MP_7-SIVB_LEM_SEPARATION.agc.html#4D5030374A4F42">MP07JOB</a>                               
-034695,000466: 
-034696,000467: 31,2363           20012                           <span class="ps">OCT     </span> 20012                                 <span class="co">#  MP8</span>
-034697,000468: 31,2364  E3,1652                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              
-034698,000469: 31,2364           02564 56063                     <span class="ps">2CADR   </span> <a href="MISSION_PHASE_8-DPS_COLD_SOAK.agc.html#4D50384A4F42">MP8JOB</a>                                
-034699,000470: 
-034700,000471: 31,2366           20010                           <span class="ps">OCT     </span> 20010                                 <span class="co">#  MP9</span>
-034701,000472: 31,2367  E4,1566                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
-034702,000473: 31,2367           02724 66064                     <span class="ps">2CADR   </span> <a href="MP9-DPS_1_BURN.agc.html#4D50394A4F42">MP9JOB</a>                                
-034703,000474: 
-<a name="312F313030"></a>034704,000475: 31,2371           00243 32703  <span class="sm">1/100   </span>           <span class="ps">2DEC    </span> 0.01                                  <span class="co">#  MP 10.  UNUSED SLOT.</span>
-034705,000476: 
-<a name="33344F4354"></a>034706,000477: 31,2373           00034        <span class="sm">34OCT   </span>           <span class="ps">OCT     </span> 00034                                 
-034707,000478: 
-034708,000479: 31,2374           20010                           <span class="ps">OCT     </span> 20010                                 <span class="co">#  MP11</span>
-034709,000480: 31,2375  E4,1566                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
-034710,000481: 31,2375           02000 74064                     <span class="ps">2CADR   </span> <a href="MISSION_PHASE_11-DPS2_FITH_APS1.agc.html#4D5031314A4F42">MP11JOB</a>                               
-034711,000482: 
-034712,000483: 31,2377           04736                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               <span class="co">#  MP 12.  UNUSED SLOT.</span>
-034713,000484: 31,2400           04736                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
-034714,000485: 31,2401           04736                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
-034715,000486: 
-034716,000487: 31,2402           20010                           <span class="ps">OCT     </span> 20010                                 <span class="co">#  MP13</span>
-034717,000488: 31,2403  E4,1566                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
-034718,000489: 31,2403           03114 56064                     <span class="ps">2CADR   </span> <a href="MISSION_PHASE_13-APS2.agc.html#4D5031334A4F42">MP13JOB</a>                               
-034719,000490: 
-034720,000491: 31,2405           04736                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               <span class="co">#  MP 14.  UNUSED SLOT.</span>
-034721,000492: 31,2406           04736                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
-034722,000493: 31,2407           04736                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
-034723,000494: 
-<a name="4D5441424C45"></a>034724,000495: 31,2410  31,2333               <span class="sm">MTABLE  </span>           <span class="ps">EQUALS  </span> <a href="#4D5441424C4531">MTABLE1</a>    -21D                       <span class="co">#  MP 1-6 NOT ACTUALLY INCLUDED IN TABLE.</span>
-034725,000496: 
+034682,000447:                                                                                                  <span class="co">#           THE FOLLOWING TABLE SPECIFIES STARTING LOCATIONS AND PRIORITIES OF ALL 206 MISSION PHASES INITIATED BY</span>
+034683,000448:                                                                                                  <span class="co">#  THE MISSION TIMERS (S4B-LEM SEP AND BEYOND). IT ALSO CONTAINS INHIBIT/ENABLE INFORMATION, ETC. EACH ENTRY</span>
+034684,000449:                                                                                                  <span class="co">#  CONSISTS OF THREE WORDS. THE FIRST IS PACKED WITH SEVERAL PIECES OF INFORMATION, AND THE SECOND TWO CONTAIN THE</span>
+034685,000450:                                                                                                  <span class="co">#  2CADR OF THE LOCATION AT WHICH THE PHASE IS TO BEGIN. THE INTERPRETATION OF WORD 1 IS AS FOLLOWS:</span>
+034686,000451: 
+034687,000452:                                                                                                  <span class="co">#           BIT15:         SPARE</span>
+034688,000453:                                                                                                  <span class="co">#           BITS 14-10:    JOB PRIORITY.</span>
+034689,000454:                                                                                                  <span class="co">#           BITS 9-5:      SPARE</span>
+034690,000455:                                                                                                  <span class="co">#           BIT4:          1 IF TIMERS TO BE DISABLED ON PHASE INITIATION.</span>
+034691,000456:                                                                                                  <span class="co">#           BIT3:          1 IF RCS TESTS (INHIBIT/ENABLE INFO).</span>
+034692,000457:                                                                                                  <span class="co">#           BIT2:                  1 IF DPS COLD SOAK</span>
+034693,000458:                                                                                                  <span class="co">#           BIT1:                  1 IF RCS COLD SOAK</span>
+034694,000459: 
+034695,000460:                                                                                                  <span class="co">#  NOTE SPARES COULD BE USED FOR SWITCHING DOWNLISTS, ETC.</span>
+034696,000461: 
+034697,000462:                                                                                                  <span class="co">#           PHASES 1 - 6 ARE NOT INCLUDED SINCE THEY ARE NOT INITIATED BY THE MISSION SCHEDULING ROUTINES.</span>
+<a name="4D5441424C4531"></a>034698,000463: 31,2360           20010        <span class="sm">MTABLE1 </span>           <span class="ps">OCT     </span> 20010                                 <span class="co">#  MP7</span>
+034699,000464: 31,2361  E4,1566                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
+034700,000465: 31,2361           02474 52064                     <span class="ps">2CADR   </span> <a href="MP_7-SIVB_LEM_SEPARATION.agc.html#4D5030374A4F42">MP07JOB</a>                               
+034701,000466: 
+034702,000467: 31,2363           20012                           <span class="ps">OCT     </span> 20012                                 <span class="co">#  MP8</span>
+034703,000468: 31,2364  E3,1652                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              
+034704,000469: 31,2364           02564 56063                     <span class="ps">2CADR   </span> <a href="MISSION_PHASE_8-DPS_COLD_SOAK.agc.html#4D50384A4F42">MP8JOB</a>                                
+034705,000470: 
+034706,000471: 31,2366           20010                           <span class="ps">OCT     </span> 20010                                 <span class="co">#  MP9</span>
+034707,000472: 31,2367  E4,1566                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
+034708,000473: 31,2367           02724 66064                     <span class="ps">2CADR   </span> <a href="MP9-DPS_1_BURN.agc.html#4D50394A4F42">MP9JOB</a>                                
+034709,000474: 
+<a name="312F313030"></a>034710,000475: 31,2371           00243 32703  <span class="sm">1/100   </span>           <span class="ps">2DEC    </span> 0.01                                  <span class="co">#  MP 10.  UNUSED SLOT.</span>
+034711,000476: 
+<a name="33344F4354"></a>034712,000477: 31,2373           00034        <span class="sm">34OCT   </span>           <span class="ps">OCT     </span> 00034                                 
+034713,000478: 
+034714,000479: 31,2374           20010                           <span class="ps">OCT     </span> 20010                                 <span class="co">#  MP11</span>
+034715,000480: 31,2375  E4,1566                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
+034716,000481: 31,2375           02000 74064                     <span class="ps">2CADR   </span> <a href="MISSION_PHASE_11-DPS2_FITH_APS1.agc.html#4D5031314A4F42">MP11JOB</a>                               
+034717,000482: 
+034718,000483: 31,2377           04736                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               <span class="co">#  MP 12.  UNUSED SLOT.</span>
+034719,000484: 31,2400           04736                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
+034720,000485: 31,2401           04736                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
+034721,000486: 
+034722,000487: 31,2402           20010                           <span class="ps">OCT     </span> 20010                                 <span class="co">#  MP13</span>
+034723,000488: 31,2403  E4,1566                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54444543">TDEC</a>                                  
+034724,000489: 31,2403           03114 56064                     <span class="ps">2CADR   </span> <a href="MISSION_PHASE_13-APS2.agc.html#4D5031334A4F42">MP13JOB</a>                               
+034725,000490: 
+034726,000491: 31,2405           04736                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               <span class="co">#  MP 14.  UNUSED SLOT.</span>
+034727,000492: 31,2406           04736                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
+034728,000493: 31,2407           04736                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
+034729,000494: 
+<a name="4D5441424C45"></a>034730,000495: 31,2410  31,2333               <span class="sm">MTABLE  </span>           <span class="ps">EQUALS  </span> <a href="#4D5441424C4531">MTABLE1</a>    -21D                       <span class="co">#  MP 1-6 NOT ACTUALLY INCLUDED IN TABLE.</span>
+034731,000496: 
 </pre>
 </span>
 </p>
@@ -787,15 +787,15 @@ Page 814
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="4241445048415345"></a>034727,000498: 31,2410           04755        <span class="sm">BADPHASE</span>           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#414C41524D">ALARM</a>                                 <span class="co">#  ALARM WHEN MPHASE COMES DUE BUT MPHASE</span>
-034728,000499: 31,2411           00601                           <span class="ps">OCT     </span> 00601                                 <span class="co">#  REGISTER IS ZERO (-0 MEANS INACTIVE).</span>
-034729,000500: 
-034730,000501: 31,2412           35660                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3337">PRIO37</a>                                
-034731,000502: 31,2413           05505                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
-034732,000503: 31,2414  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
-034733,000504: 31,2414           02007 16063                     <span class="ps">2CADR   </span> <a href="FRESH_START_AND_RESTART.agc.html#464F524745544954">FORGETIT</a>                              
-034734,000505: 
-034735,000506: 31,2416           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+<a name="4241445048415345"></a>034733,000498: 31,2410           04755        <span class="sm">BADPHASE</span>           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#414C41524D">ALARM</a>                                 <span class="co">#  ALARM WHEN MPHASE COMES DUE BUT MPHASE</span>
+034734,000499: 31,2411           00601                           <span class="ps">OCT     </span> 00601                                 <span class="co">#  REGISTER IS ZERO (-0 MEANS INACTIVE).</span>
+034735,000500: 
+034736,000501: 31,2412           35660                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3337">PRIO37</a>                                
+034737,000502: 31,2413           05505                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
+034738,000503: 31,2414  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
+034739,000504: 31,2414           02007 16063                     <span class="ps">2CADR   </span> <a href="FRESH_START_AND_RESTART.agc.html#464F524745544954">FORGETIT</a>                              
+034740,000505: 
+034741,000506: 31,2416           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
 
 End of include-file AS206_MISSION_SCHEDULING_PACKAGE.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

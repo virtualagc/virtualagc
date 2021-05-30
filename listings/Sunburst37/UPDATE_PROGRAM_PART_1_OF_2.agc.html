@@ -90,28 +90,28 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-012768,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-012769,000003:                                                                                                  <span class="co">## Filename:    UPDATE_PROGRAM_PART_1_OF_2.agc</span>
-012770,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
-012771,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
-012772,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
-012773,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
-012774,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
-012775,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
-012776,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
-012777,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-012778,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-012779,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-012780,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
-012781,000015:                                                                                                  <span class="co">## Reference:   pp. 303-304</span>
-012782,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-012783,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-012784,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-012785,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
-012786,000020:                                                                                                  <span class="co">##              2017-05-29 HG   Transcribed</span>
-012787,000021:                                                                                                  <span class="co">##              2017-06-22 RSB  Proofed comment text with</span>
-012788,000022:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
-012789,000023: 
+012772,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+012773,000003:                                                                                                  <span class="co">## Filename:    UPDATE_PROGRAM_PART_1_OF_2.agc</span>
+012774,000004:                                                                                                  <span class="co">## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.</span>
+012775,000005:                                                                                                  <span class="co">##              It is part of an early development version of the software</span>
+012776,000006:                                                                                                  <span class="co">##              for Apollo Guidance Computer (AGC) on the unmanned Lunar</span>
+012777,000007:                                                                                                  <span class="co">##              Module (LM) flight Apollo 5. Sunburst 37 was the program</span>
+012778,000008:                                                                                                  <span class="co">##              upon which Don Eyles's offline development program Shepatin</span>
+012779,000009:                                                                                                  <span class="co">##              was based; the listing herein transcribed was actually for</span>
+012780,000010:                                                                                                  <span class="co">##              the equivalent revision 0 of Shepatin.</span>
+012781,000011:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+012782,000012:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+012783,000013:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+012784,000014:                                                                                                  <span class="co">##              original YUL assembler.</span>
+012785,000015:                                                                                                  <span class="co">## Reference:   pp. 303-304</span>
+012786,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+012787,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+012788,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+012789,000019:                                                                                                  <span class="co">## Mod history: 2017-05-24 MAS  Created from Sunburst 120.</span>
+012790,000020:                                                                                                  <span class="co">##              2017-05-29 HG   Transcribed</span>
+012791,000021:                                                                                                  <span class="co">##              2017-06-22 RSB  Proofed comment text with</span>
+012792,000022:                                                                                                  <span class="co">##                              octopus/ProoferComments.</span>
+012793,000023: 
 </pre>
 </span>
 </p>
@@ -127,59 +127,59 @@ Page 303
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-012791,000025: 11,3247                                           <span class="ps">BANK    </span> 11                                    
-012792,000026: 11,3247  E4,1677                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535442554646">STBUFF</a>                                
-012793,000027:                                                                                                  <span class="co">#  THE UPDATE PROGRAM PROCESSES COMMANDS AND DATA INSERTIONS REQUESTED BY THE GROUND VIA UPLINK</span>
-012794,000028:                                                                                                  <span class="co">#  THE PROGRAM IS INITIATED BY UPLINK ENTRY OF VERBS 60,61,64-76</span>
-012795,000029: 
-012796,000030:                                                                                                  <span class="co">#      INPUT</span>
-012797,000031:                                                                                                  <span class="co">#  ENTRY           DESCRIPTION OF DATA</span>
-012798,000032:                                                                                                  <span class="co">#   V64EIEXXXXXE   DOUBLE PRECISION GROUND ELAPSED TIMEIN CSEC (OCTAL)</span>
-012799,000033:                                                                                                  <span class="co">#    XXXXXE</span>
-012800,000034:                                                                                                  <span class="co">#   V65E           SET GUIDANCE REFERENCE RELEASE DISCRETE</span>
-012801,000035:                                                                                                  <span class="co">#   V66E           INITIATE THE LGC DFI TLM CALIBRATE ROUTINE</span>
-012802,000036:                                                                                                  <span class="co">#   V67EXXXE       ENTER A THREE DIGIT OCTAL NUMBER REPRESENTING THE</span>
-012803,000037:                                                                                                  <span class="co">#                   8-BIT COMMAND TO BE SENT TO THE LMP</span>
-012804,000038:                                                                                                  <span class="co">#   V70EIETTTTTE   TIMER I IS SET TO TTTTT (OCTAL,SEC) UNLESS</span>
-012805,000039:                                                                                                  <span class="co">#                   TTTTT=+0 OR -0 WHEN THE TIMER IS SET TO -0 OR</span>
-012806,000040:                                                                                                  <span class="co">#                   TTTTT .LT. -0 WHICH STARTS MISSION PHASE</span>
-012807,000041:                                                                                                  <span class="co">#   V71EIEPPE      MISSION PHASE REGISTER I IS SET TO PP (OCTAL)</span>
-012808,000042:                                                                                                  <span class="co">#   V72EIEPPETTTTTE    SAME AS V70,V71</span>
-012809,000043:                                                                                                  <span class="co">#   V73EIE         CHANGE THE STATE (ENABLE OR INHIBIT) OF DPS COLD SOAK</span>
-012810,000044: 
-012811,000045:                                                                                                  <span class="co">#                   DISCRETE (I=1), OR RCS COLD SOAK DISCRETE (I=2).</span>
-012812,000046:                                                                                                  <span class="co">#   V74E           STOP MISSION TIMERS</span>
-012813,000047:                                                                                                  <span class="co">#   V75E1EXXXXXE... FOR DPS1, ENTER MSB,LSB OF R(P)</span>
-012814,000048:                                                                                                  <span class="co">#   V75E2EXXXXXE... FOR DPS2, ENTER MSB,LSB OF CPT(6),CPT(7),CPT(8). THE</span>
-012815,000049:                                                                                                  <span class="co">#                   DESIRED VALUE X 0.5 SHOULD BE ENTERED</span>
-012816,000050:                                                                                                  <span class="co">#   V75E3EXXXXXE... FOR APS2,ENTER MSB,LSB OF RCSM(TA)0, RCSM(TA)1,</span>
-012817,000051:                                                                                                  <span class="co">#                   RCSM(TA)2,TA,RD,TIME IN CSEC X 2(28)</span>
-012818,000052:                                                                                                  <span class="co">#                   POSITION IN METERS X 2(-24)</span>
-012819,000053:                                                                                                  <span class="co">#   V75E4EXXXXXE... FOR APS3, ENTER ALL BUT RD ABOVE</span>
-012820,000054:                                                                                                  <span class="co">#   V76EXXXXXE...  STATE VECTOR MSB,LSB OF X,Y,Z,XVEL,YVEL,ZVEL,TIME.</span>
-012821,000055:                                                                                                  <span class="co">#                   TIME IN CSEC X 2(28)</span>
-012822,000056:                                                                                                  <span class="co">#                   POSITION IN METERS X 2(-24) X 0.512</span>
-012823,000057:                                                                                                  <span class="co">#                   VELOCITY IN METERS/CSEC X 2(-7) X0.64876819</span>
-<a name="36355550444154"></a>012824,000058: 11,3247           05243        <span class="sm">65UPDAT </span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              
-012825,000059: 11,3250           56000                           <span class="ps">CADR    </span> <a href="MISSION_PHASE_2_GUIDANCE_REFERENCE_RELEASE_PLUS_BOOST_MONITOR.agc.html#475252504C414345">GRRPLACE</a>                              
-<a name="37345550444154"></a>012826,000060: 11,3251           05243        <span class="sm">74UPDAT </span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              
-012827,000061: 11,3252           16000                           <span class="ps">CADR    </span> <a href="FRESH_START_AND_RESTART.agc.html#444F563734">DOV74</a>                                 
-<a name="36365550444154"></a>012828,000062: 11,3253           00004        <span class="sm">66UPDAT </span>           <span class="op">INHINT  </span>                                       
-012829,000063: 11,3254           05307                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              
-012830,000064: 11,3255           56211                           <span class="ps">CADR    </span> <a href="MISSION_PHASE_2_GUIDANCE_REFERENCE_RELEASE_PLUS_BOOST_MONITOR.agc.html#444649544D43414C">DFITMCAL</a>                              
-012831,000065: 11,3256           15605                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-012832,000066: 
-<a name="37335550444154"></a>012833,000067: 11,3257           33316        <span class="sm">73UPDAT </span>           <span class="op">CA      </span> <a href="#4F43543733">OCT73</a>                                 
-012834,000068: 
-012835,000069: 11,3260           03262                           <span class="op">TC      </span> <a href="#36375550444154">67UPDAT</a>    +1                         
-<a name="36375550444154"></a>012836,000070: 11,3261           33317        <span class="sm">67UPDAT </span>           <span class="op">CA      </span> <a href="#4F43543637">OCT67</a>                                 
-012837,000071: 11,3262           54144                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-012838,000072: 11,3263           37755                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#4F4E45">ONE</a>                                   
-012839,000073: 11,3264           03304                           <span class="op">TC      </span> <a href="#37365550444154">76UPDAT</a>    +3                         
-<a name="37305550444154"></a>012840,000074: 11,3265           33320        <span class="sm">70UPDAT </span>           <span class="op">CA      </span> <a href="#4F43543730">OCT70</a>                                 
-012841,000075: 11,3266           03270                           <span class="op">TC      </span> <a href="#37315550444154">71UPDAT</a>    +1                         
-<a name="37315550444154"></a>012842,000076: 11,3267           33321        <span class="sm">71UPDAT </span>           <span class="op">CA      </span> <a href="#4F43543731">OCT71</a>                                 
-012843,000077: 
+012795,000025: 11,3247                                           <span class="ps">BANK    </span> 11                                    
+012796,000026: 11,3247  E4,1677                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#535442554646">STBUFF</a>                                
+012797,000027:                                                                                                  <span class="co">#  THE UPDATE PROGRAM PROCESSES COMMANDS AND DATA INSERTIONS REQUESTED BY THE GROUND VIA UPLINK</span>
+012798,000028:                                                                                                  <span class="co">#  THE PROGRAM IS INITIATED BY UPLINK ENTRY OF VERBS 60,61,64-76</span>
+012799,000029: 
+012800,000030:                                                                                                  <span class="co">#      INPUT</span>
+012801,000031:                                                                                                  <span class="co">#  ENTRY           DESCRIPTION OF DATA</span>
+012802,000032:                                                                                                  <span class="co">#   V64EIEXXXXXE   DOUBLE PRECISION GROUND ELAPSED TIMEIN CSEC (OCTAL)</span>
+012803,000033:                                                                                                  <span class="co">#    XXXXXE</span>
+012804,000034:                                                                                                  <span class="co">#   V65E           SET GUIDANCE REFERENCE RELEASE DISCRETE</span>
+012805,000035:                                                                                                  <span class="co">#   V66E           INITIATE THE LGC DFI TLM CALIBRATE ROUTINE</span>
+012806,000036:                                                                                                  <span class="co">#   V67EXXXE       ENTER A THREE DIGIT OCTAL NUMBER REPRESENTING THE</span>
+012807,000037:                                                                                                  <span class="co">#                   8-BIT COMMAND TO BE SENT TO THE LMP</span>
+012808,000038:                                                                                                  <span class="co">#   V70EIETTTTTE   TIMER I IS SET TO TTTTT (OCTAL,SEC) UNLESS</span>
+012809,000039:                                                                                                  <span class="co">#                   TTTTT=+0 OR -0 WHEN THE TIMER IS SET TO -0 OR</span>
+012810,000040:                                                                                                  <span class="co">#                   TTTTT .LT. -0 WHICH STARTS MISSION PHASE</span>
+012811,000041:                                                                                                  <span class="co">#   V71EIEPPE      MISSION PHASE REGISTER I IS SET TO PP (OCTAL)</span>
+012812,000042:                                                                                                  <span class="co">#   V72EIEPPETTTTTE    SAME AS V70,V71</span>
+012813,000043:                                                                                                  <span class="co">#   V73EIE         CHANGE THE STATE (ENABLE OR INHIBIT) OF DPS COLD SOAK</span>
+012814,000044: 
+012815,000045:                                                                                                  <span class="co">#                   DISCRETE (I=1), OR RCS COLD SOAK DISCRETE (I=2).</span>
+012816,000046:                                                                                                  <span class="co">#   V74E           STOP MISSION TIMERS</span>
+012817,000047:                                                                                                  <span class="co">#   V75E1EXXXXXE... FOR DPS1, ENTER MSB,LSB OF R(P)</span>
+012818,000048:                                                                                                  <span class="co">#   V75E2EXXXXXE... FOR DPS2, ENTER MSB,LSB OF CPT(6),CPT(7),CPT(8). THE</span>
+012819,000049:                                                                                                  <span class="co">#                   DESIRED VALUE X 0.5 SHOULD BE ENTERED</span>
+012820,000050:                                                                                                  <span class="co">#   V75E3EXXXXXE... FOR APS2,ENTER MSB,LSB OF RCSM(TA)0, RCSM(TA)1,</span>
+012821,000051:                                                                                                  <span class="co">#                   RCSM(TA)2,TA,RD,TIME IN CSEC X 2(28)</span>
+012822,000052:                                                                                                  <span class="co">#                   POSITION IN METERS X 2(-24)</span>
+012823,000053:                                                                                                  <span class="co">#   V75E4EXXXXXE... FOR APS3, ENTER ALL BUT RD ABOVE</span>
+012824,000054:                                                                                                  <span class="co">#   V76EXXXXXE...  STATE VECTOR MSB,LSB OF X,Y,Z,XVEL,YVEL,ZVEL,TIME.</span>
+012825,000055:                                                                                                  <span class="co">#                   TIME IN CSEC X 2(28)</span>
+012826,000056:                                                                                                  <span class="co">#                   POSITION IN METERS X 2(-24) X 0.512</span>
+012827,000057:                                                                                                  <span class="co">#                   VELOCITY IN METERS/CSEC X 2(-7) X0.64876819</span>
+<a name="36355550444154"></a>012828,000058: 11,3247           05243        <span class="sm">65UPDAT </span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              
+012829,000059: 11,3250           56000                           <span class="ps">CADR    </span> <a href="MISSION_PHASE_2_GUIDANCE_REFERENCE_RELEASE_PLUS_BOOST_MONITOR.agc.html#475252504C414345">GRRPLACE</a>                              
+<a name="37345550444154"></a>012830,000060: 11,3251           05243        <span class="sm">74UPDAT </span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              
+012831,000061: 11,3252           16000                           <span class="ps">CADR    </span> <a href="FRESH_START_AND_RESTART.agc.html#444F563734">DOV74</a>                                 
+<a name="36365550444154"></a>012832,000062: 11,3253           00004        <span class="sm">66UPDAT </span>           <span class="op">INHINT  </span>                                       
+012833,000063: 11,3254           05307                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              
+012834,000064: 11,3255           56211                           <span class="ps">CADR    </span> <a href="MISSION_PHASE_2_GUIDANCE_REFERENCE_RELEASE_PLUS_BOOST_MONITOR.agc.html#444649544D43414C">DFITMCAL</a>                              
+012835,000065: 11,3256           15605                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+012836,000066: 
+<a name="37335550444154"></a>012837,000067: 11,3257           33316        <span class="sm">73UPDAT </span>           <span class="op">CA      </span> <a href="#4F43543733">OCT73</a>                                 
+012838,000068: 
+012839,000069: 11,3260           03262                           <span class="op">TC      </span> <a href="#36375550444154">67UPDAT</a>    +1                         
+<a name="36375550444154"></a>012840,000070: 11,3261           33317        <span class="sm">67UPDAT </span>           <span class="op">CA      </span> <a href="#4F43543637">OCT67</a>                                 
+012841,000071: 11,3262           54144                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+012842,000072: 11,3263           37755                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#4F4E45">ONE</a>                                   
+012843,000073: 11,3264           03304                           <span class="op">TC      </span> <a href="#37365550444154">76UPDAT</a>    +3                         
+<a name="37305550444154"></a>012844,000074: 11,3265           33320        <span class="sm">70UPDAT </span>           <span class="op">CA      </span> <a href="#4F43543730">OCT70</a>                                 
+012845,000075: 11,3266           03270                           <span class="op">TC      </span> <a href="#37315550444154">71UPDAT</a>    +1                         
+<a name="37315550444154"></a>012846,000076: 11,3267           33321        <span class="sm">71UPDAT </span>           <span class="op">CA      </span> <a href="#4F43543731">OCT71</a>                                 
+012847,000077: 
 </pre>
 </span>
 </p>
@@ -195,39 +195,39 @@ Page 304
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-012845,000079: 11,3270           54144                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-012846,000080: 11,3271           37754                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#54574F">TWO</a>                                   
-012847,000081: 
-012848,000082: 11,3272           03304                           <span class="op">TC      </span> <a href="#37365550444154">76UPDAT</a>    +3                         
-<a name="36345550444154"></a>012849,000083: 11,3273           33322        <span class="sm">64UPDAT </span>           <span class="op">CA      </span> <a href="#31314F43543634">11OCT64</a>                               
-012850,000084: 11,3274           03276                           <span class="op">TC      </span> <a href="#37325550444154">72UPDAT</a>    +1                         
-<a name="37325550444154"></a>012851,000085: 11,3275           33323        <span class="sm">72UPDAT </span>           <span class="op">CA      </span> <a href="#4F43543732">OCT72</a>                                 
-012852,000086: 11,3276           54144                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-012853,000087: 11,3277           36301                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#5448524545">THREE</a>                                 
-012854,000088: 11,3300           03304                           <span class="op">TC      </span> <a href="#37365550444154">76UPDAT</a>    +3                         
-<a name="37365550444154"></a>012855,000089: 11,3301           33324        <span class="sm">76UPDAT </span>           <span class="op">CA      </span> <a href="#4F43543736">OCT76</a>                                 
-012856,000090: 11,3302           54144                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-012857,000091: 11,3303           33325                           <span class="op">CA      </span> <a href="#31314F43543136">11OCT16</a>                               
-012858,000092: 11,3304           54145                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
-012859,000093: 11,3305           03310                           <span class="op">TC      </span> <a href="#37355550444154">75UPDAT</a>    +2                         
-<a name="37355550444154"></a>012860,000094: 11,3306           33326        <span class="sm">75UPDAT </span>           <span class="op">CA      </span> <a href="#31314F43543735">11OCT75</a>                               
-012861,000095: 11,3307           54144                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-012862,000096: 11,3310           30076                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              <span class="co">#  TEST IF TIMERS ENABLED</span>
-012863,000097: 11,3311           77751                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#42495435">BIT5</a>                                  
-012864,000098: 11,3312           00006                           <span class="op">EXTEND  </span>                                       
-012865,000099: 11,3313           12053                           <span class="op">BZF     </span> <a href="EXTENDED_VERBS.agc.html#58414354414C4D">XACTALM</a>                               <span class="co">#   NO, RETURN</span>
-012866,000100: 11,3314           05224                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-012867,000101: 11,3315           54000                           <span class="ps">CADR    </span> <a href="UPDATE_PROGRAM_PART_2_OF_2.agc.html#55505041525432">UPPART2</a>                               
-<a name="4F43543733"></a>012868,000102: 11,3316           00073        <span class="sm">OCT73   </span>           <span class="ps">OCT     </span> 00073                                 
-<a name="4F43543637"></a>012869,000103: 11,3317           00067        <span class="sm">OCT67   </span>           <span class="ps">OCT     </span> 00067                                 
-<a name="4F43543730"></a>012870,000104: 11,3320           00070        <span class="sm">OCT70   </span>           <span class="ps">OCT     </span> 00070                                 
-012871,000105: 
-<a name="4F43543731"></a>012872,000106: 11,3321           00071        <span class="sm">OCT71   </span>           <span class="ps">OCT     </span> 00071                                 
-<a name="31314F43543634"></a>012873,000107: 11,3322           00064        <span class="sm">11OCT64 </span>           <span class="ps">OCT     </span> 00064                                 
-<a name="4F43543732"></a>012874,000108: 11,3323           00072        <span class="sm">OCT72   </span>           <span class="ps">OCT     </span> 00072                                 
-<a name="4F43543736"></a>012875,000109: 11,3324           00076        <span class="sm">OCT76   </span>           <span class="ps">OCT     </span> 00076                                 
-<a name="31314F43543136"></a>012876,000110: 11,3325           00016        <span class="sm">11OCT16 </span>           <span class="ps">OCT     </span> 16                                    
-<a name="31314F43543735"></a>012877,000111: 11,3326           00075        <span class="sm">11OCT75 </span>           <span class="ps">OCT     </span> 00075                                 
+012849,000079: 11,3270           54144                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+012850,000080: 11,3271           37754                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#54574F">TWO</a>                                   
+012851,000081: 
+012852,000082: 11,3272           03304                           <span class="op">TC      </span> <a href="#37365550444154">76UPDAT</a>    +3                         
+<a name="36345550444154"></a>012853,000083: 11,3273           33322        <span class="sm">64UPDAT </span>           <span class="op">CA      </span> <a href="#31314F43543634">11OCT64</a>                               
+012854,000084: 11,3274           03276                           <span class="op">TC      </span> <a href="#37325550444154">72UPDAT</a>    +1                         
+<a name="37325550444154"></a>012855,000085: 11,3275           33323        <span class="sm">72UPDAT </span>           <span class="op">CA      </span> <a href="#4F43543732">OCT72</a>                                 
+012856,000086: 11,3276           54144                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+012857,000087: 11,3277           36301                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#5448524545">THREE</a>                                 
+012858,000088: 11,3300           03304                           <span class="op">TC      </span> <a href="#37365550444154">76UPDAT</a>    +3                         
+<a name="37365550444154"></a>012859,000089: 11,3301           33324        <span class="sm">76UPDAT </span>           <span class="op">CA      </span> <a href="#4F43543736">OCT76</a>                                 
+012860,000090: 11,3302           54144                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+012861,000091: 11,3303           33325                           <span class="op">CA      </span> <a href="#31314F43543136">11OCT16</a>                               
+012862,000092: 11,3304           54145                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
+012863,000093: 11,3305           03310                           <span class="op">TC      </span> <a href="#37355550444154">75UPDAT</a>    +2                         
+<a name="37355550444154"></a>012864,000094: 11,3306           33326        <span class="sm">75UPDAT </span>           <span class="op">CA      </span> <a href="#31314F43543735">11OCT75</a>                               
+012865,000095: 11,3307           54144                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+012866,000096: 11,3310           30076                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              <span class="co">#  TEST IF TIMERS ENABLED</span>
+012867,000097: 11,3311           77751                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#42495435">BIT5</a>                                  
+012868,000098: 11,3312           00006                           <span class="op">EXTEND  </span>                                       
+012869,000099: 11,3313           12053                           <span class="op">BZF     </span> <a href="EXTENDED_VERBS.agc.html#58414354414C4D">XACTALM</a>                               <span class="co">#   NO, RETURN</span>
+012870,000100: 11,3314           05224                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+012871,000101: 11,3315           54000                           <span class="ps">CADR    </span> <a href="UPDATE_PROGRAM_PART_2_OF_2.agc.html#55505041525432">UPPART2</a>                               
+<a name="4F43543733"></a>012872,000102: 11,3316           00073        <span class="sm">OCT73   </span>           <span class="ps">OCT     </span> 00073                                 
+<a name="4F43543637"></a>012873,000103: 11,3317           00067        <span class="sm">OCT67   </span>           <span class="ps">OCT     </span> 00067                                 
+<a name="4F43543730"></a>012874,000104: 11,3320           00070        <span class="sm">OCT70   </span>           <span class="ps">OCT     </span> 00070                                 
+012875,000105: 
+<a name="4F43543731"></a>012876,000106: 11,3321           00071        <span class="sm">OCT71   </span>           <span class="ps">OCT     </span> 00071                                 
+<a name="31314F43543634"></a>012877,000107: 11,3322           00064        <span class="sm">11OCT64 </span>           <span class="ps">OCT     </span> 00064                                 
+<a name="4F43543732"></a>012878,000108: 11,3323           00072        <span class="sm">OCT72   </span>           <span class="ps">OCT     </span> 00072                                 
+<a name="4F43543736"></a>012879,000109: 11,3324           00076        <span class="sm">OCT76   </span>           <span class="ps">OCT     </span> 00076                                 
+<a name="31314F43543136"></a>012880,000110: 11,3325           00016        <span class="sm">11OCT16 </span>           <span class="ps">OCT     </span> 16                                    
+<a name="31314F43543735"></a>012881,000111: 11,3326           00075        <span class="sm">11OCT75 </span>           <span class="ps">OCT     </span> 00075                                 
 
 End of include-file UPDATE_PROGRAM_PART_1_OF_2.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

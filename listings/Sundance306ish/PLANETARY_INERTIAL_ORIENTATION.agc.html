@@ -92,369 +92,369 @@ from scratch to match what we believe would have been in the original listing.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-043932,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-043933,000003:                                                                                                  <span class="co">## Filename:    PLANETARY_INERTIAL_ORIENTATION.agc</span>
-043934,000004:                                                                                                  <span class="co">## Purpose:     A section of an attempt to reconstruct Sundance revision 306</span>
-043935,000005:                                                                                                  <span class="co">##              as closely as possible with available information. Sundance</span>
-043936,000006:                                                                                                  <span class="co">##              306 is the source code for the Lunar Module's (LM) Apollo</span>
-043937,000007:                                                                                                  <span class="co">##              Guidance Computer (AGC) for Apollo 9. This program was created</span>
-043938,000008:                                                                                                  <span class="co">##              using the mixed-revision SundanceXXX as a starting point, and</span>
-043939,000009:                                                                                                  <span class="co">##              pulling back features from Luminary 69 believed to have been</span>
-043940,000010:                                                                                                  <span class="co">##              added based on memos, checklists, observed address changes,</span>
-043941,000011:                                                                                                  <span class="co">##              or the Sundance GSOPs.</span>
-043942,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-043943,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-043944,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-043945,000015:                                                                                                  <span class="co">## Mod history: 2020-07-24 MAS  Created from SundanceXXX.</span>
-043946,000016: 
-043947,000017: 
-043948,000018: 
-043949,000019:                                                                                                  <span class="co">#  ..... RP-TO-R SUBROUTINE .....</span>
-043950,000020:                                                                                                  <span class="co">#  SUBROUTINE TO CONVERT RP (VECTOR IN PLANETARY COORDINATE SYSTEM, EITHER</span>
-043951,000021:                                                                                                  <span class="co">#   EARTH-FIXED OR MOON-FIXED) TO R (SAME VECTOR IN THE BASIC REF. SYSTEM)</span>
-043952,000022: 
-043953,000023:                                                                                                  <span class="co">#        R = MT(T)*(RP + LP X RP)        MT = M MATRIX TRANSPOSE</span>
-043954,000024: 
-043955,000025:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
-043956,000026:                                                                                                  <span class="co">#        L       CALL</span>
-043957,000027:                                                                                                  <span class="co">#        L+1             RP-TO-R</span>
-043958,000028: 
-043959,000029:                                                                                                  <span class="co">#  SUBROUTINES USED</span>
-043960,000030:                                                                                                  <span class="co">#        EARTHMX,MOONMX,EARTHL</span>
-043961,000031: 
-043962,000032:                                                                                                  <span class="co">#        ITEMS AVAILABLE FROM LAUNCH DATA</span>
-043963,000033:                                                                                                  <span class="co">#                504LM = THE LIBRATION VECTOR L OF THE MOON AT TIME TIMSUBL,EXPRESSED</span>
-043964,000034:                                                                                                  <span class="co">#                        IN THE MOON-FIXED COORD. SYSTEM         RADIANS B0</span>
-043965,000035: 
-043966,000036:                                                                                                  <span class="co">#        ITEMS NECESSARY FOR SUBR. USED (SEE DESCRIPTION OF SUBR.)</span>
-043967,000037: 
-043968,000038:                                                                                                  <span class="co">#  INPUT</span>
-043969,000039:                                                                                                  <span class="co">#        MPAC= 0 FOR EARTH, NON-ZERO FOR MOON</span>
-043970,000040:                                                                                                  <span class="co">#        0-5D= RP VECTOR</span>
-043971,000041:                                                                                                  <span class="co">#        6-7D= TIME</span>
-043972,000042: 
-043973,000043:                                                                                                  <span class="co">#  OUTPUT</span>
-043974,000044:                                                                                                  <span class="co">#        MPAC = R VECTOR METERS B-29 FOR EARTH, B-27 FOR MOON</span>
-043975,000045: 
-043976,000046: 24,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#504C414E54494E">PLANTIN</a>                               
-043977,000047: 24,2000                                           <span class="ps">BANK    </span>                                       
-043978,000048: 
-043979,000049: 24,3222                                           <span class="ps">COUNT*  </span> $$/LUROT                              
-043980,000050: 
-<a name="52502D544F2D52"></a>043981,000051: 24,3222           46020        <span class="sm">RP-TO-R </span>           <span class="in">STQ     </span> <span class="in">BHIZ      </span>                            
-043982,000052: 24,3223           00050                                    <a href="#52505245584954">RPREXIT</a>                               
-043983,000053: 24,3224           51237                                    <a href="#5250544F5241">RPTORA</a>                                
-043984,000054: 24,3225           77624                           <span class="in">CALL    </span>                                       <span class="co">#  COMPUTE M MATRIX FOR MOON</span>
-043985,000055: 24,3226           51277                                    <a href="#4D4F4F4E4D58">MOONMX</a>                                <span class="co">#  LP=LM FOR MOON  RADIANS B0</span>
-043986,000056: 24,3227           77775                           <span class="in">VLOAD   </span>                                       
-043987,000057: 24,3230           02011                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#3530344C4D">504LM</a>                                 
-<a name="5250544F5242"></a>043988,000058: 24,3231           53235        <span class="sm">RPTORB  </span>           <span class="in">VXV     </span> <span class="in">VAD       </span>                            
-043989,000059: 24,3232           00001                                    <a href="#353034525052">504RPR</a>                                
-043990,000060: 24,3233           00001                                    <a href="#353034525052">504RPR</a>                                
-043991,000061: 24,3234           52105                           <span class="in">VXM     </span> <span class="in">GOTO      </span>                            
-043992,000062: 24,3235           00025                                    <a href="#4D4D4154524958">MMATRIX</a>                               <span class="co">#  MPAC=R=MT(T)*(RP+LPXRP)</span>
-043993,000063: 24,3236           51265                                    <a href="#5250525058585858">RPRPXXXX</a>                              <span class="co">#  RESET PUSHLOC TO 0 BEFORE EXITING</span>
-<a name="5250544F5241"></a>043994,000064: 24,3237           77624        <span class="sm">RPTORA  </span>           <span class="in">CALL    </span>                                       <span class="co">#  EARTH COMPUTATIONS</span>
-043995,000065: 24,3240           51451                                    <a href="#45415254484D58">EARTHMX</a>                               <span class="co">#  M MATRIX B-1</span>
-043996,000066: 24,3241           77624                           <span class="in">CALL    </span>                                       
-043997,000067: 24,3242           51503                                    <a href="#45415254484C">EARTHL</a>                                <span class="co">#  L VECTOR RADIANS B0</span>
-043998,000068: 24,3243           76521                           <span class="in">MXV     </span> <span class="in">VSL1      </span>                            <span class="co">#  LP=M(T)*L  RAD B-0</span>
-043999,000069: 24,3244           00025                                    <a href="#4D4D4154524958">MMATRIX</a>                               
-044000,000070: 24,3245           77650                           <span class="in">GOTO    </span>                                       
-044001,000071: 24,3246           51231                                    <a href="#5250544F5242">RPTORB</a>                                
-044002,000072: 
-044003,000073:                                                                                                  <span class="co">#  ..... R-TO-RP SUBROUTINE .....</span>
-044004,000074:                                                                                                  <span class="co">#  SUBROUTINE TO CONVERT R (VECTOR IN REFERENCE COORD. SYSTEM) TO RP</span>
-044005,000075:                                                                                                  <span class="co">#  (VECTOR IN PLANETARY COORD SYSTEM) EITHER EARTH-FIXED OR MOON-FIXED</span>
-044006,000076: 
-044007,000077:                                                                                                  <span class="co">#        RP = M(T)*(R - L X R)</span>
-044008,000078: 
-044009,000079:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
-044010,000080:                                                                                                  <span class="co">#        L       CALL</span>
-044011,000081:                                                                                                  <span class="co">#        L+1             R-TO-RP</span>
-044012,000082: 
-044013,000083:                                                                                                  <span class="co">#  SUBROUTINES USED</span>
-044014,000084:                                                                                                  <span class="co">#        EARTHMX,MOONMX,EARTHL</span>
-044015,000085: 
-044016,000086:                                                                                                  <span class="co">#  INPUT</span>
-044017,000087:                                                                                                  <span class="co">#        MPAC= 0 FOR EARTH,NON-ZERO FOR MOON</span>
-044018,000088:                                                                                                  <span class="co">#        0-5D= R VECTOR</span>
-044019,000089:                                                                                                  <span class="co">#        6-7D= TIME</span>
-044020,000090: 
-044021,000091:                                                                                                  <span class="co">#        ITEMS AVAILABLE FROM LAUNCH DATA</span>
-044022,000092:                                                                                                  <span class="co">#                504LM = THE LIBRATION VECTOR L OF THE MOON AT TIME TIMSUBL,EXPRESSED</span>
-044023,000093:                                                                                                  <span class="co">#                        IN THE MOON-FIXED COORD. SYSTEM   RADIANS B0</span>
-044024,000094: 
-044025,000095:                                                                                                  <span class="co">#        ITEMS NECESSARY FOR SUBROUTINES USED (SEE DESCRIPTION OF SUBR.)</span>
-044026,000096: 
-044027,000097:                                                                                                  <span class="co">#  OUTPUT</span>
-044028,000098:                                                                                                  <span class="co">#        MPAC = RP VECTOR METERS B-29 FOR EARTH, B-27 FOR MOON</span>
-044029,000099: 
-<a name="522D544F2D5250"></a>044030,000100: 24,3247           46020        <span class="sm">R-TO-RP </span>           <span class="in">STQ     </span> <span class="in">BHIZ      </span>                            
-044031,000101: 24,3250           00050                                    <a href="#52505245584954">RPREXIT</a>                               
-044032,000102: 24,3251           51271                                    <a href="#52544F525041">RTORPA</a>                                
-044033,000103: 24,3252           77624                           <span class="in">CALL    </span>                                       
-044034,000104: 24,3253           51277                                    <a href="#4D4F4F4E4D58">MOONMX</a>                                
-044035,000105: 24,3254           61375                           <span class="in">VLOAD   </span> <span class="in">VXM       </span>                            
-044036,000106: 24,3255           02011                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#3530344C4D">504LM</a>                                 <span class="co">#  LP=LM</span>
-044037,000107: 24,3256           00025                                    <a href="#4D4D4154524958">MMATRIX</a>                               
-044038,000108: 24,3257           77772                           <span class="in">VSL1    </span>                                       <span class="co">#   L=MT(T)*LP  RADIANS B0</span>
-<a name="52544F525042"></a>044039,000109: 24,3260           51235        <span class="sm">RTORPB  </span>           <span class="in">VXV     </span> <span class="in">BVSU      </span>                            
-044040,000110: 24,3261           00001                                    <a href="#353034525052">504RPR</a>                                
-044041,000111: 24,3262           00001                                    <a href="#353034525052">504RPR</a>                                
-044042,000112: 24,3263           77721                           <span class="in">MXV     </span>                                       <span class="co">#  M(T)*(R-LXR) B-2</span>
-044043,000113: 24,3264           00025                                    <a href="#4D4D4154524958">MMATRIX</a>                               
-<a name="5250525058585858"></a>044044,000114: 24,3265           40372        <span class="sm">RPRPXXXX</span>           <span class="in">VSL1    </span> <span class="in">SETPD     </span>                            
-044045,000115: 24,3266           00001                                    0D                                    
-044046,000116: 24,3267           77650                           <span class="in">GOTO    </span>                                       
-044047,000117: 24,3270           00050                                    <a href="#52505245584954">RPREXIT</a>                               
-<a name="52544F525041"></a>044048,000118: 24,3271           77624        <span class="sm">RTORPA  </span>           <span class="in">CALL    </span>                                       <span class="co">#  EARTH COMPUTATIONS</span>
-044049,000119: 24,3272           51451                                    <a href="#45415254484D58">EARTHMX</a>                               
-044050,000120: 24,3273           77624                           <span class="in">CALL    </span>                                       
-044051,000121: 24,3274           51503                                    <a href="#45415254484C">EARTHL</a>                                
-044052,000122: 24,3275           77650                           <span class="in">GOTO    </span>                                       <span class="co">#  MPAC=L=(-AX,-AY,0) RAD B-0</span>
-044053,000123: 24,3276           51260                                    <a href="#52544F525042">RTORPB</a>                                
-044054,000124: 
-044055,000125:                                                                                                  <span class="co">#  ..... MOONMX SUBROUTINE .....</span>
-044056,000126:                                                                                                  <span class="co">#  SUBROUTINE TO COMPUTE THE TRANSFORMATION MATRIX M FOR THE MOON</span>
-044057,000127: 
-044058,000128:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
-044059,000129:                                                                                                  <span class="co">#        L       CALL</span>
-044060,000130:                                                                                                  <span class="co">#        L+1             MOONMX</span>
-044061,000131: 
-044062,000132:                                                                                                  <span class="co">#  SUBROUTINES USED</span>
-044063,000133:                                                                                                  <span class="co">#        NEWANGLE</span>
-044064,000134: 
-044065,000135:                                                                                                  <span class="co">#  INPUT</span>
-044066,000136:                                                                                                  <span class="co">#        6-7D= TIME</span>
-044067,000137: 
-044068,000138:                                                                                                  <span class="co">#        ITEMS AVAILABLE FROM LAUNCH DATA</span>
-044069,000139:                                                                                                  <span class="co">#                BSUBO,BDOT</span>
-044070,000140:                                                                                                  <span class="co">#                TIMSUBO,NODIO,NODDOT,FSUBO,FDOT</span>
-044071,000141:                                                                                                  <span class="co">#                COSI= COS(I)    B-1</span>
-044072,000142:                                                                                                  <span class="co">#                SINI= SIN(I)    B-1</span>
-044073,000143:                                                                                                  <span class="co">#                  I IS THE ANGLE BETWEEN THE MEAN LUNAR EQUATORIAL PLANE AND THE</span>
-044074,000144:                                                                                                  <span class="co">#                  PLANE OF THE ECLIPTIC (1 DEGREE 32.1 MINUTES)</span>
-044075,000145: 
-044076,000146:                                                                                                  <span class="co">#  OUTPUT</span>
-044077,000147:                                                                                                  <span class="co">#        MMATRIX= 3X3 M MATRIX B-1       (STORED IN VAC AREA)</span>
-044078,000148: 
-<a name="4D4F4F4E4D58"></a>044079,000149: 24,3277           40220        <span class="sm">MOONMX  </span>           <span class="in">STQ     </span> <span class="in">SETPD     </span>                            
-044080,000150: 24,3300           00051                                    <a href="#45415254484D5858">EARTHMXX</a>                              
-044081,000151: 24,3301           00011                                    8D                                    
-044082,000152: 24,3302           77770                           <span class="in">AXT,1   </span>                                       <span class="co">#  B REQUIRES SL 0, SL 5 IN NEWANGLE</span>
-044083,000153: 24,3303           00005                                    5                                     
-044084,000154: 24,3304           65345                           <span class="in">DLOAD   </span> <span class="in">PDDL      </span>                            <span class="co">#  PD 10D        8-9D=BSUBO</span>
-044085,000155: 24,3305           11533                                    <a href="#425355424F">BSUBO</a>                                 <span class="co">#                10-11D=BDOT</span>
-044086,000156: 24,3306           11525                                    <a href="#42444F54">BDOT</a>                                  
-044087,000157: 24,3307           45006                           <span class="in">PUSH    </span> <span class="in">CALL      </span>                            <span class="co">#  PD 12D</span>
-044088,000158: 24,3310           51424                                    <a href="#4E4557414E474C45">NEWANGLE</a>                              <span class="co">#  EXIT WITH PD 8D AND MPAC= B   REVS B0</span>
-044089,000159: 24,3311           71406                           <span class="in">PUSH    </span> <span class="in">COS       </span>                            <span class="co">#  PD 10D</span>
-044090,000160: 24,3312           14041                           <span class="in">STODL   </span> <a href="#434F42">COB</a>                                   <span class="co">#  PD 8D         COS(B) B-1</span>
-044091,000161: 24,3313           77756                           <span class="in">SIN     </span>                                       <span class="co">#                SIN(B) B-1</span>
-044092,000162: 24,3314           14043                           <span class="in">STODL   </span> <a href="#534F42">SOB</a>                                   <span class="co">#  SETUP INPUT FOR NEWANGLE</span>
-044093,000163: 24,3315           11531                                    <a href="#465355424F">FSUBO</a>                                 <span class="co">#                        8-9D=FSUBO</span>
-044094,000164: 24,3316           41525                           <span class="in">PDDL    </span> <span class="in">PUSH      </span>                            <span class="co">#  PD 10D THEN 12D       10-11D=FDOT</span>
-044095,000165: 24,3317           11523                                    <a href="#46444F54">FDOT</a>                                  
-044096,000166: 24,3320           45170                           <span class="in">AXT,1   </span> <span class="in">CALL      </span>                            <span class="co">#  F REQUIRES SL 1, SL 6 IN NEWANGLE</span>
-044097,000167: 24,3321           00004                                    4                                     
-044098,000168: 24,3322           51424                                    <a href="#4E4557414E474C45">NEWANGLE</a>                              <span class="co">#  EXIT WITH PD 8D AND MPAC= F REVS B0</span>
-044099,000169: 24,3323           14027                           <span class="in">STODL   </span> <a href="#415645435452">AVECTR</a>     +2                         <span class="co">#  SAVE F TEMP</span>
-044100,000170: 24,3324           11527                                    <a href="#4E4F44494F">NODIO</a>                                 <span class="co">#                        8-9D=NODIO</span>
-044101,000171: 24,3325           41525                           <span class="in">PDDL    </span> <span class="in">PUSH      </span>                            <span class="co">#  PD 10D THEN 12D       10-11D=NODDOT</span>
-044102,000172: 24,3326           11521                                    <a href="#4E4F44444F54">NODDOT</a>                                <span class="co">#                        MPAC=T</span>
-044103,000173: 24,3327           45170                           <span class="in">AXT,1   </span> <span class="in">CALL      </span>                            <span class="co">#  NODE REQUIRES SL 0, SL 5 IN NEWANGLE</span>
-044104,000174: 24,3330           00005                                    5                                     
-044105,000175: 24,3331           51424                                    <a href="#4E4557414E474C45">NEWANGLE</a>                              <span class="co">#  EXIT WITH PD 8D AND MPAC= NODI REVS B0</span>
-044106,000176: 24,3332           71406                           <span class="in">PUSH    </span> <span class="in">COS       </span>                            <span class="co">#  PD 10D        8-9D= NODI REVS B0</span>
-044107,000177: 24,3333           77606                           <span class="in">PUSH    </span>                                       <span class="co">#  PD 12D        10-11D= COS(NODI) B-1</span>
-044108,000178: 24,3334           00025                           <span class="in">STORE   </span> <a href="#415645435452">AVECTR</a>                                
-044109,000179: 24,3335           76405                           <span class="in">DMP     </span> <span class="in">SL1R      </span>                            
-044110,000180: 24,3336           00041                                    <a href="#434F42">COB</a>                                   <span class="co">#                         COS(NODI) B-1</span>
-044111,000181: 24,3337           14035                           <span class="in">STODL   </span> <a href="#425645435452">BVECTR</a>     +2                         <span class="co">#  PD 10D  20-25D=AVECTR= COB*SIN(NODI)</span>
-044112,000182: 24,3340           76405                           <span class="in">DMP     </span> <span class="in">SL1R      </span>                            <span class="co">#                         SOB*SIN(NODI)</span>
-044113,000183: 24,3341           00043                                    <a href="#534F42">SOB</a>                                   
-044114,000184: 24,3342           14037                           <span class="in">STODL   </span> <a href="#425645435452">BVECTR</a>     +4                         <span class="co">#  PD 8D</span>
-044115,000185: 24,3343           41556                           <span class="in">SIN     </span> <span class="in">PUSH      </span>                            <span class="co">#  PD 10D                -SIN(NODI) B-1</span>
-044116,000186: 24,3344           77676                           <span class="in">DCOMP   </span>                                       <span class="co">#          26-31D=BVECTR= COB*COS(NODI)</span>
-044117,000187: 24,3345           14033                           <span class="in">STODL   </span> <a href="#425645435452">BVECTR</a>                                <span class="co">#  PD 8D                  SOB*COS(NODI)</span>
-044118,000188: 24,3346           00027                                    <a href="#415645435452">AVECTR</a>     +2                         <span class="co">#  MOVE F FROM TEMP LOC. TO 504F</span>
-044119,000189: 24,3347           14007                           <span class="in">STODL   </span> <a href="#35303446">504F</a>                                  
-044120,000190: 24,3350           76405                           <span class="in">DMP     </span> <span class="in">SL1R      </span>                            
-044121,000191: 24,3351           00041                                    <a href="#434F42">COB</a>                                   
-044122,000192: 24,3352           14027                           <span class="in">STODL   </span> <a href="#415645435452">AVECTR</a>     +2                         
-044123,000193: 24,3353           00011                                    <a href="#53494E4E4F4449">SINNODI</a>                               <span class="co">#  8-9D=SIN(NODI) B-1</span>
-044124,000194: 24,3354           76405                           <span class="in">DMP     </span> <span class="in">SL1R      </span>                            
-044125,000195: 24,3355           00043                                    <a href="#534F42">SOB</a>                                   
-044126,000196: 24,3356           14031                           <span class="in">STODL   </span> <a href="#415645435452">AVECTR</a>     +4                         <span class="co">#                         0</span>
-044127,000197: 24,3357           06233                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849365A45524F53">HI6ZEROS</a>                              <span class="co">#        8-13D= CVECTR= -SOB  B-1</span>
-044128,000198: 24,3360           57525                           <span class="in">PDDL    </span> <span class="in">DCOMP     </span>                            <span class="co">#  PD 10D                COB</span>
-044129,000199: 24,3361           00043                                    <a href="#534F42">SOB</a>                                   
-044130,000200: 24,3362           63325                           <span class="in">PDDL    </span> <span class="in">PDVL      </span>                            <span class="co">#  PD 12D THEN PD 14D</span>
-044131,000201: 24,3363           00041                                    <a href="#434F42">COB</a>                                   
-044132,000202: 24,3364           00033                                    <a href="#425645435452">BVECTR</a>                                
-044133,000203: 24,3365           63361                           <span class="in">VXSC    </span> <span class="in">PDVL      </span>                            <span class="co">#  PD 20D        BVECTR*SINI  B-2</span>
-044134,000204: 24,3366           11517                                    <a href="#53494E49">SINI</a>                                  
-044135,000205: 24,3367           00011                                    <a href="#435645435452">CVECTR</a>                                
-044136,000206: 24,3370           53361                           <span class="in">VXSC    </span> <span class="in">VAD       </span>                            <span class="co">#  PD 14D        CVECTR*COSI  B-2</span>
-044137,000207: 24,3371           11515                                    <a href="#434F5349">COSI</a>                                  
-044138,000208: 24,3372           77772                           <span class="in">VSL1    </span>                                       
-044139,000209: 24,3373           24041                           <span class="in">STOVL   </span> <a href="#4D4D4154524958">MMATRIX</a>    +12D                       <span class="co">#  PD 8D  M2=BVECTR*SINI+CVECTR*COSI  B-1</span>
-044140,000210: 24,3374           63361                           <span class="in">VXSC    </span> <span class="in">PDVL      </span>                            <span class="co">#  PD 14D</span>
-044141,000211: 24,3375           11517                                    <a href="#53494E49">SINI</a>                                  <span class="co">#                CVECTR*SINI  B-2</span>
-044142,000212: 24,3376           00033                                    <a href="#425645435452">BVECTR</a>                                
-044143,000213: 24,3377           52361                           <span class="in">VXSC    </span> <span class="in">VSU       </span>                            <span class="co">#  PD 8D         BVECTR*COSI  B-2</span>
-044144,000214: 24,3400           11515                                    <a href="#434F5349">COSI</a>                                  
-044145,000215: 24,3401           65372                           <span class="in">VSL1    </span> <span class="in">PDDL      </span>                            <span class="co">#  PD 14D</span>
-044146,000216: 24,3402           00007                                    <a href="#35303446">504F</a>                                  <span class="co">#  8-13D=DVECTR=BVECTR*COSI-CVECTR*SINI  B-1</span>
-044147,000217: 24,3403           74346                           <span class="in">COS     </span> <span class="in">VXSC      </span>                            
-044148,000218: 24,3404           00011                                    <a href="#445645435452">DVECTR</a>                                
-044149,000219: 24,3405           73525                           <span class="in">PDDL    </span> <span class="in">SIN       </span>                            <span class="co">#  PD 20D  14-19D= DVECTR*COSF  B-2</span>
-044150,000220: 24,3406           00007                                    <a href="#35303446">504F</a>                                  
-044151,000221: 24,3407           52361                           <span class="in">VXSC    </span> <span class="in">VSU       </span>                            <span class="co">#  PD 14D          AVECTR*SINF  B-2</span>
-044152,000222: 24,3410           00025                                    <a href="#415645435452">AVECTR</a>                                
-044153,000223: 24,3411           77772                           <span class="in">VSL1    </span>                                       
-044154,000224: 24,3412           14033                           <span class="in">STODL   </span> <a href="#4D4D4154524958">MMATRIX</a>    +6                         <span class="co">#  M1= AVECTR*SINF-DVECTR*COSF  B-1</span>
-044155,000225: 24,3413           00007                                    <a href="#35303446">504F</a>                                  
-044156,000226: 24,3414           74356                           <span class="in">SIN     </span> <span class="in">VXSC      </span>                            <span class="co">#  PD 8D</span>
-044157,000227: 24,3415           71525                           <span class="in">PDDL    </span> <span class="in">COS       </span>                            <span class="co">#  PD 14D  8-13D=DVECTR*SINF B-2</span>
-044158,000228: 24,3416           00007                                    <a href="#35303446">504F</a>                                  
-044159,000229: 24,3417           53361                           <span class="in">VXSC    </span> <span class="in">VAD       </span>                            <span class="co">#  PD 8D         AVECTR*COSF B-2</span>
-044160,000230: 24,3420           00025                                    <a href="#415645435452">AVECTR</a>                                
-044161,000231: 24,3421           57572                           <span class="in">VSL1    </span> <span class="in">VCOMP     </span>                            
-044162,000232: 24,3422           34025                           <span class="in">STCALL  </span> <a href="#4D4D4154524958">MMATRIX</a>                               <span class="co">#  M0= -(AVECTR*COSF+DVECTR*SINF)  B-1</span>
-044163,000233: 24,3423           00051                                    <a href="#45415254484D5858">EARTHMXX</a>                              
-044164,000234: 
-044165,000235:                                                                                                  <span class="co">#  COMPUTE X=X0+(XDOT)(T+T0)</span>
-044166,000236:                                                                                                  <span class="co">#  8-9D= XO (REVS B-0), PUSHLOC SET AT 12D</span>
-044167,000237:                                                                                                  <span class="co">#  10-11D=XDOT (REVS/CSEC) SCALED B+23 FOR WEARTH,B+28 FOR NODDOT AND BDOT</span>
-044168,000238:                                                                                                  <span class="co">#                        AND B+27 FOR FDOT</span>
-044169,000239:                                                                                                  <span class="co">#   X1=DIFFERENCE IN 23 AND SCALING OF XDOT,=0 FOR WEARTH,5 FOR NODDOT AND</span>
-044170,000240:                                                                                                  <span class="co">#                                        BDOT AND 4 FOR FDOT</span>
-044171,000241:                                                                                                  <span class="co">#  6-7D=T (CSEC B-28), TIMSUBO= (CSEC B-42 TRIPLE PREC.)</span>
-044172,000242: 
-<a name="4E4557414E474C45"></a>044173,000243: 24,3424           54345        <span class="sm">NEWANGLE</span>           <span class="in">DLOAD   </span> <span class="in">SR        </span>                            <span class="co">#  ENTER PD 12D</span>
-044174,000244: 24,3425           00007                                    6D                                    
-044175,000245: 24,3426           20617                                    14D                                   
-044176,000246: 24,3427           72371                           <span class="in">TAD     </span> <span class="in">TLOAD     </span>                            <span class="co">#  CHANGE MODE TO TP</span>
-044177,000247: 24,3430           01707                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D5355424F">TIMSUBO</a>                               
-044178,000248: 24,3431           00155                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-044179,000249: 24,3432           14017                           <span class="in">STODL   </span> <a href="#54494D5355424D">TIMSUBM</a>                               <span class="co">#  T+T0 CSEC B-42</span>
-044180,000250: 24,3433           00020                                    <a href="#54494D5355424D">TIMSUBM</a>    +1                         
-044181,000251: 24,3434           77605                           <span class="in">DMP     </span>                                       <span class="co">#  PD 10D        MULT BY XDOT IN 10-11D</span>
-044182,000252: 24,3435           43257                           <span class="in">SL*     </span> <span class="in">DAD       </span>                            <span class="co">#  PD 8D         ADD XO IN 8-9D AFTER SHIFTING</span>
-044183,000253: 24,3436           20206                                    5,1                                   <span class="co">#                SUCH THAT SCALING IS B-0</span>
-044184,000254: 24,3437           67206                           <span class="in">PUSH    </span> <span class="in">SLOAD     </span>                            <span class="co">#  PD 10D  SAVE PARTIAL (X0+XDOT*T) IN 8-9D</span>
-044185,000255: 24,3440           00017                                    <a href="#54494D5355424D">TIMSUBM</a>                               
-044186,000256: 24,3441           41261                           <span class="in">SL      </span> <span class="in">DMP       </span>                            
-044187,000257: 24,3442           20212                                    9D                                    
-044188,000258: 24,3443           00013                                    10D                                   <span class="co">#  XDOT</span>
-044189,000259: 24,3444           43257                           <span class="in">SL*     </span> <span class="in">DAD       </span>                            <span class="co">#  PD 8D         SHIFT SUCH THAT THIS PART OF X</span>
-044190,000260: 24,3445           20213                                    10D,1                                 <span class="co">#                IS SCALED REVS/CSEC B-0</span>
-044191,000261: 24,3446           77600                           <span class="in">BOV     </span>                                       <span class="co">#  TURN OFF OVERFLOW IF SET BY SHIFT</span>
-044192,000262: 24,3447           51450                                    +1                                    <span class="co">#  INSTRUCTION BEFORE EXITING</span>
-044193,000263: 24,3450           77616                           <span class="in">RVQ     </span>                                       <span class="co">#  MPAC=X= X0+(XDOT)(T+T0)  REVS B0</span>
-044194,000264: 
-044195,000265:                                                                                                  <span class="co">#  ..... EARTHMX SUBROUTINE .....</span>
-044196,000266:                                                                                                  <span class="co">#  SUBROUTINE TO COMPUTE THE TRANSFORMATION MATRIX M FOR THE EARTH</span>
-044197,000267: 
-044198,000268:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
-044199,000269:                                                                                                  <span class="co">#        L       CALL</span>
-044200,000270:                                                                                                  <span class="co">#        L+1             EARTHMX</span>
-044201,000271: 
-044202,000272:                                                                                                  <span class="co">#  SUBROUTINES USED</span>
-044203,000273:                                                                                                  <span class="co">#        NEWANGLE</span>
-044204,000274: 
-044205,000275:                                                                                                  <span class="co">#  INPUT</span>
-044206,000276:                                                                                                  <span class="co">#        INPUT AVAILABLE FROM LAUNCH DATA        AZO  REVS B-0</span>
-044207,000277:                                                                                                  <span class="co">#                                                TEPHEM  CSEC B-42</span>
-044208,000278:                                                                                                  <span class="co">#        6-7D= TIME CSEC B-28</span>
-044209,000279: 
-044210,000280:                                                                                                  <span class="co">#  OUTPUT</span>
-044211,000281:                                                                                                  <span class="co">#        MMATRIX= 3X3 M MATRIX B-1       (STORED IN VAC AREA)</span>
-044212,000282: 
-<a name="45415254484D58"></a>044213,000283: 24,3451           40220        <span class="sm">EARTHMX </span>           <span class="in">STQ     </span> <span class="in">SETPD     </span>                            <span class="co">#  SET 8-9D=AZO</span>
-044214,000284: 24,3452           00051                                    <a href="#45415254484D5858">EARTHMXX</a>                              
-044215,000285: 24,3453           00011                                    8D                                    <span class="co">#  10-11D=WEARTH</span>
-044216,000286: 24,3454           77770                           <span class="in">AXT,1   </span>                                       <span class="co">#  FOR SL 5, AND SL 10 IN NEWANGLE</span>
-044217,000287: 24,3455           00000                                    0                                     
-044218,000288: 24,3456           65345                           <span class="in">DLOAD   </span> <span class="in">PDDL      </span>                            <span class="co">#  LEAVING PD SET AT 12D FOR NEWANGLE</span>
-044219,000289: 24,3457           01712                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#415A4F">AZO</a>                                   
-044220,000290: 24,3460           11535                                    <a href="#574541525448">WEARTH</a>                                
-044221,000291: 24,3461           45006                           <span class="in">PUSH    </span> <span class="in">CALL      </span>                            
-044222,000292: 24,3462           51424                                    <a href="#4E4557414E474C45">NEWANGLE</a>                              
-044223,000293: 24,3463           41401                           <span class="in">SETPD   </span> <span class="in">PUSH      </span>                            <span class="co">#  18-19D=504AZ</span>
-044224,000294: 24,3464           00023                                    18D                                   <span class="co">#                         COS(AZ)   SIN(AZ)     0</span>
-044225,000295: 24,3465           65346                           <span class="in">COS     </span> <span class="in">PDDL      </span>                            <span class="co">#  20-37D=  MMATRIX=     -SIN(AZ)   COS(AZ)     0    B-1</span>
-044226,000296: 24,3466           00023                                    <a href="#353034415A">504AZ</a>                                 <span class="co">#                            0         0        1</span>
-044227,000297: 24,3467           65356                           <span class="in">SIN     </span> <span class="in">PDDL      </span>                            
-044228,000298: 24,3470           06233                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849365A45524F53">HI6ZEROS</a>                              
-044229,000299: 24,3471           73525                           <span class="in">PDDL    </span> <span class="in">SIN       </span>                            
-044230,000300: 24,3472           00023                                    <a href="#353034415A">504AZ</a>                                 
-044231,000301: 24,3473           65276                           <span class="in">DCOMP   </span> <span class="in">PDDL      </span>                            
-044232,000302: 24,3474           00023                                    <a href="#353034415A">504AZ</a>                                 
-044233,000303: 24,3475           63346                           <span class="in">COS     </span> <span class="in">PDVL      </span>                            
-044234,000304: 24,3476           06233                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849365A45524F53">HI6ZEROS</a>                              
-044235,000305: 24,3477           41525                           <span class="in">PDDL    </span> <span class="in">PUSH      </span>                            
-044236,000306: 24,3500           06231                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849445048414C46">HIDPHALF</a>                              
-044237,000307: 24,3501           77650                           <span class="in">GOTO    </span>                                       
-044238,000308: 24,3502           00051                                    <a href="#45415254484D5858">EARTHMXX</a>                              
-044239,000309: 
-044240,000310:                                                                                                  <span class="co">#  ..... EARTHL SUBROUTINE .....</span>
-044241,000311:                                                                                                  <span class="co">#  SUBROUTINE TO COMPUTE L VECTOR FOR EARTH</span>
-044242,000312: 
-044243,000313:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
-044244,000314:                                                                                                  <span class="co">#        L       CALL</span>
-044245,000315:                                                                                                  <span class="co">#        L+1             EARTHL</span>
-044246,000316: 
-044247,000317:                                                                                                  <span class="co">#  INPUT</span>
-044248,000318:                                                                                                  <span class="co">#        AXO,AYO SET AT LAUNCH TIME WITH AYO IMMEDIATELY FOLLOWING AXO IN CORE</span>
-044249,000319: 
-044250,000320:                                                                                                  <span class="co">#  OUTPUT</span>
-044251,000321:                                                                                                  <span class="co">#                -AX</span>
-044252,000322:                                                                                                  <span class="co">#        MPAC=   -AY     RADIANS B-0</span>
-044253,000323:                                                                                                  <span class="co">#                  0</span>
-044254,000324: 
-<a name="45415254484C"></a>044255,000325: 24,3503           57545        <span class="sm">EARTHL  </span>           <span class="in">DLOAD   </span> <span class="in">DCOMP     </span>                            
-044256,000326: 24,3504           01716                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#41584F">AXO</a>                                   
-044257,000327: 24,3505           14017                           <span class="in">STODL   </span> <a href="#3530344C504C">504LPL</a>                                
-044258,000328: 24,3506           01714                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#2D41594F">-AYO</a>                                  
-044259,000329: 24,3507           14021                           <span class="in">STODL   </span> <a href="#3530344C504C">504LPL</a>     +2                         
-044260,000330: 24,3510           06233                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849365A45524F53">HI6ZEROS</a>                              
-044261,000331: 24,3511           24023                           <span class="in">STOVL   </span> <a href="#3530344C504C">504LPL</a>     +4                         
-044262,000332: 24,3512           00017                                    <a href="#3530344C504C">504LPL</a>                                
-044263,000333: 24,3513           77616                           <span class="in">RVQ     </span>                                       
-044264,000334: 
-044265,000335:                                                                                                  <span class="co">#  CONSTANTS AND ERASABLE ASSIGNMENTS</span>
-044266,000336: 
-<a name="434F5349"></a>044267,000337: 24,3514           17775 01734  <span class="sm">COSI    </span>           <span class="ps">2DEC    </span> .99964115  B-1                        <span class="co">#  COS(1 DEG 32.1 MIN) B-1</span>
-<a name="53494E49"></a>044268,000338: 24,3516           00333 16153  <span class="sm">SINI    </span>           <span class="ps">2DEC    </span> .02678760  B-1                        <span class="co">#  SIN(1 DEG 32.1 MIN) B-1</span>
-<a name="4E4F44444F54"></a>044269,000339: 24,3520           77665 42175  <span class="sm">NODDOT  </span>           <span class="ps">2DEC    </span> -.457335143 E-2                        <span class="co">#  REVS/CSEC B+28=-1.07047016 E-8  RAD/SEC</span>
-<a name="46444F54"></a>044270,000340: 24,3522           22211 00265  <span class="sm">FDOT    </span>           <span class="ps">2DEC    </span> .570862491                            <span class="co">#  REVS/CSEC B+27= 2.67240019 E-6  RAD/SEC</span>
-044271,000341: 
-<a name="42444F54"></a>044272,000342: 24,3524           77777 77767  <span class="sm">BDOT    </span>           <span class="ps">2DEC    </span> -3.07500412 E-8                        <span class="co">#  REVS/CSEC B+28=-7.19756666 E-14 RAD/SEC</span>
-<a name="4E4F44494F"></a>044273,000343: 24,3526           41215 66331  <span class="sm">NODIO   </span>           <span class="ps">2DEC    </span> -.960101269                            <span class="co">#  REVS B-O    = -6.03249419  RAD</span>
-<a name="465355424F"></a>044274,000344: 24,3530           15237 26751  <span class="sm">FSUBO   </span>           <span class="ps">2DEC    </span> .415998375                            <span class="co">#  REVS B-O    =  2.61379488  RAD</span>
-<a name="425355424F"></a>044275,000345: 24,3532           02052 35713  <span class="sm">BSUBO   </span>           <span class="ps">2DEC    </span> .0651205006                            <span class="co">#  REVS B-O    =  0.409164173 RAD</span>
-<a name="574541525448"></a>044276,000346: 24,3534           37116 32630  <span class="sm">WEARTH  </span>           <span class="ps">2DEC    </span> .973561855                            <span class="co">#  REVS/CSEC B+23=7.29211515 E-5 RAD/SEC</span>
-044277,000347: 
-<a name="314231"></a>044278,000348: 24,3536  11,2273               <span class="sm">1B1     </span>           <span class="ps">=       </span> <a href="LATITUDE_LONGITUDE_SUBROUTINES.agc.html#4450312F32">DP1/2</a>                                 <span class="co">#  1  SCALED B-1</span>
-<a name="52505245584954"></a>044279,000349: 24,3536  0000050               <span class="sm">RPREXIT </span>           <span class="ps">=       </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    <span class="co">#  R-TO-RP AND RP-TO-R SUBR EXIT</span>
-<a name="45415254484D5858"></a>044280,000350: 24,3536  0000051               <span class="sm">EARTHMXX</span>           <span class="ps">=       </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    <span class="co">#  EARTHMX,MOONMX SUBR. EXITS</span>
-<a name="353034525052"></a>044281,000351: 24,3536                        <span class="sm">504RPR  </span>           <span class="ps">=       </span> 0D                                    <span class="co">#  6 REGS        R OR RP VECTOR</span>
-<a name="53494E4E4F4449"></a>044282,000352: 24,3536                        <span class="sm">SINNODI </span>           <span class="ps">=       </span> 8D                                    <span class="co">#  2             SIN(NODI)</span>
-<a name="445645435452"></a>044283,000353: 24,3536                        <span class="sm">DVECTR  </span>           <span class="ps">=       </span> 8D                                    <span class="co">#  6             D VECTOR MOON</span>
-<a name="435645435452"></a>044284,000354: 24,3536                        <span class="sm">CVECTR  </span>           <span class="ps">=       </span> 8D                                    <span class="co">#  6             C VECTR MOON</span>
-<a name="353034415A"></a>044285,000355: 24,3536                        <span class="sm">504AZ   </span>           <span class="ps">=       </span> 18D                                   <span class="co">#  2            AZ</span>
-<a name="54494D5355424D"></a>044286,000356: 24,3536                        <span class="sm">TIMSUBM </span>           <span class="ps">=       </span> 14D                                   <span class="co">#  3             TIME SUB M (MOON) T+T0 IN GETAZ</span>
-<a name="3530344C504C"></a>044287,000357: 24,3536                        <span class="sm">504LPL  </span>           <span class="ps">=       </span> 14D                                   <span class="co">#  6             L OR LP VECTOR</span>
-<a name="415645435452"></a>044288,000358: 24,3536                        <span class="sm">AVECTR  </span>           <span class="ps">=       </span> 20D                                   <span class="co">#  6             A VECTOR (MOON)</span>
-<a name="425645435452"></a>044289,000359: 24,3536                        <span class="sm">BVECTR  </span>           <span class="ps">=       </span> 26D                                   <span class="co">#  6             B VECTOR (MOON)</span>
-<a name="4D4D4154524958"></a>044290,000360: 24,3536                        <span class="sm">MMATRIX </span>           <span class="ps">=       </span> 20D                                   <span class="co">#  18            M MATRIX</span>
-<a name="434F42"></a>044291,000361: 24,3536                        <span class="sm">COB     </span>           <span class="ps">=       </span> 32D                                   <span class="co">#  2             COS(B) B-1</span>
-<a name="534F42"></a>044292,000362: 24,3536                        <span class="sm">SOB     </span>           <span class="ps">=       </span> 34D                                   <span class="co">#  2             SIN(B) B-1</span>
-<a name="35303446"></a>044293,000363: 24,3536                        <span class="sm">504F    </span>           <span class="ps">=       </span> 6D                                    <span class="co">#  2             F(MOON)</span>
-044294,000364: 
+043957,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+043958,000003:                                                                                                  <span class="co">## Filename:    PLANETARY_INERTIAL_ORIENTATION.agc</span>
+043959,000004:                                                                                                  <span class="co">## Purpose:     A section of an attempt to reconstruct Sundance revision 306</span>
+043960,000005:                                                                                                  <span class="co">##              as closely as possible with available information. Sundance</span>
+043961,000006:                                                                                                  <span class="co">##              306 is the source code for the Lunar Module's (LM) Apollo</span>
+043962,000007:                                                                                                  <span class="co">##              Guidance Computer (AGC) for Apollo 9. This program was created</span>
+043963,000008:                                                                                                  <span class="co">##              using the mixed-revision SundanceXXX as a starting point, and</span>
+043964,000009:                                                                                                  <span class="co">##              pulling back features from Luminary 69 believed to have been</span>
+043965,000010:                                                                                                  <span class="co">##              added based on memos, checklists, observed address changes,</span>
+043966,000011:                                                                                                  <span class="co">##              or the Sundance GSOPs.</span>
+043967,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+043968,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+043969,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+043970,000015:                                                                                                  <span class="co">## Mod history: 2020-07-24 MAS  Created from SundanceXXX.</span>
+043971,000016: 
+043972,000017: 
+043973,000018: 
+043974,000019:                                                                                                  <span class="co">#  ..... RP-TO-R SUBROUTINE .....</span>
+043975,000020:                                                                                                  <span class="co">#  SUBROUTINE TO CONVERT RP (VECTOR IN PLANETARY COORDINATE SYSTEM, EITHER</span>
+043976,000021:                                                                                                  <span class="co">#   EARTH-FIXED OR MOON-FIXED) TO R (SAME VECTOR IN THE BASIC REF. SYSTEM)</span>
+043977,000022: 
+043978,000023:                                                                                                  <span class="co">#        R = MT(T)*(RP + LP X RP)        MT = M MATRIX TRANSPOSE</span>
+043979,000024: 
+043980,000025:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
+043981,000026:                                                                                                  <span class="co">#        L       CALL</span>
+043982,000027:                                                                                                  <span class="co">#        L+1             RP-TO-R</span>
+043983,000028: 
+043984,000029:                                                                                                  <span class="co">#  SUBROUTINES USED</span>
+043985,000030:                                                                                                  <span class="co">#        EARTHMX,MOONMX,EARTHL</span>
+043986,000031: 
+043987,000032:                                                                                                  <span class="co">#        ITEMS AVAILABLE FROM LAUNCH DATA</span>
+043988,000033:                                                                                                  <span class="co">#                504LM = THE LIBRATION VECTOR L OF THE MOON AT TIME TIMSUBL,EXPRESSED</span>
+043989,000034:                                                                                                  <span class="co">#                        IN THE MOON-FIXED COORD. SYSTEM         RADIANS B0</span>
+043990,000035: 
+043991,000036:                                                                                                  <span class="co">#        ITEMS NECESSARY FOR SUBR. USED (SEE DESCRIPTION OF SUBR.)</span>
+043992,000037: 
+043993,000038:                                                                                                  <span class="co">#  INPUT</span>
+043994,000039:                                                                                                  <span class="co">#        MPAC= 0 FOR EARTH, NON-ZERO FOR MOON</span>
+043995,000040:                                                                                                  <span class="co">#        0-5D= RP VECTOR</span>
+043996,000041:                                                                                                  <span class="co">#        6-7D= TIME</span>
+043997,000042: 
+043998,000043:                                                                                                  <span class="co">#  OUTPUT</span>
+043999,000044:                                                                                                  <span class="co">#        MPAC = R VECTOR METERS B-29 FOR EARTH, B-27 FOR MOON</span>
+044000,000045: 
+044001,000046: 24,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#504C414E54494E">PLANTIN</a>                               
+044002,000047: 24,2000                                           <span class="ps">BANK    </span>                                       
+044003,000048: 
+044004,000049: 24,3222                                           <span class="ps">COUNT*  </span> $$/LUROT                              
+044005,000050: 
+<a name="52502D544F2D52"></a>044006,000051: 24,3222           46020        <span class="sm">RP-TO-R </span>           <span class="in">STQ     </span> <span class="in">BHIZ      </span>                            
+044007,000052: 24,3223           00050                                    <a href="#52505245584954">RPREXIT</a>                               
+044008,000053: 24,3224           51237                                    <a href="#5250544F5241">RPTORA</a>                                
+044009,000054: 24,3225           77624                           <span class="in">CALL    </span>                                       <span class="co">#  COMPUTE M MATRIX FOR MOON</span>
+044010,000055: 24,3226           51277                                    <a href="#4D4F4F4E4D58">MOONMX</a>                                <span class="co">#  LP=LM FOR MOON  RADIANS B0</span>
+044011,000056: 24,3227           77775                           <span class="in">VLOAD   </span>                                       
+044012,000057: 24,3230           02011                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#3530344C4D">504LM</a>                                 
+<a name="5250544F5242"></a>044013,000058: 24,3231           53235        <span class="sm">RPTORB  </span>           <span class="in">VXV     </span> <span class="in">VAD       </span>                            
+044014,000059: 24,3232           00001                                    <a href="#353034525052">504RPR</a>                                
+044015,000060: 24,3233           00001                                    <a href="#353034525052">504RPR</a>                                
+044016,000061: 24,3234           52105                           <span class="in">VXM     </span> <span class="in">GOTO      </span>                            
+044017,000062: 24,3235           00025                                    <a href="#4D4D4154524958">MMATRIX</a>                               <span class="co">#  MPAC=R=MT(T)*(RP+LPXRP)</span>
+044018,000063: 24,3236           51265                                    <a href="#5250525058585858">RPRPXXXX</a>                              <span class="co">#  RESET PUSHLOC TO 0 BEFORE EXITING</span>
+<a name="5250544F5241"></a>044019,000064: 24,3237           77624        <span class="sm">RPTORA  </span>           <span class="in">CALL    </span>                                       <span class="co">#  EARTH COMPUTATIONS</span>
+044020,000065: 24,3240           51451                                    <a href="#45415254484D58">EARTHMX</a>                               <span class="co">#  M MATRIX B-1</span>
+044021,000066: 24,3241           77624                           <span class="in">CALL    </span>                                       
+044022,000067: 24,3242           51503                                    <a href="#45415254484C">EARTHL</a>                                <span class="co">#  L VECTOR RADIANS B0</span>
+044023,000068: 24,3243           76521                           <span class="in">MXV     </span> <span class="in">VSL1      </span>                            <span class="co">#  LP=M(T)*L  RAD B-0</span>
+044024,000069: 24,3244           00025                                    <a href="#4D4D4154524958">MMATRIX</a>                               
+044025,000070: 24,3245           77650                           <span class="in">GOTO    </span>                                       
+044026,000071: 24,3246           51231                                    <a href="#5250544F5242">RPTORB</a>                                
+044027,000072: 
+044028,000073:                                                                                                  <span class="co">#  ..... R-TO-RP SUBROUTINE .....</span>
+044029,000074:                                                                                                  <span class="co">#  SUBROUTINE TO CONVERT R (VECTOR IN REFERENCE COORD. SYSTEM) TO RP</span>
+044030,000075:                                                                                                  <span class="co">#  (VECTOR IN PLANETARY COORD SYSTEM) EITHER EARTH-FIXED OR MOON-FIXED</span>
+044031,000076: 
+044032,000077:                                                                                                  <span class="co">#        RP = M(T)*(R - L X R)</span>
+044033,000078: 
+044034,000079:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
+044035,000080:                                                                                                  <span class="co">#        L       CALL</span>
+044036,000081:                                                                                                  <span class="co">#        L+1             R-TO-RP</span>
+044037,000082: 
+044038,000083:                                                                                                  <span class="co">#  SUBROUTINES USED</span>
+044039,000084:                                                                                                  <span class="co">#        EARTHMX,MOONMX,EARTHL</span>
+044040,000085: 
+044041,000086:                                                                                                  <span class="co">#  INPUT</span>
+044042,000087:                                                                                                  <span class="co">#        MPAC= 0 FOR EARTH,NON-ZERO FOR MOON</span>
+044043,000088:                                                                                                  <span class="co">#        0-5D= R VECTOR</span>
+044044,000089:                                                                                                  <span class="co">#        6-7D= TIME</span>
+044045,000090: 
+044046,000091:                                                                                                  <span class="co">#        ITEMS AVAILABLE FROM LAUNCH DATA</span>
+044047,000092:                                                                                                  <span class="co">#                504LM = THE LIBRATION VECTOR L OF THE MOON AT TIME TIMSUBL,EXPRESSED</span>
+044048,000093:                                                                                                  <span class="co">#                        IN THE MOON-FIXED COORD. SYSTEM   RADIANS B0</span>
+044049,000094: 
+044050,000095:                                                                                                  <span class="co">#        ITEMS NECESSARY FOR SUBROUTINES USED (SEE DESCRIPTION OF SUBR.)</span>
+044051,000096: 
+044052,000097:                                                                                                  <span class="co">#  OUTPUT</span>
+044053,000098:                                                                                                  <span class="co">#        MPAC = RP VECTOR METERS B-29 FOR EARTH, B-27 FOR MOON</span>
+044054,000099: 
+<a name="522D544F2D5250"></a>044055,000100: 24,3247           46020        <span class="sm">R-TO-RP </span>           <span class="in">STQ     </span> <span class="in">BHIZ      </span>                            
+044056,000101: 24,3250           00050                                    <a href="#52505245584954">RPREXIT</a>                               
+044057,000102: 24,3251           51271                                    <a href="#52544F525041">RTORPA</a>                                
+044058,000103: 24,3252           77624                           <span class="in">CALL    </span>                                       
+044059,000104: 24,3253           51277                                    <a href="#4D4F4F4E4D58">MOONMX</a>                                
+044060,000105: 24,3254           61375                           <span class="in">VLOAD   </span> <span class="in">VXM       </span>                            
+044061,000106: 24,3255           02011                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#3530344C4D">504LM</a>                                 <span class="co">#  LP=LM</span>
+044062,000107: 24,3256           00025                                    <a href="#4D4D4154524958">MMATRIX</a>                               
+044063,000108: 24,3257           77772                           <span class="in">VSL1    </span>                                       <span class="co">#   L=MT(T)*LP  RADIANS B0</span>
+<a name="52544F525042"></a>044064,000109: 24,3260           51235        <span class="sm">RTORPB  </span>           <span class="in">VXV     </span> <span class="in">BVSU      </span>                            
+044065,000110: 24,3261           00001                                    <a href="#353034525052">504RPR</a>                                
+044066,000111: 24,3262           00001                                    <a href="#353034525052">504RPR</a>                                
+044067,000112: 24,3263           77721                           <span class="in">MXV     </span>                                       <span class="co">#  M(T)*(R-LXR) B-2</span>
+044068,000113: 24,3264           00025                                    <a href="#4D4D4154524958">MMATRIX</a>                               
+<a name="5250525058585858"></a>044069,000114: 24,3265           40372        <span class="sm">RPRPXXXX</span>           <span class="in">VSL1    </span> <span class="in">SETPD     </span>                            
+044070,000115: 24,3266           00001                                    0D                                    
+044071,000116: 24,3267           77650                           <span class="in">GOTO    </span>                                       
+044072,000117: 24,3270           00050                                    <a href="#52505245584954">RPREXIT</a>                               
+<a name="52544F525041"></a>044073,000118: 24,3271           77624        <span class="sm">RTORPA  </span>           <span class="in">CALL    </span>                                       <span class="co">#  EARTH COMPUTATIONS</span>
+044074,000119: 24,3272           51451                                    <a href="#45415254484D58">EARTHMX</a>                               
+044075,000120: 24,3273           77624                           <span class="in">CALL    </span>                                       
+044076,000121: 24,3274           51503                                    <a href="#45415254484C">EARTHL</a>                                
+044077,000122: 24,3275           77650                           <span class="in">GOTO    </span>                                       <span class="co">#  MPAC=L=(-AX,-AY,0) RAD B-0</span>
+044078,000123: 24,3276           51260                                    <a href="#52544F525042">RTORPB</a>                                
+044079,000124: 
+044080,000125:                                                                                                  <span class="co">#  ..... MOONMX SUBROUTINE .....</span>
+044081,000126:                                                                                                  <span class="co">#  SUBROUTINE TO COMPUTE THE TRANSFORMATION MATRIX M FOR THE MOON</span>
+044082,000127: 
+044083,000128:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
+044084,000129:                                                                                                  <span class="co">#        L       CALL</span>
+044085,000130:                                                                                                  <span class="co">#        L+1             MOONMX</span>
+044086,000131: 
+044087,000132:                                                                                                  <span class="co">#  SUBROUTINES USED</span>
+044088,000133:                                                                                                  <span class="co">#        NEWANGLE</span>
+044089,000134: 
+044090,000135:                                                                                                  <span class="co">#  INPUT</span>
+044091,000136:                                                                                                  <span class="co">#        6-7D= TIME</span>
+044092,000137: 
+044093,000138:                                                                                                  <span class="co">#        ITEMS AVAILABLE FROM LAUNCH DATA</span>
+044094,000139:                                                                                                  <span class="co">#                BSUBO,BDOT</span>
+044095,000140:                                                                                                  <span class="co">#                TIMSUBO,NODIO,NODDOT,FSUBO,FDOT</span>
+044096,000141:                                                                                                  <span class="co">#                COSI= COS(I)    B-1</span>
+044097,000142:                                                                                                  <span class="co">#                SINI= SIN(I)    B-1</span>
+044098,000143:                                                                                                  <span class="co">#                  I IS THE ANGLE BETWEEN THE MEAN LUNAR EQUATORIAL PLANE AND THE</span>
+044099,000144:                                                                                                  <span class="co">#                  PLANE OF THE ECLIPTIC (1 DEGREE 32.1 MINUTES)</span>
+044100,000145: 
+044101,000146:                                                                                                  <span class="co">#  OUTPUT</span>
+044102,000147:                                                                                                  <span class="co">#        MMATRIX= 3X3 M MATRIX B-1       (STORED IN VAC AREA)</span>
+044103,000148: 
+<a name="4D4F4F4E4D58"></a>044104,000149: 24,3277           40220        <span class="sm">MOONMX  </span>           <span class="in">STQ     </span> <span class="in">SETPD     </span>                            
+044105,000150: 24,3300           00051                                    <a href="#45415254484D5858">EARTHMXX</a>                              
+044106,000151: 24,3301           00011                                    8D                                    
+044107,000152: 24,3302           77770                           <span class="in">AXT,1   </span>                                       <span class="co">#  B REQUIRES SL 0, SL 5 IN NEWANGLE</span>
+044108,000153: 24,3303           00005                                    5                                     
+044109,000154: 24,3304           65345                           <span class="in">DLOAD   </span> <span class="in">PDDL      </span>                            <span class="co">#  PD 10D        8-9D=BSUBO</span>
+044110,000155: 24,3305           11533                                    <a href="#425355424F">BSUBO</a>                                 <span class="co">#                10-11D=BDOT</span>
+044111,000156: 24,3306           11525                                    <a href="#42444F54">BDOT</a>                                  
+044112,000157: 24,3307           45006                           <span class="in">PUSH    </span> <span class="in">CALL      </span>                            <span class="co">#  PD 12D</span>
+044113,000158: 24,3310           51424                                    <a href="#4E4557414E474C45">NEWANGLE</a>                              <span class="co">#  EXIT WITH PD 8D AND MPAC= B   REVS B0</span>
+044114,000159: 24,3311           71406                           <span class="in">PUSH    </span> <span class="in">COS       </span>                            <span class="co">#  PD 10D</span>
+044115,000160: 24,3312           14041                           <span class="in">STODL   </span> <a href="#434F42">COB</a>                                   <span class="co">#  PD 8D         COS(B) B-1</span>
+044116,000161: 24,3313           77756                           <span class="in">SIN     </span>                                       <span class="co">#                SIN(B) B-1</span>
+044117,000162: 24,3314           14043                           <span class="in">STODL   </span> <a href="#534F42">SOB</a>                                   <span class="co">#  SETUP INPUT FOR NEWANGLE</span>
+044118,000163: 24,3315           11531                                    <a href="#465355424F">FSUBO</a>                                 <span class="co">#                        8-9D=FSUBO</span>
+044119,000164: 24,3316           41525                           <span class="in">PDDL    </span> <span class="in">PUSH      </span>                            <span class="co">#  PD 10D THEN 12D       10-11D=FDOT</span>
+044120,000165: 24,3317           11523                                    <a href="#46444F54">FDOT</a>                                  
+044121,000166: 24,3320           45170                           <span class="in">AXT,1   </span> <span class="in">CALL      </span>                            <span class="co">#  F REQUIRES SL 1, SL 6 IN NEWANGLE</span>
+044122,000167: 24,3321           00004                                    4                                     
+044123,000168: 24,3322           51424                                    <a href="#4E4557414E474C45">NEWANGLE</a>                              <span class="co">#  EXIT WITH PD 8D AND MPAC= F REVS B0</span>
+044124,000169: 24,3323           14027                           <span class="in">STODL   </span> <a href="#415645435452">AVECTR</a>     +2                         <span class="co">#  SAVE F TEMP</span>
+044125,000170: 24,3324           11527                                    <a href="#4E4F44494F">NODIO</a>                                 <span class="co">#                        8-9D=NODIO</span>
+044126,000171: 24,3325           41525                           <span class="in">PDDL    </span> <span class="in">PUSH      </span>                            <span class="co">#  PD 10D THEN 12D       10-11D=NODDOT</span>
+044127,000172: 24,3326           11521                                    <a href="#4E4F44444F54">NODDOT</a>                                <span class="co">#                        MPAC=T</span>
+044128,000173: 24,3327           45170                           <span class="in">AXT,1   </span> <span class="in">CALL      </span>                            <span class="co">#  NODE REQUIRES SL 0, SL 5 IN NEWANGLE</span>
+044129,000174: 24,3330           00005                                    5                                     
+044130,000175: 24,3331           51424                                    <a href="#4E4557414E474C45">NEWANGLE</a>                              <span class="co">#  EXIT WITH PD 8D AND MPAC= NODI REVS B0</span>
+044131,000176: 24,3332           71406                           <span class="in">PUSH    </span> <span class="in">COS       </span>                            <span class="co">#  PD 10D        8-9D= NODI REVS B0</span>
+044132,000177: 24,3333           77606                           <span class="in">PUSH    </span>                                       <span class="co">#  PD 12D        10-11D= COS(NODI) B-1</span>
+044133,000178: 24,3334           00025                           <span class="in">STORE   </span> <a href="#415645435452">AVECTR</a>                                
+044134,000179: 24,3335           76405                           <span class="in">DMP     </span> <span class="in">SL1R      </span>                            
+044135,000180: 24,3336           00041                                    <a href="#434F42">COB</a>                                   <span class="co">#                         COS(NODI) B-1</span>
+044136,000181: 24,3337           14035                           <span class="in">STODL   </span> <a href="#425645435452">BVECTR</a>     +2                         <span class="co">#  PD 10D  20-25D=AVECTR= COB*SIN(NODI)</span>
+044137,000182: 24,3340           76405                           <span class="in">DMP     </span> <span class="in">SL1R      </span>                            <span class="co">#                         SOB*SIN(NODI)</span>
+044138,000183: 24,3341           00043                                    <a href="#534F42">SOB</a>                                   
+044139,000184: 24,3342           14037                           <span class="in">STODL   </span> <a href="#425645435452">BVECTR</a>     +4                         <span class="co">#  PD 8D</span>
+044140,000185: 24,3343           41556                           <span class="in">SIN     </span> <span class="in">PUSH      </span>                            <span class="co">#  PD 10D                -SIN(NODI) B-1</span>
+044141,000186: 24,3344           77676                           <span class="in">DCOMP   </span>                                       <span class="co">#          26-31D=BVECTR= COB*COS(NODI)</span>
+044142,000187: 24,3345           14033                           <span class="in">STODL   </span> <a href="#425645435452">BVECTR</a>                                <span class="co">#  PD 8D                  SOB*COS(NODI)</span>
+044143,000188: 24,3346           00027                                    <a href="#415645435452">AVECTR</a>     +2                         <span class="co">#  MOVE F FROM TEMP LOC. TO 504F</span>
+044144,000189: 24,3347           14007                           <span class="in">STODL   </span> <a href="#35303446">504F</a>                                  
+044145,000190: 24,3350           76405                           <span class="in">DMP     </span> <span class="in">SL1R      </span>                            
+044146,000191: 24,3351           00041                                    <a href="#434F42">COB</a>                                   
+044147,000192: 24,3352           14027                           <span class="in">STODL   </span> <a href="#415645435452">AVECTR</a>     +2                         
+044148,000193: 24,3353           00011                                    <a href="#53494E4E4F4449">SINNODI</a>                               <span class="co">#  8-9D=SIN(NODI) B-1</span>
+044149,000194: 24,3354           76405                           <span class="in">DMP     </span> <span class="in">SL1R      </span>                            
+044150,000195: 24,3355           00043                                    <a href="#534F42">SOB</a>                                   
+044151,000196: 24,3356           14031                           <span class="in">STODL   </span> <a href="#415645435452">AVECTR</a>     +4                         <span class="co">#                         0</span>
+044152,000197: 24,3357           06233                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849365A45524F53">HI6ZEROS</a>                              <span class="co">#        8-13D= CVECTR= -SOB  B-1</span>
+044153,000198: 24,3360           57525                           <span class="in">PDDL    </span> <span class="in">DCOMP     </span>                            <span class="co">#  PD 10D                COB</span>
+044154,000199: 24,3361           00043                                    <a href="#534F42">SOB</a>                                   
+044155,000200: 24,3362           63325                           <span class="in">PDDL    </span> <span class="in">PDVL      </span>                            <span class="co">#  PD 12D THEN PD 14D</span>
+044156,000201: 24,3363           00041                                    <a href="#434F42">COB</a>                                   
+044157,000202: 24,3364           00033                                    <a href="#425645435452">BVECTR</a>                                
+044158,000203: 24,3365           63361                           <span class="in">VXSC    </span> <span class="in">PDVL      </span>                            <span class="co">#  PD 20D        BVECTR*SINI  B-2</span>
+044159,000204: 24,3366           11517                                    <a href="#53494E49">SINI</a>                                  
+044160,000205: 24,3367           00011                                    <a href="#435645435452">CVECTR</a>                                
+044161,000206: 24,3370           53361                           <span class="in">VXSC    </span> <span class="in">VAD       </span>                            <span class="co">#  PD 14D        CVECTR*COSI  B-2</span>
+044162,000207: 24,3371           11515                                    <a href="#434F5349">COSI</a>                                  
+044163,000208: 24,3372           77772                           <span class="in">VSL1    </span>                                       
+044164,000209: 24,3373           24041                           <span class="in">STOVL   </span> <a href="#4D4D4154524958">MMATRIX</a>    +12D                       <span class="co">#  PD 8D  M2=BVECTR*SINI+CVECTR*COSI  B-1</span>
+044165,000210: 24,3374           63361                           <span class="in">VXSC    </span> <span class="in">PDVL      </span>                            <span class="co">#  PD 14D</span>
+044166,000211: 24,3375           11517                                    <a href="#53494E49">SINI</a>                                  <span class="co">#                CVECTR*SINI  B-2</span>
+044167,000212: 24,3376           00033                                    <a href="#425645435452">BVECTR</a>                                
+044168,000213: 24,3377           52361                           <span class="in">VXSC    </span> <span class="in">VSU       </span>                            <span class="co">#  PD 8D         BVECTR*COSI  B-2</span>
+044169,000214: 24,3400           11515                                    <a href="#434F5349">COSI</a>                                  
+044170,000215: 24,3401           65372                           <span class="in">VSL1    </span> <span class="in">PDDL      </span>                            <span class="co">#  PD 14D</span>
+044171,000216: 24,3402           00007                                    <a href="#35303446">504F</a>                                  <span class="co">#  8-13D=DVECTR=BVECTR*COSI-CVECTR*SINI  B-1</span>
+044172,000217: 24,3403           74346                           <span class="in">COS     </span> <span class="in">VXSC      </span>                            
+044173,000218: 24,3404           00011                                    <a href="#445645435452">DVECTR</a>                                
+044174,000219: 24,3405           73525                           <span class="in">PDDL    </span> <span class="in">SIN       </span>                            <span class="co">#  PD 20D  14-19D= DVECTR*COSF  B-2</span>
+044175,000220: 24,3406           00007                                    <a href="#35303446">504F</a>                                  
+044176,000221: 24,3407           52361                           <span class="in">VXSC    </span> <span class="in">VSU       </span>                            <span class="co">#  PD 14D          AVECTR*SINF  B-2</span>
+044177,000222: 24,3410           00025                                    <a href="#415645435452">AVECTR</a>                                
+044178,000223: 24,3411           77772                           <span class="in">VSL1    </span>                                       
+044179,000224: 24,3412           14033                           <span class="in">STODL   </span> <a href="#4D4D4154524958">MMATRIX</a>    +6                         <span class="co">#  M1= AVECTR*SINF-DVECTR*COSF  B-1</span>
+044180,000225: 24,3413           00007                                    <a href="#35303446">504F</a>                                  
+044181,000226: 24,3414           74356                           <span class="in">SIN     </span> <span class="in">VXSC      </span>                            <span class="co">#  PD 8D</span>
+044182,000227: 24,3415           71525                           <span class="in">PDDL    </span> <span class="in">COS       </span>                            <span class="co">#  PD 14D  8-13D=DVECTR*SINF B-2</span>
+044183,000228: 24,3416           00007                                    <a href="#35303446">504F</a>                                  
+044184,000229: 24,3417           53361                           <span class="in">VXSC    </span> <span class="in">VAD       </span>                            <span class="co">#  PD 8D         AVECTR*COSF B-2</span>
+044185,000230: 24,3420           00025                                    <a href="#415645435452">AVECTR</a>                                
+044186,000231: 24,3421           57572                           <span class="in">VSL1    </span> <span class="in">VCOMP     </span>                            
+044187,000232: 24,3422           34025                           <span class="in">STCALL  </span> <a href="#4D4D4154524958">MMATRIX</a>                               <span class="co">#  M0= -(AVECTR*COSF+DVECTR*SINF)  B-1</span>
+044188,000233: 24,3423           00051                                    <a href="#45415254484D5858">EARTHMXX</a>                              
+044189,000234: 
+044190,000235:                                                                                                  <span class="co">#  COMPUTE X=X0+(XDOT)(T+T0)</span>
+044191,000236:                                                                                                  <span class="co">#  8-9D= XO (REVS B-0), PUSHLOC SET AT 12D</span>
+044192,000237:                                                                                                  <span class="co">#  10-11D=XDOT (REVS/CSEC) SCALED B+23 FOR WEARTH,B+28 FOR NODDOT AND BDOT</span>
+044193,000238:                                                                                                  <span class="co">#                        AND B+27 FOR FDOT</span>
+044194,000239:                                                                                                  <span class="co">#   X1=DIFFERENCE IN 23 AND SCALING OF XDOT,=0 FOR WEARTH,5 FOR NODDOT AND</span>
+044195,000240:                                                                                                  <span class="co">#                                        BDOT AND 4 FOR FDOT</span>
+044196,000241:                                                                                                  <span class="co">#  6-7D=T (CSEC B-28), TIMSUBO= (CSEC B-42 TRIPLE PREC.)</span>
+044197,000242: 
+<a name="4E4557414E474C45"></a>044198,000243: 24,3424           54345        <span class="sm">NEWANGLE</span>           <span class="in">DLOAD   </span> <span class="in">SR        </span>                            <span class="co">#  ENTER PD 12D</span>
+044199,000244: 24,3425           00007                                    6D                                    
+044200,000245: 24,3426           20617                                    14D                                   
+044201,000246: 24,3427           72371                           <span class="in">TAD     </span> <span class="in">TLOAD     </span>                            <span class="co">#  CHANGE MODE TO TP</span>
+044202,000247: 24,3430           01707                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D5355424F">TIMSUBO</a>                               
+044203,000248: 24,3431           00155                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+044204,000249: 24,3432           14017                           <span class="in">STODL   </span> <a href="#54494D5355424D">TIMSUBM</a>                               <span class="co">#  T+T0 CSEC B-42</span>
+044205,000250: 24,3433           00020                                    <a href="#54494D5355424D">TIMSUBM</a>    +1                         
+044206,000251: 24,3434           77605                           <span class="in">DMP     </span>                                       <span class="co">#  PD 10D        MULT BY XDOT IN 10-11D</span>
+044207,000252: 24,3435           43257                           <span class="in">SL*     </span> <span class="in">DAD       </span>                            <span class="co">#  PD 8D         ADD XO IN 8-9D AFTER SHIFTING</span>
+044208,000253: 24,3436           20206                                    5,1                                   <span class="co">#                SUCH THAT SCALING IS B-0</span>
+044209,000254: 24,3437           67206                           <span class="in">PUSH    </span> <span class="in">SLOAD     </span>                            <span class="co">#  PD 10D  SAVE PARTIAL (X0+XDOT*T) IN 8-9D</span>
+044210,000255: 24,3440           00017                                    <a href="#54494D5355424D">TIMSUBM</a>                               
+044211,000256: 24,3441           41261                           <span class="in">SL      </span> <span class="in">DMP       </span>                            
+044212,000257: 24,3442           20212                                    9D                                    
+044213,000258: 24,3443           00013                                    10D                                   <span class="co">#  XDOT</span>
+044214,000259: 24,3444           43257                           <span class="in">SL*     </span> <span class="in">DAD       </span>                            <span class="co">#  PD 8D         SHIFT SUCH THAT THIS PART OF X</span>
+044215,000260: 24,3445           20213                                    10D,1                                 <span class="co">#                IS SCALED REVS/CSEC B-0</span>
+044216,000261: 24,3446           77600                           <span class="in">BOV     </span>                                       <span class="co">#  TURN OFF OVERFLOW IF SET BY SHIFT</span>
+044217,000262: 24,3447           51450                                    +1                                    <span class="co">#  INSTRUCTION BEFORE EXITING</span>
+044218,000263: 24,3450           77616                           <span class="in">RVQ     </span>                                       <span class="co">#  MPAC=X= X0+(XDOT)(T+T0)  REVS B0</span>
+044219,000264: 
+044220,000265:                                                                                                  <span class="co">#  ..... EARTHMX SUBROUTINE .....</span>
+044221,000266:                                                                                                  <span class="co">#  SUBROUTINE TO COMPUTE THE TRANSFORMATION MATRIX M FOR THE EARTH</span>
+044222,000267: 
+044223,000268:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
+044224,000269:                                                                                                  <span class="co">#        L       CALL</span>
+044225,000270:                                                                                                  <span class="co">#        L+1             EARTHMX</span>
+044226,000271: 
+044227,000272:                                                                                                  <span class="co">#  SUBROUTINES USED</span>
+044228,000273:                                                                                                  <span class="co">#        NEWANGLE</span>
+044229,000274: 
+044230,000275:                                                                                                  <span class="co">#  INPUT</span>
+044231,000276:                                                                                                  <span class="co">#        INPUT AVAILABLE FROM LAUNCH DATA        AZO  REVS B-0</span>
+044232,000277:                                                                                                  <span class="co">#                                                TEPHEM  CSEC B-42</span>
+044233,000278:                                                                                                  <span class="co">#        6-7D= TIME CSEC B-28</span>
+044234,000279: 
+044235,000280:                                                                                                  <span class="co">#  OUTPUT</span>
+044236,000281:                                                                                                  <span class="co">#        MMATRIX= 3X3 M MATRIX B-1       (STORED IN VAC AREA)</span>
+044237,000282: 
+<a name="45415254484D58"></a>044238,000283: 24,3451           40220        <span class="sm">EARTHMX </span>           <span class="in">STQ     </span> <span class="in">SETPD     </span>                            <span class="co">#  SET 8-9D=AZO</span>
+044239,000284: 24,3452           00051                                    <a href="#45415254484D5858">EARTHMXX</a>                              
+044240,000285: 24,3453           00011                                    8D                                    <span class="co">#  10-11D=WEARTH</span>
+044241,000286: 24,3454           77770                           <span class="in">AXT,1   </span>                                       <span class="co">#  FOR SL 5, AND SL 10 IN NEWANGLE</span>
+044242,000287: 24,3455           00000                                    0                                     
+044243,000288: 24,3456           65345                           <span class="in">DLOAD   </span> <span class="in">PDDL      </span>                            <span class="co">#  LEAVING PD SET AT 12D FOR NEWANGLE</span>
+044244,000289: 24,3457           01712                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#415A4F">AZO</a>                                   
+044245,000290: 24,3460           11535                                    <a href="#574541525448">WEARTH</a>                                
+044246,000291: 24,3461           45006                           <span class="in">PUSH    </span> <span class="in">CALL      </span>                            
+044247,000292: 24,3462           51424                                    <a href="#4E4557414E474C45">NEWANGLE</a>                              
+044248,000293: 24,3463           41401                           <span class="in">SETPD   </span> <span class="in">PUSH      </span>                            <span class="co">#  18-19D=504AZ</span>
+044249,000294: 24,3464           00023                                    18D                                   <span class="co">#                         COS(AZ)   SIN(AZ)     0</span>
+044250,000295: 24,3465           65346                           <span class="in">COS     </span> <span class="in">PDDL      </span>                            <span class="co">#  20-37D=  MMATRIX=     -SIN(AZ)   COS(AZ)     0    B-1</span>
+044251,000296: 24,3466           00023                                    <a href="#353034415A">504AZ</a>                                 <span class="co">#                            0         0        1</span>
+044252,000297: 24,3467           65356                           <span class="in">SIN     </span> <span class="in">PDDL      </span>                            
+044253,000298: 24,3470           06233                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849365A45524F53">HI6ZEROS</a>                              
+044254,000299: 24,3471           73525                           <span class="in">PDDL    </span> <span class="in">SIN       </span>                            
+044255,000300: 24,3472           00023                                    <a href="#353034415A">504AZ</a>                                 
+044256,000301: 24,3473           65276                           <span class="in">DCOMP   </span> <span class="in">PDDL      </span>                            
+044257,000302: 24,3474           00023                                    <a href="#353034415A">504AZ</a>                                 
+044258,000303: 24,3475           63346                           <span class="in">COS     </span> <span class="in">PDVL      </span>                            
+044259,000304: 24,3476           06233                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849365A45524F53">HI6ZEROS</a>                              
+044260,000305: 24,3477           41525                           <span class="in">PDDL    </span> <span class="in">PUSH      </span>                            
+044261,000306: 24,3500           06231                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849445048414C46">HIDPHALF</a>                              
+044262,000307: 24,3501           77650                           <span class="in">GOTO    </span>                                       
+044263,000308: 24,3502           00051                                    <a href="#45415254484D5858">EARTHMXX</a>                              
+044264,000309: 
+044265,000310:                                                                                                  <span class="co">#  ..... EARTHL SUBROUTINE .....</span>
+044266,000311:                                                                                                  <span class="co">#  SUBROUTINE TO COMPUTE L VECTOR FOR EARTH</span>
+044267,000312: 
+044268,000313:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
+044269,000314:                                                                                                  <span class="co">#        L       CALL</span>
+044270,000315:                                                                                                  <span class="co">#        L+1             EARTHL</span>
+044271,000316: 
+044272,000317:                                                                                                  <span class="co">#  INPUT</span>
+044273,000318:                                                                                                  <span class="co">#        AXO,AYO SET AT LAUNCH TIME WITH AYO IMMEDIATELY FOLLOWING AXO IN CORE</span>
+044274,000319: 
+044275,000320:                                                                                                  <span class="co">#  OUTPUT</span>
+044276,000321:                                                                                                  <span class="co">#                -AX</span>
+044277,000322:                                                                                                  <span class="co">#        MPAC=   -AY     RADIANS B-0</span>
+044278,000323:                                                                                                  <span class="co">#                  0</span>
+044279,000324: 
+<a name="45415254484C"></a>044280,000325: 24,3503           57545        <span class="sm">EARTHL  </span>           <span class="in">DLOAD   </span> <span class="in">DCOMP     </span>                            
+044281,000326: 24,3504           01716                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#41584F">AXO</a>                                   
+044282,000327: 24,3505           14017                           <span class="in">STODL   </span> <a href="#3530344C504C">504LPL</a>                                
+044283,000328: 24,3506           01714                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#2D41594F">-AYO</a>                                  
+044284,000329: 24,3507           14021                           <span class="in">STODL   </span> <a href="#3530344C504C">504LPL</a>     +2                         
+044285,000330: 24,3510           06233                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4849365A45524F53">HI6ZEROS</a>                              
+044286,000331: 24,3511           24023                           <span class="in">STOVL   </span> <a href="#3530344C504C">504LPL</a>     +4                         
+044287,000332: 24,3512           00017                                    <a href="#3530344C504C">504LPL</a>                                
+044288,000333: 24,3513           77616                           <span class="in">RVQ     </span>                                       
+044289,000334: 
+044290,000335:                                                                                                  <span class="co">#  CONSTANTS AND ERASABLE ASSIGNMENTS</span>
+044291,000336: 
+<a name="434F5349"></a>044292,000337: 24,3514           17775 01734  <span class="sm">COSI    </span>           <span class="ps">2DEC    </span> .99964115  B-1                        <span class="co">#  COS(1 DEG 32.1 MIN) B-1</span>
+<a name="53494E49"></a>044293,000338: 24,3516           00333 16153  <span class="sm">SINI    </span>           <span class="ps">2DEC    </span> .02678760  B-1                        <span class="co">#  SIN(1 DEG 32.1 MIN) B-1</span>
+<a name="4E4F44444F54"></a>044294,000339: 24,3520           77665 42175  <span class="sm">NODDOT  </span>           <span class="ps">2DEC    </span> -.457335143 E-2                        <span class="co">#  REVS/CSEC B+28=-1.07047016 E-8  RAD/SEC</span>
+<a name="46444F54"></a>044295,000340: 24,3522           22211 00265  <span class="sm">FDOT    </span>           <span class="ps">2DEC    </span> .570862491                            <span class="co">#  REVS/CSEC B+27= 2.67240019 E-6  RAD/SEC</span>
+044296,000341: 
+<a name="42444F54"></a>044297,000342: 24,3524           77777 77767  <span class="sm">BDOT    </span>           <span class="ps">2DEC    </span> -3.07500412 E-8                        <span class="co">#  REVS/CSEC B+28=-7.19756666 E-14 RAD/SEC</span>
+<a name="4E4F44494F"></a>044298,000343: 24,3526           41215 66331  <span class="sm">NODIO   </span>           <span class="ps">2DEC    </span> -.960101269                            <span class="co">#  REVS B-O    = -6.03249419  RAD</span>
+<a name="465355424F"></a>044299,000344: 24,3530           15237 26751  <span class="sm">FSUBO   </span>           <span class="ps">2DEC    </span> .415998375                            <span class="co">#  REVS B-O    =  2.61379488  RAD</span>
+<a name="425355424F"></a>044300,000345: 24,3532           02052 35713  <span class="sm">BSUBO   </span>           <span class="ps">2DEC    </span> .0651205006                            <span class="co">#  REVS B-O    =  0.409164173 RAD</span>
+<a name="574541525448"></a>044301,000346: 24,3534           37116 32630  <span class="sm">WEARTH  </span>           <span class="ps">2DEC    </span> .973561855                            <span class="co">#  REVS/CSEC B+23=7.29211515 E-5 RAD/SEC</span>
+044302,000347: 
+<a name="314231"></a>044303,000348: 24,3536  11,2273               <span class="sm">1B1     </span>           <span class="ps">=       </span> <a href="LATITUDE_LONGITUDE_SUBROUTINES.agc.html#4450312F32">DP1/2</a>                                 <span class="co">#  1  SCALED B-1</span>
+<a name="52505245584954"></a>044304,000349: 24,3536  0000050               <span class="sm">RPREXIT </span>           <span class="ps">=       </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    <span class="co">#  R-TO-RP AND RP-TO-R SUBR EXIT</span>
+<a name="45415254484D5858"></a>044305,000350: 24,3536  0000051               <span class="sm">EARTHMXX</span>           <span class="ps">=       </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    <span class="co">#  EARTHMX,MOONMX SUBR. EXITS</span>
+<a name="353034525052"></a>044306,000351: 24,3536                        <span class="sm">504RPR  </span>           <span class="ps">=       </span> 0D                                    <span class="co">#  6 REGS        R OR RP VECTOR</span>
+<a name="53494E4E4F4449"></a>044307,000352: 24,3536                        <span class="sm">SINNODI </span>           <span class="ps">=       </span> 8D                                    <span class="co">#  2             SIN(NODI)</span>
+<a name="445645435452"></a>044308,000353: 24,3536                        <span class="sm">DVECTR  </span>           <span class="ps">=       </span> 8D                                    <span class="co">#  6             D VECTOR MOON</span>
+<a name="435645435452"></a>044309,000354: 24,3536                        <span class="sm">CVECTR  </span>           <span class="ps">=       </span> 8D                                    <span class="co">#  6             C VECTR MOON</span>
+<a name="353034415A"></a>044310,000355: 24,3536                        <span class="sm">504AZ   </span>           <span class="ps">=       </span> 18D                                   <span class="co">#  2            AZ</span>
+<a name="54494D5355424D"></a>044311,000356: 24,3536                        <span class="sm">TIMSUBM </span>           <span class="ps">=       </span> 14D                                   <span class="co">#  3             TIME SUB M (MOON) T+T0 IN GETAZ</span>
+<a name="3530344C504C"></a>044312,000357: 24,3536                        <span class="sm">504LPL  </span>           <span class="ps">=       </span> 14D                                   <span class="co">#  6             L OR LP VECTOR</span>
+<a name="415645435452"></a>044313,000358: 24,3536                        <span class="sm">AVECTR  </span>           <span class="ps">=       </span> 20D                                   <span class="co">#  6             A VECTOR (MOON)</span>
+<a name="425645435452"></a>044314,000359: 24,3536                        <span class="sm">BVECTR  </span>           <span class="ps">=       </span> 26D                                   <span class="co">#  6             B VECTOR (MOON)</span>
+<a name="4D4D4154524958"></a>044315,000360: 24,3536                        <span class="sm">MMATRIX </span>           <span class="ps">=       </span> 20D                                   <span class="co">#  18            M MATRIX</span>
+<a name="434F42"></a>044316,000361: 24,3536                        <span class="sm">COB     </span>           <span class="ps">=       </span> 32D                                   <span class="co">#  2             COS(B) B-1</span>
+<a name="534F42"></a>044317,000362: 24,3536                        <span class="sm">SOB     </span>           <span class="ps">=       </span> 34D                                   <span class="co">#  2             SIN(B) B-1</span>
+<a name="35303446"></a>044318,000363: 24,3536                        <span class="sm">504F    </span>           <span class="ps">=       </span> 6D                                    <span class="co">#  2             F(MOON)</span>
+044319,000364: 
 
 End of include-file PLANETARY_INERTIAL_ORIENTATION.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

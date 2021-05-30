@@ -95,19 +95,19 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-036053,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
-036054,000003:                                                                                                  <span class="co">## Filename:     MASS_CALCULATOR.agc</span>
-036055,000004:                                                                                                  <span class="co">## Purpose:      A module for revision 0 of BURST120 (Sunburst). It </span>
-036056,000005:                                                                                                  <span class="co">##               is part of the source code for the Lunar Module's</span>
-036057,000006:                                                                                                  <span class="co">##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
-036058,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
-036059,000008:                                                                                                  <span class="co">## Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
-036060,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
-036061,000010:                                                                                                  <span class="co">## Mod history:  2016-09-30 RSB  Created draft version.</span>
-036062,000011:                                                                                                  <span class="co">##               2016-10-30 MAS  Transcribed.</span>
-036063,000012:                                                                                                  <span class="co">##               2016-12-06 RSB  Comment-proofing via octopus/ProoferComments;</span>
-036064,000013:                                                                                                  <span class="co">##                               changes were made.</span>
-036065,000014: 
+036059,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
+036060,000003:                                                                                                  <span class="co">## Filename:     MASS_CALCULATOR.agc</span>
+036061,000004:                                                                                                  <span class="co">## Purpose:      A module for revision 0 of BURST120 (Sunburst). It </span>
+036062,000005:                                                                                                  <span class="co">##               is part of the source code for the Lunar Module's</span>
+036063,000006:                                                                                                  <span class="co">##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
+036064,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
+036065,000008:                                                                                                  <span class="co">## Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
+036066,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
+036067,000010:                                                                                                  <span class="co">## Mod history:  2016-09-30 RSB  Created draft version.</span>
+036068,000011:                                                                                                  <span class="co">##               2016-10-30 MAS  Transcribed.</span>
+036069,000012:                                                                                                  <span class="co">##               2016-12-06 RSB  Comment-proofing via octopus/ProoferComments;</span>
+036070,000013:                                                                                                  <span class="co">##                               changes were made.</span>
+036071,000014: 
 </pre>
 </span>
 </p>
@@ -123,57 +123,57 @@ Page 844
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-036067,000016: 30,3206                                           <span class="ps">BANK    </span> 30                                    
-036068,000017:                                                                                                  <span class="co">#  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *</span>
-036069,000018: 
-036070,000019:                                                                                                  <span class="co">#      THE MASS UPDATE ROUTINE EXTENDS FROM APPROXIMATELY HERE TO THE NEXT</span>
-036071,000020:                                                                                                  <span class="co">#  ROW OF ASTERISKS.   COMPUTATIONS ARE AS FOLLOWS:-</span>
-036072,000021:                                                                                                  <span class="co">#      (1) /AF/ = MAGNITUDE DV/DT, SCALED IN UNITS OF 2(-5) M/CS/CS.</span>
-036073,000022:                                                                                                  <span class="co">#      (2) PREFORCE = /AF/ MASS, APPROXIMATE PRESENT THRUST, SCALED AT</span>
-036074,000023:                                                                                                  <span class="co">#          SOME 3.3 POUNDS PER BIT; PREFORCE LATER BECOMES PREFORCE/2FMAX.</span>
-036075,000024:                                                                                                  <span class="co">#      (3) NOMINAL EXHAUST VELOCITY, VEXNOM = VEXSTEP + (PREFORCE-FSTEP)</span>
-036076,000025:                                                                                                  <span class="co">#          SLOPE, WHERE VEXSTEP, FSTEP, AND SLOPE ARE SELECTED FROM THE</span>
-036077,000026:                                                                                                  <span class="co">#          'VEXTABLE' BY THE ROUTINE BEGINNING AT VEXFINDD; THE FSTEPS</span>
-036078,000027:                                                                                                  <span class="co">#          AND VXSTEPS DEFINE CERTAIN DISCRETE POINTS ON THE CURVE OF</span>
-036079,000028:                                                                                                  <span class="co">#          EXHAUST VELOCITY VERSUS THRUST; THE ASSOCIATED SLOPE IS ALWAYS</span>
-036080,000029:                                                                                                  <span class="co">#          THAT FOR THE SEGMENT JUST PRECEEDING THOSE POINTS.   (UNITS</span>
-036081,000030:                                                                                                  <span class="co">#          FOR VEXNOM, AS FOR NEGVEX, ARE 2(6) M/CS.)</span>
-036082,000031:                                                                                                  <span class="co">#      (4) AREARATE, A MODERATELY ABSTRUSE (NOT TO SAY ABSURD) FUNCTION</span>
-036083,000032:                                                                                                  <span class="co">#          OF DELAREA (EROSION) AND PREFORCE.   (THE AREA IN QUESTION IS</span>
-036084,000033:                                                                                                  <span class="co">#          THAT OF THE THROAT OF THE ENGINE.)</span>
-036085,000034:                                                                                                  <span class="co">#      (5) DELAREA = DELAREA + AREARATE DELTAT, SCALED IN UNITS OF 2(7) %</span>
-036086,000035:                                                                                                  <span class="co">#      (6) NEGVEX = -(VEXNOM - CVEX5 DELAREA).</span>
-036087,000036:                                                                                                  <span class="co">#      (7) MASS = MASS + (/DELV//NEGVEX) MASS, SCALED IN UNITS OF 2(15)</span>
-036088,000037:                                                                                                  <span class="co">#          KILOGRAMS.</span>
-036089,000038: 
-036090,000039:                                                                                                  <span class="co">#      THE FOLLOWING INITIALIZATIONS MUST BE MADE BEFORE LAUNCH:</span>
-036091,000040:                                                                                                  <span class="co">#  C(MASS) = 0, C(LEMMASS1) = SCALED MASS OF LEM CUM DPS, C(LEMMASS2) =</span>
-036092,000041:                                                                                                  <span class="co">#  SCALED MASS OF LEM WITHOUT DPS.   UPON LEM-SIVB SEPARATION MASS MUST</span>
-036093,000042:                                                                                                  <span class="co">#  BE REINITIALIZED USING LEMMASS1 AND DELAREA MUST BE SET TO DP ZERO.</span>
-036094,000043:                                                                                                  <span class="co">#  LATER, WHEN THE DPS PARTS COMPANY, MASS MUST BE INITIALIZED STILL</span>
-036095,000044:                                                                                                  <span class="co">#  AGAIN USING LEMMASS2.</span>
-036096,000045: 
-036097,000046:                                                                                                  <span class="co">#      THE FOLLOWING IS AN INELEGANT SUPERFLUITY:-   INPUTS: MASS, DELAREA,</span>
-036098,000047:                                                                                                  <span class="co">#  DELV, DELTAT, EMANATIONS FROM THE VEXTABLE, A TABLESPOON OF SALT AND</span>
-036099,000048:                                                                                                  <span class="co">#  SEVEN BYZANTINE DODO EGGS.   OUTPUTS: /AF/ AND MASS.   DEBRIS: PREFORCE,</span>
-036100,000049:                                                                                                  <span class="co">#  NEGVEX, AND AREARATE (TO LEARN MORE ABOUT THESE GEMS, SEE ABOVE).</span>
-036101,000050:                                                                                                  <span class="co">#  SUBROUTINES CALLED: MASSMULT (A PART OF THROTTLE CONTROL) AND THE</span>
-036102,000051:                                                                                                  <span class="co">#  INTERPRETER.   ERASABLES: BANK 5 AT PRESENT.   EYLES WROTE THIS STUFF;</span>
-036103,000052:                                                                                                  <span class="co">#  HIS LAST MODIFICATION THEREOF (NUMBER N+2) WENT INTO AGC REVISION 20.</span>
-036104,000053: 
-<a name="4D4153534D4F4E"></a>036105,000054: 30,3206           43145        <span class="sm">MASSMON </span>           <span class="in">DLOAD   </span> <span class="in">BOFF      </span>                            
-036106,000055: 30,3207           01321                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D415353">MASS</a>                                  
-036107,000056: 30,3210           00753                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53495642474F4E45">SIVBGONE</a>                              
-036108,000057: 30,3211           61373                                    <a href="#4E4F4D415353">NOMASS</a>                                
-036109,000058: 30,3212           74375                           <span class="in">VLOAD   </span> <span class="in">VXSC      </span>                            
-036110,000059: 30,3213           00404                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C56">DELV</a>                                  <span class="co">#  DV = DELV*KPIP SCALED AT 2(+4) M/CS</span>
-036111,000060: 30,3214           21163                                    <a href="AVERAGE_G_INTEGRATOR.agc.html#4B504950">KPIP</a>                                  
-036112,000061: 30,3215           51406                           <span class="in">PUSH    </span> <span class="in">ABVAL     </span>                            <span class="co">#  DV IN PDL</span>
-036113,000062: 30,3216           03624                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41424456434F4E56">ABDVCONV</a>                              
-036114,000063: 30,3217           56206                           <span class="in">PUSH    </span> <span class="in">DDV       </span>                            
-036115,000064: 30,3220           21400                                    <a href="#32534543283929">2SEC(9)</a>                               
-036116,000065: 30,3221           01325                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2F41462F">/AF/</a>                                  <span class="co">#  /AF/ = MAGNITUDE DV/DT</span>
-036117,000066: 
+036073,000016: 30,3206                                           <span class="ps">BANK    </span> 30                                    
+036074,000017:                                                                                                  <span class="co">#  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *</span>
+036075,000018: 
+036076,000019:                                                                                                  <span class="co">#      THE MASS UPDATE ROUTINE EXTENDS FROM APPROXIMATELY HERE TO THE NEXT</span>
+036077,000020:                                                                                                  <span class="co">#  ROW OF ASTERISKS.   COMPUTATIONS ARE AS FOLLOWS:-</span>
+036078,000021:                                                                                                  <span class="co">#      (1) /AF/ = MAGNITUDE DV/DT, SCALED IN UNITS OF 2(-5) M/CS/CS.</span>
+036079,000022:                                                                                                  <span class="co">#      (2) PREFORCE = /AF/ MASS, APPROXIMATE PRESENT THRUST, SCALED AT</span>
+036080,000023:                                                                                                  <span class="co">#          SOME 3.3 POUNDS PER BIT; PREFORCE LATER BECOMES PREFORCE/2FMAX.</span>
+036081,000024:                                                                                                  <span class="co">#      (3) NOMINAL EXHAUST VELOCITY, VEXNOM = VEXSTEP + (PREFORCE-FSTEP)</span>
+036082,000025:                                                                                                  <span class="co">#          SLOPE, WHERE VEXSTEP, FSTEP, AND SLOPE ARE SELECTED FROM THE</span>
+036083,000026:                                                                                                  <span class="co">#          'VEXTABLE' BY THE ROUTINE BEGINNING AT VEXFINDD; THE FSTEPS</span>
+036084,000027:                                                                                                  <span class="co">#          AND VXSTEPS DEFINE CERTAIN DISCRETE POINTS ON THE CURVE OF</span>
+036085,000028:                                                                                                  <span class="co">#          EXHAUST VELOCITY VERSUS THRUST; THE ASSOCIATED SLOPE IS ALWAYS</span>
+036086,000029:                                                                                                  <span class="co">#          THAT FOR THE SEGMENT JUST PRECEEDING THOSE POINTS.   (UNITS</span>
+036087,000030:                                                                                                  <span class="co">#          FOR VEXNOM, AS FOR NEGVEX, ARE 2(6) M/CS.)</span>
+036088,000031:                                                                                                  <span class="co">#      (4) AREARATE, A MODERATELY ABSTRUSE (NOT TO SAY ABSURD) FUNCTION</span>
+036089,000032:                                                                                                  <span class="co">#          OF DELAREA (EROSION) AND PREFORCE.   (THE AREA IN QUESTION IS</span>
+036090,000033:                                                                                                  <span class="co">#          THAT OF THE THROAT OF THE ENGINE.)</span>
+036091,000034:                                                                                                  <span class="co">#      (5) DELAREA = DELAREA + AREARATE DELTAT, SCALED IN UNITS OF 2(7) %</span>
+036092,000035:                                                                                                  <span class="co">#      (6) NEGVEX = -(VEXNOM - CVEX5 DELAREA).</span>
+036093,000036:                                                                                                  <span class="co">#      (7) MASS = MASS + (/DELV//NEGVEX) MASS, SCALED IN UNITS OF 2(15)</span>
+036094,000037:                                                                                                  <span class="co">#          KILOGRAMS.</span>
+036095,000038: 
+036096,000039:                                                                                                  <span class="co">#      THE FOLLOWING INITIALIZATIONS MUST BE MADE BEFORE LAUNCH:</span>
+036097,000040:                                                                                                  <span class="co">#  C(MASS) = 0, C(LEMMASS1) = SCALED MASS OF LEM CUM DPS, C(LEMMASS2) =</span>
+036098,000041:                                                                                                  <span class="co">#  SCALED MASS OF LEM WITHOUT DPS.   UPON LEM-SIVB SEPARATION MASS MUST</span>
+036099,000042:                                                                                                  <span class="co">#  BE REINITIALIZED USING LEMMASS1 AND DELAREA MUST BE SET TO DP ZERO.</span>
+036100,000043:                                                                                                  <span class="co">#  LATER, WHEN THE DPS PARTS COMPANY, MASS MUST BE INITIALIZED STILL</span>
+036101,000044:                                                                                                  <span class="co">#  AGAIN USING LEMMASS2.</span>
+036102,000045: 
+036103,000046:                                                                                                  <span class="co">#      THE FOLLOWING IS AN INELEGANT SUPERFLUITY:-   INPUTS: MASS, DELAREA,</span>
+036104,000047:                                                                                                  <span class="co">#  DELV, DELTAT, EMANATIONS FROM THE VEXTABLE, A TABLESPOON OF SALT AND</span>
+036105,000048:                                                                                                  <span class="co">#  SEVEN BYZANTINE DODO EGGS.   OUTPUTS: /AF/ AND MASS.   DEBRIS: PREFORCE,</span>
+036106,000049:                                                                                                  <span class="co">#  NEGVEX, AND AREARATE (TO LEARN MORE ABOUT THESE GEMS, SEE ABOVE).</span>
+036107,000050:                                                                                                  <span class="co">#  SUBROUTINES CALLED: MASSMULT (A PART OF THROTTLE CONTROL) AND THE</span>
+036108,000051:                                                                                                  <span class="co">#  INTERPRETER.   ERASABLES: BANK 5 AT PRESENT.   EYLES WROTE THIS STUFF;</span>
+036109,000052:                                                                                                  <span class="co">#  HIS LAST MODIFICATION THEREOF (NUMBER N+2) WENT INTO AGC REVISION 20.</span>
+036110,000053: 
+<a name="4D4153534D4F4E"></a>036111,000054: 30,3206           43145        <span class="sm">MASSMON </span>           <span class="in">DLOAD   </span> <span class="in">BOFF      </span>                            
+036112,000055: 30,3207           01321                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D415353">MASS</a>                                  
+036113,000056: 30,3210           00753                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53495642474F4E45">SIVBGONE</a>                              
+036114,000057: 30,3211           61373                                    <a href="#4E4F4D415353">NOMASS</a>                                
+036115,000058: 30,3212           74375                           <span class="in">VLOAD   </span> <span class="in">VXSC      </span>                            
+036116,000059: 30,3213           00404                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C56">DELV</a>                                  <span class="co">#  DV = DELV*KPIP SCALED AT 2(+4) M/CS</span>
+036117,000060: 30,3214           21163                                    <a href="AVERAGE_G_INTEGRATOR.agc.html#4B504950">KPIP</a>                                  
+036118,000061: 30,3215           51406                           <span class="in">PUSH    </span> <span class="in">ABVAL     </span>                            <span class="co">#  DV IN PDL</span>
+036119,000062: 30,3216           03624                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41424456434F4E56">ABDVCONV</a>                              
+036120,000063: 30,3217           56206                           <span class="in">PUSH    </span> <span class="in">DDV       </span>                            
+036121,000064: 30,3220           21400                                    <a href="#32534543283929">2SEC(9)</a>                               
+036122,000065: 30,3221           01325                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2F41462F">/AF/</a>                                  <span class="co">#  /AF/ = MAGNITUDE DV/DT</span>
+036123,000066: 
 </pre>
 </span>
 </p>
@@ -189,57 +189,57 @@ Page 845
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-036119,000068: 30,3222           77776                           <span class="in">EXIT    </span>                                       
-036120,000069: 
-036121,000070: 30,3223           33444                           <span class="op">CA      </span> <a href="#455448524F544C">ETHROTL</a>                               
-036122,000071: 30,3224           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 <span class="co">#  JUST TO INSURE HAVING THE PROPER EBANK</span>
-036123,000072: 30,3225  E5,1565                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455448524F54">ETHROT</a>                                
-036124,000073: 
-036125,000074: 30,3225           00006                           <span class="op">EXTEND  </span>                                       
-036126,000075: 30,3226           31325                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2F41462F">/AF/</a>                                  
-036127,000076: 30,3227           03445                           <span class="op">TC      </span> <a href="THROTTLE_CONTROL.agc.html#4D4153534D554C54">MASSMULT</a>                              <span class="co">#  WHICH PRODUCES DP FORCE IN A AND L</span>
-036128,000077: 30,3230           53546                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505245464F524345">PREFORCE</a>                              
-036129,000078: 
-<a name="43484F49434531"></a>036130,000079: 30,3231           41545        <span class="sm">CHOICE1 </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505245464F524345">PREFORCE</a>                              <span class="co">#  TEST PREFORCE TO SEE IF</span>
-036131,000080: 30,3232           63401                           <span class="op">AD      </span> <a href="#4C4F574643524954">LOWFCRIT</a>                              <span class="co">#    EITHER BIG ENGINE IS ON</span>
-036132,000081: 30,3233           00006                           <span class="op">EXTEND  </span>                                       
-036133,000082: 30,3234           63241                           <span class="op">BZMF    </span> <a href="#43484F49434532">CHOICE2</a>                               <span class="co">#  BRANCH IF PREFORCE > LOWFCRIT = 720 LBS.</span>
-036134,000083: 
-<a name="56455846494E4452"></a>036135,000084: 30,3235           00006        <span class="sm">VEXFINDR</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  OTHERWISE, USE RCSVEX</span>
-036136,000085: 30,3236           43404                           <span class="op">DCS     </span> <a href="#524353564558">RCSVEX</a>                                
-036137,000086: 30,3237           53556                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4547564558">NEGVEX</a>                                
-036138,000087: 30,3240           13252                           <span class="op">TCF     </span> <a href="#4D494E494E4954">MININIT</a>                               
-<a name="43484F49434532"></a>036139,000088: 30,3241           00006        <span class="sm">CHOICE2 </span>           <span class="op">EXTEND  </span>                                       
-036140,000089: 30,3242           00030                           <span class="op">READ    </span> 30                                    
-036141,000090: 30,3243           40000                           <span class="op">COM     </span>                                       
-036142,000091: 30,3244           77762                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#42495432">BIT2</a>                                  
-036143,000092: 30,3245           00006                           <span class="op">EXTEND  </span>                                       
-036144,000093: 30,3246           13256                           <span class="op">BZF     </span> <a href="#56455846494E4444">VEXFINDD</a>                              
-<a name="56455846494E4441"></a>036145,000094: 30,3247           00006        <span class="sm">VEXFINDA</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  OTHERWISE, USE APSVEX</span>
-036146,000095: 30,3250           43406                           <span class="op">DCS     </span> <a href="#415053564558">APSVEX</a>                                
-036147,000096: 30,3251           53556                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4547564558">NEGVEX</a>                                
-<a name="4D494E494E4954"></a>036148,000097: 30,3252           00006        <span class="sm">MININIT </span>           <span class="op">EXTEND  </span>                                       
-036149,000098: 30,3253           33415                           <span class="op">DCA     </span> <a href="#4D494E4D41535341">MINMASSA</a>                              
-036150,000099: 30,3254           53564                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D494E494D415353">MINIMASS</a>                              
-036151,000100: 30,3255           13351                           <span class="op">TCF     </span> <a href="#454E44564558">ENDVEX</a>                                
-036152,000101: 
-<a name="56455846494E4444"></a>036153,000102: 30,3256           00006        <span class="sm">VEXFINDD</span>           <span class="op">EXTEND  </span>                                       
-036154,000103: 30,3257           33417                           <span class="op">DCA     </span> <a href="#4D494E4D41535344">MINMASSD</a>                              
-036155,000104: 30,3260           53564                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D494E494D415353">MINIMASS</a>                              
-036156,000105: 
-036157,000106: 30,3261           37767                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
-036158,000107: 30,3262           55544                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564558444558">VEXDEX</a>                                
-<a name="5645584C4F4F50"></a>036159,000108: 30,3263           37761        <span class="sm">VEXLOOP </span>           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#464F5552">FOUR</a>                                  
-036160,000109: 30,3264           27544                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564558444558">VEXDEX</a>                                <span class="co">#  INCREMENTING VEXDEX BY FOUR</span>
-036161,000110: 30,3265           41545                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505245464F524345">PREFORCE</a>                              
-036162,000111: 30,3266           51544                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564558444558">VEXDEX</a>                                
-036163,000112: 30,3267           63414                           <span class="op">AD      </span> <a href="#4653544550">FSTEP</a>                                 <span class="co">#  FSTEP - PREFORCE IN A AND L</span>
-036164,000113: 30,3270           00006                           <span class="op">EXTEND  </span>                                       
-036165,000114: 30,3271           63263                           <span class="op">BZMF    </span> <a href="#5645584C4F4F50">VEXLOOP</a>                               <span class="co">#  BRANCH IF PREFORCE > OR = FSTEP.  EMERGE</span>
-036166,000115:                                                                                                  <span class="co">#    FROM LOOP WITH INDEX PROPERLY SET AS</span>
-036167,000116:                                                                                                  <span class="co">#    SOON AS FSTEP > PREFORCE.</span>
-036168,000117: 30,3272           40000                           <span class="op">COM     </span>                                       <span class="co">#  PREFORCE-FSTEP (ALWAYS MINUS) IN A AND L</span>
-036169,000118: 
+036125,000068: 30,3222           77776                           <span class="in">EXIT    </span>                                       
+036126,000069: 
+036127,000070: 30,3223           33444                           <span class="op">CA      </span> <a href="#455448524F544C">ETHROTL</a>                               
+036128,000071: 30,3224           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 <span class="co">#  JUST TO INSURE HAVING THE PROPER EBANK</span>
+036129,000072: 30,3225  E5,1565                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455448524F54">ETHROT</a>                                
+036130,000073: 
+036131,000074: 30,3225           00006                           <span class="op">EXTEND  </span>                                       
+036132,000075: 30,3226           31325                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2F41462F">/AF/</a>                                  
+036133,000076: 30,3227           03445                           <span class="op">TC      </span> <a href="THROTTLE_CONTROL.agc.html#4D4153534D554C54">MASSMULT</a>                              <span class="co">#  WHICH PRODUCES DP FORCE IN A AND L</span>
+036134,000077: 30,3230           53546                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505245464F524345">PREFORCE</a>                              
+036135,000078: 
+<a name="43484F49434531"></a>036136,000079: 30,3231           41545        <span class="sm">CHOICE1 </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505245464F524345">PREFORCE</a>                              <span class="co">#  TEST PREFORCE TO SEE IF</span>
+036137,000080: 30,3232           63401                           <span class="op">AD      </span> <a href="#4C4F574643524954">LOWFCRIT</a>                              <span class="co">#    EITHER BIG ENGINE IS ON</span>
+036138,000081: 30,3233           00006                           <span class="op">EXTEND  </span>                                       
+036139,000082: 30,3234           63241                           <span class="op">BZMF    </span> <a href="#43484F49434532">CHOICE2</a>                               <span class="co">#  BRANCH IF PREFORCE > LOWFCRIT = 720 LBS.</span>
+036140,000083: 
+<a name="56455846494E4452"></a>036141,000084: 30,3235           00006        <span class="sm">VEXFINDR</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  OTHERWISE, USE RCSVEX</span>
+036142,000085: 30,3236           43404                           <span class="op">DCS     </span> <a href="#524353564558">RCSVEX</a>                                
+036143,000086: 30,3237           53556                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4547564558">NEGVEX</a>                                
+036144,000087: 30,3240           13252                           <span class="op">TCF     </span> <a href="#4D494E494E4954">MININIT</a>                               
+<a name="43484F49434532"></a>036145,000088: 30,3241           00006        <span class="sm">CHOICE2 </span>           <span class="op">EXTEND  </span>                                       
+036146,000089: 30,3242           00030                           <span class="op">READ    </span> 30                                    
+036147,000090: 30,3243           40000                           <span class="op">COM     </span>                                       
+036148,000091: 30,3244           77762                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#42495432">BIT2</a>                                  
+036149,000092: 30,3245           00006                           <span class="op">EXTEND  </span>                                       
+036150,000093: 30,3246           13256                           <span class="op">BZF     </span> <a href="#56455846494E4444">VEXFINDD</a>                              
+<a name="56455846494E4441"></a>036151,000094: 30,3247           00006        <span class="sm">VEXFINDA</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  OTHERWISE, USE APSVEX</span>
+036152,000095: 30,3250           43406                           <span class="op">DCS     </span> <a href="#415053564558">APSVEX</a>                                
+036153,000096: 30,3251           53556                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4547564558">NEGVEX</a>                                
+<a name="4D494E494E4954"></a>036154,000097: 30,3252           00006        <span class="sm">MININIT </span>           <span class="op">EXTEND  </span>                                       
+036155,000098: 30,3253           33415                           <span class="op">DCA     </span> <a href="#4D494E4D41535341">MINMASSA</a>                              
+036156,000099: 30,3254           53564                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D494E494D415353">MINIMASS</a>                              
+036157,000100: 30,3255           13351                           <span class="op">TCF     </span> <a href="#454E44564558">ENDVEX</a>                                
+036158,000101: 
+<a name="56455846494E4444"></a>036159,000102: 30,3256           00006        <span class="sm">VEXFINDD</span>           <span class="op">EXTEND  </span>                                       
+036160,000103: 30,3257           33417                           <span class="op">DCA     </span> <a href="#4D494E4D41535344">MINMASSD</a>                              
+036161,000104: 30,3260           53564                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D494E494D415353">MINIMASS</a>                              
+036162,000105: 
+036163,000106: 30,3261           37767                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
+036164,000107: 30,3262           55544                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564558444558">VEXDEX</a>                                
+<a name="5645584C4F4F50"></a>036165,000108: 30,3263           37761        <span class="sm">VEXLOOP </span>           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#464F5552">FOUR</a>                                  
+036166,000109: 30,3264           27544                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564558444558">VEXDEX</a>                                <span class="co">#  INCREMENTING VEXDEX BY FOUR</span>
+036167,000110: 30,3265           41545                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505245464F524345">PREFORCE</a>                              
+036168,000111: 30,3266           51544                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564558444558">VEXDEX</a>                                
+036169,000112: 30,3267           63414                           <span class="op">AD      </span> <a href="#4653544550">FSTEP</a>                                 <span class="co">#  FSTEP - PREFORCE IN A AND L</span>
+036170,000113: 30,3270           00006                           <span class="op">EXTEND  </span>                                       
+036171,000114: 30,3271           63263                           <span class="op">BZMF    </span> <a href="#5645584C4F4F50">VEXLOOP</a>                               <span class="co">#  BRANCH IF PREFORCE > OR = FSTEP.  EMERGE</span>
+036172,000115:                                                                                                  <span class="co">#    FROM LOOP WITH INDEX PROPERLY SET AS</span>
+036173,000116:                                                                                                  <span class="co">#    SOON AS FSTEP > PREFORCE.</span>
+036174,000117: 30,3272           40000                           <span class="op">COM     </span>                                       <span class="co">#  PREFORCE-FSTEP (ALWAYS MINUS) IN A AND L</span>
+036175,000118: 
 </pre>
 </span>
 </p>
@@ -255,57 +255,57 @@ Page 846
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-036171,000120: 30,3273           00006                           <span class="op">EXTEND  </span>                                       
-036172,000121: 30,3274           51544                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564558444558">VEXDEX</a>                                
-036173,000122: 30,3275           73415                           <span class="op">MP      </span> <a href="#534C4F5045">SLOPE</a>                                 
-036174,000123: 30,3276           53550                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5645584E4F4D">VEXNOM</a>                                
-036175,000124: 30,3277           00006                           <span class="op">EXTEND  </span>                                       
-036176,000125: 30,3300           51544                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564558444558">VEXDEX</a>                                
-036177,000126: 30,3301           33417                           <span class="op">DCA     </span> <a href="#56455853544550">VEXSTEP</a>                               
-036178,000127: 30,3302           21550                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5645584E4F4D">VEXNOM</a>                                <span class="co">#  VEXNOM = VEXSTEP + (PREFORCE-FSTEP)SLOPE</span>
-036179,000128: 
-036180,000129: 30,3303           43700                           <span class="op">CS      </span> <a href="THROTTLE_CONTROL.agc.html#2D464D4158">-FMAX</a>                                 
-036181,000130: 30,3304           60000                           <span class="op">DOUBLE  </span>                                       
-036182,000131: 30,3305           56002                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-036183,000132: 30,3306           00006                           <span class="op">EXTEND  </span>                                       
-036184,000133: 30,3307           31546                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505245464F524345">PREFORCE</a>                              
-036185,000134: 30,3310           00006                           <span class="op">EXTEND  </span>                                       
-036186,000135: 30,3311           10002                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-036187,000136: 30,3312           55545                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505245464F524345">PREFORCE</a>                              <span class="co">#  PREFORCE = PREFORCE/2FMAX</span>
-036188,000137: 
-036189,000138: 30,3313           33412                           <span class="op">CA      </span> <a href="#4356455834">CVEX4</a>                                 
-036190,000139: 30,3314           00006                           <span class="op">EXTEND  </span>                                       
-036191,000140: 30,3315           71551                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C41524541">DELAREA</a>                               
-036192,000141: 30,3316           63411                           <span class="op">AD      </span> <a href="#4356455833">CVEX3</a>                                 
-036193,000142: 30,3317           00006                           <span class="op">EXTEND  </span>                                       
-036194,000143: 30,3320           71545                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505245464F524345">PREFORCE</a>                              
-036195,000144: 30,3321           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#                MUMBO</span>
-036196,000145: 30,3322           71545                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505245464F524345">PREFORCE</a>                              <span class="co">#                JUMBO</span>
-036197,000146: 30,3323           53554                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152454152415445">AREARATE</a>                              
-036198,000147: 30,3324           33410                           <span class="op">CA      </span> <a href="#4356455832">CVEX2</a>                                 
-036199,000148: 30,3325           00006                           <span class="op">EXTEND  </span>                                       
-036200,000149: 30,3326           71551                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C41524541">DELAREA</a>                               
-036201,000150: 30,3327           63407                           <span class="op">AD      </span> <a href="#4356455831">CVEX1</a>                                 
-036202,000151: 30,3330           00006                           <span class="op">EXTEND  </span>                                       
-036203,000152: 30,3331           71545                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505245464F524345">PREFORCE</a>                              
-036204,000153: 30,3332           21554                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152454152415445">AREARATE</a>                              <span class="co">#  NOW SCALED IN UNITS OF 2(-2) PERCENT/CS</span>
-036205,000154: 30,3333           31553                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152454152415445">AREARATE</a>                              
-036206,000155: 30,3334           00006                           <span class="op">EXTEND  </span>                                       
-036207,000156: 30,3335           73377                           <span class="op">MP      </span> <a href="#32534543283929">2SEC(9)</a>                               
-036208,000157: 30,3336           53560                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441524541544D50">DAREATMP</a>                              
-036209,000158: 30,3337           00006                           <span class="op">EXTEND  </span>                                       
-036210,000159: 30,3340           31552                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C41524541">DELAREA</a>                               
-036211,000160: 30,3341           21560                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441524541544D50">DAREATMP</a>                              <span class="co">#  DAREATMP NOW CONTAINS NEW DELAREA</span>
-036212,000161: 30,3342           31557                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441524541544D50">DAREATMP</a>                              
-036213,000162: 30,3343           00006                           <span class="op">EXTEND  </span>                                       
-036214,000163: 30,3344           73413                           <span class="op">MP      </span> <a href="#4356455835">CVEX5</a>                                 
-036215,000164: 30,3345           53556                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4547564558">NEGVEX</a>                                <span class="co">#  RESULT IS SCALED IN UNITS OF 2(6) M/CS</span>
-036216,000165: 30,3346           00006                           <span class="op">EXTEND  </span>                                       
-036217,000166: 30,3347           41550                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5645584E4F4D">VEXNOM</a>                                
-036218,000167: 30,3350           21556                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4547564558">NEGVEX</a>                                <span class="co">#  NEGVEX NOW HOLDS THE GENUINE ARTICLE</span>
-036219,000168: 
-<a name="454E44564558"></a>036220,000169: 30,3351           37767        <span class="sm">ENDVEX  </span>           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  PRECAUTIONARY</span>
-036221,000170: 
+036177,000120: 30,3273           00006                           <span class="op">EXTEND  </span>                                       
+036178,000121: 30,3274           51544                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564558444558">VEXDEX</a>                                
+036179,000122: 30,3275           73415                           <span class="op">MP      </span> <a href="#534C4F5045">SLOPE</a>                                 
+036180,000123: 30,3276           53550                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5645584E4F4D">VEXNOM</a>                                
+036181,000124: 30,3277           00006                           <span class="op">EXTEND  </span>                                       
+036182,000125: 30,3300           51544                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564558444558">VEXDEX</a>                                
+036183,000126: 30,3301           33417                           <span class="op">DCA     </span> <a href="#56455853544550">VEXSTEP</a>                               
+036184,000127: 30,3302           21550                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5645584E4F4D">VEXNOM</a>                                <span class="co">#  VEXNOM = VEXSTEP + (PREFORCE-FSTEP)SLOPE</span>
+036185,000128: 
+036186,000129: 30,3303           43700                           <span class="op">CS      </span> <a href="THROTTLE_CONTROL.agc.html#2D464D4158">-FMAX</a>                                 
+036187,000130: 30,3304           60000                           <span class="op">DOUBLE  </span>                                       
+036188,000131: 30,3305           56002                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+036189,000132: 30,3306           00006                           <span class="op">EXTEND  </span>                                       
+036190,000133: 30,3307           31546                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505245464F524345">PREFORCE</a>                              
+036191,000134: 30,3310           00006                           <span class="op">EXTEND  </span>                                       
+036192,000135: 30,3311           10002                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+036193,000136: 30,3312           55545                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505245464F524345">PREFORCE</a>                              <span class="co">#  PREFORCE = PREFORCE/2FMAX</span>
+036194,000137: 
+036195,000138: 30,3313           33412                           <span class="op">CA      </span> <a href="#4356455834">CVEX4</a>                                 
+036196,000139: 30,3314           00006                           <span class="op">EXTEND  </span>                                       
+036197,000140: 30,3315           71551                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C41524541">DELAREA</a>                               
+036198,000141: 30,3316           63411                           <span class="op">AD      </span> <a href="#4356455833">CVEX3</a>                                 
+036199,000142: 30,3317           00006                           <span class="op">EXTEND  </span>                                       
+036200,000143: 30,3320           71545                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505245464F524345">PREFORCE</a>                              
+036201,000144: 30,3321           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#                MUMBO</span>
+036202,000145: 30,3322           71545                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505245464F524345">PREFORCE</a>                              <span class="co">#                JUMBO</span>
+036203,000146: 30,3323           53554                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152454152415445">AREARATE</a>                              
+036204,000147: 30,3324           33410                           <span class="op">CA      </span> <a href="#4356455832">CVEX2</a>                                 
+036205,000148: 30,3325           00006                           <span class="op">EXTEND  </span>                                       
+036206,000149: 30,3326           71551                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C41524541">DELAREA</a>                               
+036207,000150: 30,3327           63407                           <span class="op">AD      </span> <a href="#4356455831">CVEX1</a>                                 
+036208,000151: 30,3330           00006                           <span class="op">EXTEND  </span>                                       
+036209,000152: 30,3331           71545                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505245464F524345">PREFORCE</a>                              
+036210,000153: 30,3332           21554                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152454152415445">AREARATE</a>                              <span class="co">#  NOW SCALED IN UNITS OF 2(-2) PERCENT/CS</span>
+036211,000154: 30,3333           31553                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152454152415445">AREARATE</a>                              
+036212,000155: 30,3334           00006                           <span class="op">EXTEND  </span>                                       
+036213,000156: 30,3335           73377                           <span class="op">MP      </span> <a href="#32534543283929">2SEC(9)</a>                               
+036214,000157: 30,3336           53560                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441524541544D50">DAREATMP</a>                              
+036215,000158: 30,3337           00006                           <span class="op">EXTEND  </span>                                       
+036216,000159: 30,3340           31552                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C41524541">DELAREA</a>                               
+036217,000160: 30,3341           21560                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441524541544D50">DAREATMP</a>                              <span class="co">#  DAREATMP NOW CONTAINS NEW DELAREA</span>
+036218,000161: 30,3342           31557                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441524541544D50">DAREATMP</a>                              
+036219,000162: 30,3343           00006                           <span class="op">EXTEND  </span>                                       
+036220,000163: 30,3344           73413                           <span class="op">MP      </span> <a href="#4356455835">CVEX5</a>                                 
+036221,000164: 30,3345           53556                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4547564558">NEGVEX</a>                                <span class="co">#  RESULT IS SCALED IN UNITS OF 2(6) M/CS</span>
+036222,000165: 30,3346           00006                           <span class="op">EXTEND  </span>                                       
+036223,000166: 30,3347           41550                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5645584E4F4D">VEXNOM</a>                                
+036224,000167: 30,3350           21556                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4547564558">NEGVEX</a>                                <span class="co">#  NEGVEX NOW HOLDS THE GENUINE ARTICLE</span>
+036225,000168: 
+<a name="454E44564558"></a>036226,000169: 30,3351           37767        <span class="sm">ENDVEX  </span>           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  PRECAUTIONARY</span>
+036227,000170: 
 </pre>
 </span>
 </p>
@@ -321,53 +321,53 @@ Page 847
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-036223,000172: 30,3352           54153                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F4445">MODE</a>                                  
-036224,000173: 30,3353           54111                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5646494E44">OVFIND</a>                                
-036225,000174: 
-036226,000175: 30,3354           06112                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-036227,000176: 30,3355           60545                           <span class="in">DLOAD   </span> <span class="in">SR2       </span>                            <span class="co">#  RESCALING /DELV/ TO 2(6) M/CS</span>
-036228,000177: 30,3356           41271                           <span class="in">DDV     </span> <span class="in">DMP       </span>                            
-036229,000178: 30,3357           02556                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4547564558">NEGVEX</a>                                
-036230,000179: 30,3360           01321                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D415353">MASS</a>                                  
-036231,000180: 30,3361           77615                           <span class="in">DAD     </span>                                       
-036232,000181: 30,3362           01321                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D415353">MASS</a>                                  
-036233,000182: 30,3363           02562                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41535354454D50">MASSTEMP</a>                              
-036234,000183: 30,3364           51025                           <span class="in">DSU     </span> <span class="in">BPL       </span>                            <span class="co">#  RETURN NOW IF MASS > MINIMASS</span>
-036235,000184: 30,3365           02564                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D494E494D415353">MINIMASS</a>                              
-036236,000185: 30,3366           00052                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5150524554">QPRET</a>                                 
-036237,000186: 30,3367           77745                           <span class="in">DLOAD   </span>                                       <span class="co">#  OTHERWISE SET MASS = MINIMASS</span>
-036238,000187: 30,3370           02564                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D494E494D415353">MINIMASS</a>                              
-036239,000188: 30,3371           02562                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41535354454D50">MASSTEMP</a>                              
-036240,000189: 30,3372           77616                           <span class="in">RVQ     </span>                                       
-036241,000190: 
-<a name="4E4F4D415353"></a>036242,000191: 30,3373           16562        <span class="sm">NOMASS  </span>           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41535354454D50">MASSTEMP</a>                              
-036243,000192: 30,3374           26643                                    <a href="PREBURN_FOR_APS2.agc.html#445030">DP0</a>                                   
-036244,000193: 30,3375           02560                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441524541544D50">DAREATMP</a>                              <span class="co">#  DELAREA INITIALIZED UNTIL SIVB SEPARATES</span>
-036245,000194: 30,3376           77616                           <span class="in">RVQ     </span>                                       
-036246,000195: 
-036247,000196:                                                                                                  <span class="co">#  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *</span>
-036248,000197:                                                                                                  <span class="co">#  * * * * * * * * * * * * * * * * * * * *</span>
-036249,000198: 
-036250,000199:                                                                                                  <span class="co">#  CONSTANTS FOR VEXFIND1</span>
-036251,000200: 
-<a name="32534543283929"></a>036252,000201: 30,3377           14400 00000  <span class="sm">2SEC(9) </span>           <span class="ps">2DEC    </span> 200        B-9                        <span class="co">#  CONSTANT GUIDANCE PERIOD, SUP70S5DLY</span>
-036253,000202: 
-036254,000203: 
-036255,000204: 
-<a name="4C4F574643524954"></a>036256,000205: 30,3401           00411        <span class="sm">LOWFCRIT</span>           <span class="ps">OCT     </span> 411                                   <span class="co">#  ABOUT 720 POUNDS, SCALED</span>
-<a name="4D41535343524954"></a>036257,000206: 30,3402           05423        <span class="sm">MASSCRIT</span>           <span class="ps">DEC     </span> .173031964                            <span class="co">#  MASS OF LEM WITH DPS > MASSCRIT > MASS</span>
-036258,000207:                                                                                                  <span class="co">#    OF LEM WITHOUT DPS</span>
-036259,000208: 
-<a name="524353564558"></a>036260,000209: 30,3403           15165 30244  <span class="sm">RCSVEX  </span>           <span class="ps">2DEC    </span> .4134375                              <span class="co">#  EXHAUST VELOCITY FOR RCS JETS</span>
-036261,000210: 
-<a name="415053564558"></a>036262,000211: 30,3405           17114 33562  <span class="sm">APSVEX  </span>           <span class="ps">2DEC    </span> .473441550                            <span class="co">#  EXHAUST VELOCITY FOR ASCENT ENGINE</span>
-036263,000212: 
-<a name="4356455831"></a>036264,000213: 30,3407           00316        <span class="sm">CVEX1   </span>           <span class="ps">DEC     </span> +.012558840                            
-<a name="4356455832"></a>036265,000214: 30,3410           76221        <span class="sm">CVEX2   </span>           <span class="ps">DEC     </span> -.053575066                            
-<a name="4356455833"></a>036266,000215: 30,3411           77312        <span class="sm">CVEX3   </span>           <span class="ps">DEC     </span> -.018875329                            
-<a name="4356455834"></a>036267,000216: 30,3412           02447        <span class="sm">CVEX4   </span>           <span class="ps">DEC     </span> +.080517427                            
-<a name="4356455835"></a>036268,000217: 30,3413           01503        <span class="sm">CVEX5   </span>           <span class="ps">DEC     </span> +.05099460                            
-036269,000218: 
+036229,000172: 30,3352           54153                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F4445">MODE</a>                                  
+036230,000173: 30,3353           54111                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5646494E44">OVFIND</a>                                
+036231,000174: 
+036232,000175: 30,3354           06112                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+036233,000176: 30,3355           60545                           <span class="in">DLOAD   </span> <span class="in">SR2       </span>                            <span class="co">#  RESCALING /DELV/ TO 2(6) M/CS</span>
+036234,000177: 30,3356           41271                           <span class="in">DDV     </span> <span class="in">DMP       </span>                            
+036235,000178: 30,3357           02556                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4547564558">NEGVEX</a>                                
+036236,000179: 30,3360           01321                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D415353">MASS</a>                                  
+036237,000180: 30,3361           77615                           <span class="in">DAD     </span>                                       
+036238,000181: 30,3362           01321                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D415353">MASS</a>                                  
+036239,000182: 30,3363           02562                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41535354454D50">MASSTEMP</a>                              
+036240,000183: 30,3364           51025                           <span class="in">DSU     </span> <span class="in">BPL       </span>                            <span class="co">#  RETURN NOW IF MASS > MINIMASS</span>
+036241,000184: 30,3365           02564                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D494E494D415353">MINIMASS</a>                              
+036242,000185: 30,3366           00052                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5150524554">QPRET</a>                                 
+036243,000186: 30,3367           77745                           <span class="in">DLOAD   </span>                                       <span class="co">#  OTHERWISE SET MASS = MINIMASS</span>
+036244,000187: 30,3370           02564                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D494E494D415353">MINIMASS</a>                              
+036245,000188: 30,3371           02562                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41535354454D50">MASSTEMP</a>                              
+036246,000189: 30,3372           77616                           <span class="in">RVQ     </span>                                       
+036247,000190: 
+<a name="4E4F4D415353"></a>036248,000191: 30,3373           16562        <span class="sm">NOMASS  </span>           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41535354454D50">MASSTEMP</a>                              
+036249,000192: 30,3374           26643                                    <a href="PREBURN_FOR_APS2.agc.html#445030">DP0</a>                                   
+036250,000193: 30,3375           02560                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441524541544D50">DAREATMP</a>                              <span class="co">#  DELAREA INITIALIZED UNTIL SIVB SEPARATES</span>
+036251,000194: 30,3376           77616                           <span class="in">RVQ     </span>                                       
+036252,000195: 
+036253,000196:                                                                                                  <span class="co">#  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *</span>
+036254,000197:                                                                                                  <span class="co">#  * * * * * * * * * * * * * * * * * * * *</span>
+036255,000198: 
+036256,000199:                                                                                                  <span class="co">#  CONSTANTS FOR VEXFIND1</span>
+036257,000200: 
+<a name="32534543283929"></a>036258,000201: 30,3377           14400 00000  <span class="sm">2SEC(9) </span>           <span class="ps">2DEC    </span> 200        B-9                        <span class="co">#  CONSTANT GUIDANCE PERIOD, SUP70S5DLY</span>
+036259,000202: 
+036260,000203: 
+036261,000204: 
+<a name="4C4F574643524954"></a>036262,000205: 30,3401           00411        <span class="sm">LOWFCRIT</span>           <span class="ps">OCT     </span> 411                                   <span class="co">#  ABOUT 720 POUNDS, SCALED</span>
+<a name="4D41535343524954"></a>036263,000206: 30,3402           05423        <span class="sm">MASSCRIT</span>           <span class="ps">DEC     </span> .173031964                            <span class="co">#  MASS OF LEM WITH DPS > MASSCRIT > MASS</span>
+036264,000207:                                                                                                  <span class="co">#    OF LEM WITHOUT DPS</span>
+036265,000208: 
+<a name="524353564558"></a>036266,000209: 30,3403           15165 30244  <span class="sm">RCSVEX  </span>           <span class="ps">2DEC    </span> .4134375                              <span class="co">#  EXHAUST VELOCITY FOR RCS JETS</span>
+036267,000210: 
+<a name="415053564558"></a>036268,000211: 30,3405           17114 33562  <span class="sm">APSVEX  </span>           <span class="ps">2DEC    </span> .473441550                            <span class="co">#  EXHAUST VELOCITY FOR ASCENT ENGINE</span>
+036269,000212: 
+<a name="4356455831"></a>036270,000213: 30,3407           00316        <span class="sm">CVEX1   </span>           <span class="ps">DEC     </span> +.012558840                            
+<a name="4356455832"></a>036271,000214: 30,3410           76221        <span class="sm">CVEX2   </span>           <span class="ps">DEC     </span> -.053575066                            
+<a name="4356455833"></a>036272,000215: 30,3411           77312        <span class="sm">CVEX3   </span>           <span class="ps">DEC     </span> -.018875329                            
+<a name="4356455834"></a>036273,000216: 30,3412           02447        <span class="sm">CVEX4   </span>           <span class="ps">DEC     </span> +.080517427                            
+<a name="4356455835"></a>036274,000217: 30,3413           01503        <span class="sm">CVEX5   </span>           <span class="ps">DEC     </span> +.05099460                            
+036275,000218: 
 </pre>
 </span>
 </p>
@@ -383,49 +383,49 @@ Page 848
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="4D494E4D41535341"></a>036271,000220: 30,3414           02035 07567  <span class="sm">MINMASSA</span>           <span class="ps">2DEC    </span> 2106.4833  B-15                       <span class="co">#  MASS OF APS EMPTY</span>
-036272,000221: 
-<a name="4D494E4D41535344"></a>036273,000222: 30,3416           06062 20000  <span class="sm">MINMASSD</span>           <span class="ps">2DEC    </span> 6245       B-15                       <span class="co">#  DESCENT WITH NO DPS FUEL AND 405 RCS</span>
-036274,000223: 
-036275,000224: 
-036276,000225:                                                                                                  <span class="co">#  ADDRESSES FOR ACCESSING VEXTABLE</span>
-036277,000226: 
-<a name="4653544550"></a>036278,000227: 30,3420  30,3414               <span class="sm">FSTEP   </span>           <span class="ps">=       </span> <a href="#465354455031">FSTEP1</a>     -4                         
-<a name="534C4F5045"></a>036279,000228: 30,3420  30,3415               <span class="sm">SLOPE   </span>           <span class="ps">=       </span> <a href="#534C4F504531">SLOPE1</a>     -4                         
-<a name="56455853544550"></a>036280,000229: 30,3420  30,3416               <span class="sm">VEXSTEP </span>           <span class="ps">=       </span> <a href="#56585354455031">VXSTEP1</a>    -4                         
-036281,000230: 
-036282,000231:                                                                                                  <span class="co">#  THE VEXTABLE</span>
-036283,000232: 
-<a name="465354455031"></a>036284,000233: 30,3420           01713        <span class="sm">FSTEP1  </span>           <span class="ps">DEC     </span> +.0592346907                            <span class="co">#   25%</span>
-<a name="534C4F504531"></a>036285,000234: 30,3421           11736        <span class="sm">SLOPE1  </span>           <span class="ps">DEC     </span> +.3104172317                            
-<a name="56585354455031"></a>036286,000235: 30,3422           16445 06644  <span class="sm">VXSTEP1 </span>           <span class="ps">2DEC    </span> +.4553963093                            <span class="co">#  ABOUT 2914.53 M/S</span>
-036287,000236: 
-036288,000237: 
-036289,000238: 
-<a name="465354455032"></a>036290,000239: 30,3424           03625        <span class="sm">FSTEP2  </span>           <span class="ps">DEC     </span> +.1184693815                            <span class="co">#   50%</span>
-<a name="534C4F504532"></a>036291,000240: 30,3425           76531        <span class="sm">SLOPE2  </span>           <span class="ps">DEC     </span> -.0413889642                            
-<a name="56585354455032"></a>036292,000241: 30,3426           16375 01343  <span class="sm">VXSTEP2 </span>           <span class="ps">2DEC    </span> +.4529446468                            <span class="co">#  ABOUT 2898.84 M/S</span>
-036293,000242: 
-036294,000243: 
-036295,000244: 
-<a name="465354455033"></a>036296,000245: 30,3430           06275        <span class="sm">FSTEP3  </span>           <span class="ps">DEC     </span> +.1990285610                            <span class="co">#   84%</span>
-<a name="534C4F504533"></a>036297,000246: 30,3431           06741        <span class="sm">SLOPE3  </span>           <span class="ps">DEC     </span> +.2168355662                            
-<a name="56585354455033"></a>036298,000247: 30,3432           17033 07603  <span class="sm">VXSTEP3 </span>           <span class="ps">2DEC    </span> +.4704127421                            <span class="co">#  ABOUT 3010.64 M/S</span>
-036299,000248: 
-036300,000249: 
-036301,000250: 
-<a name="465354455034"></a>036302,000251: 30,3434           07100        <span class="sm">FSTEP4  </span>           <span class="ps">DEC     </span> +.2226276618                            <span class="co">#   93%</span>
-<a name="534C4F504534"></a>036303,000252: 30,3435           76601        <span class="sm">SLOPE4  </span>           <span class="ps">DEC     </span> -.0389579859                            
-<a name="56585354455034"></a>036304,000253: 30,3436           17014 05573  <span class="sm">VXSTEP4 </span>           <span class="ps">2DEC    </span> +.4694933687                            <span class="co">#  ABOUT 3004.75 M/S</span>
-036305,000254: 
-036306,000255: 
-036307,000256: 
-<a name="48494653544550"></a>036308,000257: 30,3440           37777        <span class="sm">HIFSTEP </span>           <span class="ps">DEC     </span> +.9999999999                            <span class="co">#  JUST IN CASE, ANOMALOUSLY,</span>
-<a name="4849534C4F5045"></a>036309,000258: 30,3441           00000        <span class="sm">HISLOPE </span>           <span class="ps">DEC     </span> +.0000000000                            <span class="co">#    PREFORCE APPEARS TO</span>
-<a name="4849565853544550"></a>036310,000259: 30,3442           17014 05573  <span class="sm">HIVXSTEP</span>           <span class="ps">2DEC    </span> +.4694933687                            <span class="co">#    EXCEED 100%.</span>
-036311,000260:                                                                                                  <span class="co">#  * * * * * * * * * * * * * * * * * * * * *</span>
-036312,000261: 
-<a name="455448524F544C"></a>036313,000262: 30,3444           02565        <span class="sm">ETHROTL </span>           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455448524F54">ETHROT</a>                                
+<a name="4D494E4D41535341"></a>036277,000220: 30,3414           02035 07567  <span class="sm">MINMASSA</span>           <span class="ps">2DEC    </span> 2106.4833  B-15                       <span class="co">#  MASS OF APS EMPTY</span>
+036278,000221: 
+<a name="4D494E4D41535344"></a>036279,000222: 30,3416           06062 20000  <span class="sm">MINMASSD</span>           <span class="ps">2DEC    </span> 6245       B-15                       <span class="co">#  DESCENT WITH NO DPS FUEL AND 405 RCS</span>
+036280,000223: 
+036281,000224: 
+036282,000225:                                                                                                  <span class="co">#  ADDRESSES FOR ACCESSING VEXTABLE</span>
+036283,000226: 
+<a name="4653544550"></a>036284,000227: 30,3420  30,3414               <span class="sm">FSTEP   </span>           <span class="ps">=       </span> <a href="#465354455031">FSTEP1</a>     -4                         
+<a name="534C4F5045"></a>036285,000228: 30,3420  30,3415               <span class="sm">SLOPE   </span>           <span class="ps">=       </span> <a href="#534C4F504531">SLOPE1</a>     -4                         
+<a name="56455853544550"></a>036286,000229: 30,3420  30,3416               <span class="sm">VEXSTEP </span>           <span class="ps">=       </span> <a href="#56585354455031">VXSTEP1</a>    -4                         
+036287,000230: 
+036288,000231:                                                                                                  <span class="co">#  THE VEXTABLE</span>
+036289,000232: 
+<a name="465354455031"></a>036290,000233: 30,3420           01713        <span class="sm">FSTEP1  </span>           <span class="ps">DEC     </span> +.0592346907                            <span class="co">#   25%</span>
+<a name="534C4F504531"></a>036291,000234: 30,3421           11736        <span class="sm">SLOPE1  </span>           <span class="ps">DEC     </span> +.3104172317                            
+<a name="56585354455031"></a>036292,000235: 30,3422           16445 06644  <span class="sm">VXSTEP1 </span>           <span class="ps">2DEC    </span> +.4553963093                            <span class="co">#  ABOUT 2914.53 M/S</span>
+036293,000236: 
+036294,000237: 
+036295,000238: 
+<a name="465354455032"></a>036296,000239: 30,3424           03625        <span class="sm">FSTEP2  </span>           <span class="ps">DEC     </span> +.1184693815                            <span class="co">#   50%</span>
+<a name="534C4F504532"></a>036297,000240: 30,3425           76531        <span class="sm">SLOPE2  </span>           <span class="ps">DEC     </span> -.0413889642                            
+<a name="56585354455032"></a>036298,000241: 30,3426           16375 01343  <span class="sm">VXSTEP2 </span>           <span class="ps">2DEC    </span> +.4529446468                            <span class="co">#  ABOUT 2898.84 M/S</span>
+036299,000242: 
+036300,000243: 
+036301,000244: 
+<a name="465354455033"></a>036302,000245: 30,3430           06275        <span class="sm">FSTEP3  </span>           <span class="ps">DEC     </span> +.1990285610                            <span class="co">#   84%</span>
+<a name="534C4F504533"></a>036303,000246: 30,3431           06741        <span class="sm">SLOPE3  </span>           <span class="ps">DEC     </span> +.2168355662                            
+<a name="56585354455033"></a>036304,000247: 30,3432           17033 07603  <span class="sm">VXSTEP3 </span>           <span class="ps">2DEC    </span> +.4704127421                            <span class="co">#  ABOUT 3010.64 M/S</span>
+036305,000248: 
+036306,000249: 
+036307,000250: 
+<a name="465354455034"></a>036308,000251: 30,3434           07100        <span class="sm">FSTEP4  </span>           <span class="ps">DEC     </span> +.2226276618                            <span class="co">#   93%</span>
+<a name="534C4F504534"></a>036309,000252: 30,3435           76601        <span class="sm">SLOPE4  </span>           <span class="ps">DEC     </span> -.0389579859                            
+<a name="56585354455034"></a>036310,000253: 30,3436           17014 05573  <span class="sm">VXSTEP4 </span>           <span class="ps">2DEC    </span> +.4694933687                            <span class="co">#  ABOUT 3004.75 M/S</span>
+036311,000254: 
+036312,000255: 
+036313,000256: 
+<a name="48494653544550"></a>036314,000257: 30,3440           37777        <span class="sm">HIFSTEP </span>           <span class="ps">DEC     </span> +.9999999999                            <span class="co">#  JUST IN CASE, ANOMALOUSLY,</span>
+<a name="4849534C4F5045"></a>036315,000258: 30,3441           00000        <span class="sm">HISLOPE </span>           <span class="ps">DEC     </span> +.0000000000                            <span class="co">#    PREFORCE APPEARS TO</span>
+<a name="4849565853544550"></a>036316,000259: 30,3442           17014 05573  <span class="sm">HIVXSTEP</span>           <span class="ps">2DEC    </span> +.4694933687                            <span class="co">#    EXCEED 100%.</span>
+036317,000260:                                                                                                  <span class="co">#  * * * * * * * * * * * * * * * * * * * * *</span>
+036318,000261: 
+<a name="455448524F544C"></a>036319,000262: 30,3444           02565        <span class="sm">ETHROTL </span>           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455448524F54">ETHROT</a>                                
 
 End of include-file MASS_CALCULATOR.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

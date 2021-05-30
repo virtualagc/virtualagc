@@ -98,53 +98,53 @@ presented here.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-015553,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-015554,000003:                                                                                                  <span class="co">## Filename:    GIMBAL_LOCK_AVOIDANCE.agc</span>
-015555,000004:                                                                                                  <span class="co">## Purpose:     Part of the reconstructed source code for LMY99 Rev 0,</span>
-015556,000005:                                                                                                  <span class="co">##              otherwise known as Luminary Rev 99, the second release</span>
-015557,000006:                                                                                                  <span class="co">##              of the Apollo Guidance Computer (AGC) software for Apollo 11.</span>
-015558,000007:                                                                                                  <span class="co">##              It differs from LMY99 Rev 1 (the flown version) only in the</span>
-015559,000008:                                                                                                  <span class="co">##              placement of a single label. The corrections shown here have</span>
-015560,000009:                                                                                                  <span class="co">##              been verified to have the same bank checksums as AGC developer</span>
-015561,000010:                                                                                                  <span class="co">##              Allan Klumpp's copy of Luminary Rev 99, and so are believed</span>
-015562,000011:                                                                                                  <span class="co">##              to be accurate. This file is intended to be a faithful </span>
-015563,000012:                                                                                                  <span class="co">##              recreation, except that the code format has been changed to </span>
-015564,000013:                                                                                                  <span class="co">##              conform to the requirements of the yaYUL assembler rather than </span>
-015565,000014:                                                                                                  <span class="co">##              the original YUL assembler.</span>
-015566,000015:                                                                                                  <span class="co">##</span>
-015567,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-015568,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-015569,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo.</span>
-015570,000019:                                                                                                  <span class="co">## Pages:       364</span>
-015571,000020:                                                                                                  <span class="co">## Mod history: 2009-05-17 RSB  Adapted from the corresponding </span>
-015572,000021:                                                                                                  <span class="co">##                              Luminary131 file, using page </span>
-015573,000022:                                                                                                  <span class="co">##                              images from Luminary 1A.</span>
-015574,000023:                                                                                                  <span class="co">##              2010-12-31 JL   Fixed page number comment.</span>
-015575,000024:                                                                                                  <span class="co">##              2016-12-14 RSB  Proofed text comments with octopus/ProoferComments</span>
-015576,000025:                                                                                                  <span class="co">##                              but no errors found.</span>
-015577,000026:                                                                                                  <span class="co">##              2017-08-01 MAS  Created from LMY99 Rev 1.</span>
-015578,000027:                                                                                                  <span class="co">##              2017-08-22 RSB  Fixed comment-text typo identified in ZERLINA 56.</span>
-015579,000028: 
-015580,000029:                                                                                                  <span class="co">## This source code has been transcribed or otherwise adapted from</span>
-015581,000030:                                                                                                  <span class="co">## digitized images of a hardcopy from the MIT Museum.  The digitization</span>
-015582,000031:                                                                                                  <span class="co">## was performed by Paul Fjeld, and arranged for by Deborah Douglas of</span>
-015583,000032:                                                                                                  <span class="co">## the Museum.  Many thanks to both.  The images (with suitable reduction</span>
-015584,000033:                                                                                                  <span class="co">## in storage size and consequent reduction in image quality as well) are</span>
-015585,000034:                                                                                                  <span class="co">## available online at www.ibiblio.org/apollo.  If for some reason you</span>
-015586,000035:                                                                                                  <span class="co">## find that the images are illegible, contact me at info@sandroid.org</span>
-015587,000036:                                                                                                  <span class="co">## about getting access to the (much) higher-quality images which Paul</span>
-015588,000037:                                                                                                  <span class="co">## actually created.</span>
-015589,000038:                                                                                                  <span class="co">##</span>
-015590,000039:                                                                                                  <span class="co">## The code has been modified to match LMY99 Revision 0, otherwise</span>
-015591,000040:                                                                                                  <span class="co">## known as Luminary Revision 99, the Apollo 11 software release preceeding</span>
-015592,000041:                                                                                                  <span class="co">## the listing from which it was transcribed. It has been verified to</span>
-015593,000042:                                                                                                  <span class="co">## contain the same bank checksums as AGC developer Allan Klumpp's listing</span>
-015594,000043:                                                                                                  <span class="co">## of Luminary Revision 99 (for which we do not have scans).</span>
-015595,000044:                                                                                                  <span class="co">##</span>
-015596,000045:                                                                                                  <span class="co">## Notations on Allan Klumpp's listing read, in part:</span>
-015597,000046:                                                                                                  <span class="co">##</span>
-015598,000047:                                                                                                  <span class="co">##      ASSEMBLE REVISION 099 OF AGC PROGRAM LUMINARY BY NASA 2021112-51</span>
-015599,000048: 
+015558,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+015559,000003:                                                                                                  <span class="co">## Filename:    GIMBAL_LOCK_AVOIDANCE.agc</span>
+015560,000004:                                                                                                  <span class="co">## Purpose:     Part of the reconstructed source code for LMY99 Rev 0,</span>
+015561,000005:                                                                                                  <span class="co">##              otherwise known as Luminary Rev 99, the second release</span>
+015562,000006:                                                                                                  <span class="co">##              of the Apollo Guidance Computer (AGC) software for Apollo 11.</span>
+015563,000007:                                                                                                  <span class="co">##              It differs from LMY99 Rev 1 (the flown version) only in the</span>
+015564,000008:                                                                                                  <span class="co">##              placement of a single label. The corrections shown here have</span>
+015565,000009:                                                                                                  <span class="co">##              been verified to have the same bank checksums as AGC developer</span>
+015566,000010:                                                                                                  <span class="co">##              Allan Klumpp's copy of Luminary Rev 99, and so are believed</span>
+015567,000011:                                                                                                  <span class="co">##              to be accurate. This file is intended to be a faithful </span>
+015568,000012:                                                                                                  <span class="co">##              recreation, except that the code format has been changed to </span>
+015569,000013:                                                                                                  <span class="co">##              conform to the requirements of the yaYUL assembler rather than </span>
+015570,000014:                                                                                                  <span class="co">##              the original YUL assembler.</span>
+015571,000015:                                                                                                  <span class="co">##</span>
+015572,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+015573,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+015574,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo.</span>
+015575,000019:                                                                                                  <span class="co">## Pages:       364</span>
+015576,000020:                                                                                                  <span class="co">## Mod history: 2009-05-17 RSB  Adapted from the corresponding </span>
+015577,000021:                                                                                                  <span class="co">##                              Luminary131 file, using page </span>
+015578,000022:                                                                                                  <span class="co">##                              images from Luminary 1A.</span>
+015579,000023:                                                                                                  <span class="co">##              2010-12-31 JL   Fixed page number comment.</span>
+015580,000024:                                                                                                  <span class="co">##              2016-12-14 RSB  Proofed text comments with octopus/ProoferComments</span>
+015581,000025:                                                                                                  <span class="co">##                              but no errors found.</span>
+015582,000026:                                                                                                  <span class="co">##              2017-08-01 MAS  Created from LMY99 Rev 1.</span>
+015583,000027:                                                                                                  <span class="co">##              2017-08-22 RSB  Fixed comment-text typo identified in ZERLINA 56.</span>
+015584,000028: 
+015585,000029:                                                                                                  <span class="co">## This source code has been transcribed or otherwise adapted from</span>
+015586,000030:                                                                                                  <span class="co">## digitized images of a hardcopy from the MIT Museum.  The digitization</span>
+015587,000031:                                                                                                  <span class="co">## was performed by Paul Fjeld, and arranged for by Deborah Douglas of</span>
+015588,000032:                                                                                                  <span class="co">## the Museum.  Many thanks to both.  The images (with suitable reduction</span>
+015589,000033:                                                                                                  <span class="co">## in storage size and consequent reduction in image quality as well) are</span>
+015590,000034:                                                                                                  <span class="co">## available online at www.ibiblio.org/apollo.  If for some reason you</span>
+015591,000035:                                                                                                  <span class="co">## find that the images are illegible, contact me at info@sandroid.org</span>
+015592,000036:                                                                                                  <span class="co">## about getting access to the (much) higher-quality images which Paul</span>
+015593,000037:                                                                                                  <span class="co">## actually created.</span>
+015594,000038:                                                                                                  <span class="co">##</span>
+015595,000039:                                                                                                  <span class="co">## The code has been modified to match LMY99 Revision 0, otherwise</span>
+015596,000040:                                                                                                  <span class="co">## known as Luminary Revision 99, the Apollo 11 software release preceeding</span>
+015597,000041:                                                                                                  <span class="co">## the listing from which it was transcribed. It has been verified to</span>
+015598,000042:                                                                                                  <span class="co">## contain the same bank checksums as AGC developer Allan Klumpp's listing</span>
+015599,000043:                                                                                                  <span class="co">## of Luminary Revision 99 (for which we do not have scans).</span>
+015600,000044:                                                                                                  <span class="co">##</span>
+015601,000045:                                                                                                  <span class="co">## Notations on Allan Klumpp's listing read, in part:</span>
+015602,000046:                                                                                                  <span class="co">##</span>
+015603,000047:                                                                                                  <span class="co">##      ASSEMBLE REVISION 099 OF AGC PROGRAM LUMINARY BY NASA 2021112-51</span>
+015604,000048: 
 </pre>
 </span>
 </p>
@@ -160,52 +160,52 @@ Page 364
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-015601,000050: 15,2050                                           <span class="ps">BANK    </span> 15                                    
-015602,000051: 
-015603,000052: 22,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4B414C434D4F4E31">KALCMON1</a>                              
-015604,000053: 22,2000                                           <span class="ps">BANK    </span>                                       
-015605,000054: 
-015606,000055:                                                                                                  <span class="co">#  DETECTING GIMBAL LOCK</span>
-<a name="4C4F43534B495254"></a>015607,000056: 22,2744  22,2744               <span class="sm">LOCSKIRT</span>           <span class="ps">EQUALS  </span> <a href="#4E4F47494D4C4F43">NOGIMLOC</a>                              
-015608,000057: 
-<a name="4E4F47494D4C4F43"></a>015609,000058: 22,2744           77614        <span class="sm">NOGIMLOC</span>           <span class="in">SET     </span>                                       
-015610,000059: 22,2745           01074                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#43414C434D414E33">CALCMAN3</a>                              
-<a name="5743414C43"></a>015611,000060: 22,2746           70740        <span class="sm">WCALC   </span>           <span class="in">LXC,1   </span> <span class="in">DLOAD*    </span>                            
-015612,000061: 22,2747           01325                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              <span class="co">#  CHOOSE THE DESIRED MANEUVER RATE</span>
-015613,000062: 22,2750           04772                                    ARATE,1                               <span class="co">#  FROM A LIST OF FOUR</span>
-015614,000063: 22,2751           45002                           <span class="in">SR4     </span> <span class="in">CALL      </span>                            <span class="co">#  COMPUTE THE INCREMENTAL ROTATION MATRIX</span>
-015615,000064: 22,2752           44527                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#44454C434F4D50">DELCOMP</a>                               <span class="co">#  DEL CORRESPONDING TO A 1 SEC ROTATION</span>
-015616,000065:                                                                                                  <span class="co">#  ABOUT COF</span>
-015617,000066: 22,2753           74343                           <span class="in">DLOAD*  </span> <span class="in">VXSC      </span>                            
-015618,000067: 22,2754           04772                                    ARATE,1                               
-015619,000068: 22,2755           03271                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>                                   
-015620,000069: 22,2756           17326                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4252415445">BRATE</a>                                 <span class="co">#  COMPONENT MANEUVER RATES 45 DEG/SEC</span>
-015621,000070: 22,2757           03336                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414D">AM</a>                                    
-015622,000071: 22,2760           55605                           <span class="in">DMP     </span> <span class="in">DDV*      </span>                            
-015623,000072: 22,2761           05002                                    <a href="#414E474C54494D45">ANGLTIME</a>                              
-015624,000073: 22,2762           04772                                    ARATE,1                               
-015625,000074: 22,2763           77661                           <span class="in">SR      </span>                                       
-015626,000075: 22,2764           20606                                    5                                     
-015627,000076: 22,2765           03334                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D">TM</a>                                    <span class="co">#  MANEUVER EXECUTION TIME SCALED AS T2</span>
-015628,000077: 22,2766           77614                           <span class="in">SETGO   </span>                                       
-015629,000078: 22,2767           01035                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#43414C434D414E32">CALCMAN2</a>                              <span class="co">#  0(OFF) = CONTINUE MANEUVER</span>
-015630,000079: 22,2770           45010                                    <a href="KALCMANU_STEERING.agc.html#4E4557414E474C">NEWANGL</a>    +1                         <span class="co">#  1(ON) = START MANEUVER</span>
-015631,000080: 
-015632,000081:                                                                                                  <span class="co">#  THE FOUR SELECTABLE FREE FALL MANEUVER RATES SELECTED BY</span>
-015633,000082:                                                                                                  <span class="co">#  LOADING RATEINDX WITH 0, 2, 4, 6, RESPECTIVELY</span>
-015634,000083: 
-<a name="4152415445"></a>015635,000084: 22,2771           00221 24255  <span class="sm">ARATE   </span>           <span class="ps">2DEC    </span> .0088888888                            <span class="co">#  = 0.2 DEG/SEC         $ 22.5 DEG/SEC</span>
-015636,000085: 
-015637,000086: 22,2773           00554 02660                     <span class="ps">2DEC    </span> .0222222222                            <span class="co">#  = 0.5 DEG/SEC         $ 22.5 DEG/SEC</span>
-015638,000087: 
-015639,000088: 22,2775           02660 13301                     <span class="ps">2DEC    </span> .0888888888                            <span class="co">#  = 2.0 DEG/SEC         $ 22.5 DEG/SEC</span>
-015640,000089: 
-015641,000090: 22,2777           16161 30707                     <span class="ps">2DEC    </span> .4444444444                            <span class="co">#  = 10.0 DEG/SEC        $ 22.5 DEG/SEC</span>
-015642,000091: 
-<a name="414E474C54494D45"></a>015643,000092: 22,3001           00003 04000  <span class="sm">ANGLTIME</span>           <span class="ps">2DEC    </span> .0001907349                            <span class="co">#  = 100B-19 FUDGE FACTOR TO CONVERT</span>
-015644,000093:                                                                                                  <span class="co">#  MANEUVER ANGLE TO MANEUVER TIME</span>
-015645,000094: 
-015646,000095: 
+015606,000050: 15,2050                                           <span class="ps">BANK    </span> 15                                    
+015607,000051: 
+015608,000052: 22,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4B414C434D4F4E31">KALCMON1</a>                              
+015609,000053: 22,2000                                           <span class="ps">BANK    </span>                                       
+015610,000054: 
+015611,000055:                                                                                                  <span class="co">#  DETECTING GIMBAL LOCK</span>
+<a name="4C4F43534B495254"></a>015612,000056: 22,2744  22,2744               <span class="sm">LOCSKIRT</span>           <span class="ps">EQUALS  </span> <a href="#4E4F47494D4C4F43">NOGIMLOC</a>                              
+015613,000057: 
+<a name="4E4F47494D4C4F43"></a>015614,000058: 22,2744           77614        <span class="sm">NOGIMLOC</span>           <span class="in">SET     </span>                                       
+015615,000059: 22,2745           01074                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#43414C434D414E33">CALCMAN3</a>                              
+<a name="5743414C43"></a>015616,000060: 22,2746           70740        <span class="sm">WCALC   </span>           <span class="in">LXC,1   </span> <span class="in">DLOAD*    </span>                            
+015617,000061: 22,2747           01325                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              <span class="co">#  CHOOSE THE DESIRED MANEUVER RATE</span>
+015618,000062: 22,2750           04772                                    ARATE,1                               <span class="co">#  FROM A LIST OF FOUR</span>
+015619,000063: 22,2751           45002                           <span class="in">SR4     </span> <span class="in">CALL      </span>                            <span class="co">#  COMPUTE THE INCREMENTAL ROTATION MATRIX</span>
+015620,000064: 22,2752           44527                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#44454C434F4D50">DELCOMP</a>                               <span class="co">#  DEL CORRESPONDING TO A 1 SEC ROTATION</span>
+015621,000065:                                                                                                  <span class="co">#  ABOUT COF</span>
+015622,000066: 22,2753           74343                           <span class="in">DLOAD*  </span> <span class="in">VXSC      </span>                            
+015623,000067: 22,2754           04772                                    ARATE,1                               
+015624,000068: 22,2755           03271                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>                                   
+015625,000069: 22,2756           17326                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4252415445">BRATE</a>                                 <span class="co">#  COMPONENT MANEUVER RATES 45 DEG/SEC</span>
+015626,000070: 22,2757           03336                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414D">AM</a>                                    
+015627,000071: 22,2760           55605                           <span class="in">DMP     </span> <span class="in">DDV*      </span>                            
+015628,000072: 22,2761           05002                                    <a href="#414E474C54494D45">ANGLTIME</a>                              
+015629,000073: 22,2762           04772                                    ARATE,1                               
+015630,000074: 22,2763           77661                           <span class="in">SR      </span>                                       
+015631,000075: 22,2764           20606                                    5                                     
+015632,000076: 22,2765           03334                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D">TM</a>                                    <span class="co">#  MANEUVER EXECUTION TIME SCALED AS T2</span>
+015633,000077: 22,2766           77614                           <span class="in">SETGO   </span>                                       
+015634,000078: 22,2767           01035                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#43414C434D414E32">CALCMAN2</a>                              <span class="co">#  0(OFF) = CONTINUE MANEUVER</span>
+015635,000079: 22,2770           45010                                    <a href="KALCMANU_STEERING.agc.html#4E4557414E474C">NEWANGL</a>    +1                         <span class="co">#  1(ON) = START MANEUVER</span>
+015636,000080: 
+015637,000081:                                                                                                  <span class="co">#  THE FOUR SELECTABLE FREE FALL MANEUVER RATES SELECTED BY</span>
+015638,000082:                                                                                                  <span class="co">#  LOADING RATEINDX WITH 0, 2, 4, 6, RESPECTIVELY</span>
+015639,000083: 
+<a name="4152415445"></a>015640,000084: 22,2771           00221 24255  <span class="sm">ARATE   </span>           <span class="ps">2DEC    </span> .0088888888                            <span class="co">#  = 0.2 DEG/SEC         $ 22.5 DEG/SEC</span>
+015641,000085: 
+015642,000086: 22,2773           00554 02660                     <span class="ps">2DEC    </span> .0222222222                            <span class="co">#  = 0.5 DEG/SEC         $ 22.5 DEG/SEC</span>
+015643,000087: 
+015644,000088: 22,2775           02660 13301                     <span class="ps">2DEC    </span> .0888888888                            <span class="co">#  = 2.0 DEG/SEC         $ 22.5 DEG/SEC</span>
+015645,000089: 
+015646,000090: 22,2777           16161 30707                     <span class="ps">2DEC    </span> .4444444444                            <span class="co">#  = 10.0 DEG/SEC        $ 22.5 DEG/SEC</span>
+015647,000091: 
+<a name="414E474C54494D45"></a>015648,000092: 22,3001           00003 04000  <span class="sm">ANGLTIME</span>           <span class="ps">2DEC    </span> .0001907349                            <span class="co">#  = 100B-19 FUDGE FACTOR TO CONVERT</span>
+015649,000093:                                                                                                  <span class="co">#  MANEUVER ANGLE TO MANEUVER TIME</span>
+015650,000094: 
+015651,000095: 
 
 End of include-file GIMBAL_LOCK_AVOIDANCE.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

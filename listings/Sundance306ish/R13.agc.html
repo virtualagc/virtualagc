@@ -92,75 +92,76 @@ from scratch to match what we believe would have been in the original listing.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-031400,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-031401,000003:                                                                                                  <span class="co">## Filename:    R13.agc</span>
-031402,000004:                                                                                                  <span class="co">## Purpose:     A section of an attempt to reconstruct Sundance revision 306</span>
-031403,000005:                                                                                                  <span class="co">##              as closely as possible with available information. Sundance</span>
-031404,000006:                                                                                                  <span class="co">##              306 is the source code for the Lunar Module's (LM) Apollo</span>
-031405,000007:                                                                                                  <span class="co">##              Guidance Computer (AGC) for Apollo 9. This program was created</span>
-031406,000008:                                                                                                  <span class="co">##              using the mixed-revision SundanceXXX as a starting point, and</span>
-031407,000009:                                                                                                  <span class="co">##              pulling back features from Luminary 69 believed to have been</span>
-031408,000010:                                                                                                  <span class="co">##              added based on memos, checklists, observed address changes,</span>
-031409,000011:                                                                                                  <span class="co">##              or the Sundance GSOPs.</span>
-031410,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-031411,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-031412,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-031413,000015:                                                                                                  <span class="co">## Mod history: 2020-07-24 MAS  Created from SundanceXXX.</span>
-031414,000016: 
-031415,000017: 
-031416,000018: 
-031417,000019: 31,2171  E7,1606                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4532445053">E2DPS</a>                                 
-031418,000020: 
-031419,000021:                                                                                                  <span class="co">#  ****************************************************************************************************************</span>
-031420,000022:                                                                                                  <span class="co">#  GUILDENSTERN:  AUTO-MODES MONITOR (R13)</span>
-031421,000023:                                                                                                  <span class="co">#  ****************************************************************************************************************</span>
-031422,000024: 
-031423,000025: 31,2171                                           <span class="ps">COUNT*  </span> $$/R13                                
-031424,000026: 
-031425,000027:                                                                                                  <span class="co">#     HERE IS THE PHILOSOPHY OF GUILDENSTERN:    ON EVERY APPEARANCE OR DISAPPEARANCE OF THE MANUAL THROTTLE</span>
-031426,000028:                                                                                                  <span class="co">#  DISCRETE TO SELECT P67 OR P66 RESPECTIVELY;   ON EVERY APPEARANCE OF THE ATTITUDE-HOLD DISCRETE TO SELECT P66</span>
-031427,000029:                                                                                                  <span class="co">#  UNLESS THE CURRENT PROGRAM IS P67 IN WHICH CASE THERE IS NO CHANGE.</span>
-031428,000030: 
-<a name="4755494C44454E"></a>031429,000031: 31,2171           00006        <span class="sm">GUILDEN </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  IS UN-AUTO-THROTTLE DISCRETE PRESENT?</span>
-031430,000032: 31,2172           00030                           <span class="op">READ    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3330">CHAN30</a>                                
-031431,000033: 31,2173           75022                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495435">BIT5</a>                                  
-031432,000034: 31,2174           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-031433,000035: 31,2175           12217                           <span class="op">TCF     </span> <a href="#5354415254503637">STARTP67</a>                              <span class="co">#  YES</span>
-<a name="5036374E4F573F"></a>031434,000036: 31,2176           05375        <span class="sm">P67NOW? </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#434845434B4D4D">CHECKMM</a>                               <span class="co">#  NO:   ARE WE IN P67 NOW?</span>
-031435,000037: 31,2177           00103                           <span class="ps">DEC     </span> 67         B-14                       
-031436,000038: 31,2200           12223                           <span class="op">TCF     </span> <a href="#535441424C3F">STABL?</a>                                <span class="co">#  NO</span>
-<a name="5354415254503636"></a>031437,000039: 31,2201           03562        <span class="sm">STARTP66</span>           <span class="op">TC      </span> <a href="LUNAR_LANDING_GUIDANCE_EQUATIONS.agc.html#4641535443484E47">FASTCHNG</a>                              <span class="co">#  YES</span>
-031438,000040: 31,2202           05361                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              
-<a name="4445433636"></a>031439,000041: 31,2203           00102        <span class="sm">DEC66   </span>           <span class="ps">DEC     </span> 66         B-14                       
-031440,000042: 31,2204           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  INITIALIZE VDGVERT USING</span>
-031441,000043: 31,2205           31614                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564755">VGU</a>                                   <span class="co">#    PRESENT DOWNWARD VELOCITY</span>
-031442,000044: 31,2206           53654                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56444756455254">VDGVERT</a>                               
-031443,000045: 31,2207           35030                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-031444,000046: 31,2210           55655                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F44434F554E54">RODCOUNT</a>                              
-<a name="5652545354415254"></a>031445,000047: 31,2211           55656        <span class="sm">VRTSTART</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57434856455254">WCHVERT</a>                               
-031446,000048: 31,2212           32234                           <span class="op">CAF     </span> <a href="#56455254414452">VERTADR</a>                               <span class="co">#  WCHPHASE = VERTICAL: P65,P66,P67</span>
-031447,000049: 31,2213           55606                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5743485048415345">WCHPHASE</a>                              
-031448,000050: 31,2214           05600                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              <span class="co">#  PERMIT X-AXIS OVERRIDE</span>
-031449,000051: 31,2215           17140                           <span class="ps">CADR    </span> <a href="SERVICER.agc.html#584F56494E464C47">XOVINFLG</a>                              
-031450,000052: 31,2216           12505                           <span class="op">TCF     </span> <a href="LUNAR_LANDING_GUIDANCE_EQUATIONS.agc.html#4755494C44524554">GUILDRET</a>                              
-031451,000053: 
-<a name="5354415254503637"></a>031452,000054: 31,2217           05361        <span class="sm">STARTP67</span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              <span class="co">#  NO HARM IN "STARTING" P67 OVER AND OVER</span>
-031453,000055: 31,2220           00103                           <span class="ps">DEC     </span> 67         B-14                       <span class="co">#    SO NO NEED FOR A FASTCHNG AND NO NEED</span>
-031454,000056: 
-031455,000057: 31,2221           34375                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54454E">TEN</a>                                   <span class="co">#    TO SEE IF ALREADY IN P67</span>
-031456,000058: 31,2222           12211                           <span class="op">TCF     </span> <a href="#5652545354415254">VRTSTART</a>                              
-031457,000059: 
-<a name="535441424C3F"></a>031458,000060: 31,2223           35011        <span class="sm">STABL?  </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 <span class="co">#  IS AUTO MODE DISCRETE PRESENT?</span>
-031459,000061: 31,2224           00006                           <span class="op">EXTEND  </span>                                       
-031460,000062: 31,2225           02031                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3331">CHAN31</a>                                
-031461,000063: 31,2226           00006                           <span class="op">EXTEND  </span>                                       
-031462,000064: 31,2227           12505                           <span class="op">BZF     </span> <a href="LUNAR_LANDING_GUIDANCE_EQUATIONS.agc.html#4755494C44524554">GUILDRET</a>                              <span class="co">#  YES: ALL'S WELL</span>
-<a name="5036364E4F573F"></a>031463,000065: 31,2230           05375        <span class="sm">P66NOW? </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#434845434B4D4D">CHECKMM</a>                               <span class="co">#  NO:  ARE WE IN P66 NOW?</span>
-031464,000066: 31,2231           00102                           <span class="ps">DEC     </span> 66         B-14                       
-031465,000067: 31,2232           12201                           <span class="op">TCF     </span> <a href="#5354415254503636">STARTP66</a>                              <span class="co">#  NO</span>
-031466,000068: 31,2233           12505                           <span class="op">TCF     </span> <a href="LUNAR_LANDING_GUIDANCE_EQUATIONS.agc.html#4755494C44524554">GUILDRET</a>                              <span class="co">#  YES</span>
-031467,000069: 
-<a name="56455254414452"></a>031468,000070: 31,2234           02467        <span class="sm">VERTADR </span>           <span class="ps">ADRES   </span> <a href="LUNAR_LANDING_GUIDANCE_EQUATIONS.agc.html#564552544943414C">VERTICAL</a>                              
+031416,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+031417,000003:                                                                                                  <span class="co">## Filename:    R13.agc</span>
+031418,000004:                                                                                                  <span class="co">## Purpose:     A section of an attempt to reconstruct Sundance revision 306</span>
+031419,000005:                                                                                                  <span class="co">##              as closely as possible with available information. Sundance</span>
+031420,000006:                                                                                                  <span class="co">##              306 is the source code for the Lunar Module's (LM) Apollo</span>
+031421,000007:                                                                                                  <span class="co">##              Guidance Computer (AGC) for Apollo 9. This program was created</span>
+031422,000008:                                                                                                  <span class="co">##              using the mixed-revision SundanceXXX as a starting point, and</span>
+031423,000009:                                                                                                  <span class="co">##              pulling back features from Luminary 69 believed to have been</span>
+031424,000010:                                                                                                  <span class="co">##              added based on memos, checklists, observed address changes,</span>
+031425,000011:                                                                                                  <span class="co">##              or the Sundance GSOPs.</span>
+031426,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+031427,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+031428,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+031429,000015:                                                                                                  <span class="co">## Mod history: 2020-07-24 MAS  Created from SundanceXXX.</span>
+031430,000016:                                                                                                  <span class="co">##              2021-05-30 ABS  Removed DEC66 symbol not present in Luminary 69.</span>
+031431,000017: 
+031432,000018: 
+031433,000019: 
+031434,000020: 31,2171  E7,1606                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4532445053">E2DPS</a>                                 
+031435,000021: 
+031436,000022:                                                                                                  <span class="co">#  ****************************************************************************************************************</span>
+031437,000023:                                                                                                  <span class="co">#  GUILDENSTERN:  AUTO-MODES MONITOR (R13)</span>
+031438,000024:                                                                                                  <span class="co">#  ****************************************************************************************************************</span>
+031439,000025: 
+031440,000026: 31,2171                                           <span class="ps">COUNT*  </span> $$/R13                                
+031441,000027: 
+031442,000028:                                                                                                  <span class="co">#     HERE IS THE PHILOSOPHY OF GUILDENSTERN:    ON EVERY APPEARANCE OR DISAPPEARANCE OF THE MANUAL THROTTLE</span>
+031443,000029:                                                                                                  <span class="co">#  DISCRETE TO SELECT P67 OR P66 RESPECTIVELY;   ON EVERY APPEARANCE OF THE ATTITUDE-HOLD DISCRETE TO SELECT P66</span>
+031444,000030:                                                                                                  <span class="co">#  UNLESS THE CURRENT PROGRAM IS P67 IN WHICH CASE THERE IS NO CHANGE.</span>
+031445,000031: 
+<a name="4755494C44454E"></a>031446,000032: 31,2171           00006        <span class="sm">GUILDEN </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  IS UN-AUTO-THROTTLE DISCRETE PRESENT?</span>
+031447,000033: 31,2172           00030                           <span class="op">READ    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3330">CHAN30</a>                                
+031448,000034: 31,2173           75022                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495435">BIT5</a>                                  
+031449,000035: 31,2174           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+031450,000036: 31,2175           12217                           <span class="op">TCF     </span> <a href="#5354415254503637">STARTP67</a>                              <span class="co">#  YES</span>
+<a name="5036374E4F573F"></a>031451,000037: 31,2176           05375        <span class="sm">P67NOW? </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#434845434B4D4D">CHECKMM</a>                               <span class="co">#  NO:   ARE WE IN P67 NOW?</span>
+031452,000038: 31,2177           00103                           <span class="ps">DEC     </span> 67         B-14                       
+031453,000039: 31,2200           12223                           <span class="op">TCF     </span> <a href="#535441424C3F">STABL?</a>                                <span class="co">#  NO</span>
+<a name="5354415254503636"></a>031454,000040: 31,2201           03562        <span class="sm">STARTP66</span>           <span class="op">TC      </span> <a href="LUNAR_LANDING_GUIDANCE_EQUATIONS.agc.html#4641535443484E47">FASTCHNG</a>                              <span class="co">#  YES</span>
+031455,000041: 31,2202           05361                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              
+031456,000042: 31,2203           00102                           <span class="ps">DEC     </span> 66         B-14                       
+031457,000043: 31,2204           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  INITIALIZE VDGVERT USING</span>
+031458,000044: 31,2205           31614                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564755">VGU</a>                                   <span class="co">#    PRESENT DOWNWARD VELOCITY</span>
+031459,000045: 31,2206           53654                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56444756455254">VDGVERT</a>                               
+031460,000046: 31,2207           35030                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+031461,000047: 31,2210           55655                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F44434F554E54">RODCOUNT</a>                              
+<a name="5652545354415254"></a>031462,000048: 31,2211           55656        <span class="sm">VRTSTART</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57434856455254">WCHVERT</a>                               
+031463,000049: 31,2212           32234                           <span class="op">CAF     </span> <a href="#56455254414452">VERTADR</a>                               <span class="co">#  WCHPHASE = VERTICAL: P65,P66,P67</span>
+031464,000050: 31,2213           55606                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5743485048415345">WCHPHASE</a>                              
+031465,000051: 31,2214           05600                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              <span class="co">#  PERMIT X-AXIS OVERRIDE</span>
+031466,000052: 31,2215           17140                           <span class="ps">CADR    </span> <a href="SERVICER.agc.html#584F56494E464C47">XOVINFLG</a>                              
+031467,000053: 31,2216           12505                           <span class="op">TCF     </span> <a href="LUNAR_LANDING_GUIDANCE_EQUATIONS.agc.html#4755494C44524554">GUILDRET</a>                              
+031468,000054: 
+<a name="5354415254503637"></a>031469,000055: 31,2217           05361        <span class="sm">STARTP67</span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              <span class="co">#  NO HARM IN "STARTING" P67 OVER AND OVER</span>
+031470,000056: 31,2220           00103                           <span class="ps">DEC     </span> 67         B-14                       <span class="co">#    SO NO NEED FOR A FASTCHNG AND NO NEED</span>
+031471,000057: 
+031472,000058: 31,2221           34375                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54454E">TEN</a>                                   <span class="co">#    TO SEE IF ALREADY IN P67</span>
+031473,000059: 31,2222           12211                           <span class="op">TCF     </span> <a href="#5652545354415254">VRTSTART</a>                              
+031474,000060: 
+<a name="535441424C3F"></a>031475,000061: 31,2223           35011        <span class="sm">STABL?  </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 <span class="co">#  IS AUTO MODE DISCRETE PRESENT?</span>
+031476,000062: 31,2224           00006                           <span class="op">EXTEND  </span>                                       
+031477,000063: 31,2225           02031                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3331">CHAN31</a>                                
+031478,000064: 31,2226           00006                           <span class="op">EXTEND  </span>                                       
+031479,000065: 31,2227           12505                           <span class="op">BZF     </span> <a href="LUNAR_LANDING_GUIDANCE_EQUATIONS.agc.html#4755494C44524554">GUILDRET</a>                              <span class="co">#  YES: ALL'S WELL</span>
+<a name="5036364E4F573F"></a>031480,000066: 31,2230           05375        <span class="sm">P66NOW? </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#434845434B4D4D">CHECKMM</a>                               <span class="co">#  NO:  ARE WE IN P66 NOW?</span>
+031481,000067: 31,2231           00102                           <span class="ps">DEC     </span> 66         B-14                       
+031482,000068: 31,2232           12201                           <span class="op">TCF     </span> <a href="#5354415254503636">STARTP66</a>                              <span class="co">#  NO</span>
+031483,000069: 31,2233           12505                           <span class="op">TCF     </span> <a href="LUNAR_LANDING_GUIDANCE_EQUATIONS.agc.html#4755494C44524554">GUILDRET</a>                              <span class="co">#  YES</span>
+031484,000070: 
+<a name="56455254414452"></a>031485,000071: 31,2234           02467        <span class="sm">VERTADR </span>           <span class="ps">ADRES   </span> <a href="LUNAR_LANDING_GUIDANCE_EQUATIONS.agc.html#564552544943414C">VERTICAL</a>                              
 
 End of include-file R13.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

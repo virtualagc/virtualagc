@@ -95,19 +95,19 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-026367,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-026368,000003:                                                                                                  <span class="co">## Filename:    SPS_BACK-UP_RCS_CONTROL.agc</span>
-026369,000004:                                                                                                  <span class="co">## Purpose:     A module for revision 0 of BURST120 (Sunburst). It </span>
-026370,000005:                                                                                                  <span class="co">##              is part of the source code for the Lunar Module's</span>
-026371,000006:                                                                                                  <span class="co">##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
-026372,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-026373,000008:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-026374,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-026375,000010:                                                                                                  <span class="co">## Mod history: 2016-09-30 RSB  Created draft version.</span>
-026376,000011:                                                                                                  <span class="co">##              2016-09-30 MAS  Transcribed.</span>
-026377,000012:                                                                                                  <span class="co">##              2016-10-31 RSB  Typos.</span>
-026378,000013:                                                                                                  <span class="co">##              2016-12-06 RSB  Comment-proofing with octopus/ProoferComments.</span>
-026379,000014: 
+026373,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+026374,000003:                                                                                                  <span class="co">## Filename:    SPS_BACK-UP_RCS_CONTROL.agc</span>
+026375,000004:                                                                                                  <span class="co">## Purpose:     A module for revision 0 of BURST120 (Sunburst). It </span>
+026376,000005:                                                                                                  <span class="co">##              is part of the source code for the Lunar Module's</span>
+026377,000006:                                                                                                  <span class="co">##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
+026378,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+026379,000008:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+026380,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+026381,000010:                                                                                                  <span class="co">## Mod history: 2016-09-30 RSB  Created draft version.</span>
+026382,000011:                                                                                                  <span class="co">##              2016-09-30 MAS  Transcribed.</span>
+026383,000012:                                                                                                  <span class="co">##              2016-10-31 RSB  Typos.</span>
+026384,000013:                                                                                                  <span class="co">##              2016-12-06 RSB  Comment-proofing with octopus/ProoferComments.</span>
+026385,000014: 
 </pre>
 </span>
 </p>
@@ -123,55 +123,55 @@ Page 629
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-026381,000016: 21,3417                                           <span class="ps">BANK    </span> 21                                    
-026382,000017: 21,3417  E6,1542                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
-026383,000018: 
-<a name="535053524353"></a>026384,000019: 21,3417           40775        <span class="sm">SPSRCS  </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547415144">OMEGAQD</a>                               
-026385,000020: 21,3420           61416                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474151">OMEGAQ</a>                                
-026386,000021: 21,3421           55423                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5451">EDOTQ</a>                                 <span class="co">#   EDOT = OMEGAQ - OMEGAQD</span>
-026387,000022: 
-026388,000023: 21,3422           61413                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552">ER</a>                                    
-026389,000024: 21,3423           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  F = 1/4 E + EDOT</span>
-026390,000025: 21,3424           63464                           <span class="op">BZMF    </span> <a href="#504C555344">PLUSD</a>                                 <span class="co">#  DQ NEGATIVE FOR POSITIVE F</span>
-026391,000026: 
-026392,000027: 21,3425           33571                           <span class="op">CAF     </span> <a href="#4E454744">NEGD</a>                                  <span class="co">#  STORE DIRECTION TO THRUST IN ITEMP3</span>
-026393,000028: 
-<a name="47434F4D50555445"></a>026394,000029: 21,3426           54063        <span class="sm">GCOMPUTE</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5033">ITEMP3</a>                                
-026395,000030: 21,3427           31423                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5451">EDOTQ</a>                                 
-026396,000031: 21,3430           00006                           <span class="op">EXTEND  </span>                                       
-026397,000032: 21,3431           73570                           <span class="op">MP      </span> <a href="#41434F4E5354">ACONST</a>                                <span class="co">#  ACONST = 2**(-11) X SQRT(1/2A X PI/1024)</span>
-026398,000033: 21,3432           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-026399,000034: 21,3433           13455                           <span class="op">TCF     </span> <a href="#4C494D535151">LIMSQQ</a>                                
-026400,000035: 21,3434           13436                           <span class="op">TCF     </span> +2                                    
-026401,000036: 21,3435           13455                           <span class="op">TCF     </span> <a href="#4C494D535151">LIMSQQ</a>                                
-026402,000037: 21,3436           22000                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  A = 2**(3) X SQRT(1/2A X PI/1024)</span>
-<a name="4C494D52455451"></a>026403,000038: 21,3437           00006        <span class="sm">LIMRETQ </span>           <span class="op">EXTEND  </span>                                       
-026404,000039: 21,3440           70000                           <span class="op">SQUARE  </span>                                       
-026405,000040: 21,3441           54062                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                <span class="co">#  ITEMP2 = (1/2A) EDOT**2</span>
-026406,000041: 
-026407,000042: 21,3442           61413                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552">ER</a>                                    
-026408,000043: 21,3443           63571                           <span class="op">AD      </span> <a href="#4E454744">NEGD</a>                                  <span class="co">#  DB IS SPECIFIED BY NEGD IN SPS MODE</span>
-026409,000044: 
-026410,000045: 21,3444           00006                           <span class="op">EXTEND  </span>                                       
-026411,000046: 21,3445           63472                           <span class="op">BZMF    </span> <a href="#555A45524F">UZERO</a>                                 
-026412,000047: 
-026413,000048: 21,3446           31423                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5451">EDOTQ</a>                                 <span class="co">#  G WAS POSITIVE, NOW TEST EDOT</span>
-026414,000049: 
-026415,000050: 21,3447           00006                           <span class="op">EXTEND  </span>                                       
-026416,000051: 21,3450           63461                           <span class="op">BZMF    </span> <a href="#554C4F57">ULOW</a>                                  
-026417,000052: 
-026418,000053: 21,3451           60062                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                <span class="co">#  EDOT WAS POSITIVE, CALCULATE HIGH U CASE</span>
-026419,000054: 21,3452           61413                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552">ER</a>                                    
-026420,000055: 21,3453           55502                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435951">URGENCYQ</a>                              
-026421,000056: 
-026422,000057: 21,3454           13474                           <span class="op">TCF     </span> <a href="#5243414C43">RCALC</a>                                 
-026423,000058: 
-<a name="4C494D535151"></a>026424,000059: 21,3455           37743        <span class="sm">LIMSQQ  </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#504F534D4158">POSMAX</a>                                
-026425,000060: 21,3456           13437                           <span class="op">TCF     </span> <a href="#4C494D52455451">LIMRETQ</a>                               
-<a name="4C494D535152"></a>026426,000061: 21,3457           37743        <span class="sm">LIMSQR  </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#504F534D4158">POSMAX</a>                                
-026427,000062: 21,3460           13514                           <span class="op">TCF     </span> <a href="#4C494D52455452">LIMRETR</a>                               
-<a name="554C4F57"></a>026428,000063: 21,3461           61413        <span class="sm">ULOW    </span>           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552">ER</a>                                    <span class="co">#  EDOT WAS NEGATIVE, CALCULATE LOW U CASE</span>
-026429,000064: 21,3462           55502                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435951">URGENCYQ</a>                              
+026387,000016: 21,3417                                           <span class="ps">BANK    </span> 21                                    
+026388,000017: 21,3417  E6,1542                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
+026389,000018: 
+<a name="535053524353"></a>026390,000019: 21,3417           40775        <span class="sm">SPSRCS  </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547415144">OMEGAQD</a>                               
+026391,000020: 21,3420           61416                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474151">OMEGAQ</a>                                
+026392,000021: 21,3421           55423                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5451">EDOTQ</a>                                 <span class="co">#   EDOT = OMEGAQ - OMEGAQD</span>
+026393,000022: 
+026394,000023: 21,3422           61413                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552">ER</a>                                    
+026395,000024: 21,3423           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  F = 1/4 E + EDOT</span>
+026396,000025: 21,3424           63464                           <span class="op">BZMF    </span> <a href="#504C555344">PLUSD</a>                                 <span class="co">#  DQ NEGATIVE FOR POSITIVE F</span>
+026397,000026: 
+026398,000027: 21,3425           33571                           <span class="op">CAF     </span> <a href="#4E454744">NEGD</a>                                  <span class="co">#  STORE DIRECTION TO THRUST IN ITEMP3</span>
+026399,000028: 
+<a name="47434F4D50555445"></a>026400,000029: 21,3426           54063        <span class="sm">GCOMPUTE</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5033">ITEMP3</a>                                
+026401,000030: 21,3427           31423                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5451">EDOTQ</a>                                 
+026402,000031: 21,3430           00006                           <span class="op">EXTEND  </span>                                       
+026403,000032: 21,3431           73570                           <span class="op">MP      </span> <a href="#41434F4E5354">ACONST</a>                                <span class="co">#  ACONST = 2**(-11) X SQRT(1/2A X PI/1024)</span>
+026404,000033: 21,3432           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+026405,000034: 21,3433           13455                           <span class="op">TCF     </span> <a href="#4C494D535151">LIMSQQ</a>                                
+026406,000035: 21,3434           13436                           <span class="op">TCF     </span> +2                                    
+026407,000036: 21,3435           13455                           <span class="op">TCF     </span> <a href="#4C494D535151">LIMSQQ</a>                                
+026408,000037: 21,3436           22000                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  A = 2**(3) X SQRT(1/2A X PI/1024)</span>
+<a name="4C494D52455451"></a>026409,000038: 21,3437           00006        <span class="sm">LIMRETQ </span>           <span class="op">EXTEND  </span>                                       
+026410,000039: 21,3440           70000                           <span class="op">SQUARE  </span>                                       
+026411,000040: 21,3441           54062                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                <span class="co">#  ITEMP2 = (1/2A) EDOT**2</span>
+026412,000041: 
+026413,000042: 21,3442           61413                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552">ER</a>                                    
+026414,000043: 21,3443           63571                           <span class="op">AD      </span> <a href="#4E454744">NEGD</a>                                  <span class="co">#  DB IS SPECIFIED BY NEGD IN SPS MODE</span>
+026415,000044: 
+026416,000045: 21,3444           00006                           <span class="op">EXTEND  </span>                                       
+026417,000046: 21,3445           63472                           <span class="op">BZMF    </span> <a href="#555A45524F">UZERO</a>                                 
+026418,000047: 
+026419,000048: 21,3446           31423                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5451">EDOTQ</a>                                 <span class="co">#  G WAS POSITIVE, NOW TEST EDOT</span>
+026420,000049: 
+026421,000050: 21,3447           00006                           <span class="op">EXTEND  </span>                                       
+026422,000051: 21,3450           63461                           <span class="op">BZMF    </span> <a href="#554C4F57">ULOW</a>                                  
+026423,000052: 
+026424,000053: 21,3451           60062                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                <span class="co">#  EDOT WAS POSITIVE, CALCULATE HIGH U CASE</span>
+026425,000054: 21,3452           61413                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552">ER</a>                                    
+026426,000055: 21,3453           55502                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435951">URGENCYQ</a>                              
+026427,000056: 
+026428,000057: 21,3454           13474                           <span class="op">TCF     </span> <a href="#5243414C43">RCALC</a>                                 
+026429,000058: 
+<a name="4C494D535151"></a>026430,000059: 21,3455           37743        <span class="sm">LIMSQQ  </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#504F534D4158">POSMAX</a>                                
+026431,000060: 21,3456           13437                           <span class="op">TCF     </span> <a href="#4C494D52455451">LIMRETQ</a>                               
+<a name="4C494D535152"></a>026432,000061: 21,3457           37743        <span class="sm">LIMSQR  </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#504F534D4158">POSMAX</a>                                
+026433,000062: 21,3460           13514                           <span class="op">TCF     </span> <a href="#4C494D52455452">LIMRETR</a>                               
+<a name="554C4F57"></a>026434,000063: 21,3461           61413        <span class="sm">ULOW    </span>           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552">ER</a>                                    <span class="co">#  EDOT WAS NEGATIVE, CALCULATE LOW U CASE</span>
+026435,000064: 21,3462           55502                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435951">URGENCYQ</a>                              
 </pre>
 </span>
 </p>
@@ -187,55 +187,55 @@ Page 630
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-026431,000066: 21,3463           13474                           <span class="op">TCF     </span> <a href="#5243414C43">RCALC</a>                                 
-026432,000067: 
-<a name="504C555344"></a>026433,000068: 21,3464           41413        <span class="sm">PLUSD   </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552">ER</a>                                    
-026434,000069: 21,3465           57413                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552">ER</a>                                    
-026435,000070: 21,3466           41423                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5451">EDOTQ</a>                                 
-026436,000071: 21,3467           57423                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5451">EDOTQ</a>                                 
-026437,000072: 21,3470           43571                           <span class="op">CS      </span> <a href="#4E454744">NEGD</a>                                  
-026438,000073: 21,3471           13426                           <span class="op">TCF     </span> <a href="#47434F4D50555445">GCOMPUTE</a>                              
-026439,000074: 
-<a name="555A45524F"></a>026440,000075: 21,3472           37767        <span class="sm">UZERO   </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  G = 0, NO URGENCY</span>
-026441,000076: 21,3473           55502                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435951">URGENCYQ</a>                              
-026442,000077: 
-<a name="5243414C43"></a>026443,000078: 21,3474           40776        <span class="sm">RCALC   </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547415244">OMEGARD</a>                               <span class="co">#  REPEAT CALCULATIONS FOR R-AXIS</span>
-026444,000079: 21,3475           61420                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474152">OMEGAR</a>                                
-026445,000080: 21,3476           55424                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5452">EDOTR</a>                                 
-026446,000081: 
-026447,000082: 21,3477           61411                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     <span class="co">#  F = 1/4 E + EDOT</span>
-026448,000083: 21,3500           00006                           <span class="op">EXTEND  </span>                                       
-026449,000084: 21,3501           63535                           <span class="op">BZMF    </span> <a href="#504C55534452">PLUSDR</a>                                
-026450,000085: 
-026451,000086: 21,3502           33571                           <span class="op">CAF     </span> <a href="#4E454744">NEGD</a>                                  
-026452,000087: 
-<a name="47434F4D50555452"></a>026453,000088: 21,3503           54064        <span class="sm">GCOMPUTR</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5034">ITEMP4</a>                                
-026454,000089: 21,3504           31424                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5452">EDOTR</a>                                 
-026455,000090: 21,3505           00006                           <span class="op">EXTEND  </span>                                       
-026456,000091: 21,3506           73570                           <span class="op">MP      </span> <a href="#41434F4E5354">ACONST</a>                                <span class="co">#  ACONST = 2**(-11) X SQRT(1/2A X PI/1024)</span>
-026457,000092: 21,3507           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-026458,000093: 21,3510           13457                           <span class="op">TCF     </span> <a href="#4C494D535152">LIMSQR</a>                                
-026459,000094: 21,3511           13513                           <span class="op">TCF     </span> +2                                    
-026460,000095: 21,3512           13457                           <span class="op">TCF     </span> <a href="#4C494D535152">LIMSQR</a>                                
-026461,000096: 21,3513           22000                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  A = 2**(3) X SQRT(1/2A X PI/1024)</span>
-<a name="4C494D52455452"></a>026462,000097: 21,3514           00006        <span class="sm">LIMRETR </span>           <span class="op">EXTEND  </span>                                       
-026463,000098: 21,3515           70000                           <span class="op">SQUARE  </span>                                       
-026464,000099: 21,3516           54062                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
-026465,000100: 
-026466,000101: 21,3517           61411                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     
-026467,000102: 21,3520           63571                           <span class="op">AD      </span> <a href="#4E454744">NEGD</a>                                  
-026468,000103: 
-026469,000104: 21,3521           00006                           <span class="op">EXTEND  </span>                                       
-026470,000105: 21,3522           63543                           <span class="op">BZMF    </span> <a href="#555A45524F52">UZEROR</a>                                
-026471,000106: 
-026472,000107: 21,3523           31424                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5452">EDOTR</a>                                 
-026473,000108: 
-026474,000109: 21,3524           00006                           <span class="op">EXTEND  </span>                                       
-026475,000110: 21,3525           63532                           <span class="op">BZMF    </span> <a href="#554C4F5752">ULOWR</a>                                 
-026476,000111: 
-026477,000112: 21,3526           60062                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                <span class="co">#  EDOT WAS POSITIVE, CALCULATE HIGH U CASE</span>
-026478,000113: 21,3527           61411                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     
-026479,000114: 21,3530           55504                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435952">URGENCYR</a>                              
+026437,000066: 21,3463           13474                           <span class="op">TCF     </span> <a href="#5243414C43">RCALC</a>                                 
+026438,000067: 
+<a name="504C555344"></a>026439,000068: 21,3464           41413        <span class="sm">PLUSD   </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552">ER</a>                                    
+026440,000069: 21,3465           57413                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552">ER</a>                                    
+026441,000070: 21,3466           41423                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5451">EDOTQ</a>                                 
+026442,000071: 21,3467           57423                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5451">EDOTQ</a>                                 
+026443,000072: 21,3470           43571                           <span class="op">CS      </span> <a href="#4E454744">NEGD</a>                                  
+026444,000073: 21,3471           13426                           <span class="op">TCF     </span> <a href="#47434F4D50555445">GCOMPUTE</a>                              
+026445,000074: 
+<a name="555A45524F"></a>026446,000075: 21,3472           37767        <span class="sm">UZERO   </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  G = 0, NO URGENCY</span>
+026447,000076: 21,3473           55502                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435951">URGENCYQ</a>                              
+026448,000077: 
+<a name="5243414C43"></a>026449,000078: 21,3474           40776        <span class="sm">RCALC   </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547415244">OMEGARD</a>                               <span class="co">#  REPEAT CALCULATIONS FOR R-AXIS</span>
+026450,000079: 21,3475           61420                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474152">OMEGAR</a>                                
+026451,000080: 21,3476           55424                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5452">EDOTR</a>                                 
+026452,000081: 
+026453,000082: 21,3477           61411                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     <span class="co">#  F = 1/4 E + EDOT</span>
+026454,000083: 21,3500           00006                           <span class="op">EXTEND  </span>                                       
+026455,000084: 21,3501           63535                           <span class="op">BZMF    </span> <a href="#504C55534452">PLUSDR</a>                                
+026456,000085: 
+026457,000086: 21,3502           33571                           <span class="op">CAF     </span> <a href="#4E454744">NEGD</a>                                  
+026458,000087: 
+<a name="47434F4D50555452"></a>026459,000088: 21,3503           54064        <span class="sm">GCOMPUTR</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5034">ITEMP4</a>                                
+026460,000089: 21,3504           31424                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5452">EDOTR</a>                                 
+026461,000090: 21,3505           00006                           <span class="op">EXTEND  </span>                                       
+026462,000091: 21,3506           73570                           <span class="op">MP      </span> <a href="#41434F4E5354">ACONST</a>                                <span class="co">#  ACONST = 2**(-11) X SQRT(1/2A X PI/1024)</span>
+026463,000092: 21,3507           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+026464,000093: 21,3510           13457                           <span class="op">TCF     </span> <a href="#4C494D535152">LIMSQR</a>                                
+026465,000094: 21,3511           13513                           <span class="op">TCF     </span> +2                                    
+026466,000095: 21,3512           13457                           <span class="op">TCF     </span> <a href="#4C494D535152">LIMSQR</a>                                
+026467,000096: 21,3513           22000                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  A = 2**(3) X SQRT(1/2A X PI/1024)</span>
+<a name="4C494D52455452"></a>026468,000097: 21,3514           00006        <span class="sm">LIMRETR </span>           <span class="op">EXTEND  </span>                                       
+026469,000098: 21,3515           70000                           <span class="op">SQUARE  </span>                                       
+026470,000099: 21,3516           54062                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
+026471,000100: 
+026472,000101: 21,3517           61411                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     
+026473,000102: 21,3520           63571                           <span class="op">AD      </span> <a href="#4E454744">NEGD</a>                                  
+026474,000103: 
+026475,000104: 21,3521           00006                           <span class="op">EXTEND  </span>                                       
+026476,000105: 21,3522           63543                           <span class="op">BZMF    </span> <a href="#555A45524F52">UZEROR</a>                                
+026477,000106: 
+026478,000107: 21,3523           31424                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5452">EDOTR</a>                                 
+026479,000108: 
+026480,000109: 21,3524           00006                           <span class="op">EXTEND  </span>                                       
+026481,000110: 21,3525           63532                           <span class="op">BZMF    </span> <a href="#554C4F5752">ULOWR</a>                                 
+026482,000111: 
+026483,000112: 21,3526           60062                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                <span class="co">#  EDOT WAS POSITIVE, CALCULATE HIGH U CASE</span>
+026484,000113: 21,3527           61411                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     
+026485,000114: 21,3530           55504                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435952">URGENCYR</a>                              
 </pre>
 </span>
 </p>
@@ -251,50 +251,50 @@ Page 631
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-026481,000116: 21,3531           13545                           <span class="op">TCF     </span> <a href="#55524752454354">URGRECT</a>                               
-<a name="554C4F5752"></a>026482,000117: 21,3532           61411        <span class="sm">ULOWR   </span>           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     <span class="co">#  EDOT WAS NEGATIVE, CALCULATE LOW U CASE</span>
-026483,000118: 21,3533           55504                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435952">URGENCYR</a>                              
-026484,000119: 
-026485,000120: 21,3534           13545                           <span class="op">TCF     </span> <a href="#55524752454354">URGRECT</a>                               
-<a name="504C55534452"></a>026486,000121: 21,3535           41411        <span class="sm">PLUSDR  </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     
-026487,000122: 21,3536           57411                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     
-026488,000123: 21,3537           41424                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5452">EDOTR</a>                                 
-026489,000124: 21,3540           57424                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5452">EDOTR</a>                                 
-026490,000125: 21,3541           43571                           <span class="op">CS      </span> <a href="#4E454744">NEGD</a>                                  
-026491,000126: 21,3542           13503                           <span class="op">TCF     </span> <a href="#47434F4D50555452">GCOMPUTR</a>                              
-026492,000127: 
-<a name="555A45524F52"></a>026493,000128: 21,3543           37767        <span class="sm">UZEROR  </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
-026494,000129: 21,3544           55504                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435952">URGENCYR</a>                              
-026495,000130: 
-<a name="55524752454354"></a>026496,000131: 21,3545           10064        <span class="sm">URGRECT </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5034">ITEMP4</a>                                <span class="co">#  DR = ITEMP4, NON-ZERO</span>
-026497,000132: 21,3546           41504                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435952">URGENCYR</a>                              <span class="co">#  DR POS = POSR JETS = URGENCY NEG</span>
-026498,000133: 21,3547           55504                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435952">URGENCYR</a>                              <span class="co">#  URGENCYR NEGATIVE</span>
-026499,000134: 
-026500,000135: 21,3550           10063                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5033">ITEMP3</a>                                <span class="co">#  DQ = ITEMP3, NON-ZERO</span>
-026501,000136: 21,3551           41502                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435951">URGENCYQ</a>                              <span class="co">#  DQ POS = POSR JETS = NEGATIVE URGENCY</span>
-026502,000137: 21,3552           55502                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435951">URGENCYQ</a>                              
-026503,000138: 
-026504,000139: 21,3553           33572                           <span class="op">CAF     </span> <a href="#524553414452">RESADR</a>                                <span class="co">#  RESADR = JETSON AFTER POLICY LOCATION</span>
-026505,000140: 21,3554           54062                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A4554414452">TJETADR</a>                               
-026506,000141: 
-026507,000142: 21,3555           37744                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4E4547312F32">NEG1/2</a>                                <span class="co">#  SET URGLIMIT = NEGMAX FOR ONLY</span>
-026508,000143: 21,3556           54066                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5552474C494D4954">URGLIMIT</a>                              <span class="co">#           2 JET RESPONSE</span>
-026509,000144: 21,3557           55673                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4A2D55">NJ-U</a>                                  <span class="co">#  SET JETS FOR NO OFFSET CORRECTION</span>
-026510,000145: 21,3560           55672                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4A2B55">NJ+U</a>                                  
-026511,000146: 21,3561           55675                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4A2D56">NJ-V</a>                                  
-026512,000147: 21,3562           55674                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4A2B56">NJ+V</a>                                  
-026513,000148: 
-026514,000149: 21,3563           00006                           <span class="op">EXTEND  </span>                                       
-026515,000150: 21,3564           33567                           <span class="op">DCA     </span> <a href="#5552474158414452">URGAXADR</a>                              
-026516,000151: 21,3565           52006                           <span class="op">DTCB    </span>                                       
-026517,000152: 
-026518,000153: 21,3566  E6,1416                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474151">OMEGAQ</a>                                
-<a name="5552474158414452"></a>026519,000154: 21,3566           03154 36066  <span class="sm">URGAXADR</span>           <span class="ps">2CADR   </span> <a href="Q,R-AXES_REACTION_CONTROL_SYSTEM_AUTOPILOT.agc.html#555247504C414E45">URGPLANE</a>                              
-026520,000155: 
-<a name="41434F4E5354"></a>026521,000156: 21,3570           00016        <span class="sm">ACONST  </span>           <span class="ps">OCTAL   </span> 00016                                 
-<a name="4E454744"></a>026522,000157: 21,3571           77511        <span class="sm">NEGD    </span>           <span class="ps">DEC     </span> -0.0111                               
-<a name="524553414452"></a>026523,000158: 21,3572           03730        <span class="sm">RESADR  </span>           <span class="ps">REMADR  </span> <a href="Q,R-AXES_REACTION_CONTROL_SYSTEM_AUTOPILOT.agc.html#4A4554534F4E">JETSON</a>                                <span class="co">#  JETSON IS IN Q,R TJETLAW</span>
-026524,000159: 
+026487,000116: 21,3531           13545                           <span class="op">TCF     </span> <a href="#55524752454354">URGRECT</a>                               
+<a name="554C4F5752"></a>026488,000117: 21,3532           61411        <span class="sm">ULOWR   </span>           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     <span class="co">#  EDOT WAS NEGATIVE, CALCULATE LOW U CASE</span>
+026489,000118: 21,3533           55504                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435952">URGENCYR</a>                              
+026490,000119: 
+026491,000120: 21,3534           13545                           <span class="op">TCF     </span> <a href="#55524752454354">URGRECT</a>                               
+<a name="504C55534452"></a>026492,000121: 21,3535           41411        <span class="sm">PLUSDR  </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     
+026493,000122: 21,3536           57411                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     
+026494,000123: 21,3537           41424                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5452">EDOTR</a>                                 
+026495,000124: 21,3540           57424                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F5452">EDOTR</a>                                 
+026496,000125: 21,3541           43571                           <span class="op">CS      </span> <a href="#4E454744">NEGD</a>                                  
+026497,000126: 21,3542           13503                           <span class="op">TCF     </span> <a href="#47434F4D50555452">GCOMPUTR</a>                              
+026498,000127: 
+<a name="555A45524F52"></a>026499,000128: 21,3543           37767        <span class="sm">UZEROR  </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
+026500,000129: 21,3544           55504                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435952">URGENCYR</a>                              
+026501,000130: 
+<a name="55524752454354"></a>026502,000131: 21,3545           10064        <span class="sm">URGRECT </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5034">ITEMP4</a>                                <span class="co">#  DR = ITEMP4, NON-ZERO</span>
+026503,000132: 21,3546           41504                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435952">URGENCYR</a>                              <span class="co">#  DR POS = POSR JETS = URGENCY NEG</span>
+026504,000133: 21,3547           55504                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435952">URGENCYR</a>                              <span class="co">#  URGENCYR NEGATIVE</span>
+026505,000134: 
+026506,000135: 21,3550           10063                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5033">ITEMP3</a>                                <span class="co">#  DQ = ITEMP3, NON-ZERO</span>
+026507,000136: 21,3551           41502                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435951">URGENCYQ</a>                              <span class="co">#  DQ POS = POSR JETS = NEGATIVE URGENCY</span>
+026508,000137: 21,3552           55502                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555247454E435951">URGENCYQ</a>                              
+026509,000138: 
+026510,000139: 21,3553           33572                           <span class="op">CAF     </span> <a href="#524553414452">RESADR</a>                                <span class="co">#  RESADR = JETSON AFTER POLICY LOCATION</span>
+026511,000140: 21,3554           54062                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A4554414452">TJETADR</a>                               
+026512,000141: 
+026513,000142: 21,3555           37744                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4E4547312F32">NEG1/2</a>                                <span class="co">#  SET URGLIMIT = NEGMAX FOR ONLY</span>
+026514,000143: 21,3556           54066                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5552474C494D4954">URGLIMIT</a>                              <span class="co">#           2 JET RESPONSE</span>
+026515,000144: 21,3557           55673                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4A2D55">NJ-U</a>                                  <span class="co">#  SET JETS FOR NO OFFSET CORRECTION</span>
+026516,000145: 21,3560           55672                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4A2B55">NJ+U</a>                                  
+026517,000146: 21,3561           55675                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4A2D56">NJ-V</a>                                  
+026518,000147: 21,3562           55674                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4A2B56">NJ+V</a>                                  
+026519,000148: 
+026520,000149: 21,3563           00006                           <span class="op">EXTEND  </span>                                       
+026521,000150: 21,3564           33567                           <span class="op">DCA     </span> <a href="#5552474158414452">URGAXADR</a>                              
+026522,000151: 21,3565           52006                           <span class="op">DTCB    </span>                                       
+026523,000152: 
+026524,000153: 21,3566  E6,1416                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474151">OMEGAQ</a>                                
+<a name="5552474158414452"></a>026525,000154: 21,3566           03154 36066  <span class="sm">URGAXADR</span>           <span class="ps">2CADR   </span> <a href="Q,R-AXES_REACTION_CONTROL_SYSTEM_AUTOPILOT.agc.html#555247504C414E45">URGPLANE</a>                              
+026526,000155: 
+<a name="41434F4E5354"></a>026527,000156: 21,3570           00016        <span class="sm">ACONST  </span>           <span class="ps">OCTAL   </span> 00016                                 
+<a name="4E454744"></a>026528,000157: 21,3571           77511        <span class="sm">NEGD    </span>           <span class="ps">DEC     </span> -0.0111                               
+<a name="524553414452"></a>026529,000158: 21,3572           03730        <span class="sm">RESADR  </span>           <span class="ps">REMADR  </span> <a href="Q,R-AXES_REACTION_CONTROL_SYSTEM_AUTOPILOT.agc.html#4A4554534F4E">JETSON</a>                                <span class="co">#  JETSON IS IN Q,R TJETLAW</span>
+026530,000159: 
 </pre>
 </span>
 </p>
@@ -310,38 +310,38 @@ Page 632
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-026526,000161:                                                                                                  <span class="co">#  THE TRYGTS CODING IS AN EXTENSION OF THE Q,R-AXES REACTION CONTROL SYSTEM AUTOPILOT.  TRYGTS CALLS UPON THE GTS</span>
-026527,000162:                                                                                                  <span class="co">#  CODING WHENEVER Q,R-AXIS CONTROL FINDS ITSELF ENTERING A COAST REGION WITH JETS OFF.</span>
-026528,000163: 
-026529,000164: 21,3573  E6,1542                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
-<a name="545259475453"></a>026530,000165: 21,3573           37762        <span class="sm">TRYGTS  </span>           <span class="op">CAF     </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#55534551524A5453">USEQRJTS</a>                              <span class="co">#  IS JET USE MANDATORY.</span>
-026531,000166: 21,3574           70077                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              
-026532,000167: 21,3575           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-026533,000168: 21,3576           15733                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  YES.  RESUME.</span>
-026534,000169: 
-026535,000170: 21,3577           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  NO.  CALL IN GTS, IF POSSIBLE.</span>
-026536,000171: 21,3600           00012                           <span class="op">READ    </span> 12                                    
-026537,000172: 21,3601           73617                           <span class="op">MASK    </span> <a href="#4247494D3231">BGIM21</a>                                <span class="co">#  ARE GIMBALS STILL DRIVING.</span>
-026538,000173: 21,3602           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-026539,000174: 21,3603           15733                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  GIMBALS STILL DRIVING.  TRY AGAIN LATER.</span>
-026540,000175: 
-<a name="474F544F475453"></a>026541,000176: 21,3604           46311        <span class="sm">GOTOGTS </span>           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#5448524545">THREE</a>                                 <span class="co">#  GIMBALS STOPPED.  RESET TIME5 COUNTER</span>
-026542,000177: 21,3605           26030                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4535">TIME5</a>                                 <span class="co">#  FROM 20 MS TO 50 MS.</span>
-026543,000178: 21,3606           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  NEXT T5RUPT IN 50 MS IS PAXIS.</span>
-026544,000179: 21,3607           32100                           <span class="op">DCA     </span> <a href="KALMAN_FILTER_FOR_LM_DAP.agc.html#5041582F46494C54">PAX/FILT</a>                              
-026545,000180: 21,3610           53001                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5435414452">T5ADR</a>                                 
-026546,000181: 
-<a name="494E535254323141"></a>026547,000182: 21,3611           13404        <span class="sm">INSRT21A</span>           <span class="op">TCF     </span> <a href="TRIM_GIMBAL_CONTROL_SYSTEM.agc.html#54455354434E5452">TESTCNTR</a>                              <span class="co">#  DETERMINE WHAT TO PUT IN PASSCTR.</span>
-<a name="4C4F4144434E5452"></a>026548,000183: 21,3612           55736        <span class="sm">LOADCNTR</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50415353435452">PASSCTR</a>                               <span class="co">#  NMBR PASSES REQUIRED TO WARM UP FILTER</span>
-026549,000184: 21,3613           00006                           <span class="op">EXTEND  </span>                                       
-026550,000185: 21,3614           33621                           <span class="op">DCA     </span> <a href="#52415445494E4144">RATEINAD</a>                              <span class="co">#  NEXT T5RUPT AFTER NEXT PAXIS IS RATEINIT</span>
-026551,000186: 21,3615           53573                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5046494C54414452">PFILTADR</a>                              <span class="co">#  CONTROL FLOW SWITCH CELL FOR PAXIS RUPT.</span>
-026552,000187: 21,3616           15733                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
-026553,000188: 
-<a name="4247494D3231"></a>026554,000189: 21,3617           07400        <span class="sm">BGIM21  </span>           <span class="ps">OCT     </span> 07400                                 <span class="co">#  TRIM GIMBAL BITS IN CHANNEL 12 ARE 9-12.</span>
-026555,000190: 21,3620  E6,1542                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
-<a name="52415445494E4144"></a>026556,000191: 21,3620           03622 42066  <span class="sm">RATEINAD</span>           <span class="ps">2CADR   </span> <a href="#52415445494E4954">RATEINIT</a>                              <span class="co">#  RATE INITIALIZATION FOR KALMAN FILTER.</span>
-026557,000192: 
+026532,000161:                                                                                                  <span class="co">#  THE TRYGTS CODING IS AN EXTENSION OF THE Q,R-AXES REACTION CONTROL SYSTEM AUTOPILOT.  TRYGTS CALLS UPON THE GTS</span>
+026533,000162:                                                                                                  <span class="co">#  CODING WHENEVER Q,R-AXIS CONTROL FINDS ITSELF ENTERING A COAST REGION WITH JETS OFF.</span>
+026534,000163: 
+026535,000164: 21,3573  E6,1542                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
+<a name="545259475453"></a>026536,000165: 21,3573           37762        <span class="sm">TRYGTS  </span>           <span class="op">CAF     </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#55534551524A5453">USEQRJTS</a>                              <span class="co">#  IS JET USE MANDATORY.</span>
+026537,000166: 21,3574           70077                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              
+026538,000167: 21,3575           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+026539,000168: 21,3576           15733                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  YES.  RESUME.</span>
+026540,000169: 
+026541,000170: 21,3577           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  NO.  CALL IN GTS, IF POSSIBLE.</span>
+026542,000171: 21,3600           00012                           <span class="op">READ    </span> 12                                    
+026543,000172: 21,3601           73617                           <span class="op">MASK    </span> <a href="#4247494D3231">BGIM21</a>                                <span class="co">#  ARE GIMBALS STILL DRIVING.</span>
+026544,000173: 21,3602           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+026545,000174: 21,3603           15733                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  GIMBALS STILL DRIVING.  TRY AGAIN LATER.</span>
+026546,000175: 
+<a name="474F544F475453"></a>026547,000176: 21,3604           46311        <span class="sm">GOTOGTS </span>           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#5448524545">THREE</a>                                 <span class="co">#  GIMBALS STOPPED.  RESET TIME5 COUNTER</span>
+026548,000177: 21,3605           26030                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4535">TIME5</a>                                 <span class="co">#  FROM 20 MS TO 50 MS.</span>
+026549,000178: 21,3606           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  NEXT T5RUPT IN 50 MS IS PAXIS.</span>
+026550,000179: 21,3607           32100                           <span class="op">DCA     </span> <a href="KALMAN_FILTER_FOR_LM_DAP.agc.html#5041582F46494C54">PAX/FILT</a>                              
+026551,000180: 21,3610           53001                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5435414452">T5ADR</a>                                 
+026552,000181: 
+<a name="494E535254323141"></a>026553,000182: 21,3611           13404        <span class="sm">INSRT21A</span>           <span class="op">TCF     </span> <a href="TRIM_GIMBAL_CONTROL_SYSTEM.agc.html#54455354434E5452">TESTCNTR</a>                              <span class="co">#  DETERMINE WHAT TO PUT IN PASSCTR.</span>
+<a name="4C4F4144434E5452"></a>026554,000183: 21,3612           55736        <span class="sm">LOADCNTR</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50415353435452">PASSCTR</a>                               <span class="co">#  NMBR PASSES REQUIRED TO WARM UP FILTER</span>
+026555,000184: 21,3613           00006                           <span class="op">EXTEND  </span>                                       
+026556,000185: 21,3614           33621                           <span class="op">DCA     </span> <a href="#52415445494E4144">RATEINAD</a>                              <span class="co">#  NEXT T5RUPT AFTER NEXT PAXIS IS RATEINIT</span>
+026557,000186: 21,3615           53573                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5046494C54414452">PFILTADR</a>                              <span class="co">#  CONTROL FLOW SWITCH CELL FOR PAXIS RUPT.</span>
+026558,000187: 21,3616           15733                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
+026559,000188: 
+<a name="4247494D3231"></a>026560,000189: 21,3617           07400        <span class="sm">BGIM21  </span>           <span class="ps">OCT     </span> 07400                                 <span class="co">#  TRIM GIMBAL BITS IN CHANNEL 12 ARE 9-12.</span>
+026561,000190: 21,3620  E6,1542                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
+<a name="52415445494E4144"></a>026562,000191: 21,3620           03622 42066  <span class="sm">RATEINAD</span>           <span class="ps">2CADR   </span> <a href="#52415445494E4954">RATEINIT</a>                              <span class="co">#  RATE INITIALIZATION FOR KALMAN FILTER.</span>
+026563,000192: 
 </pre>
 </span>
 </p>
@@ -357,54 +357,54 @@ Page 633
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="52415445494E4954"></a>026559,000194: 21,3622           33645        <span class="sm">RATEINIT</span>           <span class="op">CAF     </span> <a href="#46494C544D533530">FILTMS50</a>                              <span class="co">#  RESET TIMER IMMEDIATELY  DT = 50 MS.</span>
-026560,000195: 21,3623           54030                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4535">TIME5</a>                                 
-026561,000196: 
-026562,000197: 21,3624           22016                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              <span class="co">#  INTERRUPT LEAD-IN (CONTINUED)</span>
-026563,000198: 21,3625           00006                           <span class="op">EXTEND  </span>                                       
-026564,000199: 21,3626           22012                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152555054">QRUPT</a>                                 
-026565,000200: 
-026566,000201: 21,3627           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  FILTINIT WILL BE NEXT T5RUPT, IN 50 MS.</span>
-026567,000202: 21,3630           33644                           <span class="op">DCA     </span> <a href="#46494C494E414452">FILINADR</a>                              
-026568,000203: 21,3631           53001                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5435414452">T5ADR</a>                                 
-026569,000204: 
-026570,000205: 21,3632           33635                           <span class="op">CA      </span> <a href="#4241434B484F4D45">BACKHOME</a>                              <span class="co">#  ESTABLISH RETURN SWITCH FROM THE PROCESS</span>
-026571,000206: 21,3633           55544                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354454552414452">STEERADR</a>                              <span class="co">#  OF READING CDUY,Z AND TIMER.  TO BE USED</span>
-026572,000207: 21,3634           12042                           <span class="op">TCF     </span> <a href="KALMAN_FILTER_FOR_LM_DAP.agc.html#46494C5354415254">FILSTART</a>   +1                         <span class="co">#  IN FILTINIT FOR RATE INITIALIZATION</span>
-026573,000208: 
-<a name="4241434B484F4D45"></a>026574,000209: 21,3635           03636        <span class="sm">BACKHOME</span>           <span class="ps">GENADR  </span> <a href="#4241434B484F4D45">BACKHOME</a>   +1                         
-026575,000210: 
-026576,000211: 21,3636           23543                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054494D45">DAPTIME</a>                               <span class="co">#  RETURN HERE TO STORE DATA JUST DESCRIBED</span>
-026577,000212: 21,3637           00006                           <span class="op">EXTEND  </span>                                       
-026578,000213: 21,3640           31541                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53544F5243445559">STORCDUY</a>                              <span class="co">#  IN 2S COMPLEMENT, SCALED AT PI</span>
-026579,000214: 21,3641           53741                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#484F4C4443445559">HOLDCDUY</a>                              <span class="co">#  HOLD FOR RATE DERIVATION</span>
-026580,000215: 21,3642           15733                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
-026581,000216: 
-026582,000217: 21,3643  E6,1542                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
-<a name="46494C494E414452"></a>026583,000218: 21,3643           02000 42066  <span class="sm">FILINADR</span>           <span class="ps">2CADR   </span> <a href="KALMAN_FILTER_FOR_LM_DAP.agc.html#46494C54494E4954">FILTINIT</a>                              
-026584,000219: 
-<a name="46494C544D533530"></a>026585,000220: 21,3645           37773        <span class="sm">FILTMS50</span>           <span class="ps">OCT     </span> 37773                                 <span class="co">#  50 MS CONSTANT FOR TIME5</span>
-026586,000221: 
-<a name="484F4D414741494E"></a>026587,000222: 21,3646           03647        <span class="sm">HOMAGAIN</span>           <span class="ps">GENADR  </span> <a href="#484F4D414741494E">HOMAGAIN</a>   +1                         
-026588,000223: 21,3647           37763                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  <span class="co">#  SET UP RATE CALCULATION LOOP, Z AXIS 1ST</span>
-<a name="484F4D454C4F4F50"></a>026589,000224: 21,3650           54066        <span class="sm">HOMELOOP</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152434E5452">QRCNTR</a>                                
-026590,000225: 21,3651           60000                           <span class="op">DOUBLE  </span>                                       
-026591,000226: 21,3652           54061                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B43454E5452414C">KCENTRAL</a>                              
-026592,000227: 21,3653           50066                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152434E5452">QRCNTR</a>                                
-026593,000228: 21,3654           31540                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53544F5243445559">STORCDUY</a>                              <span class="co">#  2S COMPLEMENT AT PI</span>
-026594,000229: 21,3655           00006                           <span class="op">EXTEND  </span>                                       
-026595,000230: 21,3656           50066                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152434E5452">QRCNTR</a>                                
-026596,000231: 21,3657           21740                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#484F4C4443445559">HOLDCDUY</a>                              <span class="co">#  DIFFERENCE IN 1S COMPLEMENT, AT PI</span>
-026597,000232: 21,3660           00006                           <span class="op">EXTEND  </span>                                       
-026598,000233: 21,3661           77756                           <span class="op">MP      </span> <a href="INTERPRETER.agc.html#42495436">BIT6</a>                                  <span class="co">#  DIFFERENCE IN L, AT PI/2(5)</span>
-026599,000234: 21,3662           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  ZERO L, PREPARE FOR DIVISION BY DT</span>
-026600,000235: 21,3663           00006                           <span class="op">EXTEND  </span>                                       
-026601,000236: 21,3664           11542                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    <span class="co">#  DT IS AT 1/8, SO RATE IS AT PI/4</span>
-026602,000237: 21,3665           50061                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B43454E5452414C">KCENTRAL</a>                              
-026603,000238: 21,3666           53560                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444344555946494C">DCDUYFIL</a>                              <span class="co">#  STORE S.P. INITIAL RATE ESTIMATE</span>
-026604,000239: 21,3667           10066                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152434E5452">QRCNTR</a>                                <span class="co">#  ARE BOTH RATES DONE YET.</span>
-026605,000240: 21,3670           13650                           <span class="op">TCF     </span> <a href="#484F4D454C4F4F50">HOMELOOP</a>                              <span class="co">#  NO.   NOW DO Y AXIS</span>
-026606,000241: 21,3671           33674                           <span class="op">CA      </span> <a href="#4F5244494E415259">ORDINARY</a>                              <span class="co">#  YES.   SET SWITCH FOR NORMAL OPERATION</span>
+<a name="52415445494E4954"></a>026565,000194: 21,3622           33645        <span class="sm">RATEINIT</span>           <span class="op">CAF     </span> <a href="#46494C544D533530">FILTMS50</a>                              <span class="co">#  RESET TIMER IMMEDIATELY  DT = 50 MS.</span>
+026566,000195: 21,3623           54030                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4535">TIME5</a>                                 
+026567,000196: 
+026568,000197: 21,3624           22016                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              <span class="co">#  INTERRUPT LEAD-IN (CONTINUED)</span>
+026569,000198: 21,3625           00006                           <span class="op">EXTEND  </span>                                       
+026570,000199: 21,3626           22012                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152555054">QRUPT</a>                                 
+026571,000200: 
+026572,000201: 21,3627           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  FILTINIT WILL BE NEXT T5RUPT, IN 50 MS.</span>
+026573,000202: 21,3630           33644                           <span class="op">DCA     </span> <a href="#46494C494E414452">FILINADR</a>                              
+026574,000203: 21,3631           53001                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5435414452">T5ADR</a>                                 
+026575,000204: 
+026576,000205: 21,3632           33635                           <span class="op">CA      </span> <a href="#4241434B484F4D45">BACKHOME</a>                              <span class="co">#  ESTABLISH RETURN SWITCH FROM THE PROCESS</span>
+026577,000206: 21,3633           55544                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354454552414452">STEERADR</a>                              <span class="co">#  OF READING CDUY,Z AND TIMER.  TO BE USED</span>
+026578,000207: 21,3634           12042                           <span class="op">TCF     </span> <a href="KALMAN_FILTER_FOR_LM_DAP.agc.html#46494C5354415254">FILSTART</a>   +1                         <span class="co">#  IN FILTINIT FOR RATE INITIALIZATION</span>
+026579,000208: 
+<a name="4241434B484F4D45"></a>026580,000209: 21,3635           03636        <span class="sm">BACKHOME</span>           <span class="ps">GENADR  </span> <a href="#4241434B484F4D45">BACKHOME</a>   +1                         
+026581,000210: 
+026582,000211: 21,3636           23543                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054494D45">DAPTIME</a>                               <span class="co">#  RETURN HERE TO STORE DATA JUST DESCRIBED</span>
+026583,000212: 21,3637           00006                           <span class="op">EXTEND  </span>                                       
+026584,000213: 21,3640           31541                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53544F5243445559">STORCDUY</a>                              <span class="co">#  IN 2S COMPLEMENT, SCALED AT PI</span>
+026585,000214: 21,3641           53741                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#484F4C4443445559">HOLDCDUY</a>                              <span class="co">#  HOLD FOR RATE DERIVATION</span>
+026586,000215: 21,3642           15733                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
+026587,000216: 
+026588,000217: 21,3643  E6,1542                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    
+<a name="46494C494E414452"></a>026589,000218: 21,3643           02000 42066  <span class="sm">FILINADR</span>           <span class="ps">2CADR   </span> <a href="KALMAN_FILTER_FOR_LM_DAP.agc.html#46494C54494E4954">FILTINIT</a>                              
+026590,000219: 
+<a name="46494C544D533530"></a>026591,000220: 21,3645           37773        <span class="sm">FILTMS50</span>           <span class="ps">OCT     </span> 37773                                 <span class="co">#  50 MS CONSTANT FOR TIME5</span>
+026592,000221: 
+<a name="484F4D414741494E"></a>026593,000222: 21,3646           03647        <span class="sm">HOMAGAIN</span>           <span class="ps">GENADR  </span> <a href="#484F4D414741494E">HOMAGAIN</a>   +1                         
+026594,000223: 21,3647           37763                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  <span class="co">#  SET UP RATE CALCULATION LOOP, Z AXIS 1ST</span>
+<a name="484F4D454C4F4F50"></a>026595,000224: 21,3650           54066        <span class="sm">HOMELOOP</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152434E5452">QRCNTR</a>                                
+026596,000225: 21,3651           60000                           <span class="op">DOUBLE  </span>                                       
+026597,000226: 21,3652           54061                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B43454E5452414C">KCENTRAL</a>                              
+026598,000227: 21,3653           50066                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152434E5452">QRCNTR</a>                                
+026599,000228: 21,3654           31540                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53544F5243445559">STORCDUY</a>                              <span class="co">#  2S COMPLEMENT AT PI</span>
+026600,000229: 21,3655           00006                           <span class="op">EXTEND  </span>                                       
+026601,000230: 21,3656           50066                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152434E5452">QRCNTR</a>                                
+026602,000231: 21,3657           21740                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#484F4C4443445559">HOLDCDUY</a>                              <span class="co">#  DIFFERENCE IN 1S COMPLEMENT, AT PI</span>
+026603,000232: 21,3660           00006                           <span class="op">EXTEND  </span>                                       
+026604,000233: 21,3661           77756                           <span class="op">MP      </span> <a href="INTERPRETER.agc.html#42495436">BIT6</a>                                  <span class="co">#  DIFFERENCE IN L, AT PI/2(5)</span>
+026605,000234: 21,3662           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  ZERO L, PREPARE FOR DIVISION BY DT</span>
+026606,000235: 21,3663           00006                           <span class="op">EXTEND  </span>                                       
+026607,000236: 21,3664           11542                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    <span class="co">#  DT IS AT 1/8, SO RATE IS AT PI/4</span>
+026608,000237: 21,3665           50061                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B43454E5452414C">KCENTRAL</a>                              
+026609,000238: 21,3666           53560                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444344555946494C">DCDUYFIL</a>                              <span class="co">#  STORE S.P. INITIAL RATE ESTIMATE</span>
+026610,000239: 21,3667           10066                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152434E5452">QRCNTR</a>                                <span class="co">#  ARE BOTH RATES DONE YET.</span>
+026611,000240: 21,3670           13650                           <span class="op">TCF     </span> <a href="#484F4D454C4F4F50">HOMELOOP</a>                              <span class="co">#  NO.   NOW DO Y AXIS</span>
+026612,000241: 21,3671           33674                           <span class="op">CA      </span> <a href="#4F5244494E415259">ORDINARY</a>                              <span class="co">#  YES.   SET SWITCH FOR NORMAL OPERATION</span>
 </pre>
 </span>
 </p>
@@ -420,51 +420,51 @@ Page 634
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-026608,000243: 21,3672           55742                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354454552414432">STEERAD2</a>                              
-026609,000244: 21,3673           12323                           <span class="op">TCF     </span> <a href="KALMAN_FILTER_FOR_LM_DAP.agc.html#46494C4649525354">FILFIRST</a>   +1                         
-<a name="4F5244494E415259"></a>026610,000245: 21,3674           02075        <span class="sm">ORDINARY</span>           <span class="ps">GENADR  </span> <a href="KALMAN_FILTER_FOR_LM_DAP.agc.html#5041582F46494C54">PAX/FILT</a>   -2                         
-026611,000246: 
-<a name="434C454152434835"></a>026612,000247: 21,3675           37767        <span class="sm">CLEARCH5</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  TURN OFF Q,R-AXES RCS JETS.</span>
-026613,000248: 21,3676           00006                           <span class="op">EXTEND  </span>                                       
-026614,000249: 21,3677           01005                           <span class="op">WRITE   </span> 5                                     
-026615,000250: 21,3700           33646                           <span class="op">CAF     </span> <a href="#484F4D414741494E">HOMAGAIN</a>                              <span class="co">#  SET UP TO PREVENT FILTERING DURING THE</span>
-026616,000251: 21,3701           55742                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354454552414432">STEERAD2</a>                              <span class="co">#  INITIALIZATION.</span>
-026617,000252: 21,3702           12042                           <span class="op">TCF     </span> <a href="KALMAN_FILTER_FOR_LM_DAP.agc.html#46494C5354415254">FILSTART</a>   +1                         <span class="co">#  T6JOBCHK NOT NEEDED.  CHANNEL 5 ZEROED.</span>
-026618,000253: 
-<a name="434F554E5444574E"></a>026619,000254: 21,3703           53575        <span class="sm">COUNTDWN</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50465250544C5354">PFRPTLST</a>                              <span class="co">#  FINISH CYCLING POST RUPT LIST.</span>
-026620,000255: 
-026621,000256: 21,3704           11736                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50415353435452">PASSCTR</a>                               <span class="co">#  DECREMENT PASSCTR.</span>
-026622,000257: 21,3705           55736                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50415353435452">PASSCTR</a>                               
-026623,000258: 21,3706           12041                           <span class="op">TCF     </span> <a href="KALMAN_FILTER_FOR_LM_DAP.agc.html#46494C5354415254">FILSTART</a>                              
-026624,000259: 
-<a name="54494D45444F4E45"></a>026625,000260: 21,3707           55542        <span class="sm">TIMEDONE</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    <span class="co">#  DT STORED.  SCALED AT 1/8.</span>
-026626,000261: 21,3710           01742                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354454552414432">STEERAD2</a>                              <span class="co">#  BYPASS FILTERING DURING INITIALIZATION.</span>
-026627,000262: 21,3711           12075                           <span class="op">TCF     </span> <a href="KALMAN_FILTER_FOR_LM_DAP.agc.html#5041582F46494C54">PAX/FILT</a>   -2                         
-026628,000263: 
-<a name="555355414C584954"></a>026629,000264: 21,3712           33720        <span class="sm">USUALXIT</span>           <span class="op">CA      </span> <a href="#474F51414452">GOQADR</a>                                
-026630,000265: 21,3713           55737                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534C4543544C4157">SLECTLAW</a>                              <span class="co">#  SET LOOP EXIT FOR SIMPLE CONTROL OR NOT.</span>
-026631,000266: 21,3714           13005                           <span class="op">TCF     </span> <a href="TRIM_GIMBAL_CONTROL_SYSTEM.agc.html#4754535141584953">GTSQAXIS</a>                              
-026632,000267: 
-<a name="5445535450435452"></a>026633,000268: 21,3715           11736        <span class="sm">TESTPCTR</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50415353435452">PASSCTR</a>                               <span class="co">#  EITHER ZERO (+) , OR POSITIVE</span>
-026634,000269: 21,3716           13722                           <span class="op">TCF     </span> <a href="#53494D504354524C">SIMPCTRL</a>                              <span class="co">#  USE SIMPLE CONTROL - NULLIFY ALPHA.</span>
-026635,000270: 21,3717           12731                           <span class="op">TCF     </span> <a href="TRIM_GIMBAL_CONTROL_SYSTEM.agc.html#524353434E54524C">RCSCNTRL</a>                              <span class="co">#  TO TO Q,R JETS.</span>
-026636,000271: 
-<a name="474F51414452"></a>026637,000272: 21,3720           03003        <span class="sm">GOQADR  </span>           <span class="ps">GENADR  </span> <a href="TRIM_GIMBAL_CONTROL_SYSTEM.agc.html#474F515452494D47">GOQTRIMG</a>                              
-<a name="53494D5051414452"></a>026638,000273: 21,3721           03726        <span class="sm">SIMPQADR</span>           <span class="ps">GENADR  </span> <a href="#53494D5051545247">SIMPQTRG</a>                              
-026639,000274: 
-<a name="53494D504354524C"></a>026640,000275: 21,3722           33721        <span class="sm">SIMPCTRL</span>           <span class="op">CA      </span> <a href="#53494D5051414452">SIMPQADR</a>                              <span class="co">#  SET UP 2ND PASS THROUGH CONTROL LOOP.</span>
-026641,000276: 21,3723           55737                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534C4543544C4157">SLECTLAW</a>                              
-026642,000277: 21,3724           37762                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#54574F">TWO</a>                                   <span class="co">#  SET UP INDEX FOR 1ST PASS THROUGH SIM</span>
-026643,000278: 21,3725           13727                           <span class="op">TCF     </span> <a href="#53494D504C4F4F50">SIMPLOOP</a>                              <span class="co">#  PLE CONTROL LAW.  (R-AXIS)</span>
-<a name="53494D5051545247"></a>026644,000279: 21,3726           37767        <span class="sm">SIMPQTRG</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  SET INDEX FOR Q-AXIS</span>
-<a name="53494D504C4F4F50"></a>026645,000280: 21,3727           54066        <span class="sm">SIMPLOOP</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152434E5452">QRCNTR</a>                                
-026646,000281: 21,3730           50066                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152434E5452">QRCNTR</a>                                
-026647,000282: 21,3731           11417                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484151">ALPHAQ</a>                                <span class="co">#  CHOOSE DRIVE TO NULL ALPHA</span>
-026648,000283: 21,3732           37763                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  
-026649,000284: 21,3733           13176                           <span class="op">TCF     </span> <a href="TRIM_GIMBAL_CONTROL_SYSTEM.agc.html#504F534452495645">POSDRIVE</a>                              
-026650,000285: 21,3734           47763                           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  
-026651,000286: 21,3735           13176                           <span class="op">TCF     </span> <a href="TRIM_GIMBAL_CONTROL_SYSTEM.agc.html#504F534452495645">POSDRIVE</a>                              <span class="co">#  DRIVE BITS GO TO THE CHANNEL</span>
-026652,000287: 
+026614,000243: 21,3672           55742                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354454552414432">STEERAD2</a>                              
+026615,000244: 21,3673           12323                           <span class="op">TCF     </span> <a href="KALMAN_FILTER_FOR_LM_DAP.agc.html#46494C4649525354">FILFIRST</a>   +1                         
+<a name="4F5244494E415259"></a>026616,000245: 21,3674           02075        <span class="sm">ORDINARY</span>           <span class="ps">GENADR  </span> <a href="KALMAN_FILTER_FOR_LM_DAP.agc.html#5041582F46494C54">PAX/FILT</a>   -2                         
+026617,000246: 
+<a name="434C454152434835"></a>026618,000247: 21,3675           37767        <span class="sm">CLEARCH5</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  TURN OFF Q,R-AXES RCS JETS.</span>
+026619,000248: 21,3676           00006                           <span class="op">EXTEND  </span>                                       
+026620,000249: 21,3677           01005                           <span class="op">WRITE   </span> 5                                     
+026621,000250: 21,3700           33646                           <span class="op">CAF     </span> <a href="#484F4D414741494E">HOMAGAIN</a>                              <span class="co">#  SET UP TO PREVENT FILTERING DURING THE</span>
+026622,000251: 21,3701           55742                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354454552414432">STEERAD2</a>                              <span class="co">#  INITIALIZATION.</span>
+026623,000252: 21,3702           12042                           <span class="op">TCF     </span> <a href="KALMAN_FILTER_FOR_LM_DAP.agc.html#46494C5354415254">FILSTART</a>   +1                         <span class="co">#  T6JOBCHK NOT NEEDED.  CHANNEL 5 ZEROED.</span>
+026624,000253: 
+<a name="434F554E5444574E"></a>026625,000254: 21,3703           53575        <span class="sm">COUNTDWN</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50465250544C5354">PFRPTLST</a>                              <span class="co">#  FINISH CYCLING POST RUPT LIST.</span>
+026626,000255: 
+026627,000256: 21,3704           11736                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50415353435452">PASSCTR</a>                               <span class="co">#  DECREMENT PASSCTR.</span>
+026628,000257: 21,3705           55736                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50415353435452">PASSCTR</a>                               
+026629,000258: 21,3706           12041                           <span class="op">TCF     </span> <a href="KALMAN_FILTER_FOR_LM_DAP.agc.html#46494C5354415254">FILSTART</a>                              
+026630,000259: 
+<a name="54494D45444F4E45"></a>026631,000260: 21,3707           55542        <span class="sm">TIMEDONE</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4454">DT</a>                                    <span class="co">#  DT STORED.  SCALED AT 1/8.</span>
+026632,000261: 21,3710           01742                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354454552414432">STEERAD2</a>                              <span class="co">#  BYPASS FILTERING DURING INITIALIZATION.</span>
+026633,000262: 21,3711           12075                           <span class="op">TCF     </span> <a href="KALMAN_FILTER_FOR_LM_DAP.agc.html#5041582F46494C54">PAX/FILT</a>   -2                         
+026634,000263: 
+<a name="555355414C584954"></a>026635,000264: 21,3712           33720        <span class="sm">USUALXIT</span>           <span class="op">CA      </span> <a href="#474F51414452">GOQADR</a>                                
+026636,000265: 21,3713           55737                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534C4543544C4157">SLECTLAW</a>                              <span class="co">#  SET LOOP EXIT FOR SIMPLE CONTROL OR NOT.</span>
+026637,000266: 21,3714           13005                           <span class="op">TCF     </span> <a href="TRIM_GIMBAL_CONTROL_SYSTEM.agc.html#4754535141584953">GTSQAXIS</a>                              
+026638,000267: 
+<a name="5445535450435452"></a>026639,000268: 21,3715           11736        <span class="sm">TESTPCTR</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50415353435452">PASSCTR</a>                               <span class="co">#  EITHER ZERO (+) , OR POSITIVE</span>
+026640,000269: 21,3716           13722                           <span class="op">TCF     </span> <a href="#53494D504354524C">SIMPCTRL</a>                              <span class="co">#  USE SIMPLE CONTROL - NULLIFY ALPHA.</span>
+026641,000270: 21,3717           12731                           <span class="op">TCF     </span> <a href="TRIM_GIMBAL_CONTROL_SYSTEM.agc.html#524353434E54524C">RCSCNTRL</a>                              <span class="co">#  TO TO Q,R JETS.</span>
+026642,000271: 
+<a name="474F51414452"></a>026643,000272: 21,3720           03003        <span class="sm">GOQADR  </span>           <span class="ps">GENADR  </span> <a href="TRIM_GIMBAL_CONTROL_SYSTEM.agc.html#474F515452494D47">GOQTRIMG</a>                              
+<a name="53494D5051414452"></a>026644,000273: 21,3721           03726        <span class="sm">SIMPQADR</span>           <span class="ps">GENADR  </span> <a href="#53494D5051545247">SIMPQTRG</a>                              
+026645,000274: 
+<a name="53494D504354524C"></a>026646,000275: 21,3722           33721        <span class="sm">SIMPCTRL</span>           <span class="op">CA      </span> <a href="#53494D5051414452">SIMPQADR</a>                              <span class="co">#  SET UP 2ND PASS THROUGH CONTROL LOOP.</span>
+026647,000276: 21,3723           55737                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534C4543544C4157">SLECTLAW</a>                              
+026648,000277: 21,3724           37762                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#54574F">TWO</a>                                   <span class="co">#  SET UP INDEX FOR 1ST PASS THROUGH SIM</span>
+026649,000278: 21,3725           13727                           <span class="op">TCF     </span> <a href="#53494D504C4F4F50">SIMPLOOP</a>                              <span class="co">#  PLE CONTROL LAW.  (R-AXIS)</span>
+<a name="53494D5051545247"></a>026650,000279: 21,3726           37767        <span class="sm">SIMPQTRG</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  SET INDEX FOR Q-AXIS</span>
+<a name="53494D504C4F4F50"></a>026651,000280: 21,3727           54066        <span class="sm">SIMPLOOP</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152434E5452">QRCNTR</a>                                
+026652,000281: 21,3730           50066                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152434E5452">QRCNTR</a>                                
+026653,000282: 21,3731           11417                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484151">ALPHAQ</a>                                <span class="co">#  CHOOSE DRIVE TO NULL ALPHA</span>
+026654,000283: 21,3732           37763                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  
+026655,000284: 21,3733           13176                           <span class="op">TCF     </span> <a href="TRIM_GIMBAL_CONTROL_SYSTEM.agc.html#504F534452495645">POSDRIVE</a>                              
+026656,000285: 21,3734           47763                           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  
+026657,000286: 21,3735           13176                           <span class="op">TCF     </span> <a href="TRIM_GIMBAL_CONTROL_SYSTEM.agc.html#504F534452495645">POSDRIVE</a>                              <span class="co">#  DRIVE BITS GO TO THE CHANNEL</span>
+026658,000287: 
 </pre>
 </span>
 </p>
@@ -480,48 +480,48 @@ Page 635
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-026654,000289:                                                                                                  <span class="co">#  START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************</span>
-026655,000290: 
-026656,000291:                                                                                                  <span class="co">#  FROM GTS: WHEN TRIMCNTR ACTIVE,  DO SIMPCTRL IF THE FILTER IS NOT WARM</span>
-026657,000292:                                                                                                  <span class="co">#            AND DO A TGOFF DRIVE IF IT IS.</span>
-026658,000293: 
-<a name="43484B434E5452"></a>026659,000294: 21,3736           11764        <span class="sm">CHKCNTR </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494D50434E5452">SIMPCNTR</a>                              <span class="co">#  CHOOSE SIMPCTRL OR NORMAL GTS CONTROL.</span>
-026660,000295: 21,3737           13715                           <span class="op">TCF     </span> <a href="#5445535450435452">TESTPCTR</a>                              <span class="co">#  SIMPCTRL UNTIL PASSCTR IS ZERO,THEN EXIT</span>
-026661,000296: 21,3740           13743                           <span class="op">TCF     </span> <a href="#4E4F524D4354524C">NORMCTRL</a>                              <span class="co">#  NORMAL GTS CONTROL.</span>
-026662,000297: 21,3741           04736                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
-026663,000298: 21,3742           04736                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
-026664,000299: 
-<a name="4E4F524D4354524C"></a>026665,000300: 21,3743           37763        <span class="sm">NORMCTRL</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  <span class="co">#  RETURN TO NORMAL GTS CONTROL.</span>
-026666,000301: 21,3744           12701                           <span class="op">TCF     </span> <a href="TRIM_GIMBAL_CONTROL_SYSTEM.agc.html#494E534552543231">INSERT21</a>   +1                         
-026667,000302: 
-026668,000303:                                                                                                  <span class="co">#  FROM CHEKDRIV: ALLOW TGOFFCAL DRIVES AND DISABLE SPECIAL GTS INDICATORS</span>
-026669,000304: 
-<a name="5741524D46494C54"></a>026670,000305: 21,3745           03307        <span class="sm">WARMFILT</span>           <span class="op">TC      </span> <a href="TRIM_GIMBAL_CONTROL_SYSTEM.agc.html#54474F464643414C">TGOFFCAL</a>                              <span class="co">#  (A= 0, INDEX FOR Q-AXIS IN TGOFFCAL)</span>
-026671,000306: 21,3746           37745                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4E45474D4158">NEGMAX</a>                                <span class="co">#  RETURN HERE FOR NO Q DRIVE.</span>
-026672,000307: 21,3747           54063                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5033">ITEMP3</a>                                <span class="co">#  RETURN HERE WITH TIME IN A (DECASECONDS)</span>
-026673,000308: 
-026674,000309: 21,3750           37762                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#54574F">TWO</a>                                   <span class="co">#  INDEX FOR R-AXIS.</span>
-026675,000310: 21,3751           03307                           <span class="op">TC      </span> <a href="TRIM_GIMBAL_CONTROL_SYSTEM.agc.html#54474F464643414C">TGOFFCAL</a>                              
-026676,000311: 21,3752           37745                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4E45474D4158">NEGMAX</a>                                <span class="co">#  RETURN HERE FOR NO R DRIVE.</span>
-026677,000312: 21,3753           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  RETURN HERE WITH TIME IN A (DECASECONDS)</span>
-026678,000313: 21,3754           30063                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5033">ITEMP3</a>                                
-026679,000314: 21,3755           53754                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5147494D54494D52">QGIMTIMR</a>                              <span class="co">#  SET TIMERS SIMULTANEOUSLY FOR RESTART</span>
-026680,000315:                                                                                                  <span class="co">#    PROTECTION.</span>
-026681,000316: 21,3756           03243                           <span class="op">TC      </span> <a href="TRIM_GIMBAL_CONTROL_SYSTEM.agc.html#575243484E3132">WRCHN12</a>                               <span class="co">#  START DRIVES</span>
-026682,000317: 
-026683,000318: 21,3757           11744                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D434E5452">TRIMCNTR</a>                              <span class="co">#  DEACTIVATE TRIMCNTR IF IT HAS REACHED -0</span>
-026684,000319: 21,3760           13765                           <span class="op">TCF     </span> +5                                    
-026685,000320: 21,3761           04736                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
-026686,000321: 21,3762           13765                           <span class="op">TCF     </span> +3                                    
-026687,000322: 21,3763           37745                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4E45474D4158">NEGMAX</a>                                
-026688,000323: 21,3764           55744                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D434E5452">TRIMCNTR</a>                              
-026689,000324: 21,3765           37767                 +5        <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  DEACTIVATE GTSMNITR NOW THAT TGOFFCAL</span>
-026690,000325: 21,3766           55745                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4754534D4E495452">GTSMNITR</a>                              <span class="co">#    HAS BEEN DONE</span>
-026691,000326: 21,3767           15727                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-026692,000327: 
-026693,000328:                                                                                                  <span class="co">#  **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************</span>
-026694,000329: 
-<a name="43484B53554D3231"></a>026695,000330: 21,3770           37777        <span class="sm">CHKSUM21</span>           <span class="ps">OCT     </span> 37777                                 
+026660,000289:                                                                                                  <span class="co">#  START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************</span>
+026661,000290: 
+026662,000291:                                                                                                  <span class="co">#  FROM GTS: WHEN TRIMCNTR ACTIVE,  DO SIMPCTRL IF THE FILTER IS NOT WARM</span>
+026663,000292:                                                                                                  <span class="co">#            AND DO A TGOFF DRIVE IF IT IS.</span>
+026664,000293: 
+<a name="43484B434E5452"></a>026665,000294: 21,3736           11764        <span class="sm">CHKCNTR </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494D50434E5452">SIMPCNTR</a>                              <span class="co">#  CHOOSE SIMPCTRL OR NORMAL GTS CONTROL.</span>
+026666,000295: 21,3737           13715                           <span class="op">TCF     </span> <a href="#5445535450435452">TESTPCTR</a>                              <span class="co">#  SIMPCTRL UNTIL PASSCTR IS ZERO,THEN EXIT</span>
+026667,000296: 21,3740           13743                           <span class="op">TCF     </span> <a href="#4E4F524D4354524C">NORMCTRL</a>                              <span class="co">#  NORMAL GTS CONTROL.</span>
+026668,000297: 21,3741           04736                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
+026669,000298: 21,3742           04736                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
+026670,000299: 
+<a name="4E4F524D4354524C"></a>026671,000300: 21,3743           37763        <span class="sm">NORMCTRL</span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  <span class="co">#  RETURN TO NORMAL GTS CONTROL.</span>
+026672,000301: 21,3744           12701                           <span class="op">TCF     </span> <a href="TRIM_GIMBAL_CONTROL_SYSTEM.agc.html#494E534552543231">INSERT21</a>   +1                         
+026673,000302: 
+026674,000303:                                                                                                  <span class="co">#  FROM CHEKDRIV: ALLOW TGOFFCAL DRIVES AND DISABLE SPECIAL GTS INDICATORS</span>
+026675,000304: 
+<a name="5741524D46494C54"></a>026676,000305: 21,3745           03307        <span class="sm">WARMFILT</span>           <span class="op">TC      </span> <a href="TRIM_GIMBAL_CONTROL_SYSTEM.agc.html#54474F464643414C">TGOFFCAL</a>                              <span class="co">#  (A= 0, INDEX FOR Q-AXIS IN TGOFFCAL)</span>
+026677,000306: 21,3746           37745                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4E45474D4158">NEGMAX</a>                                <span class="co">#  RETURN HERE FOR NO Q DRIVE.</span>
+026678,000307: 21,3747           54063                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5033">ITEMP3</a>                                <span class="co">#  RETURN HERE WITH TIME IN A (DECASECONDS)</span>
+026679,000308: 
+026680,000309: 21,3750           37762                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#54574F">TWO</a>                                   <span class="co">#  INDEX FOR R-AXIS.</span>
+026681,000310: 21,3751           03307                           <span class="op">TC      </span> <a href="TRIM_GIMBAL_CONTROL_SYSTEM.agc.html#54474F464643414C">TGOFFCAL</a>                              
+026682,000311: 21,3752           37745                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4E45474D4158">NEGMAX</a>                                <span class="co">#  RETURN HERE FOR NO R DRIVE.</span>
+026683,000312: 21,3753           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  RETURN HERE WITH TIME IN A (DECASECONDS)</span>
+026684,000313: 21,3754           30063                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5033">ITEMP3</a>                                
+026685,000314: 21,3755           53754                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5147494D54494D52">QGIMTIMR</a>                              <span class="co">#  SET TIMERS SIMULTANEOUSLY FOR RESTART</span>
+026686,000315:                                                                                                  <span class="co">#    PROTECTION.</span>
+026687,000316: 21,3756           03243                           <span class="op">TC      </span> <a href="TRIM_GIMBAL_CONTROL_SYSTEM.agc.html#575243484E3132">WRCHN12</a>                               <span class="co">#  START DRIVES</span>
+026688,000317: 
+026689,000318: 21,3757           11744                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D434E5452">TRIMCNTR</a>                              <span class="co">#  DEACTIVATE TRIMCNTR IF IT HAS REACHED -0</span>
+026690,000319: 21,3760           13765                           <span class="op">TCF     </span> +5                                    
+026691,000320: 21,3761           04736                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
+026692,000321: 21,3762           13765                           <span class="op">TCF     </span> +3                                    
+026693,000322: 21,3763           37745                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4E45474D4158">NEGMAX</a>                                
+026694,000323: 21,3764           55744                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D434E5452">TRIMCNTR</a>                              
+026695,000324: 21,3765           37767                 +5        <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  DEACTIVATE GTSMNITR NOW THAT TGOFFCAL</span>
+026696,000325: 21,3766           55745                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4754534D4E495452">GTSMNITR</a>                              <span class="co">#    HAS BEEN DONE</span>
+026697,000326: 21,3767           15727                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+026698,000327: 
+026699,000328:                                                                                                  <span class="co">#  **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************</span>
+026700,000329: 
+<a name="43484B53554D3231"></a>026701,000330: 21,3770           37777        <span class="sm">CHKSUM21</span>           <span class="ps">OCT     </span> 37777                                 
 
 End of include-file SPS_BACK-UP_RCS_CONTROL.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

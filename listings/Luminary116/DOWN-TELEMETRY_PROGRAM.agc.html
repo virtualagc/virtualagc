@@ -89,29 +89,29 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042288,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-042289,000003:                                                                                                  <span class="co">## Filename:    DOWN-TELEMETRY_PROGRAM.agc</span>
-042290,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 116.</span>
-042291,000005:                                                                                                  <span class="co">##              It is part of the source code for the Lunar Module's (LM)</span>
-042292,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 12.</span>
-042293,000007:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-042294,000008:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-042295,000009:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-042296,000010:                                                                                                  <span class="co">##              original YUL assembler.</span>
-042297,000011:                                                                                                  <span class="co">## Reference:   pp. 980-989</span>
-042298,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-042299,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-042300,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-042301,000015:                                                                                                  <span class="co">## Mod history: 2017-01-22 MAS  Created from Luminary 99.</span>
-042302,000016:                                                                                                  <span class="co">##              2017-01-31 RRB  Updated for Luminary 116.</span>
-042303,000017:                                                                                                  <span class="co">##              2017-03-07 HG   Fix operand O13QSAV  --> C13QSAV</span>
-042304,000018:                                                                                                  <span class="co">##                                          C13QSAV  --> C13STALL</span>
-042305,000019:                                                                                                  <span class="co">##              2017-03-13 RSB  Proofed comment text via 3-way diff vs</span>
-042306,000020:                                                                                                  <span class="co">##                              Luminary 99 and 132.</span>
-042307,000021:                                                                                                  <span class="co">##              2017-03-15 RSB  Comment-text fixes identified in 5-way</span>
-042308,000022:                                                                                                  <span class="co">##                              side-by-side diff of Luminary 69/99/116/131/210.</span>
-042309,000023:                                                                                                  <span class="co">##              2017-03-19 HG   Fix operand DNTMGCTC --> DNTMGOTO</span>
-042310,000024: 
+042299,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+042300,000003:                                                                                                  <span class="co">## Filename:    DOWN-TELEMETRY_PROGRAM.agc</span>
+042301,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 116.</span>
+042302,000005:                                                                                                  <span class="co">##              It is part of the source code for the Lunar Module's (LM)</span>
+042303,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 12.</span>
+042304,000007:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+042305,000008:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+042306,000009:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+042307,000010:                                                                                                  <span class="co">##              original YUL assembler.</span>
+042308,000011:                                                                                                  <span class="co">## Reference:   pp. 980-989</span>
+042309,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+042310,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+042311,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+042312,000015:                                                                                                  <span class="co">## Mod history: 2017-01-22 MAS  Created from Luminary 99.</span>
+042313,000016:                                                                                                  <span class="co">##              2017-01-31 RRB  Updated for Luminary 116.</span>
+042314,000017:                                                                                                  <span class="co">##              2017-03-07 HG   Fix operand O13QSAV  --> C13QSAV</span>
+042315,000018:                                                                                                  <span class="co">##                                          C13QSAV  --> C13STALL</span>
+042316,000019:                                                                                                  <span class="co">##              2017-03-13 RSB  Proofed comment text via 3-way diff vs</span>
+042317,000020:                                                                                                  <span class="co">##                              Luminary 99 and 132.</span>
+042318,000021:                                                                                                  <span class="co">##              2017-03-15 RSB  Comment-text fixes identified in 5-way</span>
+042319,000022:                                                                                                  <span class="co">##                              side-by-side diff of Luminary 69/99/116/131/210.</span>
+042320,000023:                                                                                                  <span class="co">##              2017-03-19 HG   Fix operand DNTMGCTC --> DNTMGOTO</span>
+042321,000024: 
 </pre>
 </span>
 </p>
@@ -127,61 +127,61 @@ Page 980
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042312,000026:                                                                                                  <span class="co">#  PROGRAM NAME- DOWN TELEMETRY PROGRAM</span>
-042313,000027:                                                                                                  <span class="co">#  MOD NO.- 0      TO COMPLETELY REWRITE THE DOWN TELEMETRY PROGRAM AND DOWNLINK ERASABLE DUMP PROGRAM FOR THE</span>
-042314,000028:                                                                                                  <span class="co">#                  PURPOSE OF SAVING APPROXIMATELY 150 WORDS OF CORE STORAGE.</span>
-042315,000029:                                                                                                  <span class="co">#                  THIS CHANGE REQUIRES AN ENTIRELY NEW METHOD OF SPECIFYING DOWNLINK LISTS.REFER TO DOWNLINK</span>
-042316,000030:                                                                                                  <span class="co">#                  LISTS LOG SECTION FOR MORE DETAILS. HOWEVER THIS CHANGE WILL NOT AFFECT THE GROUND PROCESSING</span>
-042317,000031:                                                                                                  <span class="co">#                  OF DOWN TELEMETRY DATA.</span>
-042318,000032:                                                                                                  <span class="co">#  MOD BY-  KILROY, SMITH, DEWITT</span>
-042319,000033:                                                                                                  <span class="co">#  DATE-    02 OCT 67</span>
-042320,000034:                                                                                                  <span class="co">#  AUTHORS- KILROY, SMITH, DEWITT, DEWOLF, FAGIN</span>
-042321,000035:                                                                                                  <span class="co">#  LOG SECTION- DOWN-TELEMETRY PROGRAM</span>
-042322,000036:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION- THIS ROUTINE IS INITIATED BY TELEMETRY END</span>
-042323,000037:                                                                                                  <span class="co">#           PULSE FROM THE DOWNLINK TELEMETRY CONVERTER. THIS PULSE OCCURS</span>
-042324,000038:                                                                                                  <span class="co">#           AT 50 TIMES PER SEC (EVERY 20 MS) THEREFORE DODOWNTM IS</span>
-042325,000039:                                                                                                  <span class="co">#           EXECUTED AT THESE RATES.  THIS ROUTINE SELECTS THE APPROPRIATE</span>
-042326,000040:                                                                                                  <span class="co">#           AGC DATA TO BE TRANSMITTED DOWNLINK AND LOADS IT INTO OUTPUT</span>
-042327,000041:                                                                                                  <span class="co">#           CHANNELS 34 AND 35. THE INFORMATION IS THEN GATED OUT FROM THE</span>
-042328,000042:                                                                                                  <span class="co">#           LGC IN SERIAL FASHION.</span>
-042329,000043:                                                                                                  <span class="co">#           THIS PROGRAM IS CODED FOR A 2 SECOND DOWNLIST. SINCE DOWNRUPTS</span>
-042330,000044:                                                                                                  <span class="co">#           OCCUR EVERY 20 MS AND 2 AGC COMPUTER WORDS CAN BE PLACED IN</span>
-042331,000045:                                                                                                  <span class="co">#           CHANNELS 34 AND 35 DURING EACH DOWNRUPT THE PROGRAM IS CAPABLE</span>
-042332,000046:                                                                                                  <span class="co">#           OF SENDING 200 AGC WORDS EVERY 2 SECONDS.</span>
-042333,000047:                                                                                                  <span class="co">#  CALLING SEQUENCE- NONE</span>
-042334,000048:                                                                                                  <span class="co">#           PROGRAM IS ENTERED VIA TCF DODOWNTM WHICH IS EXECUTED AS A</span>
-042335,000049:                                                                                                  <span class="co">#           RESULT OF A DOWNRUPT. CONTROL IS RETURNED VIA TCF RESUME WHICH</span>
-042336,000050:                                                                                                  <span class="co">#           IN EFFECT IS A RESUME.</span>
-042337,000051:                                                                                                  <span class="co">#  SUBROUTINES CALLED- NONE</span>
-042338,000052:                                                                                                  <span class="co">#  NORMAL EXIT MODE- TCF RESUME</span>
-042339,000053:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODE - NONE</span>
-042340,000054:                                                                                                  <span class="co">#  RESTART PROTECTION:</span>
-042341,000055:                                                                                                  <span class="co">#           ON A FRESH START AND RESTART THE 'STARTSUB' SUBROUTINE WILL INITIALIZE THE DOWNLIST POINTER (ACTUALLY</span>
-042342,000056:                                                                                                  <span class="co">#           DNTMGOTO) TO THE BEGINNING OF THE CURRENT DOWNLIST(I.E. CURRENT CONTENTS OF DNLSTADR). THIS HAS THE</span>
-042343,000057:                                                                                                  <span class="co">#           EFFECT OF IGNORING THE REMAINDER OF THE DOWNLIST WHICH THE DOWN-TELEMETRY PROGRAM WAS WORKING ON WHEN</span>
-042344,000058:                                                                                                  <span class="co">#           THE RESTART (OR FRESH START) OCCURRED AND RESUME DOWN TELEMETRY FROM THE BEGINNING OF THE CURRENT</span>
-042345,000059:                                                                                                  <span class="co">#           DOWNLIST.</span>
-042346,000060:                                                                                                  <span class="co">#           ALSO OF INTEREST IS THE FACT THAT ON A RESTART THE AGC WILL ZERO DOWNLINK CHANNELS 13, 34 AND 35.</span>
-042347,000061:                                                                                                  <span class="co">#  DOWNLINK LIST SELECTION:</span>
-042348,000062:                                                                                                  <span class="co">#           THE APPROPRIATE DOWNLINK LISTS ARE SELECTED BY THE FOLLOWING:</span>
-042349,000063:                                                                                                  <span class="co">#           1.  FRESH START</span>
-042350,000064:                                                                                                  <span class="co">#           2.  V37EXXE  WHERE XX = THE MAJOR MODE BEING SELECTED.</span>
-042351,000065:                                                                                                  <span class="co">#           3.  UPDATE PROGRAM (P27)</span>
-042352,000066:                                                                                                  <span class="co">#           4.      NON-V37 SELECTABLE TYPE PROGRAMS (E.G. AGS INITIALIZATION(SUNDANCE, LUMINARY) AND P61-P62</span>
-042353,000067:                                                                                                  <span class="co">#                   TRANSITION(COLOSSUS) ETC.).</span>
-042354,000068: 
-042355,000069:                                                                                                  <span class="co">#  DOWNLINK LIST RULES AND LIMITATIONS:</span>
-042356,000070:                                                                                                  <span class="co">#           READ SECTION(S) WHICH FOLLOW 'DEBRIS' WRITEUP.</span>
-042357,000071: 
-042358,000072:                                                                                                  <span class="co">#  OUTPUT-  EVERY 2 SECONDS 100 DOUBLE PRECISION WORDS (I.E. 200 LGC</span>
-042359,000073:                                                                                                  <span class="co">#           COMPUTER WORDS) ARE TRANSMITTED VIA DOWNLINK.</span>
-042360,000074: 
-042361,000075:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED- NONE</span>
-042362,000076:                                                                                                  <span class="co">#           'DNTMGOTO' AND 'DNLSTADR' ARE INITIALIZED BY THE FRESH START PROGRAM.</span>
-042363,000077: 
-042364,000078:                                                                                                  <span class="co">#  DEBRIS(ERASABLE LOCATIONS DESTROYED BY THIS PROGRAM)-</span>
-042365,000079:                                                                                                  <span class="co">#        LDATALST, DNTMBUFF TO DNTMBUFF +21D, TMINDEX, DNQ.</span>
-042366,000080: 
+042323,000026:                                                                                                  <span class="co">#  PROGRAM NAME- DOWN TELEMETRY PROGRAM</span>
+042324,000027:                                                                                                  <span class="co">#  MOD NO.- 0      TO COMPLETELY REWRITE THE DOWN TELEMETRY PROGRAM AND DOWNLINK ERASABLE DUMP PROGRAM FOR THE</span>
+042325,000028:                                                                                                  <span class="co">#                  PURPOSE OF SAVING APPROXIMATELY 150 WORDS OF CORE STORAGE.</span>
+042326,000029:                                                                                                  <span class="co">#                  THIS CHANGE REQUIRES AN ENTIRELY NEW METHOD OF SPECIFYING DOWNLINK LISTS.REFER TO DOWNLINK</span>
+042327,000030:                                                                                                  <span class="co">#                  LISTS LOG SECTION FOR MORE DETAILS. HOWEVER THIS CHANGE WILL NOT AFFECT THE GROUND PROCESSING</span>
+042328,000031:                                                                                                  <span class="co">#                  OF DOWN TELEMETRY DATA.</span>
+042329,000032:                                                                                                  <span class="co">#  MOD BY-  KILROY, SMITH, DEWITT</span>
+042330,000033:                                                                                                  <span class="co">#  DATE-    02 OCT 67</span>
+042331,000034:                                                                                                  <span class="co">#  AUTHORS- KILROY, SMITH, DEWITT, DEWOLF, FAGIN</span>
+042332,000035:                                                                                                  <span class="co">#  LOG SECTION- DOWN-TELEMETRY PROGRAM</span>
+042333,000036:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION- THIS ROUTINE IS INITIATED BY TELEMETRY END</span>
+042334,000037:                                                                                                  <span class="co">#           PULSE FROM THE DOWNLINK TELEMETRY CONVERTER. THIS PULSE OCCURS</span>
+042335,000038:                                                                                                  <span class="co">#           AT 50 TIMES PER SEC (EVERY 20 MS) THEREFORE DODOWNTM IS</span>
+042336,000039:                                                                                                  <span class="co">#           EXECUTED AT THESE RATES.  THIS ROUTINE SELECTS THE APPROPRIATE</span>
+042337,000040:                                                                                                  <span class="co">#           AGC DATA TO BE TRANSMITTED DOWNLINK AND LOADS IT INTO OUTPUT</span>
+042338,000041:                                                                                                  <span class="co">#           CHANNELS 34 AND 35. THE INFORMATION IS THEN GATED OUT FROM THE</span>
+042339,000042:                                                                                                  <span class="co">#           LGC IN SERIAL FASHION.</span>
+042340,000043:                                                                                                  <span class="co">#           THIS PROGRAM IS CODED FOR A 2 SECOND DOWNLIST. SINCE DOWNRUPTS</span>
+042341,000044:                                                                                                  <span class="co">#           OCCUR EVERY 20 MS AND 2 AGC COMPUTER WORDS CAN BE PLACED IN</span>
+042342,000045:                                                                                                  <span class="co">#           CHANNELS 34 AND 35 DURING EACH DOWNRUPT THE PROGRAM IS CAPABLE</span>
+042343,000046:                                                                                                  <span class="co">#           OF SENDING 200 AGC WORDS EVERY 2 SECONDS.</span>
+042344,000047:                                                                                                  <span class="co">#  CALLING SEQUENCE- NONE</span>
+042345,000048:                                                                                                  <span class="co">#           PROGRAM IS ENTERED VIA TCF DODOWNTM WHICH IS EXECUTED AS A</span>
+042346,000049:                                                                                                  <span class="co">#           RESULT OF A DOWNRUPT. CONTROL IS RETURNED VIA TCF RESUME WHICH</span>
+042347,000050:                                                                                                  <span class="co">#           IN EFFECT IS A RESUME.</span>
+042348,000051:                                                                                                  <span class="co">#  SUBROUTINES CALLED- NONE</span>
+042349,000052:                                                                                                  <span class="co">#  NORMAL EXIT MODE- TCF RESUME</span>
+042350,000053:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODE - NONE</span>
+042351,000054:                                                                                                  <span class="co">#  RESTART PROTECTION:</span>
+042352,000055:                                                                                                  <span class="co">#           ON A FRESH START AND RESTART THE 'STARTSUB' SUBROUTINE WILL INITIALIZE THE DOWNLIST POINTER (ACTUALLY</span>
+042353,000056:                                                                                                  <span class="co">#           DNTMGOTO) TO THE BEGINNING OF THE CURRENT DOWNLIST(I.E. CURRENT CONTENTS OF DNLSTADR). THIS HAS THE</span>
+042354,000057:                                                                                                  <span class="co">#           EFFECT OF IGNORING THE REMAINDER OF THE DOWNLIST WHICH THE DOWN-TELEMETRY PROGRAM WAS WORKING ON WHEN</span>
+042355,000058:                                                                                                  <span class="co">#           THE RESTART (OR FRESH START) OCCURRED AND RESUME DOWN TELEMETRY FROM THE BEGINNING OF THE CURRENT</span>
+042356,000059:                                                                                                  <span class="co">#           DOWNLIST.</span>
+042357,000060:                                                                                                  <span class="co">#           ALSO OF INTEREST IS THE FACT THAT ON A RESTART THE AGC WILL ZERO DOWNLINK CHANNELS 13, 34 AND 35.</span>
+042358,000061:                                                                                                  <span class="co">#  DOWNLINK LIST SELECTION:</span>
+042359,000062:                                                                                                  <span class="co">#           THE APPROPRIATE DOWNLINK LISTS ARE SELECTED BY THE FOLLOWING:</span>
+042360,000063:                                                                                                  <span class="co">#           1.  FRESH START</span>
+042361,000064:                                                                                                  <span class="co">#           2.  V37EXXE  WHERE XX = THE MAJOR MODE BEING SELECTED.</span>
+042362,000065:                                                                                                  <span class="co">#           3.  UPDATE PROGRAM (P27)</span>
+042363,000066:                                                                                                  <span class="co">#           4.      NON-V37 SELECTABLE TYPE PROGRAMS (E.G. AGS INITIALIZATION(SUNDANCE, LUMINARY) AND P61-P62</span>
+042364,000067:                                                                                                  <span class="co">#                   TRANSITION(COLOSSUS) ETC.).</span>
+042365,000068: 
+042366,000069:                                                                                                  <span class="co">#  DOWNLINK LIST RULES AND LIMITATIONS:</span>
+042367,000070:                                                                                                  <span class="co">#           READ SECTION(S) WHICH FOLLOW 'DEBRIS' WRITEUP.</span>
+042368,000071: 
+042369,000072:                                                                                                  <span class="co">#  OUTPUT-  EVERY 2 SECONDS 100 DOUBLE PRECISION WORDS (I.E. 200 LGC</span>
+042370,000073:                                                                                                  <span class="co">#           COMPUTER WORDS) ARE TRANSMITTED VIA DOWNLINK.</span>
+042371,000074: 
+042372,000075:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED- NONE</span>
+042373,000076:                                                                                                  <span class="co">#           'DNTMGOTO' AND 'DNLSTADR' ARE INITIALIZED BY THE FRESH START PROGRAM.</span>
+042374,000077: 
+042375,000078:                                                                                                  <span class="co">#  DEBRIS(ERASABLE LOCATIONS DESTROYED BY THIS PROGRAM)-</span>
+042376,000079:                                                                                                  <span class="co">#        LDATALST, DNTMBUFF TO DNTMBUFF +21D, TMINDEX, DNQ.</span>
+042377,000080: 
 </pre>
 </span>
 </p>
@@ -198,7 +198,7 @@ Page 981
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042369,000083: 
+042380,000083: 
 </pre>
 </span>
 </p>
@@ -214,56 +214,56 @@ Page 982
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042371,000085:                                                                                                  <span class="co">#  DODOWNTM IS ENTERED EVERY 20 MS BY AN INTERRUPT TRIGGERED BY THE</span>
-042372,000086:                                                                                                  <span class="co">#  RECEIPT OF AN ENDPULSE FROM THE SPACECRAFT TELEMETRY PROGRAMMER.</span>
-042373,000087: 
-042374,000088:                                                                                                  <span class="co">#  NOTES REGARDING DOWNLINK LISTS ASSOCIATED WITH THIS PROGRAM:</span>
-042375,000089:                                                                                                  <span class="co">#  1. DOWNLISTS. - DOWNLISTS MUST BE COMPILED IN THE SAME BANK AS THE</span>
-042376,000090:                                                                                                  <span class="co">#     DOWN-TELEMETRY PROGRAM. THIS IS DONE FOR EASE OF CODING, FASTER</span>
-042377,000091:                                                                                                  <span class="co">#     EXECUTION.</span>
-042378,000092:                                                                                                  <span class="co">#  2. EACH DOWNLINK LIST CONSISTS OF A CONTROL LIST AND A NUMBER OF</span>
-042379,000093:                                                                                                  <span class="co">#     SUBLISTS.</span>
-042380,000094:                                                                                                  <span class="co">#  3. A SUBLIST REFERS TO A SNAPSHOT OR DATA COMMON TO THE SAME OR OTHER</span>
-042381,000095:                                                                                                  <span class="co">#     DOWNLINK LISTS.  ANY SUBLIST CONTAINING COMMON DATA NEEDS TO BE</span>
-042382,000096:                                                                                                  <span class="co">#     CODED ONLY ONCE FOR THE APPLICABLE DOWNLINK LISTS.</span>
-042383,000097:                                                                                                  <span class="co">#  4. SNAPSHOT SUBLISTS REFER SPECIFICALLY TO HOMOGENOUS DATA WHICH MUST BE</span>
-042384,000098:                                                                                                  <span class="co">#     SAVED IN A BUFFER DURING ONE DOWNRUPT.</span>
-042385,000099:                                                                                                  <span class="co">#  5. THE 1DNADR FOR THE 1ST WORD OF SNAPSHOT DATA IS FOUND AT THE END</span>
-042386,000100:                                                                                                  <span class="co">#     OF EACH SNAPSHOT SUBLIST, SINCE THE PROGRAM CODING SENDS THIS DP WORD</span>
-042387,000101:                                                                                                  <span class="co">#     IMMEDIATELY AFTER STORING THE OTHERS IN THE SNAPSHOT BUFFER.</span>
-042388,000102:                                                                                                  <span class="co">#  6. ALL LISTS ARE COMBINATIONS OF CODED ERASABLE ADDRESS CONSTANTS</span>
-042389,000103:                                                                                                  <span class="co">#     CREATED FOR THE DOWNLIST PROGRAM.</span>
-042390,000104:                                                                                                  <span class="co">#     A. 1DNADR              1-WORD DOWNLIST ADDRESS.</span>
-042391,000105:                                                                                                  <span class="co">#         SAME AS ECADR, BUT USED WHEN THE WORD ADDRESSED IS THE LEFT</span>
-042392,000106:                                                                                                  <span class="co">#         HALF OF A DOUBLE-PRECISION WORD FOR DOWN TELEMETRY.</span>
-042393,000107:                                                                                                  <span class="co">#     B. 2DNADR - 6DNADR     N-WORD DOWNLIST ADDRESS, N = 2 - 6.</span>
-042394,000108:                                                                                                  <span class="co">#         SAME AS 1DNADR, BUT WITH THE 4 UNUSED BITS OF THE ECADR FORMAT</span>
-042395,000109:                                                                                                  <span class="co">#         FILLED IN WITH 0001-0101.  USED TO POINT TO A LIST OF N DOUBLE-</span>
-042396,000110:                                                                                                  <span class="co">#         PRECISION WORDS, STORED CONSECUTIVELY, FOR DOWN TELEMETRY.</span>
-042397,000111:                                                                                                  <span class="co">#     C. DNCHAN              DOWNLIST CHANNEL ADDRESS.</span>
-042398,000112:                                                                                                  <span class="co">#         SAME AS 1DNADR, BUT WITH PREFIX BITS 0111.  USED TO POINT TO</span>
-042399,000113:                                                                                                  <span class="co">#         A PAIR OF CHANNELS FOR DOWN TELEMETRY.</span>
-042400,000114:                                                                                                  <span class="co">#     D. DNPTR               DOWN TELEMETRY SUBLIST POINTER.</span>
-042401,000115:                                                                                                  <span class="co">#         SAME AS CAF BUT TAGGED AS A CONSTANT. USED IN CONTROL LIST TO POINT TO A SUBLIST.</span>
-042402,000116:                                                                                                  <span class="co">#         CAUTION--- A DNPTR CANNOT BE USED IN A SUBLIST.</span>
-042403,000117:                                                                                                  <span class="co">#  7. THE WORD ORDER CODE IS SET TO ZERO AT THE BEGINNING OF EACH DOWNLIST (I.E. CONTROL LIST) AND WHEN</span>
-042404,000118:                                                                                                  <span class="co">#     A '1DNADR TIME2' IS DETECTED IN THE CONTROL LIST (ONLY).</span>
-042405,000119:                                                                                                  <span class="co">#  8. IN THE SNAPSHOT SUBLIST ONLY, THE DNADR'S CANNOT POINT TO THE FIRST WORD OF ANY EBANK.</span>
-042406,000120: 
-042407,000121:                                                                                                  <span class="co">#  DOWNLINK LIST RESTRICTIONS:</span>
-042408,000122:                                                                                                  <span class="co">#    (THE FOLLOWING POINTS MAY BE LISTED ELSEWHERE BUT ARE LISTED HERE SO IT IS CLEAR THAT THESE THINGS CANNOT BE</span>
-042409,000123:                                                                                                  <span class="co">#    DONE)</span>
-042410,000124: 
-042411,000125:                                                                                                  <span class="co">#  1. SNAPSHOT DOWNLIST:</span>
-042412,000126:                                                                                                  <span class="co">#    (A) CANNOT CONTAIN THE FOLLOWING ECADRS(I.E. 1DNADR'S): 0, 400, 1000, 1400, 2000, 2400, 3000, 3400.</span>
-042413,000127:                                                                                                  <span class="co">#    (B) CAN CONTAIN ONLY 1DNADR'S</span>
-042414,000128: 
-042415,000129:                                                                                                  <span class="co">#  2. ALL DOWNLINKED DATA(EXCEPT CHANNELS) IS PICKED UP BY A &lt;DCA&lt;SO DOWNLINK LISTS CANNOT CONTAIN THE</span>
-042416,000130:                                                                                                  <span class="co">#     EQUIVALENT OF THE FOLLOWING ECADRS(I.E. IDNADRS): 377, 777, 1377, 1777, 2377, 27777, 3377, 3777.</span>
-042417,000131: 
-042418,000132:                                                                                                  <span class="co">#     (NOTE: THE TERM EQUIVALENT ' MEANT THAT THE IDNADR TO 6DNADR  WILL BE PROCESSED LIKE 1 TO 6 ECADRS)</span>
-042419,000133: 
-042420,000134:                                                                                                  <span class="co">#  3.  CONTROL LISTS AND SUBLISTS CANNOT HAVE ENTRIES = OCTAL 00000 OR OCTAL 77777</span>
+042382,000085:                                                                                                  <span class="co">#  DODOWNTM IS ENTERED EVERY 20 MS BY AN INTERRUPT TRIGGERED BY THE</span>
+042383,000086:                                                                                                  <span class="co">#  RECEIPT OF AN ENDPULSE FROM THE SPACECRAFT TELEMETRY PROGRAMMER.</span>
+042384,000087: 
+042385,000088:                                                                                                  <span class="co">#  NOTES REGARDING DOWNLINK LISTS ASSOCIATED WITH THIS PROGRAM:</span>
+042386,000089:                                                                                                  <span class="co">#  1. DOWNLISTS. - DOWNLISTS MUST BE COMPILED IN THE SAME BANK AS THE</span>
+042387,000090:                                                                                                  <span class="co">#     DOWN-TELEMETRY PROGRAM. THIS IS DONE FOR EASE OF CODING, FASTER</span>
+042388,000091:                                                                                                  <span class="co">#     EXECUTION.</span>
+042389,000092:                                                                                                  <span class="co">#  2. EACH DOWNLINK LIST CONSISTS OF A CONTROL LIST AND A NUMBER OF</span>
+042390,000093:                                                                                                  <span class="co">#     SUBLISTS.</span>
+042391,000094:                                                                                                  <span class="co">#  3. A SUBLIST REFERS TO A SNAPSHOT OR DATA COMMON TO THE SAME OR OTHER</span>
+042392,000095:                                                                                                  <span class="co">#     DOWNLINK LISTS.  ANY SUBLIST CONTAINING COMMON DATA NEEDS TO BE</span>
+042393,000096:                                                                                                  <span class="co">#     CODED ONLY ONCE FOR THE APPLICABLE DOWNLINK LISTS.</span>
+042394,000097:                                                                                                  <span class="co">#  4. SNAPSHOT SUBLISTS REFER SPECIFICALLY TO HOMOGENOUS DATA WHICH MUST BE</span>
+042395,000098:                                                                                                  <span class="co">#     SAVED IN A BUFFER DURING ONE DOWNRUPT.</span>
+042396,000099:                                                                                                  <span class="co">#  5. THE 1DNADR FOR THE 1ST WORD OF SNAPSHOT DATA IS FOUND AT THE END</span>
+042397,000100:                                                                                                  <span class="co">#     OF EACH SNAPSHOT SUBLIST, SINCE THE PROGRAM CODING SENDS THIS DP WORD</span>
+042398,000101:                                                                                                  <span class="co">#     IMMEDIATELY AFTER STORING THE OTHERS IN THE SNAPSHOT BUFFER.</span>
+042399,000102:                                                                                                  <span class="co">#  6. ALL LISTS ARE COMBINATIONS OF CODED ERASABLE ADDRESS CONSTANTS</span>
+042400,000103:                                                                                                  <span class="co">#     CREATED FOR THE DOWNLIST PROGRAM.</span>
+042401,000104:                                                                                                  <span class="co">#     A. 1DNADR              1-WORD DOWNLIST ADDRESS.</span>
+042402,000105:                                                                                                  <span class="co">#         SAME AS ECADR, BUT USED WHEN THE WORD ADDRESSED IS THE LEFT</span>
+042403,000106:                                                                                                  <span class="co">#         HALF OF A DOUBLE-PRECISION WORD FOR DOWN TELEMETRY.</span>
+042404,000107:                                                                                                  <span class="co">#     B. 2DNADR - 6DNADR     N-WORD DOWNLIST ADDRESS, N = 2 - 6.</span>
+042405,000108:                                                                                                  <span class="co">#         SAME AS 1DNADR, BUT WITH THE 4 UNUSED BITS OF THE ECADR FORMAT</span>
+042406,000109:                                                                                                  <span class="co">#         FILLED IN WITH 0001-0101.  USED TO POINT TO A LIST OF N DOUBLE-</span>
+042407,000110:                                                                                                  <span class="co">#         PRECISION WORDS, STORED CONSECUTIVELY, FOR DOWN TELEMETRY.</span>
+042408,000111:                                                                                                  <span class="co">#     C. DNCHAN              DOWNLIST CHANNEL ADDRESS.</span>
+042409,000112:                                                                                                  <span class="co">#         SAME AS 1DNADR, BUT WITH PREFIX BITS 0111.  USED TO POINT TO</span>
+042410,000113:                                                                                                  <span class="co">#         A PAIR OF CHANNELS FOR DOWN TELEMETRY.</span>
+042411,000114:                                                                                                  <span class="co">#     D. DNPTR               DOWN TELEMETRY SUBLIST POINTER.</span>
+042412,000115:                                                                                                  <span class="co">#         SAME AS CAF BUT TAGGED AS A CONSTANT. USED IN CONTROL LIST TO POINT TO A SUBLIST.</span>
+042413,000116:                                                                                                  <span class="co">#         CAUTION--- A DNPTR CANNOT BE USED IN A SUBLIST.</span>
+042414,000117:                                                                                                  <span class="co">#  7. THE WORD ORDER CODE IS SET TO ZERO AT THE BEGINNING OF EACH DOWNLIST (I.E. CONTROL LIST) AND WHEN</span>
+042415,000118:                                                                                                  <span class="co">#     A '1DNADR TIME2' IS DETECTED IN THE CONTROL LIST (ONLY).</span>
+042416,000119:                                                                                                  <span class="co">#  8. IN THE SNAPSHOT SUBLIST ONLY, THE DNADR'S CANNOT POINT TO THE FIRST WORD OF ANY EBANK.</span>
+042417,000120: 
+042418,000121:                                                                                                  <span class="co">#  DOWNLINK LIST RESTRICTIONS:</span>
+042419,000122:                                                                                                  <span class="co">#    (THE FOLLOWING POINTS MAY BE LISTED ELSEWHERE BUT ARE LISTED HERE SO IT IS CLEAR THAT THESE THINGS CANNOT BE</span>
+042420,000123:                                                                                                  <span class="co">#    DONE)</span>
+042421,000124: 
+042422,000125:                                                                                                  <span class="co">#  1. SNAPSHOT DOWNLIST:</span>
+042423,000126:                                                                                                  <span class="co">#    (A) CANNOT CONTAIN THE FOLLOWING ECADRS(I.E. 1DNADR'S): 0, 400, 1000, 1400, 2000, 2400, 3000, 3400.</span>
+042424,000127:                                                                                                  <span class="co">#    (B) CAN CONTAIN ONLY 1DNADR'S</span>
+042425,000128: 
+042426,000129:                                                                                                  <span class="co">#  2. ALL DOWNLINKED DATA(EXCEPT CHANNELS) IS PICKED UP BY A &lt;DCA&lt;SO DOWNLINK LISTS CANNOT CONTAIN THE</span>
+042427,000130:                                                                                                  <span class="co">#     EQUIVALENT OF THE FOLLOWING ECADRS(I.E. IDNADRS): 377, 777, 1377, 1777, 2377, 27777, 3377, 3777.</span>
+042428,000131: 
+042429,000132:                                                                                                  <span class="co">#     (NOTE: THE TERM EQUIVALENT ' MEANT THAT THE IDNADR TO 6DNADR  WILL BE PROCESSED LIKE 1 TO 6 ECADRS)</span>
+042430,000133: 
+042431,000134:                                                                                                  <span class="co">#  3.  CONTROL LISTS AND SUBLISTS CANNOT HAVE ENTRIES = OCTAL 00000 OR OCTAL 77777</span>
 </pre>
 </span>
 </p>
@@ -279,54 +279,54 @@ Page 983
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042422,000136:                                                                                                  <span class="co">#  4. THE '1DNADR TIME2' WHICH WILL CAUSE THE DOWNLINK PROGRAM TO SET THE WORDER CODE TO 3 MUST APPEAR IN THE</span>
-042423,000137:                                                                                                  <span class="co">#     CONTROL SECTION OF THE DOWNLIST.</span>
-042424,000138: 
-042425,000139:                                                                                                  <span class="co">#  5. 'DNCHAN 0' CANNOT BE USED.</span>
-042426,000140: 
-042427,000141:                                                                                                  <span class="co">#  6. 'DNPTR 0' CANNOT BE USED.</span>
-042428,000142: 
-042429,000143:                                                                                                  <span class="co">#  7. DNPTR CANNOT APPEAR IN A SUBLIST.</span>
-042430,000144: 
-042431,000145:                                                                                                  <span class="co">#  EBANK SETTINGS</span>
-042432,000146:                                                                                                  <span class="co">#           IN THE PROCESS OF SETTING THE EBANK (WHEN PICKING UP DOWNLINK DATA) THE DOWN TELEMETRY PROGRAM PUTS</span>
-042433,000147:                                                                                                  <span class="co">#           'GARBAGE' INTO BITS15-12 OF EBANK. HUGH BLAIR-SMITH WARNS US THAT BITS15-12 OF EBANK MAY BECOME</span>
-042434,000148:                                                                                                  <span class="co">#           SIGNIFICANT SOMEDAY IN THE FUTURE. IF/WHEN THAT HAPPENS, THE PROGRAM SHOULD INSURE(BY MASKING ETC.)</span>
-042435,000149:                                                                                                  <span class="co">#           THAT BITS 15-12 OF EBANK ARE ZERO.</span>
-042436,000150: 
-042437,000151:                                                                                                  <span class="co">#  INITIALIZATION REQUIRED - TO INTERRUPT CURRENT LIST AND START A NEW ONE..</span>
-042438,000152:                                                                                                  <span class="co">#      1.   ADRES OF DOWNLINK LIST INTO DNLSTADR</span>
-042439,000153:                                                                                                  <span class="co">#      2.   NEGONE INTO SUBLIST</span>
-042440,000154:                                                                                                  <span class="co">#      3.   NEGONE INTO DNECADR</span>
-042441,000155: 
-042442,000156: 22,3711                                           <span class="ps">BANK    </span> 22                                    
-042443,000157: 05,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#444F574E54454C4D">DOWNTELM</a>                              
-042444,000158: 05,2000                                           <span class="ps">BANK    </span>                                       
-042445,000159: 
-042446,000160: 05,3472     0340                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              
-042447,000161: 
-042448,000162: 05,3472                                           <span class="ps">COUNT*  </span> $$/DPROG                              
-<a name="444F444F574E544D"></a>042449,000163: 05,3472           54016        <span class="sm">DODOWNTM</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              
-042450,000164: 05,3473           00006                           <span class="op">EXTEND  </span>                                       
-042451,000165: 05,3474           22012                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152555054">QRUPT</a>                                 <span class="co">#  SAVE Q</span>
-042452,000166: 05,3475           34745                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495437">BIT7</a>                                  <span class="co">#  AT THE BEGINNING OF THE LIST THE WORD</span>
-042453,000167: 05,3476           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  ORDER BIT WILL BE SET BACK TO ZERO.</span>
-042454,000168: 05,3477           02013                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3133">CHAN13</a>                                
-042455,000169: 05,3500           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-042456,000170: 05,3501           00335                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              
-042457,000171: 05,3502           06022                           <span class="op">TC      </span> <a href="P20-P25.agc.html#4331335354414C4C">C13STALL</a>                              
-042458,000172: 05,3503           34745                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495437">BIT7</a>                                  
-042459,000173: 05,3504           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  SET WORD ORDER BIT TO 1 ONLY IF IT</span>
-042460,000174: 05,3505           05013                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3133">CHAN13</a>                                <span class="co">#  ALREADY ISN'T.</span>
-042461,000175: 05,3506           00335                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              <span class="co">#  GOTO APPROPRIATE PHASE OF PROGRAM</span>
-042462,000176: 
-<a name="444E504841534531"></a>042463,000177: 05,3507           37752        <span class="sm">DNPHASE1</span>           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474F4E45">NEGONE</a>                                <span class="co">#  INITIALIZE ALL CONTROL WORDS</span>
-042464,000178: 05,3510           54337                           <span class="op">TS      </span> <a href="#5355424C495354">SUBLIST</a>                               <span class="co">#  WORDS TO MINUS ONE</span>
-042465,000179: 05,3511           54336                           <span class="op">TS      </span> <a href="#444E4543414452">DNECADR</a>                               
-042466,000180: 05,3512           33637                           <span class="op">CA      </span> <a href="#4C444E5048415332">LDNPHAS2</a>                              <span class="co">#  SET DNTMGOTO =O ALL SUBSEQUENT DOWNRUPTS</span>
-042467,000181: 05,3513           54335                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              <span class="co">#  GO TO DNPHASE2</span>
-042468,000182: 05,3514           13530                           <span class="op">TCF     </span> <a href="#4E45574C495354">NEWLIST</a>                               
-<a name="444E504841534532"></a>042469,000183: 05,3515           10336        <span class="sm">DNPHASE2</span>           <span class="op">CCS     </span> <a href="#444E4543414452">DNECADR</a>                               <span class="co">#  SENDING OF DATA IN PROGRESS</span>
+042433,000136:                                                                                                  <span class="co">#  4. THE '1DNADR TIME2' WHICH WILL CAUSE THE DOWNLINK PROGRAM TO SET THE WORDER CODE TO 3 MUST APPEAR IN THE</span>
+042434,000137:                                                                                                  <span class="co">#     CONTROL SECTION OF THE DOWNLIST.</span>
+042435,000138: 
+042436,000139:                                                                                                  <span class="co">#  5. 'DNCHAN 0' CANNOT BE USED.</span>
+042437,000140: 
+042438,000141:                                                                                                  <span class="co">#  6. 'DNPTR 0' CANNOT BE USED.</span>
+042439,000142: 
+042440,000143:                                                                                                  <span class="co">#  7. DNPTR CANNOT APPEAR IN A SUBLIST.</span>
+042441,000144: 
+042442,000145:                                                                                                  <span class="co">#  EBANK SETTINGS</span>
+042443,000146:                                                                                                  <span class="co">#           IN THE PROCESS OF SETTING THE EBANK (WHEN PICKING UP DOWNLINK DATA) THE DOWN TELEMETRY PROGRAM PUTS</span>
+042444,000147:                                                                                                  <span class="co">#           'GARBAGE' INTO BITS15-12 OF EBANK. HUGH BLAIR-SMITH WARNS US THAT BITS15-12 OF EBANK MAY BECOME</span>
+042445,000148:                                                                                                  <span class="co">#           SIGNIFICANT SOMEDAY IN THE FUTURE. IF/WHEN THAT HAPPENS, THE PROGRAM SHOULD INSURE(BY MASKING ETC.)</span>
+042446,000149:                                                                                                  <span class="co">#           THAT BITS 15-12 OF EBANK ARE ZERO.</span>
+042447,000150: 
+042448,000151:                                                                                                  <span class="co">#  INITIALIZATION REQUIRED - TO INTERRUPT CURRENT LIST AND START A NEW ONE..</span>
+042449,000152:                                                                                                  <span class="co">#      1.   ADRES OF DOWNLINK LIST INTO DNLSTADR</span>
+042450,000153:                                                                                                  <span class="co">#      2.   NEGONE INTO SUBLIST</span>
+042451,000154:                                                                                                  <span class="co">#      3.   NEGONE INTO DNECADR</span>
+042452,000155: 
+042453,000156: 22,3711                                           <span class="ps">BANK    </span> 22                                    
+042454,000157: 05,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#444F574E54454C4D">DOWNTELM</a>                              
+042455,000158: 05,2000                                           <span class="ps">BANK    </span>                                       
+042456,000159: 
+042457,000160: 05,3472     0340                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              
+042458,000161: 
+042459,000162: 05,3472                                           <span class="ps">COUNT*  </span> $$/DPROG                              
+<a name="444F444F574E544D"></a>042460,000163: 05,3472           54016        <span class="sm">DODOWNTM</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              
+042461,000164: 05,3473           00006                           <span class="op">EXTEND  </span>                                       
+042462,000165: 05,3474           22012                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152555054">QRUPT</a>                                 <span class="co">#  SAVE Q</span>
+042463,000166: 05,3475           34745                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495437">BIT7</a>                                  <span class="co">#  AT THE BEGINNING OF THE LIST THE WORD</span>
+042464,000167: 05,3476           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  ORDER BIT WILL BE SET BACK TO ZERO.</span>
+042465,000168: 05,3477           02013                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3133">CHAN13</a>                                
+042466,000169: 05,3500           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+042467,000170: 05,3501           00335                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              
+042468,000171: 05,3502           06022                           <span class="op">TC      </span> <a href="P20-P25.agc.html#4331335354414C4C">C13STALL</a>                              
+042469,000172: 05,3503           34745                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495437">BIT7</a>                                  
+042470,000173: 05,3504           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  SET WORD ORDER BIT TO 1 ONLY IF IT</span>
+042471,000174: 05,3505           05013                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3133">CHAN13</a>                                <span class="co">#  ALREADY ISN'T.</span>
+042472,000175: 05,3506           00335                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              <span class="co">#  GOTO APPROPRIATE PHASE OF PROGRAM</span>
+042473,000176: 
+<a name="444E504841534531"></a>042474,000177: 05,3507           37752        <span class="sm">DNPHASE1</span>           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474F4E45">NEGONE</a>                                <span class="co">#  INITIALIZE ALL CONTROL WORDS</span>
+042475,000178: 05,3510           54337                           <span class="op">TS      </span> <a href="#5355424C495354">SUBLIST</a>                               <span class="co">#  WORDS TO MINUS ONE</span>
+042476,000179: 05,3511           54336                           <span class="op">TS      </span> <a href="#444E4543414452">DNECADR</a>                               
+042477,000180: 05,3512           33637                           <span class="op">CA      </span> <a href="#4C444E5048415332">LDNPHAS2</a>                              <span class="co">#  SET DNTMGOTO =O ALL SUBSEQUENT DOWNRUPTS</span>
+042478,000181: 05,3513           54335                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              <span class="co">#  GO TO DNPHASE2</span>
+042479,000182: 05,3514           13530                           <span class="op">TCF     </span> <a href="#4E45574C495354">NEWLIST</a>                               
+<a name="444E504841534532"></a>042480,000183: 05,3515           10336        <span class="sm">DNPHASE2</span>           <span class="op">CCS     </span> <a href="#444E4543414452">DNECADR</a>                               <span class="co">#  SENDING OF DATA IN PROGRESS</span>
 </pre>
 </span>
 </p>
@@ -342,56 +342,56 @@ Page 984
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="444F444E414452"></a>042471,000185: 05,3516           03652        <span class="sm">DODNADR </span>           <span class="op">TC      </span> <a href="#4645544348325744">FETCH2WD</a>                              <span class="co">#  YES - THEN FETCH THE NEXT 2 SP WORDS</span>
-<a name="4D494E54494D4532"></a>042472,000186: 05,3517           77753        <span class="sm">MINTIME2</span>           <span class="dn">-1DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  NEGATIVE OF TIME2 1DNADR</span>
-042473,000187: 05,3520           13521                           <span class="op">TCF     </span> +1                                    <span class="co">#  (ECADR OF 3776 + 74001 = 77777)</span>
-042474,000188: 
-042475,000189: 05,3521           10337                           <span class="op">CCS     </span> <a href="#5355424C495354">SUBLIST</a>                               <span class="co">#  IS THE SUBLIST IN CONTROL</span>
-042476,000190: 05,3522           13665                           <span class="op">TCF     </span> <a href="#4E455854494E534C">NEXTINSL</a>                              <span class="co">#  YES</span>
-<a name="444E414452444352"></a>042477,000191: 05,3523           74001        <span class="sm">DNADRDCR</span>           <span class="ps">OCT     </span> 74001                                 <span class="co">#  DNADR COUNT AND ECADR DECREMENTER</span>
-042478,000192: 
-<a name="43484B4C495354"></a>042479,000193: 05,3524           30334        <span class="sm">CHKLIST </span>           <span class="op">CA      </span> <a href="#43544C495354">CTLIST</a>                                
-042480,000194: 05,3525           00006                           <span class="op">EXTEND  </span>                                       
-042481,000195: 05,3526           63530                           <span class="op">BZMF    </span> <a href="#4E45574C495354">NEWLIST</a>                               <span class="co">#  IT WILL BE NEGATIVE AT END OF LIST</span>
-042482,000196: 05,3527           13535                           <span class="op">TCF     </span> <a href="#4E455854494E434C">NEXTINCL</a>                              
-<a name="4E45574C495354"></a>042483,000197: 05,3530           50333        <span class="sm">NEWLIST </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5354434F44">DNLSTCOD</a>                              
-042484,000198: 05,3531           32441                           <span class="op">CA      </span> <a href="DOWNLINK_LISTS.agc.html#444E5441424C45">DNTABLE</a>                               <span class="co">#  INITIALIZE CTLIST WITH</span>
-042485,000199: 05,3532           54334                           <span class="op">TS      </span> <a href="#43544C495354">CTLIST</a>                                <span class="co">#    STARTING ADDRESS OF NEW LIST</span>
-042486,000200: 05,3533           40333                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5354434F44">DNLSTCOD</a>                              
-042487,000201: 05,3534           13754                           <span class="op">TCF     </span> <a href="#53454E444944">SENDID</a>     +3                         
-<a name="4E455854494E434C"></a>042488,000202: 05,3535           50334        <span class="sm">NEXTINCL</span>           <span class="op">INDEX   </span> <a href="#43544C495354">CTLIST</a>                                
-042489,000203: 05,3536           30000                           <span class="op">CA      </span> 0                                     
-042490,000204: 05,3537           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-042491,000205: 05,3540           24334                           <span class="op">INCR    </span> <a href="#43544C495354">CTLIST</a>                                <span class="co">#  SET POINTER TO PICK UP NEXT CTLIST WORD</span>
-042492,000206: 05,3541           13545                           <span class="op">TCF     </span> +4                                    <span class="co">#  ON NEXT ENTRY TO PROG. (A SHOULD NOT =0)</span>
-042493,000207: 05,3542           56334                           <span class="op">XCH     </span> <a href="#43544C495354">CTLIST</a>                                <span class="co">#  SET CTLIST TO NEGATIVE AND PLACE(CODING)</span>
-042494,000208: 05,3543           40000                           <span class="op">COM     </span>                                       <span class="co">#  UNCOMPLEMENTED DNADR INTO A.    (FOR LA)</span>
-042495,000209: 05,3544           56334                           <span class="op">XCH     </span> <a href="#43544C495354">CTLIST</a>                                <span class="co">#                                  (ST IN )</span>
-042496,000210: 05,3545           24000                 +4        <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#                                  (CTLIST)</span>
-042497,000211: 05,3546           54336                           <span class="op">TS      </span> <a href="#444E4543414452">DNECADR</a>                               <span class="co">#  SAVE DNADR</span>
-042498,000212: 05,3547           63517                           <span class="op">AD      </span> <a href="#4D494E54494D4532">MINTIME2</a>                              <span class="co">#  TEST FOR TIME2 (NEG. OF ECADR)</span>
-042499,000213: 05,3550           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-042500,000214: 05,3551           13555                           <span class="op">TCF     </span> <a href="#534554574F">SETWO</a>      +1                         <span class="co">#  DON'T SET WORD ORDER CODE</span>
-<a name="4D494E4231333134"></a>042501,000215: 05,3552           47777        <span class="sm">MINB1314</span>           <span class="ps">OCT     </span> 47777                                 <span class="co">#  MINUS BIT 13 AND 14 (CAN'T GET HERE)</span>
-042502,000216: 05,3553           13555                           <span class="op">TCF     </span> <a href="#534554574F">SETWO</a>      +1                         <span class="co">#  DON'T SET WORD ORDER CODE</span>
-<a name="534554574F"></a>042503,000217: 05,3554           03577        <span class="sm">SETWO   </span>           <span class="op">TC      </span> <a href="#574F5A45524F">WOZERO</a>                                <span class="co">#  GO SET WORD ORDER CODE TO ZERO.</span>
-042504,000218: 05,3555           30336                 +1        <span class="op">CA      </span> <a href="#444E4543414452">DNECADR</a>                               <span class="co">#  RELOAD A WITH THE DNADR.</span>
-042505,000219: 05,3556           63552                 +2        <span class="op">AD      </span> <a href="#4D494E4231333134">MINB1314</a>                              <span class="co">#  IS THIS A REGULAR DNADR?</span>
-042506,000220: 05,3557           00006                           <span class="op">EXTEND  </span>                                       
-042507,000221: 05,3560           63652                           <span class="op">BZMF    </span> <a href="#4645544348325744">FETCH2WD</a>                              <span class="co">#  YES. (A MUST NEVER BE ZERO)</span>
-042508,000222: 05,3561           67744                           <span class="op">AD      </span> <a href="#4D494E423132">MINB12</a>                                <span class="co">#  NO- IS IT A POINTER (DNPTR) OR A</span>
-042509,000223: 05,3562           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#      CHANNEL(DNCHAN)</span>
-042510,000224: 05,3563           63610                           <span class="op">BZMF    </span> <a href="#444F444E505452">DODNPTR</a>                               <span class="co">#  IT'S A POINTER. (A MUST NEVER BE ZERO)</span>
-042511,000225: 
-<a name="444F444E4348414E"></a>042512,000226: 05,3564           00006        <span class="sm">DODNCHAN</span>           <span class="op">TC      </span> 6                                     <span class="co">#  (EXECUTED AS EXTEND)  IT S A CHANNEL</span>
-042513,000227: 05,3565           50336                           <span class="op">INDEX   </span> <a href="#444E4543414452">DNECADR</a>                               
-042514,000228: 05,3566           44000                           <span class="op">INDEX   </span> 0          -4000                      <span class="co">#  (EXECUTED AS READ)</span>
-042515,000229: 05,3567           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-042516,000230: 05,3570           00006                           <span class="op">TC      </span> 6                                     <span class="co">#  (EXECUTED AS EXTEND)</span>
-042517,000231: 05,3571           50336                           <span class="op">INDEX   </span> <a href="#444E4543414452">DNECADR</a>                               
-042518,000232: 05,3572           43777                           <span class="op">INDEX   </span> 0          -4001                      <span class="co">#  (EXECUTED AS READ)</span>
-042519,000233: 05,3573           54336                           <span class="op">TS      </span> <a href="#444E4543414452">DNECADR</a>                               <span class="co">#  SET DNECADR</span>
-042520,000234: 05,3574           37752                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474F4E45">NEGONE</a>                                <span class="co">#      TO MINUS</span>
+<a name="444F444E414452"></a>042482,000185: 05,3516           03652        <span class="sm">DODNADR </span>           <span class="op">TC      </span> <a href="#4645544348325744">FETCH2WD</a>                              <span class="co">#  YES - THEN FETCH THE NEXT 2 SP WORDS</span>
+<a name="4D494E54494D4532"></a>042483,000186: 05,3517           77753        <span class="sm">MINTIME2</span>           <span class="dn">-1DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  NEGATIVE OF TIME2 1DNADR</span>
+042484,000187: 05,3520           13521                           <span class="op">TCF     </span> +1                                    <span class="co">#  (ECADR OF 3776 + 74001 = 77777)</span>
+042485,000188: 
+042486,000189: 05,3521           10337                           <span class="op">CCS     </span> <a href="#5355424C495354">SUBLIST</a>                               <span class="co">#  IS THE SUBLIST IN CONTROL</span>
+042487,000190: 05,3522           13665                           <span class="op">TCF     </span> <a href="#4E455854494E534C">NEXTINSL</a>                              <span class="co">#  YES</span>
+<a name="444E414452444352"></a>042488,000191: 05,3523           74001        <span class="sm">DNADRDCR</span>           <span class="ps">OCT     </span> 74001                                 <span class="co">#  DNADR COUNT AND ECADR DECREMENTER</span>
+042489,000192: 
+<a name="43484B4C495354"></a>042490,000193: 05,3524           30334        <span class="sm">CHKLIST </span>           <span class="op">CA      </span> <a href="#43544C495354">CTLIST</a>                                
+042491,000194: 05,3525           00006                           <span class="op">EXTEND  </span>                                       
+042492,000195: 05,3526           63530                           <span class="op">BZMF    </span> <a href="#4E45574C495354">NEWLIST</a>                               <span class="co">#  IT WILL BE NEGATIVE AT END OF LIST</span>
+042493,000196: 05,3527           13535                           <span class="op">TCF     </span> <a href="#4E455854494E434C">NEXTINCL</a>                              
+<a name="4E45574C495354"></a>042494,000197: 05,3530           50333        <span class="sm">NEWLIST </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5354434F44">DNLSTCOD</a>                              
+042495,000198: 05,3531           32441                           <span class="op">CA      </span> <a href="DOWNLINK_LISTS.agc.html#444E5441424C45">DNTABLE</a>                               <span class="co">#  INITIALIZE CTLIST WITH</span>
+042496,000199: 05,3532           54334                           <span class="op">TS      </span> <a href="#43544C495354">CTLIST</a>                                <span class="co">#    STARTING ADDRESS OF NEW LIST</span>
+042497,000200: 05,3533           40333                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5354434F44">DNLSTCOD</a>                              
+042498,000201: 05,3534           13754                           <span class="op">TCF     </span> <a href="#53454E444944">SENDID</a>     +3                         
+<a name="4E455854494E434C"></a>042499,000202: 05,3535           50334        <span class="sm">NEXTINCL</span>           <span class="op">INDEX   </span> <a href="#43544C495354">CTLIST</a>                                
+042500,000203: 05,3536           30000                           <span class="op">CA      </span> 0                                     
+042501,000204: 05,3537           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+042502,000205: 05,3540           24334                           <span class="op">INCR    </span> <a href="#43544C495354">CTLIST</a>                                <span class="co">#  SET POINTER TO PICK UP NEXT CTLIST WORD</span>
+042503,000206: 05,3541           13545                           <span class="op">TCF     </span> +4                                    <span class="co">#  ON NEXT ENTRY TO PROG. (A SHOULD NOT =0)</span>
+042504,000207: 05,3542           56334                           <span class="op">XCH     </span> <a href="#43544C495354">CTLIST</a>                                <span class="co">#  SET CTLIST TO NEGATIVE AND PLACE(CODING)</span>
+042505,000208: 05,3543           40000                           <span class="op">COM     </span>                                       <span class="co">#  UNCOMPLEMENTED DNADR INTO A.    (FOR LA)</span>
+042506,000209: 05,3544           56334                           <span class="op">XCH     </span> <a href="#43544C495354">CTLIST</a>                                <span class="co">#                                  (ST IN )</span>
+042507,000210: 05,3545           24000                 +4        <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#                                  (CTLIST)</span>
+042508,000211: 05,3546           54336                           <span class="op">TS      </span> <a href="#444E4543414452">DNECADR</a>                               <span class="co">#  SAVE DNADR</span>
+042509,000212: 05,3547           63517                           <span class="op">AD      </span> <a href="#4D494E54494D4532">MINTIME2</a>                              <span class="co">#  TEST FOR TIME2 (NEG. OF ECADR)</span>
+042510,000213: 05,3550           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+042511,000214: 05,3551           13555                           <span class="op">TCF     </span> <a href="#534554574F">SETWO</a>      +1                         <span class="co">#  DON'T SET WORD ORDER CODE</span>
+<a name="4D494E4231333134"></a>042512,000215: 05,3552           47777        <span class="sm">MINB1314</span>           <span class="ps">OCT     </span> 47777                                 <span class="co">#  MINUS BIT 13 AND 14 (CAN'T GET HERE)</span>
+042513,000216: 05,3553           13555                           <span class="op">TCF     </span> <a href="#534554574F">SETWO</a>      +1                         <span class="co">#  DON'T SET WORD ORDER CODE</span>
+<a name="534554574F"></a>042514,000217: 05,3554           03577        <span class="sm">SETWO   </span>           <span class="op">TC      </span> <a href="#574F5A45524F">WOZERO</a>                                <span class="co">#  GO SET WORD ORDER CODE TO ZERO.</span>
+042515,000218: 05,3555           30336                 +1        <span class="op">CA      </span> <a href="#444E4543414452">DNECADR</a>                               <span class="co">#  RELOAD A WITH THE DNADR.</span>
+042516,000219: 05,3556           63552                 +2        <span class="op">AD      </span> <a href="#4D494E4231333134">MINB1314</a>                              <span class="co">#  IS THIS A REGULAR DNADR?</span>
+042517,000220: 05,3557           00006                           <span class="op">EXTEND  </span>                                       
+042518,000221: 05,3560           63652                           <span class="op">BZMF    </span> <a href="#4645544348325744">FETCH2WD</a>                              <span class="co">#  YES. (A MUST NEVER BE ZERO)</span>
+042519,000222: 05,3561           67744                           <span class="op">AD      </span> <a href="#4D494E423132">MINB12</a>                                <span class="co">#  NO- IS IT A POINTER (DNPTR) OR A</span>
+042520,000223: 05,3562           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#      CHANNEL(DNCHAN)</span>
+042521,000224: 05,3563           63610                           <span class="op">BZMF    </span> <a href="#444F444E505452">DODNPTR</a>                               <span class="co">#  IT'S A POINTER. (A MUST NEVER BE ZERO)</span>
+042522,000225: 
+<a name="444F444E4348414E"></a>042523,000226: 05,3564           00006        <span class="sm">DODNCHAN</span>           <span class="op">TC      </span> 6                                     <span class="co">#  (EXECUTED AS EXTEND)  IT S A CHANNEL</span>
+042524,000227: 05,3565           50336                           <span class="op">INDEX   </span> <a href="#444E4543414452">DNECADR</a>                               
+042525,000228: 05,3566           44000                           <span class="op">INDEX   </span> 0          -4000                      <span class="co">#  (EXECUTED AS READ)</span>
+042526,000229: 05,3567           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+042527,000230: 05,3570           00006                           <span class="op">TC      </span> 6                                     <span class="co">#  (EXECUTED AS EXTEND)</span>
+042528,000231: 05,3571           50336                           <span class="op">INDEX   </span> <a href="#444E4543414452">DNECADR</a>                               
+042529,000232: 05,3572           43777                           <span class="op">INDEX   </span> 0          -4001                      <span class="co">#  (EXECUTED AS READ)</span>
+042530,000233: 05,3573           54336                           <span class="op">TS      </span> <a href="#444E4543414452">DNECADR</a>                               <span class="co">#  SET DNECADR</span>
+042531,000234: 05,3574           37752                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474F4E45">NEGONE</a>                                <span class="co">#      TO MINUS</span>
 </pre>
 </span>
 </p>
@@ -407,54 +407,54 @@ Page 985
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042522,000236: 05,3575           56336                           <span class="op">XCH     </span> <a href="#444E4543414452">DNECADR</a>                               <span class="co">#          WHILE PRESERVING A.</span>
-042523,000237: 05,3576           13700                           <span class="op">TCF     </span> <a href="#444E544D45584954">DNTMEXIT</a>                              <span class="co">#  GO SEND CHANNELS</span>
-042524,000238: 
-<a name="574F5A45524F"></a>042525,000239: 05,3577           00006        <span class="sm">WOZERO  </span>           <span class="op">EXTEND  </span>                                       
-042526,000240: 05,3600           23265                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43313351534156">C13QSAV</a>                               
-042527,000241: 05,3601           22070                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-042528,000242: 05,3602           06022                           <span class="op">TC      </span> <a href="P20-P25.agc.html#4331335354414C4C">C13STALL</a>                              
-042529,000243: 
-042530,000244: 05,3603           22070                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-042531,000245: 05,3604           44745                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495437">BIT7</a>                                  
-042532,000246: 05,3605           00006                           <span class="op">EXTEND  </span>                                       
-042533,000247: 05,3606           03013                           <span class="op">WAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3133">CHAN13</a>                                <span class="co">#  SET WORD ORDER CODE TO ZERO</span>
-042534,000248: 05,3607           01265                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43313351534156">C13QSAV</a>                               
-042535,000249: 
-<a name="444F444E505452"></a>042536,000250: 05,3610           50336        <span class="sm">DODNPTR </span>           <span class="op">INDEX   </span> <a href="#444E4543414452">DNECADR</a>                               <span class="co">#  DNECADR CONTAINS ADRES OF SUBLIST</span>
-042537,000251: 05,3611           00000                           0        0                                     <span class="co">#  CLEAR AND ADD LIST ENTRY INTO A.</span>
-042538,000252: 05,3612           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IS THIS A SNAPSHOT SUBLIST</span>
-042539,000253: 05,3613           30336                           <span class="op">CA      </span> <a href="#444E4543414452">DNECADR</a>                               <span class="co">#  NO, IT IS A REGULAR SUBLIST.</span>
-042540,000254: 05,3614           13664                           <span class="op">TCF     </span> <a href="#444F5355424C5354">DOSUBLST</a>                              <span class="co">#  A MUST NOT BE ZERO.</span>
-042541,000255: 
-042542,000256: 05,3615           56336                           <span class="op">XCH     </span> <a href="#444E4543414452">DNECADR</a>                               <span class="co">#  YES, IT IS A SNAPSHOT SUBLIST.</span>
-042543,000257: 05,3616           54337                           <span class="op">TS      </span> <a href="#5355424C495354">SUBLIST</a>                               <span class="co">#  C(DNECADR) INTO SUBLIST</span>
-042544,000258: 05,3617           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#        A    INTO     A</span>
-042545,000259: 05,3620           56336                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               <span class="co">#  (NOTE..  TMINDEX = DNECADR)</span>
-042546,000260: 
-042547,000261:                                                                                                  <span class="co">#  THE FOLLOWING CODING (FROM SNAPLOOP TO SNAPEND)IS FOR THE PURPOSE OF TAKING A SNAPSHOT OF 12 DP REGISTERS.</span>
-042548,000262:                                                                                                  <span class="co">#  THIS IS DONE BY SAVING 11 DP REGISTERS IN DNTMBUFF AND SENDING THE FIRST DP WORD IMMEDIATELY.</span>
-042549,000263:                                                                                                  <span class="co">#  THE SNAPSHOT PROCESSING IS THE MOST TIME CONSUMING AND THEREFORE THE CODING AND LIST STRUCTURE WERE DESIGNED</span>
-042550,000264:                                                                                                  <span class="co">#  TO MINIMIZE TIME. THE TIME OPTIMIZATION RESULTS IN RULES UNIQUE TO THE SNAPSHOT PORTION OF THE DOWNLIST.</span>
-042551,000265:                                                                                                  <span class="co">#  THESE RULES ARE ......</span>
-042552,000266:                                                                                                  <span class="co">#            1.     ONLY 1DNADR'S CAN APPEAR IN THE SNAPSHOT SUBLIST</span>
-042553,000267:                                                                                                  <span class="co">#            2.     THE 1DNADR'S CANNOT REFER TO THE FIRST LOCATION IN ANY BANK.</span>
-042554,000268: 
-<a name="534E41504C4F4F50"></a>042555,000269: 05,3621           54003        <span class="sm">SNAPLOOP</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 <span class="co">#  SET EBANK</span>
-042556,000270: 05,3622           74357                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  <span class="co">#  ISOLATE RELATIVE ADDRESS</span>
-042557,000271: 05,3623           00006                           <span class="op">EXTEND  </span>                                       
-042558,000272: 05,3624           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-042559,000273: 05,3625  E3,1401                                  <span class="ps">EBANK=  </span> 1401                                  
-042560,000274: 05,3625           31402                           <span class="op">DCA     </span> 1401                                  <span class="co">#  PICK UP 2 SNAPSHOT WORDS.</span>
-042561,000275: 05,3626     0340                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              
-042562,000276: 05,3626           50336                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               
-042563,000277: 05,3627           52341                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  STORE 2 SNAPSHOT WORDS IN BUFFER</span>
-042564,000278: 05,3630           24336                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               <span class="co">#  SET BUFFER INDEX FOR NEXT 2 WORDS.</span>
-042565,000279: 05,3631           24336                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               
-<a name="534E415041474E"></a>042566,000280: 05,3632           24337        <span class="sm">SNAPAGN </span>           <span class="op">INCR    </span> <a href="#5355424C495354">SUBLIST</a>                               <span class="co">#  SET POINTER TO NEXT 2 WORDS OF SNAPSHOT</span>
-042567,000281: 05,3633           50337                           <span class="op">INDEX   </span> <a href="#5355424C495354">SUBLIST</a>                               
-042568,000282: 05,3634           00000                           0        0                                     <span class="co">#  = CA SSSS (SSSS = NEXT ENTRY IN SUBLIST)</span>
-042569,000283: 05,3635           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  TEST FOR LAST TWO WORDS OF SNAPSHOT.</span>
+042533,000236: 05,3575           56336                           <span class="op">XCH     </span> <a href="#444E4543414452">DNECADR</a>                               <span class="co">#          WHILE PRESERVING A.</span>
+042534,000237: 05,3576           13700                           <span class="op">TCF     </span> <a href="#444E544D45584954">DNTMEXIT</a>                              <span class="co">#  GO SEND CHANNELS</span>
+042535,000238: 
+<a name="574F5A45524F"></a>042536,000239: 05,3577           00006        <span class="sm">WOZERO  </span>           <span class="op">EXTEND  </span>                                       
+042537,000240: 05,3600           23265                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43313351534156">C13QSAV</a>                               
+042538,000241: 05,3601           22070                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+042539,000242: 05,3602           06022                           <span class="op">TC      </span> <a href="P20-P25.agc.html#4331335354414C4C">C13STALL</a>                              
+042540,000243: 
+042541,000244: 05,3603           22070                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+042542,000245: 05,3604           44745                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495437">BIT7</a>                                  
+042543,000246: 05,3605           00006                           <span class="op">EXTEND  </span>                                       
+042544,000247: 05,3606           03013                           <span class="op">WAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3133">CHAN13</a>                                <span class="co">#  SET WORD ORDER CODE TO ZERO</span>
+042545,000248: 05,3607           01265                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43313351534156">C13QSAV</a>                               
+042546,000249: 
+<a name="444F444E505452"></a>042547,000250: 05,3610           50336        <span class="sm">DODNPTR </span>           <span class="op">INDEX   </span> <a href="#444E4543414452">DNECADR</a>                               <span class="co">#  DNECADR CONTAINS ADRES OF SUBLIST</span>
+042548,000251: 05,3611           00000                           0        0                                     <span class="co">#  CLEAR AND ADD LIST ENTRY INTO A.</span>
+042549,000252: 05,3612           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IS THIS A SNAPSHOT SUBLIST</span>
+042550,000253: 05,3613           30336                           <span class="op">CA      </span> <a href="#444E4543414452">DNECADR</a>                               <span class="co">#  NO, IT IS A REGULAR SUBLIST.</span>
+042551,000254: 05,3614           13664                           <span class="op">TCF     </span> <a href="#444F5355424C5354">DOSUBLST</a>                              <span class="co">#  A MUST NOT BE ZERO.</span>
+042552,000255: 
+042553,000256: 05,3615           56336                           <span class="op">XCH     </span> <a href="#444E4543414452">DNECADR</a>                               <span class="co">#  YES, IT IS A SNAPSHOT SUBLIST.</span>
+042554,000257: 05,3616           54337                           <span class="op">TS      </span> <a href="#5355424C495354">SUBLIST</a>                               <span class="co">#  C(DNECADR) INTO SUBLIST</span>
+042555,000258: 05,3617           34755                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#        A    INTO     A</span>
+042556,000259: 05,3620           56336                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               <span class="co">#  (NOTE..  TMINDEX = DNECADR)</span>
+042557,000260: 
+042558,000261:                                                                                                  <span class="co">#  THE FOLLOWING CODING (FROM SNAPLOOP TO SNAPEND)IS FOR THE PURPOSE OF TAKING A SNAPSHOT OF 12 DP REGISTERS.</span>
+042559,000262:                                                                                                  <span class="co">#  THIS IS DONE BY SAVING 11 DP REGISTERS IN DNTMBUFF AND SENDING THE FIRST DP WORD IMMEDIATELY.</span>
+042560,000263:                                                                                                  <span class="co">#  THE SNAPSHOT PROCESSING IS THE MOST TIME CONSUMING AND THEREFORE THE CODING AND LIST STRUCTURE WERE DESIGNED</span>
+042561,000264:                                                                                                  <span class="co">#  TO MINIMIZE TIME. THE TIME OPTIMIZATION RESULTS IN RULES UNIQUE TO THE SNAPSHOT PORTION OF THE DOWNLIST.</span>
+042562,000265:                                                                                                  <span class="co">#  THESE RULES ARE ......</span>
+042563,000266:                                                                                                  <span class="co">#            1.     ONLY 1DNADR'S CAN APPEAR IN THE SNAPSHOT SUBLIST</span>
+042564,000267:                                                                                                  <span class="co">#            2.     THE 1DNADR'S CANNOT REFER TO THE FIRST LOCATION IN ANY BANK.</span>
+042565,000268: 
+<a name="534E41504C4F4F50"></a>042566,000269: 05,3621           54003        <span class="sm">SNAPLOOP</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 <span class="co">#  SET EBANK</span>
+042567,000270: 05,3622           74357                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  <span class="co">#  ISOLATE RELATIVE ADDRESS</span>
+042568,000271: 05,3623           00006                           <span class="op">EXTEND  </span>                                       
+042569,000272: 05,3624           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+042570,000273: 05,3625  E3,1401                                  <span class="ps">EBANK=  </span> 1401                                  
+042571,000274: 05,3625           31402                           <span class="op">DCA     </span> 1401                                  <span class="co">#  PICK UP 2 SNAPSHOT WORDS.</span>
+042572,000275: 05,3626     0340                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              
+042573,000276: 05,3626           50336                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               
+042574,000277: 05,3627           52341                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  STORE 2 SNAPSHOT WORDS IN BUFFER</span>
+042575,000278: 05,3630           24336                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               <span class="co">#  SET BUFFER INDEX FOR NEXT 2 WORDS.</span>
+042576,000279: 05,3631           24336                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               
+<a name="534E415041474E"></a>042577,000280: 05,3632           24337        <span class="sm">SNAPAGN </span>           <span class="op">INCR    </span> <a href="#5355424C495354">SUBLIST</a>                               <span class="co">#  SET POINTER TO NEXT 2 WORDS OF SNAPSHOT</span>
+042578,000281: 05,3633           50337                           <span class="op">INDEX   </span> <a href="#5355424C495354">SUBLIST</a>                               
+042579,000282: 05,3634           00000                           0        0                                     <span class="co">#  = CA SSSS (SSSS = NEXT ENTRY IN SUBLIST)</span>
+042580,000283: 05,3635           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  TEST FOR LAST TWO WORDS OF SNAPSHOT.</span>
 </pre>
 </span>
 </p>
@@ -470,55 +470,55 @@ Page 986
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042571,000285: 05,3636           13621                           <span class="op">TCF     </span> <a href="#534E41504C4F4F50">SNAPLOOP</a>                              <span class="co">#  NOT LAST TWO.</span>
-<a name="4C444E5048415332"></a>042572,000286: 05,3637           03515        <span class="sm">LDNPHAS2</span>           <span class="ps">GENADR  </span> <a href="#444E504841534532">DNPHASE2</a>                              
-042573,000287: 05,3640           54337                           <span class="op">TS      </span> <a href="#5355424C495354">SUBLIST</a>                               <span class="co">#  YES, LAST.  SAVE A.</span>
-042574,000288: 05,3641           37752                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474F4E45">NEGONE</a>                                <span class="co">#  SET DNECADR AND</span>
-042575,000289: 05,3642           54336                           <span class="op">TS      </span> <a href="#444E4543414452">DNECADR</a>                               <span class="co">#      SUBLIST POINTERS</span>
-042576,000290: 05,3643           56337                           <span class="op">XCH     </span> <a href="#5355424C495354">SUBLIST</a>                               <span class="co">#          TO NEGATIVE VALUES.</span>
-042577,000291: 05,3644           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
-042578,000292: 05,3645           74357                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  
-042579,000293: 05,3646           00006                           <span class="op">EXTEND  </span>                                       
-042580,000294: 05,3647           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-042581,000295: 05,3650  E3,1401                                  <span class="ps">EBANK=  </span> 1401                                  
-042582,000296: 05,3650           31402                           <span class="op">DCA     </span> 1401                                  <span class="co">#  PICK UP FIRST 2 WORDS OF SNAPSHOT.</span>
-042583,000297: 05,3651     0340                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              
-<a name="534E4150454E44"></a>042584,000298: 05,3651           13700        <span class="sm">SNAPEND </span>           <span class="op">TCF     </span> <a href="#444E544D45584954">DNTMEXIT</a>                              <span class="co">#     NOW GO SEND THEM.</span>
-042585,000299: 
-<a name="4645544348325744"></a>042586,000300: 05,3652           30336        <span class="sm">FETCH2WD</span>           <span class="op">CA      </span> <a href="#444E4543414452">DNECADR</a>                               
-042587,000301: 05,3653           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 <span class="co">#  SET EBANK</span>
-042588,000302: 05,3654           74357                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  <span class="co">#  ISOLATE RELATIVE ADDRESS</span>
-042589,000303: 05,3655           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-042590,000304: 05,3656           33523                           <span class="op">CA      </span> <a href="#444E414452444352">DNADRDCR</a>                              <span class="co">#  DECREMENT COUNT AND ECADR</span>
-042591,000305: 05,3657           26336                           <span class="op">ADS     </span> <a href="#444E4543414452">DNECADR</a>                               
-042592,000306: 05,3660           00006                           <span class="op">EXTEND  </span>                                       
-042593,000307: 05,3661           50001                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-042594,000308: 05,3662  E3,1400                                  <span class="ps">EBANK=  </span> 1400                                  
-042595,000309: 05,3662           31401                           <span class="op">DCA     </span> 1400                                  <span class="co">#  PICK UP 2 DATA WORDS</span>
-042596,000310: 05,3663     0340                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              
-042597,000311: 05,3663           13700                           <span class="op">TCF     </span> <a href="#444E544D45584954">DNTMEXIT</a>                              <span class="co">#     NOW GO SEND THEM.</span>
-042598,000312: 
-<a name="444F5355424C5354"></a>042599,000313: 05,3664           54337        <span class="sm">DOSUBLST</span>           <span class="op">TS      </span> <a href="#5355424C495354">SUBLIST</a>                               <span class="co">#  SET SUBLIST POINTER</span>
-<a name="4E455854494E534C"></a>042600,000314: 05,3665           50337        <span class="sm">NEXTINSL</span>           <span class="op">INDEX   </span> <a href="#5355424C495354">SUBLIST</a>                               
-042601,000315: 05,3666           00000                           0        0                                     <span class="co">#  = CA SSSS (SSSS = NEXT ENTRY IN SUBLIST)</span>
-042602,000316: 05,3667           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IS IT THE END OF THE SUBLIST</span>
-042603,000317: 05,3670           24337                           <span class="op">INCR    </span> <a href="#5355424C495354">SUBLIST</a>                               <span class="co">#  NO-</span>
-042604,000318: 05,3671           13675                           <span class="op">TCF     </span> +4                                    
-042605,000319: 05,3672           54337                           <span class="op">TS      </span> <a href="#5355424C495354">SUBLIST</a>                               <span class="co">#  SAVE A.</span>
-042606,000320: 05,3673           37752                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474F4E45">NEGONE</a>                                <span class="co">#  SET SUBLIST TO MINUS</span>
-042607,000321: 05,3674           56337                           <span class="op">XCH     </span> <a href="#5355424C495354">SUBLIST</a>                               <span class="co">#  RETRIEVE A.</span>
-042608,000322: 05,3675           24000                 +4        <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-042609,000323: 05,3676           54336                           <span class="op">TS      </span> <a href="#444E4543414452">DNECADR</a>                               <span class="co">#  SAVE DNADR</span>
-042610,000324: 05,3677           13556                           <span class="op">TCF     </span> <a href="#534554574F">SETWO</a>      +2                         <span class="co">#  GO USE COMMON CODING (PROBLEMS WOULD</span>
-042611,000325:                                                                                                  <span class="co">#  OCCUR IF THE PROGRAM ENCOUNTERED A</span>
-042612,000326:                                                                                                  <span class="co">#  DNPTR NOW)</span>
-042613,000327: 
-<a name="444E544D45584954"></a>042614,000328: 05,3700           00006        <span class="sm">DNTMEXIT</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  DOWN-TELEMETRY EXIT</span>
-042615,000329: 05,3701           01034                           <span class="op">WRITE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D31">DNTM1</a>                                 <span class="co">#  TO SEND A + L TO CHANNELS 34 + 35</span>
-042616,000330: 05,3702           30001                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  RESPECTIVELY</span>
-<a name="544D455849544C"></a>042617,000331: 05,3703           00006        <span class="sm">TMEXITL </span>           <span class="op">EXTEND  </span>                                       
-042618,000332: 05,3704           01035                           <span class="op">WRITE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D32">DNTM2</a>                                 
-<a name="544D524553554D45"></a>042619,000333: 05,3705           15270        <span class="sm">TMRESUME</span>           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  EXIT TELEMETRY PROGRAM VIA RESUME.</span>
+042582,000285: 05,3636           13621                           <span class="op">TCF     </span> <a href="#534E41504C4F4F50">SNAPLOOP</a>                              <span class="co">#  NOT LAST TWO.</span>
+<a name="4C444E5048415332"></a>042583,000286: 05,3637           03515        <span class="sm">LDNPHAS2</span>           <span class="ps">GENADR  </span> <a href="#444E504841534532">DNPHASE2</a>                              
+042584,000287: 05,3640           54337                           <span class="op">TS      </span> <a href="#5355424C495354">SUBLIST</a>                               <span class="co">#  YES, LAST.  SAVE A.</span>
+042585,000288: 05,3641           37752                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474F4E45">NEGONE</a>                                <span class="co">#  SET DNECADR AND</span>
+042586,000289: 05,3642           54336                           <span class="op">TS      </span> <a href="#444E4543414452">DNECADR</a>                               <span class="co">#      SUBLIST POINTERS</span>
+042587,000290: 05,3643           56337                           <span class="op">XCH     </span> <a href="#5355424C495354">SUBLIST</a>                               <span class="co">#          TO NEGATIVE VALUES.</span>
+042588,000291: 05,3644           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
+042589,000292: 05,3645           74357                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  
+042590,000293: 05,3646           00006                           <span class="op">EXTEND  </span>                                       
+042591,000294: 05,3647           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+042592,000295: 05,3650  E3,1401                                  <span class="ps">EBANK=  </span> 1401                                  
+042593,000296: 05,3650           31402                           <span class="op">DCA     </span> 1401                                  <span class="co">#  PICK UP FIRST 2 WORDS OF SNAPSHOT.</span>
+042594,000297: 05,3651     0340                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              
+<a name="534E4150454E44"></a>042595,000298: 05,3651           13700        <span class="sm">SNAPEND </span>           <span class="op">TCF     </span> <a href="#444E544D45584954">DNTMEXIT</a>                              <span class="co">#     NOW GO SEND THEM.</span>
+042596,000299: 
+<a name="4645544348325744"></a>042597,000300: 05,3652           30336        <span class="sm">FETCH2WD</span>           <span class="op">CA      </span> <a href="#444E4543414452">DNECADR</a>                               
+042598,000301: 05,3653           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 <span class="co">#  SET EBANK</span>
+042599,000302: 05,3654           74357                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  <span class="co">#  ISOLATE RELATIVE ADDRESS</span>
+042600,000303: 05,3655           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+042601,000304: 05,3656           33523                           <span class="op">CA      </span> <a href="#444E414452444352">DNADRDCR</a>                              <span class="co">#  DECREMENT COUNT AND ECADR</span>
+042602,000305: 05,3657           26336                           <span class="op">ADS     </span> <a href="#444E4543414452">DNECADR</a>                               
+042603,000306: 05,3660           00006                           <span class="op">EXTEND  </span>                                       
+042604,000307: 05,3661           50001                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+042605,000308: 05,3662  E3,1400                                  <span class="ps">EBANK=  </span> 1400                                  
+042606,000309: 05,3662           31401                           <span class="op">DCA     </span> 1400                                  <span class="co">#  PICK UP 2 DATA WORDS</span>
+042607,000310: 05,3663     0340                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              
+042608,000311: 05,3663           13700                           <span class="op">TCF     </span> <a href="#444E544D45584954">DNTMEXIT</a>                              <span class="co">#     NOW GO SEND THEM.</span>
+042609,000312: 
+<a name="444F5355424C5354"></a>042610,000313: 05,3664           54337        <span class="sm">DOSUBLST</span>           <span class="op">TS      </span> <a href="#5355424C495354">SUBLIST</a>                               <span class="co">#  SET SUBLIST POINTER</span>
+<a name="4E455854494E534C"></a>042611,000314: 05,3665           50337        <span class="sm">NEXTINSL</span>           <span class="op">INDEX   </span> <a href="#5355424C495354">SUBLIST</a>                               
+042612,000315: 05,3666           00000                           0        0                                     <span class="co">#  = CA SSSS (SSSS = NEXT ENTRY IN SUBLIST)</span>
+042613,000316: 05,3667           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IS IT THE END OF THE SUBLIST</span>
+042614,000317: 05,3670           24337                           <span class="op">INCR    </span> <a href="#5355424C495354">SUBLIST</a>                               <span class="co">#  NO-</span>
+042615,000318: 05,3671           13675                           <span class="op">TCF     </span> +4                                    
+042616,000319: 05,3672           54337                           <span class="op">TS      </span> <a href="#5355424C495354">SUBLIST</a>                               <span class="co">#  SAVE A.</span>
+042617,000320: 05,3673           37752                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474F4E45">NEGONE</a>                                <span class="co">#  SET SUBLIST TO MINUS</span>
+042618,000321: 05,3674           56337                           <span class="op">XCH     </span> <a href="#5355424C495354">SUBLIST</a>                               <span class="co">#  RETRIEVE A.</span>
+042619,000322: 05,3675           24000                 +4        <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+042620,000323: 05,3676           54336                           <span class="op">TS      </span> <a href="#444E4543414452">DNECADR</a>                               <span class="co">#  SAVE DNADR</span>
+042621,000324: 05,3677           13556                           <span class="op">TCF     </span> <a href="#534554574F">SETWO</a>      +2                         <span class="co">#  GO USE COMMON CODING (PROBLEMS WOULD</span>
+042622,000325:                                                                                                  <span class="co">#  OCCUR IF THE PROGRAM ENCOUNTERED A</span>
+042623,000326:                                                                                                  <span class="co">#  DNPTR NOW)</span>
+042624,000327: 
+<a name="444E544D45584954"></a>042625,000328: 05,3700           00006        <span class="sm">DNTMEXIT</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  DOWN-TELEMETRY EXIT</span>
+042626,000329: 05,3701           01034                           <span class="op">WRITE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D31">DNTM1</a>                                 <span class="co">#  TO SEND A + L TO CHANNELS 34 + 35</span>
+042627,000330: 05,3702           30001                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  RESPECTIVELY</span>
+<a name="544D455849544C"></a>042628,000331: 05,3703           00006        <span class="sm">TMEXITL </span>           <span class="op">EXTEND  </span>                                       
+042629,000332: 05,3704           01035                           <span class="op">WRITE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D32">DNTM2</a>                                 
+<a name="544D524553554D45"></a>042630,000333: 05,3705           15270        <span class="sm">TMRESUME</span>           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  EXIT TELEMETRY PROGRAM VIA RESUME.</span>
 </pre>
 </span>
 </p>
@@ -534,11 +534,11 @@ Page 987
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="4D494E423132"></a>042621,000335: 05,3706     7744               <span class="sm">MINB12  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#2D312F38">-1/8</a>                                  
-<a name="444E4543414452"></a>042622,000336: 05,3706     0336               <span class="sm">DNECADR </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               
-<a name="43544C495354"></a>042623,000337: 05,3706     0334               <span class="sm">CTLIST  </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C444154414C5354">LDATALST</a>                              
-<a name="5355424C495354"></a>042624,000338: 05,3706     0337               <span class="sm">SUBLIST </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E51">DNQ</a>                                   
-042625,000339:                                                                                                  <span class="co">#  MOD BY - DENSMORE - JUNE 1969 - ELIMINATE ERASABLE DUMP COUNT</span>
+<a name="4D494E423132"></a>042632,000335: 05,3706     7744               <span class="sm">MINB12  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#2D312F38">-1/8</a>                                  
+<a name="444E4543414452"></a>042633,000336: 05,3706     0336               <span class="sm">DNECADR </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               
+<a name="43544C495354"></a>042634,000337: 05,3706     0334               <span class="sm">CTLIST  </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C444154414C5354">LDATALST</a>                              
+<a name="5355424C495354"></a>042635,000338: 05,3706     0337               <span class="sm">SUBLIST </span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E51">DNQ</a>                                   
+042636,000339:                                                                                                  <span class="co">#  MOD BY - DENSMORE - JUNE 1969 - ELIMINATE ERASABLE DUMP COUNT</span>
 </pre>
 </span>
 </p>
@@ -554,59 +554,59 @@ Page 988
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042627,000341:                                                                                                  <span class="co">#  SUBROUTINE NAME- DNDUMP</span>
-042628,000342: 
-042629,000343:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION - TO SEND (DUMP) ALL 8 BANKS OF ERASABLE STORAGE TWICE.  BANKS ARE SENT ONE AT A TIME</span>
-042630,000344:                                                                                                  <span class="co">#           EACH BANK IS PRECEEDED BY AN ID WORD, SYNCH BITS, ECADR AND TIME1 FOLLOWED BY THE 256D WORDS OF EACH</span>
-042631,000345:                                                                                                  <span class="co">#           EBANK. EBANKS ARE DUMPED IN ORDER (I.E. EBANK 0 FIRST, THEN EBANK1 ETC.)</span>
-042632,000346: 
-042633,000347:                                                                                                  <span class="co">#  CALLING SEQUENCE- THE GROUND OR ASTRONAUT BY KEYING V74E CAN INITIALIZE THE DUMP.</span>
-042634,000348:                                                                                                  <span class="co">#           AFTER KEYING IN V74E THE CURRENT DOWNLIST WILL BE IMMEDIATELY TERMINATED AND THE DOWNLINK ERASABLE DUMP</span>
-042635,000349:                                                                                                  <span class="co">#           WILL BEGIN.</span>
-042636,000350:                                                                                                  <span class="co">#           ONCE INITIATED THE DOWNLINK ERASABLE DUMP CAN BE TERMINATED (AND INTERRUPTED DOWNLIST REINSTATED) ONLY</span>
-042637,000351:                                                                                                  <span class="co">#           BY THE FOLLOWING:</span>
-042638,000352:                                                                                                  <span class="co">#            1. A FRESH START</span>
-042639,000353:                                                                                                  <span class="co">#            2. COMPLETION OF BOTH COMPLETE DUMPS</span>
-042640,000354:                                                                                                  <span class="co">#            3. AND INVOLUNTARILY BY A RESTART.</span>
-042641,000355:                                                                                                  <span class="co">#  NORMAL EXIT MODE- TCF DNPHASE1</span>
-042642,000356:                                                                                                  <span class="co">#  ALARM OR ABORT MODE- NONE</span>
-042643,000357:                                                                                                  <span class="co">#  *SUBROUTINES CALLED- NONE.</span>
-042644,000358:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED -</span>
-042645,000359:                                                                                                  <span class="co">#           NONE</span>
-042646,000360:                                                                                                  <span class="co">#  DEBRIS - DUMPLOC, DUMPSW, DNTMGOTO, EBANK AND CENTRAL REGISTERS</span>
-042647,000361:                                                                                                  <span class="co">#  TIMING -   TIME (IN SECS) = ((NO.DUMPS)*(NO.EBANKS)*(WDSPEREBANK + NO.IDWDS)) / NO.WDSPERSEC</span>
-042648,000362:                                                                                                  <span class="co">#             TIME (IN SECS) =  (   4    )*(    8    )*(    256     +     4   )  /     100</span>
-042649,000363:                                                                                                  <span class="co">#        THUS TIME (IN SECS TO SEND DUMP OF ERASABLE 4 TIMES VIA DOWNLINK) = 83.2 SECONDS</span>
-042650,000364: 
-042651,000365:                                                                                                  <span class="co">#  STRUCTURE OF ONE EBANK AS IT IS SENT BY DOWNLINK PROGRAM -</span>
-042652,000366:                                                                                                  <span class="co">#     (REMINDER - THIS ONLY DESCRIBES ONE OF THE 8 EBANKS X 4 (DUMPS) = 32 EBANKS WHICH WILL BE SENT BY DNDUMP)</span>
-042653,000367:                                                                                                  <span class="co">#          DOWNLIST                                   W</span>
-042654,000368:                                                                                                  <span class="co">#           WORD     TAKEN FROM CONTENTS OF   EXAMPLE O   COMMENTS</span>
-042655,000369: 
-042656,000370:                                                                                                  <span class="co">#            1       ERASID                    0177X  0   DOWNLIST I.D. FOR DOWNLINK ERASABLE DUMP (X=7 CSM, 6 LM)</span>
-042657,000371:                                                                                                  <span class="co">#            2       LOWIDCOD                  77340  1   DOWNLINK SYNCH BITS.(SAME ONE USED IN ALL OTHER DOWNLISTS)</span>
-042658,000372:                                                                                                  <span class="co">#            3       DUMPLOC                   13400  1   (SEE NOTES ON DUMPLOC)1= 3RD ERAS DUMP, 3400=ECADR OF 5TH WD</span>
-042659,000373:                                                                                                  <span class="co">#            4       TIME1                     14120  1   TIME IN CENTISECONDS</span>
-042660,000374:                                                                                                  <span class="co">#            5       FIRST WORD OF EBANK X     03400  1   IN THIS EXAMPLE THIS WORD = CONTENTS OF E7,1400 (ECADR 3400)</span>
-042661,000375:                                                                                                  <span class="co">#            6       2ND   WORD OF EBANK X     00142  1   IN THIS EXAMPLE THIS WORD = CONTENTS OF E7,1401 (ECADR 3401)</span>
-042662,000376:                                                                                                  <span class="co">#            7       3RD   WORD OF EBANK X     00142  1   IN THIS EXAMPLE THIS WORD = CONTENTS OF E7,1402 (ECADR 3402)</span>
-042663,000377:                                                                                                  <span class="co">#            .                                        1</span>
-042664,000378:                                                                                                  <span class="co">#            .                                        1</span>
-042665,000379:                                                                                                  <span class="co">#            .                                        1</span>
-042666,000380:                                                                                                  <span class="co">#          260D      256TH WORD OF EBANK X     03777  1   IN THIS EXAMPLE THIS WORD = CONTENTS OF E7,1777 (ECADR 3777)</span>
-042667,000381: 
-042668,000382:                                                                                                  <span class="co">#  NOTE- DUMPLOC CONTAINS THE COUNTER AND ECADR FOR EACH WORD BEING SENT.</span>
-042669,000383:                                                                                                  <span class="co">#        THE BIT STRUCTURE OF DUMPLOC IS FOLLOWS---</span>
-042670,000384:                                                                                                  <span class="co">#                                        X = NOT USED</span>
-042671,000385:                                                                                                  <span class="co">#           X ABC EEE RRRRRRRR         ABC = ERASABLE DUMP COUNTER (I.E. ABC = 0,1,2 OR 3 WHICH MEANS THAT</span>
-042672,000386:                                                                                                  <span class="co">#                                            COMPLETE ERASABLE DUMP NUMBER 1,2,3 OR 4 RESPECTIVELY IS IN PROGRESS)</span>
-042673,000387:                                                                                                  <span class="co">#                                      EEE = EBANK BITS</span>
-042674,000388:                                                                                                  <span class="co">#                                 RRRRRRRR = RELATIVE ADDRESS WITHIN AN EBANK.</span>
-042675,000389: 
-042676,000390: 
-<a name="444E44554D5049"></a>042677,000391: 05,3706           34755        <span class="sm">DNDUMPI </span>           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  INITIALIZE DOWNLINK</span>
-042678,000392: 05,3707           54336                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44554D504C4F43">DUMPLOC</a>                               <span class="co">#  ERASABLE DUMP</span>
-042679,000393: 05,3710           03751                 +2        <span class="op">TC      </span> <a href="#53454E444944">SENDID</a>                                <span class="co">#  GO SEND ID AND SYNCH BITS</span>
+042638,000341:                                                                                                  <span class="co">#  SUBROUTINE NAME- DNDUMP</span>
+042639,000342: 
+042640,000343:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION - TO SEND (DUMP) ALL 8 BANKS OF ERASABLE STORAGE TWICE.  BANKS ARE SENT ONE AT A TIME</span>
+042641,000344:                                                                                                  <span class="co">#           EACH BANK IS PRECEEDED BY AN ID WORD, SYNCH BITS, ECADR AND TIME1 FOLLOWED BY THE 256D WORDS OF EACH</span>
+042642,000345:                                                                                                  <span class="co">#           EBANK. EBANKS ARE DUMPED IN ORDER (I.E. EBANK 0 FIRST, THEN EBANK1 ETC.)</span>
+042643,000346: 
+042644,000347:                                                                                                  <span class="co">#  CALLING SEQUENCE- THE GROUND OR ASTRONAUT BY KEYING V74E CAN INITIALIZE THE DUMP.</span>
+042645,000348:                                                                                                  <span class="co">#           AFTER KEYING IN V74E THE CURRENT DOWNLIST WILL BE IMMEDIATELY TERMINATED AND THE DOWNLINK ERASABLE DUMP</span>
+042646,000349:                                                                                                  <span class="co">#           WILL BEGIN.</span>
+042647,000350:                                                                                                  <span class="co">#           ONCE INITIATED THE DOWNLINK ERASABLE DUMP CAN BE TERMINATED (AND INTERRUPTED DOWNLIST REINSTATED) ONLY</span>
+042648,000351:                                                                                                  <span class="co">#           BY THE FOLLOWING:</span>
+042649,000352:                                                                                                  <span class="co">#            1. A FRESH START</span>
+042650,000353:                                                                                                  <span class="co">#            2. COMPLETION OF BOTH COMPLETE DUMPS</span>
+042651,000354:                                                                                                  <span class="co">#            3. AND INVOLUNTARILY BY A RESTART.</span>
+042652,000355:                                                                                                  <span class="co">#  NORMAL EXIT MODE- TCF DNPHASE1</span>
+042653,000356:                                                                                                  <span class="co">#  ALARM OR ABORT MODE- NONE</span>
+042654,000357:                                                                                                  <span class="co">#  *SUBROUTINES CALLED- NONE.</span>
+042655,000358:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED -</span>
+042656,000359:                                                                                                  <span class="co">#           NONE</span>
+042657,000360:                                                                                                  <span class="co">#  DEBRIS - DUMPLOC, DUMPSW, DNTMGOTO, EBANK AND CENTRAL REGISTERS</span>
+042658,000361:                                                                                                  <span class="co">#  TIMING -   TIME (IN SECS) = ((NO.DUMPS)*(NO.EBANKS)*(WDSPEREBANK + NO.IDWDS)) / NO.WDSPERSEC</span>
+042659,000362:                                                                                                  <span class="co">#             TIME (IN SECS) =  (   4    )*(    8    )*(    256     +     4   )  /     100</span>
+042660,000363:                                                                                                  <span class="co">#        THUS TIME (IN SECS TO SEND DUMP OF ERASABLE 4 TIMES VIA DOWNLINK) = 83.2 SECONDS</span>
+042661,000364: 
+042662,000365:                                                                                                  <span class="co">#  STRUCTURE OF ONE EBANK AS IT IS SENT BY DOWNLINK PROGRAM -</span>
+042663,000366:                                                                                                  <span class="co">#     (REMINDER - THIS ONLY DESCRIBES ONE OF THE 8 EBANKS X 4 (DUMPS) = 32 EBANKS WHICH WILL BE SENT BY DNDUMP)</span>
+042664,000367:                                                                                                  <span class="co">#          DOWNLIST                                   W</span>
+042665,000368:                                                                                                  <span class="co">#           WORD     TAKEN FROM CONTENTS OF   EXAMPLE O   COMMENTS</span>
+042666,000369: 
+042667,000370:                                                                                                  <span class="co">#            1       ERASID                    0177X  0   DOWNLIST I.D. FOR DOWNLINK ERASABLE DUMP (X=7 CSM, 6 LM)</span>
+042668,000371:                                                                                                  <span class="co">#            2       LOWIDCOD                  77340  1   DOWNLINK SYNCH BITS.(SAME ONE USED IN ALL OTHER DOWNLISTS)</span>
+042669,000372:                                                                                                  <span class="co">#            3       DUMPLOC                   13400  1   (SEE NOTES ON DUMPLOC)1= 3RD ERAS DUMP, 3400=ECADR OF 5TH WD</span>
+042670,000373:                                                                                                  <span class="co">#            4       TIME1                     14120  1   TIME IN CENTISECONDS</span>
+042671,000374:                                                                                                  <span class="co">#            5       FIRST WORD OF EBANK X     03400  1   IN THIS EXAMPLE THIS WORD = CONTENTS OF E7,1400 (ECADR 3400)</span>
+042672,000375:                                                                                                  <span class="co">#            6       2ND   WORD OF EBANK X     00142  1   IN THIS EXAMPLE THIS WORD = CONTENTS OF E7,1401 (ECADR 3401)</span>
+042673,000376:                                                                                                  <span class="co">#            7       3RD   WORD OF EBANK X     00142  1   IN THIS EXAMPLE THIS WORD = CONTENTS OF E7,1402 (ECADR 3402)</span>
+042674,000377:                                                                                                  <span class="co">#            .                                        1</span>
+042675,000378:                                                                                                  <span class="co">#            .                                        1</span>
+042676,000379:                                                                                                  <span class="co">#            .                                        1</span>
+042677,000380:                                                                                                  <span class="co">#          260D      256TH WORD OF EBANK X     03777  1   IN THIS EXAMPLE THIS WORD = CONTENTS OF E7,1777 (ECADR 3777)</span>
+042678,000381: 
+042679,000382:                                                                                                  <span class="co">#  NOTE- DUMPLOC CONTAINS THE COUNTER AND ECADR FOR EACH WORD BEING SENT.</span>
+042680,000383:                                                                                                  <span class="co">#        THE BIT STRUCTURE OF DUMPLOC IS FOLLOWS---</span>
+042681,000384:                                                                                                  <span class="co">#                                        X = NOT USED</span>
+042682,000385:                                                                                                  <span class="co">#           X ABC EEE RRRRRRRR         ABC = ERASABLE DUMP COUNTER (I.E. ABC = 0,1,2 OR 3 WHICH MEANS THAT</span>
+042683,000386:                                                                                                  <span class="co">#                                            COMPLETE ERASABLE DUMP NUMBER 1,2,3 OR 4 RESPECTIVELY IS IN PROGRESS)</span>
+042684,000387:                                                                                                  <span class="co">#                                      EEE = EBANK BITS</span>
+042685,000388:                                                                                                  <span class="co">#                                 RRRRRRRR = RELATIVE ADDRESS WITHIN AN EBANK.</span>
+042686,000389: 
+042687,000390: 
+<a name="444E44554D5049"></a>042688,000391: 05,3706           34755        <span class="sm">DNDUMPI </span>           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  INITIALIZE DOWNLINK</span>
+042689,000392: 05,3707           54336                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44554D504C4F43">DUMPLOC</a>                               <span class="co">#  ERASABLE DUMP</span>
+042690,000393: 05,3710           03751                 +2        <span class="op">TC      </span> <a href="#53454E444944">SENDID</a>                                <span class="co">#  GO SEND ID AND SYNCH BITS</span>
 </pre>
 </span>
 </p>
@@ -622,54 +622,54 @@ Page 989
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042681,000395: 05,3711           33720                           <span class="op">CA      </span> <a href="#4C444E44554D5031">LDNDUMP1</a>                              <span class="co">#  SET DNTMGOTO</span>
-042682,000396: 05,3712           54335                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              <span class="co">#  TO LOCATION FOR NEXT PASS</span>
-042683,000397: 05,3713           30025                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 <span class="co">#  PLACE TIME1</span>
-042684,000398: 05,3714           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  INTO L</span>
-042685,000399: 05,3715           30336                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44554D504C4F43">DUMPLOC</a>                               <span class="co">#  AND ECADR OF THIS EBANK INTO A</span>
-042686,000400: 05,3716           13700                           <span class="op">TCF     </span> <a href="#444E544D45584954">DNTMEXIT</a>                              <span class="co">#  SEND DUMPLOC AND TIME1</span>
-042687,000401: 
-<a name="4C444E44554D50"></a>042688,000402: 05,3717           03721        <span class="sm">LDNDUMP </span>           <span class="ps">ADRES   </span> <a href="#444E44554D50">DNDUMP</a>                                
-<a name="4C444E44554D5031"></a>042689,000403: 05,3720           03733        <span class="sm">LDNDUMP1</span>           <span class="ps">ADRES   </span> <a href="#444E44554D5031">DNDUMP1</a>                               
-042690,000404: 
-<a name="444E44554D50"></a>042691,000405: 05,3721           34752        <span class="sm">DNDUMP  </span>           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  INCREMENT ECADR IN DUMPLOC</span>
-042692,000406: 05,3722           26336                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44554D504C4F43">DUMPLOC</a>                               <span class="co">#  TO NEXT DP WORD TO BE</span>
-042693,000407: 05,3723           74357                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  <span class="co">#  DUMPED AND SAVE IT.</span>
-042694,000408: 05,3724           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IS THIS THE BEGINNING OF A NEW EBANK</span>
-042695,000409: 05,3725           13735                           <span class="op">TCF     </span> <a href="#444E44554D5032">DNDUMP2</a>                               <span class="co">#  NO - THEN CONTINUE DUMPING</span>
-042696,000410: 05,3726           30336                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44554D504C4F43">DUMPLOC</a>                               <span class="co">#  YES - IS THIS THE END OF THE</span>
-042697,000411: 05,3727           74737                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543133">BIT13</a>                                 <span class="co">#  SECOND COMPLETE ERASABLE DUMP?</span>
-042698,000412: 05,3730           00006                           <span class="op">EXTEND  </span>                                       
-042699,000413: 05,3731           13710                           <span class="op">BZF     </span> <a href="#444E44554D5049">DNDUMPI</a>    +2                         <span class="co">#  NO - GO BACK AND INITIALIZE NEXT BANK</span>
-042700,000414: 05,3732           13507                           <span class="op">TCF     </span> <a href="#444E504841534531">DNPHASE1</a>                              <span class="co">#  YES - SEND DOWNLIST AGAIN</span>
-<a name="444E44554D5031"></a>042701,000415: 05,3733           33717        <span class="sm">DNDUMP1 </span>           <span class="op">CA      </span> <a href="#4C444E44554D50">LDNDUMP</a>                               <span class="co">#  SET DNTMGOTO</span>
-042702,000416: 05,3734           54335                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              <span class="co">#  FOR WORDS 3 TO 256D OF CURRENT EBANK</span>
-042703,000417: 
-<a name="444E44554D5032"></a>042704,000418: 05,3735           30336        <span class="sm">DNDUMP2 </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44554D504C4F43">DUMPLOC</a>                               
-042705,000419: 05,3736           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 <span class="co">#  SET EBANK</span>
-042706,000420: 05,3737           74357                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  <span class="co">#  ISOLATE RELATIVE ADDRESS.</span>
-042707,000421: 05,3740           54002                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  (NOTE: MASK INSTRUCTION IS USED TO PICK</span>
-042708,000422: 05,3741           34754                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454730">NEG0</a>                                  <span class="co">#  UP ERASABLE REGISTERS SO THAT EDITING</span>
-042709,000423: 05,3742           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  REGISTERS 20-23 WILL NOT BE ALTERED.)</span>
-042710,000424: 05,3743           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-042711,000425: 05,3744  E3,1400                                  <span class="ps">EBANK=  </span> 1400                                  <span class="co">#  PICK UP LOW ORDER REGISTER OF PAIR</span>
-042712,000426: 05,3744           71401                           <span class="op">MASK    </span> 1401                                  <span class="co">#  OF ERASABLE REGISTERS.</span>
-042713,000427: 05,3745           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-042714,000428: 05,3746           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  PICK UP HIGH ORDER REGISTER OF PAIR</span>
-042715,000429: 05,3747           71400                           <span class="op">MASK    </span> 1400                                  <span class="co">#  OF ERASABLE REGISTERS.</span>
-042716,000430: 05,3750     0340                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              
-042717,000431: 05,3750           13700                           <span class="op">TCF     </span> <a href="#444E544D45584954">DNTMEXIT</a>                              <span class="co">#  GO SEND THEM</span>
-042718,000432: 
-<a name="53454E444944"></a>042719,000433: 05,3751           00006        <span class="sm">SENDID  </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  ** ENTRANCE USED BY ERASABLE DUMP PROG.**</span>
-042720,000434: 05,3752           22335                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              <span class="co">#  SET DNTMGOTO SO NEXT TIME PROG WILL GO</span>
-042721,000435: 05,3753           35011                           <span class="op">CAF     </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#455241534944">ERASID</a>                                <span class="co">#  TO LOCATION FOLLOWING :TC SENDID:</span>
-042722,000436: 
-042723,000437: 05,3754           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  ** ENTRANCE USED BY REGULAR DOWNLINK PG **</span>
-042724,000438: 05,3755           03577                           <span class="op">TC      </span> <a href="#574F5A45524F">WOZERO</a>                                <span class="co">#  GO SET WORD ORDER CODE TO ZERO</span>
-042725,000439: 05,3756           32065                           <span class="op">CAF     </span> <a href="DOWNLINK_LISTS.agc.html#4C4F574944434F44">LOWIDCOD</a>                              <span class="co">#  PLACE SPECIAL ID CODE INTO L</span>
-042726,000440: 05,3757           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  AND ID BACK INTO A</span>
-042727,000441: 05,3760           13700                           <span class="op">TCF     </span> <a href="#444E544D45584954">DNTMEXIT</a>                              <span class="co">#  SEND DOWNLIST ID CODE(S).</span>
-042728,000442: 
+042692,000395: 05,3711           33720                           <span class="op">CA      </span> <a href="#4C444E44554D5031">LDNDUMP1</a>                              <span class="co">#  SET DNTMGOTO</span>
+042693,000396: 05,3712           54335                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              <span class="co">#  TO LOCATION FOR NEXT PASS</span>
+042694,000397: 05,3713           30025                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 <span class="co">#  PLACE TIME1</span>
+042695,000398: 05,3714           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  INTO L</span>
+042696,000399: 05,3715           30336                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44554D504C4F43">DUMPLOC</a>                               <span class="co">#  AND ECADR OF THIS EBANK INTO A</span>
+042697,000400: 05,3716           13700                           <span class="op">TCF     </span> <a href="#444E544D45584954">DNTMEXIT</a>                              <span class="co">#  SEND DUMPLOC AND TIME1</span>
+042698,000401: 
+<a name="4C444E44554D50"></a>042699,000402: 05,3717           03721        <span class="sm">LDNDUMP </span>           <span class="ps">ADRES   </span> <a href="#444E44554D50">DNDUMP</a>                                
+<a name="4C444E44554D5031"></a>042700,000403: 05,3720           03733        <span class="sm">LDNDUMP1</span>           <span class="ps">ADRES   </span> <a href="#444E44554D5031">DNDUMP1</a>                               
+042701,000404: 
+<a name="444E44554D50"></a>042702,000405: 05,3721           34752        <span class="sm">DNDUMP  </span>           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  INCREMENT ECADR IN DUMPLOC</span>
+042703,000406: 05,3722           26336                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44554D504C4F43">DUMPLOC</a>                               <span class="co">#  TO NEXT DP WORD TO BE</span>
+042704,000407: 05,3723           74357                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  <span class="co">#  DUMPED AND SAVE IT.</span>
+042705,000408: 05,3724           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IS THIS THE BEGINNING OF A NEW EBANK</span>
+042706,000409: 05,3725           13735                           <span class="op">TCF     </span> <a href="#444E44554D5032">DNDUMP2</a>                               <span class="co">#  NO - THEN CONTINUE DUMPING</span>
+042707,000410: 05,3726           30336                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44554D504C4F43">DUMPLOC</a>                               <span class="co">#  YES - IS THIS THE END OF THE</span>
+042708,000411: 05,3727           74737                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543133">BIT13</a>                                 <span class="co">#  SECOND COMPLETE ERASABLE DUMP?</span>
+042709,000412: 05,3730           00006                           <span class="op">EXTEND  </span>                                       
+042710,000413: 05,3731           13710                           <span class="op">BZF     </span> <a href="#444E44554D5049">DNDUMPI</a>    +2                         <span class="co">#  NO - GO BACK AND INITIALIZE NEXT BANK</span>
+042711,000414: 05,3732           13507                           <span class="op">TCF     </span> <a href="#444E504841534531">DNPHASE1</a>                              <span class="co">#  YES - SEND DOWNLIST AGAIN</span>
+<a name="444E44554D5031"></a>042712,000415: 05,3733           33717        <span class="sm">DNDUMP1 </span>           <span class="op">CA      </span> <a href="#4C444E44554D50">LDNDUMP</a>                               <span class="co">#  SET DNTMGOTO</span>
+042713,000416: 05,3734           54335                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              <span class="co">#  FOR WORDS 3 TO 256D OF CURRENT EBANK</span>
+042714,000417: 
+<a name="444E44554D5032"></a>042715,000418: 05,3735           30336        <span class="sm">DNDUMP2 </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44554D504C4F43">DUMPLOC</a>                               
+042716,000419: 05,3736           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 <span class="co">#  SET EBANK</span>
+042717,000420: 05,3737           74357                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  <span class="co">#  ISOLATE RELATIVE ADDRESS.</span>
+042718,000421: 05,3740           54002                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  (NOTE: MASK INSTRUCTION IS USED TO PICK</span>
+042719,000422: 05,3741           34754                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454730">NEG0</a>                                  <span class="co">#  UP ERASABLE REGISTERS SO THAT EDITING</span>
+042720,000423: 05,3742           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  REGISTERS 20-23 WILL NOT BE ALTERED.)</span>
+042721,000424: 05,3743           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+042722,000425: 05,3744  E3,1400                                  <span class="ps">EBANK=  </span> 1400                                  <span class="co">#  PICK UP LOW ORDER REGISTER OF PAIR</span>
+042723,000426: 05,3744           71401                           <span class="op">MASK    </span> 1401                                  <span class="co">#  OF ERASABLE REGISTERS.</span>
+042724,000427: 05,3745           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+042725,000428: 05,3746           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  PICK UP HIGH ORDER REGISTER OF PAIR</span>
+042726,000429: 05,3747           71400                           <span class="op">MASK    </span> 1400                                  <span class="co">#  OF ERASABLE REGISTERS.</span>
+042727,000430: 05,3750     0340                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              
+042728,000431: 05,3750           13700                           <span class="op">TCF     </span> <a href="#444E544D45584954">DNTMEXIT</a>                              <span class="co">#  GO SEND THEM</span>
+042729,000432: 
+<a name="53454E444944"></a>042730,000433: 05,3751           00006        <span class="sm">SENDID  </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  ** ENTRANCE USED BY ERASABLE DUMP PROG.**</span>
+042731,000434: 05,3752           22335                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              <span class="co">#  SET DNTMGOTO SO NEXT TIME PROG WILL GO</span>
+042732,000435: 05,3753           35011                           <span class="op">CAF     </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#455241534944">ERASID</a>                                <span class="co">#  TO LOCATION FOLLOWING :TC SENDID:</span>
+042733,000436: 
+042734,000437: 05,3754           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  ** ENTRANCE USED BY REGULAR DOWNLINK PG **</span>
+042735,000438: 05,3755           03577                           <span class="op">TC      </span> <a href="#574F5A45524F">WOZERO</a>                                <span class="co">#  GO SET WORD ORDER CODE TO ZERO</span>
+042736,000439: 05,3756           32065                           <span class="op">CAF     </span> <a href="DOWNLINK_LISTS.agc.html#4C4F574944434F44">LOWIDCOD</a>                              <span class="co">#  PLACE SPECIAL ID CODE INTO L</span>
+042737,000440: 05,3757           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  AND ID BACK INTO A</span>
+042738,000441: 05,3760           13700                           <span class="op">TCF     </span> <a href="#444E544D45584954">DNTMEXIT</a>                              <span class="co">#  SEND DOWNLIST ID CODE(S).</span>
+042739,000442: 
 
 End of include-file DOWN-TELEMETRY_PROGRAM.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

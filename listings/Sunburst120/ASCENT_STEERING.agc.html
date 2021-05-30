@@ -95,21 +95,21 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-039147,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-039148,000003:                                                                                                  <span class="co">## Filename:    ASCENT_STEERING.agc</span>
-039149,000004:                                                                                                  <span class="co">## Purpose:     A module for revision 0 of BURST120 (Sunburst). It </span>
-039150,000005:                                                                                                  <span class="co">##              is part of the source code for the Lunar Module's</span>
-039151,000006:                                                                                                  <span class="co">##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
-039152,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-039153,000008:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-039154,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-039155,000010:                                                                                                  <span class="co">## Mod history: 2016-09-30 RSB  Created draft version.</span>
-039156,000011:                                                                                                  <span class="co">##              2016-10-24 RSB  Transcribed.</span>
-039157,000012:                                                                                                  <span class="co">##              2016-10-31 RSB  Typos.</span>
-039158,000013:                                                                                                  <span class="co">##              2016-11-01 RSB  More typos.</span>
-039159,000014:                                                                                                  <span class="co">##              2016-12-06 RSB  Comment proofing via octopus/ProoferComments</span>
-039160,000015:                                                                                                  <span class="co">##                              performed, and changes made.</span>
-039161,000016: 
+039153,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+039154,000003:                                                                                                  <span class="co">## Filename:    ASCENT_STEERING.agc</span>
+039155,000004:                                                                                                  <span class="co">## Purpose:     A module for revision 0 of BURST120 (Sunburst). It </span>
+039156,000005:                                                                                                  <span class="co">##              is part of the source code for the Lunar Module's</span>
+039157,000006:                                                                                                  <span class="co">##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
+039158,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+039159,000008:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+039160,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+039161,000010:                                                                                                  <span class="co">## Mod history: 2016-09-30 RSB  Created draft version.</span>
+039162,000011:                                                                                                  <span class="co">##              2016-10-24 RSB  Transcribed.</span>
+039163,000012:                                                                                                  <span class="co">##              2016-10-31 RSB  Typos.</span>
+039164,000013:                                                                                                  <span class="co">##              2016-11-01 RSB  More typos.</span>
+039165,000014:                                                                                                  <span class="co">##              2016-12-06 RSB  Comment proofing via octopus/ProoferComments</span>
+039166,000015:                                                                                                  <span class="co">##                              performed, and changes made.</span>
+039167,000016: 
 </pre>
 </span>
 </p>
@@ -125,56 +125,56 @@ Page 913
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-039163,000018:                                                                                                  <span class="co">#     PROGRAM NAME--ASCENT        BY--BERMAN</span>
-039164,000019:                                                                                                  <span class="co">#      ASCENT IS AN E-GUIDANCE SCHEME WHICH PRODUCES A DESIRED UNIT THRUST VECTOR DURING ASCENT BURNS, WITH THE</span>
-039165,000020:                                                                                                  <span class="co">#  CURRENT STATE AND ESTIMATED TGO,AND ESTIMATED VCO (VELOCITIES IN ASCENT ARE DEFINED IN LOCAL VERTICAL SYSTEMS),</span>
-039166,000021:                                                                                                  <span class="co">#  RCO IS ESTIMATED. THIS ENABLES THE LAMBERT SUBROUTINE TO SOLVE FOR A BETTER VCO. THIS AND V ALLOW US TO IMPROVE</span>
-039167,000022:                                                                                                  <span class="co">#  THE ESTIMATE OF TGO. FINALLY, TGO AND THE DESIRED CHANGES IN R AND V ARE USED TO COMPUTE UT.</span>
-039168,000023:                                                                                                  <span class="co">#     MODING SWITCHES</span>
-039169,000024:                                                                                                  <span class="co">#        HC--IF 0, ABVAL(RCO) IS CONSTRAINED TO A SPECIFIED VALUE-- IF 1, ABVAL(RCO) IS NOT CONSTRAINED, BUT IS</span>
-039170,000025:                                                                                                  <span class="co">#            ESTIMATED.</span>
-039171,000026:                                                                                                  <span class="co">#        PASS-- IF 0, USE LAMBERT TO UPDATE VCO-- IF 1, SKIP LAMBERT. PASS IS INVERTED EVERY ENTRY TO ASCENT, THUS</span>
-039172,000027:                                                                                                  <span class="co">#            LAMBERT IS USED EVERY OTHER ENTRY.</span>
-039173,000028:                                                                                                  <span class="co">#        DIRECT-- IF 0, SPECIFIED INJECTION CONDITIONS ARE USED AND PASS IS SET PERMANENTLY TO 1 AFTER THE FIRST</span>
-039174,000029:                                                                                                  <span class="co">#            ENTRY-- IF 1, LAMBERT IS USED FOR TARGETING UNDER CONTROL OF            PASS.</span>
-039175,000030: 
-039176,000031:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
-039177,000032:                                                                                                  <span class="co">#     ASCENT IS ENTERED IN INTERPRETIVE BY</span>
-039178,000033:                                                                                                  <span class="co">#                                                   GOTO</span>
-039179,000034:                                                                                                  <span class="co">#                                                          ASCENT</span>
-039180,000035: 
-039181,000036:                                                                                                  <span class="co">#  NORMAL EXIT</span>
-039182,000037:                                                                                                  <span class="co">#     NORMAL EXIT FROM ASCENT IS BY</span>
-039183,000038:                                                                                                  <span class="co">#                                                   GOTO</span>
-039184,000039:                                                                                                  <span class="co">#                                                          ASCRET</span>
-039185,000040: 
-039186,000041:                                                                                                  <span class="co">#  WHERE THE PREAPS PROGRAM PUTS A RETURN ADDRESS IN ASCRET FOR THE FIRST (PRE-IGNITION) ENTRY, AND THEN STORES</span>
-039187,000042:                                                                                                  <span class="co">#  FINDCDUD IN ASCRET SO THAT SUBSEQUENT EXITS WILL BE TO FINDCDUD.</span>
-039188,000043: 
-039189,000044:                                                                                                  <span class="co">#  DEBRIS</span>
-039190,000045:                                                                                                  <span class="co">#     USES 118 ERASABLE LOCATIONS CURRENTLY ASSIGNES TO  AMEMORY  THRU  AMEMORY +117. (SEE PG. 32 OF SUNBURST FOR</span>
-039191,000046:                                                                                                  <span class="co">#  VARIABLE NAMES.</span>
-039192,000047: 
-039193,000048:                                                                                                  <span class="co">#  RESERVED LOCATIONS</span>
-039194,000049:                                                                                                  <span class="co">#     THE FOLLOWING 44 LOCATIONS MUST NOT BE DISTURBED DURING MP13 OR MP4 -- PAXIS1,QAXIS,SAXIS,ATMEAS,RDOTD,YDOTD,</span>
-039195,000050:                                                                                                  <span class="co">#  ZDOTD,RCO,TGO,PCONS,PRATE,TINT,TREF,YCONS,ASCRET. THE REMAINING 74 LOCATIONS MAY BE USED BETWEEN EXIT FROM</span>
-039196,000051:                                                                                                  <span class="co">#  ASCENT AND RE-ENTRY INTO THE THRUST MAGNITUDE FILTER, ATMAG.</span>
-039197,000052: 32,2125                                           <span class="ps">BANK    </span> 32                                    
-039198,000053: 32,2125  E4,1452                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54434F">TCO</a>                                   
-<a name="415343454E54"></a>039199,000054: 32,2125           70375        <span class="sm">ASCENT  </span>           <span class="in">VLOAD   </span> <span class="in">V/SC      </span>                            <span class="co">#  FORM GRAVITY SCALED 2(10)M/CS/CS FROM</span>
-039200,000055: 32,2126           01065                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#474454312F32">GDT1/2</a>                                <span class="co">#  GDT1/2 SCALED 2(-7)M/CS</span>
-039201,000056: 32,2127           24672                                    <a href="#3253454328313829">2SEC(18)</a>                              
-039202,000057: 32,2130           50360                           <span class="in">AXC,1   </span> <span class="in">DOT       </span>                            <span class="co">#  LOAD X1 WITH -5   (OLD NSHIFT CONTENTS)</span>
-039203,000058: 32,2131           00005                                    5                                     
-039204,000059: 32,2132           01033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495452">UNITR</a>                                 <span class="co">#  G,URX2(9)=GRX2(9)</span>
-039205,000060: 32,2133           47315                           <span class="in">PDVL    </span> <span class="in">VXV       </span>                            <span class="co">#  STORE IN PDL(0)                        2</span>
-039206,000061: 32,2134           01033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495452">UNITR</a>                                 <span class="co">#  LOAD UNITR*2(-1)</span>
-039207,000062: 32,2135           01017                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564E">VN</a>                                    <span class="co">#  UR*2(-1) X VN*2(-7)=H/R*2(-8)</span>
-039208,000063: 32,2136           56236                           <span class="in">VSQ     </span> <span class="in">DDV       </span>                            <span class="co">#  H(2)/R(2)*2(-16)</span>
-039209,000064: 32,2137           01047                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524D4147">RMAG</a>                                  <span class="co">#  H(2)/R(3)*2(9)</span>
-039210,000065: 32,2140           43352                           <span class="in">SL1     </span> <span class="in">DAD       </span>                            
-039211,000066: 32,2141           77614                           <span class="in">BON     </span>                                       
-039212,000067: 32,2142           02306                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#42414B544F34">BAKTO4</a>                                
+039169,000018:                                                                                                  <span class="co">#     PROGRAM NAME--ASCENT        BY--BERMAN</span>
+039170,000019:                                                                                                  <span class="co">#      ASCENT IS AN E-GUIDANCE SCHEME WHICH PRODUCES A DESIRED UNIT THRUST VECTOR DURING ASCENT BURNS, WITH THE</span>
+039171,000020:                                                                                                  <span class="co">#  CURRENT STATE AND ESTIMATED TGO,AND ESTIMATED VCO (VELOCITIES IN ASCENT ARE DEFINED IN LOCAL VERTICAL SYSTEMS),</span>
+039172,000021:                                                                                                  <span class="co">#  RCO IS ESTIMATED. THIS ENABLES THE LAMBERT SUBROUTINE TO SOLVE FOR A BETTER VCO. THIS AND V ALLOW US TO IMPROVE</span>
+039173,000022:                                                                                                  <span class="co">#  THE ESTIMATE OF TGO. FINALLY, TGO AND THE DESIRED CHANGES IN R AND V ARE USED TO COMPUTE UT.</span>
+039174,000023:                                                                                                  <span class="co">#     MODING SWITCHES</span>
+039175,000024:                                                                                                  <span class="co">#        HC--IF 0, ABVAL(RCO) IS CONSTRAINED TO A SPECIFIED VALUE-- IF 1, ABVAL(RCO) IS NOT CONSTRAINED, BUT IS</span>
+039176,000025:                                                                                                  <span class="co">#            ESTIMATED.</span>
+039177,000026:                                                                                                  <span class="co">#        PASS-- IF 0, USE LAMBERT TO UPDATE VCO-- IF 1, SKIP LAMBERT. PASS IS INVERTED EVERY ENTRY TO ASCENT, THUS</span>
+039178,000027:                                                                                                  <span class="co">#            LAMBERT IS USED EVERY OTHER ENTRY.</span>
+039179,000028:                                                                                                  <span class="co">#        DIRECT-- IF 0, SPECIFIED INJECTION CONDITIONS ARE USED AND PASS IS SET PERMANENTLY TO 1 AFTER THE FIRST</span>
+039180,000029:                                                                                                  <span class="co">#            ENTRY-- IF 1, LAMBERT IS USED FOR TARGETING UNDER CONTROL OF            PASS.</span>
+039181,000030: 
+039182,000031:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
+039183,000032:                                                                                                  <span class="co">#     ASCENT IS ENTERED IN INTERPRETIVE BY</span>
+039184,000033:                                                                                                  <span class="co">#                                                   GOTO</span>
+039185,000034:                                                                                                  <span class="co">#                                                          ASCENT</span>
+039186,000035: 
+039187,000036:                                                                                                  <span class="co">#  NORMAL EXIT</span>
+039188,000037:                                                                                                  <span class="co">#     NORMAL EXIT FROM ASCENT IS BY</span>
+039189,000038:                                                                                                  <span class="co">#                                                   GOTO</span>
+039190,000039:                                                                                                  <span class="co">#                                                          ASCRET</span>
+039191,000040: 
+039192,000041:                                                                                                  <span class="co">#  WHERE THE PREAPS PROGRAM PUTS A RETURN ADDRESS IN ASCRET FOR THE FIRST (PRE-IGNITION) ENTRY, AND THEN STORES</span>
+039193,000042:                                                                                                  <span class="co">#  FINDCDUD IN ASCRET SO THAT SUBSEQUENT EXITS WILL BE TO FINDCDUD.</span>
+039194,000043: 
+039195,000044:                                                                                                  <span class="co">#  DEBRIS</span>
+039196,000045:                                                                                                  <span class="co">#     USES 118 ERASABLE LOCATIONS CURRENTLY ASSIGNES TO  AMEMORY  THRU  AMEMORY +117. (SEE PG. 32 OF SUNBURST FOR</span>
+039197,000046:                                                                                                  <span class="co">#  VARIABLE NAMES.</span>
+039198,000047: 
+039199,000048:                                                                                                  <span class="co">#  RESERVED LOCATIONS</span>
+039200,000049:                                                                                                  <span class="co">#     THE FOLLOWING 44 LOCATIONS MUST NOT BE DISTURBED DURING MP13 OR MP4 -- PAXIS1,QAXIS,SAXIS,ATMEAS,RDOTD,YDOTD,</span>
+039201,000050:                                                                                                  <span class="co">#  ZDOTD,RCO,TGO,PCONS,PRATE,TINT,TREF,YCONS,ASCRET. THE REMAINING 74 LOCATIONS MAY BE USED BETWEEN EXIT FROM</span>
+039202,000051:                                                                                                  <span class="co">#  ASCENT AND RE-ENTRY INTO THE THRUST MAGNITUDE FILTER, ATMAG.</span>
+039203,000052: 32,2125                                           <span class="ps">BANK    </span> 32                                    
+039204,000053: 32,2125  E4,1452                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54434F">TCO</a>                                   
+<a name="415343454E54"></a>039205,000054: 32,2125           70375        <span class="sm">ASCENT  </span>           <span class="in">VLOAD   </span> <span class="in">V/SC      </span>                            <span class="co">#  FORM GRAVITY SCALED 2(10)M/CS/CS FROM</span>
+039206,000055: 32,2126           01065                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#474454312F32">GDT1/2</a>                                <span class="co">#  GDT1/2 SCALED 2(-7)M/CS</span>
+039207,000056: 32,2127           24672                                    <a href="#3253454328313829">2SEC(18)</a>                              
+039208,000057: 32,2130           50360                           <span class="in">AXC,1   </span> <span class="in">DOT       </span>                            <span class="co">#  LOAD X1 WITH -5   (OLD NSHIFT CONTENTS)</span>
+039209,000058: 32,2131           00005                                    5                                     
+039210,000059: 32,2132           01033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495452">UNITR</a>                                 <span class="co">#  G,URX2(9)=GRX2(9)</span>
+039211,000060: 32,2133           47315                           <span class="in">PDVL    </span> <span class="in">VXV       </span>                            <span class="co">#  STORE IN PDL(0)                        2</span>
+039212,000061: 32,2134           01033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495452">UNITR</a>                                 <span class="co">#  LOAD UNITR*2(-1)</span>
+039213,000062: 32,2135           01017                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564E">VN</a>                                    <span class="co">#  UR*2(-1) X VN*2(-7)=H/R*2(-8)</span>
+039214,000063: 32,2136           56236                           <span class="in">VSQ     </span> <span class="in">DDV       </span>                            <span class="co">#  H(2)/R(2)*2(-16)</span>
+039215,000064: 32,2137           01047                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524D4147">RMAG</a>                                  <span class="co">#  H(2)/R(3)*2(9)</span>
+039216,000065: 32,2140           43352                           <span class="in">SL1     </span> <span class="in">DAD       </span>                            
+039217,000066: 32,2141           77614                           <span class="in">BON     </span>                                       
+039218,000067: 32,2142           02306                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#42414B544F34">BAKTO4</a>                                
 </pre>
 </span>
 </p>
@@ -190,56 +190,56 @@ Page 914
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-039214,000069: 32,2143           66307                                    <a href="MP4-CONTINGENCY_ORBIT_INSERTION.agc.html#47464B4E4F574E">GFKNOWN</a>                               <span class="co">#  DURING PROCO1, GO BACK TO MP4</span>
-039215,000070: 32,2144           26111                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47454646">GEFF</a>                                  <span class="co">#  STORE GEFFX2(9) (POS UP)</span>
-039216,000071: 32,2145           01033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495452">UNITR</a>                                 <span class="co">#  LOAD URX2(-1)</span>
-039217,000072: 32,2146           53435                           <span class="in">VXV     </span> <span class="in">UNIT      </span>                            <span class="co">#  URX2(-1)XQX2(-1)=ZAXISXSIN</span>
-039218,000073: 32,2147           02007                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5141584953">QAXIS</a>                                 <span class="co">#  ZAXISX2(-1)</span>
-039219,000074: 32,2150           02077                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A41584953">ZAXIS</a>                                 <span class="co">#  STORE ZAXIS</span>
-039220,000075: 32,2151           57435                           <span class="in">VXV     </span> <span class="in">VCOMP     </span>                            <span class="co">#  ZAXISX2(-1)XQAXISX2(-1)=-MAXISX2(-2)</span>
-039221,000076: 32,2152           02007                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5141584953">QAXIS</a>                                 <span class="co">#  MAXISX2(-2)</span>
-039222,000077: 32,2153           63372                           <span class="in">VSL1    </span> <span class="in">PDVL      </span>                            <span class="co">#  MAXISX2(-1) IN PDL(0)                  6</span>
-039223,000078: 32,2154           01033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495452">UNITR</a>                                 <span class="co">#  LOAD URX2(-1)</span>
-039224,000079: 32,2155           72441                           <span class="in">DOT     </span> <span class="in">SL1       </span>                            <span class="co">#  URX2(-1).VX2(-7)=VRX2(-8)</span>
-039225,000080: 32,2156           01017                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564E">VN</a>                                    <span class="co">#  SHIFT TO VRX2(-7)</span>
-039226,000081: 32,2157           26147                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52444F54">RDOT</a>                                  <span class="co">#  STORE IN RDOT</span>
-039227,000082: 32,2160           02077                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A41584953">ZAXIS</a>                                 <span class="co">#  LOAD ZAXISX2(-1)</span>
-039228,000083: 32,2161           72441                           <span class="in">DOT     </span> <span class="in">SL1       </span>                            <span class="co">#  ZAXISX2(-1).VX2(-7)=ZDOTX2(-8)        (6</span>
-039229,000084: 32,2162           01017                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564E">VN</a>                                    <span class="co">#  SHIFT TO ZDOTX2(-7)</span>
-039230,000085: 32,2163           26105                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A444F54">ZDOT</a>                                  <span class="co">#  STORE IN ZDOT</span>
-039231,000086: 32,2164           02077                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A41584953">ZAXIS</a>                                 <span class="co">#  LOAD ZAXISX2(-1)</span>
-039232,000087: 32,2165           76435                           <span class="in">VXV     </span> <span class="in">VSL1      </span>                            <span class="co">#  Z*2(-1)XUR*2(-1)=LAXIS*2(-2)</span>
-039233,000088: 32,2166           01033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495452">UNITR</a>                                 <span class="co">#  SHIFT TO LAXIS*2(-1)</span>
-039234,000089: 32,2167           02071                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C41584953">LAXIS</a>                                 <span class="co">#  STORE</span>
-039235,000090: 32,2170           72441                           <span class="in">DOT     </span> <span class="in">SL1       </span>                            <span class="co">#  LAXIS.VN=YDOT*2(-8)</span>
-039236,000091: 32,2171           01017                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564E">VN</a>                                    <span class="co">#  SHIFT TO YDOT*2(-7)</span>
-039237,000092: 32,2172           26067                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#59444F54">YDOT</a>                                  <span class="co">#  STORE IN YDOT</span>
-039238,000093: 32,2173           00001                                    00D                                   <span class="co">#  LOAD MAXISX2(-1)</span>
-039239,000094: 32,2174           62441                           <span class="in">DOT     </span> <span class="in">SL2       </span>                            <span class="co">#  MAXISX2(-1).SX2(-1)=RZX2(-2)</span>
-039240,000095: 32,2175           02015                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5341584953">SAXIS</a>                                 <span class="co">#  SHIFT TO RZ</span>
-039241,000096: 32,2176           63406                           <span class="in">PUSH    </span> <span class="in">DSQ       </span>                            <span class="co">#  STORE RZ IN PDL(6)                     8</span>
-039242,000097: 32,2177           41206                           <span class="in">PUSH    </span> <span class="in">DMP       </span>                            <span class="co">#  STORE RZ(2) IN PDL(8)                 10</span>
-039243,000098: 32,2200           24670                                    <a href="#4450332F3830">DP3/80</a>                                <span class="co">#  3/8ORZ(2)</span>
-039244,000099: 32,2201           41215                           <span class="in">DAD     </span> <span class="in">DMP       </span>                            <span class="co">#  1/12+3/8ORZ(2)</span>
-039245,000100: 32,2202           24700                                    <a href="#312F31325448">1/12TH</a>                                <span class="co">#  RZ(2)/12+3/8ORZ(4)                     8</span>
-039246,000101: 32,2203           41215                           <span class="in">DAD     </span> <span class="in">DMP       </span>                            <span class="co">#  1/2+RZ(2)/12+3/8ORZ(4)</span>
-039247,000102: 32,2204           26641                                    <a href="PREBURN_FOR_APS2.agc.html#44502E35">DP.5</a>                                  <span class="co">#  RZ(...)                                6</span>
-039248,000103: 32,2205           60405                           <span class="in">DMP     </span> <span class="in">SR2       </span>                            <span class="co">#  Z*2(-26)</span>
-039249,000104: 32,2206           02375                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52434F">RCO</a>                                   <span class="co">#  SHIFT TO Z*2(-28)</span>
-039250,000105: 32,2207           50315                           <span class="in">PDVL    </span> <span class="in">DOT       </span>                            <span class="co">#  STORE Z IN PDL(6)                      8</span>
-039251,000106: 32,2210           01033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495452">UNITR</a>                                 <span class="co">#  LOAD URX2(-1)</span>
-039252,000107: 32,2211           02007                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5141584953">QAXIS</a>                                 <span class="co">#  URX2(-1).QX2(-1)=RYX2(-2)</span>
-039253,000108: 32,2212           02151                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5259">RY</a>                                    <span class="co">#  STORE IN RY</span>
-039254,000109: 32,2213           41316                           <span class="in">DSQ     </span> <span class="in">DMP       </span>                            <span class="co">#  RY(2)X2(-4)                           (8</span>
-039255,000110: 32,2214           24704                                    <a href="#4450322F3348">DP2/3H</a>                                <span class="co">#  RY(2)/24</span>
-039256,000111: 32,2215           41215                           <span class="in">DAD     </span> <span class="in">DMP       </span>                            
-039257,000112: 32,2216           24702                                    <a href="#44502E3235">DP.25</a>                                 <span class="co">#  1/4+RY(2)/24</span>
-039258,000113: 32,2217           02151                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5259">RY</a>                                    <span class="co">#  RY(1+RY(2)/6)/16</span>
-039259,000114: 32,2220           42405                           <span class="in">DMP     </span> <span class="in">SL4       </span>                            <span class="co">#  RCORY(1+RY(2)/6)X2(N-34)=YX2(N-34)</span>
-039260,000115: 32,2221           02375                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52434F">RCO</a>                                   <span class="co">#  YX2(N-30)</span>
-039261,000116: 32,2222           45325                           <span class="in">PDDL    </span> <span class="in">DSU       </span>                            <span class="co">#  STORE IN PDL(8)                      (10</span>
-039262,000117: 32,2223           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   <span class="co">#  LOAD TGO*2(-17)</span>
-039263,000118: 32,2224           24706                                    <a href="#4454415343">DTASC</a>                                 <span class="co">#  (TGO-DT)*2(-17)</span>
+039220,000069: 32,2143           66307                                    <a href="MP4-CONTINGENCY_ORBIT_INSERTION.agc.html#47464B4E4F574E">GFKNOWN</a>                               <span class="co">#  DURING PROCO1, GO BACK TO MP4</span>
+039221,000070: 32,2144           26111                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47454646">GEFF</a>                                  <span class="co">#  STORE GEFFX2(9) (POS UP)</span>
+039222,000071: 32,2145           01033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495452">UNITR</a>                                 <span class="co">#  LOAD URX2(-1)</span>
+039223,000072: 32,2146           53435                           <span class="in">VXV     </span> <span class="in">UNIT      </span>                            <span class="co">#  URX2(-1)XQX2(-1)=ZAXISXSIN</span>
+039224,000073: 32,2147           02007                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5141584953">QAXIS</a>                                 <span class="co">#  ZAXISX2(-1)</span>
+039225,000074: 32,2150           02077                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A41584953">ZAXIS</a>                                 <span class="co">#  STORE ZAXIS</span>
+039226,000075: 32,2151           57435                           <span class="in">VXV     </span> <span class="in">VCOMP     </span>                            <span class="co">#  ZAXISX2(-1)XQAXISX2(-1)=-MAXISX2(-2)</span>
+039227,000076: 32,2152           02007                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5141584953">QAXIS</a>                                 <span class="co">#  MAXISX2(-2)</span>
+039228,000077: 32,2153           63372                           <span class="in">VSL1    </span> <span class="in">PDVL      </span>                            <span class="co">#  MAXISX2(-1) IN PDL(0)                  6</span>
+039229,000078: 32,2154           01033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495452">UNITR</a>                                 <span class="co">#  LOAD URX2(-1)</span>
+039230,000079: 32,2155           72441                           <span class="in">DOT     </span> <span class="in">SL1       </span>                            <span class="co">#  URX2(-1).VX2(-7)=VRX2(-8)</span>
+039231,000080: 32,2156           01017                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564E">VN</a>                                    <span class="co">#  SHIFT TO VRX2(-7)</span>
+039232,000081: 32,2157           26147                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52444F54">RDOT</a>                                  <span class="co">#  STORE IN RDOT</span>
+039233,000082: 32,2160           02077                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A41584953">ZAXIS</a>                                 <span class="co">#  LOAD ZAXISX2(-1)</span>
+039234,000083: 32,2161           72441                           <span class="in">DOT     </span> <span class="in">SL1       </span>                            <span class="co">#  ZAXISX2(-1).VX2(-7)=ZDOTX2(-8)        (6</span>
+039235,000084: 32,2162           01017                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564E">VN</a>                                    <span class="co">#  SHIFT TO ZDOTX2(-7)</span>
+039236,000085: 32,2163           26105                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A444F54">ZDOT</a>                                  <span class="co">#  STORE IN ZDOT</span>
+039237,000086: 32,2164           02077                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A41584953">ZAXIS</a>                                 <span class="co">#  LOAD ZAXISX2(-1)</span>
+039238,000087: 32,2165           76435                           <span class="in">VXV     </span> <span class="in">VSL1      </span>                            <span class="co">#  Z*2(-1)XUR*2(-1)=LAXIS*2(-2)</span>
+039239,000088: 32,2166           01033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495452">UNITR</a>                                 <span class="co">#  SHIFT TO LAXIS*2(-1)</span>
+039240,000089: 32,2167           02071                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C41584953">LAXIS</a>                                 <span class="co">#  STORE</span>
+039241,000090: 32,2170           72441                           <span class="in">DOT     </span> <span class="in">SL1       </span>                            <span class="co">#  LAXIS.VN=YDOT*2(-8)</span>
+039242,000091: 32,2171           01017                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564E">VN</a>                                    <span class="co">#  SHIFT TO YDOT*2(-7)</span>
+039243,000092: 32,2172           26067                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#59444F54">YDOT</a>                                  <span class="co">#  STORE IN YDOT</span>
+039244,000093: 32,2173           00001                                    00D                                   <span class="co">#  LOAD MAXISX2(-1)</span>
+039245,000094: 32,2174           62441                           <span class="in">DOT     </span> <span class="in">SL2       </span>                            <span class="co">#  MAXISX2(-1).SX2(-1)=RZX2(-2)</span>
+039246,000095: 32,2175           02015                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5341584953">SAXIS</a>                                 <span class="co">#  SHIFT TO RZ</span>
+039247,000096: 32,2176           63406                           <span class="in">PUSH    </span> <span class="in">DSQ       </span>                            <span class="co">#  STORE RZ IN PDL(6)                     8</span>
+039248,000097: 32,2177           41206                           <span class="in">PUSH    </span> <span class="in">DMP       </span>                            <span class="co">#  STORE RZ(2) IN PDL(8)                 10</span>
+039249,000098: 32,2200           24670                                    <a href="#4450332F3830">DP3/80</a>                                <span class="co">#  3/8ORZ(2)</span>
+039250,000099: 32,2201           41215                           <span class="in">DAD     </span> <span class="in">DMP       </span>                            <span class="co">#  1/12+3/8ORZ(2)</span>
+039251,000100: 32,2202           24700                                    <a href="#312F31325448">1/12TH</a>                                <span class="co">#  RZ(2)/12+3/8ORZ(4)                     8</span>
+039252,000101: 32,2203           41215                           <span class="in">DAD     </span> <span class="in">DMP       </span>                            <span class="co">#  1/2+RZ(2)/12+3/8ORZ(4)</span>
+039253,000102: 32,2204           26641                                    <a href="PREBURN_FOR_APS2.agc.html#44502E35">DP.5</a>                                  <span class="co">#  RZ(...)                                6</span>
+039254,000103: 32,2205           60405                           <span class="in">DMP     </span> <span class="in">SR2       </span>                            <span class="co">#  Z*2(-26)</span>
+039255,000104: 32,2206           02375                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52434F">RCO</a>                                   <span class="co">#  SHIFT TO Z*2(-28)</span>
+039256,000105: 32,2207           50315                           <span class="in">PDVL    </span> <span class="in">DOT       </span>                            <span class="co">#  STORE Z IN PDL(6)                      8</span>
+039257,000106: 32,2210           01033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495452">UNITR</a>                                 <span class="co">#  LOAD URX2(-1)</span>
+039258,000107: 32,2211           02007                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5141584953">QAXIS</a>                                 <span class="co">#  URX2(-1).QX2(-1)=RYX2(-2)</span>
+039259,000108: 32,2212           02151                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5259">RY</a>                                    <span class="co">#  STORE IN RY</span>
+039260,000109: 32,2213           41316                           <span class="in">DSQ     </span> <span class="in">DMP       </span>                            <span class="co">#  RY(2)X2(-4)                           (8</span>
+039261,000110: 32,2214           24704                                    <a href="#4450322F3348">DP2/3H</a>                                <span class="co">#  RY(2)/24</span>
+039262,000111: 32,2215           41215                           <span class="in">DAD     </span> <span class="in">DMP       </span>                            
+039263,000112: 32,2216           24702                                    <a href="#44502E3235">DP.25</a>                                 <span class="co">#  1/4+RY(2)/24</span>
+039264,000113: 32,2217           02151                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5259">RY</a>                                    <span class="co">#  RY(1+RY(2)/6)/16</span>
+039265,000114: 32,2220           42405                           <span class="in">DMP     </span> <span class="in">SL4       </span>                            <span class="co">#  RCORY(1+RY(2)/6)X2(N-34)=YX2(N-34)</span>
+039266,000115: 32,2221           02375                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52434F">RCO</a>                                   <span class="co">#  YX2(N-30)</span>
+039267,000116: 32,2222           45325                           <span class="in">PDDL    </span> <span class="in">DSU       </span>                            <span class="co">#  STORE IN PDL(8)                      (10</span>
+039268,000117: 32,2223           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   <span class="co">#  LOAD TGO*2(-17)</span>
+039269,000118: 32,2224           24706                                    <a href="#4454415343">DTASC</a>                                 <span class="co">#  (TGO-DT)*2(-17)</span>
 </pre>
 </span>
 </p>
@@ -255,56 +255,56 @@ Page 915
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-039265,000120: 32,2225           02141                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   <span class="co">#  REPLACE IN TGO</span>
-039266,000121: 32,2226           71214                           <span class="in">BOFF    </span> <span class="in">DLOAD     </span>                            <span class="co">#  IF HC=0, GO TO HOLDR</span>
-039267,000122: 32,2227           02351                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4843">HC</a>                                    
-039268,000123: 32,2230           64241                                    <a href="#484F4C4452">HOLDR</a>                                 
-039269,000124: 32,2231           02147                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52444F54">RDOT</a>                                  <span class="co">#  LOAD RDOT*2(-7)</span>
-039270,000125: 32,2232           41215                           <span class="in">DAD     </span> <span class="in">DMP       </span>                            <span class="co">#  (RDOT+RDOTD)*2(-7)</span>
-039271,000126: 32,2233           02041                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52444F5444">RDOTD</a>                                 
-039272,000127: 32,2234           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   <span class="co">#  TGO(RDOT+RDOTD)*2(-24)</span>
-039273,000128: 32,2235           43342                           <span class="in">SR1     </span> <span class="in">DAD       </span>                            <span class="co">#  SHIFT TO RGO*2(-24)</span>
-039274,000129: 32,2236           01047                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524D4147">RMAG</a>                                  <span class="co">#  FORM RCO*2(-24)</span>
-039275,000130: 32,2237           77742                           <span class="in">SR1     </span>                                       <span class="co">#  SHIFT TO RCO*2(-24)</span>
-039276,000131: 32,2240           02375                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52434F">RCO</a>                                   <span class="co">#  STORE IN RCO</span>
-039277,000132: 
-<a name="484F4C4452"></a>039278,000133: 32,2241           77614        <span class="sm">HOLDR   </span>           <span class="in">BOFF    </span>                                       
-039279,000134: 32,2242           02347                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#444952454354">DIRECT</a>                                
-039280,000135: 32,2243           64404                                    <a href="#4741494E">GAIN</a>                                  
-<a name="4C414D50524550"></a>039281,000136: 32,2244           71214        <span class="sm">LAMPREP </span>           <span class="in">BOFF    </span> <span class="in">DLOAD     </span>                            <span class="co">#  IF LAMB NOT DONE, GO TO GAIN+1</span>
-039282,000137: 32,2245           02341                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#444F4E455357">DONESW</a>                                
-039283,000138: 32,2246           64404                                    <a href="#4741494E">GAIN</a>                                  
-039284,000139: 32,2247           02067                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#59444F54">YDOT</a>                                  <span class="co">#  LOAD YDOT*2(-7)</span>
-039285,000140: 32,2250           65205                           <span class="in">DMP     </span> <span class="in">PDDL      </span>                            <span class="co">#  YDOT TGO*2(-24)</span>
-039286,000141: 32,2251           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   <span class="co">#  PUSH DOWN                             12</span>
-039287,000142: 32,2252           02043                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#59444F5444">YDOTD</a>                                 <span class="co">#  LOAD YDOTD*2(-7)</span>
-039288,000143: 32,2253           43205                           <span class="in">DMP     </span> <span class="in">DAD       </span>                            <span class="co">#  YDOTD TGO*2(-24)</span>
-039289,000144: 32,2254           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   <span class="co">#  TGO(YDOT+YDOTD)*2(-24)                10</span>
-039290,000145: 32,2255           43257                           <span class="in">SL*     </span> <span class="in">DAD       </span>                            <span class="co">#  YGO/2*2(N-30)</span>
-039291,000146: 32,2256           20172                                    0          -7,1                       <span class="co">#                                         8</span>
-039292,000147: 32,2257           77626                           <span class="in">STADR   </span>                                       <span class="co">#  YCO*2(N-30)</span>
-039293,000148: 32,2260           63736                           <span class="in">STODL   </span> 32D                                   <span class="co">#  STORE IN PDL(32)</span>
-039294,000149: 32,2261           02105                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A444F54">ZDOT</a>                                  <span class="co">#  LOAD ZDOTX2(-7)</span>
-039295,000150: 32,2262           41215                           <span class="in">DAD     </span> <span class="in">DMP       </span>                            <span class="co">#  (ZDOT+ZDOTD)X2(-7)</span>
-039296,000151: 32,2263           02045                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A444F5444">ZDOTD</a>                                 <span class="co">#  TGO(ZDOT+ZDOTD)X2(-24)</span>
-039297,000152: 32,2264           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
-039298,000153: 32,2265           43257                           <span class="in">SL*     </span> <span class="in">DAD       </span>                            <span class="co">#  SHIFT TO TGO(ZDOT+ZDOTD)X2(N-34)</span>
-039299,000154: 32,2266           20167                                    0          -10D,1                     <span class="co">#  ZCOX2(N-33)                            6</span>
-039300,000155: 32,2267           56271                           <span class="in">DDV     </span> <span class="in">DDV       </span>                            <span class="co">#  ZRADCO/8</span>
-039301,000156: 32,2270           02375                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52434F">RCO</a>                                   
-039302,000157: 32,2271           05740                                    <a href="SECOND_DPS_GUIDANCE.agc.html#50492F34">PI/4</a>                                  <span class="co">#  ZRADCO/2PI</span>
-039303,000158: 32,2272           71406                           <span class="in">PUSH    </span> <span class="in">COS       </span>                            <span class="co">#  STORE IN PDL(6),TAKE 1/2COS            8</span>
-039304,000159: 32,2273           73525                           <span class="in">PDDL    </span> <span class="in">SIN       </span>                            <span class="co">#  EXCH.ZRADCO/2PI WITH .5COS,TAKE .5SIN  8</span>
-039305,000160: 32,2274           74206                           <span class="in">PUSH    </span> <span class="in">VXSC      </span>                            <span class="co">#  STORE 1/2SIN IN PDL(8)                10</span>
-039306,000161: 32,2275           02015                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5341584953">SAXIS</a>                                 <span class="co">#  S/4SIN</span>
-039307,000162: 32,2276           74325                           <span class="in">PDDL    </span> <span class="in">VXSC      </span>                            <span class="co">#  STORE IN PDL(10),LOAD1/2COS           16</span>
-039308,000163: 32,2277           00007                                    06D                                   <span class="co">#  P/4COS</span>
-039309,000164: 32,2300           02001                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#504158495331">PAXIS1</a>                                
-039310,000165: 32,2301           77655                           <span class="in">VAD     </span>                                       <span class="co">#  S/4SIN+P/4COS,                        10</span>
-039311,000166: 32,2302           77725                           <span class="in">PDDL    </span>                                       <span class="co">#  STORE IN PDL(10)                      16</span>
-039312,000167: 32,2303           00041                                    32D                                   <span class="co">#  LOAD YCOX2(N-30)</span>
-039313,000168: 32,2304           65316                           <span class="in">DSQ     </span> <span class="in">PDDL      </span>                            <span class="co">#  YCO(2)X2(2N-60),STORE IN PDL(16)      18</span>
-039314,000169: 32,2305           02375                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52434F">RCO</a>                                   <span class="co">#  LOAD RCOX2(N-30)</span>
+039271,000120: 32,2225           02141                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   <span class="co">#  REPLACE IN TGO</span>
+039272,000121: 32,2226           71214                           <span class="in">BOFF    </span> <span class="in">DLOAD     </span>                            <span class="co">#  IF HC=0, GO TO HOLDR</span>
+039273,000122: 32,2227           02351                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4843">HC</a>                                    
+039274,000123: 32,2230           64241                                    <a href="#484F4C4452">HOLDR</a>                                 
+039275,000124: 32,2231           02147                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52444F54">RDOT</a>                                  <span class="co">#  LOAD RDOT*2(-7)</span>
+039276,000125: 32,2232           41215                           <span class="in">DAD     </span> <span class="in">DMP       </span>                            <span class="co">#  (RDOT+RDOTD)*2(-7)</span>
+039277,000126: 32,2233           02041                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52444F5444">RDOTD</a>                                 
+039278,000127: 32,2234           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   <span class="co">#  TGO(RDOT+RDOTD)*2(-24)</span>
+039279,000128: 32,2235           43342                           <span class="in">SR1     </span> <span class="in">DAD       </span>                            <span class="co">#  SHIFT TO RGO*2(-24)</span>
+039280,000129: 32,2236           01047                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524D4147">RMAG</a>                                  <span class="co">#  FORM RCO*2(-24)</span>
+039281,000130: 32,2237           77742                           <span class="in">SR1     </span>                                       <span class="co">#  SHIFT TO RCO*2(-24)</span>
+039282,000131: 32,2240           02375                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52434F">RCO</a>                                   <span class="co">#  STORE IN RCO</span>
+039283,000132: 
+<a name="484F4C4452"></a>039284,000133: 32,2241           77614        <span class="sm">HOLDR   </span>           <span class="in">BOFF    </span>                                       
+039285,000134: 32,2242           02347                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#444952454354">DIRECT</a>                                
+039286,000135: 32,2243           64404                                    <a href="#4741494E">GAIN</a>                                  
+<a name="4C414D50524550"></a>039287,000136: 32,2244           71214        <span class="sm">LAMPREP </span>           <span class="in">BOFF    </span> <span class="in">DLOAD     </span>                            <span class="co">#  IF LAMB NOT DONE, GO TO GAIN+1</span>
+039288,000137: 32,2245           02341                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#444F4E455357">DONESW</a>                                
+039289,000138: 32,2246           64404                                    <a href="#4741494E">GAIN</a>                                  
+039290,000139: 32,2247           02067                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#59444F54">YDOT</a>                                  <span class="co">#  LOAD YDOT*2(-7)</span>
+039291,000140: 32,2250           65205                           <span class="in">DMP     </span> <span class="in">PDDL      </span>                            <span class="co">#  YDOT TGO*2(-24)</span>
+039292,000141: 32,2251           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   <span class="co">#  PUSH DOWN                             12</span>
+039293,000142: 32,2252           02043                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#59444F5444">YDOTD</a>                                 <span class="co">#  LOAD YDOTD*2(-7)</span>
+039294,000143: 32,2253           43205                           <span class="in">DMP     </span> <span class="in">DAD       </span>                            <span class="co">#  YDOTD TGO*2(-24)</span>
+039295,000144: 32,2254           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   <span class="co">#  TGO(YDOT+YDOTD)*2(-24)                10</span>
+039296,000145: 32,2255           43257                           <span class="in">SL*     </span> <span class="in">DAD       </span>                            <span class="co">#  YGO/2*2(N-30)</span>
+039297,000146: 32,2256           20172                                    0          -7,1                       <span class="co">#                                         8</span>
+039298,000147: 32,2257           77626                           <span class="in">STADR   </span>                                       <span class="co">#  YCO*2(N-30)</span>
+039299,000148: 32,2260           63736                           <span class="in">STODL   </span> 32D                                   <span class="co">#  STORE IN PDL(32)</span>
+039300,000149: 32,2261           02105                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A444F54">ZDOT</a>                                  <span class="co">#  LOAD ZDOTX2(-7)</span>
+039301,000150: 32,2262           41215                           <span class="in">DAD     </span> <span class="in">DMP       </span>                            <span class="co">#  (ZDOT+ZDOTD)X2(-7)</span>
+039302,000151: 32,2263           02045                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A444F5444">ZDOTD</a>                                 <span class="co">#  TGO(ZDOT+ZDOTD)X2(-24)</span>
+039303,000152: 32,2264           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
+039304,000153: 32,2265           43257                           <span class="in">SL*     </span> <span class="in">DAD       </span>                            <span class="co">#  SHIFT TO TGO(ZDOT+ZDOTD)X2(N-34)</span>
+039305,000154: 32,2266           20167                                    0          -10D,1                     <span class="co">#  ZCOX2(N-33)                            6</span>
+039306,000155: 32,2267           56271                           <span class="in">DDV     </span> <span class="in">DDV       </span>                            <span class="co">#  ZRADCO/8</span>
+039307,000156: 32,2270           02375                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52434F">RCO</a>                                   
+039308,000157: 32,2271           05740                                    <a href="SECOND_DPS_GUIDANCE.agc.html#50492F34">PI/4</a>                                  <span class="co">#  ZRADCO/2PI</span>
+039309,000158: 32,2272           71406                           <span class="in">PUSH    </span> <span class="in">COS       </span>                            <span class="co">#  STORE IN PDL(6),TAKE 1/2COS            8</span>
+039310,000159: 32,2273           73525                           <span class="in">PDDL    </span> <span class="in">SIN       </span>                            <span class="co">#  EXCH.ZRADCO/2PI WITH .5COS,TAKE .5SIN  8</span>
+039311,000160: 32,2274           74206                           <span class="in">PUSH    </span> <span class="in">VXSC      </span>                            <span class="co">#  STORE 1/2SIN IN PDL(8)                10</span>
+039312,000161: 32,2275           02015                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5341584953">SAXIS</a>                                 <span class="co">#  S/4SIN</span>
+039313,000162: 32,2276           74325                           <span class="in">PDDL    </span> <span class="in">VXSC      </span>                            <span class="co">#  STORE IN PDL(10),LOAD1/2COS           16</span>
+039314,000163: 32,2277           00007                                    06D                                   <span class="co">#  P/4COS</span>
+039315,000164: 32,2300           02001                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#504158495331">PAXIS1</a>                                
+039316,000165: 32,2301           77655                           <span class="in">VAD     </span>                                       <span class="co">#  S/4SIN+P/4COS,                        10</span>
+039317,000166: 32,2302           77725                           <span class="in">PDDL    </span>                                       <span class="co">#  STORE IN PDL(10)                      16</span>
+039318,000167: 32,2303           00041                                    32D                                   <span class="co">#  LOAD YCOX2(N-30)</span>
+039319,000168: 32,2304           65316                           <span class="in">DSQ     </span> <span class="in">PDDL      </span>                            <span class="co">#  YCO(2)X2(2N-60),STORE IN PDL(16)      18</span>
+039320,000169: 32,2305           02375                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52434F">RCO</a>                                   <span class="co">#  LOAD RCOX2(N-30)</span>
 </pre>
 </span>
 </p>
@@ -320,56 +320,56 @@ Page 916
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-039316,000171: 32,2306           45316                           <span class="in">DSQ     </span> <span class="in">DSU       </span>                            <span class="co">#  (RCO(2)-YCO(2))X2(2N-60)              16</span>
-039317,000172: 32,2307           74366                           <span class="in">SQRT    </span> <span class="in">VXSC      </span>                            <span class="co">#  (RCO(2)-YCO(2))(1/2)X2(N-30)XPDL(10)  10</span>
-039318,000173: 32,2310           65372                           <span class="in">VSL1    </span> <span class="in">PDDL      </span>                            <span class="co">#  SHIFT TO ROOT*(SSIN+PCOS)*2(N-31)</span>
-039319,000174: 32,2311           00041                                    32D                                   <span class="co">#  STORE PS TERMS IN PDL(10),LOAD YCO    16</span>
-039320,000175: 32,2312           53361                           <span class="in">VXSC    </span> <span class="in">VAD       </span>                            <span class="co">#  QYCOX2(N-31)</span>
-039321,000176: 32,2313           02007                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5141584953">QAXIS</a>                                 <span class="co">#  ADD PS TERMS,GET RCOX2(N-31)          10</span>
-039322,000177: 32,2314           77772                           <span class="in">VSL1    </span>                                       <span class="co">#  SHIFT TO RCOV*2(N-30)</span>
-039323,000178: 32,2315           77614                           <span class="in">BOFF    </span>                                       
-039324,000179: 32,2316           02350                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#50415353">PASS</a>                                  
-039325,000180: 32,2317           64321                                    <a href="#4F4C4452434F">OLDRCO</a>                                
-039326,000181: 32,2320           02340                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52434F56">RCOV</a>                                  <span class="co">#  STORE CUTOFF POSITION</span>
-<a name="4F4C4452434F"></a>039327,000182: 32,2321           03614        <span class="sm">OLDRCO  </span>           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52434F54454D5056">RCOTEMPV</a>                              
-039328,000183: 32,2322           53435                           <span class="in">VXV     </span> <span class="in">UNIT      </span>                            
-039329,000184: 32,2323           02365                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5231564543">R1VEC</a>                                 
-039330,000185: 32,2324           52165                           <span class="in">SIGN    </span> <span class="in">GOTO      </span>                            
-039331,000186: 32,2325           03622                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54414735">TAG5</a>                                  <span class="co">#  PATCH IN THRUST MAGNITUDE FILTER LOG</span>
-039332,000187: 32,2326           65054                                    <a href="THRUST_MAGNITUDE_FILTER.agc.html#4153435041544348">ASCPATCH</a>                              <span class="co">#  SECTION SO IT IS AT END OF BANK.</span>
-039333,000188: 
-<a name="454E445041544348"></a>039334,000189: 32,2327           02153        <span class="sm">ENDPATCH</span>           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5552434F">URCO</a>                                  
-039335,000190: 32,2330           53435                           <span class="in">VXV     </span> <span class="in">UNIT      </span>                            <span class="co">#  GET LOCAL Z-AXIS</span>
-039336,000191: 32,2331           02007                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5141584953">QAXIS</a>                                 
-039337,000192: 32,2332           77601                           <span class="in">SETPD   </span>                                       <span class="co">#  CLEAR PDC</span>
-039338,000193: 32,2333           00001                                    00D                                   <span class="co">#  RESET PDC TO 0                         0</span>
-039339,000194: 32,2334           16133                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4831">H1</a>                                    <span class="co">#  STORE H1</span>
-039340,000195: 32,2335           02373                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54494E54">TINT</a>                                  <span class="co">#  LOAD TINT*2(-28)</span>
-039341,000196: 32,2336           43025                           <span class="in">DSU     </span> <span class="in">BON       </span>                            
-039342,000197: 32,2337           02053                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54434F">TCO</a>                                   <span class="co">#  IF PASS=1, USE RAW TFL</span>
-039343,000198: 32,2340           02310                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#50415353">PASS</a>                                  
-039344,000199: 32,2341           64344                                    <a href="#5553454954">USEIT</a>                                 <span class="co">#  IF PASS=0, AVERAGE TFL</span>
-039345,000200: 32,2342           70415                           <span class="in">DAD     </span> <span class="in">SR1       </span>                            
-039346,000201: 32,2343           02143                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54464C">TFL</a>                                   
-<a name="5553454954"></a>039347,000202: 32,2344           02143        <span class="sm">USEIT   </span>           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54464C">TFL</a>                                   
-039348,000203: 32,2345           77614                           <span class="in">CLEAR   </span>                                       
-039349,000204: 32,2346           02261                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#444F4E455357">DONESW</a>                                
-039350,000205: 32,2347           77614                           <span class="in">BONCLR  </span>                                       
-039351,000206: 32,2350           02200                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F4E565357">CONVSW</a>                                <span class="co">#  LAMBERT'S ITERATING PROCESS IS NOT</span>
-039352,000207: 32,2351           65001                                    <a href="#415343414C41524D">ASCALARM</a>                              <span class="co">#  CONVERGING WELL TO VOVEC - HENCE ALARM</span>
-039353,000208: 32,2352           77776                           <span class="in">EXIT    </span>                                       
-<a name="414C41524D524554"></a>039354,000209: 32,2353           31451        <span class="sm">ALARMRET</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C414D5052494F">LAMPRIO</a>                               
-039355,000210: 32,2354           00004                           <span class="op">INHINT  </span>                                       
-039356,000211: 32,2355           05516                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               <span class="co">#  SET UP LAMBERT JOB</span>
-039357,000212: 32,2356  E3,1675                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53504C4F43">SPLOC</a>                                 
-039358,000213: 32,2356           02711 64063                     <span class="ps">2CADR   </span> <a href="#4C414D42534554">LAMBSET</a>                               
-039359,000214: 
-039360,000215: 32,2360           00003                           <span class="op">RELINT  </span>                                       
-039361,000216: 32,2361           10067                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                <span class="co">#  CHECK FOR LAMBERT INTERRUPT</span>
-039362,000217: 32,2362           05532                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4348414E4731">CHANG1</a>                                
-<a name="44554D504C4F43"></a>039363,000218: 32,2363           06112        <span class="sm">DUMPLOC </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               <span class="co">#  HIGH PRIO FOR LAMB DURING PREBURN PASS</span>
-039364,000219: 32,2364           41575                           <span class="in">VLOAD   </span> <span class="in">PUSH      </span>                            <span class="co">#  WILL CAUSE INTERRUPT HERE.</span>
-039365,000220: 32,2365           02324                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5630564543">V0VEC</a>                                 <span class="co">#  LOAD V0VEC, RESCALE FOR ASCENT</span>
+039322,000171: 32,2306           45316                           <span class="in">DSQ     </span> <span class="in">DSU       </span>                            <span class="co">#  (RCO(2)-YCO(2))X2(2N-60)              16</span>
+039323,000172: 32,2307           74366                           <span class="in">SQRT    </span> <span class="in">VXSC      </span>                            <span class="co">#  (RCO(2)-YCO(2))(1/2)X2(N-30)XPDL(10)  10</span>
+039324,000173: 32,2310           65372                           <span class="in">VSL1    </span> <span class="in">PDDL      </span>                            <span class="co">#  SHIFT TO ROOT*(SSIN+PCOS)*2(N-31)</span>
+039325,000174: 32,2311           00041                                    32D                                   <span class="co">#  STORE PS TERMS IN PDL(10),LOAD YCO    16</span>
+039326,000175: 32,2312           53361                           <span class="in">VXSC    </span> <span class="in">VAD       </span>                            <span class="co">#  QYCOX2(N-31)</span>
+039327,000176: 32,2313           02007                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5141584953">QAXIS</a>                                 <span class="co">#  ADD PS TERMS,GET RCOX2(N-31)          10</span>
+039328,000177: 32,2314           77772                           <span class="in">VSL1    </span>                                       <span class="co">#  SHIFT TO RCOV*2(N-30)</span>
+039329,000178: 32,2315           77614                           <span class="in">BOFF    </span>                                       
+039330,000179: 32,2316           02350                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#50415353">PASS</a>                                  
+039331,000180: 32,2317           64321                                    <a href="#4F4C4452434F">OLDRCO</a>                                
+039332,000181: 32,2320           02340                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52434F56">RCOV</a>                                  <span class="co">#  STORE CUTOFF POSITION</span>
+<a name="4F4C4452434F"></a>039333,000182: 32,2321           03614        <span class="sm">OLDRCO  </span>           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52434F54454D5056">RCOTEMPV</a>                              
+039334,000183: 32,2322           53435                           <span class="in">VXV     </span> <span class="in">UNIT      </span>                            
+039335,000184: 32,2323           02365                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5231564543">R1VEC</a>                                 
+039336,000185: 32,2324           52165                           <span class="in">SIGN    </span> <span class="in">GOTO      </span>                            
+039337,000186: 32,2325           03622                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54414735">TAG5</a>                                  <span class="co">#  PATCH IN THRUST MAGNITUDE FILTER LOG</span>
+039338,000187: 32,2326           65054                                    <a href="THRUST_MAGNITUDE_FILTER.agc.html#4153435041544348">ASCPATCH</a>                              <span class="co">#  SECTION SO IT IS AT END OF BANK.</span>
+039339,000188: 
+<a name="454E445041544348"></a>039340,000189: 32,2327           02153        <span class="sm">ENDPATCH</span>           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5552434F">URCO</a>                                  
+039341,000190: 32,2330           53435                           <span class="in">VXV     </span> <span class="in">UNIT      </span>                            <span class="co">#  GET LOCAL Z-AXIS</span>
+039342,000191: 32,2331           02007                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5141584953">QAXIS</a>                                 
+039343,000192: 32,2332           77601                           <span class="in">SETPD   </span>                                       <span class="co">#  CLEAR PDC</span>
+039344,000193: 32,2333           00001                                    00D                                   <span class="co">#  RESET PDC TO 0                         0</span>
+039345,000194: 32,2334           16133                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4831">H1</a>                                    <span class="co">#  STORE H1</span>
+039346,000195: 32,2335           02373                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54494E54">TINT</a>                                  <span class="co">#  LOAD TINT*2(-28)</span>
+039347,000196: 32,2336           43025                           <span class="in">DSU     </span> <span class="in">BON       </span>                            
+039348,000197: 32,2337           02053                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54434F">TCO</a>                                   <span class="co">#  IF PASS=1, USE RAW TFL</span>
+039349,000198: 32,2340           02310                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#50415353">PASS</a>                                  
+039350,000199: 32,2341           64344                                    <a href="#5553454954">USEIT</a>                                 <span class="co">#  IF PASS=0, AVERAGE TFL</span>
+039351,000200: 32,2342           70415                           <span class="in">DAD     </span> <span class="in">SR1       </span>                            
+039352,000201: 32,2343           02143                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54464C">TFL</a>                                   
+<a name="5553454954"></a>039353,000202: 32,2344           02143        <span class="sm">USEIT   </span>           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54464C">TFL</a>                                   
+039354,000203: 32,2345           77614                           <span class="in">CLEAR   </span>                                       
+039355,000204: 32,2346           02261                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#444F4E455357">DONESW</a>                                
+039356,000205: 32,2347           77614                           <span class="in">BONCLR  </span>                                       
+039357,000206: 32,2350           02200                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F4E565357">CONVSW</a>                                <span class="co">#  LAMBERT'S ITERATING PROCESS IS NOT</span>
+039358,000207: 32,2351           65001                                    <a href="#415343414C41524D">ASCALARM</a>                              <span class="co">#  CONVERGING WELL TO VOVEC - HENCE ALARM</span>
+039359,000208: 32,2352           77776                           <span class="in">EXIT    </span>                                       
+<a name="414C41524D524554"></a>039360,000209: 32,2353           31451        <span class="sm">ALARMRET</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C414D5052494F">LAMPRIO</a>                               
+039361,000210: 32,2354           00004                           <span class="op">INHINT  </span>                                       
+039362,000211: 32,2355           05516                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               <span class="co">#  SET UP LAMBERT JOB</span>
+039363,000212: 32,2356  E3,1675                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53504C4F43">SPLOC</a>                                 
+039364,000213: 32,2356           02711 64063                     <span class="ps">2CADR   </span> <a href="#4C414D42534554">LAMBSET</a>                               
+039365,000214: 
+039366,000215: 32,2360           00003                           <span class="op">RELINT  </span>                                       
+039367,000216: 32,2361           10067                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                <span class="co">#  CHECK FOR LAMBERT INTERRUPT</span>
+039368,000217: 32,2362           05532                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4348414E4731">CHANG1</a>                                
+<a name="44554D504C4F43"></a>039369,000218: 32,2363           06112        <span class="sm">DUMPLOC </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               <span class="co">#  HIGH PRIO FOR LAMB DURING PREBURN PASS</span>
+039370,000219: 32,2364           41575                           <span class="in">VLOAD   </span> <span class="in">PUSH      </span>                            <span class="co">#  WILL CAUSE INTERRUPT HERE.</span>
+039371,000220: 32,2365           02324                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5630564543">V0VEC</a>                                 <span class="co">#  LOAD V0VEC, RESCALE FOR ASCENT</span>
 </pre>
 </span>
 </p>
@@ -385,57 +385,57 @@ Page 917
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-039367,000222: 32,2366           72441                           <span class="in">DOT     </span> <span class="in">SL1       </span>                            <span class="co">#  V1*2(-7) IN PDL(0)</span>
-039368,000223: 32,2367           02153                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5552434F">URCO</a>                                  <span class="co">#  V1.URCO=RDOTD*2(-8)</span>
-039369,000224: 32,2370           26041                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52444F5444">RDOTD</a>                                 <span class="co">#  STORE IN RDOTD</span>
-039370,000225: 32,2371           00001                                    00D                                   <span class="co">#  LOAD V1*2(-7)</span>
-039371,000226: 32,2372           72441                           <span class="in">DOT     </span> <span class="in">SL1       </span>                            <span class="co">#  V1.N1*2(-8)=ZDOTD*2(-8)</span>
-039372,000227: 32,2373           02133                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4831">H1</a>                                    <span class="co">#  SHIFT TO 2(-7)</span>
-039373,000228: 32,2374           26045                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A444F5444">ZDOTD</a>                                 <span class="co">#  STORE IN ZDOTD,LOAD URCO*2(-1)</span>
-039374,000229: 32,2375           02153                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5552434F">URCO</a>                                  
-039375,000230: 32,2376           50235                           <span class="in">VXV     </span> <span class="in">DOT       </span>                            <span class="co">#  URCOXH1*2(-2)=-UYCO*2(-2)</span>
-039376,000231: 32,2377           02133                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4831">H1</a>                                    <span class="co">#  -UYCO.V1*2(-9)=-YDOTD*2(-9)            0</span>
-039377,000232: 32,2400           57512                           <span class="in">SL2     </span> <span class="in">DCOMP     </span>                            <span class="co">#  +YDOTD*2(-7)</span>
-039378,000233: 32,2401           26043                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#59444F5444">YDOTD</a>                                 
-039379,000234: 32,2402           03614                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52434F54454D5056">RCOTEMPV</a>                              
-039380,000235: 32,2403           02340                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52434F56">RCOV</a>                                  
-<a name="4741494E"></a>039381,000236: 32,2404           40345        <span class="sm">GAIN    </span>           <span class="in">DLOAD   </span> <span class="in">SETPD     </span>                            <span class="co">#  LOAD YDOTD</span>
-039382,000237: 32,2405           02043                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#59444F5444">YDOTD</a>                                 
-039383,000238: 32,2406           00003                                    02D                                   <span class="co">#  SET PDC AT 2                           2</span>
-039384,000239: 32,2407           41425                           <span class="in">DSU     </span> <span class="in">PUSH      </span>                            <span class="co">#  (YDOTD-YDOT)X2(-7)=DYDOTX2(-7)</span>
-039385,000240: 32,2410           02067                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#59444F54">YDOT</a>                                  <span class="co">#  STORE IN PDL(2)                        4</span>
-039386,000241: 32,2411           14041                           <span class="in">STODL   </span> 32D                                   <span class="co">#  STORE DYDOT IN 32                     (2</span>
-039387,000242: 32,2412           02045                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A444F5444">ZDOTD</a>                                 <span class="co">#  LOAD ZDOT</span>
-039388,000243: 32,2413           77625                           <span class="in">DSU     </span>                                       
-039389,000244: 32,2414           02105                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A444F54">ZDOT</a>                                  
-039390,000245: 32,2415           00001                           <span class="in">STORE   </span> 00D                                   <span class="co">#  STORE IN PDL(0)</span>
-039391,000246: 32,2416           14037                           <span class="in">STODL   </span> 30D                                   <span class="co">#  ALSO IN 30</span>
-039392,000247: 32,2417           02111                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#47454646">GEFF</a>                                  <span class="co">#  LOAD GEFF</span>
-039393,000248: 32,2420           72405                           <span class="in">DMP     </span> <span class="in">SL1       </span>                            <span class="co">#  GEFF TGOX2(-8)</span>
-039394,000249: 32,2421           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   <span class="co">#  SHIFT TO 2(-7)</span>
-039395,000250: 32,2422           45325                           <span class="in">PDDL    </span> <span class="in">DSU       </span>                            <span class="co">#  STORE IN PDL(4)                        6</span>
-039396,000251: 32,2423           02041                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52444F5444">RDOTD</a>                                 <span class="co">#  LOAD RDOTD</span>
-039397,000252: 32,2424           02147                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52444F54">RDOT</a>                                  <span class="co">#  DRDOTX2(-7)</span>
-039398,000253: 32,2425           00035                           <span class="in">STORE   </span> 28D                                   <span class="co">#  STORE IN 28</span>
-039399,000254: 32,2426           55425                           <span class="in">DSU     </span> <span class="in">VDEF      </span>                            <span class="co">#  DRDOT-TGOGEFF,DEFINE VGX2(-7)        0,4</span>
-039400,000255: 32,2427           77626                           <span class="in">STADR   </span>                                       
-039401,000256: 32,2430           75445                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564756454354">VGVECT</a>                                <span class="co">#  FOR DOWNLINK</span>
-039402,000257: 32,2431           45246                           <span class="in">ABVAL   </span> <span class="in">DSU       </span>                            <span class="co">#  GET VG(SCALAR)</span>
-039403,000258: 32,2432           02057                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#56544F">VTO</a>                                   <span class="co">#  SUBTRACT TAILOFF</span>
-039404,000259: 32,2433           41471                           <span class="in">DDV     </span> <span class="in">PUSH      </span>                            <span class="co">#  VG*2(-7)/V3*2(-7)=VG/VE</span>
-039405,000260: 32,2434           02025                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5645">VE</a>                                    <span class="co">#  STORE IN PDL(0)7)=VG/VE                2</span>
-039406,000261: 32,2435           44205                           <span class="in">DMP     </span> <span class="in">BDSU      </span>                            <span class="co">#  KTVG/VE</span>
-039407,000262: 32,2436           03627                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4B54">KT</a>                                    <span class="co">#  1/2-KTVG/VE</span>
-039408,000263: 32,2437           26641                                    <a href="PREBURN_FOR_APS2.agc.html#44502E35">DP.5</a>                                  
-039409,000264: 32,2440           41215                           <span class="in">DAD     </span> <span class="in">DMP       </span>                            <span class="co">#  1-KTVG/VE</span>
-039410,000265: 32,2441           26641                                    <a href="PREBURN_FOR_APS2.agc.html#44502E35">DP.5</a>                                  <span class="co">#  VG/VE(1-KTVG/VE)=TGO/TBUP              0</span>
-039411,000266: 32,2442           41206                           <span class="in">PUSH    </span> <span class="in">DMP       </span>                            <span class="co">#  STORE TGO/TBUP IN PDL(0)               2</span>
-039412,000267: 32,2443           02027                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54425550">TBUP</a>                                  <span class="co">#  TGOX2(-17)</span>
-039413,000268: 32,2444           02141                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   <span class="co">#  STORE</span>
-039414,000269: 32,2445           50025                           <span class="in">DSU     </span> <span class="in">BMN       </span>                            <span class="co">#  IF TGO SMTHAN 4SEC,GO TO SET UP ENGOFF</span>
-039415,000270: 32,2446           24674                                    <a href="#3253454328313629">2SEC(16)</a>                              <span class="co">#  2*2(-16)=4*2(-17)</span>
-039416,000271: 32,2447           64714                                    <a href="#454E474F4646">ENGOFF</a>                                
-039417,000272: 
+039373,000222: 32,2366           72441                           <span class="in">DOT     </span> <span class="in">SL1       </span>                            <span class="co">#  V1*2(-7) IN PDL(0)</span>
+039374,000223: 32,2367           02153                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5552434F">URCO</a>                                  <span class="co">#  V1.URCO=RDOTD*2(-8)</span>
+039375,000224: 32,2370           26041                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52444F5444">RDOTD</a>                                 <span class="co">#  STORE IN RDOTD</span>
+039376,000225: 32,2371           00001                                    00D                                   <span class="co">#  LOAD V1*2(-7)</span>
+039377,000226: 32,2372           72441                           <span class="in">DOT     </span> <span class="in">SL1       </span>                            <span class="co">#  V1.N1*2(-8)=ZDOTD*2(-8)</span>
+039378,000227: 32,2373           02133                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4831">H1</a>                                    <span class="co">#  SHIFT TO 2(-7)</span>
+039379,000228: 32,2374           26045                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A444F5444">ZDOTD</a>                                 <span class="co">#  STORE IN ZDOTD,LOAD URCO*2(-1)</span>
+039380,000229: 32,2375           02153                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5552434F">URCO</a>                                  
+039381,000230: 32,2376           50235                           <span class="in">VXV     </span> <span class="in">DOT       </span>                            <span class="co">#  URCOXH1*2(-2)=-UYCO*2(-2)</span>
+039382,000231: 32,2377           02133                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4831">H1</a>                                    <span class="co">#  -UYCO.V1*2(-9)=-YDOTD*2(-9)            0</span>
+039383,000232: 32,2400           57512                           <span class="in">SL2     </span> <span class="in">DCOMP     </span>                            <span class="co">#  +YDOTD*2(-7)</span>
+039384,000233: 32,2401           26043                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#59444F5444">YDOTD</a>                                 
+039385,000234: 32,2402           03614                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52434F54454D5056">RCOTEMPV</a>                              
+039386,000235: 32,2403           02340                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52434F56">RCOV</a>                                  
+<a name="4741494E"></a>039387,000236: 32,2404           40345        <span class="sm">GAIN    </span>           <span class="in">DLOAD   </span> <span class="in">SETPD     </span>                            <span class="co">#  LOAD YDOTD</span>
+039388,000237: 32,2405           02043                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#59444F5444">YDOTD</a>                                 
+039389,000238: 32,2406           00003                                    02D                                   <span class="co">#  SET PDC AT 2                           2</span>
+039390,000239: 32,2407           41425                           <span class="in">DSU     </span> <span class="in">PUSH      </span>                            <span class="co">#  (YDOTD-YDOT)X2(-7)=DYDOTX2(-7)</span>
+039391,000240: 32,2410           02067                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#59444F54">YDOT</a>                                  <span class="co">#  STORE IN PDL(2)                        4</span>
+039392,000241: 32,2411           14041                           <span class="in">STODL   </span> 32D                                   <span class="co">#  STORE DYDOT IN 32                     (2</span>
+039393,000242: 32,2412           02045                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A444F5444">ZDOTD</a>                                 <span class="co">#  LOAD ZDOT</span>
+039394,000243: 32,2413           77625                           <span class="in">DSU     </span>                                       
+039395,000244: 32,2414           02105                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A444F54">ZDOT</a>                                  
+039396,000245: 32,2415           00001                           <span class="in">STORE   </span> 00D                                   <span class="co">#  STORE IN PDL(0)</span>
+039397,000246: 32,2416           14037                           <span class="in">STODL   </span> 30D                                   <span class="co">#  ALSO IN 30</span>
+039398,000247: 32,2417           02111                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#47454646">GEFF</a>                                  <span class="co">#  LOAD GEFF</span>
+039399,000248: 32,2420           72405                           <span class="in">DMP     </span> <span class="in">SL1       </span>                            <span class="co">#  GEFF TGOX2(-8)</span>
+039400,000249: 32,2421           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   <span class="co">#  SHIFT TO 2(-7)</span>
+039401,000250: 32,2422           45325                           <span class="in">PDDL    </span> <span class="in">DSU       </span>                            <span class="co">#  STORE IN PDL(4)                        6</span>
+039402,000251: 32,2423           02041                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52444F5444">RDOTD</a>                                 <span class="co">#  LOAD RDOTD</span>
+039403,000252: 32,2424           02147                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52444F54">RDOT</a>                                  <span class="co">#  DRDOTX2(-7)</span>
+039404,000253: 32,2425           00035                           <span class="in">STORE   </span> 28D                                   <span class="co">#  STORE IN 28</span>
+039405,000254: 32,2426           55425                           <span class="in">DSU     </span> <span class="in">VDEF      </span>                            <span class="co">#  DRDOT-TGOGEFF,DEFINE VGX2(-7)        0,4</span>
+039406,000255: 32,2427           77626                           <span class="in">STADR   </span>                                       
+039407,000256: 32,2430           75445                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564756454354">VGVECT</a>                                <span class="co">#  FOR DOWNLINK</span>
+039408,000257: 32,2431           45246                           <span class="in">ABVAL   </span> <span class="in">DSU       </span>                            <span class="co">#  GET VG(SCALAR)</span>
+039409,000258: 32,2432           02057                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#56544F">VTO</a>                                   <span class="co">#  SUBTRACT TAILOFF</span>
+039410,000259: 32,2433           41471                           <span class="in">DDV     </span> <span class="in">PUSH      </span>                            <span class="co">#  VG*2(-7)/V3*2(-7)=VG/VE</span>
+039411,000260: 32,2434           02025                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5645">VE</a>                                    <span class="co">#  STORE IN PDL(0)7)=VG/VE                2</span>
+039412,000261: 32,2435           44205                           <span class="in">DMP     </span> <span class="in">BDSU      </span>                            <span class="co">#  KTVG/VE</span>
+039413,000262: 32,2436           03627                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4B54">KT</a>                                    <span class="co">#  1/2-KTVG/VE</span>
+039414,000263: 32,2437           26641                                    <a href="PREBURN_FOR_APS2.agc.html#44502E35">DP.5</a>                                  
+039415,000264: 32,2440           41215                           <span class="in">DAD     </span> <span class="in">DMP       </span>                            <span class="co">#  1-KTVG/VE</span>
+039416,000265: 32,2441           26641                                    <a href="PREBURN_FOR_APS2.agc.html#44502E35">DP.5</a>                                  <span class="co">#  VG/VE(1-KTVG/VE)=TGO/TBUP              0</span>
+039417,000266: 32,2442           41206                           <span class="in">PUSH    </span> <span class="in">DMP       </span>                            <span class="co">#  STORE TGO/TBUP IN PDL(0)               2</span>
+039418,000267: 32,2443           02027                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54425550">TBUP</a>                                  <span class="co">#  TGOX2(-17)</span>
+039419,000268: 32,2444           02141                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   <span class="co">#  STORE</span>
+039420,000269: 32,2445           50025                           <span class="in">DSU     </span> <span class="in">BMN       </span>                            <span class="co">#  IF TGO SMTHAN 4SEC,GO TO SET UP ENGOFF</span>
+039421,000270: 32,2446           24674                                    <a href="#3253454328313629">2SEC(16)</a>                              <span class="co">#  2*2(-16)=4*2(-17)</span>
+039422,000271: 32,2447           64714                                    <a href="#454E474F4646">ENGOFF</a>                                
+039423,000272: 
 </pre>
 </span>
 </p>
@@ -451,56 +451,56 @@ Page 918
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="4B454550474F494E"></a>039419,000274: 32,2450           47014        <span class="sm">KEEPGOIN</span>           <span class="in">BONCLR  </span> <span class="in">RTB       </span>                            <span class="co">#  DURING PRECOI, GO BACK TO MP4</span>
-039420,000275: 32,2451           02206                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#42414B544F34">BAKTO4</a>                                
-039421,000276: 32,2452           66313                                    <a href="MP4-CONTINGENCY_ORBIT_INSERTION.agc.html#544B4E4F574E">TKNOWN</a>                                
-039422,000277: 32,2453           33454                                    <a href="RTB_OP_CODES.agc.html#4C4F414454494D45">LOADTIME</a>                              
-039423,000278: 32,2454           02107                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D45">TIME</a>                                  
-039424,000279: 32,2455           54345                           <span class="in">DLOAD   </span> <span class="in">SR        </span>                            
-039425,000280: 32,2456           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   <span class="co">#  TGO*2(-17)</span>
-039426,000281: 32,2457           20614                                    11D                                   <span class="co">#  TGO*2(-28)</span>
-039427,000282: 32,2460           02346                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5454474F">TTGO</a>                                  <span class="co">#  FOR DOWNLINK</span>
-039428,000283: 32,2461           43214                           <span class="in">BONCLR  </span> <span class="in">DAD       </span>                            <span class="co">#  IF PASS ON, DO NOT COMPUTE TCO.</span>
-039429,000284: 32,2462           02210                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#50415353">PASS</a>                                  <span class="co">#  CLEAR PASS ,GO TO AFTTCO</span>
-039430,000285: 32,2463           64472                                    <a href="#41465454434F">AFTTCO</a>                                
-039431,000286: 32,2464           02107                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D45">TIME</a>                                  <span class="co">#  T+TGO=TCO*2(-28)</span>
-039432,000287: 32,2465           16053                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54434F">TCO</a>                                   <span class="co">#  STORE TCO                             (2</span>
-039433,000288: 32,2466           24710                                    <a href="#5432">T2</a>                                    <span class="co">#  LOAD T2X2(-17)</span>
-039434,000289: 32,2467           51025                           <span class="in">DSU     </span> <span class="in">BPL       </span>                            <span class="co">#  T2-TGO</span>
-039435,000290: 32,2470           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
-039436,000291: 32,2471           64571                                    <a href="#41494D4552">AIMER</a>                                 <span class="co">#  IF T2-TGO POS,GO TO AIMER</span>
-039437,000292: 
-<a name="41465454434F"></a>039438,000293: 32,2472           45345        <span class="sm">AFTTCO  </span>           <span class="in">DLOAD   </span> <span class="in">DSU       </span>                            <span class="co">#  LOAD TGO*2(-28)</span>
-039439,000294: 32,2473           02107                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D45">TIME</a>                                  <span class="co">#  SUBTRACT 100 CS, 1/2DT</span>
-039440,000295: 32,2474           24664                                    <a href="#3130304353">100CS</a>                                 <span class="co">#  (T-.5DT)*2(-28)</span>
-039441,000296: 32,2475           16055                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54524546">TREF</a>                                  <span class="co">#  *2(-28)</span>
-039442,000297: 32,2476           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   <span class="co">#  LOAD TGOX2(-17)</span>
-039443,000298: 32,2477           43205                           <span class="in">DMP     </span> <span class="in">DAD       </span>                            <span class="co">#  RDOT TGO*2(-24)</span>
-039444,000299: 32,2500           02147                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52444F54">RDOT</a>                                  <span class="co">#  (R+RDOT TGO)*2(-24)</span>
-039445,000300: 32,2501           01047                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524D4147">RMAG</a>                                  
-039446,000301: 32,2502           44342                           <span class="in">SR1     </span> <span class="in">BDSU      </span>                            <span class="co">#  *2(-25)</span>
-039447,000302: 32,2503           02375                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52434F">RCO</a>                                   <span class="co">#  RCO-R-RDOT TGO=DR*2(-25)</span>
-039448,000303: 32,2504           14033                           <span class="in">STODL   </span> 26D                                   <span class="co">#  STORE DR IN 26,LOAD TGO/TBUP</span>
-039449,000304: 32,2505           43221                           <span class="in">BDSU    </span> <span class="in">DAD       </span>                            <span class="co">#  1/2-TGO/TBUP</span>
-039450,000305: 32,2506           26641                                    <a href="PREBURN_FOR_APS2.agc.html#44502E35">DP.5</a>                                  
-039451,000306: 32,2507           26641                                    <a href="PREBURN_FOR_APS2.agc.html#44502E35">DP.5</a>                                  <span class="co">#  1-TGO/TBUP</span>
-039452,000307: 32,2510           77624                           <span class="in">CALL    </span>                                       
-039453,000308: 32,2511           65060                                    <a href="LOGSUB_ROUTINE.agc.html#4C4F47535542">LOGSUB</a>                                <span class="co">#  CALL LOG SUBROUTINE</span>
-039454,000309: 
-039455,000310: 32,2512           41461                           <span class="in">SL      </span> <span class="in">PUSH      </span>                            <span class="co">#  SHIFT TO -L,STORE IN PDL(0)            2</span>
-039456,000311: 32,2513           20206                                    5                                     
-039457,000312: 32,2514           44265                           <span class="in">BDDV    </span> <span class="in">BDSU      </span>                            <span class="co">#  -TGO/L*2(-17)</span>
-039458,000313: 32,2515           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
-039459,000314: 32,2516           02027                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54425550">TBUP</a>                                  <span class="co">#  (TBUP+TGO/L)*2(-17)=D12*2(-17)</span>
-039460,000315: 32,2517           45325                           <span class="in">PDDL    </span> <span class="in">DSU       </span>                            <span class="co">#  D12 IN PDL(2)                          4</span>
-039461,000316: 32,2520           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
-039462,000317: 32,2521           24676                                    <a href="#5433">T3</a>                                    <span class="co">#  TGO-T3</span>
-039463,000318: 32,2522           71244                           <span class="in">BPL     </span> <span class="in">DLOAD     </span>                            <span class="co">#  IF TGO-T3 POS,GO TO RATE</span>
-039464,000319: 32,2523           64531                                    <a href="#5241544552">RATER</a>                                 
-039465,000320: 32,2524           26643                                    <a href="PREBURN_FOR_APS2.agc.html#445030">DP0</a>                                   <span class="co">#  SET B=0</span>
-039466,000321: 32,2525           02131                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052415445">PRATE</a>                                 
-039467,000322: 32,2526           77614                           <span class="in">SETGO   </span>                                       <span class="co">#  SET HC=1,GO TO CONST</span>
-039468,000323: 32,2527           02031                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4843">HC</a>                                    
+<a name="4B454550474F494E"></a>039425,000274: 32,2450           47014        <span class="sm">KEEPGOIN</span>           <span class="in">BONCLR  </span> <span class="in">RTB       </span>                            <span class="co">#  DURING PRECOI, GO BACK TO MP4</span>
+039426,000275: 32,2451           02206                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#42414B544F34">BAKTO4</a>                                
+039427,000276: 32,2452           66313                                    <a href="MP4-CONTINGENCY_ORBIT_INSERTION.agc.html#544B4E4F574E">TKNOWN</a>                                
+039428,000277: 32,2453           33454                                    <a href="RTB_OP_CODES.agc.html#4C4F414454494D45">LOADTIME</a>                              
+039429,000278: 32,2454           02107                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D45">TIME</a>                                  
+039430,000279: 32,2455           54345                           <span class="in">DLOAD   </span> <span class="in">SR        </span>                            
+039431,000280: 32,2456           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   <span class="co">#  TGO*2(-17)</span>
+039432,000281: 32,2457           20614                                    11D                                   <span class="co">#  TGO*2(-28)</span>
+039433,000282: 32,2460           02346                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5454474F">TTGO</a>                                  <span class="co">#  FOR DOWNLINK</span>
+039434,000283: 32,2461           43214                           <span class="in">BONCLR  </span> <span class="in">DAD       </span>                            <span class="co">#  IF PASS ON, DO NOT COMPUTE TCO.</span>
+039435,000284: 32,2462           02210                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#50415353">PASS</a>                                  <span class="co">#  CLEAR PASS ,GO TO AFTTCO</span>
+039436,000285: 32,2463           64472                                    <a href="#41465454434F">AFTTCO</a>                                
+039437,000286: 32,2464           02107                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D45">TIME</a>                                  <span class="co">#  T+TGO=TCO*2(-28)</span>
+039438,000287: 32,2465           16053                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54434F">TCO</a>                                   <span class="co">#  STORE TCO                             (2</span>
+039439,000288: 32,2466           24710                                    <a href="#5432">T2</a>                                    <span class="co">#  LOAD T2X2(-17)</span>
+039440,000289: 32,2467           51025                           <span class="in">DSU     </span> <span class="in">BPL       </span>                            <span class="co">#  T2-TGO</span>
+039441,000290: 32,2470           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
+039442,000291: 32,2471           64571                                    <a href="#41494D4552">AIMER</a>                                 <span class="co">#  IF T2-TGO POS,GO TO AIMER</span>
+039443,000292: 
+<a name="41465454434F"></a>039444,000293: 32,2472           45345        <span class="sm">AFTTCO  </span>           <span class="in">DLOAD   </span> <span class="in">DSU       </span>                            <span class="co">#  LOAD TGO*2(-28)</span>
+039445,000294: 32,2473           02107                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D45">TIME</a>                                  <span class="co">#  SUBTRACT 100 CS, 1/2DT</span>
+039446,000295: 32,2474           24664                                    <a href="#3130304353">100CS</a>                                 <span class="co">#  (T-.5DT)*2(-28)</span>
+039447,000296: 32,2475           16055                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54524546">TREF</a>                                  <span class="co">#  *2(-28)</span>
+039448,000297: 32,2476           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   <span class="co">#  LOAD TGOX2(-17)</span>
+039449,000298: 32,2477           43205                           <span class="in">DMP     </span> <span class="in">DAD       </span>                            <span class="co">#  RDOT TGO*2(-24)</span>
+039450,000299: 32,2500           02147                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52444F54">RDOT</a>                                  <span class="co">#  (R+RDOT TGO)*2(-24)</span>
+039451,000300: 32,2501           01047                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524D4147">RMAG</a>                                  
+039452,000301: 32,2502           44342                           <span class="in">SR1     </span> <span class="in">BDSU      </span>                            <span class="co">#  *2(-25)</span>
+039453,000302: 32,2503           02375                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52434F">RCO</a>                                   <span class="co">#  RCO-R-RDOT TGO=DR*2(-25)</span>
+039454,000303: 32,2504           14033                           <span class="in">STODL   </span> 26D                                   <span class="co">#  STORE DR IN 26,LOAD TGO/TBUP</span>
+039455,000304: 32,2505           43221                           <span class="in">BDSU    </span> <span class="in">DAD       </span>                            <span class="co">#  1/2-TGO/TBUP</span>
+039456,000305: 32,2506           26641                                    <a href="PREBURN_FOR_APS2.agc.html#44502E35">DP.5</a>                                  
+039457,000306: 32,2507           26641                                    <a href="PREBURN_FOR_APS2.agc.html#44502E35">DP.5</a>                                  <span class="co">#  1-TGO/TBUP</span>
+039458,000307: 32,2510           77624                           <span class="in">CALL    </span>                                       
+039459,000308: 32,2511           65060                                    <a href="LOGSUB_ROUTINE.agc.html#4C4F47535542">LOGSUB</a>                                <span class="co">#  CALL LOG SUBROUTINE</span>
+039460,000309: 
+039461,000310: 32,2512           41461                           <span class="in">SL      </span> <span class="in">PUSH      </span>                            <span class="co">#  SHIFT TO -L,STORE IN PDL(0)            2</span>
+039462,000311: 32,2513           20206                                    5                                     
+039463,000312: 32,2514           44265                           <span class="in">BDDV    </span> <span class="in">BDSU      </span>                            <span class="co">#  -TGO/L*2(-17)</span>
+039464,000313: 32,2515           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
+039465,000314: 32,2516           02027                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54425550">TBUP</a>                                  <span class="co">#  (TBUP+TGO/L)*2(-17)=D12*2(-17)</span>
+039466,000315: 32,2517           45325                           <span class="in">PDDL    </span> <span class="in">DSU       </span>                            <span class="co">#  D12 IN PDL(2)                          4</span>
+039467,000316: 32,2520           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
+039468,000317: 32,2521           24676                                    <a href="#5433">T3</a>                                    <span class="co">#  TGO-T3</span>
+039469,000318: 32,2522           71244                           <span class="in">BPL     </span> <span class="in">DLOAD     </span>                            <span class="co">#  IF TGO-T3 POS,GO TO RATE</span>
+039470,000319: 32,2523           64531                                    <a href="#5241544552">RATER</a>                                 
+039471,000320: 32,2524           26643                                    <a href="PREBURN_FOR_APS2.agc.html#445030">DP0</a>                                   <span class="co">#  SET B=0</span>
+039472,000321: 32,2525           02131                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052415445">PRATE</a>                                 
+039473,000322: 32,2526           77614                           <span class="in">SETGO   </span>                                       <span class="co">#  SET HC=1,GO TO CONST</span>
+039474,000323: 32,2527           02031                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4843">HC</a>                                    
 </pre>
 </span>
 </p>
@@ -516,56 +516,56 @@ Page 919
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-039470,000325: 32,2530           64553                                    <a href="#434F4E5354">CONST</a>                                 
-039471,000326: 
-<a name="5241544552"></a>039472,000327: 32,2531           45345        <span class="sm">RATER   </span>           <span class="in">DLOAD   </span> <span class="in">DSU       </span>                            <span class="co">#  TGO</span>
-039473,000328: 32,2532           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
-039474,000329: 32,2533           00003                                    02D                                   <span class="co">#  TGO-D12=D21X2(-17)</span>
-039475,000330: 32,2534           70525                           <span class="in">PDDL    </span> <span class="in">SR1       </span>                            <span class="co">#  D21 IN PDL(4)                          6</span>
-039476,000331: 32,2535           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   <span class="co">#  LOAD TGOX2(-17),SHIFT TO 1/2</span>
-039477,000332: 32,2536           54225                           <span class="in">DSU     </span> <span class="in">SL        </span>                            <span class="co">#  .5TGO-D21=D*2(-17)</span>
-039478,000333: 32,2537           00005                                    04D                                   <span class="co">#  SHIFT TO D*2(-12)</span>
-039479,000334: 32,2540           20206                                    05D                                   
-039480,000335: 32,2541           41325                           <span class="in">PDDL    </span> <span class="in">DMP       </span>                            <span class="co">#  STORE D IN PDL(6),LOADDRDOT*2(-7)      8</span>
-039481,000336: 32,2542           00035                                    28D                                   <span class="co">#  D21 DRDOT*2(-24)</span>
-039482,000337: 32,2543           00005                                    04D                                   
-039483,000338: 32,2544           45342                           <span class="in">SR1     </span> <span class="in">DSU       </span>                            <span class="co">#  SHIFT TO 2(-25)</span>
-039484,000339: 32,2545           00033                                    26D                                   <span class="co">#  (D21 DRDOT-DR)*2(-25)</span>
-039485,000340: 32,2546           56271                           <span class="in">DDV     </span> <span class="in">DDV       </span>                            <span class="co">#  DIVIDE BY TGO*2(-17)</span>
-039486,000341: 32,2547           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   <span class="co">#  DIVIDE BY D*2(-12),GET B*2(4)          6</span>
-039487,000342: 32,2550           77601                           <span class="in">SETPD   </span>                                       <span class="co">#  REDUCE PDC TO 4                        4</span>
-039488,000343: 32,2551           00005                                    04D                                   
-039489,000344: 32,2552           02131                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052415445">PRATE</a>                                 <span class="co">#  STORE B*2(4)</span>
-<a name="434F4E5354"></a>039490,000345: 32,2553           56345        <span class="sm">CONST   </span>           <span class="in">DLOAD   </span> <span class="in">DDV       </span>                            <span class="co">#  LOAD DRDOTX2(-7)</span>
-039491,000346: 32,2554           00035                                    28D                                   <span class="co">#  DRDOT/-LX2(-7)</span>
-039492,000347: 32,2555           00001                                    00D                                   
-039493,000348: 32,2556           65342                           <span class="in">SR1     </span> <span class="in">PDDL      </span>                            <span class="co">#  EXCH DRDOT/-L*2(-8) WITH D12 IN PDL(2) 4</span>
-039494,000349: 32,2557           54205                           <span class="in">DMP     </span> <span class="in">SL        </span>                            <span class="co">#  D12 PRATE*2(-16)</span>
-039495,000350: 32,2560           02131                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5052415445">PRATE</a>                                 <span class="co">#  SHIFT TO 2(-8)</span>
-039496,000351: 32,2561           20206                                    5                                     
-039497,000352: 32,2562           77621                           <span class="in">BDSU    </span>                                       <span class="co">#  PULL DRDOT/-L,GET A*2(-8)              2</span>
-039498,000353: 32,2563           77626                           <span class="in">STADR   </span>                                       
-039499,000354: 32,2564           61664                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50434F4E53">PCONS</a>                                 <span class="co">#  STORE A*2(-8) IN PCONS</span>
-039500,000355: 32,2565           00041                                    32D                                   <span class="co">#  LOAD DYDOTX2(-7)</span>
-039501,000356: 32,2566           70471                           <span class="in">DDV     </span> <span class="in">SR1       </span>                            <span class="co">#  DYDOT/-L*2(-7)=C*2(-7)</span>
-039502,000357: 32,2567           00001                                    00D                                   <span class="co">#  SHIFT TO 2(-8)</span>
-039503,000358: 32,2570           02065                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#59434F4E53">YCONS</a>                                 <span class="co">#  STORE C*2(-8) IN YCONS</span>
-039504,000359: 
-<a name="41494D4552"></a>039505,000360: 32,2571           77601        <span class="sm">AIMER   </span>           <span class="in">SETPD   </span>                                       
-039506,000361: 32,2572           00001                                    00D                                   <span class="co">#                                         0</span>
-039507,000362: 32,2573           45345                           <span class="in">DLOAD   </span> <span class="in">DSU       </span>                            
-039508,000363: 32,2574           02107                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D45">TIME</a>                                  
-039509,000364: 32,2575           02055                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54524546">TREF</a>                                  <span class="co">#  (T-TO)X2(-28)</span>
-039510,000365: 32,2576           54205                           <span class="in">DMP     </span> <span class="in">SL        </span>                            <span class="co">#  B(T-TO)*2(-24)</span>
-039511,000366: 32,2577           02131                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5052415445">PRATE</a>                                 <span class="co">#  SHIFT TO 2(-8)</span>
-039512,000367: 32,2600           20221                                    16D                                   
-039513,000368: 32,2601           56215                           <span class="in">DAD     </span> <span class="in">DDV       </span>                            <span class="co">#  (A+B(T-TO))*2(-8)</span>
-039514,000369: 32,2602           02113                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#50434F4E53">PCONS</a>                                 <span class="co">#  DIVIDE BY TBUP*2(-17)</span>
-039515,000370: 32,2603           02027                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54425550">TBUP</a>                                  
-039516,000371: 32,2604           74225                           <span class="in">DSU     </span> <span class="in">VXSC      </span>                            <span class="co">#  SUBTRACT GEFF, GET ATR*2(9)</span>
-039517,000372: 32,2605           02111                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#47454646">GEFF</a>                                  
-039518,000373: 32,2606           01033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495452">UNITR</a>                                 <span class="co">#  ATR UR*2(8)</span>
-039519,000374: 32,2607           56325                           <span class="in">PDDL    </span> <span class="in">DDV       </span>                            <span class="co">#  STORE IN PDL(0),LOAD C*2(-8)           6      </span>
+039476,000325: 32,2530           64553                                    <a href="#434F4E5354">CONST</a>                                 
+039477,000326: 
+<a name="5241544552"></a>039478,000327: 32,2531           45345        <span class="sm">RATER   </span>           <span class="in">DLOAD   </span> <span class="in">DSU       </span>                            <span class="co">#  TGO</span>
+039479,000328: 32,2532           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
+039480,000329: 32,2533           00003                                    02D                                   <span class="co">#  TGO-D12=D21X2(-17)</span>
+039481,000330: 32,2534           70525                           <span class="in">PDDL    </span> <span class="in">SR1       </span>                            <span class="co">#  D21 IN PDL(4)                          6</span>
+039482,000331: 32,2535           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   <span class="co">#  LOAD TGOX2(-17),SHIFT TO 1/2</span>
+039483,000332: 32,2536           54225                           <span class="in">DSU     </span> <span class="in">SL        </span>                            <span class="co">#  .5TGO-D21=D*2(-17)</span>
+039484,000333: 32,2537           00005                                    04D                                   <span class="co">#  SHIFT TO D*2(-12)</span>
+039485,000334: 32,2540           20206                                    05D                                   
+039486,000335: 32,2541           41325                           <span class="in">PDDL    </span> <span class="in">DMP       </span>                            <span class="co">#  STORE D IN PDL(6),LOADDRDOT*2(-7)      8</span>
+039487,000336: 32,2542           00035                                    28D                                   <span class="co">#  D21 DRDOT*2(-24)</span>
+039488,000337: 32,2543           00005                                    04D                                   
+039489,000338: 32,2544           45342                           <span class="in">SR1     </span> <span class="in">DSU       </span>                            <span class="co">#  SHIFT TO 2(-25)</span>
+039490,000339: 32,2545           00033                                    26D                                   <span class="co">#  (D21 DRDOT-DR)*2(-25)</span>
+039491,000340: 32,2546           56271                           <span class="in">DDV     </span> <span class="in">DDV       </span>                            <span class="co">#  DIVIDE BY TGO*2(-17)</span>
+039492,000341: 32,2547           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   <span class="co">#  DIVIDE BY D*2(-12),GET B*2(4)          6</span>
+039493,000342: 32,2550           77601                           <span class="in">SETPD   </span>                                       <span class="co">#  REDUCE PDC TO 4                        4</span>
+039494,000343: 32,2551           00005                                    04D                                   
+039495,000344: 32,2552           02131                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052415445">PRATE</a>                                 <span class="co">#  STORE B*2(4)</span>
+<a name="434F4E5354"></a>039496,000345: 32,2553           56345        <span class="sm">CONST   </span>           <span class="in">DLOAD   </span> <span class="in">DDV       </span>                            <span class="co">#  LOAD DRDOTX2(-7)</span>
+039497,000346: 32,2554           00035                                    28D                                   <span class="co">#  DRDOT/-LX2(-7)</span>
+039498,000347: 32,2555           00001                                    00D                                   
+039499,000348: 32,2556           65342                           <span class="in">SR1     </span> <span class="in">PDDL      </span>                            <span class="co">#  EXCH DRDOT/-L*2(-8) WITH D12 IN PDL(2) 4</span>
+039500,000349: 32,2557           54205                           <span class="in">DMP     </span> <span class="in">SL        </span>                            <span class="co">#  D12 PRATE*2(-16)</span>
+039501,000350: 32,2560           02131                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5052415445">PRATE</a>                                 <span class="co">#  SHIFT TO 2(-8)</span>
+039502,000351: 32,2561           20206                                    5                                     
+039503,000352: 32,2562           77621                           <span class="in">BDSU    </span>                                       <span class="co">#  PULL DRDOT/-L,GET A*2(-8)              2</span>
+039504,000353: 32,2563           77626                           <span class="in">STADR   </span>                                       
+039505,000354: 32,2564           61664                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50434F4E53">PCONS</a>                                 <span class="co">#  STORE A*2(-8) IN PCONS</span>
+039506,000355: 32,2565           00041                                    32D                                   <span class="co">#  LOAD DYDOTX2(-7)</span>
+039507,000356: 32,2566           70471                           <span class="in">DDV     </span> <span class="in">SR1       </span>                            <span class="co">#  DYDOT/-L*2(-7)=C*2(-7)</span>
+039508,000357: 32,2567           00001                                    00D                                   <span class="co">#  SHIFT TO 2(-8)</span>
+039509,000358: 32,2570           02065                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#59434F4E53">YCONS</a>                                 <span class="co">#  STORE C*2(-8) IN YCONS</span>
+039510,000359: 
+<a name="41494D4552"></a>039511,000360: 32,2571           77601        <span class="sm">AIMER   </span>           <span class="in">SETPD   </span>                                       
+039512,000361: 32,2572           00001                                    00D                                   <span class="co">#                                         0</span>
+039513,000362: 32,2573           45345                           <span class="in">DLOAD   </span> <span class="in">DSU       </span>                            
+039514,000363: 32,2574           02107                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D45">TIME</a>                                  
+039515,000364: 32,2575           02055                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54524546">TREF</a>                                  <span class="co">#  (T-TO)X2(-28)</span>
+039516,000365: 32,2576           54205                           <span class="in">DMP     </span> <span class="in">SL        </span>                            <span class="co">#  B(T-TO)*2(-24)</span>
+039517,000366: 32,2577           02131                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5052415445">PRATE</a>                                 <span class="co">#  SHIFT TO 2(-8)</span>
+039518,000367: 32,2600           20221                                    16D                                   
+039519,000368: 32,2601           56215                           <span class="in">DAD     </span> <span class="in">DDV       </span>                            <span class="co">#  (A+B(T-TO))*2(-8)</span>
+039520,000369: 32,2602           02113                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#50434F4E53">PCONS</a>                                 <span class="co">#  DIVIDE BY TBUP*2(-17)</span>
+039521,000370: 32,2603           02027                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54425550">TBUP</a>                                  
+039522,000371: 32,2604           74225                           <span class="in">DSU     </span> <span class="in">VXSC      </span>                            <span class="co">#  SUBTRACT GEFF, GET ATR*2(9)</span>
+039523,000372: 32,2605           02111                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#47454646">GEFF</a>                                  
+039524,000373: 32,2606           01033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495452">UNITR</a>                                 <span class="co">#  ATR UR*2(8)</span>
+039525,000374: 32,2607           56325                           <span class="in">PDDL    </span> <span class="in">DDV       </span>                            <span class="co">#  STORE IN PDL(0),LOAD C*2(-8)           6      </span>
 </pre>
 </span>
 </p>
@@ -581,55 +581,55 @@ Page 920
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-039521,000376: 32,2610           02065                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#59434F4E53">YCONS</a>                                 
-039522,000377: 32,2611           02027                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54425550">TBUP</a>                                  <span class="co">#  C/TBUP*2(9)=ATY*2(9)</span>
-039523,000378: 32,2612           53361                           <span class="in">VXSC    </span> <span class="in">VAD       </span>                            <span class="co">#  ATY LAXIS*2(8)</span>
-039524,000379: 32,2613           02071                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4C41584953">LAXIS</a>                                 <span class="co">#  (ATY LAXIS+ATR UR)*2(8)=AH*2(8)        0</span>
-039525,000380: 32,2614           41572                           <span class="in">VSL1    </span> <span class="in">PUSH      </span>                            <span class="co">#  SHIFT TO AH*2(9),STORE IN PDL(0)       6</span>
-039526,000381: 32,2615           65246                           <span class="in">ABVAL   </span> <span class="in">PDDL      </span>                            <span class="co">#  AH2X2(18) IN PDL(34),AHMAG IN MPAC</span>
-039527,000382: 32,2616           02023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4154">AT</a>                                    <span class="co">#  STORE AHMAG IN PDL( 6),LOAD AT         8</span>
-039528,000383: 32,2617           45316                           <span class="in">DSQ     </span> <span class="in">DSU       </span>                            <span class="co">#  AT(2)X2(18)</span>
-039529,000384: 32,2620           00043                                    34D                                   <span class="co">#  (AT(2)-AH2)X2(18)=ATP2X2(18)</span>
-039530,000385: 32,2621           41325                           <span class="in">PDDL    </span> <span class="in">DMP       </span>                            <span class="co">#  STORE IN PDL( 8)                      10</span>
-039531,000386: 32,2622           02023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4154">AT</a>                                    <span class="co">#  LOAD AT X2(9)</span>
-039532,000387: 32,2623           02061                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4B52">KR</a>                                    <span class="co">#  AT KRX2(8)</span>
-039533,000388: 32,2624           41552                           <span class="in">SL1     </span> <span class="in">PUSH      </span>                            <span class="co">#  2(9),STORE IN PDL(10)                 12</span>
-039534,000389: 32,2625           45316                           <span class="in">DSQ     </span> <span class="in">DSU       </span>                            <span class="co">#  AT(2)KR(2)X2(18)</span>
-039535,000390: 32,2626           00043                                    34D                                   <span class="co">#   -AH2X2(18) =ATP3X2(18)</span>
-039536,000391: 32,2627           71240                           <span class="in">BMN     </span> <span class="in">DLOAD     </span>                            <span class="co">#  IF ATP3 NEG,GO TO AIMING</span>
-039537,000392: 32,2630           64635                                    <a href="#41494D494E47">AIMING</a>                                
-039538,000393: 32,2631           00011                                    8D                                    <span class="co">#  LOAD ATP2X2(18)</span>
-039539,000394: 32,2632           77766                           <span class="in">SQRT    </span>                                       <span class="co">#  ATPX2(9)</span>
-039540,000395: 32,2633           77650                           <span class="in">GOTO    </span>                                       
-039541,000396: 32,2634           64645                                    <a href="#41494D4544">AIMED</a>                                 
-039542,000397: 
-<a name="41494D494E47"></a>039543,000398: 32,2635           55345        <span class="sm">AIMING  </span>           <span class="in">DLOAD   </span> <span class="in">BDDV      </span>                            <span class="co">#  KR AT/AH=KH FROMPDL(10,6)              8</span>
-039544,000399: 32,2636           00007                                    06D                                   
-039545,000400: 32,2637           77761                           <span class="in">VXSC    </span>                                       <span class="co">#  KH AH*2(9)</span>
-039546,000401: 32,2640           00001                                    00D                                   
-039547,000402: 32,2641           14001                           <span class="in">STODL   </span> 00D                                   <span class="co">#  STORE NEW AH IN PDL(0)</span>
-039548,000403: 32,2642           02023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4154">AT</a>                                    <span class="co">#  LOAD ATX2(9)</span>
-039549,000404: 32,2643           77605                           <span class="in">DMP     </span>                                       <span class="co">#  AT(1-KR(2))(1/2)X2(9)=ATPX2(9)</span>
-039550,000405: 32,2644           02037                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4B5231">KR1</a>                                   
-039551,000406: 
-<a name="41494D4544"></a>039552,000407: 32,2645           74365        <span class="sm">AIMED   </span>           <span class="in">SIGN    </span> <span class="in">VXSC      </span>                            <span class="co">#  GIVE SIGN TO ATP</span>
-039553,000408: 32,2646           00037                                    30D                                   
-039554,000409: 32,2647           02077                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A41584953">ZAXIS</a>                                 <span class="co">#  ATP ZAXISX2(8)</span>
-039555,000410: 32,2650           53372                           <span class="in">VSL1    </span> <span class="in">VAD       </span>                            <span class="co">#  ATP ZAXISX2(9)</span>
-039556,000411: 32,2651           00001                                    00D                                   <span class="co">#  (ATPZAXIS+AH)X2(9)</span>
-039557,000412: 32,2652           77656                           <span class="in">UNIT    </span>                                       <span class="co">#  GET UT*2(-1)</span>
-039558,000413: 32,2653           02233                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4158495344">AXISD</a>                                 
-039559,000414: 32,2654           45001                           <span class="in">SETPD   </span> <span class="in">CALL      </span>                            
-039560,000415: 32,2655           00001                                    0                                     
-039561,000416: 32,2656           02050                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#415343524554">ASCRET</a>                                
-039562,000417: 32,2657           77776                           <span class="in">EXIT    </span>                                       
-<a name="4153435445524D"></a>039563,000418: 32,2660           04161        <span class="sm">ASCTERM </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              <span class="co">#  THE SERVEXIT PHASE CHANGE</span>
-039564,000419: 32,2661           00035                           <span class="ps">OCT     </span> 00035                                 
-039565,000420: 32,2662           15567                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-039566,000421: 
-<a name="3130304353"></a>039567,000422: 32,2663           00000 00144  <span class="sm">100CS   </span>           <span class="ps">2DEC    </span> 100        B-28                       
-039568,000423: 
-039569,000424: 32,2665           12702 21727                     <span class="ps">2DEC    </span> 0.34                                  <span class="co">#  KT WAS HERE, BUT NOW IS IN ERASABLE.  </span>
+039527,000376: 32,2610           02065                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#59434F4E53">YCONS</a>                                 
+039528,000377: 32,2611           02027                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54425550">TBUP</a>                                  <span class="co">#  C/TBUP*2(9)=ATY*2(9)</span>
+039529,000378: 32,2612           53361                           <span class="in">VXSC    </span> <span class="in">VAD       </span>                            <span class="co">#  ATY LAXIS*2(8)</span>
+039530,000379: 32,2613           02071                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4C41584953">LAXIS</a>                                 <span class="co">#  (ATY LAXIS+ATR UR)*2(8)=AH*2(8)        0</span>
+039531,000380: 32,2614           41572                           <span class="in">VSL1    </span> <span class="in">PUSH      </span>                            <span class="co">#  SHIFT TO AH*2(9),STORE IN PDL(0)       6</span>
+039532,000381: 32,2615           65246                           <span class="in">ABVAL   </span> <span class="in">PDDL      </span>                            <span class="co">#  AH2X2(18) IN PDL(34),AHMAG IN MPAC</span>
+039533,000382: 32,2616           02023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4154">AT</a>                                    <span class="co">#  STORE AHMAG IN PDL( 6),LOAD AT         8</span>
+039534,000383: 32,2617           45316                           <span class="in">DSQ     </span> <span class="in">DSU       </span>                            <span class="co">#  AT(2)X2(18)</span>
+039535,000384: 32,2620           00043                                    34D                                   <span class="co">#  (AT(2)-AH2)X2(18)=ATP2X2(18)</span>
+039536,000385: 32,2621           41325                           <span class="in">PDDL    </span> <span class="in">DMP       </span>                            <span class="co">#  STORE IN PDL( 8)                      10</span>
+039537,000386: 32,2622           02023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4154">AT</a>                                    <span class="co">#  LOAD AT X2(9)</span>
+039538,000387: 32,2623           02061                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4B52">KR</a>                                    <span class="co">#  AT KRX2(8)</span>
+039539,000388: 32,2624           41552                           <span class="in">SL1     </span> <span class="in">PUSH      </span>                            <span class="co">#  2(9),STORE IN PDL(10)                 12</span>
+039540,000389: 32,2625           45316                           <span class="in">DSQ     </span> <span class="in">DSU       </span>                            <span class="co">#  AT(2)KR(2)X2(18)</span>
+039541,000390: 32,2626           00043                                    34D                                   <span class="co">#   -AH2X2(18) =ATP3X2(18)</span>
+039542,000391: 32,2627           71240                           <span class="in">BMN     </span> <span class="in">DLOAD     </span>                            <span class="co">#  IF ATP3 NEG,GO TO AIMING</span>
+039543,000392: 32,2630           64635                                    <a href="#41494D494E47">AIMING</a>                                
+039544,000393: 32,2631           00011                                    8D                                    <span class="co">#  LOAD ATP2X2(18)</span>
+039545,000394: 32,2632           77766                           <span class="in">SQRT    </span>                                       <span class="co">#  ATPX2(9)</span>
+039546,000395: 32,2633           77650                           <span class="in">GOTO    </span>                                       
+039547,000396: 32,2634           64645                                    <a href="#41494D4544">AIMED</a>                                 
+039548,000397: 
+<a name="41494D494E47"></a>039549,000398: 32,2635           55345        <span class="sm">AIMING  </span>           <span class="in">DLOAD   </span> <span class="in">BDDV      </span>                            <span class="co">#  KR AT/AH=KH FROMPDL(10,6)              8</span>
+039550,000399: 32,2636           00007                                    06D                                   
+039551,000400: 32,2637           77761                           <span class="in">VXSC    </span>                                       <span class="co">#  KH AH*2(9)</span>
+039552,000401: 32,2640           00001                                    00D                                   
+039553,000402: 32,2641           14001                           <span class="in">STODL   </span> 00D                                   <span class="co">#  STORE NEW AH IN PDL(0)</span>
+039554,000403: 32,2642           02023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4154">AT</a>                                    <span class="co">#  LOAD ATX2(9)</span>
+039555,000404: 32,2643           77605                           <span class="in">DMP     </span>                                       <span class="co">#  AT(1-KR(2))(1/2)X2(9)=ATPX2(9)</span>
+039556,000405: 32,2644           02037                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4B5231">KR1</a>                                   
+039557,000406: 
+<a name="41494D4544"></a>039558,000407: 32,2645           74365        <span class="sm">AIMED   </span>           <span class="in">SIGN    </span> <span class="in">VXSC      </span>                            <span class="co">#  GIVE SIGN TO ATP</span>
+039559,000408: 32,2646           00037                                    30D                                   
+039560,000409: 32,2647           02077                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5A41584953">ZAXIS</a>                                 <span class="co">#  ATP ZAXISX2(8)</span>
+039561,000410: 32,2650           53372                           <span class="in">VSL1    </span> <span class="in">VAD       </span>                            <span class="co">#  ATP ZAXISX2(9)</span>
+039562,000411: 32,2651           00001                                    00D                                   <span class="co">#  (ATPZAXIS+AH)X2(9)</span>
+039563,000412: 32,2652           77656                           <span class="in">UNIT    </span>                                       <span class="co">#  GET UT*2(-1)</span>
+039564,000413: 32,2653           02233                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4158495344">AXISD</a>                                 
+039565,000414: 32,2654           45001                           <span class="in">SETPD   </span> <span class="in">CALL      </span>                            
+039566,000415: 32,2655           00001                                    0                                     
+039567,000416: 32,2656           02050                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#415343524554">ASCRET</a>                                
+039568,000417: 32,2657           77776                           <span class="in">EXIT    </span>                                       
+<a name="4153435445524D"></a>039569,000418: 32,2660           04161        <span class="sm">ASCTERM </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              <span class="co">#  THE SERVEXIT PHASE CHANGE</span>
+039570,000419: 32,2661           00035                           <span class="ps">OCT     </span> 00035                                 
+039571,000420: 32,2662           15567                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+039572,000421: 
+<a name="3130304353"></a>039573,000422: 32,2663           00000 00144  <span class="sm">100CS   </span>           <span class="ps">2DEC    </span> 100        B-28                       
+039574,000423: 
+039575,000424: 32,2665           12702 21727                     <span class="ps">2DEC    </span> 0.34                                  <span class="co">#  KT WAS HERE, BUT NOW IS IN ERASABLE.  </span>
 </pre>
 </span>
 </p>
@@ -645,56 +645,56 @@ Page 921
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="4450332F3830"></a>039571,000426: 32,2667           01146 14632  <span class="sm">DP3/80  </span>           <span class="ps">2DEC    </span> 0.0375                                
-039572,000427: 
-<a name="3253454328313829"></a>039573,000428: 32,2671           00014 20000  <span class="sm">2SEC(18)</span>           <span class="ps">2DEC    </span> 200        B-18                       
-039574,000429: 
-<a name="3253454328313629"></a>039575,000430: 32,2673           00062 00000  <span class="sm">2SEC(16)</span>           <span class="ps">2DEC    </span> 200        B-16                       
-039576,000431: 
-<a name="5433"></a>039577,000432: 32,2675           00175 00000  <span class="sm">T3      </span>           <span class="ps">2DEC    </span> 1000       B-17                       
-039578,000433: 
-<a name="312F31325448"></a>039579,000434: 32,2677           02525 12525  <span class="sm">1/12TH  </span>           <span class="ps">2DEC    </span> 0.083333333                            
-039580,000435: 
-<a name="44502E3235"></a>039581,000436: 32,2701           10000 00000  <span class="sm">DP.25   </span>           <span class="ps">2DEC    </span> 0.25                                  
-039582,000437: 
-<a name="4450322F3348"></a>039583,000438: 32,2703           25252 25253  <span class="sm">DP2/3H  </span>           <span class="ps">2DEC    </span> .666666667                            
-039584,000439: 
-<a name="4454415343"></a>039585,000440: 32,2705           00031 00000  <span class="sm">DTASC   </span>           <span class="ps">2DEC    </span> 200        B-17                       
-039586,000441: 
-<a name="5432"></a>039587,000442: 32,2707           00031 00000  <span class="sm">T2      </span>           <span class="ps">2DEC    </span> 200        B-17                       
-039588,000443: 
-<a name="4C414D42534554"></a>039589,000444: 32,2711           06112        <span class="sm">LAMBSET </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               <span class="co">#  CALL FOR LAMBERT SUBR.</span>
-039590,000445: 32,2712           77624                           <span class="in">CALL    </span>                                       
-039591,000446: 32,2713           74625                                    <a href="LAMB.agc.html#4C414D42455254">LAMBERT</a>                               
-<a name="454E474F4646"></a>039592,000447: 32,2714           71214        <span class="sm">ENGOFF  </span>           <span class="in">BON     </span> <span class="in">DLOAD     </span>                            
-039593,000448: 32,2715           02313                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#454E474F46465357">ENGOFFSW</a>                              
-039594,000449: 32,2716           64450                                    <a href="#4B454550474F494E">KEEPGOIN</a>                              
-039595,000450: 32,2717           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
-039596,000451: 32,2720           77452                           <span class="in">SL3     </span> <span class="in">EXIT      </span>                            
-039597,000452: 32,2721           00004                           <span class="op">INHINT  </span>                                       
-039598,000453: 32,2722           37751                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#4542414E4B34">EBANK4</a>                                <span class="co">#  INSURE THAT THE EBANK IS SET PROPERLY</span>
-039599,000454: 32,2723           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
-039600,000455: 32,2724  E4,1540                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
-039601,000456: 32,2724           30144                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-039602,000457: 32,2725           55566                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E474F46464454">ENGOFFDT</a>                              
-039603,000458: 32,2726           00006                           <span class="op">EXTEND  </span>                                       
-039604,000459: 32,2727           62751                           <span class="op">BZMF    </span> <a href="#454E474F464632">ENGOFF2</a>                               
-039605,000460: 32,2730           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-039606,000461: 32,2731  E4,1540                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
-039607,000462: 32,2731           02757 64064                     <span class="ps">2CADR   </span> <a href="#454E474F464633">ENGOFF3</a>                               
-039608,000463: 
-039609,000464: 32,2733           40100                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524434">FLAGWRD4</a>                              <span class="co">#  BYPASS PHASCHNG WHEN IN MP 13.</span>
-039610,000465: 32,2734           77754                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#42495438">BIT8</a>                                  
-039611,000466: 32,2735           00006                           <span class="op">EXTEND  </span>                                       
-039612,000467: 32,2736           12744                           <span class="op">BZF     </span> <a href="#454E474F464631">ENGOFF1</a>                               
-039613,000468: 
-039614,000469: 32,2737           04161                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              <span class="co">#  RESTART PROTECTION FOR ENGINOFF CALL</span>
-039615,000470: 32,2740           47012                           <span class="ps">OCT     </span> 47012                                 
-039616,000471: 32,2741           76211                           <span class="ps">-GENADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E474F46464454">ENGOFFDT</a>                              
-039617,000472: 32,2742  E4,1540                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
-039618,000473: 32,2742           02757 64064                     <span class="ps">2CADR   </span> <a href="#454E474F464633">ENGOFF3</a>                               
-039619,000474: 
-<a name="454E474F464631"></a>039620,000475: 32,2744           00003        <span class="sm">ENGOFF1 </span>           <span class="op">RELINT  </span>                                       
+<a name="4450332F3830"></a>039577,000426: 32,2667           01146 14632  <span class="sm">DP3/80  </span>           <span class="ps">2DEC    </span> 0.0375                                
+039578,000427: 
+<a name="3253454328313829"></a>039579,000428: 32,2671           00014 20000  <span class="sm">2SEC(18)</span>           <span class="ps">2DEC    </span> 200        B-18                       
+039580,000429: 
+<a name="3253454328313629"></a>039581,000430: 32,2673           00062 00000  <span class="sm">2SEC(16)</span>           <span class="ps">2DEC    </span> 200        B-16                       
+039582,000431: 
+<a name="5433"></a>039583,000432: 32,2675           00175 00000  <span class="sm">T3      </span>           <span class="ps">2DEC    </span> 1000       B-17                       
+039584,000433: 
+<a name="312F31325448"></a>039585,000434: 32,2677           02525 12525  <span class="sm">1/12TH  </span>           <span class="ps">2DEC    </span> 0.083333333                            
+039586,000435: 
+<a name="44502E3235"></a>039587,000436: 32,2701           10000 00000  <span class="sm">DP.25   </span>           <span class="ps">2DEC    </span> 0.25                                  
+039588,000437: 
+<a name="4450322F3348"></a>039589,000438: 32,2703           25252 25253  <span class="sm">DP2/3H  </span>           <span class="ps">2DEC    </span> .666666667                            
+039590,000439: 
+<a name="4454415343"></a>039591,000440: 32,2705           00031 00000  <span class="sm">DTASC   </span>           <span class="ps">2DEC    </span> 200        B-17                       
+039592,000441: 
+<a name="5432"></a>039593,000442: 32,2707           00031 00000  <span class="sm">T2      </span>           <span class="ps">2DEC    </span> 200        B-17                       
+039594,000443: 
+<a name="4C414D42534554"></a>039595,000444: 32,2711           06112        <span class="sm">LAMBSET </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               <span class="co">#  CALL FOR LAMBERT SUBR.</span>
+039596,000445: 32,2712           77624                           <span class="in">CALL    </span>                                       
+039597,000446: 32,2713           74625                                    <a href="LAMB.agc.html#4C414D42455254">LAMBERT</a>                               
+<a name="454E474F4646"></a>039598,000447: 32,2714           71214        <span class="sm">ENGOFF  </span>           <span class="in">BON     </span> <span class="in">DLOAD     </span>                            
+039599,000448: 32,2715           02313                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#454E474F46465357">ENGOFFSW</a>                              
+039600,000449: 32,2716           64450                                    <a href="#4B454550474F494E">KEEPGOIN</a>                              
+039601,000450: 32,2717           02141                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
+039602,000451: 32,2720           77452                           <span class="in">SL3     </span> <span class="in">EXIT      </span>                            
+039603,000452: 32,2721           00004                           <span class="op">INHINT  </span>                                       
+039604,000453: 32,2722           37751                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#4542414E4B34">EBANK4</a>                                <span class="co">#  INSURE THAT THE EBANK IS SET PROPERLY</span>
+039605,000454: 32,2723           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
+039606,000455: 32,2724  E4,1540                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
+039607,000456: 32,2724           30144                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+039608,000457: 32,2725           55566                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E474F46464454">ENGOFFDT</a>                              
+039609,000458: 32,2726           00006                           <span class="op">EXTEND  </span>                                       
+039610,000459: 32,2727           62751                           <span class="op">BZMF    </span> <a href="#454E474F464632">ENGOFF2</a>                               
+039611,000460: 32,2730           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+039612,000461: 32,2731  E4,1540                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
+039613,000462: 32,2731           02757 64064                     <span class="ps">2CADR   </span> <a href="#454E474F464633">ENGOFF3</a>                               
+039614,000463: 
+039615,000464: 32,2733           40100                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524434">FLAGWRD4</a>                              <span class="co">#  BYPASS PHASCHNG WHEN IN MP 13.</span>
+039616,000465: 32,2734           77754                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#42495438">BIT8</a>                                  
+039617,000466: 32,2735           00006                           <span class="op">EXTEND  </span>                                       
+039618,000467: 32,2736           12744                           <span class="op">BZF     </span> <a href="#454E474F464631">ENGOFF1</a>                               
+039619,000468: 
+039620,000469: 32,2737           04161                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              <span class="co">#  RESTART PROTECTION FOR ENGINOFF CALL</span>
+039621,000470: 32,2740           47012                           <span class="ps">OCT     </span> 47012                                 
+039622,000471: 32,2741           76211                           <span class="ps">-GENADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E474F46464454">ENGOFFDT</a>                              
+039623,000472: 32,2742  E4,1540                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
+039624,000473: 32,2742           02757 64064                     <span class="ps">2CADR   </span> <a href="#454E474F464633">ENGOFF3</a>                               
+039625,000474: 
+<a name="454E474F464631"></a>039626,000475: 32,2744           00003        <span class="sm">ENGOFF1 </span>           <span class="op">RELINT  </span>                                       
 </pre>
 </span>
 </p>
@@ -710,44 +710,44 @@ Page 922
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-039622,000477: 32,2745           06112                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-039623,000478: 32,2746           52014                           <span class="in">SET     </span> <span class="in">GOTO      </span>                            
-039624,000479: 32,2747           02073                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#454E474F46465357">ENGOFFSW</a>                              
-039625,000480: 32,2750           64450                                    <a href="#4B454550474F494E">KEEPGOIN</a>                              
-<a name="454E474F464632"></a>039626,000481: 32,2751           02773        <span class="sm">ENGOFF2 </span>           <span class="op">TC      </span> <a href="#455845554E54">EXEUNT</a>                                
-039627,000482: 32,2752           05206                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-039628,000483: 32,2753           40263                           <span class="ps">CADR    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#454E47494E4F4646">ENGINOFF</a>                              
-039629,000484: 32,2754           05206                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-039630,000485: 32,2755           40114                           <span class="ps">CADR    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#53544F5052415445">STOPRATE</a>                              
-039631,000486: 32,2756           12660                           <span class="op">TCF     </span> <a href="#4153435445524D">ASCTERM</a>                               
-<a name="454E474F464633"></a>039632,000487: 32,2757           02773        <span class="sm">ENGOFF3 </span>           <span class="op">TC      </span> <a href="#455845554E54">EXEUNT</a>                                
-039633,000488: 32,2760           05270                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              
-039634,000489: 32,2761           40263                           <span class="ps">CADR    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#454E47494E4F4646">ENGINOFF</a>                              
-039635,000490: 32,2762           05270                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              
-039636,000491: 32,2763           40114                           <span class="ps">CADR    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#53544F5052415445">STOPRATE</a>                              
-039637,000492: 32,2764           40100                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524434">FLAGWRD4</a>                              <span class="co">#  BYPASS PHASCHNG WHEN IN MP 13.</span>
-039638,000493: 32,2765           77754                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#42495438">BIT8</a>                                  
-039639,000494: 32,2766           00006                           <span class="op">EXTEND  </span>                                       
-039640,000495: 32,2767           15727                           <span class="op">BZF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-039641,000496: 
-039642,000497: 32,2770           04161                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              <span class="co">#  DEACTIVATE GROUP 2 AFTER SUCCESSFUL CALL</span>
-039643,000498: 32,2771           00002                           <span class="ps">OCT     </span> 00002                                 
-039644,000499: 
-039645,000500: 32,2772           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-<a name="455845554E54"></a>039646,000501: 32,2773           00006        <span class="sm">EXEUNT  </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  DISENGAGE THE GUIDANCE EQUATIONS</span>
-039647,000502: 32,2774           33000                           <span class="op">DCA     </span> <a href="#5345525645584144">SERVEXAD</a>                              
-039648,000503: 32,2775           53073                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41564745584954">AVGEXIT</a>                               
-039649,000504: 32,2776           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-039650,000505: 
-039651,000506: 32,2777  E5,1511                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456434E5452">DVCNTR</a>                                
-<a name="5345525645584144"></a>039652,000507: 32,2777           02324 60065  <span class="sm">SERVEXAD</span>           <span class="ps">2CADR   </span> <a href="206_SERVICE_ROUTINES.agc.html#5345525645584954">SERVEXIT</a>                              
-039653,000508: 
-<a name="415343414C41524D"></a>039654,000509: 32,3001           77776        <span class="sm">ASCALARM</span>           <span class="in">EXIT    </span>                                       
-039655,000510: 32,3002           04755                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#414C41524D">ALARM</a>                                 
-039656,000511: 32,3003           00405                           <span class="ps">OCT     </span> 00405                                 <span class="co">#  LAMBERT ITERATIONS NOT CONVERGING</span>
-039657,000512: 32,3004           12353                           <span class="op">TCF     </span> <a href="#414C41524D524554">ALARMRET</a>                              
-039658,000513: 
-039659,000514:                                                                                                  <span class="co">#  ************************************************************************</span>
+039628,000477: 32,2745           06112                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+039629,000478: 32,2746           52014                           <span class="in">SET     </span> <span class="in">GOTO      </span>                            
+039630,000479: 32,2747           02073                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#454E474F46465357">ENGOFFSW</a>                              
+039631,000480: 32,2750           64450                                    <a href="#4B454550474F494E">KEEPGOIN</a>                              
+<a name="454E474F464632"></a>039632,000481: 32,2751           02773        <span class="sm">ENGOFF2 </span>           <span class="op">TC      </span> <a href="#455845554E54">EXEUNT</a>                                
+039633,000482: 32,2752           05206                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+039634,000483: 32,2753           40263                           <span class="ps">CADR    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#454E47494E4F4646">ENGINOFF</a>                              
+039635,000484: 32,2754           05206                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+039636,000485: 32,2755           40114                           <span class="ps">CADR    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#53544F5052415445">STOPRATE</a>                              
+039637,000486: 32,2756           12660                           <span class="op">TCF     </span> <a href="#4153435445524D">ASCTERM</a>                               
+<a name="454E474F464633"></a>039638,000487: 32,2757           02773        <span class="sm">ENGOFF3 </span>           <span class="op">TC      </span> <a href="#455845554E54">EXEUNT</a>                                
+039639,000488: 32,2760           05270                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              
+039640,000489: 32,2761           40263                           <span class="ps">CADR    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#454E47494E4F4646">ENGINOFF</a>                              
+039641,000490: 32,2762           05270                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              
+039642,000491: 32,2763           40114                           <span class="ps">CADR    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#53544F5052415445">STOPRATE</a>                              
+039643,000492: 32,2764           40100                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524434">FLAGWRD4</a>                              <span class="co">#  BYPASS PHASCHNG WHEN IN MP 13.</span>
+039644,000493: 32,2765           77754                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#42495438">BIT8</a>                                  
+039645,000494: 32,2766           00006                           <span class="op">EXTEND  </span>                                       
+039646,000495: 32,2767           15727                           <span class="op">BZF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+039647,000496: 
+039648,000497: 32,2770           04161                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              <span class="co">#  DEACTIVATE GROUP 2 AFTER SUCCESSFUL CALL</span>
+039649,000498: 32,2771           00002                           <span class="ps">OCT     </span> 00002                                 
+039650,000499: 
+039651,000500: 32,2772           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+<a name="455845554E54"></a>039652,000501: 32,2773           00006        <span class="sm">EXEUNT  </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  DISENGAGE THE GUIDANCE EQUATIONS</span>
+039653,000502: 32,2774           33000                           <span class="op">DCA     </span> <a href="#5345525645584144">SERVEXAD</a>                              
+039654,000503: 32,2775           53073                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41564745584954">AVGEXIT</a>                               
+039655,000504: 32,2776           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+039656,000505: 
+039657,000506: 32,2777  E5,1511                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456434E5452">DVCNTR</a>                                
+<a name="5345525645584144"></a>039658,000507: 32,2777           02324 60065  <span class="sm">SERVEXAD</span>           <span class="ps">2CADR   </span> <a href="206_SERVICE_ROUTINES.agc.html#5345525645584954">SERVEXIT</a>                              
+039659,000508: 
+<a name="415343414C41524D"></a>039660,000509: 32,3001           77776        <span class="sm">ASCALARM</span>           <span class="in">EXIT    </span>                                       
+039661,000510: 32,3002           04755                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#414C41524D">ALARM</a>                                 
+039662,000511: 32,3003           00405                           <span class="ps">OCT     </span> 00405                                 <span class="co">#  LAMBERT ITERATIONS NOT CONVERGING</span>
+039663,000512: 32,3004           12353                           <span class="op">TCF     </span> <a href="#414C41524D524554">ALARMRET</a>                              
+039664,000513: 
+039665,000514:                                                                                                  <span class="co">#  ************************************************************************</span>
 
 End of include-file ASCENT_STEERING.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

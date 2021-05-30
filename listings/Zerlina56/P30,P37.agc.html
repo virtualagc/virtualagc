@@ -87,26 +87,26 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-027163,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-027164,000003:                                                                                                  <span class="co">## Filename:    P30,P37.agc</span>
-027165,000004:                                                                                                  <span class="co">## Purpose:     A log section of Zerlina 56, the final revision of</span>
-027166,000005:                                                                                                  <span class="co">##              Don Eyles's offline development program for the variable </span>
-027167,000006:                                                                                                  <span class="co">##              guidance period servicer. It also includes a new P66 with LPD </span>
-027168,000007:                                                                                                  <span class="co">##              (Landing Point Designator) capability, based on an idea of John </span>
-027169,000008:                                                                                                  <span class="co">##              Young's. Neither of these advanced features were actually flown,</span>
-027170,000009:                                                                                                  <span class="co">##              but Zerlina was also the birthplace of other big improvements to</span>
-027171,000010:                                                                                                  <span class="co">##              Luminary including the terrain model and new (Luminary 1E)</span>
-027172,000011:                                                                                                  <span class="co">##              analog display programs. Zerlina was branched off of Luminary 145,</span>
-027173,000012:                                                                                                  <span class="co">##              and revision 56 includes all changes up to and including Luminary</span>
-027174,000013:                                                                                                  <span class="co">##              183. It is therefore quite close to the Apollo 14 program,</span>
-027175,000014:                                                                                                  <span class="co">##              Luminary 178, where not modified with new features.</span>
-027176,000015:                                                                                                  <span class="co">## Reference:   pp. 612-615</span>
-027177,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-027178,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-027179,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-027180,000019:                                                                                                  <span class="co">## Mod history: 2017-07-28 MAS  Created from Luminary 210.</span>
-027181,000020:                                                                                                  <span class="co">##              2017-08-23 RSB  Transcribed.</span>
-027182,000021: 
+027168,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+027169,000003:                                                                                                  <span class="co">## Filename:    P30,P37.agc</span>
+027170,000004:                                                                                                  <span class="co">## Purpose:     A log section of Zerlina 56, the final revision of</span>
+027171,000005:                                                                                                  <span class="co">##              Don Eyles's offline development program for the variable </span>
+027172,000006:                                                                                                  <span class="co">##              guidance period servicer. It also includes a new P66 with LPD </span>
+027173,000007:                                                                                                  <span class="co">##              (Landing Point Designator) capability, based on an idea of John </span>
+027174,000008:                                                                                                  <span class="co">##              Young's. Neither of these advanced features were actually flown,</span>
+027175,000009:                                                                                                  <span class="co">##              but Zerlina was also the birthplace of other big improvements to</span>
+027176,000010:                                                                                                  <span class="co">##              Luminary including the terrain model and new (Luminary 1E)</span>
+027177,000011:                                                                                                  <span class="co">##              analog display programs. Zerlina was branched off of Luminary 145,</span>
+027178,000012:                                                                                                  <span class="co">##              and revision 56 includes all changes up to and including Luminary</span>
+027179,000013:                                                                                                  <span class="co">##              183. It is therefore quite close to the Apollo 14 program,</span>
+027180,000014:                                                                                                  <span class="co">##              Luminary 178, where not modified with new features.</span>
+027181,000015:                                                                                                  <span class="co">## Reference:   pp. 612-615</span>
+027182,000016:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+027183,000017:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+027184,000018:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+027185,000019:                                                                                                  <span class="co">## Mod history: 2017-07-28 MAS  Created from Luminary 210.</span>
+027186,000020:                                                                                                  <span class="co">##              2017-08-23 RSB  Transcribed.</span>
+027187,000021: 
 </pre>
 </span>
 </p>
@@ -122,57 +122,57 @@ Page 612
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-027184,000023:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION  P30    DATE 3-6-67</span>
-027185,000024: 
-027186,000025:                                                                                                  <span class="co">#  MOD.1  BY RAMA AIYAWAR</span>
-027187,000026:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION</span>
-027188,000027:                                                                                                  <span class="co">#     ACCEPT ASTRONAUT INPUTS OF TIG,DELV(LV)</span>
-027189,000028:                                                                                                  <span class="co">#     CALL IMU STATUS CHECK ROUTINE (R02)</span>
-027190,000029:                                                                                                  <span class="co">#     DISPLAY TIME TO GO, APOGEE, PERIGEE, DELV(MAG), MGA AT IGN</span>
-027191,000030:                                                                                                  <span class="co">#     REQUEST BURN PROGRAM</span>
-027192,000031: 
-027193,000032:                                                                                                  <span class="co">#  CALLING SEQUENCE VIA JOB FROM V37</span>
-027194,000033: 
-027195,000034:                                                                                                  <span class="co">#  EXIT VIA V37 CALL OR TO GOTOPOOH (V34E)</span>
-027196,000035: 
-027197,000036:                                                                                                  <span class="co">#  SUBROUTINE CALLS-FLAGUP, PHASCHNG, BANKCALL, ENDOFJOB, GOFLASH, GOFLASHR</span>
-027198,000037:                                                                                                  <span class="co">#                   GOPERF3R, INTPRET, BLANKET, GOTOPOOH, R02BOTH, S30.1,</span>
-027199,000038:                                                                                                  <span class="co">#                   TTG/N35, MIDGIM, DISPMGA</span>
-027200,000039: 
-027201,000040:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION- STATE VECTOR</span>
-027202,000041: 
-027203,000042:                                                                                                  <span class="co">#  OUTPUT-RINIT, VINIT, +MGA, VTIG, RTIG, DELVSIN, DELVSAB, DELVSLV, HAPO,</span>
-027204,000043:                                                                                                  <span class="co">#         HPER, TTOGO</span>
-027205,000044: 
-027206,000045:                                                                                                  <span class="co">#  DEBRIS- A, L, MPAC, PUSHLIST</span>
-027207,000046: 
-027208,000047: 32,2407                                           <span class="ps">BANK    </span> 32                                    
-027209,000048: 35,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#50333053">P30S</a>                                  
-027210,000049: 35,2000                                           <span class="ps">BANK    </span>                                       
-027211,000050: 35,2000  E4,1643                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2B4D4741">+MGA</a>                                  
-027212,000051: 35,2000                                           <span class="ps">COUNT*  </span> $$/<a href="#503330">P30</a>                                
-<a name="503330"></a>027213,000052: 35,2000           05515        <span class="sm">P30     </span>           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#5550464C4147">UPFLAG</a>                                <span class="co">#  SET UPDATE FLAG</span>
-027214,000053: 35,2001           00027                           <span class="ps">ADRES   </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#5550444154464C47">UPDATFLG</a>                              
-027215,000054: 35,2002           05515                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#5550464C4147">UPFLAG</a>                                <span class="co">#  SET TRACK FLAG</span>
-027216,000055: 35,2003           00031                           <span class="ps">ADRES   </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#545241434B464C47">TRACKFLG</a>                              
-027217,000056: 
-<a name="5033304E3333"></a>027218,000057: 35,2004           32032        <span class="sm">P30N33  </span>           <span class="op">CAF     </span> <a href="#5630364E3333">V06N33</a>                                <span class="co">#  T OF IGN</span>
-027219,000058: 35,2005           03627                           <span class="op">TC      </span> <a href="P34-P35,_P74-P75.agc.html#564E504F4F48">VNPOOH</a>                                <span class="co">#  RETURNS ON PROCEED, POOH ON TERMINATE</span>
-027220,000059: 
-027221,000060: 35,2006           33644                           <span class="op">CAF     </span> <a href="P34-P35,_P74-P75.agc.html#5630364E3831">V06N81</a>                                <span class="co">#  DISPLAY DELTA V (LV)</span>
-027222,000061: 35,2007           03627                           <span class="op">TC      </span> <a href="P34-P35,_P74-P75.agc.html#564E504F4F48">VNPOOH</a>                                <span class="co">#      REDISPLAY ON RECYCLE</span>
-027223,000062: 
-027224,000063: 35,2010           05527                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              <span class="co">#  RESET UPDATE FLAG</span>
-027225,000064: 35,2011           00027                           <span class="ps">ADRES   </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#5550444154464C47">UPDATFLG</a>                              
-027226,000065: 35,2012           06051                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-027227,000066: 35,2013           77624                           <span class="in">CALL    </span>                                       
-027228,000067: 35,2014           70060                                    <a href="#5333302E31">S30.1</a>                                 
-027229,000068: 35,2015           43014                           <span class="in">SET     </span> <span class="in">SET       </span>                            
-027230,000069: 35,2016           00470                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#5550444154464C47">UPDATFLG</a>                              
-027231,000070: 35,2017           01067                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#5844454C56464C47">XDELVFLG</a>                              
-027232,000071: 35,2020           77776                           <span class="in">EXIT    </span>                                       
-<a name="504152414D3330"></a>027233,000072: 35,2021           32033        <span class="sm">PARAM30 </span>           <span class="op">CAF     </span> <a href="#5630364E3432">V06N42</a>                                <span class="co">#  DISPLAY APOGEE,PERIGEE ,DELTA V</span>
-027234,000073: 
+027189,000023:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION  P30    DATE 3-6-67</span>
+027190,000024: 
+027191,000025:                                                                                                  <span class="co">#  MOD.1  BY RAMA AIYAWAR</span>
+027192,000026:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION</span>
+027193,000027:                                                                                                  <span class="co">#     ACCEPT ASTRONAUT INPUTS OF TIG,DELV(LV)</span>
+027194,000028:                                                                                                  <span class="co">#     CALL IMU STATUS CHECK ROUTINE (R02)</span>
+027195,000029:                                                                                                  <span class="co">#     DISPLAY TIME TO GO, APOGEE, PERIGEE, DELV(MAG), MGA AT IGN</span>
+027196,000030:                                                                                                  <span class="co">#     REQUEST BURN PROGRAM</span>
+027197,000031: 
+027198,000032:                                                                                                  <span class="co">#  CALLING SEQUENCE VIA JOB FROM V37</span>
+027199,000033: 
+027200,000034:                                                                                                  <span class="co">#  EXIT VIA V37 CALL OR TO GOTOPOOH (V34E)</span>
+027201,000035: 
+027202,000036:                                                                                                  <span class="co">#  SUBROUTINE CALLS-FLAGUP, PHASCHNG, BANKCALL, ENDOFJOB, GOFLASH, GOFLASHR</span>
+027203,000037:                                                                                                  <span class="co">#                   GOPERF3R, INTPRET, BLANKET, GOTOPOOH, R02BOTH, S30.1,</span>
+027204,000038:                                                                                                  <span class="co">#                   TTG/N35, MIDGIM, DISPMGA</span>
+027205,000039: 
+027206,000040:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION- STATE VECTOR</span>
+027207,000041: 
+027208,000042:                                                                                                  <span class="co">#  OUTPUT-RINIT, VINIT, +MGA, VTIG, RTIG, DELVSIN, DELVSAB, DELVSLV, HAPO,</span>
+027209,000043:                                                                                                  <span class="co">#         HPER, TTOGO</span>
+027210,000044: 
+027211,000045:                                                                                                  <span class="co">#  DEBRIS- A, L, MPAC, PUSHLIST</span>
+027212,000046: 
+027213,000047: 32,2407                                           <span class="ps">BANK    </span> 32                                    
+027214,000048: 35,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#50333053">P30S</a>                                  
+027215,000049: 35,2000                                           <span class="ps">BANK    </span>                                       
+027216,000050: 35,2000  E4,1643                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2B4D4741">+MGA</a>                                  
+027217,000051: 35,2000                                           <span class="ps">COUNT*  </span> $$/<a href="#503330">P30</a>                                
+<a name="503330"></a>027218,000052: 35,2000           05515        <span class="sm">P30     </span>           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#5550464C4147">UPFLAG</a>                                <span class="co">#  SET UPDATE FLAG</span>
+027219,000053: 35,2001           00027                           <span class="ps">ADRES   </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#5550444154464C47">UPDATFLG</a>                              
+027220,000054: 35,2002           05515                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#5550464C4147">UPFLAG</a>                                <span class="co">#  SET TRACK FLAG</span>
+027221,000055: 35,2003           00031                           <span class="ps">ADRES   </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#545241434B464C47">TRACKFLG</a>                              
+027222,000056: 
+<a name="5033304E3333"></a>027223,000057: 35,2004           32032        <span class="sm">P30N33  </span>           <span class="op">CAF     </span> <a href="#5630364E3333">V06N33</a>                                <span class="co">#  T OF IGN</span>
+027224,000058: 35,2005           03627                           <span class="op">TC      </span> <a href="P34-P35,_P74-P75.agc.html#564E504F4F48">VNPOOH</a>                                <span class="co">#  RETURNS ON PROCEED, POOH ON TERMINATE</span>
+027225,000059: 
+027226,000060: 35,2006           33644                           <span class="op">CAF     </span> <a href="P34-P35,_P74-P75.agc.html#5630364E3831">V06N81</a>                                <span class="co">#  DISPLAY DELTA V (LV)</span>
+027227,000061: 35,2007           03627                           <span class="op">TC      </span> <a href="P34-P35,_P74-P75.agc.html#564E504F4F48">VNPOOH</a>                                <span class="co">#      REDISPLAY ON RECYCLE</span>
+027228,000062: 
+027229,000063: 35,2010           05527                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              <span class="co">#  RESET UPDATE FLAG</span>
+027230,000064: 35,2011           00027                           <span class="ps">ADRES   </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#5550444154464C47">UPDATFLG</a>                              
+027231,000065: 35,2012           06051                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+027232,000066: 35,2013           77624                           <span class="in">CALL    </span>                                       
+027233,000067: 35,2014           70060                                    <a href="#5333302E31">S30.1</a>                                 
+027234,000068: 35,2015           43014                           <span class="in">SET     </span> <span class="in">SET       </span>                            
+027235,000069: 35,2016           00470                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#5550444154464C47">UPDATFLG</a>                              
+027236,000070: 35,2017           01067                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#5844454C56464C47">XDELVFLG</a>                              
+027237,000071: 35,2020           77776                           <span class="in">EXIT    </span>                                       
+<a name="504152414D3330"></a>027238,000072: 35,2021           32033        <span class="sm">PARAM30 </span>           <span class="op">CAF     </span> <a href="#5630364E3432">V06N42</a>                                <span class="co">#  DISPLAY APOGEE,PERIGEE ,DELTA V</span>
+027239,000073: 
 </pre>
 </span>
 </p>
@@ -188,19 +188,19 @@ Page 613
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-027236,000075: 35,2022           03627                           <span class="op">TC      </span> <a href="P34-P35,_P74-P75.agc.html#564E504F4F48">VNPOOH</a>                                
-027237,000076: 
-027238,000077: 35,2023           06051                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-027239,000078: 35,2024           77614                           <span class="in">SET     </span>                                       
-027240,000079: 35,2025           01071                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#46494E414C464C47">FINALFLG</a>                              
-<a name="5245564E31363435"></a>027241,000080: 35,2026           77624        <span class="sm">REVN1645</span>           <span class="in">CALL    </span>                                       
-027242,000081: 35,2027           73523                                    <a href="P34-P35,_P74-P75.agc.html#564E31363435">VN1645</a>                                
-027243,000082: 35,2030           77650                           <span class="in">GOTO    </span>                                       <span class="co">#  COMES HERE ON RECYCLE RESPONSE</span>
-027244,000083: 35,2031           72026                                    <a href="#5245564E31363435">REVN1645</a>                              
-027245,000084: 
-<a name="5630364E3333"></a>027246,000085: 35,2032           01441        <span class="sm">V06N33  </span>           <span class="ps">VN      </span> 0633                                  
-<a name="5630364E3432"></a>027247,000086: 35,2033           01452        <span class="sm">V06N42  </span>           <span class="ps">VN      </span> 0642                                  
-027248,000087: 
+027241,000075: 35,2022           03627                           <span class="op">TC      </span> <a href="P34-P35,_P74-P75.agc.html#564E504F4F48">VNPOOH</a>                                
+027242,000076: 
+027243,000077: 35,2023           06051                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+027244,000078: 35,2024           77614                           <span class="in">SET     </span>                                       
+027245,000079: 35,2025           01071                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#46494E414C464C47">FINALFLG</a>                              
+<a name="5245564E31363435"></a>027246,000080: 35,2026           77624        <span class="sm">REVN1645</span>           <span class="in">CALL    </span>                                       
+027247,000081: 35,2027           73523                                    <a href="P34-P35,_P74-P75.agc.html#564E31363435">VN1645</a>                                
+027248,000082: 35,2030           77650                           <span class="in">GOTO    </span>                                       <span class="co">#  COMES HERE ON RECYCLE RESPONSE</span>
+027249,000083: 35,2031           72026                                    <a href="#5245564E31363435">REVN1645</a>                              
+027250,000084: 
+<a name="5630364E3333"></a>027251,000085: 35,2032           01441        <span class="sm">V06N33  </span>           <span class="ps">VN      </span> 0633                                  
+<a name="5630364E3432"></a>027252,000086: 35,2033           01452        <span class="sm">V06N42  </span>           <span class="ps">VN      </span> 0642                                  
+027253,000087: 
 </pre>
 </span>
 </p>
@@ -216,57 +216,57 @@ Page 614
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-027250,000089:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION S30.1      DATE 9NOV66</span>
-027251,000090: 
-027252,000091:                                                                                                  <span class="co">#  MOD NO 1        LOG SECTION  P30,P37</span>
-027253,000092:                                                                                                  <span class="co">#  MOD  BY  RAMA AIYAWAR **</span>
-027254,000093:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION</span>
-027255,000094:                                                                                                  <span class="co">#           BASED ON STORED TARGET PARAMETERS(R OF IGNITION(RTIG),V OF</span>
-027256,000095:                                                                                                  <span class="co">#           IGNITION(VTIG),TIME OF IGNITION (TIG)),COMPUTE PERIGEE ALTITUDE</span>
-027257,000096:                                                                                                  <span class="co">#           APOGEE ALTITUDE AND DELTAV REQUIRED(DELVSIN).</span>
-027258,000097:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
-027259,000098:                                                                                                  <span class="co">#      L    CALL</span>
-027260,000099:                                                                                                  <span class="co">#      L+1         S30.1</span>
-027261,000100:                                                                                                  <span class="co">#  NORMAL EXIT MODE</span>
-027262,000101:                                                                                                  <span class="co">#      AT L+2 OR CALLING SEQUENCE (GOTO L+2)</span>
-027263,000102:                                                                                                  <span class="co">#  SUBROUTINES CALLED</span>
-027264,000103:                                                                                                  <span class="co">#           LEMPREC</span>
-027265,000104:                                                                                                  <span class="co">#           PERIAPO</span>
-027266,000105:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODES</span>
-027267,000106:                                                                                                  <span class="co">#                  NONE</span>
-027268,000107:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED</span>
-027269,000108:                                                                                                  <span class="co">#           TIG       TIME OF IGNITION                   DP     B28CS</span>
-027270,000109:                                                                                                  <span class="co">#           DELVSLV   SPECIFIED DELTA-V IN LOCAL VERT.</span>
-027271,000110:                                                                                                  <span class="co">#                     COORDS. OF ACTIVE VEHICLE AT</span>
-027272,000111:                                                                                                  <span class="co">#                  TIME OF IGNITION      VECTOR  B+7  METERS/CS</span>
-027273,000112:                                                                                                  <span class="co">#  OUTPUT</span>
-027274,000113:                                                                                                  <span class="co">#           RTIG   POSITION AT TIG       VECTOR  B+29 METERS</span>
-027275,000114:                                                                                                  <span class="co">#           VTIG   VELOCITY AT TIG       VECTOR  B+29 METERS/CS</span>
-027276,000115:                                                                                                  <span class="co">#           PDL 4D APOGEE ALTITUDE       DP      B+29 M ,  B+27 METERS.</span>
-027277,000116:                                                                                                  <span class="co">#           HAPO   APOGEE ALTITUDE       DP      B+29 METERS</span>
-027278,000117:                                                                                                  <span class="co">#           PDL 8D PERIGEE ALTITUDE      DP      B+29 M ,  B+27 METERS.</span>
-027279,000118:                                                                                                  <span class="co">#           HPER   PERIGEE ALTITUDE      DP      B+29 METERS</span>
-027280,000119:                                                                                                  <span class="co">#           DELVSIN   SPECIFIED DELTA-V IN INERTIAL</span>
-027281,000120:                                                                                                  <span class="co">#                     COORD. OF ACTIVE VEHICLE AT</span>
-027282,000121:                                                                                                  <span class="co">#                  TIME OF IGNITION      VECTOR  B+7  METERS/CS</span>
-027283,000122:                                                                                                  <span class="co">#           DELVSAB MAG. OF DELVSIN      VECTOR  B+7  METERS/CS</span>
-027284,000123:                                                                                                  <span class="co">#  DEBRIS QTEMP    TEMP. ERASABLE</span>
-027285,000124:                                                                                                  <span class="co">#         QPRET,MPAC</span>
-027286,000125:                                                                                                  <span class="co">#         PUSHLIST</span>
-027287,000126: 
-027288,000127: 34,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#5033305331">P30S1</a>                                 
-027289,000128: 34,2000                                           <span class="ps">BANK    </span>                                       
-027290,000129: 
-027291,000130: 34,2060                                           <span class="ps">COUNT*  </span> $$/S30S                               
-027292,000131: 
-<a name="5333302E31"></a>027293,000132: 34,2060           71220        <span class="sm">S30.1   </span>           <span class="in">STQ     </span> <span class="in">DLOAD     </span>                            
-027294,000133: 34,2061           03632                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5154454D50">QTEMP</a>                                 
-027295,000134: 34,2062           03442                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   <span class="co">#  TIME IGNITION SCALED AT 2(+28)CS</span>
-027296,000135: 34,2063           34041                           <span class="in">STCALL  </span> <a href="ORBITAL_INTEGRATION.agc.html#5444454331">TDEC1</a>                                 
-027297,000136: 34,2064           27056                                    <a href="INTEGRATION_INITIALIZATION.agc.html#4C454D50524543">LEMPREC</a>                               <span class="co">#  ENCKE ROUTINE FOR LEM</span>
-027298,000137: 
-027299,000138: 34,2065           67175                           <span class="in">VLOAD   </span> <span class="in">SXA,2     </span>                            
-027300,000139: 
+027255,000089:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION S30.1      DATE 9NOV66</span>
+027256,000090: 
+027257,000091:                                                                                                  <span class="co">#  MOD NO 1        LOG SECTION  P30,P37</span>
+027258,000092:                                                                                                  <span class="co">#  MOD  BY  RAMA AIYAWAR **</span>
+027259,000093:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION</span>
+027260,000094:                                                                                                  <span class="co">#           BASED ON STORED TARGET PARAMETERS(R OF IGNITION(RTIG),V OF</span>
+027261,000095:                                                                                                  <span class="co">#           IGNITION(VTIG),TIME OF IGNITION (TIG)),COMPUTE PERIGEE ALTITUDE</span>
+027262,000096:                                                                                                  <span class="co">#           APOGEE ALTITUDE AND DELTAV REQUIRED(DELVSIN).</span>
+027263,000097:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
+027264,000098:                                                                                                  <span class="co">#      L    CALL</span>
+027265,000099:                                                                                                  <span class="co">#      L+1         S30.1</span>
+027266,000100:                                                                                                  <span class="co">#  NORMAL EXIT MODE</span>
+027267,000101:                                                                                                  <span class="co">#      AT L+2 OR CALLING SEQUENCE (GOTO L+2)</span>
+027268,000102:                                                                                                  <span class="co">#  SUBROUTINES CALLED</span>
+027269,000103:                                                                                                  <span class="co">#           LEMPREC</span>
+027270,000104:                                                                                                  <span class="co">#           PERIAPO</span>
+027271,000105:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODES</span>
+027272,000106:                                                                                                  <span class="co">#                  NONE</span>
+027273,000107:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED</span>
+027274,000108:                                                                                                  <span class="co">#           TIG       TIME OF IGNITION                   DP     B28CS</span>
+027275,000109:                                                                                                  <span class="co">#           DELVSLV   SPECIFIED DELTA-V IN LOCAL VERT.</span>
+027276,000110:                                                                                                  <span class="co">#                     COORDS. OF ACTIVE VEHICLE AT</span>
+027277,000111:                                                                                                  <span class="co">#                  TIME OF IGNITION      VECTOR  B+7  METERS/CS</span>
+027278,000112:                                                                                                  <span class="co">#  OUTPUT</span>
+027279,000113:                                                                                                  <span class="co">#           RTIG   POSITION AT TIG       VECTOR  B+29 METERS</span>
+027280,000114:                                                                                                  <span class="co">#           VTIG   VELOCITY AT TIG       VECTOR  B+29 METERS/CS</span>
+027281,000115:                                                                                                  <span class="co">#           PDL 4D APOGEE ALTITUDE       DP      B+29 M ,  B+27 METERS.</span>
+027282,000116:                                                                                                  <span class="co">#           HAPO   APOGEE ALTITUDE       DP      B+29 METERS</span>
+027283,000117:                                                                                                  <span class="co">#           PDL 8D PERIGEE ALTITUDE      DP      B+29 M ,  B+27 METERS.</span>
+027284,000118:                                                                                                  <span class="co">#           HPER   PERIGEE ALTITUDE      DP      B+29 METERS</span>
+027285,000119:                                                                                                  <span class="co">#           DELVSIN   SPECIFIED DELTA-V IN INERTIAL</span>
+027286,000120:                                                                                                  <span class="co">#                     COORD. OF ACTIVE VEHICLE AT</span>
+027287,000121:                                                                                                  <span class="co">#                  TIME OF IGNITION      VECTOR  B+7  METERS/CS</span>
+027288,000122:                                                                                                  <span class="co">#           DELVSAB MAG. OF DELVSIN      VECTOR  B+7  METERS/CS</span>
+027289,000123:                                                                                                  <span class="co">#  DEBRIS QTEMP    TEMP. ERASABLE</span>
+027290,000124:                                                                                                  <span class="co">#         QPRET,MPAC</span>
+027291,000125:                                                                                                  <span class="co">#         PUSHLIST</span>
+027292,000126: 
+027293,000127: 34,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#5033305331">P30S1</a>                                 
+027294,000128: 34,2000                                           <span class="ps">BANK    </span>                                       
+027295,000129: 
+027296,000130: 34,2060                                           <span class="ps">COUNT*  </span> $$/S30S                               
+027297,000131: 
+<a name="5333302E31"></a>027298,000132: 34,2060           71220        <span class="sm">S30.1   </span>           <span class="in">STQ     </span> <span class="in">DLOAD     </span>                            
+027299,000133: 34,2061           03632                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5154454D50">QTEMP</a>                                 
+027300,000134: 34,2062           03442                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   <span class="co">#  TIME IGNITION SCALED AT 2(+28)CS</span>
+027301,000135: 34,2063           34041                           <span class="in">STCALL  </span> <a href="ORBITAL_INTEGRATION.agc.html#5444454331">TDEC1</a>                                 
+027302,000136: 34,2064           27056                                    <a href="INTEGRATION_INITIALIZATION.agc.html#4C454D50524543">LEMPREC</a>                               <span class="co">#  ENCKE ROUTINE FOR LEM</span>
+027303,000137: 
+027304,000138: 34,2065           67175                           <span class="in">VLOAD   </span> <span class="in">SXA,2     </span>                            
+027305,000139: 
 </pre>
 </span>
 </p>
@@ -282,47 +282,47 @@ Page 615
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-027302,000141: 34,2066           00001                                    <a href="ORBITAL_INTEGRATION.agc.html#52415454">RATT</a>                                  
-027303,000142: 34,2067           02777                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52545832">RTX2</a>                                  
-027304,000143: 34,2070           03642                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52544947">RTIG</a>                                  <span class="co">#  RADIUS VECTOR AT IGNITION TIME</span>
-027305,000144: 34,2071           57456                           <span class="in">UNIT    </span> <span class="in">VCOMP     </span>                            
-027306,000145: 34,2072           27656                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5653494E">DELVSIN</a>                               <span class="co">#  ZRF/LV IN DELVSIN SCALED AT 2</span>
-027307,000146: 34,2073           00007                                    <a href="ORBITAL_INTEGRATION.agc.html#56415454">VATT</a>                                  <span class="co">#  VELOCITY VECTOR AT TIG, SCALED 2(7) M/CS</span>
-027308,000147: 34,2074           03650                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56544947">VTIG</a>                                  
-027309,000148: 34,2075           53435                           <span class="in">VXV     </span> <span class="in">UNIT      </span>                            
-027310,000149: 34,2076           03642                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52544947">RTIG</a>                                  
-027311,000150: 34,2077           66001                           <span class="in">SETPD   </span> <span class="in">SXA,1     </span>                            
-027312,000151: 34,2100           00001                                    0                                     
-027313,000152: 34,2101           02776                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52545831">RTX1</a>                                  
-027314,000153: 34,2102           47206                           <span class="in">PUSH    </span> <span class="in">VXV       </span>                            <span class="co">#  YRF/LV PDL 0  SCALED AT 2</span>
-027315,000154: 34,2103           03656                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5653494E">DELVSIN</a>                               
-027316,000155: 34,2104           63372                           <span class="in">VSL1    </span> <span class="in">PDVL      </span>                            
-027317,000156: 34,2105           63315                           <span class="in">PDVL    </span> <span class="in">PDVL      </span>                            <span class="co">#  YRF/LV PDL 6   SCALED AT 2</span>
-027318,000157: 34,2106           03656                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5653494E">DELVSIN</a>                               <span class="co">#  ZRF/LV PDL 12D SCALED AT 2</span>
-027319,000158: 34,2107           03434                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C56534C56">DELVSLV</a>                               
-027320,000159: 34,2110           76505                           <span class="in">VXM     </span> <span class="in">VSL1      </span>                            
-027321,000160: 34,2111           00001                                    0                                     
-027322,000161: 34,2112           03656                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5653494E">DELVSIN</a>                               <span class="co">#  DELTAV IN INERT. COOR. SCALED TO B+7M/CS</span>
-027323,000162: 34,2113           77646                           <span class="in">ABVAL   </span>                                       
-027324,000163: 34,2114           27664                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C56534142">DELVSAB</a>                               <span class="co">#  DELTA V MAG.</span>
-027325,000164: 34,2115           03642                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52544947">RTIG</a>                                  <span class="co">#  (FOR PERIAPO)</span>
-027326,000165: 34,2116           53315                           <span class="in">PDVL    </span> <span class="in">VAD       </span>                            <span class="co">#  VREQUIRED = VTIG + DELVSIN (FOR PERIAPO)</span>
-027327,000166: 34,2117           03650                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#56544947">VTIG</a>                                  
-027328,000167: 34,2120           03656                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5653494E">DELVSIN</a>                               
-027329,000168: 34,2121           77624                           <span class="in">CALL    </span>                                       
-027330,000169: 34,2122           46337                                    <a href="P34-P35,_P74-P75.agc.html#5045524941504F31">PERIAPO1</a>                              
-027331,000170: 34,2123           77624                           <span class="in">CALL    </span>                                       
-027332,000171: 34,2124           46447                                    <a href="P34-P35,_P74-P75.agc.html#53484946545231">SHIFTR1</a>                               <span class="co">#  RESCALE IF NEEDED</span>
-027333,000172: 34,2125           77624                           <span class="in">CALL    </span>                                       <span class="co">#  LIMIT DISPLAY TO 9999.9 N. MI.</span>
-027334,000173: 34,2126           45636                                    <a href="R30.agc.html#4D415843484B">MAXCHK</a>                                
-027335,000174: 34,2127           16312                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#48504552">HPER</a>                                  <span class="co">#  PERIGEE ALT 2(29) METERS, FOR DISPLAY</span>
-027336,000175: 34,2130           00005                                    4D                                    
-027337,000176: 34,2131           77624                           <span class="in">CALL    </span>                                       
-027338,000177: 34,2132           46447                                    <a href="P34-P35,_P74-P75.agc.html#53484946545231">SHIFTR1</a>                               <span class="co">#  RESCALE IF NEEDED</span>
-027339,000178: 34,2133           77624                           <span class="in">CALL    </span>                                       <span class="co">#  LIMIT DISPLAY TO 9999.9 N. MI.</span>
-027340,000179: 34,2134           45636                                    <a href="R30.agc.html#4D415843484B">MAXCHK</a>                                
-027341,000180: 34,2135           36310                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4841504F">HAPO</a>                                  <span class="co">#  APOGEE  ALT 2(29) METERS, FOR DISPLAY</span>
-027342,000181: 34,2136           03632                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5154454D50">QTEMP</a>                                 
+027307,000141: 34,2066           00001                                    <a href="ORBITAL_INTEGRATION.agc.html#52415454">RATT</a>                                  
+027308,000142: 34,2067           02777                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52545832">RTX2</a>                                  
+027309,000143: 34,2070           03642                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52544947">RTIG</a>                                  <span class="co">#  RADIUS VECTOR AT IGNITION TIME</span>
+027310,000144: 34,2071           57456                           <span class="in">UNIT    </span> <span class="in">VCOMP     </span>                            
+027311,000145: 34,2072           27656                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5653494E">DELVSIN</a>                               <span class="co">#  ZRF/LV IN DELVSIN SCALED AT 2</span>
+027312,000146: 34,2073           00007                                    <a href="ORBITAL_INTEGRATION.agc.html#56415454">VATT</a>                                  <span class="co">#  VELOCITY VECTOR AT TIG, SCALED 2(7) M/CS</span>
+027313,000147: 34,2074           03650                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56544947">VTIG</a>                                  
+027314,000148: 34,2075           53435                           <span class="in">VXV     </span> <span class="in">UNIT      </span>                            
+027315,000149: 34,2076           03642                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52544947">RTIG</a>                                  
+027316,000150: 34,2077           66001                           <span class="in">SETPD   </span> <span class="in">SXA,1     </span>                            
+027317,000151: 34,2100           00001                                    0                                     
+027318,000152: 34,2101           02776                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52545831">RTX1</a>                                  
+027319,000153: 34,2102           47206                           <span class="in">PUSH    </span> <span class="in">VXV       </span>                            <span class="co">#  YRF/LV PDL 0  SCALED AT 2</span>
+027320,000154: 34,2103           03656                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5653494E">DELVSIN</a>                               
+027321,000155: 34,2104           63372                           <span class="in">VSL1    </span> <span class="in">PDVL      </span>                            
+027322,000156: 34,2105           63315                           <span class="in">PDVL    </span> <span class="in">PDVL      </span>                            <span class="co">#  YRF/LV PDL 6   SCALED AT 2</span>
+027323,000157: 34,2106           03656                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5653494E">DELVSIN</a>                               <span class="co">#  ZRF/LV PDL 12D SCALED AT 2</span>
+027324,000158: 34,2107           03434                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C56534C56">DELVSLV</a>                               
+027325,000159: 34,2110           76505                           <span class="in">VXM     </span> <span class="in">VSL1      </span>                            
+027326,000160: 34,2111           00001                                    0                                     
+027327,000161: 34,2112           03656                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5653494E">DELVSIN</a>                               <span class="co">#  DELTAV IN INERT. COOR. SCALED TO B+7M/CS</span>
+027328,000162: 34,2113           77646                           <span class="in">ABVAL   </span>                                       
+027329,000163: 34,2114           27664                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C56534142">DELVSAB</a>                               <span class="co">#  DELTA V MAG.</span>
+027330,000164: 34,2115           03642                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52544947">RTIG</a>                                  <span class="co">#  (FOR PERIAPO)</span>
+027331,000165: 34,2116           53315                           <span class="in">PDVL    </span> <span class="in">VAD       </span>                            <span class="co">#  VREQUIRED = VTIG + DELVSIN (FOR PERIAPO)</span>
+027332,000166: 34,2117           03650                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#56544947">VTIG</a>                                  
+027333,000167: 34,2120           03656                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5653494E">DELVSIN</a>                               
+027334,000168: 34,2121           77624                           <span class="in">CALL    </span>                                       
+027335,000169: 34,2122           46337                                    <a href="P34-P35,_P74-P75.agc.html#5045524941504F31">PERIAPO1</a>                              
+027336,000170: 34,2123           77624                           <span class="in">CALL    </span>                                       
+027337,000171: 34,2124           46447                                    <a href="P34-P35,_P74-P75.agc.html#53484946545231">SHIFTR1</a>                               <span class="co">#  RESCALE IF NEEDED</span>
+027338,000172: 34,2125           77624                           <span class="in">CALL    </span>                                       <span class="co">#  LIMIT DISPLAY TO 9999.9 N. MI.</span>
+027339,000173: 34,2126           45636                                    <a href="R30.agc.html#4D415843484B">MAXCHK</a>                                
+027340,000174: 34,2127           16312                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#48504552">HPER</a>                                  <span class="co">#  PERIGEE ALT 2(29) METERS, FOR DISPLAY</span>
+027341,000175: 34,2130           00005                                    4D                                    
+027342,000176: 34,2131           77624                           <span class="in">CALL    </span>                                       
+027343,000177: 34,2132           46447                                    <a href="P34-P35,_P74-P75.agc.html#53484946545231">SHIFTR1</a>                               <span class="co">#  RESCALE IF NEEDED</span>
+027344,000178: 34,2133           77624                           <span class="in">CALL    </span>                                       <span class="co">#  LIMIT DISPLAY TO 9999.9 N. MI.</span>
+027345,000179: 34,2134           45636                                    <a href="R30.agc.html#4D415843484B">MAXCHK</a>                                
+027346,000180: 34,2135           36310                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4841504F">HAPO</a>                                  <span class="co">#  APOGEE  ALT 2(29) METERS, FOR DISPLAY</span>
+027347,000181: 34,2136           03632                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5154454D50">QTEMP</a>                                 
 
 End of include-file P30,P37.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

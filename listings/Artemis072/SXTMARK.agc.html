@@ -87,24 +87,24 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-010554,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-010555,000003:                                                                                                  <span class="co">## Filename:    SXTMARK.agc</span>
-010556,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Artemis (i.e., Colossus 3),</span>
-010557,000005:                                                                                                  <span class="co">##              build 072.  This is for the Command Module's (CM)</span>
-010558,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC), for</span>
-010559,000007:                                                                                                  <span class="co">##              Apollo 15-17.</span>
-010560,000008:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-010561,000009:                                                                                                  <span class="co">## Contact:     Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
-010562,000010:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-010563,000011:                                                                                                  <span class="co">## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Artemis072/</span>
-010564,000012:                                                                                                  <span class="co">## Mod history: 2009-08-04 JL   Adapted from corresponding Comanche 055 file.</span>
-010565,000013:                                                                                                  <span class="co">##              2010-01-31 JL   Fixed build errors.</span>
-010566,000014:                                                                                                  <span class="co">##              2010-02-11 JL   Fixed error on p242.</span>
-010567,000015:                                                                                                  <span class="co">##              2010-02-20 RSB  Un-##'d this header.</span>
-010568,000016:                                                                                                  <span class="co">##              2010-12-29 JL   Fixed indentation.</span>
-010569,000017:                                                                                                  <span class="co">##              2017-02-08 RSB  Proofed comment text by diff'ing vs Comanche 55</span>
-010570,000018:                                                                                                  <span class="co">##                              and/or octopus/ProoferComments as most-appropriate.</span>
-010571,000019: 
+010559,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+010560,000003:                                                                                                  <span class="co">## Filename:    SXTMARK.agc</span>
+010561,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Artemis (i.e., Colossus 3),</span>
+010562,000005:                                                                                                  <span class="co">##              build 072.  This is for the Command Module's (CM)</span>
+010563,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC), for</span>
+010564,000007:                                                                                                  <span class="co">##              Apollo 15-17.</span>
+010565,000008:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+010566,000009:                                                                                                  <span class="co">## Contact:     Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
+010567,000010:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+010568,000011:                                                                                                  <span class="co">## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Artemis072/</span>
+010569,000012:                                                                                                  <span class="co">## Mod history: 2009-08-04 JL   Adapted from corresponding Comanche 055 file.</span>
+010570,000013:                                                                                                  <span class="co">##              2010-01-31 JL   Fixed build errors.</span>
+010571,000014:                                                                                                  <span class="co">##              2010-02-11 JL   Fixed error on p242.</span>
+010572,000015:                                                                                                  <span class="co">##              2010-02-20 RSB  Un-##'d this header.</span>
+010573,000016:                                                                                                  <span class="co">##              2010-12-29 JL   Fixed indentation.</span>
+010574,000017:                                                                                                  <span class="co">##              2017-02-08 RSB  Proofed comment text by diff'ing vs Comanche 55</span>
+010575,000018:                                                                                                  <span class="co">##                              and/or octopus/ProoferComments as most-appropriate.</span>
+010576,000019: 
 </pre>
 </span>
 </p>
@@ -120,54 +120,54 @@ Page 239
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-010573,000021: 
-010574,000022:                                                                                                  <span class="co">#  PROGRAM NAME     -     SXTMARK</span>
-010575,000023: 
-010576,000024:                                                                                                  <span class="co">#  MOD. 1        8 AUG. 69       BY P.RYE</span>
-010577,000025: 
-010578,000026:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION</span>
-010579,000027: 
-010580,000028:                                                                                                  <span class="co">#        SXTMARK IS CALLED BY P03 AND BY P22, P23, P51, AND P52 VIA R53.</span>
-010581,000029:                                                                                                  <span class="co">#        THE REGISTER MARKINDX IS SET TO 5 IF THE CALLING PROGRAM IS P22, OR TO 1 FOR OTHER USERS.</span>
-010582,000030:                                                                                                  <span class="co">#           THIS REGISTER INDICATES THE NUMBER OF MARKS DESIRED.</span>
-010583,000031:                                                                                                  <span class="co">#        THE REGISTER EXTVBACT IS CHECKED (SUBROUTINE TESTMARK) TO INSURE THAT THE MARK DISPLAY SYSTEM</span>
-010584,000032:                                                                                                  <span class="co">#           IS FREE.  IF NOT, BAILOUT (31211) IS DONE.</span>
-010585,000033:                                                                                                  <span class="co">#        BIT 2 OF THE REGISTER EXTVBACT IS SET BY SXTMARK, RESERVING THE MARKING AND EXTENDED VERB SYSTEM.</span>
-010586,000034:                                                                                                  <span class="co">#        SXTMARK DISPLAYS A FLASHING VERB 51, CALLING FOR MARKS.  A PROCEED RESPONSE TO THIS DISPLAY</span>
-010587,000035:                                                                                                  <span class="co">#           WILL RELEASE THE MARKING SYSTEM (SUBROUTINES MKRELEAS, CLEARMARK) AND RETURN TO THE</span>
-010588,000036:                                                                                                  <span class="co">#           CALLING PROGRAM.</span>
-010589,000037: 
-010590,000038:                                                                                                  <span class="co">#        WHEN SUFFICIENT MARKS HAVE BEEN MADE (MARKINDX = 0) A FLASHING V50N25, R1 = 16, IS DISPLAYED.</span>
-010591,000039:                                                                                                  <span class="co">#           A PROCEED RESPONSE TO THIS DISPLAY WILL RETURN TO THE CALLING PROGRAM AFTER RELEASING THE</span>
-010592,000040:                                                                                                  <span class="co">#           MARKING SYSTEM.</span>
-010593,000041: 
-010594,000042:                                                                                                  <span class="co">#        MARKS ARE PROCESSED BY THE ROUTINE MARKRUPT AS FOLLOWS:</span>
-010595,000043:                                                                                                  <span class="co">#                IF NO MARKS ARE CALLED FOR, ALARM CODE 114 IS SENT AND THE MARKRUPT ROUTINE EXITS.</span>
-010596,000044:                                                                                                  <span class="co">#                IF A MARK IS ACCEPTED, MARKFLG IS SET TO ENABLE A REJECT.</span>
-010597,000045:                                                                                                  <span class="co">#                IF R21(P20) IS RUNNING, DATA IS MOVED FROM STORAGE MRKBUF1 INTO MRKBUF2.  NEW MARK DATA</span>
-010598,000046:                                                                                                  <span class="co">#                        IS STORED INTO MRKBUF1.</span>
-010599,000047:                                                                                                  <span class="co">#                IF P22 IS RUNNING, MARK DATA IS STORED INTO SVMRKDAT, USING THE REGISTER P22DEX AS AN</span>
-010600,000048:                                                                                                  <span class="co">#                        INDEX AND THE REGISTER 8NN AS A COUNTER.  MARKINDX IS DECREMENTED.</span>
-010601,000049:                                                                                                  <span class="co">#                IF R57 IS RUNNING, MARK DATA IS STORED INTO MARKDOWN FOR DOWNLINK, THEN PROCESSED AS FOR</span>
-010602,000050:                                                                                                  <span class="co">#                        R21.  MARKRUPT THEN CALLS MARKDISP (IN R57).</span>
-010603,000051:                                                                                                  <span class="co">#                FOR OTHER USERS, MARK DATA IS STORED INTO MRKBUF1 AND MARKINDX IS DECREMENTED.</span>
-010604,000052: 
-010605,000053:                                                                                                  <span class="co">#        MARK REJECTS ARE PROCESSED BY THE ROUTINE MARKRUPT AS FOLLOWS:</span>
-010606,000054:                                                                                                  <span class="co">#                IF MARKFLG IS CLEAR (I.E., NO MARK WAS TAKEN), ALARM CODE 110 IS SENT AND THE ROUTINE EXITS.</span>
-010607,000055:                                                                                                  <span class="co">#                OTHERWISE, MARKINDX IS INCREMENTED, THE P22 INDICATORS 8NN AND P22DEX ARE DECREMENTED</span>
-010608,000056:                                                                                                  <span class="co">#                        (IF THE USER IS P22), AND THE V51FL DISPLAY IN SXTMARK IS REESTABLISHED.</span>
-010609,000057: 
-010610,000058:                                                                                                  <span class="co">#        IF THE ERASABLE REGISTER CDUCHKWD IS SET TO A NON-ZERO VALUE, VALIDITY OF THE MARKS IS CHECKED</span>
-010611,000059:                                                                                                  <span class="co">#           BY THE MARKRUPT ROUTINE AS FOLLOWS:</span>
-010612,000060:                                                                                                  <span class="co">#                IF THE CDU'S CHANGE BY MORE THAN 3 BITS OVER THE TIME PERIOD INDICATED BY THE VALUE OF</span>
-010613,000061:                                                                                                  <span class="co">#                        CDUCHKWD, ALARM CODE 121 IS SENT AND THE ROUTINE EXITS.</span>
-010614,000062: 
-010615,000063:                                                                                                  <span class="co">#  CALLING SEQUENCE -</span>
-010616,000064: 
-010617,000065:                                                                                                  <span class="co">#        TC      BANKCALL</span>
-010618,000066:                                                                                                  <span class="co">#        CADR    SXTMARK</span>
-010619,000067: 
-010620,000068: 
+010578,000021: 
+010579,000022:                                                                                                  <span class="co">#  PROGRAM NAME     -     SXTMARK</span>
+010580,000023: 
+010581,000024:                                                                                                  <span class="co">#  MOD. 1        8 AUG. 69       BY P.RYE</span>
+010582,000025: 
+010583,000026:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION</span>
+010584,000027: 
+010585,000028:                                                                                                  <span class="co">#        SXTMARK IS CALLED BY P03 AND BY P22, P23, P51, AND P52 VIA R53.</span>
+010586,000029:                                                                                                  <span class="co">#        THE REGISTER MARKINDX IS SET TO 5 IF THE CALLING PROGRAM IS P22, OR TO 1 FOR OTHER USERS.</span>
+010587,000030:                                                                                                  <span class="co">#           THIS REGISTER INDICATES THE NUMBER OF MARKS DESIRED.</span>
+010588,000031:                                                                                                  <span class="co">#        THE REGISTER EXTVBACT IS CHECKED (SUBROUTINE TESTMARK) TO INSURE THAT THE MARK DISPLAY SYSTEM</span>
+010589,000032:                                                                                                  <span class="co">#           IS FREE.  IF NOT, BAILOUT (31211) IS DONE.</span>
+010590,000033:                                                                                                  <span class="co">#        BIT 2 OF THE REGISTER EXTVBACT IS SET BY SXTMARK, RESERVING THE MARKING AND EXTENDED VERB SYSTEM.</span>
+010591,000034:                                                                                                  <span class="co">#        SXTMARK DISPLAYS A FLASHING VERB 51, CALLING FOR MARKS.  A PROCEED RESPONSE TO THIS DISPLAY</span>
+010592,000035:                                                                                                  <span class="co">#           WILL RELEASE THE MARKING SYSTEM (SUBROUTINES MKRELEAS, CLEARMARK) AND RETURN TO THE</span>
+010593,000036:                                                                                                  <span class="co">#           CALLING PROGRAM.</span>
+010594,000037: 
+010595,000038:                                                                                                  <span class="co">#        WHEN SUFFICIENT MARKS HAVE BEEN MADE (MARKINDX = 0) A FLASHING V50N25, R1 = 16, IS DISPLAYED.</span>
+010596,000039:                                                                                                  <span class="co">#           A PROCEED RESPONSE TO THIS DISPLAY WILL RETURN TO THE CALLING PROGRAM AFTER RELEASING THE</span>
+010597,000040:                                                                                                  <span class="co">#           MARKING SYSTEM.</span>
+010598,000041: 
+010599,000042:                                                                                                  <span class="co">#        MARKS ARE PROCESSED BY THE ROUTINE MARKRUPT AS FOLLOWS:</span>
+010600,000043:                                                                                                  <span class="co">#                IF NO MARKS ARE CALLED FOR, ALARM CODE 114 IS SENT AND THE MARKRUPT ROUTINE EXITS.</span>
+010601,000044:                                                                                                  <span class="co">#                IF A MARK IS ACCEPTED, MARKFLG IS SET TO ENABLE A REJECT.</span>
+010602,000045:                                                                                                  <span class="co">#                IF R21(P20) IS RUNNING, DATA IS MOVED FROM STORAGE MRKBUF1 INTO MRKBUF2.  NEW MARK DATA</span>
+010603,000046:                                                                                                  <span class="co">#                        IS STORED INTO MRKBUF1.</span>
+010604,000047:                                                                                                  <span class="co">#                IF P22 IS RUNNING, MARK DATA IS STORED INTO SVMRKDAT, USING THE REGISTER P22DEX AS AN</span>
+010605,000048:                                                                                                  <span class="co">#                        INDEX AND THE REGISTER 8NN AS A COUNTER.  MARKINDX IS DECREMENTED.</span>
+010606,000049:                                                                                                  <span class="co">#                IF R57 IS RUNNING, MARK DATA IS STORED INTO MARKDOWN FOR DOWNLINK, THEN PROCESSED AS FOR</span>
+010607,000050:                                                                                                  <span class="co">#                        R21.  MARKRUPT THEN CALLS MARKDISP (IN R57).</span>
+010608,000051:                                                                                                  <span class="co">#                FOR OTHER USERS, MARK DATA IS STORED INTO MRKBUF1 AND MARKINDX IS DECREMENTED.</span>
+010609,000052: 
+010610,000053:                                                                                                  <span class="co">#        MARK REJECTS ARE PROCESSED BY THE ROUTINE MARKRUPT AS FOLLOWS:</span>
+010611,000054:                                                                                                  <span class="co">#                IF MARKFLG IS CLEAR (I.E., NO MARK WAS TAKEN), ALARM CODE 110 IS SENT AND THE ROUTINE EXITS.</span>
+010612,000055:                                                                                                  <span class="co">#                OTHERWISE, MARKINDX IS INCREMENTED, THE P22 INDICATORS 8NN AND P22DEX ARE DECREMENTED</span>
+010613,000056:                                                                                                  <span class="co">#                        (IF THE USER IS P22), AND THE V51FL DISPLAY IN SXTMARK IS REESTABLISHED.</span>
+010614,000057: 
+010615,000058:                                                                                                  <span class="co">#        IF THE ERASABLE REGISTER CDUCHKWD IS SET TO A NON-ZERO VALUE, VALIDITY OF THE MARKS IS CHECKED</span>
+010616,000059:                                                                                                  <span class="co">#           BY THE MARKRUPT ROUTINE AS FOLLOWS:</span>
+010617,000060:                                                                                                  <span class="co">#                IF THE CDU'S CHANGE BY MORE THAN 3 BITS OVER THE TIME PERIOD INDICATED BY THE VALUE OF</span>
+010618,000061:                                                                                                  <span class="co">#                        CDUCHKWD, ALARM CODE 121 IS SENT AND THE ROUTINE EXITS.</span>
+010619,000062: 
+010620,000063:                                                                                                  <span class="co">#  CALLING SEQUENCE -</span>
+010621,000064: 
+010622,000065:                                                                                                  <span class="co">#        TC      BANKCALL</span>
+010623,000066:                                                                                                  <span class="co">#        CADR    SXTMARK</span>
+010624,000067: 
+010625,000068: 
 </pre>
 </span>
 </p>
@@ -183,51 +183,51 @@ Page 240
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-010622,000070: 
-010623,000071:                                                                                                  <span class="co">#  NORMAL EXIT MODE -</span>
-010624,000072: 
-010625,000073:                                                                                                  <span class="co">#        RETURN TO USER VIA BANKJUMP (RETURN ADDRESS IN OPTCADR).</span>
-010626,000074: 
-010627,000075: 
-010628,000076:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODES</span>
-010629,000077: 
-010630,000078:                                                                                                  <span class="co">#        1. ALARM 110 - MARK REJECT WITH NO MARK</span>
-010631,000079:                                                                                                  <span class="co">#        2. ALARM 113 - NO INBITS</span>
-010632,000080:                                                                                                  <span class="co">#        3. ALARM 121 - CDU'S NO GOOD AT MARK TIME</span>
-010633,000081:                                                                                                  <span class="co">#        4. ALARM 114 - MARK MADE BUT NOT DESIRED</span>
-010634,000082:                                                                                                  <span class="co">#        5. BAILOUT 31211 - MARK DISPLAY SYSTEM BUSY</span>
-010635,000083: 
-010636,000084: 
-010637,000085:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED -</span>
-010638,000086: 
-010639,000087:                                                                                                  <span class="co">#        NONE</span>
-010640,000088: 
-010641,000089: 
-010642,000090:                                                                                                  <span class="co">#  OUTPUT -</span>
-010643,000091: 
-010644,000092:                                                                                                  <span class="co">#        FOR P22:</span>
-010645,000093:                                                                                                  <span class="co">#                MARK DATA IN SVMRKDAT</span>
-010646,000094:                                                                                                  <span class="co">#                MARKINDX DECREMENTED BY ONE FOR EACH MARK TAKEN</span>
-010647,000095:                                                                                                  <span class="co">#                NO. OF MARKS IN 8NN</span>
-010648,000096:                                                                                                  <span class="co">#        FOR R57:</span>
-010649,000097:                                                                                                  <span class="co">#                MARK DATA IN MARKDOWN AND MRKBUF1</span>
-010650,000098:                                                                                                  <span class="co">#        FOR OTHER USERS:</span>
-010651,000099:                                                                                                  <span class="co">#                MARKINDX DECREMENTED TO ZERO IF A MARK WAS TAKEN</span>
-010652,000100:                                                                                                  <span class="co">#                MARK DATA IN MRKBUF1</span>
-010653,000101: 
-010654,000102: 
-010655,000103:                                                                                                  <span class="co">#  CONDITIONS AT EXIT -</span>
-010656,000104: 
-010657,000105:                                                                                                  <span class="co">#        MARKINDX = INITIAL VALUE - NO. MARKS TAKEN</span>
-010658,000106:                                                                                                  <span class="co">#        MARKING SYSTEM IS RELEASED :</span>
-010659,000107:                                                                                                  <span class="co">#                EXTVBACT = 0</span>
-010660,000108:                                                                                                  <span class="co">#                BIT 9 OPTMODES = 0</span>
-010661,000109:                                                                                                  <span class="co">#                OPTIND = -1</span>
-010662,000110:                                                                                                  <span class="co">#                BIT 2 CHAN12 = 0</span>
-010663,000111:                                                                                                  <span class="co">#        MARKFLG = 0</span>
-010664,000112:                                                                                                  <span class="co">#        OPTCADR CONTAINS CADR OF SXTMARK CALLER</span>
-010665,000113: 
-010666,000114: 
+010627,000070: 
+010628,000071:                                                                                                  <span class="co">#  NORMAL EXIT MODE -</span>
+010629,000072: 
+010630,000073:                                                                                                  <span class="co">#        RETURN TO USER VIA BANKJUMP (RETURN ADDRESS IN OPTCADR).</span>
+010631,000074: 
+010632,000075: 
+010633,000076:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODES</span>
+010634,000077: 
+010635,000078:                                                                                                  <span class="co">#        1. ALARM 110 - MARK REJECT WITH NO MARK</span>
+010636,000079:                                                                                                  <span class="co">#        2. ALARM 113 - NO INBITS</span>
+010637,000080:                                                                                                  <span class="co">#        3. ALARM 121 - CDU'S NO GOOD AT MARK TIME</span>
+010638,000081:                                                                                                  <span class="co">#        4. ALARM 114 - MARK MADE BUT NOT DESIRED</span>
+010639,000082:                                                                                                  <span class="co">#        5. BAILOUT 31211 - MARK DISPLAY SYSTEM BUSY</span>
+010640,000083: 
+010641,000084: 
+010642,000085:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED -</span>
+010643,000086: 
+010644,000087:                                                                                                  <span class="co">#        NONE</span>
+010645,000088: 
+010646,000089: 
+010647,000090:                                                                                                  <span class="co">#  OUTPUT -</span>
+010648,000091: 
+010649,000092:                                                                                                  <span class="co">#        FOR P22:</span>
+010650,000093:                                                                                                  <span class="co">#                MARK DATA IN SVMRKDAT</span>
+010651,000094:                                                                                                  <span class="co">#                MARKINDX DECREMENTED BY ONE FOR EACH MARK TAKEN</span>
+010652,000095:                                                                                                  <span class="co">#                NO. OF MARKS IN 8NN</span>
+010653,000096:                                                                                                  <span class="co">#        FOR R57:</span>
+010654,000097:                                                                                                  <span class="co">#                MARK DATA IN MARKDOWN AND MRKBUF1</span>
+010655,000098:                                                                                                  <span class="co">#        FOR OTHER USERS:</span>
+010656,000099:                                                                                                  <span class="co">#                MARKINDX DECREMENTED TO ZERO IF A MARK WAS TAKEN</span>
+010657,000100:                                                                                                  <span class="co">#                MARK DATA IN MRKBUF1</span>
+010658,000101: 
+010659,000102: 
+010660,000103:                                                                                                  <span class="co">#  CONDITIONS AT EXIT -</span>
+010661,000104: 
+010662,000105:                                                                                                  <span class="co">#        MARKINDX = INITIAL VALUE - NO. MARKS TAKEN</span>
+010663,000106:                                                                                                  <span class="co">#        MARKING SYSTEM IS RELEASED :</span>
+010664,000107:                                                                                                  <span class="co">#                EXTVBACT = 0</span>
+010665,000108:                                                                                                  <span class="co">#                BIT 9 OPTMODES = 0</span>
+010666,000109:                                                                                                  <span class="co">#                OPTIND = -1</span>
+010667,000110:                                                                                                  <span class="co">#                BIT 2 CHAN12 = 0</span>
+010668,000111:                                                                                                  <span class="co">#        MARKFLG = 0</span>
+010669,000112:                                                                                                  <span class="co">#        OPTCADR CONTAINS CADR OF SXTMARK CALLER</span>
+010670,000113: 
+010671,000114: 
 </pre>
 </span>
 </p>
@@ -243,55 +243,55 @@ Page 241
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-010668,000116: 07,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#5358544D41524B45">SXTMARKE</a>                              
-010669,000117: 07,2000                                           <span class="ps">BANK    </span>                                       
-010670,000118: 
-010671,000119: 07,2000  E7,1722                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D524B42554631">MRKBUF1</a>                               
-010672,000120: 07,2000                                           <span class="ps">COUNT*  </span> $$/SXTMK                              
-<a name="5358544D41524B"></a>010673,000121: 07,2000           02062        <span class="sm">SXTMARK </span>           <span class="op">TC      </span> <a href="#544553544D41524B">TESTMARK</a>                              
-010674,000122: 07,2001           05354                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#434845434B4D4D">CHECKMM</a>                               <span class="co">#  IS THIS P24</span>
-010675,000123: 07,2002           00030                           <span class="ps">MM      </span> 24         B-14                       
-010676,000124: 07,2003           12005                           <span class="op">TCF     </span> +2                                    <span class="co">#  NO</span>
-010677,000125: 07,2004           12010                           <span class="op">TCF     </span> <a href="#5358544D524B41">SXTMRKA</a>                               <span class="co">#  YES</span>
-010678,000126: 07,2005           05354                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#434845434B4D4D">CHECKMM</a>                               
-010679,000127: 07,2006           00026                           <span class="ps">MM      </span> 22         B-14                       
-010680,000128: 07,2007           12015                           <span class="op">TCF     </span> <a href="#5345544D524B">SETMRK</a>                                
-<a name="5358544D524B41"></a>010681,000129: 07,2010           34772        <span class="sm">SXTMRKA </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  INITIALIZE MARK COUNTER</span>
-010682,000130: 07,2011           55747                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#384E4E">8NN</a>                                   
-010683,000131: 
-010684,000132: 07,2012           55753                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503232444558">P22DEX</a>                                
-010685,000133: 07,2013           34773                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#46495645">FIVE</a>                                  <span class="co">#  5 MARKS FOR P22, ONE FOR ALL OTHERS</span>
-010686,000134: 07,2014           12016                           <span class="op">TCF     </span> <a href="#5345544D524B">SETMRK</a>     +1                         
-<a name="5345544D524B"></a>010687,000135: 07,2015           34770        <span class="sm">SETMRK  </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-010688,000136: 07,2016           54301                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B494E4458">MARKINDX</a>                              
-010689,000137: 
-010690,000138: 07,2017           04665                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#4D414B4543414452">MAKECADR</a>                              <span class="co">#  STORE RETURN TO USER WHO CALLED</span>
-010691,000139: 07,2020           55336                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F505443414452">OPTCADR</a>                               <span class="co">#     SXTMARK IN OPTCADR</span>
-010692,000140: 
-<a name="4D4B56423531"></a>010693,000141: 07,2021           04636        <span class="sm">MKVB51  </span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  CLEAR DISPLAY FOR MARK VERB</span>
-010694,000142: 07,2022           20575                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#4B4C45454E4558">KLEENEX</a>                               
-<a name="4D4B5642445350"></a>010695,000143: 07,2023           32061        <span class="sm">MKVBDSP </span>           <span class="op">CAF     </span> <a href="#56423531">VB51</a>                                  <span class="co">#  DISPLAY MARK VERB 51</span>
-010696,000144: 07,2024           04636                 +1        <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-010697,000145: 07,2025           20604                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F4D41524B34">GOMARK4</a>                               
-010698,000146: 07,2026           12031                           <span class="op">TCF     </span> <a href="#5445524D535854">TERMSXT</a>                               <span class="co">#  VB34-TERMINATE</span>
-010699,000147: 07,2027           12042                           <span class="op">TCF     </span> <a href="#454E54414E535752">ENTANSWR</a>                              <span class="co">#  V33-PROCEED-MARKING DONE</span>
-010700,000148: 07,2030           12052                           <span class="op">TCF     </span> <a href="#4D4B56423558">MKVB5X</a>                                <span class="co">#  ENTER-RECYCLE TO INITIAL MARK DISPLAY</span>
-010701,000149: 
-<a name="5445524D535854"></a>010702,000150: 07,2031           05527        <span class="sm">TERMSXT </span>           <span class="op">TC      </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#434C4541524D524B">CLEARMRK</a>                              <span class="co">#  CLEAR MARK ACTIVITY.</span>
-010703,000151: 
-010704,000152: 07,2032           02073                           <span class="op">TC      </span> <a href="#4D4B524C454553">MKRLEES</a>                               
-010705,000153: 
-010706,000154: 07,2033           05354                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#434845434B4D4D">CHECKMM</a>                               
-010707,000155: 07,2034           00003                           <span class="ps">MM      </span> 03         B-14                       
-010708,000156: 07,2035           12037                           <span class="op">TCF     </span> +2                                    
-010709,000157: 07,2036           02040                           <span class="op">TC      </span> <a href="#5445524D503033">TERMP03</a>                               
-010710,000158: 07,2037           04103                           <span class="op">TC      </span> <a href="FRESH_START_AND_RESTART.agc.html#474F544F504F4F48">GOTOPOOH</a>                              
-010711,000159: 
-<a name="5445524D503033"></a>010712,000160: 07,2040           04655        <span class="sm">TERMP03 </span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              
-010713,000161: 07,2041           67370                           <span class="ps">CADR    </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#47434F4D5035">GCOMP5</a>                                
-010714,000162: 
-<a name="454E54414E535752"></a>010715,000163: 07,2042           37645        <span class="sm">ENTANSWR</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3234">PRIO24</a>                                
-010716,000164: 07,2043           05121                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
+010673,000116: 07,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#5358544D41524B45">SXTMARKE</a>                              
+010674,000117: 07,2000                                           <span class="ps">BANK    </span>                                       
+010675,000118: 
+010676,000119: 07,2000  E7,1722                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D524B42554631">MRKBUF1</a>                               
+010677,000120: 07,2000                                           <span class="ps">COUNT*  </span> $$/SXTMK                              
+<a name="5358544D41524B"></a>010678,000121: 07,2000           02062        <span class="sm">SXTMARK </span>           <span class="op">TC      </span> <a href="#544553544D41524B">TESTMARK</a>                              
+010679,000122: 07,2001           05354                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#434845434B4D4D">CHECKMM</a>                               <span class="co">#  IS THIS P24</span>
+010680,000123: 07,2002           00030                           <span class="ps">MM      </span> 24         B-14                       
+010681,000124: 07,2003           12005                           <span class="op">TCF     </span> +2                                    <span class="co">#  NO</span>
+010682,000125: 07,2004           12010                           <span class="op">TCF     </span> <a href="#5358544D524B41">SXTMRKA</a>                               <span class="co">#  YES</span>
+010683,000126: 07,2005           05354                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#434845434B4D4D">CHECKMM</a>                               
+010684,000127: 07,2006           00026                           <span class="ps">MM      </span> 22         B-14                       
+010685,000128: 07,2007           12015                           <span class="op">TCF     </span> <a href="#5345544D524B">SETMRK</a>                                
+<a name="5358544D524B41"></a>010686,000129: 07,2010           34772        <span class="sm">SXTMRKA </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  INITIALIZE MARK COUNTER</span>
+010687,000130: 07,2011           55747                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#384E4E">8NN</a>                                   
+010688,000131: 
+010689,000132: 07,2012           55753                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503232444558">P22DEX</a>                                
+010690,000133: 07,2013           34773                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#46495645">FIVE</a>                                  <span class="co">#  5 MARKS FOR P22, ONE FOR ALL OTHERS</span>
+010691,000134: 07,2014           12016                           <span class="op">TCF     </span> <a href="#5345544D524B">SETMRK</a>     +1                         
+<a name="5345544D524B"></a>010692,000135: 07,2015           34770        <span class="sm">SETMRK  </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+010693,000136: 07,2016           54301                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B494E4458">MARKINDX</a>                              
+010694,000137: 
+010695,000138: 07,2017           04665                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#4D414B4543414452">MAKECADR</a>                              <span class="co">#  STORE RETURN TO USER WHO CALLED</span>
+010696,000139: 07,2020           55336                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F505443414452">OPTCADR</a>                               <span class="co">#     SXTMARK IN OPTCADR</span>
+010697,000140: 
+<a name="4D4B56423531"></a>010698,000141: 07,2021           04636        <span class="sm">MKVB51  </span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  CLEAR DISPLAY FOR MARK VERB</span>
+010699,000142: 07,2022           20575                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#4B4C45454E4558">KLEENEX</a>                               
+<a name="4D4B5642445350"></a>010700,000143: 07,2023           32061        <span class="sm">MKVBDSP </span>           <span class="op">CAF     </span> <a href="#56423531">VB51</a>                                  <span class="co">#  DISPLAY MARK VERB 51</span>
+010701,000144: 07,2024           04636                 +1        <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+010702,000145: 07,2025           20604                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F4D41524B34">GOMARK4</a>                               
+010703,000146: 07,2026           12031                           <span class="op">TCF     </span> <a href="#5445524D535854">TERMSXT</a>                               <span class="co">#  VB34-TERMINATE</span>
+010704,000147: 07,2027           12042                           <span class="op">TCF     </span> <a href="#454E54414E535752">ENTANSWR</a>                              <span class="co">#  V33-PROCEED-MARKING DONE</span>
+010705,000148: 07,2030           12052                           <span class="op">TCF     </span> <a href="#4D4B56423558">MKVB5X</a>                                <span class="co">#  ENTER-RECYCLE TO INITIAL MARK DISPLAY</span>
+010706,000149: 
+<a name="5445524D535854"></a>010707,000150: 07,2031           05527        <span class="sm">TERMSXT </span>           <span class="op">TC      </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#434C4541524D524B">CLEARMRK</a>                              <span class="co">#  CLEAR MARK ACTIVITY.</span>
+010708,000151: 
+010709,000152: 07,2032           02073                           <span class="op">TC      </span> <a href="#4D4B524C454553">MKRLEES</a>                               
+010710,000153: 
+010711,000154: 07,2033           05354                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#434845434B4D4D">CHECKMM</a>                               
+010712,000155: 07,2034           00003                           <span class="ps">MM      </span> 03         B-14                       
+010713,000156: 07,2035           12037                           <span class="op">TCF     </span> +2                                    
+010714,000157: 07,2036           02040                           <span class="op">TC      </span> <a href="#5445524D503033">TERMP03</a>                               
+010715,000158: 07,2037           04103                           <span class="op">TC      </span> <a href="FRESH_START_AND_RESTART.agc.html#474F544F504F4F48">GOTOPOOH</a>                              
+010716,000159: 
+<a name="5445524D503033"></a>010717,000160: 07,2040           04655        <span class="sm">TERMP03 </span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              
+010718,000161: 07,2041           67370                           <span class="ps">CADR    </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#47434F4D5035">GCOMP5</a>                                
+010719,000162: 
+<a name="454E54414E535752"></a>010720,000163: 07,2042           37645        <span class="sm">ENTANSWR</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3234">PRIO24</a>                                
+010721,000164: 07,2043           05121                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
 </pre>
 </span>
 </p>
@@ -307,52 +307,52 @@ Page 242
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-010718,000166: 07,2044  0003777                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57484F4341524553">WHOCARES</a>                              
-010719,000167: 07,2044           05524 04067                     <span class="ps">2CADR   </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                
-010720,000168: 
-010721,000169: 07,2046           35052                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3133">PRIO13</a>                                <span class="co">#  ALLOW LEFTOVER SLEEPING JOB IF ANY</span>
-010722,000170: 07,2047           05176                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#5052494F43484E47">PRIOCHNG</a>                              
-010723,000171: 
-<a name="4D4B56524554"></a>010724,000172: 07,2050           31336        <span class="sm">MKVRET  </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F505443414452">OPTCADR</a>                               <span class="co">#  OPTCADR HAS RETURN CADR OF USER WHO</span>
-010725,000173: 07,2051           04660                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B4A554D50">BANKJUMP</a>                              <span class="co">#     CALLED SXTMARK</span>
-010726,000174: 
-<a name="4D4B56423558"></a>010727,000175: 07,2052           10301        <span class="sm">MKVB5X  </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B494E4458">MARKINDX</a>                              <span class="co">#  REDISPLAY VB51 IF MORE MARKS WANTED</span>
-010728,000176: 07,2053           12021                           <span class="op">TCF     </span> <a href="#4D4B56423531">MKVB51</a>                                
-<a name="4D4B56423530"></a>010729,000177: 07,2054           34321        <span class="sm">MKVB50  </span>           <span class="op">CAF     </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#52314431">R1D1</a>                                  <span class="co">#  OCT 16</span>
-010730,000178: 07,2055           55250                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44535054454D31">DSPTEM1</a>                               
-010731,000179: 07,2056           32060                           <span class="op">CAF     </span> <a href="#5635304E3235">V50N25</a>                                <span class="co">#  DISPLAY V50N25 IF MARKING DONE.</span>
-010732,000180: 07,2057           12024                           <span class="op">TCF     </span> <a href="#4D4B5642445350">MKVBDSP</a>    +1                         
-<a name="5635304E3235"></a>010733,000181: 07,2060           14431        <span class="sm">V50N25  </span>           <span class="ps">VN      </span> 5025                                  
-<a name="56423531"></a>010734,000182: 07,2061           14600        <span class="sm">VB51    </span>           <span class="ps">VN      </span> 5100                                  
-010735,000183: 
-<a name="544553544D41524B"></a>010736,000184: 07,2062           36211        <span class="sm">TESTMARK</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   
-010737,000185: 07,2063           71247                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558545642414354">EXTVBACT</a>                              
-010738,000186: 07,2064           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-010739,000187: 07,2065           12071                           <span class="op">TCF     </span> <a href="#4D4B41424F5254">MKABORT</a>                               
-010740,000188: 07,2066           34767                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  
-010741,000189: 07,2067           27247                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558545642414354">EXTVBACT</a>                              
-010742,000190: 07,2070           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-010743,000191: 
-<a name="4D4B41424F5254"></a>010744,000192: 07,2071           07706        <span class="sm">MKABORT </span>           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#4241494C4F5554">BAILOUT</a>                               
-010745,000193: 07,2072           31211                           <span class="ps">OCT     </span> 31211                                 
-010746,000194: 
-<a name="4D4B52454C454153"></a>010747,000195: 07,2073  07,2073               <span class="sm">MKRELEAS</span>           <span class="ps">EQUALS  </span> <a href="#4D4B524C454553">MKRLEES</a>                               
-010748,000196: 
-<a name="4D4B524C454553"></a>010749,000197: 07,2073           00004        <span class="sm">MKRLEES </span>           <span class="op">INHINT  </span>                                       
-010750,000198: 07,2074           37702                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474F4E45">NEGONE</a>                                
-010751,000199: 07,2075           55323                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494E44">OPTIND</a>                                <span class="co">#  KILL COARS OPTICS</span>
-010752,000200: 
-010753,000201: 07,2076           34772                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-010754,000202: 07,2077           54301                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B494E4458">MARKINDX</a>                              
-010755,000203: 
-010756,000204: 07,2100           44765                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B424954">MARKBIT</a>                               
-010757,000205: 07,2101           70075                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524431">FLAGWRD1</a>                              
-010758,000206: 07,2102           54075                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524431">FLAGWRD1</a>                              
-010759,000207: 
-010760,000208: 07,2103           00003                           <span class="op">RELINT  </span>                                       
-010761,000209: 
-010762,000210: 07,2104           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-010763,000211: 
+010723,000166: 07,2044  0003777                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57484F4341524553">WHOCARES</a>                              
+010724,000167: 07,2044           05524 04067                     <span class="ps">2CADR   </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                
+010725,000168: 
+010726,000169: 07,2046           35052                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3133">PRIO13</a>                                <span class="co">#  ALLOW LEFTOVER SLEEPING JOB IF ANY</span>
+010727,000170: 07,2047           05176                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#5052494F43484E47">PRIOCHNG</a>                              
+010728,000171: 
+<a name="4D4B56524554"></a>010729,000172: 07,2050           31336        <span class="sm">MKVRET  </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F505443414452">OPTCADR</a>                               <span class="co">#  OPTCADR HAS RETURN CADR OF USER WHO</span>
+010730,000173: 07,2051           04660                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B4A554D50">BANKJUMP</a>                              <span class="co">#     CALLED SXTMARK</span>
+010731,000174: 
+<a name="4D4B56423558"></a>010732,000175: 07,2052           10301        <span class="sm">MKVB5X  </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B494E4458">MARKINDX</a>                              <span class="co">#  REDISPLAY VB51 IF MORE MARKS WANTED</span>
+010733,000176: 07,2053           12021                           <span class="op">TCF     </span> <a href="#4D4B56423531">MKVB51</a>                                
+<a name="4D4B56423530"></a>010734,000177: 07,2054           34321        <span class="sm">MKVB50  </span>           <span class="op">CAF     </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#52314431">R1D1</a>                                  <span class="co">#  OCT 16</span>
+010735,000178: 07,2055           55250                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44535054454D31">DSPTEM1</a>                               
+010736,000179: 07,2056           32060                           <span class="op">CAF     </span> <a href="#5635304E3235">V50N25</a>                                <span class="co">#  DISPLAY V50N25 IF MARKING DONE.</span>
+010737,000180: 07,2057           12024                           <span class="op">TCF     </span> <a href="#4D4B5642445350">MKVBDSP</a>    +1                         
+<a name="5635304E3235"></a>010738,000181: 07,2060           14431        <span class="sm">V50N25  </span>           <span class="ps">VN      </span> 5025                                  
+<a name="56423531"></a>010739,000182: 07,2061           14600        <span class="sm">VB51    </span>           <span class="ps">VN      </span> 5100                                  
+010740,000183: 
+<a name="544553544D41524B"></a>010741,000184: 07,2062           36211        <span class="sm">TESTMARK</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   
+010742,000185: 07,2063           71247                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558545642414354">EXTVBACT</a>                              
+010743,000186: 07,2064           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+010744,000187: 07,2065           12071                           <span class="op">TCF     </span> <a href="#4D4B41424F5254">MKABORT</a>                               
+010745,000188: 07,2066           34767                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  
+010746,000189: 07,2067           27247                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558545642414354">EXTVBACT</a>                              
+010747,000190: 07,2070           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+010748,000191: 
+<a name="4D4B41424F5254"></a>010749,000192: 07,2071           07706        <span class="sm">MKABORT </span>           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#4241494C4F5554">BAILOUT</a>                               
+010750,000193: 07,2072           31211                           <span class="ps">OCT     </span> 31211                                 
+010751,000194: 
+<a name="4D4B52454C454153"></a>010752,000195: 07,2073  07,2073               <span class="sm">MKRELEAS</span>           <span class="ps">EQUALS  </span> <a href="#4D4B524C454553">MKRLEES</a>                               
+010753,000196: 
+<a name="4D4B524C454553"></a>010754,000197: 07,2073           00004        <span class="sm">MKRLEES </span>           <span class="op">INHINT  </span>                                       
+010755,000198: 07,2074           37702                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474F4E45">NEGONE</a>                                
+010756,000199: 07,2075           55323                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494E44">OPTIND</a>                                <span class="co">#  KILL COARS OPTICS</span>
+010757,000200: 
+010758,000201: 07,2076           34772                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+010759,000202: 07,2077           54301                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B494E4458">MARKINDX</a>                              
+010760,000203: 
+010761,000204: 07,2100           44765                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B424954">MARKBIT</a>                               
+010762,000205: 07,2101           70075                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524431">FLAGWRD1</a>                              
+010763,000206: 07,2102           54075                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524431">FLAGWRD1</a>                              
+010764,000207: 
+010765,000208: 07,2103           00003                           <span class="op">RELINT  </span>                                       
+010766,000209: 
+010767,000210: 07,2104           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+010768,000211: 
 </pre>
 </span>
 </p>
@@ -368,52 +368,52 @@ Page 243
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-010765,000213: 
-<a name="4D41524B52555054"></a>010766,000214: 07,2105           54016        <span class="sm">MARKRUPT</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              <span class="co">#  STORE CDUS AND OPTICS NOW</span>
-010767,000215: 07,2106           30035                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554">CDUT</a>                                  
-010768,000216: 07,2107           54361                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B43445554">MKCDUT</a>                                
-010769,000217: 07,2110           30036                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553">CDUS</a>                                  
-010770,000218: 07,2111           54357                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B43445553">MKCDUS</a>                                
-010771,000219: 07,2112           30033                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445559">CDUY</a>                                  
-010772,000220: 07,2113           54356                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B43445559">MKCDUY</a>                                
-010773,000221: 07,2114           30034                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
-010774,000222: 07,2115           54360                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B4344555A">MKCDUZ</a>                                
-010775,000223: 07,2116           30032                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  
-010776,000224: 07,2117           54362                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B43445558">MKCDUX</a>                                
-010777,000225: 07,2120           00006                           <span class="op">EXTEND  </span>                                       
-010778,000226: 07,2121           30025                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  GET TIME</span>
-010779,000227: 07,2122           52355                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B54325431">MKT2T1</a>                                
-010780,000228: 07,2123           00006                           <span class="op">EXTEND  </span>                                       
-010781,000229: 07,2124           30355                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B54325431">MKT2T1</a>                                
-010782,000230: 07,2125           52014                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53414D5054494D45">SAMPTIME</a>                              <span class="co">#  RUPT TIME FOR NOUN 65.</span>
-010783,000231: 
-010784,000232: 07,2126           56002                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-010785,000233: 07,2127           54012                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152555054">QRUPT</a>                                 
-010786,000234: 
-010787,000235: 07,2130           34763                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  <span class="co">#  SEE IF MARK OR MKREJECT</span>
-010788,000236: 07,2131           00006                           <span class="op">EXTEND  </span>                                       
-010789,000237: 07,2132           02016                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E41564B4559494E">NAVKEYIN</a>                              
-010790,000238: 07,2133           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-010791,000239: 07,2134           02154                           <span class="op">TC      </span> <a href="#4D41524B4954">MARKIT</a>                                <span class="co">#  ITS A MARK</span>
-010792,000240: 
-010793,000241: 07,2135           34762                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495437">BIT7</a>                                  <span class="co">#  NOT A MARK, SEE IF MKREJECT</span>
-010794,000242: 07,2136           00006                           <span class="op">EXTEND  </span>                                       
-010795,000243: 07,2137           02016                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E41564B4559494E">NAVKEYIN</a>                              
-010796,000244: 07,2140           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-010797,000245: 07,2141           02344                           <span class="op">TC      </span> <a href="#4D4B52454A454354">MKREJECT</a>                              <span class="co">#  ITS A MARK REJECT</span>
-010798,000246: 
-<a name="4B455943414C4C"></a>010799,000247: 07,2142           34342        <span class="sm">KEYCALL </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543337">OCT37</a>                                 <span class="co">#  NOT MARK OR MKREJECT, SEE IF KEYCODE</span>
-010800,000248: 07,2143           00006                           <span class="op">EXTEND  </span>                                       
-010801,000249: 07,2144           02016                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E41564B4559494E">NAVKEYIN</a>                              
-010802,000250: 07,2145           00006                           <span class="op">EXTEND  </span>                                       
-010803,000251: 07,2146           12151                           <span class="op">BZF     </span> +3                                    <span class="co">#  IF NO INBITS</span>
-010804,000252: 07,2147           04655                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              
-010805,000253: 07,2150           17675                           <span class="ps">CADR    </span> <a href="KEYRUPT,_UPRUPT.agc.html#4B4559434F4D">KEYCOM</a>                                <span class="co">#  IT,S A KEY CODE, NOT A MARK.</span>
-010806,000254: 
-010807,000255: 07,2151           05671                 +3        <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#414C41524D">ALARM</a>                                 <span class="co">#  ALARM IF NO INBITS</span>
-010808,000256: 07,2152           00113                           <span class="ps">OCT     </span> 113                                   
-010809,000257: 07,2153           05323                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
-010810,000258: 
+010770,000213: 
+<a name="4D41524B52555054"></a>010771,000214: 07,2105           54016        <span class="sm">MARKRUPT</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              <span class="co">#  STORE CDUS AND OPTICS NOW</span>
+010772,000215: 07,2106           30035                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554">CDUT</a>                                  
+010773,000216: 07,2107           54361                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B43445554">MKCDUT</a>                                
+010774,000217: 07,2110           30036                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553">CDUS</a>                                  
+010775,000218: 07,2111           54357                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B43445553">MKCDUS</a>                                
+010776,000219: 07,2112           30033                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445559">CDUY</a>                                  
+010777,000220: 07,2113           54356                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B43445559">MKCDUY</a>                                
+010778,000221: 07,2114           30034                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
+010779,000222: 07,2115           54360                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B4344555A">MKCDUZ</a>                                
+010780,000223: 07,2116           30032                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  
+010781,000224: 07,2117           54362                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B43445558">MKCDUX</a>                                
+010782,000225: 07,2120           00006                           <span class="op">EXTEND  </span>                                       
+010783,000226: 07,2121           30025                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  GET TIME</span>
+010784,000227: 07,2122           52355                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B54325431">MKT2T1</a>                                
+010785,000228: 07,2123           00006                           <span class="op">EXTEND  </span>                                       
+010786,000229: 07,2124           30355                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B54325431">MKT2T1</a>                                
+010787,000230: 07,2125           52014                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53414D5054494D45">SAMPTIME</a>                              <span class="co">#  RUPT TIME FOR NOUN 65.</span>
+010788,000231: 
+010789,000232: 07,2126           56002                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+010790,000233: 07,2127           54012                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152555054">QRUPT</a>                                 
+010791,000234: 
+010792,000235: 07,2130           34763                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  <span class="co">#  SEE IF MARK OR MKREJECT</span>
+010793,000236: 07,2131           00006                           <span class="op">EXTEND  </span>                                       
+010794,000237: 07,2132           02016                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E41564B4559494E">NAVKEYIN</a>                              
+010795,000238: 07,2133           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+010796,000239: 07,2134           02154                           <span class="op">TC      </span> <a href="#4D41524B4954">MARKIT</a>                                <span class="co">#  ITS A MARK</span>
+010797,000240: 
+010798,000241: 07,2135           34762                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495437">BIT7</a>                                  <span class="co">#  NOT A MARK, SEE IF MKREJECT</span>
+010799,000242: 07,2136           00006                           <span class="op">EXTEND  </span>                                       
+010800,000243: 07,2137           02016                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E41564B4559494E">NAVKEYIN</a>                              
+010801,000244: 07,2140           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+010802,000245: 07,2141           02344                           <span class="op">TC      </span> <a href="#4D4B52454A454354">MKREJECT</a>                              <span class="co">#  ITS A MARK REJECT</span>
+010803,000246: 
+<a name="4B455943414C4C"></a>010804,000247: 07,2142           34342        <span class="sm">KEYCALL </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543337">OCT37</a>                                 <span class="co">#  NOT MARK OR MKREJECT, SEE IF KEYCODE</span>
+010805,000248: 07,2143           00006                           <span class="op">EXTEND  </span>                                       
+010806,000249: 07,2144           02016                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E41564B4559494E">NAVKEYIN</a>                              
+010807,000250: 07,2145           00006                           <span class="op">EXTEND  </span>                                       
+010808,000251: 07,2146           12151                           <span class="op">BZF     </span> +3                                    <span class="co">#  IF NO INBITS</span>
+010809,000252: 07,2147           04655                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              
+010810,000253: 07,2150           17675                           <span class="ps">CADR    </span> <a href="KEYRUPT,_UPRUPT.agc.html#4B4559434F4D">KEYCOM</a>                                <span class="co">#  IT,S A KEY CODE, NOT A MARK.</span>
+010811,000254: 
+010812,000255: 07,2151           05671                 +3        <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#414C41524D">ALARM</a>                                 <span class="co">#  ALARM IF NO INBITS</span>
+010813,000256: 07,2152           00113                           <span class="ps">OCT     </span> 113                                   
+010814,000257: 07,2153           05323                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
+010815,000258: 
 </pre>
 </span>
 </p>
@@ -429,57 +429,57 @@ Page 244
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-010812,000260: 
-010813,000261:                                                                                                  <span class="co">#  PROGRAM NAME - MARKIT                                 DATE- 19 SEPT 1967</span>
-010814,000262: 
-010815,000263:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
-010816,000264:                                                                                                  <span class="co">#        FROM MARKRUPT IF CHAN 16 BIT 6 = 1</span>
-010817,000265: 
-010818,000266:                                                                                                  <span class="co">#  EXIT</span>
-010819,000267:                                                                                                  <span class="co">#        RESUME</span>
-010820,000268: 
-010821,000269:                                                                                                  <span class="co">#  INPUT</span>
-010822,000270:                                                                                                  <span class="co">#        CDUCHKWD. ALSO ALL INITIALIZATION FOR MARKCONT</span>
-010823,000271: 
-010824,000272:                                                                                                  <span class="co">#  OUTPUT</span>
-010825,000273:                                                                                                  <span class="co">#        MKT2T1,MKCDUX,MKCDUY,MKCDUZ,MKCDUS,MKCDUT</span>
-010826,000274: 
-010827,000275:                                                                                                  <span class="co">#  ALARM EXIT</span>
-010828,000276:                                                                                                  <span class="co">#        NONE</span>
-010829,000277: 
-<a name="4D41524B4954"></a>010830,000278: 07,2154           11341        <span class="sm">MARKIT  </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445543484B5744">CDUCHKWD</a>                              
-010831,000279: 07,2155           12160                           <span class="op">TCF     </span> +3                                    <span class="co">#  DELAY OF CDUCHKWD CS IF PNZ</span>
-010832,000280: 07,2156           12160                           <span class="op">TCF     </span> +2                                    
-010833,000281: 07,2157           34772                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-010834,000282: 07,2160           64770                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   <span class="co">#  10 MS IF NO CHECK</span>
-010835,000283: 07,2161           05233                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-010836,000284: 07,2162  E7,1722                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D524B42554631">MRKBUF1</a>                               
-010837,000285: 07,2162           02165 16067                     <span class="ps">2CADR   </span> <a href="#4D41524B444946">MARKDIF</a>                               
-010838,000286: 
-010839,000287: 07,2164           15323                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
-010840,000288: 
-<a name="4D41524B444946"></a>010841,000289: 07,2165           34753        <span class="sm">MARKDIF </span>           <span class="op">CAF     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503234424954">P24BIT</a>                                <span class="co">#  IS THIS P24</span>
-010842,000290: 07,2166           70105                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524439">FLAGWRD9</a>                              
-010843,000291: 07,2167           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-010844,000292: 07,2170           12204                           <span class="op">TCF     </span> <a href="#4D41524B434F4E54">MARKCONT</a>                              <span class="co">#  YES ACCEPT MARK</span>
-010845,000293: 07,2171           31341                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445543484B5744">CDUCHKWD</a>                              <span class="co">#  IF DELAY CHECK IS ZERO OR NEG, ACP MARK</span>
-010846,000294: 07,2172           00006                           <span class="op">EXTEND  </span>                                       
-010847,000295: 07,2173           62204                           <span class="op">BZMF    </span> <a href="#4D41524B434F4E54">MARKCONT</a>                              
-010848,000296: 07,2174           44770                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  
-010849,000297: 07,2175           54353                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B4E4458">MKNDX</a>                                 <span class="co">#  SET INDEX -1</span>
-010850,000298: 07,2176           30362                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B43445558">MKCDUX</a>                                
-010851,000299: 07,2177           02325                           <span class="op">TC      </span> <a href="#44494643484B">DIFCHK</a>                                <span class="co">#  SEE IF VEHICLE RATE TO MUCH AT MARK</span>
-010852,000300: 07,2200           30356                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B43445559">MKCDUY</a>                                
-010853,000301: 07,2201           02325                           <span class="op">TC      </span> <a href="#44494643484B">DIFCHK</a>                                
-010854,000302: 07,2202           30360                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B4344555A">MKCDUZ</a>                                
-010855,000303: 07,2203           02325                           <span class="op">TC      </span> <a href="#44494643484B">DIFCHK</a>                                
-010856,000304: 
-<a name="4D41524B434F4E54"></a>010857,000305: 07,2204           34753        <span class="sm">MARKCONT</span>           <span class="op">CAF     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#523231424954">R21BIT</a>                                <span class="co">#  R21 MARKING</span>
-010858,000306: 07,2205           70076                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              
-010859,000307: 07,2206           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-010860,000308: 07,2207           12314                           <span class="op">TCF     </span> <a href="#5055544D41524B">PUTMARK</a>                               <span class="co">#  YES</span>
-010861,000309: 
-010862,000310: 07,2210           34755                           <span class="op">CAF     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#563539464C424954">V59FLBIT</a>                              
+010817,000260: 
+010818,000261:                                                                                                  <span class="co">#  PROGRAM NAME - MARKIT                                 DATE- 19 SEPT 1967</span>
+010819,000262: 
+010820,000263:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
+010821,000264:                                                                                                  <span class="co">#        FROM MARKRUPT IF CHAN 16 BIT 6 = 1</span>
+010822,000265: 
+010823,000266:                                                                                                  <span class="co">#  EXIT</span>
+010824,000267:                                                                                                  <span class="co">#        RESUME</span>
+010825,000268: 
+010826,000269:                                                                                                  <span class="co">#  INPUT</span>
+010827,000270:                                                                                                  <span class="co">#        CDUCHKWD. ALSO ALL INITIALIZATION FOR MARKCONT</span>
+010828,000271: 
+010829,000272:                                                                                                  <span class="co">#  OUTPUT</span>
+010830,000273:                                                                                                  <span class="co">#        MKT2T1,MKCDUX,MKCDUY,MKCDUZ,MKCDUS,MKCDUT</span>
+010831,000274: 
+010832,000275:                                                                                                  <span class="co">#  ALARM EXIT</span>
+010833,000276:                                                                                                  <span class="co">#        NONE</span>
+010834,000277: 
+<a name="4D41524B4954"></a>010835,000278: 07,2154           11341        <span class="sm">MARKIT  </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445543484B5744">CDUCHKWD</a>                              
+010836,000279: 07,2155           12160                           <span class="op">TCF     </span> +3                                    <span class="co">#  DELAY OF CDUCHKWD CS IF PNZ</span>
+010837,000280: 07,2156           12160                           <span class="op">TCF     </span> +2                                    
+010838,000281: 07,2157           34772                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+010839,000282: 07,2160           64770                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   <span class="co">#  10 MS IF NO CHECK</span>
+010840,000283: 07,2161           05233                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+010841,000284: 07,2162  E7,1722                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D524B42554631">MRKBUF1</a>                               
+010842,000285: 07,2162           02165 16067                     <span class="ps">2CADR   </span> <a href="#4D41524B444946">MARKDIF</a>                               
+010843,000286: 
+010844,000287: 07,2164           15323                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
+010845,000288: 
+<a name="4D41524B444946"></a>010846,000289: 07,2165           34753        <span class="sm">MARKDIF </span>           <span class="op">CAF     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503234424954">P24BIT</a>                                <span class="co">#  IS THIS P24</span>
+010847,000290: 07,2166           70105                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524439">FLAGWRD9</a>                              
+010848,000291: 07,2167           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+010849,000292: 07,2170           12204                           <span class="op">TCF     </span> <a href="#4D41524B434F4E54">MARKCONT</a>                              <span class="co">#  YES ACCEPT MARK</span>
+010850,000293: 07,2171           31341                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445543484B5744">CDUCHKWD</a>                              <span class="co">#  IF DELAY CHECK IS ZERO OR NEG, ACP MARK</span>
+010851,000294: 07,2172           00006                           <span class="op">EXTEND  </span>                                       
+010852,000295: 07,2173           62204                           <span class="op">BZMF    </span> <a href="#4D41524B434F4E54">MARKCONT</a>                              
+010853,000296: 07,2174           44770                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  
+010854,000297: 07,2175           54353                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B4E4458">MKNDX</a>                                 <span class="co">#  SET INDEX -1</span>
+010855,000298: 07,2176           30362                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B43445558">MKCDUX</a>                                
+010856,000299: 07,2177           02325                           <span class="op">TC      </span> <a href="#44494643484B">DIFCHK</a>                                <span class="co">#  SEE IF VEHICLE RATE TO MUCH AT MARK</span>
+010857,000300: 07,2200           30356                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B43445559">MKCDUY</a>                                
+010858,000301: 07,2201           02325                           <span class="op">TC      </span> <a href="#44494643484B">DIFCHK</a>                                
+010859,000302: 07,2202           30360                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B4344555A">MKCDUZ</a>                                
+010860,000303: 07,2203           02325                           <span class="op">TC      </span> <a href="#44494643484B">DIFCHK</a>                                
+010861,000304: 
+<a name="4D41524B434F4E54"></a>010862,000305: 07,2204           34753        <span class="sm">MARKCONT</span>           <span class="op">CAF     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#523231424954">R21BIT</a>                                <span class="co">#  R21 MARKING</span>
+010863,000306: 07,2205           70076                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              
+010864,000307: 07,2206           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+010865,000308: 07,2207           12314                           <span class="op">TCF     </span> <a href="#5055544D41524B">PUTMARK</a>                               <span class="co">#  YES</span>
+010866,000309: 
+010867,000310: 07,2210           34755                           <span class="op">CAF     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#563539464C424954">V59FLBIT</a>                              
 </pre>
 </span>
 </p>
@@ -495,56 +495,56 @@ Page 245
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-010864,000312: 07,2211           70101                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524435">FLAGWRD5</a>                              <span class="co">#  V59FLAG</span>
-010865,000313: 07,2212           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-010866,000314: 07,2213           12304                           <span class="op">TCF     </span> <a href="#444F574E4D524B">DOWNMRK</a>                               
-010867,000315: 
-010868,000316: 07,2214           10301                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B494E4458">MARKINDX</a>                              <span class="co">#  MARKS CALLED FOR</span>
-010869,000317: 07,2215           12221                           <span class="op">TCF     </span> <a href="#4D41524B32">MARK2</a>                                 <span class="co">#  YES</span>
-010870,000318: 
-<a name="313134414C4D"></a>010871,000319: 07,2216           05671        <span class="sm">114ALM  </span>           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#414C41524D">ALARM</a>                                 
-010872,000320: 07,2217           00114                           <span class="ps">OCT     </span> 114                                   <span class="co">#  MARKS NOT CALLED FOR</span>
-010873,000321: 07,2220           05314                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-010874,000322: 
-<a name="4D41524B32"></a>010875,000323: 07,2221           54301        <span class="sm">MARK2   </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B494E4458">MARKINDX</a>                              <span class="co">#  DECREMENT NO. MARKS WANTED</span>
-010876,000324: 
-010877,000325: 07,2222           05547                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#5550464C4147">UPFLAG</a>                                
-010878,000326: 07,2223           00032                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B464C47">MARKFLG</a>                               <span class="co">#  SET FLAG TO ENABLE REJECT</span>
-010879,000327: 
-010880,000328: 07,2224           05354                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#434845434B4D4D">CHECKMM</a>                               <span class="co">#  IS THIS P24</span>
-010881,000329: 07,2225           00030                           <span class="ps">MM      </span> 24         B-14                       
-010882,000330: 07,2226           12235                           <span class="op">TCF     </span> <a href="#4D524B43484B3232">MRKCHK22</a>                              <span class="co">#  NO</span>
-010883,000331: 07,2227           24301                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B494E4458">MARKINDX</a>                              <span class="co">#  RESTORE THIS REGISTER</span>
-010884,000332: 07,2230           05547                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#5550464C4147">UPFLAG</a>                                
-010885,000333: 07,2231           00061                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5032324D4B464C47">P22MKFLG</a>                              <span class="co">#  DOWNLINK CONTAINS P24 MARKS</span>
-010886,000334: 07,2232           05547                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#5550464C4147">UPFLAG</a>                                
-010887,000335: 07,2233           00052                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5032344D4B464C47">P24MKFLG</a>                              <span class="co">#  NEW P24MARK TAKEN</span>
-010888,000336: 07,2234           12240                           <span class="op">TCF     </span> <a href="#56414353544F52">VACSTOR</a>    -1                         
-<a name="4D524B43484B3232"></a>010889,000337: 07,2235           05354        <span class="sm">MRKCHK22</span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#434845434B4D4D">CHECKMM</a>                               
-010890,000338: 07,2236           00026                           <span class="ps">MM      </span> 22         B-14                       
-010891,000339: 07,2237           12314                           <span class="op">TCF     </span> <a href="#5055544D41524B">PUTMARK</a>                               
-010892,000340: 07,2240           25747                 -1        <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#384E4E">8NN</a>                                   <span class="co">#  NO, MARKS TAKEN.</span>
-<a name="56414353544F52"></a>010893,000341: 07,2241           00006        <span class="sm">VACSTOR </span>           <span class="op">EXTEND  </span>                                       
-010894,000342: 07,2242           30355                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B54325431">MKT2T1</a>                                
-010895,000343: 07,2243           51753                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503232444558">P22DEX</a>                                
-010896,000344: 07,2244           53540                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53564D524B444154">SVMRKDAT</a>                              
-010897,000345: 07,2245           00006                           <span class="op">EXTEND  </span>                                       
-010898,000346: 07,2246           30357                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B43445559">MKCDUY</a>                                
-010899,000347: 07,2247           51753                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503232444558">P22DEX</a>                                
-010900,000348: 07,2250           53542                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53564D524B444154">SVMRKDAT</a>   +2                         
-010901,000349: 07,2251           00006                           <span class="op">EXTEND  </span>                                       
-010902,000350: 07,2252           30361                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B4344555A">MKCDUZ</a>                                
-010903,000351: 07,2253           51753                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503232444558">P22DEX</a>                                
-010904,000352: 07,2254           53544                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53564D524B444154">SVMRKDAT</a>   +4                         
-010905,000353: 07,2255           30362                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B43445558">MKCDUX</a>                                
-010906,000354: 07,2256           51753                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503232444558">P22DEX</a>                                
-010907,000355: 07,2257           55545                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53564D524B444154">SVMRKDAT</a>   +6                         
-010908,000356: 
-010909,000357: 07,2260           05354                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#434845434B4D4D">CHECKMM</a>                               <span class="co">#  IS THIS P24</span>
-010910,000358: 07,2261           00030                           <span class="ps">MM      </span> 24         B-14                       
-010911,000359: 07,2262           12273                           <span class="op">TCF     </span> <a href="#494E44494E43">INDINC</a>                                <span class="co">#  NO</span>
-010912,000360: 07,2263           44172                           <span class="op">CS      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4F43543334">OCT34</a>                                 <span class="co">#  YES DEC 28</span>
-010913,000361: 07,2264           61753                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503232444558">P22DEX</a>                                
+010869,000312: 07,2211           70101                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524435">FLAGWRD5</a>                              <span class="co">#  V59FLAG</span>
+010870,000313: 07,2212           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+010871,000314: 07,2213           12304                           <span class="op">TCF     </span> <a href="#444F574E4D524B">DOWNMRK</a>                               
+010872,000315: 
+010873,000316: 07,2214           10301                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B494E4458">MARKINDX</a>                              <span class="co">#  MARKS CALLED FOR</span>
+010874,000317: 07,2215           12221                           <span class="op">TCF     </span> <a href="#4D41524B32">MARK2</a>                                 <span class="co">#  YES</span>
+010875,000318: 
+<a name="313134414C4D"></a>010876,000319: 07,2216           05671        <span class="sm">114ALM  </span>           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#414C41524D">ALARM</a>                                 
+010877,000320: 07,2217           00114                           <span class="ps">OCT     </span> 114                                   <span class="co">#  MARKS NOT CALLED FOR</span>
+010878,000321: 07,2220           05314                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+010879,000322: 
+<a name="4D41524B32"></a>010880,000323: 07,2221           54301        <span class="sm">MARK2   </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B494E4458">MARKINDX</a>                              <span class="co">#  DECREMENT NO. MARKS WANTED</span>
+010881,000324: 
+010882,000325: 07,2222           05547                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#5550464C4147">UPFLAG</a>                                
+010883,000326: 07,2223           00032                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B464C47">MARKFLG</a>                               <span class="co">#  SET FLAG TO ENABLE REJECT</span>
+010884,000327: 
+010885,000328: 07,2224           05354                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#434845434B4D4D">CHECKMM</a>                               <span class="co">#  IS THIS P24</span>
+010886,000329: 07,2225           00030                           <span class="ps">MM      </span> 24         B-14                       
+010887,000330: 07,2226           12235                           <span class="op">TCF     </span> <a href="#4D524B43484B3232">MRKCHK22</a>                              <span class="co">#  NO</span>
+010888,000331: 07,2227           24301                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B494E4458">MARKINDX</a>                              <span class="co">#  RESTORE THIS REGISTER</span>
+010889,000332: 07,2230           05547                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#5550464C4147">UPFLAG</a>                                
+010890,000333: 07,2231           00061                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5032324D4B464C47">P22MKFLG</a>                              <span class="co">#  DOWNLINK CONTAINS P24 MARKS</span>
+010891,000334: 07,2232           05547                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#5550464C4147">UPFLAG</a>                                
+010892,000335: 07,2233           00052                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5032344D4B464C47">P24MKFLG</a>                              <span class="co">#  NEW P24MARK TAKEN</span>
+010893,000336: 07,2234           12240                           <span class="op">TCF     </span> <a href="#56414353544F52">VACSTOR</a>    -1                         
+<a name="4D524B43484B3232"></a>010894,000337: 07,2235           05354        <span class="sm">MRKCHK22</span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#434845434B4D4D">CHECKMM</a>                               
+010895,000338: 07,2236           00026                           <span class="ps">MM      </span> 22         B-14                       
+010896,000339: 07,2237           12314                           <span class="op">TCF     </span> <a href="#5055544D41524B">PUTMARK</a>                               
+010897,000340: 07,2240           25747                 -1        <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#384E4E">8NN</a>                                   <span class="co">#  NO, MARKS TAKEN.</span>
+<a name="56414353544F52"></a>010898,000341: 07,2241           00006        <span class="sm">VACSTOR </span>           <span class="op">EXTEND  </span>                                       
+010899,000342: 07,2242           30355                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B54325431">MKT2T1</a>                                
+010900,000343: 07,2243           51753                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503232444558">P22DEX</a>                                
+010901,000344: 07,2244           53540                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53564D524B444154">SVMRKDAT</a>                              
+010902,000345: 07,2245           00006                           <span class="op">EXTEND  </span>                                       
+010903,000346: 07,2246           30357                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B43445559">MKCDUY</a>                                
+010904,000347: 07,2247           51753                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503232444558">P22DEX</a>                                
+010905,000348: 07,2250           53542                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53564D524B444154">SVMRKDAT</a>   +2                         
+010906,000349: 07,2251           00006                           <span class="op">EXTEND  </span>                                       
+010907,000350: 07,2252           30361                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B4344555A">MKCDUZ</a>                                
+010908,000351: 07,2253           51753                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503232444558">P22DEX</a>                                
+010909,000352: 07,2254           53544                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53564D524B444154">SVMRKDAT</a>   +4                         
+010910,000353: 07,2255           30362                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B43445558">MKCDUX</a>                                
+010911,000354: 07,2256           51753                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503232444558">P22DEX</a>                                
+010912,000355: 07,2257           55545                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53564D524B444154">SVMRKDAT</a>   +6                         
+010913,000356: 
+010914,000357: 07,2260           05354                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#434845434B4D4D">CHECKMM</a>                               <span class="co">#  IS THIS P24</span>
+010915,000358: 07,2261           00030                           <span class="ps">MM      </span> 24         B-14                       
+010916,000359: 07,2262           12273                           <span class="op">TCF     </span> <a href="#494E44494E43">INDINC</a>                                <span class="co">#  NO</span>
+010917,000360: 07,2263           44172                           <span class="op">CS      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4F43543334">OCT34</a>                                 <span class="co">#  YES DEC 28</span>
+010918,000361: 07,2264           61753                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503232444558">P22DEX</a>                                
 </pre>
 </span>
 </p>
@@ -560,55 +560,55 @@ Page 246
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-010915,000363: 07,2265           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  ARE THERE ANY MORE LOC LEFT IN MARK</span>
-010916,000364: 07,2266           12270                           <span class="op">BZF     </span> +2                                    <span class="co">#  DOWNLINK BUFFER</span>
-010917,000365: 07,2267           12273                           <span class="op">TCF     </span> <a href="#494E44494E43">INDINC</a>                                <span class="co">#  YES</span>
-010918,000366: 07,2270           34772                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  REINITIALIZE INDEX FOR</span>
-010919,000367: 07,2271           55753                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503232444558">P22DEX</a>                                <span class="co">#  BEGINNING OF BUFFER</span>
-010920,000368: 07,2272           12275                           <span class="op">TCF     </span> <a href="#4D41524B444F4E45">MARKDONE</a>                              
-<a name="494E44494E43"></a>010921,000369: 07,2273           34774        <span class="sm">INDINC  </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534556454E">SEVEN</a>                                 
-010922,000370: 07,2274           27753                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503232444558">P22DEX</a>                                
-<a name="4D41524B444F4E45"></a>010923,000371: 07,2275           10301        <span class="sm">MARKDONE</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B494E4458">MARKINDX</a>                              <span class="co">#  ANY MORE MARKS TO BE TAKEN</span>
-010924,000372: 07,2276           15314                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-010925,000373: 07,2277           37644                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3232">PRIO22</a>                                
-010926,000374: 07,2300           05135                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               
-010927,000375: 07,2301  E7,1722                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D524B42554631">MRKBUF1</a>                               
-010928,000376: 07,2301           02052 16067                     <span class="ps">2CADR   </span> <a href="#4D4B56423558">MKVB5X</a>                                
-010929,000377: 
-010930,000378: 07,2303           15314                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-010931,000379: 
-<a name="444F574E4D524B"></a>010932,000380: 07,2304           36211        <span class="sm">DOWNMRK </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   <span class="co">#  FOR CALIBRATION MARK</span>
-010933,000381: 07,2305           05607                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#47454E5452414E">GENTRAN</a>                               
-010934,000382: 07,2306           00354                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B54325431">MKT2T1</a>                                
-010935,000383: 07,2307           01674                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B444F574E">MARKDOWN</a>                              
-010936,000384: 
-010937,000385: 07,2310           35047                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F35">PRIO5</a>                                 
-010938,000386: 07,2311           05121                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
-010939,000387: 07,2312  E7,1722                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D524B42554631">MRKBUF1</a>                               
-010940,000388: 07,2312           02230 76067                     <span class="ps">2CADR   </span> <a href="P20-P25.agc.html#4D41524B44495350">MARKDISP</a>                              
-010941,000389: 
-<a name="5055544D41524B"></a>010942,000390: 07,2314           36211        <span class="sm">PUTMARK </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   
-010943,000391: 07,2315           05607                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#47454E5452414E">GENTRAN</a>                               
-010944,000392: 07,2316           00354                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B54325431">MKT2T1</a>                                
-010945,000393: 07,2317           01722                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D524B42554631">MRKBUF1</a>                               
-010946,000394: 
-010947,000395: 07,2320           34753                           <span class="op">CAF     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#523231424954">R21BIT</a>                                <span class="co">#  DONT CALL VB50 DISPLAY FOR R21</span>
-010948,000396: 07,2321           70076                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              
-010949,000397: 07,2322           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-010950,000398: 07,2323           15314                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-010951,000399: 
-010952,000400: 07,2324           12275                           <span class="op">TCF     </span> <a href="#4D41524B444F4E45">MARKDONE</a>                              
-010953,000401: 
-<a name="44494643484B"></a>010954,000402: 07,2325           24353        <span class="sm">DIFCHK  </span>           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B4E4458">MKNDX</a>                                 <span class="co">#  INCREMENT INDEX</span>
-010955,000403: 
-010956,000404: 07,2326           00006                           <span class="op">EXTEND  </span>                                       
-010957,000405: 07,2327           50353                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B4E4458">MKNDX</a>                                 
-010958,000406: 07,2330           20032                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  <span class="co">#  GET MARK(ICDU) - CURRENT(ICDU)</span>
-010959,000407: 07,2331           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-010960,000408: 07,2332           12336                           <span class="op">TCF     </span> +4                                    
-010961,000409: 07,2333           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-010962,000410: 07,2334           12336                           <span class="op">TCF     </span> +2                                    
-010963,000411: 07,2335           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+010920,000363: 07,2265           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  ARE THERE ANY MORE LOC LEFT IN MARK</span>
+010921,000364: 07,2266           12270                           <span class="op">BZF     </span> +2                                    <span class="co">#  DOWNLINK BUFFER</span>
+010922,000365: 07,2267           12273                           <span class="op">TCF     </span> <a href="#494E44494E43">INDINC</a>                                <span class="co">#  YES</span>
+010923,000366: 07,2270           34772                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  REINITIALIZE INDEX FOR</span>
+010924,000367: 07,2271           55753                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503232444558">P22DEX</a>                                <span class="co">#  BEGINNING OF BUFFER</span>
+010925,000368: 07,2272           12275                           <span class="op">TCF     </span> <a href="#4D41524B444F4E45">MARKDONE</a>                              
+<a name="494E44494E43"></a>010926,000369: 07,2273           34774        <span class="sm">INDINC  </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534556454E">SEVEN</a>                                 
+010927,000370: 07,2274           27753                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503232444558">P22DEX</a>                                
+<a name="4D41524B444F4E45"></a>010928,000371: 07,2275           10301        <span class="sm">MARKDONE</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B494E4458">MARKINDX</a>                              <span class="co">#  ANY MORE MARKS TO BE TAKEN</span>
+010929,000372: 07,2276           15314                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+010930,000373: 07,2277           37644                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3232">PRIO22</a>                                
+010931,000374: 07,2300           05135                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               
+010932,000375: 07,2301  E7,1722                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D524B42554631">MRKBUF1</a>                               
+010933,000376: 07,2301           02052 16067                     <span class="ps">2CADR   </span> <a href="#4D4B56423558">MKVB5X</a>                                
+010934,000377: 
+010935,000378: 07,2303           15314                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+010936,000379: 
+<a name="444F574E4D524B"></a>010937,000380: 07,2304           36211        <span class="sm">DOWNMRK </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   <span class="co">#  FOR CALIBRATION MARK</span>
+010938,000381: 07,2305           05607                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#47454E5452414E">GENTRAN</a>                               
+010939,000382: 07,2306           00354                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B54325431">MKT2T1</a>                                
+010940,000383: 07,2307           01674                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B444F574E">MARKDOWN</a>                              
+010941,000384: 
+010942,000385: 07,2310           35047                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F35">PRIO5</a>                                 
+010943,000386: 07,2311           05121                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
+010944,000387: 07,2312  E7,1722                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D524B42554631">MRKBUF1</a>                               
+010945,000388: 07,2312           02230 76067                     <span class="ps">2CADR   </span> <a href="P20-P25.agc.html#4D41524B44495350">MARKDISP</a>                              
+010946,000389: 
+<a name="5055544D41524B"></a>010947,000390: 07,2314           36211        <span class="sm">PUTMARK </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   
+010948,000391: 07,2315           05607                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#47454E5452414E">GENTRAN</a>                               
+010949,000392: 07,2316           00354                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B54325431">MKT2T1</a>                                
+010950,000393: 07,2317           01722                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D524B42554631">MRKBUF1</a>                               
+010951,000394: 
+010952,000395: 07,2320           34753                           <span class="op">CAF     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#523231424954">R21BIT</a>                                <span class="co">#  DONT CALL VB50 DISPLAY FOR R21</span>
+010953,000396: 07,2321           70076                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              
+010954,000397: 07,2322           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+010955,000398: 07,2323           15314                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+010956,000399: 
+010957,000400: 07,2324           12275                           <span class="op">TCF     </span> <a href="#4D41524B444F4E45">MARKDONE</a>                              
+010958,000401: 
+<a name="44494643484B"></a>010959,000402: 07,2325           24353        <span class="sm">DIFCHK  </span>           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B4E4458">MKNDX</a>                                 <span class="co">#  INCREMENT INDEX</span>
+010960,000403: 
+010961,000404: 07,2326           00006                           <span class="op">EXTEND  </span>                                       
+010962,000405: 07,2327           50353                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B4E4458">MKNDX</a>                                 
+010963,000406: 07,2330           20032                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  <span class="co">#  GET MARK(ICDU) - CURRENT(ICDU)</span>
+010964,000407: 07,2331           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+010965,000408: 07,2332           12336                           <span class="op">TCF     </span> +4                                    
+010966,000409: 07,2333           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+010967,000410: 07,2334           12336                           <span class="op">TCF     </span> +2                                    
+010968,000411: 07,2335           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
 </pre>
 </span>
 </p>
@@ -624,56 +624,56 @@ Page 247
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-010965,000413: 07,2336           67701                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454732">NEG2</a>                                  <span class="co">#  SEE IF DIFFERENCE GREATER THAN 3 BITS</span>
-010966,000414: 07,2337           00006                           <span class="op">EXTEND  </span>                                       
-010967,000415: 07,2340           62335                           <span class="op">BZMF    </span> -3                                    <span class="co">#  NOT GREATER</span>
-010968,000416: 
-010969,000417: 07,2341           05671                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#414C41524D">ALARM</a>                                 <span class="co">#  COUPLED WITH PROGRAM ALARM</span>
-010970,000418: 07,2342           00121                           <span class="ps">OCT     </span> 00121                                 
-010971,000419: 
-010972,000420: 07,2343           15314                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  DO NOT ACCEPT</span>
-010973,000421: 
-<a name="4D4B52454A454354"></a>010974,000422: 07,2344           34753        <span class="sm">MKREJECT</span>           <span class="op">CAF     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#523231424954">R21BIT</a>                                
-010975,000423: 07,2345           70076                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              <span class="co">#  R21 MARK (SPECIAL MARKING FOR R21)</span>
-010976,000424: 07,2346           00006                           <span class="op">EXTEND  </span>                                       
-010977,000425: 07,2347           12367                           <span class="op">BZF     </span> <a href="#4D524B52454A4354">MRKREJCT</a>                              <span class="co">#  NOT SET THEREFORE REGULAR REJECT</span>
-010978,000426: 07,2350           31722                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D524B42554631">MRKBUF1</a>                               <span class="co">#  IS THERE A MARK IN THE BUFFER?</span>
-010979,000427: 07,2351           00006                           <span class="op">EXTEND  </span>                                       
-010980,000428: 07,2352           12355                           <span class="op">BZF     </span> +3                                    <span class="co">#  YES - REJECT MARK IN BUFFER</span>
-010981,000429: 
-010982,000430: 07,2353           00006                           <span class="op">EXTEND  </span>                                       
-010983,000431: 07,2354           62360                           <span class="op">BZMF    </span> <a href="#52454A4354523232">REJCTR22</a>                              <span class="co">#  NO,SET FLAG TO REJECT MARK PROCESSED-R22</span>
-010984,000432: 
-010985,000433: 07,2355           37702                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474F4E45">NEGONE</a>                                <span class="co">#  -1 (FOR R22)</span>
-010986,000434: 07,2356           55722                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D524B42554631">MRKBUF1</a>                               <span class="co">#  -0 IN TIME IS FLAG TO R22 SIGNIFYING A</span>
-010987,000435: 07,2357           05323                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
-010988,000436: 
-<a name="52454A4354523232"></a>010989,000437: 07,2360           34762        <span class="sm">REJCTR22</span>           <span class="op">CAF     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5232324341424954">R22CABIT</a>                              <span class="co">#  IS R22 PROCESSING A MARK?</span>
-010990,000438: 07,2361           70105                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524439">FLAGWRD9</a>                              
-010991,000439: 07,2362           00006                           <span class="op">EXTEND  </span>                                       
-010992,000440: 07,2363           15323                           <span class="op">BZF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  NO IGNORE MARK REJECT</span>
-010993,000441: 
-010994,000442: 07,2364           05547                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#5550464C4147">UPFLAG</a>                                
-010995,000443: 07,2365           00231                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52454A4354464C47">REJCTFLG</a>                              <span class="co">#  YES - SET FLAG FOR R22</span>
-010996,000444: 07,2366           05323                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
-010997,000445: 
-<a name="4D524B52454A4354"></a>010998,000446: 07,2367           34765        <span class="sm">MRKREJCT</span>           <span class="op">CAF     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B424954">MARKBIT</a>                               
-010999,000447: 07,2370           70075                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524431">FLAGWRD1</a>                              
-011000,000448: 07,2371           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-011001,000449: 07,2372           02376                           <span class="op">TC      </span> <a href="#52454A45435433">REJECT3</a>                               
-011002,000450: 
-011003,000451: 07,2373           05671                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#414C41524D">ALARM</a>                                 <span class="co">#  DONT ACCEPT TWO REJECTS TOGETHER</span>
-011004,000452: 07,2374           00110                           <span class="ps">OCT     </span> 110                                   
-011005,000453: 07,2375           05323                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
-011006,000454: 
-<a name="52454A45435433"></a>011007,000455: 07,2376           05561        <span class="sm">REJECT3 </span>           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              
-011008,000456: 07,2377           00032                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B464C47">MARKFLG</a>                               
-011009,000457: 
-011010,000458: 07,2400           05354                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#434845434B4D4D">CHECKMM</a>                               <span class="co">#  IS THIS P24</span>
-011011,000459: 07,2401           00030                           <span class="ps">MM      </span> 24         B-14                       
-011012,000460: 07,2402           12422                           <span class="op">TCF     </span> <a href="#52454A45435434">REJECT4</a>                               <span class="co">#  NO</span>
-011013,000461: 07,2403           05561                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              <span class="co">#  YES</span>
-011014,000462: 07,2404           00052                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5032344D4B464C47">P24MKFLG</a>                              
+010970,000413: 07,2336           67701                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454732">NEG2</a>                                  <span class="co">#  SEE IF DIFFERENCE GREATER THAN 3 BITS</span>
+010971,000414: 07,2337           00006                           <span class="op">EXTEND  </span>                                       
+010972,000415: 07,2340           62335                           <span class="op">BZMF    </span> -3                                    <span class="co">#  NOT GREATER</span>
+010973,000416: 
+010974,000417: 07,2341           05671                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#414C41524D">ALARM</a>                                 <span class="co">#  COUPLED WITH PROGRAM ALARM</span>
+010975,000418: 07,2342           00121                           <span class="ps">OCT     </span> 00121                                 
+010976,000419: 
+010977,000420: 07,2343           15314                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  DO NOT ACCEPT</span>
+010978,000421: 
+<a name="4D4B52454A454354"></a>010979,000422: 07,2344           34753        <span class="sm">MKREJECT</span>           <span class="op">CAF     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#523231424954">R21BIT</a>                                
+010980,000423: 07,2345           70076                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              <span class="co">#  R21 MARK (SPECIAL MARKING FOR R21)</span>
+010981,000424: 07,2346           00006                           <span class="op">EXTEND  </span>                                       
+010982,000425: 07,2347           12367                           <span class="op">BZF     </span> <a href="#4D524B52454A4354">MRKREJCT</a>                              <span class="co">#  NOT SET THEREFORE REGULAR REJECT</span>
+010983,000426: 07,2350           31722                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D524B42554631">MRKBUF1</a>                               <span class="co">#  IS THERE A MARK IN THE BUFFER?</span>
+010984,000427: 07,2351           00006                           <span class="op">EXTEND  </span>                                       
+010985,000428: 07,2352           12355                           <span class="op">BZF     </span> +3                                    <span class="co">#  YES - REJECT MARK IN BUFFER</span>
+010986,000429: 
+010987,000430: 07,2353           00006                           <span class="op">EXTEND  </span>                                       
+010988,000431: 07,2354           62360                           <span class="op">BZMF    </span> <a href="#52454A4354523232">REJCTR22</a>                              <span class="co">#  NO,SET FLAG TO REJECT MARK PROCESSED-R22</span>
+010989,000432: 
+010990,000433: 07,2355           37702                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474F4E45">NEGONE</a>                                <span class="co">#  -1 (FOR R22)</span>
+010991,000434: 07,2356           55722                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D524B42554631">MRKBUF1</a>                               <span class="co">#  -0 IN TIME IS FLAG TO R22 SIGNIFYING A</span>
+010992,000435: 07,2357           05323                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
+010993,000436: 
+<a name="52454A4354523232"></a>010994,000437: 07,2360           34762        <span class="sm">REJCTR22</span>           <span class="op">CAF     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5232324341424954">R22CABIT</a>                              <span class="co">#  IS R22 PROCESSING A MARK?</span>
+010995,000438: 07,2361           70105                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524439">FLAGWRD9</a>                              
+010996,000439: 07,2362           00006                           <span class="op">EXTEND  </span>                                       
+010997,000440: 07,2363           15323                           <span class="op">BZF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  NO IGNORE MARK REJECT</span>
+010998,000441: 
+010999,000442: 07,2364           05547                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#5550464C4147">UPFLAG</a>                                
+011000,000443: 07,2365           00231                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52454A4354464C47">REJCTFLG</a>                              <span class="co">#  YES - SET FLAG FOR R22</span>
+011001,000444: 07,2366           05323                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
+011002,000445: 
+<a name="4D524B52454A4354"></a>011003,000446: 07,2367           34765        <span class="sm">MRKREJCT</span>           <span class="op">CAF     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B424954">MARKBIT</a>                               
+011004,000447: 07,2370           70075                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524431">FLAGWRD1</a>                              
+011005,000448: 07,2371           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+011006,000449: 07,2372           02376                           <span class="op">TC      </span> <a href="#52454A45435433">REJECT3</a>                               
+011007,000450: 
+011008,000451: 07,2373           05671                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#414C41524D">ALARM</a>                                 <span class="co">#  DONT ACCEPT TWO REJECTS TOGETHER</span>
+011009,000452: 07,2374           00110                           <span class="ps">OCT     </span> 110                                   
+011010,000453: 07,2375           05323                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
+011011,000454: 
+<a name="52454A45435433"></a>011012,000455: 07,2376           05561        <span class="sm">REJECT3 </span>           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              
+011013,000456: 07,2377           00032                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B464C47">MARKFLG</a>                               
+011014,000457: 
+011015,000458: 07,2400           05354                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#434845434B4D4D">CHECKMM</a>                               <span class="co">#  IS THIS P24</span>
+011016,000459: 07,2401           00030                           <span class="ps">MM      </span> 24         B-14                       
+011017,000460: 07,2402           12422                           <span class="op">TCF     </span> <a href="#52454A45435434">REJECT4</a>                               <span class="co">#  NO</span>
+011018,000461: 07,2403           05561                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              <span class="co">#  YES</span>
+011019,000462: 07,2404           00052                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5032344D4B464C47">P24MKFLG</a>                              
 </pre>
 </span>
 </p>
@@ -689,37 +689,37 @@ Page 248
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-011016,000464: 07,2405           11753                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503232444558">P22DEX</a>                                <span class="co">#  IS MARK TO BE REJ, THE LAST MARK IN BUF</span>
-011017,000465: 07,2406           12411                           <span class="op">TCF     </span> +3                                    <span class="co">#  NO</span>
-011018,000466: 07,2407           34172                           <span class="op">CA      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4F43543334">OCT34</a>                                 <span class="co">#  YES</span>
-011019,000467: 07,2410           12413                           <span class="op">TCF     </span> +3                                    
-011020,000468: 07,2411           44774                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534556454E">SEVEN</a>                                 
-011021,000469: 07,2412           61753                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503232444558">P22DEX</a>                                
-<a name="52454A45435435"></a>011022,000470: 07,2413           54070        <span class="sm">REJECT5 </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-011023,000471: 07,2414           00006                           <span class="op">EXTEND  </span>                                       
-011024,000472: 07,2415           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-011025,000473: 07,2416           41540                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53564D524B444154">SVMRKDAT</a>                              
-011026,000474: 07,2417           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-011027,000475: 07,2420           53540                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53564D524B444154">SVMRKDAT</a>                              
-011028,000476: 07,2421           12433                           <span class="op">TCF     </span> <a href="#52454A45584954">REJEXIT</a>                               
-<a name="52454A45435434"></a>011029,000477: 07,2422           24301        <span class="sm">REJECT4 </span>           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B494E4458">MARKINDX</a>                              <span class="co">#  CALL FOR ANOTHER MARK</span>
-011030,000478: 07,2423           05354                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#434845434B4D4D">CHECKMM</a>                               
-011031,000479: 07,2424           00026                           <span class="ps">MM      </span> 22         B-14                       
-011032,000480: 07,2425           12433                           <span class="op">TCF     </span> <a href="#52454A45584954">REJEXIT</a>                               
-011033,000481: 
-011034,000482: 07,2426           44770                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   <span class="co">#  FOR P22</span>
-011035,000483: 07,2427           27747                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#384E4E">8NN</a>                                   
-011036,000484: 07,2430           44774                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534556454E">SEVEN</a>                                 
-011037,000485: 07,2431           27753                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503232444558">P22DEX</a>                                <span class="co">#  DECREMENT P22 INDEX</span>
-011038,000486: 
-011039,000487: 07,2432           12413                           <span class="op">TCF     </span> <a href="#52454A45435435">REJECT5</a>                               
-011040,000488: 
-<a name="52454A45584954"></a>011041,000489: 07,2433           37644        <span class="sm">REJEXIT </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3232">PRIO22</a>                                
-011042,000490: 07,2434           05135                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               
-011043,000491: 07,2435  E7,1722                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D524B42554631">MRKBUF1</a>                               
-011044,000492: 07,2435           02023 16067                     <span class="ps">2CADR   </span> <a href="#4D4B5642445350">MKVBDSP</a>                               
-011045,000493: 
-011046,000494: 07,2437           15323                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
+011021,000464: 07,2405           11753                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503232444558">P22DEX</a>                                <span class="co">#  IS MARK TO BE REJ, THE LAST MARK IN BUF</span>
+011022,000465: 07,2406           12411                           <span class="op">TCF     </span> +3                                    <span class="co">#  NO</span>
+011023,000466: 07,2407           34172                           <span class="op">CA      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4F43543334">OCT34</a>                                 <span class="co">#  YES</span>
+011024,000467: 07,2410           12413                           <span class="op">TCF     </span> +3                                    
+011025,000468: 07,2411           44774                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534556454E">SEVEN</a>                                 
+011026,000469: 07,2412           61753                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503232444558">P22DEX</a>                                
+<a name="52454A45435435"></a>011027,000470: 07,2413           54070        <span class="sm">REJECT5 </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+011028,000471: 07,2414           00006                           <span class="op">EXTEND  </span>                                       
+011029,000472: 07,2415           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+011030,000473: 07,2416           41540                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53564D524B444154">SVMRKDAT</a>                              
+011031,000474: 07,2417           50070                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+011032,000475: 07,2420           53540                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53564D524B444154">SVMRKDAT</a>                              
+011033,000476: 07,2421           12433                           <span class="op">TCF     </span> <a href="#52454A45584954">REJEXIT</a>                               
+<a name="52454A45435434"></a>011034,000477: 07,2422           24301        <span class="sm">REJECT4 </span>           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B494E4458">MARKINDX</a>                              <span class="co">#  CALL FOR ANOTHER MARK</span>
+011035,000478: 07,2423           05354                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#434845434B4D4D">CHECKMM</a>                               
+011036,000479: 07,2424           00026                           <span class="ps">MM      </span> 22         B-14                       
+011037,000480: 07,2425           12433                           <span class="op">TCF     </span> <a href="#52454A45584954">REJEXIT</a>                               
+011038,000481: 
+011039,000482: 07,2426           44770                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   <span class="co">#  FOR P22</span>
+011040,000483: 07,2427           27747                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#384E4E">8NN</a>                                   
+011041,000484: 07,2430           44774                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534556454E">SEVEN</a>                                 
+011042,000485: 07,2431           27753                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503232444558">P22DEX</a>                                <span class="co">#  DECREMENT P22 INDEX</span>
+011043,000486: 
+011044,000487: 07,2432           12413                           <span class="op">TCF     </span> <a href="#52454A45435435">REJECT5</a>                               
+011045,000488: 
+<a name="52454A45584954"></a>011046,000489: 07,2433           37644        <span class="sm">REJEXIT </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3232">PRIO22</a>                                
+011047,000490: 07,2434           05135                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               
+011048,000491: 07,2435  E7,1722                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D524B42554631">MRKBUF1</a>                               
+011049,000492: 07,2435           02023 16067                     <span class="ps">2CADR   </span> <a href="#4D4B5642445350">MKVBDSP</a>                               
+011050,000493: 
+011051,000494: 07,2437           15323                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
 
 End of include-file SXTMARK.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

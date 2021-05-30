@@ -86,24 +86,25 @@ project's GitHub repository</a>.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-053165,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-053166,000003:                                                                                                  <span class="co">## Filename:    POWERED_FLIGHT_SUBROUTINES.agc</span>
-053167,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 173.</span>
-053168,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the second</span>
-053169,000006:                                                                                                  <span class="co">##              (unflown) release of the flight software for the Lunar</span>
-053170,000007:                                                                                                  <span class="co">##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 14.</span>
-053171,000008:                                                                                                  <span class="co">##              The code has been recreated from a reconstructed copy of</span>
-053172,000009:                                                                                                  <span class="co">##              Luminary 178, as well as Luminary memo 167 (revision 1).</span>
-053173,000010:                                                                                                  <span class="co">##              It has been adapted such that the resulting bugger words</span>
-053174,000011:                                                                                                  <span class="co">##              exactly match those specified for Luminary 173 in NASA</span>
-053175,000012:                                                                                                  <span class="co">##              drawing 2021152N, which gives relatively high confidence</span>
-053176,000013:                                                                                                  <span class="co">##              that the reconstruction is correct.</span>
-053177,000014:                                                                                                  <span class="co">## Reference:   pp. 1248-1256</span>
-053178,000015:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-053179,000016:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-053180,000017:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-053181,000018:                                                                                                  <span class="co">## Mod history: 2019-09-18 MAS  Created from Luminary 178.</span>
-053182,000019: 
+053179,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+053180,000003:                                                                                                  <span class="co">## Filename:    POWERED_FLIGHT_SUBROUTINES.agc</span>
+053181,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 173.</span>
+053182,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the second</span>
+053183,000006:                                                                                                  <span class="co">##              (unflown) release of the flight software for the Lunar</span>
+053184,000007:                                                                                                  <span class="co">##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 14.</span>
+053185,000008:                                                                                                  <span class="co">##              The code has been recreated from a reconstructed copy of</span>
+053186,000009:                                                                                                  <span class="co">##              Luminary 178, as well as Luminary memo 167 (revision 1).</span>
+053187,000010:                                                                                                  <span class="co">##              It has been adapted such that the resulting bugger words</span>
+053188,000011:                                                                                                  <span class="co">##              exactly match those specified for Luminary 173 in NASA</span>
+053189,000012:                                                                                                  <span class="co">##              drawing 2021152N, which gives relatively high confidence</span>
+053190,000013:                                                                                                  <span class="co">##              that the reconstruction is correct.</span>
+053191,000014:                                                                                                  <span class="co">## Reference:   pp. 1248-1256</span>
+053192,000015:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+053193,000016:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+053194,000017:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+053195,000018:                                                                                                  <span class="co">## Mod history: 2019-09-18 MAS  Created from Luminary 178.</span>
+053196,000019:                                                                                                  <span class="co">##              2021-05-30 ABS  SINSLOC -> SINESLOC</span>
+053197,000020: 
 </pre>
 </span>
 </p>
@@ -119,56 +120,56 @@ Page 1248
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-053184,000021: 14,3775                                           <span class="ps">BANK    </span> 14                                    <span class="co">#  SAME FBANK AS THE FINDCDUD SUB-PROGRAM</span>
-053185,000022: 23,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#504F57464C495445">POWFLITE</a>                              
-053186,000023: 23,2000                                           <span class="ps">BANK    </span>                                       
-053187,000024: 
-053188,000025: 23,3535     0142                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444558444558">DEXDEX</a>                                
-053189,000026: 23,3535                                           <span class="ps">COUNT*  </span> $$/POWFL                              
-053190,000027: 
-053191,000028:                                                                                                  <span class="co">#      CDUTRIG, CDUTRIG1, CDUTRIG2, AND CD*TR*GS ALL COMPUTE THE SINES AND</span>
-053192,000029:                                                                                                  <span class="co">#  COSINES OF THREE 2'S COMPLEMENT ANGLES AND PLACE THE RESULT, DOUBLE</span>
-053193,000030:                                                                                                  <span class="co">#  PRECISION, IN THE SAME ORDER AS THE INPUTS, AT SINCDU AND COSCDU.   AN</span>
-053194,000031:                                                                                                  <span class="co">#  ADDITIONAL OUTPUT IS THE 1'S COMPLEMENT ANGLES AT CDUSPOT.   THESE</span>
-053195,000032:                                                                                                  <span class="co">#  ROUTINES GO OUT OF THEIR WAY TO LEAVE THE MPAC AREA AS THEY FIND IT,</span>
-053196,000033:                                                                                                  <span class="co">#  EXCEPT FOR THE GENERALLY UNIMPORTANT MPAC +2.   THEY DIFFER ONLY IN</span>
-053197,000034:                                                                                                  <span class="co">#  WHERE THEY GET THE ANGLES, AND IN METHOD OF CALLING.</span>
-053198,000035: 
-053199,000036:                                                                                                  <span class="co">#      CDUTRIG (AND CDUTRIG1, WHICH CAN BE CALLED IN BASIC) COMPUTE THE</span>
-053200,000037:                                                                                                  <span class="co">#  SINES AND COSINES FROM THE CURRENT CONTENTS OF THE CDU REGISTERS.</span>
-053201,000038:                                                                                                  <span class="co">#  THE CONTENTS OF CDUTEMP, ETC., ARE NOT TOUCHED SO THAT THEY MAY</span>
-053202,000039:                                                                                                  <span class="co">#  CONTINUE TO FORM A CONSISTENT SET WITH THE LATEST PIPA READINGS.</span>
-053203,000040: 
-053204,000041:                                                                                                  <span class="co">#      CDUTRIG1 IS LIKE CDUTRIG EXCEPT THAT IT CAN BE CALLED IN BASIC.</span>
-053205,000042: 
-053206,000043:                                                                                                  <span class="co">#      CD*TR*GS FINDS CDU VALUES IN CDUSPOT RATHER THAN IN CDUTEMP.   THIS</span>
-053207,000044:                                                                                                  <span class="co">#  ALLOWS USERS TO MAKE TRANSFORMATIONS USING ARBITRARY ANGLES, OR REAL</span>
-053208,000045:                                                                                                  <span class="co">#  ANGLES IN AN ORDER OTHER THAN X Y Z.   A CALL TO THIS ROUTINE IS</span>
-053209,000046:                                                                                                  <span class="co">#  NECESSARY IN PREPARATION FOR A CALL TO AX*SR*T IN EITHER OF ITS TWO</span>
-053210,000047:                                                                                                  <span class="co">#  MODES (SMNB OR NBSM).   SINCE AX*SR*T EXPECTS TO FIND THE SINES AND</span>
-053211,000048:                                                                                                  <span class="co">#  COSINES IN THE ORDER Y Z X THE ANGLES MUST HAVE BEEN PLACED IN CDUSPOT</span>
-053212,000049:                                                                                                  <span class="co">#  IN THIS ORDER.   CD*TR*GS NEED NOT BE REPEATED WHEN AX*SR*T IS CALLED</span>
-053213,000050:                                                                                                  <span class="co">#  MORE THAN ONCE, PROVIDED THE ANGLES HAVE NOT CHANGED.   NOTE THAT SINCE</span>
-053214,000051:                                                                                                  <span class="co">#  IT CLOBBERS BUF2 (IN THE SINE AND COSINE ROUTINES) CD*TR*GS CANNOT BE</span>
-053215,000052:                                                                                                  <span class="co">#  CALLED USING BANKCALL.   SORRY.</span>
-053216,000053: 
-053217,000054:                                                                                                  <span class="co">#      CD*TR*G IS LIKE CD*TR*GS EXCEPT THAT IT CAN BE CALLED IN</span>
-053218,000055:                                                                                                  <span class="co">#  INTERPRETIVE.</span>
-053219,000056: 
-<a name="43445554524947"></a>053220,000057: 23,3535           77776        <span class="sm">CDUTRIG </span>           <span class="in">EXIT    </span>                                       
-053221,000058: 23,3536           03545                           <span class="op">TC      </span> <a href="#4344555452494753">CDUTRIGS</a>                              
-053222,000059: 23,3537           06042                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-053223,000060: 23,3540           77616                           <span class="in">RVQ     </span>                                       
-053224,000061: 
-<a name="43442A54522A47"></a>053225,000062: 23,3541           77776        <span class="sm">CD*TR*G </span>           <span class="in">EXIT    </span>                                       
-053226,000063: 23,3542           03553                           <span class="op">TC      </span> <a href="#43442A54522A4753">CD*TR*GS</a>                              
-053227,000064: 23,3543           06042                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-053228,000065: 23,3544           77616                           <span class="in">RVQ     </span>                                       
-053229,000066: 
-<a name="4344555452494753"></a>053230,000067: 23,3545           30032        <span class="sm">CDUTRIGS</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  
-053231,000068: 23,3546           54771                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553504F54">CDUSPOT</a>    +4                         
-053232,000069: 23,3547           30033                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445559">CDUY</a>                                  
-053233,000070: 23,3550           54765                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553504F54">CDUSPOT</a>                               
+053199,000022: 14,3775                                           <span class="ps">BANK    </span> 14                                    <span class="co">#  SAME FBANK AS THE FINDCDUD SUB-PROGRAM</span>
+053200,000023: 23,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#504F57464C495445">POWFLITE</a>                              
+053201,000024: 23,2000                                           <span class="ps">BANK    </span>                                       
+053202,000025: 
+053203,000026: 23,3535     0142                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444558444558">DEXDEX</a>                                
+053204,000027: 23,3535                                           <span class="ps">COUNT*  </span> $$/POWFL                              
+053205,000028: 
+053206,000029:                                                                                                  <span class="co">#      CDUTRIG, CDUTRIG1, CDUTRIG2, AND CD*TR*GS ALL COMPUTE THE SINES AND</span>
+053207,000030:                                                                                                  <span class="co">#  COSINES OF THREE 2'S COMPLEMENT ANGLES AND PLACE THE RESULT, DOUBLE</span>
+053208,000031:                                                                                                  <span class="co">#  PRECISION, IN THE SAME ORDER AS THE INPUTS, AT SINCDU AND COSCDU.   AN</span>
+053209,000032:                                                                                                  <span class="co">#  ADDITIONAL OUTPUT IS THE 1'S COMPLEMENT ANGLES AT CDUSPOT.   THESE</span>
+053210,000033:                                                                                                  <span class="co">#  ROUTINES GO OUT OF THEIR WAY TO LEAVE THE MPAC AREA AS THEY FIND IT,</span>
+053211,000034:                                                                                                  <span class="co">#  EXCEPT FOR THE GENERALLY UNIMPORTANT MPAC +2.   THEY DIFFER ONLY IN</span>
+053212,000035:                                                                                                  <span class="co">#  WHERE THEY GET THE ANGLES, AND IN METHOD OF CALLING.</span>
+053213,000036: 
+053214,000037:                                                                                                  <span class="co">#      CDUTRIG (AND CDUTRIG1, WHICH CAN BE CALLED IN BASIC) COMPUTE THE</span>
+053215,000038:                                                                                                  <span class="co">#  SINES AND COSINES FROM THE CURRENT CONTENTS OF THE CDU REGISTERS.</span>
+053216,000039:                                                                                                  <span class="co">#  THE CONTENTS OF CDUTEMP, ETC., ARE NOT TOUCHED SO THAT THEY MAY</span>
+053217,000040:                                                                                                  <span class="co">#  CONTINUE TO FORM A CONSISTENT SET WITH THE LATEST PIPA READINGS.</span>
+053218,000041: 
+053219,000042:                                                                                                  <span class="co">#      CDUTRIG1 IS LIKE CDUTRIG EXCEPT THAT IT CAN BE CALLED IN BASIC.</span>
+053220,000043: 
+053221,000044:                                                                                                  <span class="co">#      CD*TR*GS FINDS CDU VALUES IN CDUSPOT RATHER THAN IN CDUTEMP.   THIS</span>
+053222,000045:                                                                                                  <span class="co">#  ALLOWS USERS TO MAKE TRANSFORMATIONS USING ARBITRARY ANGLES, OR REAL</span>
+053223,000046:                                                                                                  <span class="co">#  ANGLES IN AN ORDER OTHER THAN X Y Z.   A CALL TO THIS ROUTINE IS</span>
+053224,000047:                                                                                                  <span class="co">#  NECESSARY IN PREPARATION FOR A CALL TO AX*SR*T IN EITHER OF ITS TWO</span>
+053225,000048:                                                                                                  <span class="co">#  MODES (SMNB OR NBSM).   SINCE AX*SR*T EXPECTS TO FIND THE SINES AND</span>
+053226,000049:                                                                                                  <span class="co">#  COSINES IN THE ORDER Y Z X THE ANGLES MUST HAVE BEEN PLACED IN CDUSPOT</span>
+053227,000050:                                                                                                  <span class="co">#  IN THIS ORDER.   CD*TR*GS NEED NOT BE REPEATED WHEN AX*SR*T IS CALLED</span>
+053228,000051:                                                                                                  <span class="co">#  MORE THAN ONCE, PROVIDED THE ANGLES HAVE NOT CHANGED.   NOTE THAT SINCE</span>
+053229,000052:                                                                                                  <span class="co">#  IT CLOBBERS BUF2 (IN THE SINE AND COSINE ROUTINES) CD*TR*GS CANNOT BE</span>
+053230,000053:                                                                                                  <span class="co">#  CALLED USING BANKCALL.   SORRY.</span>
+053231,000054: 
+053232,000055:                                                                                                  <span class="co">#      CD*TR*G IS LIKE CD*TR*GS EXCEPT THAT IT CAN BE CALLED IN</span>
+053233,000056:                                                                                                  <span class="co">#  INTERPRETIVE.</span>
+053234,000057: 
+<a name="43445554524947"></a>053235,000058: 23,3535           77776        <span class="sm">CDUTRIG </span>           <span class="in">EXIT    </span>                                       
+053236,000059: 23,3536           03545                           <span class="op">TC      </span> <a href="#4344555452494753">CDUTRIGS</a>                              
+053237,000060: 23,3537           06042                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+053238,000061: 23,3540           77616                           <span class="in">RVQ     </span>                                       
+053239,000062: 
+<a name="43442A54522A47"></a>053240,000063: 23,3541           77776        <span class="sm">CD*TR*G </span>           <span class="in">EXIT    </span>                                       
+053241,000064: 23,3542           03553                           <span class="op">TC      </span> <a href="#43442A54522A4753">CD*TR*GS</a>                              
+053242,000065: 23,3543           06042                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+053243,000066: 23,3544           77616                           <span class="in">RVQ     </span>                                       
+053244,000067: 
+<a name="4344555452494753"></a>053245,000068: 23,3545           30032        <span class="sm">CDUTRIGS</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  
+053246,000069: 23,3546           54771                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553504F54">CDUSPOT</a>    +4                         
+053247,000070: 23,3547           30033                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445559">CDUY</a>                                  
+053248,000071: 23,3550           54765                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553504F54">CDUSPOT</a>                               
 </pre>
 </span>
 </p>
@@ -184,41 +185,41 @@ Page 1249
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-053235,000072: 23,3551           30034                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
-053236,000073: 23,3552           54767                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553504F54">CDUSPOT</a>    +2                         
-053237,000074: 
-<a name="43442A54522A4753"></a>053238,000075: 23,3553           00006        <span class="sm">CD*TR*GS</span>           <span class="op">EXTEND  </span>                                       
-053239,000076: 23,3554           22142                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D32">TEM2</a>                                  
-053240,000077: 23,3555           34751                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#464F5552">FOUR</a>                                  
-<a name="54522A474C2A2A50"></a>053241,000078: 23,3556           76245        <span class="sm">TR*GL**P</span>           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   <span class="co">#  MAKE IT EVEN AND SMALLER</span>
-053242,000079: 23,3557           54143                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D33">TEM3</a>                                  
-053243,000080: 23,3560           50143                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D33">TEM3</a>                                  
-053244,000081: 23,3561           30765                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553504F54">CDUSPOT</a>                               
-053245,000082: 23,3562           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  STORING 2'S COMP ANGLE, LOADING MPAC</span>
-053246,000083: 23,3563           52127                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>       +4                         <span class="co">#  STORING MPAC FOR LATER RESTORATION</span>
-053247,000084: 23,3564           04713                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#5553505243414452">USPRCADR</a>                              
-053248,000085: 23,3565           21577                           <span class="ps">CADR    </span> <a href="RTB_OP_CODES.agc.html#4344554C4F474943">CDULOGIC</a>                              
-053249,000086: 23,3566           00006                           <span class="op">EXTEND  </span>                                       
-053250,000087: 23,3567           30155                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-053251,000088: 23,3570           50143                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D33">TEM3</a>                                  
-053252,000089: 23,3571           52766                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553504F54">CDUSPOT</a>                               <span class="co">#  STORING 1'S COMPLEMENT ANGLE</span>
-053253,000090: 23,3572           04713                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#5553505243414452">USPRCADR</a>                              
-053254,000091: 23,3573           01517                           <span class="ps">CADR    </span> <a href="INTERPRETER.agc.html#434F53494E45">COSINE</a>                                
-053255,000092: 23,3574           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-053256,000093: 23,3575           50143                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D33">TEM3</a>                                  
-053257,000094: 23,3576           52744                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F53434455">COSCDU</a>                                <span class="co">#  STORING COSINE</span>
-053258,000095: 23,3577           00006                           <span class="op">EXTEND  </span>                                       
-053259,000096: 23,3600           50143                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D33">TEM3</a>                                  
-053260,000097: 23,3601           30766                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553504F54">CDUSPOT</a>                               <span class="co">#  LOADING 1'S COMPLEMENT ANGLE</span>
-053261,000098: 23,3602           04713                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#5553505243414452">USPRCADR</a>                              
-053262,000099: 23,3603           01531                           <span class="ps">CADR    </span> <a href="INTERPRETER.agc.html#53494E45">SINE</a>       +1                         <span class="co">#  SINE +1 EXPECTS ARGUMENT IN A AND L</span>
-053263,000100: 23,3604           52127                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>       +4                         <span class="co">#  BRINGING UP PRIOR MPAC TO BE RESTORED</span>
-053264,000101: 23,3605           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-053265,000102: 23,3606           50143                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D33">TEM3</a>                                  
-053266,000103: 23,3607           52736                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>                                
-053267,000104: 23,3610           10143                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D33">TEM3</a>                                  
-053268,000105: 23,3611           13556                           <span class="op">TCF     </span> <a href="#54522A474C2A2A50">TR*GL**P</a>                              
-053269,000106: 23,3612           00142                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D32">TEM2</a>                                  
+053250,000073: 23,3551           30034                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
+053251,000074: 23,3552           54767                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553504F54">CDUSPOT</a>    +2                         
+053252,000075: 
+<a name="43442A54522A4753"></a>053253,000076: 23,3553           00006        <span class="sm">CD*TR*GS</span>           <span class="op">EXTEND  </span>                                       
+053254,000077: 23,3554           22142                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D32">TEM2</a>                                  
+053255,000078: 23,3555           34751                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#464F5552">FOUR</a>                                  
+<a name="54522A474C2A2A50"></a>053256,000079: 23,3556           76245        <span class="sm">TR*GL**P</span>           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   <span class="co">#  MAKE IT EVEN AND SMALLER</span>
+053257,000080: 23,3557           54143                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D33">TEM3</a>                                  
+053258,000081: 23,3560           50143                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D33">TEM3</a>                                  
+053259,000082: 23,3561           30765                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553504F54">CDUSPOT</a>                               
+053260,000083: 23,3562           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  STORING 2'S COMP ANGLE, LOADING MPAC</span>
+053261,000084: 23,3563           52127                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>       +4                         <span class="co">#  STORING MPAC FOR LATER RESTORATION</span>
+053262,000085: 23,3564           04713                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#5553505243414452">USPRCADR</a>                              
+053263,000086: 23,3565           21577                           <span class="ps">CADR    </span> <a href="RTB_OP_CODES.agc.html#4344554C4F474943">CDULOGIC</a>                              
+053264,000087: 23,3566           00006                           <span class="op">EXTEND  </span>                                       
+053265,000088: 23,3567           30155                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+053266,000089: 23,3570           50143                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D33">TEM3</a>                                  
+053267,000090: 23,3571           52766                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553504F54">CDUSPOT</a>                               <span class="co">#  STORING 1'S COMPLEMENT ANGLE</span>
+053268,000091: 23,3572           04713                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#5553505243414452">USPRCADR</a>                              
+053269,000092: 23,3573           01517                           <span class="ps">CADR    </span> <a href="INTERPRETER.agc.html#434F53494E45">COSINE</a>                                
+053270,000093: 23,3574           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+053271,000094: 23,3575           50143                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D33">TEM3</a>                                  
+053272,000095: 23,3576           52744                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F53434455">COSCDU</a>                                <span class="co">#  STORING COSINE</span>
+053273,000096: 23,3577           00006                           <span class="op">EXTEND  </span>                                       
+053274,000097: 23,3600           50143                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D33">TEM3</a>                                  
+053275,000098: 23,3601           30766                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553504F54">CDUSPOT</a>                               <span class="co">#  LOADING 1'S COMPLEMENT ANGLE</span>
+053276,000099: 23,3602           04713                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#5553505243414452">USPRCADR</a>                              
+053277,000100: 23,3603           01531                           <span class="ps">CADR    </span> <a href="INTERPRETER.agc.html#53494E45">SINE</a>       +1                         <span class="co">#  SINE +1 EXPECTS ARGUMENT IN A AND L</span>
+053278,000101: 23,3604           52127                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>       +4                         <span class="co">#  BRINGING UP PRIOR MPAC TO BE RESTORED</span>
+053279,000102: 23,3605           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+053280,000103: 23,3606           50143                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D33">TEM3</a>                                  
+053281,000104: 23,3607           52736                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>                                
+053282,000105: 23,3610           10143                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D33">TEM3</a>                                  
+053283,000106: 23,3611           13556                           <span class="op">TCF     </span> <a href="#54522A474C2A2A50">TR*GL**P</a>                              
+053284,000107: 23,3612           00142                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D32">TEM2</a>                                  
 </pre>
 </span>
 </p>
@@ -234,48 +235,48 @@ Page 1250
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-053271,000108:                                                                                                  <span class="co">#  ****************************************************************************************************************</span>
-053272,000109: 
-053273,000110:                                                                                                  <span class="co">#      QUICTRIG, INTENDED FOR GUIDANCE CYCLE USE WHERE TIME IS CRITICAL, IS A MUCH FASTER VERSION OF CD*TR*GS.</span>
-053274,000111:                                                                                                  <span class="co">#  QUICTRIG COMPUTES AND STORES THE SINES AND COSINES OF THE 2'S COMPLEMENT ANGLES AT CDUSPOT, CDUSPOT +2,</span>
-053275,000112:                                                                                                  <span class="co">#  AND CDUSPOT +4.   UNLIKE CD*TR*GS, QUICTRIG DOES NOT LEAVE THE 1'S COMPLEMENT VERSIONS OF THE ANGLES IN</span>
-053276,000113:                                                                                                  <span class="co">#  CDUSPOT.   QUICTRIG'S EXECUTION TIME IS 4.1 MS;   THIS IS 10 TIMES AS FAST AS CD*TR*GS.   QUICTRIG MAY BE</span>
-053277,000114:                                                                                                  <span class="co">#  CALLED FROM INTERPRETIVE AS AN RTB OP-CODE, OR FROM BASIC VIA BANKCALL OR IBNKCALL.</span>
-053278,000115: 
-<a name="515450524F4C4F47"></a>053279,000116: 23,3613           00004        <span class="sm">QTPROLOG</span>           <span class="op">INHINT  </span>                                       
-053280,000117: 23,3614           30032                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  
-053281,000118: 23,3615           54771                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553504F5458">CDUSPOTX</a>                              
-053282,000119: 23,3616           30033                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445559">CDUY</a>                                  
-053283,000120: 23,3617           54765                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553504F5459">CDUSPOTY</a>                              
-053284,000121: 23,3620           30034                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
-053285,000122: 23,3621           54767                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553504F545A">CDUSPOTZ</a>                              
-053286,000123: 
-<a name="5155494354524947"></a>053287,000124: 23,3622           00004        <span class="sm">QUICTRIG</span>           <span class="op">INHINT  </span>                                       <span class="co">#  INHINT SINCE DAP USES THE SAME TEMPS</span>
-053288,000125: 23,3623           00006                           <span class="op">EXTEND  </span>                                       
-053289,000126: 23,3624           22061                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-053290,000127: 23,3625           34751                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#464F5552">FOUR</a>                                  
-053291,000128: 23,3626           76245                 +4        <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   
-053292,000129: 23,3627           54062                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
-053293,000130: 23,3630           50062                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
-053294,000131: 23,3631           30765                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553504F54">CDUSPOT</a>                               
-053295,000132: 23,3632           05033                           <span class="op">TC      </span> <a href="SINGLE_PRECISION_SUBROUTINES.agc.html#535053494E">SPSIN</a>                                 
-053296,000133: 23,3633           00006                           <span class="op">EXTEND  </span>                                       
-053297,000134: 23,3634           74736                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 <span class="co">#  SCALE DOWN TO MATCH INTERPRETER OUTPUTS</span>
-053298,000135: 23,3635           50062                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
-053299,000136: 23,3636           52736                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>                                
-053300,000137: 23,3637           50062                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
-053301,000138: 23,3640           30765                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553504F54">CDUSPOT</a>                               
-053302,000139: 23,3641           05032                           <span class="op">TC      </span> <a href="SINGLE_PRECISION_SUBROUTINES.agc.html#5350434F53">SPCOS</a>                                 
-053303,000140: 23,3642           00006                           <span class="op">EXTEND  </span>                                       
-053304,000141: 23,3643           74736                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 
-053305,000142: 23,3644           50062                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
-053306,000143: 23,3645           52744                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F53434455">COSCDU</a>                                
-053307,000144: 23,3646           10062                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
-053308,000145: 23,3647           13626                           <span class="op">TCF     </span> <a href="#5155494354524947">QUICTRIG</a>   +4                         
-053309,000146: 23,3650           30061                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-053310,000147: 23,3651           00003                           <span class="op">RELINT  </span>                                       
-053311,000148: 23,3652           00000                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-053312,000149: 
+053286,000109:                                                                                                  <span class="co">#  ****************************************************************************************************************</span>
+053287,000110: 
+053288,000111:                                                                                                  <span class="co">#      QUICTRIG, INTENDED FOR GUIDANCE CYCLE USE WHERE TIME IS CRITICAL, IS A MUCH FASTER VERSION OF CD*TR*GS.</span>
+053289,000112:                                                                                                  <span class="co">#  QUICTRIG COMPUTES AND STORES THE SINES AND COSINES OF THE 2'S COMPLEMENT ANGLES AT CDUSPOT, CDUSPOT +2,</span>
+053290,000113:                                                                                                  <span class="co">#  AND CDUSPOT +4.   UNLIKE CD*TR*GS, QUICTRIG DOES NOT LEAVE THE 1'S COMPLEMENT VERSIONS OF THE ANGLES IN</span>
+053291,000114:                                                                                                  <span class="co">#  CDUSPOT.   QUICTRIG'S EXECUTION TIME IS 4.1 MS;   THIS IS 10 TIMES AS FAST AS CD*TR*GS.   QUICTRIG MAY BE</span>
+053292,000115:                                                                                                  <span class="co">#  CALLED FROM INTERPRETIVE AS AN RTB OP-CODE, OR FROM BASIC VIA BANKCALL OR IBNKCALL.</span>
+053293,000116: 
+<a name="515450524F4C4F47"></a>053294,000117: 23,3613           00004        <span class="sm">QTPROLOG</span>           <span class="op">INHINT  </span>                                       
+053295,000118: 23,3614           30032                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  
+053296,000119: 23,3615           54771                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553504F5458">CDUSPOTX</a>                              
+053297,000120: 23,3616           30033                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445559">CDUY</a>                                  
+053298,000121: 23,3617           54765                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553504F5459">CDUSPOTY</a>                              
+053299,000122: 23,3620           30034                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
+053300,000123: 23,3621           54767                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553504F545A">CDUSPOTZ</a>                              
+053301,000124: 
+<a name="5155494354524947"></a>053302,000125: 23,3622           00004        <span class="sm">QUICTRIG</span>           <span class="op">INHINT  </span>                                       <span class="co">#  INHINT SINCE DAP USES THE SAME TEMPS</span>
+053303,000126: 23,3623           00006                           <span class="op">EXTEND  </span>                                       
+053304,000127: 23,3624           22061                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+053305,000128: 23,3625           34751                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#464F5552">FOUR</a>                                  
+053306,000129: 23,3626           76245                 +4        <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   
+053307,000130: 23,3627           54062                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
+053308,000131: 23,3630           50062                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
+053309,000132: 23,3631           30765                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553504F54">CDUSPOT</a>                               
+053310,000133: 23,3632           05033                           <span class="op">TC      </span> <a href="SINGLE_PRECISION_SUBROUTINES.agc.html#535053494E">SPSIN</a>                                 
+053311,000134: 23,3633           00006                           <span class="op">EXTEND  </span>                                       
+053312,000135: 23,3634           74736                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 <span class="co">#  SCALE DOWN TO MATCH INTERPRETER OUTPUTS</span>
+053313,000136: 23,3635           50062                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
+053314,000137: 23,3636           52736                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>                                
+053315,000138: 23,3637           50062                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
+053316,000139: 23,3640           30765                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553504F54">CDUSPOT</a>                               
+053317,000140: 23,3641           05032                           <span class="op">TC      </span> <a href="SINGLE_PRECISION_SUBROUTINES.agc.html#5350434F53">SPCOS</a>                                 
+053318,000141: 23,3642           00006                           <span class="op">EXTEND  </span>                                       
+053319,000142: 23,3643           74736                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 
+053320,000143: 23,3644           50062                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
+053321,000144: 23,3645           52744                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F53434455">COSCDU</a>                                
+053322,000145: 23,3646           10062                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
+053323,000146: 23,3647           13626                           <span class="op">TCF     </span> <a href="#5155494354524947">QUICTRIG</a>   +4                         
+053324,000147: 23,3650           30061                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+053325,000148: 23,3651           00003                           <span class="op">RELINT  </span>                                       
+053326,000149: 23,3652           00000                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+053327,000150: 
 </pre>
 </span>
 </p>
@@ -291,54 +292,54 @@ Page 1251
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-053314,000151:                                                                                                  <span class="co">#  ****************************************************************************************************************</span>
-053315,000152:                                                                                                  <span class="co">#      THESE INTERFACE ROUTINES MAKE IT POSSIBLE TO CALL AX*SR*T, ETC., IN</span>
-053316,000153:                                                                                                  <span class="co">#  INTERPRETIVE.   LATER, WHERE POSSIBLE, THEY WILL BE ELIMINATED.</span>
-053317,000154: 
-053318,000155:                                                                                                  <span class="co">#      THESE INTERFACE ROUTINES ARE PERMANENT.   ALL RESTORE USER'S EBANK</span>
-053319,000156:                                                                                                  <span class="co">#  SETTING.   ALL ARE STRICT INTERPRETIVE SUBROUTINES, CALLED USING "CALL",</span>
-053320,000157:                                                                                                  <span class="co">#  RETURNING VIA QPRET.   ALL EXPECT AND RETURN THE VECTOR TO BE TRANSFOR-</span>
-053321,000158:                                                                                                  <span class="co">#  MED INTERPRETER-STYLE IN MPAC; COMPONENTS AT MPAC, MPAC +3, AND MPAC +5.</span>
-053322,000159: 
-053323,000160:                                                                                                  <span class="co">#      TRG*SMNB AND TRG*NBSM BOTH EXPECT TO SEE THE 2'S COMPLEMENT ANGLES</span>
-053324,000161:                                                                                                  <span class="co">#  AT CDUSPOT (ORDER Y Z X, AT CDUSPOT, CDUSPOT +2, AND CDUSPOT +4; ODD</span>
-053325,000162:                                                                                                  <span class="co">#  LOCATIONS NEED NOT BE ZEROED).   TRG*NBSM DOES THE NB TO SM TRANSFOR-</span>
-053326,000163:                                                                                                  <span class="co">#  MATION;  TRG*SMNB, VICE VERSA.</span>
-053327,000164: 
-053328,000165:                                                                                                  <span class="co">#      CDU*NBSM DOES ITS TRANSFORMATION USING THE PRESENT CONTENTS OF</span>
-053329,000166:                                                                                                  <span class="co">#  THE CDU COUNTERS.   OTHERWISE IT IS LIKE TRG*NBSM.</span>
-053330,000167: 
-053331,000168:                                                                                                  <span class="co">#      CDU*SMNB IS THE COMPLEMENT OF CDU*NBSM.</span>
-053332,000169: 
-<a name="4344552A534D4E42"></a>053333,000170: 23,3653           77776        <span class="sm">CDU*SMNB</span>           <span class="in">EXIT    </span>                                       
-053334,000171: 23,3654           03545                           <span class="op">TC      </span> <a href="#4344555452494753">CDUTRIGS</a>                              
-053335,000172: 23,3655           13660                           <span class="op">TCF     </span> <a href="#432A4D4D2A4E31">C*MM*N1</a>                               
-053336,000173: 
-<a name="5452472A534D4E42"></a>053337,000174: 23,3656           77776        <span class="sm">TRG*SMNB</span>           <span class="in">EXIT    </span>                                       
-053338,000175: 23,3657           03553                           <span class="op">TC      </span> <a href="#43442A54522A4753">CD*TR*GS</a>                              
-<a name="432A4D4D2A4E31"></a>053339,000176: 23,3660           07535        <span class="sm">C*MM*N1 </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#4D50414356425546">MPACVBUF</a>                              <span class="co">#  AX*SR*T EXPECTS VECTOR IN VBUF</span>
-053340,000177: 23,3661           46250                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5448524545">THREE</a>                                 <span class="co">#  SIGNAL FOR SM TO NB TRANSFORMATION</span>
-<a name="432A4D4D2A4E32"></a>053341,000178: 23,3662           03702        <span class="sm">C*MM*N2 </span>           <span class="op">TC      </span> <a href="#41582A53522A54">AX*SR*T</a>                               
-053342,000179: 23,3663           06042                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-053343,000180: 23,3664           43575                           <span class="in">VLOAD   </span> <span class="in">RVQ       </span>                            
-053344,000181: 23,3665           00123                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>                                  
-053345,000182: 
-<a name="4344552A4E42534D"></a>053346,000183: 23,3666           77776        <span class="sm">CDU*NBSM</span>           <span class="in">EXIT    </span>                                       
-053347,000184: 23,3667           03545                           <span class="op">TC      </span> <a href="#4344555452494753">CDUTRIGS</a>                              
-053348,000185: 23,3670           13673                           <span class="op">TCF     </span> <a href="#432A4D4D2A4E33">C*MM*N3</a>                               
-053349,000186: 
-<a name="5452472A4E42534D"></a>053350,000187: 23,3671           77776        <span class="sm">TRG*NBSM</span>           <span class="in">EXIT    </span>                                       
-053351,000188: 23,3672           03553                           <span class="op">TC      </span> <a href="#43442A54522A4753">CD*TR*GS</a>                              
-<a name="432A4D4D2A4E33"></a>053352,000189: 23,3673           07535        <span class="sm">C*MM*N3 </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#4D50414356425546">MPACVBUF</a>                              <span class="co">#  FOR AX*SR*T</span>
-053353,000190: 23,3674           36250                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5448524545">THREE</a>                                 <span class="co">#  SIGNAL FOR NB TO SM TRANSFORMATION</span>
-053354,000191: 23,3675           13662                           <span class="op">TCF     </span> <a href="#432A4D4D2A4E32">C*MM*N2</a>                               
-053355,000192: 
-053356,000193:                                                                                                  <span class="co">#      *NBSM* AND *SMNB* EXPECT TO SEE THE SINES AND COSINES (AT SINCDU</span>
-053357,000194:                                                                                                  <span class="co">#  AND COSCDU) RATHER THAN THE ANGLES THEMSELVES.   OTHERWISE THEY ARE</span>
-053358,000195:                                                                                                  <span class="co">#  LIKE TRG*NBSM AND TRG*SMNB.</span>
-053359,000196: 
-053360,000197:                                                                                                  <span class="co">#      NOTE THAT JUST AS CD*TR*GS NEED BE CALLED ONLY ONCE FOR EACH SERIES</span>
-053361,000198:                                                                                                  <span class="co">#  OF TRANSFORMATIONS USING THE SAME ANGLES, SO TOO ONLY ONE OF TRG*NBSM</span>
+053329,000152:                                                                                                  <span class="co">#  ****************************************************************************************************************</span>
+053330,000153:                                                                                                  <span class="co">#      THESE INTERFACE ROUTINES MAKE IT POSSIBLE TO CALL AX*SR*T, ETC., IN</span>
+053331,000154:                                                                                                  <span class="co">#  INTERPRETIVE.   LATER, WHERE POSSIBLE, THEY WILL BE ELIMINATED.</span>
+053332,000155: 
+053333,000156:                                                                                                  <span class="co">#      THESE INTERFACE ROUTINES ARE PERMANENT.   ALL RESTORE USER'S EBANK</span>
+053334,000157:                                                                                                  <span class="co">#  SETTING.   ALL ARE STRICT INTERPRETIVE SUBROUTINES, CALLED USING "CALL",</span>
+053335,000158:                                                                                                  <span class="co">#  RETURNING VIA QPRET.   ALL EXPECT AND RETURN THE VECTOR TO BE TRANSFOR-</span>
+053336,000159:                                                                                                  <span class="co">#  MED INTERPRETER-STYLE IN MPAC; COMPONENTS AT MPAC, MPAC +3, AND MPAC +5.</span>
+053337,000160: 
+053338,000161:                                                                                                  <span class="co">#      TRG*SMNB AND TRG*NBSM BOTH EXPECT TO SEE THE 2'S COMPLEMENT ANGLES</span>
+053339,000162:                                                                                                  <span class="co">#  AT CDUSPOT (ORDER Y Z X, AT CDUSPOT, CDUSPOT +2, AND CDUSPOT +4; ODD</span>
+053340,000163:                                                                                                  <span class="co">#  LOCATIONS NEED NOT BE ZEROED).   TRG*NBSM DOES THE NB TO SM TRANSFOR-</span>
+053341,000164:                                                                                                  <span class="co">#  MATION;  TRG*SMNB, VICE VERSA.</span>
+053342,000165: 
+053343,000166:                                                                                                  <span class="co">#      CDU*NBSM DOES ITS TRANSFORMATION USING THE PRESENT CONTENTS OF</span>
+053344,000167:                                                                                                  <span class="co">#  THE CDU COUNTERS.   OTHERWISE IT IS LIKE TRG*NBSM.</span>
+053345,000168: 
+053346,000169:                                                                                                  <span class="co">#      CDU*SMNB IS THE COMPLEMENT OF CDU*NBSM.</span>
+053347,000170: 
+<a name="4344552A534D4E42"></a>053348,000171: 23,3653           77776        <span class="sm">CDU*SMNB</span>           <span class="in">EXIT    </span>                                       
+053349,000172: 23,3654           03545                           <span class="op">TC      </span> <a href="#4344555452494753">CDUTRIGS</a>                              
+053350,000173: 23,3655           13660                           <span class="op">TCF     </span> <a href="#432A4D4D2A4E31">C*MM*N1</a>                               
+053351,000174: 
+<a name="5452472A534D4E42"></a>053352,000175: 23,3656           77776        <span class="sm">TRG*SMNB</span>           <span class="in">EXIT    </span>                                       
+053353,000176: 23,3657           03553                           <span class="op">TC      </span> <a href="#43442A54522A4753">CD*TR*GS</a>                              
+<a name="432A4D4D2A4E31"></a>053354,000177: 23,3660           07535        <span class="sm">C*MM*N1 </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#4D50414356425546">MPACVBUF</a>                              <span class="co">#  AX*SR*T EXPECTS VECTOR IN VBUF</span>
+053355,000178: 23,3661           46250                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5448524545">THREE</a>                                 <span class="co">#  SIGNAL FOR SM TO NB TRANSFORMATION</span>
+<a name="432A4D4D2A4E32"></a>053356,000179: 23,3662           03702        <span class="sm">C*MM*N2 </span>           <span class="op">TC      </span> <a href="#41582A53522A54">AX*SR*T</a>                               
+053357,000180: 23,3663           06042                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+053358,000181: 23,3664           43575                           <span class="in">VLOAD   </span> <span class="in">RVQ       </span>                            
+053359,000182: 23,3665           00123                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>                                  
+053360,000183: 
+<a name="4344552A4E42534D"></a>053361,000184: 23,3666           77776        <span class="sm">CDU*NBSM</span>           <span class="in">EXIT    </span>                                       
+053362,000185: 23,3667           03545                           <span class="op">TC      </span> <a href="#4344555452494753">CDUTRIGS</a>                              
+053363,000186: 23,3670           13673                           <span class="op">TCF     </span> <a href="#432A4D4D2A4E33">C*MM*N3</a>                               
+053364,000187: 
+<a name="5452472A4E42534D"></a>053365,000188: 23,3671           77776        <span class="sm">TRG*NBSM</span>           <span class="in">EXIT    </span>                                       
+053366,000189: 23,3672           03553                           <span class="op">TC      </span> <a href="#43442A54522A4753">CD*TR*GS</a>                              
+<a name="432A4D4D2A4E33"></a>053367,000190: 23,3673           07535        <span class="sm">C*MM*N3 </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#4D50414356425546">MPACVBUF</a>                              <span class="co">#  FOR AX*SR*T</span>
+053368,000191: 23,3674           36250                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5448524545">THREE</a>                                 <span class="co">#  SIGNAL FOR NB TO SM TRANSFORMATION</span>
+053369,000192: 23,3675           13662                           <span class="op">TCF     </span> <a href="#432A4D4D2A4E32">C*MM*N2</a>                               
+053370,000193: 
+053371,000194:                                                                                                  <span class="co">#      *NBSM* AND *SMNB* EXPECT TO SEE THE SINES AND COSINES (AT SINCDU</span>
+053372,000195:                                                                                                  <span class="co">#  AND COSCDU) RATHER THAN THE ANGLES THEMSELVES.   OTHERWISE THEY ARE</span>
+053373,000196:                                                                                                  <span class="co">#  LIKE TRG*NBSM AND TRG*SMNB.</span>
+053374,000197: 
+053375,000198:                                                                                                  <span class="co">#      NOTE THAT JUST AS CD*TR*GS NEED BE CALLED ONLY ONCE FOR EACH SERIES</span>
+053376,000199:                                                                                                  <span class="co">#  OF TRANSFORMATIONS USING THE SAME ANGLES, SO TOO ONLY ONE OF TRG*NBSM</span>
 </pre>
 </span>
 </p>
@@ -354,55 +355,55 @@ Page 1252
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-053363,000200:                                                                                                  <span class="co">#  AND TRG*SMNB NEED BE CALLED FOR EACH SERIES.   FOR SUBSEQUENT TRANSFOR-</span>
-053364,000201:                                                                                                  <span class="co">#  MATIONS USE *NBSM* AND *SMNB*.</span>
-053365,000202: 
-<a name="2A534D4E422A"></a>053366,000203: 23,3676           77776        <span class="sm">*SMNB*  </span>           <span class="in">EXIT    </span>                                       
-053367,000204: 23,3677           13660                           <span class="op">TCF     </span> <a href="#432A4D4D2A4E31">C*MM*N1</a>                               
-053368,000205: 
-<a name="2A4E42534D2A"></a>053369,000206: 23,3700           77776        <span class="sm">*NBSM*  </span>           <span class="in">EXIT    </span>                                       
-053370,000207: 23,3701           13673                           <span class="op">TCF     </span> <a href="#432A4D4D2A4E33">C*MM*N3</a>                               
-053371,000208: 
-053372,000209:                                                                                                  <span class="co">#        AX*SR*T COMBINES THE OLD SMNB AND NBSM.   FOR THE NB TO SM</span>
-053373,000210:                                                                                                  <span class="co">#  TRANSFORMATION, ENTER WITH +3 IN A.   FOR SM TO NB, ENTER WITH -3.</span>
-053374,000211:                                                                                                  <span class="co">#  THE VECTOR TO BE TRANSFORMED ARRIVES, AND IS RETURNED, IN VBUF.</span>
-053375,000212:                                                                                                  <span class="co">#  AX*SR*T EXPECTS TO FIND THE SINES AND COSINES OF THE ANGLES OF ROTATION</span>
-053376,000213:                                                                                                  <span class="co">#  AT SINCDU AND COSCDU, IN THE ORDER Y Z X.   A CALL TO CD*TR*GS, WITH</span>
-053377,000214:                                                                                                  <span class="co">#  THE 2'S COMPLEMENT ANGLES (ORDER Y Z X) AT CDUSPOT, WILL TAKE CARE OF</span>
-053378,000215:                                                                                                  <span class="co">#  THIS.   HERE IS A SAMPLE CALLING SEQUENCE:-</span>
-053379,000216: 
-053380,000217:                                                                                                  <span class="co">#                             TC     CDUTRIGS</span>
-053381,000218:                                                                                                  <span class="co">#                             CS     THREE       ("CA  THREE" FOR NBSM)</span>
-053382,000219:                                                                                                  <span class="co">#                             TC     AX*SR*T</span>
-053383,000220: 
-053384,000221:                                                                                                  <span class="co">#  THE CALL TO CD*TR*GS NEED NOT BE REPEATED, WHEN AX*SR*T IS CALLED MORE</span>
-053385,000222:                                                                                                  <span class="co">#  THAN ONCE, UNLESS THE ANGLES HAVE CHANGED.</span>
-053386,000223: 
-053387,000224:                                                                                                  <span class="co">#      AX*SR*T IS GUARANTEED SAFE ONLY FOR VECTORS OF MAGNITUDE LESS THAN</span>
-053388,000225:                                                                                                  <span class="co">#  UNITY.   A LOOK AT THE CASE IN WHICH A VECTOR OF GREATER MAGNITUDE</span>
-053389,000226:                                                                                                  <span class="co">#  HAPPENS TO LIE ALONG AN AXIS OF THE SYSTEM TO WHICH IT IS TO BE TRANS-</span>
-053390,000227:                                                                                                  <span class="co">#  FORMED CONVINCES ONE THAT THIS IS A RESTRICTION WHICH MUST BE ACCEPTED.</span>
-053391,000228: 
-<a name="41582A53522A54"></a>053392,000229: 23,3702           54142        <span class="sm">AX*SR*T </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444558444558">DEXDEX</a>                                <span class="co">#  WHERE IT BECOMES THE INDEX OF INDEXES</span>
-053393,000230: 23,3703           00006                           <span class="op">EXTEND  </span>                                       
-053394,000231: 23,3704           22145                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52544E5341564552">RTNSAVER</a>                              
-053395,000232: 
-<a name="522A544C2A2A50"></a>053396,000233: 23,3705           10142        <span class="sm">R*TL**P </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444558444558">DEXDEX</a>                                <span class="co">#          +3 --> 0     -3 --> 2</span>
-053397,000234: 23,3706           40142                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444558444558">DEXDEX</a>                                <span class="co">#  THUS:   +2 --> 1     -2 --> 1</span>
-053398,000235: 23,3707           66250                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5448524545">THREE</a>                                 <span class="co">#          +1 --> 2     -1 --> 0</span>
-053399,000236: 23,3710           00006                           <span class="op">EXTEND  </span>                                       
-053400,000237: 23,3711           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-053401,000238: 23,3712           33771                           <span class="op">DCA     </span> <a href="#494E44455849">INDEXI</a>                                
-053402,000239: 23,3713           52144                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44455849">DEXI</a>                                  
-053403,000240: 
-053404,000241: 23,3714           34753                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-053405,000242: 23,3715           54130                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-053406,000243: 23,3716           00006                           <span class="op">EXTEND  </span>                                       
-053407,000244: 23,3717           50143                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44455831">DEX1</a>                                  
-053408,000245: 23,3720           40123                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>                                  
-053409,000246: 23,3721           13723                           <span class="op">TCF     </span> <a href="#4C4F4F5031">LOOP1</a>                                 <span class="co">#    REALLY BE A SUBTRACT, AND VICE VERSA</span>
-053410,000247: 
-<a name="4C4F4F5032"></a>053411,000248: 23,3722           52131        <span class="sm">LOOP2   </span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  LOADING VECTOR COMPONENT, STORING INDEX</span>
+053378,000201:                                                                                                  <span class="co">#  AND TRG*SMNB NEED BE CALLED FOR EACH SERIES.   FOR SUBSEQUENT TRANSFOR-</span>
+053379,000202:                                                                                                  <span class="co">#  MATIONS USE *NBSM* AND *SMNB*.</span>
+053380,000203: 
+<a name="2A534D4E422A"></a>053381,000204: 23,3676           77776        <span class="sm">*SMNB*  </span>           <span class="in">EXIT    </span>                                       
+053382,000205: 23,3677           13660                           <span class="op">TCF     </span> <a href="#432A4D4D2A4E31">C*MM*N1</a>                               
+053383,000206: 
+<a name="2A4E42534D2A"></a>053384,000207: 23,3700           77776        <span class="sm">*NBSM*  </span>           <span class="in">EXIT    </span>                                       
+053385,000208: 23,3701           13673                           <span class="op">TCF     </span> <a href="#432A4D4D2A4E33">C*MM*N3</a>                               
+053386,000209: 
+053387,000210:                                                                                                  <span class="co">#        AX*SR*T COMBINES THE OLD SMNB AND NBSM.   FOR THE NB TO SM</span>
+053388,000211:                                                                                                  <span class="co">#  TRANSFORMATION, ENTER WITH +3 IN A.   FOR SM TO NB, ENTER WITH -3.</span>
+053389,000212:                                                                                                  <span class="co">#  THE VECTOR TO BE TRANSFORMED ARRIVES, AND IS RETURNED, IN VBUF.</span>
+053390,000213:                                                                                                  <span class="co">#  AX*SR*T EXPECTS TO FIND THE SINES AND COSINES OF THE ANGLES OF ROTATION</span>
+053391,000214:                                                                                                  <span class="co">#  AT SINCDU AND COSCDU, IN THE ORDER Y Z X.   A CALL TO CD*TR*GS, WITH</span>
+053392,000215:                                                                                                  <span class="co">#  THE 2'S COMPLEMENT ANGLES (ORDER Y Z X) AT CDUSPOT, WILL TAKE CARE OF</span>
+053393,000216:                                                                                                  <span class="co">#  THIS.   HERE IS A SAMPLE CALLING SEQUENCE:-</span>
+053394,000217: 
+053395,000218:                                                                                                  <span class="co">#                             TC     CDUTRIGS</span>
+053396,000219:                                                                                                  <span class="co">#                             CS     THREE       ("CA  THREE" FOR NBSM)</span>
+053397,000220:                                                                                                  <span class="co">#                             TC     AX*SR*T</span>
+053398,000221: 
+053399,000222:                                                                                                  <span class="co">#  THE CALL TO CD*TR*GS NEED NOT BE REPEATED, WHEN AX*SR*T IS CALLED MORE</span>
+053400,000223:                                                                                                  <span class="co">#  THAN ONCE, UNLESS THE ANGLES HAVE CHANGED.</span>
+053401,000224: 
+053402,000225:                                                                                                  <span class="co">#      AX*SR*T IS GUARANTEED SAFE ONLY FOR VECTORS OF MAGNITUDE LESS THAN</span>
+053403,000226:                                                                                                  <span class="co">#  UNITY.   A LOOK AT THE CASE IN WHICH A VECTOR OF GREATER MAGNITUDE</span>
+053404,000227:                                                                                                  <span class="co">#  HAPPENS TO LIE ALONG AN AXIS OF THE SYSTEM TO WHICH IT IS TO BE TRANS-</span>
+053405,000228:                                                                                                  <span class="co">#  FORMED CONVINCES ONE THAT THIS IS A RESTRICTION WHICH MUST BE ACCEPTED.</span>
+053406,000229: 
+<a name="41582A53522A54"></a>053407,000230: 23,3702           54142        <span class="sm">AX*SR*T </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444558444558">DEXDEX</a>                                <span class="co">#  WHERE IT BECOMES THE INDEX OF INDEXES</span>
+053408,000231: 23,3703           00006                           <span class="op">EXTEND  </span>                                       
+053409,000232: 23,3704           22145                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52544E5341564552">RTNSAVER</a>                              
+053410,000233: 
+<a name="522A544C2A2A50"></a>053411,000234: 23,3705           10142        <span class="sm">R*TL**P </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444558444558">DEXDEX</a>                                <span class="co">#          +3 --> 0     -3 --> 2</span>
+053412,000235: 23,3706           40142                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444558444558">DEXDEX</a>                                <span class="co">#  THUS:   +2 --> 1     -2 --> 1</span>
+053413,000236: 23,3707           66250                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5448524545">THREE</a>                                 <span class="co">#          +1 --> 2     -1 --> 0</span>
+053414,000237: 23,3710           00006                           <span class="op">EXTEND  </span>                                       
+053415,000238: 23,3711           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+053416,000239: 23,3712           33771                           <span class="op">DCA     </span> <a href="#494E44455849">INDEXI</a>                                
+053417,000240: 23,3713           52144                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44455849">DEXI</a>                                  
+053418,000241: 
+053419,000242: 23,3714           34753                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+053420,000243: 23,3715           54130                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+053421,000244: 23,3716           00006                           <span class="op">EXTEND  </span>                                       
+053422,000245: 23,3717           50143                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44455831">DEX1</a>                                  
+053423,000246: 23,3720           40123                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>                                  
+053424,000247: 23,3721           13723                           <span class="op">TCF     </span> <a href="#4C4F4F5031">LOOP1</a>                                 <span class="co">#    REALLY BE A SUBTRACT, AND VICE VERSA</span>
+053425,000248: 
+<a name="4C4F4F5032"></a>053426,000249: 23,3722           52131        <span class="sm">LOOP2   </span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  LOADING VECTOR COMPONENT, STORING INDEX</span>
 </pre>
 </span>
 </p>
@@ -418,54 +419,54 @@ Page 1253
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="4C4F4F5031"></a>053413,000250: 23,3723           52155        <span class="sm">LOOP1   </span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-053414,000251: 23,3724           33767                           <span class="op">CA      </span> <a href="#53494E534C4F43">SINSLOC</a>                               
-053415,000252: 23,3725           60143                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44455831">DEX1</a>                                  
-053416,000253: 23,3726           54116                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414444525744">ADDRWD</a>                                
-053417,000254: 
-053418,000255: 23,3727           07112                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#444D50535542">DMPSUB</a>                                <span class="co">#  MULTIPLY BY SIN(CDUANGLE)</span>
-053419,000256: 23,3730           10142                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444558444558">DEXDEX</a>                                
-053420,000257: 23,3731           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  NBSM CASE</span>
-053421,000258: 23,3732           13735                           <span class="op">TCF     </span> +3                                    
-053422,000259: 23,3733           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  SMNB CASE</span>
-053423,000260: 23,3734           40155                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-053424,000261: 23,3735           52160                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5445524D31544D50">TERM1TMP</a>                              
-053425,000262: 
-053426,000263: 23,3736           36245                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   <span class="co">#  SINCDU AND COSCDU (EACH 6 WORDS) MUST</span>
-053427,000264: 23,3737           26116                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414444525744">ADDRWD</a>                                <span class="co">#    BE CONSECUTIVE AND IN THAT ORDER</span>
-053428,000265: 
-053429,000266: 23,3740           00006                           <span class="op">EXTEND  </span>                                       
-053430,000267: 23,3741           50130                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-053431,000268: 23,3742           50143                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44455831">DEX1</a>                                  
-053432,000269: 23,3743           30123                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>                                  
-053433,000270: 23,3744           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-053434,000271: 23,3745           07112                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#444D50535542">DMPSUB</a>                                <span class="co">#  MULTIPLY BY COS(CDUANGLE)</span>
-053435,000272: 23,3746           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-053436,000273: 23,3747           20160                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5445524D31544D50">TERM1TMP</a>                              
-053437,000274: 23,3750           52160                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5445524D31544D50">TERM1TMP</a>                              
-053438,000275: 23,3751           20001                           <span class="op">DDOUBL  </span>                                       
-053439,000276: 23,3752           50130                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-053440,000277: 23,3753           50143                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44455831">DEX1</a>                                  
-053441,000278: 23,3754           52123                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>                                  
-053442,000279: 23,3755           52131                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  LOADING INDEX, STORING VECTOR COMPONENT</span>
-053443,000280: 
-053444,000281: 23,3756           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  'CAUSE THAT'S WHERE THE INDEX NOW IS</span>
-053445,000282: 23,3757           13722                           <span class="op">TCF     </span> <a href="#4C4F4F5032">LOOP2</a>                                 
-053446,000283: 
-053447,000284: 23,3760           00006                           <span class="op">EXTEND  </span>                                       
-053448,000285: 23,3761           26142                           <span class="op">DIM     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444558444558">DEXDEX</a>                                <span class="co">#  DECREMENT MAGNITUDE PRESERVING SIGN</span>
-053449,000286: 
-<a name="545354504F494E54"></a>053450,000287: 23,3762           10142        <span class="sm">TSTPOINT</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444558444558">DEXDEX</a>                                <span class="co">#  ONLY THE BRANCHING FUNCTION IS USED</span>
-053451,000288: 23,3763           13705                           <span class="op">TCF     </span> <a href="#522A544C2A2A50">R*TL**P</a>                               
-053452,000289: 23,3764           00145                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52544E5341564552">RTNSAVER</a>                              
-053453,000290: 23,3765           13705                           <span class="op">TCF     </span> <a href="#522A544C2A2A50">R*TL**P</a>                               
-053454,000291: 23,3766           00145                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52544E5341564552">RTNSAVER</a>                              
-053455,000292: 
-<a name="53494E534C4F43"></a>053456,000293: 23,3767           00735        <span class="sm">SINSLOC </span>           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>                                <span class="co">#  FOR USE IN SETTING ADDRWD</span>
-053457,000294: 
-<a name="494E44455849"></a>053458,000295: 23,3770           00004        <span class="sm">INDEXI  </span>           <span class="ps">DEC     </span> 4          B-14                       <span class="co">#  **********    DON'T    **********</span>
-053459,000296: 23,3771           00002                           <span class="ps">DEC     </span> 2          B-14                       <span class="co">#  **********    TOUCH    **********</span>
-053460,000297: 23,3772           00000                           <span class="ps">DEC     </span> 0          B-14                       <span class="co">#  **********    THESE    **********</span>
+<a name="4C4F4F5031"></a>053428,000251: 23,3723           52155        <span class="sm">LOOP1   </span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+053429,000252: 23,3724           33767                           <span class="op">CA      </span> <a href="#53494E45534C4F43">SINESLOC</a>                              
+053430,000253: 23,3725           60143                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44455831">DEX1</a>                                  
+053431,000254: 23,3726           54116                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414444525744">ADDRWD</a>                                
+053432,000255: 
+053433,000256: 23,3727           07112                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#444D50535542">DMPSUB</a>                                <span class="co">#  MULTIPLY BY SIN(CDUANGLE)</span>
+053434,000257: 23,3730           10142                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444558444558">DEXDEX</a>                                
+053435,000258: 23,3731           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  NBSM CASE</span>
+053436,000259: 23,3732           13735                           <span class="op">TCF     </span> +3                                    
+053437,000260: 23,3733           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  SMNB CASE</span>
+053438,000261: 23,3734           40155                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+053439,000262: 23,3735           52160                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5445524D31544D50">TERM1TMP</a>                              
+053440,000263: 
+053441,000264: 23,3736           36245                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   <span class="co">#  SINCDU AND COSCDU (EACH 6 WORDS) MUST</span>
+053442,000265: 23,3737           26116                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414444525744">ADDRWD</a>                                <span class="co">#    BE CONSECUTIVE AND IN THAT ORDER</span>
+053443,000266: 
+053444,000267: 23,3740           00006                           <span class="op">EXTEND  </span>                                       
+053445,000268: 23,3741           50130                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+053446,000269: 23,3742           50143                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44455831">DEX1</a>                                  
+053447,000270: 23,3743           30123                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>                                  
+053448,000271: 23,3744           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+053449,000272: 23,3745           07112                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#444D50535542">DMPSUB</a>                                <span class="co">#  MULTIPLY BY COS(CDUANGLE)</span>
+053450,000273: 23,3746           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+053451,000274: 23,3747           20160                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5445524D31544D50">TERM1TMP</a>                              
+053452,000275: 23,3750           52160                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5445524D31544D50">TERM1TMP</a>                              
+053453,000276: 23,3751           20001                           <span class="op">DDOUBL  </span>                                       
+053454,000277: 23,3752           50130                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+053455,000278: 23,3753           50143                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44455831">DEX1</a>                                  
+053456,000279: 23,3754           52123                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56425546">VBUF</a>                                  
+053457,000280: 23,3755           52131                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  LOADING INDEX, STORING VECTOR COMPONENT</span>
+053458,000281: 
+053459,000282: 23,3756           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  'CAUSE THAT'S WHERE THE INDEX NOW IS</span>
+053460,000283: 23,3757           13722                           <span class="op">TCF     </span> <a href="#4C4F4F5032">LOOP2</a>                                 
+053461,000284: 
+053462,000285: 23,3760           00006                           <span class="op">EXTEND  </span>                                       
+053463,000286: 23,3761           26142                           <span class="op">DIM     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444558444558">DEXDEX</a>                                <span class="co">#  DECREMENT MAGNITUDE PRESERVING SIGN</span>
+053464,000287: 
+<a name="545354504F494E54"></a>053465,000288: 23,3762           10142        <span class="sm">TSTPOINT</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444558444558">DEXDEX</a>                                <span class="co">#  ONLY THE BRANCHING FUNCTION IS USED</span>
+053466,000289: 23,3763           13705                           <span class="op">TCF     </span> <a href="#522A544C2A2A50">R*TL**P</a>                               
+053467,000290: 23,3764           00145                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52544E5341564552">RTNSAVER</a>                              
+053468,000291: 23,3765           13705                           <span class="op">TCF     </span> <a href="#522A544C2A2A50">R*TL**P</a>                               
+053469,000292: 23,3766           00145                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52544E5341564552">RTNSAVER</a>                              
+053470,000293: 
+<a name="53494E45534C4F43"></a>053471,000294: 23,3767           00735        <span class="sm">SINESLOC</span>           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>                                <span class="co">#  FOR USE IN SETTING ADDRWD</span>
+053472,000295: 
+<a name="494E44455849"></a>053473,000296: 23,3770           00004        <span class="sm">INDEXI  </span>           <span class="ps">DEC     </span> 4          B-14                       <span class="co">#  **********    DON'T    **********</span>
+053474,000297: 23,3771           00002                           <span class="ps">DEC     </span> 2          B-14                       <span class="co">#  **********    TOUCH    **********</span>
+053475,000298: 23,3772           00000                           <span class="ps">DEC     </span> 0          B-14                       <span class="co">#  **********    THESE    **********</span>
 </pre>
 </span>
 </p>
@@ -481,54 +482,54 @@ Page 1254
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-053462,000299: 23,3773           00004                           <span class="ps">DEC     </span> 4          B-14                       <span class="co">#  **********  CONSTANTS  **********</span>
-053463,000300: 
-053464,000301:                                                                                                  <span class="co">#  ****************************************************************************************************************</span>
-053465,000302: 
-053466,000303: 10,2030                                           <span class="ps">BANK    </span> 10                                    
-053467,000304: 10,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#464C4553484C4F43">FLESHLOC</a>                              
-053468,000305: 10,2000                                           <span class="ps">BANK    </span>                                       
-053469,000306: 10,2030                                           <span class="ps">COUNT*  </span> $$/POWFL                              
-053470,000307: 
-053471,000308:                                                                                                  <span class="co">#      ROUTINE FLESHPOT COMPUTES THE BODY-STABLE MEMBER TRANSFORMATION MATRIX (COMMONLY CALLED XNB) AND STORES</span>
-053472,000309:                                                                                                  <span class="co">#  IT IN THE LOCATIONS SPECIFIED BY THE ECADR ENTERING IN A.</span>
-053473,000310: 
-<a name="43414C43534D5343"></a>053474,000311: 10,2030           77776        <span class="sm">CALCSMSC</span>           <span class="in">EXIT    </span>                                       
-053475,000312: 10,2031           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-053476,000313: 10,2032           20036                           <span class="ps">CADR    </span> <a href="#464C455348504F54">FLESHPOT</a>   -1                         
-053477,000314: 10,2033           06042                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-053478,000315: 10,2034           77616                           <span class="in">RVQ     </span>                                       
-053479,000316: 
-<a name="584E424543414452"></a>053480,000317: 10,2035           02664        <span class="sm">XNBECADR</span>           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>                                   
-053481,000318: 
-053482,000319: 10,2036           32035                 -1        <span class="op">CAF     </span> <a href="#584E424543414452">XNBECADR</a>                              
-053483,000320: 
-<a name="464C455348504F54"></a>053484,000321: 10,2037           54142        <span class="sm">FLESHPOT</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D32">TEM2</a>                                  
-053485,000322: 10,2040           56003                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
-053486,000323: 10,2041           56142                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D32">TEM2</a>                                  
-053487,000324: 10,2042           74357                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  
-053488,000325: 10,2043           65007                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F435431343030">OCT1400</a>                               
-053489,000326: 10,2044           54141                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D31">TEM1</a>                                  
-053490,000327: 
-053491,000328: 10,2045           00006                           <span class="op">EXTEND  </span>                                       
-053492,000329: 10,2046           30744                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F5343445559">COSCDUY</a>                               
-053493,000330: 10,2047           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-053494,000331: 10,2050           07106                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#444D50">DMP</a>                                   
-053495,000332: 10,2051           00745                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F534344555A">COSCDUZ</a>                               
-053496,000333: 10,2052           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-053497,000334: 10,2053           20001                           <span class="op">DDOUBL  </span>                                       
-053498,000335: 10,2054           50141                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D31">TEM1</a>                                  
-053499,000336: 10,2055           52001                           <span class="op">DXCH    </span> 0                                     <span class="co">#  = COSY COSZ</span>
-053500,000337: 
-053501,000338: 10,2056           00006                           <span class="op">EXTEND  </span>                                       
-053502,000339: 10,2057           30740                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E4344555A">SINCDUZ</a>                               
-053503,000340: 10,2060           50141                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D31">TEM1</a>                                  
-053504,000341: 10,2061           52003                           <span class="op">DXCH    </span> 2                                     <span class="co">#  = SINZ</span>
-053505,000342: 
-053506,000343: 10,2062           00006                           <span class="op">EXTEND  </span>                                       
-053507,000344: 10,2063           40736                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E43445559">SINCDUY</a>                               
-053508,000345: 10,2064           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-053509,000346: 10,2065           07112                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#444D50535542">DMPSUB</a>                                <span class="co">#  ADDRWD SET TO COSCDUZ</span>
+053477,000300: 23,3773           00004                           <span class="ps">DEC     </span> 4          B-14                       <span class="co">#  **********  CONSTANTS  **********</span>
+053478,000301: 
+053479,000302:                                                                                                  <span class="co">#  ****************************************************************************************************************</span>
+053480,000303: 
+053481,000304: 10,2030                                           <span class="ps">BANK    </span> 10                                    
+053482,000305: 10,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#464C4553484C4F43">FLESHLOC</a>                              
+053483,000306: 10,2000                                           <span class="ps">BANK    </span>                                       
+053484,000307: 10,2030                                           <span class="ps">COUNT*  </span> $$/POWFL                              
+053485,000308: 
+053486,000309:                                                                                                  <span class="co">#      ROUTINE FLESHPOT COMPUTES THE BODY-STABLE MEMBER TRANSFORMATION MATRIX (COMMONLY CALLED XNB) AND STORES</span>
+053487,000310:                                                                                                  <span class="co">#  IT IN THE LOCATIONS SPECIFIED BY THE ECADR ENTERING IN A.</span>
+053488,000311: 
+<a name="43414C43534D5343"></a>053489,000312: 10,2030           77776        <span class="sm">CALCSMSC</span>           <span class="in">EXIT    </span>                                       
+053490,000313: 10,2031           04616                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+053491,000314: 10,2032           20036                           <span class="ps">CADR    </span> <a href="#464C455348504F54">FLESHPOT</a>   -1                         
+053492,000315: 10,2033           06042                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+053493,000316: 10,2034           77616                           <span class="in">RVQ     </span>                                       
+053494,000317: 
+<a name="584E424543414452"></a>053495,000318: 10,2035           02664        <span class="sm">XNBECADR</span>           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584E42">XNB</a>                                   
+053496,000319: 
+053497,000320: 10,2036           32035                 -1        <span class="op">CAF     </span> <a href="#584E424543414452">XNBECADR</a>                              
+053498,000321: 
+<a name="464C455348504F54"></a>053499,000322: 10,2037           54142        <span class="sm">FLESHPOT</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D32">TEM2</a>                                  
+053500,000323: 10,2040           56003                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
+053501,000324: 10,2041           56142                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D32">TEM2</a>                                  
+053502,000325: 10,2042           74357                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  
+053503,000326: 10,2043           65007                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F435431343030">OCT1400</a>                               
+053504,000327: 10,2044           54141                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D31">TEM1</a>                                  
+053505,000328: 
+053506,000329: 10,2045           00006                           <span class="op">EXTEND  </span>                                       
+053507,000330: 10,2046           30744                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F5343445559">COSCDUY</a>                               
+053508,000331: 10,2047           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+053509,000332: 10,2050           07106                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#444D50">DMP</a>                                   
+053510,000333: 10,2051           00745                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F534344555A">COSCDUZ</a>                               
+053511,000334: 10,2052           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+053512,000335: 10,2053           20001                           <span class="op">DDOUBL  </span>                                       
+053513,000336: 10,2054           50141                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D31">TEM1</a>                                  
+053514,000337: 10,2055           52001                           <span class="op">DXCH    </span> 0                                     <span class="co">#  = COSY COSZ</span>
+053515,000338: 
+053516,000339: 10,2056           00006                           <span class="op">EXTEND  </span>                                       
+053517,000340: 10,2057           30740                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E4344555A">SINCDUZ</a>                               
+053518,000341: 10,2060           50141                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D31">TEM1</a>                                  
+053519,000342: 10,2061           52003                           <span class="op">DXCH    </span> 2                                     <span class="co">#  = SINZ</span>
+053520,000343: 
+053521,000344: 10,2062           00006                           <span class="op">EXTEND  </span>                                       
+053522,000345: 10,2063           40736                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E43445559">SINCDUY</a>                               
+053523,000346: 10,2064           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+053524,000347: 10,2065           07112                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#444D50535542">DMPSUB</a>                                <span class="co">#  ADDRWD SET TO COSCDUZ</span>
 </pre>
 </span>
 </p>
@@ -544,57 +545,57 @@ Page 1255
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-053511,000348: 10,2066           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-053512,000349: 10,2067           20001                           <span class="op">DDOUBL  </span>                                       
-053513,000350: 10,2070           50141                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D31">TEM1</a>                                  
-053514,000351: 10,2071           52005                           <span class="op">DXCH    </span> 4                                     <span class="co">#  = - SINY COSZ</span>
-053515,000352: 
-053516,000353: 10,2072           00006                           <span class="op">EXTEND  </span>                                       
-053517,000354: 10,2073           40742                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E43445558">SINCDUX</a>                               
-053518,000355: 10,2074           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-053519,000356: 10,2075           07112                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#444D50535542">DMPSUB</a>                                <span class="co">#  ADDRWD SET TO COSCDUZ STILL</span>
-053520,000357: 10,2076           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-053521,000358: 10,2077           20001                           <span class="op">DDOUBL  </span>                                       
-053522,000359: 10,2100           52160                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +3                         
-053523,000360: 
-053524,000361: 10,2101           00006                           <span class="op">EXTEND  </span>                                       
-053525,000362: 10,2102           40742                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E43445558">SINCDUX</a>                               
-053526,000363: 10,2103           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-053527,000364: 10,2104           07106                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#444D50">DMP</a>                                   
-053528,000365: 10,2105           00737                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E4344555A">SINCDUZ</a>                               
-053529,000366: 10,2106           00006                           <span class="op">EXTEND  </span>                                       
-053530,000367: 10,2107           40155                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-053531,000368: 10,2110           52162                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
-053532,000369: 10,2111           07106                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#444D50">DMP</a>                                   
-053533,000370: 10,2112           00735                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E43445559">SINCDUY</a>                               
-053534,000371: 10,2113           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-053535,000372: 10,2114           20001                           <span class="op">DDOUBL  </span>                                       
-053536,000373: 10,2115           20001                           <span class="op">DDOUBL  </span>                                       
-053537,000374: 10,2116           52162                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
-053538,000375: 
-053539,000376: 10,2117           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-053540,000377: 10,2120           07106                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#444D50">DMP</a>                                   
-053541,000378: 10,2121           00743                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F5343445559">COSCDUY</a>                               
-053542,000379: 10,2122           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-053543,000380: 10,2123           20001                           <span class="op">DDOUBL  </span>                                       
-053544,000381: 10,2124           20001                           <span class="op">DDOUBL  </span>                                       
-053545,000382: 10,2125           52131                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-053546,000383: 
-053547,000384: 10,2126           00006                           <span class="op">EXTEND  </span>                                       
-053548,000385: 10,2127           30744                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F5343445559">COSCDUY</a>                               
-053549,000386: 10,2130           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-053550,000387: 10,2131           07106                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#444D50">DMP</a>                                   
-053551,000388: 10,2132           00747                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F5343445558">COSCDUX</a>                               
-053552,000389: 10,2133           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-053553,000390: 10,2134           20001                           <span class="op">DDOUBL  </span>                                       
-053554,000391: 10,2135           20162                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
-053555,000392: 
-053556,000393: 10,2136           00006                           <span class="op">EXTEND  </span>                                       
-053557,000394: 10,2137           30736                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E43445559">SINCDUY</a>                               
-053558,000395: 10,2140           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-053559,000396: 10,2141           07112                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#444D50535542">DMPSUB</a>                                <span class="co">#  ADDRWD SET TO COSCDUX</span>
-053560,000397: 10,2142           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-053561,000398: 
+053526,000349: 10,2066           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+053527,000350: 10,2067           20001                           <span class="op">DDOUBL  </span>                                       
+053528,000351: 10,2070           50141                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D31">TEM1</a>                                  
+053529,000352: 10,2071           52005                           <span class="op">DXCH    </span> 4                                     <span class="co">#  = - SINY COSZ</span>
+053530,000353: 
+053531,000354: 10,2072           00006                           <span class="op">EXTEND  </span>                                       
+053532,000355: 10,2073           40742                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E43445558">SINCDUX</a>                               
+053533,000356: 10,2074           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+053534,000357: 10,2075           07112                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#444D50535542">DMPSUB</a>                                <span class="co">#  ADDRWD SET TO COSCDUZ STILL</span>
+053535,000358: 10,2076           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+053536,000359: 10,2077           20001                           <span class="op">DDOUBL  </span>                                       
+053537,000360: 10,2100           52160                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +3                         
+053538,000361: 
+053539,000362: 10,2101           00006                           <span class="op">EXTEND  </span>                                       
+053540,000363: 10,2102           40742                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E43445558">SINCDUX</a>                               
+053541,000364: 10,2103           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+053542,000365: 10,2104           07106                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#444D50">DMP</a>                                   
+053543,000366: 10,2105           00737                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E4344555A">SINCDUZ</a>                               
+053544,000367: 10,2106           00006                           <span class="op">EXTEND  </span>                                       
+053545,000368: 10,2107           40155                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+053546,000369: 10,2110           52162                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
+053547,000370: 10,2111           07106                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#444D50">DMP</a>                                   
+053548,000371: 10,2112           00735                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E43445559">SINCDUY</a>                               
+053549,000372: 10,2113           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+053550,000373: 10,2114           20001                           <span class="op">DDOUBL  </span>                                       
+053551,000374: 10,2115           20001                           <span class="op">DDOUBL  </span>                                       
+053552,000375: 10,2116           52162                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
+053553,000376: 
+053554,000377: 10,2117           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+053555,000378: 10,2120           07106                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#444D50">DMP</a>                                   
+053556,000379: 10,2121           00743                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F5343445559">COSCDUY</a>                               
+053557,000380: 10,2122           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+053558,000381: 10,2123           20001                           <span class="op">DDOUBL  </span>                                       
+053559,000382: 10,2124           20001                           <span class="op">DDOUBL  </span>                                       
+053560,000383: 10,2125           52131                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+053561,000384: 
+053562,000385: 10,2126           00006                           <span class="op">EXTEND  </span>                                       
+053563,000386: 10,2127           30744                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F5343445559">COSCDUY</a>                               
+053564,000387: 10,2130           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+053565,000388: 10,2131           07106                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#444D50">DMP</a>                                   
+053566,000389: 10,2132           00747                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F5343445558">COSCDUX</a>                               
+053567,000390: 10,2133           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+053568,000391: 10,2134           20001                           <span class="op">DDOUBL  </span>                                       
+053569,000392: 10,2135           20162                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
+053570,000393: 
+053571,000394: 10,2136           00006                           <span class="op">EXTEND  </span>                                       
+053572,000395: 10,2137           30736                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E43445559">SINCDUY</a>                               
+053573,000396: 10,2140           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+053574,000397: 10,2141           07112                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#444D50535542">DMPSUB</a>                                <span class="co">#  ADDRWD SET TO COSCDUX</span>
+053575,000398: 10,2142           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+053576,000399: 
 </pre>
 </span>
 </p>
@@ -610,55 +611,55 @@ Page 1256
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-053563,000400: 10,2143           20001                           <span class="op">DDOUBL  </span>                                       
-053564,000401: 10,2144           20131                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-053565,000402: 
-053566,000403: 10,2145           52131                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-053567,000404: 10,2146           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-053568,000405: 
-053569,000406: 10,2147           00006                           <span class="op">EXTEND  </span>                                       
-053570,000407: 10,2150           30155                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-053571,000408: 10,2151           50141                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D31">TEM1</a>                                  
-053572,000409: 10,2152           52015                           <span class="op">DXCH    </span> 14                                    <span class="co">#  = SINY COSX + SINX SINZ COSY</span>
-053573,000410: 
-053574,000411: 10,2153           00006                           <span class="op">EXTEND  </span>                                       
-053575,000412: 10,2154           30160                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +3                         
-053576,000413: 10,2155           50141                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D31">TEM1</a>                                  
-053577,000414: 10,2156           52017                           <span class="op">DXCH    </span> 16                                    <span class="co">#  = - SINX COSZ</span>
-053578,000415: 
-053579,000416: 10,2157           00006                           <span class="op">EXTEND  </span>                                       
-053580,000417: 10,2160           30162                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
-053581,000418: 10,2161           50141                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D31">TEM1</a>                                  
-053582,000419: 10,2162           52021                           <span class="op">DXCH    </span> 20                                    <span class="co">#  = COSX COSY - SINX SINY SINZ</span>
-053583,000420: 
-053584,000421: 10,2163           30141                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D31">TEM1</a>                                  
-053585,000422: 10,2164           54116                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414444525744">ADDRWD</a>                                
-053586,000423: 10,2165           00006                           <span class="op">EXTEND  </span>                                       
-053587,000424: 10,2166           30006                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A">Z</a>                                     
-053588,000425: 10,2167           64751                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#464F5552">FOUR</a>                                  
-053589,000426: 10,2170           52165                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   
-053590,000427: 10,2171           34744                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  
-053591,000428: 10,2172           54023                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F50">EDOP</a>                                  
-053592,000429: 10,2173           17463                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#565856">VXV</a>                                   
-053593,000430: 10,2174           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-053594,000431: 10,2175           20001                           <span class="op">DDOUBL  </span>                                       
-053595,000432: 10,2176           50141                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D31">TEM1</a>                                  
-053596,000433: 10,2177           52007                           <span class="op">DXCH    </span> 6                                     
-053597,000434: 
-053598,000435: 10,2200           52160                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +3                         
-053599,000436: 10,2201           20001                           <span class="op">DDOUBL  </span>                                       
-053600,000437: 10,2202           50141                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D31">TEM1</a>                                  
-053601,000438: 10,2203           52011                           <span class="op">DXCH    </span> 10                                    
-053602,000439: 
-053603,000440: 10,2204           52162                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
-053604,000441: 10,2205           20001                           <span class="op">DDOUBL  </span>                                       
-053605,000442: 10,2206           50141                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D31">TEM1</a>                                  
-053606,000443: 10,2207           52013                           <span class="op">DXCH    </span> 12                                    
-053607,000444: 
-053608,000445: 10,2210           30142                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D32">TEM2</a>                                  
-053609,000446: 10,2211           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
-053610,000447: 10,2212           14631                           <span class="op">TCF     </span> <a href="INTER-BANK_COMMUNICATION.agc.html#535752455455524E">SWRETURN</a>                              
-053611,000448: 
+053578,000401: 10,2143           20001                           <span class="op">DDOUBL  </span>                                       
+053579,000402: 10,2144           20131                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+053580,000403: 
+053581,000404: 10,2145           52131                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+053582,000405: 10,2146           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+053583,000406: 
+053584,000407: 10,2147           00006                           <span class="op">EXTEND  </span>                                       
+053585,000408: 10,2150           30155                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+053586,000409: 10,2151           50141                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D31">TEM1</a>                                  
+053587,000410: 10,2152           52015                           <span class="op">DXCH    </span> 14                                    <span class="co">#  = SINY COSX + SINX SINZ COSY</span>
+053588,000411: 
+053589,000412: 10,2153           00006                           <span class="op">EXTEND  </span>                                       
+053590,000413: 10,2154           30160                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +3                         
+053591,000414: 10,2155           50141                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D31">TEM1</a>                                  
+053592,000415: 10,2156           52017                           <span class="op">DXCH    </span> 16                                    <span class="co">#  = - SINX COSZ</span>
+053593,000416: 
+053594,000417: 10,2157           00006                           <span class="op">EXTEND  </span>                                       
+053595,000418: 10,2160           30162                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
+053596,000419: 10,2161           50141                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D31">TEM1</a>                                  
+053597,000420: 10,2162           52021                           <span class="op">DXCH    </span> 20                                    <span class="co">#  = COSX COSY - SINX SINY SINZ</span>
+053598,000421: 
+053599,000422: 10,2163           30141                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D31">TEM1</a>                                  
+053600,000423: 10,2164           54116                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414444525744">ADDRWD</a>                                
+053601,000424: 10,2165           00006                           <span class="op">EXTEND  </span>                                       
+053602,000425: 10,2166           30006                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A">Z</a>                                     
+053603,000426: 10,2167           64751                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#464F5552">FOUR</a>                                  
+053604,000427: 10,2170           52165                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   
+053605,000428: 10,2171           34744                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  
+053606,000429: 10,2172           54023                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F50">EDOP</a>                                  
+053607,000430: 10,2173           17463                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#565856">VXV</a>                                   
+053608,000431: 10,2174           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+053609,000432: 10,2175           20001                           <span class="op">DDOUBL  </span>                                       
+053610,000433: 10,2176           50141                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D31">TEM1</a>                                  
+053611,000434: 10,2177           52007                           <span class="op">DXCH    </span> 6                                     
+053612,000435: 
+053613,000436: 10,2200           52160                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +3                         
+053614,000437: 10,2201           20001                           <span class="op">DDOUBL  </span>                                       
+053615,000438: 10,2202           50141                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D31">TEM1</a>                                  
+053616,000439: 10,2203           52011                           <span class="op">DXCH    </span> 10                                    
+053617,000440: 
+053618,000441: 10,2204           52162                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
+053619,000442: 10,2205           20001                           <span class="op">DDOUBL  </span>                                       
+053620,000443: 10,2206           50141                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D31">TEM1</a>                                  
+053621,000444: 10,2207           52013                           <span class="op">DXCH    </span> 12                                    
+053622,000445: 
+053623,000446: 10,2210           30142                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D32">TEM2</a>                                  
+053624,000447: 10,2211           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
+053625,000448: 10,2212           14631                           <span class="op">TCF     </span> <a href="INTER-BANK_COMMUNICATION.agc.html#535752455455524E">SWRETURN</a>                              
+053626,000449: 
 
 End of include-file POWERED_FLIGHT_SUBROUTINES.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>
