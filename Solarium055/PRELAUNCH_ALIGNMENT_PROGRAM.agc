@@ -14,6 +14,7 @@
 ##		2016-08-23 RSB	Typos.
 ## 		2016-12-28 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and fixed errors found.
+##		2021-05-30 ABS	Fixed capitalization of a page marker comment.
 
 ## Page 332
 
@@ -634,7 +635,7 @@ GYROCOM		ITA	1
 		ITCI	0
 			S2
 
-## page 348
+## Page 348
 
 # VERTICAL ERECTION SUBROUTINE
 #

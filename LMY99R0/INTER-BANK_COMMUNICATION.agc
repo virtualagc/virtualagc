@@ -27,6 +27,7 @@
 ##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
 ##				Luminary 99 vs Comanche 55.
 ##		2017-08-01 MAS	Created from LMY99 Rev 1.
+##		2021-05-30 ABS	ISWCALLL -> ISWCALL
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -125,7 +126,7 @@ IBNKCALL	DXCH	RUPTREG3	# USES RUPTREG3,4 FOR DP RETURN ADDRESS.
 		CAF	0
 		INCR	Q
 
-ISWCALLL	TS	L
+ISWCALL		TS	L
 		LXCH	FBANK
 		MASK	LOW10
 		XCH	Q

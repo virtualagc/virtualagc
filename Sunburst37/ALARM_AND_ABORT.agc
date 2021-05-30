@@ -22,6 +22,7 @@
 ##                              Remove tabs
 ##		2017-06-22 RSB	Proofed comment text with
 ##				octopus/ProoferComments.
+##              2021-05-30 ABS  Fixed a page marker comment.
 
 ## Page 300
 
@@ -130,7 +131,7 @@ MULTEXIT        CAF     PRIO37
 
 MULTFAIL        CA      L
                 AD      BIT15
-##PAGE302
+## Page 302
                 XCH     FAILREG +2
                 MASK    POSMAX
                 TS      FAILREG +1

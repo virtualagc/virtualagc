@@ -15,6 +15,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-08-14 MAS  Created from Artemis 072.
+##              2021-05-30 ABS  NORMSBIT -> NDRMSBIT
+##                              GONBYBIT -> G0NBYBIT
+##                              Removed RUPTSTOR line not present in scans.
 
 ## Page 38
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -1086,7 +1089,7 @@ NORMSW		=	110D		# UNIT NORMAL INPUT	LAMBERT COMPUTE ITS
 					# TO LAMBERT.		OWN UNIT NORMAL.
 
 
-NORMSBIT	=	BIT10
+NDRMSBIT	=	BIT10
 
 ## Page 61
 #			BIT 9 FLAG 7
@@ -1100,7 +1103,7 @@ RVSWBIT		=	BIT9
 #			BIT 8 FLAG 7
 GONEBY		=	112D		# PASSED TARGET		APPROACHING TARGET
 
-GONBYBIT	=	BIT8
+G0NBYBIT	=	BIT8
 
 #			BIT 7 FLAG 7
 #		=	113D
@@ -1479,7 +1482,6 @@ WAITBANK	EQUALS	ITEMP2
 EXECTEM2	EQUALS	ITEMP2
 
 ITEMP3		ERASE
-RUPTSTOR	EQUALS	ITEMP3
 WAITADR		EQUALS	ITEMP3
 NEWPRIO		EQUALS	ITEMP3
 

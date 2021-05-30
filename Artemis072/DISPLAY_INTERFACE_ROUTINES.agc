@@ -16,6 +16,7 @@
 ##		2010-02-20 RSB	Un-##'d this header.
 ##		2017-01-21 RSB	Proofed comment text by diff'ing vs Comanche 55
 ##				and corrected errors found.
+##		2021-05-30 ABS	BLKNR1 -> BLNKR1
 
 ## Page 1448
 
@@ -1427,5 +1428,5 @@ PERFRQST	=	BIT5
 FLSHRQST	=	BIT4
 BLNKR3		=	BIT3
 BLNKR2		=	BIT2
-BLKNR1		=	BIT1
+BLNKR1		=	BIT1
 DSPONLY		=	ZERO

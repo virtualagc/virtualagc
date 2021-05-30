@@ -13,6 +13,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-07-24 MAS  Created from SundanceXXX.
+##              2021-05-30 ABS  Aligned IAW to field boundary.
 
 
 
@@ -129,7 +130,7 @@ V06N53          VN      0653
 
 STATEXTP        STQ     RTB
                         STATEXIT
-                LOADTIME
+                        LOADTIME
                 STCALL  TDEC1
                         OTHPREC         # GET BASE VECTORS
                 VLOAD

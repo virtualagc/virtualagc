@@ -20,6 +20,9 @@
 ##                              from Luminary 131. Moved ZAXIS1 to share with
 ##                              UHZP. Moved JPARM to share with R60VSAVE.
 ##                              Moved RODCOUNT to share with RUNIT +3.
+##              2021-05-30 ABS  TTPIO -> TTPI0
+##                              NEGTORKP -> NEGTOTKP as in Luminary 131 scans
+##                              since its usage still matches what's there.
 
 ## Page 90
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -1855,7 +1858,7 @@ JETRATER        EQUALS  JETRATE +2      # SCALED AT PI/4 RADIANS/SECOND
 
 DOWNTORK        ERASE   +5              # ACCUMULATED JET TORQUE COMMANDED ABOUT
 POSTORKP        EQUALS  DOWNTORK        #       +,-P, +,-U, +,-V RESPECTIVELY.
-NEGTORKP        EQUALS  DOWNTORK +1     #       EMPLOYED EXCLUSIVELY FOR DOWNLIST.
+NEGTOTKP        EQUALS  DOWNTORK +1     #       EMPLOYED EXCLUSIVELY FOR DOWNLIST.
 POSTORKU        EQUALS  DOWNTORK +2     #       NOT INITIALIZED:  PERMITTED TO OVERFLOW
 ## Page 134
 NEGTORKU        EQUALS  DOWNTORK +3     #       SCALED AT 32 JET-SEC, OR ABOUT 2.0 JET-
@@ -2280,7 +2283,7 @@ QTEMP           ERASE                   # I(1)TMP COMMON RETURN SAVE REGISTER.
 
 TCSI            ERASE   +1              # B(2)TMP CSI TIME IN CENTISECONDS
 TTPI            ERASE   +1              # B(2)TMP TPI TIME IN CENTISECONDS
-TTPIO           ERASE   +1              # B(2)TMP TTPI STORAGE FOR RECYCLE
+TTPI0           ERASE   +1              # B(2)TMP TTPI STORAGE FOR RECYCLE
 
 # P30,P40 INTERFACE.                            (21D)
 

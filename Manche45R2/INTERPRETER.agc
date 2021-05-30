@@ -14,6 +14,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-24 MAS  Created from Comanche 45.
+##              2021-05-30 ABS  Modfied COUNT operands to match Comanche 55.
 
 ## Page 1107
 # SECTION 1   DISPATCHER
@@ -26,7 +27,7 @@
 
 		BLOCK	03
 		
-		COUNT*	$$/INTER
+		COUNT	03/INTER
 INTPRET		RELINT
 		EXTEND				# SET LOC TO THE WORD FOLLOWING THE TC.
 		QXCH	LOC
@@ -342,7 +343,7 @@ MISCJUMP	TCF	AXT		# 00 - ADDRESS TO INDEX TRUE.
 
 ## Page 1118
 # THE FOLLOWING JUMP TABLE APPIES TO UNARY INSTRUCTIONS.
-		COUNT*	$$/INTER
+		COUNT	00/INTER
 		BANK	0		# 00 - EXIT - DETECTED EARLIER.
 UNAJUMP		TCF	SQRT		# 01 - SQUARE ROOT.
 		TCF	SINE		# 02 - SIN.

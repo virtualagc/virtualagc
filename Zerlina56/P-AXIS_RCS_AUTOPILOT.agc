@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
 ##              2017-08-22 MAS  Updated for Zerlina 56.
+##              2021-05-30 ABS  +8 -> +8D
 
 ## Page 1409
                 BANK            16
@@ -741,7 +742,7 @@ RATERROR        CA              CDUX                    # FINDCDUW REQUIRES THAT
                 TS              EDOTP
                 CCS             DAPTEMP1                # IF P COMMAND CHANGE EXCEEDS BREAKOUT
                 TCF             +3                      # LEVEL, GO TO DIRECT RATE CONTROL. IF NOT
-                TCF             +8                      # CHECK FOR DIRECT RATE CONTROL LAST TIME.
+                TCF             +8D                     # CHECK FOR DIRECT RATE CONTROL LAST TIME.
                 TCF             +1
                 AD              -RATEDB
                 EXTEND

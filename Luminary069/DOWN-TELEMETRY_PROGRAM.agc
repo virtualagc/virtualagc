@@ -24,6 +24,7 @@
 ##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##		2017-03-15 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##              2021-05-30 ABS  Removed WO1 symbol not present in scans.
 
 ## Page 983
 # PROGRAM NAME - DOWN TELEMETRY PROGRAM
@@ -160,7 +161,7 @@ DODOWNTM	TS	BANKRUPT
 		EXTEND
 		QXCH	QRUPT		# SAVE Q
 		CA      BIT7		# SET WORD ORDER CODE TO 1. EXCEPTION- AT
-WO1		EXTEND			# THE BEGINNING OF EACH LIST THE WORD
+		EXTEND			# THE BEGINNING OF EACH LIST THE WORD
 		WOR	CHAN13		# CODE WILL BE SET BACK TO 0.
 		TC	DNTMGOTO	# GO TO APPROPRIATE PHASE OF PROGRAM
 

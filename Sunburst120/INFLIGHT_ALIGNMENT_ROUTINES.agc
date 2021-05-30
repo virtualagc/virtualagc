@@ -16,6 +16,7 @@
 ##				changes made.
 ##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
 ##				Luminary 99 vs Comanche 55.
+##		2021-05-30 ABS	Aligned various IAWs to field boundaries.
 
 ## Page 340
 		BANK	15
@@ -137,8 +138,8 @@ TRIG2		DLOAD	SIGN		# (135,-135)
 
 
 SMNB            ITA             CLEAR                           # PUSHDOWN 00,02,04-10D,30D,32D-36D
-                S2                                              
-                NBSMBIT                                         # SET NBSMBIT = 0
+                                S2
+                                NBSMBIT                         # SET NBSMBIT = 0
 
 SMNB1           AXT,1           AXT,2                           # ROTATE X,Z, ABOUT Y
 		                4                                               
@@ -252,7 +253,7 @@ AXISROT1        DAD             STADR                           #   MPAC + PD2  
 				8D,1
 ## Page 346
                 DMP*            SL1                             #      MPAC         .
-                32D             +4,1                            # S1COS S2COS S3COS .
+                                32D             +4,1            # S1COS S2COS S3COS .
 
                 DSU             STADR                           #   MPAC - PD0      .
                 STORE           32D             +4,1            # S1    S2    S3
@@ -719,7 +720,7 @@ AOTSM           STQ		SETPD
 RRANGLES        DLOAD           DCOMP                           # SINCE WE WILL FIND THE MODE 1 SHAFT
                 		34D                             # ANGLE LATER, WE CAN FIND THE MODE 1
                 SETPD           ASIN                            # TRUNNION BY SIMPLY TAKING THE ARCSIN OF
-                0                                               # THE Y COMPONENT, THE ASIN GIVING AN
+                                0                               # THE Y COMPONENT, THE ASIN GIVING AN
                 PUSH            BDSU                            # ANSWER WHOSE ABS VAL IS LESS THAN 90 DEG
                 		HALFDP                                          
                 STODL           4                               # MODE 2 TRUNNION TO 4.
@@ -763,7 +764,7 @@ RRANGLES        DLOAD           DCOMP                           # SINCE WE WILL 
 
                 TC              INTPRET                         
                 GOTO                                            
-                S2                                              
+                                S2                              
 
 ## Page 359
 #    GIVEN RR TRUNION AND SHAFT (T,S) IN TANG,+1, FIND THE ASSOCIATED

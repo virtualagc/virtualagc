@@ -11,6 +11,7 @@
 ## Mod history: 2011-01-27 JL   Adapted from corresponding Colossus 249 file.
 ##		2016-12-30 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and corrected errors found.
+##		2021-05-30 ABS	Single instance of $$/P03 -> $$/PO3 to match scans.
 
 ## Page 414
 # NAME- IMU PERFORMANCE TESTS 2
@@ -1158,7 +1159,7 @@ TAR1		SLOAD*	SR2		# X1=2 X2=12 S2=6 X1=0 X2=6 S2=6
 		BANK	33
 		SETLOC	IMUCAL
 		BANK
-		COUNT*	$$/P03
+		COUNT*	$$/PO3
 
 CONTIN33	CA	ONE
 		TS	STARCODE

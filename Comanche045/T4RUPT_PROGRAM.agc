@@ -14,6 +14,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-06 MAS  Created from Comanche 44.
+##              2021-05-30 ABS  $$/T4RUPT -> $$/T4RPT
 
 ## Page 133
 		BANK	12
@@ -1307,7 +1308,7 @@ OPTDRIVE	CA	CDUS			# GRAB OPTIC SHAFT CDU
 		TCF	OZONE	+1
 OZONE		CAF	ZERO			# ABS(CDUS) LESS THEN 90 DEG-ZONE ZERO
 		TS	ZONE
-		COUNT*	$$/T4RUPT
+		COUNT*	$$/T4UPT
 CONTDRVE	CCS	OPTIND
 		TC	+4			# WORK COARS OPTICS
 		TC	+3			# WORK COARS OPTICS

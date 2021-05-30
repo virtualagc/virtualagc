@@ -15,6 +15,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-08-14 MAS  Created from Artemis 072.
+##              2021-05-30 ABS  ENDOCM -> ENDDCM
 
 ## Page 403
 		SETLOC	KALCMON1
@@ -394,7 +395,7 @@ LOOPSIN		SLOAD*	RTB
 ## Page 411
 		STORE	16D,2		# C8=-SIN(THETA)SIN(PHI)SIN(PSI)
 		RVQ			#    +COS(THETA)COS(PHI)
-ENDOCM		EQUALS
+ENDDCM		EQUALS
 
 		SETLOC	KALCMON1
 		BANK

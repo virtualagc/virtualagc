@@ -19,6 +19,8 @@
 ##				Luminary 99 and 132.
 ##		2017-03-15 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##              2021-05-30 ABS  "--1" -> " -1" to match scans and for
+##                              yaYUL compatibility.
 
 ## Page 1331
 # DISPLAYS CAN BE CLASSIFIED INTO THE FOLLOWING CATEGORIES-
@@ -635,7 +637,7 @@ GOMARK2R        TS              PLAYTEM1                        # MARK GOPERFS-3
                 CAF             MPERFMSK                        # MARK, PERFORM, FLASH
                 TCF             GODSPRS                         
 
--1              AD              PRIO13
+ -1             AD              PRIO13
 GOMARK3R        TS              PLAYTEM1                        
                 CAF             MARK3MSK                        
                 TCF             GODSPRS                         

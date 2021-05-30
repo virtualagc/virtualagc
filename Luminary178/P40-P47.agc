@@ -18,6 +18,7 @@
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
 ##              2019-09-08 MAS  Removed Zerlina-specific changes to
 ##                              restart points, and calls to PIPCYCLE.
+##              2021-05-30 ABS  TGDCALC -> TGOCALC
 
 ## Page 738
 # PROGRAM DESCRIPTION  P40BOTH    DECEMBER 22, 1966
@@ -939,7 +940,7 @@ BDTOK           VLOAD   ABVAL
                 TC      PHASCHNG
                 OCT     10035
                 TC      INTPRET
-TGDCALC         SETPD   VLOAD
+TGOCALC         SETPD   VLOAD
                         0
                         VG
                 STOVL   VGPREV

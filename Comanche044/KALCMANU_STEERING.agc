@@ -14,6 +14,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51.
+##              2021-05-30 ABS  ZEROERROR -> ZEROEROR
 
 ## Page 414
 # GENERATION OF STEERING COMMANDS FOR DIGITAL AUTOPILOT FREE FALL MANEUVERS
@@ -233,7 +234,7 @@ STOPYZ		CAF	ZERO
 		BANK
 
 ## Page 419
-ZEROERROR	CA	CDUX		# PICK UP CDU ANGLES AND STORE IN
+ZEROEROR	CA	CDUX		# PICK UP CDU ANGLES AND STORE IN
 		TS	CDUXD		# CDU DESIRED
 		CA	CDUY
 		TS	CDUYD

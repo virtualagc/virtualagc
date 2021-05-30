@@ -11,6 +11,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
+##              2021-05-30 ABS  Aligned IAW to field boundary.
 
 ## Sundance 292
 
@@ -179,7 +180,7 @@ MASSMON         BON             AXT,1                   # ARE WE ON THE SURFACE?
                 STODL           /AF/                    # /AF/ = MAGNITUDE DV/DT
                                 ABDVCONV
                 VSR4            DDV*
-                                APSVEX1
+                                APSVEX1,1
                 DMP             DAD
                                 MASS
                                 MASS

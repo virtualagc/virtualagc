@@ -20,6 +20,7 @@
 ##              2017-06-05 MAS  Transcribed.
 ##		2017-06-22 RSB	Proofed comment text with
 ##				octopus/ProoferComments.
+##              2021-05-30 ABS  Added missing EBANK= statement.
 
 ## Page 348
                 BANK            6
@@ -415,6 +416,7 @@ PERFORM         TC              GRABWAIT                        # KEY RELEASE MA
                 INHINT                                          # ENTER. THE FAIL HAS BEEN RESET.
                 CAF             BIT2                            # 20MS.
                 TC              WAITLIST
+                EBANK=          JETSTEP
                 2CADR           TRIMON                          # CHECK AGAIN TO BE SURE. THEN PROCEED..
 
 

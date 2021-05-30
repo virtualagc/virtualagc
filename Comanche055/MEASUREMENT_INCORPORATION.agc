@@ -15,6 +15,7 @@
 ##				and corrected the errors found.
 ##		2017-01-15 RSB	Fixed comment-text errors identified in 
 ##				diff'ing against Colossus 249.
+##		2021-05-30 ABS	ZEROD -> ZEROO
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -438,7 +439,7 @@ DOCSM1		RTB	CALL
 			SVDWN1		# STORE DOWNLINK STATE VECTOR
 		GOTO
 			FAZAB4
-ZEROD		=	ZEROVECS
+ZEROO		=	ZEROVECS
 54DD		DEC	54
 6DD		DEC	-6
 12DD		DEC	12

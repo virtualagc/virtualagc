@@ -13,6 +13,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-07-24 MAS  Created from SundanceXXX.
+##              2021-05-30 ABS  Removed DEC66 symbol not present in Luminary 69.
 
 
 
@@ -38,7 +39,7 @@ P67NOW?         TC              CHECKMM                 # NO:   ARE WE IN P67 NO
                 TCF             STABL?                  # NO
 STARTP66        TC              FASTCHNG                # YES
                 TC              NEWMODEX
-DEC66           DEC             66
+                DEC             66
                 EXTEND                                  # INITIALIZE VDGVERT USING
                 DCA             VGU                     #   PRESENT DOWNWARD VELOCITY
                 DXCH            VDGVERT

@@ -18,6 +18,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-28 MAS  Created from Luminary 99.
+##              2021-05-30 ABS  DFC-6 -> DEC-6, DFC-12 -> DEC-12
 
 ## Page 1100
 		SETLOC	INTPRET1
@@ -62,8 +63,8 @@ ZEROVEC		2DEC	0
 		2DEC	0
 		
 		OCT	77777		# -0, -6, -12 MUST REMAIN IN THIS ORDER
-DFC-6		DEC	-6
-DFC-12		DEC	-12
+DEC-6		DEC	-6
+DEC-12		DEC	-12
 LODPMAX		2OCT	3777737777	# THESE TWO CONSTANTS MUST REMAIN
 
 LODPMAX1	2OCT	3777737777	# ADJACENT AND THE SAME FOR INTEGRATION

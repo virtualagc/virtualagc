@@ -14,6 +14,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-24 MAS  Created from Comanche 45.
+##              2021-05-30 ABS  Added empty page 882 to match Comanche 055.
 
 ## Page 844
 # ENTRY INITIALIZATION ROUTINE
@@ -1595,3 +1596,5 @@ COS15		2DEC	.965
 LATSLOPE	EQUALS	1/12TH
 # ... END OF RE-ENTRY CONSTANTS ...
 
+## Page 882
+## Empty page.

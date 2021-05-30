@@ -7,6 +7,8 @@
 ## Website:     www.ibiblio.org/apollo/Restoration.html
 ## Mod history: 2019-06-12 MAS  Recreated from Computer History Museum's
 ##				physical core-rope modules.
+##              2021-05-30 ABS  Removed DLY2 symbol not present in
+##                              Retread 44 or Aurora 12.
 
 ## Page 118
 
@@ -22,7 +24,7 @@ WAITLIST        XCH     Q               #  SAVE DELTA T IN Q AND RETURN IN
                 INDEX   A
                 DCA     0               # PICK UP 2CADR OF TASK.
                 TS      WAITADR         # BBCON WILL REMAIN IN L.
-DLY2            CAF     WAITBB 
+                CAF     WAITBB 
                 XCH     BBANK
                 TCF     WAIT2
 

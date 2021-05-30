@@ -11,6 +11,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
+##              2021-05-30 ABS  Aligned TCF BURNBABY and TCF B*RNB*B* to field
+##                              boundaries and surrounding comments to match.
+##                              TGDCALC -> TGOCALC
 
 ## Sundance 306
 
@@ -135,9 +138,9 @@ P40IN           CALL
                 TC              P40SXT4
 
 
-#               ***********************
-                    TCF    BURNBABY
-#               ***********************
+#           ***********************
+                TCF    BURNBABY
+#           ***********************
 
 
 P40SXT4         EXTEND
@@ -253,9 +256,9 @@ P41NORM         CALL
                 OCT             00076                   # GROUP 6 RESTARTS AT REDO6.7
                 OCT             04024                   # GROUP 4 RESTARTS HERE
 
-#               ***********************
-                    TCF    B*RNB*B*
-#               ***********************
+#           ***********************
+                TCF    B*RNB*B*
+#           ***********************
 
 
 BLNKWAIT        CAF             1SEC
@@ -265,7 +268,7 @@ BLNKWAIT        CAF             1SEC
 REDO6.7         CA              DISPDEX                 # ON A RESTART, DO NOT PUT UP DISPLAY IF
                 AD              TWO                     # BLANKING (BETWEEN TIG-35 AND TIG-30)
 
-#               ***********************
+#           ***********************
 
 
                 EXTEND
@@ -917,7 +920,7 @@ VGAIN*          STORE           VG                      # VELOCITY TO BE GAINED 
 BDTOK           DLOAD
                                 36D
                 STORE           VGDISP
-TGDCALC         SETPD           STQ
+TGOCALC         SETPD           STQ
                                 0
                                 S40EXIT
                 VLOAD

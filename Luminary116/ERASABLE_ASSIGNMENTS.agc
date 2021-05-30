@@ -20,6 +20,9 @@
 ##              2017-03-15 RSB  Comment-text fixes identified in 5-way
 ##                              side-by-side diff of Luminary 69/99/116/131/210.
 ##              2017-03-19 HG   Fix label BLINCR1  -> ELINCR1
+##              2021-05-30 ABS  W.INDI -> W.IND1
+##                              TTPIO -> TTPI0
+##                              NETTOTKP -> NEGTOTKP
 
 ## Page 90
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -799,7 +802,7 @@ DNLRALT         EQUALS          DNLRVELZ        +1              # B(1) TMP
 #          INCORPORATION UNSWITCHED.                                      (2D)
 
 W.IND           EQUALS          PIPAGE                          # B(1)
-W.INDI          EQUALS          W.IND           +1              # I(1)
+W.IND1          EQUALS          W.IND           +1              # I(1)
 
 
 #          SUBROUTINE BALLANGS OF R60.                                    (1D)
@@ -1986,7 +1989,7 @@ JETRATER        EQUALS          JETRATE         +2              # SCALED AT PI/4
 
 DOWNTORK        ERASE           +5                              # ACCUMULATED JET TORQUE COMMANDED ABOUT
 POSTORKP        EQUALS          DOWNTORK                        #   +,-P, +,-U, +,-V RESPECTIVELY.
-NETTOTKP        EQUALS          DOWNTORK        +1              #   EMPLOYED EXCLUSIVELY FOR DOWNLIST.
+NEGTOTKP        EQUALS          DOWNTORK        +1              #   EMPLOYED EXCLUSIVELY FOR DOWNLIST.
 POSTORKU        EQUALS          DOWNTORK        +2              #   NOT INITIALIZED: PERMITTED TO OVERFLOW
 ## Page 134
 NEGTORKU        EQUALS          DOWNTORK        +3              # SCALED AT 32 JET-SEC, OR ABOUT 2.0 JET-
@@ -2426,7 +2429,7 @@ QTEMP           ERASE                                           # I(1)TMP COMMON
 
 TCSI            ERASE           +1                              # B(2)TMP CSI TIME IN CENTISECONDS
 TTPI            ERASE           +1                              # B(2)TMP TPI TIME IN CENTISECONDS
-TTPIO           ERASE           +1                              # B(2)TMP TTPI STORAGE FOR RECYCLE
+TTPI0           ERASE           +1                              # B(2)TMP TTPI STORAGE FOR RECYCLE
 
 #          P30,P40 INTERFACE.                                             (21D)
 

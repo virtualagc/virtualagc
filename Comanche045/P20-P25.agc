@@ -14,6 +14,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-06 MAS  Created from Comanche 44.
+##              2021-05-30 ABS  $/CRS61 -> $$/CRS61
 
 ## Page 562
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -1487,7 +1488,7 @@ INITB		STORE	W +90D,1	# CLEAR 54 - 89
 		BANK
 		
 		EBANK=	CDUXD
-		COUNT*	$/CRS61
+		COUNT*	$$/CRS61
 		
 CRS61.1		STQ	SETPD
 			Q611

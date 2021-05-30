@@ -19,6 +19,7 @@
 ##                              to call FRCS2 instead of FRCS4, with 4SEC(17)
 ##                              as the duration instead of 6.5SECS. Removed
 ##                              the definition of 6.5SECS.
+##              2021-05-30 ABS  TGDCALC -> TGOCALC
 
 ## Page 738
 # PROGRAM DESCRIPTION  P40BOTH    DECEMBER 22, 1966
@@ -940,7 +941,7 @@ BDTOK           VLOAD   ABVAL
                 TC      PHASCHNG
                 OCT     10035
                 TC      INTPRET
-TGDCALC         SETPD   VLOAD
+TGOCALC         SETPD   VLOAD
                         0
                         VG
                 STOVL   VGPREV

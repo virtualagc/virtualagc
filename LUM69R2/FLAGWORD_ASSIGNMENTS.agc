@@ -16,6 +16,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-27 MAS  Created from Luminary 69.
+##              2021-05-30 ABS  Removed erroneous "-3" line.
 
 ## Page 77
 #          FLAGWORDS 0-11  ARE DOWNLINKED AND CAN BE SET AND CLEARED BY UP-FLAG AND DOWN-FLAG INSTRUCTIONS IN THE
@@ -822,7 +823,6 @@ REDFLBIT        =               BIT6                    # PERMITTED           PE
 
 # BIT 5 FLAG 6
 #               =               100D
-3
 
 # BIT 4 FLAG 6
 #               =               101D

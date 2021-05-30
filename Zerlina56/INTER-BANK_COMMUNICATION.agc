@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
 ##              2017-08-27 MAS  Updated for Zerlina 56.
+##              2021-05-30 ABS  ISWCALLL -> ISWCALL
 
 ## Page 989
 #          THE FOLLOWING ROUTINE CAN BE USED TO CALL A SUBROUTINE IN ANOTHER BANK. IN THE BANKCALL VERSION, THE
@@ -97,7 +98,7 @@ IBNKCALL        DXCH    RUPTREG3        # USES RUPTREG3,4 FOR DP RETURN ADDRESS.
                 CAF     0
                 INCR    Q
 
-ISWCALLL        TS      L
+ISWCALL         TS      L
                 LXCH    FBANK
                 MASK    LOW10
                 XCH     Q

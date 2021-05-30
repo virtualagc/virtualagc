@@ -13,6 +13,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-07-24 MAS  Created from SundanceXXX.
+##              2021-05-30 ABS  SINSLOC -> SINESLOC
 
 
 
@@ -241,7 +242,7 @@ R*TL**P         CCS     DEXDEX          #               +3 --> 0        -3 --> 2
 
 LOOP2           DXCH    BUF             # LOADING VECTOR COMPONENT, STORING INDEX
 LOOP1           DXCH    MPAC
-                CA      SINSLOC
+                CA      SINESLOC
                 AD      DEX1
                 TS      ADDRWD
 
@@ -283,7 +284,7 @@ TSTPOINT        CCS     DEXDEX          # ONLY THE BRANCHING FUNCTION IS USED
                 TCF     R*TL**P
                 TC      RTNSAVER
 
-SINSLOC         ADRES   SINCDU          # FOR USE IN SETTING ADDRWD
+SINESLOC        ADRES   SINCDU          # FOR USE IN SETTING ADDRWD
 
 INDEXI          DEC     4               # **********   DON'T   **********
                 DEC     2               # **********   TOUCH   **********

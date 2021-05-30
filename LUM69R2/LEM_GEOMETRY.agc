@@ -16,6 +16,8 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-27 MAS  Created from Luminary 69.
+##              2021-05-30 ABS  Replaced use of ANTENBIT with BIT12 to match
+##                              Luminary 69.
 
 ## Page 334
 		BANK	23
@@ -133,7 +135,7 @@ RRANGLES	STORE	32D
 		EXIT
 		
 		CS	RADMODES	# SWAP MODEA AND MODEB IF RR IN MODE 2.
-		MASK	ANTENBIT
+		MASK	BIT12
 		CCS	A
 		TCF	+4
 		

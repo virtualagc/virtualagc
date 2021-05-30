@@ -20,6 +20,7 @@
 ##		2017-01-28 RSB	WTIH -> WITH.
 ##		2017-02-08 RSB	Proofed comment text by diff'ing vs Comanche 55
 ##				and corrected errors found.
+##		2021-05-30 ABS	Added missing COUNT* line.
 
 ## Page 897
 		SETLOC	RTE1
@@ -1059,6 +1060,7 @@ PREC210		DLOAD			# PREPARE FOR NEXT ITERATION
 
 		SETLOC	RTE2
 		BANK
+		COUNT*	$$/P37
 PREC220		DLOAD	DSU
 			X(T2)
 			X(T2)PRE

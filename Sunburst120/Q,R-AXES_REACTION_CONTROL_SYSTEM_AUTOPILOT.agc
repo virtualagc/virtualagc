@@ -15,6 +15,8 @@
 ##		2016-11-02 RSB	More typos.
 ##		2016-12-05 RSB	Comment-proofing with octopus/ProoferComments
 ##				completed, changes made.
+##		2021-05-30 ABS	Added missing EBANK= statement.
+##				NETAPOSB -> NEGAPOSB
 
 ## Page 519
                 BANK            17
@@ -24,6 +26,7 @@
 
                 EBANK=          DT
 NULLFILT        2CADR           FILDUMMY
+                EBANK=          DT
 
 QRAXIS          CAF             MS20QR                  # RESET TIMER IMMEDIATELY - DT = 20 MS
                 TS              TIME5
@@ -944,7 +947,7 @@ A-B/ONLY	CS		TERMB
 		
 POSBURG		CAE		TERMA			# A URGENCY TEST
 		EXTEND
-		BZMF		NETAPOSB
+		BZMF		NEGAPOSB
 		
 POSAPOSB	CAE		A-B
 		EXTEND
@@ -989,7 +992,7 @@ MINUSU		CAE		1/AMINU
 		CAF		TWO
 		TCF		POLTYPE			# GO FIND BEST POLICY
 		
-NETAPOSB	CAE		A+B
+NEGAPOSB	CAE		A+B
 		EXTEND
 		BZMF		PLUSV
 		

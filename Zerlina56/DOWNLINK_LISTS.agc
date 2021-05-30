@@ -19,6 +19,7 @@
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
 ## 		2017-08-18 RSB	Transcribed.
 ## 		2017-08-19 MAS	Fixed an incorrect operator.
+##              2021-05-30 ABS  Fixed marker comment for Page 204.
 
 ## Page 199
                 BANK            22
@@ -242,7 +243,7 @@ LMCSTA06        2DNADR          X789                    # X789+0...+3           
 
 LMCSTA07        3DNADR          OGC                     # OGC,+1,IGC,+1,MGC,+1     COMMON DATA
                 1DNADR          BESTI                   # BESTI,BESTJ
-# Page 204                
+## Page 204
                 3DNADR          STARSAV1                # STARSAV1+0...+5
                -3DNADR          STARSAV2                # STARSAV2+0...+5
 

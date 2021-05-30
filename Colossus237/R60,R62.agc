@@ -11,6 +11,7 @@
 ## Mod history: 2011-01-27 JL   Adapted from corresponding Colossus 249 file.
 ##		2016-12-30 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and corrected errors found.
+##		2021-05-30 ABS	Removed STORANG symbol not present in scans.
 
 ## Page 381
 		BANK	34
@@ -200,7 +201,7 @@ VECPOINT	STQ	BOV		# SAVE RETURN ADDRESS
 VECLEAR		AXC,2	RTB
 			MIS		# READ THE PRESENT CDU ANGLES AND
 			READCDUK	# STORE THEM IN PD25, 26, 27
-STORANG		STCALL	25D
+		STCALL	25D
 			CDUTODCM	# S/C AXES TO STABLE MEMBER AXES (MIS)
 		VLOAD	VXM
 			POINTVSM	# RESOLVE THE POINTING DIRECTION VF INTO

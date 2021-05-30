@@ -19,6 +19,7 @@
 ##				and corrected errors found.  No differences
 ##				remained afterward.
 ##		2017-01-28 RSB	WTIH -> WITH.
+##		2021-05-30 ABS	ZEROERROR -> ZEROEROR
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -246,7 +247,7 @@ STOPYZ		CAF	ZERO
 		TS	BIAS2
 		TC	Q
 		
-ZEROERROR	CA	CDUX		# PICK UP CDU ANGLES AND STORE IN
+ZEROEROR	CA	CDUX		# PICK UP CDU ANGLES AND STORE IN
 		TS	CDUXD		# CDU DESIRED
 		CA	CDUY
 		TS	CDUYD

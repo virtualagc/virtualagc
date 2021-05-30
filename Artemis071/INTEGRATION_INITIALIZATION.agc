@@ -15,6 +15,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-08-14 MAS  Created from Artemis 072.
+##              2021-05-30 ABS  SP3SPT1 -> 2P3SPT1
 
 ## Page 1309
 # 1.0 INTRODUCTION
@@ -286,7 +287,7 @@ ENDINT		CLEAR	EXIT
 			STATEFLG
 		TC	PHASCHNG
 		OCT	20032
-SP3SPT1		=	2.3SPOT
+2P3SPT1		=	2.3SPOT
 		EXTEND
 		DCA	600SECS
 		TC	LONGCALL

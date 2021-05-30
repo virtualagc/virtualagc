@@ -11,6 +11,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
+##              2021-05-30 ABS  Removed WO1 symbol not present in Luminary 69.
 
 ## Sundance 292
 
@@ -145,7 +146,7 @@ DODOWNTM        TS      BANKRUPT
                 EXTEND
                 QXCH    QRUPT           # SAVE Q
                 CA      BIT7            # SET WORD ORDER CODE TO 1. EXCEPTION- AT
-WO1             EXTEND                  # THE BEGINNING OF EACH LIST THE WORD
+                EXTEND                  # THE BEGINNING OF EACH LIST THE WORD
                 WOR     CHAN13          # CODE WILL BE SET BACK TO 0.
                 TC      DNTMGOTO        # GO TO APPROPRIATE PHASE OF PROGRAM
 

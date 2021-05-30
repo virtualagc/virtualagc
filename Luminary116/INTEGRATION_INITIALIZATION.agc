@@ -22,6 +22,7 @@
 ##                              side-by-side diff of Luminary 69/99/116/131/210.
 ##              2017-03-19 HG   Fix missing operator and operand  SET POOHFLAG
 ##		2017-08-19 MAS	Fixed comment errors found transcribing Zerlina 56.
+##              2021-05-30 ABS  Fix a couple of page numbers to match scans.
 
 ## Page 1196
 # 1.0 INTRODUCTION
@@ -530,7 +531,7 @@ LEMCONIC        STQ             CALL
                                 X1
                                 INTSTALL
                 SXA,1           CLRGO
-## Page 1215
+## Page 1206
                                 IRETURN
                                 VINTFLAG
                                 IFLAGC
@@ -585,7 +586,7 @@ INTEGRVS        SET             SSP
 
 # OUTPUT
 #   RATT   AS
-## Page 1216
+## Page 1207
 #   VATT   DEFINED
 #   TAT            BEFORE
 

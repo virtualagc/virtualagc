@@ -14,6 +14,8 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-06 MAS  Created from Comanche 44.
+##              2021-05-30 ABS  ENDOCM -> ENDDCM
+##                              ZEROERROR -> ZEROEROR
 
 ## Page 399
 		BANK	15
@@ -407,7 +409,7 @@ LOOPSIN		SLOAD*	RTB
 		STADR
 		STORE	16D,2		# C8=-SIN(THETA)SIN(PHI)SIN(PSI)
 		RVQ			#    +COS(THETA)COS(PHI)
-ENDOCM		EQUALS
+ENDDCM		EQUALS
 
 		BANK	15
 		SETLOC	KALCMON1
@@ -604,7 +606,7 @@ VECOFANG	VDEF	RVQ
 
 NOGOM2		INHINT			# THIS LOCATION ACCESSED BY A BZMF NOGO -2
 		TC	BANKCALL
-		CADR	ZEROERROR
+		CADR	ZEROEROR
 		
 NOGO		INHINT
 		TC	STOPRATE

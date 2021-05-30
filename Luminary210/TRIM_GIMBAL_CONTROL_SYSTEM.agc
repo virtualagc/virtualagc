@@ -15,6 +15,7 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##		2016-12-26 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2021-05-30 ABS	GTSGO+DN -> GTSGO+ON
 
 ## Page 1470
                 BANK            21
@@ -57,7 +58,7 @@ GTS             CAF             NEGONE                  # MAKE THE NEXT PASS THR
                 AD              A                       # FOR THE RIGHT SHIFT DUE TO EDITING.
                 TS              SAVESR
 
-GTSGO+DN        CAF             TWO                     # SET INDEXER FOR R-AXIS CALCULATIONS.
+GTSGO+ON        CAF             TWO                     # SET INDEXER FOR R-AXIS CALCULATIONS.
                 TCF             GOQTRIMG        +1
 
 GOQTRIMG        CAF             ZERO                    # SET INDEXER FOR Q-AXIS CALCULATIONS

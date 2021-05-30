@@ -24,6 +24,7 @@
 ##				side-by-side diff of Luminary 69/99/116/131/210.
 ##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
 ##				Luminary 99 vs Comanche 55.
+##              2021-05-30 ABS  SINSLOC -> SINESLOC
 
 ## Page 1254
 		BANK	14		# SAME FBANK AS THE FINDCDUD SUB-PROGRAM
@@ -245,7 +246,7 @@ R*TL**P		CCS	DEXDEX		#       	+3 --> 0	-3 --> 2
 LOOP2		DXCH	BUF		# LOADING VECTOR COMPONENT, STORING INDEX
 ## Page 1259
 LOOP1		DXCH	MPAC
-		CA	SINSLOC
+		CA	SINESLOC
 		AD	DEX1
 		TS	ADDRWD
 
@@ -287,7 +288,7 @@ TSTPOINT	CCS	DEXDEX		# ONLY THE BRANCHING FUNCTION IS USED
 		TCF	R*TL**P
 		TC	RTNSAVER
 
-SINSLOC		ADRES	SINCDU		# FOR USE IN SETTING ADDRWD
+SINESLOC	ADRES	SINCDU		# FOR USE IN SETTING ADDRWD
 
 INDEXI		DEC	4		# **********   DON'T   **********
 		DEC	2		# **********   TOUCH   **********

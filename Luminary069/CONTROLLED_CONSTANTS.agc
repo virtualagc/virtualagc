@@ -20,6 +20,7 @@
 ##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
 ##		2017-03-02 RSB	$$/DAPAD --> $$/DAPAO.
+##              2021-05-30 ABS  2DEC* -> DEC for non extended address fields.
 
 ## Page 53
 # DPS AND APS ENGINE PARAMETERS
@@ -90,7 +91,7 @@ AT/RCS          2DEC            .0000785        B+10    # 4 JETS IN A DRY LEM
 
 APSVEX          DEC             -3030           E-2 B-5 # 9942 FT/SEC IN M/CS.
 
-DPSVEX          DEC*            -2952           E-2 B-5 # 9684 FT/SEC IN M/CS.
+DPSVEX          DEC             -2952           E-2 B-5 # 9684 FT/SEC IN M/CS.
 
 # ************************************************************************
 
@@ -546,7 +547,7 @@ RATESP          2DEC            .03660098       B+4     #                     * 
                 2DEC            .455880394              # LOMO                *
                 2DEC            .275337971              # LOSO                *
                 2DEC            .0398987882             # LONO                *
-VAL67           2DEC*           .017361944      B+1     # AMOD                *
+VAL67           2DEC            .017361944      B+1     # AMOD                *
                 2DEC            .286523072              # AARG                *
                 2DEC            .036291712      B+1     # 1/27                *
                 2DEC            .003534722      B+1     # BMOD                *

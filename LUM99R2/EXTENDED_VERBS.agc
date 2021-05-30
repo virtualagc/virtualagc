@@ -31,6 +31,7 @@
 ##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
 ##				Luminary 99 vs Comanche 55.
 ##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
+##		2021-05-30 ABS	Removed "." typo in location field.
 
 ## Page 262
 		BANK	7
@@ -675,7 +676,7 @@ R04C		CAF	BIT14		# ENABLE RR AUTO TRACKER
 		TS	RTSTMAX		# FOR SEQUENTIAL STORAGE
 		
 		TC	WAITLIST
-.		EBANK=	RSTACK
+		EBANK=	RSTACK
 		2CADR	RADSAMP
 		
 		RELINT

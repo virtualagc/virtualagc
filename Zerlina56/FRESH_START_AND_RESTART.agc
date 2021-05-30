@@ -19,6 +19,7 @@
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
 ##              2017-08-19 MAS  Updated for Zerlina 56.
 ##              2017-08-24 MAS  Replaced an incorrect CS with a CA.
+##              2021-05-30 ABS  CANTROD -> CANTROO
 
 ## Page 218
                 BANK            10
@@ -745,7 +746,7 @@ V37             TS              MMNUMBER                # SAVE MAJOR MODE
                 CA              IMODES30                # IS IMU BEINB INITIALIZED
                 MASK            BIT6
                 CCS             A
-                TCF             CANTROD
+                TCF             CANTROO
 
                 CS              MMNUMBER                # IS P70 REQUESTED?
                 AD              DEC70
@@ -763,7 +764,7 @@ V37             TS              MMNUMBER                # SAVE MAJOR MODE
                 MASK            NODOBIT
                 CCS             A
                 TCF             CHECKTAB                # NO
-CANTROD         TC              ALARM
+CANTROO         TC              ALARM
                 OCT             1520
 
 V37BAD          TC              RELDSP                  # RELEASES DISPLAY FROM ASTRONAUT

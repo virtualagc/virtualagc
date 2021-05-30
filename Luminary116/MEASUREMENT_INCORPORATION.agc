@@ -16,6 +16,7 @@
 ##		2017-01-24 RRB  Updated for Luminary 116.
 ##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
 ##				Luminary 99 and 131.
+##              2021-05-30 ABS  ZEROD -> ZEROO
 
 ## Page 1141
 #  INCORP1--PERFORMS THE SIX DIMENSIONAL STATE VECTOR DEVIATION FOR POSITI
@@ -421,7 +422,7 @@ DOCSM1          RTB             CALL
                                 SVDWN1                          # STORE DOWNLINK STATE VECTOR
                 GOTO                                            
                                 FAZAB4                          
-ZEROD           =               ZEROVECS                        
+ZEROO           =               ZEROVECS                        
 54DD            DEC             54                              
 6DD             DEC             -6                              
 12DD            DEC             12                              

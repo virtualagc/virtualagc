@@ -11,6 +11,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
+##              2021-05-30 ABS  Aligned IAW to field boundary.
 
 ## Sundance 306
 
@@ -127,7 +128,7 @@ V06N53          VN      0653
 
 STATEXTP        STQ     RTB
                         STATEXIT
-                LOADTIME
+                        LOADTIME
                 STCALL  TDEC1
                         OTHPREC         # GET BASE VECTORS
                 VLOAD

@@ -11,6 +11,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
+##              2021-05-30 ABS  Added ITR0 location symbol to match previous
+##                              and subsequent version scans.
+##                              B5TOBB -> B5TOB8
 
 ## Sundance 292
 
@@ -380,7 +383,7 @@ DOSTORE         TS      ADDRWD
                 MASK    B12T14
                 EXTEND
                 MP      BIT5            # EACH TRANSFER VECTOR ENTRY IS TWO WORDS.
-                INDEX   A
+ITR0            INDEX   A
                 TCF     STORJUMP
                 
 #          STORE CODE JUMP TABLE. CALLS THE APPROPRIATE STORING ROUTINE AND EXITS TO DANZIG OR TO ADDRESS WITH
@@ -2863,7 +2866,7 @@ BOV(B)          CCS     OVFIND          # BRANCH ON OVERFLOW TO BASIC OR INTERP.
                 TS      OVFIND
                 CCS     CYR
                 TCF     RTB             # IF BASIC.
-B5TOBB          OCT     360
+B5TOB8          OCT     360
                 TCF     GOTO
 
 BZE/GOTO        CCS     CYR             # SEE WHICH OP-CODE IS DESIRED.

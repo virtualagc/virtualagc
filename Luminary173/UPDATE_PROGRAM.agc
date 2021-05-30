@@ -16,6 +16,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-09-18 MAS  Created from Luminary 178.
+##              2021-05-30 ABS  DELTAOK -> DELTATOK
 
 ## Page 1374
 # PROGRAM NAME:   P27
@@ -382,7 +383,7 @@ TIMEDIDR        INHINT
                 DCA     UPBUFF +18D
                 DAS     MPAC            # FORM SUM IN MPAC
                 EXTEND
-                BZF     DELTAOK         # TEST FOR OVERFLOW
+                BZF     DELTATOK        # TEST FOR OVERFLOW
                 CAF     ZERO
                 DXCH    UPBUFF +18D     # OVERFLOW, RESTORE OLD VALUE OF CLOCK
                 DAS     TIME2           # AND TURN ON OPERATOR ERROR
@@ -392,7 +393,7 @@ TIMEDIDR        INHINT
 
                 TC      UPTEMP          # GO TO ERROR EXIT
 
-DELTAOK         TC      TPAGREE         # FORCE SIGN AGREEMENT
+DELTATOK        TC      TPAGREE         # FORCE SIGN AGREEMENT
                 DXCH    MPAC
                 DAS     TIME2           # INCREMENT TIME2,TIME1
 

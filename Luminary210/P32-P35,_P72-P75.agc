@@ -20,6 +20,8 @@
 ##		2017-02-07 RSB	Comment-text corrections identified while 
 ##				proofing Artemis 72.
 ##		2017-08-25 RSB	Corrected a misprint (00 -> 0D) identified in ZERLINA 56.
+##              2021-05-30 ABS  TTPIO -> TTPI0
+##                              K10RK2 -> K1ORK2
 
 ## Page 624
 # COELLIPTIC SEQUENCE INITIATION (CSI) PROGRAMS (P32 AND P72)
@@ -314,7 +316,7 @@ P32/P72F        STORE           T2TOT3
                                 DISDVLVC
                 DLOAD
                                 TTPI
-                STCALL          TTPIO
+                STCALL          TTPI0
                                 VN1645
                 GOTO
                                 P32/P72B
@@ -487,7 +489,7 @@ P33/P73A        TC              P20FLGON
                 TC              VNPOOH
                 TC              INTPRET
                 DLOAD
-                                TTPIO
+                                TTPI0
                 STODL           TTPI
                                 TCDH
                 STCALL          TIG
@@ -551,7 +553,7 @@ P33/P73E        DSU             BPL
                 STODL           T1TOT2
                                 TTPI
                 DSU             PUSH
-                                TTPIO
+                                TTPI0
 P33/P73F        ABS             DSU
                                 60MIN
                 BPL             DAD
@@ -953,7 +955,7 @@ NTP/2           DLOAD           DMP
                                 RPASS3                  #                                       PL11D
                 TAD             TAD                     # TEMP1**2+RA3.RA3+RP3.RP3=TEMP2        PL08D
                 BPL             DLOAD
-                                K10RK2
+                                K1ORK2
                                 LOOPCT
                 DSU             AXT,2
                                 1DPB28
@@ -967,7 +969,7 @@ NTP/2           DLOAD           DMP
                                 DVPREV
                 STCALL          DELVCSI
                                 CSI/B1
-K10RK2          SQRT            PUSH                    # TEMP3 = TEMP2**.5                B29 PL10D
+K1ORK2          SQRT            PUSH                    # TEMP3 = TEMP2**.5                B29 PL10D
                 DCOMP           DSU
                                 06D                     # -TEMP1-TEMP3 =K2 AT 10D
                 STODL           10D                     #                                      PL08D

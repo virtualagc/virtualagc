@@ -21,6 +21,7 @@
 ##		2017-03-09 RSB	Comment text fixes noted in proofing Luminary 116.
 ##		2017-03-16 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2021-05-30 ABS	STARTMNAD -> STRTMNAD
 
 ## Page 487
 # MOD NO: 0                             DATE: 1 MAY 1968
@@ -155,7 +156,7 @@ TOBALLC         TC              BANKCALL
 
 AUTOMANV        TC              CHKLINUS
                 TCF             STARTMNV
-                CAF             STARTMNAD               # RESTART AT STARTMNV IF PRIORITY
+                CAF             STRTMNAD                # RESTART AT STARTMNV IF PRIORITY
                 TS              TBASE2                  #    DISPLAY FLAG SET
 
 STARTMNV        TC              BANKCALL                # PERFORM MANEUVER VIA KALCMANU
@@ -167,7 +168,7 @@ ENDMANU1        TC              DOWNFLAG                # RESET 3-AXIS FLAG
                 CAE             TEMPR60			#					-
                 TC              BANKJUMP		#					-
 
-STARTMNAD       ADRES           STARTMNV
+STRTMNAD        ADRES           STARTMNV
 
 CHKLINUS        CS              FLAGWRD5
                 MASK            PDSPFBIT                # IS PRIORITY DISPLAY FLAG SET?
