@@ -68,6 +68,7 @@ typedef struct
   int	resumed;
   int	version;
   int	initializeSunburst37;
+  int	no_resume;
 } Options_t;
 
 extern Options_t* CliParseArguments(int argc, char *argv[]);

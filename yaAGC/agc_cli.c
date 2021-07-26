@@ -102,6 +102,9 @@ static void CliShowUsage(void)
 "                         otherwise clean memory, in lieu of pad-loads.  Not\n"
 "                         required for subsequent runs.  Note that this option only\n"
 "                         has an effect if there is no existing core-dump file.\n"
+"--no-resume              Disables the resuming from a core-resume-file.\n"
+"                         By default yaAGC resumes from the \"core\" resume file or\n"
+"                         another file provided as a command line argument.\n"
 "Note that the exec-ropes file should contain exactly 36 banks\n"
 "(36x1024=36864 words, or 73728 bytes). Other sizes may be accepted,\n"
 "but it is unclear what (if any) utility such core-rope images\n"
@@ -192,6 +195,7 @@ static void CliInitializeOptions(void)
 	  Options.interlace = 50;
 	  Options.version = 0;
 	  Options.initializeSunburst37 = 0;
+	  Options.no_resume = 0;
 }
 /**
 This function takes a character string and checks the string for
@@ -244,6 +248,7 @@ static int CliProcessArgument(char* token)
 	else if (!strncmp (token, "-symtab=", 8)) Options.symtab = strdup(&token[8]);
 	else if (1 == sscanf (token,"-interlace=%d", &j)) Options.interlace = j;
 	else if (!strcmp (token, "-initialize-sunburst-37")) Options.initializeSunburst37 = 1;
+	else if (!strcmp (token, "-no-resume")) Options.no_resume = 1;
 	else if (Options.core == (char*)0) Options.core = strdup(token);
 	else if (Options.resume == (char*)0) Options.resume = strdup(token);
 	else result = CLI_E_UNKOWNTOKEN;
