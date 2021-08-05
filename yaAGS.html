@@ -38,6 +38,8 @@ document.write(headerTemplate.replace("@TITLE@","Abort Guidance System (AGS)").r
 Flight
 
 
+
+
                       Software</big></small></big></small></small></a></big></li>
       <ul>
         <li><big><a href="#Availability_"><small><small><big><small><big>Availability</big></small></big></small></small></a></big></li>
@@ -64,6 +66,8 @@ Flight
       fact our AGS simulation has been built into the Orbiter spacecraft
       simulator via <a href="https://sourceforge.net/projects/nassp/">the
 NASSP
+
+
 
 
         project</a>, and in so doing you can fly simulated aborts of
@@ -97,7 +101,8 @@ NASSP
     </p>
     <center><iframe src="https://www.youtube.com/embed/YelwfOFSYTk"
         gesture="media" allowfullscreen="" width="1280" height="720"
-        frameborder="0">&amp;amp;amp;lt;br&amp;amp;amp;gt; </iframe></center>
+        frameborder="0">&amp;amp;amp;amp;amp;lt;br&amp;amp;amp;amp;amp;gt;
+      </iframe></center>
     <div align="left"><br>
       This second video is similar, except that the abort takes place on
       the lunar surface itself, so I guess you could say it's not even
@@ -107,7 +112,8 @@ NASSP
     </div>
     <center><iframe src="https://www.youtube.com/embed/KJiWwAMuPvE"
         gesture="media" allowfullscreen="" width="1280" height="720"
-        frameborder="0">&amp;amp;amp;lt;br&amp;amp;amp;gt; </iframe></center>
+        frameborder="0">&amp;amp;amp;amp;amp;lt;br&amp;amp;amp;amp;amp;gt;
+      </iframe></center>
     <ul>
     </ul>
     <h2><a name="What_is_the_Abort_Guidance_System_AGS_"
@@ -154,6 +160,8 @@ NASSP
     nicely where it was "supposed" to be with no inputs from
     Stafford.&nbsp; (See the <a class="moz-txt-link-freetext"
       href="http://history.nasa.gov/alsj/a410/A10_MissionReport.pdf">mission
+
+
 
 
       report</a>.)&nbsp; So it all turned out okay.<br>
@@ -267,10 +275,14 @@ NASSP
 Emergency
 
 
+
+
           Abort Guidance System Study</a>", May 10, 1963</li>
       <li>Grumman, LED-540-3, "<a
 href="Documents/Grumman%20LED-540-3%20Back-up%20Guidance%20Requirements.pdf">Back-up
 Guidance
+
+
 
 
           Requirements</a>", July 9, 1963</li>
@@ -279,10 +291,14 @@ href="Documents/Grumman%20LEM-500-4%20Abort%20Guidance%20System%20Redefinition%2
 Guidance
 
 
+
+
           System Redefinition Studies</a>", March 31, 1965</li>
       <li>Grumman, LSP-300-3B, "<a
           href="Documents/Specification,%20Abort%20Guidance%20Section.pdf">Design
 Control
+
+
 
 
           Specification for Abort Guidance Section, Guidance, Navigation
@@ -349,6 +365,8 @@ href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Prog
 Operating
 
 
+
+
           Manual, Flight Program 8</a>, 17618-H110-RO-00, TRW, March
         1971, 233 pages.<br>
       </li>
@@ -362,23 +380,35 @@ Operating
         id="Evolution_of_the_Flight_Software"></a>Evolution of the
       Flight Software</h2>
     The known versions of the AGS flight software are as follows.&nbsp;
-    As you can probably tell by looking, this table should not be taken
-    as authoritative.<br>
+    Unfortunately, we've never found (so far!) any master document that
+    lists the specific AGS flight-software versions that were used for
+    particular Apollo missions, or for other purposes, so relating
+    software versions to missions has required a bit of detective
+    work!&nbsp; Cooper Lushbaugh has stepped forward to do that work
+    (thanks, Cooper!), and the details of his work are covered in the <b>Notes</b>
+    column of the table below.&nbsp; The software dates listed in the <b>Description</b>
+    column are sometimes the dates in the flight program source code and
+    sometimes are release dates or other dates mentioned in supporting
+    documentation.<br>
     <br>
-    <table summary="" style="width: 75%; text-align: left; margin-left:
-      auto; margin-right: auto;" cellspacing="2" cellpadding="2"
+    <table style="width: 75%; text-align: left; margin-left: auto;
+      margin-right: auto;" summary="" cellspacing="2" cellpadding="2"
       border="1">
       <tbody>
         <tr>
-          <td style="vertical-align: top; font-weight: bold;">Program
-            Name<br>
+          <td style="vertical-align: top; font-weight: bold;"
+            valign="bottom">Program Name<br>
           </td>
-          <td style="vertical-align: top; font-weight: bold;"> Acronym<br>
+          <td style="vertical-align: top; font-weight: bold;"
+            valign="bottom"> Acronym<br>
           </td>
-          <td style="vertical-align: top; font-weight: bold;">
-            Description<br>
+          <td style="vertical-align: top; font-weight: bold;"
+            valign="bottom"> Description<br>
           </td>
-          <td style="vertical-align: top; font-weight: bold;"> Listing</td>
+          <td valign="bottom"><b>Notes</b><br>
+          </td>
+          <td style="vertical-align: top; font-weight: bold;"
+            valign="bottom"> Program Listing</td>
         </tr>
         <tr>
           <td style="vertical-align: top;">Design Mission Computer
@@ -386,8 +416,11 @@ Operating
           </td>
           <td style="vertical-align: top;">DMCP<br>
           </td>
-          <td style="vertical-align: top;">The baseline software, of
-            which all other programs listed below are modifications<br>
+          <td style="vertical-align: top;">Baseline<br>
+          </td>
+          <td valign="top">All of the other flight programs listed below
+            (FP2 through FP8) are modifications of this baseline
+            software.<br>
           </td>
           <td style="vertical-align: top;"><br>
           </td>
@@ -397,9 +430,11 @@ Operating
           </td>
           <td style="vertical-align: top;">FP2<br>
           </td>
-          <td style="vertical-align: top;">December 1967, probably for
-            Apollo 5 (unmanned LM Earth-orbit test mission)<br>
+          <td style="vertical-align: top;">December 1967, probably
+            Apollo 5<br>
           </td>
+          <td valign="top"> Apollo 5 was an unmanned LM Earth-orbit test
+            mission.</td>
           <td style="vertical-align: top;"><br>
           </td>
         </tr>
@@ -408,8 +443,15 @@ Operating
           </td>
           <td style="vertical-align: top;">FP3<br>
           </td>
-          <td style="vertical-align: top;">May 1968, probably for Apollo
-            9<br>
+          <td style="vertical-align: top;">May 1968, Apollo 9<br>
+          </td>
+          <td valign="top">The <a
+              href="https://www.hq.nasa.gov/alsj/a410/A09_MissionReport.pdf#page=202">Apollo
+
+              9 Mission Report (page 9-29)</a> says: "The abort
+            electronics assembly flight program 3, the inflight
+            calibration routines, and all input/output inter­faces
+            performed properly throughout the mission."<br>
           </td>
           <td style="vertical-align: top;"><br>
           </td>
@@ -421,6 +463,8 @@ Operating
           </td>
           <td style="vertical-align: top;">(Identical to FP 3)<br>
           </td>
+          <td valign="top"><br>
+          </td>
           <td style="vertical-align: top;"><br>
           </td>
         </tr>
@@ -429,7 +473,13 @@ Operating
           </td>
           <td style="vertical-align: top;">FP5<br>
           </td>
-          <td style="vertical-align: top;">Probably for Apollo 10<br>
+          <td style="vertical-align: top;">Apollo 10<br>
+          </td>
+          <td valign="top">The <a
+href="https://www.ibiblio.org/apollo/Documents/a10-final-flight-plan-19690417.pdf#page=29">Apollo
+
+              10 Flight Plan (page 1-22)</a> says: "The LM AGS will use
+            Flight Program 5 (Mission G will use Flight Program "X")."<br>
           </td>
           <td style="vertical-align: top;"><br>
           </td>
@@ -439,20 +489,46 @@ Operating
           </td>
           <td style="vertical-align: top;">FP6<br>
           </td>
-          <td style="vertical-align: top;">Our copy is dated February
-            14, 1969, for Apollo 11.&nbsp; Regarding Apollo 12, it has
-            been pointed out to me that a couple of significant FP7
-            documents weren't released until <i>after</i> the Apollo 12
-            mission, so we can conclude that Apollo 12 also used
-            FP6.&nbsp; (The documents mentioned, are the FP7 "Programmed
-            Guidance Equations" and "Sim Flight Operating
-            Procedures.&nbsp; While we don't have the full texts of
-            these documents as of this writing, the former is referenced
-            <a href="Pultorak_files/FP8Flowcharts.pdf">here</a>, dated
-            December 1969, and the latter's title page can be seen <a
+          <td style="vertical-align: top;">February 14, 1969, Apollo 11
+            and Apollo 12</td>
+          <td valign="top">Regarding Apollo 11:&nbsp; The <a
+href="http://www.ibiblio.org/apollo/Pultorak_files/FP6ComputerProgramSpecification.pdf#page=8">LM
+
+              AGS Computer Program Specification, Flight Program 6 (page
+              8)</a> and the <a
+href="http://www.ibiblio.org/apollo/Pultorak_files/FP6FinalDesignReport.pdf#page=2">LM
+
+              AGS Guidance Software Final Design Report, Flight Program
+              6 (page 2)</a> specify that FP6 was designed for "G" type
+            missions.&nbsp; Similarly, the <a
+href="http://www.ibiblio.org/apollo/Pultorak_files/FP6_ProgramVerificationTestResults.pdf#page=4">Program
+
+              Verification Test Results, LM/AGS Flight Program No. 6
+              (page 4)</a> says that "the testing was required to verify
+            the program for the manned lunar landing (G) Mission."&nbsp;
+            Apollo 11 was the only G mission.&nbsp; The <a
+href="http://www.ibiblio.org/apollo/Pultorak_files/FP6MissionConstants.pdf">LM/AGS
+
+              Flight Program 6 LM 5 Mission Constants</a> is even more
+            explicit in its very title, given that LM-5 was the Lunar
+            Module used in Apollo 11.<br>
+            <br>
+            Regarding Apollo 12:&nbsp; This is less obvious than the
+            Apollo 11 case, since Apollo 12 was an "H" type mission
+            rather than a "G" type mission.&nbsp; A couple of
+            significant FP7 documents weren't released until <i>after</i>
+            the Apollo 12 mission, so we can conclude that Apollo 12
+            continued to use FP6.&nbsp; (The documents mentioned are the
+            FP7 "Programmed Guidance Equations" and "Sim Flight
+            Operating Procedures.&nbsp; While we don't have the full
+            texts of these documents as of this writing, the former is
+            referenced <a href="Pultorak_files/FP8Flowcharts.pdf">here</a>,
+            dated December 1969, and the latter's title page can be seen
+            <a
 href="https://archive.org/details/NARASWSelectedApolloBoxes/page/n1679/mode/1up">here</a>,
-            dated January 1970.&nbsp; Thanks to Cooper Lushbaugh for
-            discovering this!)</td>
+            dated January 1970.)&nbsp; Also, see the following entry
+            (Apollo 13).<br>
+          </td>
           <td style="vertical-align: top;"><a style="color: rgb(255, 0,
               0);" href="listings/FP6/FP6.aea.html">FP6.aea.html</a></td>
         </tr>
@@ -461,15 +537,70 @@ href="https://archive.org/details/NARASWSelectedApolloBoxes/page/n1679/mode/1up"
           </td>
           <td style="vertical-align: top;">FP7<br>
           </td>
-          <td style="vertical-align: top;">There is good reason to
-            believe that FP7 was used for the Apollo 14 mission, since
-            the <a href="Documents/LM%20PGNS-AGS%20Training%20Card.pdf">"LM
+          <td style="vertical-align: top;">Apollo 13 and Apollo 14<br>
+          </td>
+          <td valign="top">The G&amp;N Dictionaries for the <a
+              href="https://history.nasa.gov/afj/ap12fj/pdf/a12_lm_g+n.pdf#page=83">Apollo
+
+              12 (page 83)</a> and <a
+href="https://history.nasa.gov/afj/ap13fj/pdf-hr/76-a13-g+n-dictionary.pdf#page=101">Apollo
+
+              13 (page 101)</a> missions allow us to conclude that
+            Apollo 12 and 13 used different versions of the AGS Flight
+            Program.&nbsp; The AGS portions of these "dictionaries"
+            relevant to our discussion are basically lists of AGS memory
+            locations, including descriptions and the allowed values
+            they can contain.&nbsp; Since the dictionaries for Apollo 12
+            and 13 differ slightly, the AGS software versions must
+            differ as well. An example is addresses 225/226.&nbsp; Since
+            Apollo 12 (see preceding entry in this table) used FP6, then
+            we'd conclude that Apollo 13 used a later version of the
+            Flight Program.<br>
+            <br>
+            Just as we can conclude that Apollo 12 and 13 used different
+            versions of the software, we can conclude that Apollo 13 and
+            14 used the same version.&nbsp; We can do this by comparing
+            the Apollo 13 G&amp;N Dictionary described above with
+            the&nbsp; <a
+              href="Documents/LM%20PGNS-AGS%20Training%20Card.pdf">"LM
+              PGNS/AGS Training Card"</a>, because the training card
+            also contains a list of AGS memory addresses, and that list
+            agrees with the Apollo 13 dictionary.&nbsp; But beyond that,
+            the training card specifically states that it covers:<br>
+            <ul>
+              <li>Apollo 14</li>
+              <li>AGC software Luminary 178 (which was used in the
+                Apollo 14 LM)</li>
+              <li>AGC Flight Program 7<br>
+              </li>
+            </ul>
+            A summary of all that is:<br>
+            <ul>
+              <li>Apollo 14 used AGS Flight Program 7</li>
+              <li>Apollo 13 used the same AGS Flight Program as Apollo
+                14</li>
+              <li>Apollo 13 used different AGS software than Apollo 12,
+                which is known to have used Flight program 6.</li>
+            </ul>
+            <p>The conclusion that both Apollo 13 and 14 used FP7 is
+              inescapable.<br>
+            </p>
+            <p>By the way, it's tempting to say that it doesn't really
+              matter for Apollo 13 which flight program version was
+              used, since because of the service-module explosion there
+              was no lunar landing.&nbsp; But in fact, <a
+href="https://history.nasa.gov/afj/ap13fj/19day5-themanualcoursecorrection.html">the
 
 
-              PGNS/AGS Training Card"</a> covers the use of FP7 with the
-            Luminary 178 (the Apollo 14 LM AGC software); the training
-            card also contains direct references to Apollo 14.&nbsp;
-            (Thanks to Cooper Lushbaugh for observing these facts.)<br>
+                AGS <i>was</i> in fact used in Apollo 13 for a manual
+                course correction</a>.&nbsp; My reading of the linked
+              flight log is that the AGS/DEDA was only used in the
+              course correction to monitor velocity (AGS address
+              470).&nbsp; But this was identical in FP6 and FP8, and
+              therefore presumably in FP7.&nbsp; In other words, even
+              though we presently have no copy of FP7, either FP6 or FP8
+              might suffice in a simulation of an Apollo 13 mission.<br>
+            </p>
           </td>
           <td style="vertical-align: top;"><br>
           </td>
@@ -479,20 +610,28 @@ href="https://archive.org/details/NARASWSelectedApolloBoxes/page/n1679/mode/1up"
           </td>
           <td style="vertical-align: top;">FP8<br>
           </td>
-          <td style="vertical-align: top;">Released April 28, 1971
-            (though our copy is dated December 18, 1970), for Apollo
-            15-17.&nbsp; That FP8 was used for Apollo 15 can be
-            concluded from the document titled <a
+          <td style="vertical-align: top;">Released April 28, 1971 (copy
+            is dated December 18, 1970), Apollo 15-17.<br>
+          </td>
+          <td valign="top">Apollo 15:&nbsp; That FP8 was used for Apollo
+            15 can be concluded from the document titled <a
               href="Documents/19750064553.pdf">"Verification of LM AGS
               Rendezvous Navigation Using Automatic Data for Apollo 15"</a>.&nbsp;
 
-            As is pointed out later, <a href="#Availability_">the
-              release date is mentioned in the documentation for the
-              Apollo 17 Flight Readiness Review</a> (of which
-            unfortunately we do not have a copy), which is how we can
-            conclude it was used for Apollo 17 as well.&nbsp; (Thanks to
-            Cooper Lushbaugh and Fabrizio Bernardini for these
-            observations.)<br>
+
+
+            <br>
+            <br>
+            Apollo 17:&nbsp; As is pointed out later, <a
+              href="yaAGS.html#Availability_">the release date is
+              mentioned in the documentation for the Apollo 17 Flight
+              Readiness Review</a> (of which unfortunately we do not
+            have a copy), which is how we can conclude FP8 was used for
+            Apollo 17 as well. <br>
+            <br>
+            Apollo 16:&nbsp; I don't know of any direct support for the
+            conclusion that Apollo 16 used FP8, but the fact that both
+            Apollo 15 and 17 did so seems pretty suggestive.<br>
           </td>
           <td style="vertical-align: top;"><a style="color: rgb(255, 0,
               0);" href="listings/FP8/FP8.aea.html">FP8.aea.html</a></td>
@@ -500,23 +639,7 @@ href="https://archive.org/details/NARASWSelectedApolloBoxes/page/n1679/mode/1up"
       </tbody>
     </table>
     <br>
-    Note that at present there is no good argument to distinguish
-    whether Apollo 13 used FP6 or whether it used FP7.&nbsp; It's
-    tempting to say that it doesn't really matter for Apollo 13 which
-    version was used, since because of the explosion there was no lunar
-    landing.&nbsp; But in fact, <a
-href="https://history.nasa.gov/afj/ap13fj/19day5-themanualcoursecorrection.html">the
-      AGS <i>was</i> in fact used in Apollo 13 for a manual course
-      correction</a>.&nbsp; My reading of the linked flight log is that
-    the AGS/DEDA was only used in the course correction to monitor
-    velocity (AGS address 470).&nbsp; But this was identical in FP6 and
-    FP8; moreover, <a
-href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Program%208.pdf#page=4">the
-      FP8 Operating Manual</a>, which lists procedural changes between
-    FP7 and FP8, does <i>not</i> list address 470 has being a
-    change.&nbsp; Hence we can conclude that FP6 and FP7 behaved
-    identically insofar as the manual course correction would have been
-    concerned.<br>
+    <br>
     <h2><a name="Architecture_of_the_Abort_Electronics"
         id="Architecture_of_the_Abort_Electronics"></a>Architecture of
       the Abort Electronics Assembly (AEA)</h2>
@@ -806,6 +929,8 @@ href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Prog
 However,
 
 
+
+
         it is certainly possible for the developer of a LM simulation to
         develop his or her own emulation of the DEDA.&nbsp; Indeed, the
         program <span style="font-weight: bold;">yaDEDA2</span> has now
@@ -829,6 +954,8 @@ However,
           style="font-weight: bold;">yaDEDA</span> can be operated even
         without the presence of <span style="font-weight: bold;">yaAGS</span>.&nbsp;
 Notice
+
+
 
 
         that the DEDA has two displays:&nbsp; a three-digit display
@@ -968,6 +1095,8 @@ Notice
 Alters
 
 
+
+
               the locations of graphics files used by the <span
                 style="font-weight: bold;">yaDEDA</span> program to the
               ./pixmaps/yaDEDA/ folder rather than the default system
@@ -987,6 +1116,8 @@ Alters
     The original cross-assembler for AGS assembly language was known as
     the "LEM Assembly Program", or <span style="font-weight: bold;">LEMAP</span>.&nbsp;
 You
+
+
 
 
     can read all about it in the document by H. L. Stiverson (see
@@ -1016,6 +1147,8 @@ You
 Presumably,
 
 
+
+
       <span style="font-style: italic;">Filename</span> was produced by
       an earlier run of <span style="font-weight: bold;">yaLEMAP</span>
       or <span style="font-weight: bold;">binLEMAP</span> (see
@@ -1024,6 +1157,8 @@ Presumably,
       regression testing is performed during a normal build.&nbsp; This
       switch also causes a change in <span style="font-weight: bold;">yaLEMAP</span>'s
 return
+
+
 
 
       codes, which are normally based on the presence of errors and
@@ -1170,6 +1305,8 @@ return
     </div>
     <h2><a name="AGS_Flight_Software" id="AGS_Flight_Software"></a><small><big>AGS
 Flight
+
+
 
 
           Software</big></small></h2>
@@ -1333,6 +1470,8 @@ Overflow=0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 Index=000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
         Halted=0<br>
         Icount=1&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; Cycles=0</span><br
         style="font-family: monospace;">
@@ -1444,6 +1583,8 @@ Index=000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 a
 
 
+
+
         dump is performed using the last <span style="font-style:
           italic;">N</span> and <span style="font-style: italic;">A</span>
         previously used.</li>
@@ -1506,6 +1647,8 @@ a
 the
 
 
+
+
             state of the system (CPU, memory, i/o channels) to backtrace
             point #<span style="font-style: italic;">N</span> (from the
             list displayed by the BACKTRACES command).</li>
@@ -1550,10 +1693,12 @@ the
 Commons
 
 
+
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2021-08-03.<br>
+          2021-08-05.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
