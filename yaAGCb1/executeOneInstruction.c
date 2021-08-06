@@ -349,6 +349,7 @@ executeOneInstruction(FILE *logFile)
           goto resumeFromInterrupt;
         }
       else agc.INDEX = fetchedFromOperand;
+      edit(operand);
     }
   else if (opcode == 030000 && !extracode) /* XCH (erasable) or CAF (fixed). */
     {
@@ -424,6 +425,7 @@ executeOneInstruction(FILE *logFile)
           if (ctrOVCTR == 0) ctrOVCTR = 077777; // Convert +0 to -0.
           ctrOVCTR = (ctrOVCTR - 1) & 077777;
         }
+      edit(operand);
     }
   else if (opcode == 070000) /* MASK. */
     {
@@ -478,12 +480,13 @@ executeOneInstruction(FILE *logFile)
       numMCT = 18;
 
         {
-          int32_t numerator, denominator, quotient, remainder, sign = 1;
+          int32_t numerator, denominator, quotient, remainder, sign = 1, numeratorSign = 1;
           numerator = fixUcForWriting(regA) << 14;
-          if (0 != (0100000 & regA)) numerator |= 030000037777;
+          if (0 != (0100000 & regA)) numerator |= 034000037777;
           denominator = (int16_t) ((operand < 4) ? fetchedFromOperand : fetchedFromOperandSignExtended);
           if (numerator < 0)
             {
+              numeratorSign = -1;
               sign = -sign;
               numerator = ~numerator;
             }
@@ -500,7 +503,15 @@ executeOneInstruction(FILE *logFile)
             quotient = ~quotient;
           regA = quotient;
           regQ = ~remainder;
-          regLP = (sign > 0) ? 1 : 0140001;
+          if (sign > 0)
+            regLP = 1;
+          else
+            {
+              if (numeratorSign > 0)
+                regLP = 0140000;
+              else
+                regLP = 0140001;
+            }
         }
     }
   else if (opcode == 030000 && extracode) /* SU */
