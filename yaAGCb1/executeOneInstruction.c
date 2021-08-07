@@ -42,6 +42,18 @@
  *                              instructions implemented now, though I've
  *                              had no way to test DV so far.
  *              2016-09-27 RSB  Hooked up DSRUPT.
+ *              2021-08-07 RSB  Fixed a bunch of errors identified by
+ *                              running SELF-CHECK in Solarium:
+ *                              * AD and INDEX now edit their arguments
+ *                              * SL no longer shifts into bit 14
+ *                              * DV now sets LP to either 140001 or 140000
+ *                                depending on inputs.
+ *                              * DV with negative numerators now works.
+ *                              * DV of equal-magnitude numbers now sets
+ *                                A and Q correctly.
+ *                              * CCS and SU now respect overflow.
+ *                              * TS A now preserves the value of A on
+ *                                overflow.
  */
 
 #include <stdlib.h>
