@@ -400,8 +400,11 @@ executeOneInstruction(FILE *logFile)
             {
               // Overflow.
               incrementZ(1);
-              if (aOverflowBits == 0040000) regA = 0000001;// Positive overflow.
-              else regA = 0177776;// Negative overflow;
+              if (operand != 00)
+                {
+                    if (aOverflowBits == 0040000) regA = 0000001;// Positive overflow.
+                    else regA = 0177776;// Negative overflow;
+                }
             }
         }
     }
