@@ -319,13 +319,13 @@ executeOneInstruction(FILE *logFile)
           uint16_t K;
           // Arrange to jump.  Recall that Z already points to the next
           // instruction.
-          K = (operand >= 04) ? fetchedFromOperand : fixUcForWriting(fetchedFromOperand);
+          K = fetchedFromOperandSignExtended;
           if (K == 000000) incrementZ(1);// +0
-          else if (0 == (K & 040000)) incrementZ(0);// >0
-          else if (K == 077777) incrementZ(3);// -0
+          else if (0 == (K & 0100000)) incrementZ(0);// >0
+          else if (K == 0177777) incrementZ(3);// -0
           else incrementZ(2);// < 0
           // Compute the "diminished absolute value" of c(K).
-          if (0 != (K & 040000)) K = (~K) & 037777;// Absolute value.
+          if (0 != (K & 0100000)) K = (~K) & 0177777;// Absolute value.
           if (K >= 1) K--;
           regA = K;
           edit(operand);
@@ -523,7 +523,7 @@ executeOneInstruction(FILE *logFile)
       // R-393 says that SU takes 2 more MCT than AD, but the control-pulse
       // sequences it lists for SU don't support that notion.
       //numMCT += 2;
-      fetchedFromOperandSignExtended = ~fetchedFromOperand;
+      fetchedFromOperandSignExtended = ~fetchedFromOperandSignExtended;
       fetchedFromOperand = fetchedFromOperandSignExtended & 0177777;
       goto entrySubtraction;
     }
