@@ -126,7 +126,7 @@ edit(uint16_t flatAddress)
     }
   else if (flatAddress == 023)
     {
-      regSL = ((regSL << 1) & 0077776) | ((regSL & 0100000) >> 15);
+      regSL = ((regSL << 1) & 0037776) | ((regSL & 0100000) >> 15);
     }
   return;
 }
@@ -498,14 +498,22 @@ executeOneInstruction(FILE *logFile)
               sign = -sign;
               denominator = ~denominator;
             }
-          quotient = numerator / denominator;
-          remainder = numerator % denominator;
-          if (quotient > 037777)
-            quotient = 037777;
-          if (sign < 0)
-            quotient = ~quotient;
-          regA = quotient;
-          regQ = ~remainder;
+          if ((numerator >> 14) == denominator)
+            {
+              regQ = ~denominator;
+              regA = (sign > 0) ? 037777 : 0140000;
+            }
+          else
+            {
+              quotient = numerator / denominator;
+              remainder = numerator % denominator;
+              if (quotient > 037777)
+                quotient = 037777;
+              if (sign < 0)
+                quotient = ~quotient;
+              regA = quotient;
+              regQ = ~remainder;
+            }
           if (sign > 0)
             regLP = 1;
           else
