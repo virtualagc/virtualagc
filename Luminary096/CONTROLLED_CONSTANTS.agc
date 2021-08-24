@@ -21,6 +21,8 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 96.
 ## Mod history: 2019-08-04 MAS  Created from Luminary 97.
+##              2021-08-23 MAS  Reverted VAL67 and RATESP to their Luminary
+##                              96 values, as described in LNY-59.
 
 ## Page 38
 # DPS AND APS ENGINE PARAMETERS
@@ -521,13 +523,19 @@ KONMAT		2DEC	1.0 B-1			#         *************
 CSTODAY		2DEC	8640000 B-33		# 		      * NOTE           *
 RCB-13		OCT	00002			#		      * TABLES CONTAIN *
 		OCT	00000			#		      * CONSTANTS FOR  *
-RATESP		2DEC	.03660098 B+4		# LOMR		      * 1969 - 1970    *
+## <b>Reconstruction:</b> The following value at RATESP, introduced in PCN 707.2, is
+## incorrect as noted in anomaly report LNY-59. It was changed to the correct value
+## .03660098 B+4 in Luminary 97.
+RATESP		2DEC	.0366098 B+4		# LOMR		      * 1969 - 1970    *
 		2DEC	.00273779 B+4		# LOSR
 		2DEC	-.00014719 B+4		# LONR
 		2DEC	.815282336		# LOMO
 		2DEC	.274674910		# LOSO
 		2DEC	.986209499		# LONO
-VAL67		2DEC*	.01726666666 B+1*	# AMOD
+## <b>Reconstruction:</b> The following value at VAL67, introduced in PCN 707.2, is
+## incorrect as noted in anomaly report LNY-59. It was changed to the correct value
+## .01726666666 B+1 in Luminary 97.
+VAL67		2DEC	.072663888 B+1	 	# AMOD
 		2DEC	.530784445		# AARG
 		2DEC	.036291712 B+1		# 1/27
 		2DEC	.003505277 B+1		# BMOD
