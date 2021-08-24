@@ -54,6 +54,7 @@
  *          	2019-08-16 RSB	Added Artemis 71.
  *          	2019-09-22 RSB  Added Luminary 163 and 173
  *          	2020-12-06 RSB  Added Comanche 44 and 45, though 45 isn't available yet.
+ *          	2021-08-24 RSB  Added Luminary 96, removed 99R2
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and any ability to
@@ -139,11 +140,12 @@ enum
   ID_APOLLO10LMBUTTON,
   ID_COMANCHE51BUTTON,
   ID_COMANCHE55BUTTON,
+  ID_LUMINARY96BUTTON,
   ID_LUMINARY97BUTTON,
   ID_LUMINARY98BUTTON,
   ID_LMY99R0BUTTON,
   ID_LUMINARY99BUTTON,
-  ID_LUM99R2BUTTON,
+  // ID_LUM99R2BUTTON,
   ID_APOLLO12CMBUTTON,
   ID_APOLLO12LMBUTTON,
   ID_APOLLO13CMBUTTON,
