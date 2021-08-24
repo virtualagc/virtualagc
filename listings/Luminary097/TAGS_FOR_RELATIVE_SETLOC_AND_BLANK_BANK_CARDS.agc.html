@@ -66,8 +66,9 @@ color: #993399;
 </td>
 <td style="vertical-align: middle;">
 These source-code files are part of a reconstructed copy of Luminary 97, the
-original release of the Apollo 11 Lunar Module (LM) Apollo Guidance Computer
-(AGC) software. 
+second release of the Apollo 11 Lunar Module (LM) Apollo Guidance Computer
+(AGC) software. It was created to fix two incorrect ephemeris constants in
+Luminary 96, as described by anomaly report LNY-59.
 <br><br>
 The reconstruction began with source code of Luminary 99 revision 1 previously
 transcribed from a digitized copy of that program.  The code was then updated 
@@ -88,26 +89,28 @@ project's GitHub repository</a>.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-001088,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-001089,000003:                                                                                                  <span class="co">## Filename:    TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc</span>
-001090,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 97.</span>
-001091,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the</span>
-001092,000006:                                                                                                  <span class="co">##              original release of the flight software for the Lunar </span>
-001093,000007:                                                                                                  <span class="co">##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 11.</span>
-001094,000008:                                                                                                  <span class="co">##              The code has been recreated from a copy of Luminary 99</span>
-001095,000009:                                                                                                  <span class="co">##              revision 001, using asterisks indicating changed lines in</span>
-001096,000010:                                                                                                  <span class="co">##              the listing and Luminary Memos #83 and #85, which list </span>
-001097,000011:                                                                                                  <span class="co">##              changes between Luminary 97 and 98, and 98 and 99. The</span>
-001098,000012:                                                                                                  <span class="co">##              code has been adapted such that the resulting bugger words</span>
-001099,000013:                                                                                                  <span class="co">##              exactly match those specified for Luminary 97 in NASA drawing</span>
-001100,000014:                                                                                                  <span class="co">##              2021152D, which gives relatively high confidence that the</span>
-001101,000015:                                                                                                  <span class="co">##              reconstruction is correct.</span>
-001102,000016:                                                                                                  <span class="co">## Reference:   pp. 28-37</span>
-001103,000017:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-001104,000018:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-001105,000019:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-001106,000020:                                                                                                  <span class="co">## Mod history: 2019-07-28 MAS  Created from Luminary 99.</span>
-001107,000021: 
+001090,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+001091,000003:                                                                                                  <span class="co">## Filename:    TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc</span>
+001092,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 97.</span>
+001093,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the</span>
+001094,000006:                                                                                                  <span class="co">##              second release of the flight software for the Lunar </span>
+001095,000007:                                                                                                  <span class="co">##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 11.</span>
+001096,000008:                                                                                                  <span class="co">##              It was created to fix two incorrect ephemeris constants in</span>
+001097,000009:                                                                                                  <span class="co">##              Luminary 96, as described by anomaly report LNY-59.</span>
+001098,000010:                                                                                                  <span class="co">##              The code has been recreated from a copy of Luminary 99</span>
+001099,000011:                                                                                                  <span class="co">##              revision 001, using asterisks indicating changed lines in</span>
+001100,000012:                                                                                                  <span class="co">##              the listing and Luminary Memos #83 and #85, which list </span>
+001101,000013:                                                                                                  <span class="co">##              changes between Luminary 97 and 98, and 98 and 99. The</span>
+001102,000014:                                                                                                  <span class="co">##              code has been adapted such that the resulting bugger words</span>
+001103,000015:                                                                                                  <span class="co">##              exactly match those specified for Luminary 97 in NASA drawing</span>
+001104,000016:                                                                                                  <span class="co">##              2021152D, which gives relatively high confidence that the</span>
+001105,000017:                                                                                                  <span class="co">##              reconstruction is correct.</span>
+001106,000018:                                                                                                  <span class="co">## Reference:   pp. 28-37</span>
+001107,000019:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+001108,000020:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+001109,000021:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+001110,000022:                                                                                                  <span class="co">## Mod history: 2019-07-28 MAS  Created from Luminary 99.</span>
+001111,000023: 
 </pre>
 </span>
 </p>
@@ -123,51 +126,51 @@ Page 28
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-001109,000023: ???????                                           <span class="ps">COUNT   </span> BANKSUM                               
-001110,000024: 
-001111,000025:                                                                                                  <span class="co">#  MODULE 1 CONTAINS BANKS 0 THROUGH 5</span>
-001112,000026: 
-001113,000027:    4000                                           <span class="ps">BLOCK   </span> 02                                    
-<a name="52414441524646"></a>001114,000028:    4000                        <span class="sm">RADARFF </span>           <span class="ps">EQUALS  </span>                                       
-<a name="464654414731"></a>001115,000029:    4000                        <span class="sm">FFTAG1  </span>           <span class="ps">EQUALS  </span>                                       
-<a name="464654414732"></a>001116,000030:    4000                        <span class="sm">FFTAG2  </span>           <span class="ps">EQUALS  </span>                                       
-<a name="464654414733"></a>001117,000031:    4000                        <span class="sm">FFTAG3  </span>           <span class="ps">EQUALS  </span>                                       
-<a name="464654414734"></a>001118,000032:    4000                        <span class="sm">FFTAG4  </span>           <span class="ps">EQUALS  </span>                                       
-<a name="464654414737"></a>001119,000033:    4000                        <span class="sm">FFTAG7  </span>           <span class="ps">EQUALS  </span>                                       
-<a name="464654414738"></a>001120,000034:    4000                        <span class="sm">FFTAG8  </span>           <span class="ps">EQUALS  </span>                                       
-<a name="464654414739"></a>001121,000035:    4000                        <span class="sm">FFTAG9  </span>           <span class="ps">EQUALS  </span>                                       
-<a name="46465441473130"></a>001122,000036:    4000                        <span class="sm">FFTAG10 </span>           <span class="ps">EQUALS  </span>                                       
-<a name="46465441473131"></a>001123,000037:    4000                        <span class="sm">FFTAG11 </span>           <span class="ps">EQUALS  </span>                                       
-<a name="46465441473132"></a>001124,000038:    4000                        <span class="sm">FFTAG12 </span>           <span class="ps">EQUALS  </span>                                       
-<a name="46465441473133"></a>001125,000039:    4000                        <span class="sm">FFTAG13 </span>           <span class="ps">EQUALS  </span>                                       
-001126,000040:    4000                                           <span class="ps">BNKSUM  </span> 02                                    
-001127,000041: 
-001128,000042:    6000                                           <span class="ps">BLOCK   </span> 03                                    
-<a name="464654414735"></a>001129,000043:    6000                        <span class="sm">FFTAG5  </span>           <span class="ps">EQUALS  </span>                                       
-<a name="464654414736"></a>001130,000044:    6000                        <span class="sm">FFTAG6  </span>           <span class="ps">EQUALS  </span>                                       
-001131,000045:    6000                                           <span class="ps">BNKSUM  </span> 03                                    
-001132,000046: 
-001133,000047: 00,2000                                           <span class="ps">BANK    </span> 00                                    
-<a name="444C41594A4F42"></a>001134,000048: 00,2000                        <span class="sm">DLAYJOB </span>           <span class="ps">EQUALS  </span>                                       
-001135,000049: 00,2000                                           <span class="ps">BNKSUM  </span> 00                                    
-001136,000050: 
-001137,000051: 01,2000                                           <span class="ps">BANK    </span> 01                                    
-<a name="52455354415254"></a>001138,000052: 01,2000                        <span class="sm">RESTART </span>           <span class="ps">EQUALS  </span>                                       
-<a name="4C4F414444415031"></a>001139,000053: 01,2000                        <span class="sm">LOADDAP1</span>           <span class="ps">EQUALS  </span>                                       
-001140,000054: 01,2000                                           <span class="ps">BNKSUM  </span> 01                                    
-001141,000055: 
-001142,000056: 04,2000                                           <span class="ps">BANK    </span> 04                                    
-<a name="523032"></a>001143,000057: 04,2000                        <span class="sm">R02     </span>           <span class="ps">EQUALS  </span>                                       
-<a name="564552423337"></a>001144,000058: 04,2000                        <span class="sm">VERB37  </span>           <span class="ps">EQUALS  </span>                                       
-<a name="50494E42414C4C34"></a>001145,000059: 04,2000                        <span class="sm">PINBALL4</span>           <span class="ps">EQUALS  </span>                                       
-<a name="434F4E49435331"></a>001146,000060: 04,2000                        <span class="sm">CONICS1 </span>           <span class="ps">EQUALS  </span>                                       
-<a name="4B455952555054"></a>001147,000061: 04,2000                        <span class="sm">KEYRUPT </span>           <span class="ps">EQUALS  </span>                                       
-<a name="5233364C4D"></a>001148,000062: 04,2000                        <span class="sm">R36LM   </span>           <span class="ps">EQUALS  </span>                                       
-<a name="55504441544532"></a>001149,000063: 04,2000                        <span class="sm">UPDATE2 </span>           <span class="ps">EQUALS  </span>                                       
-<a name="452F50524F47"></a>001150,000064: 04,2000                        <span class="sm">E/PROG  </span>           <span class="ps">EQUALS  </span>                                       
-<a name="414F544D41524B32"></a>001151,000065: 04,2000                        <span class="sm">AOTMARK2</span>           <span class="ps">EQUALS  </span>                                       
-001152,000066: 04,2000                                           <span class="ps">BNKSUM  </span> 04                                    
-001153,000067: 
+001113,000025: ???????                                           <span class="ps">COUNT   </span> BANKSUM                               
+001114,000026: 
+001115,000027:                                                                                                  <span class="co">#  MODULE 1 CONTAINS BANKS 0 THROUGH 5</span>
+001116,000028: 
+001117,000029:    4000                                           <span class="ps">BLOCK   </span> 02                                    
+<a name="52414441524646"></a>001118,000030:    4000                        <span class="sm">RADARFF </span>           <span class="ps">EQUALS  </span>                                       
+<a name="464654414731"></a>001119,000031:    4000                        <span class="sm">FFTAG1  </span>           <span class="ps">EQUALS  </span>                                       
+<a name="464654414732"></a>001120,000032:    4000                        <span class="sm">FFTAG2  </span>           <span class="ps">EQUALS  </span>                                       
+<a name="464654414733"></a>001121,000033:    4000                        <span class="sm">FFTAG3  </span>           <span class="ps">EQUALS  </span>                                       
+<a name="464654414734"></a>001122,000034:    4000                        <span class="sm">FFTAG4  </span>           <span class="ps">EQUALS  </span>                                       
+<a name="464654414737"></a>001123,000035:    4000                        <span class="sm">FFTAG7  </span>           <span class="ps">EQUALS  </span>                                       
+<a name="464654414738"></a>001124,000036:    4000                        <span class="sm">FFTAG8  </span>           <span class="ps">EQUALS  </span>                                       
+<a name="464654414739"></a>001125,000037:    4000                        <span class="sm">FFTAG9  </span>           <span class="ps">EQUALS  </span>                                       
+<a name="46465441473130"></a>001126,000038:    4000                        <span class="sm">FFTAG10 </span>           <span class="ps">EQUALS  </span>                                       
+<a name="46465441473131"></a>001127,000039:    4000                        <span class="sm">FFTAG11 </span>           <span class="ps">EQUALS  </span>                                       
+<a name="46465441473132"></a>001128,000040:    4000                        <span class="sm">FFTAG12 </span>           <span class="ps">EQUALS  </span>                                       
+<a name="46465441473133"></a>001129,000041:    4000                        <span class="sm">FFTAG13 </span>           <span class="ps">EQUALS  </span>                                       
+001130,000042:    4000                                           <span class="ps">BNKSUM  </span> 02                                    
+001131,000043: 
+001132,000044:    6000                                           <span class="ps">BLOCK   </span> 03                                    
+<a name="464654414735"></a>001133,000045:    6000                        <span class="sm">FFTAG5  </span>           <span class="ps">EQUALS  </span>                                       
+<a name="464654414736"></a>001134,000046:    6000                        <span class="sm">FFTAG6  </span>           <span class="ps">EQUALS  </span>                                       
+001135,000047:    6000                                           <span class="ps">BNKSUM  </span> 03                                    
+001136,000048: 
+001137,000049: 00,2000                                           <span class="ps">BANK    </span> 00                                    
+<a name="444C41594A4F42"></a>001138,000050: 00,2000                        <span class="sm">DLAYJOB </span>           <span class="ps">EQUALS  </span>                                       
+001139,000051: 00,2000                                           <span class="ps">BNKSUM  </span> 00                                    
+001140,000052: 
+001141,000053: 01,2000                                           <span class="ps">BANK    </span> 01                                    
+<a name="52455354415254"></a>001142,000054: 01,2000                        <span class="sm">RESTART </span>           <span class="ps">EQUALS  </span>                                       
+<a name="4C4F414444415031"></a>001143,000055: 01,2000                        <span class="sm">LOADDAP1</span>           <span class="ps">EQUALS  </span>                                       
+001144,000056: 01,2000                                           <span class="ps">BNKSUM  </span> 01                                    
+001145,000057: 
+001146,000058: 04,2000                                           <span class="ps">BANK    </span> 04                                    
+<a name="523032"></a>001147,000059: 04,2000                        <span class="sm">R02     </span>           <span class="ps">EQUALS  </span>                                       
+<a name="564552423337"></a>001148,000060: 04,2000                        <span class="sm">VERB37  </span>           <span class="ps">EQUALS  </span>                                       
+<a name="50494E42414C4C34"></a>001149,000061: 04,2000                        <span class="sm">PINBALL4</span>           <span class="ps">EQUALS  </span>                                       
+<a name="434F4E49435331"></a>001150,000062: 04,2000                        <span class="sm">CONICS1 </span>           <span class="ps">EQUALS  </span>                                       
+<a name="4B455952555054"></a>001151,000063: 04,2000                        <span class="sm">KEYRUPT </span>           <span class="ps">EQUALS  </span>                                       
+<a name="5233364C4D"></a>001152,000064: 04,2000                        <span class="sm">R36LM   </span>           <span class="ps">EQUALS  </span>                                       
+<a name="55504441544532"></a>001153,000065: 04,2000                        <span class="sm">UPDATE2 </span>           <span class="ps">EQUALS  </span>                                       
+<a name="452F50524F47"></a>001154,000066: 04,2000                        <span class="sm">E/PROG  </span>           <span class="ps">EQUALS  </span>                                       
+<a name="414F544D41524B32"></a>001155,000067: 04,2000                        <span class="sm">AOTMARK2</span>           <span class="ps">EQUALS  </span>                                       
+001156,000068: 04,2000                                           <span class="ps">BNKSUM  </span> 04                                    
+001157,000069: 
 </pre>
 </span>
 </p>
@@ -183,47 +186,47 @@ Page 29
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-001155,000069: 05,2000                                           <span class="ps">BANK    </span> 05                                    
-<a name="4652414E44524553"></a>001156,000070: 05,2000                        <span class="sm">FRANDRES</span>           <span class="ps">EQUALS  </span>                                       
-<a name="444F574E54454C4D"></a>001157,000071: 05,2000                        <span class="sm">DOWNTELM</span>           <span class="ps">EQUALS  </span>                                       
-<a name="41424F52545331"></a>001158,000072: 05,2000                        <span class="sm">ABORTS1 </span>           <span class="ps">EQUALS  </span>                                       
-<a name="455048454D31"></a>001159,000073: 05,2000                        <span class="sm">EPHEM1  </span>           <span class="ps">EQUALS  </span>                                       
-<a name="4153454E5433"></a>001160,000074: 05,2000                        <span class="sm">ASENT3  </span>           <span class="ps">EQUALS  </span>                                       
-001161,000075: 05,2000                                           <span class="ps">BNKSUM  </span> 05                                    
-001162,000076: 
-001163,000077:                                                                                                  <span class="co">#  MODULE 2 CONTAINS BANKS 6 THROUGH 13</span>
-001164,000078: 
-001165,000079: 06,2000                                           <span class="ps">BANK    </span> 06                                    
-<a name="494D55434F4D50"></a>001166,000080: 06,2000                        <span class="sm">IMUCOMP </span>           <span class="ps">EQUALS  </span>                                       
-<a name="5434525550"></a>001167,000081: 06,2000                        <span class="sm">T4RUP   </span>           <span class="ps">EQUALS  </span>                                       
-<a name="5243534D4F4E54"></a>001168,000082: 06,2000                        <span class="sm">RCSMONT </span>           <span class="ps">EQUALS  </span>                                       
-<a name="4D49444447494D"></a>001169,000083: 06,2000                        <span class="sm">MIDDGIM </span>           <span class="ps">EQUALS  </span>                                       
-<a name="45415254484C4F43"></a>001170,000084: 06,2000                        <span class="sm">EARTHLOC</span>           <span class="ps">EQUALS  </span>                                       
-001171,000085: 06,2000                                           <span class="ps">BNKSUM  </span> 06                                    
-001172,000086: 
-001173,000087: 07,2000                                           <span class="ps">BANK    </span> 07                                    
-<a name="414F544D41524B31"></a>001174,000088: 07,2000                        <span class="sm">AOTMARK1</span>           <span class="ps">EQUALS  </span>                                       
-<a name="4D4F44455357"></a>001175,000089: 07,2000                        <span class="sm">MODESW  </span>           <span class="ps">EQUALS  </span>                                       
-<a name="4153454E5432"></a>001176,000090: 07,2000                        <span class="sm">ASENT2  </span>           <span class="ps">EQUALS  </span>                                       
-001177,000091: 07,2000                                           <span class="ps">BNKSUM  </span> 07                                    
-001178,000092: 
-001179,000093: 10,2000                                           <span class="ps">BANK    </span> 10                                    
-<a name="525442434F444553"></a>001180,000094: 10,2000                        <span class="sm">RTBCODES</span>           <span class="ps">EQUALS  </span>                                       
-<a name="444953504C415953"></a>001181,000095: 10,2000                        <span class="sm">DISPLAYS</span>           <span class="ps">EQUALS  </span>                                       
-<a name="5048415345544142"></a>001182,000096: 10,2000                        <span class="sm">PHASETAB</span>           <span class="ps">EQUALS  </span>                                       
-<a name="464C4553484C4F43"></a>001183,000097: 10,2000                        <span class="sm">FLESHLOC</span>           <span class="ps">EQUALS  </span>                                       
-<a name="534C43544D55"></a>001184,000098: 10,2000                        <span class="sm">SLCTMU  </span>           <span class="ps">EQUALS  </span>                                       
-001185,000099: 10,2000                                           <span class="ps">BNKSUM  </span> 10                                    
-001186,000100: 
-001187,000101: 11,2000                                           <span class="ps">BANK    </span> 11                                    
-<a name="4F52424954414C"></a>001188,000102: 11,2000                        <span class="sm">ORBITAL </span>           <span class="ps">EQUALS  </span>                                       
-<a name="46324450532A3131"></a>001189,000103: 11,2000                        <span class="sm">F2DPS*11</span>           <span class="ps">EQUALS  </span>                                       
-<a name="494E5456454C"></a>001190,000104: 11,2000                        <span class="sm">INTVEL  </span>           <span class="ps">EQUALS  </span>                                       
-001191,000105: 11,2000                                           <span class="ps">BNKSUM  </span> 11                                    
-001192,000106: 
-001193,000107: 12,2000                                           <span class="ps">BANK    </span> 12                                    
-<a name="434F4E494353"></a>001194,000108: 12,2000                        <span class="sm">CONICS  </span>           <span class="ps">EQUALS  </span>                                       
-<a name="4F52424954414C31"></a>001195,000109: 12,2000                        <span class="sm">ORBITAL1</span>           <span class="ps">EQUALS  </span>                                       
+001159,000071: 05,2000                                           <span class="ps">BANK    </span> 05                                    
+<a name="4652414E44524553"></a>001160,000072: 05,2000                        <span class="sm">FRANDRES</span>           <span class="ps">EQUALS  </span>                                       
+<a name="444F574E54454C4D"></a>001161,000073: 05,2000                        <span class="sm">DOWNTELM</span>           <span class="ps">EQUALS  </span>                                       
+<a name="41424F52545331"></a>001162,000074: 05,2000                        <span class="sm">ABORTS1 </span>           <span class="ps">EQUALS  </span>                                       
+<a name="455048454D31"></a>001163,000075: 05,2000                        <span class="sm">EPHEM1  </span>           <span class="ps">EQUALS  </span>                                       
+<a name="4153454E5433"></a>001164,000076: 05,2000                        <span class="sm">ASENT3  </span>           <span class="ps">EQUALS  </span>                                       
+001165,000077: 05,2000                                           <span class="ps">BNKSUM  </span> 05                                    
+001166,000078: 
+001167,000079:                                                                                                  <span class="co">#  MODULE 2 CONTAINS BANKS 6 THROUGH 13</span>
+001168,000080: 
+001169,000081: 06,2000                                           <span class="ps">BANK    </span> 06                                    
+<a name="494D55434F4D50"></a>001170,000082: 06,2000                        <span class="sm">IMUCOMP </span>           <span class="ps">EQUALS  </span>                                       
+<a name="5434525550"></a>001171,000083: 06,2000                        <span class="sm">T4RUP   </span>           <span class="ps">EQUALS  </span>                                       
+<a name="5243534D4F4E54"></a>001172,000084: 06,2000                        <span class="sm">RCSMONT </span>           <span class="ps">EQUALS  </span>                                       
+<a name="4D49444447494D"></a>001173,000085: 06,2000                        <span class="sm">MIDDGIM </span>           <span class="ps">EQUALS  </span>                                       
+<a name="45415254484C4F43"></a>001174,000086: 06,2000                        <span class="sm">EARTHLOC</span>           <span class="ps">EQUALS  </span>                                       
+001175,000087: 06,2000                                           <span class="ps">BNKSUM  </span> 06                                    
+001176,000088: 
+001177,000089: 07,2000                                           <span class="ps">BANK    </span> 07                                    
+<a name="414F544D41524B31"></a>001178,000090: 07,2000                        <span class="sm">AOTMARK1</span>           <span class="ps">EQUALS  </span>                                       
+<a name="4D4F44455357"></a>001179,000091: 07,2000                        <span class="sm">MODESW  </span>           <span class="ps">EQUALS  </span>                                       
+<a name="4153454E5432"></a>001180,000092: 07,2000                        <span class="sm">ASENT2  </span>           <span class="ps">EQUALS  </span>                                       
+001181,000093: 07,2000                                           <span class="ps">BNKSUM  </span> 07                                    
+001182,000094: 
+001183,000095: 10,2000                                           <span class="ps">BANK    </span> 10                                    
+<a name="525442434F444553"></a>001184,000096: 10,2000                        <span class="sm">RTBCODES</span>           <span class="ps">EQUALS  </span>                                       
+<a name="444953504C415953"></a>001185,000097: 10,2000                        <span class="sm">DISPLAYS</span>           <span class="ps">EQUALS  </span>                                       
+<a name="5048415345544142"></a>001186,000098: 10,2000                        <span class="sm">PHASETAB</span>           <span class="ps">EQUALS  </span>                                       
+<a name="464C4553484C4F43"></a>001187,000099: 10,2000                        <span class="sm">FLESHLOC</span>           <span class="ps">EQUALS  </span>                                       
+<a name="534C43544D55"></a>001188,000100: 10,2000                        <span class="sm">SLCTMU  </span>           <span class="ps">EQUALS  </span>                                       
+001189,000101: 10,2000                                           <span class="ps">BNKSUM  </span> 10                                    
+001190,000102: 
+001191,000103: 11,2000                                           <span class="ps">BANK    </span> 11                                    
+<a name="4F52424954414C"></a>001192,000104: 11,2000                        <span class="sm">ORBITAL </span>           <span class="ps">EQUALS  </span>                                       
+<a name="46324450532A3131"></a>001193,000105: 11,2000                        <span class="sm">F2DPS*11</span>           <span class="ps">EQUALS  </span>                                       
+<a name="494E5456454C"></a>001194,000106: 11,2000                        <span class="sm">INTVEL  </span>           <span class="ps">EQUALS  </span>                                       
+001195,000107: 11,2000                                           <span class="ps">BNKSUM  </span> 11                                    
+001196,000108: 
+001197,000109: 12,2000                                           <span class="ps">BANK    </span> 12                                    
+<a name="434F4E494353"></a>001198,000110: 12,2000                        <span class="sm">CONICS  </span>           <span class="ps">EQUALS  </span>                                       
+<a name="4F52424954414C31"></a>001199,000111: 12,2000                        <span class="sm">ORBITAL1</span>           <span class="ps">EQUALS  </span>                                       
 </pre>
 </span>
 </p>
@@ -239,18 +242,18 @@ Page 30
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="494E545052455432"></a>001197,000111: 12,2000                        <span class="sm">INTPRET2</span>           <span class="ps">EQUALS  </span>                                       
-001198,000112: 12,2000                                           <span class="ps">BNKSUM  </span> 12                                    
-001199,000113: 
-001200,000114: 13,2000                                           <span class="ps">BANK    </span> 13                                    
-<a name="4C41544C4F4E47"></a>001201,000115: 13,2000                        <span class="sm">LATLONG </span>           <span class="ps">EQUALS  </span>                                       
-<a name="494E54494E4954"></a>001202,000116: 13,2000                        <span class="sm">INTINIT </span>           <span class="ps">EQUALS  </span>                                       
-<a name="4C454D47454F4D"></a>001203,000117: 13,2000                        <span class="sm">LEMGEOM </span>           <span class="ps">EQUALS  </span>                                       
-<a name="5037364C4F43"></a>001204,000118: 13,2000                        <span class="sm">P76LOC  </span>           <span class="ps">EQUALS  </span>                                       
-<a name="4F52424954414C32"></a>001205,000119: 13,2000                        <span class="sm">ORBITAL2</span>           <span class="ps">EQUALS  </span>                                       
-<a name="414254464C4753"></a>001206,000120: 13,2000                        <span class="sm">ABTFLGS </span>           <span class="ps">EQUALS  </span>                                       
-001207,000121: 13,2000                                           <span class="ps">BNKSUM  </span> 13                                    
-001208,000122: 
+<a name="494E545052455432"></a>001201,000113: 12,2000                        <span class="sm">INTPRET2</span>           <span class="ps">EQUALS  </span>                                       
+001202,000114: 12,2000                                           <span class="ps">BNKSUM  </span> 12                                    
+001203,000115: 
+001204,000116: 13,2000                                           <span class="ps">BANK    </span> 13                                    
+<a name="4C41544C4F4E47"></a>001205,000117: 13,2000                        <span class="sm">LATLONG </span>           <span class="ps">EQUALS  </span>                                       
+<a name="494E54494E4954"></a>001206,000118: 13,2000                        <span class="sm">INTINIT </span>           <span class="ps">EQUALS  </span>                                       
+<a name="4C454D47454F4D"></a>001207,000119: 13,2000                        <span class="sm">LEMGEOM </span>           <span class="ps">EQUALS  </span>                                       
+<a name="5037364C4F43"></a>001208,000120: 13,2000                        <span class="sm">P76LOC  </span>           <span class="ps">EQUALS  </span>                                       
+<a name="4F52424954414C32"></a>001209,000121: 13,2000                        <span class="sm">ORBITAL2</span>           <span class="ps">EQUALS  </span>                                       
+<a name="414254464C4753"></a>001210,000122: 13,2000                        <span class="sm">ABTFLGS </span>           <span class="ps">EQUALS  </span>                                       
+001211,000123: 13,2000                                           <span class="ps">BNKSUM  </span> 13                                    
+001212,000124: 
 </pre>
 </span>
 </p>
@@ -266,39 +269,39 @@ Page 31
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-001210,000124:                                                                                                  <span class="co">#  MODULE 3 CONTAINS BANKS 14 THROUGH 21</span>
-001211,000125: 
-001212,000126: 14,2000                                           <span class="ps">BANK    </span> 14                                    
-<a name="5035305331"></a>001213,000127: 14,2000                        <span class="sm">P50S1   </span>           <span class="ps">EQUALS  </span>                                       
-<a name="53544152544142"></a>001214,000128: 14,2000                        <span class="sm">STARTAB </span>           <span class="ps">EQUALS  </span>                                       
-<a name="4153454E5434"></a>001215,000129: 14,2000                        <span class="sm">ASENT4  </span>           <span class="ps">EQUALS  </span>                                       
-001216,000130: 14,2000                                           <span class="ps">BNKSUM  </span> 14                                    
-001217,000131: 
-001218,000132: 15,2000                                           <span class="ps">BANK    </span> 15                                    
-<a name="50353053"></a>001219,000133: 15,2000                        <span class="sm">P50S    </span>           <span class="ps">EQUALS  </span>                                       
-<a name="455048454D"></a>001220,000134: 15,2000                        <span class="sm">EPHEM   </span>           <span class="ps">EQUALS  </span>                                       
-001221,000135: 15,2000                                           <span class="ps">BNKSUM  </span> 15                                    
-001222,000136: 
-001223,000137: 16,2000                                           <span class="ps">BANK    </span> 16                                    
-<a name="4441505331"></a>001224,000138: 16,2000                        <span class="sm">DAPS1   </span>           <span class="ps">EQUALS  </span>                                       
-001225,000139: 16,2000                                           <span class="ps">BNKSUM  </span> 16                                    
-001226,000140: 
-001227,000141: 17,2000                                           <span class="ps">BANK    </span> 17                                    
-<a name="4441505332"></a>001228,000142: 17,2000                        <span class="sm">DAPS2   </span>           <span class="ps">EQUALS  </span>                                       
-<a name="5034305333"></a>001229,000143: 17,2000                        <span class="sm">P40S3   </span>           <span class="ps">EQUALS  </span>                                       
-001230,000144: 17,2000                                           <span class="ps">BNKSUM  </span> 17                                    
-001231,000145: 
-001232,000146: 20,2000                                           <span class="ps">BANK    </span> 20                                    
-<a name="4441505333"></a>001233,000147: 20,2000                        <span class="sm">DAPS3   </span>           <span class="ps">EQUALS  </span>                                       
-<a name="4C4F4144444150"></a>001234,000148: 20,2000                        <span class="sm">LOADDAP </span>           <span class="ps">EQUALS  </span>                                       
-<a name="524F4454524150"></a>001235,000149: 20,2000                        <span class="sm">RODTRAP </span>           <span class="ps">EQUALS  </span>                                       
-001236,000150: 20,2000                                           <span class="ps">BNKSUM  </span> 20                                    
-001237,000151: 
-001238,000152: 21,2000                                           <span class="ps">BANK    </span> 21                                    
-<a name="4441505334"></a>001239,000153: 21,2000                        <span class="sm">DAPS4   </span>           <span class="ps">EQUALS  </span>                                       
-<a name="523130"></a>001240,000154: 21,2000                        <span class="sm">R10     </span>           <span class="ps">EQUALS  </span>                                       
-<a name="523131"></a>001241,000155: 21,2000                        <span class="sm">R11     </span>           <span class="ps">EQUALS  </span>                                       
-001242,000156: 21,2000                                           <span class="ps">BNKSUM  </span> 21                                    
+001214,000126:                                                                                                  <span class="co">#  MODULE 3 CONTAINS BANKS 14 THROUGH 21</span>
+001215,000127: 
+001216,000128: 14,2000                                           <span class="ps">BANK    </span> 14                                    
+<a name="5035305331"></a>001217,000129: 14,2000                        <span class="sm">P50S1   </span>           <span class="ps">EQUALS  </span>                                       
+<a name="53544152544142"></a>001218,000130: 14,2000                        <span class="sm">STARTAB </span>           <span class="ps">EQUALS  </span>                                       
+<a name="4153454E5434"></a>001219,000131: 14,2000                        <span class="sm">ASENT4  </span>           <span class="ps">EQUALS  </span>                                       
+001220,000132: 14,2000                                           <span class="ps">BNKSUM  </span> 14                                    
+001221,000133: 
+001222,000134: 15,2000                                           <span class="ps">BANK    </span> 15                                    
+<a name="50353053"></a>001223,000135: 15,2000                        <span class="sm">P50S    </span>           <span class="ps">EQUALS  </span>                                       
+<a name="455048454D"></a>001224,000136: 15,2000                        <span class="sm">EPHEM   </span>           <span class="ps">EQUALS  </span>                                       
+001225,000137: 15,2000                                           <span class="ps">BNKSUM  </span> 15                                    
+001226,000138: 
+001227,000139: 16,2000                                           <span class="ps">BANK    </span> 16                                    
+<a name="4441505331"></a>001228,000140: 16,2000                        <span class="sm">DAPS1   </span>           <span class="ps">EQUALS  </span>                                       
+001229,000141: 16,2000                                           <span class="ps">BNKSUM  </span> 16                                    
+001230,000142: 
+001231,000143: 17,2000                                           <span class="ps">BANK    </span> 17                                    
+<a name="4441505332"></a>001232,000144: 17,2000                        <span class="sm">DAPS2   </span>           <span class="ps">EQUALS  </span>                                       
+<a name="5034305333"></a>001233,000145: 17,2000                        <span class="sm">P40S3   </span>           <span class="ps">EQUALS  </span>                                       
+001234,000146: 17,2000                                           <span class="ps">BNKSUM  </span> 17                                    
+001235,000147: 
+001236,000148: 20,2000                                           <span class="ps">BANK    </span> 20                                    
+<a name="4441505333"></a>001237,000149: 20,2000                        <span class="sm">DAPS3   </span>           <span class="ps">EQUALS  </span>                                       
+<a name="4C4F4144444150"></a>001238,000150: 20,2000                        <span class="sm">LOADDAP </span>           <span class="ps">EQUALS  </span>                                       
+<a name="524F4454524150"></a>001239,000151: 20,2000                        <span class="sm">RODTRAP </span>           <span class="ps">EQUALS  </span>                                       
+001240,000152: 20,2000                                           <span class="ps">BNKSUM  </span> 20                                    
+001241,000153: 
+001242,000154: 21,2000                                           <span class="ps">BANK    </span> 21                                    
+<a name="4441505334"></a>001243,000155: 21,2000                        <span class="sm">DAPS4   </span>           <span class="ps">EQUALS  </span>                                       
+<a name="523130"></a>001244,000156: 21,2000                        <span class="sm">R10     </span>           <span class="ps">EQUALS  </span>                                       
+<a name="523131"></a>001245,000157: 21,2000                        <span class="sm">R11     </span>           <span class="ps">EQUALS  </span>                                       
+001246,000158: 21,2000                                           <span class="ps">BNKSUM  </span> 21                                    
 </pre>
 </span>
 </p>
@@ -314,49 +317,49 @@ Page 32
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-001244,000158: 
-001245,000159:                                                                                                  <span class="co">#  MODULE 4 CONTAINS BANKS 22 THROUGH 27</span>
-001246,000160: 
-001247,000161: 22,2000                                           <span class="ps">BANK    </span> 22                                    
-<a name="4B414C434D4F4E31"></a>001248,000162: 22,2000                        <span class="sm">KALCMON1</span>           <span class="ps">EQUALS  </span>                                       
-<a name="4B414C434D4F4E32"></a>001249,000163: 22,2000                        <span class="sm">KALCMON2</span>           <span class="ps">EQUALS  </span>                                       
-<a name="5233304C4F43"></a>001250,000164: 22,2000                        <span class="sm">R30LOC  </span>           <span class="ps">EQUALS  </span>                                       
-<a name="52454E44455A"></a>001251,000165: 22,2000                        <span class="sm">RENDEZ  </span>           <span class="ps">EQUALS  </span>                                       
-<a name="5345525632"></a>001252,000166: 22,2000                        <span class="sm">SERV2   </span>           <span class="ps">EQUALS  </span>                                       
-<a name="4C414E44434E5354"></a>001253,000167: 22,2000                        <span class="sm">LANDCNST</span>           <span class="ps">EQUALS  </span>                                       
-001254,000168: 22,2000                                           <span class="ps">BNKSUM  </span> 22                                    
-001255,000169: 
-001256,000170: 23,2000                                           <span class="ps">BANK    </span> 23                                    
-<a name="504F57464C495445"></a>001257,000171: 23,2000                        <span class="sm">POWFLITE</span>           <span class="ps">EQUALS  </span>                                       
-<a name="504F57464C495431"></a>001258,000172: 23,2000                        <span class="sm">POWFLIT1</span>           <span class="ps">EQUALS  </span>                                       
-<a name="494E464C49474854"></a>001259,000173: 23,2000                        <span class="sm">INFLIGHT</span>           <span class="ps">EQUALS  </span>                                       
-<a name="41504F50455249"></a>001260,000174: 23,2000                        <span class="sm">APOPERI </span>           <span class="ps">EQUALS  </span>                                       
-<a name="523631"></a>001261,000175: 23,2000                        <span class="sm">R61     </span>           <span class="ps">EQUALS  </span>                                       
-<a name="523632"></a>001262,000176: 23,2000                        <span class="sm">R62     </span>           <span class="ps">EQUALS  </span>                                       
-<a name="494E545052455431"></a>001263,000177: 23,2000                        <span class="sm">INTPRET1</span>           <span class="ps">EQUALS  </span>                                       
-<a name="4D454153494E43"></a>001264,000178: 23,2000                        <span class="sm">MEASINC </span>           <span class="ps">EQUALS  </span>                                       
-<a name="4D454153494E4331"></a>001265,000179: 23,2000                        <span class="sm">MEASINC1</span>           <span class="ps">EQUALS  </span>                                       
-<a name="455854564231"></a>001266,000180: 23,2000                        <span class="sm">EXTVB1  </span>           <span class="ps">EQUALS  </span>                                       
-<a name="50313241"></a>001267,000181: 23,2000                        <span class="sm">P12A    </span>           <span class="ps">EQUALS  </span>                                       
-<a name="4E4F524D4C495A"></a>001268,000182: 23,2000                        <span class="sm">NORMLIZ </span>           <span class="ps">EQUALS  </span>                                       
-<a name="4153454E5437"></a>001269,000183: 23,2000                        <span class="sm">ASENT7  </span>           <span class="ps">EQUALS  </span>                                       
-001270,000184: 23,2000                                           <span class="ps">BNKSUM  </span> 23                                    
-001271,000185: 
-001272,000186: 24,2000                                           <span class="ps">BANK    </span> 24                                    
-<a name="504C414E54494E"></a>001273,000187: 24,2000                        <span class="sm">PLANTIN </span>           <span class="ps">EQUALS  </span>                                       
-<a name="50323053"></a>001274,000188: 24,2000                        <span class="sm">P20S    </span>           <span class="ps">EQUALS  </span>                                       
-001275,000189: 24,2000                                           <span class="ps">BNKSUM  </span> 24                                    
-001276,000190: 
-001277,000191: 25,2000                                           <span class="ps">BANK    </span> 25                                    
-<a name="5032305331"></a>001278,000192: 25,2000                        <span class="sm">P20S1   </span>           <span class="ps">EQUALS  </span>                                       
-<a name="5032305332"></a>001279,000193: 25,2000                        <span class="sm">P20S2   </span>           <span class="ps">EQUALS  </span>                                       
-<a name="5241444152555054"></a>001280,000194: 25,2000                        <span class="sm">RADARUPT</span>           <span class="ps">EQUALS  </span>                                       
-<a name="52524C454144494E"></a>001281,000195: 25,2000                        <span class="sm">RRLEADIN</span>           <span class="ps">EQUALS  </span>                                       
-<a name="5232395331"></a>001282,000196: 25,2000                        <span class="sm">R29S1   </span>           <span class="ps">EQUALS  </span>                                       
-<a name="504C414E54494E33"></a>001283,000197: 25,2000                        <span class="sm">PLANTIN3</span>           <span class="ps">EQUALS  </span>                                       
-001284,000198: 25,2000                                           <span class="ps">BNKSUM  </span> 25                                    
-001285,000199: 
-001286,000200: 26,2000                                           <span class="ps">BANK    </span> 26                                    
+001248,000160: 
+001249,000161:                                                                                                  <span class="co">#  MODULE 4 CONTAINS BANKS 22 THROUGH 27</span>
+001250,000162: 
+001251,000163: 22,2000                                           <span class="ps">BANK    </span> 22                                    
+<a name="4B414C434D4F4E31"></a>001252,000164: 22,2000                        <span class="sm">KALCMON1</span>           <span class="ps">EQUALS  </span>                                       
+<a name="4B414C434D4F4E32"></a>001253,000165: 22,2000                        <span class="sm">KALCMON2</span>           <span class="ps">EQUALS  </span>                                       
+<a name="5233304C4F43"></a>001254,000166: 22,2000                        <span class="sm">R30LOC  </span>           <span class="ps">EQUALS  </span>                                       
+<a name="52454E44455A"></a>001255,000167: 22,2000                        <span class="sm">RENDEZ  </span>           <span class="ps">EQUALS  </span>                                       
+<a name="5345525632"></a>001256,000168: 22,2000                        <span class="sm">SERV2   </span>           <span class="ps">EQUALS  </span>                                       
+<a name="4C414E44434E5354"></a>001257,000169: 22,2000                        <span class="sm">LANDCNST</span>           <span class="ps">EQUALS  </span>                                       
+001258,000170: 22,2000                                           <span class="ps">BNKSUM  </span> 22                                    
+001259,000171: 
+001260,000172: 23,2000                                           <span class="ps">BANK    </span> 23                                    
+<a name="504F57464C495445"></a>001261,000173: 23,2000                        <span class="sm">POWFLITE</span>           <span class="ps">EQUALS  </span>                                       
+<a name="504F57464C495431"></a>001262,000174: 23,2000                        <span class="sm">POWFLIT1</span>           <span class="ps">EQUALS  </span>                                       
+<a name="494E464C49474854"></a>001263,000175: 23,2000                        <span class="sm">INFLIGHT</span>           <span class="ps">EQUALS  </span>                                       
+<a name="41504F50455249"></a>001264,000176: 23,2000                        <span class="sm">APOPERI </span>           <span class="ps">EQUALS  </span>                                       
+<a name="523631"></a>001265,000177: 23,2000                        <span class="sm">R61     </span>           <span class="ps">EQUALS  </span>                                       
+<a name="523632"></a>001266,000178: 23,2000                        <span class="sm">R62     </span>           <span class="ps">EQUALS  </span>                                       
+<a name="494E545052455431"></a>001267,000179: 23,2000                        <span class="sm">INTPRET1</span>           <span class="ps">EQUALS  </span>                                       
+<a name="4D454153494E43"></a>001268,000180: 23,2000                        <span class="sm">MEASINC </span>           <span class="ps">EQUALS  </span>                                       
+<a name="4D454153494E4331"></a>001269,000181: 23,2000                        <span class="sm">MEASINC1</span>           <span class="ps">EQUALS  </span>                                       
+<a name="455854564231"></a>001270,000182: 23,2000                        <span class="sm">EXTVB1  </span>           <span class="ps">EQUALS  </span>                                       
+<a name="50313241"></a>001271,000183: 23,2000                        <span class="sm">P12A    </span>           <span class="ps">EQUALS  </span>                                       
+<a name="4E4F524D4C495A"></a>001272,000184: 23,2000                        <span class="sm">NORMLIZ </span>           <span class="ps">EQUALS  </span>                                       
+<a name="4153454E5437"></a>001273,000185: 23,2000                        <span class="sm">ASENT7  </span>           <span class="ps">EQUALS  </span>                                       
+001274,000186: 23,2000                                           <span class="ps">BNKSUM  </span> 23                                    
+001275,000187: 
+001276,000188: 24,2000                                           <span class="ps">BANK    </span> 24                                    
+<a name="504C414E54494E"></a>001277,000189: 24,2000                        <span class="sm">PLANTIN </span>           <span class="ps">EQUALS  </span>                                       
+<a name="50323053"></a>001278,000190: 24,2000                        <span class="sm">P20S    </span>           <span class="ps">EQUALS  </span>                                       
+001279,000191: 24,2000                                           <span class="ps">BNKSUM  </span> 24                                    
+001280,000192: 
+001281,000193: 25,2000                                           <span class="ps">BANK    </span> 25                                    
+<a name="5032305331"></a>001282,000194: 25,2000                        <span class="sm">P20S1   </span>           <span class="ps">EQUALS  </span>                                       
+<a name="5032305332"></a>001283,000195: 25,2000                        <span class="sm">P20S2   </span>           <span class="ps">EQUALS  </span>                                       
+<a name="5241444152555054"></a>001284,000196: 25,2000                        <span class="sm">RADARUPT</span>           <span class="ps">EQUALS  </span>                                       
+<a name="52524C454144494E"></a>001285,000197: 25,2000                        <span class="sm">RRLEADIN</span>           <span class="ps">EQUALS  </span>                                       
+<a name="5232395331"></a>001286,000198: 25,2000                        <span class="sm">R29S1   </span>           <span class="ps">EQUALS  </span>                                       
+<a name="504C414E54494E33"></a>001287,000199: 25,2000                        <span class="sm">PLANTIN3</span>           <span class="ps">EQUALS  </span>                                       
+001288,000200: 25,2000                                           <span class="ps">BNKSUM  </span> 25                                    
+001289,000201: 
+001290,000202: 26,2000                                           <span class="ps">BANK    </span> 26                                    
 </pre>
 </span>
 </p>
@@ -372,23 +375,23 @@ Page 33
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="5032305333"></a>001288,000202: 26,2000                        <span class="sm">P20S3   </span>           <span class="ps">EQUALS  </span>                                       
-<a name="4241574C414E4753"></a>001289,000203: 26,2000                        <span class="sm">BAWLANGS</span>           <span class="ps">EQUALS  </span>                                       
-<a name="4D414E55564552"></a>001290,000204: 26,2000                        <span class="sm">MANUVER </span>           <span class="ps">EQUALS  </span>                                       
-<a name="4D414E5556455231"></a>001291,000205: 26,2000                        <span class="sm">MANUVER1</span>           <span class="ps">EQUALS  </span>                                       
-<a name="504C414E54494E31"></a>001292,000206: 26,2000                        <span class="sm">PLANTIN1</span>           <span class="ps">EQUALS  </span>                                       
-<a name="504C414E54494E32"></a>001293,000207: 26,2000                        <span class="sm">PLANTIN2</span>           <span class="ps">EQUALS  </span>                                       
-001294,000208: 26,2000                                           <span class="ps">BNKSUM  </span> 26                                    
-001295,000209: 
-001296,000210: 27,2000                                           <span class="ps">BANK    </span> 27                                    
-<a name="544F462D4646"></a>001297,000211: 27,2000                        <span class="sm">TOF-FF  </span>           <span class="ps">EQUALS  </span>                                       
-<a name="544F462D464631"></a>001298,000212: 27,2000                        <span class="sm">TOF-FF1 </span>           <span class="ps">EQUALS  </span>                                       
-<a name="5034305331"></a>001299,000213: 27,2000                        <span class="sm">P40S1   </span>           <span class="ps">EQUALS  </span>                                       
-<a name="5645435054"></a>001300,000214: 27,2000                        <span class="sm">VECPT   </span>           <span class="ps">EQUALS  </span>                                       
-<a name="4153454E5431"></a>001301,000215: 27,2000                        <span class="sm">ASENT1  </span>           <span class="ps">EQUALS  </span>                                       
-<a name="5345525633"></a>001302,000216: 27,2000                        <span class="sm">SERV3   </span>           <span class="ps">EQUALS  </span>                                       
-001303,000217: 27,2000                                           <span class="ps">BNKSUM  </span> 27                                    
-001304,000218: 
+<a name="5032305333"></a>001292,000204: 26,2000                        <span class="sm">P20S3   </span>           <span class="ps">EQUALS  </span>                                       
+<a name="4241574C414E4753"></a>001293,000205: 26,2000                        <span class="sm">BAWLANGS</span>           <span class="ps">EQUALS  </span>                                       
+<a name="4D414E55564552"></a>001294,000206: 26,2000                        <span class="sm">MANUVER </span>           <span class="ps">EQUALS  </span>                                       
+<a name="4D414E5556455231"></a>001295,000207: 26,2000                        <span class="sm">MANUVER1</span>           <span class="ps">EQUALS  </span>                                       
+<a name="504C414E54494E31"></a>001296,000208: 26,2000                        <span class="sm">PLANTIN1</span>           <span class="ps">EQUALS  </span>                                       
+<a name="504C414E54494E32"></a>001297,000209: 26,2000                        <span class="sm">PLANTIN2</span>           <span class="ps">EQUALS  </span>                                       
+001298,000210: 26,2000                                           <span class="ps">BNKSUM  </span> 26                                    
+001299,000211: 
+001300,000212: 27,2000                                           <span class="ps">BANK    </span> 27                                    
+<a name="544F462D4646"></a>001301,000213: 27,2000                        <span class="sm">TOF-FF  </span>           <span class="ps">EQUALS  </span>                                       
+<a name="544F462D464631"></a>001302,000214: 27,2000                        <span class="sm">TOF-FF1 </span>           <span class="ps">EQUALS  </span>                                       
+<a name="5034305331"></a>001303,000215: 27,2000                        <span class="sm">P40S1   </span>           <span class="ps">EQUALS  </span>                                       
+<a name="5645435054"></a>001304,000216: 27,2000                        <span class="sm">VECPT   </span>           <span class="ps">EQUALS  </span>                                       
+<a name="4153454E5431"></a>001305,000217: 27,2000                        <span class="sm">ASENT1  </span>           <span class="ps">EQUALS  </span>                                       
+<a name="5345525633"></a>001306,000218: 27,2000                        <span class="sm">SERV3   </span>           <span class="ps">EQUALS  </span>                                       
+001307,000219: 27,2000                                           <span class="ps">BNKSUM  </span> 27                                    
+001308,000220: 
 </pre>
 </span>
 </p>
@@ -404,49 +407,49 @@ Page 34
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-001306,000220:                                                                                                  <span class="co">#  MODULE 5 CONTAINS BANKS 30 THROUGH 35</span>
-001307,000221: 
-001308,000222: 30,2000                                           <span class="ps">BANK    </span> 30                                    
-<a name="4C4F575355504552"></a>001309,000223: 30,2000                        <span class="sm">LOWSUPER</span>           <span class="ps">EQUALS  </span>                                       
-<a name="503132"></a>001310,000224: 30,2000                        <span class="sm">P12     </span>           <span class="ps">EQUALS  </span>                                       
-<a name="4153454E54"></a>001311,000225: 30,2000                        <span class="sm">ASENT   </span>           <span class="ps">EQUALS  </span>                                       
-<a name="4643445557"></a>001312,000226: 30,2000                        <span class="sm">FCDUW   </span>           <span class="ps">EQUALS  </span>                                       
-<a name="464C4F47535542"></a>001313,000227: 30,2000                        <span class="sm">FLOGSUB </span>           <span class="ps">EQUALS  </span>                                       
-<a name="5642363741"></a>001314,000228: 30,2000                        <span class="sm">VB67A   </span>           <span class="ps">EQUALS  </span>                                       
-<a name="4153454E5435"></a>001315,000229: 30,2000                        <span class="sm">ASENT5  </span>           <span class="ps">EQUALS  </span>                                       
-001316,000230: 30,2000                                           <span class="ps">BNKSUM  </span> 30                                    
-001317,000231: 
-001318,000232: 31,2000                                           <span class="ps">BANK    </span> 31                                    
-<a name="465448524F54"></a>001319,000233: 31,2000                        <span class="sm">FTHROT  </span>           <span class="ps">EQUALS  </span>                                       
-<a name="46324450532A3331"></a>001320,000234: 31,2000                        <span class="sm">F2DPS*31</span>           <span class="ps">EQUALS  </span>                                       
-<a name="56423637"></a>001321,000235: 31,2000                        <span class="sm">VB67    </span>           <span class="ps">EQUALS  </span>                                       
-001322,000236: 31,2000                                           <span class="ps">BNKSUM  </span> 31                                    
-001323,000237: 
-001324,000238: 32,2000                                           <span class="ps">BANK    </span> 32                                    
-<a name="5032305334"></a>001325,000239: 32,2000                        <span class="sm">P20S4   </span>           <span class="ps">EQUALS  </span>                                       
-<a name="46324450532A3332"></a>001326,000240: 32,2000                        <span class="sm">F2DPS*32</span>           <span class="ps">EQUALS  </span>                                       
-<a name="41424F525453"></a>001327,000241: 32,2000                        <span class="sm">ABORTS  </span>           <span class="ps">EQUALS  </span>                                       
-<a name="4C52533232"></a>001328,000242: 32,2000                        <span class="sm">LRS22   </span>           <span class="ps">EQUALS  </span>                                       
-<a name="5036364C4F43"></a>001329,000243: 32,2000                        <span class="sm">P66LOC  </span>           <span class="ps">EQUALS  </span>                                       
-<a name="523437"></a>001330,000244: 32,2000                        <span class="sm">R47     </span>           <span class="ps">EQUALS  </span>                                       
-<a name="53455256"></a>001331,000245: 32,2000                        <span class="sm">SERV    </span>           <span class="ps">EQUALS  </span>                                       
-001332,000246: 32,2000                                           <span class="ps">BNKSUM  </span> 32                                    
-001333,000247: 
-001334,000248: 33,2000                                           <span class="ps">BANK    </span> 33                                    
-<a name="5345525649434553"></a>001335,000249: 33,2000                        <span class="sm">SERVICES</span>           <span class="ps">EQUALS  </span>                                       
-<a name="5232392F53455256"></a>001336,000250: 33,2000                        <span class="sm">R29/SERV</span>           <span class="ps">EQUALS  </span>                                       
-<a name="4153454E5436"></a>001337,000251: 33,2000                        <span class="sm">ASENT6  </span>           <span class="ps">EQUALS  </span>                                       
-001338,000252: 33,2000                                           <span class="ps">BNKSUM  </span> 33                                    
-001339,000253: 
-001340,000254: 34,2000                                           <span class="ps">BANK    </span> 34                                    
-<a name="5354424C454F5242"></a>001341,000255: 34,2000                        <span class="sm">STBLEORB</span>           <span class="ps">EQUALS  </span>                                       
-<a name="5033305331"></a>001342,000256: 34,2000                        <span class="sm">P30S1   </span>           <span class="ps">EQUALS  </span>                                       
-<a name="4353492F43444831"></a>001343,000257: 34,2000                        <span class="sm">CSI/CDH1</span>           <span class="ps">EQUALS  </span>                                       
-<a name="41534346494C54"></a>001344,000258: 34,2000                        <span class="sm">ASCFILT </span>           <span class="ps">EQUALS  </span>                                       
-<a name="5231325354554646"></a>001345,000259: 34,2000                        <span class="sm">R12STUFF</span>           <span class="ps">EQUALS  </span>                                       
-<a name="5345525634"></a>001346,000260: 34,2000                        <span class="sm">SERV4   </span>           <span class="ps">EQUALS  </span>                                       
-001347,000261: 34,2000                                           <span class="ps">BNKSUM  </span> 34                                    
-001348,000262: 
+001310,000222:                                                                                                  <span class="co">#  MODULE 5 CONTAINS BANKS 30 THROUGH 35</span>
+001311,000223: 
+001312,000224: 30,2000                                           <span class="ps">BANK    </span> 30                                    
+<a name="4C4F575355504552"></a>001313,000225: 30,2000                        <span class="sm">LOWSUPER</span>           <span class="ps">EQUALS  </span>                                       
+<a name="503132"></a>001314,000226: 30,2000                        <span class="sm">P12     </span>           <span class="ps">EQUALS  </span>                                       
+<a name="4153454E54"></a>001315,000227: 30,2000                        <span class="sm">ASENT   </span>           <span class="ps">EQUALS  </span>                                       
+<a name="4643445557"></a>001316,000228: 30,2000                        <span class="sm">FCDUW   </span>           <span class="ps">EQUALS  </span>                                       
+<a name="464C4F47535542"></a>001317,000229: 30,2000                        <span class="sm">FLOGSUB </span>           <span class="ps">EQUALS  </span>                                       
+<a name="5642363741"></a>001318,000230: 30,2000                        <span class="sm">VB67A   </span>           <span class="ps">EQUALS  </span>                                       
+<a name="4153454E5435"></a>001319,000231: 30,2000                        <span class="sm">ASENT5  </span>           <span class="ps">EQUALS  </span>                                       
+001320,000232: 30,2000                                           <span class="ps">BNKSUM  </span> 30                                    
+001321,000233: 
+001322,000234: 31,2000                                           <span class="ps">BANK    </span> 31                                    
+<a name="465448524F54"></a>001323,000235: 31,2000                        <span class="sm">FTHROT  </span>           <span class="ps">EQUALS  </span>                                       
+<a name="46324450532A3331"></a>001324,000236: 31,2000                        <span class="sm">F2DPS*31</span>           <span class="ps">EQUALS  </span>                                       
+<a name="56423637"></a>001325,000237: 31,2000                        <span class="sm">VB67    </span>           <span class="ps">EQUALS  </span>                                       
+001326,000238: 31,2000                                           <span class="ps">BNKSUM  </span> 31                                    
+001327,000239: 
+001328,000240: 32,2000                                           <span class="ps">BANK    </span> 32                                    
+<a name="5032305334"></a>001329,000241: 32,2000                        <span class="sm">P20S4   </span>           <span class="ps">EQUALS  </span>                                       
+<a name="46324450532A3332"></a>001330,000242: 32,2000                        <span class="sm">F2DPS*32</span>           <span class="ps">EQUALS  </span>                                       
+<a name="41424F525453"></a>001331,000243: 32,2000                        <span class="sm">ABORTS  </span>           <span class="ps">EQUALS  </span>                                       
+<a name="4C52533232"></a>001332,000244: 32,2000                        <span class="sm">LRS22   </span>           <span class="ps">EQUALS  </span>                                       
+<a name="5036364C4F43"></a>001333,000245: 32,2000                        <span class="sm">P66LOC  </span>           <span class="ps">EQUALS  </span>                                       
+<a name="523437"></a>001334,000246: 32,2000                        <span class="sm">R47     </span>           <span class="ps">EQUALS  </span>                                       
+<a name="53455256"></a>001335,000247: 32,2000                        <span class="sm">SERV    </span>           <span class="ps">EQUALS  </span>                                       
+001336,000248: 32,2000                                           <span class="ps">BNKSUM  </span> 32                                    
+001337,000249: 
+001338,000250: 33,2000                                           <span class="ps">BANK    </span> 33                                    
+<a name="5345525649434553"></a>001339,000251: 33,2000                        <span class="sm">SERVICES</span>           <span class="ps">EQUALS  </span>                                       
+<a name="5232392F53455256"></a>001340,000252: 33,2000                        <span class="sm">R29/SERV</span>           <span class="ps">EQUALS  </span>                                       
+<a name="4153454E5436"></a>001341,000253: 33,2000                        <span class="sm">ASENT6  </span>           <span class="ps">EQUALS  </span>                                       
+001342,000254: 33,2000                                           <span class="ps">BNKSUM  </span> 33                                    
+001343,000255: 
+001344,000256: 34,2000                                           <span class="ps">BANK    </span> 34                                    
+<a name="5354424C454F5242"></a>001345,000257: 34,2000                        <span class="sm">STBLEORB</span>           <span class="ps">EQUALS  </span>                                       
+<a name="5033305331"></a>001346,000258: 34,2000                        <span class="sm">P30S1   </span>           <span class="ps">EQUALS  </span>                                       
+<a name="4353492F43444831"></a>001347,000259: 34,2000                        <span class="sm">CSI/CDH1</span>           <span class="ps">EQUALS  </span>                                       
+<a name="41534346494C54"></a>001348,000260: 34,2000                        <span class="sm">ASCFILT </span>           <span class="ps">EQUALS  </span>                                       
+<a name="5231325354554646"></a>001349,000261: 34,2000                        <span class="sm">R12STUFF</span>           <span class="ps">EQUALS  </span>                                       
+<a name="5345525634"></a>001350,000262: 34,2000                        <span class="sm">SERV4   </span>           <span class="ps">EQUALS  </span>                                       
+001351,000263: 34,2000                                           <span class="ps">BNKSUM  </span> 34                                    
+001352,000264: 
 </pre>
 </span>
 </p>
@@ -462,13 +465,13 @@ Page 35
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-001350,000264: 35,2000                                           <span class="ps">BANK    </span> 35                                    
-<a name="4353492F434448"></a>001351,000265: 35,2000                        <span class="sm">CSI/CDH </span>           <span class="ps">EQUALS  </span>                                       
-<a name="50333053"></a>001352,000266: 35,2000                        <span class="sm">P30S    </span>           <span class="ps">EQUALS  </span>                                       
-<a name="474C4D"></a>001353,000267: 35,2000                        <span class="sm">GLM     </span>           <span class="ps">EQUALS  </span>                                       
-<a name="5034305332"></a>001354,000268: 35,2000                        <span class="sm">P40S2   </span>           <span class="ps">EQUALS  </span>                                       
-001355,000269: 35,2000                                           <span class="ps">BNKSUM  </span> 35                                    
-001356,000270: 
+001354,000266: 35,2000                                           <span class="ps">BANK    </span> 35                                    
+<a name="4353492F434448"></a>001355,000267: 35,2000                        <span class="sm">CSI/CDH </span>           <span class="ps">EQUALS  </span>                                       
+<a name="50333053"></a>001356,000268: 35,2000                        <span class="sm">P30S    </span>           <span class="ps">EQUALS  </span>                                       
+<a name="474C4D"></a>001357,000269: 35,2000                        <span class="sm">GLM     </span>           <span class="ps">EQUALS  </span>                                       
+<a name="5034305332"></a>001358,000270: 35,2000                        <span class="sm">P40S2   </span>           <span class="ps">EQUALS  </span>                                       
+001359,000271: 35,2000                                           <span class="ps">BNKSUM  </span> 35                                    
+001360,000272: 
 </pre>
 </span>
 </p>
@@ -484,42 +487,42 @@ Page 36
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-001358,000272:                                                                                                  <span class="co">#  MODULE 6 CONTAINS BANKS 36 THROUGH 43</span>
-001359,000273: 
-001360,000274: 36,2000                                           <span class="ps">BANK    </span> 36                                    
-<a name="50343053"></a>001361,000275: 36,2000                        <span class="sm">P40S    </span>           <span class="ps">EQUALS  </span>                                       
-001362,000276: 36,2000                                           <span class="ps">BNKSUM  </span> 36                                    
-001363,000277: 
-001364,000278: 37,2000                                           <span class="ps">BANK    </span> 37                                    
-<a name="503035503036"></a>001365,000279: 37,2000                        <span class="sm">P05P06  </span>           <span class="ps">EQUALS  </span>                                       
-<a name="494D5532"></a>001366,000280: 37,2000                        <span class="sm">IMU2    </span>           <span class="ps">EQUALS  </span>                                       
-<a name="494D5534"></a>001367,000281: 37,2000                        <span class="sm">IMU4    </span>           <span class="ps">EQUALS  </span>                                       
-<a name="523331"></a>001368,000282: 37,2000                        <span class="sm">R31     </span>           <span class="ps">EQUALS  </span>                                       
-<a name="494D555355504552"></a>001369,000283: 37,2000                        <span class="sm">IMUSUPER</span>           <span class="ps">EQUALS  </span>                                       
-<a name="5345525631"></a>001370,000284: 37,2000                        <span class="sm">SERV1   </span>           <span class="ps">EQUALS  </span>                                       
-001371,000285: 37,2000                                           <span class="ps">BNKSUM  </span> 37                                    
-001372,000286: 
-001373,000287: 40,2000                                           <span class="ps">BANK    </span> 40                                    
-<a name="50494E42414C4C31"></a>001374,000288: 40,2000                        <span class="sm">PINBALL1</span>           <span class="ps">EQUALS  </span>                                       
-<a name="53454C4653555052"></a>001375,000289: 40,2000                        <span class="sm">SELFSUPR</span>           <span class="ps">EQUALS  </span>                                       
-<a name="50494E5355504552"></a>001376,000290: 40,2000                        <span class="sm">PINSUPER</span>           <span class="ps">EQUALS  </span>                                       
-<a name="5233314C4F43"></a>001377,000291: 40,2000                        <span class="sm">R31LOC  </span>           <span class="ps">EQUALS  </span>                                       
-001378,000292: 40,2000                                           <span class="ps">BNKSUM  </span> 40                                    
-001379,000293: 
-001380,000294: 41,2000                                           <span class="ps">BANK    </span> 41                                    
-<a name="50494E42414C4C32"></a>001381,000295: 41,2000                        <span class="sm">PINBALL2</span>           <span class="ps">EQUALS  </span>                                       
-001382,000296: 41,2000                                           <span class="ps">BNKSUM  </span> 41                                    
-001383,000297: 
-001384,000298: 42,2000                                           <span class="ps">BANK    </span> 42                                    
-<a name="5342414E44"></a>001385,000299: 42,2000                        <span class="sm">SBAND   </span>           <span class="ps">EQUALS  </span>                                       
-<a name="50494E42414C4C33"></a>001386,000300: 42,2000                        <span class="sm">PINBALL3</span>           <span class="ps">EQUALS  </span>                                       
-001387,000301: 42,2000                                           <span class="ps">BNKSUM  </span> 42                                    
-001388,000302: 
-001389,000303: 43,2000                                           <span class="ps">BANK    </span> 43                                    
-<a name="4558545645524253"></a>001390,000304: 43,2000                        <span class="sm">EXTVERBS</span>           <span class="ps">EQUALS  </span>                                       
-<a name="53454C4643484543"></a>001391,000305: 43,2000                        <span class="sm">SELFCHEC</span>           <span class="ps">EQUALS  </span>                                       
-001392,000306: 43,2000                                           <span class="ps">BNKSUM  </span> 43                                    
-001393,000307: 
+001362,000274:                                                                                                  <span class="co">#  MODULE 6 CONTAINS BANKS 36 THROUGH 43</span>
+001363,000275: 
+001364,000276: 36,2000                                           <span class="ps">BANK    </span> 36                                    
+<a name="50343053"></a>001365,000277: 36,2000                        <span class="sm">P40S    </span>           <span class="ps">EQUALS  </span>                                       
+001366,000278: 36,2000                                           <span class="ps">BNKSUM  </span> 36                                    
+001367,000279: 
+001368,000280: 37,2000                                           <span class="ps">BANK    </span> 37                                    
+<a name="503035503036"></a>001369,000281: 37,2000                        <span class="sm">P05P06  </span>           <span class="ps">EQUALS  </span>                                       
+<a name="494D5532"></a>001370,000282: 37,2000                        <span class="sm">IMU2    </span>           <span class="ps">EQUALS  </span>                                       
+<a name="494D5534"></a>001371,000283: 37,2000                        <span class="sm">IMU4    </span>           <span class="ps">EQUALS  </span>                                       
+<a name="523331"></a>001372,000284: 37,2000                        <span class="sm">R31     </span>           <span class="ps">EQUALS  </span>                                       
+<a name="494D555355504552"></a>001373,000285: 37,2000                        <span class="sm">IMUSUPER</span>           <span class="ps">EQUALS  </span>                                       
+<a name="5345525631"></a>001374,000286: 37,2000                        <span class="sm">SERV1   </span>           <span class="ps">EQUALS  </span>                                       
+001375,000287: 37,2000                                           <span class="ps">BNKSUM  </span> 37                                    
+001376,000288: 
+001377,000289: 40,2000                                           <span class="ps">BANK    </span> 40                                    
+<a name="50494E42414C4C31"></a>001378,000290: 40,2000                        <span class="sm">PINBALL1</span>           <span class="ps">EQUALS  </span>                                       
+<a name="53454C4653555052"></a>001379,000291: 40,2000                        <span class="sm">SELFSUPR</span>           <span class="ps">EQUALS  </span>                                       
+<a name="50494E5355504552"></a>001380,000292: 40,2000                        <span class="sm">PINSUPER</span>           <span class="ps">EQUALS  </span>                                       
+<a name="5233314C4F43"></a>001381,000293: 40,2000                        <span class="sm">R31LOC  </span>           <span class="ps">EQUALS  </span>                                       
+001382,000294: 40,2000                                           <span class="ps">BNKSUM  </span> 40                                    
+001383,000295: 
+001384,000296: 41,2000                                           <span class="ps">BANK    </span> 41                                    
+<a name="50494E42414C4C32"></a>001385,000297: 41,2000                        <span class="sm">PINBALL2</span>           <span class="ps">EQUALS  </span>                                       
+001386,000298: 41,2000                                           <span class="ps">BNKSUM  </span> 41                                    
+001387,000299: 
+001388,000300: 42,2000                                           <span class="ps">BANK    </span> 42                                    
+<a name="5342414E44"></a>001389,000301: 42,2000                        <span class="sm">SBAND   </span>           <span class="ps">EQUALS  </span>                                       
+<a name="50494E42414C4C33"></a>001390,000302: 42,2000                        <span class="sm">PINBALL3</span>           <span class="ps">EQUALS  </span>                                       
+001391,000303: 42,2000                                           <span class="ps">BNKSUM  </span> 42                                    
+001392,000304: 
+001393,000305: 43,2000                                           <span class="ps">BANK    </span> 43                                    
+<a name="4558545645524253"></a>001394,000306: 43,2000                        <span class="sm">EXTVERBS</span>           <span class="ps">EQUALS  </span>                                       
+<a name="53454C4643484543"></a>001395,000307: 43,2000                        <span class="sm">SELFCHEC</span>           <span class="ps">EQUALS  </span>                                       
+001396,000308: 43,2000                                           <span class="ps">BNKSUM  </span> 43                                    
+001397,000309: 
 </pre>
 </span>
 </p>
@@ -535,38 +538,38 @@ Page 37
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-001395,000309: 
-<a name="4849365A45524F53"></a>001396,000310: 43,2000  23,2521               <span class="sm">HI6ZEROS</span>           <span class="ps">EQUALS  </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#5A45524F56454353">ZEROVECS</a>                              <span class="co">#  ZERO VECTOR ALWAYS IN HIGH MEMORY</span>
-<a name="4C4F365A45524F53"></a>001397,000311: 43,2000  12,2006               <span class="sm">LO6ZEROS</span>           <span class="ps">EQUALS  </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#5A45524F564543">ZEROVEC</a>                               <span class="co">#  ZERO VECTOR ALWAYS IN LOW MEMORY</span>
-<a name="4849445048414C46"></a>001398,000312: 43,2000  23,2517               <span class="sm">HIDPHALF</span>           <span class="ps">EQUALS  </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#554E495458">UNITX</a>                                 
-<a name="4C4F445048414C46"></a>001399,000313: 43,2000  12,2004               <span class="sm">LODPHALF</span>           <span class="ps">EQUALS  </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#58554E4954">XUNIT</a>                                 
-<a name="48494450312F34"></a>001400,000314: 43,2000  23,2511               <span class="sm">HIDP1/4 </span>           <span class="ps">EQUALS  </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#4450312F345448">DP1/4TH</a>                               
-<a name="4C4F4450312F34"></a>001401,000315: 43,2000  04,3036               <span class="sm">LODP1/4 </span>           <span class="ps">EQUALS  </span> <a href="CONIC_SUBROUTINES.agc.html#44312F34">D1/4</a>                                  <span class="co">#  2DEC .25</span>
-<a name="4849554E495458"></a>001402,000316: 43,2000  23,2517               <span class="sm">HIUNITX </span>           <span class="ps">EQUALS  </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#554E495458">UNITX</a>                                 
-<a name="4849554E495459"></a>001403,000317: 43,2000  23,2515               <span class="sm">HIUNITY </span>           <span class="ps">EQUALS  </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#554E495459">UNITY</a>                                 
-<a name="4849554E49545A"></a>001404,000318: 43,2000  23,2513               <span class="sm">HIUNITZ </span>           <span class="ps">EQUALS  </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#554E49545A">UNITZ</a>                                 
-<a name="4C4F554E495458"></a>001405,000319: 43,2000  12,2004               <span class="sm">LOUNITX </span>           <span class="ps">EQUALS  </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#58554E4954">XUNIT</a>                                 <span class="co">#  2DEC .5</span>
-<a name="4C4F554E495459"></a>001406,000320: 43,2000  12,2002               <span class="sm">LOUNITY </span>           <span class="ps">EQUALS  </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#59554E4954">YUNIT</a>                                 <span class="co">#  2DEC 0</span>
-<a name="4C4F554E49545A"></a>001407,000321: 43,2000  12,2000               <span class="sm">LOUNITZ </span>           <span class="ps">EQUALS  </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#5A554E4954">ZUNIT</a>                                 <span class="co">#  2DEC 0</span>
-001408,000322: 
-<a name="44454C5253504C"></a>001409,000323: 43,2000  22,3541               <span class="sm">DELRSPL </span>           <span class="ps">EQUALS  </span> <a href="R30.agc.html#53504C524554">SPLRET</a>                                <span class="co">#  COL PGM, ALSO CALLED BY R30 IN LUMINARY</span>
-001410,000324: 
-001411,000325:                                                                                                  <span class="co">#  ROPE-SPECIFIC ASSIGNS OBVIATING NEED TO CHECK COMPUTER FLAG IN DETERMINING INTEGRATION AREA ENTRIES.</span>
-001412,000326: 
-<a name="41544F5054484953"></a>001413,000327: 43,2000  13,2734               <span class="sm">ATOPTHIS</span>           <span class="ps">EQUALS  </span> <a href="INTEGRATION_INITIALIZATION.agc.html#41544F504C454D">ATOPLEM</a>                               
-<a name="41544F504F5448"></a>001414,000328: 43,2000  13,2661               <span class="sm">ATOPOTH </span>           <span class="ps">EQUALS  </span> <a href="INTEGRATION_INITIALIZATION.agc.html#41544F5043534D">ATOPCSM</a>                               
-<a name="4F544850524543"></a>001415,000329: 43,2000  13,3043               <span class="sm">OTHPREC </span>           <span class="ps">EQUALS  </span> <a href="INTEGRATION_INITIALIZATION.agc.html#43534D50524543">CSMPREC</a>                               
-<a name="4D4F4F4E54484953"></a>001416,000330: 43,2000  0000174               <span class="sm">MOONTHIS</span>           <span class="ps">EQUALS  </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#4C4D4F4F4E464C47">LMOONFLG</a>                              
-<a name="4D4F4F4E4F5448"></a>001417,000331: 43,2000  0000173               <span class="sm">MOONOTH </span>           <span class="ps">EQUALS  </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#434D4F4F4E464C47">CMOONFLG</a>                              
-<a name="4D4F564154484953"></a>001418,000332: 43,2000  13,2747               <span class="sm">MOVATHIS</span>           <span class="ps">EQUALS  </span> <a href="INTEGRATION_INITIALIZATION.agc.html#4D4F5645414C454D">MOVEALEM</a>                              
-<a name="524D4D"></a>001419,000333: 43,2000  12,2017               <span class="sm">RMM     </span>           <span class="ps">=       </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#4C4F44504D4158">LODPMAX</a>                               
-<a name="524D45"></a>001420,000334: 43,2000  12,2021               <span class="sm">RME     </span>           <span class="ps">=       </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#4C4F44504D415831">LODPMAX1</a>                              
-<a name="5448495350524543"></a>001421,000335: 43,2000  13,3057               <span class="sm">THISPREC</span>           <span class="ps">EQUALS  </span> <a href="INTEGRATION_INITIALIZATION.agc.html#4C454D50524543">LEMPREC</a>                               
-<a name="5448495341584953"></a>001422,000336: 43,2000  23,2513               <span class="sm">THISAXIS</span>           <span class="ps">=       </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#554E49545A">UNITZ</a>                                 
-<a name="4E42314E4232"></a>001423,000337: 43,2000  23,2513               <span class="sm">NB1NB2  </span>           <span class="ps">EQUALS  </span> <a href="#5448495341584953">THISAXIS</a>                              <span class="co">#  FOR R31</span>
-<a name="455241534944"></a>001424,000338: 43,2000     5011               <span class="sm">ERASID  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495453322D3130">BITS2-10</a>                              <span class="co">#  DOWNLINK ERASABLE DUMP ID</span>
-<a name="44454C41594E554D"></a>001425,000339: 43,2000     4752               <span class="sm">DELAYNUM</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   
-001426,000340: 
+001399,000311: 
+<a name="4849365A45524F53"></a>001400,000312: 43,2000  23,2521               <span class="sm">HI6ZEROS</span>           <span class="ps">EQUALS  </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#5A45524F56454353">ZEROVECS</a>                              <span class="co">#  ZERO VECTOR ALWAYS IN HIGH MEMORY</span>
+<a name="4C4F365A45524F53"></a>001401,000313: 43,2000  12,2006               <span class="sm">LO6ZEROS</span>           <span class="ps">EQUALS  </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#5A45524F564543">ZEROVEC</a>                               <span class="co">#  ZERO VECTOR ALWAYS IN LOW MEMORY</span>
+<a name="4849445048414C46"></a>001402,000314: 43,2000  23,2517               <span class="sm">HIDPHALF</span>           <span class="ps">EQUALS  </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#554E495458">UNITX</a>                                 
+<a name="4C4F445048414C46"></a>001403,000315: 43,2000  12,2004               <span class="sm">LODPHALF</span>           <span class="ps">EQUALS  </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#58554E4954">XUNIT</a>                                 
+<a name="48494450312F34"></a>001404,000316: 43,2000  23,2511               <span class="sm">HIDP1/4 </span>           <span class="ps">EQUALS  </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#4450312F345448">DP1/4TH</a>                               
+<a name="4C4F4450312F34"></a>001405,000317: 43,2000  04,3036               <span class="sm">LODP1/4 </span>           <span class="ps">EQUALS  </span> <a href="CONIC_SUBROUTINES.agc.html#44312F34">D1/4</a>                                  <span class="co">#  2DEC .25</span>
+<a name="4849554E495458"></a>001406,000318: 43,2000  23,2517               <span class="sm">HIUNITX </span>           <span class="ps">EQUALS  </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#554E495458">UNITX</a>                                 
+<a name="4849554E495459"></a>001407,000319: 43,2000  23,2515               <span class="sm">HIUNITY </span>           <span class="ps">EQUALS  </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#554E495459">UNITY</a>                                 
+<a name="4849554E49545A"></a>001408,000320: 43,2000  23,2513               <span class="sm">HIUNITZ </span>           <span class="ps">EQUALS  </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#554E49545A">UNITZ</a>                                 
+<a name="4C4F554E495458"></a>001409,000321: 43,2000  12,2004               <span class="sm">LOUNITX </span>           <span class="ps">EQUALS  </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#58554E4954">XUNIT</a>                                 <span class="co">#  2DEC .5</span>
+<a name="4C4F554E495459"></a>001410,000322: 43,2000  12,2002               <span class="sm">LOUNITY </span>           <span class="ps">EQUALS  </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#59554E4954">YUNIT</a>                                 <span class="co">#  2DEC 0</span>
+<a name="4C4F554E49545A"></a>001411,000323: 43,2000  12,2000               <span class="sm">LOUNITZ </span>           <span class="ps">EQUALS  </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#5A554E4954">ZUNIT</a>                                 <span class="co">#  2DEC 0</span>
+001412,000324: 
+<a name="44454C5253504C"></a>001413,000325: 43,2000  22,3541               <span class="sm">DELRSPL </span>           <span class="ps">EQUALS  </span> <a href="R30.agc.html#53504C524554">SPLRET</a>                                <span class="co">#  COL PGM, ALSO CALLED BY R30 IN LUMINARY</span>
+001414,000326: 
+001415,000327:                                                                                                  <span class="co">#  ROPE-SPECIFIC ASSIGNS OBVIATING NEED TO CHECK COMPUTER FLAG IN DETERMINING INTEGRATION AREA ENTRIES.</span>
+001416,000328: 
+<a name="41544F5054484953"></a>001417,000329: 43,2000  13,2734               <span class="sm">ATOPTHIS</span>           <span class="ps">EQUALS  </span> <a href="INTEGRATION_INITIALIZATION.agc.html#41544F504C454D">ATOPLEM</a>                               
+<a name="41544F504F5448"></a>001418,000330: 43,2000  13,2661               <span class="sm">ATOPOTH </span>           <span class="ps">EQUALS  </span> <a href="INTEGRATION_INITIALIZATION.agc.html#41544F5043534D">ATOPCSM</a>                               
+<a name="4F544850524543"></a>001419,000331: 43,2000  13,3043               <span class="sm">OTHPREC </span>           <span class="ps">EQUALS  </span> <a href="INTEGRATION_INITIALIZATION.agc.html#43534D50524543">CSMPREC</a>                               
+<a name="4D4F4F4E54484953"></a>001420,000332: 43,2000  0000174               <span class="sm">MOONTHIS</span>           <span class="ps">EQUALS  </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#4C4D4F4F4E464C47">LMOONFLG</a>                              
+<a name="4D4F4F4E4F5448"></a>001421,000333: 43,2000  0000173               <span class="sm">MOONOTH </span>           <span class="ps">EQUALS  </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#434D4F4F4E464C47">CMOONFLG</a>                              
+<a name="4D4F564154484953"></a>001422,000334: 43,2000  13,2747               <span class="sm">MOVATHIS</span>           <span class="ps">EQUALS  </span> <a href="INTEGRATION_INITIALIZATION.agc.html#4D4F5645414C454D">MOVEALEM</a>                              
+<a name="524D4D"></a>001423,000335: 43,2000  12,2017               <span class="sm">RMM     </span>           <span class="ps">=       </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#4C4F44504D4158">LODPMAX</a>                               
+<a name="524D45"></a>001424,000336: 43,2000  12,2021               <span class="sm">RME     </span>           <span class="ps">=       </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#4C4F44504D415831">LODPMAX1</a>                              
+<a name="5448495350524543"></a>001425,000337: 43,2000  13,3057               <span class="sm">THISPREC</span>           <span class="ps">EQUALS  </span> <a href="INTEGRATION_INITIALIZATION.agc.html#4C454D50524543">LEMPREC</a>                               
+<a name="5448495341584953"></a>001426,000338: 43,2000  23,2513               <span class="sm">THISAXIS</span>           <span class="ps">=       </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#554E49545A">UNITZ</a>                                 
+<a name="4E42314E4232"></a>001427,000339: 43,2000  23,2513               <span class="sm">NB1NB2  </span>           <span class="ps">EQUALS  </span> <a href="#5448495341584953">THISAXIS</a>                              <span class="co">#  FOR R31</span>
+<a name="455241534944"></a>001428,000340: 43,2000     5011               <span class="sm">ERASID  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495453322D3130">BITS2-10</a>                              <span class="co">#  DOWNLINK ERASABLE DUMP ID</span>
+<a name="44454C41594E554D"></a>001429,000341: 43,2000     4752               <span class="sm">DELAYNUM</span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   
+001430,000342: 
 
 End of include-file TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

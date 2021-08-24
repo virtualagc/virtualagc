@@ -66,8 +66,9 @@ color: #993399;
 </td>
 <td style="vertical-align: middle;">
 These source-code files are part of a reconstructed copy of Luminary 97, the
-original release of the Apollo 11 Lunar Module (LM) Apollo Guidance Computer
-(AGC) software. 
+second release of the Apollo 11 Lunar Module (LM) Apollo Guidance Computer
+(AGC) software. It was created to fix two incorrect ephemeris constants in
+Luminary 96, as described by anomaly report LNY-59.
 <br><br>
 The reconstruction began with source code of Luminary 99 revision 1 previously
 transcribed from a digitized copy of that program.  The code was then updated 
@@ -88,26 +89,28 @@ project's GitHub repository</a>.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061752,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-061753,000003:                                                                                                  <span class="co">## Filename:    TJET_LAW.agc</span>
-061754,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 97.</span>
-061755,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the</span>
-061756,000006:                                                                                                  <span class="co">##              original release of the flight software for the Lunar </span>
-061757,000007:                                                                                                  <span class="co">##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 11.</span>
-061758,000008:                                                                                                  <span class="co">##              The code has been recreated from a copy of Luminary 99</span>
-061759,000009:                                                                                                  <span class="co">##              revision 001, using asterisks indicating changed lines in</span>
-061760,000010:                                                                                                  <span class="co">##              the listing and Luminary Memos #83 and #85, which list </span>
-061761,000011:                                                                                                  <span class="co">##              changes between Luminary 97 and 98, and 98 and 99. The</span>
-061762,000012:                                                                                                  <span class="co">##              code has been adapted such that the resulting bugger words</span>
-061763,000013:                                                                                                  <span class="co">##              exactly match those specified for Luminary 97 in NASA drawing</span>
-061764,000014:                                                                                                  <span class="co">##              2021152D, which gives relatively high confidence that the</span>
-061765,000015:                                                                                                  <span class="co">##              reconstruction is correct.</span>
-061766,000016:                                                                                                  <span class="co">## Reference:   pp. 1460-1469</span>
-061767,000017:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-061768,000018:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-061769,000019:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-061770,000020:                                                                                                  <span class="co">## Mod history: 2019-07-28 MAS  Created from Luminary 99.</span>
-061771,000021: 
+061920,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+061921,000003:                                                                                                  <span class="co">## Filename:    TJET_LAW.agc</span>
+061922,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 97.</span>
+061923,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the</span>
+061924,000006:                                                                                                  <span class="co">##              second release of the flight software for the Lunar </span>
+061925,000007:                                                                                                  <span class="co">##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 11.</span>
+061926,000008:                                                                                                  <span class="co">##              It was created to fix two incorrect ephemeris constants in</span>
+061927,000009:                                                                                                  <span class="co">##              Luminary 96, as described by anomaly report LNY-59.</span>
+061928,000010:                                                                                                  <span class="co">##              The code has been recreated from a copy of Luminary 99</span>
+061929,000011:                                                                                                  <span class="co">##              revision 001, using asterisks indicating changed lines in</span>
+061930,000012:                                                                                                  <span class="co">##              the listing and Luminary Memos #83 and #85, which list </span>
+061931,000013:                                                                                                  <span class="co">##              changes between Luminary 97 and 98, and 98 and 99. The</span>
+061932,000014:                                                                                                  <span class="co">##              code has been adapted such that the resulting bugger words</span>
+061933,000015:                                                                                                  <span class="co">##              exactly match those specified for Luminary 97 in NASA drawing</span>
+061934,000016:                                                                                                  <span class="co">##              2021152D, which gives relatively high confidence that the</span>
+061935,000017:                                                                                                  <span class="co">##              reconstruction is correct.</span>
+061936,000018:                                                                                                  <span class="co">## Reference:   pp. 1460-1469</span>
+061937,000019:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+061938,000020:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+061939,000021:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+061940,000022:                                                                                                  <span class="co">## Mod history: 2019-07-28 MAS  Created from Luminary 99.</span>
+061941,000023: 
 </pre>
 </span>
 </p>
@@ -123,55 +126,55 @@ Page 1460
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061773,000023:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION</span>
-061774,000024:                                                                                                  <span class="co">#  DESIGNED BY:  R. D. GOSS AND P. S. WEISSMAN</span>
-061775,000025:                                                                                                  <span class="co">#  CODED BY:  P. S. WEISSMAN 28 FEBRUARY 1968</span>
-061776,000026: 
-061777,000027:                                                                                                  <span class="co">#  TJETLAW IS CALLED AS A SUBROUTINE WHEN THE LEM IS NOT DOCKED AND THE AUTOPILOT IS IN THE AUTOMATIC OR</span>
-061778,000028:                                                                                                  <span class="co">#  ATTITUDE-HOLD MODE TO CALCULATE THE JET-FIRING-TIME (TJET) REQUIRED FOR THE AXIS INDICATED BY AXISCTR:</span>
-061779,000029:                                                                                                  <span class="co">#        -1      INDICATES THE P-AXIS</span>
-061780,000030:                                                                                                  <span class="co">#        +0      INDICATES THE U-AXIS</span>
-061781,000031:                                                                                                  <span class="co">#        +1      INDICATES THE V-AXIS.</span>
-061782,000032:                                                                                                  <span class="co">#  THE REGISTERS E AND EDOT CONTAIN THE APPROPRIATE ATTITUDE ERROR AND ERROR RATE AND SENSETYP SHOWS WHETHER</span>
-061783,000033:                                                                                                  <span class="co">#  UNBALANCED COUPLES ARE PREFERRED.  TJETLAW ALSO USES VARIOUS FUNCTIONS OF ACCELERATION AND DEADBAND WHICH ARE</span>
-061784,000034:                                                                                                  <span class="co">#  COMPUTED IN THE 1/ACCONT SECTION OF 1/ACCS AND ARE STORED IN SUCH AN ORDER THAT THEY CAN BE CONVENIENTLY</span>
-061785,000035:                                                                                                  <span class="co">#  ACCESSED BY INDEXING.</span>
-061786,000036: 
-061787,000037:                                                                                                  <span class="co">#  THE SIGN OF THE REQUIRED ROTATION IS CARRIED THROUGH TJETLAW AS ROTSENSE AND IS FINALLY APPLIED TO TJET JUST</span>
-061788,000038:                                                                                                  <span class="co">#  PREVIOUS TO ITS STORAGE IN THE LOCATION CORRESPONDING TO THE AXIS (TJP, TJU OR TJV).  THE NUMBER OF JETS THAT</span>
-061789,000039:                                                                                                  <span class="co">#  TJETLAW ASSUMES WILL BE USED IS INDICATED BY THE SETTING OF NUMBERT FOR THE U- OR V-AXIS.  TWO JETS ARE ALWAYS</span>
-061790,000040:                                                                                                  <span class="co">#  ASSUMED FOR THE P-AXIS ALTHOUGH FOUR JETS WILL BE FIRED WHEN FIREFCT IS MORE NEGATIVE THAN -4.0 DEGREES</span>
-061791,000041:                                                                                                  <span class="co">#  (FIREFCT IS THE DISTANCE TO A SWITCH CURVE IN THE PHASE PLANE) AND A LONG FIRING IS CALLED FOR.</span>
-061792,000042: 
-061793,000043:                                                                                                  <span class="co">#  IN ORDER TO AVOID SCALING DIFFICULTIES, SIMPLE ALGORITHMS TAGGED RUFLAW1, -2 AND -3 ARE RESORTED TO WHEN THE</span>
-061794,000044:                                                                                                  <span class="co">#  ERROR AND/OR ERROR RATE ARE LARGE.</span>
-061795,000045: 
-061796,000046:                                                                                                  <span class="co">#  CALLING SEQUENCE:</span>
-061797,000047:                                                                                                  <span class="co">#                TC      TJETLAW         (MUST BE IN JASK)</span>
-061798,000048:                                                                                                  <span class="co">#        OR</span>
-061799,000049:                                                                                                  <span class="co">#                INHINT                  (MUST BE IN JASK)</span>
-061800,000050:                                                                                                  <span class="co">#                TC      IBNKCALL</span>
-061801,000051:                                                                                                  <span class="co">#                CADR    TJETLAW</span>
-061802,000052:                                                                                                  <span class="co">#                RELINT</span>
-061803,000053: 
-061804,000054:                                                                                                  <span class="co">#  EXIT:         RETURN TO Q.</span>
-061805,000055: 
-061806,000056:                                                                                                  <span class="co">#  INPUT:</span>
-061807,000057:                                                                                                  <span class="co">#        FROM THE CALLER:  E, EDOT, AXISCTR, SENSETYP, TJP, -U, -V.</span>
-061808,000058:                                                                                                  <span class="co">#        FROM 1/ACCONT:  48 ERASABLES BEGINNING AT BLOCKTOP (INCLUDING FLAT, ZONE3LIM AND ACCSWU, -V).</span>
-061809,000059: 
-061810,000060:                                                                                                  <span class="co">#  OUTPUT:</span>
-061811,000061:                                                                                                  <span class="co">#        TJP, -U OR -V, NUMBERT (DAPTEMP5), FIREFCT (DAPTEMP3).</span>
-061812,000062: 
-061813,000063:                                                                                                  <span class="co">#  DEBRIS:</span>
-061814,000064:                                                                                                  <span class="co">#        A, L, Q, E, EDOT, DAPTEMP1-6, DAPTREG1-4.</span>
-061815,000065: 
-061816,000066:                                                                                                  <span class="co">#  ALARM:  NONE</span>
-061817,000067: 
-061818,000068: 17,3252                                           <span class="ps">BANK    </span> 17                                    
-061819,000069: 17,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4441505332">DAPS2</a>                                 
-061820,000070: 17,2000                                           <span class="ps">BANK    </span>                                       
-061821,000071: 17,3252  E6,1524                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A50">TJP</a>                                   
+061943,000025:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION</span>
+061944,000026:                                                                                                  <span class="co">#  DESIGNED BY:  R. D. GOSS AND P. S. WEISSMAN</span>
+061945,000027:                                                                                                  <span class="co">#  CODED BY:  P. S. WEISSMAN 28 FEBRUARY 1968</span>
+061946,000028: 
+061947,000029:                                                                                                  <span class="co">#  TJETLAW IS CALLED AS A SUBROUTINE WHEN THE LEM IS NOT DOCKED AND THE AUTOPILOT IS IN THE AUTOMATIC OR</span>
+061948,000030:                                                                                                  <span class="co">#  ATTITUDE-HOLD MODE TO CALCULATE THE JET-FIRING-TIME (TJET) REQUIRED FOR THE AXIS INDICATED BY AXISCTR:</span>
+061949,000031:                                                                                                  <span class="co">#        -1      INDICATES THE P-AXIS</span>
+061950,000032:                                                                                                  <span class="co">#        +0      INDICATES THE U-AXIS</span>
+061951,000033:                                                                                                  <span class="co">#        +1      INDICATES THE V-AXIS.</span>
+061952,000034:                                                                                                  <span class="co">#  THE REGISTERS E AND EDOT CONTAIN THE APPROPRIATE ATTITUDE ERROR AND ERROR RATE AND SENSETYP SHOWS WHETHER</span>
+061953,000035:                                                                                                  <span class="co">#  UNBALANCED COUPLES ARE PREFERRED.  TJETLAW ALSO USES VARIOUS FUNCTIONS OF ACCELERATION AND DEADBAND WHICH ARE</span>
+061954,000036:                                                                                                  <span class="co">#  COMPUTED IN THE 1/ACCONT SECTION OF 1/ACCS AND ARE STORED IN SUCH AN ORDER THAT THEY CAN BE CONVENIENTLY</span>
+061955,000037:                                                                                                  <span class="co">#  ACCESSED BY INDEXING.</span>
+061956,000038: 
+061957,000039:                                                                                                  <span class="co">#  THE SIGN OF THE REQUIRED ROTATION IS CARRIED THROUGH TJETLAW AS ROTSENSE AND IS FINALLY APPLIED TO TJET JUST</span>
+061958,000040:                                                                                                  <span class="co">#  PREVIOUS TO ITS STORAGE IN THE LOCATION CORRESPONDING TO THE AXIS (TJP, TJU OR TJV).  THE NUMBER OF JETS THAT</span>
+061959,000041:                                                                                                  <span class="co">#  TJETLAW ASSUMES WILL BE USED IS INDICATED BY THE SETTING OF NUMBERT FOR THE U- OR V-AXIS.  TWO JETS ARE ALWAYS</span>
+061960,000042:                                                                                                  <span class="co">#  ASSUMED FOR THE P-AXIS ALTHOUGH FOUR JETS WILL BE FIRED WHEN FIREFCT IS MORE NEGATIVE THAN -4.0 DEGREES</span>
+061961,000043:                                                                                                  <span class="co">#  (FIREFCT IS THE DISTANCE TO A SWITCH CURVE IN THE PHASE PLANE) AND A LONG FIRING IS CALLED FOR.</span>
+061962,000044: 
+061963,000045:                                                                                                  <span class="co">#  IN ORDER TO AVOID SCALING DIFFICULTIES, SIMPLE ALGORITHMS TAGGED RUFLAW1, -2 AND -3 ARE RESORTED TO WHEN THE</span>
+061964,000046:                                                                                                  <span class="co">#  ERROR AND/OR ERROR RATE ARE LARGE.</span>
+061965,000047: 
+061966,000048:                                                                                                  <span class="co">#  CALLING SEQUENCE:</span>
+061967,000049:                                                                                                  <span class="co">#                TC      TJETLAW         (MUST BE IN JASK)</span>
+061968,000050:                                                                                                  <span class="co">#        OR</span>
+061969,000051:                                                                                                  <span class="co">#                INHINT                  (MUST BE IN JASK)</span>
+061970,000052:                                                                                                  <span class="co">#                TC      IBNKCALL</span>
+061971,000053:                                                                                                  <span class="co">#                CADR    TJETLAW</span>
+061972,000054:                                                                                                  <span class="co">#                RELINT</span>
+061973,000055: 
+061974,000056:                                                                                                  <span class="co">#  EXIT:         RETURN TO Q.</span>
+061975,000057: 
+061976,000058:                                                                                                  <span class="co">#  INPUT:</span>
+061977,000059:                                                                                                  <span class="co">#        FROM THE CALLER:  E, EDOT, AXISCTR, SENSETYP, TJP, -U, -V.</span>
+061978,000060:                                                                                                  <span class="co">#        FROM 1/ACCONT:  48 ERASABLES BEGINNING AT BLOCKTOP (INCLUDING FLAT, ZONE3LIM AND ACCSWU, -V).</span>
+061979,000061: 
+061980,000062:                                                                                                  <span class="co">#  OUTPUT:</span>
+061981,000063:                                                                                                  <span class="co">#        TJP, -U OR -V, NUMBERT (DAPTEMP5), FIREFCT (DAPTEMP3).</span>
+061982,000064: 
+061983,000065:                                                                                                  <span class="co">#  DEBRIS:</span>
+061984,000066:                                                                                                  <span class="co">#        A, L, Q, E, EDOT, DAPTEMP1-6, DAPTREG1-4.</span>
+061985,000067: 
+061986,000068:                                                                                                  <span class="co">#  ALARM:  NONE</span>
+061987,000069: 
+061988,000070: 17,3252                                           <span class="ps">BANK    </span> 17                                    
+061989,000071: 17,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4441505332">DAPS2</a>                                 
+061990,000072: 17,2000                                           <span class="ps">BANK    </span>                                       
+061991,000073: 17,3252  E6,1524                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A50">TJP</a>                                   
 </pre>
 </span>
 </p>
@@ -187,56 +190,56 @@ Page 1461
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061823,000073: 17,3252                                           <span class="ps">COUNT*  </span> $$/DAPTJ                              
-061824,000074: 
-<a name="544A45544C4157"></a>061825,000075: 17,3252           00006        <span class="sm">TJETLAW </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  SAVE Q FOR RETURN.</span>
-061826,000076: 17,3253           23745                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#484F4C4451">HOLDQ</a>                                 
-061827,000077: 
-061828,000078:                                                                                                  <span class="co">#  SET INDEXERS TO CORRESPOND TO THE AXIS AND TO THE SIGN OF EDOT</span>
-061829,000079: 
-061830,000080: 17,3254           51505                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953435452">AXISCTR</a>                               <span class="co">#  AXISDIFF(-1)=NO OF LOCATIONS BER P AND U</span>
-061831,000081: 17,3255           33722                           <span class="op">CAF     </span> <a href="#4158495344494646">AXISDIFF</a>                              <span class="co">#  AXISDIFF(0)=0</span>
-061832,000082: 17,3256           55746                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494631">ADRSDIF1</a>                              <span class="co">#  AXISDIFF(+1)=NO OF LOCATIONS BET V AND U</span>
-061833,000083: 
-061834,000084: 17,3257           31427                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  IF EDOT NEGATIVE, PICK UP SET OF VALUES</span>
-061835,000085: 17,3260           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        THAT ALLOW USE OF SAME CODING AS FOR</span>
-061836,000086: 17,3261           63266                           <span class="op">BZMF    </span> <a href="#4E454745444F54">NEGEDOT</a>                               <span class="co">#        POSITIVE EDOT.</span>
-061837,000087: 17,3262           31746                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494631">ADRSDIF1</a>                              <span class="co">#  SET A SECOND INDEXER WHICH MAY BE</span>
-061838,000088: 17,3263           55744                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494632">ADRSDIF2</a>                              <span class="co">#        MODIFIED BY A DECISION FOR MAX JETS.</span>
-061839,000089: 17,3264           33724                           <span class="op">CAF     </span> <a href="#53454E534F52">SENSOR</a>                                <span class="co">#  FOR POSITIVE EDOT, ROTSENSE IS</span>
-061840,000090: 17,3265           13276                           <span class="op">TCF     </span> <a href="#53455453454E5345">SETSENSE</a>                              <span class="co">#        INITIALIZED POSITIVE.</span>
-061841,000091: 
-<a name="4E454745444F54"></a>061842,000092: 17,3266           41752        <span class="sm">NEGEDOT </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     <span class="co">#  IN ORDER FOR NEG EDOT CASE TO USE CODING</span>
-061843,000093: 17,3267           55752                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     <span class="co">#        OF POS EDOT, MUST MODIFY AS FOLLOWS:</span>
-061844,000094: 17,3270           41427                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#        1. COMPLEMENT E AND EDOT.</span>
-061845,000095: 17,3271           55427                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#        2. SET SENSE OF ROTATION TO NEGATIVE</span>
-061846,000096: 17,3272           34753                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  <span class="co">#           (REVERSED LATER IF NECESSARY).</span>
-061847,000097: 17,3273           27746                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494631">ADRSDIF1</a>                              <span class="co">#        3. INCREMENT INDEXERS BY ONE SO THAT</span>
-061848,000098: 17,3274           55744                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494632">ADRSDIF2</a>                              <span class="co">#           THE PROPER PARAMETERS ARE ACCESSED.</span>
-061849,000099: 17,3275           43724                           <span class="op">CS      </span> <a href="#53454E534F52">SENSOR</a>                                
-<a name="53455453454E5345"></a>061850,000100: 17,3276           55740        <span class="sm">SETSENSE</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F5453454E5345">ROTSENSE</a>                              
-061851,000101: 
-061852,000102:                                                                                                  <span class="co">#  TEST MAGNITUDE OF E (ATTITUDE ERROR, SINGLE-PRECISION, SCALED AT PI RADIANS):</span>
-061853,000103:                                                                                                  <span class="co">#        IF GREATER THAN (OR EQUAL TO) PI/16 RADIANS, GO TO THE SIMPLIFIED TJET ROUTINE.</span>
-061854,000104:                                                                                                  <span class="co">#        IF LESS THAN PI/16 RADIANS, RESCALE TO PI/4.</span>
-061855,000105: 
-061856,000106: 17,3277           31752                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     <span class="co">#  PICK UP ATTITUDE ERROR FOR THIS AXIS</span>
-061857,000107: 17,3300           00006                           <span class="op">EXTEND  </span>                                       
-061858,000108: 17,3301           74747                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495435">BIT5</a>                                  <span class="co">#  SHIFT RIGHT TEN BITS:  IF A-REGISTER IS</span>
-061859,000109: 17,3302           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#        ZERO, RESCALE AND TEST EDOT.</span>
-061860,000110: 17,3303           13664                           <span class="op">TCF     </span> <a href="#5255464C415732">RUFLAW2</a>                               
-061861,000111: 17,3304           13306                           <span class="op">TCF     </span> <a href="#5343414C4545">SCALEE</a>                                
-061862,000112: 17,3305           13630                           <span class="op">TCF     </span> <a href="#5255464C415731">RUFLAW1</a>                               
-<a name="5343414C4545"></a>061863,000113: 17,3306           34737        <span class="sm">SCALEE  </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543133">BIT13</a>                                 <span class="co">#  ERROR IS IN L SCALED AT PI/16.  RESCALE</span>
-061864,000114: 17,3307           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        IT TO PI/4 AND SAVE IT.</span>
-061865,000115: 17,3310           70001                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-061866,000116: 17,3311           55752                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     
-061867,000117: 
-061868,000118:                                                                                                  <span class="co">#  TEST MAGNITUDE OF EDOT (ERROR RATE SCALED AT PI/4 RADIANS/SECOND)</span>
-061869,000119:                                                                                                  <span class="co">#        IF GREATER THAN (OR EQUAL TO) PI/32 RADIANS/SECOND, GO TO THE SIMPLIFIED TJET ROUTINE.</span>
-061870,000120:                                                                                                  <span class="co">#        IF LESS THAN PI/32 RADIANS/SECOND, THEN RESCALE TO PI/32 RADIANS/SECOND.</span>
-061871,000121: 
-061872,000122: 17,3312           31427                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  PICK UP SINGLE-PRECISION ERROR-RATE</span>
+061993,000075: 17,3252                                           <span class="ps">COUNT*  </span> $$/DAPTJ                              
+061994,000076: 
+<a name="544A45544C4157"></a>061995,000077: 17,3252           00006        <span class="sm">TJETLAW </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  SAVE Q FOR RETURN.</span>
+061996,000078: 17,3253           23745                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#484F4C4451">HOLDQ</a>                                 
+061997,000079: 
+061998,000080:                                                                                                  <span class="co">#  SET INDEXERS TO CORRESPOND TO THE AXIS AND TO THE SIGN OF EDOT</span>
+061999,000081: 
+062000,000082: 17,3254           51505                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953435452">AXISCTR</a>                               <span class="co">#  AXISDIFF(-1)=NO OF LOCATIONS BER P AND U</span>
+062001,000083: 17,3255           33722                           <span class="op">CAF     </span> <a href="#4158495344494646">AXISDIFF</a>                              <span class="co">#  AXISDIFF(0)=0</span>
+062002,000084: 17,3256           55746                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494631">ADRSDIF1</a>                              <span class="co">#  AXISDIFF(+1)=NO OF LOCATIONS BET V AND U</span>
+062003,000085: 
+062004,000086: 17,3257           31427                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  IF EDOT NEGATIVE, PICK UP SET OF VALUES</span>
+062005,000087: 17,3260           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        THAT ALLOW USE OF SAME CODING AS FOR</span>
+062006,000088: 17,3261           63266                           <span class="op">BZMF    </span> <a href="#4E454745444F54">NEGEDOT</a>                               <span class="co">#        POSITIVE EDOT.</span>
+062007,000089: 17,3262           31746                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494631">ADRSDIF1</a>                              <span class="co">#  SET A SECOND INDEXER WHICH MAY BE</span>
+062008,000090: 17,3263           55744                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494632">ADRSDIF2</a>                              <span class="co">#        MODIFIED BY A DECISION FOR MAX JETS.</span>
+062009,000091: 17,3264           33724                           <span class="op">CAF     </span> <a href="#53454E534F52">SENSOR</a>                                <span class="co">#  FOR POSITIVE EDOT, ROTSENSE IS</span>
+062010,000092: 17,3265           13276                           <span class="op">TCF     </span> <a href="#53455453454E5345">SETSENSE</a>                              <span class="co">#        INITIALIZED POSITIVE.</span>
+062011,000093: 
+<a name="4E454745444F54"></a>062012,000094: 17,3266           41752        <span class="sm">NEGEDOT </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     <span class="co">#  IN ORDER FOR NEG EDOT CASE TO USE CODING</span>
+062013,000095: 17,3267           55752                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     <span class="co">#        OF POS EDOT, MUST MODIFY AS FOLLOWS:</span>
+062014,000096: 17,3270           41427                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#        1. COMPLEMENT E AND EDOT.</span>
+062015,000097: 17,3271           55427                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#        2. SET SENSE OF ROTATION TO NEGATIVE</span>
+062016,000098: 17,3272           34753                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  <span class="co">#           (REVERSED LATER IF NECESSARY).</span>
+062017,000099: 17,3273           27746                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494631">ADRSDIF1</a>                              <span class="co">#        3. INCREMENT INDEXERS BY ONE SO THAT</span>
+062018,000100: 17,3274           55744                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494632">ADRSDIF2</a>                              <span class="co">#           THE PROPER PARAMETERS ARE ACCESSED.</span>
+062019,000101: 17,3275           43724                           <span class="op">CS      </span> <a href="#53454E534F52">SENSOR</a>                                
+<a name="53455453454E5345"></a>062020,000102: 17,3276           55740        <span class="sm">SETSENSE</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F5453454E5345">ROTSENSE</a>                              
+062021,000103: 
+062022,000104:                                                                                                  <span class="co">#  TEST MAGNITUDE OF E (ATTITUDE ERROR, SINGLE-PRECISION, SCALED AT PI RADIANS):</span>
+062023,000105:                                                                                                  <span class="co">#        IF GREATER THAN (OR EQUAL TO) PI/16 RADIANS, GO TO THE SIMPLIFIED TJET ROUTINE.</span>
+062024,000106:                                                                                                  <span class="co">#        IF LESS THAN PI/16 RADIANS, RESCALE TO PI/4.</span>
+062025,000107: 
+062026,000108: 17,3277           31752                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     <span class="co">#  PICK UP ATTITUDE ERROR FOR THIS AXIS</span>
+062027,000109: 17,3300           00006                           <span class="op">EXTEND  </span>                                       
+062028,000110: 17,3301           74747                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495435">BIT5</a>                                  <span class="co">#  SHIFT RIGHT TEN BITS:  IF A-REGISTER IS</span>
+062029,000111: 17,3302           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#        ZERO, RESCALE AND TEST EDOT.</span>
+062030,000112: 17,3303           13664                           <span class="op">TCF     </span> <a href="#5255464C415732">RUFLAW2</a>                               
+062031,000113: 17,3304           13306                           <span class="op">TCF     </span> <a href="#5343414C4545">SCALEE</a>                                
+062032,000114: 17,3305           13630                           <span class="op">TCF     </span> <a href="#5255464C415731">RUFLAW1</a>                               
+<a name="5343414C4545"></a>062033,000115: 17,3306           34737        <span class="sm">SCALEE  </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543133">BIT13</a>                                 <span class="co">#  ERROR IS IN L SCALED AT PI/16.  RESCALE</span>
+062034,000116: 17,3307           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        IT TO PI/4 AND SAVE IT.</span>
+062035,000117: 17,3310           70001                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+062036,000118: 17,3311           55752                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     
+062037,000119: 
+062038,000120:                                                                                                  <span class="co">#  TEST MAGNITUDE OF EDOT (ERROR RATE SCALED AT PI/4 RADIANS/SECOND)</span>
+062039,000121:                                                                                                  <span class="co">#        IF GREATER THAN (OR EQUAL TO) PI/32 RADIANS/SECOND, GO TO THE SIMPLIFIED TJET ROUTINE.</span>
+062040,000122:                                                                                                  <span class="co">#        IF LESS THAN PI/32 RADIANS/SECOND, THEN RESCALE TO PI/32 RADIANS/SECOND.</span>
+062041,000123: 
+062042,000124: 17,3312           31427                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  PICK UP SINGLE-PRECISION ERROR-RATE</span>
 </pre>
 </span>
 </p>
@@ -252,57 +255,57 @@ Page 1462
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061874,000124: 17,3313           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  FOR THIS AXIS=</span>
-061875,000125: 17,3314           74750                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495434">BIT4</a>                                  <span class="co">#  SHIFT RIGHT ELEVEN BITS, IF THE A-REG IS</span>
-061876,000126: 17,3315           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  ZERO, THEN RESCALE AND USE FINELAW.</span>
-061877,000127: 17,3316           13320                           <span class="op">BZF     </span> <a href="#5343414C45444F54">SCALEDOT</a>                              
-061878,000128: 17,3317           13672                           <span class="op">TCF     </span> <a href="#5255464C415733">RUFLAW3</a>                               
-061879,000129: 
-061880,000130:                                                                                                  <span class="co">#  *** FINELAW STARTS HERE ***</span>
-061881,000131: 
-<a name="5343414C45444F54"></a>061882,000132: 17,3320           23427        <span class="sm">SCALEDOT</span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  EDOT IS SCALED AT PI/32 RADIANS/SECOND.</span>
-061883,000133: 
-061884,000134: 17,3321           31427                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  COMPUTE (EDOT)(EDOT)</span>
-061885,000135: 17,3322           00006                           <span class="op">EXTEND  </span>                                       
-061886,000136: 17,3323           70000                           <span class="op">SQUARE  </span>                                       <span class="co">#  PRODUCT SCALED AT PI(2)/2(10) RAD/SEC.</span>
-061887,000137: 17,3324           00006                           <span class="op">EXTEND  </span>                                       
-061888,000138: 17,3325           74737                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543133">BIT13</a>                                 <span class="co">#  SHIFT RIGHT TWO BITS TO RESCALE EDOTSQ</span>
-061889,000139: 17,3326           55737                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F545351">EDOTSQ</a>                                <span class="co">#        TO PI(2)/2(8) RAD(2)/SEC(2).</span>
-061890,000140: 
-<a name="45525254455354"></a>061891,000141: 17,3327           11752        <span class="sm">ERRTEST </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     <span class="co">#  DOES BIG ERROR (THREE DEG BEYOND THE</span>
-061892,000142: 17,3330           63725                           <span class="op">AD      </span> <a href="#2D33444547">-3DEG</a>                                 <span class="co">#  DEADBAND) REQUIRE MAXIMUM JETS?</span>
-061893,000143: 17,3331           13333                           <span class="op">TCF     </span> +2                                    
-061894,000144: 17,3332           63725                           <span class="op">AD      </span> <a href="#2D33444547">-3DEG</a>                                 
-061895,000145: 17,3333           00006                           <span class="op">EXTEND  </span>                                       
-061896,000146: 17,3334           51746                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494631">ADRSDIF1</a>                              
-061897,000147: 17,3335           61601                           <span class="op">SU      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464952454442">FIREDB</a>                                
-061898,000148: 17,3336           00006                           <span class="op">EXTEND  </span>                                       
-061899,000149: 17,3337           63344                           <span class="op">BZMF    </span> <a href="#53454E5354455354">SENSTEST</a>                              <span class="co">#  IF NOT:  ARE UNBALANCED JETS PREFERRED|</span>
-<a name="4D41584A455453"></a>061900,000150: 17,3340           34752        <span class="sm">MAXJETS </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  IF YES:  INCREMENT ADDRESS LOCATOR AND</span>
-061901,000151: 17,3341           27744                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494632">ADRSDIF2</a>                              <span class="co">#           SET SWITCH FOR JET SELECT LOGIC TO 4.</span>
-061902,000152: 17,3342           34751                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#464F5552">FOUR</a>                                  <span class="co">#           (ALWAYS DO THIS FOR P-AXIS)</span>
-061903,000153: 17,3343           13347                           <span class="op">TCF     </span> <a href="#544A43414C43">TJCALC</a>                                
-<a name="53454E5354455354"></a>061904,000154: 17,3344           11500        <span class="sm">SENSTEST</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53454E5345545950">SENSETYP</a>                              <span class="co">#  DOES TRANSLATION PREFER MIN JETS.</span>
-061905,000155: 17,3345           13347                           <span class="op">TCF     </span> <a href="#544A43414C43">TJCALC</a>                                <span class="co">#  YES.  USE MIN-JET PARAMETERS.</span>
-061906,000156: 17,3346           13340                           <span class="op">TCF     </span> <a href="#4D41584A455453">MAXJETS</a>                               <span class="co">#  NO.  GET MAX-JET PARAMETERS.</span>
-<a name="544A43414C43"></a>061907,000157: 17,3347           55743        <span class="sm">TJCALC  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E554D42455254">NUMBERT</a>                               <span class="co">#  SET TO +0,1,4 FOR (U,V-AXES) JET SELECT.</span>
-061908,000158: 
-061909,000159:                                                                                                  <span class="co">#  BEGINNING OF TJET CALCULATIONS:</span>
-061910,000160: 
-061911,000161: 17,3350           41737                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F545351">EDOTSQ</a>                                <span class="co">#  SCALED AT PI(2)/2(8).</span>
-061912,000162: 17,3351           00006                           <span class="op">EXTEND  </span>                                       
-061913,000163: 17,3352           51744                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494632">ADRSDIF2</a>                              
-061914,000164: 17,3353           71567                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F414E455431">1/ANET1</a>                               <span class="co">#  .5/ACC SCALED AT 2(6)/PI SEC(2)/RADIAN.</span>
-061915,000165: 17,3354           51746                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494631">ADRSDIF1</a>                              
-061916,000166: 17,3355           61601                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464952454442">FIREDB</a>                                <span class="co">#  DEADBAND SCALED AT PI/4 RADIAN.</span>
-061917,000167: 17,3356           00006                           <span class="op">EXTEND  </span>                                       
-061918,000168: 17,3357           61752                           <span class="op">SU      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     <span class="co">#  ATTITUDE ERROR SCALED AT PI/4 RADIAN.</span>
-061919,000169: 17,3360           55741                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46495245464354">FIREFCT</a>                               <span class="co">#  -E-.5(EDOTSQ)/ACC-DB AT PI/4 RADIAN.</span>
-061920,000170: 17,3361           00006                           <span class="op">EXTEND  </span>                                       
-061921,000171: 17,3362           63542                           <span class="op">BZMF    </span> <a href="#5A4F4E312C322C33">ZON1,2,3</a>                              
-061922,000172: 
-<a name="5A4F4E45342C35"></a>061923,000173: 17,3363           51746        <span class="sm">ZONE4,5 </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494631">ADRSDIF1</a>                              
-061924,000174: 17,3364           31573                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F41434F415354">1/ACOAST</a>                              <span class="co">#  .5/ACC SCALED AT 2(6)/PI WHERE</span>
+062044,000126: 17,3313           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  FOR THIS AXIS=</span>
+062045,000127: 17,3314           74750                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495434">BIT4</a>                                  <span class="co">#  SHIFT RIGHT ELEVEN BITS, IF THE A-REG IS</span>
+062046,000128: 17,3315           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  ZERO, THEN RESCALE AND USE FINELAW.</span>
+062047,000129: 17,3316           13320                           <span class="op">BZF     </span> <a href="#5343414C45444F54">SCALEDOT</a>                              
+062048,000130: 17,3317           13672                           <span class="op">TCF     </span> <a href="#5255464C415733">RUFLAW3</a>                               
+062049,000131: 
+062050,000132:                                                                                                  <span class="co">#  *** FINELAW STARTS HERE ***</span>
+062051,000133: 
+<a name="5343414C45444F54"></a>062052,000134: 17,3320           23427        <span class="sm">SCALEDOT</span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  EDOT IS SCALED AT PI/32 RADIANS/SECOND.</span>
+062053,000135: 
+062054,000136: 17,3321           31427                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  COMPUTE (EDOT)(EDOT)</span>
+062055,000137: 17,3322           00006                           <span class="op">EXTEND  </span>                                       
+062056,000138: 17,3323           70000                           <span class="op">SQUARE  </span>                                       <span class="co">#  PRODUCT SCALED AT PI(2)/2(10) RAD/SEC.</span>
+062057,000139: 17,3324           00006                           <span class="op">EXTEND  </span>                                       
+062058,000140: 17,3325           74737                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543133">BIT13</a>                                 <span class="co">#  SHIFT RIGHT TWO BITS TO RESCALE EDOTSQ</span>
+062059,000141: 17,3326           55737                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F545351">EDOTSQ</a>                                <span class="co">#        TO PI(2)/2(8) RAD(2)/SEC(2).</span>
+062060,000142: 
+<a name="45525254455354"></a>062061,000143: 17,3327           11752        <span class="sm">ERRTEST </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     <span class="co">#  DOES BIG ERROR (THREE DEG BEYOND THE</span>
+062062,000144: 17,3330           63725                           <span class="op">AD      </span> <a href="#2D33444547">-3DEG</a>                                 <span class="co">#  DEADBAND) REQUIRE MAXIMUM JETS?</span>
+062063,000145: 17,3331           13333                           <span class="op">TCF     </span> +2                                    
+062064,000146: 17,3332           63725                           <span class="op">AD      </span> <a href="#2D33444547">-3DEG</a>                                 
+062065,000147: 17,3333           00006                           <span class="op">EXTEND  </span>                                       
+062066,000148: 17,3334           51746                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494631">ADRSDIF1</a>                              
+062067,000149: 17,3335           61601                           <span class="op">SU      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464952454442">FIREDB</a>                                
+062068,000150: 17,3336           00006                           <span class="op">EXTEND  </span>                                       
+062069,000151: 17,3337           63344                           <span class="op">BZMF    </span> <a href="#53454E5354455354">SENSTEST</a>                              <span class="co">#  IF NOT:  ARE UNBALANCED JETS PREFERRED|</span>
+<a name="4D41584A455453"></a>062070,000152: 17,3340           34752        <span class="sm">MAXJETS </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  IF YES:  INCREMENT ADDRESS LOCATOR AND</span>
+062071,000153: 17,3341           27744                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494632">ADRSDIF2</a>                              <span class="co">#           SET SWITCH FOR JET SELECT LOGIC TO 4.</span>
+062072,000154: 17,3342           34751                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#464F5552">FOUR</a>                                  <span class="co">#           (ALWAYS DO THIS FOR P-AXIS)</span>
+062073,000155: 17,3343           13347                           <span class="op">TCF     </span> <a href="#544A43414C43">TJCALC</a>                                
+<a name="53454E5354455354"></a>062074,000156: 17,3344           11500        <span class="sm">SENSTEST</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53454E5345545950">SENSETYP</a>                              <span class="co">#  DOES TRANSLATION PREFER MIN JETS.</span>
+062075,000157: 17,3345           13347                           <span class="op">TCF     </span> <a href="#544A43414C43">TJCALC</a>                                <span class="co">#  YES.  USE MIN-JET PARAMETERS.</span>
+062076,000158: 17,3346           13340                           <span class="op">TCF     </span> <a href="#4D41584A455453">MAXJETS</a>                               <span class="co">#  NO.  GET MAX-JET PARAMETERS.</span>
+<a name="544A43414C43"></a>062077,000159: 17,3347           55743        <span class="sm">TJCALC  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E554D42455254">NUMBERT</a>                               <span class="co">#  SET TO +0,1,4 FOR (U,V-AXES) JET SELECT.</span>
+062078,000160: 
+062079,000161:                                                                                                  <span class="co">#  BEGINNING OF TJET CALCULATIONS:</span>
+062080,000162: 
+062081,000163: 17,3350           41737                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F545351">EDOTSQ</a>                                <span class="co">#  SCALED AT PI(2)/2(8).</span>
+062082,000164: 17,3351           00006                           <span class="op">EXTEND  </span>                                       
+062083,000165: 17,3352           51744                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494632">ADRSDIF2</a>                              
+062084,000166: 17,3353           71567                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F414E455431">1/ANET1</a>                               <span class="co">#  .5/ACC SCALED AT 2(6)/PI SEC(2)/RADIAN.</span>
+062085,000167: 17,3354           51746                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494631">ADRSDIF1</a>                              
+062086,000168: 17,3355           61601                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464952454442">FIREDB</a>                                <span class="co">#  DEADBAND SCALED AT PI/4 RADIAN.</span>
+062087,000169: 17,3356           00006                           <span class="op">EXTEND  </span>                                       
+062088,000170: 17,3357           61752                           <span class="op">SU      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     <span class="co">#  ATTITUDE ERROR SCALED AT PI/4 RADIAN.</span>
+062089,000171: 17,3360           55741                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46495245464354">FIREFCT</a>                               <span class="co">#  -E-.5(EDOTSQ)/ACC-DB AT PI/4 RADIAN.</span>
+062090,000172: 17,3361           00006                           <span class="op">EXTEND  </span>                                       
+062091,000173: 17,3362           63542                           <span class="op">BZMF    </span> <a href="#5A4F4E312C322C33">ZON1,2,3</a>                              
+062092,000174: 
+<a name="5A4F4E45342C35"></a>062093,000175: 17,3363           51746        <span class="sm">ZONE4,5 </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494631">ADRSDIF1</a>                              
+062094,000176: 17,3364           31573                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F41434F415354">1/ACOAST</a>                              <span class="co">#  .5/ACC SCALED AT 2(6)/PI WHERE</span>
 </pre>
 </span>
 </p>
@@ -318,56 +321,56 @@ Page 1463
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061926,000176: 17,3365           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  ACC = MAX(AMIN, AOS-).</span>
-061927,000177: 17,3366           71737                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F545351">EDOTSQ</a>                                <span class="co">#  SCALED AT PI/2(8).</span>
-061928,000178: 17,3367           61752                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     <span class="co">#  SCALED AT PI/4</span>
-061929,000179: 17,3370           51746                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494631">ADRSDIF1</a>                              
-061930,000180: 17,3371           61603                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F4153544442">COASTDB</a>                               <span class="co">#  SCALED AT PI/4 POS. FOR NEG. INTERCEPT.</span>
-061931,000181: 17,3372           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  TEST E+.5(EDOTSQ)/ACC+DB AT PI/4 RADIAN.</span>
-061932,000182: 17,3373           63426                           <span class="op">BZMF    </span> <a href="#5A4F4E4535">ZONE5</a>                                 <span class="co">#  IF FUNCTION NEGATIVE, FIND TJET.</span>
-061933,000183:                                                                                                  <span class="co">#  IF FUNCTION POSITIVE, IN ZONE 4.</span>
-061934,000184: 
-061935,000185:                                                                                                  <span class="co">#  ZONE 4 IS THE COAST REGION.  HOWEVER, IF THE JETS ARE ON AND DRIVING TOWARD</span>
-061936,000186:                                                                                                  <span class="co">#        A. THE AXIS WITHIN + OR - (DB + FLAT) FOR DRIFTING FLIGHT, OR</span>
-061937,000187:                                                                                                  <span class="co">#        B. THE USUAL TARGET PARABOLA FOR POWERED FLIGHT</span>
-061938,000188:                                                                                                  <span class="co">#  THEN THE THRUSTERS ARE KEPT ON.</span>
-061939,000189: 
-<a name="5A4F4E4534"></a>061940,000190: 17,3374           51505        <span class="sm">ZONE4   </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953435452">AXISCTR</a>                               <span class="co">#  IS THE CURRENT VALUE IN TJET NON-ZERO</span>
-061941,000191: 17,3375           41525                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A455455">TJETU</a>                                 <span class="co">#        WITH SENSE OPPOSITE TO EDOT,</span>
-061942,000192: 17,3376           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        (I.E., ARE JETS ON AND FIRING TOWARD</span>
-061943,000193: 17,3377           71740                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F5453454E5345">ROTSENSE</a>                              <span class="co">#        THE DESIRABLE STATE).</span>
-061944,000194: 17,3400           00006                           <span class="op">EXTEND  </span>                                       
-061945,000195: 17,3401           63422                           <span class="op">BZMF    </span> <a href="#434F415354544A">COASTTJ</a>                               <span class="co">#  NO.  COAST.</span>
-061946,000196: 
-<a name="4A4554534F4E"></a>061947,000197: 17,3402           11555        <span class="sm">JETSON  </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C4154">FLAT</a>                                  <span class="co">#  YES.  IS THIS DRIFTING OR POWERED FLIGHT|</span>
-061948,000198: 17,3403           13414                           <span class="op">TCF     </span> <a href="#44524946542F4F4E">DRIFT/ON</a>                              <span class="co">#  DRIFTING.  GO MAKE FURTHER TEST.</span>
-061949,000199: 
-061950,000200: 17,3404           41741                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46495245464354">FIREFCT</a>                               <span class="co">#  POWERED (OR ULLAGE).  CAN TARGET PARABOLA</span>
-061951,000201: 17,3405           51746                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494631">ADRSDIF1</a>                              <span class="co">#        BE REACHED FROM THIS POINT IN THE</span>
-061952,000202: 17,3406           61605                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4158495344495354">AXISDIST</a>                              <span class="co">#        PHASE PLANE|</span>
-061953,000203: 17,3407           00006                           <span class="op">EXTEND  </span>                                       
-061954,000204: 17,3410           63422                           <span class="op">BZMF    </span> <a href="#434F415354544A">COASTTJ</a>                               <span class="co">#  NO. SET TJET = 0.</span>
-061955,000205: 17,3411           03526                           <span class="op">TC      </span> <a href="#5A313233434F4D50">Z123COMP</a>                              <span class="co">#  YES.  CALCULATE TJET AS THOUGH IN ZONE 1</span>
-061956,000206: 17,3412           31741                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46495245464354">FIREFCT</a>                               <span class="co">#        AFTER COMPUTING THE REQUIRED</span>
-061957,000207: 17,3413           13562                           <span class="op">TCF     </span> <a href="#5A4F4E4531">ZONE1</a>                                 <span class="co">#        PARAMETERS.</span>
-061958,000208: 
-<a name="44524946542F4F4E"></a>061959,000209: 17,3414           51746        <span class="sm">DRIFT/ON</span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494631">ADRSDIF1</a>                              <span class="co">#  CAN TARGET STRIP OF AXIS BE REACHED FROM</span>
-061960,000210: 17,3415           41601                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464952454442">FIREDB</a>                                <span class="co">#        THIS POINT IN THE PHASE PLANE|</span>
-061961,000211: 17,3416           60000                           <span class="op">DOUBLE  </span>                                       
-061962,000212: 17,3417           61741                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46495245464354">FIREFCT</a>                               
-061963,000213: 17,3420           00006                           <span class="op">EXTEND  </span>                                       
-061964,000214: 17,3421           63424                           <span class="op">BZMF    </span> +3                                    
-<a name="434F415354544A"></a>061965,000215: 17,3422           34755        <span class="sm">COASTTJ </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  NO.  SET TJET = 0.</span>
-061966,000216: 17,3423           13466                           <span class="op">TCF     </span> <a href="#52455455524E544A">RETURNTJ</a>                              
-061967,000217: 
-061968,000218: 17,3424           03526                           <span class="op">TC      </span> <a href="#5A313233434F4D50">Z123COMP</a>                              <span class="co">#  YES. CALCULATE TJET AS THOUGH IN ZONE 2</span>
-061969,000219: 17,3425           13547                           <span class="op">TCF     </span> <a href="#5A4F4E45322C33">ZONE2,3</a>                               <span class="co">#        OR 3 AFTER COMPUTING REQUIRED VALUES.</span>
-061970,000220: 
-<a name="5A4F4E4535"></a>061971,000221: 17,3426           54001        <span class="sm">ZONE5   </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  TEMPORARILY STORE FUNCTION IN L.</span>
-061972,000222: 17,3427           11740                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F5453454E5345">ROTSENSE</a>                              <span class="co">#  MODIFY ADRSDIF2 FOR ACCESSING 1/ANET2</span>
-061973,000223: 17,3430           13434                           <span class="op">TCF     </span> +4                                    <span class="co">#  AND ACCFCTZ5, WHICH MUST BE PICKED UP</span>
-061974,000224: 17,3431           05705                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               <span class="co">#  FROM THE NEXT LOWER REGISTER IF THE</span>
-061975,000225: 17,3432           44752                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  (ACTUAL) ERROR RATE IS NEGATIVE.</span>
+062096,000178: 17,3365           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  ACC = MAX(AMIN, AOS-).</span>
+062097,000179: 17,3366           71737                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F545351">EDOTSQ</a>                                <span class="co">#  SCALED AT PI/2(8).</span>
+062098,000180: 17,3367           61752                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     <span class="co">#  SCALED AT PI/4</span>
+062099,000181: 17,3370           51746                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494631">ADRSDIF1</a>                              
+062100,000182: 17,3371           61603                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F4153544442">COASTDB</a>                               <span class="co">#  SCALED AT PI/4 POS. FOR NEG. INTERCEPT.</span>
+062101,000183: 17,3372           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  TEST E+.5(EDOTSQ)/ACC+DB AT PI/4 RADIAN.</span>
+062102,000184: 17,3373           63426                           <span class="op">BZMF    </span> <a href="#5A4F4E4535">ZONE5</a>                                 <span class="co">#  IF FUNCTION NEGATIVE, FIND TJET.</span>
+062103,000185:                                                                                                  <span class="co">#  IF FUNCTION POSITIVE, IN ZONE 4.</span>
+062104,000186: 
+062105,000187:                                                                                                  <span class="co">#  ZONE 4 IS THE COAST REGION.  HOWEVER, IF THE JETS ARE ON AND DRIVING TOWARD</span>
+062106,000188:                                                                                                  <span class="co">#        A. THE AXIS WITHIN + OR - (DB + FLAT) FOR DRIFTING FLIGHT, OR</span>
+062107,000189:                                                                                                  <span class="co">#        B. THE USUAL TARGET PARABOLA FOR POWERED FLIGHT</span>
+062108,000190:                                                                                                  <span class="co">#  THEN THE THRUSTERS ARE KEPT ON.</span>
+062109,000191: 
+<a name="5A4F4E4534"></a>062110,000192: 17,3374           51505        <span class="sm">ZONE4   </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953435452">AXISCTR</a>                               <span class="co">#  IS THE CURRENT VALUE IN TJET NON-ZERO</span>
+062111,000193: 17,3375           41525                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A455455">TJETU</a>                                 <span class="co">#        WITH SENSE OPPOSITE TO EDOT,</span>
+062112,000194: 17,3376           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        (I.E., ARE JETS ON AND FIRING TOWARD</span>
+062113,000195: 17,3377           71740                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F5453454E5345">ROTSENSE</a>                              <span class="co">#        THE DESIRABLE STATE).</span>
+062114,000196: 17,3400           00006                           <span class="op">EXTEND  </span>                                       
+062115,000197: 17,3401           63422                           <span class="op">BZMF    </span> <a href="#434F415354544A">COASTTJ</a>                               <span class="co">#  NO.  COAST.</span>
+062116,000198: 
+<a name="4A4554534F4E"></a>062117,000199: 17,3402           11555        <span class="sm">JETSON  </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C4154">FLAT</a>                                  <span class="co">#  YES.  IS THIS DRIFTING OR POWERED FLIGHT|</span>
+062118,000200: 17,3403           13414                           <span class="op">TCF     </span> <a href="#44524946542F4F4E">DRIFT/ON</a>                              <span class="co">#  DRIFTING.  GO MAKE FURTHER TEST.</span>
+062119,000201: 
+062120,000202: 17,3404           41741                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46495245464354">FIREFCT</a>                               <span class="co">#  POWERED (OR ULLAGE).  CAN TARGET PARABOLA</span>
+062121,000203: 17,3405           51746                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494631">ADRSDIF1</a>                              <span class="co">#        BE REACHED FROM THIS POINT IN THE</span>
+062122,000204: 17,3406           61605                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4158495344495354">AXISDIST</a>                              <span class="co">#        PHASE PLANE|</span>
+062123,000205: 17,3407           00006                           <span class="op">EXTEND  </span>                                       
+062124,000206: 17,3410           63422                           <span class="op">BZMF    </span> <a href="#434F415354544A">COASTTJ</a>                               <span class="co">#  NO. SET TJET = 0.</span>
+062125,000207: 17,3411           03526                           <span class="op">TC      </span> <a href="#5A313233434F4D50">Z123COMP</a>                              <span class="co">#  YES.  CALCULATE TJET AS THOUGH IN ZONE 1</span>
+062126,000208: 17,3412           31741                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46495245464354">FIREFCT</a>                               <span class="co">#        AFTER COMPUTING THE REQUIRED</span>
+062127,000209: 17,3413           13562                           <span class="op">TCF     </span> <a href="#5A4F4E4531">ZONE1</a>                                 <span class="co">#        PARAMETERS.</span>
+062128,000210: 
+<a name="44524946542F4F4E"></a>062129,000211: 17,3414           51746        <span class="sm">DRIFT/ON</span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494631">ADRSDIF1</a>                              <span class="co">#  CAN TARGET STRIP OF AXIS BE REACHED FROM</span>
+062130,000212: 17,3415           41601                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464952454442">FIREDB</a>                                <span class="co">#        THIS POINT IN THE PHASE PLANE|</span>
+062131,000213: 17,3416           60000                           <span class="op">DOUBLE  </span>                                       
+062132,000214: 17,3417           61741                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46495245464354">FIREFCT</a>                               
+062133,000215: 17,3420           00006                           <span class="op">EXTEND  </span>                                       
+062134,000216: 17,3421           63424                           <span class="op">BZMF    </span> +3                                    
+<a name="434F415354544A"></a>062135,000217: 17,3422           34755        <span class="sm">COASTTJ </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  NO.  SET TJET = 0.</span>
+062136,000218: 17,3423           13466                           <span class="op">TCF     </span> <a href="#52455455524E544A">RETURNTJ</a>                              
+062137,000219: 
+062138,000220: 17,3424           03526                           <span class="op">TC      </span> <a href="#5A313233434F4D50">Z123COMP</a>                              <span class="co">#  YES. CALCULATE TJET AS THOUGH IN ZONE 2</span>
+062139,000221: 17,3425           13547                           <span class="op">TCF     </span> <a href="#5A4F4E45322C33">ZONE2,3</a>                               <span class="co">#        OR 3 AFTER COMPUTING REQUIRED VALUES.</span>
+062140,000222: 
+<a name="5A4F4E4535"></a>062141,000223: 17,3426           54001        <span class="sm">ZONE5   </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  TEMPORARILY STORE FUNCTION IN L.</span>
+062142,000224: 17,3427           11740                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F5453454E5345">ROTSENSE</a>                              <span class="co">#  MODIFY ADRSDIF2 FOR ACCESSING 1/ANET2</span>
+062143,000225: 17,3430           13434                           <span class="op">TCF     </span> +4                                    <span class="co">#  AND ACCFCTZ5, WHICH MUST BE PICKED UP</span>
+062144,000226: 17,3431           05705                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               <span class="co">#  FROM THE NEXT LOWER REGISTER IF THE</span>
+062145,000227: 17,3432           44752                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  (ACTUAL) ERROR RATE IS NEGATIVE.</span>
 </pre>
 </span>
 </p>
@@ -383,58 +386,58 @@ Page 1464
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061977,000227: 17,3433           27744                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494632">ADRSDIF2</a>                              
-061978,000228: 
-061979,000229: 17,3434           30001                 +4        <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-061980,000230: 17,3435           00006                           <span class="op">EXTEND  </span>                                       
-061981,000231: 17,3436           51744                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494632">ADRSDIF2</a>                              <span class="co">#  TTOAXIS AND HH ARE THE PARAMETERS UPON</span>
-061982,000232: 17,3437           71576                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4143434643545A35">ACCFCTZ5</a>                              <span class="co">#        WHICH THE APPROXIMATIONS TO TJET ARE</span>
-061983,000233: 17,3440           20001                           <span class="op">DDOUBL  </span>                                       <span class="co">#        BASED.</span>
-061984,000234: 17,3441           20001                           <span class="op">DDOUBL  </span>                                       
-061985,000235: 17,3442           53750                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#  DOUBLE PRECISION H SCALED AT 8 SEC(2).</span>
-061986,000236: 17,3443           51744                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494632">ADRSDIF2</a>                              
-061987,000237: 17,3444           31570                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F414E455432">1/ANET2</a>                               <span class="co">#  SCALED AT 2(7)/PI SEC(2)/RAD.</span>
-061988,000238: 17,3445           00006                           <span class="op">EXTEND  </span>                                       
-061989,000239: 17,3446           71427                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  SCALED AT PI/2(5)</span>
-061990,000240: 17,3447           55742                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F41584953">TTOAXIS</a>                               <span class="co">#  SCALED AT 4 SEC.</span>
-061991,000241: 
-061992,000242:                                                                                                  <span class="co">#  TEST WHETHER TJET GREATER THAN 50 MSEC.</span>
-061993,000243: 
-061994,000244: 17,3450           00006                           <span class="op">EXTEND  </span>                                       
-061995,000245: 17,3451           73734                           <span class="op">MP      </span> <a href="#2D2E3035415432">-.05AT2</a>                               <span class="co">#  H - .05 TTOAXIS - .00125 G.T. ZERO</span>
-061996,000246: 17,3452           61747                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#        (SCALED AT 8 SEC(2) ).</span>
-061997,000247: 17,3453           67746                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454732">NEG2</a>                                  
-061998,000248: 17,3454           00006                           <span class="op">EXTEND  </span>                                       
-061999,000249: 17,3455           63503                           <span class="op">BZMF    </span> <a href="#464F524D554C4131">FORMULA1</a>                              
-062000,000250: 
-062001,000251:                                                                                                  <span class="co">#  TEST WHETHER TJET GREATER THAN 150 MSEC.</span>
-062002,000252: 
-062003,000253: 17,3456           31742                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F41584953">TTOAXIS</a>                               
-062004,000254: 17,3457           00006                           <span class="op">EXTEND  </span>                                       
-062005,000255: 17,3460           73735                           <span class="op">MP      </span> <a href="#2D2E3135415432">-.15AT2</a>                               <span class="co">#  H - .15 TTOAXIS - .01125 G.T. ZERO</span>
-062006,000256: 17,3461           61747                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#        (SCALED AT 8 SEC(2) )</span>
-062007,000257: 17,3462           63726                           <span class="op">AD      </span> <a href="#2D2E303131324138">-.0112A8</a>                              
-062008,000258: 17,3463           00006                           <span class="op">EXTEND  </span>                                       
-062009,000259: 17,3464           63513                           <span class="op">BZMF    </span> <a href="#464F524D554C4132">FORMULA2</a>                              
-062010,000260: 
-062011,000261:                                                                                                  <span class="co">#  IF TJET GREATER THAN 150 MSEC, ASSIGN IT VALUE OF 250 MSEC, SINCE THIS</span>
-062012,000262:                                                                                                  <span class="co">#  IS ENOUGH TO ASSURE NO SKIP NEXT CSP (100 MSEC).</span>
-062013,000263: 
-<a name="46554C4C54494D45"></a>062014,000264: 17,3465           34741        <span class="sm">FULLTIME</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543131">BIT11</a>                                 <span class="co">#  250 MSEC SCALED AT 4 SEC.</span>
-062015,000265: 
-062016,000266:                                                                                                  <span class="co">#  RETURN TO CALLING PROGRAM WITH JET TIME SCALED AS TIME6 AND SIGNED.</span>
-062017,000267: 
-<a name="52455455524E544A"></a>062018,000268: 17,3466           00006        <span class="sm">RETURNTJ</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  ALL BRANCHES TERMINATE HERE WITH TJET</span>
-062019,000269: 17,3467           71740                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F5453454E5345">ROTSENSE</a>                              <span class="co">#        (SCALED AT 4 SEC) IN THE ACCUMULATOR.</span>
-062020,000270: 17,3470           51505                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953435452">AXISCTR</a>                               <span class="co">#  ROTSENSE APPLIES SIGN AND CHANGES SCALE.</span>
-062021,000271: 17,3471           55525                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A455455">TJETU</a>                                 
-062022,000272: 17,3472           00006                           <span class="op">EXTEND  </span>                                       
-062023,000273: 17,3473           51505                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953435452">AXISCTR</a>                               
-062024,000274: 17,3474           71547                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414343535755">ACCSWU</a>                                <span class="co">#  SET SWITCH FOR JET SELECT IF ROTATION IS</span>
-062025,000275: 17,3475           30001                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-062026,000276: 17,3476           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        IN A SENSE FOR WHICH 1/ACCS HAS FORCED</span>
-062027,000277: 17,3477           63502                           <span class="op">BZMF    </span> +3                                    <span class="co">#        A MAX-JET CALCULATION.</span>
-062028,000278: 17,3500           34751                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#464F5552">FOUR</a>                                  
+062147,000229: 17,3433           27744                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494632">ADRSDIF2</a>                              
+062148,000230: 
+062149,000231: 17,3434           30001                 +4        <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+062150,000232: 17,3435           00006                           <span class="op">EXTEND  </span>                                       
+062151,000233: 17,3436           51744                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494632">ADRSDIF2</a>                              <span class="co">#  TTOAXIS AND HH ARE THE PARAMETERS UPON</span>
+062152,000234: 17,3437           71576                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4143434643545A35">ACCFCTZ5</a>                              <span class="co">#        WHICH THE APPROXIMATIONS TO TJET ARE</span>
+062153,000235: 17,3440           20001                           <span class="op">DDOUBL  </span>                                       <span class="co">#        BASED.</span>
+062154,000236: 17,3441           20001                           <span class="op">DDOUBL  </span>                                       
+062155,000237: 17,3442           53750                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#  DOUBLE PRECISION H SCALED AT 8 SEC(2).</span>
+062156,000238: 17,3443           51744                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494632">ADRSDIF2</a>                              
+062157,000239: 17,3444           31570                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F414E455432">1/ANET2</a>                               <span class="co">#  SCALED AT 2(7)/PI SEC(2)/RAD.</span>
+062158,000240: 17,3445           00006                           <span class="op">EXTEND  </span>                                       
+062159,000241: 17,3446           71427                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  SCALED AT PI/2(5)</span>
+062160,000242: 17,3447           55742                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F41584953">TTOAXIS</a>                               <span class="co">#  SCALED AT 4 SEC.</span>
+062161,000243: 
+062162,000244:                                                                                                  <span class="co">#  TEST WHETHER TJET GREATER THAN 50 MSEC.</span>
+062163,000245: 
+062164,000246: 17,3450           00006                           <span class="op">EXTEND  </span>                                       
+062165,000247: 17,3451           73734                           <span class="op">MP      </span> <a href="#2D2E3035415432">-.05AT2</a>                               <span class="co">#  H - .05 TTOAXIS - .00125 G.T. ZERO</span>
+062166,000248: 17,3452           61747                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#        (SCALED AT 8 SEC(2) ).</span>
+062167,000249: 17,3453           67746                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454732">NEG2</a>                                  
+062168,000250: 17,3454           00006                           <span class="op">EXTEND  </span>                                       
+062169,000251: 17,3455           63503                           <span class="op">BZMF    </span> <a href="#464F524D554C4131">FORMULA1</a>                              
+062170,000252: 
+062171,000253:                                                                                                  <span class="co">#  TEST WHETHER TJET GREATER THAN 150 MSEC.</span>
+062172,000254: 
+062173,000255: 17,3456           31742                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F41584953">TTOAXIS</a>                               
+062174,000256: 17,3457           00006                           <span class="op">EXTEND  </span>                                       
+062175,000257: 17,3460           73735                           <span class="op">MP      </span> <a href="#2D2E3135415432">-.15AT2</a>                               <span class="co">#  H - .15 TTOAXIS - .01125 G.T. ZERO</span>
+062176,000258: 17,3461           61747                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#        (SCALED AT 8 SEC(2) )</span>
+062177,000259: 17,3462           63726                           <span class="op">AD      </span> <a href="#2D2E303131324138">-.0112A8</a>                              
+062178,000260: 17,3463           00006                           <span class="op">EXTEND  </span>                                       
+062179,000261: 17,3464           63513                           <span class="op">BZMF    </span> <a href="#464F524D554C4132">FORMULA2</a>                              
+062180,000262: 
+062181,000263:                                                                                                  <span class="co">#  IF TJET GREATER THAN 150 MSEC, ASSIGN IT VALUE OF 250 MSEC, SINCE THIS</span>
+062182,000264:                                                                                                  <span class="co">#  IS ENOUGH TO ASSURE NO SKIP NEXT CSP (100 MSEC).</span>
+062183,000265: 
+<a name="46554C4C54494D45"></a>062184,000266: 17,3465           34741        <span class="sm">FULLTIME</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543131">BIT11</a>                                 <span class="co">#  250 MSEC SCALED AT 4 SEC.</span>
+062185,000267: 
+062186,000268:                                                                                                  <span class="co">#  RETURN TO CALLING PROGRAM WITH JET TIME SCALED AS TIME6 AND SIGNED.</span>
+062187,000269: 
+<a name="52455455524E544A"></a>062188,000270: 17,3466           00006        <span class="sm">RETURNTJ</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  ALL BRANCHES TERMINATE HERE WITH TJET</span>
+062189,000271: 17,3467           71740                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F5453454E5345">ROTSENSE</a>                              <span class="co">#        (SCALED AT 4 SEC) IN THE ACCUMULATOR.</span>
+062190,000272: 17,3470           51505                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953435452">AXISCTR</a>                               <span class="co">#  ROTSENSE APPLIES SIGN AND CHANGES SCALE.</span>
+062191,000273: 17,3471           55525                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A455455">TJETU</a>                                 
+062192,000274: 17,3472           00006                           <span class="op">EXTEND  </span>                                       
+062193,000275: 17,3473           51505                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953435452">AXISCTR</a>                               
+062194,000276: 17,3474           71547                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414343535755">ACCSWU</a>                                <span class="co">#  SET SWITCH FOR JET SELECT IF ROTATION IS</span>
+062195,000277: 17,3475           30001                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+062196,000278: 17,3476           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        IN A SENSE FOR WHICH 1/ACCS HAS FORCED</span>
+062197,000279: 17,3477           63502                           <span class="op">BZMF    </span> +3                                    <span class="co">#        A MAX-JET CALCULATION.</span>
+062198,000280: 17,3500           34751                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#464F5552">FOUR</a>                                  
 </pre>
 </span>
 </p>
@@ -450,55 +453,55 @@ Page 1465
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-062030,000280: 17,3501           55743                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E554D42455254">NUMBERT</a>                               
-062031,000281: 17,3502           01745                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#484F4C4451">HOLDQ</a>                                 <span class="co">#  RETURN VIA SAVED Q.</span>
-062032,000282: 
-062033,000283:                                                                                                  <span class="co">#  TJET = H/(.025 + TTOAXIS)     FOR TJET LESS THAN 50 MSEC.</span>
-062034,000284: 
-<a name="464F524D554C4131"></a>062035,000285: 17,3503           43733        <span class="sm">FORMULA1</span>           <span class="op">CS      </span> <a href="#2D2E303235415434">-.025AT4</a>                              <span class="co">#  .025 SEC SCALED AT 4.</span>
-062036,000286: 17,3504           61742                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F41584953">TTOAXIS</a>                               <span class="co">#  SCALED AT 4 SECONDS.</span>
-062037,000287: 17,3505           53750                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#  STORE DENOMINATOR IN FIRST WORD OF H,</span>
-062038,000288: 17,3506           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        WHICH NEED NOT BE PRESERVED.  PICK UP</span>
-062039,000289: 17,3507           11747                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#        DP H AND DIVIDE BY DENOMINATOR.</span>
-062040,000290: 17,3510           00006                           <span class="op">EXTEND  </span>                                       
-062041,000291: 17,3511           74736                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 <span class="co">#  RESCALE TJET FROM 2 TO USUAL 4 SEC.</span>
-062042,000292: 17,3512           13623                           <span class="op">TCF     </span> <a href="#43484B4D494E544A">CHKMINTJ</a>                              <span class="co">#  CHECK THAT TJET IS NOT LESS THAN MINIMUM</span>
-062043,000293: 
-062044,000294:                                                                                                  <span class="co">#  TJET = (H + .00375)/(0.1 + TTOAXIS)   FOR TJET GREATER THAN 50 MSEC.</span>
-062045,000295: 
-<a name="464F524D554C4132"></a>062046,000296: 17,3513           00006        <span class="sm">FORMULA2</span>           <span class="op">EXTEND  </span>                                       
-062047,000297: 17,3514           33737                           <span class="op">DCA     </span> <a href="#2E30303337354138">.00375A8</a>                              <span class="co">#  .00375 SEC(2) SCALED AT 8.</span>
-062048,000298: 17,3515           21750                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#  STORE NUMERATOR IN DP H, WHICH NEED NOT</span>
-062049,000299:                                                                                                  <span class="co">#        BE PRESERVED.</span>
-062050,000300: 17,3516           31742                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F41584953">TTOAXIS</a>                               <span class="co">#  SCALED AT 4 SEC.</span>
-062051,000301: 17,3517           63727                           <span class="op">AD      </span> <a href="#2E31415434">.1AT4</a>                                 <span class="co">#  0.1 SEC SCALED AT 4.</span>
-062052,000302: 17,3520           53750                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#  STORE DENOMINATOR IN FIRST WORD OF H,</span>
-062053,000303: 17,3521           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        WHICH NEED NOT BE PRESERVED.  PICK UP</span>
-062054,000304: 17,3522           11747                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#        DP NUMERATOR AND DIVIDE BY DENOMINATOR</span>
-062055,000305: 17,3523           00006                           <span class="op">EXTEND  </span>                                       
-062056,000306: 17,3524           74736                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 <span class="co">#  RESCALE TJET FROM 2 TO USUAL 4 SEC.</span>
-062057,000307: 17,3525           13466                           <span class="op">TCF     </span> <a href="#52455455524E544A">RETURNTJ</a>                              <span class="co">#  END SUBROUTINE.</span>
-062058,000308: 
-062059,000309:                                                                                                  <span class="co">#  SUBROUTINIZED COMPUTATIONS REQUIRED FOR ALL ENTRIES INTO CODING FOR ZONES 1, 2, AND 3.</span>
-062060,000310:                                                                                                  <span class="co">#  REACHED BY TC FROM 3 POINTS IN TJETLAW.</span>
-062061,000311: 
-<a name="5A313233434F4D50"></a>062062,000312: 17,3526           41740        <span class="sm">Z123COMP</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F5453454E5345">ROTSENSE</a>                              <span class="co">#  USED IN RETURNTJ SECTION TO RESCALE TJET</span>
-062063,000313: 17,3527           55740                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F5453454E5345">ROTSENSE</a>                              <span class="co">#        AS TIME6 AND GIVE IT PROPER SIGN.</span>
-062064,000314: 17,3530           31427                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  SCALED AT PI/2(5) RAD/SEC.</span>
-062065,000315: 17,3531           00006                           <span class="op">EXTEND  </span>                                       
-062066,000316: 17,3532           51744                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494632">ADRSDIF2</a>                              
-062067,000317: 17,3533           71567                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F414E455431">1/ANET1</a>                               <span class="co">#  SCALED AT 2(7)/PI SEC(2)/RAD.</span>
-062068,000318: 17,3534           55742                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F41584953">TTOAXIS</a>                               <span class="co">#  STORE TIME-TO-AXIS SCALED AT 4 SECONDS.</span>
-062069,000319: 17,3535           63740                           <span class="op">AD      </span> <a href="#2D544A4D4158">-TJMAX</a>                                
-062070,000320: 17,3536           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  IS TIME TO AXIS LESS THAN 150 MSEC.</span>
-062071,000321: 17,3537           63541                           <span class="op">BZMF    </span> +2                                    
-062072,000322: 17,3540           13465                           <span class="op">TCF     </span> <a href="#46554C4C54494D45">FULLTIME</a>                              <span class="co">#  NO. FIRE JETS, DO NOT CALCULATE TJET.</span>
-062073,000323: 17,3541           00002                           <span class="op">RETURN  </span>                                       <span class="co">#  YES.  GO ON TO FIND TJET</span>
-062074,000324: 
-<a name="5A4F4E312C322C33"></a>062075,000325: 17,3542           03526        <span class="sm">ZON1,2,3</span>           <span class="op">TC      </span> <a href="#5A313233434F4D50">Z123COMP</a>                              <span class="co">#  SUBROUTINIZED PREPARATION FOR ZONE1,2,3.</span>
-062076,000326: 
-062077,000327:                                                                                                  <span class="co">#  IF THE (NEG) DISTANCE BEYOND PARABOLA IS LESS THAN FLAT, USE SPECIAL</span>
-062078,000328:                                                                                                  <span class="co">#  LOGIC TO ACQUIRE MINIMUM IMPULSE LIMIT CYCLE.  DURING POWERED FLIGHT</span>
+062200,000282: 17,3501           55743                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E554D42455254">NUMBERT</a>                               
+062201,000283: 17,3502           01745                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#484F4C4451">HOLDQ</a>                                 <span class="co">#  RETURN VIA SAVED Q.</span>
+062202,000284: 
+062203,000285:                                                                                                  <span class="co">#  TJET = H/(.025 + TTOAXIS)     FOR TJET LESS THAN 50 MSEC.</span>
+062204,000286: 
+<a name="464F524D554C4131"></a>062205,000287: 17,3503           43733        <span class="sm">FORMULA1</span>           <span class="op">CS      </span> <a href="#2D2E303235415434">-.025AT4</a>                              <span class="co">#  .025 SEC SCALED AT 4.</span>
+062206,000288: 17,3504           61742                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F41584953">TTOAXIS</a>                               <span class="co">#  SCALED AT 4 SECONDS.</span>
+062207,000289: 17,3505           53750                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#  STORE DENOMINATOR IN FIRST WORD OF H,</span>
+062208,000290: 17,3506           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        WHICH NEED NOT BE PRESERVED.  PICK UP</span>
+062209,000291: 17,3507           11747                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#        DP H AND DIVIDE BY DENOMINATOR.</span>
+062210,000292: 17,3510           00006                           <span class="op">EXTEND  </span>                                       
+062211,000293: 17,3511           74736                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 <span class="co">#  RESCALE TJET FROM 2 TO USUAL 4 SEC.</span>
+062212,000294: 17,3512           13623                           <span class="op">TCF     </span> <a href="#43484B4D494E544A">CHKMINTJ</a>                              <span class="co">#  CHECK THAT TJET IS NOT LESS THAN MINIMUM</span>
+062213,000295: 
+062214,000296:                                                                                                  <span class="co">#  TJET = (H + .00375)/(0.1 + TTOAXIS)   FOR TJET GREATER THAN 50 MSEC.</span>
+062215,000297: 
+<a name="464F524D554C4132"></a>062216,000298: 17,3513           00006        <span class="sm">FORMULA2</span>           <span class="op">EXTEND  </span>                                       
+062217,000299: 17,3514           33737                           <span class="op">DCA     </span> <a href="#2E30303337354138">.00375A8</a>                              <span class="co">#  .00375 SEC(2) SCALED AT 8.</span>
+062218,000300: 17,3515           21750                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#  STORE NUMERATOR IN DP H, WHICH NEED NOT</span>
+062219,000301:                                                                                                  <span class="co">#        BE PRESERVED.</span>
+062220,000302: 17,3516           31742                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F41584953">TTOAXIS</a>                               <span class="co">#  SCALED AT 4 SEC.</span>
+062221,000303: 17,3517           63727                           <span class="op">AD      </span> <a href="#2E31415434">.1AT4</a>                                 <span class="co">#  0.1 SEC SCALED AT 4.</span>
+062222,000304: 17,3520           53750                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#  STORE DENOMINATOR IN FIRST WORD OF H,</span>
+062223,000305: 17,3521           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        WHICH NEED NOT BE PRESERVED.  PICK UP</span>
+062224,000306: 17,3522           11747                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#        DP NUMERATOR AND DIVIDE BY DENOMINATOR</span>
+062225,000307: 17,3523           00006                           <span class="op">EXTEND  </span>                                       
+062226,000308: 17,3524           74736                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 <span class="co">#  RESCALE TJET FROM 2 TO USUAL 4 SEC.</span>
+062227,000309: 17,3525           13466                           <span class="op">TCF     </span> <a href="#52455455524E544A">RETURNTJ</a>                              <span class="co">#  END SUBROUTINE.</span>
+062228,000310: 
+062229,000311:                                                                                                  <span class="co">#  SUBROUTINIZED COMPUTATIONS REQUIRED FOR ALL ENTRIES INTO CODING FOR ZONES 1, 2, AND 3.</span>
+062230,000312:                                                                                                  <span class="co">#  REACHED BY TC FROM 3 POINTS IN TJETLAW.</span>
+062231,000313: 
+<a name="5A313233434F4D50"></a>062232,000314: 17,3526           41740        <span class="sm">Z123COMP</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F5453454E5345">ROTSENSE</a>                              <span class="co">#  USED IN RETURNTJ SECTION TO RESCALE TJET</span>
+062233,000315: 17,3527           55740                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F5453454E5345">ROTSENSE</a>                              <span class="co">#        AS TIME6 AND GIVE IT PROPER SIGN.</span>
+062234,000316: 17,3530           31427                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  SCALED AT PI/2(5) RAD/SEC.</span>
+062235,000317: 17,3531           00006                           <span class="op">EXTEND  </span>                                       
+062236,000318: 17,3532           51744                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494632">ADRSDIF2</a>                              
+062237,000319: 17,3533           71567                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F414E455431">1/ANET1</a>                               <span class="co">#  SCALED AT 2(7)/PI SEC(2)/RAD.</span>
+062238,000320: 17,3534           55742                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F41584953">TTOAXIS</a>                               <span class="co">#  STORE TIME-TO-AXIS SCALED AT 4 SECONDS.</span>
+062239,000321: 17,3535           63740                           <span class="op">AD      </span> <a href="#2D544A4D4158">-TJMAX</a>                                
+062240,000322: 17,3536           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  IS TIME TO AXIS LESS THAN 150 MSEC.</span>
+062241,000323: 17,3537           63541                           <span class="op">BZMF    </span> +2                                    
+062242,000324: 17,3540           13465                           <span class="op">TCF     </span> <a href="#46554C4C54494D45">FULLTIME</a>                              <span class="co">#  NO. FIRE JETS, DO NOT CALCULATE TJET.</span>
+062243,000325: 17,3541           00002                           <span class="op">RETURN  </span>                                       <span class="co">#  YES.  GO ON TO FIND TJET</span>
+062244,000326: 
+<a name="5A4F4E312C322C33"></a>062245,000327: 17,3542           03526        <span class="sm">ZON1,2,3</span>           <span class="op">TC      </span> <a href="#5A313233434F4D50">Z123COMP</a>                              <span class="co">#  SUBROUTINIZED PREPARATION FOR ZONE1,2,3.</span>
+062246,000328: 
+062247,000329:                                                                                                  <span class="co">#  IF THE (NEG) DISTANCE BEYOND PARABOLA IS LESS THAN FLAT, USE SPECIAL</span>
+062248,000330:                                                                                                  <span class="co">#  LOGIC TO ACQUIRE MINIMUM IMPULSE LIMIT CYCLE.  DURING POWERED FLIGHT</span>
 </pre>
 </span>
 </p>
@@ -514,57 +517,57 @@ Page 1466
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-062080,000330:                                                                                                  <span class="co">#  OR ULLAGE, FLAT = 0</span>
-062081,000331: 
-062082,000332: 17,3543           31741                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46495245464354">FIREFCT</a>                               <span class="co">#  SCALED AT PI/4 RAD.</span>
-062083,000333: 17,3544           61555                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C4154">FLAT</a>                                  
-062084,000334: 17,3545           00006                           <span class="op">EXTEND  </span>                                       
-062085,000335: 17,3546           63562                           <span class="op">BZMF    </span> <a href="#5A4F4E4531">ZONE1</a>                                 <span class="co">#  NOT IN SPECIAL ZONES.</span>
-062086,000336: 
-062087,000337:                                                                                                  <span class="co">#  FIRE FOR AXIS OR, IF CLOSE, FIRE MINIMUM IMPULSE.  IF ON AXIS, COAST.</span>
-062088,000338: 
-<a name="5A4F4E45322C33"></a>062089,000339: 17,3547           41556        <span class="sm">ZONE2,3 </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A4F4E45334C494D">ZONE3LIM</a>                              <span class="co">#  HEIGHT OF MIN-IMPULSE ZONE SET BY 1/ACCS</span>
-062090,000340: 17,3550           61742                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F41584953">TTOAXIS</a>                               <span class="co">#        35 MSEC IN DRIFTING FLIGHT</span>
-062091,000341: 17,3551           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        ZERO WHEN TRYING TO ENTER GTS CONTROL.</span>
-062092,000342: 17,3552           63555                           <span class="op">BZMF    </span> <a href="#5A4F4E4533">ZONE3</a>                                 
-<a name="5A4F4E4532"></a>062093,000343: 17,3553           31742        <span class="sm">ZONE2   </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F41584953">TTOAXIS</a>                               <span class="co">#  FIRE TO AXIS.</span>
-062094,000344: 17,3554           13466                           <span class="op">TCF     </span> <a href="#52455455524E544A">RETURNTJ</a>                              
-<a name="5A4F4E4533"></a>062095,000345: 17,3555           11427        <span class="sm">ZONE3   </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  CHECK IF EDOT IS ZERO.</span>
-062096,000346: 17,3556           34746                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  <span class="co">#  FIRE A ONE-JET MINIMUM IMPULSE.</span>
-062097,000347: 17,3557           13466                           <span class="op">TCF     </span> <a href="#52455455524E544A">RETURNTJ</a>                              <span class="co">#  TJET = +0.</span>
-062098,000348: 17,3560           05705                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               <span class="co">#  CANNOT BE BECAUSE NEG EDOT COMPLEMENTED.</span>
-062099,000349: 17,3561           13466                           <span class="op">TCF     </span> <a href="#52455455524E544A">RETURNTJ</a>                              <span class="co">#  TJET = +0.</span>
-062100,000350: 
-<a name="5A4F4E4531"></a>062101,000351: 17,3562           00006        <span class="sm">ZONE1   </span>           <span class="op">EXTEND  </span>                                       
-062102,000352: 17,3563           51746                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494631">ADRSDIF1</a>                              
-062103,000353: 17,3564           61605                           <span class="op">SU      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4158495344495354">AXISDIST</a>                              <span class="co">#  SCALED AT PI/4 RAD.</span>
-062104,000354: 17,3565           00006                           <span class="op">EXTEND  </span>                                       
-062105,000355: 17,3566           51744                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494632">ADRSDIF2</a>                              
-062106,000356: 17,3567           71575                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4143434643545A31">ACCFCTZ1</a>                              <span class="co">#  SCALED AT 2(7)/PI SEC(2)/RAD.</span>
-062107,000357: 17,3570           20001                           <span class="op">DDOUBL  </span>                                       
-062108,000358: 17,3571           20001                           <span class="op">DDOUBL  </span>                                       
-062109,000359: 17,3572           53750                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#  DOUBLE PRECISION H SCALED AT 8 SEC(2).</span>
-062110,000360: 
-062111,000361:                                                                                                  <span class="co">#  TEST WHETHER TOTAL TIME REQUIRED GREATER THAN 150 MSEC:</span>
-062112,000362:                                                                                                  <span class="co">#                             2                                   2</span>
-062113,000363:                                                                                                  <span class="co">#        IS .5(.150 - TTOAXIS)  - H  NEGATIVE (SCALED AT 8 SECONDS )</span>
-062114,000364: 
-062115,000365: 17,3573           31742                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F41584953">TTOAXIS</a>                               <span class="co">#  TTOAXIS SCALED AT 4 SECONDS.</span>
-062116,000366: 17,3574           63740                           <span class="op">AD      </span> <a href="#2D544A4D4158">-TJMAX</a>                                <span class="co">#  -.150 SECOND SCALED AT 4.</span>
-062117,000367: 17,3575           00006                           <span class="op">EXTEND  </span>                                       
-062118,000368: 17,3576           70000                           <span class="op">SQUARE  </span>                                       
-062119,000369: 17,3577           00006                           <span class="op">EXTEND  </span>                                       
-062120,000370: 17,3600           61747                           <span class="op">SU      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#  HIGH WORD OF H SCALED AT 8 SEC(2).</span>
-062121,000371: 17,3601           00006                           <span class="op">EXTEND  </span>                                       
-062122,000372: 17,3602           63465                           <span class="op">BZMF    </span> <a href="#46554C4C54494D45">FULLTIME</a>                              <span class="co">#  YES.  NEED NOT CALCULATE TJET.</span>
-062123,000373: 
-062124,000374:                                                                                                  <span class="co">#  TEST WHETHER TIME BEYOND AXIS GREATER THAN 50 MSEC TO DETERMINE WHICH APPROXIMATION TO USE.</span>
-062125,000375: 
-062126,000376: 17,3603           31747                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    
-062127,000377: 17,3604           67746                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454732">NEG2</a>                                  
-062128,000378: 17,3605           00006                           <span class="op">EXTEND  </span>                                       
-062129,000379: 17,3606           63616                           <span class="op">BZMF    </span> <a href="#464F524D554C4133">FORMULA3</a>                              
-062130,000380: 
+062250,000332:                                                                                                  <span class="co">#  OR ULLAGE, FLAT = 0</span>
+062251,000333: 
+062252,000334: 17,3543           31741                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46495245464354">FIREFCT</a>                               <span class="co">#  SCALED AT PI/4 RAD.</span>
+062253,000335: 17,3544           61555                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C4154">FLAT</a>                                  
+062254,000336: 17,3545           00006                           <span class="op">EXTEND  </span>                                       
+062255,000337: 17,3546           63562                           <span class="op">BZMF    </span> <a href="#5A4F4E4531">ZONE1</a>                                 <span class="co">#  NOT IN SPECIAL ZONES.</span>
+062256,000338: 
+062257,000339:                                                                                                  <span class="co">#  FIRE FOR AXIS OR, IF CLOSE, FIRE MINIMUM IMPULSE.  IF ON AXIS, COAST.</span>
+062258,000340: 
+<a name="5A4F4E45322C33"></a>062259,000341: 17,3547           41556        <span class="sm">ZONE2,3 </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5A4F4E45334C494D">ZONE3LIM</a>                              <span class="co">#  HEIGHT OF MIN-IMPULSE ZONE SET BY 1/ACCS</span>
+062260,000342: 17,3550           61742                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F41584953">TTOAXIS</a>                               <span class="co">#        35 MSEC IN DRIFTING FLIGHT</span>
+062261,000343: 17,3551           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        ZERO WHEN TRYING TO ENTER GTS CONTROL.</span>
+062262,000344: 17,3552           63555                           <span class="op">BZMF    </span> <a href="#5A4F4E4533">ZONE3</a>                                 
+<a name="5A4F4E4532"></a>062263,000345: 17,3553           31742        <span class="sm">ZONE2   </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F41584953">TTOAXIS</a>                               <span class="co">#  FIRE TO AXIS.</span>
+062264,000346: 17,3554           13466                           <span class="op">TCF     </span> <a href="#52455455524E544A">RETURNTJ</a>                              
+<a name="5A4F4E4533"></a>062265,000347: 17,3555           11427        <span class="sm">ZONE3   </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  CHECK IF EDOT IS ZERO.</span>
+062266,000348: 17,3556           34746                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  <span class="co">#  FIRE A ONE-JET MINIMUM IMPULSE.</span>
+062267,000349: 17,3557           13466                           <span class="op">TCF     </span> <a href="#52455455524E544A">RETURNTJ</a>                              <span class="co">#  TJET = +0.</span>
+062268,000350: 17,3560           05705                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               <span class="co">#  CANNOT BE BECAUSE NEG EDOT COMPLEMENTED.</span>
+062269,000351: 17,3561           13466                           <span class="op">TCF     </span> <a href="#52455455524E544A">RETURNTJ</a>                              <span class="co">#  TJET = +0.</span>
+062270,000352: 
+<a name="5A4F4E4531"></a>062271,000353: 17,3562           00006        <span class="sm">ZONE1   </span>           <span class="op">EXTEND  </span>                                       
+062272,000354: 17,3563           51746                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494631">ADRSDIF1</a>                              
+062273,000355: 17,3564           61605                           <span class="op">SU      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4158495344495354">AXISDIST</a>                              <span class="co">#  SCALED AT PI/4 RAD.</span>
+062274,000356: 17,3565           00006                           <span class="op">EXTEND  </span>                                       
+062275,000357: 17,3566           51744                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494632">ADRSDIF2</a>                              
+062276,000358: 17,3567           71575                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4143434643545A31">ACCFCTZ1</a>                              <span class="co">#  SCALED AT 2(7)/PI SEC(2)/RAD.</span>
+062277,000359: 17,3570           20001                           <span class="op">DDOUBL  </span>                                       
+062278,000360: 17,3571           20001                           <span class="op">DDOUBL  </span>                                       
+062279,000361: 17,3572           53750                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#  DOUBLE PRECISION H SCALED AT 8 SEC(2).</span>
+062280,000362: 
+062281,000363:                                                                                                  <span class="co">#  TEST WHETHER TOTAL TIME REQUIRED GREATER THAN 150 MSEC:</span>
+062282,000364:                                                                                                  <span class="co">#                             2                                   2</span>
+062283,000365:                                                                                                  <span class="co">#        IS .5(.150 - TTOAXIS)  - H  NEGATIVE (SCALED AT 8 SECONDS )</span>
+062284,000366: 
+062285,000367: 17,3573           31742                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F41584953">TTOAXIS</a>                               <span class="co">#  TTOAXIS SCALED AT 4 SECONDS.</span>
+062286,000368: 17,3574           63740                           <span class="op">AD      </span> <a href="#2D544A4D4158">-TJMAX</a>                                <span class="co">#  -.150 SECOND SCALED AT 4.</span>
+062287,000369: 17,3575           00006                           <span class="op">EXTEND  </span>                                       
+062288,000370: 17,3576           70000                           <span class="op">SQUARE  </span>                                       
+062289,000371: 17,3577           00006                           <span class="op">EXTEND  </span>                                       
+062290,000372: 17,3600           61747                           <span class="op">SU      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#  HIGH WORD OF H SCALED AT 8 SEC(2).</span>
+062291,000373: 17,3601           00006                           <span class="op">EXTEND  </span>                                       
+062292,000374: 17,3602           63465                           <span class="op">BZMF    </span> <a href="#46554C4C54494D45">FULLTIME</a>                              <span class="co">#  YES.  NEED NOT CALCULATE TJET.</span>
+062293,000375: 
+062294,000376:                                                                                                  <span class="co">#  TEST WHETHER TIME BEYOND AXIS GREATER THAN 50 MSEC TO DETERMINE WHICH APPROXIMATION TO USE.</span>
+062295,000377: 
+062296,000378: 17,3603           31747                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    
+062297,000379: 17,3604           67746                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454732">NEG2</a>                                  
+062298,000380: 17,3605           00006                           <span class="op">EXTEND  </span>                                       
+062299,000381: 17,3606           63616                           <span class="op">BZMF    </span> <a href="#464F524D554C4133">FORMULA3</a>                              
+062300,000382: 
 </pre>
 </span>
 </p>
@@ -580,33 +583,33 @@ Page 1467
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-062132,000382:                                                                                                  <span class="co">#  TJET = H/0.1 + TTOAXIS + .0375        FOR APPROXIMATION OVER MORE THAN 50 MSEC.</span>
-062133,000383: 
-062134,000384: 17,3607           33730                           <span class="op">CAF     </span> <a href="#2E31415432">.1AT2</a>                                 <span class="co">#  STORE .1 SEC SCALED AT 2 FOR DIVISION.</span>
-062135,000385: 17,3610           53750                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#  DP H SCALED AT 8 SEC(2) NEED NOT BE</span>
-062136,000386: 17,3611           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        PRESERVED.</span>
-062137,000387: 17,3612           11747                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#  QUOTIENT SCALED AT 4 SECONDS.</span>
-062138,000388: 17,3613           61742                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F41584953">TTOAXIS</a>                               <span class="co">#  SCALED AT 4 SEC.</span>
-062139,000389: 17,3614           63731                           <span class="op">AD      </span> <a href="#2E30333735415434">.0375AT4</a>                              <span class="co">#  .0375 SEC SCALED AT 4.</span>
-062140,000390: 17,3615           13466                           <span class="op">TCF     </span> <a href="#52455455524E544A">RETURNTJ</a>                              <span class="co">#  END COMPUTATION.</span>
-062141,000391: 
-062142,000392:                                                                                                  <span class="co">#  TJET = H/.O25 + TTOAXIS       FOR APPROXIMATION OVER LESS THAN 50 MSEC.</span>
-062143,000393: 
-<a name="464F524D554C4133"></a>062144,000394: 17,3616           43732        <span class="sm">FORMULA3</span>           <span class="op">CS      </span> <a href="#2D2E303235415432">-.025AT2</a>                              <span class="co">#  STORE +.025 SEC SCALED AT 2 FOR DIVISION</span>
-062145,000395: 17,3617           53750                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#  PICK UP DP H AT 8, WHICH NEED NOT BE</span>
-062146,000396: 17,3620           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        PRESERVED.</span>
-062147,000397: 17,3621           11747                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#  QUOTIENT SCALED AT 4 SECONDS.</span>
-062148,000398: 17,3622           61742                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F41584953">TTOAXIS</a>                               <span class="co">#  SCALED AT 4 SEC.</span>
-062149,000399: 
-062150,000400:                                                                                                  <span class="co">#  IF COMPUTED JET TIME IS LESS THAN TJMIN, TJET IS SET TO ZERO.</span>
-062151,000401:                                                                                                  <span class="co">#  MINIMUM IMPULSES REQUIRED IN ZONE 3 ARE NOT SUBJECT TO THIS CONSTRAINT, NATURALLY.</span>
-062152,000402: 
-<a name="43484B4D494E544A"></a>062153,000403: 17,3623           63742        <span class="sm">CHKMINTJ</span>           <span class="op">AD      </span> <a href="#2D544A4D494E">-TJMIN</a>                                <span class="co">#  IS COMPUTED TIME LESS THAN THE MINIMUM.</span>
-062154,000404: 17,3624           00006                           <span class="op">EXTEND  </span>                                       
-062155,000405: 17,3625           63422                           <span class="op">BZMF    </span> <a href="#434F415354544A">COASTTJ</a>                               <span class="co">#  YES, SET TIME TO ZERO.</span>
-062156,000406: 17,3626           63741                           <span class="op">AD      </span> <a href="#544A4D494E">TJMIN</a>                                 <span class="co">#  NO, RESTORE COMPUTED TIME.</span>
-062157,000407: 17,3627           13466                           <span class="op">TCF     </span> <a href="#52455455524E544A">RETURNTJ</a>                              <span class="co">#  END COMPUTATION.</span>
-062158,000408: 
+062302,000384:                                                                                                  <span class="co">#  TJET = H/0.1 + TTOAXIS + .0375        FOR APPROXIMATION OVER MORE THAN 50 MSEC.</span>
+062303,000385: 
+062304,000386: 17,3607           33730                           <span class="op">CAF     </span> <a href="#2E31415432">.1AT2</a>                                 <span class="co">#  STORE .1 SEC SCALED AT 2 FOR DIVISION.</span>
+062305,000387: 17,3610           53750                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#  DP H SCALED AT 8 SEC(2) NEED NOT BE</span>
+062306,000388: 17,3611           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        PRESERVED.</span>
+062307,000389: 17,3612           11747                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#  QUOTIENT SCALED AT 4 SECONDS.</span>
+062308,000390: 17,3613           61742                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F41584953">TTOAXIS</a>                               <span class="co">#  SCALED AT 4 SEC.</span>
+062309,000391: 17,3614           63731                           <span class="op">AD      </span> <a href="#2E30333735415434">.0375AT4</a>                              <span class="co">#  .0375 SEC SCALED AT 4.</span>
+062310,000392: 17,3615           13466                           <span class="op">TCF     </span> <a href="#52455455524E544A">RETURNTJ</a>                              <span class="co">#  END COMPUTATION.</span>
+062311,000393: 
+062312,000394:                                                                                                  <span class="co">#  TJET = H/.O25 + TTOAXIS       FOR APPROXIMATION OVER LESS THAN 50 MSEC.</span>
+062313,000395: 
+<a name="464F524D554C4133"></a>062314,000396: 17,3616           43732        <span class="sm">FORMULA3</span>           <span class="op">CS      </span> <a href="#2D2E303235415432">-.025AT2</a>                              <span class="co">#  STORE +.025 SEC SCALED AT 2 FOR DIVISION</span>
+062315,000397: 17,3617           53750                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#  PICK UP DP H AT 8, WHICH NEED NOT BE</span>
+062316,000398: 17,3620           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        PRESERVED.</span>
+062317,000399: 17,3621           11747                           <span class="op">DV      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4848">HH</a>                                    <span class="co">#  QUOTIENT SCALED AT 4 SECONDS.</span>
+062318,000400: 17,3622           61742                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F41584953">TTOAXIS</a>                               <span class="co">#  SCALED AT 4 SEC.</span>
+062319,000401: 
+062320,000402:                                                                                                  <span class="co">#  IF COMPUTED JET TIME IS LESS THAN TJMIN, TJET IS SET TO ZERO.</span>
+062321,000403:                                                                                                  <span class="co">#  MINIMUM IMPULSES REQUIRED IN ZONE 3 ARE NOT SUBJECT TO THIS CONSTRAINT, NATURALLY.</span>
+062322,000404: 
+<a name="43484B4D494E544A"></a>062323,000405: 17,3623           63742        <span class="sm">CHKMINTJ</span>           <span class="op">AD      </span> <a href="#2D544A4D494E">-TJMIN</a>                                <span class="co">#  IS COMPUTED TIME LESS THAN THE MINIMUM.</span>
+062324,000406: 17,3624           00006                           <span class="op">EXTEND  </span>                                       
+062325,000407: 17,3625           63422                           <span class="op">BZMF    </span> <a href="#434F415354544A">COASTTJ</a>                               <span class="co">#  YES, SET TIME TO ZERO.</span>
+062326,000408: 17,3626           63741                           <span class="op">AD      </span> <a href="#544A4D494E">TJMIN</a>                                 <span class="co">#  NO, RESTORE COMPUTED TIME.</span>
+062327,000409: 17,3627           13466                           <span class="op">TCF     </span> <a href="#52455455524E544A">RETURNTJ</a>                              <span class="co">#  END COMPUTATION.</span>
+062328,000410: 
 </pre>
 </span>
 </p>
@@ -622,57 +625,57 @@ Page 1468
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-062160,000410:                                                                                                  <span class="co">#  *** ROUGHLAW ***</span>
-062161,000411: 
-062162,000412:                                                                                                  <span class="co">#  BEFORE ENTRY TO RUFLAW:</span>
-062163,000413:                                                                                                  <span class="co">#        1. INDEXERS ADRSDIF1 AND ADRSDIF2 ARE SET ON BASIS OF AXIS, AND SIGN OF EDOT.</span>
-062164,000414:                                                                                                  <span class="co">#        2. IF EDOT WAS NEGATIVE, E AND EDOT ARE ROTATED INTO UPPER HALF-PLANE AND ROTSENSE IS MADE NEGATIVE.</span>
-062165,000415:                                                                                                  <span class="co">#        3. E IS SCALED AT PI RADIANS AND EDOT AT PI/4 RAD/SEC.</span>
-062166,000416:                                                                                                  <span class="co">#           (EXCEPT THE RUFLAW3 ENTRY WHEN E IS AT PI/4)</span>
-062167,000417: 
-062168,000418:                                                                                                  <span class="co">#  RUFLAW1:      ERROR MORE NEGATIVE THAN PI/16 RAD.  FIRE TO A RATE OF 6.5 DEG/SEC (IF JET TIME EXCEEDS 20 MSEC.).</span>
-062169,000419:                                                                                                  <span class="co">#  RUFLAW2:      ERROR MORE POSITIVE THAN PI/16 RAD.  FIRE TO AN OPPOSING RATE OF 6.5 DEG/SEC.</span>
-062170,000420:                                                                                                  <span class="co">#  RUFLAW3:      ERROR RATE GREATER THAN PI/32 RAD/SEC AND ERROR WITHIN BOUNDS.  COAST IF BELOW FIREFCT, FIRE IF ABOVE</span>
-062171,000421: 
-<a name="5255464C415731"></a>062172,000422: 17,3630           43743        <span class="sm">RUFLAW1 </span>           <span class="op">CS      </span> <a href="#52554652415445">RUFRATE</a>                               <span class="co">#  DECREMENT EDOT BY .1444 RAD/SEC AT PI/4</span>
-062173,000423: 17,3631           27427                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#        WHICH IS THE TARGET RATE</span>
-062174,000424: 17,3632           00006                           <span class="op">EXTEND  </span>                                       
-062175,000425: 17,3633           63654                           <span class="op">BZMF    </span> <a href="#534D414C52415445">SMALRATE</a>                              <span class="co">#  BRANCH IF RATE LESS THAN TARGET.</span>
-062176,000426: 17,3634           03712                           <span class="op">TC      </span> <a href="#5255465345545550">RUFSETUP</a>                              <span class="co">#  REVERSE ROTSENSE AND INDICATE MAX JETS.</span>
-062177,000427: 17,3635           31427                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  PICK UP DESIRED RATE CHANGE.</span>
-062178,000428: 
-<a name="5255464C41573132"></a>062179,000429: 17,3636           00006        <span class="sm">RUFLAW12</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  COMPUTE TJET</span>
-062180,000430: 17,3637           51744                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494632">ADRSDIF2</a>                              <span class="co">#        = (DESIRED RATE CHANGE)/(2-JET ACCEL.)</span>
-062181,000431: 17,3640           71571                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F414E455431">1/ANET1</a>    +2                         
-062182,000432: 17,3641           67741                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#2D312F38">-1/8</a>                                  <span class="co">#  IF TJET, SCALED AT 32 SEC, EXCEEDS</span>
-062183,000433: 17,3642           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        4 SECONDS, SET TJET TO TJMAX.</span>
-062184,000434: 17,3643           63645                           <span class="op">BZMF    </span> +2                                    
-062185,000435: 17,3644           13465                           <span class="op">TCF     </span> <a href="#46554C4C54494D45">FULLTIME</a>                              
-062186,000436: 17,3645           00006                           <span class="op">EXTEND  </span>                                       
-062187,000437: 17,3646           13465                           <span class="op">BZF     </span> <a href="#46554C4C54494D45">FULLTIME</a>                              
-062188,000438: 17,3647           64740                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543132">BIT12</a>                                 <span class="co">#  RESTORE COMPUTED TJET TO ACCUMULATOR.</span>
-062189,000439: 17,3650           20001                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-062190,000440: 17,3651           20001                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-062191,000441: 17,3652           20001                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  RESCALED TJET AT 4 SECONDS.</span>
-062192,000442: 17,3653           13623                           <span class="op">TCF     </span> <a href="#43484B4D494E544A">CHKMINTJ</a>                              <span class="co">#  RETURN AS FROM FINELAW.</span>
-062193,000443: 
-<a name="534D414C52415445"></a>062194,000444: 17,3654           03714        <span class="sm">SMALRATE</span>           <span class="op">TC      </span> <a href="#5255465345545550">RUFSETUP</a>   +2                         <span class="co">#  SET NUMBERT AND FIREFCT FOR MAXIMUM JETS</span>
-062195,000445: 17,3655           11740                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F5453454E5345">ROTSENSE</a>                              
-062196,000446: 17,3656           34753                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   <span class="co">#  MODIFY INDEXER TO POINT TO 1/ANET</span>
-062197,000447: 17,3657           13661                           <span class="op">TCF     </span> +2                                    <span class="co">#        CORRESPONDING TO THE PROPER SENSE.</span>
-062198,000448: 17,3660           37747                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474F4E45">NEGONE</a>                                
-062199,000449: 17,3661           27744                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494632">ADRSDIF2</a>                              
-062200,000450: 
-062201,000451: 17,3662           41427                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  (.144 AT PI/4 - EDOT) = DESIRED RATE CHNG.</span>
-062202,000452: 17,3663           13636                           <span class="op">TCF     </span> <a href="#5255464C41573132">RUFLAW12</a>                              
-062203,000453: 
-<a name="5255464C415732"></a>062204,000454: 17,3664           03712        <span class="sm">RUFLAW2 </span>           <span class="op">TC      </span> <a href="#5255465345545550">RUFSETUP</a>                              <span class="co">#  REVERSE ROTSENSE AND INDICATE MAX JETS.</span>
-062205,000455: 17,3665           33743                           <span class="op">CAF     </span> <a href="#52554652415445">RUFRATE</a>                               
-062206,000456: 17,3666           61427                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  (.144 AT PI/4 + EDOT) = DESIRED RATE CHNG.</span>
-062207,000457: 17,3667           54000                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IF OVERFLOW SKIP, FIRE FOR FULL TIME.</span>
-062208,000458: 17,3670           13636                           <span class="op">TCF     </span> <a href="#5255464C41573132">RUFLAW12</a>                              <span class="co">#  OTHERWISE, COMPUTE JET TIME.</span>
-062209,000459: 17,3671           13465                           <span class="op">TCF     </span> <a href="#46554C4C54494D45">FULLTIME</a>                              
-062210,000460: 
+062330,000412:                                                                                                  <span class="co">#  *** ROUGHLAW ***</span>
+062331,000413: 
+062332,000414:                                                                                                  <span class="co">#  BEFORE ENTRY TO RUFLAW:</span>
+062333,000415:                                                                                                  <span class="co">#        1. INDEXERS ADRSDIF1 AND ADRSDIF2 ARE SET ON BASIS OF AXIS, AND SIGN OF EDOT.</span>
+062334,000416:                                                                                                  <span class="co">#        2. IF EDOT WAS NEGATIVE, E AND EDOT ARE ROTATED INTO UPPER HALF-PLANE AND ROTSENSE IS MADE NEGATIVE.</span>
+062335,000417:                                                                                                  <span class="co">#        3. E IS SCALED AT PI RADIANS AND EDOT AT PI/4 RAD/SEC.</span>
+062336,000418:                                                                                                  <span class="co">#           (EXCEPT THE RUFLAW3 ENTRY WHEN E IS AT PI/4)</span>
+062337,000419: 
+062338,000420:                                                                                                  <span class="co">#  RUFLAW1:      ERROR MORE NEGATIVE THAN PI/16 RAD.  FIRE TO A RATE OF 6.5 DEG/SEC (IF JET TIME EXCEEDS 20 MSEC.).</span>
+062339,000421:                                                                                                  <span class="co">#  RUFLAW2:      ERROR MORE POSITIVE THAN PI/16 RAD.  FIRE TO AN OPPOSING RATE OF 6.5 DEG/SEC.</span>
+062340,000422:                                                                                                  <span class="co">#  RUFLAW3:      ERROR RATE GREATER THAN PI/32 RAD/SEC AND ERROR WITHIN BOUNDS.  COAST IF BELOW FIREFCT, FIRE IF ABOVE</span>
+062341,000423: 
+<a name="5255464C415731"></a>062342,000424: 17,3630           43743        <span class="sm">RUFLAW1 </span>           <span class="op">CS      </span> <a href="#52554652415445">RUFRATE</a>                               <span class="co">#  DECREMENT EDOT BY .1444 RAD/SEC AT PI/4</span>
+062343,000425: 17,3631           27427                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#        WHICH IS THE TARGET RATE</span>
+062344,000426: 17,3632           00006                           <span class="op">EXTEND  </span>                                       
+062345,000427: 17,3633           63654                           <span class="op">BZMF    </span> <a href="#534D414C52415445">SMALRATE</a>                              <span class="co">#  BRANCH IF RATE LESS THAN TARGET.</span>
+062346,000428: 17,3634           03712                           <span class="op">TC      </span> <a href="#5255465345545550">RUFSETUP</a>                              <span class="co">#  REVERSE ROTSENSE AND INDICATE MAX JETS.</span>
+062347,000429: 17,3635           31427                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  PICK UP DESIRED RATE CHANGE.</span>
+062348,000430: 
+<a name="5255464C41573132"></a>062349,000431: 17,3636           00006        <span class="sm">RUFLAW12</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  COMPUTE TJET</span>
+062350,000432: 17,3637           51744                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494632">ADRSDIF2</a>                              <span class="co">#        = (DESIRED RATE CHANGE)/(2-JET ACCEL.)</span>
+062351,000433: 17,3640           71571                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F414E455431">1/ANET1</a>    +2                         
+062352,000434: 17,3641           67741                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#2D312F38">-1/8</a>                                  <span class="co">#  IF TJET, SCALED AT 32 SEC, EXCEEDS</span>
+062353,000435: 17,3642           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        4 SECONDS, SET TJET TO TJMAX.</span>
+062354,000436: 17,3643           63645                           <span class="op">BZMF    </span> +2                                    
+062355,000437: 17,3644           13465                           <span class="op">TCF     </span> <a href="#46554C4C54494D45">FULLTIME</a>                              
+062356,000438: 17,3645           00006                           <span class="op">EXTEND  </span>                                       
+062357,000439: 17,3646           13465                           <span class="op">BZF     </span> <a href="#46554C4C54494D45">FULLTIME</a>                              
+062358,000440: 17,3647           64740                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543132">BIT12</a>                                 <span class="co">#  RESTORE COMPUTED TJET TO ACCUMULATOR.</span>
+062359,000441: 17,3650           20001                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+062360,000442: 17,3651           20001                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+062361,000443: 17,3652           20001                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  RESCALED TJET AT 4 SECONDS.</span>
+062362,000444: 17,3653           13623                           <span class="op">TCF     </span> <a href="#43484B4D494E544A">CHKMINTJ</a>                              <span class="co">#  RETURN AS FROM FINELAW.</span>
+062363,000445: 
+<a name="534D414C52415445"></a>062364,000446: 17,3654           03714        <span class="sm">SMALRATE</span>           <span class="op">TC      </span> <a href="#5255465345545550">RUFSETUP</a>   +2                         <span class="co">#  SET NUMBERT AND FIREFCT FOR MAXIMUM JETS</span>
+062365,000447: 17,3655           11740                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F5453454E5345">ROTSENSE</a>                              
+062366,000448: 17,3656           34753                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   <span class="co">#  MODIFY INDEXER TO POINT TO 1/ANET</span>
+062367,000449: 17,3657           13661                           <span class="op">TCF     </span> +2                                    <span class="co">#        CORRESPONDING TO THE PROPER SENSE.</span>
+062368,000450: 17,3660           37747                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474F4E45">NEGONE</a>                                
+062369,000451: 17,3661           27744                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494632">ADRSDIF2</a>                              
+062370,000452: 
+062371,000453: 17,3662           41427                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  (.144 AT PI/4 - EDOT) = DESIRED RATE CHNG.</span>
+062372,000454: 17,3663           13636                           <span class="op">TCF     </span> <a href="#5255464C41573132">RUFLAW12</a>                              
+062373,000455: 
+<a name="5255464C415732"></a>062374,000456: 17,3664           03712        <span class="sm">RUFLAW2 </span>           <span class="op">TC      </span> <a href="#5255465345545550">RUFSETUP</a>                              <span class="co">#  REVERSE ROTSENSE AND INDICATE MAX JETS.</span>
+062375,000457: 17,3665           33743                           <span class="op">CAF     </span> <a href="#52554652415445">RUFRATE</a>                               
+062376,000458: 17,3666           61427                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  (.144 AT PI/4 + EDOT) = DESIRED RATE CHNG.</span>
+062377,000459: 17,3667           54000                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IF OVERFLOW SKIP, FIRE FOR FULL TIME.</span>
+062378,000460: 17,3670           13636                           <span class="op">TCF     </span> <a href="#5255464C41573132">RUFLAW12</a>                              <span class="co">#  OTHERWISE, COMPUTE JET TIME.</span>
+062379,000461: 17,3671           13465                           <span class="op">TCF     </span> <a href="#46554C4C54494D45">FULLTIME</a>                              
+062380,000462: 
 </pre>
 </span>
 </p>
@@ -688,55 +691,55 @@ Page 1469
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="5255464C415733"></a>062212,000462: 17,3672           03712        <span class="sm">RUFLAW3 </span>           <span class="op">TC      </span> <a href="#5255465345545550">RUFSETUP</a>                              <span class="co">#  EXECUTE COMMON RUFLAW SUBROUTINE.</span>
-062213,000463: 17,3673           51746                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494631">ADRSDIF1</a>                              
-062214,000464: 17,3674           41601                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464952454442">FIREDB</a>                                <span class="co">#  CALCULATE DISTANCE FROM SWITCH CURVE</span>
-062215,000465: 17,3675           61752                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     <span class="co">#        1/ANET1*EDOT*EDOT +E - FIREDB = 0</span>
-062216,000466: 17,3676           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#                SCALED AT 4 PI RADIANS</span>
-062217,000467: 17,3677           74741                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543131">BIT11</a>                                 
-062218,000468: 17,3700           57427                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  
-062219,000469: 17,3701           00006                           <span class="op">EXTEND  </span>                                       
-062220,000470: 17,3702           70000                           <span class="op">SQUARE  </span>                                       
-062221,000471: 17,3703           00006                           <span class="op">EXTEND  </span>                                       
-062222,000472: 17,3704           51746                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494631">ADRSDIF1</a>                              
-062223,000473: 17,3705           71571                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F414E455431">1/ANET1</a>    +2                         
-062224,000474: 17,3706           61427                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  
-062225,000475: 17,3707           00006                           <span class="op">EXTEND  </span>                                       
-062226,000476: 17,3710           63422                           <span class="op">BZMF    </span> <a href="#434F415354544A">COASTTJ</a>                               <span class="co">#  COAST IF BELOW IT.</span>
-062227,000477: 17,3711           13465                           <span class="op">TCF     </span> <a href="#46554C4C54494D45">FULLTIME</a>                              <span class="co">#  FIRE FOR FULL PERIOD IF ABOVE IT.</span>
-062228,000478: 
-062229,000479:                                                                                                  <span class="co">#  SUBROUTINE USED IN ALL ENTRIES TO ROUGHLAW.</span>
-062230,000480: 
-<a name="5255465345545550"></a>062231,000481: 17,3712           41740        <span class="sm">RUFSETUP</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F5453454E5345">ROTSENSE</a>                              <span class="co">#  REVERSE ROTSENSE WHEN ENTER HERE.</span>
-062232,000482: 17,3713           55740                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F5453454E5345">ROTSENSE</a>                              
-062233,000483: 17,3714           34751                 +2        <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#464F5552">FOUR</a>                                  <span class="co">#  REQUIRE MAXIMUM (2) JETS IN U,V-AXES.</span>
-062234,000484: 17,3715           55743                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E554D42455254">NUMBERT</a>                               
-062235,000485: 17,3716           34735                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474D4158">NEGMAX</a>                                <span class="co">#  SUGGEST MAXIMUM (4) JETS IN P-AXIS.</span>
-062236,000486: 17,3717           55741                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46495245464354">FIREFCT</a>                               
-062237,000487: 17,3720           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-062238,000488: 
-062239,000489:                                                                                                  <span class="co">#  CONSTANTS FOR TJETLAW</span>
-062240,000490: 
-062241,000491: 17,3721           77757                           <span class="ps">DEC     </span> -16        B-14                       <span class="co">#  AXISDIFF(INDEX) = NUMBER OF REGISTERS</span>
-<a name="4158495344494646"></a>062242,000492: 17,3722           00000        <span class="sm">AXISDIFF</span>           <span class="ps">DEC     </span> +0         B-14                       <span class="co">#        BETWEEN STORED 1/ACCS PARAMETERS FOR</span>
-062243,000493: 17,3723           00020                           <span class="ps">DEC     </span> 16         B-14                       <span class="co">#        THE INDEXED AXIS AND THE U-AXIS.</span>
-<a name="53454E534F52"></a>062244,000494: 17,3724           14400        <span class="sm">SENSOR  </span>           <span class="ps">OCT     </span> 14400                                 <span class="co">#  RATIO OF TJET SCALING WITHIN TJETLAW</span>
-062245,000495:                                                                                                  <span class="co">#        (4 SEC) TO SCALING FOR T6 (10.24 SEC).</span>
-<a name="2D33444547"></a>062246,000496: 17,3725           75673        <span class="sm">-3DEG   </span>           <span class="ps">DEC     </span> -.06667                               <span class="co">#  -3.0 DEGREES SCALED AT 45.</span>
-<a name="2D2E303131324138"></a>062247,000497: 17,3726           77750        <span class="sm">-.0112A8</span>           <span class="ps">DEC     </span> -.00141                               <span class="co">#  -.01125 SEC(2) SCALED AT 8.</span>
-<a name="2E31415434"></a>062248,000498: 17,3727           00632        <span class="sm">.1AT4   </span>           <span class="ps">DEC     </span> .025                                  <span class="co">#  0.1 SECOND SCALED AT 4.</span>
-<a name="2E31415432"></a>062249,000499: 17,3730           01463        <span class="sm">.1AT2   </span>           <span class="ps">DEC     </span> .05                                   <span class="co">#  0.1 SEC SCALED AT 2.</span>
-<a name="2E30333735415434"></a>062250,000500: 17,3731           00232        <span class="sm">.0375AT4</span>           <span class="ps">DEC     </span> .00938                                <span class="co">#  .0375 SEC SCALED AT 4.</span>
-<a name="2D2E303235415432"></a>062251,000501: 17,3732           77462        <span class="sm">-.025AT2</span>           <span class="ps">DEC     </span> -.0125                                <span class="co">#  -.025 SEC SCALED AT 2.</span>
-<a name="2D2E303235415434"></a>062252,000502: 17,3733           77631        <span class="sm">-.025AT4</span>           <span class="ps">DEC     </span> -.00625                               
-<a name="2D2E3035415432"></a>062253,000503: 17,3734           77145        <span class="sm">-.05AT2 </span>           <span class="ps">DEC     </span> -.025                                 
-<a name="2D2E3135415432"></a>062254,000504: 17,3735           75462        <span class="sm">-.15AT2 </span>           <span class="ps">DEC     </span> -.075                                 
-<a name="2E30303337354138"></a>062255,000505: 17,3736           00007 25605  <span class="sm">.00375A8</span>           <span class="ps">2DEC    </span> .00375     B-3                        
-062256,000506: 
-<a name="2D544A4D4158"></a>062257,000507: 17,3740           76631        <span class="sm">-TJMAX  </span>           <span class="ps">DEC     </span> -.0375                                <span class="co">#  LARGEST CALCULATED TIME.  .150 SEC AT 4.</span>
-<a name="544A4D494E"></a>062258,000508: 17,3741           00122        <span class="sm">TJMIN   </span>           <span class="ps">DEC     </span> .005                                  <span class="co">#  SMALLEST ALLOWABLE TIME.  .020 SEC AT 4.</span>
-<a name="2D544A4D494E"></a>062259,000509: 17,3742           77655        <span class="sm">-TJMIN  </span>           <span class="ps">DEC     </span> -.005                                 
-<a name="52554652415445"></a>062260,000510: 17,3743           04476        <span class="sm">RUFRATE </span>           <span class="ps">DEC     </span> .1444                                 <span class="co">#  CORRESPONDS TO TARGET RATE OF 6.5 DEG/S.</span>
+<a name="5255464C415733"></a>062382,000464: 17,3672           03712        <span class="sm">RUFLAW3 </span>           <span class="op">TC      </span> <a href="#5255465345545550">RUFSETUP</a>                              <span class="co">#  EXECUTE COMMON RUFLAW SUBROUTINE.</span>
+062383,000465: 17,3673           51746                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494631">ADRSDIF1</a>                              
+062384,000466: 17,3674           41601                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464952454442">FIREDB</a>                                <span class="co">#  CALCULATE DISTANCE FROM SWITCH CURVE</span>
+062385,000467: 17,3675           61752                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     <span class="co">#        1/ANET1*EDOT*EDOT +E - FIREDB = 0</span>
+062386,000468: 17,3676           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#                SCALED AT 4 PI RADIANS</span>
+062387,000469: 17,3677           74741                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543131">BIT11</a>                                 
+062388,000470: 17,3700           57427                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  
+062389,000471: 17,3701           00006                           <span class="op">EXTEND  </span>                                       
+062390,000472: 17,3702           70000                           <span class="op">SQUARE  </span>                                       
+062391,000473: 17,3703           00006                           <span class="op">EXTEND  </span>                                       
+062392,000474: 17,3704           51746                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4144525344494631">ADRSDIF1</a>                              
+062393,000475: 17,3705           71571                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F414E455431">1/ANET1</a>    +2                         
+062394,000476: 17,3706           61427                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  
+062395,000477: 17,3707           00006                           <span class="op">EXTEND  </span>                                       
+062396,000478: 17,3710           63422                           <span class="op">BZMF    </span> <a href="#434F415354544A">COASTTJ</a>                               <span class="co">#  COAST IF BELOW IT.</span>
+062397,000479: 17,3711           13465                           <span class="op">TCF     </span> <a href="#46554C4C54494D45">FULLTIME</a>                              <span class="co">#  FIRE FOR FULL PERIOD IF ABOVE IT.</span>
+062398,000480: 
+062399,000481:                                                                                                  <span class="co">#  SUBROUTINE USED IN ALL ENTRIES TO ROUGHLAW.</span>
+062400,000482: 
+<a name="5255465345545550"></a>062401,000483: 17,3712           41740        <span class="sm">RUFSETUP</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F5453454E5345">ROTSENSE</a>                              <span class="co">#  REVERSE ROTSENSE WHEN ENTER HERE.</span>
+062402,000484: 17,3713           55740                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F5453454E5345">ROTSENSE</a>                              
+062403,000485: 17,3714           34751                 +2        <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#464F5552">FOUR</a>                                  <span class="co">#  REQUIRE MAXIMUM (2) JETS IN U,V-AXES.</span>
+062404,000486: 17,3715           55743                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E554D42455254">NUMBERT</a>                               
+062405,000487: 17,3716           34735                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474D4158">NEGMAX</a>                                <span class="co">#  SUGGEST MAXIMUM (4) JETS IN P-AXIS.</span>
+062406,000488: 17,3717           55741                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46495245464354">FIREFCT</a>                               
+062407,000489: 17,3720           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+062408,000490: 
+062409,000491:                                                                                                  <span class="co">#  CONSTANTS FOR TJETLAW</span>
+062410,000492: 
+062411,000493: 17,3721           77757                           <span class="ps">DEC     </span> -16        B-14                       <span class="co">#  AXISDIFF(INDEX) = NUMBER OF REGISTERS</span>
+<a name="4158495344494646"></a>062412,000494: 17,3722           00000        <span class="sm">AXISDIFF</span>           <span class="ps">DEC     </span> +0         B-14                       <span class="co">#        BETWEEN STORED 1/ACCS PARAMETERS FOR</span>
+062413,000495: 17,3723           00020                           <span class="ps">DEC     </span> 16         B-14                       <span class="co">#        THE INDEXED AXIS AND THE U-AXIS.</span>
+<a name="53454E534F52"></a>062414,000496: 17,3724           14400        <span class="sm">SENSOR  </span>           <span class="ps">OCT     </span> 14400                                 <span class="co">#  RATIO OF TJET SCALING WITHIN TJETLAW</span>
+062415,000497:                                                                                                  <span class="co">#        (4 SEC) TO SCALING FOR T6 (10.24 SEC).</span>
+<a name="2D33444547"></a>062416,000498: 17,3725           75673        <span class="sm">-3DEG   </span>           <span class="ps">DEC     </span> -.06667                               <span class="co">#  -3.0 DEGREES SCALED AT 45.</span>
+<a name="2D2E303131324138"></a>062417,000499: 17,3726           77750        <span class="sm">-.0112A8</span>           <span class="ps">DEC     </span> -.00141                               <span class="co">#  -.01125 SEC(2) SCALED AT 8.</span>
+<a name="2E31415434"></a>062418,000500: 17,3727           00632        <span class="sm">.1AT4   </span>           <span class="ps">DEC     </span> .025                                  <span class="co">#  0.1 SECOND SCALED AT 4.</span>
+<a name="2E31415432"></a>062419,000501: 17,3730           01463        <span class="sm">.1AT2   </span>           <span class="ps">DEC     </span> .05                                   <span class="co">#  0.1 SEC SCALED AT 2.</span>
+<a name="2E30333735415434"></a>062420,000502: 17,3731           00232        <span class="sm">.0375AT4</span>           <span class="ps">DEC     </span> .00938                                <span class="co">#  .0375 SEC SCALED AT 4.</span>
+<a name="2D2E303235415432"></a>062421,000503: 17,3732           77462        <span class="sm">-.025AT2</span>           <span class="ps">DEC     </span> -.0125                                <span class="co">#  -.025 SEC SCALED AT 2.</span>
+<a name="2D2E303235415434"></a>062422,000504: 17,3733           77631        <span class="sm">-.025AT4</span>           <span class="ps">DEC     </span> -.00625                               
+<a name="2D2E3035415432"></a>062423,000505: 17,3734           77145        <span class="sm">-.05AT2 </span>           <span class="ps">DEC     </span> -.025                                 
+<a name="2D2E3135415432"></a>062424,000506: 17,3735           75462        <span class="sm">-.15AT2 </span>           <span class="ps">DEC     </span> -.075                                 
+<a name="2E30303337354138"></a>062425,000507: 17,3736           00007 25605  <span class="sm">.00375A8</span>           <span class="ps">2DEC    </span> .00375     B-3                        
+062426,000508: 
+<a name="2D544A4D4158"></a>062427,000509: 17,3740           76631        <span class="sm">-TJMAX  </span>           <span class="ps">DEC     </span> -.0375                                <span class="co">#  LARGEST CALCULATED TIME.  .150 SEC AT 4.</span>
+<a name="544A4D494E"></a>062428,000510: 17,3741           00122        <span class="sm">TJMIN   </span>           <span class="ps">DEC     </span> .005                                  <span class="co">#  SMALLEST ALLOWABLE TIME.  .020 SEC AT 4.</span>
+<a name="2D544A4D494E"></a>062429,000511: 17,3742           77655        <span class="sm">-TJMIN  </span>           <span class="ps">DEC     </span> -.005                                 
+<a name="52554652415445"></a>062430,000512: 17,3743           04476        <span class="sm">RUFRATE </span>           <span class="ps">DEC     </span> .1444                                 <span class="co">#  CORRESPONDS TO TARGET RATE OF 6.5 DEG/S.</span>
 
 End of include-file TJET_LAW.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>
