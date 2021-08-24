@@ -26,6 +26,7 @@
 ##		2016-12-18 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-08-01 MAS	Created from LMY99 Rev 1.
+##		2021-05-30 ABS  OCT21103 -> OCT1103
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -197,7 +198,7 @@ STRTIDLE	CAF	BBSERVDL
 CCSHOLE		INHINT
 		CA	Q
 		TC	ABORT2
-OCT21103	OCT	1103
+OCT1103		OCT	1103
 CURTAINS	INHINT
 		CA	Q
 		TC	ALARM2

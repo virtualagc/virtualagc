@@ -13,8 +13,9 @@
 #				but is more "accurate" to use).
 #		2017-06-18 MAS	Removed --flip=7, since this is now handled by
 #				--blk2.
+#		2021-04-20 RSB	Added --honeywell.
 
 BASENAME=Aurora12
-EXTRA_YAYUL_ARGS+=--blk2 --early-sbank
+EXTRA_YAYUL_ARGS+=--blk2 --early-sbank --honeywell
 
 include ../Makefile.inc

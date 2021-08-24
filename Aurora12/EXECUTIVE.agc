@@ -9,6 +9,7 @@
 ## Mod history:  2016-09-20 JL   Created.
 ##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
 ##				 and fixed the errors found.
+##		 2021-05-30 ABS	 Aligned TCF +1 line to match scans.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of 
@@ -367,7 +368,7 @@ EJSCAN          CCS     PRIORITY +12D
                 CCS     PRIORITY +36D
                 TC      EJ1
 -CCSPR          -CCS    PRIORITY
-                        TCF     +1
+                TCF     +1
 
                 CCS     PRIORITY +48D
                 TC      EJ1

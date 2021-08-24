@@ -36,6 +36,8 @@
 ##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##		2017-03-15 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2021-05-30 ABS  Removed RUPTSTOR definition not present in scans.
+##				TTPIO -> TTPI0
 
 ## Page 92
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -214,7 +216,6 @@ WAITBANK        EQUALS          ITEMP2
 EXECTEM2        EQUALS          ITEMP2
 
 ITEMP3          ERASE
-RUPTSTOR        EQUALS          ITEMP3
 WAITADR         EQUALS          ITEMP3
 NEWPRIO         EQUALS          ITEMP3
 
@@ -2504,7 +2505,7 @@ QTEMP           ERASE                                   # I(1)TMP COMMON RETURN 
 
 TCSI            ERASE           +1                      # B(2)TMP CSI TIME IN CENTISECONDS
 TTPI            ERASE           +1                      # B(2)TMP TPI TIME IN CENTISECONDS
-TTPIO           ERASE           +1                      # B(2)TMP TTPI STORAGE FOR RECYCLE
+TTPI0           ERASE           +1                      # B(2)TMP TTPI STORAGE FOR RECYCLE
 
 
 #          P30,P40 INTERFACE.                            (20D)

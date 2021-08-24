@@ -7,6 +7,7 @@
 ## Website:     www.ibiblio.org/apollo/Restoration.html
 ## Mod history: 2019-06-12 MAS  Recreated from Computer History Museum's
 ##				physical core-rope modules.
+##              2021-05-30 ABS  B5TOBB -> B5TOB8
 
 ## Page 17
 # SECTION 1  DISPATCHER
@@ -2870,7 +2871,7 @@ BOV(B)          CCS             OVFIND                  # BRANCH ON OVERFLOW TO 
                 TS              OVFIND
                 CCS             CYR
                 TCF             RTB                     # IF BASIC.
-B5TOBB          OCT             360
+B5TOB8          OCT             360
                 TCF             GOTO
 
 ## Page 101

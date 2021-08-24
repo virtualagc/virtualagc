@@ -1,5 +1,5 @@
 /*
- * Copyright 2003,2009-2010,2016 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2003,2009-2010,2016,2020-2021 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -92,6 +92,17 @@
  *                              notations only in block 1, now does it for all targets.
  *                              EditSymbolNew() now tracks how many symbol values have
  *                              *changed*" during a pass, for post-analysis by pass().
+ *              2020-12-14 RSB  In colorized html of assembly listings, changed the
+ *                              formerly-custom color used for visited hyperlinks back to
+ *                              the default.  I think the reason I originally customized it
+ *                              must have been that I thought the default was too close to
+ *                              the color being used for colorized comments. But the custom
+ *                              color is far too close to the (black) color of the text in
+ *                              ##-style annotations, so it's made it really, really hard
+ *                              to visually distinguish visited lines in annotations from
+ *                              the plain text. And in retrospect, I don't see any way for
+ *                              it to really be confused with a comment.
+ *              2021-04-20 RSB  Added --ebcdic.
  *
  * Concerning the concept of a symbol's namespace.  I had originally
  * intended to implement this, and so many functions had a namespace
@@ -128,6 +139,12 @@
 // On the second pass, true values are assigned to the symbols.
 Symbol_t *SymbolTable = NULL;
 int SymbolTableSize = 0, SymbolTableMax = 0;
+
+// Set these variables to set symbol-table collation.  No more than one
+// of them non-zero.  If both zero, then native collation is used.
+int forceAscii = 1;  // Kept this way until just about to print symbol table.
+int ebcdic = 1;
+int honeywell = 0;
 
 // Set this variable non-zero to treat "## Page" as "# Page".
 int UnpoundPage = 0;
@@ -237,7 +254,7 @@ HtmlCreate(char *Filename)
           "<style type=\"text/css\">\n"
           "p.nobreak { white-space:nowrap; }\n"
           "a { text-decoration:none; }\n"
-          "a:visited { COLOR: #000850; }\n"
+          // "a:visited { COLOR: #000850; }\n"
           "</style>\n"
 
           "<style type=\"text/css\">\n"
@@ -319,6 +336,8 @@ HtmlClose(void)
 
 static int StyleInitialized = 0;
 int StyleOnly = 0;
+int inReconstructionComment = 0;
+int reconstructionComments = 0;
 
 int
 HtmlCheck(int WriteOutput, FILE *InputFile, char *s, int sSize,
@@ -492,6 +511,8 @@ HtmlCheck(int WriteOutput, FILE *InputFile, char *s, int sSize,
     {
       //if (WriteOutput)
       //  printf("HERE\n");
+      if (WriteOutput && inReconstructionComment && reconstructionComments)
+        printf ("%s", s);
       // Set proper style and output the line.
       if (WriteOutput && Html && HtmlOut != NULL)
         {
@@ -513,6 +534,8 @@ HtmlCheck(int WriteOutput, FILE *InputFile, char *s, int sSize,
           (*CurrentLineInFile)++;
           if (strncmp(s, "## ", 3) && strncmp(s, "##\t", 3))
             break;
+          if (WriteOutput && inReconstructionComment && reconstructionComments)
+            printf ("%s", s);
           if (WriteOutput && Html && HtmlOut != NULL)
             fprintf(HtmlOut, "%s", &s[3]);
         }
@@ -751,7 +774,12 @@ CompareSymbolName(const void *Raw1, const void *Raw2)
   if (Element1->Namespace > Element2->Namespace)
     return (1);
 
-  return (strcmp(Element1->Name, Element2->Name));
+  if (ebcdic && !forceAscii)
+    return (strcmpEBCDIC(Element1->Name, Element2->Name));
+  else if (honeywell && !forceAscii)
+    return (strcmpHoneywell(Element1->Name, Element2->Name));
+  else
+    return (strcmp(Element1->Name, Element2->Name));
 #undef Element1
 #undef Element2
 }
@@ -809,11 +837,122 @@ GetSymbol(const char *Name)
 
 //------------------------------------------------------------------------
 // Print the symbol table.
+int pageSize = 45;  // GAP page is 3 columns of 45 rows each.
 void
 PrintSymbolsToFile(FILE *fp)
 {
   int i;
   char *status = "";
+  Symbol_t **columnizedSymbolTable = NULL, *currentSymbol, *dummySymbol;
+  int columnizedSymbolTableSize = 0;
+  int currentRow = 0, currentColumn = 0, currentPageOffset = 0;
+  char initial, lastInitial = 0, thisPageSize;
+  Symbol_t separator;
+  int symbolNumber = 0, *symbolNumbers = NULL;
+
+  if (honeywell)
+    pageSize = 43;
+  thisPageSize = pageSize;
+  separator.Type = SYMBOL_SEPARATOR;
+
+  // The SymbolTable[] array, if printed out simplistically, would be row
+  // by row, with no page breaks.  However, we want it to print column by
+  // column, with page breaks, to allow easier comparison to the original
+  // printouts.  Also, we want to eliminate the internal symbols added by
+  // yaYUL ($3, $4, etc.) that aren't present in the source code itself.
+  // Moreover, we want to add separators wherever the initial character of
+  // the symbol name changes.
+  // Therefore, we start out by making new array of symbols,
+  // columnizedSymbolTable[], in which the elements are rearranged
+  // appropriately.  However, the elements of columnizedSymbolTable[] point
+  // to the entries in SymbolTable[].  I.e, it's an array of Symbol_t *
+  // rather than an array of Symbol_t.
+  columnizedSymbolTable = calloc(SymbolTableSize + 256, sizeof(Symbol_t *));
+  symbolNumbers = calloc(SymbolTableSize + 256, sizeof(int));
+  for (i = 0, currentSymbol = SymbolTable; i < SymbolTableSize;
+      i++, currentSymbol++)
+    {
+      int initialCheck = 1, position;
+      // Eliminate internal symbols.
+      //fprintf(stderr, "%s\n", currentSymbol->Name);
+      initial = currentSymbol->Name[0];
+      if (initial == '$')
+        {
+          if (!strcmp(currentSymbol->Name, "$3")
+              || !strcmp(currentSymbol->Name, "$4")
+              || !strcmp(currentSymbol->Name, "$5")
+              || !strcmp(currentSymbol->Name, "$6")
+              || !strcmp(currentSymbol->Name, "$7")
+              || !strcmp(currentSymbol->Name, "$16")
+              || !strcmp(currentSymbol->Name, "$17")
+              || !strcmp(currentSymbol->Name, "$25")
+              || !strcmp(currentSymbol->Name, "$5777"))
+            continue;
+        }
+      // The code at saveSymbol is executed either once (normally, to store
+      // a symbol) or twice (if the initial character of the symbol name
+      // changes, to store a separator record before storing the symbol record.
+      // At least for YUL, such separators aren't added if they're the very
+      // first entry on a page.
+      if (initial != lastInitial && lastInitial != 0)
+        {
+          lastInitial = initial;
+          if (honeywell == 0 || currentRow != 0 || currentColumn != 0)
+            {
+              dummySymbol = &separator;
+              saveSymbol: position = currentPageOffset + currentRow * 3
+                  + currentColumn;
+              columnizedSymbolTable[position] = dummySymbol;
+              symbolNumbers[position] = symbolNumber;
+              position++;
+              if (position > columnizedSymbolTableSize)
+                columnizedSymbolTableSize = position;
+              currentRow++;
+              if (currentRow >= thisPageSize)
+                {
+                  currentRow = 0;
+                  currentColumn++;
+                  if (currentColumn >= 3)
+                    {
+                      currentColumn = 0;
+                      currentPageOffset += pageSize * 3;
+                      // The following is intended to adjust the
+                      // number of rows on the *last* page of the symbol table,
+                      // similarly to how GAP does it.  Unfortunately, it
+                      // requires counting the number of changes of the
+                      // the leading character of the symbol name remaining,
+                      // so that we know how many separators remain.
+                      if (SymbolTableSize - i < pageSize * 3)
+                        {
+                          char l = lastInitial;
+                          int numChanges = 0, j;
+                          for (j = i + 1; j < SymbolTableSize; j++)
+                            {
+                              if (SymbolTable[j].Name[0] != l)
+                                {
+                                  numChanges++;
+                                  l = SymbolTable[j].Name[0];
+                                }
+                            }
+                          thisPageSize = (SymbolTableSize + numChanges - i + 1)
+                              / 3;
+                          if (thisPageSize > pageSize)
+                            thisPageSize = pageSize;
+                        }
+                    }
+                }
+            }
+        }
+      if (initialCheck)
+        {
+          initialCheck = 0;
+          lastInitial = currentSymbol->Name[0];
+          symbolNumber++;
+          dummySymbol = currentSymbol;
+          goto saveSymbol;
+        }
+    }
+  //fprintf(stderr, "Here A!\n");
 
   fprintf(fp, "Symbol Table\n------------\n");
   if (Block1)
@@ -832,58 +971,98 @@ PrintSymbolsToFile(FILE *fp)
         }
     }
 
-  for (i = 0; i < SymbolTableSize; i++)
+  //fprintf(stderr, "columnizedSymbolTableSize = %d\n",columnizedSymbolTableSize);
+  for (i = 0; i < columnizedSymbolTableSize; i++)
     {
-      if (!(i & 3) && i != 0)
+      /*
+       if (columnizedSymbolTable[i] == NULL)
+       fprintf(stderr, "%d: %s %d\n", i, "", 0);
+       else
+       fprintf(stderr, "%d: %s %d\n", i, columnizedSymbolTable[i]->Name,
+       columnizedSymbolTable[i]->Type);
+       */
+
+      if (0 != i && 0 == (i % (pageSize * 3)))
+        {
+          fprintf(fp, "\n");
+          if (HtmlOut != NULL)
+            fprintf(HtmlOut, "%s", "<br>\n");
+        }
+
+      //if (!(i & 3) && i != 0)
+      if (i != 0 && (i % 3) == 0)
         {
           fprintf(fp, "\n");
           if (HtmlOut != NULL)
             fprintf(HtmlOut, "\n");
         }
 
-      if (SymbolTable[i].Value.Invalid)
-        status = ",I";
-      else if (SymbolTable[i].Value.Constant)
-        status = ",C";
-      else if (SymbolTable[i].Value.Erasable)
-        status = ",E";
-      else if (SymbolTable[i].Value.Fixed)
-        status = ",F";
-      else
-        status = ",?";
-      fprintf(fp, "%6d%s:   %-*s   ", i + 1, status,
-      MAX_LABEL_LENGTH, SymbolTable[i].Name);
-      if (HtmlOut)
+      if (columnizedSymbolTable[i] == NULL
+          || columnizedSymbolTable[i]->Type == SYMBOL_EMPTY)
         {
-          char *normalized;
-          int width;
-
-          width = MAX_LABEL_LENGTH;
-          normalized = NormalizeString(SymbolTable[i].Name);
-          if (NULL != strstr(normalized, "&amp;"))
-            width += 4;
-
-          if (SymbolTable[i].FileName[0])
-            {
-              fprintf(HtmlOut, "%06d%s:   <a href=\"%s.html#%s\">%-*s</a>   ",
-                  i + 1, status, SymbolTable[i].FileName,
-                  NormalizeAnchor(SymbolTable[i].Name), width, normalized);
-            }
+          fprintf(fp, "                                  ");
+          if (HtmlOut != NULL)
+            fprintf(HtmlOut, "                                  ");
+        }
+      else if (columnizedSymbolTable[i]->Type == SYMBOL_SEPARATOR)
+        {
+          fprintf(fp, "  ==============================  ");
+          if (HtmlOut != NULL)
+            fprintf(HtmlOut, "================================  ");
+        }
+      else
+        {
+          if (columnizedSymbolTable[i]->Value.Invalid)
+            status = ",I";
+          else if (columnizedSymbolTable[i]->Value.Constant)
+            status = ",C";
+          else if (columnizedSymbolTable[i]->Value.Erasable)
+            status = ",E";
+          else if (columnizedSymbolTable[i]->Value.Fixed)
+            status = ",F";
           else
+            status = ",?";
+          fprintf(fp, "%6d%s:   %-*s   ", symbolNumbers[i], status,
+          MAX_LABEL_LENGTH, columnizedSymbolTable[i]->Name);
+          if (HtmlOut)
             {
-              fprintf(HtmlOut, "%06d%s:   %-*s   ", i + 1, status, width,
-                  normalized);
+              char *normalized;
+              int width;
+
+              width = MAX_LABEL_LENGTH;
+              normalized = NormalizeString(columnizedSymbolTable[i]->Name);
+              if (NULL != strstr(normalized, "&amp;"))
+                width += 4;
+
+              if (columnizedSymbolTable[i]->FileName[0])
+                {
+                  fprintf(HtmlOut,
+                      "%06d%s:   <a href=\"%s.html#%s\">%-*s</a>   ",
+                      symbolNumbers[i], status,
+                      columnizedSymbolTable[i]->FileName,
+                      NormalizeAnchor(columnizedSymbolTable[i]->Name), width,
+                      normalized);
+                }
+              else
+                {
+                  fprintf(HtmlOut, "%06d%s:   %-*s   ", symbolNumbers[i],
+                      status, width, normalized);
+                }
             }
+
+          AddressPrint(&columnizedSymbolTable[i]->Value);
         }
 
-      AddressPrint(&SymbolTable[i].Value);
-      if (3 != (i & 3))
+      //if (3 != (i & 3))
+      if (2 != (i % 3))
         {
           fprintf(fp, "\t\t");
           if (HtmlOut != NULL)
             fprintf(HtmlOut, "%s", NormalizeString("\t"));
         }
+
     }
+  //fprintf(stderr, "Here B!\n");
 
   fprintf(fp, "\n");
   if (HtmlOut != NULL)
@@ -960,7 +1139,7 @@ EditSymbolNew(const char *Name, Address_t *Value, int Type, char *FileName,
 #endif
 
   // Reassign the value.
-  if (memcmp(&Symbol->Value, Value, sizeof (*Value)))
+  if (memcmp(&Symbol->Value, Value, sizeof(*Value)))
     numSymbolsReassigned++;
   Symbol->Value = *Value;
 

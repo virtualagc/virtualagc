@@ -1,0 +1,70 @@
+<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="white-space: nowrap; vertical-align: middle;">
+<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
+</td>
+<td style="vertical-align: middle;">
+These source-code files are part of a reconstructed copy of Comanche 44, the
+initial release (though not the final mission release) of the Apollo 10 
+Command Module (CM) Apollo Guidance Computer (AGC) software.  Subsequent releases
+were Comanche 45 and Comanche 45/2 (the flown release on Apollo 10). The reconstruction
+is believed to be exactly accurate, but in the absence of an actual Apollo-era
+listing of Comanche 44, some explanation of the reconstruction process is needed
+to insure confidence in that accuracy. 
+<br><br>
+The starting point was the source code of Comanche 51 
+(separately previously reconstructed from an Apollo-era listing of Comanche 55, 
+flown on Apollo 11).  Comanche 51 source code was then modified 
+by undoing changes known to have been made between revisions 44 and 51. The now-reconstructed 
+Comanche 44 source code was verified by assembling it and checking that the assembled code had
+the expected known-correct memory-bank checksums. 
+Note that page numbers in the reconstructed code match those on the Comanche 55 printout,
+although the source code would likely have different page numbers in a contemporary
+Comanche 44 listing.
+<br><br>
+Annotations that were not present in the contemporary source code have been added to the reconstructed
+code to justify each change relative to Comanche 51. Here's a guide to the Apollo documentation referenced
+in those annotations:<br>
+<ul>
+<li><a href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n89/mode/1up">
+    MIT/IL engineering drawing 2021153D, sheet 3</a>.  Listing of the memory-bank 
+    checksums for Comanche 44.</li>
+<li><a href="https://archive.org/details/Comanche55J2k60">
+       Comanche 55 (Apollo 11 CM final release) assembly listing</a>.</li>
+<li><a href="http://www.ibiblio.org/apollo/listings/Comanche051/MAIN.agc.html">
+       Reconstructed Comanche 51 (Apollo 11 CM initial release) assembly listing</a>.</li>
+<li><a href="https://archive.org/details/Colossus249MartinPp15651719">
+       Colossus 249 (Apollo 9 CM final release) assembly listing</a>.</li>
+<li><a href="http://www.ibiblio.org/apollo/Documents/HSI-208454.pdf#page=12">
+       <i>Guidance System Operations Plan for Colossus 3</i>, Section 5, p. <i>xiii</i></a>.  
+       Table listing some Program Request Changes (PCRs) incorporated between 
+       Comanche 45/2 and Comanche 55.</li>
+<li><a href="http://www.ibiblio.org/apollo/Documents/HSI-208472.pdf#page=8">
+       <i>Guidance System Operations Plan for Colossus 2E</i>, Section 3, pp. <i>ix-x</i></a>.
+       Tables listing some Program Change Requests (PCRs) incorporated between 
+       Comanche 44 and Comanche 55.</li>
+<li><a href="http://www.ibiblio.org/apollo/links.html#PGE_COLOSSUS2">
+       <i>Programmed Guidance Equations for Colossus 2, Based on Comanche 55</i></a>. 
+       Provides a pseudocode representation of portions of Comanche 55, showing change bars.
+       The software revisions <i>from which</i> and <i>to which</i> the changes occurred
+       are indicated by the markings next to the document page number:
+       <ul>
+       <li>"Rev. 0" pages:  change bars are from Colossus 249 to Comanche 45</li>
+       <li>"Rev. 1" pages:  change bars are from Comanche 45 to Comanche 45/2</li>
+       <li>"Rev. 2" pages:  change bars are from Comanche 45/2 to Comanche 55</li>
+       </ul>
+       </li>
+</ul>
+In most cases, only the titles (rather than the full texts) of PCRs are known.  In addition to the 
+explanatory annotations, there is also 
+<a href="https://github.com/virtualagc/virtualagc/issues/1134">
+a step-by-step commentary about the reconstruction process</a>.
+<br><br>
+Comments expected to have been present in the original source code are prefixed with a single '#' symbol, 
+whereas comments added later are prefixed by "##" or "###".  Report any errors 
+noted by creating an 
+issue report at <a href="https://github.com/rburkey2005/virtualagc/issues">the Virtual AGC
+Project's GitHub repository</a>.
+</td></tr></tbody></table>
+

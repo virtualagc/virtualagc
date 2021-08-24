@@ -11,13 +11,14 @@
 ## Mod history: 2011-03-15 JL	Adapted from corresponding Colossus 249 file.
 ##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and fixed errors found.
+##		2021-05-30 ABS	EBANK= MPAC -> EBANK= KMPAC
 
 ## Page 967
 		BANK	20
 		SETLOC	MYSUBS
 		BANK
 
-		EBANK=	MPAC
+		EBANK=	KMPAC
 SPCOS1		EQUALS	SPCOS
 SPSIN1		EQUALS	SPSIN
 SPCOS2		EQUALS	SPCOS

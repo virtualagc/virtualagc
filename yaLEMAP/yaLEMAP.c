@@ -1,5 +1,5 @@
 /*
- * Copyright 2005,2009,2016,2017 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2005,2009,2016,2017,2021 Ronald S. Burkey <info@sandroid.org>
  * This file is part of yaAGC.
  *
  * yaAGC is free software; you can redistribute it and/or modify
@@ -67,7 +67,10 @@
  * 		2017-10-12 MAS	Cleaned up HTML and .lst formatting. Pulled
  * 		                --unpound-page over from yaYUL.
  * 		2017-11-18 RSB	Some compiler warnings fixed.
- *
+ * 		2021-04-20 RSB  Accounted for EBCDIC mods, in yaYUL, not
+ * 		                desired here.
+ *              2021-05-24 RSB  Workaround for bad cygwin pow() function.
+ *              2021-05-24 RSB  My workarounds were bogus.  I've rolled them back. *
  * Note that we use yaYUL's symbol-table machinery for handling the
  * symbol table.
  */
@@ -1296,6 +1299,10 @@ main (int argc, char *argv[])
   printf ("AGS cross-assembler yaLEMAP, " __DATE__ ", " __TIME__ "\n");
   printf ("Copyright 2005,2009 Ronald S. Burkey.\n");
   printf ("Licensed under the General Public License (GPL).\n");
+
+  // Use the native collation order for sorting the symbol table.
+  ebcdic = 0;
+  honeywell = 0;
 
   Lst = fopen ("yaLEMAP.lst", "w");
   if (Lst == NULL)

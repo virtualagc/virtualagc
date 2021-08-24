@@ -9,7 +9,7 @@
 BASENAME=Retread50
 
 ## Retread was built for the BLK2 target
-EXTRA_YAYUL_ARGS+=--blk2 --early-sbank --no-checksums --parity
+EXTRA_YAYUL_ARGS+=--blk2 --early-sbank --no-checksums --parity --honeywell
 
 # Retread does not have checksums, so disable them.
 OCT2BIN_ARGS+=--no-checksums

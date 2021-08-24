@@ -1,4 +1,4 @@
-# Copyright 2003-2007,2009-2010,2016-2018 Ronald S. Burkey <info@sandroid.org>
+# Copyright 2003-2007,2009-2010,2016-2018,2020 Ronald S. Burkey <info@sandroid.org>
 #
 # This file is part of yaAGC.
 #
@@ -178,6 +178,22 @@
 #		2019-07-27 MAS	Added LUM69R2.
 #		2019-07-28 MAS	Added Luminary 97 and 98.
 #		2019-07-31 RSB	Added COMANCHE051.
+#		2019-08-16 RSB	Added Artemis071.
+#		2019-09-17 MAS	Added Luminary 178.
+#		2019-09-18 RSB	Added yaOBC and yaASM targets.
+#		2019-09-22 RSB	Added Luminary163 and 173 missions.
+#		2020-05-13 RSB	While I had added the yaOBC and yaASM (Gemini) targets a
+#				couple of years ago, for some reason I didn't set them
+#				to be built automatically.  Now they are.  Also, added
+#				the yaLVDC (LVDC/PTC) target, and have it build automatically.
+#		2020-07-22 RSB	Added SundanceXXX.
+#		2020-08-05 RSB	Added Sundance306ish.
+#		2020-12-05 RSB	Added Comanche044. Also, added some comments mostly
+#				intended to help me recall how my own personal build
+#				environment works :-), but also provides an example of
+#				the FORCE_cc and FORCE_CC build switches.  Also, updated
+#				the NVER version code.
+#		2020-12-24 RSB	Added Comanche045 and Manche45R2.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -185,18 +201,39 @@
 #	Use "make WIN32=yes" for Windows.
 #	Use "gmake FREEBSD=yes" for FreeBSD.
 #	Use "make" for Linux.
+#
 # On some platforms, we simply can't deduce what C or C++ compiler is being used
 # from the settings indicated above.  An example is Mac OS X, in which older versions
-# of Xcode used gcc, but newer ones use clang (which we don't support).  Or so I'm 
-# told.  At any rate, you can force using specific C and C++ compilers by giving their
-# full pathnames. For example:
+# of Xcode used gcc, but newer ones use clang (which we don't support, but see below).  
+# Or so I'm told.  At any rate, you can force using specific C and C++ compilers by 
+# giving their full pathnames. For example:
 #	make MACOSX=yes FORCE_cc=/path/to/gcc FORCE_CC=/path/to/g++
-# I have no systems myself on which this is an issue, so that's a feature I've never
-# tested in any meaningful way.  Another available switch is FORCE_clang=yes, which makes
-# certain changes that *may* allow building with clang rather than gcc.
+# Most people shouldn't need this feature, but the more complex your build environment,
+# the more likely. This is clunky, I admit, but it's better than having to perform AGC 
+# builds in a clean virtual machine, which is often the only other practical option. It's  
+# the curse of having been a software developer for so long!  Too ... many ... versions.
+#
+# Another available switch is FORCE_clang=yes, which makes certain changes that *may* 
+# allow building with clang rather than gcc.  Since I don't have any Macs new 
+# enough to be use clang, I can't testify of my own personal knowledge that this
+# works as hoped for on a Mac.  But see the examples below. 
+#
+# Some examples of FORCE_xxx:
+#
+#    1.	On my own (Linux) computer, with so many competing versions of gcc and libraries, 
+#	I'll get a runtime version-mismatch between the VirtualAGC GUI and libstdc++ if 
+#	I just run 'make' by itself using the default version of g++ found in my PATH.
+#	So instead, I have to run "make FORCE_CC=/usr/bin/g++".  
+#
+#    2.	I have installed clang on my Linux box, not because I have any interest in clang
+#	as such, but just to do my due diligence for Mac users, to the extent feasible 
+#	without having an actual modern Mac.  A build of Virtual AGC with clang does 
+#	complete without errors on my Linux box, and does seem to work after it is built.  
+#	The build-command I have to use for clang 3.9 is:
+# 	"make FORCE_clang=yes FORCE_cc=/usr/bin/clang-3.9 FORCE_CC=/usr/bin/clang++-3.9".
 
 # NVER is the overall version code for the release.
-NVER:=\\\"2017-07-29\\\"
+NVER:=\\\"2020-12-24\\\"
 DATE:=`date +%Y%m%d`
 
 # DON'T CHANGE THE FOLLOWING SWITCH *********************************
@@ -424,7 +461,8 @@ MISSIONS += Luminary099 Artemis072 Colossus237 Luminary130
 MISSIONS += Aurora12 Sunburst120 Luminary210 Retread44 Luminary069
 MISSIONS += SuperJob LUM99R2 Luminary116 Borealis Sunburst37 LMY99R0
 MISSIONS += Retread50 SundialE LUM69R2 Luminary097 Luminary098
-MISSIONS += Comanche051
+MISSIONS += Comanche051 Artemis071 Luminary178 Luminary163 Luminary173
+MISSIONS += SundanceXXX Sundance306ish Comanche044 Comanche045 Manche45R2
 # ifndef MACOSX
 MISSIONS += Solarium055 TRIVIUM TRIVIUM-repaired
 # endif
@@ -434,12 +472,14 @@ export MISSIONS
 cbMISSIONS = Validation Luminary131 Colossus249 Comanche055 Luminary130
 cbMISSIONS += Luminary099 Artemis072 Colossus237 Aurora12 Sunburst120 LMY99R0
 cbMISSIONS += Luminary069 LUM99R2 Luminary116 Luminary210 Retread44 Borealis SuperJob
-cbMISSIONS += LUM69R2 Luminary097 Luminary098
+cbMISSIONS += LUM69R2 Luminary097 Luminary098 Luminary178
 cbMISSIONS := $(patsubst %,%.cbp,$(cbMISSIONS))
 
 # The base set of targets to be built always.
 SUBDIRS = Tools yaLEMAP yaAGC yaAGS yaYUL ControlPulseSim yaUniverse
 SUBDIRS += yaAGC-Block1-Pultorak yaAGCb1 yaUplinkBlock1 Validation-Block1
+SUBDIRS += yaASM yaOBC
+SUBDIRS += yaLVDC
 SUBDIRS += $(MISSIONS)
 
 ifndef NOGUI
@@ -460,8 +500,8 @@ ifndef FREEBSD
 SUBDIRS += yaACA2
 endif
 SUBDIRS += yaACA3
-SUBDIRS += yaTelemetry 
 SUBDIRS += jWiz
+SUBDIRS += yaTelemetry 
 SUBDIRS += yaDSKYb1
 SUBDIRS += VirtualAGC
 endif # NOGUI
@@ -555,6 +595,18 @@ VirtualAGC:
 .PHONY: VirtualAGC-installer
 VirtualAGC-installer: all
 	$(BUILD) -C VirtualAGC "YADSKY_SUFFIX=$(YADSKY_SUFFIX)" "YADEDA_SUFFIX=$(YADEDA_SUFFIX)" $(ISMACOSX) $(DEV_STATIC) VirtualAGC-installer
+
+.PHONY: yaASM
+yaASM:
+	$(BUILD) -C $@
+
+.PHONY: yaOBC
+yaOBC:
+	$(BUILD) -C $@
+
+.PHONY: yaLVDC
+yaLVDC:
+	$(BUILD) -C $@
 
 # This target is for making HTML assembly listings for the website.
 .PHONY: listings
@@ -653,6 +705,8 @@ Validation.cbp:
 clean: clean-missions
 	$(MAKE) -C yaLEMAP clean
 	$(MAKE) -C yaASM clean
+	$(MAKE) -C yaOBC clean
+	$(MAKE) -C yaLVDC clean
 	$(MAKE) -C yaAGC clean
 	$(MAKE) -C yaAGS clean
 	$(MAKE) -C yaDSKY/src -f Makefile.all-archs clean
@@ -744,7 +798,7 @@ else
 	@echo "Run Virtual AGC from its desktop icon."
 	@echo "Or else, run Virtual AGC from a command-line as follows:"
 	@echo "  cd ~/VirtualAGC/Resources"
-	@echo "  ../bin//VirtualAGC"
+	@echo "  ../bin/VirtualAGC"
 	@echo "================================================================"
 endif
 endif

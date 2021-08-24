@@ -16,6 +16,7 @@
 ##              2017-01-30 RRB  Updated for Luminary 116.
 ##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
 ##				Luminary 99 and 131.
+##              2021-05-30 ABS  GTSGO+DN -> GTSGO+ON
 
 ## Page 1462
                 BANK            21                              
@@ -57,7 +58,7 @@ GTS             CAF             NEGONE                          # MAKE THE NEXT 
                 AD              A                               # FOR THE RIGHT SHIFT DUE TO EDITING.
                 TS              SAVESR                          
 
-GTSGO+DN        CAF             TWO                             # SET INDEXER FOR R-AXIS CALCULATIONS.
+GTSGO+ON        CAF             TWO                             # SET INDEXER FOR R-AXIS CALCULATIONS.
                 TCF             GOQTRIMG        +1              
 
 GOQTRIMG        CAF             ZERO                            # SET INDEXER FOR Q-AXIS CALCULATIONS

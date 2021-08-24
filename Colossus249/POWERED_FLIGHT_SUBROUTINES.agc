@@ -18,6 +18,7 @@
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
 ##		2017-02-08 RSB	Added a note about a curiously-misprinted line.
+##		2021-05-30 ABS	SINSLOC -> SINESLOC
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -286,7 +287,7 @@ R*TL**P		CCS	DEXDEX		#       	+3 --> 0	-3 --> 2
 LOOP2		DXCH	BUF		# LOADING VECTOR COMPONENT, STORING INDEX
 
 LOOP1		DXCH	MPAC
-		CA	SINSLOC
+		CA	SINESLOC
 		AD	DEX1
 		TS	ADDRWD
 
@@ -328,7 +329,7 @@ TSTPOINT	CCS	DEXDEX		# ONLY THE BRANCHING FUNCTION IS USED
 		TCF	R*TL**P
 		TC	RTNSAVER
 
-SINSLOC		ADRES	SINCDU		# FOR USE IN SETTING ADDRWD
+SINESLOC	ADRES	SINCDU		# FOR USE IN SETTING ADDRWD
 
 INDEXI		DEC	4		# **********   DON'T   **********
 		DEC	2		# **********   TOUCH   **********

@@ -17,6 +17,6 @@
 #		2017-01-30 MAS	Changed to += for extra args.
 
 BASENAME=Solarium055
-EXTRA_YAYUL_ARGS+="--block1"
+EXTRA_YAYUL_ARGS+=--block1 --honeywell
 OCT2BIN_ARGS+="--block1"
 include ../Makefile.inc

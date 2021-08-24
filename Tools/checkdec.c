@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2005,2016 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2003-2005,2016,2021 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -31,6 +31,8 @@
  *              05/14/05 RSB	Corrected website reference.
  *              08/01/15 RSB    Check return value of fgets to avoid a
  *                              compiler warning.
+ *              05/24/21 RSB    Workaround for bad cygwin pow() function.
+ *              05/24/21 RSB    My workarounds were bogus.  I've rolled them back.
  */
 
 #include <stdio.h>

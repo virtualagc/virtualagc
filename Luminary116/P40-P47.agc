@@ -22,6 +22,7 @@
 ##		2017-08-16 RSB	Fixed comment typo identified in AP11ROPE.
 ##		2017-08-26 MAS  Fixed an incorrect label found while transcribing
 ##                              Zerlina 56 (it was unreferenced so caused no errors).
+##              2021-05-30 ABS  TGDCALC -> TGOCALC
 
 ## Page 745
 # PROGRAM DESCRIPTION  P40BOTH          DECEMBER 22, 1966
@@ -909,7 +910,7 @@ VGAIN*          STORE           VG                              # VELOCITY TO BE
 BDTOK           VLOAD           ABVAL                           
                                 VG                              
                 STORE           VGDISP                          
-TGDCALC         SETPD           VLOAD                           
+TGOCALC         SETPD           VLOAD                           
                                 0                               
                                 VG                              
                 STOVL           VGPREV                          

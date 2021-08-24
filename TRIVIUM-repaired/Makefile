@@ -6,7 +6,7 @@
 # Mod history:	2018-10-20 RSB	Created
 
 BASENAME=TRIVIUM
-EXTRA_YAYUL_ARGS+="--block1"
+EXTRA_YAYUL_ARGS+=--block1 --honeywell
 NO_BINSOURCE=1
 
 include ../Makefile.inc

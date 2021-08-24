@@ -16,6 +16,7 @@
 ##              2017-02-03 RRB  Updated for Luminary 116.
 ##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
 ##				Luminary 99 and 131.
+##              2021-05-30 ABS  UPCK -> UPOK
 
 ## Page 1328
                 BANK            14                              
@@ -74,7 +75,7 @@ UPRPT1          CAF             LOW5                            # TEST FOR TRIPL
                 COM                                             
                 TC              UPTEST                          
 
-UPCK            CS              ELRCODE                         # CODE IS GOOD. IF CODE = 'ERROR RESET',
+UPOK            CS              ELRCODE                         # CODE IS GOOD. IF CODE = 'ERROR RESET',
                 AD              KEYTEMP1                        # CLEAR UPLOCKFL(SET BIT4 OF FLAGWRD7 = 0)
                 EXTEND                                          # IF CODE DOES NOT = 'ERROR RESET', ACCEPT
                 BZF             CLUPLOCK                        # CODE ONLY IF UPLOCKFL IS CLEAR (=0).

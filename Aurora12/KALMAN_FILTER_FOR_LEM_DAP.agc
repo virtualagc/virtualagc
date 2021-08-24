@@ -17,6 +17,7 @@
 ## 
 ##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
 ##				 and fixed the errors found.
+##		 2021-05-21 ABS	 Removed space in numeric subfield to match scans.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of
@@ -225,7 +226,7 @@ KLMNFLTR        CAE     CDU2DOT         # A SCALED AT PI/8 (USE S.P.)
                 CAE     ITEMP5          # W0 IS SCALED AT 2
                 EXTEND                  # DPDIFF IS RESCALED TO PI
                 MP      W0              # W0*DPDIFF IS SCALED AT 2PI (AS CDU)
-                ADS     CDU + 1
+                ADS     CDU +1
                 TS      L
                 TCF      +2
                 ADS     CDU

@@ -70,8 +70,8 @@ void MyFrameClass::set_properties()
     // begin wxGlade: MyFrameClass::set_properties
     SetTitle(wxT("Information"));
     Text->SetMinSize(wxSize(360,360));
-    Text->SetFont(wxFont(14, wxDEFAULT, wxNORMAL, wxBOLD, 0, wxT("")));
-    panel_1->SetFont(wxFont(14, wxDEFAULT, wxNORMAL, wxBOLD, 0, wxT("")));
+    Text->SetFont(wxFont(14, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, 0, wxT("")));
+    panel_1->SetFont(wxFont(14, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, 0, wxT("")));
     // end wxGlade
 }
 

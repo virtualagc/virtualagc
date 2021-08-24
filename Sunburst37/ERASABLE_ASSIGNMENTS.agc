@@ -23,6 +23,7 @@
 ##                                        ABDCONV -> ABDVCONV
 ##		2017-06-21 RSB	A few comments corrected using 
 ##				octopus/ProoferComments.
+##              2021-05-30 ABS  Added missing BODYFLAG definition.
 
 ## Page 10
 
@@ -159,6 +160,7 @@ MIDFLAG         EQUALS          2
 MOONFLAG        EQUALS          3
 NBSMBIT         EQUALS          4
 COAROFIN        EQUALS          5
+BODYFLAG        EQUALS          6
 IMUSE           EQUALS          7
 RRUSE           EQUALS          8D
 RRNBSW          EQUALS          9D

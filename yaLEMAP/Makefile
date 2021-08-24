@@ -101,13 +101,13 @@ binLEMAP.exe: binLEMAP.c
 binLEMAP-macosx: binLEMAP.c
 	powerpc-apple-darwin9-${cc} -arch i386 -arch ppc ${CFLAGS} -o $@ $^
 
-yaLEMAP: yaLEMAP.c ../yaYUL/SymbolTable.c
+yaLEMAP: yaLEMAP.c ../yaYUL/SymbolTable.c ../yaYUL/strcmpEBCDIC.c
 	${cc} ${CFLAGS} -o $@ $^ -lm
 
-yaLEMAP.exe: yaLEMAP.c ../yaYUL/SymbolTable.c
+yaLEMAP.exe: yaLEMAP.c ../yaYUL/SymbolTable.c ../yaYUL/strcmpEBCDIC.c
 	i386-mingw32-${cc} ${CFLAGS} -o $@ $^ -lm
 
-yaLEMAP-macosx: yaLEMAP.c ../yaYUL/SymbolTable.c
+yaLEMAP-macosx: yaLEMAP.c ../yaYUL/SymbolTable.c ../yaYUL/strcmpEBCDIC.c
 	powerpc-apple-darwin9-${cc} -arch i386 -arch ppc ${CFLAGS} -o $@ $^ -lm
 
 .PHONY:	clean

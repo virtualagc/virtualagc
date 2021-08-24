@@ -42,6 +42,18 @@
  *                              instructions implemented now, though I've
  *                              had no way to test DV so far.
  *              2016-09-27 RSB  Hooked up DSRUPT.
+ *              2021-08-07 RSB  Fixed a bunch of errors identified by
+ *                              running SELF-CHECK in Solarium:
+ *                              * AD and INDEX now edit their arguments
+ *                              * SL no longer shifts into bit 14
+ *                              * DV now sets LP to either 140001 or 140000
+ *                                depending on inputs.
+ *                              * DV with negative numerators now works.
+ *                              * DV of equal-magnitude numbers now sets
+ *                                A and Q correctly.
+ *                              * CCS and SU now respect overflow.
+ *                              * TS A now preserves the value of A on
+ *                                overflow.
  */
 
 #include <stdlib.h>
@@ -126,7 +138,7 @@ edit(uint16_t flatAddress)
     }
   else if (flatAddress == 023)
     {
-      regSL = ((regSL << 1) & 0077776) | ((regSL & 0100000) >> 15);
+      regSL = ((regSL << 1) & 0037776) | ((regSL & 0100000) >> 15);
     }
   return;
 }
@@ -319,13 +331,13 @@ executeOneInstruction(FILE *logFile)
           uint16_t K;
           // Arrange to jump.  Recall that Z already points to the next
           // instruction.
-          K = (operand >= 04) ? fetchedFromOperand : fixUcForWriting(fetchedFromOperand);
+          K = fetchedFromOperandSignExtended;
           if (K == 000000) incrementZ(1);// +0
-          else if (0 == (K & 040000)) incrementZ(0);// >0
-          else if (K == 077777) incrementZ(3);// -0
+          else if (0 == (K & 0100000)) incrementZ(0);// >0
+          else if (K == 0177777) incrementZ(3);// -0
           else incrementZ(2);// < 0
           // Compute the "diminished absolute value" of c(K).
-          if (0 != (K & 040000)) K = (~K) & 037777;// Absolute value.
+          if (0 != (K & 0100000)) K = (~K) & 0177777;// Absolute value.
           if (K >= 1) K--;
           regA = K;
           edit(operand);
@@ -349,6 +361,7 @@ executeOneInstruction(FILE *logFile)
           goto resumeFromInterrupt;
         }
       else agc.INDEX = fetchedFromOperand;
+      edit(operand);
     }
   else if (opcode == 030000 && !extracode) /* XCH (erasable) or CAF (fixed). */
     {
@@ -399,8 +412,11 @@ executeOneInstruction(FILE *logFile)
             {
               // Overflow.
               incrementZ(1);
-              if (aOverflowBits == 0040000) regA = 0000001;// Positive overflow.
-              else regA = 0177776;// Negative overflow;
+              if (operand != 00)
+                {
+                    if (aOverflowBits == 0040000) regA = 0000001;// Positive overflow.
+                    else regA = 0177776;// Negative overflow;
+                }
             }
         }
     }
@@ -424,6 +440,7 @@ executeOneInstruction(FILE *logFile)
           if (ctrOVCTR == 0) ctrOVCTR = 077777; // Convert +0 to -0.
           ctrOVCTR = (ctrOVCTR - 1) & 077777;
         }
+      edit(operand);
     }
   else if (opcode == 070000) /* MASK. */
     {
@@ -478,12 +495,13 @@ executeOneInstruction(FILE *logFile)
       numMCT = 18;
 
         {
-          int32_t numerator, denominator, quotient, remainder, sign = 1;
+          int32_t numerator, denominator, quotient, remainder, sign = 1, numeratorSign = 1;
           numerator = fixUcForWriting(regA) << 14;
-          if (0 != (0100000 & regA)) numerator |= 030000037777;
+          if (0 != (0100000 & regA)) numerator |= 034000037777;
           denominator = (int16_t) ((operand < 4) ? fetchedFromOperand : fetchedFromOperandSignExtended);
           if (numerator < 0)
             {
+              numeratorSign = -1;
               sign = -sign;
               numerator = ~numerator;
             }
@@ -492,15 +510,31 @@ executeOneInstruction(FILE *logFile)
               sign = -sign;
               denominator = ~denominator;
             }
-          quotient = numerator / denominator;
-          remainder = numerator % denominator;
-          if (quotient > 037777)
-            quotient = 037777;
-          if (sign < 0)
-            quotient = ~quotient;
-          regA = quotient;
-          regQ = ~remainder;
-          regLP = (sign > 0) ? 1 : 0140001;
+          if ((numerator >> 14) == denominator)
+            {
+              regQ = ~denominator;
+              regA = (sign > 0) ? 037777 : 0140000;
+            }
+          else
+            {
+              quotient = numerator / denominator;
+              remainder = numerator % denominator;
+              if (quotient > 037777)
+                quotient = 037777;
+              if (sign < 0)
+                quotient = ~quotient;
+              regA = quotient;
+              regQ = ~remainder;
+            }
+          if (sign > 0)
+            regLP = 1;
+          else
+            {
+              if (numeratorSign > 0)
+                regLP = 0140000;
+              else
+                regLP = 0140001;
+            }
         }
     }
   else if (opcode == 030000 && extracode) /* SU */
@@ -509,7 +543,7 @@ executeOneInstruction(FILE *logFile)
       // R-393 says that SU takes 2 more MCT than AD, but the control-pulse
       // sequences it lists for SU don't support that notion.
       //numMCT += 2;
-      fetchedFromOperandSignExtended = ~fetchedFromOperand;
+      fetchedFromOperandSignExtended = ~fetchedFromOperandSignExtended;
       fetchedFromOperand = fetchedFromOperandSignExtended & 0177777;
       goto entrySubtraction;
     }

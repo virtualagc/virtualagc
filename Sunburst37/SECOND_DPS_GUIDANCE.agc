@@ -23,6 +23,7 @@
 ##                              fractional number off by one.
 ##		2017-06-23 RSB	Proofed comment text with
 ##				octopus/ProoferComments.
+##              2021-05-30 ABS  2DEC* -> DEC for non extended address fields.
 
 ## Page 814
 
@@ -1552,7 +1553,7 @@ TTF/4NU1        DEC*            -1.000000000    E+2  B-15*
 
 A1FS            2DEC*           +5.044035031    E-5  B+6*
 
-                2DEC*           0
+                2DEC            0
 
                 2DEC*           +4.277783493    E-11 B+30*
 
@@ -1591,7 +1592,7 @@ TTF/4NU3        DEC*            -2.500000000    E+2  B-15*
 
 A3FS            2DEC*           +1.536879692    E-13 B+6*
 
-                2DEC*           0
+                2DEC            0
 
                 2DEC*           +2.438530673    E-11 B+30*
 

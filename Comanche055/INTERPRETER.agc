@@ -24,6 +24,7 @@
 ##				identified while proofing Artemis 072.
 ##		2017-03-15 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2021-05-30 ABS	Modfied COUNT operands to match scans.
 
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -53,7 +54,7 @@
 
 		BLOCK	03
 		
-		COUNT*	$$/INTER
+		COUNT	03/INTER
 INTPRET		RELINT
 		EXTEND				# SET LOC TO THE WORD FOLLOWING THE TC.
 		QXCH	LOC
@@ -369,7 +370,7 @@ MISCJUMP	TCF	AXT		# 00 - ADDRESS TO INDEX TRUE.
 
 ## Page 1118
 # THE FOLLOWING JUMP TABLE APPIES TO UNARY INSTRUCTIONS.
-		COUNT*	$$/INTER
+		COUNT	00/INTER
 		BANK	0		# 00 - EXIT - DETECTED EARLIER.
 UNAJUMP		TCF	SQRT		# 01 - SQUARE ROOT.
 		TCF	SINE		# 02 - SIN.

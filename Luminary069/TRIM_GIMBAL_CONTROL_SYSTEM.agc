@@ -23,6 +23,9 @@
 ##              2017-01-23 Fix operator TC -> TCF
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##              2021-05-30 ABS  GTSGO+DN -> GTSGO+ON
+##                              MAXISHIFT -> MAXISHFT
+##                              MINISHIFT -> MINISHFT
 
 ## Page 1467
                 BANK    21
@@ -63,7 +66,7 @@ GTS             CAF     NEGONE          # MAKE THE NEXT PASS THROUGH THE DAP BE
                 AD      A               # FOR THE RIGHT SHIFT DUE TO EDITING.
                 TS      SAVESR
 
-GTSGO+DN        CAF     TWO             # SET INDEXER FOR R-AXIS CALCULATIONS.
+GTSGO+ON        CAF     TWO             # SET INDEXER FOR R-AXIS CALCULATIONS.
                 TS      QRCNTR
                 CA      AOSR
                 EXTEND
@@ -458,14 +461,14 @@ SAVESHFT        TS      Q               # Q BOUNDS ARE ZERO AND 24 (DECIMAL).
                 CS      FOURTEEN
                 AD      Q
                 EXTEND                  # Q = 0(MOD 3), SO A REG IS NON-ZERO.
-                BZMF    MINISHIFT       # BRANCH IF SMALL SHIFT SUFFICES.
+                BZMF    MINISHFT        # BRANCH IF SMALL SHIFT SUFFICES.
 
-MAXISHIFT       TS      Q               # 14 BIT SHIFT RIGHT NOW.
+MAXISHFT        TS      Q               # 14 BIT SHIFT RIGHT NOW.
                 CA      ZERO
                 XCH     FUNCTION
                 TS      FUNCTION +1
 
-MINISHIFT       INDEX   Q               # C(Q) ARE GREATER THAN ZERO.
+MINISHFT        INDEX   Q               # C(Q) ARE GREATER THAN ZERO.
                 CA      BIT15
                 TS      Q               # 2**(-Q) WILL BE SHIFT MULTIPLIER.
                 EXTEND

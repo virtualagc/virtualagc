@@ -1,5 +1,5 @@
 /*
- * Copyright 2011,2012 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2011,2012,2019,2020 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -17,8 +17,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * Filename:    yaASM.c
- * Purpose:     Cross-assembler for Gemini OBC and (potentially) Apollo LVDC
- *              source code.
+ * Purpose:     Cross-assembler for Gemini OBC.  Was at one time intended
+ *              also for the Apollo LVDC, but that is no longer the case.
+ *              (For LVDC, refer to yaASM.py instead.)
  * Compiler:    GNU gcc.
  * Reference:   http://www.ibibio.org/apollo
  * Mods:        2010-01-30 RSB  Began adapting from yaLEMAP.c.
@@ -55,6 +56,11 @@
  *                              and STO instructions.
  *              2012-01-08 RSB  Fixed to not abort instantly on
  *                              error detection.
+ *              2019-09-08 RSB  Backed out anything related to LVDC
+ *                              support.  Use yaASM.py instead for LVDC.
+ *              2020-12-06 RSB  Changed character stuffed at end of input
+ *                              line buffer to avoid a clang warning for
+ *                              signed vs unsigned characters.
  */
 
 #include <stdlib.h>
@@ -67,7 +73,6 @@
 #include "./yaASM.h"
 
 // Command-line options.
-static int Lvdc = 0; // If 0, then OBC.
 static int HalfWordMode = 0; // Can change during assembly.
 static Address_t InstructionPointer, StartingInstructionPointer =
   { 0, 0, 2, 0 }, ObcEntry =
@@ -208,7 +213,6 @@ WriteBinary(enum SymbolType_t Type, Address_t *Address, uint32_t Value)
         {
           RetVal++;
           fprintf(stderr, "Trying to overwrite binary at address ");
-          //if (Lvdc)
           fprintf(stderr, "%o-", Address->Module);
           fprintf(stderr, "%02o-%o-%03o\n", Address->Page, Address->Syllable,
               Address->Word);
@@ -338,15 +342,10 @@ main(int argc, char *argv[])
           fprintf(stderr, "The binary (if any) is output to yaASM.bin.\n");
           fprintf(stderr, "The available OPTIONS are:\n");
           fprintf(stderr, "--help          Shows this help-menu.\n");
-          fprintf(stderr,
-              "--lvdc          Assemble for Apollo LVDC. (By default,\n");
-          fprintf(stderr, "                assembles for Gemini OBC.\n");
-          fprintf(stderr,
-              "--hwm           (Gemini OBC only.) Start assembly in\n");
-          fprintf(stderr, "                \"half-word mode\". (HALF or NORM\n");
-          fprintf(stderr,
-              "                directives within the source code itself\n");
-          fprintf(stderr, "                can change the mode.)\n");
+          fprintf(stderr, "--hwm           Start assembly in \"half-word\n");
+          fprintf(stderr, "                mode\". (HALF or NORM directives\n");
+          fprintf(stderr, "                within the source code itself can\n");
+          fprintf(stderr, "                change the mode.)\n");
           fprintf(stderr,
               "--code=M-P-S-W  Starting address for instructions.\n");
           fprintf(stderr,
@@ -354,13 +353,13 @@ main(int argc, char *argv[])
           fprintf(stderr,
               "                the page number in octal (0-17). S is\n");
           fprintf(stderr,
-              "                the syllable number (0,1,2 for OBC or\n");
+              "                the syllable number (0,1,2). W is the\n");
           fprintf(stderr,
-              "                0,1 for LVDC). W is the word number in\n");
+              "                word number in octal (0-377).  CODE\n");
           fprintf(stderr,
-              "                octal (0-377).  CODE directives embedded\n");
+              "                directives embedded within the source\n");
           fprintf(stderr,
-              "                within the source code can change this.\n");
+              "                code can change this.\n");
           fprintf(stderr,
               "--data=M-P-S-W  Starting address for data. The same\n");
           fprintf(stderr,
@@ -378,8 +377,6 @@ main(int argc, char *argv[])
         }
       else if (!strncmp(argv[i], "--input=", 8))
         Input = &argv[i][8];
-      else if (!strcmp(argv[i], "--lvdc"))
-        Lvdc = 1;
       else if (!strcmp(argv[i], "--hwm"))
         HalfWordMode = 1;
       else if (4 == sscanf(argv[i], "--code=%d-%d-%d-%d", &m, &p, &s, &w))
@@ -397,12 +394,12 @@ main(int argc, char *argv[])
           StartingDataPointer.Syllable = s;
           StartingDataPointer.Word = w;
           ParseAddressForError: ;
-          //if (m != 0 && !Lvdc)
+          //if (m != 0)
           //  {
           //    fprintf(stderr, "For OBC, module number must be 0.\n");
           //    goto Help;
           //  }
-          if ((m < 0 || m >= MAX_MODULES) /*&& Lvdc*/)
+          if (m < 0 || m >= MAX_MODULES)
             {
               fprintf(stderr, "Module number out of range.\n");
               goto Help;
@@ -412,7 +409,7 @@ main(int argc, char *argv[])
               fprintf(stderr, "Sector number out of range.\n");
               goto Help;
             }
-          if (s < 0 || s >= MAX_SYLLABLES || (s > 1 && Lvdc))
+          if (s < 0 || s >= MAX_SYLLABLES)
             {
               fprintf(stderr, "Syllable number out of range.\n");
               goto Help;
@@ -429,17 +426,12 @@ main(int argc, char *argv[])
           goto Help;
         }
     }
-  if (HalfWordMode && Lvdc)
-    {
-      fprintf(stderr, "Half-word mode is not legal for LVDC.\n");
-      goto Help;
-    }
   if (HalfWordMode && DataPointer.Syllable != 2)
     {
       fprintf(stderr, "Syllable must be 2 for data in half-word mode.\n");
       goto Help;
     }
-  if (!Lvdc && !HalfWordMode && DataPointer.Syllable != 0)
+  if (!HalfWordMode && DataPointer.Syllable != 0)
     {
       fprintf(stderr,
           "Syllable must be 0 for data when OBC is not in half-word mode.\n");
@@ -593,7 +585,6 @@ main(int argc, char *argv[])
   for (i = 0; i < NumSymbols; i++)
     {
       printf("%-8s at address ", Symbols[i].Name);
-      //if (Lvdc)
       printf("%o-", Symbols[i].Address.Module);
       printf("%02o-%o-%03o: ", Symbols[i].Address.Page,
           Symbols[i].Address.Syllable, Symbols[i].Address.Word);
@@ -633,7 +624,6 @@ main(int argc, char *argv[])
   printf("------------------------" NL);
   for (i = 0; i < NumSymbols; i++)
     {
-      //if (Lvdc)
       printf("%o-", Symbols[i].Address.Module);
       printf("%02o-%o-%03o, ", Symbols[i].Address.Page,
           Symbols[i].Address.Syllable, Symbols[i].Address.Word);
@@ -698,7 +688,6 @@ main(int argc, char *argv[])
                     }
                   j = 1;
                 }
-              //if (Lvdc)
               printf("%o-", m);
               printf("%02o-N-%03o:", p, w);
               if (j)
@@ -796,7 +785,7 @@ Pass(enum PassType_t PassType)
       char FirstChar;
       char OperandBuffer[MAX_SYMSIZE + 1], *OperandField;
 
-      InputLine[LINESIZE - 1] = 255;
+      InputLine[LINESIZE - 1] = 127; // 20201206 RSB, was 255.
       if (NULL == fgets(InputLine, sizeof(Line_t), fin)) // Done with this file?
 
         {
@@ -848,7 +837,6 @@ Pass(enum PassType_t PassType)
             {
               if (Commented)
                 {
-                  //if (Lvdc)
                   printf("   ");
                   if (FirstChar == '#')
                     printf("                   \t#%s", Comment);
@@ -933,7 +921,6 @@ Pass(enum PassType_t PassType)
           InstructionPointer.HalfWordMode = HalfWordMode;
           if (PassType == PT_CODE)
             {
-              //if (Lvdc)
               printf("   ");
               printf("                   \t         %s" NL, Fields[0]);
             }
@@ -945,7 +932,6 @@ Pass(enum PassType_t PassType)
           InstructionPointer.HalfWordMode = HalfWordMode;
           if (PassType == PT_CODE)
             {
-              //if (Lvdc)
               printf("   ");
               printf("                   \t         %s" NL, Fields[0]);
             }
@@ -990,7 +976,7 @@ Pass(enum PassType_t PassType)
               m = p = s = w = 0;
             }
           if (m < 0 || m >= MAX_MODULES || p < 0 || p >= MAX_SECTORS || s < 0
-              || s > (Lvdc ? 2 : 3) || w < 0 || w > MAX_WORDS)
+              || s > 3 || w < 0 || w > MAX_WORDS)
             {
               //fprintf(stderr,
               //    "%s:%d: error: Operand for DATA/CODE out of range.\n",
@@ -1011,7 +997,7 @@ Pass(enum PassType_t PassType)
             }
           else
             {
-              if (!Lvdc && s == 1)
+              if (s == 1)
                 {
                   //fprintf(stderr,
                   //    "%s:%d: error: Data syllable for OBC must be 0 or 2.\n",
@@ -1028,15 +1014,12 @@ Pass(enum PassType_t PassType)
               DataPointer.Syllable = s;
               DataPointer.Word = w;
               DataPointer.HalfWordMode = HalfWordMode;
-              if (!Lvdc)
-                HalfWordMode = s ? 1 : 0;
+              HalfWordMode = s ? 1 : 0;
             }
           if (PassType == PT_CODE)
             {
-              //if (Lvdc)
               printf("   ");
               printf("                   \t         %s ", Fields[0]);
-              //if (Lvdc)
               printf("%o-", m);
               printf("%02o-%o-%03o" NL, p, s, w);
             }
@@ -1216,7 +1199,6 @@ Pass(enum PassType_t PassType)
         if (PassType == PT_CODE)
           {
             // Write to the listing.
-            //if (Lvdc)
             printf("%o-", DataPointer.Module);
             //else
             //  printf("   ");
@@ -1264,7 +1246,6 @@ Pass(enum PassType_t PassType)
                 sizeof(Symbol_t), CompareSymbols);
             // Print to listing.  The binary was written in between
             // the PT_SYMBOLS and PT_CODE.
-            //if (Lvdc)
             printf("%o-", OurLeftHandSymbol->Address.Module);
             //else
             //  printf("   ");
@@ -1428,7 +1409,6 @@ Pass(enum PassType_t PassType)
                 ErrorCount++;
               }
             // Write to the listing.
-            //if (Lvdc)
             printf("%o-", DataPointer.Module);
             //else
             //  printf("   ");
@@ -1809,8 +1789,6 @@ Pass(enum PassType_t PassType)
                       Input, LineInFile);
                   ErrorCount++;
                 }
-              // For LVDC, need to do some module checking here.
-              // TBD
               // Need to do some checking on syllable matches.
               if (HalfWordMode)
                 {
@@ -1891,10 +1869,7 @@ Pass(enum PassType_t PassType)
             printf("%s:%d: error: Write-binary error.\r\n", Input, LineInFile);
             ErrorCount++;
           }
-        //if (Lvdc)
         printf("%o-", InstructionPointer.Module);
-        //else
-        //  printf("   ");
         printf("%02o-%o-%03o ", InstructionPointer.Page,
             InstructionPointer.Syllable, InstructionPointer.Word);
         printf("    %05o ", OperandValue);

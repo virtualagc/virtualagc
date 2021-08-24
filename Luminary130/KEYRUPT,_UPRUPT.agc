@@ -22,6 +22,8 @@
 ##		2017-02-27 RSB	Proofed comment text using octopus/ProoferComments.
 ##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##		2018-09-04 MAS	Copied from Luminary 131 for Luminary 130.
+##		2021-05-30 ABS	UPCK -> UPOK
+##                              Removed typo "- )" on empty line.
 
 ## Page 1330
 		BANK	14
@@ -80,7 +82,7 @@ UPRPT1		CAF	LOW5		# TEST FOR TRIPLE CHAR REDUNDANCY
 		COM
 		TC	UPTEST
 
-UPCK		CS	ELRCODE		# CODE IS GOOD.  IF CODE = 'ERROR RESET',
+UPOK		CS	ELRCODE		# CODE IS GOOD.  IF CODE = 'ERROR RESET',
 		AD	KEYTEMP1	# CLEAR UPLOCKFL (SET BIT4 OF FLAGWRD7 = 0)
 		EXTEND			# IF CODE DOES NOT = 'ERROR RESET', ACCEPT
 		BZF	CLUPLOCK	# CODE ONLY IF UPLOCKFL IS CLEAR (=0).
@@ -90,7 +92,7 @@ UPCK		CS	ELRCODE		# CODE IS GOOD.  IF CODE = 'ERROR RESET',
 		CCS	A
 		TC	RESUME		# UPLOCKFL = 1
 		TC	ACCEPTUP	# UPLOCKFL = 0
- )
+
 CLUPLOCK	CS	UPLOCBIT	# CLEAR UPLOCKFL (I.E., SET BIT 4 OF )
 		MASK	FLAGWRD7	# FLAGWRD7 = 0)
 		TS	FLAGWRD7

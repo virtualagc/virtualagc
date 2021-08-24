@@ -7,6 +7,8 @@
 ## Website:     www.ibiblio.org/apollo/Restoration.html
 ## Mod history: 2019-06-12 MAS  Recreated from Computer History Museum's
 ##				physical core-rope modules.
+##              2021-05-30 ABS  Removed ENDSPF symbol not present in
+##                              Retread 44 or Aurora 12.
 
 ## Page 135
 # KEYBOARD AND DISPLAY PROGRAM
@@ -1905,7 +1907,7 @@ DSPFMEM         CAF             R1D1                    # IF F/F, DATACALL USES 
                 CA              NOUNCADR                # ORIGINAL FCADR LOADED STILL IN NOUNCADR.
                 TC              DATACALL
                 TC              DSPOCTWD
-ENDSPF          TC              ENDOFJOB
+                TC              ENDOFJOB
 
 ## Page 177
 #  DSPDECWD CONVERTS C(MPAC) AND C(MPAC+1)TO A SIGN AND 5 CHAR DECIMAL

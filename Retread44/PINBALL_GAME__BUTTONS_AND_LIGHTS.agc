@@ -22,6 +22,7 @@
 ##		2017-03-08 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
 ##				Luminary 99 vs Comanche 55.
+##              2021-05-30 ABS  Removed ENDSPF symbol not present in scans.
 
 ## Page 135
 ## The log section name, PINBALL GAME  BUTTONS AND LIGHTS, is circled in red.
@@ -1919,7 +1920,7 @@ DSPFMEM         CAF             R1D1                    # IF F/F, DATACALL USES 
                 CA              NOUNCADR                # ORIGINAL FCADR LOADED STILL IN NOUNCADR.
                 TC              DATACALL
                 TC              DSPOCTWD
-ENDSPF          TC              ENDOFJOB
+                TC              ENDOFJOB
 
 ## Page 177
 #  DSPDECWD CONVERTS C(MPAC) AND C(MPAC+1)TO A SIGN AND 5 CHAR DECIMAL

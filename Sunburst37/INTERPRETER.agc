@@ -22,6 +22,7 @@
 ##              2017-06-15 HG   Fix opcode TC  -> TCF
 ##		2017-06-23 RSB	Proofed comment text with
 ##				octopus/ProoferComments.
+##              2021-05-30 ABS  B5TOBB -> B5TOB8
 
 ## Page 893
 # SECTION 1  DISPATCHER
@@ -3191,7 +3192,7 @@ BOV(B)          CCS             OVFIND                          # BRANCH ON OVER
                 CCS             CYR                             
 
                 TCF             RTB                             # IF BASIC.
-B5TOBB          OCT             360                             
+B5TOB8          OCT             360                             
                 TCF             GOTO                            
 
 ## Page 981

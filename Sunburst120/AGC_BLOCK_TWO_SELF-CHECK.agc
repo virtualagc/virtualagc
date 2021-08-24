@@ -21,6 +21,7 @@
 ##		2016-12-06 RSB	Comments proofed using octopus/ProoferComments,
 ##				changes made.
 ##		2017-01-28 RSB	WTIH -> WITH.
+##		2021-05-30 ABS	Removed SIDLOOP symbol not present in scans.
 
 ## Page 1075
 # PROGRAM DESCRIPTION                                                         DATE  14 FEBRUARY 1967
@@ -181,7 +182,7 @@ ERRORS          INHINT
 TCALARM2        TC              ALARM2                          
                 OCT             01102                           # SELF-CHECK MALFUNCTION INDICATOR
                 CCS             SMODE                           
-SIDLOOP         CA              S+ZERO                          
+                CA              S+ZERO                          
                 TS              SMODE                           
                 TC              SELFCHK                         # GO TO IDLE LOOP
                 TC              SFAIL                           # CONTINUE WITH SELF-CHECK

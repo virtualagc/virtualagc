@@ -20,6 +20,7 @@
 ##				Luminary 116.
 ##		2017-08-12 MAS	Fixed a comment text error found while transcribing
 ##				Zerlina 56.
+##		2021-05-30 ABS	$$/LUROY -> $$/LUROT
 
 ## Page 38
 # DPS AND APS ENGINE PARAMETERS
@@ -544,7 +545,7 @@ VAL67		2DEC*	.01726666666 B+1*	# AMOD
 
 		SETLOC	PLANTIN2
 		BANK
-		COUNT*	$$/LUROY
+		COUNT*	$$/LUROT
 		
 COSI		2DEC*	9.996417320 E-1 B-1*	# COS (5521.5 SEC.)
 SINI		2DEC*	2.676579050 E-2 B-1*	# SIN (5521.5 SEC.)

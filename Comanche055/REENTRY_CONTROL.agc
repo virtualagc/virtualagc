@@ -17,6 +17,7 @@
 ##				and corrected the errors found.
 ##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
 ##				vs Colossus 249.
+##		2021-05-30 ABS	Added empty page 882 to match scans.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -1615,3 +1616,5 @@ COS15		2DEC	.965
 LATSLOPE	EQUALS	1/12TH
 # ... END OF RE-ENTRY CONSTANTS ...
 
+## Page 882
+## Empty page.

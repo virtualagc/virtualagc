@@ -12,6 +12,9 @@
 ##               2016-10-18 HG   Fix label DEG/SECC -> DEG/SEC
 ##                               Fix operand modifier TS TANG +  -> TS TANG +1
 ##                               Fix instruction TC -> TCF
+##               2021-05-30 ABS  Removed 2F typo text in code.
+##                               Removed leading whitespace from a page marker
+##                               comment.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of
@@ -40,7 +43,7 @@
 SILVER          EXTEND
                 QXCH    QPLACE          #  SHOULD BE ADDRESS OF STRTWACH
 
-                CCS     CALCDIR 2F      # 2F COMMAND IS POSITIVE THE MINUS TORQ
+                CCS     CALCDIR         # 2F COMMAND IS POSITIVE THE MINUS TORQ
                 CAF     BIT9            #  WINDING IS TO BE ENERGIZED
                 TC      +2
                 TC      TORK            #  COMMAND IS NEG SO USE PLUS WINDING
@@ -523,7 +526,7 @@ FINEZERO        EXTEND
                 TS      STATE
                 RELINT
                 
- ## Page 0511
+## Page 0511
  
                 TC      BANKCALL
                 CADR    LEMLAB

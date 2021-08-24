@@ -28,6 +28,7 @@
 ##				P00HBIT --> POOHBIT.
 ##		2017-08-14 MAS	Fixed typos found while transcribing Zerlina 56.
 ##		2018-09-04 MAS	Copied from Luminary 131 for Luminary 130.
+##		2021-05-30 ABS	Added empty page 89 fpr SUBRO output.
 
 ## Page 61
 # FLAGWORDS 0-11	ARE DOWNLINKED AND CAN BE SET AND CLEARED BY UP-FLAG AND DOWN-FLAG INSTRUCTIONS IN THE
@@ -1243,4 +1244,6 @@ AUTRATE2	=	BIT2			# ASTRONAUT-CHOSEN KALCMANU MANEUVER RATES
 AUTR1FLG	=	209D			# (1,0)=		2.0 DEG/SEC
 AUTRATE1	=	BIT1			# (1,1)=	       10.0 DEG/SEC
 
+## Page 89
+## Nothing on this page.
 

@@ -14,6 +14,8 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-28 MAS  Created from Luminary 99.
+##              2021-05-30 ABS  Added IRT0 location symbol to match Luminary 99.
+##                              B5TOBB -> B5TOB8
 
 ## Page 1002
 # SECTION 1   DISPATCHER
@@ -394,7 +396,7 @@ DOSTORE		TS	ADDRWD
 		MASK	B12T14
 		EXTEND
 		MP	BIT5		# EACH TRANSFER VECTOR ENTRY IS TWO WORDS.
-		INDEX	A
+ITR0		INDEX	A
 		TCF	STORJUMP
 		
 ## Page 1015
@@ -2930,7 +2932,7 @@ BOV(B)		CCS	OVFIND		# BRANCH ON OVERFLOW TO BASIC OR INTERP.
 		TS	OVFIND
 		CCS	CYR
 		TCF	RTB		# IF BASIC.
-B5TOBB		OCT	360
+B5TOB8		OCT	360
 		TCF	GOTO
 
 ## Page 1091

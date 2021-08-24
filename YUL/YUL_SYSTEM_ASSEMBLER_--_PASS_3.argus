@@ -126,7 +126,7 @@ P0031   ITEMS FOR INTERPASS STORAGE.  63 WORDS.
 
 R0053              THE FOLLOWING INSTRUCTION IS PLACED AT THE BASE ADDRESS6OF PASS 3 (10077) FOR CONVENIENCE.
 
- 0055   YUL PASS 3 TS           L DIRECTY     Z.X5          INISH P3            FIRST INSTRUCTION EXECUTED IN PASS 3.
+ 0055   YUL PASS 3 TS           L DIRECTY     Z,X5          INISH P3            FIRST INSTRUCTION EXECUTED IN PASS 3.
 
 R00561  SIMULATED EXTENDED TS ROUTINE, PLACED HERE TO TAKE ADVANTAGE OF THE 7.
 
@@ -877,7 +877,7 @@ P04686  THERE ARE AT MOST 45 LINES OF SYMBOL INFORMATION ON A PAGE (135 SYMBOLS)
  04716             WA           ONE THIRD     ONE THIRD     SYM LINER           SHOW THAT NO PAGE IS UNDER CONSTRUCTION.
  0472              TS           L BANK 5      Z,X1          AV DIS PAG     C    POINT TO CONSTRUCTION AREA, SKIP TO HOF.
 
- 04724  ONE SYM Q  NA           OWED SYM      ZERO          C,+2                BR. IF A SYMBOL IS OWED (NEW 1ST LTR).
+ 04724  OWE SYM Q  NA           OWED SYM      ZERO          C,+2                BR. IF A SYMBOL IS OWED (NEW 1ST LTR).
  04728             TS           Z,X0          Z,R1          THREAD              RESTORE ADDRESS, FETCH ANOTHER SYMBOL.
  04732             TX           OWED SYM      -             LINE +1             SET IT UP FOR FIRST-LETTER COMPARISON.
  04736             TS           ZERO          OWED SYM      PL THREAD           CLEAR FLAG, GO TO PROCESS OWED SYMBOL.
@@ -1168,7 +1168,7 @@ R05321  AND UPPER ADDRESS LIMITS AND THE ENTRY TYPE.  PRINTED IN TWO COLUMNS AT 
  05336             MT           BLANKS        10            N,AU2,1
 
  0534   AV DIS PAG TX           BIT 1         -             OLD SPACE           SKIP TO H-O-F BEFORE EACH PAGE.
- 0535              TX           L BANKS       -             Z,X1                TWO COLUMNS ARE BUILT UP IN BANK 5.
+ 0535              TX           L BANK5       -             Z,X1                TWO COLUMNS ARE BUILT UP IN BANK 5.
  0536   WHAT TYPE  TX           Z,S2          -             ADDRESS
  05365             TX           L TYP TAB     -             Z,X3
  0537              LA, CAC3     ADDRESS       3,0           C,+2                BRANCH WHEN MEMORY TYPE FOUND.
@@ -1181,7 +1181,7 @@ R05321  AND UPPER ADDRESS LIMITS AND THE ENTRY TYPE.  PRINTED IN TWO COLUMNS AT 
  0542              TS           ADDRESS       EQIVLENT      AVAIL Q        C    TEST AVAILABILITY OF FIRST LOCATION.
  0543              LA           BIT 32        EQIVLENT      F AVAIL             ONE OF BITS 1-32 IS ONE IF AVAILABLE.
  0544              SWE, CAC1    M TYPE CAX    16,L          N,X1                SAVE ADDRESS OF DESCRIPTION.
- 0545              TS           ZERO          COMP BITS     FIDN END            GO TO FIND END OF RESERVED E OR F.
+ 0545              TS           ZERO          COMP BITS     FIND END            GO TO FIND END OF RESERVED E OR F.
  0546   F AVAIL    TS           M TYPE CAX    N,X1          E AVAIL +1          SAVE ADDRESS OF DESCRIPTION.
 
  0547   ERASABLE   TS           ADDRESS       EQIVLENT      AVAIL Q        C    TEST AVAILABILITY OF FIRST LOCATION.

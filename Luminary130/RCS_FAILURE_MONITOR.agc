@@ -23,6 +23,8 @@
 ##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##		2017-08-18 RSB	Comment-text bug identified in ZERLINA 56.
 ##		2018-09-04 MAS	Copied from Luminary 131 for Luminary 130.
+##		2021-05-30 ABS	Added missing RCSMON definition to match
+##				Luminary 131.
 
 ## Page 192
 # PROGRAM DESCRIPTION
@@ -79,7 +81,9 @@ RCSMONEX	EQUALS	RESUME
 ## Page 193
 		COUNT*	$$/T4RCS
 		
-RCSMONIT	CS	ZERO
+RCSMONIT	EQUALS	RCSMON
+		
+RCSMON		CS	ZERO
 		EXTEND
 		RXOR	CHAN32			# PICK UP + INVERT INVERTED CHANNEL 32.
 		MASK	LOW8			# KEEP JET-FAIL BITS ONLY.

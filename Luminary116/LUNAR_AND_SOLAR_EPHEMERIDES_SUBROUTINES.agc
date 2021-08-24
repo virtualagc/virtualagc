@@ -17,8 +17,9 @@
 ##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
 ##				Luminary 99 and 131.
 ##		2017-08-26 MAS	Fixed comment-text errors found while transcribing Zerlina 56.
+##              2021-05-30 ABS  Fixed a page number to match scans.
 
-## Page 984
+## Page 976
 # NAME - LSPOS - LOCATE SUN AND MOON                    DATE - 25 OCT 67
 # MOD NO. 1
 # MOD BY NEVILLE                                        ASSEMBLY SUNDANCE

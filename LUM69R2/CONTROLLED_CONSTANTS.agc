@@ -17,6 +17,12 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-27 MAS  Created from Luminary 69.
 ##              2019-07-27 MAS  Updated J4REQ/J3 to match LUM69 rev 2.
+##		2020-12-14 RSB	Tweaked the annotation relevant to the
+##				change mentioned above to conform to the
+##				style and extent of similar justifying
+##				annotations previously added to 
+##				Comanche 44 and 51.
+##              2021-05-30 ABS  2DEC* -> DEC for non extended address fields.
 
 ## Page 53
 # DPS AND APS ENGINE PARAMETERS
@@ -87,7 +93,7 @@ AT/RCS          2DEC            .0000785        B+10    # 4 JETS IN A DRY LEM
 
 APSVEX          DEC             -3030           E-2 B-5 # 9942 FT/SEC IN M/CS.
 
-DPSVEX          DEC*            -2952           E-2 B-5 # 9684 FT/SEC IN M/CS.
+DPSVEX          DEC             -2952           E-2 B-5 # 9684 FT/SEC IN M/CS.
 
 # ************************************************************************
 
@@ -332,9 +338,19 @@ OMEGMOON        2DEC*           2.66169947      E-8 B+23*
 MUM             2DEC*           4.9027780       E8 B-30*        # M
 MUEARTH         2DEC*           3.986032        E10 B-36*
                 2DEC            0
-## The second line of J4REQ/J3 was changed from "2DEC  0" betwen Luminary 69 and LUM69 rev 2,
-## as part of the introduction of the R-2 lunar potential model.
 J4REQ/J3        2DEC*           .4991607391     E7 B-26*
+## <b>Reconstruction:</b> In Luminary 69, the following line reads "2DEC 0".
+## It has been changed in Luminary 69/2 due to incorporation of the R-2
+## Lunar Potential Model &mdash; see
+## <a href="http://www.ibiblio.org/apollo/Documents/LUM75_text.pdf">LUMINARY Memo #75</a>.
+## The Luminary 69/2 version of the line has been taken from Luminary 99/1, which 
+## also incorporates the R-2 model. As for the question of how it was <i>known</i> 
+## during the reconstruction process to target this specific value, the bulk of R-2 
+## model code changes are confined to the <a href="ORBITAL_INTEGRATION.agc.html">ORBITAL 
+## INTEGRATION log section</a>, and indeed J4REQ/J3 is used <i>only</i> there.  Thus,
+## after ORBITAL INTEGRATION modifications were made, it would only be natural to check 
+## that the constants which the ORBITAL INTEGRATION code referenced had the expected 
+## values relative to Luminary 99/1.
                 2DEC            -176236.02      B-25
 2J3RE/J2        2DEC*           -.1355426363    E5 B-27*
                 2DEC*           .3067493316     E18 B-60*
@@ -545,7 +561,7 @@ RATESP          2DEC            .03660098       B+4     #                     * 
                 2DEC            .455880394              # LOMO                *
                 2DEC            .275337971              # LOSO                *
                 2DEC            .0398987882             # LONO                *
-VAL67           2DEC*           .017361944      B+1     # AMOD                *
+VAL67           2DEC            .017361944      B+1     # AMOD                *
                 2DEC            .286523072              # AARG                *
                 2DEC            .036291712      B+1     # 1/27                *
                 2DEC            .003534722      B+1     # BMOD                *

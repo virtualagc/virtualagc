@@ -23,6 +23,7 @@
 ##		2017-03-15 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
 ##		2017-08-14 MAS	Fixed a typo found while transcribing Zerlina 56.
+##              2021-05-30 ABS  Removed erroneous "-3" line.
 
 ## Page 77
 #          FLAGWORDS 0-11  ARE DOWNLINKED AND CAN BE SET AND CLEARED BY UP-FLAG AND DOWN-FLAG INSTRUCTIONS IN THE
@@ -829,7 +830,6 @@ REDFLBIT        =               BIT6                    # PERMITTED           PE
 
 # BIT 5 FLAG 6
 #               =               100D
-3
 
 # BIT 4 FLAG 6
 #               =               101D

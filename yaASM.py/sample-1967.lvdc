@@ -1,0 +1,1520 @@
+# Copyright:    Public domain.
+# Filename:     sample-1967.lvdc
+# Purpose:      This is an abridged form of LVDC flight program 
+#               AS-206RAM (1967), from which all guidance-related
+#               code has been removed, in order to insure that 
+#               there are no possible ITAR restrictions against
+#               its export.  It includes only code for mathematical 
+#               utility functions and other generic computer
+#               operations, and exists for the purpose of
+#               demonstrating the syntax and the constructs in 
+#               LVDC assembly language. 
+# Assembler:    yaASM.py
+# Contact:      Ron Burkey <info@sandroid.org>.
+# Website:      www.ibiblio.org/apollo/LVDC.html
+# Mod history:  2019-09-10 RSB  Abridged LVDC-AS206RAM.lvdc.
+#
+# The original program listing from which this code was transcribed
+# (and abridged) was an unreleased engineering version.  It contained 
+# assembly-time errors that rendered it non-functional as-is, and some
+# such errors have been corrected in this abridged version.  Additionally, 
+# some modern code has been added to facilitate demonstrating operation 
+# of those portions of the original code that have been retained.
+#
+# The nature of the "demonstration" is that there is now a "workshop"
+# area of the code that is used to call various utility subroutines
+# that were provided by the original code, such as trigonometric 
+# functions and matrix operations.  You can modify the workshop area
+# and reassemble the code, if desired.  Look for the program label 
+# "WRKSHP".
+#
+# Beyond what was mentioned above, there are several purely-visual
+# ways in which this abridged transcription differs from the original
+# printout:
+#
+#    1. Possible transcription errors in program comments.
+#    2. Slight differences in columnar alignment.
+#    3. Insertion of addition program comments.  These are visually
+#       distinguished from the original comments in that modern
+#       comments all occupy a full line, and are marked by the
+#       character "#" in column 1.
+#    4. In the original code, almost all lines have SEQUENCE numbers 
+#       at the ends of lines.  Those sequence numbers are not 
+#       preserved here, but the range of sequence numbers for 
+#       individual pages are indicated in the comments.
+
+# What follows are allocations of variables that were spread
+# out across various pages of the original program listing.  The comments
+# associated with these allocations have been retained as-is, and may
+# refer to code that has been removed during abridgment.
+
+	DOGD	2,14,100
+OPTMP1	BSS	1	      		ORBITAL PROCESSOR TEMPORARY STORAGE
+
+	DOGD	2,17,0
+HCFDIV	HPC	UFDIV			TO UTILITY DIVIDE ROUTINE
+HCPSQR	HPC	UPSQRT			TO UTILITY PARTIAL SQUARE ROOT ROUTINE
+KMINUS	OCT	400000000
+KONES	OCT	777777776
+KPLUS	OCT	200000000
+KZERO	DEC	0.B0			ZERO
+
+	DOGD	2,17,100
+	MAT
+TEMP	BSS	1			)
+TEMP1	BSS	1			)
+TEMP2	BSS	1			)
+	VEC
+TEMP3	BSS	1			)
+TEMP4	BSS	1			) TEMPORARY STORAGE LOCATIONS THAT
+TEMP5	BSS	1			)     MAY BE USED BY ANY PROGRAM THAT
+	VEC
+TEMP6	BSS	1			)         IS NOT INITIATED BY AN
+TEMP7	BSS	1			)            INTERRUPT
+TEMP8	BSS	1			)
+TEMP9	BSS	1			)
+
+UTEMP1	BSS	1			   )
+UTEMP2	BSS	1			   )
+UTEMP3	BSS	1			   )
+	VEC
+UTEMP4	BSS	1			   ) TEMPORARY STORAGE LOCATIONS
+UTEMP5	BSS	1			   )    USED BY UTILITY ROUTINES.
+UTEMP6	BSS	1			   )
+UTEMP7	BSS	1			   )
+UTDIV1	BSS	1			DENOMINATOR FOR THE FIXED POINT DIVIDE
+CMDATA	BSS	1	      CMDATA
+*					WORD USED TO SAVE COMPRESSED DATA WORD
+*					PRIOR TO COMPRESSION
+
+	DOGD	2,17,200
+UTEXM	BSS	1			LOCATION USED BY EXM IN SUBROUTINES
+
+# PAGE 1, SEQUENCE 000060-000100
+
+***************************************
+*                                     *
+*  AS - 206RAM  LVDC FLIGHT PROGRAM   *
+*                                     *
+***************************************
+
+# PAGE 2, SEQUENCE 000120-000370, TITLE "TABLE OF CONTENTS"
+
+***********************************************************************
+*                                                                     *
+*   1    INITIALIZATION                                               *
+*   2    ACCELEROMETER PROCESSING                                     *
+*   3    BOOST NAVIGATION                                             *
+*   4    GUIDANCE SELECT AND PRE-IGM                                  *
+*   5    IGM                                                          *
+*   6    BACKUP ROUTINES                                              *
+*   7    INTERRUPT ROUTINES                                           *
+*   8    ORBITAL INITIALIZATION                                       *
+*   9    ORBITAL PROCESSOR                                            *
+*  10    ORBITAL NAVIGATION                                           *
+*  11    C-BAND TRANSPONDER ROUTINE                                   *
+*  12    ACCELERATION ROUTINES                                        *
+*  13    ORBITAL GUIDANCE                                             *
+*  14    INTERRUPT PROCESSING                                         *
+*  15    TLC                                                          *
+*  16    MINOR LOOP SUPPORT                                           *
+*  17    MINOR LOOP                                                   *
+*  18    DISAGREEMENT BIT PROCESSING                                  *
+*  19    SWITCH SELECTOR CHECK                                        *
+*  20    SWITCH SELECTOR PROCESSING                                   *
+*  21    FLIGHT SIMULATION                                            *
+*  22    UTILITY ROUTINES                                             *
+*                                                                     *
+***********************************************************************
+
+# PAGE 3, SEQUENCE 000390-000920, TITLE "TELEMETRY DESCRIPTION"
+
+**********************************************************************
+*
+****************************
+*        1  3     REAL     *      TELEMETRY OUTPUT FROM THE LVDC AND THE
+*        2  2     TIME     * LVDA IS A CONFIGURATION OF FORTY BITS. OF
+*        3  1  A1 REGISTER * THESE, BITS 5 THROUGH 10 AND BITS 21
+*       -------------------* THROUGH 40 CONTAIN TELEMETRY DATA.  BITS 1,
+* 10     4  P     PARITY   * 2, 3, 19, AND 20 CONTAIN THE CONTENTS OF
+* BIT   -------------------* THE REAL TIME REGISTER.  IF THE TELEMETRY
+* ARRAY  5  6              * IS FROM THE LVDA, THE REAL TIME REGISTER
+*        6  5              * CONTAINS THE 5 LOW ORDER BITS OF THE REAL
+*        7  4              * TIME CLOCK WHEN THE DATA WORD ENTERS THE
+*        8  3     DATA     * DOM.  HOWEVER, IF THE TELEMETRY IS FROM THE
+*        9  2              * LVDC, BIT 19 IS A VALIDITY BIT THAT IS
+*       10  1              * ADDED TO THE TELEMETRY WORD IF THE COMPUTER
+********-------------------* INFORMATION IS VALID.  IT IS CONSIDERED NOT
+*       11  8 NA2          * VALID IF THE TAG OR BUFFER REGISTERS ARE
+*       12  1  A8          * BEING LOADED WHILE THE PCM IS SAMPLING THE
+*       13  2  A9          * BUFFER REGISTER OR IF THE BUFFER REGISTER
+*       14  7  A7 TAG      * CONTAINS ORBITAL CHECK OUT ADDRESS INFOR-
+* 10    15  6  A6 REGISTER * MATION.  BITS 20, 1, AND 2 ARE THE 3 LOW
+* BIT   16  5  A5          * ORDER BITS OF THE MODE REGISTER.  BIT 3 IS
+* ARRAY 17  4  A4          * THE A1 BIT OF THE ASSOCIATED LVDC PIO
+*       18  3  A3          * TELEMETRY TAG.  THE TAG REGISTER CONTENTS,
+*       -------------------* STORED IN BITS 11 THROUGH 18, ARE USED TO
+*       19  5 VAL REAL TIME* IDENTIFY TELEMETRY DATA. THE PIO CODES AND
+*       20  4     REGISTER * THE DATA WHICH EACH TELEMETERS ARE LISTED
+********-------------------* BELOW.  A REAL TIME REGISTER BIT IS ADDED
+*       21 16              * TO THESE 8 BITS IF THE DATA IS FROM THE
+*       22 15              * LVDC.  THESE 9 BITS CORRESPOND TO A UNIQUE
+*       23 14              * PIO CODE.  THE REMAINING BIT, BIT 4, IS
+*       24 13              * USED TO EFFECT ODD PARITY IN THE 40 BIT
+* 10    25 12              * WORD.
+* BIT   26 11     DATA     *
+* ARRAY 27 10              *      PCM (PULSE CODE MODULATION) IS THE
+*       28  9              * MAIN TELEMETRY SYSTEM USED WITH THE DATA
+*       29  8              * ADAPTER.  THE TELEMETRY OUTPUT IS IN THE 
+*       30  7              * FORM OF A 10 BIT ARRAY.  THUS, FOUR 10 BIT
+**************************** TELEMETRY ARRAYS ARE REQUIRED TO TRANSMIT
+*       31 26              * ONE 40 BIT DATA ADAPTER WORD.  THE BIT
+*       32 25              * OUTPUT CONFIGURATION OF THE PCM, LVDC, AND
+*       33 24              * THE BUFFER REGISTER DIFFERS AS SHOWN IN
+*       34 23              * THE CHART BELOW.
+* 10    35 22              *
+* BIT   36 21     DATA     *          TELEMETRY TAG ARRAY
+* ARRAY 37 20              *
+*       38 19              * L *M3 *M2 *M1  A9  A8 A7 A6 A5 A4 A3 A2  A1
+*       39 18              * B *M3 *M2 *M1 *A1 NA2 A7 A6 A5 A4 A3 A9  A8
+*       40 17              * P *M2 *M1 *A1 NA2  A8 A9 A7 A6 A5 A4 A3 *M3
+****************************   L = LVDC, B = BUFFER, P = PCM
+*                              NA2 = NOT A2
+*                              *XY IS NOT USED IN IDENTIFICATION OF LVDA
+*                                  TELEMETRY
+************************************************************************
+
+# PAGE 4, SEQUENCE 000940-001480, TITLE "BOOST TELEMETRY"
+
+************************************************************************
+*
+* TASEC    0000   0200   0400    15              SECONDS
+*                                      TIME ELAPSED FROM GRR IN SECONDS
+* CHIZ     0001   0600   1400    0               PIRADS
+*                                      YAW GUID. COMM. IN SPACE-FIX. SYS
+* CHIX     0005   0604   1402    0               PIRADS
+*                                      PITCH GUID COMM. IN SPACE-FIX.SYS
+* CHIY     0011   0610   1404    0               PIRADS
+*                                      ROLL GUID. COMM. IN SPACE-FIX.SYS
+* ACCZ     0004   0204   0402                    .05 M/SEC
+* ACCX     0010   0210   0404                    .05 M/SEC
+* ACCY     0014   0214   0406                    .05 M/SEC
+*                                      ACCELEROMETER OPTISYN READINGS
+* THETZ    0015   0614   1406    0               PIRADS
+*                                      WHOLE YAW GIMBAL ANGLE
+* THETX    0021   0620   1410    0               PIRADS
+*                                      WHOLE ROLL GIMBAL ANGLE
+* THETY    0025   0624   1412    0               PIRADS
+*                                      WHOLE PITCH GIMBAL ANGLE
+* TB       0031   0630   1414    15              SECONDS
+*                                      TIME ELAPSED IN CURRENT TIME BASE
+* ZS       0034   0234   0416    23              METERS
+* XS       0044   0244   0422    23              METERS
+* YS       0050   0250   0424    23              METERS
+*                                      COMPONENTS OF SPACE-FIXED POS.
+* 1/R      0054   0254   0426    -22             1/METERS
+*                                      RECIP. OF TOTAL SPACE-FIXED RAD.
+* GZ       0060   0260   0430    4               M/SEC**2
+* GX       0064   0264   0432    4               M/SEC**2
+* GY       0070   0270   0434    4               M/SEC**2
+*                                      COMP. OF GRAVITATIONAL ACCEL.
+* SS       0075   0674   1436
+*                                      SWITCH SELECTOR INTERRUPT
+* ZDS      0110   0310   0444    14              M/SEC
+* XDS      0114   0314   0446    14              M/SEC
+* YDS      0120   0320   0450    14              M/SEC
+*                                      COMP. OF SPACE-FIXED VELOCITY
+* V        0124   0324   0452    14              M/SEC
+*                                      TOTAL SPACE-FIXED VELOCITY
+* ACCT     0174   0374   0476    25              QMS
+*                                      REAL TIME CLOCK READING IN QMS
+* T1I      0400   0202   0500    10              SECONDS
+*                                      FIRST IGM PHASE TIME-TO -GO
+* MC24     0415   0616   1506
+*                                      MODE CODE 24 STATUS CHANGES
+*
+*         1 Z ACC   0 NOMINAL   0 B FAILED   1 A FAILED   1 BOTH FAILED
+*         2 Z ACC   0 A USED    1 USED A     0 USED B     1 USED (F/M)C
+*
+*         3 X ACC   0 NOMINAL   0 B FAILED   1 A FAILED   1 BOTH FAILED
+*         4 X ACC   0 A USED    1 USED A     0 USED B     1 USED (F/M)C
+*
+*         5 Y ACC   0 NOMINAL   0 B FAILED   1 A FAILED   1 BOTH FAILED
+*         6 Y ACC   0 A USED    1 USED A     0 USED B     1 USED (F/M)C
+
+# PAGE 5, SEQUENCE 001490-00230
+
+*
+*         7  Z GIM   0 NOMINAL  0 3 FINE FAILURES  1 BACKUPS FAILING
+*         8  Z GIM   0 NOMINAL  1 BACKUP IN USE    1   15/SEC
+*
+*         9  X GIM   0 NOMINAL  0 3 FINE FAILURES  1 BACKUPS FAILING
+*         10 X GIM   0 NOMINAL  1 BACKUP IN USE    1   15/SEC
+*
+*         11 Y GIM   0 NOMINAL  0 3 FINE FAILURES  1 BACKUPS FAILING
+*         12 Y GIM   0 NOMINAL  1 BACKUP IN USE    1   15/SEC
+*
+*         13 DGCNT   0 DGCNT NEG  0 DGCNT ZERO   1 DGCNT POS
+*         14 DGCNT   0 NOMINAL    1 ONE COD BAD  1 BOTH CODS BAD
+*
+*         15 AFAL    A COD BAD
+*         16 BFAL    B COD BAD
+*
+*         17 LADAFL  0 NOMINAL  1 PROGRAM CONTINUOUSLY SELECTS
+*         18 SS FEEDBACK ERROR WITH 2 OR MORE BITS IN ERROR
+*
+*         21 DGMAF   0 NOMINAL  1 A COUNTER BAD
+*         22 DGMBF   0 NOMINAL  1 B COUNTER BAD
+*
+*         23 Z ACCELEROMETER ZERO FAILURE
+*         24 X ACCELEROMETER ZERO FAILURE
+*
+*
+* MC25     0421   0622   1510
+*                                      MODE CODE 25 STATUS CHANGES
+*
+*
+*         1  GUIDANCE REFERENCE RELEASE INTERRUPT TB0
+*         2  LIFTOFF TB1
+*         3  START PITCH AND ROLL
+*         4  STOP ROLL
+*         5  TIME BASE 2
+*         6  STOP PITCH
+*         7  INBOARD ENGINE CUTOFF COMMAND
+*         8  TIME BASE 3
+*         9  START 1ST PHASE IGM EQUATIONS
+*         10 ) ENGINE MIXTURE  0 NOMINAL  1 HIGH   1 LOW
+*         11 ) RATIO CHANGE    1 ACCEL   0 ACCEL  1 ACCEL
+*         12 STEERING MISALIGNMENT CORRECTION
+*         13 IGM CHI TILDA STEERING
+*         14 IGM FREEZE
+*         15 S-IVB CUTOFF COMMAND
+*         16 TIME BASE 4
+*         17-20 SPARES
+*         21 S-I INBOARD ENGINE OUT
+*         22 S-I OUTBOARD ENGINE OUT
+*         23-26 SPARES
+*
+* DORSW    0425   0626   1512
+*                                      DISCRETE OUTPUT REGISTER CONTENTS
+*                                     DOR STATUS CHANGE=GUIDANCE FAILURE
+* ICR      0431   0632   1514
+# PAGE 6, SEQUENCE 002040-002580
+*                                      LVDA INTERNAL CONT. REG. CONTENTS
+*                                      ICR STATUS CHANGE- TO Z BACKUP
+*                                      COD ORDER IN DISAGREEMENT BIT
+*                                      PROCESSING, FORCE LADDERS TO
+*                                      CHANNEL A IN ML, CHANGE CHANNEL A
+*                                      TO CHANNEL B OR B TO A IN SWITCH
+*                                      SELECTOR
+* Z4       0434   0236   0516    23              METERS
+* X4       0444   0246   0522    23              METERS
+* Y4       0450   0252   0524    23              METERS
+*                                      POSITIONS IN TARGET PLANE COORD.
+* EMRR     0435   0636   1516
+*                                      ERROR MONITOR REG. CONTENTS
+*                                     EMR STATUS CHANGE = LADDER ERROR
+*                                     USING CONVERTER B OR DISAGREEMENT
+*                                     IN SELECTOR VOTER CIRCUITS
+* INT      0441   0642   1520
+*                                      LLS,OBCO,TLC,S4BCO INTERRUPTS
+*                                       INT = INT + REALTIME
+*                                     INTERRUPT IDENTIFICATION CODES
+*                                       GRR  =  101010100
+*                                       LLS  =  202020202
+*                                       OBCO =  303030303
+*                                       S4BEO=  404040404
+*                                       TLC  =  357740000
+* T3I      0460   0262   0530    10              SECONDS
+*                                      TIME-TO-GO IN S4B SECOND BURN
+* TLCHPC   0461   0662   1530
+*                                      TLC HOP CONSTANT
+* DIS.IN   0465   0666   1532
+*                                      DISCRETE INPUTS - LO, ENG. OUT
+*                                     DI = DI + REALTIME
+*                                       LO = 101000000  ) REAL TIME IN
+*                                       EO = 000600000  ) LOWER HALF
+*                                       S4B= 404040404
+* SQ3      0471   0672   1534    1
+*                                      SQRT(1-ZSP**2)
+* TBBU     0475   0676   1536
+*                                      TIME BASE BACKUP
+*                                       LIFTOFF BACKUP = 101010100
+*                                       LLS BACKUP     = 202020202
+*                                       OBCO BACKUP    = 303030302
+*                                       S4BCO BACUP    = 404040404
+*
+* FDBK     0500   0302   0540
+*                                      SS FEEDBACK REG.,IN EVENT OF ERR.
+* ML ERROR 0570   0372   0574
+*                                      MINOR LOOP ERROR CODE
+*
+*
+*         GROUP 1 TELEMETRY COMES FROM DISAGREEMENT PROCESSING
+*
+*
+*                      BIT ASSIGNMENTS FOR ERROR DATA WORD
+*         1   2 - 12    13 14 15   16 - 26
+
+# PAGE 7, SEQUENCE 002590-003130
+
+*         1 (A COUNTER)  0  0  1 (B COUNTER)  DG BIT ON IN ERROR
+*
+*         1 (A COUNTER)  0  0  0 (B COUNTER)  THIS DATA WORD WITH 000
+*                                             ERROR TAG WILL BE PAIRED
+*                                             WITH ONE OF THE SPECIAL
+*                                             COUNTER DATA WORDS
+*
+*         1 (A COUNTER)  0  1  0 (B COUNTER)  A COUNTER BAD ) A AND B
+*         1 (A COUNTER)  0  1  1 (B COUNTER)  B COUNTER BAD ) ARE THE 
+*         1 (A COUNTER)  1  0  0 (B COUNTER)  BOTH BAD      ) SPECIAL
+*         1 (A COUNTER)  1  0  1 (B COUNTER)  NONE BAD      ) COUNTERS
+*
+*
+*         GROUP 2 TELEMETRY COMES FROM ML REASONABLENESS FAILURES
+*
+*
+*         1   2 - 12    13 14 15   16 - 26
+*                      BIT ASSIGNMENTS FOR ERROR DATA WORD
+*         0 (OLD GIMBAL) 0  0  0 (CURRENT GIMBAL)    PITCH ) GIMBAL
+*         0 (OLD GIMBAL) 0  0  1 (CURRENT GIMBAL)    ROLL  ) FAILED ZERO
+*         0 (OLD GIMBAL) 0  1  0 (CURRENT GIMBAL)    YAW   ) TEST
+*         0 (OLD GIMBAL) 0  1  1 (CURRENT GIMBAL)    PITCH ) FAILED ON
+*         0 (OLD GIMBAL) 1  0  0 (CURRENT GIMBAL)    ROLL  ) INCREASING
+*         0 (OLD GIMBAL) 1  0  1 (CURRENT GIMBAL)    YAW   ) DECREASING
+*         0 (OLD GIMBAL) 1  1  0 (CURRENT GIMBAL)    ROLL  ) SWITCHED
+*         0 (OLD GIMBAL) 1  1  1 (CURRENT GIMBAL)    PITCH ) TO
+*         0 (OLD GIMBAL) 1  1  1 (CURRENT GIMBAL)    YAW   ) BACKUPS
+*
+*
+* MLCHIZ   0501   0702   1540    0               PIRADS
+* MLCHIX   0505   0706   1542    0               PIRADS
+* MLCHIY   0511   0712   1544    0               PIRADS
+*                                      MINOR LOOP CHI'S
+* TAUD     0544   0346   0562    10              SECONDS
+*                                      TIME-TO-GO
+* T(I)     0561   0762   1570    15              SECONDS
+*                                      TIME FROM GRR OF TIME BASE CHANGE
+* ETC      0571   0772   1574    
+*                                      END OF TELEMETRY CYCLE, 1 PER CC
+* BTC      0575   0776   1576
+*                                      BEGIN TELEMETRY CYCLE, 1 PER CC
+* ZDM      1020   1220   2410    14              M/SEC
+* XDM      1024   1224   2412    14              M/SEC
+* YDM      1030   1230   2414    14              M/SEC
+*                                      COMPONENTS OF MEASURED VELOCITY
+* IGZ      1074   1274   2436    14              M/SEC
+* IGX      1100   1300   2440    14              M/SEC
+* IGY      1104   1304   2442    14              M/SEC
+*                                      COMP. OF GRAVITATIONAL VELOCITY
+* ZDDM     1130   1330   2454    6               M/SEC**2
+* XDDM     1134   1334   2456    6               M/SEC**2
+* YDDM     1140   1340   2460    6               M/SEC**2
+*                                      COMP. OF MEASURED ACCELERATION
+* F/M      1144   1344   2462    6               M/SEC**2
+# The following should obviously read TOTAL MEASURED ACCELERATION, but 
+# the original printout does incorrectly say VELOCITY instead. - RSB 2019
+*                                      TOTAL MEASURED VELOCITY
+
+# PAGE 8, SEQUENCE 003140-003680
+
+* DCHIZ    1445   1646   3522    0               PIRADS
+* DCHIX    1451   1652   3524    0               PIRADS
+* DCHIY    1455   1656   3526    0               PIRADS
+*                                      CHANGE IN CHI'S PER MINOR LOOP
+* ACZ1     1501   1702   3540
+* ACX1     1505   1706   3542
+* ACY1     1511   1712   3544
+*                                      FIRST ACCELEROMETER READ EXTRA
+* RLT1     1515   1716   3546    25
+*                                      FIRST -EXTRA- ACCEL. READ
+* ACZ2     1521   1722   3550
+* ACX2     1525   1726   3552
+* ACY2     1531   1732   3554
+*                                      SECOND ACCELEROMETER READ EXTRA
+* RLT2     1535   1736   3556    25
+*                                      SECOND -EXTRA- ACCEL. READ
+* (M/F)I   2150   2350   4454    -02             SEC**2/M
+*                                      RECIPROCAL OF F/M
+* (M/F)S   2154   2354   4456    -02             SEC**2/M
+*                                      SMOOTHED VALUE OF (M/F)I
+* TAU1     2404   2206   4502    10              SECONDS
+*                                      FIRST IGM PHASE TOTAL BURN TIME
+* TAU3     2410   2212   4504    10              SECONDS
+*                                      SECOND IGM PHASE TOTAL BURN TIME
+* PSI(T)   2414   2216   4506    0               PIRADS
+*                                      TOTAL RANGE ANGLE
+* XV       2424   2226   4512    23              METERS
+* YV       2430   2232   4514    23              METERS
+*                                      COMP. OF POSITION IN IGM COMP.SYS
+* ZDV      2434   2236   4516    14              M/SEC
+* XDV      2444   2246   4522    14              M/SEC
+* YDV      2450   2252   4524    14              M/SEC
+*                                      COMP. OF VEL. IN IGM COMP. SYS.
+* DT3IP    2454   2256   4526    10              SECONDS
+*                                      CORRECTION TO TIME-TO-GO
+* DZDV     2464   2266   4532    14              M/SEC
+* DXDV     2470   2272   4534    14              M/SEC
+* DYDV     2474   2275   4536    14              M/SEC
+*                                      VELOCITIES TO BE GAINED
+* CHITZ    2500   2302   4540    0               PIRADS
+*                                      VEL. CORRECTION IN IGM YAW, GUID.
+* CHITY    2504   2306   4542    0               PIRADS
+*                                      VEL. CORRECTION IN IGM PITCH,GUID
+* G0       2510   2312   4544    11
+*                                      TOTAL Y(V) DISTANCE TO BE GAINED
+* N1       2514   2316   4546    0               PIRADS
+*                                      ALT. CORRECTION IN IGM YAW, GUID.
+* N2       2520   2322   4550    -08             PIRADS/SEC
+*                                      IDEAL IGM YAW RATE
+* N3       2530   2332   4554    0               PIRADS
+*                                      ALT. CORRECTION IN IGM PITCH
+* N4       2534   2336   4556    -07             PIRADS/SEC
+*                                      IDEAL IGM PITCH RATE
+* GOP      2524   2326   4552    11   
+*                                      TOTAL X(V) DISTANCE TO BE GAINED
+
+# PAGE 9, SEQUENCE 003690-004230
+
+* CHIZP    2550   2352   0564    0               PIRADS
+*                                      YAW GUID. COMMAND IN IGM COMP SYS
+* CHIYP    2554   2356   0566    0               PIRADS
+*                                      PITCH GUID. COMMAND, IGM COMP SYS
+* SMCZ     2560   2362   0570    0               PIRADS
+*                                      YAW STEERING MISALIGNMENT
+* SMCY     2564   2366   0572    0               PIRADS
+*                                      PITCH STEERING MISALIGNMENT
+*
+*      CERTAIN QUANTITIES MAY BE TELEMETERED FROM THE DISCRETE OUTPUT
+* MULTIPLEXOR (DOM).  THE DOM HAS THE CAPACITY TO HOLD FOUR WORDS AT
+* ONE TIME.  WORDS ARE TELEMETERED FROM THE FIRST POSITION EACH 4.167
+* MILLISECONDS IF NO LVDC TELEMETRY IS GIVEN DURING THAT TIME.  OTHER
+* WORDS IN THE DOM ARE THEN SHIFTED FORWARD.  NEWLY PIO-ED WORDS ARE
+* PLACED IN THE FIRST AVAILABLE LOCATIONS IN THE DOM.  THE WORDS WHICH
+* MAY ENTER THE DOM, AND THE CONDITIONS WHICH MUST EXIST BEFORE THE
+* DOM IS USED, ARE GIVEN BELOW.
+*
+*      WHEN THE MINOR LOOP INTERRUPT BIT IS SET IN THE INTERRUPT
+* STORAGE REGISTER, ONLY GIMBAL ANGLE READINGS AND LADDER OUTPUTS
+* ARE STORED IN THE DOM.  THE GIMBAL ANGLE READINGS OCCUPY THE LEFT
+* (HIGH-ORDER) HALF OF THE WORD AND THE LADDER OUTPUT IS PUT IN THE
+* RIGHT HALF OF THE WORD.  DURING A MINOR LOOP, THE POSSIBLE DOM WORDS
+* ARE-     Z GIMBAL - YAW   LADDER COMMAND     (ASSUMED LOST)
+*          Y GIMBAL - PITCH LADDER COMMAND     (TIMING GUARANTEES THAT
+*          X GIMBAL - YAW   LADDER COMMAND       EACH OF THESE THREE
+*          Z GIMBAL - ROLL  LADDER COMMAND       WILL BE PUT INTO DOM)
+*
+*      NOTICE THAT THE PIO CODES DO NOT CONVERT TO TAGS AS ABOVE.
+*
+* ZGIMB      223 023 144              FINE GIMBAL NO.1
+* XGIMB      363 163 174              FINE GIMBAL NO.2
+* YGIMB      353 153 172              FINE GIMBAL NO.3
+* YAW LAD    156                      TURNS ON DATA BITS 16 AND 17
+* ROL LAD    152                      TURNS ON DATA BIT 16, BIT 17 OFF
+* PIT LAD    146                      TURNS ON DATA BIT 17, BIT 16 OFF
+*
+*   DURING EACH MINOR LOOP ONE EXTRA WORD IS PLACED ON THE DOM AFTER THE
+* MINOR LOOP INTERRUPT BIT HAS BEEN RESET.  THE ACCELEROMETERS ARE READ
+* THREE TIMES PER MAJOR LOOP.  TIMING GUARANTEES THAT AT LEAST ONE
+* READING WILL ENTER THE DOM SO THE ACCELEROMETERS ARE READ IN A 
+* DIFFERENT ORDER DURING EACH OF THE THREE READINGS.  THE OTHER WORDS
+* THAT ARE PLACED ON THE DOM ARE THE INTERNAL CONTROL REGISTER, DISCRETE
+* INPUT REGISTER, DISCRETE INPUT SPARES REGISTER, ERROR MONITOR REGISTER
+* AND THE COD AND POWER SUPPLY WORD.  THE BACKUP GIMBALS WILL ALSO BE
+* PLACED ON THE DOM ONCE PER MAJOR LOOP.
+*     203   BACKUP GIMBAL NO. 1  (Z)
+*     303   BACKUP GIMBAL NO. 2  (X)
+*     273   BACKUP GIMBAL NO. 3  (Y)
+*     107   Z ACCELEROMETER
+*     127   X ACCELEROMETER
+*     117   Y ACCELEROMETER
+*     057   DISCRETE INPUT REGISTER
+*     023   ERROR MONITOR REGISTER
+*     066   COD AND POWER SUPPLY WORD
+# PAGE 10, SEQUENCE 004240-004260
+*     053   DISCRETE INPUT SPARES
+*     022   INTERNAL CONTROL REGISTER
+************************************************************************
+
+# PAGE 11, SEQUENCE 004280-004820, TITLE "ORBITAL TELEM."
+
+************************************************************************
+*
+*
+*                 **********************************
+*                 *                                *
+*                 *  TELEMETERED ONCE PER SECOND   *
+*                 *                                *
+*                 **********************************
+*
+*
+*
+* CHIZ     0001   0600   1400    0               PIRADS
+*                                      YAW GUID. COMM. IN SPACE-FIX. SYS
+* CHIX     0005   0604   1402    0               PIRADS
+*                                      PITCH GUID COMM. IN SPACE-FIX.SYS
+* CHIY     0011   0610   1404    0               PIRADS
+*                                      ROLL GUID. COMM. IN SPACE-FIX.SYS
+* THETZ    0015   0614   1406    0               PIRADS
+*                                      WHOLE YAW GIMBAL ANGLE
+* THETX    0021   0620   1410    0               PIRADS
+*                                      WHOLE ROLL GIMBAL ANGLE
+* THETY    0025   0624   1412    0               PIRADS
+*                                      WHOLE PITCH GIMBAL ANGLE
+* TLTBB    0030   0230   0414    15              SECONDS
+*                                      BIASED TIME ELAPSED IN TB
+* TB       0031   0630   1414    15              SECONDS
+*                                      TIME ELAPSED IN CURRENT TIME BASE
+* TBA      0074   0274   0436    15              SECONDS
+*                                      SET EQUAL TO TBB AT THE TIME OF
+*                                      A STATION GAIN OR OF A STATION
+*                                      LOSS
+* TASEC    0000   0300   0440    15              SECONDS
+*                                      TIME ELAPSED FROM GRR IN SECONDS
+* ZS       0134   0334   0456    23              METERS
+* XS       0144   0344   0462    23              METERS
+* YS       0150   0350   0464    23              METERS
+*                                      COMPONENTS OF SPACE-FIXED POS.
+* TLPAST   0174   0374   0476    25              QMS
+*                                      RTC READING ASSO'D WITH TB
+* MC27     0420   0222   0510
+*                                      MODE CODE 27 STATUS CHANGE
+*
+*
+* 1      LVDC IS CONFIGURED TO THE ORBITAL NAVIGATION MODE
+* 2      ORBITAL MANUEVER NO. 1 IN PROGRESS
+* 3      ORBITAL MANUEVER NO. 2 IN PROGRESS
+* 4      ORBITAL MANUEVER NO. 3 IN PROGRESS
+* 5      ORBITAL MANUEVER NO. 4 IN PROGRESS
+* 6      SPARE
+* 7      ORBITAL MANUEVER NO. 5 (RETROGRADE MANUEVER) IN PROGRESS
+* 8      SPARE
+* 9      SECTOR DUMP IN PROGRESS INDICATION
+* 10     NAVIGATION UPDATE HAS BEEN RECEIVED
+* 11     INERTIAL ATTITUDE HOLD, CONTROL MODE IS IN PROGRESS
+* 12     NORMAL ORBITAL PITCH RATE, CONTROL MODE IN PROGRESS
+* 13     SPARE
+# PAGE 12, SEQUENCE 004830-005370
+* 14     TIME SEQUENCE UPDATE HAS BEEN RECEIVED
+*        (THIS BIT WILL BE RESET TO ZERO AT RECEIPT OF THE COMMAND MODE)
+*        (WORD INTERRUPT AND A ONE BIT WILL BE SET UPON THE VALIDATION)
+# Yes, in the line below, the original printout did say NOMMAND. - RSB 2019
+*        (OF THE DATA NOMMAND WORD FOR EACH UPDATE.)
+* 15     S-IVB CUTOFF COMMAND
+* 16     TIME BASE 4
+*
+* MC28     0414   0216   0506
+*                                      MODE CODE 28 STATUS CHANGE
+*
+*
+* 1    Z ACC    0 NOMINAL   0 A BAD   1 BOTH BAD
+* 2    Z ACC    0 NOMINAL   0 B USED  1 F/MC USED
+*
+* 3    X ACC    0 NOMINAL   0 A BAD   1 BOTH BAD
+* 4    X ACC    0 NOMINAL   0 B USED  1 F/MC USED
+*
+* 5    Y ACC    0 NOMINAL   0 A BAD   1 BOTH BAD
+* 6    Y ACC    0 NOMINAL   0 B USED  1 F/MC USED
+*
+* 7    Z GIM    0 NOMINAL   0 3 FINE FAILURES  1  BACKUPS FAILING
+* 8    Z GIM    0 NOMINAL   1 BACKUP IN USE    1    15/SEC
+*
+* 9    X GIM    0 NOMINAL   0 3 FINE FAILURES  1  BACKUPS FAILING
+* 10   X GIM    0 NOMINAL   1 BACKUP IN USE    1    15/SEC
+*
+* 11   Y GIM    0 NOMINAL   0 3 FINE FAILURES  1  BACKUPS FAILING
+* 12   Y GIM    0 NOMINAL   1 BACKUP IN USE    1    15/SEC
+*
+* 13   DGCNT    0 DGBIT NEG   0 DGBIT ZERO      1  DGBIT POS
+* 14   DGCNT    0 NOMINAL     1 ONE COD BAD    1  BOTH CODS BAD
+*
+* 15   AFAL     A COD BAD
+* 16   BFAL     B COD BAD
+*
+* 17   LADAFL   0 NOMINAL   1 PROGRAM CONTINUOUSLY SELECTS CONVERTER B
+*
+* 18   SS FEEDBACK ERROR WITH 2 OR MORE BITS IN ERROR
+* 19   SELF TEST FAILURE
+*
+* 21   DGMAF    0 NOMINAL   1 A BAD
+* 22   DGMBF    0 NOMINAL   1 B BAD
+*
+* Z4       0434   0236   0516    23              METERS
+* X4       0444   0246   0522    23              METERS
+*                                      POSITIONS IN TARGET PLANE COORD.
+* TLEMR1   0435   0636   1516
+*                                      ERROR MONITOR REG. CONTENTS
+*                                     EMR STATUS CHANGE = LADDER ERROR
+*                                     USING CONVERTER B OR DISAGREEMENT
+*                                     IN SELECTOR VOTOR CIRCUITS
+* MLCHIZ   0501   0602   1500    0               PIRADS
+* MLCHIX   0505   0606   1502    0               PIRADS
+* MLCHIY   0511   0612   1504    0               PIRADS
+*                                      MINOR LOOP CHI'S
+
+# PAGE 13, SEQUENCE 005380-005920
+
+* T(I)     0561   0762   1570    15              SECONDS
+*                                      TIME FROM GRR OF TIME BASE CHANGE
+* ETC      0571   0772   1574
+*                                      END OF TELEMETRY CYCLE, 1 PER CC
+* BTC      0575   0776   1576  
+*                                      BEGIN TELEMETRY CYCLE, 1 PER CC
+*
+*
+*                 **********************************
+*                 *                                *
+*                 * TELEMETERED ONCE PER 8 SECONDS *
+*                 *                                *
+*                 **********************************
+*
+*
+*
+* ONTAS    0000   0200   0400    15              SECONDS
+*                                      TIME OF LAST ORBIT NAVIGATION
+* ACCZ     0004   0204   0402                    .05 M/SEC
+* ACCX     0010   0210   0404                    .05 M/SEC
+* ACCY     0014   0214   0406                    .05 M/SEC
+*                                      ACCELEROMETER OPTISYN READINGS
+* ONZN     0034   0234   0416    23              METERS
+* ONXN     0044   0244   0422    23              METERS
+* ONYN     0050   0250   0424    23              METERS
+*                                      COMPONENTS OF S INTERIAL POSITION
+* 1/R      0054   0254   0426    -22             1/METERS
+*                                      RECIP. OF TOTAL SPACE-FIXED RAD.
+* GZ       0060   0260   0430    4               M/SEC**2
+* GX       0064   0264   0432    4               M/SEC**2
+* GY       0070   0270   0434    4               M/SEC**2
+*                                      COMP. OF GRAVITATIONAL ACCEL.
+* ZDS      0110   0310   0444    14              M/SEC
+* XDS      0114   0314   0446    14              M/SEC
+* YDS      0120   0320   0450    14              M/SEC
+*                                      COMP. OF SPACE-FIXED VELOCITY
+* V        0124   0324   0452    14              M/SEC
+*                                      TOTAL SPACE-FIXED VELOCITY
+* ZDDV     0504   0306   0542    4               M/SEC**2
+* XDDV     0510   0310   0544    4               M/SEC**2
+* YDDV     0514   0314   0546    4               M/SEC**2
+*                                      COMPONENTS OF VENT ACCELERATION
+* ZDDD     0520   0322   0550    4               M/SEC**2
+* XDDD     0524   0326   0552    4               M/SEC**2
+* YDDD     0530   0332   0552    4               M/SEC**2
+*                                      COMPONENTS OF DRAG ACCELERATION
+* ALT      0534   0336   0556    4               METERS
+*                                      ALTITUDE
+* TLEMR8   0535   0736   1556 
+*                                      MINOR LOOP ERROR CODE
+*
+*
+*
+*                 *****************************
+# PAGE 14, SEQUENCE 005930-006430
+*                 *                           *
+*                 *   TELEMETERED ONLY WHEN   *
+*                 * IN VIEW OF GROUND STATION *
+*                 *                           *
+*                 *****************************
+*
+*
+* ML ERROR 0570   0372   0574
+*                                      MINOR LOOP ERROR CODE
+*
+* GROUP 1 TELEMETRY COMES FROM DISAGREEMENT PROCESSING
+*
+*   BIT ASSIGNMENTS FOR ERROR DATA WORD
+*  1   2 - 12    13 14 15   16 - 26
+*  1 (A COUNTER)  0  0  1 (B COUNTER)    DG BIT ON IN ERROR
+*
+*  1 (A COUNTER)  0  0  0 (B COUNTER)    THIS DATA WORD WITH 000 ERROR
+*                                         TAG WILL BE ASSOCIATED WITH
+*                                         ONE OF THE FOLLOWING WORDS
+*
+*  1 (A COUNTER)  0  1  0 (B COUNTER)    A COUNTER BAD,SPECIAL COUNTER
+*  1 (A COUNTER)  0  1  1 (B COUNTER)    B COUNTER BAD,SPECIAL COUNTER
+*  1 (A COUNTER)  1  0  0 (B COUNTER)    A AND B BOTH BAD, SPECIAL
+*                                           COUNTERS
+*  1 (A COUNTER)  1  0  1 (B COUNTER)    NO COUNTERS BAD, SPECIAL
+*                                           COUNTERS
+*
+*
+* GROUP 2 TELEMETRY COMES FROM MINOR LOOP REASONABLENESS FAILURES
+*
+*   BIT ASSIGNMENTS FOR ERROR DATA WORD
+*   1    2 - 12    13 14 15    16 - 26
+*   0 (OLD GIMBAL)  0  0  0 (CURRENT GIMBAL)  PITCH GIMBAL FAILED ZERO
+*                                               TEST
+*   0 (OLD GIMBAL)  0  0  1 (CURRENT GIMBAL)  ROLL GIMBAL FAILED ZERO
+*                                               TEST
+*   0 (OLD GIMBAL)  0  1  0 (CURRENT GIMBAL)  YAW GIMBAL FAILED ZERO
+*                                               TEST
+*   0 (OLD GIMBAL)  0  1  1 (CURRENT GIMBAL)  PITCH GIMBAL FAILED TEST
+*                                               INCREASING OR DECREASING
+*   0 (OLD GIMBAL)  1  0  0 (CURRENT GIMBAL)  ROLL GIMBAL FAILED TEST
+*                                               INCREASING OR DECREASING
+*   0 (OLD GIMBAL)  1  0  1 (CURRENT GIMBAL)  YAW GIMBAL FAILED TEST
+*                                               INCREASING OR DECREASING
+*   0 (OLD GIMBAL)  1  1  0 (CURRENT GIMBAL)  ROLL GIMBAL SWITCHED TO
+*                                               BACKUPS
+*   0 (OLD GIMBAL)  1  1  1 (CURRENT GIMBAL)  PITCH GIMBAL SWITCHED TO
+*                                               BACKUPS
+*   0 (OLD GIMBAL)  1  1  1 (CURRENT GIMBAL)  YAW GIMBAL SWITCHED TO
+*                                               BACKUPS
+************************************************************************
+
+# PAGE 21, SEQUENCE 009150-009670, TITLE "MACRO DEFINITIONS"
+
+CBSTA	MACRO	ARG1,ARG2,ARG3
+	DEC	ARG1
+	DEC	ARG2
+	DEC	ARG3
+	ENDMAC
+
+
+INHIB	MACRO
+	MPY	KPLUS
+	CLA	=O35774
+	PIO	072
+	CLA	KZERO
+	PIO	032
+	ENDMAC
+	
+
+MOVE1	MACRO	ARG1,ARG2
+	CDS	ARG1
+	CLA	ARG1
+	CDS	ARG2
+	STO	ARG2
+	ENDMAC
+
+
+MOVE2	MACRO	ARG1,ARG2,ARG3
+	CLA	ARG1
+	STO	ARG2
+	STO	ARG3
+	ENDMAC
+
+
+ORS	MACRO	ARG1,ARG2
+	CLA	ARG1
+	AND	ARG2
+	XOR	ARG2
+	XOR	ARG1
+	STO	ARG1
+	ENDMAC
+
+
+TELEM	MACRO	ARG1,ARG2,ARG3
+	HOP	ARG1
+	CLA	ARG2
+	PIO	ARG3
+	ENDMAC
+
+#-----------------------------------------------------------------------
+# Workshop area.  Stuff in between these lines is totally customizable
+# for the purpose of demo'ing the this abridged LVDC program, and does
+# not come from the original AS-206RAM LVDC flight program.
+
+# The idea of this demo is to exercise the mathematical functions supplied
+# originally as "utility routines".  Since in this demo there is no 
+# ground-control system to either upload commands or to receive download
+# data, we can use PIO instructions otherwise used for that purpose to
+# receive inputs or to transmit outputs for the demo.
+
+	ORGDD	4,1,0,0,2,14,
+WRKSHP	TRA	WRKSHP
+
+# End of workshop area.
+#-----------------------------------------------------------------------
+
+# From this point to the end of the program is a portion of the "utilities"
+# section of the original program listing.
+
+	ORGDD	4,3,0,0,2,14,
+
+# PAGE 261, SEQUENCE 113100-113440, TITLE "22. UTILITY ROUTINES"
+
+************************************************************************
+*                          UTILITY ROUTINES                            *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  FUNCTION    PROVIDES FOR CALCULATIONS NEEDED BY VARIOUS ROUTINES.   *
+*                                                                      *
+*  ENTRIES     AUATAN - ARC-TANGENT                                    *
+*              AUSC   - SIN-COS                                        *
+*              UFDIV  - FIXED POINT DIVIDE                             *
+*              UPSQRT - PARTIAL SQUARE ROOT                            *
+*              MATMPY - MATRIX MULTIPLY                                *
+*              MATTRA - MATRIX TRANSPOSE                               *
+*              UVDOT  - VECTOR DOT PRODUCT                             *
+*              UVCRS  - VECTOR CROSS PRODUCT                           *
+*              AULN   - NATURAL LOGARITHM                              *
+*              AUDIVD - AUTOMATIC DIVIDE                               *
+*              WIPER  - BSS AREA ZEROING                               *
+*              TERMIN - VARIABLE ZEROING FOR REPEATABLE MODE           *
+*              UGCOMP - DATA COMPRESSION                               *
+*              UACOMP - DATA COMPRESSION                               *
+*              TABST  - TABLE STORE                                    *
+*                                                                      *
+************************************************************************
+
+# PAGE 273, SEQUENCE 116450-116980
+
+************************************************************************
+*                                                                      *
+*                          ARCTANGENT ROUTINE                          *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  INPUT       TWO ARGUMENTS, X IN ACC AND Z IN PQ, SCALED THE SAME    *
+*                                                                      *
+*  OUTPUT      ARCTAN (X/Z) IN ACCUMULATOR, IN PIRADS SCALED B0        *
+*                                                                      *
+*  NOTE        X CORRESPONDS TO A SIN AND Z CORRESPONDS TO A COS SINCE *
+*              TAN = SIN/COS                                           *
+*                                                                      *
+************************************************************************
+
+
+AUATAN	STO	777
+	SHR	1
+	STO	UTEMP1			BN+1  SIN Z
+	TMI	*+2
+	TRA	*+2
+	RSU	KZERO
+	STO	UTEMP3			BN+1  ABS (SIN Z)
+	CLA	775			BN
+	SHR	1
+	STO	UTEMP2			BN+1  COS Z
+	TMI	*+2
+	TRA	*+2
+	RSU	KZERO
+	STO	UTEMP4			BN+1  ABS (COS Z)
+	SUB	UTEMP3			BN+1  ABS (SIN Z)
+	SHR	1
+	STO	UTEMP5			BN+2  ABS (COS Z) - ABS (SIN Z)
+	CLA	UTEMP3			BN+1  ABS (SIN Z)
+	ADD	UTEMP4			BN+1  ABS (COS Z)
+	STO	UTDIV1			BN+1  ABS (COS Z) + ABS (SIN Z)
+	CLA	777
+	STO	UTEMP3
+	CLA	UTEMP5
+	HOP	HCFDIV
+
+*	
+*   V = (1/2)*(ABS(COS Z) - ABS(SIN Z))/(ABS(COS Z) + ABS(SIN Z))
+*
+
+	STO	UTEMP4			B1    V
+	MPH	UTEMP4			B1
+	SHL	1
+	STO	UTEMP5			B1    V**2
+	MPH	=-.3730974E-2B-6	C11
+	ADD	=.016760072B-5		C9
+	MPH	UTEMP5			B1    V**2
+	ADD	=-.037061733B-4		C7
+	MPH	UTEMP5			B1    V**2
+	ADD	=.06160680B-3		C5
+# PAGE 274, SEQUENCE 116990-117220
+	MPH	UTEMP5			B1    V**2
+	ADD	=-.10587734B-2		C3
+	MPH	UTEMP5			B1    V**2
+	ADD	=.31830264B-1		C1
+	MPH	UTEMP4			B1    V
+	STO	UTEMP4			B0    X
+*
+*   X =  V*(C1 + V**2*(C3 + V**2*(C5 + V**2*(C7 + V**2*(C9+V**2*C11)))))
+*
+	CLA	UTEMP2			BN+1  COS Z
+	TMI	*+4
+	CLA	=O1			B0    1/4
+	SUB	UTEMP4			B0    X
+	TRA	*+3
+	CLA	=O3			B0    3/4
+	ADD	UTEMP4			B0    X
+	STO	UTEMP4			B0
+	CLA	UTEMP1			BN+1  SIN Z
+	TMI	*+3
+	CLA	UTEMP4
+	HOP	UTEMP3
+	CLA	KZERO
+	SUB	UTEMP4
+	HOP	UTEMP3
+	
+# PAGE 275, SEQUENCE 117240-117730
+
+************************************************************************
+*                                                                      *
+*                      SINE AND COSINE ROUTINE                         *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  INPUT       ARGUMENT IN ACCUMULATOR, IN PIRADS SCALED B0            *
+*                                                                      *
+*  OUTPUT      SINE IN ACCUMULATOR AND COSINE IN PQ, BOTH SCALED B0    *
+*                                                                      *
+************************************************************************
+
+
+AUSC	STO	777
+	STO	UTEMP1			B0    Z
+	TMI	AUSC1
+	RSU	KPLUS			B0    1/2
+	STO	UTEMP2			B0    1/2 - Z
+	TMI	*+2
+	TRA	AUSC3
+	ADD	KPLUS			B0    1/2
+	TRA	AUSC2			      AC = 1 - Z, B0
+AUSC1	ADD	KPLUS			B0    1/2
+	STO	UTEMP2			B0    1/2 + Z
+	TMI	*+2
+	TRA	AUSC3
+	RSU	=O6			B0    - 1/2
+AUSC2	STO	UTEMP1			B0    - (1 + Z)
+AUSC3	CLA	777
+	STO	UTEMP3
+	CALL	SCPOLY,UTEMP1		COMPUTE SIN
+	STO	UTEMP1
+	CALL	SCPOLY,UTEMP2		COMPUTE COS
+	STO	775
+	CLA	UTEMP1
+	HOP	UTEMP3
+SCPOLY	STO	777
+	STO	UTEMP4			B0    ANGLE
+	MPH	UTEMP4			B0
+	SHL	1
+	STO	UTEMP5			B-1   SQUARE OF ANGLE
+	MPH	=-.558396947B3			C7
+	ADD	=2.54360520B2			C5
+	MPH	UTEMP5			B-1
+	SHR	2
+	ADD	=-5.16736782B3			C3
+	MPH	UTEMP5			B-1
+	ADD	=3.14158970B2			C1
+# PAGE 276, SEQUENCE 117740-117760
+	MPH	UTEMP4			B0
+	SHL	2				RESCALE TO B0
+	HOP	777
+	
+# PAGE 277, SEQUENCE 117780-117980
+
+************************************************************************
+*                                                                      *
+*                      FIXED POINT DIVIDE ROUTINE                      *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  INPUT       NUMERATOR IN ACCUMULATOR, DENOMINATOR IN UTDIV1         *
+*                                                                      *
+*  OUTPUT      QUOTIENT IN THE AC AND IN THE PQ AT RETURN HOP          *
+*                                                                      *
+*  NOTE        BY TRANSFERRING TO PARTIAL SQUARE ROOT ROUTINE          *
+*              A 7 INSTRUCTION DELAY IS PRODUCED.                      *
+*                                                                      *
+************************************************************************
+
+
+UFDIV	STO	777			     LINKAGE
+	DIV	UTDIV1			ISSUE DIVIDE
+	CLA	KZERO			DELAY ONE CYCLE
+	TRA	UD1			DELAY 6 MORE CYCLES BEFORE AC # QUOTIENT
+
+# PAGE 278, SEQUENCE 118000-118250
+
+************************************************************************
+*                                                                      *
+*                     PARTIAL SQUARE ROOT ROUTINE                      *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  INPUT       ARGUMENT IN ACCUMULATOR, ITS PREVIOUS SQUARE ROOT VALUE *
+*              IN UTDIV1.  ARGUMENT SCALED B%2N<, SQ RT SCALED B%N<.   *
+*                                                                      *
+*  OUTPUT      AC CONTAINS NEW VALUE FOR SQ RT OF ARGUMENT.            *
+*              PQ CONTAINS HALF OF %ARGUENT<%PREVIOUS SQ RT<.          *
+*                                                                      *
+************************************************************************
+
+
+UPSQRT	STO	777			      LINKAGE
+	SHR	1			 DIVIDE BY 2
+	DIV	UTDIV1			 ISSUE DIVIDE
+	CLA	UTDIV1
+	SHR	1			 DIVIDE BY 2
+UD1	EXM	2,1,0			 DELAY 2 CYCLES
+	EXM	2,1,0			 DELAY TWO CYCLES
+	ADD	KZERO			 DELAY 1 CYCLE
+	ADD	775			 RESULT OF DIVISION
+	HOP	777			RETURN
+	
+# PAGE 279, SEQUENCE 118270-118800
+
+************************************************************************
+*                                                                      *
+*                   MATRIX MULTIPLY ROUTINE                            *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  INPUT       IN THE ACCUMULATOR, A DFW OF THE FORM CLA,A,MPY,B       *
+*              WHERE A AND B ARE THE INITIAL LOCATIONS OF THE          *
+*	       MATRICES TO BE MULTIPLIED.			       *
+*              IN THE PQ, A WORD CONTAINING A DFW IN SYLLABLE 1        *
+*	       OF THE FORM STO, C AND A COUNTER (SCALED 25) IN         *
+*              SYLLABLE 0.  C IS THE INITIAL LOCATION OF THE PRODUCT   *
+*              MATRIX.                                                 *
+*                                                                      *
+*  OUTPUT      A PRODUCT MATRIX C = AXB (NOT BXA).                     *
+*	       IF COUNTER = 1, C(3X1) = A(3X3) X B(3X1).               *
+*              IF COUNTER = 3, C(3X3) = A(3X3) X B(3X3).               *
+*                                                                      *
+*  NOTES       ALL MATRICES WILL BE GROUPED IN VECTOR FORM.            *
+*	       EACH COLUMN OR ROW WILL BE STORED AS A VECTOR USING     *
+*              THE VEC PSEUDO OPERATION.  IN ADDITION, THE 3           *
+*              VECTORS REQUIRED TO REPRESENT A 3X3 MATRIX              *
+*              MUST BE STORED CONSECUTIVELY.                           *
+*              THE A MATRIX MUST BE STORED BY ROWS AND THE             *
+*              B MATRIX BY COLUMNS.  THE OUTPUT MATRIX WILL            *
+*              BE STORED BY COLUMNS.                                   *
+*                                                                      *
+************************************************************************
+
+
+MATMPY	STO	777
+	SUB	=O01			ADJUST DFW
+	STO	UTEMP4			SAVE DFW USED TO FORM PRODUCT
+	CLA	775	
+	STO	UTEMP7			SAVE DFW USED TO STORE PRODUCT
+	AND	=3
+	STO	UTEMP5			SAVE COUNTER
+	CLA	777
+	STO	UTEMP6			SAVE RETURN HOP CONSTANT
+MM1	HOP	MMSET
+	EXM	0,1,0			STORE FIRST ELEMENT
+	HOP	MMSET
+	EXM	0,1,1			STORE SECOND ELEMENT
+	HOP	MMSET
+	EXM	0,1,2			STORE THIRD ELEMENT
+	CLA	UTEMP5			COUNTER = 1 OR 3 ORIGINALLY
+	SUB	=1			DECREMENT COUNTER
+	TNZ	*+2
+	HOP	UTEMP6			EXIT WHEN COUNTER = 0
+	STO	UTEMP5			SAVE COUNTER
+	CLA	UTEMP4			)
+	ADD	=O7500004		)RESET A ADDRESS, INCREMENT B ADDRESS
+	STO	UTEMP4			)           IN PRODUCT DFW
+# PAGE 280, SEQUENCE 118810-118890
+	CLA	UTEMP7			    )
+	ADD	=O01			    )INCREMENT A ADDRESS IN STORE DFW
+	STO	UTEMP7			    )
+	TRA	MM1
+MMSET	STO	777
+	CLA	UTEMP4			)
+	ADD	=O01			)INCREMENT A ADDRESS IN PRODUCT DFW
+	STO	UTEMP4			)
+	TRA	UVDOT1			GO FORM DOT PRODUCT
+
+# PAGE 281, SEQUENCE 118910-119370
+
+************************************************************************
+*                                                                      *
+*              MATRIX TRANSPOSE ROUTINE                                *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  INPUT       IN THE ACCUMULATOR, A DFW OF THE FORM STO,B,CLA,A WHERE *
+*              A AND B ARE THE INITIAL LOCATIONS OF THE MATRIX TO BE   *
+*	       TRANSPOSED AND OF THE MATRIX WHERE THE TRANSPOSE IS TO  *
+*              BE STORED.                                              *
+*                                                                      *
+*  OUTPUT      TRANSPOSE OF MATRIX A                                   *
+*                                                                      *
+*  NOTES       IF A = B, THEN THE MATRIX A WILL BE TRANSPOSED AND      *
+*	       STORED IN THE MATRIX LOCATION A.                        *
+*                                                                      *
+************************************************************************
+
+
+
+MATTRA	STO	777
+	STO	UTEXM			SET UP DFW FOR USE BY EXM
+	EXM	0,0,0			)
+	EXM	0,1,0			)
+	EXM	0,0,5			)  MOVE DIAGONAL ELEMENTS
+	EXM	0,1,5			)
+	EXM	0,0,12			)
+	EXM	0,1,12			)
+	EXM	0,0,1			 )
+	STO	UTEMP1			 )  
+	EXM	0,0,2			 )  SAVE ONE SET OF OFF DIAGONAL
+	STO	UTEMP2			 )  ELEMENTS
+	EXM	0,0,6			 )
+	STO	UTEMP3			 )
+	EXM	0,0,4			)
+	EXM	0,1,1			)
+	EXM	0,0,10			)  MOVE OPPOSITE ELEMENTS ACROSS
+	EXM	0,1,2			)
+	EXM	0,0,11			)
+	EXM	0,1,6			)
+	CLA	UTEMP1			 )
+	EXM	0,1,4			 )
+	CLA	UTEMP2			 ) SET DIAGONAL ELEMENTS
+	EXM	0,1,10			 )
+	CLA	UTEMP3			 )
+	EXM	0,1,11			 )
+	HOP	777
+		
+# PAGE 282, SEQUENCE 119390-119790
+
+************************************************************************
+*                                                                      *
+*              MATRIX TRANSPOSE ROUTINE                                *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  INPUT       IN THE ACCUMULATOR, A WORD DEFINED BY THE DFW MACRO     *
+*              OPERATION.  SYLLABLE 1 OF THIS WORD MUST CONTAIN THE    *
+*	       INSTRUCTION- CLA P, WHERE P IS THE FIRST OF THREE       *
+*              CONSECUTIVE LOCATIONS CONTAINING MULTIPLICANDS.         *
+*	       SYLLABLE 2 CONTAINS THE INSTRUCTION- MPY Q, WHERE Q IS  *
+*	       THE FIRST OF THREE CONSECUTIVELY LOCATED MULTIPLIERS.   *
+*                                                                      *
+*  OUTPUT      THE SUM OF PRODUCTS- P(1)*Q(1) + P(2)*Q(2) + P(3)*Q(3)  *
+*                                                                      *
+************************************************************************
+
+
+UVDOT	STO	777			LINKAGE
+UVDOT1	STO	UTEXM			     EXM LOCATION USED BY UTILITY ROUTINE
+	EXM	0,1,0			CLA A(1)
+	EXM	0,0,0			MPY B(1)
+	EXM	0,1,1		        CLA A(2)
+	STO	UTEMP1
+	CLA	775			FIRST PRODUCT
+	STO	UTEMP2
+	CLA	UTEMP1
+	EXM	0,0,1			MPY B(2)
+	EXM	0,1,2			CLA A(3)
+	STO	UTEMP1
+	CLA	775			SECOND PRODUCT
+	STO	UTEMP3
+	CLA	UTEMP1
+	EXM	0,0,2			MPY B(3)
+	CLA	UTEMP7
+	STO	UTEXM			     SET UP DFW USED BY MATMPY TO STORE
+	CLA	UTEMP2
+	ADD	UTEMP3
+	ADD	775			THIRD PRODUCT
+	HOP	777
+	
+# PAGE 283, SEQUENCE 119810-120340
+
+************************************************************************
+*                                                                      *
+*                     VECTOR CROSS PRODUCT ROUTINE                     *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  INPUT       IN THE ACCUMULATOR, A WORD DEFINED BY THE DFW MACRO     *
+*              OPERATION.  SYLLABLE 1 OF THIS WORD MUST CONTAIN THE    *
+*	       INSTRUCTION- CLA A, WHERE A IS THE FIRST OF THREE       *
+*              CONSECUTIVE LOCATIONS CONTAINING THE FIRST VECTOR.      *
+*	       SYLLABLE 2 CONTAINS THE INSTRUCTION- MPY B, WHERE B IS  *
+*	       THE FIRST OF THREE CONSECUTIVE LOCATIONS CONTAINING     *
+*	       THE SECOND VECTOR.				       *
+*                                                                      *
+*  OUTPUT      UTEMP1 CONTAINS AXB(1) = A(2)*B(3) - A(3)*B(2)          *
+*              UTEMP2 CONTAINS AXB(2) = A(3)*B(1) - A(1)*B(2)          *
+*	       UTEMP3 CONTAINS AXB(3) = A(1)*B(2) - A(2)*B(1)          *
+*                                                                      *
+************************************************************************
+
+
+UVCRS	STO	777
+	STO	UTEXM			STORE INTO LOCATION FOR EXM
+	EXM	0,1,1			CLA  A2
+	EXM	0,0,2			MPY  B3
+	EXM	0,1,2			CLA  A3
+	STO	UTEMP4			A3
+	CLA	775
+	STO	UTEMP1			A2*B3
+	CLA	UTEMP4			A3
+	EXM	0,0,1			MPY  B2
+	EXM	0,1,0			CLA  A1     (DELAY)
+	CLA	UTEMP1			A2*B3
+	SUB	775			A3*B2
+	STO	UTEMP1			AXB(1) = A2*B3 - A3*B2
+	CLA	UTEMP4			A3
+	EXM	0,0,0			MPY  B1
+	EXM	0,1,0			CLA  A1
+	STO	UTEMP4			A1
+	CLA	775
+	STO	UTEMP2			A3*B1
+	CLA	UTEMP4			A1
+	EXM	0,0,2			MPY  B3
+	EXM	0,1,0			CLA  A1     (DELAY)
+	CLA	UTEMP2			A3*B1
+	SUB	775			A1*B3
+	STO	UTEMP2			AXB(2) = A3*B1 - A1*B3
+	CLA	UTEMP4			A1
+	EXM	0,0,1			MPY  B2
+	EXM	0,1,1			CLA  A2
+	STO	UTEMP4			A2
+	CLA	775
+	STO	UTEMP3			A1*B2
+# PAGE 284, SEQUENCE 120250-120410
+	CLA	UTEMP4			A2
+	EXM	0,0,0			MPY  B1
+	EXM	0,1,0			CLA  A1     (DELAY)
+	CLA	UTEMP3			A1*B2
+	SUB	775			A2*B1
+	STO	UTEMP3			AXB(3) = A1*B2 - A2*B1
+	HOP	777
+	
+# PAGE 285, SEQUENCE 120430-120950
+
+************************************************************************
+*                                                                      *
+*                          NATURAL LOG                                 *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  INPUT       TWO ARGUMENTS, X IN ACC AND Z IN PQ, SCALED THE SAME    *
+*                                                                      *
+*  OUTPUT      LN (X/Z) IN ACCUMULATOR, SCALED B2                      *
+*                                                                      *
+************************************************************************
+
+
+	DOGD	2,6,
+AULN	STO	777			ENTER SCALED B0
+	STO	UTEMP1
+	CLA	775
+	STO	UTEMP3
+	RSU	UTEMP1
+	TMI	AUL5
+	TNZ	AUL4
+	HOP	777
+AUL4	CLA	UTEMP3
+	DIV	UTEMP1
+	CLA	=-.69314718B2
+	TRA	*+5
+AUL5	CLA	UTEMP1
+	DIV	UTEMP3
+	SHL	0
+	TRA	*+1
+	STO	UTEMP4
+	EXM	2,1,0			DELAY 2 INSTRUCTIONS
+	CLA	=-1.3862944B2		INITIALIZE L = -2LN2
+	STO	UTEMP2
+	CLA	775
+	SHR	1			SCALE B1
+	STO	UTEMP1
+	SUB	=.25B1
+	TMI	AUL1
+	SUB	=.25B1			IS IT LESS THAN 1/2
+	TMI	AUL2			YES
+	CLA	UTEMP2
+	SUB	=-.69314718B2		LET L = -LN2
+	STO	UTEMP2
+	CLA	UTEMP1
+	SHL	1
+	TRA	AUL3
+AUL1	CLA	UTEMP2
+	ADD	=-.69314718B2
+	STO	UTEMP2
+	CLA	UTEMP1
+	SHL	1
+# PAGE 286, SEQUENCE 120960-121210
+	TRA	*+2
+AUL2	CLA	UTEMP1
+	SHL	2
+AUL3	SUB	KPLUS			SUB 1 AND SCALE B0
+	SHL	1
+	STO	UTEMP1
+	MPH	=-.01833831B2
+	ADD	=.08556927B2
+	MPH	UTEMP1
+	ADD	=-.19376149B2
+	MPH	UTEMP1
+	ADD	=.31765005B2
+	MPH	UTEMP1
+	ADD	=-.49787544B2
+	MPH	UTEMP1
+	ADD	=.99990167B2
+	MPH	UTEMP1
+	ADD	UTEMP2
+	STO	UTEMP1
+	CLA	UTEMP4
+	TNZ	*+3
+	CLA	UTEMP1
+	HOP	777
+	SHL	0
+	SUB	UTEMP1
+	HOP	777
+	
+# PAGE 287, SEQUENCE 121230-121760
+
+************************************************************************
+*                                                                      *
+*                        SCALED DIVIDE ROUTINE                         *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  INPUT       NUMERATOR IN ACCUMULATOR, ITS SCALING IN TEMP           *
+*              DENOMINATOR IN PQ, ITS SCALING IN TEMP1                 *
+*              SCALING OF ANSWER IN TEMP2, ALL SCALINGS SCALED B25     *
+*                                                                      *
+*  OUTPUT      QUOTIENT IN ACCUMULATOR                                 *
+*                                                                      *
+************************************************************************
+
+
+AUDIVD	STO	777			SAVE HOP CONSTANT FOR RETURN.
+	STO	UTEMP1			SAVE NUMERATOR.
+	CLA	775
+	STO	UTEMP2			SAVE
+	XOR	UTEMP1
+	STO	UTEMP3			PLUS IF SIGNS SAME, MINUS IF DIFFERENT.
+	CLA	UTEMP1
+	RSU	KZERO
+	TMI	AUDV10
+	STO	UTEMP1			IF NUMER WAS MINUS, SAVE COMPLEMENT.
+AUDV10	CLA	UTEMP2
+	RSU	KZERO
+	TMI	AUDV20
+	STO	UTEMP2			IF DENOM WAS MINUS, SAVE COMPLEMENT.
+AUDV20	CLA	UTEMP2
+	TNZ	*+2			***
+	TRA	AUDV85			ZERO DENOM.
+	SHL	1			SHIFT DENOM LEFT 1.
+	TMI	AUDV30			TRANSFER IF SHIFTED TOO FAR.
+	STO	UTEMP2			IF NOT YET SHIFTED TOO FAR,
+	CLA	TEMP1
+	SUB	=1B25			UPDATE (DECREMENT) SCALING
+	STO	TEMP1
+	TRA	AUDV20			AND GO SHIFT AGAIN.
+AUDV30	SHR	1			IF SHIFTED TOO FAR,
+	AND	=O377777776		REPAIR DAMAGE
+	STO	UTEMP2			AND SAVE DESIRED DENOM.
+AUDV40	CLA	UTEMP1
+	TNZ	*+2			***
+	HOP	777			***
+	SHL	1			SHIFT NUMBER LEFT 1.
+	TMI	AUDV50			TRANSFER IF SHIFTED TOO FAR.
+	STO	UTEMP1			IF NOT YET SHIFTED TOO FAR,
+	CLA	TEMP
+	SUB	=1B25			UPDATE (DECREMENT) SCALING
+	STO	TEMP
+	TRA	AUDV40			AND GO SHIFT AGAIN.
+AUDV50	SHR	1			IF SHIFTED TOO FAR,
+# PAGE 288, SEQUENCE 121770-122240
+	AND	=O377777776		REPAIR DAMAGE
+	STO	UTEMP1			AND SAVE DESIRED NUMER.
+	SUB	UTEMP2
+	TMI	AUDV60			TRANSFER IF NUMER LT DENOM.
+	CLA	UTEMP1			IF NUMER GE DENOM,
+	SHR	1			SHIFT NUMER RIGHT 1,
+	STO	UTEMP1			SAVE,
+	CLA	TEMP			AND UPDATE (INCREMENT) SCALING.
+	ADD	=1B25
+	STO	TEMP
+AUDV60	CLA	UTEMP1			BEGIN DIVISION N/D.
+	DIV	UTEMP2
+	CLA	TEMP			FIND NUMER SCALING
+	SUB	TEMP1			- DENOM SCALING
+	SUB	TEMP2			- ANSWER SCALING.
+	STO	UTEMP4
+	TMI	AUDV70			TRANSFER TO SHIFT RIGHT.
+	TNZ	AUDV80			TRANSFER TO SHIFT LEFT.
+	TRA	AUDV90			NO SHIFT NEEDED.
+AUDV70	CLA	UTEMP4
+	ADD	=1B25			UPDATE SCALING.
+	STO	UTEMP4
+	TMI	*+2
+	TNZ	AUDV90			TRANSFER IF SHIFTER IS GOING PLUS.
+	CLA	775
+	SHR	1			AS LONG AS SHIFTER IS MINUS OR ZERO,
+	STO	775			SHIFT.
+	TRA	AUDV70			GO TRY FOR ANOTHER RIGHT SHIFT.
+AUDV80	CLA	UTEMP4
+	SUB	=1B25			UPDATE SCALING.
+	STO	UTEMP4
+	TMI	AUDV90			TRANSFER IF SHIFTER IS GOING PLUS.
+	CLA	775
+	SHL	1			SHIFT AS LONG AS SHIFTER IS ZERO OR MINUS.
+	TMI	*+3			TRANSFER IF OVERFLOW.
+	STO	775
+	TRA	AUDV80			GO TRY FOR ANOTEHR LEFT SHIFT.
+AUDV85	CLA	=O377777770		IF OVERFLOW, REPLACE WITH
+	STO	775			ALL BITS (LARGETS POSSIBLE NUMBER).
+	TRA	*+1			REPLACE THIS WITH TELE. PIO  **************
+AUDV90	CLA	UTEMP3
+	TMI	*+2			SIGN OF ANSWER MUST BE MADE MINUS.
+	TRA	*+4			SKIP COMPLEMENTING IF PLUS.
+	CLA	775
+	RSU	KZERO
+	STO	775
+	CLA	775			ANSWER IN ACCUMULATOR.
+	HOP	777
+	
+# PAGE 294, SEQUENCE 124180-124490
+
+************************************************************************
+*                                                                      *
+*                     DATA COMPRESSION POSITION SUBROUTINE             *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  INPUT       ARGUMENT IN ACCUMULATOR				       *
+*                                                                      *
+*  OUTPUT      ACCUMULATOR WILL CONTAIN ARGUMENT PROPERLY MASKED AND   *
+*              POSITIONED FOR DATA COMPRESSION			       *
+*                                                                      *
+************************************************************************
+
+
+	DOGD	2,14,
+UGCOMP	STO	776			SAVE RETURN HOP
+	AND	=O777707776		MASK OUT BITS 12,13,14
+	STO	OPTMP1
+	SHR	3
+	
+	AND	=O07777
+	TRA	*+6
+UACOMP	STO	776			SAVE RETURN HOP
+	AND	=O777717776		MASK OUT BITS 12,13
+	STO	OPTMP1
+	SHR	2
+	AND	=O17776			POSITION AND MASK OFF 1ST TWO BITS
+	STO	775
+	CLA	OPTMP1
+	AND	=O000017776
+	ADD	775
+	HOP	776
+	
+	END
+

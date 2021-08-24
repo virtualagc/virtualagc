@@ -19,6 +19,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-28 MAS  Created from Luminary 99. Removed coding related
 ##                              to WOTEST, which was introduced in Luminary 98.
+##              2021-05-30 ABS  Removed WO1 symbol related to WOTEST.
 
 ## Page 988
 # PROGRAM NAME - DOWN TELEMETRY PROGRAM
@@ -167,7 +168,7 @@ DODOWNTM	TS	BANKRUPT
 ## of code to check whether or not it is time to write the word order bit.
 ## This was done to decrease the write frequency.
 		CA      BIT7		# SET WORD ORDER CODE TO 1. EXCEPTION- AT
-WO1		EXTEND			# THE BEGINNING OF EACH LIST THE WORD
+		EXTEND			# THE BEGINNING OF EACH LIST THE WORD
 		WOR	CHAN13		# CODE WILL BE SET BACK TO 0.
 		TC	DNTMGOTO	# GOTO APPROPRIATE PHASE OF PROGRAM
 

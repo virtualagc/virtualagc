@@ -76,6 +76,7 @@
 #				else's builds.
 #		2016-11-12 RSB	"Permanently" disabled READLINE.
 #		2016-11-18 RSB	Explicitly include socket library in Solaris.
+#		2021-05-13 MKF	Defined WASI and targets yaAGC.wasm, yaAGC.wast.
 
 LIBS=${LIBS2}
 
@@ -84,7 +85,11 @@ PREFIX=/usr/local
 endif
 
 .PHONY: default
+ifdef WASI
+default: yaAGC.wasm
+else
 default: yaAGC
+endif
 
 #---------------------------------------------------------------------------
 # The use of libreadline adds a command-history to yaAGC, but may have some
@@ -124,6 +129,30 @@ endif # MACOSX
 endif # NOREADLINE
 
 CFLAGS2 += -DGDBMI
+
+ifdef WASI
+WASI_SDK_PATH ?= /opt/wasi-sdk
+
+CFLAGS2 = \
+	--target=wasm32-wasi \
+	--sysroot ${WASI_SDK_PATH}/share/wasi-sysroot \
+	-DWASI=yes \
+	-O3 \
+	-flto \
+	-fwhole-program-vtables \
+	-fvirtual-function-elimination
+
+LDFLAGS2 = \
+	--no-entry \
+	--export-dynamic \
+	--unresolved-symbols=import-functions \
+	-L ${WASI_SDK_PATH}/share/wasi-sysroot/lib/wasm32-wasi \
+	-lc \
+	--export=malloc \
+	--export=free \
+	--import-memory \
+	--lto-O3
+endif
 
 # Alberto Galdo's iPhone mod.
 ifdef IPHONE
@@ -183,6 +212,14 @@ yaAGC:	$(OBJECTS) checkdec.o libyaAGC.a ${NATIVE_WINAGC}
 	${cc} ${CFLAGS} ${CFLAGS2_NATIVE} -o yaAGC ${OBJECTS} checkdec.o \
 	libyaAGC.a -L. ${STATIC} ${LIBS} -lpthread -lyaAGC -lm ${CURSES}
 
+yaAGC.wasm: wasm.o agc_engine.o agc_engine_init.o agc_utilities.o ringbuffer_api.o ringbuffer.o
+	${WASI_SDK_PATH}/bin/wasm-ld ${LDFLAGS2} -o $@ $^
+	wasm-opt $@ -Oz -o $@
+	wasm-strip $@
+
+yaAGC.wast: yaAGC.wasm
+	wasm2wat $< > $@
+
 libyaAGC.a: ${LIBOBJECTS}
 ifdef IPHONE
 	${IPHONE_DEV}/usr/bin/ar -rc $@ $^
@@ -195,7 +232,7 @@ endif
 	touch ../yaDEDA/src/main.c
 
 clean:
-	rm -f yaAGC libyaAGC.a *.o *~ *.bak *.elf *.o68 *.o8 *.rel *.exe *-macosx
+	rm -f yaAGC libyaAGC.a *.o *~ *.bak *.elf *.o68 *.o8 *.rel *.exe *-macosx *.wasm *.wast
 
 install:	yaAGC
 	cp yaAGC ${PREFIX}/bin
@@ -205,13 +242,17 @@ checkdec.o: ../Tools/checkdec.c
 	${cc} ${CFLAGS} ${CFLAGS2} -O0 -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
 
 %.o:	%.c agc_engine.h
+ifdef WASI
+	${WASI_SDK_PATH}/bin/clang ${CFLAGS2} -c -o $@ $<
+else
 	${cc} ${CFLAGS0} ${CFLAGS2} -DNVER=${NVER} -DINSTALLDIR="\"${PREFIX}/bin\"" -c -o $@ $<
+endif
 
 #----------------------------------------------------------------------------------
 # Building for multiple architectures, using IMCROSS. 
 
 .PHONY: all-archs
-all-archs: default yaAGC.exe WinAGC.exe yaAGC-macosx
+all-archs: default yaAGC.exe WinAGC.exe yaAGC-macosx yaAGC.wasm
 
 #CSOURCE:=main.c agc_engine_init.c agc_engine.c agc_utilities.c rfopen.c \
 #	 Backtrace.c SocketAPI.c DecodeDigitalDownlink.c ../Tools/checkdec.c \
