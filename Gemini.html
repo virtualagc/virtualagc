@@ -56,6 +56,7 @@ document.write(headerTemplate.replace("@TITLE@","Gemini Spacecraft").replace("@S
         <li>(See also <a href="#yaPanel_the_Control_Panel_Emulation_">the
 
 
+
             yaPanel section</a> for various other user-interface related
           peripheral devices.)<br>
         </li>
@@ -141,6 +142,7 @@ document.write(headerTemplate.replace("@TITLE@","Gemini Spacecraft").replace("@S
     Division, in Owego, New York, just as Apollo's <a href="LVDC.html">Launch
 
 
+
       Vehicle Digital Computer (LVDC)</a> was.&nbsp; The OBC and the
     LVDC are extraordinarily similar at the CPU level.<br>
     <br>
@@ -167,6 +169,7 @@ document.write(headerTemplate.replace("@TITLE@","Gemini Spacecraft").replace("@S
     </table>
     <br>
     <h2><a name="Peripheral_Devices" id="Peripheral_Devices"></a>Peripheral
+
 
 
       Devices</h2>
@@ -253,11 +256,13 @@ document.write(headerTemplate.replace("@TITLE@","Gemini Spacecraft").replace("@S
     <h2><a name="Gemini_Documentation" id="Gemini_Documentation"></a>Gemini
 
 
+
       Documentation</h2>
     Sadly, documentation we've been able to collect for the OBC lags far
     behind that of the AGC or even that of the Abort Guidance System
     (AGS).&nbsp; What little survives that we have been able to access
     can be found in our <a href="links.html#Gemini_spacecraft_computer">Document
+
 
 
       Library</a>.&nbsp; There's a lot of unique stuff there contributed
@@ -297,8 +302,10 @@ document.write(headerTemplate.replace("@TITLE@","Gemini Spacecraft").replace("@S
 Tomayko's
 
 
+
       Computers in Spaceflight, Chapter 1, section 4</a>, and from <a
       href="Documents/GeminiSoftwareHistory.pdf"> this short memo</a>.&nbsp;
+
 
     (Where there's any discrepancy, I personally believe in the memo.)<br>
     <br>
@@ -905,6 +912,7 @@ Tomayko's
     <h3><a name="Layout_of_Memory_Words" id="Layout_of_Memory_Words"></a>Layout
 
 
+
       of Memory Words</h3>
     I should make it clear that in this section I'm describing my
     perspective on the organization of OBC memory, in terms of how the
@@ -1085,6 +1093,7 @@ Tomayko's
 specify
 
 
+
         the current syllable:&nbsp; 00 for syllable 0, 01 for syllable
         1, and 10 for syllable 2.&nbsp; After the <span
           style="font-family: courier new,courier,monospace;">HOP</span>
@@ -1108,6 +1117,7 @@ specify
         selects between "normal" mode (<span style="font-family: Courier
           New,Courier,monospace;">H=0</span>) and "half-word" mode (<span
           style="font-family: Courier New,Courier,monospace;">H=1</span>),
+
 
         and this mode persists until another <span style="font-family:
           Courier New,Courier,monospace;">HOP</span> instruction changes
@@ -1156,6 +1166,7 @@ specify
     <h3><a name="Instruction_Sequencing" id="Instruction_Sequencing"></a>Instruction
 
 
+
       Sequencing</h3>
     You may naïvely suppose (I did!) if you did not read the preceding
     section in great detail, that the everyday usage of the words "word"
@@ -1196,6 +1207,7 @@ specify
     the syllable manually by executing an instruction (<big><span
         style="font-family: Courier New,Courier,monospace;">HOP</span></big>)&nbsp;
 and
+
 
 
     a HOP constant specifically designed to change the syllable
@@ -1305,6 +1317,7 @@ and
 #
 
 
+
                 Location we want to HOP to.</span><br>
             </div>
             <br>
@@ -1327,6 +1340,7 @@ and
                 TARGET&nbsp;&nbsp;&nbsp;
                 ...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 #
+
 
 
                 Location we want to HOP to.<br>
@@ -1385,6 +1399,7 @@ and
 In
 
 
+
             other words, 4 other instructions not involving
             multiplication or division can be performed in the interval
             between <span style="font-family: Courier
@@ -1397,6 +1412,7 @@ In
             <div style="margin-left: 40px;"><span style="font-family:
                 Courier New,Courier,monospace;">RESULT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 #
+
 
 
                 Allocate variable for output.<br>
@@ -1421,10 +1437,12 @@ In
 #
 
 
+
                 The result won't be available<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 NOP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 #
+
 
 
                 for a while, so kill some time.<br>
@@ -1433,6 +1451,7 @@ In
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 SPQ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 #
+
 
 
                 Fetch quotient into accumulator.<br>
@@ -1466,6 +1485,7 @@ In
             addresses is given in the <a
               href="#IO_Ports_For_PRO_Instruction">following section</a>.&nbsp;
 
+
             (The <span style="font-family: Courier
               New,Courier,monospace;">PRO</span> instruction is
             essentially equivalent to the <a
@@ -1491,13 +1511,16 @@ In
               <span style="font-family: Courier New,Courier,monospace;">PRO&nbsp;&nbsp;&nbsp;
 
 
+
                 0<span style="font-style: italic;">YX&nbsp;&nbsp;&nbsp;</span></span><span
                 style="font-family: Courier New,Courier,monospace;">#
                 Same as "PRO YX"</span><br>
               <span style="font-family: Courier New,Courier,monospace;">PRO&nbsp;&nbsp;&nbsp;
 
 
+
                 4<span style="font-style: italic;">YX</span>&nbsp;&nbsp;&nbsp;
+
 
 
                 # If A9=1</span><br>
@@ -1507,6 +1530,7 @@ In
             constant as operand, and that constant was placed directly
             into the bits A9-A1.)&nbsp; For example, to read MDIU
             keystroke data, <span style="font-style: italic;">X</span>=3
+
 
 
             and <span style="font-style: italic;">Y</span>=4, so<br>
@@ -1536,6 +1560,7 @@ In
             <div style="margin-left: 40px;"><span style="font-family:
                 Courier New,Courier,monospace;">RESULT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 #
+
 
 
                 Allocate variable for output.<br>
@@ -1574,6 +1599,7 @@ In
 #
 
 
+
                 Allocate variable for output.<br>
                 ARG1&nbsp;&nbsp;&nbsp;&nbsp; DEC&nbsp;&nbsp;&nbsp;&nbsp;
                 56<br>
@@ -1584,6 +1610,7 @@ In
                 &nbsp;&nbsp;&nbsp; ARG2<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 STO&nbsp;&nbsp;&nbsp;&nbsp; RESULT&nbsp;</span>&nbsp;&nbsp;
+
 
 
             </div>
@@ -1612,6 +1639,7 @@ In
             <div style="margin-left: 40px;"><span style="font-family:
                 Courier New,Courier,monospace;">RESULT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 #
+
 
 
                 Allocate variable for output.<br>
@@ -1650,6 +1678,7 @@ In
                 &nbsp;&nbsp;&nbsp; DEC&nbsp;&nbsp;&nbsp;&nbsp; 56</span><br>
               <span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CLA&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
                 K56</span><br>
@@ -1695,11 +1724,13 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 (i.e.,
 
 
+
             to logically AND together octal 37 and octal 52):<br>
             <br>
             <div style="margin-left: 40px;"><span style="font-family:
                 Courier New,Courier,monospace;">RESULT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 #
+
 
 
                 Allocate variable for output.<br>
@@ -1726,20 +1757,20 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
           <td style="vertical-align: middle;">This is a multiplication
             instruction.&nbsp; It multiplies two 24-bit numbers to
             produce a 26-bit product.&nbsp; The accumulator provides the
-            address of one operand, and the address embedded in the
-            instruction points to the other operand.&nbsp; Recall that
-            A1-A8 select the offset within a 256-word sector, and A9 is
-            the "residual bit" that selects between the current sector
-            and the "residual sector".&nbsp; In both cases, the
-            most-significant 24-bits of the operands are used, and the
-            least-significant 2 bits of the operand are ignored.&nbsp;
-            The result is available via the <span style="font-family:
-              monospace;">SPQ</span> instruction on the 2nd instruction
-            following <span style="font-family: Courier
-              New,Courier,monospace;">MPY</span>.&nbsp; Any other
-            instruction not involving multiplication or division can be
-            performed between the <span style="font-family: courier
-              new,courier,monospace;">MPY</span> and the <span
+            address of one multiplication factor, and the address
+            embedded in the instruction points to the other
+            factor.&nbsp; Recall that A1-A8 select the offset within a
+            256-word sector, and A9 is the "residual bit" that selects
+            between the current sector and the "residual sector".&nbsp;
+            In both cases, the most-significant 24-bits of the operands
+            are used, and the least-significant 2 bits of the operand
+            are ignored.&nbsp; The result is available via the <span
+              style="font-family: monospace;">SPQ</span> instruction on
+            the 2nd instruction following <span style="font-family:
+              Courier New,Courier,monospace;">MPY</span>.&nbsp; Any
+            other instruction not involving multiplication or division
+            can be performed between the <span style="font-family:
+              courier new,courier,monospace;">MPY</span> and the <span
               style="font-family: courier new,courier,monospace;">SPQ</span>.<br>
             <br>
             To illustrate the assembly-language syntax, let's multiply
@@ -1747,6 +1778,7 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
             <br>
             <span style="font-family: Courier New,Courier,monospace;">RESULT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 #
+
 
 
               Allocate variable for output.<br>
@@ -1765,16 +1797,19 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 #
 
 
+
               The result won't be available<br>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               NOP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 #
 
 
+
               for a while, so kill some time.<br>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               SPQ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 #
+
 
 
               Fetch product into accumulator.<br>
@@ -1811,6 +1846,7 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 for
 
 
+
               various instructions</a>.<br>
             <br>
             Assembly-language examples:<br>
@@ -1822,6 +1858,7 @@ for
                 FINISH<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...</span><br>
               <span style="font-family: Courier New,Courier,monospace;">FINISH&nbsp;&nbsp;
+
 
 
                 ...<br>
@@ -1948,6 +1985,7 @@ for
 for
 
 
+
               various instructions</a>.<br>
             <br>
             There assembly-language syntax for this instruction is:<br>
@@ -2004,11 +2042,13 @@ for
 #
 
 
+
                 Never gets here!<br>
               </span> <span style="font-family: Courier
                 New,Courier,monospace;">FINISH&nbsp;&nbsp;
                 ...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 #
+
 
 
                 But does get to here!<br>
@@ -2021,12 +2061,14 @@ for
 #
 
 
+
                 Comes to here!<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 TRA&nbsp;&nbsp;&nbsp;&nbsp; BAILOUT<br>
                 FINISH2&nbsp;
                 ...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 #
+
 
 
                 Never comes to here!<br>
@@ -2073,10 +2115,12 @@ for
 #
 
 
+
                 Allocate a variable</span><br style="font-family:
                 Courier New,Courier,monospace;">
               <span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 STO&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
                 RESULT&nbsp;&nbsp; # Store accumulator value in the
@@ -2158,6 +2202,7 @@ STO&nbsp;&nbsp;&nbsp;&nbsp;
 for
 
 
+
               various instructions</a>.<br>
             <br>
             There assembly-language syntax for this instruction is:<br>
@@ -2171,6 +2216,7 @@ for
             constant as operand, and that constant was placed directly
             into the bits A6-A1.)&nbsp; For example, to read the MDIU
             data-ready bit, <span style="font-style: italic;">X</span>=1
+
 
 
             and <span style="font-style: italic;">Y</span>=0, so<br>
@@ -2221,6 +2267,7 @@ for
 #
 
 
+
                 Variable for counting loop iterations.<br>
                 K1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 DEC&nbsp;&nbsp;&nbsp;&nbsp; 1<br>
@@ -2237,6 +2284,7 @@ for
 #
 
 
+
                 Do stuff<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 CLA&nbsp;&nbsp;&nbsp;&nbsp; LOOPCTR&nbsp;&nbsp; #
@@ -2248,6 +2296,7 @@ for
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 ...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 #
+
 
 
                 Done!<br>
@@ -2284,6 +2333,7 @@ for
     field.&nbsp; So, for example, if X=3 and Y=4, the instruction would
     be <span style="font-family: courier new,courier,monospace;">PRO43</span>.&nbsp;
 That's
+
 
 
     the opposite of present ordering of the columns in the table below
@@ -2330,6 +2380,7 @@ That's
             buffered in the <a href="#Uplink">Digital Command System</a>
             (DCS) to be read into bits M1-M24 of the accumulator.&nbsp;
             Or, reads data from the <a href="#Rendezvous_Radar">Rendezvous
+
 
               Radar</a> (if any).<br>
           </td>
@@ -2437,6 +2488,7 @@ That's
             "Digit select weight 2" and "Digit select weight 4" to
             select the next digit position to which a display value will
             be output to the <a href="#yaMDIU_the_MDIU_Emulation">MDIU</a>.&nbsp;
+
 
 
             It is not really explained how these work, but I think that
@@ -2703,6 +2755,7 @@ That's
           <td style="vertical-align: middle;">From the <a href="#PCDP">PCDP</a>'s
 
 
+
             RESET switch.<br>
           </td>
         </tr>
@@ -2776,6 +2829,7 @@ That's
           </td>
           <td style="vertical-align: middle;">Reads a keystroke that has
             been buffered in the <a href="#yaMDIU_the_MDIU_Emulation">MDIU</a>.&nbsp;
+
 
             This operation should be done only in response to a separate
             discrete "Data ready" input via <span style="font-family:
@@ -2863,6 +2917,7 @@ That's
           <td style="vertical-align: middle;">To the <a href="#PCDP">PCDP</a>'s
 
 
+
             MALF light.<br>
           </td>
         </tr>
@@ -2909,6 +2964,7 @@ That's
           <td style="vertical-align: middle;">To the <a href="#PCDP">PCDP</a>'s
 
 
+
             COMP light.<br>
           </td>
         </tr>
@@ -2928,8 +2984,10 @@ That's
             <br>
             <span style="font-style: italic;">(Units with ATM only.)</span>&nbsp;
 
+
             Initiates winding of the <a
               href="Gemini.html#Auxiliary_Tape_Memory_ATM">ATM</a>.&nbsp;
+
 
 
             I assume that the value in the accumulator should be
@@ -2957,14 +3015,17 @@ That's
             <br>
             <span style="font-style: italic;">(Units with ATM only.)</span>&nbsp;
 
+
             Initiates rewinding of the <a
               href="Gemini.html#Auxiliary_Tape_Memory_ATM">ATM</a>.&nbsp;
+
 
 
             I assume that the value in the accumulator should be
             negative, however, I don't think that outputting a positive
             or zero value stops the rewinding.&nbsp; Instead, use <a
               href="Gemini.html#Auxiliary_Tape_Memory_ATM">PRO14</a>.&nbsp;
+
 
 
             (I don't know how to select between the TRS/ATM functions,
@@ -2982,6 +3043,7 @@ That's
           </td>
           <td style="vertical-align: middle;">For incrementally
             adjusting the delta-V displays of the <a href="#IVI">IVI</a>.&nbsp;
+
 
 
             First, the X, Y, or Z display is selected (see "Select X
@@ -3198,6 +3260,7 @@ That's
     field.&nbsp; So, for example, if X=3 and Y=4, the instruction would
     be <span style="font-family: courier new,courier,monospace;">CLD 43</span>.&nbsp;
 
+
     That's the opposite of present ordering of the columns in the table
     below and could be confusing, for which I apologize, but as I said
     above, I'm too lazy to rewrite the table.<br>
@@ -3246,6 +3309,7 @@ That's
             Computer mode 2<br>
           </td>
           <td style="vertical-align: middle;"> From the <a href="#PCDP">PCDP</a>'s
+
 
             COMPUTER mode selector rotary dial.&nbsp; The rotary dial
             has 7 positions, encoded onto 3 discrete inputs, "Computer
@@ -3455,6 +3519,7 @@ That's
           <td style="vertical-align: middle;">From the <a href="#PCDP">PCDP</a>'s
 
 
+
             START switch<br>
           </td>
         </tr>
@@ -3506,6 +3571,7 @@ That's
           <td style="vertical-align: middle;">From <a href="#Downlink">Instrumentation
 
 
+
               System</a> (IS), to trigger beginning of a new downlink
             cycle every 2.4 seconds.<br>
           </td>
@@ -3519,6 +3585,7 @@ That's
             Velocity error count not zero<br>
           </td>
           <td style="vertical-align: middle;">From the <a href="#IVI">IVI</a>.&nbsp;
+
 
 
             It is an indicator that a prior "Write output processor" (<span
@@ -3754,6 +3821,7 @@ That's
           <td style="vertical-align: middle;">From the <a href="#PCDP">PCDP</a>'s
 
 
+
             FADE-IN.&nbsp; This is a signal from a relay, but anything
             beyond that is TBD.<br>
           </td>
@@ -3811,6 +3879,7 @@ That's
             transfer<br>
           </td>
           <td style="vertical-align: middle;">From the <a href="#PCDP">PCDP</a>'s
+
 
 
             ABORT switch.&nbsp; The software should poll it during
@@ -3941,6 +4010,7 @@ That's
 but
 
 
+
     the assembler creates them transparently, and the programmer doesn't
     have to know about them unless he suddenly finds himself out of
     memory.&nbsp; In this example, <span style="font-family: Courier
@@ -3990,6 +4060,7 @@ but
           style="font-family: Courier New,Courier,monospace;">ALPHA1</span>
         and output the square root in variable <span
           style="font-family: Courier New,Courier,monospace;">ALPHA3</span>.&nbsp;
+
 
 
         The input variable <span style="font-family: Courier
@@ -4261,6 +4332,7 @@ but
         <li>Wait 1.5 ms.</li>
         <li><span style="font-family: courier new,courier,monospace;">CLD27</span>.&nbsp;
 (Reads
+
 
 
           the data bit.)</li>
@@ -4622,6 +4694,7 @@ but
 documentation
 
 
+
     does not precisely describe how data is read from the ATM.&nbsp; But
     the following is my best guess as to how the actual OBC/ATM
     interface works.&nbsp;<br>
@@ -4644,6 +4717,7 @@ documentation
           New,Courier,monospace;">CLD14</span> and <span
           style="font-family: Courier New,Courier,monospace;">CLD15</span>.&nbsp;
 I
+
 
 
         <span style="font-style: italic;">assume</span> that being in
@@ -4717,6 +4791,7 @@ I
     <h2><a name="Gemini_Assembly_Language" id="Gemini_Assembly_Language"></a>OBC
 
 
+
       Assembly Language</h2>
     I've given a number of examples of OBC assembly-language above,
     particularly where describing the various CPU instructions, but I'd
@@ -4763,6 +4838,7 @@ I
       <li><a href="Documents/GeminiCharlieLeistCodeSnippetMethod.pdf">
           Explanation of the coding method</a>.</li>
       <li><span style="font-style: italic;">Design diagrams</span>.&nbsp;
+
 
         Charlie's sample code is supposed to be an implementation of
         page 7 of the <a href="Documents/GeminiOBC-MathFlow-III.pdf">
@@ -4872,6 +4948,7 @@ I
     and <a href="#yaOBC_the_OBC_CPU_Emulation">an OBC CPU emulator,
       which I call <span style="font-weight: bold;">yaOBC</span></a>.&nbsp;
 
+
     At this point, these programs are very much works in progress, and I
     don't claim that they are fully debugged or even that they will run
     on your computer.&nbsp; For this reason, they have not made their
@@ -4921,6 +4998,7 @@ I
         term for names of variables or constants, though for the purpose
         of describing syntax I'll symbolize all such things as <span
           style="font-family: Courier New,Courier,monospace;">LHS</span>.)
+
 
 
         <span style="font-family: Courier New,Courier,monospace;">LHS</span>
@@ -4998,6 +5076,7 @@ I
         and <span style="font-family: Courier New,Courier,monospace;">OPERAND</span>
         are not.&nbsp; <span style="font-weight: bold; color: rgb(153,
           51, 0);">yaASM </span><span style="color: rgb(153, 51, 0);">treats
+
 
 
           such a line as an allocation for an uninitialized variable
@@ -5177,6 +5256,7 @@ I
 The
 
 
+
             same situation could occur with left-hand symbols as well;
             for example, if there were two modules for the exact same
             area of memory, and the entry points for both were at the
@@ -5198,6 +5278,7 @@ The
             next variable or constant declaration encountered should be
             assembled at address <span style="font-style: italic;
               font-family: Courier New,Courier,monospace;"> M-PP-S-WWW</span>.&nbsp;
+
 
             See the <span style="font-family: Courier
               New,Courier,monospace;">CODE</span> directive for more
@@ -5397,6 +5478,7 @@ The
 There
 
 
+
             is no convention for storing values in memory with the
             binary point at any location other than fully to the left or
             fully to the right of all the bits; it's up to the
@@ -5464,6 +5546,7 @@ There
 In
 
 
+
             the example shown at right, two variables (<span
               style="font-family: Courier New,Courier,monospace;">A</span>
             and <span style="font-family: Courier
@@ -5522,6 +5605,7 @@ In
               <span style="font-family: Courier New,Courier,monospace;">LAB
 
 
+
                 ... code ...</span></small><br>
           </td>
         </tr>
@@ -5559,6 +5643,7 @@ In
       OBC assembler, which I call <span style="font-weight: bold;">yaASM</span></a>,
     and <a href="Gemini.html#yaOBC_the_OBC_CPU_Emulation">an OBC CPU
       emulator, which I call <span style="font-weight: bold;">yaOBC</span></a>.&nbsp;
+
 
 
     At this point, these programs are very much works in progress, and I
@@ -5690,10 +5775,12 @@ In
 On
 
 
+
     Mac OS X you'd have to replace them by <span style="font-family:
       Courier New,Courier,monospace;">./yaASM-macosx</span> and <span
       style="font-family: Courier New,Courier,monospace;">./yaOBC-macosx</span>.&nbsp;
 But
+
 
 
     otherwise, the programs should operate in exactly the same manner on
@@ -5714,6 +5801,7 @@ But
     This is an <span style="font-style: italic;">actual existing
       program</span> described in <a
 href="Documents/GeminiCatchUpAndRendezvousAnalysisAndSimulationReport4.pdf">this
+
 
 
       report</a>, with the full FORTRAN source code in Appendix A of the
@@ -5836,6 +5924,7 @@ href="Documents/GeminiCatchUpAndRendezvousAnalysisAndSimulationReport4.pdf">this
       style="font-weight: bold;">BENCH7</span>.&nbsp; The dynamic
     simulation program, referred to in Report #4 as the "dynamic
     environment", is created as <span style="font-weight: bold;">MAIN7</span>.&nbsp;
+
 
 
     Neither has any command-line arguments, but both expect input files
@@ -6140,6 +6229,7 @@ href="Documents/GeminiCatchUpAndRendezvousAnalysisAndSimulationReport4.pdf">this
       switch.&nbsp; The defaults are "--com<span style="font-style:
         italic;">N</span>=COM<span style="font-style: italic;">N</span>",
 
+
       but those defaults are meaningful only in Windows.&nbsp; On Linux,
       the comport names are generally one of the following
       instead:&nbsp; /dev/ttyS0, /dev/ttyS1, ..., /dev/ttyUSB0,
@@ -6183,6 +6273,7 @@ href="Documents/GeminiCatchUpAndRendezvousAnalysisAndSimulationReport4.pdf">this
         New,Courier,monospace;">
       <span style="font-family: Courier New,Courier,monospace;">0-00-2-000&nbsp;&nbsp;&nbsp;
 START&nbsp;&nbsp;&nbsp;
+
 
 
         CLA&nbsp;
@@ -6386,6 +6477,7 @@ START&nbsp;&nbsp;&nbsp;
         displays the value stored at <span style="font-style: italic;">Location</span>.&nbsp;
 
 
+
         <a href="Gemini.html#Location-Field_Parsing_by_the_Debugger">See
           the section below on parsing the <span style="font-style:
             italic;">Location</span> field</a>.&nbsp; Note that program
@@ -6432,11 +6524,13 @@ START&nbsp;&nbsp;&nbsp;
         <li>An address of the form "<span style="font-style: italic;">Module-Sector-Syllable-Word</span>",
 
 
+
           in which case a HOP constant is formed with the half-word mode
           flag reset to 0.&nbsp; (The value of <span style="font-style:
             italic;">Module</span> is ignored, since the OBC HOP
           constant has no field associated with it.)</li>
         <li>An address of the form "H-<span style="font-style: italic;">Module-Sector-Syllable-Word</span>",
+
 
 
           in which case a HOP constant is formed with the half-word mode
@@ -6493,10 +6587,13 @@ START&nbsp;&nbsp;&nbsp;
 A
 
 
+
     numbering system is used in which <span style="font-style: italic;">Module</span>=0
 
 
+
     corresponds to Program Module I, <span style="font-style: italic;">Module</span>=1
+
 
 
     corresponds to Program Module II, and so on.<br>
@@ -6508,6 +6605,7 @@ A
     contents of main memory" and not merely as Program Module I.&nbsp;
     Therefore, as time progresses and various program modules are loaded
     from ATM into main memory, <span style="font-style: italic;">Module</span>=0
+
 
     becomes a mashup of not only Program Module I, but also a lot of
     other program modules as well.&nbsp; However, <span
@@ -6530,6 +6628,7 @@ A
       <li>An existing constant's name.</li>
       <li>An existing variable's name.</li>
       <li>An address of the form "<span style="font-style: italic;">Module-Sector-Syllable-Word</span>",
+
 
 
         with all fields being octal numbers, <span style="font-style:
@@ -6624,6 +6723,7 @@ A
             style="font-style: italic;">X</span>, with <span
             style="font-style: italic;">X</span> being a floating-point
           number.&nbsp; If <span style="font-style: italic;">X</span>==1.0
+
 
           (the default at startup), then emulated time is nominally
           identical to real time.&nbsp; If <span style="font-style:
@@ -6801,6 +6901,7 @@ A
     <div style="margin-left: 40px;"><span style="font-style: italic;">(Option
 
 
+
         present, but not currently correctly functional.)</span> This
       switch causes assembly to occur for the LVDC computer.&nbsp; The
       default, when the switch is missing, is to assemble for the Gemini
@@ -6895,6 +6996,7 @@ A
     since we won't simulate all of the Gemini peripherals, many of the
     controls and readouts won't be functional.&nbsp; <a
       name="yaMDIU_the_MDIU_Emulation" id="yaMDIU_the_MDIU_Emulation"></a>Recall
+
 
     that the MDIU comprises the MDR readout unit and the MDK keypad
     unit, as seen in the photo at right, to provide a simple display and
@@ -7073,6 +7175,7 @@ A
           <li>Any documents missing from the <a href="links.html">Document
 
 
+
               Library</a>.</li>
           <li>Developers' notes.</li>
         </ul>
@@ -7122,6 +7225,7 @@ A
                         style="font-size: 10pt; font-family: Arial;">Many
 
 
+
                         things were new in the 50s, 60s and 70s.&nbsp;
                         In the late 50s, I participated in a panel
                         discussion on local TV to explain to the public
@@ -7157,9 +7261,11 @@ A
                         style="font-size: 10pt; font-family: Arial;">.&nbsp;
 
 
+
                         I wish I had kept all his notes.</span></font><font
                       size="2" face="arial,helvetica,sansserif"><span
                         style="font-size: 10pt; font-family: Arial;">&nbsp;
+
 
 
                         The series expansion was verified and derived by
@@ -7169,6 +7275,7 @@ A
                         style="font-size: 10pt; font-family: Arial;">&nbsp;
 
 
+
                         As I recall, the values of the constants were
                         determined by tracking satellites that were
                         already in orbit.&nbsp; The constants were to
@@ -7176,6 +7283,7 @@ A
                         down to those selected in the OBC.</span></font><font
                       size="2" face="arial,helvetica,sansserif"><span
                         style="font-size: 10pt; font-family: Arial;">&nbsp;
+
 
 
                         All equations were checked and re-checked by
@@ -7229,6 +7337,7 @@ A
                       to show relative trajectories.&nbsp; Wow!&nbsp;
                       What power. [<span style="font-style: italic;">Ed.:
 
+
                         There are machine-dependent features, it seems,
                         so the program must either have been FORTRAN II
                         or a mix of II and IV.</span>]</span></font><br>
@@ -7264,6 +7373,7 @@ A
                           style="font-size: 10pt; font-family: Arial;">Perhaps
 
 
+
                           someone else will come forward with
                           clarification.</span></font></li>
                     <li class="MsoNormal" style=""><font size="2"
@@ -7275,6 +7385,7 @@ A
                         face="arial,helvetica,sansserif"><span
                           style="font-size: 10pt; font-family: Arial;">Changing
 the
+
 
 
                           flight software required a big shoehorn.&nbsp;
@@ -7309,6 +7420,7 @@ the
                       MARS [type of memory element used] inventor was
                       probably <a
                         href="http://www.spoke.com/info/pFeUHpV/AlbertVinal">Al
+
 
 
                         Vinal</a>.&nbsp;</span></font> <font size="2"
@@ -7360,6 +7472,7 @@ the
                       orbital</span> <span style="font-family: Arial;">navigation
 
 
+
                       mode, and up to six terms were used for the
                       "environment"</span><span style="font-family:
                       Arial;">simulation and accuracy comparisons.
@@ -7368,6 +7481,7 @@ the
                       everything else in memory, or the speed required.
                       We</span> <span style="font-family: Arial;">needed
 the
+
 
 
                       power of a modern TV remote.</span></small><span
@@ -7400,6 +7514,7 @@ the
                     color="navy" face="arial,helvetica,sansserif"><span
                       style="font-size: 10pt; font-family: Arial;">Consider
 this
+
 
 
                       \96 the OBC was the first attempt (to my
@@ -7657,6 +7772,7 @@ this
 NOP
 
 
+
                                     did not use any memory locations and
                                     thus would not heat up the memory.</span></font></div>
                             </div>
@@ -7684,6 +7800,7 @@ NOP
                                     style="font-size: 10pt; color:
                                     black;">NOP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 Again
+
 
 
                                     no heat up of the memory</span></font></div>
@@ -7714,6 +7831,7 @@ Again
                                       style="font-size: 10pt; color:
                                       black;">NOP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 Again
+
 
 
                                       no heat of the memory</span></font></div>
@@ -7805,6 +7923,7 @@ Again
 Cool
 
 
+
                                     memory</span></font></div>
                             </div>
                             <div style="margin-left: 40px; font-family:
@@ -7849,6 +7968,7 @@ Cool
                                     style="font-size: 10pt; color:
                                     black;">NOP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 Cool
+
 
 
                                     Memory</span></font></div>
@@ -7899,6 +8019,7 @@ Cool
 Cool
 
 
+
                                       memory</span></font></div>
                               </div>
                             </div>
@@ -7947,6 +8068,7 @@ Cool
                           numerical values during calculations:</span>&nbsp;
 
 
+
                         <font><font><font><font size="2" color="black"
                                 face="arial,helvetica,sansserif"><font
                                   size="2" color="black"
@@ -7957,11 +8079,13 @@ Cool
                                       face="arial,helvetica,sansserif">Scaling
 
 
+
                                       is something the programmer did by
                                       hand calculations. You got no help
                                       from the assembler on this topic.
                                       Fixed point scaling of numbers in
                                       Gemini&nbsp;made the programmer <b>always,
+
 
                                         always, always</b> remember
                                       where the decimal point and binary
@@ -8103,6 +8227,7 @@ Cool
                       style="font-size: 10pt; font-family: Arial;">Radiation
 
 
+
                       Inc. (who won the communications part) use our
                       design concept.</span></font> <font size="2"
                     face="arial,helvetica,sansserif"><span
@@ -8120,6 +8245,7 @@ Cool
                       style="font-size: 10pt; font-family: Arial;">Vehicle
 
 
+
                       in Huntsville as the switch selector had to have
                       the highest reliability as there were four of
                       those boxes on each rocket, one for the Instrument
@@ -8127,6 +8253,7 @@ Cool
                       propulsion and all</span></font> <font size="2"
                     face="arial,helvetica,sansserif"><span
                       style="font-size: 10pt; font-family: Arial;">commands
+
 
 
                       for gimballing of the engines for control of the
@@ -8171,6 +8298,7 @@ Cool
                       italic;"><font size="3" lang="0" color="#000000"><small>(In
 
 
+
                           response to "</small></font></font><font
                       style="font-style: italic;"><font size="3"
                         lang="0" color="black"><small>How much
@@ -8180,6 +8308,7 @@ Cool
                           style="font-style: italic;">")</span>&nbsp; As
                         much as a Turing Machine and more!</small></font>
                     <font size="3" lang="0" color="#000000"><small>Limits
+
 
 
                         were imposed only by the lack of an interrupt
@@ -8258,6 +8387,7 @@ Cool
                 <td style="vertical-align: top; background-color:
                   rgb(204, 255, 255);"><small><font style="font-style:
                       italic;"><font size="3" lang="0" color="#000000"><small>(In
+
 
 
                           response to</small></font></font> <font
@@ -8339,6 +8469,7 @@ Cool
                               style="font-size: 12pt;"><small>Computational
 
 
+
                                 step size in the simulation was
                                 controlled using 7090 console
                                 keys.&nbsp; A family of results could be
@@ -8394,6 +8525,7 @@ Cool
         255);"> This page is available under the <a
           href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 Commons
+
 
 
           No Rights Reserved License</a></span><br>
