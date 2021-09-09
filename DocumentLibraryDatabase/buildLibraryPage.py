@@ -475,7 +475,7 @@ for n in range(len(records)):
         break
     URLs = record["URLs"]
     print("<li>", end="")
-    print(datetime.fromtimestamp(epoch).strftime("(Added %m/%d/%Y) "), end="" )
+    print(datetime.fromtimestamp(epoch).strftime("<b>%m/%d/%Y:</b> "), end="" )
     DocumentNumbers = record["DocumentNumbers"]
     if len(DocumentNumbers) > 0:
         print(DocumentNumbers[0]["Number"])
