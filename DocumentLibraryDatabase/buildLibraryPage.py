@@ -4,7 +4,21 @@
 # Filename:     buildLibraryPage.py
 # Purpose:	     Builds a Virtual AGC Project "document library" web page from
 #               a database of documents stored on the site. 
-# Mod history:  2021-09-08 RSB    Began
+# Mod history:  2021-09-08 RSB  Began
+#               2021-09-11 RSB  Added some database conveniences:  For the 
+#                               Authors, the strings ", and " and " and "
+#                               are now automatically replaced by ", ".
+#                               Also, ", Jr" is replaced by " Jr".
+#                               For the date fields, "MM/YYYY" and "YYYY"
+#                               are now accepted, rather than insisting
+#                               on "??/??/????".  I had already added
+#                               the convenience of optional "M", "D", and "YY"
+#                               rather than insisting on "??", "??", and "YYYY"
+#               2021-09-12 RSB  Simplified the code for parsing simple lists
+#                               and name/org lists, extended it to all 
+#                               fields that could benefit from it, including
+#                               handling of comma vs %44, slash vs %47,
+#                               and ", Jr".
 #
 # Usage:
 #	./buildLibraryPage.py <DocumentLibraryDatabase.tsv >../linksAuto.html
@@ -39,9 +53,16 @@
 # I now embed on every Virtual AGC web-page anyway.
 #
 # The TSV database is structured as follows, with one line per file (except 
-# the top line, which is a header):
+# the top line, which is a header).  Note that the the characters "," and "/"
+# have a special meaning in terms of parsing certain fields into sub-fields, so
+# if a any such sub-field (such as an author name or a document number) contains
+# a "," or "/" unrelated to the desired sub-fields, they should be replaced
+# by the strings "%44" and "%47", respectively.  As a convenience, the 
+# suffixes ", Jr" and ", Sr" can be used directly in Author names or Scanner
+# names without having to resort to "%44".  Also, "/" is a natural part of 
+# URLs, so they needn't be replaced by "%47".
 #
-#   Field 1     DateAdded.  This is an optional field of the form MM/DD/YYYY,
+#   Field 1     Date Added.  This is an optional field of the form MM/DD/YYYY,
 #               which indicates the date when the document file was added to
 #               the library.  This used for automatically determining which
 #               document files are newly added and therefore need to be
@@ -51,13 +72,18 @@
 #               timestamps when collating, since obviously the file couldn't
 #               have been added before it existed.
 #
-#   Field 2     DocumentDate.  This is supposed to be the date the document
-#               is explicitly dated.  The format is MM/DD/YYYY, but any
-#               unknown field can be filled with '?'.  So for example, if only
-#               the month and day were known, then MM/??/YYYY.  If the date
-#           `   were completely unknown, it would be ??/??/????.
-#
-#   Field 3     DocumentID.  This is the document number originally assigned
+#   Field 2     Document Date.  This is supposed to reflect how the document
+#               is internally dated.  The date format is one of the following,
+#                   Year
+#                   Month/Year
+#                   Month/Day/Year
+#               where Year is either YY or YYYY, Month is either M or MM, and
+#               Day is either D or DD.  Also, any of these fields may consist
+#               of question marks ("?", "??", "????"), which are then
+#               automatically converted to one of the 3 patterns without 
+#               question marks listed above.  A completely unknown date may
+#               be entered as a single question mark.
+#   Field 3     Document Number.  This is the document number originally assigned
 #               back during Apollo, such as "R-567" or "LUMINARY Memo #125".
 #               If there's more than one document number assigned to the same
 #               document, such as "MSC12345" and "71-FM-8765", they are
@@ -72,34 +98,57 @@
 #               organization suffixes I've been using so far:
 #                   IL          Instrumentation lab or Charles Stark Draper Lab
 #                   AC          AC Electronics or Delco Electronics
-#                   MSC         Manned Spacecraft Center
+#                   MSC or JSC  Manned Spacecraft Center
 #                   GAEC        Grumman
-#                   NAA         North American
+#                   NAA         North American Aviation (or Rockwell)
 #                   TRW         TRW
 #                   IBM         IBM Federal Systems Division
-#                   NASA        NASA other than MSC.
+#                   NASA        NASA other than MSC/JSC.
 #                   Raytheon    Raytheon
+#                   JPL         Jet Propulsion Laboratory
+#                   Bellcomm
+#                   Bendix
 #               Note that the document numbers themselves cannot contain
 #               '/' or ',', so if they do have those characters, remove or 
-#               substitute them somehow.
+#               substitute them somehow.  My observation so far is that none
+#               of the document numbers contain commas, and that only
+#               about 0.1% of document numbers for Apollo contain a slash,
+#               which I've simply replaced them with hyphens.
 #
 #   Field 4     Revision.  Empty for initial version or unknown.  I also 
 #               sometimes put "Draft" or "Preliminary" as the revision level.
 #
-#   Field 5     DocumentPortion.  If the file contains the entire document, 
+#   Field 5     Portion.  If the file contains the entire document, 
 #               blank. But the file may be one of a multivolume set, or just 
 #               some range of sections, or just a table, or some other portion 
 #               of the entire document.  In that case, this field is a very 
 #               concise description of the portion.
 #               
-#   Field 6     Author name.  If unknown, or an organization rather than a
-#               person, may be left blanks.  If there are multiple authors,
+#   Field 6     Authors.  If unknown, may be left blank, but I usually use
+#               "Anonymous", simply as a maintenance feature to emphasize that
+#               I actually checked it rather than just accidentally omitted
+#               it.  If there are multiple authors,
 #               they can be comma-delimited.  If the authors are a part of 
 #               some known organization, that affiliation can be appended with
 #               a "/".  For example "Hugh Blair-Smith/IL, Jay Sampson/AC".
-#               Note that name suffixes like "Jr." can be used but must not 
-#               have commas included.  Thus, "Abe Barlow Jr." rather than
-#               "Abe Barlow, Jr.".
+#               Note that names must not contain commas, since commas delimit
+#               the names; however, ", Jr" is an exception for 
+#               convenience, in that it will be accepted without causing a 
+#               break in the name.  Beyond that, "%44" can be placed within
+#               a name, and will automatically be replaced by a ",".  For
+#               example, "%44 Sr." in place of ", Sr.".
+#               Also, if individual authors aren't listed
+#               in the document, but the organization which created it can
+#               be used as the author; for example, "MIT Instrumentation 
+#               Laboratory", "AC Electronics", and so on.  Where the 
+#               organization names changed over the course of the project
+#               ("MIT Instrumentation Laboratory" becoming "Charles Stark
+#               Draper Laboratory", "AC Electronics" perhaps appearing as
+#               "Delco Electronics" or even "General Motors", "Manned 
+#               Spacecraft Center" becoming "Johnson Space Center", etc.) I
+#               generally just continue to use the one that came first or was
+#               more commonly used.
+#               
 #
 #   Field 7     Target.  The document may be targeted for things like specific
 #                   Mission (AS-204, Apollo 7, etc)
@@ -126,6 +175,11 @@
 #               much smaller than the other, then it is preferable.  
 #               Conversely, if the files are reasonably comparable in size but 
 #               one is much-more-legible, then it is the preferable one.
+#               Note that URLs must not contain commas, since commas delimit
+#               the URL lists.  If a URL does contain a comma, replace it
+#               with "%44"; the software will automatically convert this back
+#               to a comma without it affecting how the URL lists are broken
+#               up.  The actual URL in a hyperlink will have a comma.
 #
 #   Field 10    Title of the document or partial document; or failing that,
 #               a reasonable description.
@@ -148,9 +202,6 @@
 #               name can be put here.  Or it can be left empty.  If there
 #               are multiple URLs in field 9, then there may be multiple 
 #               names here, comma-delimited, and in the same order as field 9.
-#               Note that name suffixes like "Jr." can be used but must not 
-#               have commas included.  Thus, "Abe Barlow Jr." rather than
-#               "Abe Barlow, Jr.".
 #
 #   Field 13    Unlucky field 13 is the Disclaimer.  This is hardly ever
 #               necessary, but some archives require as a part of their terms
@@ -183,6 +234,55 @@ lenOldRemote = len(oldRemote)
 lenRemote = len(remote)
 lenLocal = len(local)
 
+# Here are various HTML blurbs that head up individual sections of the 
+# document we're going to output.
+
+blurbTop = """ 
+This is our collection of all documentation we've managed to
+collect over the decades that bears even a passing relevance to the 
+spaceborne guidance computers used in the Apollo and Gemini programs ... or at
+least all of the documentation I think I'm legally able to give you.  Some 
+hints as to where to find such documentation on your own can be found on our
+<a href="https://www.ibiblio.org/apollo/QuestForInfo.html">Documentation
+Quest page</a>.  Our <a href="https://www.ibiblio.org/apollo/faq.html">FAQ
+page</a> also points out various significant Apollo-centric websites from
+which we've taken some documentation, in order to centralize it.
+<br><br>
+When we're in possession of high-resolution scans, it's our practice to provide
+only a reduced-quality but legible version here, but to provide the full
+resolution data at <a href="https://archive.org/details/virtualagcproject">
+our Internet Archive site</a>.  On this page, the links for both are 
+provided.  In general, when any given document has multiple hyperlinks listed,
+the <i>first</i> of the links is the recommended one, and the second or third
+links provided are generally either much larger downloads, or else are much
+lower quality scans.
+<br><br>
+Finally, while the available documents are provided below in a form which we 
+think is relatively convenient, we also usually have more information about
+the downloads than we care to clutter up your screen with.  For example, we
+have the sizes of the downloads, and sometimes the names of the archives from
+which we extracted the documents, as well as the name of the person who either
+did the scanning for us or else financially supported the scanning process.
+You can see this supplemental information by hovering your mouse over a
+hyperlink before clicking the link.  Unfortunately, that <i>only</i> works if
+you have a mouse rather than a touchscreen; but that's life!
+"""
+
+blurbDebug = """
+This section is present temporarily, only for the purpose of debugging.  It
+will be removed before this auto-generated page goes live in production.
+Right now, it simply lists every document in the library, in the same order
+found on <a href="https://www.ibiblio.org/apollo/links.html">our 
+previously-existing Document Library page ... at least to the extent that
+I've input the data.</a>
+"""
+
+blurbRecentlyAdded = """
+This section lists all documents added or changed in the preceding 6-month
+period, with the most-recently-added documents at the top of the list, and
+the least-recently-added ones at the bottom.
+"""
+
 # Given a field from the database which is supposed to be a date (MM/DD/YYYY, 
 # but possibly with unknown fields like ??, or things like M/D/YY), parses
 # it into month, day, and year fields (strings) with the appropriate widths.
@@ -195,6 +295,10 @@ def parseDate(dateString, defaultYear):
     year = ""
     if dateString.strip() != "":
         dateFields = dateString.strip().split('/')
+        if len(dateFields) == 1:
+            dateFields = ["??", "??", dateFields[0]]
+        elif len(dateFields) == 2:
+            dateFields = [dateFields[0], "??", dateFields[1]]
         if len(dateFields) == 3:
             month = dateFields[0].strip()
             day = dateFields[1].strip()
@@ -223,7 +327,25 @@ def simpleList(field):
         return []
     array = field.split(",")
     for n in range(len(array)):
-        array[n] = array[n].strip()
+        array[n] = array[n].strip().replace("%44", ",")
+    return array
+
+# Parse a comma-delimited list in which the fields are '/'-delimited pairs.
+# The name input parameter will be "Number" for Document Numbers and "Name"
+# for Authors.
+def orgList(field, name):
+    array = simpleList(field)
+    for n in range(len(array)):
+        subFields = array[n].split('/')
+        for m in range(len(subFields)):
+            subFields[m] = subFields[m].replace("%47", "/")
+        array[n] = { name : "", "Organization" : "" }
+        if len(subFields) > 0:
+            array[n][name] = subFields[0]
+        if len(subFields) > 1:
+            array[n]["Organization"] = subFields[1]
+        if len(subFields) > 2:
+            print("Illegal field: " + array[n], file=sys.stderr)
     return array
 
 # Make a filesize human-friendly.  Simplified from stack overflow.
@@ -244,6 +366,66 @@ def myTimeSortKey(record):
         key = record["EpochFile"]
     return key
 
+# What this function does is to take something like NA, where N represents
+# any string of 0-10 digits and A is any string of 0-10 characters with a 
+# leading non-digit, and to pad it so that N is left-padded with '0' and 
+# A is left-padded with ' '.  The idea is to normalize strings like "34A",
+# "568", and 129FJ so that they sort in a way we'd expect:  first, numerically
+# on N, and then stringily on A.
+def padDocNumberField(n):
+    m = "0000000000"
+    while n[:1].isdigit():
+        m = m[1:] + n[:1]
+        n = n[1:]
+    return m + "%10s" % n
+
+# Used for sorting the records in order of document numbers.  We assume
+# in this case that the first document number in a record that we encounter
+# having the form "something#number" is what we want to use to sort on 
+# numbers.
+def myDocSortKeyRaw(record, reverse):
+    dn = ""
+    for documentNumber in record["DocumentNumbers"]:
+        if "#" not in documentNumber["Number"]:
+            continue
+        fields = documentNumber["Number"].split("#")
+        if len(fields) == 2:
+            fields2 = fields[1].split("-")
+            if len(fields2) == 1:
+                dn = padDocNumberField("")
+                n = padDocNumberField(fields2[0])
+            elif reverse:
+                dn = padDocNumberField(fields2[0])
+                n = padDocNumberField(fields2[1])
+            else:
+                dn = padDocNumberField(fields2[1])
+                n = padDocNumberField(fields2[0])
+            dn += n
+            break
+    return dn
+def myDocSortKey(record):
+    return myDocSortKeyRaw(record, False)
+def myDocSortKeyReverse(record):
+    return myDocSortKeyRaw(record, True)
+
+def myXdeSortKey(record):
+    dn = ""
+    for documentNumber in record["DocumentNumbers"]:
+        fields = documentNumber["Number"].split("-")
+        if len(fields) == 4 and fields[0] == "XDE":
+            dn = fields[0] + "-" + fields[1] + "-" + fields[2] + "-"
+            dn += padDocNumberField(fields[3])
+            break
+    return dn
+
+# Sort key for database order.
+def myOriginalSortKey(record):
+    return record["lineNumber"]
+
+# Sort key for document titles.
+def myTitleSortKey(record):
+    return record["Title"]
+
 # Make a sensible publication date out of the kinds of date fields I have.
 def makeSensiblePublicationDate(record):
     month = record["MonthPublished"]
@@ -260,6 +442,126 @@ def makeSensiblePublicationDate(record):
             outString = year
     return outString
 
+# Uses info from the document record to create a "mouse hover" (using the title
+# attribute of the href) to show supplemental data about a file for download.
+# Idea is that while there's some info that could be valuable to see 
+# occasionally, it's not worth cluttering up the main page all the time.
+def makeHover(record, n):
+    Archives = record["Archives"]
+    Sponsors = record["Sponsors"]
+    SizeFiles = record["SizeFiles"]
+    hover = ""
+    if len(SizeFiles) > n and SizeFiles[n] != 0:
+        hover += "File size: " + friendlyFilesize(SizeFiles[n]) + ". "
+    if len(Sponsors) > n and Sponsors[n] != "":
+        hover += "Scanned by: " + Sponsors[n] + ". "
+    if len(Archives) > n and Archives[n] != "":
+        hover += "Archived by: " + Archives[n] + "."
+    if hover != "":
+        hover = "title=\"" + hover[:-1] + "\""
+    return hover
+
+# Create the HTML string for printing out a document entry. So to change
+# how documents are displayed, it's only necessary to modify or replace
+# this one function.
+def documentEntryHTML(record, showComment):    
+    html = ""
+    URLs = record["URLs"]
+    DocumentNumbers = record["DocumentNumbers"]
+    if len(DocumentNumbers) > 0:
+        html += DocumentNumbers[0]["Number"]
+        if DocumentNumbers[0]["Organization"] != "":
+            html += " (" + DocumentNumbers[0]["Organization"] + ")"
+        for m in range(1, len(DocumentNumbers)):
+            html += ", " + DocumentNumbers[m]["Number"]
+            if DocumentNumbers[m]["Organization"] != "":
+                html += " (" + DocumentNumbers[m]["Organization"] + ")"
+        html += ", "
+    if record["Revision"] != "":
+        html += record["Revision"] + ", "
+    if record["Portion"] != "":
+        html += record["Portion"] + ", "
+    if "Video" in record["Keywords"]:
+        html += "Video, "
+    if "Transcript" in record["Keywords"]:
+        html += "Transcript, "
+    if "Audio" in record["Keywords"]:
+        html += "Audio, "
+    if "Photo" in record["Keywords"]:
+        html += "Photograph, "
+    if len(URLs) > 0:
+        hover = makeHover(record, 0)
+        html += "\"<a " + hover + " href=\"" + URLs[0] + "\">"
+        html += record["Title"]
+        html += "</a>\""
+        for m in range(1, len(URLs)):
+            hover = makeHover(record, m)
+            html += " or <a " + hover + " href=\"" + URLs[m] + "\">here</a>"
+    else:
+        html += record["Title"]
+    published = makeSensiblePublicationDate(record)
+    if published != "":
+        html += ", " + published
+    Authors = record["Authors"]
+    if len(Authors) > 0:
+        html += ", by " + Authors[0]["Name"]
+        if Authors[0]["Organization"] != "":
+            html += " (" + Authors[0]["Organization"] + ")"
+        for m in range(1, len(Authors)):
+            html += ", " + Authors[m]["Name"]
+            if Authors[m]["Organization"] != "":
+                html += " (" + Authors[m]["Organization"] + ")"
+    if html != "":
+        html += ". "
+    if record["Disclaimer"] != "":
+        html += record["Disclaimer"]
+        while html[-1:] == " ":
+            html = html[:-1]
+        if html[-1:] not in [".", "!", "?"]:
+            html += ". "
+    if showComment and record["Comment"] != "":
+        html += record["Comment"]
+        while html[-1:] == " ":
+            html = html[:-1]
+        if html[-1:] not in [".", "!", "?"]:
+            html += ". "
+    if html != "" and len(URLs) == 0:
+        html = "<span style=\"color:#808080\">" + html + "</span>"
+    return html
+
+# The following list determines how to divide the page up into sections.
+# Items are chosen for the sections based on the parameters in the table,
+# and on document-specific data in the database, such as document numbers,
+# targets, and keywords. The parameters targets[] and keywords[] are simply
+# lists of targets and keywords that may appear in the database, and an item
+# is included in the section if there is any overlap.  The DocumentNumbers[]
+# parameters, on the other hand, try to match only the leading portions of
+# strings.  The anchor field must have a matching <a name="..."></a> tag.
+# Only entries with an "anchor" key are used in the table of contents.
+# Never remove the 1st two entries below, but the "anchor" can be removed
+# to disable either of the first 2 entries.  If restored, the anchors must
+# be "Debug" and "RecentAdditions" precisely.
+tableOfContentsSpec = [
+    { "anchor" : "Debug", "title" : "Debug", "sortKey" : myOriginalSortKey, "blurb" : blurbDebug },
+    { "anchor" : "RecentAdditions", "title" : "Recently Added", "sortKey" : myTimeSortKey, "sortReverse" : True, "blurb" : blurbRecentlyAdded },
+    { "anchor" : "Presentation", "title" : "Presentations", "sortKey" : myTitleSortKey, "keywords" : ["Presentation"] },
+    { "title" : "AGC Software Language Manuals", "keywords" : ["AGC Language"] },
+    { "title" : "Program Listings", "keywords" : ["AGC Listing", "AGS Listing", "LVDC Listing", "OBC Listing"] },
+    { "anchor" : "SGAMemos", "title" : "Space Guidance Analysis Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Space Guidance Analysis Memo"] },
+    { "anchor" : "ApolloProjectMemos", "title" : "Apollo Project Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Apollo Project Memo"] },
+    { "anchor" : "ApolloEngineeringMemos", "title" : "Apollo Engineering Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Apollo Engineering Memo"] },
+    { "anchor" : "DigitalDevelopmentMemos", "title" : "Digital Development Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Digital Development Memo"] },
+    { "anchor" : "ElectronicDesignGroupMemos", "title" : "Electronic Design Group Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Electronic Design Group Memo"] },
+    { "anchor" : "ISSMemos", "title" : "Inertial Sub-System (I.S.S.) Memos", "sortKey" : myDocSortKeyReverse, "documentNumbers" : ["ISS Memo"] },
+    { "anchor" : "XDENotes", "title" : "XDE Notes", "sortKey" : myXdeSortKey, "documentNumbers" : ["XDE-"] },
+    { "anchor" : "DigitalGroupMemos", "title" : "Digital Group Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["DG Memo"] },
+    { "anchor" : "MissionTechniquesMemos", "title" : "Mission Techniques Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Mission Techniques Memo"] },
+    { "anchor" : "SystemTestGroupMemos", "title" : "System Test Group Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["System Test Group Memo"] },
+    { "anchor" : "LuminaryMemos", "title" : "LUMINARY Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["LUMINARY Memo"] },
+    { "anchor" : "ColossusMemos", "title" : "COLOSSUS Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["COLOSSUS Memo"] },
+    { "anchor" : "SkylarkMemos", "title" : "SKYLARK (SKYLAB) Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["SKYLARK Memo", "SKYLAB Memo"] }
+]
+
 # Step 1:  Read the entire database into the lines[] array from stdin.
 lines = sys.stdin.readlines()
 
@@ -272,10 +574,12 @@ if len(lines) < 2 or len(lines[0].split('\t')) != 14:
     sys.exit(1)
 globalError = False
 records = []
+lineNumber = 1
 for line in lines[1:]:
     fields = line.split('\t')
     # Make a default (empty) record for this line.
     record = {
+        "lineNumber" : lineNumber,
         # Field 1
         "MonthAdded": "",
         "DayAdded": "",
@@ -310,13 +614,14 @@ for line in lines[1:]:
         # Field 14
         "Comment" : "",
         # Stuff that doesn't come from the database per se.
+        "SizeFiles": [],
         "MonthFile": "",
         "DayFile": "",
         "YearFile": "",
-        "SizeFile": "",
         "PathFile": "",
         "EpochFile": 0
     }
+    lineNumber += 1
     # Now work on each field individually.
     if len(fields) >= 1:    # Field 1
         (illegal, month, day, year) = parseDate(fields[0], "20")
@@ -339,61 +644,27 @@ for line in lines[1:]:
         record["YearPublished"] = year
     if len(fields) >= 3:    # Field 3
         if fields[2].strip() != "":
-            DocumentNumbers = fields[2].split(",")
-            for n in range(len(DocumentNumbers)):
-                DocumentNumberFields = DocumentNumbers[n].strip().split("/") 
-                if len(DocumentNumberFields) > 2:
-                    print("Illegal document-number field: " + DocumentNumbers[n], 
-                          file=sys.stderr)
-                if len(DocumentNumberFields) == 0:
-                    DocumentNumbers[n] = { 
-                        "Number" : "", 
-                        "Organization" : "" }
-                elif len(DocumentNumberFields) == 1:
-                    DocumentNumbers[n] = { 
-                        "Number" : DocumentNumberFields[0].strip(), 
-                        "Organization" : "" }
-                else:
-                    DocumentNumbers[n] = { 
-                        "Number" : DocumentNumberFields[0].strip(), 
-                        "Organization" : DocumentNumberFields[1].strip() }
-            record["DocumentNumbers"] = DocumentNumbers
+            record["DocumentNumbers"] = orgList(fields[2], "Number") 
     if len(fields) >= 4:    # Field 4
         record["Revision"] = fields[3].strip()
     if len(fields) >= 5:    # Field 5
         record["Portion"] = fields[4].strip()
     if len(fields) >= 6:    # Field 6
         if fields[5].strip() != "":
-            Authors = fields[5].split(",")
-            for n in range(len(Authors)):
-                AuthorFields = Authors[n].strip().split("/") 
-                if len(AuthorFields) > 2:
-                    print("Illegal author field: " + Authors[n], 
-                          file=sys.stderr)
-                if len(AuthorFields) == 0:
-                    Authors[n] = { 
-                        "Name" : "", 
-                        "Organization" : "" }
-                elif len(AuthorFields) == 1:
-                    Authors[n] = { 
-                        "Name" : AuthorFields[0].strip(), 
-                        "Organization" : "" }
-                else:
-                    Authors[n] = { 
-                        "Name" : AuthorFields[0].strip(), 
-                        "Organization" : AuthorFields[1].strip() }
-            record["Authors"] = Authors
+            field5 = fields[5].replace(", and ", ", ").replace(" and ", ", ").replace(", Jr", "%44 Jr")
+            record["Authors"] = orgList(field5, "Name")            
     if len(fields) >= 7:    # Field 7
         record["Targets"] = simpleList(fields[6])
     if len(fields) >= 8:    # Field 8
         record["Keywords"] = simpleList(fields[7])
     if len(fields) >= 9:    # Field 9
-        URLs = fields[8].split(",") 
+        URLs = simpleList(fields[8])
         # Do some cleanup on the URLs.
         PathFile = ""
-        fileSize = 0
+        fileSizes = []
         epoch = 0
         for n in range(len(URLs)):
+            fileSizes.append(0)
             URLs[n] = URLs[n].strip()
             # Convert "http:" to "https:" where I know it's needed.
             if oldRemote == URLs[n][:lenOldRemote]:
@@ -408,32 +679,32 @@ for line in lines[1:]:
                 filePath = filePath.replace("%20", " ").replace("%28", "(").replace("%29", ")")
                 try:
                     stat = os.stat(filePath)
+                    fileSizes[n] = stat.st_size
                     if True:
                         modTime = os.path.getmtime(filePath)
                     else:
                         modTime = stat.st_mtime
                     if modTime > epoch:
                         epoch = modTime
-                        fileSize = stat.st_size
                         PathFile = filePath
                 except:
                     print("Cannot read file " + filePath, file=sys.stderr)
+        record["SizeFiles"] = fileSizes
         if epoch > 0:
             timestamp = time.localtime(epoch)
             record["YearFile"] = timestamp[0]
             record["MonthFile"] = "%02d" % timestamp[1]
             record["DayFile"] = "%02d" % timestamp[2]
             record["PathFile"] = PathFile
-            record["SizeFile"] = fileSize
             record["EpochFile"] = epoch
         
         record["URLs"] = URLs
     if len(fields) >= 10:    # Field 10
         record["Title"] = fields[9].strip()
     if len(fields) >= 11:    # Field 11
-        record["Archives"] = simpleList(fields[10])
+        record["Archives"] = simpleList(fields[10].replace(", Jr", "%44 Jr"))
     if len(fields) >= 12:    # Field 12
-        record["Sponsors"] = simpleList(fields[11])
+        record["Sponsors"] = simpleList(fields[11].replace(", Jr", "%44 Jr"))
     if len(fields) >= 13:    # Field 13
         record["Disclaimer"] = fields[12].strip()
     if len(fields) >= 14:    # Field 14
@@ -447,12 +718,7 @@ for line in lines[1:]:
 # that there will always be a "Recent Additions" (or similarly-named) section,
 # regardless of the targets and keywords defined in the database.
 
-# Sort from newest (added) to oldest (added).
-records.sort(reverse=True, key=myTimeSortKey)
-
-#       TBD
-
-# Step 4:  Output the HTML
+# Step 4:  Output the HTML file header.
 currentEpoch = int(time.time())
 cutoffMonths = 6
 cutoffEpoch = currentEpoch - cutoffMonths * 30 * 24 * 3600
@@ -464,56 +730,98 @@ print("<meta charset=\"utf-8\">")
 print("<title>Auto-Generated List of Recent Virtual AGC Document Library Additions</title>")
 print("</head>")
 print("<body>")
-print("<h1>Recent Additions to Virtual AGC Document Library as of %s</h1>" % (time.strftime("%m/%d/%Y", time.localtime(currentEpoch))))
+
+# Step 5:  Output the HTML body.
+
+print(blurbTop)
+print("<h1>Table of Contents</h1>")
 print("<ul>")
-for n in range(len(records)):
-    record = records[n]
-    epoch = myTimeSortKey(record)
-    # Only show files for the last cutoffMonths, but if that's less than
-    # cutoffFiles files, show some more.
-    if epoch < cutoffEpoch and n >= cutoffFiles:
-        break
-    URLs = record["URLs"]
-    print("<li>", end="")
-    print(datetime.fromtimestamp(epoch).strftime("<b>%m/%d/%Y:</b> "), end="" )
-    DocumentNumbers = record["DocumentNumbers"]
-    if len(DocumentNumbers) > 0:
-        print(DocumentNumbers[0]["Number"])
-        if DocumentNumbers[0]["Organization"] != "":
-            print(" (" + DocumentNumbers[0]["Organization"] + ")", end="")
-        for m in range(1, len(DocumentNumbers)):
-            print(", " + DocumentNumbers[m]["Number"], end="")
-            if DocumentNumbers[m]["Organization"] != "":
-                print(" (" + DocumentNumbers[m]["Organization"] + ")", end="")
-        print(", ")
-    print("\"<a href=\"" + URLs[0] + "\">", end="")
-    print(record["Title"], end="")
-    print("</a>\"", end="")
-    for m in range(1, len(URLs)):
-        print(" or <a href=\"" + URLs[m] + "\">here</a>", end="")
-    published = makeSensiblePublicationDate(record)
-    if published != "":
-        print(", " + published, end="")
-    if record["Revision"] != "":
-        print(", " + record["Revision"], end="")
-    if record["Portion"] != "":
-        print(", " + record["Portion"], end="")
-    if record["SizeFile"] != "":
-        print(", " + friendlyFilesize(record["SizeFile"]), end="")
-    Authors = record["Authors"]
-    if len(Authors) > 0:
-        print(", by " + Authors[0]["Name"], end="")
-        if Authors[0]["Organization"] != "":
-            print(" (" + Authors[0]["Organization"] + ")", end="")
-        for m in range(1, len(Authors)):
-            print(", " + Authors[m]["Name"], end="")
-            if Authors[m]["Organization"] != "":
-                print(" (" + Authors[m]["Organization"] + ")", end="")
-    print(". ", end="")
-    if record["Disclaimer"] != "":
-        print(record["Disclaimer"], end="")
-    print("</li>")
+for n in range(len(tableOfContentsSpec)):
+    if "anchor" in tableOfContentsSpec[n]:
+        print("<li>")
+        print("<a href=\"#" + tableOfContentsSpec[n]["anchor"] + "\">")
+        print(tableOfContentsSpec[n]["title"])
+        print("</a>")
+        print("</li>")
 print("</ul>")
+
+# Step 5@:  Just for testing, complete output, in the same order
+# as database entry ... which the way I've been doing it, is almost exactly
+# the same as the old links.html page.
+if "anchor" in tableOfContentsSpec[0] and tableOfContentsSpec[0]["anchor"] == "Debug":
+    print("<a name=\"Debug\"></a>")
+    print("<h1>Entire Document Library in Database Order as of %s</h1>" % (time.strftime("%m/%d/%Y", time.localtime(currentEpoch))))
+    print(blurbDebug)
+    print("<ol>")
+    records.sort(key=tableOfContentsSpec[0]["sortKey"])
+    for n in range(len(records)):
+        html = documentEntryHTML(records[n], True)
+        if html != "":
+            print("<li>", end="")
+            print(html, end="")    
+            print("</li>")
+    print("</ol>")
+
+# Step 5A:  "Recent Additions" section.
+if "anchor" in tableOfContentsSpec[1] and tableOfContentsSpec[1]["anchor"] == "RecentAdditions":
+    print("<a name=\"RecentAdditions\"></a>")
+    print("<h1>Recent Additions to Virtual AGC Document Library as of %s</h1>" % (time.strftime("%m/%d/%Y", time.localtime(currentEpoch))))
+    print(blurbRecentlyAdded)
+    print("<ul>")
+    records.sort(reverse=True, key=tableOfContentsSpec[1]["sortKey"])  # Sort from newest (added) to oldest (added).
+    for n in range(len(records)):
+        record = records[n]
+        epoch = myTimeSortKey(record)
+        # Only show files for the last cutoffMonths, but if that's less than
+        # cutoffFiles files, show some more.
+        if epoch < cutoffEpoch and n >= cutoffFiles:
+            break
+        print("<li>", end="")
+        print(datetime.fromtimestamp(epoch).strftime("<b>%m/%d/%Y:</b> "), end="" )
+        print(documentEntryHTML(record, False), end="")    
+        print("</li>")
+    print("</ul>")
+
+# Step 5B:  Output all other sections, based on the parameters in 
+# tableOfContentsSpec[].  
+for n in range(2, len(tableOfContentsSpec)):
+    if "anchor" not in tableOfContentsSpec[n]:
+        continue
+    print("<a name=\"" + tableOfContentsSpec[n]["anchor"] + "\"></a>")
+    print("<h1>" + tableOfContentsSpec[n]["title"] + "</h1>")
+    if "blurb" in tableOfContentsSpec[n]:
+        print(tableOfContentsSpec[n]["blurb"])
+    print("<ul>")
+    records.sort(key=tableOfContentsSpec[n]["sortKey"])
+    keywordsSet = set([])
+    targetsSet = set([])
+    documentNumbers = []
+    if "keywords" in tableOfContentsSpec[n]:
+        keywordsSet = set(tableOfContentsSpec[n]["keywords"])
+    if "targets" in tableOfContentsSpec[n]:
+        targetsSet = set(tableOfContentsSpec[n]["targets"])
+    if "documentNumbers" in tableOfContentsSpec[n]:
+        documentNumbers = tableOfContentsSpec[n]["documentNumbers"]
+    for record in records:
+        matched = False
+        if len(list(keywordsSet & set(record["Keywords"]))) > 0:
+            matched = True
+        elif len(list(targetsSet & set(record["Targets"]))) > 0:
+            matched = True
+        else:
+            for documentNumberA in documentNumbers:
+                if matched:
+                    break
+                for documentNumberB in record["DocumentNumbers"]:
+                    if matched:
+                        break
+                    if documentNumberB["Number"].startswith(documentNumberA):
+                        matched = True
+        if matched:
+            print("<li>" + documentEntryHTML(record, True) + "</li>")
+    print("</ul>")
+
+# Final step: Cleanup.
 print("</body>")
 print("</html>")
 
@@ -528,9 +836,9 @@ if False:
             MonthFile = record["MonthFile"]
             DayFile = record["DayFile"]
             YearFile = record["YearFile"]
-            SizeFile = record["SizeFile"]
+            SizeFiles = record["SizeFiles"]
             if PathFile != "":
-                print("%s/%s/%s %s %s" % (MonthFile, DayFile, YearFile, SizeFile, PathFile))
+                print("%s/%s/%s %s" % (MonthFile, DayFile, YearFile, PathFile))
             if record["Title"] != "":
                 print("----------------------------------------------------")
                 print(record["Title"])
@@ -548,7 +856,7 @@ if False:
                         print("Document Number: " + DocumentNumber["Number"] + " (" + DocumentNumber["Organization"] + ")")
                 print("Portion=%s, Revision=%s" % (record["Portion"], record["Revision"]))
                 print("URLs: " + str(record["URLs"]))
-                print("File info: %s/%s/%s size=%s name=%s" % (record["MonthFile"], record["DayFile"], record["YearFile"], friendlyFilesize(record["SizeFile"]), record["PathFile"][lenLocal:]))
+                print("File info: %s/%s/%s name=%s" % (record["MonthFile"], record["DayFile"], record["YearFile"], record["PathFile"][lenLocal:]))
                 print("Added: %s/%s/%s" % (record["MonthAdded"], record["DayAdded"], record["YearAdded"]))
                 print("Published: %s/%s/%s" % (record["MonthPublished"], record["DayPublished"], record["YearPublished"]))
                 print("Targets: " + str(record["Targets"]))
