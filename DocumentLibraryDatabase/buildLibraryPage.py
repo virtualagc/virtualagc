@@ -18,7 +18,8 @@
 #                               and name/org lists, extended it to all 
 #                               fields that could benefit from it, including
 #                               handling of comma vs %44, slash vs %47,
-#                               and ", Jr".
+#                               and ", Jr".  More importantly, it's actually
+#                               generating a lot more of the web-page now.
 #
 # Usage:
 #	./buildLibraryPage.py <DocumentLibraryDatabase.tsv >../linksAuto.html
@@ -273,8 +274,8 @@ This section is present temporarily, only for the purpose of debugging.  It
 will be removed before this auto-generated page goes live in production.
 Right now, it simply lists every document in the library, in the same order
 found on <a href="https://www.ibiblio.org/apollo/links.html">our 
-previously-existing Document Library page ... at least to the extent that
-I've input the data.</a>
+previously-existing Document Library page</a> ... at least to the extent that
+I've input the data.
 """
 
 blurbRecentlyAdded = """
@@ -700,7 +701,10 @@ for line in lines[1:]:
         
         record["URLs"] = URLs
     if len(fields) >= 10:    # Field 10
-        record["Title"] = fields[9].strip()
+        title = fields[9].strip()
+        while title[-1:] == "." and title[-3:] != "...":
+            title = title[:-1]
+        record["Title"] = title
     if len(fields) >= 11:    # Field 11
         record["Archives"] = simpleList(fields[10].replace(", Jr", "%44 Jr"))
     if len(fields) >= 12:    # Field 12
@@ -750,7 +754,7 @@ print("</ul>")
 # the same as the old links.html page.
 if "anchor" in tableOfContentsSpec[0] and tableOfContentsSpec[0]["anchor"] == "Debug":
     print("<a name=\"Debug\"></a>")
-    print("<h1>Entire Document Library in Database Order as of %s</h1>" % (time.strftime("%m/%d/%Y", time.localtime(currentEpoch))))
+    print("<h1>Debug</h1>")
     print(blurbDebug)
     print("<ol>")
     records.sort(key=tableOfContentsSpec[0]["sortKey"])
