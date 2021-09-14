@@ -99,12 +99,12 @@
 #               organization suffixes I've been using so far:
 #                   IL          Instrumentation lab or Charles Stark Draper Lab
 #                   AC          AC Electronics or Delco Electronics
-#                   MSC or JSC  Manned Spacecraft Center
+#                   MSC         Manned Spacecraft Center or Johnson Space Center
 #                   GAEC        Grumman
 #                   NAA         North American Aviation (or Rockwell)
 #                   TRW         TRW
 #                   IBM         IBM Federal Systems Division
-#                   NASA        NASA other than MSC/JSC.
+#                   NASA        NASA other than MSC
 #                   Raytheon    Raytheon
 #                   JPL         Jet Propulsion Laboratory
 #                   Bellcomm
@@ -233,6 +233,7 @@ import sys
 import os
 import time
 from datetime import datetime, date
+import re
 
 oldRemote = "http://www.ibiblio.org/apollo/"
 remote = "https://www.ibiblio.org/apollo/"
@@ -241,14 +242,17 @@ lenOldRemote = len(oldRemote)
 lenRemote = len(remote)
 lenLocal = len(local)
 
+hoverColor = "#e8e8e8"
+
 # Here are various HTML blurbs that head up individual sections of the 
 # document we're going to output.
 
 blurbTop = """ 
-This is our collection of all documentation we've managed to
-collect over the decades that bears even a passing relevance to the 
+This is our collection of all the documentation we've managed to
+gather over the decades that bears even a passing relevance to the 
 spaceborne guidance computers used in the Apollo and Gemini programs ... or at
-least all of the documentation I think I'm legally able to give you.  Some 
+least all of the documentation I think I'm legally able to give you at the
+present time.  Some 
 hints as to where to find such documentation on your own can be found on our
 <a href="https://www.ibiblio.org/apollo/QuestForInfo.html">Documentation
 Quest page</a>.  Our <a href="https://www.ibiblio.org/apollo/faq.html">FAQ
@@ -265,14 +269,25 @@ links provided are generally either much larger downloads, or else are much
 lower quality scans.
 <br><br>
 Finally, while the available documents are provided below in a form which we 
-think is relatively convenient, we also usually have more information about
-the downloads than we care to clutter up your screen with.  For example, we
+think is relatively convenient, we also usually have more information 
+than we care to clutter up your screen with.  For example, we
 have the sizes of the downloads, and sometimes the names of the archives from
 which we extracted the documents, as well as the name of the person who either
 did the scanning for us or else financially supported the scanning process.
-You can see this supplemental information by hovering your mouse over a
-hyperlink before clicking the link.  Unfortunately, that <i>only</i> works if
-you have a mouse rather than a touchscreen; but that's life!
+You can see this supplemental information by hovering your mouse over the
+document title's
+hyperlink before clicking the link.  Similarly, if you hover the mouse over
+a <code title="Organizational affiliation appears here!" style="background-color:
+""" + hoverColor + """
+">document number</code>
+or an <code title="Organizational affiliation appears here!" style="background-color:""" + hoverColor + """
+">author name</code>, 
+that's highlighted as shown here, you may be
+able to find out the organization that produced the document or with which
+the author was affiliated. Unfortunately, this extra pop-up information 
+<i>only</i> works if
+you have a mouse rather than a touchscreen, since you can hover a mouse
+cursor but not a finger; but that's life!
 """
 
 blurbDebug = """
@@ -284,14 +299,93 @@ previously-existing Document Library page</a> ... at least to the extent that
 I've input the data.
 """
 
+cutoffMonths = 3
 blurbRecentlyAdded = """
-This section lists all documents added or changed in the preceding 6-month
-period, sorted from most-recently added to least-recently added.
+This section lists all documents updated in the last 
+""" + "%d" % cutoffMonths + """
+months. Note that recently-added <a href="#EngineeringDrawings">G&N 
+engineering drawings</a> are <i>not</i> included in the list.
+"""
+
+blurbPresentations = """
+Presentations from the MAPLD '04 conference, by AGC developers and other 
+knowledgeable folks.
+"""
+
+blurbGSOPs = """
+The items below are arranged by MIT Instrumentation Laboratory document 
+number.
+"""
+
+blurbSGA = """
+If you are interested in the mathematical underpinnings of the AGC software, 
+then this amazing series of memos from MIT's Instrumentation Lab is the place 
+to look.  The memos are in roughly chronological order.  It is very interesting
+to reflect on the fact that these mathematical memos are often written by the 
+very same people whose names you find as authors in the software.  The AGC 
+software was written in a time ... or at least a place ... where software was 
+regarded as the expression of mathematical knowledge as opposed to being a mere 
+exercise in the expert employment of programming languages and tools as it is 
+today.  It is interesting also to reflect on the nature of the software this 
+approach produced.
+"""
+
+blurbDD = """
+These memos primarily relate to the electrical design of the AGC.
+"""
+
+blurbXDE = """
+These are notes from AC Spark Plug Division, commenting on topics peripheral 
+to the AGC, such as ground-support equipment.
+"""
+
+blurbLuminaryMemos = """
+The "LUMINARY Memos" are internal memos from the MIT Instrumentation Laboratory 
+dealing with issues of LUMINARY software development, along with 
+closely-related software branches such as ZERLINA.
+<br><br>
+Of particular interest, 
+if you're concerned with the evolution of the AGC software, are the many memos 
+used to document the changes of the LUMINARY code from one revision to the 
+next.  In theory, if you had all of them, you could come pretty close to using
+them to document the complete evolution of LUMINARY, or at any rate from 
+LUMINARY 4 (memo #22) through LUMINARY 209 (memo #205).
+<br><br>
+But back to the memos. Over 250 of them are known, of which we've gotten the 
+majority from Don Eyles's personal collection. The items which are grayed-out 
+relate to memos about which we have some information but not the actual memos 
+themselves. 
+"""
+
+blurbPcrsPcns = """
+Program Change Requests (PCRs) were the official mechanism by which proposed
+AGC software changes were submitted to the NASA Software Change Board (SCB) for 
+approval or rejection.  I'm not sure what the distinction between a PCR and
+a Program Change Notice (PCN) is. Visually they're essentially the same
+thing.  In any case, the signficance is that since AGC software changes were
+governed by them, knowledge of the PCRs/PCNs is of tremendous importance in 
+tracking changes between LUMINARY and COLOSSUS software revisions ... or 
+alternatively, of no importance whatever if you're not interested in 
+understanding the evolution of LUMINARY and COLOSSUS.
+<br><br>
+The entries below are arranged by PCR/PCN number.
+"""
+
+blurbAnomalies = """
+In this section, we cover Assembly Control Board Requests and
+MIT/IL Software Anomaly Reports.  These seemed to act similarly to PCRs and 
+PCNs respectively (see above), and except that for some reason approvals could 
+be made by a local board at MIT/IL rather than by the higher powers at the SCB.
+<br><br>
+These documents have no titles as such, so the titles given below are actually
+portions we've extracted from the descriptions of the problems described by 
+the documents.
+<br><br>
+The entries below are arranged by publication date.
 """
 
 blurbAGS = """
-For lack of a better method, the entries in this section are sorted by 
-publication date.
+The entries in this section are sorted by publication date.
 """
 
 blurbLVDC = """
@@ -301,8 +395,53 @@ lamented that all of the LVDC software has probably vanished and does not exist
 any longer. Fortunately, that has turned out to be false, although there may
 be enough truth in it to make us very uncomfortable.
 <br><br>
-For lack of a better method, the entries in this section are sorted by 
+The entries in this section are sorted by 
 publication date.
+"""
+
+blurbElectroMechanical = """
+There is one significant category of Document Library items which cannot be
+contained within the format of this web page.  I refer to electro-mechanical 
+drawings of the CM and LM G&N systems.  For example, the AGC 
+circuit schematics or the drawings of the physical design of the DSKY.  
+While a <i>few</i> of those drawings appear here, the truth is that the 
+totality of G&N electro-mechanical drawings in our collection outnumbers the 
+mere "documents" found here by about 100-to-1. And you can't "browse" through
+hundreds of thousands of engineering drawings the way you can with a mere few 
+thousand documents.  Instead, you have to go to our 
+<a href="https://www.ibiblio.org/apollo/ElectroMechanical.html">
+Electro-Mechanical Page</a>, which provides you with two very-valuable 
+resources to find the engineering drawings you need:
+<ul>
+<li>It has a search engine, allowing you to 
+<a href="https://www.ibiblio.org/apollo/TipueSearch.html">search the 
+electro-mechanical drawings</a> by fragments of drawing numbers or drawing 
+titles.</li>
+<li>It lets you 
+<a href="https://www.ibiblio.org/apollo/ElectroMechanical.html#Navigate_the_Assembly_Hierarchy_">
+navigate the electro-mechanical drawing hierarchy</a> in a top-down fashion.</li>
+</ul>
+"""
+
+blurbEverything = """
+If none of the sections above coincides with your special interests, this 
+section may help.  It contains <i>every</i> item in our Document Library, 
+whether or not those documents were already included in the preceding sections.
+(Excluding, of course, G&N system engineering drawings, as covered
+in the immediately-preceding section.)
+<br><br>
+If you <i>still</i> can't find what you need after you've looked in this 
+section, you might consider using the Google searchbar that appears near the 
+top of this page. It has the great advantage of searching not only document 
+titles, document numbers, and authors, but in fact does a complete search of 
+the text <i>within</i> the documents ... and not only here on this Document 
+Library page, but for all pages on the Virtual AGC website.  Alas, the optical
+character recognition (OCR) process that creates the text index is not perfect,
+so your search may still fail even if the document you want is present.  But
+then, what <i>is</i> perfect in this old world?
+<br><br>
+The entries below are sorted by publication date. Items whose publication date
+is unknown appear at the very top of the list.
 """
 
 # Given a field from the database which is supposed to be a date (MM/DD/YYYY, 
@@ -401,10 +540,25 @@ def friendlyFilesize(num):
 
 # Used for sorting the records in order of descending newness.
 def myTimeSortKey(record):
-    key = record["EpochAdded"]
-    if record["EpochFile"] > key:
-        key = record["EpochFile"]
-    return key
+    epoch = record["EpochAdded"]
+    if record["EpochFile"] > epoch:
+        epoch = record["EpochFile"]
+    return epoch
+
+# This sorting key not only reverses the order of myTimeSortKey, but 
+# also reduces it to an integral number of days, without hours, minutes, 
+# seconds.
+def myTimeReverseSortKey(record):
+    if False:
+        days = myTimeSortKey(record) // 86400
+        reverse = 99999 - days 
+        return "%05d" % reverse
+    else:
+        epoch = myTimeSortKey(record)
+        epochString = datetime.fromtimestamp(epoch).strftime("%Y/%m/%d")
+        fields = epochString.split("/")
+        reverseEpoch = "%04d%02d%02d" % ( 9999-int(fields[0]), 99-int(fields[1]), 99-int(fields[2]))
+        return reverseEpoch
 
 # What this function does is to take something like NA, where N represents
 # any string of 0-10 digits and A is any string of 0-10 characters with a 
@@ -458,6 +612,21 @@ def myXdeSortKey(record):
             break
     return dn
 
+# Tries to normalize the form of document numbers of the form 
+# x-y-...-z[.u] by turning all fields that are pure integers into 
+# zero-padded fixed lengths. If there are multiple document numbers,
+# only the primary one is used.
+def myDashSortKey(record):
+    if len(record["DocumentNumbers"]) == 0:
+        return ""
+    fields = re.split('[-.]' , record["DocumentNumbers"][0]["Number"])
+    key = ""
+    for field in fields:
+        if field == "PCN":
+            field = "PCR"
+        key += "%10s" % field
+    return key
+
 # Sort key for database order.
 def myOriginalSortKey(record):
     return record["lineNumber"]
@@ -503,10 +672,20 @@ def myAuthorSortKey(record):
                     if suffix != "":
                         authorName += " " + suffix
         output += "%-30s" % authorName
-    return output + "%-100s" % record["Title"].upper()
+    return output + record["Title"].upper()
 
 def myDateAuthorSortKey(record):
     return myPubDateSortKey(record) + myAuthorSortKey(record)
+
+# Sort key used for the "Recently Added" section.  We want to sort primarily
+# on the epoch added (myTimeSortKey), but then secondarily the way we
+# normally sort on publication date and author (myDateAuthorSortKey).  The
+# problem is that the former we want in descending order but that we want
+# the latter in ascending order.  To account for that, we mathematically
+# manipulate the epoch to reverse the sort order for just that field.
+def myRecentSortKey(record):
+    key = myTimeReverseSortKey(record) + myDateAuthorSortKey(record)
+    return key
 
 # Make a sensible publication date out of the kinds of date fields I have.
 def makeSensiblePublicationDate(record):
@@ -528,7 +707,14 @@ def makeSensiblePublicationDate(record):
 # attribute of the href) to show supplemental data about a file for download.
 # Idea is that while there's some info that could be valuable to see 
 # occasionally, it's not worth cluttering up the main page all the time.
-def makeHover(record, n):
+archiveAbbreviations = {
+    "NARA-SW" : "National Archives and Records Administration, Fort Worth Branch",
+    "UHCL" : "University of Houston &mdash; Clear Lake, JSC History Collection",
+    "NTRS" : "NASA Technical Reports Server",
+    "KLABS" : "NASA Office of Logic Design Website",
+    "UAH" : "University of Alabama in Huntsville"
+}
+def makeTitleHover(record, n):
     Archives = record["Archives"]
     Sponsors = record["Sponsors"]
     SizeFiles = record["SizeFiles"]
@@ -538,31 +724,75 @@ def makeHover(record, n):
     if len(Sponsors) > n and Sponsors[n] != "":
         hover += "Scanned by: " + Sponsors[n] + ". "
     if len(Archives) > n and Archives[n] != "":
-        hover += "Archived by: " + Archives[n] + "."
+        archive = Archives[n]
+        if archive in archiveAbbreviations:
+            archive = archiveAbbreviations[archive]
+        hover += "Archived by: " + archive + "."
     if hover != "":
+        # I tried the following, to indicate to the user that there's some
+        # additional hover information available ... but it was just nasty,
+        # so I've eliminated it.
+        #hover = "style=\"background-color:" + hoverColor + "\" title=\"" + hover[:-1] + "\""
         hover = "title=\"" + hover[:-1] + "\""
     return hover
+
+# Makes a hover containing the organizational affiliation for a document
+# number or author dictionary.
+orgAbbreviations = { 
+    "IL" : "MIT Instrumentation lab (AKA Charles Stark Draper Laboratory)",
+    "AC" : "AC Electronics (AKA AC Sparkplug, Delco Electronics, etc.)",
+    "MSC" : "Manned Spacecraft Center (AKA Johnson Space Center)",
+    "GAEC" : "Grumman Aerospace Engineering",
+    "NAA" : "North American Aviation (AKA North American Rockwell)",
+    "TRW" : "TRW (AKA Thompson Ramo Wolldridge)",
+    "IBM" : "IBM Federal Systems Division",
+    "NASA" : "National Aeronautics and Space Administration (other than MSC)",
+    "JPL" : "Jet Propulsion Laboratory",
+    "Douglas" : "McDonnell Douglas"
+}
+def makeOrgHover(dict):
+    hover = ""
+    endHover = ""
+    if "Organization" in dict and dict["Organization"] not in [ "", "_" ]:
+        endHover = "</span>"
+        org = dict["Organization"]
+        if org in orgAbbreviations:
+            org = orgAbbreviations[org]
+        hover = "<span style=\"background-color:" + hoverColor + "\" title=\"Affiliation: " + org + "\">"
+    return (hover, endHover)
 
 # Create the HTML string for printing out a document entry. So to change
 # how documents are displayed, it's only necessary to modify or replace
 # this one function.
+useOrgHover = True
+def addOrg(dict):
+    html = ""
+    if "Name" in dict:
+        nameNumber = dict["Name"]
+    else:
+        nameNumber = dict["Number"]
+    html += "<code>"
+    if useOrgHover:
+        (hover, endHover) = makeOrgHover(dict)
+        html += hover + nameNumber + endHover
+    else:
+        html += nameNumber
+        if dict["Organization"] not in [ "", "_" ]:
+            html += " (" + dict["Organization"] + ")"
+    html += "</code>"
+    return html
+    
 def documentEntryHTML(record, showComment):    
     html = ""
     URLs = record["URLs"]
     DocumentNumbers = record["DocumentNumbers"]
     if len(DocumentNumbers) > 0:
-        html += DocumentNumbers[0]["Number"]
-        if DocumentNumbers[0]["Organization"] != "":
-            html += " (" + DocumentNumbers[0]["Organization"] + ")"
+        html += addOrg(DocumentNumbers[0])
         for m in range(1, len(DocumentNumbers)):
-            html += ", " + DocumentNumbers[m]["Number"]
-            if DocumentNumbers[m]["Organization"] != "":
-                html += " (" + DocumentNumbers[m]["Organization"] + ")"
+            html += ", " + addOrg(DocumentNumbers[m])
         html += ", "
     if record["Revision"] != "":
         html += record["Revision"] + ", "
-    if record["Portion"] != "":
-        html += record["Portion"] + ", "
     if "Video" in record["Keywords"]:
         html += "Video, "
     if "Transcript" in record["Keywords"]:
@@ -572,28 +802,28 @@ def documentEntryHTML(record, showComment):
     if "Photo" in record["Keywords"]:
         html += "Photograph, "
     if len(URLs) > 0:
-        hover = makeHover(record, 0)
+        hover = makeTitleHover(record, 0)
         html += "\"<a " + hover + " href=\"" + URLs[0] + "\">"
         html += record["Title"]
         html += "</a>\""
         for m in range(1, len(URLs)):
-            hover = makeHover(record, m)
+            hover = makeTitleHover(record, m)
             html += " or <a " + hover + " href=\"" + URLs[m] + "\">here</a>"
     else:
         html += record["Title"]
+    if record["Portion"] != "":
+        portion = record["Portion"]
+        portion = portion[:1].lower() + portion[1:]
+        html += ", " + portion
     published = makeSensiblePublicationDate(record)
     if published != "":
         html += ", " + published
     Authors = record["Authors"]
     if len(Authors) > 0:
-        html += ", by " + Authors[0]["Name"]
-        if Authors[0]["Organization"] not in [ "", "_" ]:
-            html += " (" + Authors[0]["Organization"] + ")"
+        html += ", by " + addOrg(Authors[0])
         for m in range(1, len(Authors)):
-            html += ", " + Authors[m]["Name"]
-            if Authors[m]["Organization"] not in [ "", "_"] :
-                html += " (" + Authors[m]["Organization"] + ")"
-    if html != "":
+            html += ", " + addOrg(Authors[m])
+    if html != "" and html[-1:] not in [".", "!", "?"] and html[-15:] not in [ ".</span></code>", "?</span></code>", "!</span></code>" ]:
         html += ". "
     if record["Disclaimer"] != "":
         html += record["Disclaimer"]
@@ -616,34 +846,43 @@ def documentEntryHTML(record, showComment):
 # and on document-specific data in the database, such as document numbers,
 # targets, and keywords. The parameters targets[] and keywords[] are simply
 # lists of targets and keywords that may appear in the database, and an item
-# is included in the section if there is any overlap.  The DocumentNumbers[]
+# is included in the section if there is any overlap. The DocumentNumbers[]
 # parameters, on the other hand, try to match only the leading portions of
-# strings.  The anchor field must have a matching <a name="..."></a> tag.
+# strings.  As an alternative to the above, you can include the key/value
+# pair "all":True (which matches *all* records) or "none":True (which matches
+# *no* record, but still creates a section with a blurb).
+#
+# The anchor field must have a matching <a name="..."></a> tag.
 # Only entries with an "anchor" key are used in the table of contents.
 # Never remove the 1st two entries below, but the "anchor" can be removed
 # to disable either of the first 2 entries.  If restored, the anchors must
 # be "Debug" and "RecentAdditions" precisely.
 tableOfContentsSpec = [
-    { "anchor" : "Debug", "title" : "Debug", "sortKey" : myOriginalSortKey, "blurb" : blurbDebug },
-    { "anchor" : "RecentAdditions", "title" : "Recently Added", "sortKey" : myTimeSortKey, "sortReverse" : True, "blurb" : blurbRecentlyAdded },
-    { "anchor" : "Presentation", "title" : "Presentations", "sortKey" : myAuthorSortKey, "keywords" : ["Presentation"] },
+    { "title" : "Debug", "sortKey" : myOriginalSortKey, "blurb" : blurbDebug },
+    { "anchor" : "RecentAdditions", "title" : "Recently Added Documents", "sortKey" : myRecentSortKey, "blurb" : blurbRecentlyAdded },
+    { "anchor" : "Presentations", "title" : "Presentations", "sortKey" : myAuthorSortKey, "keywords" : ["Presentation"], "blurb" : blurbPresentations },
+    { "anchor" : "GSOPs", "title" : "Guidance System Operations Plans (GSOP)", "sortKey" : myDashSortKey, "keywords" : [ "GSOP" ], "blurb" : blurbGSOPs },
     { "title" : "AGC Software Language Manuals", "keywords" : ["AGC Language"] },
     { "title" : "Program Listings", "keywords" : ["AGC Listing", "AGS Listing", "LVDC Listing", "OBC Listing"] },
-    { "anchor" : "SGAMemos", "title" : "Space Guidance Analysis Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Space Guidance Analysis Memo"] },
+    { "anchor" : "SGAMemos", "title" : "Space Guidance Analysis Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Space Guidance Analysis Memo"], "blurb" : blurbSGA },
     { "anchor" : "ApolloProjectMemos", "title" : "Apollo Project Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Apollo Project Memo"] },
     { "anchor" : "ApolloEngineeringMemos", "title" : "Apollo Engineering Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Apollo Engineering Memo"] },
-    { "anchor" : "DigitalDevelopmentMemos", "title" : "Digital Development Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Digital Development Memo"] },
+    { "anchor" : "DigitalDevelopmentMemos", "title" : "Digital Development Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Digital Development Memo"], "blurb" : blurbDD },
     { "anchor" : "ElectronicDesignGroupMemos", "title" : "Electronic Design Group Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Electronic Design Group Memo"] },
     { "anchor" : "ISSMemos", "title" : "Inertial Sub-System (I.S.S.) Memos", "sortKey" : myDocSortKeyReverse, "documentNumbers" : ["ISS Memo"] },
-    { "anchor" : "XDENotes", "title" : "XDE Notes", "sortKey" : myXdeSortKey, "documentNumbers" : ["XDE-"] },
+    { "anchor" : "XDENotes", "title" : "XDE Notes", "sortKey" : myXdeSortKey, "documentNumbers" : ["XDE-"], "blurb" : blurbXDE },
     { "anchor" : "DigitalGroupMemos", "title" : "Digital Group Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["DG Memo"] },
     { "anchor" : "MissionTechniquesMemos", "title" : "Mission Techniques Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Mission Techniques Memo"] },
     { "anchor" : "SystemTestGroupMemos", "title" : "System Test Group Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["System Test Group Memo"] },
-    { "anchor" : "LuminaryMemos", "title" : "LUMINARY Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["LUMINARY Memo"] },
+    { "anchor" : "LuminaryMemos", "title" : "LUMINARY Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["LUMINARY Memo"], "blurb" : blurbLuminaryMemos },
     { "anchor" : "ColossusMemos", "title" : "COLOSSUS Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["COLOSSUS Memo"] },
     { "anchor" : "SkylarkMemos", "title" : "SKYLARK (SKYLAB) Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["SKYLARK Memo", "SKYLAB Memo"] },
+    { "anchor" : "PcrsPcns", "title" : "Program Change Requests (PCR) and Notices (PCN)", "sortKey" : myDashSortKey, "documentNumbers" : [ "PCR-", "PCN-"], "blurb" : blurbPcrsPcns  },
+    { "anchor" : "Anomalies", "title" : "Software Anomaly Reports and Assembly Control Board Requests", "sortKey" : myDateAuthorSortKey, "blurb" : blurbAnomalies, "documentNumbers" : [ "LNY-", "L-", "COL-", "COM-", "A-" ] },
     { "anchor" : "AGS", "title" : "Abort Guidance System (AGS)", "sortKey" : myDateAuthorSortKey, "blurb" : blurbAGS, "keywords" : [ "AGS" ] },
-    { "anchor" : "LVDC", "title" : "Launch Vehicle Digital Computer (LVDC) and Friends", "sortKey" : myDateAuthorSortKey, "blurb" : blurbLVDC, "keywords" : [ "LVDC", "LVDA", "FCC", "IU" ] }
+    { "anchor" : "LVDC", "title" : "Launch Vehicle Digital Computer (LVDC) and Friends", "sortKey" : myDateAuthorSortKey, "blurb" : blurbLVDC, "keywords" : [ "LVDC", "LVDA", "FCC", "IU" ] },
+    { "anchor" : "EngineeringDrawings", "title" : "Engineering Drawings", "none" : True, "blurb" : blurbElectroMechanical },
+    { "anchor" : "Everything", "title" : "Everything", "sortKey" : myDateAuthorSortKey, "blurb" : blurbEverything, "all" : True }
 ]
 
 # Step 1:  Read the entire database into the lines[] array from stdin.
@@ -807,7 +1046,6 @@ for line in lines[1:]:
 
 # Step 4:  Output the HTML file header.
 currentEpoch = int(time.time())
-cutoffMonths = 6
 cutoffEpoch = currentEpoch - cutoffMonths * 30 * 24 * 3600
 cutoffFiles = 25
 print("<!DOCTYPE html>")
@@ -837,7 +1075,7 @@ print("</ul>")
 # the same as the old links.html page.
 if "anchor" in tableOfContentsSpec[0] and tableOfContentsSpec[0]["anchor"] == "Debug":
     print("<a name=\"Debug\"></a>")
-    print("<h1>Debug</h1>")
+    print("<h1>" + tableOfContentsSpec[0]["title"] + "</h1>")
     print(blurbDebug)
     print("<ol>")
     records.sort(key=tableOfContentsSpec[0]["sortKey"])
@@ -852,10 +1090,14 @@ if "anchor" in tableOfContentsSpec[0] and tableOfContentsSpec[0]["anchor"] == "D
 # Step 5A:  "Recent Additions" section.
 if "anchor" in tableOfContentsSpec[1] and tableOfContentsSpec[1]["anchor"] == "RecentAdditions":
     print("<a name=\"RecentAdditions\"></a>")
-    print("<h1>Recent Additions to Virtual AGC Document Library as of %s</h1>" % (time.strftime("%m/%d/%Y", time.localtime(currentEpoch))))
-    print(blurbRecentlyAdded)
-    print("<ul>")
-    records.sort(reverse=True, key=tableOfContentsSpec[1]["sortKey"])  # Sort from newest (added) to oldest (added).
+    print("<h1>" + tableOfContentsSpec[1]["title"] + " (%s)</h1>" % (time.strftime("%m/%d/%Y", time.localtime(currentEpoch))))
+    print(blurbRecentlyAdded + "<br><br>")
+    lastDateString = "00/00/0000"
+    inUL = False
+    reverse = False
+    if "reverse" in tableOfContentsSpec[1] and tableOfContentsSpec[1]["reverse"]:
+        reverse = True
+    records.sort(reverse=reverse, key=tableOfContentsSpec[1]["sortKey"])  # Sort from newest (added) to oldest (added).
     for n in range(len(records)):
         record = records[n]
         epoch = myTimeSortKey(record)
@@ -863,11 +1105,19 @@ if "anchor" in tableOfContentsSpec[1] and tableOfContentsSpec[1]["anchor"] == "R
         # cutoffFiles files, show some more.
         if epoch < cutoffEpoch and n >= cutoffFiles:
             break
+        recordDateString = datetime.fromtimestamp(epoch).strftime("%m/%d/%Y")
+        if recordDateString != lastDateString:
+            if inUL:
+                print("</ul>")
+            print("<i>Added " + recordDateString + "</i><ul>")
+            inUL = True
+            lastDateString = recordDateString
         print("<li>", end="")
-        print(datetime.fromtimestamp(epoch).strftime("<b>%m/%d/%Y:</b> "), end="" )
+        #print("\"" + myRecentSortKey(record) + "\"<br>")
         print(documentEntryHTML(record, False), end="")    
         print("</li>")
-    print("</ul>")
+    if inUL:
+        print("</ul>")
 
 # Step 5B:  Output all other sections, based on the parameters in 
 # tableOfContentsSpec[].  
@@ -878,11 +1128,14 @@ for n in range(2, len(tableOfContentsSpec)):
     print("<h1>" + tableOfContentsSpec[n]["title"] + "</h1>")
     if "blurb" in tableOfContentsSpec[n]:
         print(tableOfContentsSpec[n]["blurb"])
+    if "none" in tableOfContentsSpec[n] and tableOfContentsSpec[n]["none"]:
+        continue
     print("<ul>")
     records.sort(key=tableOfContentsSpec[n]["sortKey"])
     keywordsSet = set([])
     targetsSet = set([])
     documentNumbers = []
+    all = "all" in tableOfContentsSpec[n] and tableOfContentsSpec[n]["all"]
     if "keywords" in tableOfContentsSpec[n]:
         keywordsSet = set(tableOfContentsSpec[n]["keywords"])
     if "targets" in tableOfContentsSpec[n]:
@@ -891,7 +1144,9 @@ for n in range(2, len(tableOfContentsSpec)):
         documentNumbers = tableOfContentsSpec[n]["documentNumbers"]
     for record in records:
         matched = False
-        if len(list(keywordsSet & set(record["Keywords"]))) > 0:
+        if all and record["Title"] != "" and len(record["URLs"]) > 0:
+            matched = True
+        elif len(list(keywordsSet & set(record["Keywords"]))) > 0:
             matched = True
         elif len(list(targetsSet & set(record["Targets"]))) > 0:
             matched = True
