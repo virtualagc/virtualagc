@@ -128,10 +128,16 @@
 #   Field 6     Authors.  If unknown, may be left blank, but I usually use
 #               "Anonymous", simply as a maintenance feature to emphasize that
 #               I actually checked it rather than just accidentally omitted
-#               it.  If there are multiple authors,
-#               they can be comma-delimited.  If the authors are a part of 
+#               it.  If there are multiple authors, they can be 
+#               comma-delimited.  If the authors are a part of 
 #               some known organization, that affiliation can be appended with
 #               a "/".  For example "Hugh Blair-Smith/IL, Jay Sampson/AC".
+#               Actually, every individual should have an affiliation, even
+#               if it's just "/" followed by nothing, and no corporate author
+#               (such as "MIT Instrumentation Laboratory") should have an
+#               affiliation.  That's because we use the affiliation to 
+#               recognize which authors are individuals and which are 
+#               corporates, and that affects sorting on author names.
 #               Note that names must not contain commas, since commas delimit
 #               the names; however, ", Jr" is an exception for 
 #               convenience, in that it will be accepted without causing a 
@@ -280,8 +286,23 @@ I've input the data.
 
 blurbRecentlyAdded = """
 This section lists all documents added or changed in the preceding 6-month
-period, with the most-recently-added documents at the top of the list, and
-the least-recently-added ones at the bottom.
+period, sorted from most-recently added to least-recently added.
+"""
+
+blurbAGS = """
+For lack of a better method, the entries in this section are sorted by 
+publication date.
+"""
+
+blurbLVDC = """
+We have precious little LVDC documentation, and even less LVDC software.  
+The Wikipedia article on the LVDC at the time I first wrote on this subject
+lamented that all of the LVDC software has probably vanished and does not exist 
+any longer. Fortunately, that has turned out to be false, although there may
+be enough truth in it to make us very uncomfortable.
+<br><br>
+For lack of a better method, the entries in this section are sorted by 
+publication date.
 """
 
 # Given a field from the database which is supposed to be a date (MM/DD/YYYY, 
@@ -322,6 +343,22 @@ def parseDate(dateString, defaultYear):
             print("Illegal date field: " + dateString, file=sys.stderr)
     return (illegal, month, day, year)
 
+def myPubDateSortKey(record):
+    month = record["MonthPublished"]
+    day = record["DayPublished"]
+    year = record["YearPublished"]
+    if illegal:
+        month = "00"
+        day = "00"
+        year = "0000"
+    if month == "":
+        month = "00"
+    if day == "":
+        day = "00"
+    if year == "":
+        year = "0000"
+    return year + month + day
+
 # Parse a simple comma-delimited list appearing in a database field.
 def simpleList(field):
     if field.strip() == "":
@@ -344,6 +381,8 @@ def orgList(field, name):
         if len(subFields) > 0:
             array[n][name] = subFields[0]
         if len(subFields) > 1:
+            if subFields[1] == "":
+                subFields[1] = "_"
             array[n]["Organization"] = subFields[1]
         if len(subFields) > 2:
             print("Illegal field: " + array[n], file=sys.stderr)
@@ -427,6 +466,48 @@ def myOriginalSortKey(record):
 def myTitleSortKey(record):
     return record["Title"]
 
+# Sort key for authors.  This is really tricky. This is really tricky.  We
+# have to be able to normalize names from FIRST [MIDDLE] LAST [SUFFIX] to
+# LAST FIRST [MIDDLE] [SUFFIX].  But we also have to distinguish that case
+# from the case of corporate authors like "MIT Instrumentation Lab" (which
+# we don't want converted to "Lab MIT Instrumentation").  Then too, there
+# may be multiple authors, so we need to normalize each author name into
+# a fixed-length string (of adequate length) and concatenate them all.  
+# Finally, if the names match, we need to add on the title as a secondary
+# sort field.
+def myAuthorSortKey(record):
+    output = ""
+    for author in record["Authors"]:
+        authorName = author["Name"].upper()
+        if author["Organization"] != "":
+            # If we've gotten here, then the authorName is an individual
+            # rather than a corporate author (if the author names are
+            # formatted properly in the database).  We have to normalize
+            # by picking off the author's last name, and putting it 
+            # first.
+            nameFields = authorName.split()
+            if len(nameFields) > 0:
+                if nameFields[-1] in [ "JR", "JR.", "SR", "SR.", "III", "IV", "V", "VI", "VII", "VIII" ]:
+                    suffix = nameFields[-1]
+                    nameFields = nameFields[:-1]
+                else:
+                    suffix = ""
+                if len(nameFields) > 0:
+                    lastName = nameFields[-1]
+                    nameFields = nameFields[:-1]
+                    while lastName[-1:] == ",":
+                        lastName = lastName[:-1]
+                    authorName = lastName
+                    for n in nameFields:
+                        authorName += " " + n
+                    if suffix != "":
+                        authorName += " " + suffix
+        output += "%-30s" % authorName
+    return output + "%-100s" % record["Title"].upper()
+
+def myDateAuthorSortKey(record):
+    return myPubDateSortKey(record) + myAuthorSortKey(record)
+
 # Make a sensible publication date out of the kinds of date fields I have.
 def makeSensiblePublicationDate(record):
     month = record["MonthPublished"]
@@ -506,11 +587,11 @@ def documentEntryHTML(record, showComment):
     Authors = record["Authors"]
     if len(Authors) > 0:
         html += ", by " + Authors[0]["Name"]
-        if Authors[0]["Organization"] != "":
+        if Authors[0]["Organization"] not in [ "", "_" ]:
             html += " (" + Authors[0]["Organization"] + ")"
         for m in range(1, len(Authors)):
             html += ", " + Authors[m]["Name"]
-            if Authors[m]["Organization"] != "":
+            if Authors[m]["Organization"] not in [ "", "_"] :
                 html += " (" + Authors[m]["Organization"] + ")"
     if html != "":
         html += ". "
@@ -524,7 +605,7 @@ def documentEntryHTML(record, showComment):
         html += record["Comment"]
         while html[-1:] == " ":
             html = html[:-1]
-        if html[-1:] not in [".", "!", "?"]:
+        if html[-1:] not in [".", "!", "?", ">"]:
             html += ". "
     if html != "" and len(URLs) == 0:
         html = "<span style=\"color:#808080\">" + html + "</span>"
@@ -545,7 +626,7 @@ def documentEntryHTML(record, showComment):
 tableOfContentsSpec = [
     { "anchor" : "Debug", "title" : "Debug", "sortKey" : myOriginalSortKey, "blurb" : blurbDebug },
     { "anchor" : "RecentAdditions", "title" : "Recently Added", "sortKey" : myTimeSortKey, "sortReverse" : True, "blurb" : blurbRecentlyAdded },
-    { "anchor" : "Presentation", "title" : "Presentations", "sortKey" : myTitleSortKey, "keywords" : ["Presentation"] },
+    { "anchor" : "Presentation", "title" : "Presentations", "sortKey" : myAuthorSortKey, "keywords" : ["Presentation"] },
     { "title" : "AGC Software Language Manuals", "keywords" : ["AGC Language"] },
     { "title" : "Program Listings", "keywords" : ["AGC Listing", "AGS Listing", "LVDC Listing", "OBC Listing"] },
     { "anchor" : "SGAMemos", "title" : "Space Guidance Analysis Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Space Guidance Analysis Memo"] },
@@ -560,7 +641,9 @@ tableOfContentsSpec = [
     { "anchor" : "SystemTestGroupMemos", "title" : "System Test Group Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["System Test Group Memo"] },
     { "anchor" : "LuminaryMemos", "title" : "LUMINARY Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["LUMINARY Memo"] },
     { "anchor" : "ColossusMemos", "title" : "COLOSSUS Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["COLOSSUS Memo"] },
-    { "anchor" : "SkylarkMemos", "title" : "SKYLARK (SKYLAB) Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["SKYLARK Memo", "SKYLAB Memo"] }
+    { "anchor" : "SkylarkMemos", "title" : "SKYLARK (SKYLAB) Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["SKYLARK Memo", "SKYLAB Memo"] },
+    { "anchor" : "AGS", "title" : "Abort Guidance System (AGS)", "sortKey" : myDateAuthorSortKey, "blurb" : blurbAGS, "keywords" : [ "AGS" ] },
+    { "anchor" : "LVDC", "title" : "Launch Vehicle Digital Computer (LVDC) and Friends", "sortKey" : myDateAuthorSortKey, "blurb" : blurbLVDC, "keywords" : [ "LVDC", "LVDA", "FCC", "IU" ] }
 ]
 
 # Step 1:  Read the entire database into the lines[] array from stdin.
