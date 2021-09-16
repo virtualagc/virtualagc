@@ -243,6 +243,49 @@ lenRemote = len(remote)
 lenLocal = len(local)
 
 hoverColor = "#e8e8e8"
+fancyHeaderAndFooter = True
+
+fileHeader = """<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<title>Virtual AGC Document Library Page</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name=Author content="Ronald Burkey">
+<link rel=icon type="image/png" href="favicon.png">
+<meta name=author content="Ronald S. Burkey">
+<script type="text/javascript" src="Header.js"></script>
+</head>
+<body style="background-image: url(gray3.jpg);">
+<script type="text/javascript">
+document.write(headerTemplate.replace("@TITLE@","Virtual AGC Project").replace("@SUBTITLE@","Document Library Page"))
+</script>
+<br><br>
+"""
+
+currentEpoch = int(time.time())
+currentDateString = time.strftime("%Y-%m-%d", time.localtime(currentEpoch))
+fileFooter = """
+<br>
+<hr style="width: 100%; height: 2px;">
+<center><br><span style=
+"color: rgb(84, 89, 93); font-family: sans-serif; font-size: 11.05px; 
+font-style: normal; font-variant: normal; font-weight: normal; 
+letter-spacing: normal; line-height: 16.575px; orphans: auto; 
+text-align: center; text-indent: 0px; text-transform: none; 
+white-space: normal; widows: 1; word-spacing: 0px; 
+-webkit-text-stroke-width: 0px; display: inline !important; 
+float: none; background-color: rgb(255, 255, 255);">
+This page is available under the 
+<a href="https://creativecommons.org/publicdomain/zero/1.0/">
+Creative Commons No Rights Reserved License</a>
+</span><br><i><font size="-1">Last modified by <a href=
+"mailto:info@sandroid.org">Ronald Burkey</a> on """ + currentDateString + """
+<br><br>
+<a href="https://www.ibiblio.org">
+<img style="border: 0px solid ; width: 300px; height: 100px;" alt=
+"Virtual AGC is hosted by ibiblio.org" src="hosted.png" height=
+"100" width="300"></a><br></font></i></center><br></body></html>
+"""
 
 # Here are various HTML blurbs that head up individual sections of the 
 # document we're going to output.
@@ -254,8 +297,8 @@ spaceborne guidance computers used in the Apollo and Gemini programs ... or at
 least all of the documentation I think I'm legally able to give you at the
 present time.  Some 
 hints as to where to find such documentation on your own can be found on our
-<a href="https://www.ibiblio.org/apollo/QuestForInfo.html">Documentation
-Quest page</a>.  Our <a href="https://www.ibiblio.org/apollo/faq.html">FAQ
+<a href="QuestForInfo.html">Documentation
+Quest page</a>.  Our <a href="faq.html">FAQ
 page</a> also points out various significant Apollo-centric websites from
 which we've taken some documentation, in order to centralize it.
 <br><br>
@@ -288,13 +331,23 @@ the author was affiliated. Unfortunately, this extra pop-up information
 <i>only</i> works if
 you have a mouse rather than a touchscreen, since you can hover a mouse
 cursor but not a finger; but that's life!
+<br><br>
+Another slight drawback to the way information appears in these mouse hovers,
+I suppose, is that none of it shows up if you use your browser's text-search
+facility.  I doubt that you'd really want to search on any of that particular
+information anyway.  But you can get around that problem by downloading the
+<a href="DocumentLibraryDatabase/DocumentLibraryDatabase.tsv">
+spreadsheet</a> that contains all of the information used to generate this 
+web-page, and you can search or sort that spreadsheet in any manner you like.
+(In pulling it into your spreadsheet program, you need merely know that the
+columnar data is tab-delimited.)
 """
 
 blurbDebug = """
 This section is present temporarily, only for the purpose of debugging.  It
 will be removed before this auto-generated page goes live in production.
 Right now, it simply lists every document in the library, in the same order
-found on <a href="https://www.ibiblio.org/apollo/links.html">our 
+found on <a href="links.html">our 
 previously-existing Document Library page</a> ... at least to the extent that
 I've input the data.
 """
@@ -406,21 +459,24 @@ drawings of the CM and LM G&N systems.  For example, the AGC
 circuit schematics or the drawings of the physical design of the DSKY.  
 While a <i>few</i> of those drawings appear here, the truth is that the 
 totality of G&N electro-mechanical drawings in our collection outnumbers the 
-mere "documents" found here by about 100-to-1. And you can't "browse" through
-hundreds of thousands of engineering drawings the way you can with a mere few 
-thousand documents.  Instead, you have to go to our 
-<a href="https://www.ibiblio.org/apollo/ElectroMechanical.html">
+mere "documents" found here by a very large factor. And you can't "browse" 
+through hundreds of thousands of engineering drawings in any meaningful way
+if they're just listed sequentially.  Instead, you have to go to our 
+<a href="ElectroMechanical.html">
 Electro-Mechanical Page</a>, which provides you with two very-valuable 
 resources to find the engineering drawings you need:
 <ul>
 <li>It has a search engine, allowing you to 
-<a href="https://www.ibiblio.org/apollo/TipueSearch.html">search the 
+<a href="TipueSearch.html">search the 
 electro-mechanical drawings</a> by fragments of drawing numbers or drawing 
 titles.</li>
 <li>It lets you 
-<a href="https://www.ibiblio.org/apollo/ElectroMechanical.html#Navigate_the_Assembly_Hierarchy_">
+<a href="ElectroMechanical.html#Navigate_the_Assembly_Hierarchy_">
 navigate the electro-mechanical drawing hierarchy</a> in a top-down fashion.</li>
 </ul>
+As for the few related documents which it makes sense to include directly 
+here, I've sorted them for you by publication date; the undated documents
+appear at the beginning of the list.
 """
 
 blurbEverything = """
@@ -524,7 +580,7 @@ def orgList(field, name):
                 subFields[1] = "_"
             array[n]["Organization"] = subFields[1]
         if len(subFields) > 2:
-            print("Illegal field: " + array[n], file=sys.stderr)
+            print("Illegal field: " + str(array[n]), file=sys.stderr)
     return array
 
 # Make a filesize human-friendly.  Simplified from stack overflow.
@@ -743,7 +799,7 @@ orgAbbreviations = {
     "AC" : "AC Electronics (AKA AC Sparkplug, Delco Electronics, etc.)",
     "MSC" : "Manned Spacecraft Center (AKA Johnson Space Center)",
     "GAEC" : "Grumman Aerospace Engineering",
-    "NAA" : "North American Aviation (AKA North American Rockwell)",
+    "NAA" : "North American Aviation (AKA North American Rockwell AKA Rockwell International)",
     "TRW" : "TRW (AKA Thompson Ramo Wolldridge)",
     "IBM" : "IBM Federal Systems Division",
     "NASA" : "National Aeronautics and Space Administration (other than MSC)",
@@ -856,7 +912,9 @@ def documentEntryHTML(record, showComment):
 # Only entries with an "anchor" key are used in the table of contents.
 # Never remove the 1st two entries below, but the "anchor" can be removed
 # to disable either of the first 2 entries.  If restored, the anchors must
-# be "Debug" and "RecentAdditions" precisely.
+# be "Debug" and "RecentAdditions" precisely.  Note that keyword- and
+# target-searches are not case sensitive; in practice, they will all be 
+# converted to lower-case, regardless of how they're entered in this array.
 tableOfContentsSpec = [
     { "title" : "Debug", "sortKey" : myOriginalSortKey, "blurb" : blurbDebug },
     { "anchor" : "RecentAdditions", "title" : "Recently Added Documents", "sortKey" : myRecentSortKey, "blurb" : blurbRecentlyAdded },
@@ -881,7 +939,7 @@ tableOfContentsSpec = [
     { "anchor" : "Anomalies", "title" : "Software Anomaly Reports and Assembly Control Board Requests", "sortKey" : myDateAuthorSortKey, "blurb" : blurbAnomalies, "documentNumbers" : [ "LNY-", "L-", "COL-", "COM-", "A-" ] },
     { "anchor" : "AGS", "title" : "Abort Guidance System (AGS)", "sortKey" : myDateAuthorSortKey, "blurb" : blurbAGS, "keywords" : [ "AGS" ] },
     { "anchor" : "LVDC", "title" : "Launch Vehicle Digital Computer (LVDC) and Friends", "sortKey" : myDateAuthorSortKey, "blurb" : blurbLVDC, "keywords" : [ "LVDC", "LVDA", "FCC", "IU" ] },
-    { "anchor" : "EngineeringDrawings", "title" : "Engineering Drawings", "none" : True, "blurb" : blurbElectroMechanical },
+    { "anchor" : "EngineeringDrawings", "title" : "AGC Electrical and Mechanical Design", "sortKey" : myDateAuthorSortKey, "keywords" : [ "Engineering Drawings" ], "blurb" : blurbElectroMechanical },
     { "anchor" : "Everything", "title" : "Everything", "sortKey" : myDateAuthorSortKey, "blurb" : blurbEverything, "all" : True }
 ]
 
@@ -977,9 +1035,9 @@ for line in lines[1:]:
             field5 = fields[5].replace(", and ", ", ").replace(" and ", ", ").replace(", Jr", "%44 Jr")
             record["Authors"] = orgList(field5, "Name")            
     if len(fields) >= 7:    # Field 7
-        record["Targets"] = simpleList(fields[6])
+        record["Targets"] = simpleList(fields[6].lower())
     if len(fields) >= 8:    # Field 8
-        record["Keywords"] = simpleList(fields[7])
+        record["Keywords"] = simpleList(fields[7].lower())
     if len(fields) >= 9:    # Field 9
         URLs = simpleList(fields[8])
         # Do some cleanup on the URLs.
@@ -995,7 +1053,8 @@ for line in lines[1:]:
             # For all of the URLs which I can reinterpret as being files on my
             # local drive determine the file timestamp, and use the latest one.
             if remote == URLs[n][:lenRemote]:
-                filePath = local + URLs[n][lenRemote:]
+                URLs[n] = URLs[n][lenRemote:]
+                filePath = local + URLs[n]
                 index = filePath.find("#page=")
                 if index > -1:
                     filePath = filePath[:index]
@@ -1048,13 +1107,16 @@ for line in lines[1:]:
 currentEpoch = int(time.time())
 cutoffEpoch = currentEpoch - cutoffMonths * 30 * 24 * 3600
 cutoffFiles = 25
-print("<!DOCTYPE html>")
-print("<html lang=\"en\">")
-print("<head>")
-print("<meta charset=\"utf-8\">")
-print("<title>Auto-Generated List of Recent Virtual AGC Document Library Additions</title>")
-print("</head>")
-print("<body>")
+if fancyHeaderAndFooter:
+    print(fileHeader)
+else:
+    print("<!DOCTYPE html>")
+    print("<html lang=\"en\">")
+    print("<head>")
+    print("<meta charset=\"utf-8\">")
+    print("<title>Auto-Generated List of Recent Virtual AGC Document Library Additions</title>")
+    print("</head>")
+    print("<body>")
 
 # Step 5:  Output the HTML body.
 
@@ -1090,7 +1152,7 @@ if "anchor" in tableOfContentsSpec[0] and tableOfContentsSpec[0]["anchor"] == "D
 # Step 5A:  "Recent Additions" section.
 if "anchor" in tableOfContentsSpec[1] and tableOfContentsSpec[1]["anchor"] == "RecentAdditions":
     print("<a name=\"RecentAdditions\"></a>")
-    print("<h1>" + tableOfContentsSpec[1]["title"] + " (%s)</h1>" % (time.strftime("%m/%d/%Y", time.localtime(currentEpoch))))
+    print("<h1>" + tableOfContentsSpec[1]["title"] + " (%s)</h1>" % currentDateString)
     print(blurbRecentlyAdded + "<br><br>")
     lastDateString = "00/00/0000"
     inUL = False
@@ -1124,6 +1186,13 @@ if "anchor" in tableOfContentsSpec[1] and tableOfContentsSpec[1]["anchor"] == "R
 for n in range(2, len(tableOfContentsSpec)):
     if "anchor" not in tableOfContentsSpec[n]:
         continue
+    # Convert all keywords and targets being searched for to lower case.
+    for key in [ "keywords", "targets" ]:
+        if key in tableOfContentsSpec[n]:
+            values = tableOfContentsSpec[n][key]
+            for m in range(len(values)):
+                values[m] = values[m].lower()
+            tableOfContentsSpec[n][key] = values
     print("<a name=\"" + tableOfContentsSpec[n]["anchor"] + "\"></a>")
     print("<h1>" + tableOfContentsSpec[n]["title"] + "</h1>")
     if "blurb" in tableOfContentsSpec[n]:
@@ -1164,8 +1233,11 @@ for n in range(2, len(tableOfContentsSpec)):
     print("</ul>")
 
 # Final step: Cleanup.
-print("</body>")
-print("</html>")
+if fancyHeaderAndFooter:
+    print(fileFooter)
+else:
+    print("</body>")
+    print("</html>")
 
 # Some debugging output
 if False:
