@@ -168,13 +168,16 @@ headerTemplate += '</tbody>'
   + '</table>';
 
 /* 
- * The following function is only used for host https://virtualagc.github.io/virtualagc.
- * On that "staging" version of the website, there are no directories like 
- * Documents, Downloads, hrst, klabs, etc., and so references to them need to be
- * redirected to http://www.ibiblio.org/apollo + whatever.  We simply
+ * The following function is only used for host https://virtualagc.github.io/virtualagc
+ * and for local browsing.  On that "staging" version of the website and locally, there 
+ * are no directories like Documents, Downloads, hrst, klabs, etc., and so references to 
+ * them need to be redirected to https://www.ibiblio.org/apollo + whatever.  We simply
  * loop through all of the links in the page, and if any of them are to one of the
- * affected subdirectories, we prefix the href properly.
+ * affected subdirectories, we prefix the href properly.  The single variable
+ * named "correctHost" can be changed if we need to move from ibiblio.org for some
+ * reason.
  */
+correctHost = "https://www.ibiblio.org/apollo"
 var retargetedFolders = [ "/OnnoHommes/",
                           "/AlessandroCinqueman/",
                           "/DimitrisVitoris/",
@@ -199,17 +202,20 @@ var retargetedFolders = [ "/OnnoHommes/",
 ]
 var numRetargets = retargetedFolders.length
 window.onload = function() {
-	if (window.location.hostname != "virtualagc.github.io") 
+	/*alert('"' + window.location.hostname + '"')*/
+	if (window.location.hostname != "virtualagc.github.io" && window.location.hostname != "") 
 		return
 	var i, j
 	var links = document.links
 	var numLinks = links.length
+	if (window.location.hostname == "")
+		correctHost += "/"
 	for (i = 0; i < numLinks; i++) {
 		if ("href" in links[i]) {
 			for (j = 0; j < numRetargets; j++) {
 				var index = links[i].href.indexOf(retargetedFolders[j])
 				if (index >= 0) {
-					links[i].href = "http://www.ibiblio.org/apollo" + links[i].href.substring(index)
+					links[i].href = correctHost + links[i].href.substring(index)
 					break
 				}
 			}
@@ -222,7 +228,7 @@ window.onload = function() {
 			for (j = 0; j < numRetargets; j++) {
 				var index = images[i].src.indexOf(retargetedFolders[j])
 				if (index >= 0) {
-					images[i].src = "http://www.ibiblio.org/apollo" + images[i].src.substring(index)
+					images[i].src = correctHost + images[i].src.substring(index)
 					break
 				}
 			}
