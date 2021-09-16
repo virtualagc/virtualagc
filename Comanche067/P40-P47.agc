@@ -941,28 +941,15 @@ NOFLASH		CAE	NVWORD1		# DISPLAY NVWORD1 NORMALLY
 		TC	BANKCALL
 		CADR	REGODSP
 
-## <a name="12WORDS"></a>
-## <b>Reconstruction:</b> The <code>E6SETTER</code> and <code>E7SETTER</code> functions were originally
-## present in Comanche 55, but they need to be moved to memory bank 2, and to be slightly tweaked
-## (replacing <code>TS</code> with <code>XCH</code>) in Comanche 67.  This is related to the fact that 
-## disassembly of the EMP <code>TB6JOB</code> from the Comanche 67 pad loads reveals the use of 12
-## extra words of fixed-fixed memory, compared to Comanche 55; but it does not reveal the specific locations
-## of those extra words.  In Artemis 71, there are 12 extra words due to the migration of <code>DODOWNTM</code>, 
-## <code>E6SETTER</code>, and <code>E7SETTER</code> to fixed-fixed memory.  That change has been ported here.
-		BLOCK	02
-
 E7SETTER	CAF	EBANK7
-		XCH	EBANK
+		TS	EBANK
 		EBANK=	TIG
 		TC	Q
 		
 E6SETTER	CAF	EBANK6		# SET UP EBANK6
-		XCH	EBANK
+		TS	EBANK
 		EBANK=	DAPDATR1
 		TC	Q
-
-		SETLOC	P40S
-		BANK
 
 		EBANK=	DAPDATR1
 V99E		TC	2PHSCHNG
@@ -1925,7 +1912,7 @@ REDO40.9	TC	INTPRET		# S40.9 RESTARTS COME HERE TO GRACEFULLY
 		STORE	VGTEMP		#	NONE) NOW CAN GO THRU SETUP.9
 		EXIT			#	WITHOUT DISTURBING VGPREV
 		TCF	ENDS40.9 -2	# STORE 0,0 COVERED NBRCYCLS,P -- FIX UP S
-		
+
 200CSHI		2DEC	200 B-12
 
 EARTHMU		2DEC*	-3.986032 E10 B-36*

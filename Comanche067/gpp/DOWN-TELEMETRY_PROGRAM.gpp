@@ -154,13 +154,18 @@
 ## It is related to the fact that 
 ## disassembly of the EMP <code>TB6JOB</code> from the Comanche 67 pad loads revealed the use of 12
 ## extra words of fixed-fixed memory, compared to Comanche 55; but it did not reveal the specific locations
-## of those extra words.  In Artemis 71, there are 12 extra words due to the migration of <code>DODOWNTM</code>, 
-## <code>E6SETTER</code>, and <code>E7SETTER</code> to fixed-fixed memory.  That change has been ported here.
+## of those extra words.  It is also related to the known partial octal listings of Comanche 67,
+## in which DODOWNTM seems to match In Artemis, but without a TC C13STALL instruction.
 		BLOCK	02
 DODOWNTM	TS	BANKRUPT
 		EXTEND
 		QXCH	QRUPT		# SAVE Q
-		CA	BIT7		# SET WORD ORDER CODE TO 1.  EXCEPTION- AT
+		CA	BIT7		# SET WORD ORDER CODE TO 1. EXCEPTION- AT
+		EXTEND
+		RAND	CHAN13
+		CCS	A
+		TC	DNTMGOTO
+		CA	BIT7
 		EXTEND			# THE BEGINNING OF EACH LIST THE WORD
 		WOR	CHAN13		# CODE WILL BE SET BACK TO 0.
 		TC	DNTMGOTO	# GOTO APPROPRIATE PHASE OF PROGRAM

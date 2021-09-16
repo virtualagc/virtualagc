@@ -14,6 +14,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##		2021-08-28 RSB	Changes related to known partial octal listing of Comanche 67.
 
 ## Page 131
 		SETLOC	4000 
@@ -91,7 +92,8 @@ MKRUPTBB	BBCON	MARKRUPT
 UPRPTBB		=	KEYRPTBB
 
 		EBANK=	DNTMBUFF
-DWNRPTBB	BBCON	DODOWNTM
+## <b>Reconstruction:</b> This change matches the known partial octal listing of Comanche 67.
+DWNRPTBB	BBCON	DNPHASE1
 
 		EBANK=	DATATEST
 RDRPTBB		BBCON	VHFREAD

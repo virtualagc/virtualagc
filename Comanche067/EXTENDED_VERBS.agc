@@ -19,6 +19,7 @@
 ##		2020-12-29 RSB	Put a placeholder annotation on a potential
 ##				Reconstruction 3A that I had missed before.
 ##		2021-01-11 RSB	Incorporated PCR 785.
+##		2021-08-27 RSB	Corrected typo VNLD0CDU -> VNLDOCDU
 
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -289,7 +290,7 @@ OPTCOARK	CA	OPTCADR
 		OCT	00117
 		TC	ENDEXT
 		
-OPTC1		CAF	VNLD0CDU		# VERB-NOUN TO LOAD OPTICS CDUS
+OPTC1		CAF	VNLDOCDU		# VERB-NOUN TO LOAD OPTICS CDUS
 		TC	BANKCALL
 		CADR	GOXDSPF
 		TC	TERMEXTV
@@ -309,7 +310,7 @@ OPTC1		CAF	VNLD0CDU		# VERB-NOUN TO LOAD OPTICS CDUS
 		TC	ENDEXTVB
 		TC	ENDEXTVB
 		
-VNLD0CDU	VN	2492
+VNLDOCDU	VN	2492
 OPTCOARV	EQUALS	IMUCOARV		# DIFFERENT NOUNS.
 
 ## Page 243

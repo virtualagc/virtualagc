@@ -568,12 +568,10 @@ DVTHRUSH	EQUALS	ELEVEN		# 15 PERCENT OF 2SEC PIPA ACCUMULATION,
 
 JTAGTIME	DEC	120		# = 1 SEC + T CDU, T CDU = .1 SEC
 
-## <b>Reconstruction:</b>  The following two constants were removed to conserve
-## a word of memory in bank 37 that overflowed due to implementing PCR 787.
-## 2.5SEC		DEC	250
-## MDOTFAIL	DEC	144.0 B-16	# 5 SEC MASS LOSS AT 28.8 KG/SEC
-##					# SHOULD BE 2-4 SECS FOR NO START
-##					#	    6-8 SECS FOR FAILURE
+2.5SEC		DEC	250
+MDOTFAIL	DEC	144.0 B-16	# 5 SEC MASS LOSS AT 28.8 KG/SEC
+					# SHOULD BE 2-4 SECS FOR NO START
+					#	    6-8 SECS FOR FAILURE
 					
 ## Page 831
 # NORMLIZE PERFORMS THE INITIALIZATION REQUIRED PRIOR TO THE FIRST ENTRY TO AVERAGEG, AND SCALES RN SO THAT IT
@@ -803,11 +801,7 @@ CALCRVG		VLOAD	VXSC
 		STCALL	VN1		# TEMP STORAGE OF VN SCALED 2(+7) M/CS
 			31D
 
-## <b>Reconstruction:</b>  The following constant was removed to conserve
-## a word of memory in bank 37 that overflowed due to implementing PCR 787.
-## <pre>
-## KPIP		2DEC	.1024		# SCALES DELV TO 2(+4)
-## </pre>
+KPIP		2DEC	.1024		# SCALES DELV TO 2(+4)
 
 KPIP1		2DEC	0.074880	# 207 DELV SCALING.  1 PULSE = 5.85 CM/SEC.
 
