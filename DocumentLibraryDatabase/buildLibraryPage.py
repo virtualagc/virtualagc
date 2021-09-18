@@ -228,6 +228,20 @@
 #   Field 14    A comment (in HTML) what will be added as-is to the document's
 #               entry on the library page.  Fortunately, I've seldom done that
 #               in the past, but it needs to be done sometimes.
+#
+#   Field 15    If the document is a scan of a software listing, this field
+#               can be used as a URL for the transcription to source file(s)
+#               in the github repo.
+#
+#   Field 16    Similarly, this field could be a URL for the assembly listing
+#               output by the "modern" assembler.
+#
+#   Field 17    And similarly, this field could be the URL for the
+#               colorized, syntax-highlighted HTML of the assembly listing.
+#
+#   Field 18    In cases where we have a core dump of software without having
+#               source code, this field can contain a URL to the core dump
+#               (typically in our github repo).
 
 import sys
 import os
@@ -242,7 +256,7 @@ lenOldRemote = len(oldRemote)
 lenRemote = len(remote)
 lenLocal = len(local)
 
-hoverColor = "#e8e8e8"
+hoverColor = "#e0e0e0"
 fancyHeaderAndFooter = True
 
 fileHeader = """<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
@@ -257,7 +271,7 @@ fileHeader = """<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
 </head>
 <body style="background-image: url(gray3.jpg);">
 <script type="text/javascript">
-document.write(headerTemplate.replace("@TITLE@","Virtual AGC Project").replace("@SUBTITLE@","Document Library Page"))
+document.write(headerTemplate.replace("@TITLE@","Virtual AGC Project").replace("@SUBTITLE@","Document Library Page Redux"))
 </script>
 <br><br>
 """
@@ -370,6 +384,84 @@ The items below are arranged by MIT Instrumentation Laboratory document
 number.
 """
 
+blurbPadloads = """
+Arranged by mission.
+"""
+
+blurbAssemblyListing = """
+Here are listings of actual software for the various onboard guidance 
+computers covered by the Virtual AGC Project.  We don't have <i>all</i> of
+it, by any means, but we have what we have!  While all of the software 
+revisions listed below are equipped with comments
+&mdash; too many and too much, some may say &mdash; there tend to be much
+longer writeups on the pages specifically devoted to them.  So if you want
+even more detail, I'd suggest looking in one of these places: the 
+<a href="yaAGS.html">AGS page</a>, the <a href="LVDC.html">LVDC/PTC page</a>,
+the <a href="Luminary.html">LM AGC software page</a>, or the
+<a href="Colossus.html">CM AGC software page</a>
+<br><br>
+The collection contains many software revisions which never flew in Apollo 
+missions, and conversely there are missions for which we don't have some of 
+the software.  And, there are missions for which we may not have the <i>exact</i>
+software revision originally used, but do have a revision which is fine for
+successfully flying a simulated mission.  Here's a mission-by-mission
+summary of what we presently have and don't have:<br><br>
+<table cellspacing="2" cellpadding="2" border="1" align="center" style="font-family:sans-serif"><tbody>
+<tr style="font-weight:bold" align="center"><td>Mission</td><td>CM AGC</td><td>LM AGC</td><td>AGS</td><td>LVDC</td></tr>
+<tr align="center"><td>AS-202</td><td>no</td><td>n/a</td><td>n/a</td><td>no</td></tr>
+<tr align="center"><td>Apollo 1</td><td>no</td><td>n/a</td><td>n/a</td><td>no</td></tr>
+<tr align="center"><td>Apollo 4</td><td>yes</td><td>n/a</td><td>n/a</td><td>no</td></tr>
+<tr align="center"><td>Apollo 5</td><td>n/a</td><td>yes</td><td>no</td><td>no</td></tr>
+<tr align="center"><td>Apollo 6</td><td>yes</td><td>n/a</td><td>n/a</td><td>no</td></tr>
+<tr align="center"><td>Apollo 7</td><td>no</td><td>n/a</td><td>n/a</td><td>no</td></tr>
+<tr align="center"><td>Apollo 8</td><td>yes</td><td>n/a</td><td>n/a</td><td>no</td></tr>
+<tr align="center"><td>Apollo 9</td><td>yes</td><td>fine</td><td>no</td><td>no</td></tr>
+<tr align="center"><td>Apollo 10</td><td>yes</td><td>yes</td><td>no</td><td>no</td></tr>
+<tr align="center"><td>Apollo 11</td><td>yes</td><td>yes</td><td>yes</td><td>no</td></tr>
+<tr align="center"><td>Apollo 12</td><td>no</td><td>yes</td><td>yes</td><td>no</td></tr>
+<tr align="center"><td>Apollo 13</td><td>no</td><td>fine</td><td>no</td><td>no</td></tr>
+<tr align="center"><td>Apollo 14</td><td>no</td><td>yes</td><td>no</td><td>no</td></tr>
+<tr align="center"><td>Apollo 15</td><td>yes</td><td>yes</td><td>yes</td><td>no</td></tr>
+<tr align="center"><td>Apollo 16</td><td>yes</td><td>yes</td><td>yes</td><td>no</td></tr>
+<tr align="center"><td>Apollo 17</td><td>yes</td><td>yes</td><td>yes</td><td>no</td></tr>
+<tr align="center"><td>Skylab 2</td><td>no</td><td>n/a</td><td>n/a</td><td>no</td></tr>
+<tr align="center"><td>Skylab 3</td><td>no</td><td>n/a</td><td>n/a</td><td>no</td></tr>
+<tr align="center"><td>Skylab 4</td><td>no</td><td>n/a</td><td>n/a</td><td>no</td></tr>
+<tr align="center"><td>ASTP</td><td>no</td><td>n/a</td><td>n/a</td><td>no</td></tr>
+</tbody></table><br>
+The software listings below are sorted by their creation dates.  It should be noted
+that there is a certain art to determining these dates, and thus the results
+are somewhat subjective.  For example, the dates on the printouts were the 
+dates the printouts were made ... which could sometimes even be <i>after</i> 
+the mission flew.  For software revisions that were "released", we usually know
+the release dates, but those were always some undetermined number of weeks 
+after the software had been created, undergone testing, etc.  And for some 
+engineering revisions of the software, we have no <i>specific</i> knowledge
+beyond a rough timeframe.  Nevertheless, our arrangement is probably pretty
+close to the objective reality (if we only knew what it was).
+"""
+
+blurbMathFlow = """
+The term "math flow" refers to the underlying, implementation-independent,
+mathematical algorithms that are &mdash; at some point in the development
+process &mdash; coded as guidance-computer instructions.  Or another way of 
+looking at it, I suppose, is that the math flow encompasses the algorithms
+needed to <i>program</i> the guidance computers, as opposed to the information need
+to <i>use</i> those computers after they're programmed.
+<br><br>
+There are several ways the Apollo and Gemini guidance computers' math flow 
+are represented in or collected documentation.
+For example, there may simply be a set of mathematical equations that represent
+the physics of spacecraft motion.  At the other end of the spectrum, there 
+may be detailed sets of flowcharts that form an almost-complete pictorial 
+representation of the
+eventual computer program's control flow and handling of variables.  The
+entire continuum of possibilities is represented in this section, for all of 
+the types of guidance computers covered by the Virtual AGC Project.
+<br><br>
+Documents are sorted by publication date.
+"""
+
 blurbSGA = """
 If you are interested in the mathematical underpinnings of the AGC software, 
 then this amazing series of memos from MIT's Instrumentation Lab is the place 
@@ -453,37 +545,50 @@ publication date.
 """
 
 blurbElectroMechanical = """
-There is one significant category of Document Library items which cannot be
-contained within the format of this web page.  I refer to electro-mechanical 
-drawings of the CM and LM G&N systems.  For example, the AGC 
-circuit schematics or the drawings of the physical design of the DSKY.  
-While a <i>few</i> of those drawings appear here, the truth is that the 
-totality of G&N electro-mechanical drawings in our collection outnumbers the 
-mere "documents" found here by a very large factor. And you can't "browse" 
-through hundreds of thousands of engineering drawings in any meaningful way
-if they're just listed sequentially.  Instead, you have to go to our 
-<a href="ElectroMechanical.html">
-Electro-Mechanical Page</a>, which provides you with two very-valuable 
-resources to find the engineering drawings you need:
-<ul>
-<li>It has a search engine, allowing you to 
-<a href="TipueSearch.html">search the 
-electro-mechanical drawings</a> by fragments of drawing numbers or drawing 
-titles.</li>
-<li>It lets you 
-<a href="ElectroMechanical.html#Navigate_the_Assembly_Hierarchy_">
-navigate the electro-mechanical drawing hierarchy</a> in a top-down fashion.</li>
-</ul>
-As for the few related documents which it makes sense to include directly 
-here, I've sorted them for you by publication date; the undated documents
-appear at the beginning of the list.
+There are two significant categories of Document Library items which cannot be
+contained fully within the structure of this web page.  I refer to electrical 
+and mechanical engineering drawings of the CM and LM G&N systems, primarily
+by the MIT Instrumentation Laboratory, and to engineering drawings of the 
+Lunar Module, primarily by Grumman Aerospace Engineering. (Drawings of the
+CSM, by North American Aviation, we unfortunately have little expectation of
+accessing in bulk.)  Examples of the MIT/IL drawings are the AGC circuit 
+schematics or the mechanical drawings of the physical design 
+of the DSKY. There are around 100,000 such drawings presently (September 2021)
+in the library, with the number expected to reach around 500,000 eventually.
+Therefore, they cannot each be listed here individually.
+<br><br>
+Large numbers of engineering drawings are presented here <i>indirectly</i>, 
+in the form of "drawing trees".  For example, Apollo 11 contained 2 G&N 
+systems, one for the CM (drawing 2014999-101) and one for the LM 
+(drawing 6014999-091). Each of them comprises a set of drawings, one for each
+of their sub-assemblies.  And each of those comprises yet another set of 
+drawings, one for each of their sub-sub-assemblies.  And so on.  Only the
+two top-level drawings are explicitly presented here, in the form of links to
+separate "drawing tree" pages dedicated to them.  It is those separate 
+drawing tree pages, rather than this Document Library page, which allow you to 
+navigate throughout their drawing hierarchies.
+<br><br>
+To find specific engineering drawings outside the context of the drawing trees
+in which they reside, however, you won't be able to browse your way through 
+a sequential list of them.  Instead, I'd recommend going to our <blockquote>
+<a href="TipueSearch.html">G&N engineering-drawing search engine</a>
+</blockquote>
+which allows you to find engineering drawings by fragments of drawing numbers 
+or drawing titles.  Or you can try our <a href="ElectroMechanical.html">
+Electro-Mechanical page</a>, which may provide additional resources or 
+related information.
+<br><br>
+As for the electro-mechanical design documents which we are able to provide
+explicitly here without having to use the separate search engine, I've sorted 
+them for you by publication date; the undated 
+documents appear at the beginning of the list.
 """
 
 blurbEverything = """
 If none of the sections above coincides with your special interests, this 
 section may help.  It contains <i>every</i> item in our Document Library, 
 whether or not those documents were already included in the preceding sections.
-(Excluding, of course, G&N system engineering drawings, as covered
+(Excluding, of course, some G&N system engineering drawings, as explained
 in the immediately-preceding section.)
 <br><br>
 If you <i>still</i> can't find what you need after you've looked in this 
@@ -542,16 +647,12 @@ def myPubDateSortKey(record):
     month = record["MonthPublished"]
     day = record["DayPublished"]
     year = record["YearPublished"]
-    if illegal:
-        month = "00"
-        day = "00"
+    if year == "":
         year = "0000"
     if month == "":
         month = "00"
     if day == "":
         day = "00"
-    if year == "":
-        year = "0000"
     return year + month + day
 
 # Parse a simple comma-delimited list appearing in a database field.
@@ -731,7 +832,30 @@ def myAuthorSortKey(record):
     return output + record["Title"].upper()
 
 def myDateAuthorSortKey(record):
-    return myPubDateSortKey(record) + myAuthorSortKey(record)
+    key = myPubDateSortKey(record) + myAuthorSortKey(record)
+    # print ("\"%s\" %s" % (key, record["Title"]), file=sys.stderr)
+    return key
+
+def myMissionSortKey(record):
+    targets = record["Targets"]
+    if len(targets) > 0:
+        fmt = "%-10s%10s"
+        firstTarget = targets[0].lower()
+        if "as-" == firstTarget[:3]:
+            key = fmt % ("1as-", firstTarget[3:].strip())
+        elif "apollo " == firstTarget[:7]:
+            key = fmt % ("2apollo", firstTarget[7:].strip())
+        elif "skylab" == firstTarget:
+            key = fmt % ("3skylab", "1")
+        elif "skylab " == firstTarget[:7]:
+            key = fmt % ("3skylab", firstTarget[7:].strip())
+        elif "astp" == firstTarget[:4]:
+            key = fmt % ("4astp", "")
+        else:
+            key = fmt % ("", "")
+        #print("'" + key + "'", file=sys.stderr)
+        return key
+    return ""
 
 # Sort key used for the "Recently Added" section.  We want to sort primarily
 # on the epoch added (myTimeSortKey), but then secondarily the way we
@@ -866,7 +990,7 @@ def documentEntryHTML(record, showComment):
             hover = makeTitleHover(record, m)
             html += " or <a " + hover + " href=\"" + URLs[m] + "\">here</a>"
     else:
-        html += record["Title"]
+        html += "\"" + record["Title"] + "\""
     if record["Portion"] != "":
         portion = record["Portion"]
         portion = portion[:1].lower() + portion[1:]
@@ -882,7 +1006,7 @@ def documentEntryHTML(record, showComment):
     if html != "" and html[-1:] not in [".", "!", "?"] and html[-15:] not in [ ".</span></code>", "?</span></code>", "!</span></code>" ]:
         html += ". "
     if record["Disclaimer"] != "":
-        html += record["Disclaimer"]
+        html += "Disclaimer: " + record["Disclaimer"]
         while html[-1:] == " ":
             html = html[:-1]
         if html[-1:] not in [".", "!", "?"]:
@@ -893,7 +1017,20 @@ def documentEntryHTML(record, showComment):
             html = html[:-1]
         if html[-1:] not in [".", "!", "?", ">"]:
             html += ". "
-    if html != "" and len(URLs) == 0:
+    if record["TranscriptionURL"] != "" or record["AssemblyListingURL"] != "" or record["ColorizedURL"] != "" or record["CoreDumpURL"] != "":
+        if html[-1:] != ">":
+            html += "<br>"
+        html += "<blockquote><i>See also:</i><ul>"
+        if record["TranscriptionURL"] != "":
+            html += "<li><a href=\"" + record["TranscriptionURL"] + "\">Machine-friendly, assemblable source-code files.</a></li>"
+        if record["AssemblyListingURL"] != "":
+            html += "<li><a href=\"" + record["AssemblyListingURL"] + "\">Listing created by assembling the source-code file(s).</a></li>"
+        if record["ColorizedURL"] != "":
+            html += "<li><a href=\"" + record["ColorizedURL"] + "\">Human-friendly, colorized, syntax-highlighted assembly listing.</a></li>"
+        if record["CoreDumpURL"] != "":
+            html += "<li><a href=\"" + record["CoreDumpURL"] + "\">Core-rope contents dumped from physical memory modules.</a></li>"
+        html += "</ul></blockquote>"
+    if html != "" and len(URLs) == 0 and record["TranscriptionURL"] == "" and record["AssemblyListingURL"] == "" and record["ColorizedURL"] == "" and record["CoreDumpURL"] == "":
         html = "<span style=\"color:#808080\">" + html + "</span>"
     return html
 
@@ -908,6 +1045,10 @@ def documentEntryHTML(record, showComment):
 # pair "all":True (which matches *all* records) or "none":True (which matches
 # *no* record, but still creates a section with a blurb).
 #
+# Note that the default collating function is myDateAuthorSortKey, so if that's
+# what's wanted, you can simply leave out 
+#       "sortKey" : myDateAuthorSortKey
+#
 # The anchor field must have a matching <a name="..."></a> tag.
 # Only entries with an "anchor" key are used in the table of contents.
 # Never remove the 1st two entries below, but the "anchor" can be removed
@@ -919,9 +1060,14 @@ tableOfContentsSpec = [
     { "title" : "Debug", "sortKey" : myOriginalSortKey, "blurb" : blurbDebug },
     { "anchor" : "RecentAdditions", "title" : "Recently Added Documents", "sortKey" : myRecentSortKey, "blurb" : blurbRecentlyAdded },
     { "anchor" : "Presentations", "title" : "Presentations", "sortKey" : myAuthorSortKey, "keywords" : ["Presentation"], "blurb" : blurbPresentations },
+    { "anchor" : "ProgrammerManuals", "title" : "Programmers' Manuals", "keywords" : ["Programmer manual"]},
+    { "anchor" : "UserGuides", "title" : "AGC Users' Guides", "keywords" : [ "AGC user guide" ] },
     { "anchor" : "GSOPs", "title" : "Guidance System Operations Plans (GSOP)", "sortKey" : myDashSortKey, "keywords" : [ "GSOP" ], "blurb" : blurbGSOPs },
-    { "title" : "AGC Software Language Manuals", "keywords" : ["AGC Language"] },
-    { "title" : "Program Listings", "keywords" : ["AGC Listing", "AGS Listing", "LVDC Listing", "OBC Listing"] },
+    { "anchor" : "ReferenceCards", "title" : "Quick-Reference Cards, Data Cards, Cue Cards", "keywords" : ["Reference cards"]},
+    { "anchor" : "PadLoads", "title" : "AGC Pad Loads", "sortKey" : myMissionSortKey, "keywords" : [ "Pad load" ], "blurb" : blurbPadloads },
+    { "anchor" : "EMPs", "title" : "Erasable Memory Programs (EMP)", "keywords" : ["Erasable memory programs"]},
+    { "anchor" : "AssemblyListings", "title" : "Software Listings", "keywords" : ["Assembly listing"], "blurb" : blurbAssemblyListing },
+    { "anchor" : "MathFlow", "title" : "Math Flow", "keywords" : [ "Guidance equations" ], "blurb" : blurbMathFlow },
     { "anchor" : "SGAMemos", "title" : "Space Guidance Analysis Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Space Guidance Analysis Memo"], "blurb" : blurbSGA },
     { "anchor" : "ApolloProjectMemos", "title" : "Apollo Project Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Apollo Project Memo"] },
     { "anchor" : "ApolloEngineeringMemos", "title" : "Apollo Engineering Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Apollo Engineering Memo"] },
@@ -932,15 +1078,52 @@ tableOfContentsSpec = [
     { "anchor" : "DigitalGroupMemos", "title" : "Digital Group Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["DG Memo"] },
     { "anchor" : "MissionTechniquesMemos", "title" : "Mission Techniques Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Mission Techniques Memo"] },
     { "anchor" : "SystemTestGroupMemos", "title" : "System Test Group Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["System Test Group Memo"] },
+    { "anchor" : "Requirements", "title" : "AGC/AGS Software Requirements", "keywords" : ["Software requirements"]},
     { "anchor" : "LuminaryMemos", "title" : "LUMINARY Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["LUMINARY Memo"], "blurb" : blurbLuminaryMemos },
     { "anchor" : "ColossusMemos", "title" : "COLOSSUS Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["COLOSSUS Memo"] },
     { "anchor" : "SkylarkMemos", "title" : "SKYLARK (SKYLAB) Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["SKYLARK Memo", "SKYLAB Memo"] },
     { "anchor" : "PcrsPcns", "title" : "Program Change Requests (PCR) and Notices (PCN)", "sortKey" : myDashSortKey, "documentNumbers" : [ "PCR-", "PCN-"], "blurb" : blurbPcrsPcns  },
-    { "anchor" : "Anomalies", "title" : "Software Anomaly Reports and Assembly Control Board Requests", "sortKey" : myDateAuthorSortKey, "blurb" : blurbAnomalies, "documentNumbers" : [ "LNY-", "L-", "COL-", "COM-", "A-" ] },
-    { "anchor" : "AGS", "title" : "Abort Guidance System (AGS)", "sortKey" : myDateAuthorSortKey, "blurb" : blurbAGS, "keywords" : [ "AGS" ] },
-    { "anchor" : "LVDC", "title" : "Launch Vehicle Digital Computer (LVDC) and Friends", "sortKey" : myDateAuthorSortKey, "blurb" : blurbLVDC, "keywords" : [ "LVDC", "LVDA", "FCC", "IU" ] },
-    { "anchor" : "EngineeringDrawings", "title" : "AGC Electrical and Mechanical Design", "sortKey" : myDateAuthorSortKey, "keywords" : [ "Engineering Drawings" ], "blurb" : blurbElectroMechanical },
-    { "anchor" : "Everything", "title" : "Everything", "sortKey" : myDateAuthorSortKey, "blurb" : blurbEverything, "all" : True }
+    { "anchor" : "Anomalies", "title" : "Software Anomaly Reports and Assembly Control Board Requests", "blurb" : blurbAnomalies, "documentNumbers" : [ "LNY-", "L-", "COL-", "COM-", "A-" ] },
+    { "anchor" : "SCB", "title" : "Software Control Board (SCB)", "keywords" : ["SCB"]},
+    { "anchor" : "SDP", "title" : "Software Development Plans", "keywords" : ["SDP"]},
+    { "anchor" : "Experience", "title" : "Apollo Experience Reports", "keywords" : ["Experience report"]},
+    { "anchor" : "AGS", "title" : "Abort Guidance System (AGS)", "blurb" : blurbAGS, "keywords" : [ "AGS" ] },
+    { "anchor" : "LVDC", "title" : "Launch Vehicle Digital Computer (LVDC) and Friends", "blurb" : blurbLVDC, "keywords" : [ "LVDC", "LVDA", "FCC", "IU" ] },
+    { "anchor" : "SystemsHandbooks", "title" : "Systems Handbooks", "keywords" : ["systems handbook"]},
+    { "anchor" : "OperationsHandbooks", "title" : "Operations Handbooks", "keywords" : ["operations handbook"]},
+    { "anchor" : "OperationalDataBooks", "title" : "Operational Data Books", "keywords" : ["operational data book"]},
+    { "anchor" : "CrewDebriefing", "title" : "Technical Crew Debriefings", "keywords" : ["Debriefing"]},
+    { "anchor" : "Postflight", "title" : "Mission Reports and Trajectory Reconstructions", "keywords" : ["Mission report", "Trajectory reconstruction"]},
+    { "anchor" : "FlightPlan", "title" : "Flight Plans", "keywords" : ["flight plan"]},
+    { "anchor" : "FlightData", "title" : "Flight Data Files (Checklists, G&N Dictionaries, ...)", "keywords" : ["flight data"]},
+    { "anchor" : "SpacecraftFamiliarization", "title" : "Spacecraft Familiarization Manuals", "keywords" : ["spacecraft familiarization"]},
+    { "anchor" : "FlightEvaluation", "title" : "Launch Vehicle and Spacecraft Flight Evaluation Reports", "keywords" : ["flight evaluation"]},
+    
+    { "anchor" : "Apollo1", "title" : "Mission-Specific Documentation: Apollo 1", "targets" : ["Apollo 1"] },
+    { "anchor" : "AS202", "title" : "Mission-Specific Documentation: AS-202 (\"Apollo 3\")", "targets" : ["AS-202"] },
+    { "anchor" : "Apollo4", "title" : "Mission-Specific Documentation: Apollo 4", "targets" : ["Apollo 4"] },
+    { "anchor" : "Apollo5", "title" : "Mission-Specific Documentation: Apollo 5", "targets" : ["Apollo 5"] },
+    { "anchor" : "Apollo6", "title" : "Mission-Specific Documentation: Apollo 6", "targets" : ["Apollo 6"] },
+    { "anchor" : "2TV-1", "title" : "Mission-Specific Documentation: 2TV-1", "targets" : ["2TV-1"] },
+    { "anchor" : "Apollo7", "title" : "Mission-Specific Documentation: Apollo 7", "targets" : ["Apollo 7"] },
+    { "anchor" : "Apollo8", "title" : "Mission-Specific Documentation: Apollo 8", "targets" : ["Apollo 8"] },
+    { "anchor" : "Apollo9", "title" : "Mission-Specific Documentation: Apollo 9", "targets" : ["Apollo 9"] },
+    { "anchor" : "Apollo10", "title" : "Mission-Specific Documentation: Apollo 10", "targets" : ["Apollo 10"] },
+    { "anchor" : "Apollo11", "title" : "Mission-Specific Documentation: Apollo 11", "targets" : ["Apollo 11"] },
+    { "anchor" : "Apollo12", "title" : "Mission-Specific Documentation: Apollo 12", "targets" : ["Apollo 12"] },
+    { "anchor" : "Apollo13", "title" : "Mission-Specific Documentation: Apollo 13", "targets" : ["Apollo 13"] },
+    { "anchor" : "Apollo14", "title" : "Mission-Specific Documentation: Apollo 14", "targets" : ["Apollo 14"] },
+    { "anchor" : "Apollo15", "title" : "Mission-Specific Documentation: Apollo 15", "targets" : ["Apollo 15"] },
+    { "anchor" : "Apollo16", "title" : "Mission-Specific Documentation: Apollo 16", "targets" : ["Apollo 16"] },
+    { "anchor" : "Apollo17", "title" : "Mission-Specific Documentation: Apollo 17", "targets" : ["Apollo 17"] },
+    { "anchor" : "Skylab2", "title" : "Mission-Specific Documentation: Skylab 2", "targets" : ["Skylab 2"] },
+    { "anchor" : "Skylab3", "title" : "Mission-Specific Documentation: Skylab 3", "targets" : ["Skylab 3"] },
+    { "anchor" : "Skylab4", "title" : "Mission-Specific Documentation: Skylab 4", "targets" : ["Skylab 4"] },
+    { "anchor" : "ASTP", "title" : "Mission-Specific Documentation: ASTP", "targets" : ["ASTP"] },
+    
+    { "anchor" : "StatusReports", "title" : "Status Reports", "keywords" : ["Status reports"]},
+    { "anchor" : "EngineeringDrawings", "title" : "AGC Electrical and Mechanical Design", "keywords" : [ "Engineering Drawings", "Drawing Tree" ], "blurb" : blurbElectroMechanical },
+    { "anchor" : "Everything", "title" : "Everything", "blurb" : blurbEverything, "all" : True }
 ]
 
 # Step 1:  Read the entire database into the lines[] array from stdin.
@@ -950,7 +1133,7 @@ lines = sys.stdin.readlines()
 # fields are defined, and append into an array records[].  The first line is
 # skipped, since it contains the column headings.  However, we parse it anyway
 # to determine if it has the right number of fields.
-if len(lines) < 2 or len(lines[0].split('\t')) != 14:
+if len(lines) < 2 or len(lines[0].split('\t')) != 18:
     print("Database is empty or has wrong number of fields", file=sys.stderr)
     sys.exit(1)
 globalError = False
@@ -994,6 +1177,11 @@ for line in lines[1:]:
         "Disclaimer": "",
         # Field 14
         "Comment" : "",
+        # Field 15-18
+        "TranscriptonURL" : "",
+        "AssemblyListinURL" : "",
+        "ColorizedURL" : "",
+        "CoreDumpURL" : "",
         # Stuff that doesn't come from the database per se.
         "SizeFiles": [],
         "MonthFile": "",
@@ -1094,6 +1282,14 @@ for line in lines[1:]:
         record["Disclaimer"] = fields[12].strip()
     if len(fields) >= 14:    # Field 14
         record["Comment"] = fields[13].strip()
+    if len(fields) >= 15:    # Field 15
+        record["TranscriptionURL"] = fields[14].strip().replace("http://www.ibiblio.org", "https://www.ibiblio.org")
+    if len(fields) >= 16:    # Field 16
+        record["AssemblyListingURL"] = fields[15].strip().replace("http://www.ibiblio.org", "https://www.ibiblio.org")
+    if len(fields) >= 17:    # Field 17
+        record["ColorizedURL"] = fields[16].strip().replace("http://www.ibiblio.org", "https://www.ibiblio.org")
+    if len(fields) >= 18:    # Field 18
+        record["CoreDumpURL"] = fields[17].strip().replace("http://www.ibiblio.org", "https://www.ibiblio.org")
         
     # Finish up this input line.
     records.append(record)
@@ -1200,7 +1396,10 @@ for n in range(2, len(tableOfContentsSpec)):
     if "none" in tableOfContentsSpec[n] and tableOfContentsSpec[n]["none"]:
         continue
     print("<ul>")
-    records.sort(key=tableOfContentsSpec[n]["sortKey"])
+    if "sortKey" in tableOfContentsSpec[n]:
+        records.sort(key=tableOfContentsSpec[n]["sortKey"])
+    else:
+        records.sort(key=myDateAuthorSortKey)
     keywordsSet = set([])
     targetsSet = set([])
     documentNumbers = []
