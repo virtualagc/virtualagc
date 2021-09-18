@@ -450,7 +450,7 @@ needed to <i>program</i> the guidance computers, as opposed to the information n
 to <i>use</i> those computers after they're programmed.
 <br><br>
 There are several ways the Apollo and Gemini guidance computers' math flow 
-are represented in or collected documentation.
+are represented in our collected documentation.
 For example, there may simply be a set of mathematical equations that represent
 the physics of spacecraft motion.  At the other end of the spectrum, there 
 may be detailed sets of flowcharts that form an almost-complete pictorial 
@@ -973,14 +973,14 @@ def documentEntryHTML(record, showComment):
         html += ", "
     if record["Revision"] != "":
         html += record["Revision"] + ", "
-    if "Video" in record["Keywords"]:
+    if "video" in record["Keywords"]:
         html += "Video, "
-    if "Transcript" in record["Keywords"]:
-        html += "Transcript, "
-    if "Audio" in record["Keywords"]:
+    if "transcript" in record["Keywords"]:
+        html += "Transcription, "
+    if "audio" in record["Keywords"]:
         html += "Audio, "
-    if "Photo" in record["Keywords"]:
-        html += "Photograph, "
+    if "photo" in record["Keywords"]:
+        html += "Photography, "
     if len(URLs) > 0:
         hover = makeTitleHover(record, 0)
         html += "\"<a " + hover + " href=\"" + URLs[0] + "\">"
@@ -1061,7 +1061,7 @@ tableOfContentsSpec = [
     { "anchor" : "RecentAdditions", "title" : "Recently Added Documents", "sortKey" : myRecentSortKey, "blurb" : blurbRecentlyAdded },
     { "anchor" : "Presentations", "title" : "Presentations", "sortKey" : myAuthorSortKey, "keywords" : ["Presentation"], "blurb" : blurbPresentations },
     { "anchor" : "ProgrammerManuals", "title" : "Programmers' Manuals", "keywords" : ["Programmer manual"]},
-    { "anchor" : "UserGuides", "title" : "AGC Users' Guides", "keywords" : [ "AGC user guide" ] },
+    { "anchor" : "UserGuides", "title" : "AGC/AGS Users' Guides", "keywords" : [ "AGC user guide", "AGS user guide" ] },
     { "anchor" : "GSOPs", "title" : "Guidance System Operations Plans (GSOP)", "sortKey" : myDashSortKey, "keywords" : [ "GSOP" ], "blurb" : blurbGSOPs },
     { "anchor" : "ReferenceCards", "title" : "Quick-Reference Cards, Data Cards, Cue Cards", "keywords" : ["Reference cards"]},
     { "anchor" : "PadLoads", "title" : "AGC Pad Loads", "sortKey" : myMissionSortKey, "keywords" : [ "Pad load" ], "blurb" : blurbPadloads },
@@ -1094,7 +1094,7 @@ tableOfContentsSpec = [
     { "anchor" : "OperationalDataBooks", "title" : "Operational Data Books", "keywords" : ["operational data book"]},
     { "anchor" : "CrewDebriefing", "title" : "Technical Crew Debriefings", "keywords" : ["Debriefing"]},
     { "anchor" : "Postflight", "title" : "Mission Reports and Trajectory Reconstructions", "keywords" : ["Mission report", "Trajectory reconstruction"]},
-    { "anchor" : "FlightPlan", "title" : "Flight Plans", "keywords" : ["flight plan"]},
+    { "anchor" : "FlightPlan", "title" : "Flight Plans and Planned Trajectories", "keywords" : ["flight plan", "trajectory"]},
     { "anchor" : "FlightData", "title" : "Flight Data Files (Checklists, G&N Dictionaries, ...)", "keywords" : ["flight data"]},
     { "anchor" : "SpacecraftFamiliarization", "title" : "Spacecraft Familiarization Manuals", "keywords" : ["spacecraft familiarization"]},
     { "anchor" : "FlightEvaluation", "title" : "Launch Vehicle and Spacecraft Flight Evaluation Reports", "keywords" : ["flight evaluation"]},
@@ -1123,7 +1123,7 @@ tableOfContentsSpec = [
     
     { "anchor" : "StatusReports", "title" : "Status Reports", "keywords" : ["Status reports"]},
     { "anchor" : "EngineeringDrawings", "title" : "AGC Electrical and Mechanical Design", "keywords" : [ "Engineering Drawings", "Drawing Tree" ], "blurb" : blurbElectroMechanical },
-    { "anchor" : "Everything", "title" : "Everything", "blurb" : blurbEverything, "all" : True }
+    { "anchor" : "Everything", "title" : "Everything", "blurb" : blurbEverything, "all" : True, "lineNumbers" : True }
 ]
 
 # Step 1:  Read the entire database into the lines[] array from stdin.
@@ -1294,10 +1294,14 @@ for line in lines[1:]:
     # Finish up this input line.
     records.append(record)
 
-# Step 3:  Analyze records[] to determine what sections we will need in the
-# output HTML, and the criteria for adding any given record to a section.  Note
-# that there will always be a "Recent Additions" (or similarly-named) section,
-# regardless of the targets and keywords defined in the database.
+# Step 3:  Sanity Clause.  Look for duplicates.
+allURLs = []
+for record in records:
+    allURLs += record["URLs"]
+allURLs.sort()
+for n in range(1, len(allURLs)):
+    if allURLs[n-1] == allURLs[n]:
+        print("Duplicate: " + allURLs[n], file=sys.stderr)
 
 # Step 4:  Output the HTML file header.
 currentEpoch = int(time.time())
@@ -1395,7 +1399,10 @@ for n in range(2, len(tableOfContentsSpec)):
         print(tableOfContentsSpec[n]["blurb"])
     if "none" in tableOfContentsSpec[n] and tableOfContentsSpec[n]["none"]:
         continue
-    print("<ul>")
+    if "lineNumbers" in tableOfContentsSpec[n] and tableOfContentsSpec[n]["lineNumbers"]:
+        print("<ol>")
+    else:
+        print("<ul>")
     if "sortKey" in tableOfContentsSpec[n]:
         records.sort(key=tableOfContentsSpec[n]["sortKey"])
     else:
@@ -1429,7 +1436,10 @@ for n in range(2, len(tableOfContentsSpec)):
                         matched = True
         if matched:
             print("<li>" + documentEntryHTML(record, True) + "</li>")
-    print("</ul>")
+    if "lineNumbers" in tableOfContentsSpec[n] and tableOfContentsSpec[n]["lineNumbers"]:
+        print("</ol>")
+    else:
+        print("</ul>")
 
 # Final step: Cleanup.
 if fancyHeaderAndFooter:
