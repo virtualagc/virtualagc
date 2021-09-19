@@ -544,6 +544,41 @@ The entries in this section are sorted by
 publication date.
 """
 
+blurbSoundAndFury = """
+The title of this section is a little misleading, in that many people, upon 
+seeing the lead-in "sound and fury ...", would immediately fill in the ending 
+"... signifying nothing". 
+<br><br>
+I certainly don't intend to imply that the items in this section "signify 
+nothing", but you may nevertheless have to put in a little more effort to 
+determine just what they do signify within the context of AGC development.  
+That's because these memos share some common characteristics that add to your 
+confusion, such as:
+<br>
+<ul>
+  <li>They present just one side of an obviously two-sided
+    discussion.</li>
+  <li>They don't tend to share the emotionally-neutral tone that
+    almost every other document in this library has.<br>
+  </li>
+  <li>We don't know the personal interrelationships between the
+    people involved.</li>
+  <li>They were written before the invention of emojis. 
+  <img src="smiley.png" alt="" width="16" height="16"></li>
+</ul>
+And there may be individually-complicating features as well.  One of the memos, 
+for example, was written on April Fools' Day.  Is it fooling, or is it not?  I 
+can't say.  What I can say is that if you decode the memos properly, it's 
+possible that there may be lessons to be learned from them.
+"""
+
+blurbSomethingDifferent = """
+In this section, we provide some stuff that doesn't directly pertain to any of 
+the computers in Apollo or Gemini.  But if the original developers give me 
+interesting and sometimes unique material, or if I find interesting material 
+related to them, I'd like to present it anyway. 
+"""
+
 blurbElectroMechanical = """
 There are two significant categories of Document Library items which cannot be
 contained fully within the structure of this web page.  I refer to electrical 
@@ -1061,7 +1096,7 @@ tableOfContentsSpec = [
     { "anchor" : "RecentAdditions", "title" : "Recently Added Documents", "sortKey" : myRecentSortKey, "blurb" : blurbRecentlyAdded },
     { "anchor" : "Presentations", "title" : "Presentations", "sortKey" : myAuthorSortKey, "keywords" : ["Presentation"], "blurb" : blurbPresentations },
     { "anchor" : "ProgrammerManuals", "title" : "Programmers' Manuals", "keywords" : ["Programmer manual"]},
-    { "anchor" : "UserGuides", "title" : "AGC/AGS Users' Guides", "keywords" : [ "AGC user guide", "AGS user guide" ] },
+    { "anchor" : "UserGuides", "title" : "Onboard Computer Users' Guides", "keywords" : [ "AGC user guide", "AGS user guide", "OBC user guide" ] },
     { "anchor" : "GSOPs", "title" : "Guidance System Operations Plans (GSOP)", "sortKey" : myDashSortKey, "keywords" : [ "GSOP" ], "blurb" : blurbGSOPs },
     { "anchor" : "ReferenceCards", "title" : "Quick-Reference Cards, Data Cards, Cue Cards", "keywords" : ["Reference cards"]},
     { "anchor" : "PadLoads", "title" : "AGC Pad Loads", "sortKey" : myMissionSortKey, "keywords" : [ "Pad load" ], "blurb" : blurbPadloads },
@@ -1121,7 +1156,12 @@ tableOfContentsSpec = [
     { "anchor" : "Skylab4", "title" : "Mission-Specific Documentation: Skylab 4", "targets" : ["Skylab 4"] },
     { "anchor" : "ASTP", "title" : "Mission-Specific Documentation: ASTP", "targets" : ["ASTP"] },
     
-    { "anchor" : "StatusReports", "title" : "Status Reports", "keywords" : ["Status reports"]},
+    { "anchor" : "StatusReports", "title" : "Status Reports", "keywords" : ["Status report"]},
+    { "anchor" : "Press", "title" : "The Press", "keywords" : ["Press"]},
+    { "anchor" : "OBC", "title" : "Gemini On-Board Computer (OBC)", "keywords" : ["OBC"]},
+    { "anchor"  : "Fury", "title" : "Sound and Fury", "keywords" : ["Sound and fury"], "blurb" : blurbSoundAndFury },
+    { "anchor"  : "Different", "title" : "Something Different", "keywords" : ["something different"], "blurb" : blurbSomethingDifferent },
+     
     { "anchor" : "EngineeringDrawings", "title" : "AGC Electrical and Mechanical Design", "keywords" : [ "Engineering Drawings", "Drawing Tree" ], "blurb" : blurbElectroMechanical },
     { "anchor" : "Everything", "title" : "Everything", "blurb" : blurbEverything, "all" : True, "lineNumbers" : True }
 ]
