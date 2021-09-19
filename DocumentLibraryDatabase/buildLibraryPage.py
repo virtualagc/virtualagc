@@ -1093,7 +1093,7 @@ def documentEntryHTML(record, showComment):
 # converted to lower-case, regardless of how they're entered in this array.
 tableOfContentsSpec = [
     { "title" : "Debug", "sortKey" : myOriginalSortKey, "blurb" : blurbDebug },
-    { "anchor" : "RecentAdditions", "title" : "Recently Added Documents", "sortKey" : myRecentSortKey, "blurb" : blurbRecentlyAdded },
+    { "anchor" : "RecentAdditions", "title" : "Recently Added Documents as of %s" % currentDateString, "sortKey" : myRecentSortKey, "blurb" : blurbRecentlyAdded },
     { "anchor" : "Presentations", "title" : "Presentations", "sortKey" : myAuthorSortKey, "keywords" : ["Presentation"], "blurb" : blurbPresentations },
     { "anchor" : "ProgrammerManuals", "title" : "Programmers' Manuals", "keywords" : ["Programmer manual"]},
     { "anchor" : "UserGuides", "title" : "Onboard Computer Users' Guides", "keywords" : [ "AGC user guide", "AGS user guide", "OBC user guide" ] },
@@ -1343,6 +1343,28 @@ for n in range(1, len(allURLs)):
     if allURLs[n-1] == allURLs[n]:
         print("Duplicate: " + allURLs[n], file=sys.stderr)
 
+# Also, output a list of all the unique PDF links.  Remember that the
+# URLs may have suffixes like "#page=..." that have to be removed, and
+# character substitutions like " " -> "%20" that have to be undone.
+# The general idea is to convert the URL to a filename that's in a form
+# identical to what the 'find' command would come up with, because the 
+# reason I'm even creating this file is to compare it to the list of PDFs
+# already on the disk, to see what I've left out of the database.  To get
+# the list of PDFs on the local drive, you do this:
+#       cd To/the/local/apollo
+#       find -type f -name "*.pdf" | LC_COLLATE=C sort -u >pdf.files
+# Now you can diff or kompare (or whatever) pdf.files and buildLibraryPage.files.
+for n in range(len(allURLs)):
+    allURLs[n] = allURLs[n].split("#")[0].replace("%20", " ").replace("%44", ",").replace("%28", "(").replace("%29", ")")
+allURLs.sort()
+f = open("buildLibraryPage.files", "w")
+if allURLs[0][-4:] == ".pdf":
+    print(allURLs[0], file=f)
+for n in range(1, len(allURLs)):
+    if allURLs[n] != allURLs[n-1] and allURLs[n][-4:] == ".pdf":
+        print("./" + allURLs[n], file=f)
+f.close()
+
 # Step 4:  Output the HTML file header.
 currentEpoch = int(time.time())
 cutoffEpoch = currentEpoch - cutoffMonths * 30 * 24 * 3600
@@ -1392,7 +1414,7 @@ if "anchor" in tableOfContentsSpec[0] and tableOfContentsSpec[0]["anchor"] == "D
 # Step 5A:  "Recent Additions" section.
 if "anchor" in tableOfContentsSpec[1] and tableOfContentsSpec[1]["anchor"] == "RecentAdditions":
     print("<a name=\"RecentAdditions\"></a>")
-    print("<h1>" + tableOfContentsSpec[1]["title"] + " (%s)</h1>" % currentDateString)
+    print("<h1>" + tableOfContentsSpec[1]["title"] + "</h1>")
     print(blurbRecentlyAdded + "<br><br>")
     lastDateString = "00/00/0000"
     inUL = False
