@@ -61,7 +61,7 @@ headerTemplate = '<table summary="" nosave="" width="100%" border="1" cellpaddin
   + '</td>' 
   + '</tr>' 
   + '<tr align="center">' 
-  + '<td> <a href="links.html"><small>Document library</small></a> </td>' 
+  + '<td> <a href="links2.html"><small>Document library</small></a> </td>' 
   + '</tr>' 
   + '<tr align="center">' 
   + '<td> <a href="changes.html"><small>Change log</small></a>' 

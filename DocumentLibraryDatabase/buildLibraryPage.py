@@ -20,9 +20,10 @@
 #                               handling of comma vs %44, slash vs %47,
 #                               and ", Jr".  More importantly, it's actually
 #                               generating a lot more of the web-page now.
+#               2021-09-20 RSB  First fully-functional version, I think.
 #
 # Usage:
-#	./buildLibraryPage.py <DocumentLibraryDatabase.tsv >../linksAuto.html
+#	./buildLibraryPage.py <DocumentLibraryDatabase.tsv >../links2.html
 #
 # Up to this point (2021-09-08), the document-library page (links.html) has
 # been a manually-maintained HTML file. That worked fine 18 years ago when
@@ -305,56 +306,50 @@ Creative Commons No Rights Reserved License</a>
 # document we're going to output.
 
 blurbTop = """ 
-This is our collection of all the documentation we've managed to
-gather over the decades that bears even a passing relevance to the 
-spaceborne guidance computers used in the Apollo and Gemini programs ... or at
-least all of the documentation I think I'm legally able to give you at the
-present time.  Some 
-hints as to where to find such documentation on your own can be found on our
-<a href="QuestForInfo.html">Documentation
-Quest page</a>.  Our <a href="faq.html">FAQ
-page</a> also points out various significant Apollo-centric websites from
-which we've taken some documentation, in order to centralize it.
+<i>(Our <a href="links.html">old version of this page</a> is still available, 
+but not likely to be updated in the future.)</i>
 <br><br>
-When we're in possession of high-resolution scans, it's our practice to provide
-only a reduced-quality but legible version here, but to provide the full
-resolution data at <a href="https://archive.org/details/virtualagcproject">
-our Internet Archive site</a>.  On this page, the links for both are 
-provided.  In general, when any given document has multiple hyperlinks listed,
-the <i>first</i> of the links is the recommended one, and the second or third
-links provided are generally either much larger downloads, or else are much
-lower quality scans.
+This is our Virtual AGC Document Library.  New submissions are 
+always welcome. Suggestions of where physical documents can be found for 
+subsequent digitization appear on our
+<a href="QuestForInfo.html">Documentation Quest page</a>.  
+Our <a href="faq.html#other_websites">FAQ page</a> points out various significant 
+Apollo-centric websites that may contain documents we've not so-far collected.
 <br><br>
-Finally, while the available documents are provided below in a form which we 
-think is relatively convenient, we also usually have more information 
-than we care to clutter up your screen with.  For example, we
-have the sizes of the downloads, and sometimes the names of the archives from
-which we extracted the documents, as well as the name of the person who either
-did the scanning for us or else financially supported the scanning process.
-You can see this supplemental information by hovering your mouse over the
-document title's
-hyperlink before clicking the link.  Similarly, if you hover the mouse over
-a <code title="Organizational affiliation appears here!" style="background-color:
+In the list below, some documents are provided by multiple links.  In general,
+when there's more than one link, the <i>first</i> one is to the one we feel
+most-inclined to recommend. The others may be lower resolution, larger 
+downloads, mutilated by the OCR process, missing some pages, or have some other 
+deficiencies that make them less preferable.  But the less-preferable documents
+are sometimes useful.
+<br><br>
+To avoid clutter on your screens, some details we have &mdash; download 
+size, archive from which the digitization was made, name of the person who scanned
+the document or financially subsidized it, the organizational affiliations of
+the authors, the organizations which assigned the document numbers &mdash; are
+omitted from the entries for the documents.  You can get this kind of 
+information anyway, should you desire it, by hovering the mouse cursor over 
+the <span title="Download size, archive name, name of scanner/sponsor" 
+style="cursor:pointer; color:blue; text-decoration:underline">document title</span>, <code title="Organizational affiliation" 
+style="background-color:""" + hoverColor + """">author name</code>, or
+<code title="Organizational affiliation" style="background-color:
 """ + hoverColor + """
-">document number</code>
-or an <code title="Organizational affiliation appears here!" style="background-color:""" + hoverColor + """
-">author name</code>, 
-that's highlighted as shown here, you may be
-able to find out the organization that produced the document or with which
-the author was affiliated. Unfortunately, this extra pop-up information 
-<i>only</i> works if
-you have a mouse rather than a touchscreen, since you can hover a mouse
-cursor but not a finger; but that's life!
+">document number</code>.  Notice the styling that's used to call your 
+attention to the availability of the extra information; authors' names or 
+document numbers without extra information available are not thusly highlighted.
 <br><br>
-Another slight drawback to the way information appears in these mouse hovers,
-I suppose, is that none of it shows up if you use your browser's text-search
-facility.  I doubt that you'd really want to search on any of that particular
-information anyway.  But you can get around that problem by downloading the
+Unless otherwise stated, documents are sorted by publication date, from 
+earliest to latest, and those with unknown dating appear at the top of the
+list.  Determination of the publication date is sometimes rather subjective.
+<br><br>
+Finally, this page is auto-generated from a database &mdash; actually a 
+spreadsheet &mdash; and if you desire, you can
 <a href="DocumentLibraryDatabase/DocumentLibraryDatabase.tsv">
-spreadsheet</a> that contains all of the information used to generate this 
-web-page, and you can search or sort that spreadsheet in any manner you like.
-(In pulling it into your spreadsheet program, you need merely know that the
-columnar data is tab-delimited.)
+download the spreadsheet</a>. (In pulling it into your spreadsheet program, 
+you mostly need to know that the columnar data is tab-delimited. There are
+additional rules that apply to fields containing comma-delimited lists or 
+organizational affiliations, but I won't bother to explain those things 
+further unless somebody actually asks me about them.)
 """
 
 blurbDebug = """
@@ -372,6 +367,8 @@ This section lists all documents updated in the last
 """ + "%d" % cutoffMonths + """
 months. Note that recently-added <a href="#EngineeringDrawings">G&N 
 engineering drawings</a> are <i>not</i> included in the list.
+<br><br>
+The entries are arranged from most-recently added to least-recently added.
 """
 
 blurbPresentations = """
@@ -429,16 +426,6 @@ summary of what we presently have and don't have:<br><br>
 <tr align="center"><td>Skylab 4</td><td>no</td><td>n/a</td><td>n/a</td><td>no</td></tr>
 <tr align="center"><td>ASTP</td><td>no</td><td>n/a</td><td>n/a</td><td>no</td></tr>
 </tbody></table><br>
-The software listings below are sorted by their creation dates.  It should be noted
-that there is a certain art to determining these dates, and thus the results
-are somewhat subjective.  For example, the dates on the printouts were the 
-dates the printouts were made ... which could sometimes even be <i>after</i> 
-the mission flew.  For software revisions that were "released", we usually know
-the release dates, but those were always some undetermined number of weeks 
-after the software had been created, undergone testing, etc.  And for some 
-engineering revisions of the software, we have no <i>specific</i> knowledge
-beyond a rough timeframe.  Nevertheless, our arrangement is probably pretty
-close to the objective reality (if we only knew what it was).
 """
 
 blurbMathFlow = """
@@ -458,14 +445,12 @@ representation of the
 eventual computer program's control flow and handling of variables.  The
 entire continuum of possibilities is represented in this section, for all of 
 the types of guidance computers covered by the Virtual AGC Project.
-<br><br>
-Documents are sorted by publication date.
 """
 
 blurbSGA = """
 If you are interested in the mathematical underpinnings of the AGC software, 
 then this amazing series of memos from MIT's Instrumentation Lab is the place 
-to look.  The memos are in roughly chronological order.  It is very interesting
+to look.  It is very interesting
 to reflect on the fact that these mathematical memos are often written by the 
 very same people whose names you find as authors in the software.  The AGC 
 software was written in a time ... or at least a place ... where software was 
@@ -500,6 +485,8 @@ But back to the memos. Over 250 of them are known, of which we've gotten the
 majority from Don Eyles's personal collection. The items which are grayed-out 
 relate to memos about which we have some information but not the actual memos 
 themselves. 
+<br><br>
+The items are arranged according to their memo numbers.
 """
 
 blurbPcrsPcns = """
@@ -525,12 +512,9 @@ be made by a local board at MIT/IL rather than by the higher powers at the SCB.
 These documents have no titles as such, so the titles given below are actually
 portions we've extracted from the descriptions of the problems described by 
 the documents.
-<br><br>
-The entries below are arranged by publication date.
 """
 
 blurbAGS = """
-The entries in this section are sorted by publication date.
 """
 
 blurbLVDC = """
@@ -539,9 +523,6 @@ The Wikipedia article on the LVDC at the time I first wrote on this subject
 lamented that all of the LVDC software has probably vanished and does not exist 
 any longer. Fortunately, that has turned out to be false, although there may
 be enough truth in it to make us very uncomfortable.
-<br><br>
-The entries in this section are sorted by 
-publication date.
 """
 
 blurbSoundAndFury = """
@@ -612,11 +593,6 @@ which allows you to find engineering drawings by fragments of drawing numbers
 or drawing titles.  Or you can try our <a href="ElectroMechanical.html">
 Electro-Mechanical page</a>, which may provide additional resources or 
 related information.
-<br><br>
-As for the electro-mechanical design documents which we are able to provide
-explicitly here without having to use the separate search engine, I've sorted 
-them for you by publication date; the undated 
-documents appear at the beginning of the list.
 """
 
 blurbEverything = """
@@ -635,9 +611,6 @@ Library page, but for all pages on the Virtual AGC website.  Alas, the optical
 character recognition (OCR) process that creates the text index is not perfect,
 so your search may still fail even if the document you want is present.  But
 then, what <i>is</i> perfect in this old world?
-<br><br>
-The entries below are sorted by publication date. Items whose publication date
-is unknown appear at the very top of the list.
 """
 
 # Given a field from the database which is supposed to be a date (MM/DD/YYYY, 
@@ -1133,6 +1106,17 @@ tableOfContentsSpec = [
     { "anchor" : "FlightData", "title" : "Flight Data Files (Checklists, G&N Dictionaries, ...)", "keywords" : ["flight data"]},
     { "anchor" : "SpacecraftFamiliarization", "title" : "Spacecraft Familiarization Manuals", "keywords" : ["spacecraft familiarization"]},
     { "anchor" : "FlightEvaluation", "title" : "Launch Vehicle and Spacecraft Flight Evaluation Reports", "keywords" : ["flight evaluation"]},
+
+    { "anchor" : "Gemini3", "title" : "Mission-Specific Documentation: Gemini 3", "targets" : ["Gemini 3"] },
+    { "anchor" : "Gemini4", "title" : "Mission-Specific Documentation: Gemini 4", "targets" : ["Gemini 4"] },
+    { "anchor" : "Gemini5", "title" : "Mission-Specific Documentation: Gemini 5", "targets" : ["Gemini 5"] },
+    { "anchor" : "Gemini6", "title" : "Mission-Specific Documentation: Gemini 6", "targets" : ["Gemini 6", "Gemini 6A"] },
+    { "anchor" : "Gemini7", "title" : "Mission-Specific Documentation: Gemini 7", "targets" : ["Gemini 7"] },
+    { "anchor" : "Gemini8", "title" : "Mission-Specific Documentation: Gemini 8", "targets" : ["Gemini 8"] },
+    { "anchor" : "Gemini9", "title" : "Mission-Specific Documentation: Gemini 9", "targets" : ["Gemini 9", "Gemini 9A"] },
+    { "anchor" : "Gemini10", "title" : "Mission-Specific Documentation: Gemini 10", "targets" : ["Gemini 10"] },
+    { "anchor" : "Gemini11", "title" : "Mission-Specific Documentation: Gemini 11", "targets" : ["Gemini 11"] },
+    { "anchor" : "Gemini12", "title" : "Mission-Specific Documentation: Gemini 12", "targets" : ["Gemini 12"] },
     
     { "anchor" : "Apollo1", "title" : "Mission-Specific Documentation: Apollo 1", "targets" : ["Apollo 1"] },
     { "anchor" : "AS202", "title" : "Mission-Specific Documentation: AS-202 (\"Apollo 3\")", "targets" : ["AS-202"] },
@@ -1162,7 +1146,7 @@ tableOfContentsSpec = [
     { "anchor"  : "Fury", "title" : "Sound and Fury", "keywords" : ["Sound and fury"], "blurb" : blurbSoundAndFury },
     { "anchor"  : "Different", "title" : "Something Different", "keywords" : ["something different"], "blurb" : blurbSomethingDifferent },
      
-    { "anchor" : "EngineeringDrawings", "title" : "AGC Electrical and Mechanical Design", "keywords" : [ "Engineering Drawings", "Drawing Tree" ], "blurb" : blurbElectroMechanical },
+    { "anchor" : "EngineeringDrawings", "title" : "Electrical and Mechanical Design", "keywords" : [ "Engineering Drawings", "Drawing Tree" ], "blurb" : blurbElectroMechanical },
     { "anchor" : "Everything", "title" : "Everything", "blurb" : blurbEverything, "all" : True, "lineNumbers" : True }
 ]
 
