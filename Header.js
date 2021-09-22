@@ -235,3 +235,28 @@ window.onload = function() {
 		}
 	}
 }
+
+/*
+	A button for toggling between "read more" and "read less".  To use
+	it, just embed the block of HTML to which you want to add
+	a READ MORE button between the following two lines of HTML:
+	
+	  <span id="moreUNIQUEID" style="display:none">
+	  </span><br><button onclick="toggleMore('UNIQUEID')" id="buttonUNIQUEID">Read more</button>
+		
+	Of course, where it says UNIQUEID here (3 places), you use 
+	a unique ID string for each block which you're doctoring up 
+	in this manner.
+*/
+function toggleMore(basename) {
+	var more = document.getElementById("more" + basename);
+	var button = document.getElementById("button" + basename);
+	if (more.style.display === "none") {
+		button.innerHTML = "Read less";
+		more.style.display = "inline";
+	} else {
+		button.innerHTML = "Read more";
+		more.style.display = "none";
+	}
+}
+
