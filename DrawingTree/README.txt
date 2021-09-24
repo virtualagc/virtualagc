@@ -64,7 +64,7 @@ The three URLs shown have to be translated by downstream software as:
 
 This "compression" of the URLs is not meant to affect the end drilldown
 HTML files produced, but does affect the search engine (specifically the
-search engine's tipuesearch_content.js file), since the entire motification
+search engine's tipuesearch_content.js file), since the entire modification
 for the compression is to reduce the bandwidth and memory of the search 
 engine.  The search engine thus performs the URL translation to achieve
 the full URL only at the time it displays search results, and at all other
