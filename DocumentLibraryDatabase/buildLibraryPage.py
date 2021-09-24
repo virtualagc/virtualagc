@@ -187,7 +187,13 @@
 #               the URL lists.  If a URL does contain a comma, replace it
 #               with "%44"; the software will automatically convert this back
 #               to a comma without it affecting how the URL lists are broken
-#               up.  The actual URL in a hyperlink will have a comma.
+#               up.  The actual URL in a hyperlink will have a comma.  There
+#               are some factors built in for my own personal convenience,
+#               in that "http://www.ibiblio.org/" and "^.*/sandroid.org/public_html/"
+#               are both automatically replaced by "https://www.ibiblio.org/";
+#               That so that I can cut-and-paste URLs from existing web pages
+#               or from my local document stash without having to correct them
+#               for onlin use.
 #
 #   Field 10    Title of the document or partial document; or failing that,
 #               a reasonable description.
@@ -1252,7 +1258,11 @@ for line in lines[1:]:
     if len(fields) >= 8:    # Field 8
         record["Keywords"] = simpleList(fields[7].lower())
     if len(fields) >= 9:    # Field 9
-        URLs = simpleList(fields[8])
+        # The string replacement in the line below is a simple convenience for
+        # me (RSB), so that I can cut-and-paste hyperlinks to local documents
+        # and have the hyperlinks automatically turned into the correct web
+        # hyperlinks without having to manually fix up each link myself.
+        URLs = simpleList(re.sub("^.*/sandroid[.]org/public_html/", "https://www.ibiblio.org/", fields[8], 1))
         # Do some cleanup on the URLs.
         PathFile = ""
         fileSizes = []
