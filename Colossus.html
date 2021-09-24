@@ -533,9 +533,7 @@ src="https://www.youtube.com/embed/WquhaobDqLU?feature=player_detailpage"
 
                     Changes from AS-202 to AS-501</a>".&nbsp; The
                   significance is that we <i>have</i> the source code
-                  for AS-502 (Solarium 55, see below), which is almost
-                  identical, or indeed perhaps even <i>exactly
-                    identical</i> to AS-501 (Solarium 54).&nbsp; Thus if
+                  for AS-501 and AS-502 (Solarium 55, see below).&nbsp; Thus if
                   we knew the changes between AS-202 and AS-501, it
                   might help us reconstruct the Corona source code from
                   Solarium 55 source code, and those change are exactly
@@ -660,7 +658,7 @@ src="SunspotFixedMemoryAllocation-small.png"
           <td style="text-align: center;"><span style="font-weight:
               bold;">Solarium</span><br>
           </td>
-          <td style="text-align: center;">54<br>
+          <td style="text-align: center;">54 (see notes)<br>
           </td>
           <td style="text-align: center;" align="center"><a
               href="listings/Solarium055/MAIN.agc.html">Syntax-highlighted,<br>
@@ -695,7 +693,10 @@ src="SunspotFixedMemoryAllocation-small.png"
               sources do refer to it as the "programmer"—was a gadget
               that was the stand-in for the crew.<br>
               <br>
-              Regarding the software itself:&nbsp; Jay Sampson, who
+              Regarding the software itself you'll note that we say
+              that SOLARIUM 54 was used in the mission, whereas if you
+              look at the entry for Apollo 6 below, you'll see that we say
+              SOLARIUM 55 was used there. However, Jay Sampson, who
               coded the changes from the Corona (AS-202) code to derive
               Solarium (AS-501), is insistent that there were no code
               changes between missions AS-501 (Apollo 4) and AS-502
@@ -717,11 +718,58 @@ src="SunspotFixedMemoryAllocation-small.png"
               High Apogee Suborbital".&nbsp; In other words, it was used
               for <i>both</i> Apollo 4 and Apollo 6.&nbsp; <br>
               <br>
-              All roads having led back to the same conclusion, unless
-              other evidence is uncovered, I will therefore presume that
-              Apollo 4 and 6 used identical software.<br>
+              Going one step even beyond that, we can consult the actual
+              engineering drawings for the G&N systems of the Apollo 4 and
+              Apollos 6 missions.  These are provided as "drilldowns" of the
+              <a href="1014999-111.html">Apollo 4 G&N system (assembly 1014999-111)</a>
+              and the <a href="1014999-121.html">Apollo 6 G&N system (assembly 1014999-121)</a>.
+              When you drill down until you reach the "computer program assembly"
+              (which specified which software was used to manufacture the core-rope
+              memory modules), you find that <i>both</i> Apollo 4 and 6 used computer program assembly
+              1021108-021, and that's exactly what's marked at the top of every
+              page of the SOLARIUM 55 software listing. It's also worth looking at drawing
+              <a href="https://archive.org/details/apertureCardBox451Part2NARASW_images/page/n865/mode/1up?view=theater">1021108</a>.  
+              As it happens, the drawing does show that there were two software releases
+              manufactured into memory modules, namely -011 and -021, so <i>perhaps</i>
+              the -011 release could have been SOLARIUM 54; we just don't know.  But even
+              if so, the remainder of the drawing hierarchy says it wasn't used on Apollo 4.
+              (Interestingly, SOLARIUM 54 and 55 are pretty similar, and are seen to 
+              differ only in one of the 6 memory modules.  But again, that's irrelevant to Apollo 4.
+              It's also interesting that the drawing lists the function of -021 as
+              <code>FLIGHT MISSION</code>, but doesn't bother to list any function
+              for the -011 modules and says that its <code>LAUNCH PERIOD</code> is 
+              <code>N/A</code>.)<br>
               <br>
-              As mentioned above, Apollo 4 used Block 1 spacecraft, and
+              All roads having led back to the same conclusion, unless
+              other evidence is uncovered, I will therefore presume it is a 
+              proven fact that
+              Apollo 4 and 6 used identical software, namely SOLARIUM 55.<br>
+              <br>
+              I suppose at this point, we may wonder where the idea even arose that
+              SOLARIUM 54 was used in Apollo 4, since every bit of evidence seems to
+              say otherwise?  Well, originally, we didn't have feedback from Jay Sampson
+              nor a large pile of engineering drawings to consult, so some of these ideas
+              came from scrounging through various less-official documentation to scrounge 
+              every clue.  This idea seems to have come from 
+              <a href="hrst/archive/967.pdf#page=31">a brief note in volume I of the MIT/IL report R-700</a>, 
+              which appears to say:
+              <pre>
+                      November 1966     SOLARIUM 54 mission program released for APOLLO 4 (CM).
+                                        SOLARIUM 55 mission program released for APOLLO 6 (CM).
+              </pre>
+              Indeed, this is the <i>only</i> reference to SOLARIUM 54 I find in the contemporary
+              documentation.  Now as it happens, the scan of that volume of R-700 was partially
+              mutilated in the digitization process; optical character recognition (OCR) settings were
+              used which <i>discarded</i> the scanned imagery wherever possible and replaced it with 
+              OCR-created text instead. Which is fine until the OCR processing makes a mistake.  If
+              it originally said "SOLARIUM 55" but the OCR processor mistakenly read "SOLARIUM 54", then
+              SOLARIUM 54 is what shows up in the final PDF and all trace of the original SOLARIUM 55 
+              vanishes.  So perhaps that happened in this case.  Unless we can find a hardcopy of the
+              document again, we may never know.<br>
+              <br>
+              But enough about SOLARIUM 55 vs SOLARIUM 54!<br>
+              <br>
+              As mentioned above, Apollo 4 used a Block 1 spacecraft, and
               thus Solarium is Block 1 AGC software.&nbsp; As such,
               Apollo 4 missions cannot be simulated with the "normal"
               (Apollo Block 2) NASSP add-on for the Orbiter Spacecraft
