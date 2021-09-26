@@ -174,6 +174,11 @@
 #               files and thus segregate them appropriately in the document
 #               library page.
 #
+#               The keyword "Blurb" is special. The entire record is always
+#               ignored, except when printing out the "Recent Additions" 
+#               section.  There, the Comment field is used as a blurb for that
+#               day's sub-section. 
+#
 #   Field 9     Absolute URL to the file, for making hyperlinks.  If there's 
 #               more than one available file, their URLs should be 
 #               comma-delimited, and they should be arranged in order of 
@@ -432,6 +437,15 @@ summary of what we presently have and don't have:<br><br>
 <tr align="center"><td>Skylab 4</td><td>no</td><td>n/a</td><td>n/a</td><td>no</td></tr>
 <tr align="center"><td>ASTP</td><td>no</td><td>n/a</td><td>n/a</td><td>no</td></tr>
 </tbody></table><br>
+The table below is a list of all releases of AGC software (that we're aware of)
+for the purpose of manufacturing core-rope memory modules.  This information
+was gleaned from many, many documents in the library, as opposed to a single
+authoritative source, so there are unfortunately many gaps and question marks
+in the table.  A number of the software revisions for which we have the source
+code were never manufactured into memory modules, such as ZERLINA, SUPER JOB,
+and DAP AURORA, so they don't appear in the table at all.  Conversely, there
+are many software revisions manufactured as ropes for which we have no 
+contemporary source listing or modern reconstruction.<br><br>
 """
 
 blurbMathFlow = """
@@ -497,10 +511,20 @@ The items are arranged according to their memo numbers.
 
 blurbPcrsPcns = """
 Program Change Requests (PCRs) were the official mechanism by which proposed
-AGC software changes were submitted to the NASA Software Change Board (SCB) for 
-approval or rejection.  I'm not sure what the distinction between a PCR and
-a Program Change Notice (PCN) is. Visually they're essentially the same
-thing.  In any case, the signficance is that since AGC software changes were
+AGC software changes were submitted to the NASA's Software 
+Control Board (SCB), for subsequent approval or rejection.  The PCR was the 
+normal tool for this, and PCRs could be created either by MIT/IL or by NASA,
+but did not take effect until action was taken by the SCB.  The lesser-used
+PCN is almost the same as a PCR, except that MIT/IL unilaterally put them into
+effect <i>as if</i> NASA's SCB had approved them ... even though the SCB 
+<i>could</i> end up disapproving the PCN and forcing MIT/IL to undo whatever
+work they had done in connection with it. Often the PCN was used for simple
+clerical changes in the GSOP, which were almost certain to eventually win SCB
+approval, but sometimes they were apparently used for issues that blocked 
+further development and thus which would cause scheduling issues if it were 
+necessary to stop work until the next SCB meeting.  In any case, the 
+signficance (for us) of either PCRs or PCNs is 
+that since AGC software changes were
 governed by them, knowledge of the PCRs/PCNs is of tremendous importance in 
 tracking changes between LUMINARY and COLOSSUS software revisions ... or 
 alternatively, of no importance whatever if you're not interested in 
@@ -511,13 +535,23 @@ The entries below are arranged by PCR/PCN number.
 
 blurbAnomalies = """
 In this section, we cover Assembly Control Board Requests and
-MIT/IL Software Anomaly Reports.  These seemed to act similarly to PCRs and 
-PCNs respectively (see above), and except that for some reason approvals could 
-be made by a local board at MIT/IL rather than by the higher powers at the SCB.
+Software Anomaly Reports.  These acted similarly to PCRs and 
+PCNs (see above), and have a similar importance for us in 
+understanding the evolution of AGC software over time.  The difference from 
+PCRs/PCNs is that approvals or rejections were made by MIT/IL's
+Assembly Control Board (ACB) rather than by NASA's SCB.  The scopes of the 
+SCB's actions and the ACB's actions differed in that the SCB decided upon the 
+contents of (or changes to) the software specification (which
+was regarded as the GSOP document), whereas the ACB examined discrepancies 
+between the software and the specification, or else items left unspecified 
+altogether by the GSOP (and therefore presumably of little or no importance
+to the SCB).  Thus being entirely internal to MIT/IL, ACB Requests and 
+Software Anomaly Reports could presumably
+be acted upon much more quickly and easily than was the case for PCRs and PCNs.
 <br><br>
-These documents have no titles as such, so the titles given below are actually
-portions we've extracted from the descriptions of the problems described by 
-the documents.
+ACB Requests and Software Anomaly Reports have no titles as such, so the titles 
+given below are actually extracts from the (often rather long) problem 
+descriptions given in forms.
 """
 
 blurbAGS = """
@@ -879,6 +913,10 @@ def myMissionSortKey(record):
 # manipulate the epoch to reverse the sort order for just that field.
 def myRecentSortKey(record):
     key = myTimeReverseSortKey(record) + myDateAuthorSortKey(record)
+    if "blurb" in record["Keywords"]:
+        key = "A" + key
+    else:
+        key = "B" + key
     return key
 
 # Make a sensible publication date out of the kinds of date fields I have.
@@ -1080,7 +1118,7 @@ tableOfContentsSpec = [
     { "anchor" : "ReferenceCards", "title" : "Quick-Reference Cards, Data Cards, Cue Cards", "keywords" : ["Reference cards"]},
     { "anchor" : "PadLoads", "title" : "AGC Pad Loads", "sortKey" : myMissionSortKey, "keywords" : [ "Pad load" ], "blurb" : blurbPadloads },
     { "anchor" : "EMPs", "title" : "Erasable Memory Programs (EMP)", "keywords" : ["Erasable memory programs"]},
-    { "anchor" : "AssemblyListings", "title" : "Software Listings", "keywords" : ["Assembly listing"], "blurb" : blurbAssemblyListing },
+    { "anchor" : "AssemblyListings", "title" : "Software Listings", "keywords" : ["Assembly listing", "release table"], "blurb" : blurbAssemblyListing },
     { "anchor" : "MathFlow", "title" : "Math Flow", "keywords" : [ "Guidance equations" ], "blurb" : blurbMathFlow },
     { "anchor" : "SGAMemos", "title" : "Space Guidance Analysis Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Space Guidance Analysis Memo"], "blurb" : blurbSGA },
     { "anchor" : "ApolloProjectMemos", "title" : "Apollo Project Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Apollo Project Memo"] },
@@ -1399,6 +1437,8 @@ if "anchor" in tableOfContentsSpec[0] and tableOfContentsSpec[0]["anchor"] == "D
     print("<ol>")
     records.sort(key=tableOfContentsSpec[0]["sortKey"])
     for n in range(len(records)):
+        if "blurb" in records["Keywords"]:
+            continue
         html = documentEntryHTML(records[n], True)
         if html != "":
             print("<li>", end="")
@@ -1427,16 +1467,20 @@ if "anchor" in tableOfContentsSpec[1] and tableOfContentsSpec[1]["anchor"] == "R
         recordDateString = datetime.fromtimestamp(epoch).strftime("%m/%d/%Y")
         if recordDateString != lastDateString:
             if inUL:
-                print("</ul>")
-            print("<i>Added " + recordDateString + "</i><ul>")
+                print("</ol>")
+            print("<i>Added " + recordDateString + "</i>")
             inUL = True
             lastDateString = recordDateString
+            if "blurb" in record["Keywords"]:
+                print("<blockquote><b>Note:</b> " + record["Comment"] + "</blockquote><ol>")
+                continue
+            print("<ol>")
         print("<li>", end="")
         #print("\"" + myRecentSortKey(record) + "\"<br>")
         print(documentEntryHTML(record, False), end="")    
         print("</li>")
     if inUL:
-        print("</ul>")
+        print("</ol>")
 
 # Step 5B:  Output all other sections, based on the parameters in 
 # tableOfContentsSpec[].  
@@ -1454,6 +1498,21 @@ for n in range(2, len(tableOfContentsSpec)):
     print("<h1>" + tableOfContentsSpec[n]["title"] + "</h1>")
     if "blurb" in tableOfContentsSpec[n]:
         print(tableOfContentsSpec[n]["blurb"])
+    # Determine if we should add releaseTable.html to the end of the section
+    # blurb.
+    if "keywords" in tableOfContentsSpec[n]:
+        if "release table" in tableOfContentsSpec[n]["keywords"]:
+            f = open("releaseTable.html", "r")
+            releaseTableLines = f.readlines();
+            f.close()
+            state = 0
+            for line in releaseTableLines:
+                if state == 0 and "<table" in line:
+                    state = 1
+                if state == 1:
+                    print(line)
+                if "</table>" in line:
+                    state = 2
     if "none" in tableOfContentsSpec[n] and tableOfContentsSpec[n]["none"]:
         continue
     if "lineNumbers" in tableOfContentsSpec[n] and tableOfContentsSpec[n]["lineNumbers"]:
@@ -1475,6 +1534,8 @@ for n in range(2, len(tableOfContentsSpec)):
     if "documentNumbers" in tableOfContentsSpec[n]:
         documentNumbers = tableOfContentsSpec[n]["documentNumbers"]
     for record in records:
+        if "blurb" in record["Keywords"]:
+            continue
         matched = False
         if all and record["Title"] != "" and len(record["URLs"]) > 0:
             matched = True
