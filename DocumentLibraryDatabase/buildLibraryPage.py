@@ -1108,6 +1108,15 @@ def documentEntryHTML(record, showComment):
 # be "Debug" and "RecentAdditions" precisely.  Note that keyword- and
 # target-searches are not case sensitive; in practice, they will all be 
 # converted to lower-case, regardless of how they're entered in this array.
+#
+# The keyword "release table" is special.  It is used only in the list below,
+# and not in the database.  When present, the file releaseTable.html is fetched
+# and inserted as-is below the section's blurb.  I expect this is useful only
+# for the Assembly Listings section, though a similar technique might be useful
+# someday in other sections.  If used, the file releaseTable.html
+# should be prepared from the Google Sheets spreadsheet titled
+# "Known AGC Software Releases" by using the instructions in the script
+# fixReleaseTable.py.
 tableOfContentsSpec = [
     { "title" : "Debug", "sortKey" : myOriginalSortKey, "blurb" : blurbDebug },
     { "anchor" : "RecentAdditions", "title" : "Recently Added Documents as of %s" % currentDateString, "sortKey" : myRecentSortKey, "blurb" : blurbRecentlyAdded },
@@ -1505,14 +1514,8 @@ for n in range(2, len(tableOfContentsSpec)):
             f = open("releaseTable.html", "r")
             releaseTableLines = f.readlines();
             f.close()
-            state = 0
             for line in releaseTableLines:
-                if state == 0 and "<table" in line:
-                    state = 1
-                if state == 1:
-                    print(line)
-                if "</table>" in line:
-                    state = 2
+                print(line)
     if "none" in tableOfContentsSpec[n] and tableOfContentsSpec[n]["none"]:
         continue
     if "lineNumbers" in tableOfContentsSpec[n] and tableOfContentsSpec[n]["lineNumbers"]:

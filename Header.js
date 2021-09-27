@@ -208,8 +208,10 @@ window.onload = function() {
 	var i, j
 	var links = document.links
 	var numLinks = links.length
+	/*
 	if (window.location.hostname == "")
 		correctHost += "/"
+	*/
 	for (i = 0; i < numLinks; i++) {
 		if ("href" in links[i]) {
 			for (j = 0; j < numRetargets; j++) {
