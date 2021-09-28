@@ -1178,6 +1178,7 @@ tableOfContentsSpec = [
     { "anchor" : "Apollo5", "title" : "Mission-Specific Documentation: Apollo 5", "targets" : ["Apollo 5"], "keywords" : ["fp2", "sunburst", "sunburst 120", "sunburst 119", "sunburst 118", "sunburst 117"] },
     { "anchor" : "Apollo6", "title" : "Mission-Specific Documentation: Apollo 6", "targets" : ["Apollo 6"], "keywords" : ["solarium", "solarium 55"] },
     { "anchor" : "2TV-1", "title" : "Mission-Specific Documentation: 2TV-1", "targets" : ["2TV-1"], "keywords" : ["sundial", "sundial e"] },
+    { "anchor" : "LTA-8", "title" : "Mission-Specific Documentation: LTA-8", "targets" : ["LTA-8"], "keywords" : ["aurora"] },
     { "anchor" : "Apollo7", "title" : "Mission-Specific Documentation: Apollo 7", "targets" : ["Apollo 7"], "keywords" : ["sundisk", "sundisk 282", "sundisk 281"] },
     { "anchor" : "Apollo8", "title" : "Mission-Specific Documentation: Apollo 8", "targets" : ["Apollo 8"], "keywords" : ["colossus 1", "colossus 237", "colossus 236", "colossus 235", "colossus 234"] },
     { "anchor" : "Apollo9", "title" : "Mission-Specific Documentation: Apollo 9", "targets" : ["Apollo 9"], "keywords" : ["fp3", "fp4", "colossus 1a", "colossus 249", "colossus 248", "colossus 247", "colossus 246", "sundance", "sundance 306", "sundance 305", "sundance 304", "sundance 303", "sundance 302", "sundance 292"] },
