@@ -63,6 +63,23 @@ def makeItemId(item):
     itemId = itemName.replace(" ", "_") + "_" + itemRev
     return (itemName, itemRev, itemId)
 
+# Word-wrap a string for a note.
+maxNoteWidth = 50
+def wrap(sIn):
+    words = sIn.strip().split()
+    sOut = ""
+    onThisLine = 0
+    for word in words:
+        if onThisLine + 1 + len(word) > maxNoteWidth:
+            sOut += "\l"
+            onThisLine = 0
+        if onThisLine > 0:
+            sOut += " "
+            onThisLine += 1
+        sOut += word
+        onThisLine += len(word)
+    return sOut
+
 allVersions = []
 lines = sys.stdin.readlines()
 firstLine = True
@@ -72,8 +89,10 @@ for line in lines:
         continue
     if line.strip() == "":
         continue
-    fields = line.upper().split('\t')
+    fields = line.split('\t')
     for n in range(len(fields)):
+        if n != 8:
+            fields[n] = fields[n].upper()
         fields[n] = fields[n].strip()
     if len(fields) != 9:
         print("Bad line: '%s'" % line, file=sys.stderr)
@@ -117,6 +136,7 @@ if True:
     # Now, attach the appropriate revision of each unique program to the date.
     for item in allVersions:
         program = item[1]
+        note = item[8]
         revision = re.split("[-,]", item[2])[-1]
         if revision.isdigit():
             revision = int(revision)
@@ -126,6 +146,11 @@ if True:
             dates[dateLabel][program] = { "label" : dateLabel, "revision" : revision, "item" : item }
         elif revision > dates[dateLabel][program]["revision"]:
             dates[dateLabel][program] = { "label" : dateLabel, "revision" : revision, "item" : item }
+        if note != "":
+            if "_NOTE_" not in dates[dateLabel]:
+                dates[dateLabel]["_NOTE_"] = { "label" : dateLabel, "revision" : revision, "note" : wrap(note) + "\l" }
+            else:
+                dates[dateLabel]["_NOTE_"]["note"] += "\l" + wrap(note) + "\l"
     # Now, for the purpose of determining which date labels are actually 
     # visible on the timeline, for each month determine the date (in the dates
     # dictionary) that's closest to the middle of the month.  There may not 
@@ -256,6 +281,7 @@ for item in allVersions:
 # Add in the y-axis rank constraints.
 if True:
     lastLabel = ""
+    lastNoteLabel = ""
     for label in sorted(dates):
         if dates[label] != {}:
             if lastLabel != "":
@@ -265,9 +291,18 @@ if True:
             for program in dates[label]:
                 if program == "visible":
                     continue
-                (itemName, itemRev, itemId) = makeItemId(dates[label][program]["item"])
+                if program == "_NOTE_":
+                    itemId = "note" + label
+                else:
+                    (itemName, itemRev, itemId) = makeItemId(dates[label][program]["item"])
                 print(" %s;" % itemId, end="")
             print("}")
+            if "_NOTE_" in dates[label]:
+                thisNoteLabel = "note" + label
+                print("\t%s [shape=\"rectangle\", label=\"%s\", fontname=\"Courier\"]" % (thisNoteLabel, dates[label]["_NOTE_"]["note"]))
+                if lastNoteLabel != "":
+                    print("\t%s -> %s [style=\"invis\"]" % (lastNoteLabel, thisNoteLabel))
+                lastNoteLabel = thisNoteLabel
 else:
     for release in releases:
         constraint = "{rank = same;"
