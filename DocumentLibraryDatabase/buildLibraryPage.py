@@ -437,6 +437,33 @@ summary of what we presently have and don't have:<br><br>
 <tr align="center"><td>Skylab 4</td><td>no</td><td>n/a</td><td>n/a</td><td>no</td></tr>
 <tr align="center"><td>ASTP</td><td>no</td><td>n/a</td><td>n/a</td><td>no</td></tr>
 </tbody></table><br>
+<a href="DocumentLibraryDatabase/AGCSoftwareTree.svg">
+<img src="detailAGCSoftwareTree.png" alt="" style="float:right; border:2px solid blue">
+</a>If just seeing 
+what went into each mission isn't enough for you, and you need to see the vast 
+sweep of all the AGC and AGS software development from the beginning in 1963 
+until the end in 1971, I have a chart of that as well. Alas, there's no LVDC 
+info in the chart, and I've had to leave out some AGC side branches like LA MESH,
+DIANA, SHEPATIN, and so forth. But I managed to include some side branches,
+particularly ZERLINA. There's a small detail 
+from the full chart to the right, and if you click that image, the full chart 
+will appear. Admittedly, there's some guesswork involved because of lacking 
+information, particularly in the very early years, but I think the chart 
+captures pretty well what's going on.  Each bubble in the chart represents
+some specific revision of some specific AGC program, or else a range of 
+revisions when there's just too much information missing to distinguish 
+between them.  Gray bubbles are Block 1 code, brown bubbles are Block 2 CM
+code, yellow bubbles are LM code, and white bubble are AGS. The name of the 
+AGC program is in red if
+core ropes were actually manufactured for that revision.  The arrows connecting
+the bubbles tell you what revisions of what programs evolved into what other
+revisions.  The arrows are also decorated with lists telling what PCRs, PCNs,
+software-anomaly reports, and ACB requests were involved in that particular
+stage of the evolution &mdash; though in many cases that's simply "TBD", as it
+actually is in the detail image at the right. The
+full chart, by the way, is about 40 times as high as it is wide, so be 
+prepared to scroll downward a <i>lot</i> if you look at very much of it.<br>
+<br>
 The table below is a list of all releases of AGC software (that we're aware of)
 for the purpose of manufacturing core-rope memory modules.  This information
 was gleaned from many, many documents in the library, as opposed to a single
