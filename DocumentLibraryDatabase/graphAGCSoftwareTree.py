@@ -274,6 +274,8 @@ for item in allVersions:
         fillcolor = "lightyellow"
     if "AGS " == itemName[:4]:
         fillcolor = "white"
+    if "DIGFLY" == itemName[:6]:
+        fillcolor = "lightgreen"
     print(" style=\"filled\" fillcolor=\"%s\"" % fillcolor, end="")
     print("]")
     if predId != "":
