@@ -445,7 +445,7 @@ sweep of all the AGC and AGS software development from the beginning in 1963
 until the end in 1971, I have a chart of that as well. Alas, there's no LVDC 
 info in the chart, and I've had to leave out some AGC non-mission branches like LA MESH,
 DIANA, and so forth. But I included some non-mission branches,
-particularly SHEPATIN and ZERLINA, since we actually representative
+particularly SHEPATIN and ZERLINA, since we actually have representative
 copies of those. There's a small detail 
 from the full chart to the right, and if you click that image, the full chart 
 will appear. Admittedly, there's some guesswork involved because of lacking 
