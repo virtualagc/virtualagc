@@ -64,7 +64,7 @@ def makeItemId(item):
     return (itemName, itemRev, itemId)
 
 # Word-wrap a string for a note.
-maxNoteWidth = 50
+maxNoteWidth = 40
 def wrap(sIn):
     words = sIn.strip().split()
     sOut = ""
@@ -136,7 +136,7 @@ if True:
     # Now, attach the appropriate revision of each unique program to the date.
     for item in allVersions:
         program = item[1]
-        note = item[8]
+        note = item[8].replace("\"", "\\\"")
         revision = re.split("[-,]", item[2])[-1]
         if revision.isdigit():
             revision = int(revision)
@@ -227,7 +227,7 @@ if False:
 # Now generate the actual output.
 monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 block1 = ["ECLIPSE", "SUNRISE", "CORONA", "SOLARIUM", "SUNSPOT", "MOONGLOW", "ARES"]
-lem = ["RETREAD", "AURORA", "SUNBURST", "SUNDANCE", "LUMINARY", "LUM131", "LUM131A", "LM131", "LMY99", "LUM69", "BURST116", "ZERLINA"]
+lem = ["RETREAD", "AURORA", "SUNBURST", "SUNDANCE", "LUMINARY", "LUM131", "LUM131A", "LM131", "LMY99", "LUM69", "BURST116", "ZERLINA", "SHEPATIN"]
 print("digraph G {")
 for label in sorted(dates):
     if dates[label] != {}:
@@ -299,7 +299,7 @@ if True:
             print("}")
             if "_NOTE_" in dates[label]:
                 thisNoteLabel = "note" + label
-                print("\t%s [shape=\"rectangle\", label=\"%s\", fontname=\"Courier\"]" % (thisNoteLabel, dates[label]["_NOTE_"]["note"]))
+                print("\t%s [shape=\"note\", label=\"%s\", fontname=\"Courier\"]" % (thisNoteLabel, dates[label]["_NOTE_"]["note"]))
                 if lastNoteLabel != "":
                     print("\t%s -> %s [style=\"invis\"]" % (lastNoteLabel, thisNoteLabel))
                 lastNoteLabel = thisNoteLabel
