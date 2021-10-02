@@ -226,8 +226,8 @@ if False:
 
 # Now generate the actual output.
 monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-block1 = ["ECLIPSE", "SUNRISE", "CORONA", "SOLARIUM", "SUNSPOT", "MOONGLOW", "ARES"]
-lem = ["RETREAD", "AURORA", "SUNBURST", "SUNDANCE", "LUMINARY", "LUM131", "LUM131A", "LM131", "LMY99", "LUM69", "BURST116", "ZERLINA", "SHEPATIN"]
+block1 = ["ECLIPSE", "SUNRISE", "CORONA", "SOLARIUM", "SUNSPOT", "MOONGLOW", "ARES", "TRIVIUM"]
+lem = ["RETREAD", "AURORA", "SUNBURST", "SUNDANCE", "LUMINARY", "LUM131", "LUM131A", "LM131", "LMY99", "LUM69", "BURST116", "ZERLINA", "SHEPATIN", "DAP AURORA", "AP11ROPE"]
 print("digraph G {")
 for label in sorted(dates):
     if dates[label] != {}:
@@ -278,6 +278,9 @@ for item in allVersions:
     print("]")
     if predId != "":
         print("\t%s -> %s [label=\"%s\"]" % (predId, itemId, itemForm))
+# Add a couple of "inspired by" connections between Block I and Block II code.
+print("\tSUNRISE_69 -> RETREAD_0 [label=\"INFLUENCED\l(NOT BRANCHED)\", style=\"dotted\"]")
+print("\tSUNSPOT_247 -> SUNDISK_0 [label=\"INFLUENCED\l(NOT BRANCHED)\", style=\"dotted\"]")
 # Add in the y-axis rank constraints.
 if True:
     lastLabel = ""
