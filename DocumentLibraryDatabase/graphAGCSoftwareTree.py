@@ -282,7 +282,7 @@ for item in allVersions:
         print("\t%s -> %s [label=\"%s\"]" % (predId, itemId, itemForm))
 # Add a couple of "inspired by" connections between Block I and Block II code.
 print("\tSUNRISE_69 -> RETREAD_0 [label=\"INFLUENCED\l(NOT BRANCHED)\", style=\"dotted\"]")
-print("\tSUNSPOT_247 -> SUNDISK_0 [label=\"INFLUENCED\l(NOT BRANCHED)\", style=\"dotted\"]")
+print("\tSUNSPOT_TBD -> SUNDISK_0 [label=\"INFLUENCED\l(NOT BRANCHED)\", style=\"dotted\"]")
 # Add in the y-axis rank constraints.
 if True:
     lastLabel = ""
