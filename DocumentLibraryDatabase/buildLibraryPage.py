@@ -940,11 +940,12 @@ def myMissionSortKey(record):
 # the latter in ascending order.  To account for that, we mathematically
 # manipulate the epoch to reverse the sort order for just that field.
 def myRecentSortKey(record):
-    key = myTimeReverseSortKey(record) + myDateAuthorSortKey(record)
+    key = myTimeReverseSortKey(record)
     if "blurb" in record["Keywords"]:
-        key = "A" + key
+        key = key + "A"
     else:
-        key = "B" + key
+        key = key + "B"
+    key += myDateAuthorSortKey(record)
     return key
 
 # Make a sensible publication date out of the kinds of date fields I have.
