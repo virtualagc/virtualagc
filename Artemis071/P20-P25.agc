@@ -16,6 +16,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-08-14 MAS  Created from Artemis 072.
 ##              2021-05-30 ABS  NOUTINPT -> NDUTINPT
+##		2021-10-06 RSB	RANGER0 -> RANGERD
 
 ## Page 552
 
@@ -1158,7 +1159,7 @@ REND3		CALL
 			VHFTIME		# LAST READING OF RADAR
 		BMN	EXIT
 			REND1A
-RANGER0		INHINT			# READ RADAR RANGE
+RANGERD		INHINT			# READ RADAR RANGE
 		CS	OCT17
 		EXTEND
 		WAND	CHAN13		# ZERO OUT BITS 1-4 OF CHANNEL 13
