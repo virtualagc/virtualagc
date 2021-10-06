@@ -23,7 +23,7 @@ def sortByLabel(record):
     return record["label"]
 
 def sortByAddress(record):
-    if "movedto" in record:
+    if "movedTo" in record:
         movedTo = record["movedTo"]
     else:
         movedTo = "NW"
@@ -87,7 +87,7 @@ for symbol in listing1:
     if lastFrom != symbol["bank"] or lastTo != symbol["movedTo"]:
         if numOnLine != 0:
             print("")
-        print("%s -> %s:" % (symbol["bank"], symbol["movedTo"]), end="")
+        print("- %s -> %s:" % (symbol["bank"], symbol["movedTo"]), end="")
         numOnLine = 0
         lastFrom = symbol["bank"]
         lastTo= symbol["movedTo"]
