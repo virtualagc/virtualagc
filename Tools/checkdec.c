@@ -32,9 +32,8 @@
  *              08/01/15 RSB    Check return value of fgets to avoid a
  *                              compiler warning.
  *              05/24/21 RSB    Workaround for bad cygwin pow() function.
+ *              05/24/21 RSB    My workarounds were bogus.  I've rolled them back.
  */
-
-#include "../yaYUL/yaYUL.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -61,7 +60,7 @@ CheckDec(char *s)
 
   if (4 == (i = sscanf(s, "%o %o * E%d B%d", &Oct1, &Oct2, &n10, &n2)))
     {
-      scalar = agcPow(2.0, n2) * agcPow(10.0, n10);
+      scalar = pow(2.0, n2) * pow(10.0, n10);
       goto Oct2Dec;
     }
   if (2 == (i = sscanf(s, "%o %o", &Oct1, &Oct2)))
@@ -81,7 +80,7 @@ CheckDec(char *s)
           SignC = '+';
         }
       i = ((Oct1 & 037777) << 14) | (Oct2 & 037777);
-      scalar *= agcPow(2.0, -28);
+      scalar *= pow(2.0, -28);
       x = Sign * scalar * i;
       printf("(%c%010o) %.10g\n", SignC, i, x);
       return;

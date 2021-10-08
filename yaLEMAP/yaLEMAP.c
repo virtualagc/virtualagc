@@ -70,7 +70,7 @@
  * 		2021-04-20 RSB  Accounted for EBCDIC mods, in yaYUL, not
  * 		                desired here.
  *              2021-05-24 RSB  Workaround for bad cygwin pow() function.
- *
+ *              2021-05-24 RSB  My workarounds were bogus.  I've rolled them back. *
  * Note that we use yaYUL's symbol-table machinery for handling the
  * symbol table.
  */
@@ -418,7 +418,7 @@ EvaluateDecimal (char *s, Address_t *Address)
 
   // Now put it all together.
   Value = Integer + (Numerator * 1.0) / Denominator;
-  Value *= agcPow (10.0, En) * agcPow (2.0, 17 - Bn);
+  Value *= pow (10.0, En) * pow (2.0, 17 - Bn);
   i = Value + 0.5;
 
   Done: if (i > 0377777)
