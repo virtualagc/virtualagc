@@ -1,5 +1,5 @@
 /*
-  Copyright 2003,2016 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003,2016,2021 Ronald S. Burkey <info@sandroid.org>
 
   This file is part of yaAGC. 
 
@@ -26,6 +26,12 @@
   History:      04/15/03 RSB    Began.
                 08/18/16 RSB    Some cross-my-finger-and-hope tweaks for
                                 --block1.
+                10/08/21 RSB    Added BankOveflows[044] to hold info about
+                                which banks had overflowed.  This info is
+                                only for the eventual assembly-listing printout.
+                                Before, there was no way to tell the banks
+                                which had overflowed from the ones which
+                                were merely full.
  */
 
 #include "yaYUL.h"
@@ -36,6 +42,7 @@
 //-------------------------------------------------------------------------
 // Increment program counter by a certain amount. 
 // Sets the Overflow flag in the Address_t structure.
+int BankOverflows[044] = { 0 };
 void IncPc(Address_t *OldPc, int Increment, Address_t *NewPc)
 {
     int i, j, Max, Min, BankIncrement;
@@ -159,6 +166,8 @@ void IncPc(Address_t *OldPc, int Increment, Address_t *NewPc)
     } else if (i > Max) {
         NewPc->Overflow = 1;
         NewPc->SReg = Max;
+        if (NewPc->Fixed && NewPc->Banked)
+          BankOverflows[NewPc->FB] = 1;
     }  
 
     // Back-convert to get a pseudo-address.

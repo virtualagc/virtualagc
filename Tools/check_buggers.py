@@ -69,7 +69,7 @@ def get_bugger(rope, bank):
 
         s += 1
 
-def check_buggers(rope_file, bugger_file):
+def check_buggers(rope_file, bugger_file, bankOverflows):
     rope = load_rope(rope_file)
 
     with open(bugger_file, 'r') as f:
@@ -86,19 +86,46 @@ def check_buggers(rope_file, bugger_file):
         expected_bugger = int(buggerstr, 8)
 
         actual_bugger = get_bugger(rope, bank)
-        if actual_bugger != expected_bugger:
-            print('Bugger word mismatch in bank %02o; actual %05o != expected %05o (diff = %05o)' %
-                  (bank, actual_bugger, expected_bugger, abs(actual_bugger - expected_bugger)))
+        overflow = ""
+        if len(bankOverflows) > bank and bankOverflows[bank]:
+            overflow = " OVERFLOW"
+        if actual_bugger != expected_bugger or overflow != "":
+            print('Bugger word mismatch in bank %02o; actual %05o != expected %05o (diff = %05o)%s' %
+                  (bank, actual_bugger, expected_bugger, abs(actual_bugger - expected_bugger), overflow))
             errors += 1
 
     return errors
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Check bugger words of a rope binary against a known set')
+    parser.add_argument('--listing', help="Optional input assembly-listing file")
     parser.add_argument('rope_file', help="Input rope binary file")
     parser.add_argument('bugger_file', help="Input bugger word file")
 
     args = parser.parse_args()
+    
+    # We use --listing only to determine which banks have overflowed.
+    bankOverflows = []
+    if args.listing:
+        f = open(args.listing, "r")
+        listingLines = f.readlines()
+        f.close()
+        inUsageTable = False
+        for line in listingLines:
+            if not inUsageTable:
+                if "Usage Table for Fixed" in line:
+                    inUsageTable = True
+                continue
+            if "---------------" in line:
+                continue
+            # Lines are of the form "Bank NN: NNNN/2000 words used."
+            # For overflowed banks, NNNN=2000.
+            fields = line.split()
+            subfields = fields[2].split("/")
+            overflowed = subfields[0] == "2000"
+            bankOverflows.append(overflowed)
+            if fields[1] == "43:":
+                break
 
-    rc = check_buggers(args.rope_file, args.bugger_file)
+    rc = check_buggers(args.rope_file, args.bugger_file, bankOverflows)
     sys.exit(rc)

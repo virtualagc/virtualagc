@@ -76,6 +76,7 @@
  *                2021-05-24 RSB Workaround for bad cygwin pow() function.
  *                2021-05-24 RSB ... and apparently, for MINGW as well.
  *                2021-05-24 RSB My workarounds were bogus.  I've rolled them back.
+ *                2021-10-08 RSB Added BankOverflows[].
  */
 
 #ifndef INCLUDED_YAYUL_H
@@ -446,6 +447,7 @@ typedef struct
 //-------------------------------------------------------------------------
 // Function prototypes.
 
+extern int BankOverflows[044];
 int
 Add(int n1, int n2);
 void
