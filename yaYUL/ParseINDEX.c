@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2004 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2004,2021 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC. 
 
@@ -24,6 +24,8 @@
 		07/05/04 RSB.	Added KeepExtend.
 		07/10/04 RSB.	Fixed the case of the operand being a constant
 				(like "L").
+                2021-10-09 RSB  Allowed for accurate overflow word counts in
+                                fixed banks, I hope.
 */
 
 #include "yaYUL.h"
@@ -42,7 +44,7 @@ int ParseINDEX(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   
   //KeepExtend = 1;
   OutRecord->Extend = InRecord->Extend;
-  IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
+  IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter, 1);
   if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow)
     {
       strcpy(OutRecord->ErrorMessage, "Next code may overflow storage.");
@@ -58,7 +60,7 @@ int ParseINDEX(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   if (!i)
     {
       if (*InRecord->Operand == '+' || *InRecord->Operand == '-')
-	  IncPc(&InRecord->ProgramCounter, Value, &Offset);
+	  IncPc(&InRecord->ProgramCounter, Value, &Offset, 0);
       else
           PseudoToStruct(Value, &Offset);
 	

@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2004 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2004,2021 Ronald S. Burkey <info@sandroid.org>
 
   This file is part of yaAGC. 
 
@@ -22,6 +22,8 @@
   Mode:		04/18/03 RSB.	Began.
   		07/23/04 RSB.	Added 2OCT.
                 2012-09-25 JL   Add support for 2OCT with 2 arguments.
+                2021-10-09 RSB  Allowed for accurate overflow word counts
+                                in fixed banks, I hope.
  */
 
 #include "yaYUL.h"
@@ -37,7 +39,7 @@ int ParseOCT(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     char *s;
     int Value;
 
-    IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
+    IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter, 1);
     if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow) {
         strcpy(OutRecord->ErrorMessage, "Next code may overflow storage.");
         OutRecord->Warning = 1;
@@ -87,7 +89,7 @@ int Parse2OCT(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     int Value1 = 0;
     int Value2 = 0;
 
-    IncPc(&InRecord->ProgramCounter, 2, &OutRecord->ProgramCounter);
+    IncPc(&InRecord->ProgramCounter, 2, &OutRecord->ProgramCounter, 1);
     if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow) {
         strcpy(OutRecord->ErrorMessage, "Next code may overflow storage.");
         OutRecord->Warning = 1;

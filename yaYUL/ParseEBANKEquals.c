@@ -1,5 +1,5 @@
 /*
- * Copyright 2003,2004,2016 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2003,2004,2016,2021 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -25,6 +25,8 @@
  *              2016-10-21 RSB  Added code for processing the case of the
  *                              operand being a small literal number, sent
  *                              by Hartmuth Gutsche.
+ *              2021-10-09 RSB  Allowed for accurate overflow word counts
+ *                              in fixed banks, I hope.
  */
 
 #include "yaYUL.h"
@@ -109,7 +111,7 @@ ParseEBANKEquals(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
           "", &Address);
       if (!i)
         {
-          IncPc(&Address, OpcodeOffset, &Address);
+          IncPc(&Address, OpcodeOffset, &Address, 0);
           goto DoIt;
         }
 

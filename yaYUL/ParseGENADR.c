@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2004 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2004,2021 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC. 
 
@@ -25,6 +25,8 @@
                                memory properly.  yaYUL has now been
                                substantially changed to account for this.
                 07/21/04 RSB   Now allow constants as destinations.
+                2021-10-09 RSB Allowed for accurate overflow word counts
+                               in fixed banks, I hope.
 */
 
 #include "yaYUL.h"
@@ -41,7 +43,7 @@ ParseGENADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   Address_t Address;
   int Value, i;
 
-  IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
+  IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter, 1);
 
   if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow)
     {
@@ -70,7 +72,7 @@ ParseGENADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   i = GetOctOrDec(InRecord->Operand, &Value);
   if (!i && *InRecord->Mod1 == 0)
     {
-      IncPc(&InRecord->ProgramCounter, Value, &Address);
+      IncPc(&InRecord->ProgramCounter, Value, &Address, 0);
 
     DoIt:  
       if (Address.Invalid)

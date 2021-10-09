@@ -1,5 +1,5 @@
 /*
-  Copyright 2004 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2004,2021 Ronald S. Burkey <info@sandroid.org>
 
   This file is part of yaAGC. 
 
@@ -23,6 +23,8 @@
                 2012-10-02 JL   Added note.
                 2012-10-04 JL   Move FixSuperbankBits to Utilities.c.
                 2017-06-17 MAS  Refactored superbank bit logic.
+                2021-10-09 RSB  Allowed for accurate overflow word counts
+                                in fixed banks, I hope.
  */
 
 #include "yaYUL.h"
@@ -43,7 +45,7 @@ int Parse2CADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     Address_t Address;
     int i;
 
-    IncPc(&InRecord->ProgramCounter, 2, &OutRecord->ProgramCounter);
+    IncPc(&InRecord->ProgramCounter, 2, &OutRecord->ProgramCounter, 1);
     if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow) {
         strcpy(OutRecord->ErrorMessage, "Next code may overflow storage.");
         OutRecord->Warning = 1;

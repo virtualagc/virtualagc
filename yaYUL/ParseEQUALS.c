@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2004,2016 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2003-2004,2016,2017,2021 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -35,6 +35,8 @@
  *                              found some places in SUNBURST.  However, I
  *               01/29/17 MAS   Added an address calculation tweak for
  *                              the --raytheon option.
+ *               2021-10-09 RSB Allowed for accurate overflow word counts
+ *                              in fixed banks, I hope.
  */
 
 #include "yaYUL.h"
@@ -69,7 +71,7 @@ FetchSymbolPlusOffset(Address_t *pc, char *Operand, char *Mod1,
   i = GetOctOrDec(Operand, &Offset);
   if (!i)
     {
-      IncPc(pc, Offset, Value);
+      IncPc(pc, Offset, Value, 0);
       return (0);
     }
   Value->Invalid = 1;
@@ -189,7 +191,7 @@ ParseEQUALS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
               LabelValue.Value += OpcodeOffset;
             }
           else
-            IncPc(&LabelValue, OpcodeOffset, &LabelValue);
+            IncPc(&LabelValue, OpcodeOffset, &LabelValue, 0);
         }
 
       EditSymbolNew(InRecord->Label, &LabelValue, SYMBOL_CONSTANT,
@@ -205,7 +207,7 @@ ParseEQUALS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 
       if (*InRecord->Operand == '+' || *InRecord->Operand == '-')
         {
-          IncPc(&InRecord->ProgramCounter, Value, &LabelValue);
+          IncPc(&InRecord->ProgramCounter, Value, &LabelValue, 0);
         }
       else
         {

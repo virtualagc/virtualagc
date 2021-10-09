@@ -1,5 +1,5 @@
 /*
-  Copyright 2009,2016 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2009,2016,2021 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC. 
 
@@ -22,6 +22,8 @@
   		unique to Block 1.
   Mode:		2009-07-25 RSB	Copied from ParseCADR.c.
                 2016-08-24 RSB  Fixed for Block 1.
+                2021-10-09 RSB  Allowed for accurate overflow word
+                                counts in fixed banks, I hope.
   
   At the moment I don't know how or if XCADR differs from CADR, so I've
   just copied ParseCADR().
@@ -43,7 +45,7 @@ int ParseXCADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       i = 0;
   }
 
-  IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
+  IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter, 1);
   if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow)
     {
       strcpy(OutRecord->ErrorMessage, "Next code may overflow storage.");
@@ -72,7 +74,7 @@ int ParseXCADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   i = GetOctOrDec(InRecord->Operand, &Value);
   if (!i && *InRecord->Mod1 == 0)
     {
-      IncPc(&InRecord->ProgramCounter, Value, &Address);
+      IncPc(&InRecord->ProgramCounter, Value, &Address, 0);
     DoIt:  
       if (Address.Invalid)
         {

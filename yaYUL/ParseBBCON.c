@@ -1,5 +1,5 @@
 /*
- * Copyright 2004,2016-2017 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2004,2016-2017,2021 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -28,6 +28,8 @@
  *                              commented out yesterday.
  *               2017-01-05 RSB Added BBCON* as distinct from BBCON.
  *               2017-06-17 MAS Refactored superbank bit logic.
+ *               2021-10-09 RSB Allowed for accurate overflow word counts
+ *                              in fixed banks, I hope.
  */
 
 #include "yaYUL.h"
@@ -46,7 +48,7 @@ ParseBBCONraw(int star, ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     //extern Line_t CurrentFilename;
     //extern int CurrentLineInFile;
 
-    IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
+    IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter, 1);
     if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow) {
         strcpy(OutRecord->ErrorMessage, "Next code may overflow storage.");
         OutRecord->Warning = 1;
@@ -71,7 +73,7 @@ ParseBBCONraw(int star, ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 
     i = GetOctOrDec(InRecord->Operand, &Value);
     if ((!i && *InRecord->Mod1 == 0) || star) {
-        IncPc(&InRecord->ProgramCounter, Value, &Address);
+        IncPc(&InRecord->ProgramCounter, Value, &Address, 0);
         DoIt:
         if (star)
           {

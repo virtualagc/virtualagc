@@ -122,6 +122,7 @@
  *             			accident, and similarly was failing by accident in Mac OS X.
  *            	2018-10-12 RSB	Added --simulation stuff.
  *            	2021-01-24 RSB  Added a "Reconstruction" marker in .lst files.
+ *            	2021-10-09 RSB  Allowed for accurate overflow word counts in fixed banks, I hope.
  *
  * I don't really try to duplicate the formatting used by the original
  * assembly-language code, since that format was appropriate for
@@ -1490,6 +1491,9 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
     { "", "", "", "", "", "", "", "", "", "" };
   int thisLineDoubleComment = 0;
 
+  for (i = 0; i < 044; i++)
+    BankOverflows[i] = 0;
+
   inReconstructionComment = 0;
 
   debugLineString = s;
@@ -2266,7 +2270,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
                 }
               IncPc(&ParseInputRecord.ProgramCounter,
                   ParseOutputRecord.NumWords,
-                  &ParseOutputRecord.ProgramCounter);
+                  &ParseOutputRecord.ProgramCounter, 1);
               ParseOutputRecord.EBank = ParseInputRecord.EBank;
               ParseOutputRecord.SBank = ParseInputRecord.SBank;
               //UpdateBankCounts(&ParseOutputRecord.ProgramCounter);
@@ -2298,7 +2302,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
                   NumInterpretiveOperands--;
                   IncPc(&ParseInputRecord.ProgramCounter,
                       ParseOutputRecord.NumWords,
-                      &ParseOutputRecord.ProgramCounter);
+                      &ParseOutputRecord.ProgramCounter, 0);
                   ParseOutputRecord.EBank = ParseInputRecord.EBank;
                   ParseOutputRecord.SBank = ParseInputRecord.SBank;
                   //UpdateBankCounts(&ParseOutputRecord.ProgramCounter);
@@ -2314,7 +2318,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
                   NumInterpretiveOperands = 0;
                   IncPc(&ParseInputRecord.ProgramCounter,
                       ParseOutputRecord.NumWords,
-                      &ParseOutputRecord.ProgramCounter);
+                      &ParseOutputRecord.ProgramCounter, 0);
                   ParseOutputRecord.EBank = ParseInputRecord.EBank;
                   ParseOutputRecord.SBank = ParseInputRecord.SBank;
                   //UpdateBankCounts(&ParseOutputRecord.ProgramCounter);
@@ -2395,7 +2399,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
               // operator produces a single word of output, it is more accurate
               // to ASSUME this rather than not to advance the program counter.
               IncPc(&ParseInputRecord.ProgramCounter, 1,
-                  &ParseOutputRecord.ProgramCounter);
+                  &ParseOutputRecord.ProgramCounter, 1);
             }
           else
             {

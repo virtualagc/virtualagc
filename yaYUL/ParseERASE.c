@@ -1,5 +1,5 @@
 /*
- *  Copyright 2003-2004,2016 Ronald S. Burkey <info@sandroid.org>
+ *  Copyright 2003-2004,2016,2021 Ronald S. Burkey <info@sandroid.org>
  *
  *  This file is part of yaAGC.
  *
@@ -28,6 +28,8 @@
  *                              apparently causing problems for
  *                              MS Visual C, but which served no purpose
  *                              anyway.
+*               2021-10-09 RSB  Allowed for accurate overflow word counts
+*                               in fixed banks, I hope.
  */
 
 #include "yaYUL.h"
@@ -64,7 +66,7 @@ ParseERASE(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   int Value, i;
 
-  IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
+  IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter, 1);
 
   if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow)
     {
@@ -154,7 +156,7 @@ ParseERASE(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
                 }
 
               IncPc(&InRecord->ProgramCounter, 1 + Value,
-                  &OutRecord->ProgramCounter);
+                  &OutRecord->ProgramCounter, 1);
 
               if (!OutRecord->ProgramCounter.Invalid)
                 {

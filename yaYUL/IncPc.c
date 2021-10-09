@@ -26,12 +26,16 @@
   History:      04/15/03 RSB    Began.
                 08/18/16 RSB    Some cross-my-finger-and-hope tweaks for
                                 --block1.
-                10/08/21 RSB    Added BankOveflows[044] to hold info about
+                10/08/21 RSB    Added BankOverflows[044] to hold info about
                                 which banks had overflowed.  This info is
                                 only for the eventual assembly-listing printout.
                                 Before, there was no way to tell the banks
                                 which had overflowed from the ones which
                                 were merely full.
+                10/09/21 RSB    Changed BankOverflows[] to record the actual
+                                number of words overflowed.
+                2021-10-09 RSB  Allowed for accurate overflow word counts in
+                                fixed banks, I hope.
  */
 
 #include "yaYUL.h"
@@ -42,8 +46,15 @@
 //-------------------------------------------------------------------------
 // Increment program counter by a certain amount. 
 // Sets the Overflow flag in the Address_t structure.
+// This function is used mostly for instructions, but is also used sometimes
+// for determining whether operands are in-range.  We need to distinguish the
+// two cases in order to measure block overflow correctly; pureInstruction is
+// non-zero for the case of an instruction, and 0 otherwise.  In fact, it's pretty
+// easy to know which is which; it should be 1 if NewPc is OutRecord->ProgramCounter,
+// and 0 otherwise.  But the only penalty for getting it wrong is that the overflow
+// count of a fixed bank may be reported wrong.
 int BankOverflows[044] = { 0 };
-void IncPc(Address_t *OldPc, int Increment, Address_t *NewPc)
+void IncPc(Address_t *OldPc, int Increment, Address_t *NewPc, int pureInstruction)
 {
     int i, j, Max, Min, BankIncrement;
 
@@ -100,11 +111,6 @@ void IncPc(Address_t *OldPc, int Increment, Address_t *NewPc)
         } else
             return;
     }
-
-    // Okey-smokey, the "address" is really an address. If it has previously
-    // overflowed, there's no particular reason to continue.
-    if (NewPc->Overflow)
-        return;
 
     // Compute the new S-register value (in the absence of overflow).
     i = (j = NewPc->SReg) + Increment;
@@ -166,9 +172,19 @@ void IncPc(Address_t *OldPc, int Increment, Address_t *NewPc)
     } else if (i > Max) {
         NewPc->Overflow = 1;
         NewPc->SReg = Max;
-        if (NewPc->Fixed && NewPc->Banked)
-          BankOverflows[NewPc->FB] = 1;
+        if (pureInstruction && NewPc->Fixed && NewPc->Banked && Increment > 0 && Increment < 6)
+          {
+            BankOverflows[NewPc->FB] += i - Max;
+            printf("Info: %04o %d\n", BankOverflows[NewPc->FB], i - Max);
+          }
     }  
+
+    // Okey-smokey, the "address" is really an address. If it has previously
+    // overflowed, there's no particular reason to continue.  We didn't actually
+    // need most of the above stuff, but I didn't want to bypass the computation
+    // of the number of used words in the bank.
+    if (NewPc->Overflow)
+        return;
 
     // Back-convert to get a pseudo-address.
     if (NewPc->Unbanked)

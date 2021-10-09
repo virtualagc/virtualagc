@@ -77,6 +77,16 @@
  *                2021-05-24 RSB ... and apparently, for MINGW as well.
  *                2021-05-24 RSB My workarounds were bogus.  I've rolled them back.
  *                2021-10-08 RSB Added BankOverflows[].
+ *                2021-10-09 RSB Changed the interface for IncPc(), unfortunately,
+ *                               adding an extra input parameter to assist in trying to
+ *                               accurately count the number of words used in fixed banks
+ *                               which overflow, which unfortunately turns out to be very
+ *                               tricky on the existing framework.  I hope I got it right,
+ *                               though probably not, but at least it's more accurate than
+ *                               it had been.  Of course there are no overflows at all in
+ *                               the AGC code we've rescued, but knowing how much a bank
+ *                               has overflowed can be very helpful during reconstruction
+ *                               efforts for code we *don't* have copies of.
  */
 
 #ifndef INCLUDED_YAYUL_H
@@ -451,7 +461,7 @@ extern int BankOverflows[044];
 int
 Add(int n1, int n2);
 void
-IncPc(Address_t *Input, int Increment, Address_t *Output);
+IncPc(Address_t *Input, int Increment, Address_t *Output, int PureInstruction);
 void
 PseudoToSegmented(int Value, ParseOutput_t *OutputRecord);
 void

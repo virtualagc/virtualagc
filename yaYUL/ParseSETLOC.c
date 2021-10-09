@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2004 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2004,2016,2017,2021 Ronald S. Burkey <info@sandroid.org>
 
   This file is part of yaAGC. 
 
@@ -26,6 +26,8 @@
                 01/27/17 MAS.   Added support for Raytheon-style
                                 absolute addresses (eg. FF024000)
                 06/17/17 MAS.   SETLOC has no effect on the SBank.
+                2021-10-09 RSB  Allowed for accurate overflow
+                                word counts in fixed banks, I hope.
  */
 
 #include "yaYUL.h"
@@ -56,7 +58,7 @@ int ParseSETLOC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
         if (InRecord->Operand[0] == '+' || InRecord->Operand[0] == '-') {
             // This is a relative SETLOC or LOC. Change the PC by the requested
             // value.
-            IncPc(&OutRecord->ProgramCounter, Value, &OutRecord->ProgramCounter);
+            IncPc(&OutRecord->ProgramCounter, Value, &OutRecord->ProgramCounter, 1);
         } else {
             // What we've found here is that a constant, like 04000, is the
             // operand of the SETLOC pseudo-op.  I don't really know what is
@@ -101,7 +103,7 @@ int ParseSETLOC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 
     i = GetOctOrDec(InRecord->Mod1, &Value);
     if (!i)
-        IncPc(&OutRecord->ProgramCounter, Value, &OutRecord->ProgramCounter);
+        IncPc(&OutRecord->ProgramCounter, Value, &OutRecord->ProgramCounter, 1);
 
     // Make sure this prints properly in the output listing (?).
     InRecord->ProgramCounter = OutRecord->ProgramCounter;

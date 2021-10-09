@@ -1,5 +1,5 @@
 /*
- *  Copyright 2003-2004,2016 Ronald S. Burkey <info@sandroid.org>
+ *  Copyright 2003-2004,2016,2021 Ronald S. Burkey <info@sandroid.org>
  *
  *  This file is part of yaAGC.
  *
@@ -41,6 +41,8 @@
  *                              my own fault.
  *              10/21/16 RSB    Added a fix to the --blk2 EBANK handling mentioned
  *                              above, sent by Hartmuth Gutsche.
+ *              2021-10-09 RSB  Allowed for accurate overflow word counts in
+ *                              fixed banks, I hope.
  */
 
 #include "yaYUL.h"
@@ -65,7 +67,7 @@ ParseST(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode, int Flags)
     {
       Opcode += (blk2 ? 02000 : 04000) * ArgType;
     }
-  IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
+  IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter, 1);
   if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow)
     {
       strcpy(OutRecord->ErrorMessage, "Next code may overflow storage.");
@@ -130,7 +132,7 @@ ParseST(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode, int Flags)
     }
   if (!i && *InRecord->Mod1 == 0)
     {
-      IncPc(&InRecord->ProgramCounter, Value, &K);
+      IncPc(&InRecord->ProgramCounter, Value, &K, 0);
       DoIt: if (K.Invalid)
         {
           strcpy(OutRecord->ErrorMessage, "Destination address not resolved.");
@@ -160,7 +162,7 @@ ParseST(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode, int Flags)
           if (K.Constant)
             PseudoToStruct(K.Value, &K);
           if (Flags & KPLUS1)
-            IncPc(&K, 1, &K);
+            IncPc(&K, 1, &K, 0);
           i = K.SReg;
           if (!K.Erasable)
             {

@@ -43,6 +43,8 @@
                                appropriately.  The pow() changes have been
                                rolled back, and a different fix (fuzzDEC) has
                                been applied for all platforms, not just cygwin.
+                2021-10-09 RSB Allowed for accurate overflow word counts in
+                               fixed banks, I hope.
  */
 
 #include "yaYUL.h"
@@ -109,7 +111,7 @@ int Parse2DEC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 //    printf("--- 2DEC: (original) operand=\"%s\" mod1=\"%s\" mod2=\"%s\" extra=\"%s\"\n", InRecord->Operand, InRecord->Mod1, InRecord->Mod2, InRecord->Extra);
 //#endif
 
-    IncPc(&InRecord->ProgramCounter, 2, &OutRecord->ProgramCounter);
+    IncPc(&InRecord->ProgramCounter, 2, &OutRecord->ProgramCounter, 1);
 
     if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow) {
         strcpy(OutRecord->ErrorMessage, "Next code may overflow storage.");
@@ -281,7 +283,7 @@ int ParseDEC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     char *tmpmod1 = NULL, *tmpmod2 = NULL;
     int Sign, Value, i;
 
-    IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
+    IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter, 1);
 
     if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow) {
         strcpy(OutRecord->ErrorMessage, "Next code may overflow storage.");
@@ -374,7 +376,7 @@ int ParseVN(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     char c;
     unsigned Value;
 
-    IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
+    IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter, 1);
 
     if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow) {
         strcpy(OutRecord->ErrorMessage, "Next code may overflow storage.");

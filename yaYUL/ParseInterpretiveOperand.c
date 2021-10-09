@@ -1,5 +1,5 @@
 /*
- *  Copyright 2003-2004,2016 Ronald S. Burkey <info@sandroid.org>
+ *  Copyright 2003-2004,2016,2021 Ronald S. Burkey <info@sandroid.org>
  *
  *  This file is part of yaAGC.
  *
@@ -24,6 +24,8 @@
  *              2016-08-24 RSB  Updates related to --block1.
  *              2016-10-21 RSB  Added a --blk2 to fix sent by Hartmuth Gutsche,
  *                              to avoid some of the EBANK handling.
+ *              2021-10-09 RSB  Allowed for accurate overflow word counts in fixed
+ *                              banks, I hope.
  */
 
 #include "yaYUL.h"
@@ -45,7 +47,7 @@ ParseInterpretiveOperand (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   //}
 
   ArgType = ParseComma (InRecord);
-  IncPc (&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
+  IncPc (&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter, 1);
 
   if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow)
     {
@@ -90,7 +92,7 @@ ParseInterpretiveOperand (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 	  if (*InRecord->Operand == '+'
 	      || (!Block1 && *InRecord->Operand == '-'))
 	    {
-	      IncPc (&InRecord->ProgramCounter, Value, &K);
+	      IncPc (&InRecord->ProgramCounter, Value, &K, 0);
 	    }
 	  else
 	    {

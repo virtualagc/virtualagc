@@ -1,5 +1,5 @@
 /*
- *  Copyright 2003,2016 Ronald S. Burkey <info@sandroid.org>
+ *  Copyright 2003,2016,2021 Ronald S. Burkey <info@sandroid.org>
  *
  *  This file is part of yaAGC.
  *
@@ -29,6 +29,8 @@
  *              2016-10-20 RSB  When the operand for CADR was a simple number, it was
  *                              incorrectly treating it as an offset to the current location
  *                              rather than a full pseudo-address.
+ *              2021-10-09 RSB  Allowed for accurate overflow word counts in
+ *                              fixed banks, I hope.
  */
 
 #include "yaYUL.h"
@@ -50,7 +52,7 @@ ParseCADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   Address_t Address;
   int Value, i;
 
-  IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
+  IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter, 1);
   if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow)
     {
       strcpy(OutRecord->ErrorMessage, "Next code may overflow storage.");

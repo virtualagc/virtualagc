@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2004 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2004,2021 Ronald S. Burkey <info@sandroid.org>
   Copyright 2009 Jim Lawton <jim DOT lawton AT gmail DOT com>
   
   This file is part of yaAGC. 
@@ -21,6 +21,8 @@
   Filename:	ParseCHECKequals.c
   Purpose:	Assembles the CHECK= pseudo-op.
   Mode:		2009-09-03 JL	Added, based on original EQUALS parser.
+                2021-10-09 RSB  Allowed for accurate overflow word counts
+                                in fixed banks, I hope.
 */
 
 #include "yaYUL.h"
@@ -92,7 +94,7 @@ int ParseCHECKequals(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
             }
           else
             {
-	          IncPc(&checkValue, OpcodeOffset, &checkValue);
+	          IncPc(&checkValue, OpcodeOffset, &checkValue, 0);
 	        }
 	      rhValue = checkValue.Value;
 	      rhValid = 1;
@@ -102,7 +104,7 @@ int ParseCHECKequals(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     {
       if (*InRecord->Operand == '+' || *InRecord->Operand == '-')
         {
-          IncPc(&InRecord->ProgramCounter, rhValue, &checkValue);
+          IncPc(&InRecord->ProgramCounter, rhValue, &checkValue, 0);
         }
       else
         {

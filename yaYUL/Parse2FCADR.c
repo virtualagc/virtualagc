@@ -1,5 +1,5 @@
 /*
-  Copyright 2004 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2004,2012,2021 Ronald S. Burkey <info@sandroid.org>
 
   This file is part of yaAGC. 
 
@@ -21,6 +21,8 @@
   Purpose:      Assembles the 2FCADR pseudo-ops.
   Hsitory:      07/09/04 RSB.   Created.
                 2012-10-02 JL   Added note.
+                2021-10-09 RSB  Allowed for accurate overflow word counts
+                                in fixed banks, I hope.
  */
 
 #include "yaYUL.h"
@@ -44,7 +46,7 @@ Parse2FCADR (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     Address_t Address;
     int i;
 
-    IncPc(&InRecord->ProgramCounter, 2, &OutRecord->ProgramCounter);
+    IncPc(&InRecord->ProgramCounter, 2, &OutRecord->ProgramCounter, 1);
     if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow) {
         strcpy(OutRecord->ErrorMessage, "Next code may overflow storage.");
         OutRecord->Warning = 1;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2003,2004 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2003,2004,2011,2016,2017,2021 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -32,6 +32,8 @@
  *              2017-06-17 MAS Refactored the SBANK= logic. Once established,
  *                             the SBank remains established. It is also now
  *                             tracked simply as a superbank number, as in YUL.
+ *              2021-10-09 RSB Allowed for accurate overflow word counts in
+ *                             fixed banks, I hope.
  */
 
 #include "yaYUL.h"
@@ -120,7 +122,7 @@ int ParseSBANKEquals(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
         // The operand is NOT a number.  Presumably, it's a symbol.
         i = FetchSymbolPlusOffset(&InRecord->ProgramCounter, InRecord->Operand, "", &Address);
         if (!i) {
-            IncPc(&Address, OpcodeOffset, &Address);
+            IncPc(&Address, OpcodeOffset, &Address, 0);
             goto DoIt;
         }
 

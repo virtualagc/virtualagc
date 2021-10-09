@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2004,2016 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2004,2021 Ronald S. Burkey <info@sandroid.org>
 
   This file is part of yaAGC. 
 
@@ -40,6 +40,8 @@
                 2017-01-29 MAS  Added some special logic for handling Raython-
                                 style literal operands.
                 2017-06-28 MAS  Added BLK2's special  handling of EDRUPT.
+                2021-10-09 RSB  Allowed for accurate overflow word counts in
+                                fixed banks, I hope.
  */
 
 #include "yaYUL.h"
@@ -70,7 +72,7 @@ int ParseGeneral(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode, i
     if (InRecord->Mod2)
         strcat(args, InRecord->Mod2);
 
-    IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
+    IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter, 1);
 
     if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow) {
         strcpy(OutRecord->ErrorMessage, "Next code may overflow storage.");
@@ -150,7 +152,7 @@ int ParseGeneral(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode, i
 
     if (!i) {
         if (*InRecord->Operand == '+' || *InRecord->Operand == '-')
-            IncPc(&InRecord->ProgramCounter, Value, &K);
+            IncPc(&InRecord->ProgramCounter, Value, &K, 0);
         else
             PseudoToStruct(Value, &K);
 
@@ -191,7 +193,7 @@ int ParseGeneral(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode, i
             }
 
             if (Flags & KPLUS1)
-                IncPc(&K, 1, &K);
+                IncPc(&K, 1, &K, 0);
 
             i = K.SReg;
             if (!InRecord->IndexValid) {

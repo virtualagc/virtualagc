@@ -70,14 +70,14 @@ def get_bugger(rope, bank):
         s += 1
 
 def mismatchSortKey(output):
-    if "OVERFLOW" in output["message"]:
-        return "B77777%02o" % output["bank"]
+    if "used = 2" in output["message"]:
+        return "B%-5s%02o" % (output["usage"], output["bank"])
     return "A%05o%02o" % (output["discrepancy"], output["bank"])
 
 summary = { "match" : 0, "singleDigit" : 0, "doubleDigit" : 0, 
            "tripleDigit" : 0, "quadrupleDigit" : 0, "quintupleDigit" : 0, "overflow" : 0}
 outputs = []
-def check_buggers(rope_file, bugger_file, bankOverflows):
+def check_buggers(rope_file, bugger_file, bankUsages):
     rope = load_rope(rope_file)
 
     with open(bugger_file, 'r') as f:
@@ -94,11 +94,11 @@ def check_buggers(rope_file, bugger_file, bankOverflows):
         expected_bugger = int(buggerstr, 8)
 
         actual_bugger = get_bugger(rope, bank)
-        overflow = ""
-        if len(bankOverflows) > bank and bankOverflows[bank]:
-            overflow = " OVERFLOW"
+        usage = ""
+        if bankUsages[bank] != "0000/2000":
+            usage = "; used = " + bankUsages[bank].split("/")[0]
         discrepancy = abs(actual_bugger - expected_bugger)
-        if overflow != "":
+        if bankUsages[bank][0] == "2":
             summary["overflow"] += 1
         elif actual_bugger == expected_bugger:
             summary["match"] += 1
@@ -112,14 +112,14 @@ def check_buggers(rope_file, bugger_file, bankOverflows):
             summary["quadrupleDigit"] += 1
         else:
             summary["quintupleDigit"] += 1
-        outputMessage = '\tBugger word mismatch in bank %02o; actual %05o != expected %05o (diff = %05o)%s' % (bank, actual_bugger, expected_bugger, discrepancy, overflow)
-        outputs.append({"discrepancy" : discrepancy, "bank" : bank, "message" : outputMessage})
-        if actual_bugger != expected_bugger or overflow != "":
+        outputMessage = '\tBugger word mismatch in bank %02o; actual %05o != expected %05o (diff = %05o)%s' % (bank, actual_bugger, expected_bugger, discrepancy, usage)
+        outputs.append({"discrepancy" : discrepancy, "bank" : bank, "usage" : bankUsages[bank].split("/")[0], "message" : outputMessage})
+        if actual_bugger != expected_bugger or bankUsages[bank][0] == "2":
             errors += 1
     
     print("Mismatches, in Bank Order:")
     for output in outputs:
-        if output["discrepancy"] != 0 or "OVERFLOW" in output["message"]:
+        if output["discrepancy"] != 0 or "used = 2" in output["message"]:
             print(output["message"])
     print("Mismatches, in Discrepancy Order:")
     outputs.sort(key=mismatchSortKey)
@@ -137,7 +137,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     # We use --listing only to determine which banks have overflowed.
-    bankOverflows = []
+    bankUsages = ["0000/2000"]*044
     if args.listing:
         f = open(args.listing, "r")
         listingLines = f.readlines()
@@ -151,13 +151,12 @@ if __name__ == '__main__':
             if "---------------" in line:
                 continue
             # Lines are of the form "Bank NN: NNNN/2000 words used."
-            # For overflowed banks, NNNN=2000.
+            # For overflowed banks, NNNN>1777.
             fields = line.split()
-            subfields = fields[2].split("/")
-            overflowed = subfields[0] == "2000"
-            bankOverflows.append(overflowed)
-            if fields[1] == "43:":
+            bank = int(fields[1][:-1], 8)
+            bankUsages[bank] = fields[2]
+            if bank == 043:
                 break
 
-    rc = check_buggers(args.rope_file, args.bugger_file, bankOverflows)
+    rc = check_buggers(args.rope_file, args.bugger_file, bankUsages)
     sys.exit(rc)
