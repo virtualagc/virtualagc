@@ -70,7 +70,7 @@ def get_bugger(rope, bank):
         s += 1
 
 def mismatchSortKey(output):
-    if "used = 2" in output["message"]:
+    if "overflow" in output["message"]:
         return "B%-5s%02o" % (output["usage"], output["bank"])
     return "A%05o%02o" % (output["discrepancy"], output["bank"])
 
@@ -96,7 +96,11 @@ def check_buggers(rope_file, bugger_file, bankUsages):
         actual_bugger = get_bugger(rope, bank)
         usage = ""
         if bankUsages[bank] != "0000/2000":
-            usage = "; used = " + bankUsages[bank].split("/")[0]
+            used = int(bankUsages[bank].split("/")[0], 8)
+            if used <= 01777:
+                usage = "; remaining = %3d words" % (01777 - used)
+            else:
+                usage = "; overflow  = %3d words" % (used - 01777)
         discrepancy = abs(actual_bugger - expected_bugger)
         if bankUsages[bank][0] == "2":
             summary["overflow"] += 1
@@ -119,7 +123,7 @@ def check_buggers(rope_file, bugger_file, bankUsages):
     
     print("Mismatches, in Bank Order:")
     for output in outputs:
-        if output["discrepancy"] != 0 or "used = 2" in output["message"]:
+        if output["discrepancy"] != 0 or "overflow" in output["message"]:
             print(output["message"])
     print("Mismatches, in Discrepancy Order:")
     outputs.sort(key=mismatchSortKey)

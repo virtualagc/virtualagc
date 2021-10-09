@@ -175,7 +175,7 @@ void IncPc(Address_t *OldPc, int Increment, Address_t *NewPc, int pureInstructio
         if (pureInstruction && NewPc->Fixed && NewPc->Banked && Increment > 0 && Increment < 6)
           {
             BankOverflows[NewPc->FB] += i - Max;
-            printf("Info: %04o %d\n", BankOverflows[NewPc->FB], i - Max);
+            //printf("Info: %04o %d\n", BankOverflows[NewPc->FB], i - Max);
           }
     }  
 
