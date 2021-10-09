@@ -69,6 +69,14 @@ def get_bugger(rope, bank):
 
         s += 1
 
+def mismatchSortKey(output):
+    if "OVERFLOW" in output["message"]:
+        return "B77777%02o" % output["bank"]
+    return "A%05o%02o" % (output["discrepancy"], output["bank"])
+
+summary = { "match" : 0, "singleDigit" : 0, "doubleDigit" : 0, 
+           "tripleDigit" : 0, "quadrupleDigit" : 0, "quintupleDigit" : 0, "overflow" : 0}
+outputs = []
 def check_buggers(rope_file, bugger_file, bankOverflows):
     rope = load_rope(rope_file)
 
@@ -89,11 +97,35 @@ def check_buggers(rope_file, bugger_file, bankOverflows):
         overflow = ""
         if len(bankOverflows) > bank and bankOverflows[bank]:
             overflow = " OVERFLOW"
+        discrepancy = abs(actual_bugger - expected_bugger)
+        if overflow != "":
+            summary["overflow"] += 1
+        elif actual_bugger == expected_bugger:
+            summary["match"] += 1
+        elif discrepancy < 010:
+            summary["singleDigit"] += 1
+        elif discrepancy < 0100:
+            summary["doubleDigit"] += 1
+        elif discrepancy < 01000:
+            summary["tripleDigit"] += 1
+        elif discrepancy < 010000:
+            summary["quadrupleDigit"] += 1
+        else:
+            summary["quintupleDigit"] += 1
+        outputMessage = '\tBugger word mismatch in bank %02o; actual %05o != expected %05o (diff = %05o)%s' % (bank, actual_bugger, expected_bugger, discrepancy, overflow)
+        outputs.append({"discrepancy" : discrepancy, "bank" : bank, "message" : outputMessage})
         if actual_bugger != expected_bugger or overflow != "":
-            print('Bugger word mismatch in bank %02o; actual %05o != expected %05o (diff = %05o)%s' %
-                  (bank, actual_bugger, expected_bugger, abs(actual_bugger - expected_bugger), overflow))
             errors += 1
-
+    
+    print("Mismatches, in Bank Order:")
+    for output in outputs:
+        if output["discrepancy"] != 0 or "OVERFLOW" in output["message"]:
+            print(output["message"])
+    print("Mismatches, in Discrepancy Order:")
+    outputs.sort(key=mismatchSortKey)
+    for output in outputs:
+        print(output["message"])
+    print("Summary:  %02d-%02d-%02d-%02d-%02d-%02d-%02d" % (summary["match"], summary["singleDigit"], summary["doubleDigit"], summary["tripleDigit"], summary["quadrupleDigit"], summary["quintupleDigit"], summary["overflow"]))
     return errors
 
 if __name__ == '__main__':
