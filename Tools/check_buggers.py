@@ -74,6 +74,12 @@ def mismatchSortKey(output):
         return "B%-5s%02o" % (output["usage"], output["bank"])
     return "A%05o%02o" % (output["discrepancy"], output["bank"])
 
+def bankSortKey(output):
+    return output["bank"]
+
+def usedSortKey(output):
+    return output["usage"]
+
 summary = { "match" : 0, "singleDigit" : 0, "doubleDigit" : 0, 
            "tripleDigit" : 0, "quadrupleDigit" : 0, "quintupleDigit" : 0, "overflow" : 0}
 outputs = []
@@ -121,15 +127,21 @@ def check_buggers(rope_file, bugger_file, bankUsages):
         if actual_bugger != expected_bugger or bankUsages[bank][0] == "2":
             errors += 1
     
-    print("Mismatches, in Bank Order:")
+    print("Mismatched Banks, in Word-Usage Order:")
+    outputs.sort(key=usedSortKey)
     for output in outputs:
         if output["discrepancy"] != 0 or "overflow" in output["message"]:
             print(output["message"])
-    print("Mismatches, in Discrepancy Order:")
+    print("All Banks, in Checksum-Discrepancy Order:")
     outputs.sort(key=mismatchSortKey)
     for output in outputs:
         print(output["message"])
     print("Summary:  %02d-%02d-%02d-%02d-%02d-%02d-%02d" % (summary["match"], summary["singleDigit"], summary["doubleDigit"], summary["tripleDigit"], summary["quadrupleDigit"], summary["quintupleDigit"], summary["overflow"]))
+    print("Mismatched Banks, in Bank-Number Order:")
+    outputs.sort(key=bankSortKey)
+    for output in outputs:
+        if output["discrepancy"] != 0 or "overflow" in output["message"]:
+            print(output["message"])
     return errors
 
 if __name__ == '__main__':
