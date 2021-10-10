@@ -26,6 +26,8 @@ import array
 import sys
 import os
 
+useListing = False
+
 def load_rope(filename):
     # Load the rope data into an array
     rope = array.array('H')
@@ -127,11 +129,12 @@ def check_buggers(rope_file, bugger_file, bankUsages):
         if actual_bugger != expected_bugger or bankUsages[bank][0] == "2":
             errors += 1
     
-    print("Mismatched Banks, in Word-Usage Order:")
-    outputs.sort(key=usedSortKey)
-    for output in outputs:
-        if output["discrepancy"] != 0 or "overflow" in output["message"]:
-            print(output["message"])
+    if useListing:
+        print("Mismatched Banks, in Word-Usage Order:")
+        outputs.sort(key=usedSortKey)
+        for output in outputs:
+            if output["discrepancy"] != 0 or "overflow" in output["message"]:
+                print(output["message"])
     print("All Banks, in Checksum-Discrepancy Order:")
     outputs.sort(key=mismatchSortKey)
     for output in outputs:
@@ -158,6 +161,7 @@ if __name__ == '__main__':
         f = open(args.listing, "r")
         listingLines = f.readlines()
         f.close()
+        useListing = True
         inUsageTable = False
         for line in listingLines:
             if not inUsageTable:
