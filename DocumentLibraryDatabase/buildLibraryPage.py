@@ -372,7 +372,7 @@ previously-existing Document Library page</a> ... at least to the extent that
 I've input the data.
 """
 
-cutoffMonths = 3
+cutoffMonths = 2
 blurbRecentlyAdded = """
 This section lists all documents updated in the last 
 """ + "%d" % cutoffMonths + """
@@ -380,6 +380,12 @@ months. Note that recently-added <a href="#EngineeringDrawings">G&N
 engineering drawings</a> are <i>not</i> included in the list.
 <br><br>
 The entries are arranged from most-recently added to least-recently added.
+<br><br>
+By the way, most documents listed in this section will also appear in one or
+more other sections of the library.  In those <i>other</i> sections, you find
+the new entries distinguished by the badge <img src="new.png">, but we don't 
+do that in this section, since obviously every document would have such
+a badge.
 """
 
 blurbPresentations = """
@@ -554,11 +560,32 @@ necessary to stop work until the next SCB meeting.  In any case, the
 signficance (for us) of either PCRs or PCNs is 
 that since AGC software changes were
 governed by them, knowledge of the PCRs/PCNs is of tremendous importance in 
-tracking changes between LUMINARY and COLOSSUS software revisions ... or 
+tracking changes between AGC software revisions ... or 
 alternatively, of no importance whatever if you're not interested in 
-understanding the evolution of LUMINARY and COLOSSUS.
+understanding the evolution of the software.
 <br><br>
-The entries below are arranged by PCR/PCN number.
+When the full text of a PCR or PCN isn't currently available, information 
+has instead come from
+other contemporary documentation, including:
+<ul>
+<li>Lists in the GSOP documents of PCRs/PCNs incorporated into various AGC revisions.</li>
+<li>SCB meeting minutes listing PCRs/PCNs which had been approved or rejected.
+The SCB minutes often give a much fuller explanation than the mere titles of
+the PCRs/PCNs provide.</li>
+<li>LUMINARY or COLOSSUS memos describing the revision-to-revision changes in
+the software.  These also may give more information than the mere titles of the
+PCRs or PCNs.</li>
+<li>Lists of PCRs/PCNs compiled by the development managers for various missions.</li>
+</ul>
+None of these sources are meticulous about using the exact titles of the PCRs.
+<br><br>
+All known PCRs and PCNs for which we have any information at all are listed,
+whether approved or disapproved by the SCB, and whether or not a copy is currently 
+available in the library.  Unless stated otherwise, PCRs/PCNs were approved for
+implementation.  The entries below are arranged by PCR/PCN number. We've also 
+added a rough categorization to 
+each PCR/PCN entry as to which AGC program(s) it applies to:  SUNDISK, SUNDANCE, 
+LUMINARY, COLOSSUS (which includes COMANCHE and ARTEMIS), or SKYLARK.
 """
 
 blurbAnomalies = """
@@ -579,7 +606,7 @@ be acted upon much more quickly and easily than was the case for PCRs and PCNs.
 <br><br>
 ACB Requests and Software Anomaly Reports have no titles as such, so the titles 
 given below are actually extracts from the (often rather long) problem 
-descriptions given in forms.
+descriptions given in forms.  The entries are sorted by document number.
 """
 
 blurbAGS = """
@@ -948,6 +975,24 @@ def myRecentSortKey(record):
     key += myDateAuthorSortKey(record)
     return key
 
+# For sorting software anomalies.
+def myAnomalySortKey(record):
+    if len(record["DocumentNumbers"]) == 0:
+        return ""
+    key = record["DocumentNumbers"][0]["Number"]
+    fields = key.split("-")
+    while len(fields[0]) < 3:
+        fields[0] += "Z"
+    if len(fields) == 2:
+        while len(fields[1]) < 3:
+            fields[1] = "0" + fields[1]
+        key = fields[0] + fields[1]
+    elif len(fields) == 3:
+        while len(fields[2]) < 3:
+            fields[2] = "0" + fields[2]
+        key = fields[0] + fields[1] + fields[2]
+    return key
+
 # Make a sensible publication date out of the kinds of date fields I have.
 def makeSensiblePublicationDate(record):
     month = record["MonthPublished"]
@@ -1045,8 +1090,30 @@ def addOrg(dict):
     
 def documentEntryHTML(record, showComment):    
     html = ""
+    if "recent" in record and record["recent"]:
+        html = "<img src=\"new.png\">"
     URLs = record["URLs"]
     DocumentNumbers = record["DocumentNumbers"]
+    target = ""
+    for documentNumber in DocumentNumbers:
+        if documentNumber["Number"].lower()[:4] in ["pcr-", "pcn-"]:
+            keywords = str(record["Keywords"]).lower()
+            if "sundance" in keywords:
+                target += ", SUNDANCE"
+            if "luminary" in keywords:
+                target += ", LUMINARY"
+            if "artemis" in keywords or "comanche" in keywords or "colossus" in keywords:
+                target += ", COLOSSUS"
+            if "skylark" in keywords:
+                target += ", SKYLARK"
+            if "sundisk" in keywords:
+                target += ", SUNDISK"
+            if target[:2] == ", ":
+                target = target[2:]
+            if target != "":
+                html += "(" + target + ") "
+            break
+            
     if len(DocumentNumbers) > 0:
         html += addOrg(DocumentNumbers[0])
         for m in range(1, len(DocumentNumbers)):
@@ -1173,7 +1240,7 @@ tableOfContentsSpec = [
     { "anchor" : "ColossusMemos", "title" : "COLOSSUS Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["COLOSSUS Memo"] },
     { "anchor" : "SkylarkMemos", "title" : "SKYLARK (SKYLAB) Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["SKYLARK Memo", "SKYLAB Memo"] },
     { "anchor" : "PcrsPcns", "title" : "Program Change Requests (PCR) and Notices (PCN)", "sortKey" : myDashSortKey, "documentNumbers" : [ "PCR-", "PCN-"], "blurb" : blurbPcrsPcns  },
-    { "anchor" : "Anomalies", "title" : "Software Anomaly Reports and Assembly Control Board Requests", "blurb" : blurbAnomalies, "documentNumbers" : [ "LNY-", "L-", "COL-", "COM-", "A-" ] },
+    { "anchor" : "Anomalies", "title" : "Software Anomaly Reports and Assembly Control Board Requests", "sortKey" : myAnomalySortKey, "blurb" : blurbAnomalies, "documentNumbers" : [ "LNY-", "L-", "COL-", "COM-", "A-" ] },
     { "anchor" : "SCB", "title" : "Software Control Board (SCB)", "keywords" : ["SCB"]},
     { "anchor" : "SDP", "title" : "Software Development Plans", "keywords" : ["SDP"]},
     { "anchor" : "Block1", "title" : "Block I Specifics", "keywords" : ["Block 1"]},
@@ -1518,6 +1585,7 @@ if "anchor" in tableOfContentsSpec[1] and tableOfContentsSpec[1]["anchor"] == "R
         #print("\"" + myRecentSortKey(record) + "\"<br>")
         print(documentEntryHTML(record, False), end="")    
         print("</li>")
+        records[n]["recent"] = True  # Used later for new.png.
     if inUL:
         print("</ol>")
 
