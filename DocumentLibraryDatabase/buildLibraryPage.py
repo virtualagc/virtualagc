@@ -1522,6 +1522,7 @@ else:
 # Step 5:  Output the HTML body.
 
 print(blurbTop)
+print("<hr>")
 print("<h1>Table of Contents</h1>")
 print("<ul>")
 for n in range(len(tableOfContentsSpec)):
@@ -1537,6 +1538,7 @@ print("</ul>")
 # as database entry ... which the way I've been doing it, is almost exactly
 # the same as the old links.html page.
 if "anchor" in tableOfContentsSpec[0] and tableOfContentsSpec[0]["anchor"] == "Debug":
+    print("<hr>")
     print("<a name=\"Debug\"></a>")
     print("<h1>" + tableOfContentsSpec[0]["title"] + "</h1>")
     print(blurbDebug)
@@ -1554,6 +1556,7 @@ if "anchor" in tableOfContentsSpec[0] and tableOfContentsSpec[0]["anchor"] == "D
 
 # Step 5A:  "Recent Additions" section.
 if "anchor" in tableOfContentsSpec[1] and tableOfContentsSpec[1]["anchor"] == "RecentAdditions":
+    print("<hr>")
     print("<a name=\"RecentAdditions\"></a>")
     print("<h1>" + tableOfContentsSpec[1]["title"] + "</h1>")
     print(blurbRecentlyAdded + "<br><br>")
@@ -1601,6 +1604,7 @@ for n in range(2, len(tableOfContentsSpec)):
             for m in range(len(values)):
                 values[m] = values[m].lower()
             tableOfContentsSpec[n][key] = values
+    print("<hr>")
     print("<a name=\"" + tableOfContentsSpec[n]["anchor"] + "\"></a>")
     print("<h1>" + tableOfContentsSpec[n]["title"] + "</h1>")
     if "blurb" in tableOfContentsSpec[n]:
