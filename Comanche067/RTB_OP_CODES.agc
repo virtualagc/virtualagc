@@ -14,6 +14,11 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##		2021-10-05 RSB	For PCR-799, I had pasted TIMEOPT into this
+##				module, for reasons that undoubted seemed
+##				reasonable to me then, but seem absurd now.
+##				It has been moved to the R30 module, where
+##				it is in ARTEMIS.
 
 ## Page 1508
 		BANK	22
@@ -303,44 +308,6 @@ VECSGNAG	TC	BANKCALL
 
 ## Page 1516
 
-## <b>Reconstruction:</b>  The <code>TIMEOPT</code> subroutine has been copied
-## directly out of Artemis 71, due to PCR 799.  If you refer to the 
-## <a href="http://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1027&view=FitV">
-## Colossus 2C flowchart for V82, sheet 5</a>, you'll notice that almost the entire
-## sheet, from "DSPTEMX<sub>D</sub>&larr;+0<sub>D</sub> through STRTDEC1, does not 
-## appear in the <a href="http://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf#page=326&view=FitV">
-## corresponding sheet 6 of the Colossus 2 flowchart for V82</a>, and that 
-## furthermore, that block of the flowchart closely matches the code in 
-## <code>TIMEOPT</code. In Artemis, <code>TIMEOPT</code> simply appears in 
-## bank 23 along with the subroutine <code>V82CALL</code> that calls it.
-## That positioning is no good in Comanche 67, since bank 23 isn't big enough.
-## Either <code>TIMEOPT</code> must have been put in some other bank, or else
-## some other code must have moved to a different bank to make room for 
-## <code>TIMEOPT</code>.  The former makes more sense.  I simply chose
-## a bank that had enough space in it, but also had a relatively poor
-## checksum diff compared to the few other available banks.
-		BANK	30
-		
-TIMEOPT		STORE	DSPTEMX
- +1		STQ	EXIT
-			VEHRET
-		CAF	V06N16X
-		TC	BANKCALL
-		CADR	GOXDSPF 
-		TC	ENDEXT
-		TC	+2
-		TC	-5
-## Page 519	
-		TC	INTPRET
-		DLOAD	BZE
-			DSPTEMX
-			GETNOW
-STRTDEC1  	STCALL	TDEC1 
-			VEHRET
-GETNOW		RTB	GOTO
-			LOADTIME
-			STRTDEC1
-V06N16X		VN	0616
 ## <b>Reconstruction:</b>  Allocation of <code>VEHRET</code>
 ## a potential error. There are two possibilities:
 ## <ul>

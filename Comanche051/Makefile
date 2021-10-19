@@ -13,6 +13,7 @@ BASENAME=Comanche051
 
 NO_BINSOURCE=yes
 EXTRA_TARGETS=diffComanche051sums
+EXTRA_YAYUL_ARGS=--reconstruction
 
 include ../Makefile.inc
 

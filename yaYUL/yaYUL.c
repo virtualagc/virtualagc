@@ -701,6 +701,10 @@ main(int argc, char *argv[])
       printf("                 because such ##-comments typically include HTML not appropriate\n");
       printf("                 in a plain-vanilla text file like the assembly listing.\n");
       printf("                 (Those comments are targeted for --html assembly listings.\n");
+      printf("                 I repeat that the line containing \"Reconstruction:\" *must*\n");
+      printf("                 come first in the block; if it is preceded by another ##-style\n");
+      printf("                 comment, then the entire block will be omitted from the output\n");
+      printf("                 listing.\n");
     }
   if ((RetVal || Fatals) && !Force)
     remove(OutputFilename);

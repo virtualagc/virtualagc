@@ -399,8 +399,7 @@ COMTERM		STORE	UZ
 			S1		#         4
 		PUSH	BDDV*		# NORMED R  TO 0D
 			J2REQSQ,2
-## <a name="R2MODEL"></a>
-## <b>Reconstruction:</b> 65 lines of interpretive code at the point in Comanche 55
+## <a name="R2MODEL"></a><b>Reconstruction:</b> 65 lines of interpretive code at the point in Comanche 55
 ## corresponding to this position have been
 ## replaced in Comanche 51 by the 56 lines of not-obviously-related interpretive instructions
 ## that follow this annotation.  (For visual convenience, we've also added a terminating 
