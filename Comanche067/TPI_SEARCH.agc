@@ -14,6 +14,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##		2021-10-20 RSB	Coded fix for Software Anomaly Report COM-14.
 
 ## Page 551
 # PROGRAM DESCRIPTION S17.1 AND S17.2
@@ -523,7 +524,9 @@ VNCOMP17	EXTEND
 		CA	VERBNOUN
 		TCR	BANKCALL
 		CADR	GOFLASH
-		TC	-3			# TERMINATE ILLEGAL REDISPLAY
+## <b>Reconstruction:</b> The following line has been changed from the Comanche 55
+## baseline (<code>TC -3</code>) as the fix for Software Anomaly Report COM-14.
+		TC	GOTOPOOH		# TERMINATE PROGRAM
 		TC	QSAVED			# PROCEED
 		CS	MPAC			# RECYCLE WITH NEW TPI TIME
 		AD	BIT6			# OR PROCEED WITH NEW SEARCH OPTION

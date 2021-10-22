@@ -15,6 +15,7 @@
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
 ##				Added fix for PCR801.1.
+##		2021-10-20 RSB	Implemented fix for COM-13.
 
 ## Page 423
 # NAME-		IMU PERFORMANCE TESTS 2
@@ -1363,7 +1364,11 @@ AZMTHCG1	TC	INTPRET
 		CAF	VN0629
 		TC	BANKCALL
 		CADR	GOFLASH
-		TCF	+2
+## <b>Reconstruction:</b>  The following line has been changed from the Comanche 55
+## baseline (<code>TCF +2</code>) due to implementation of the fix for 
+## Software Anomaly Report COM-13. The change (which matches ARTEMIS) allows V78 
+## to be terminated rather than to simply keep recycling.
+		TCF	+11
 		TCF	+2
 		TCF	-5
 		TC	INTPRET
@@ -1372,7 +1377,11 @@ AZMTHCG1	TC	INTPRET
 			CDULOGIC
 		STORE	LAUNCHAZ
 		EXIT
-		CA	ZERO
+## <b>Reconstruction:</b>  I've slightly changed the following line from the 
+## Comanche 55 baseline in a way that shouldn't affect how it assembles, but 
+## makes some of the code above slightly more transparent.  This is a side-effect
+## of implementing Software Anomaly Report COM-13.
+ +11		CAF	ZERO
 		TS	PREMTRXC
 		TC	PHASCHNG
 		OCT	00004

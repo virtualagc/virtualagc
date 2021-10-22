@@ -158,7 +158,9 @@ SIZETAB		TC	1.2SPOT -12006
 		DEC	0
 
 3.7SPOT		OCT	22000
-## <b>Reconstruction:</b> This change matches the known partial octal listing of Comanche 67.
+## <b>Reconstruction:</b> This change was made due to Software Anomaly Report COM-15.
+## (It is also independently verified, in that matches a small known partial octal listing 
+## of Comanche 67.)
 		EBANK=	OGC
 		2CADR	MATRXJOB
 

@@ -17,7 +17,7 @@
 ##		2021-10-05 RSB	For PCR-799, I had pasted TIMEOPT into RTB_OP_CODES
 ##				module, for reasons that undoubted seemed
 ##				reasonable to me then, but seem ludicrous now.
-##				It has been moved to is module, where
+##				It has been moved to this module, where
 ##				it is in ARTEMIS.
 
 ## Page 514
