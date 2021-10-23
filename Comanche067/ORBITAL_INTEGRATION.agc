@@ -15,6 +15,7 @@
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
 ##				Added fix for PCR801.1.
+##		2021-10-23 RSB	Completed incorporation of PCR-772.1.
 
 ## Page 1334
 # DELETE
@@ -329,6 +330,9 @@ OBLATE		LXA,2	DLOAD
 		PDDL	CALL
 			3/5
 			R-TO-RP
+## <b>Reconstruction:</b> This block of code (down to the end of the COMTERM
+## routine) has been made due to PCR-772.1.  The block has been imported
+## from either Luminary 116 or Artemis 72. (They are identical.)
 		STOVL	URPV		# RP/R	B-1	IN PLANETARY COORDINATES
 			ZUNIT
 		PUSH	CALL		# ZUNIT	B-1	IN PLANETARY COORDL	 AT 00D
@@ -474,6 +478,7 @@ COMTERM		STODL	UZ		# UZ	B-1	IN INERTIAL COORD	 AT 20D
 		STORE	FV
 		LXA,2
 			PBODY
+## End of PCR-772.1 related changes.
 ## Page 1344
 NBRANCH		SLOAD	LXA,1
 			DIFEQCNT
@@ -489,6 +494,7 @@ COSPHIE		DLOAD
 		GOTO
 			COMTERM
 			
+## <b>Reconstruction:</b>  The MATRIX routine was added due to PCR-772.1.
 MATRIX		VXV	VCOMP
 			504LM		# ROUTINE TRANSLATES FROM PLANETARY
 		VAD			# TO INERTIAL COORDINATES

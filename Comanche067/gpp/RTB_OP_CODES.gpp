@@ -317,15 +317,8 @@ QUALITY1	BOF	DLOAD
 			URPV
 		DSQ	GOTO
 			QUALITY2
-#ifdef Reconstruction831
-## `QUALITY2` has been _temporarily_ stashed in a different bank simply because there's room
-## for it there, but isn't room for it in bank 12 where it was originally. 
-## Undoubtedly we'll have to eventually move it elsewhere. 
-		BANK	17
-#else			
 		SETLOC	MODCHG2
 		BANK
-#endif
 QUALITY2	PDDL	DSQ		# SQUARE INTO 2D, B2
 			URPV	+2	# Y COMPONENT, B1
 		DSU
