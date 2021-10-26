@@ -144,9 +144,24 @@ V16N44		VN	1644
 TFFBANK		ECADR	TFF
 
 V82GOFF1	TC	INTPRET
-		DLOAD	CALL
+## <b>Reconstruction:</b>  These changes due to PCR 799.  Refer also to the 
+## <a href="http://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1027&view=FitV">
+## Colossus 2C flowchart for V82, sheet 5</a>.
+		DLOAD
 			ZEROVECS	# INITIAL TIME = 0 = PRES. TIME
-			TIMEOPT		# ALLOW TIME SELECTION
+		STORE	DSPTEMX
+ 		EXIT
+		CAF	V06N16X
+		TC	BANKCALL
+		CADR	GOXDSPF 
+		TC	ENDEXT
+		TC	ISTIMEOK
+		TC	-5
+ISTIMEOK	TC	INTPRET
+		DLOAD	BZE
+			DSPTEMX
+			GETNOW
+STRTDEC1  	STORE	TDEC1 
 		RTB
 			LOADTIME
 		STORE	TDEC1		# TIME FOR STATE VECTOR UPDATE.
@@ -184,37 +199,10 @@ THISSHIP	TC	INTPRET
 		GOTO
 			BOTHSHIP
 
-## <b>Reconstruction:</b>  The <code>TIMEOPT</code> subroutine has been copied
-## directly out of Artemis 71, due to PCR 799.  If you refer to the 
-## <a href="http://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1027&view=FitV">
-## Colossus 2C flowchart for V82, sheet 5</a>, you'll notice that almost the entire
-## sheet, from "DSPTEMX<sub>D</sub>&larr;+0<sub>D</sub> through STRTDEC1, does not 
-## appear in the <a href="http://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf#page=326&view=FitV">
-## corresponding sheet 6 of the Colossus 2 flowchart for V82</a>, and that 
-## furthermore, that block of the flowchart closely matches the code in 
-## <code>TIMEOPT</code. I've no good reason to think it belongs in bank 30.
-		BANK	30
-TIMEOPT		STORE	DSPTEMX
- +1		STQ	EXIT
-			VEHRET
-		CAF	V06N16X
-		TC	BANKCALL
-		CADR	GOXDSPF 
-		TC	ENDEXT
-		TC	+2
-		TC	-5
-## Page 519	
-		TC	INTPRET
-		DLOAD	BZE
-			DSPTEMX
-			GETNOW
-STRTDEC1  	STCALL	TDEC1 
-			VEHRET
 GETNOW		RTB	GOTO
 			LOADTIME
 			STRTDEC1
 V06N16X		VN	0616
-		BANK	23
 
 # THE FOLLOWING CONSTANTS ARE PAIRWISE INDEXED.  DO NOT SEPARATE PAIRS.
 

@@ -344,35 +344,4 @@ QUALITY2	PDDL	DSQ		# SQUARE INTO 2D, B2
 			COSPHI/2	# SAME AS URPV +4, Z COMPONENT
 #endif
 
-#ifdef Reconstruction799
-## <b>Reconstruction:</b>  Allocation of <code>VEHRET</code>
-## a potential error. There are two possibilities:
-## <ul>
-## <li>It may be allocated in E0, E1, or E2 in such a way that erasable pad
-## load addresses are not affected.  This would require it to be in E0
-## from 0111-0377, or in E3 from 01353-01377.</li>
-## <li>It may share a previously-allocated location for a routine not used
-## simultaneously with V82.</li>
-## </ul>
-## In Artemis, it's actually a standalone variable (i.e., the first of the
-## two options above). That makes little sense to me in Comanche 67,
-## since it's only needed for temporary storage of <code>TIMEOPT</code>'s 
-## return address above.  (It may make a little more sense in Artemis, 
-## since in Artemis <code>TIMEOPT</code> is called through V90 in addition
-## to V82.  I don't know.  But the positioning used in Artemis isn't 
-## possible in Comanche 67 due to the affect on erasable pad load addresses.)
-## <br></br>
-## So the second option, shared storage, seems much more natural to me.  
-## Unfortunately, that doesn't really narrow it down too 
-## much.  One thing I notice about <code>TIMEOPT</code> is that it also uses the
-## temporary variable <code>DSPTEMX</code>, which is itself aliased in 
-## ERASABLE ASSIGMENTS as the last 2 words of the 3-word area <code>DSPTEM2</code>
-## It seems not unreasonable that the 1st word of <code>DSPTEM2</code> might have
-## been originally used for <code>VEHRET</code> and then only later turned into
-## a standalone variable in Artemis for reasons I don't know.
-## <br><br>
-## However, ultimately this is little more than a guess, so it is likely to
-## be very wrong, and needs to be revisited later. 
-VEHRET		EQUALS	DSPTEM2
-#endif
 			

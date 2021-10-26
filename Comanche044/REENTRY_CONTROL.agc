@@ -14,6 +14,8 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51.
+##		2021-10-26 RSB	Corrected 2 typos in VREFER.  The errors were 
+##				numerically too small to affect the assembled octal.
 
 ## Page 844
 # ENTRY INITIALIZATION ROUTINE
@@ -1397,7 +1399,7 @@ VREFER		DEC	.019288		# REFERENCE VELOCITY SCALED V/51532.3946
 		DEC	-.006828   B3
 		DEC	-.00806946 B3
 		DEC	-.0109791  B3
-		DEC	-.0151498  B3
+		DEC	-.0151496  B3
 		DEC	-.0179817  B3
 		DEC	-.0159061  B3
 		DEC	-.0159061  B3
@@ -1408,7 +1410,7 @@ VREFER		DEC	.019288		# REFERENCE VELOCITY SCALED V/51532.3946
 		DEC	.017148
 		DEC	.027926
 		DEC	.037
-		DEC	.063298
+		DEC	.063296
 		DEC	.077889
 		DEC	.098815
 		DEC	.127519

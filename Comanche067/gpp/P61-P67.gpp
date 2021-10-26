@@ -23,7 +23,7 @@
 # MOD NO: 1	MOD BY:  RR BAIRNSFATHER	DATE: 22 JUN 67		RESTARTS.
 # MOD NO: 2	MOD BY:  RR BAIRNSFATHER	DATE: 17 JAN 68		COLOSSUS GSOP CHANGES.
 # MOD NO: 3	MOD BY:  RR BAIRNSFATHER	DATE:  8 MAY 68		DELETE CMSM MANEUVER (PCR 50)
-#ifdef Reconstruction787
+#ifdef Reconstruction787_835
 ## <b>Reconstruction:</b> The following comment was copied from Artemis 71,
 ## per PCR 787.
 # MOD NO: 4		MOD BY:  RR BAIRNSFATHER	DATE:  1 JUL 69		PCR 787: TICK TTE
@@ -68,14 +68,14 @@ P61		CA	BIT14		# EXTENDED VERB SHOULD BE FREE THIS CLOSE
 					
 		CA	V06N61		# LAT(SPL)	LNG(SPL)	HEADSUP
 					# XXX.XX DEG	XXX.XX DEG	XXXXX.
-#ifdef Reconstruction787
+#ifdef Reconstruction787_835
 ## <b>Reconstruction:</b>  Unless otherwise stated, all of the annotations here within the P61 
-## program relate to implementation of PCR 787. At each point in P61 where the Comanche 55 
-## baseline code for P61 differs from the Artemis 71 code for P61 (which includes the PCR 787
+## program relate to implementation of PCR 787 or PCR 835. At each point in P61 where the Comanche 55 
+## baseline code for P61 differs from the Artemis 71 code for P61 (which includes the PCR 787/835
 ## fix), an annotation is added to describe whether the baseline code was retained, or else
-## whether Artemis 71 code was imported instead.  The decision is based on 
+## whether Artemis 71 code was imported instead.  The decision is based primarily on 
 ## <a href="http://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1228&view=FitV">
-## document E-2456's Colossus 2D flowchart for P61</a>.  While we have the corresponding
+## document E-2456's Colossus 2D flowchart for P61 and other routines</a>.  While we have the corresponding
 ## flowchart document for Colossus 2C (Comanche 67), the P61 flowchart in it had not been
 ## updated, and remained in the same form as for Colossus 2A (Comanche 55), which is of 
 ## no use to us. That the 2D version of the flowcharts is valid for 2C is an
@@ -103,9 +103,10 @@ P61.4		ZL
 		NOOP			# IF HEADSUP NEG,ROLLC =0 (LIFT UP)
 		DXCH	ROLLC		# ROLLC IS USED BY S62.3: GIM ANG AT .05G
 
-#ifdef Reconstruction787
+#ifdef Reconstruction787_835
 ## <b>Reconstruction:</b> At this point, Artemis 71 inserts the 2 instructions 
-## following this annotation. The corresponding operation appears in the flowchart.
+## following this annotation. The corresponding operation appears in the flowchart,
+## although the flowchart appears erroneously to use bit 11 rather than bit 14.
 AGIN,MON	CA	BIT14		# LOCK OUT EXTENDED VERBS.(REDUNDANT ON
 		TS	EXTVBACT	#  INITIAL PASS)
 #endif				
@@ -115,7 +116,7 @@ NEWRNVN		DLOAD
 			PIPTIME		# SAVE TIME OF RN,VN TO DETERMINE IF AN
 		STCALL	MM		# UPDATE HAS OCCURRED
 			STARTEN1	# INITIALIZE
-#if defined(Reconstruction787) 			
+#if defined(Reconstruction787_835) 			
 ## <b>Reconstruction:</b> At this point, Comanche 55 would have the two lines
 ## of code
 ## <pre>
@@ -128,10 +129,19 @@ NEWRNVN		DLOAD
 			RN
 			.05GSW		# THE DRAG > 0.05 G .
 					# .05GSW SET =1 BY  FRESH START.
-#elif defined(Reconstruction787A)
-		CLEAR	VLOAD
-			.05GSW
-			RN
+#elif defined(Reconstruction787_835A)
+## <b>Reconstruction:</b> At this point, Comanche 55 would have the two lines
+## of code
+## <pre>
+##		VLOAD
+##			RN
+## </pre>
+## However, the flowchart instead matches Artemis 71, the following 3 lines of code
+## are not from Artemis, however, but are a functionally identical rearrangement of them
+## that more-accurately reflects the ordering implied by the flowchart.
+		CLEAR	VLOAD		# 'TTE' WILL BE DECREMENTED UNTIL
+			.05GSW		# THE DRAG > 0.05 G .
+			RN		# .05GSW SET =1 BY  FRESH START.
 #else
 		VLOAD
 			RN
@@ -160,9 +170,12 @@ P61.1		TC	CLEARMRK
 		CADR	GOFLASH
 		
 		TC	GOTOPOOH
-#ifdef Reconstruction787
+#ifdef Reconstruction787_835
 ## <b>Reconstruction:</b>  The code from here to the beginning of the comments
-## preceding <code>P62</code> has been replaced from Artemis 71.
+## preceding <code>P62</code> has been replaced or adapted from Artemis 71.
+## (Artemis uses VNFLASH rather than GOFLASH, so there are 
+## "terminate", "proceed" and "recycle" branches following it, 
+## rather than a simple "terminate".)
 		TC	+2		# PROCEED
 		TC	-5	
 
@@ -381,7 +394,7 @@ P63.1		TC	PHASCHNG
 		
 V06N60		VN	0660
 V06N61		VN	0661
-#ifdef Reconstruction787
+#ifdef Reconstruction787_835
 ## <b>Reconstruction:</b> In Comanche 55, we would find
 ## <pre>
 ## V06N63	VN	0663
@@ -816,7 +829,7 @@ CALLCON		CALL
 			EMSALT
 			CALCTFF		# SAVES MPAC IN RTERM		(18D)
 
-#ifdef Reconstruction787
+#ifdef Reconstruction787_835
 ## <b>Reconstruction:</b>  The following 6 instructions (update of <code>TTE1</code>
 ## and <code>TTE2</code> replace 2 instructions (update of <code>TTE1</code> only),
 ## per PCR 787.
@@ -1174,7 +1187,15 @@ DUMPTRIG	SIGN	RVQ
 					
 DISPTARG	STQ			# C(MPAC) = TRGO ESTIMATE
 			60GENRET
+#ifdef Reconstruction787_835
+## <b>Reconstruction:</b>  In the following line, the DSU 
+## instruction from the Comanche 55 baseline has been changed
+## to DAD (as in Artemis 71), to reflect a change in the 
+## sign of TTE1.  This change relates to PCN-787 and PCN-835.
+		DMP	DAD
+#else
 		DMP	DSU
+#endif
 			KTETA1
 			TTE1
 		STCALL	DTEAROT

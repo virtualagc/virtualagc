@@ -17,6 +17,9 @@
 ##				and corrected the errors found.
 ##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
 ##				vs Colossus 249.
+##		2021-10-26 RSB	Fixed *two* transcription errors in the VREFER
+##				table.  The significance was too low numerically,
+##				though, to affect their assembled octals.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -1417,7 +1420,7 @@ VREFER		DEC	.019288		# REFERENCE VELOCITY SCALED V/51532.3946
 		DEC	-.006828   B3
 		DEC	-.00806946 B3
 		DEC	-.0109791  B3
-		DEC	-.0151498  B3
+		DEC	-.0151496  B3
 		DEC	-.0179817  B3
 		DEC	-.0159061  B3
 		DEC	-.0159061  B3
@@ -1428,7 +1431,7 @@ VREFER		DEC	.019288		# REFERENCE VELOCITY SCALED V/51532.3946
 		DEC	.017148
 		DEC	.027926
 		DEC	.037
-		DEC	.063298
+		DEC	.063296
 		DEC	.077889
 		DEC	.098815
 		DEC	.127519

@@ -3396,7 +3396,7 @@ MARK2DWN	EQUALS	R53EXIT	+1	#  (7) USED BY ALLIGNMENT P50S
 ## Page 118
 # *-*-*-*- OVERLAY 1 IN EBANK 7 -*-*-*-*
 
-#ifdef Reconstruction787
+#ifdef Reconstruction787_835
 ## <b>Reconstruction:</b>  The following comment has been retained from Comanche 55, 
 ## in spite of the addition of <code>TTE2</code> below per PCR 787. While it's not
 ## entirely clear what's included in the REENTRY ERASABLES block, if the block is
@@ -3499,8 +3499,8 @@ TTE		EQUALS	VIO	+2	# 2P DSP NOUN 63 FOR P61.
 ASPS		EQUALS	TTE	+2	# I(2) HI-WORD ONLY ON DNLIST FOR TEMP
 TTE1		EQUALS	ASPS	+2	# I(2ETMP HOLDS UNDECREMENTED TTE VALUE
 
-#ifdef Reconstruction787
-## <b>Reconstruction:</b> The following was added in implementing PCR 787.
+#ifdef Reconstruction787_835
+## <b>Reconstruction:</b> The following was added in implementing PCR-787/835.
 TTE2		EQUALS	TTE1 +2		# I(2) HOLDS COMPENSATED TTE VALUE DURING
 					#      P61 THRU P63 FOR  N63 DISPLAY
 #endif
@@ -3519,8 +3519,8 @@ VGDISP		EQUALS	GAMMAEI	+2	# B(2)DSP N.40,42,99 FOR P30,34,35,37,40,
 					#	    41 VG DISPLAY
 
 # SOME P11 DISPLAY REGISTERS.		(6D)
-#ifdef Reconstruction787
-## <b>Reconstruction:</b> The following line is changed per PCR 787.
+#ifdef Reconstruction787_835
+## <b>Reconstruction:</b> The following line is changed per PCR-787/835.
 ALTI		EQUALS	TTE2	+2	# 2P DSP NOUN 62 FOR P11.
 #else
 ALTI		EQUALS	TTE1	+2	# 2P DSP NOUN 62 FOR P11.

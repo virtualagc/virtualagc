@@ -16,6 +16,9 @@
 ##				and fixed errors found.
 ##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
 ##				vs Colossus 249.
+##		2021-10-26 RSB	Corrected a typo in VREFER.  It was a numerical value
+##				in which the error was of too low a significance to
+##				affect the assembled octal.
 
 ## Page 795
 # ENTRY INITIALIZATION ROUTINE
@@ -1419,7 +1422,7 @@ VREFER		DEC	.019288		# REFERENCE VELOCITY SCALED V/51532.3946
 		DEC	-.006828    B3
 		DEC	-.00806946  B3
 		DEC	-.0109791   B3
-		DEC	-.0151498   B3
+		DEC	-.0151496   B3
 		DEC	-.0179817   B3
 		DEC	-.0159061   B3
 		DEC	-.0159061   B3

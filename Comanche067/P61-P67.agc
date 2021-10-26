@@ -67,12 +67,12 @@ P61		CA	BIT14		# EXTENDED VERB SHOULD BE FREE THIS CLOSE
 		CA	V06N61		# LAT(SPL)	LNG(SPL)	HEADSUP
 					# XXX.XX DEG	XXX.XX DEG	XXXXX.
 ## <b>Reconstruction:</b>  Unless otherwise stated, all of the annotations here within the P61 
-## program relate to implementation of PCR 787. At each point in P61 where the Comanche 55 
-## baseline code for P61 differs from the Artemis 71 code for P61 (which includes the PCR 787
+## program relate to implementation of PCR 787 or PCR 835. At each point in P61 where the Comanche 55 
+## baseline code for P61 differs from the Artemis 71 code for P61 (which includes the PCR 787/835
 ## fix), an annotation is added to describe whether the baseline code was retained, or else
-## whether Artemis 71 code was imported instead.  The decision is based on 
+## whether Artemis 71 code was imported instead.  The decision is based primarily on 
 ## <a href="http://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1228&view=FitV">
-## document E-2456's Colossus 2D flowchart for P61</a>.  While we have the corresponding
+## document E-2456's Colossus 2D flowchart for P61 and other routines</a>.  While we have the corresponding
 ## flowchart document for Colossus 2C (Comanche 67), the P61 flowchart in it had not been
 ## updated, and remained in the same form as for Colossus 2A (Comanche 55), which is of 
 ## no use to us. That the 2D version of the flowcharts is valid for 2C is an
@@ -100,7 +100,8 @@ P61.4		ZL
 		DXCH	ROLLC		# ROLLC IS USED BY S62.3: GIM ANG AT .05G
 
 ## <b>Reconstruction:</b> At this point, Artemis 71 inserts the 2 instructions 
-## following this annotation. The corresponding operation appears in the flowchart.
+## following this annotation. The corresponding operation appears in the flowchart,
+## although the flowchart appears erroneously to use bit 11 rather than bit 14.
 AGIN,MON	CA	BIT14		# LOCK OUT EXTENDED VERBS.(REDUNDANT ON
 		TS	EXTVBACT	#  INITIAL PASS)
 		
@@ -146,7 +147,10 @@ P61.1		TC	CLEARMRK
 		
 		TC	GOTOPOOH
 ## <b>Reconstruction:</b>  The code from here to the beginning of the comments
-## preceding <code>P62</code> has been replaced from Artemis 71.
+## preceding <code>P62</code> has been replaced or adapted from Artemis 71.
+## (Artemis uses VNFLASH rather than GOFLASH, so there are 
+## "terminate", "proceed" and "recycle" branches following it, 
+## rather than a simple "terminate".)
 		TC	+2		# PROCEED
 		TC	-5	
 
@@ -1125,7 +1129,11 @@ DUMPTRIG	SIGN	RVQ
 					
 DISPTARG	STQ			# C(MPAC) = TRGO ESTIMATE
 			60GENRET
-		DMP	DSU
+## <b>Reconstruction:</b>  In the following line, the DSU 
+## instruction from the Comanche 55 baseline has been changed
+## to DAD (as in Artemis 71), to reflect a change in the 
+## sign of TTE1.  This change relates to PCN-787 and PCN-835.
+		DMP	DAD
 			KTETA1
 			TTE1
 		STCALL	DTEAROT

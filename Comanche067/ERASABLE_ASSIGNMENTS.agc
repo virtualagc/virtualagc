@@ -3476,7 +3476,7 @@ TTE		EQUALS	VIO	+2	# 2P DSP NOUN 63 FOR P61.
 ASPS		EQUALS	TTE	+2	# I(2) HI-WORD ONLY ON DNLIST FOR TEMP
 TTE1		EQUALS	ASPS	+2	# I(2ETMP HOLDS UNDECREMENTED TTE VALUE
 
-## <b>Reconstruction:</b> The following was added in implementing PCR 787.
+## <b>Reconstruction:</b> The following was added in implementing PCR-787/835.
 TTE2		EQUALS	TTE1 +2		# I(2) HOLDS COMPENSATED TTE VALUE DURING
 					#      P61 THRU P63 FOR  N63 DISPLAY
 								
@@ -3494,7 +3494,7 @@ VGDISP		EQUALS	GAMMAEI	+2	# B(2)DSP N.40,42,99 FOR P30,34,35,37,40,
 					#	    41 VG DISPLAY
 
 # SOME P11 DISPLAY REGISTERS.		(6D)
-## <b>Reconstruction:</b> The following line is changed per PCR 787.
+## <b>Reconstruction:</b> The following line is changed per PCR-787/835.
 ALTI		EQUALS	TTE2	+2	# 2P DSP NOUN 62 FOR P11.
 HDOT		EQUALS	ALTI	+2	# 2P DSP NOUN 62 FOR P11.
 
