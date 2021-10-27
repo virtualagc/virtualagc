@@ -15,6 +15,7 @@
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
 ##		2021-02-03 RSB	Implemented PCR 807.1.
+##		2021-10-26 RSB	Cleaned up PCR 807.1 a bit, but no functional change.
 
 ## Page 456
 # GROUND TRACKING DETERMINATION PROGRAM P21
@@ -83,21 +84,18 @@
 		EBANK=	P21TIME
 		COUNT	24/P21
 		
-## <b>Reconstruction:</b> From here through the next annotation, various pieces of 
-## code have been changed or imported from Artemis 71, due to PCR 807.1 and sheet 2 
-## of the Colossus 2C flowchart FC-2580.
 PROG21		CAF	ONE
 		TS	OPTION2		# ASSUMED VEHICLE IS LM, R2 = 00001
-
 		CAF	BIT2		#  OPTION 2
 		TC	BANKCALL
 		CADR	GOPERF4
 		TC	GOTOPOOH	# TERMINATE
 		TC	+2		# PROCEED VALUE OF ASSUMED VEHICLE OK
 		TC	-5		# R2 LOADED THROUGH DSKY
-		CAF	ZERO		# ZERO DSPTEM
-		TS	DSPTEM1
-		TS	DSPTEM1 +1
+## <b>Reconstruction:</b> The following 3 lines were added due to PCR-807.1.
+                CAF     ZERO            # INITIAL TIME = PRESENT TIME
+                TS      DSPTEM1
+                TS      DSPTEM1 +1
 P21PROG1	CAF	V6N34		# LOAD DESIRED TIME OF LAT-LONG.
 		TC	BANKCALL
 		CADR	GOFLASH
@@ -105,12 +103,18 @@ P21PROG1	CAF	V6N34		# LOAD DESIRED TIME OF LAT-LONG.
 		TC	+2		# PROCEED VALUES OK
 		TC	-5		# TIME LOADED THROUGH DSKY
 		TC	INTPRET
-		DLOAD	BZE
-			DSPTEM1
-			P21PRTM		# SET TO INTEG TO PRES TIME
-P21PROG2	STCALL	TDEC1		# INTEG TO TIME SPECIFIED IN TDEC
+## <b>Reconstruction:</b> The following 4 lines replace the 3 lines
+## <pre>
+##		DLOAD	
+##			DSPTEM1
+##		STCALL	TDEC1		# INTEG TO TIME SPECIFIED IN TDEC
+## </pre>
+## in the Comanche 55 baseline, due to PCR-807.1.
+                DLOAD   BZE                             
+                        DSPTEM1                         
+                        P21PRTM                         
+P21PROG2        STCALL  TDEC1           # INTEG TO TIME SPECIFIED IN TDEC1
 			INTSTALL
-## <b>Reconstruction:</b>  End of changed block of code for PCR 807.1.
 		BON	SET
 			P21FLAG
 			P21CONT		# ON...RECYCLE USING BASE VECTOR
