@@ -21,6 +21,8 @@
 #                               and ", Jr".  More importantly, it's actually
 #                               generating a lot more of the web-page now.
 #               2021-09-20 RSB  First fully-functional version, I think.
+#               2021-10-27 RSB  Added "ACB-" document-number prefix for 
+#                               ACB requests.
 #
 # Usage:
 #	./buildLibraryPage.py <DocumentLibraryDatabase.tsv >../links2.html
@@ -1240,7 +1242,7 @@ tableOfContentsSpec = [
     { "anchor" : "ColossusMemos", "title" : "COLOSSUS Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["COLOSSUS Memo"] },
     { "anchor" : "SkylarkMemos", "title" : "SKYLARK (SKYLAB) Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["SKYLARK Memo", "SKYLAB Memo"] },
     { "anchor" : "PcrsPcns", "title" : "Program Change Requests (PCR) and Notices (PCN)", "sortKey" : myDashSortKey, "documentNumbers" : [ "PCR-", "PCN-"], "blurb" : blurbPcrsPcns  },
-    { "anchor" : "Anomalies", "title" : "Software Anomaly Reports and Assembly Control Board Requests", "sortKey" : myAnomalySortKey, "blurb" : blurbAnomalies, "documentNumbers" : [ "LNY-", "L-", "COL-", "COM-", "A-" ] },
+    { "anchor" : "Anomalies", "title" : "Software Anomaly Reports and Assembly Control Board Requests", "sortKey" : myAnomalySortKey, "blurb" : blurbAnomalies, "documentNumbers" : [ "ACB-", "LNY-", "L-", "COL-", "COM-", "A-" ] },
     { "anchor" : "SCB", "title" : "Software Control Board (SCB)", "keywords" : ["SCB"]},
     { "anchor" : "SDP", "title" : "Software Development Plans", "keywords" : ["SDP"]},
     { "anchor" : "Block1", "title" : "Block I Specifics", "keywords" : ["Block 1"]},
