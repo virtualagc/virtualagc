@@ -1496,16 +1496,13 @@ LAMBLOOP	DMP
 		BPL	RTB
 			INITV
 			CHECKCTR
-## <b>Reconstruction:</b> The three lines
+## <b>Reconstruction:</b> The two lines
 ## <pre>
 ##		BHIZ	CALL
 ##			SUFFCHEK
-##			ITERATOR
-## </pre>
-## from Comanche 55 were replaced by the following block of code
-## (through `GOITER +1`), due to PCR 831.1.  It reflects a 
-## LAMBERT-related change from Luminary 99 to Luminary 116, the
-## LM software revision corresponding to this CM software revision.
+### </pre>
+## in the Comanche 55 baseline were replaced by the following block of code
+## (through `GOITER`), due to PCR 831.1. 
 		BHIZ	BON
 			SUFFCHEK
 			SLOPESW

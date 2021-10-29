@@ -14,7 +14,9 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
-##		2021-02-03 RSB	Changed for  and .
+##		2021-02-03 RSB	Changed for  and ReconstructionCOAR.
+##		2021-10-28 RSB	ReconstructionCOAR replaced by just 
+##				alone.  The STALLOOP in COARSUB was eliminated.
 
 ## Page 737
 # PROGRAM NAME - PROG52			DATE - NOV 30, 1966
@@ -1176,10 +1178,7 @@ COARFINE	EXIT
 		TC	PHASCHNG
 		OCT	04024
 ## <b>Reconstruction:</b>  The following line in Comanche 67 replaces a block of 
-## 10 instructions in Comanche 55. The need for it was discovered in sheet 23 of
-## Colossus 2C flowchart FC-2720, while implementing the change for PCR 825.1,
-## but the change is <i>not</i> part of PCR 825.1.  Perhaps the correct PCR
-## authorizing it will be discovered in the future.
+## 10 instructions in Comanche 55, due to PCR 825.1. 
 		TC	COARSUB		# PERFORM ALIGNMENT
 		TC	INTPRET
 		RTB	VLOAD
@@ -1451,7 +1450,8 @@ P51AA		CAF	PRFMSTAQ
 		CAF	V41K		# NOW DISPLAY COARSE ALIGN VERB 41
 		TC	BANKCALL
 		CADR	GODSPRET
-## <b>Reconstruction:</b>  See earlier annotation for `COARFINE`.
+## <b>Reconstruction:</b>  A block of 10 instructions has been replaced by the
+## following instruction, due to PCR-825.1.
 		TC	COARSUB		# PERFORM ALIGNMENT
 		TC	PHASCHNG
 		OCT	05024
@@ -1817,7 +1817,9 @@ SR52.1		TC	MAKECADR
 		TC	INTPRET
 		RTB	DAD
 			LOADTIME
-			1.3SECDP
+## <b>Reconstruction:</b> The following line is changed (from <code>1.3SECDP</code>
+## due to PCR 960.
+			2.4SECDP
 		STORE	AOPTIME
 		BON	BON
 			TARG1FLG
@@ -1893,7 +1895,9 @@ SR52E1		CA	QMIN
 		TC	SWCALL
 38TRDEG		2DEC	.66666667	# CORESPONDS TO 50 DEGS IN TRUNION
 
-1.3SECDP	2DEC	130
+## <b>Reconstruction:</b> The following line is changed (from <code>1.3SECDP</code>
+## due to PCR 960.
+2.4SECDP	2DEC	240
 
 20DEGSMN	DEC	-07199
 		DEC	-0
@@ -2179,29 +2183,21 @@ DEC227		DEC	227
 VNPLANV		VN	0688
 1/SQR3		2DEC	.57735021
 
-## <b>Reconstruction:</b> See the annotation for <code>COARFINE</code> earlier.
+## <b>Reconstruction:</b> COARSUB was added per PCR-825.1.
 		SETLOC	P50S1
 		BANK
 		COUNT*	$$/R50
 COARSUB		CA	Q
 		TS	QMIN
-## Page 788
-STALLOOP	CA	MODECADR	# IS IMU IN USE?
-		EXTEND
-		BZF	CORSCALL	# NO, GO AHEAD WITH COARSE ALIGN
-		CAF	1SEC		# YES, SO WAIT A SEC
 		TC	BANKCALL
-		CADR	DELAYJOB
-		TC	STALLOOP	# 			AND TRY AGAIN
-CORSCALL	TC	BANKCALL
-		CADR	IMUCOARS	# PERFORM COARSE ALIGN
+		CADR	IMUCOARS	# PERFORM COARSE ALIGNMENT
+		TC	BANKCALL
+		CADR	IMUSTALL	# REQUEST MODE SWITCH
+		TC	CURTAINS
+		TC	BANKCALL
+		CADR	IMUFIN20
 		TC	BANKCALL
 		CADR	IMUSTALL
-		TC	CURTAINS	# BAD END
-		TC	BANKCALL
-		CADR	IMUFIN20	# PERFORM FINE ALIGN
-		TC	BANKCALL
-		CADR	IMUSTALL
-		TC	CURTAINS	# BAD END
+		TC	CURTAINS	# TEST FOR MALFUNCTION
 		TC	QMIN
 

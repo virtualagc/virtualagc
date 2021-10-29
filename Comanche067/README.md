@@ -4,5 +4,4 @@ The reconstruction is currently incomplete. In fact, there are overflowing memor
 
 The reconstruction effort *had been* covered in detail in issue #1140 (https://github.com/virtualagc/virtualagc/issues/1140), but the narrative eventually became too unwieldy in the context of a GitHub issue so I am currently documenting it on a separate wiki page (https://slimwiki.com/virtual-agc-project/comanche-67-reconstruction).  
 
-Also, during this reconstruction process, you cannot hope to successfully edit or build the reconstructed code without consulting the crucial documentation near the beginning of the Makefile (https://github.com/virtualagc/virtualagc/blob/comanche67/Comanche067/Makefile).
-
+Also, during this reconstruction process, you cannot hope to successfully edit or build the reconstructed code without consulting the crucial documentation near the beginning of the [Makefile](https://github.com/virtualagc/virtualagc/blob/comanche67/Comanche067/Makefile).
