@@ -98,7 +98,8 @@ include ../Makefile.inc
 .PHONY: diffComanche067sums
 diffComanche067sums: 
 	if test -f MAIN.agc.bin ; then mv MAIN.agc.bin Comanche067.bin ; fi
-	../Tools/check_buggers.py --listing=MAIN.agc.lst Comanche067.bin Comanche067.buggers
+	lFile=MAIN.agc.lst ; if test ! -f MAIN.agc.lst ; then lFile=Comanche067.lst ; fi ; \
+	../Tools/check_buggers.py --listing=$$lFile Comanche067.bin Comanche067.buggers
 
 ifdef ReconstructionLevel
 

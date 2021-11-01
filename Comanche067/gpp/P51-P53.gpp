@@ -298,7 +298,11 @@ V16N20		VN	1620
 ALRM15		EQUALS	OCT15
 		SETLOC	P50S2
 		BANK
-V06N89*		VN	0689			
+#ifdef ReconstructionBank16_Constants
+V06N89*		=	V06N89
+#else
+V06N89*		VN	0689
+#endif			
 
 # NAME - P52LS
 #

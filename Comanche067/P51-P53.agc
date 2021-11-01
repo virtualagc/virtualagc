@@ -1,3 +1,8 @@
+
+
+
+
+
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    P51-P53.agc
@@ -294,7 +299,7 @@ V16N20		VN	1620
 ALRM15		EQUALS	OCT15
 		SETLOC	P50S2
 		BANK
-V06N89*		VN	0689			
+V06N89*		VN	0689
 
 # NAME - P52LS
 #

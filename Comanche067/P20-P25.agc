@@ -1,3 +1,8 @@
+
+
+
+
+
 ### FILE="Main.annotation"
 ## Copyright:	Public domain.
 ## Filename:	P20-P25.agc
@@ -665,7 +670,7 @@ R61CSM		CAF	EBANK6		# SWITCH TO EBANK 6
 ## <b>Reconstruction:</b>  Per Colossus 2C flowchart FC-2550, due to PCR 785,
 ## new instructions to clear the flag <code>V50N18FL</code> must be added to 
 ## Colossus 67 after the pre-existing code to call <code>CRS61.1</code> is 
-## executed.  
+## executed.  The following 5 lines replace 3 lines in the Comanche 55 baseline.
 		CALL
 			CRS61.1		# LOS DETERMINATION + VEH ATTITUDE
 		EXIT

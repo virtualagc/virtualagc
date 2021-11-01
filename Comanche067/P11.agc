@@ -1,3 +1,8 @@
+
+
+
+
+
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    P11.agc
@@ -874,6 +879,11 @@ REDOSAT		LXCH	BANKRUPT	# ALSO COMES HERE FOR RESTARTS
 		
 #	THIS SECTION IS EXECUTED EVERY 100 MSECS
 ## Page 550
+
+		SETLOC	P11THREE
+		BANK
+		COUNT*	$$/P11
+
 SATSTICK	LXCH	BANKRUPT
 		EXTEND
 		QXCH	QRUPT

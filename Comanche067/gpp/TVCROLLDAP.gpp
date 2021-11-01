@@ -590,7 +590,7 @@ MINLIM		DEC	.00277778 B+4	# RATELIM,MIN (1DEG/SEC), SC.AT B-4 REV/SC
 
 MAXLIM		DEC	.01388889 B+4	# RATELIM,MAX (5DEG/SEC), SC.AT B-4 REV/SC
 
-#ifdef Reconstruction772A
+#if defined(Reconstruction772A) || defined(ReconstructionBank16_Constants)
 #TMINFIRE	DEC	1.5 B+4		15 MS  (14MIN), SC.AT 16 BITS/CS
 TMINFIRE	=	BITS4&5
 #else

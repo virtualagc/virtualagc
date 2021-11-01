@@ -12,6 +12,7 @@
 #               bank as a side effect.  This lets you find out exactly which
 #               objects may have changed addresses to cause the problem.
 # Mod history:  2021-10-21 RSB  Began
+#               2021-10-31 RSB  Now ignores the case of MM==NN.
 #
 # Usage:
 #   bankToBankReference.py MM NN <assembly.lst
@@ -58,6 +59,9 @@ else:
     bankNum = int(targetBank, 8)
     if bankNum < 0 or bankNum > 0o43:
         sys.exit(1)
+
+if sourceBank == targetBank:
+    sys.exit(1)
 
 # Read the input listing file and parse it.
 codeLines = [] # This is where we collect all of the parsed input data.

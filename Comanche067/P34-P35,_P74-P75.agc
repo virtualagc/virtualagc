@@ -1,3 +1,8 @@
+
+
+
+
+
 ### FILE="Main.annotation"
 ## Copyright:	Public domain.
 ## Filename:	P34-35_P74-75.agc
@@ -1230,6 +1235,7 @@ INITVEL5	VLOAD
 		GOTO
 			INITVEL2	# CONTINUE ITERATING AT INITVEL2
 
+
 # COMPUTE THE DELTA VELOCITY
 
 INITVEL6	VLOAD
@@ -1239,7 +1245,7 @@ INITVEL7	VLOAD	VSU
 			VIPRIME
 			VINIT
 		STOVL	DELVEET3	# DELVEET3 = VIPRIME-VINIT (+7)
-			VTARGET
+			VTARGET	
 		STORE	VTPRIME
 		SLOAD	BHIZ
 			RTX2
@@ -1602,6 +1608,12 @@ R36A		ZL
 		LXCH	OPTIONY		# SAVE VEH. OPTION
 R36P3		CAF	V06N16N
 		TC	BANKCALL
+## The following line is a curiosity, not restricted to the reconstruction of Comanche 67.
+## All known revisions of Colossus 1 and Colossus 2 call GOMARKF here.  (Colossus 3 code is
+## quite different in this section of R36, and isn't comparable.)  Yet the flowchart
+## (known as FC-2631) covering R36 instead indicates a call to the very similar yet different
+## subroutine GOFLASH. At this writing, though, we have copies of FC-2631 only for Colossus 2A
+## and Colossus 2D.
 		CADR	GOMARKF
 		TCF	ENDEXT		# TERMINATE
 		TCF	+2		# PROCEED

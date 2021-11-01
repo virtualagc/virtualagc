@@ -1,3 +1,8 @@
+
+
+
+
+
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    R30.agc
@@ -144,7 +149,7 @@ V16N44		VN	1644
 TFFBANK		ECADR	TFF
 
 V82GOFF1	TC	INTPRET
-## <b>Reconstruction:</b>  These changes due to PCR 799.  Refer also to the 
+## <b>Reconstruction:</b>  These additions (down to next annotation) due to PCR 799.  Refer also to the 
 ## <a href="http://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1027&view=FitV">
 ## Colossus 2C flowchart for V82, sheet 5</a>.
 		DLOAD
@@ -161,7 +166,8 @@ ISTIMEOK	TC	INTPRET
 		DLOAD	BZE
 			DSPTEMX
 			GETNOW
-STRTDEC1  	STORE	TDEC1 
+STRTDEC1  	STORE	TDEC1
+## <b>Reconstruction:</b>  End of addition. 
 		RTB
 			LOADTIME
 		STORE	TDEC1		# TIME FOR STATE VECTOR UPDATE.
@@ -199,6 +205,7 @@ THISSHIP	TC	INTPRET
 		GOTO
 			BOTHSHIP
 
+## <b>Reconstruction:</b>  Next 4 lines added per PCR-799.
 GETNOW		RTB	GOTO
 			LOADTIME
 			STRTDEC1
