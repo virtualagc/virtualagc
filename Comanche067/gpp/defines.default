@@ -39,7 +39,24 @@
 #define ReconstructionCOM15
 #define ReconstructionCOM17
 
+#define ReconstructionBank23_SATSTICK_to_P11THREE
+#ifdef DontRemoveThisComment
+
+                      READ ME!
+                      --------
+  The specific setting of ReconstructionBank23_P11FOUR
+  is probably wrong, but keep it in place until
+  determining the correct setting.  Any of 15, 16, 17,
+  20, or 30 not only gets rid of overflow in memory bank
+  23, but also clears the banksum discrepancies of banks
+  10 and 33. So it's really, really helpful, even if 
+  wrong! (But 30 is probably *not* the correct setting,
+  because using it blows up the relatively small banksum
+  discrepancy of bank 30 itself.)
+
+#endif
 #define ReconstructionBank23_P11FOUR 20
+
 #endif
 
 #ifndef ReconstructionBank11_S522
@@ -60,4 +77,8 @@
 #ifndef ReconstructionBank23_P11FOUR
 #define ReconstructionBank23_P11FOUR 23
 #endif
+#ifndef ReconstructionBank37_CDHTAG1
+#define ReconstructionBank37_CDHTAG1 25
+#endif
+
 
