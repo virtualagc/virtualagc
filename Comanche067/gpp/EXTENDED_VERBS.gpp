@@ -95,7 +95,14 @@ VERB69		TC	VERB69		# VB69 CAUSE RESTART
 		TC	SETPRFLG	# VB76 SET PREFERRED ATTITUDE FLAG
 		TC	RESETPRF	# VB77 RESET PREFERRED ATT. FLAG
 		TC	CHAZFOGC	# CHANGE GYROCOMPASS LAUNCH AZIMUTH V78
+#ifdef Reconstruction815
+## <b>Reconstruction:</b>  V79 is not present in the Comanche 55 baseline, in 
+## which this table position was a spare,
+## and has been added due to PCR-815 and flowchart FC-2370.
+		TC	V79
+#else
 		TC	ALM/END		# V79 SPARE
+#endif
 		TC	LEMVEC		# VB80 UPDATE LEM STATE VECTOR
 		TC	CSMVEC		# VB81 UPDATE CSM STATE VECTOR
 		TC	V82PERF		# VB82 REQUEST ORBIT PARAM DISPLAY (R30)
@@ -308,7 +315,21 @@ OPTC1		CAF	VNLDOCDU		# VERB-NOUN TO LOAD OPTICS CDUS
 		TS	OPTIND			# SET COARS WORKING
 		
 		TC	ENDEXTVB
+#ifdef ReconstructionFC2235
+## <b>Reconstruction:</b> The Comanche 55 baseline has a redundant
+## <code>TC ENDEXTVB</code> here that is unreachable and never executed.
+## Redundant <code>TC ENDEXTVB</code> instructions are often found following
+## a call to the subroutine IMUSTALL, because IMUSTALL has two possible
+## branches upon return; there is no call to IMUSTALL here, but the 
+## commonality of the redundant instructions is probably why there was a
+## redundant copy here.  The redundant instruction is gone by the time of
+## Artemis 71.  Unfortunately, I have no documentation allowing me to 
+## determine whether it was removed between Comanche 55 and Comanche 67
+## (where Artemis forked from Comanche), or whether it was removed between
+## Comanche 67 and Artemis 71.
+#else
 		TC	ENDEXTVB
+#endif
 		
 VNLDOCDU	VN	2492
 OPTCOARV	EQUALS	IMUCOARV		# DIFFERENT NOUNS.
@@ -818,12 +839,13 @@ MAXIN		TC	UPFLAG
 V0648		VN	0648
 V06N47		VN	0647
 V04N46		VN	0446
+
 		BANK	43
 		SETLOC	EXTVERBS
 		BANK
 		
 		COUNT*	$$/EXTVB
-
+		
 # V82PERF	VERB82		DESCRIPTION
 #	REQUEST ORBIT PARAMETERS DISPLAY (R30)
 #
@@ -1169,6 +1191,91 @@ RESETPRF	TC	DOWNFLAG
 		ADRES	PRFTRKAT	# BIT 10 FLAG 5
 		TC	GOPIN
 		
+#ifdef Reconstruction815
+## <b>Reconstruction:</b>  V79 is not present in the Comanche 55 baseline,
+## and has been added due to PCR-815 and flowchart FC-2370.
+		BANK	43
+		SETLOC	EXTVERBS
+		BANK
+		COUNT*	$$/EXTVB
+		
+V79		TC	TESTXACT
+
+#if bankRATEMANU != 43
+		TC	BANKCALL
+		CADR	RATEMANU
+		BANK	bankRATEMANU
+#endif
+
+RATEMANU	CAF	V06N79
+		TC	BANKCALL
+		CADR	GOMARKF
+		TC	ENDEXT
+		TC	+2
+		TC	RATEMANU
+		
+#if bankRATECOMP != bankRATEMANU		
+		TC	BANKCALL
+		CADR	RATECOMP	
+		BANK	bankRATECOMP
+#endif
+		
+RATECOMP	INHINT
+
+		TC	STOPRATE	# ZERO WBODY'S, DELCDU'S, AND BIAS'S
+		
+		DCA	THETADX
+		DXCH	CDUXD		# SET STEERING ANGLES TO CENTER OF DAP DEADBAND
+		DCA	THETADY
+		DXCH	CDUYD
+		DCA	THETADZ
+		DXCH	CDUZD
+		
+		CCS	DBPTC		# TEST DEADBAND PASSIVE THERMAL CONTROL
+		AD	ONE
+		TC	+1
+		ADD	ONE
+		TS	ADB
+		
+		CAF	RATEPTC
+		MP	RTOW
+		DXCH	WBODY
+		CAF	RATEPTC
+		MP	RTODEL
+		DXCH	DELCDUX
+		
+		CAF	OPTPTC
+		EXTEND
+		BZF	PTCROLL
+		
+		CAF	ZERO		# NO, Y-AXIS OPTION
+		TS	L
+		DXCH	WBODY
+		DXCH	WBODY1
+		CAF	ZERO
+		TS	L
+		DXCH	DELCDUX
+		DXCH	DELCDUY
+		
+		CS	BIT1
+		TC	+2
+PTCROLL		CS	BIT5
+		MASK	CH31TEMP
+		TS	CH31TEMP
+		CS	ONE
+		TS	HOLDFLAG
+		TC	ENDEXT
+
+		BANK	bankRATEMANU		
+V06N79		VN	0679
+		BANK	bankRATECOMP
+RTOW		DEC	0.02
+RTODEL		DEC	0.005
+
+		BANK	43
+		COUNT*	$$/EXTVB
+#endif		
+
 ## Page 264
 # VB 87   SET VHF RANGE FLAG - ALLOWS R22 TO ACCEPT RANGE DATA.
 

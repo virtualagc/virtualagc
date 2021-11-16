@@ -5,6 +5,7 @@
 
 
 
+
 ### FILE="Main.annotation"
 ## Copyright:	Public domain.
 ## Filename:	P40-P47.agc
@@ -2208,15 +2209,23 @@ S41.2		CA	DAPDATR1
 		AD	-BIT14		# (OCT57777)
 		EXTEND
 		BZF	TOGETHER	# YES
-		
-		CS	BIT2		# NO, UNSET FLAG
+
+## <b>Reconstruction:</b> <code>BIT2</code> (in the Comanche 55 baseline)
+## has been changed to <code>ATTCHBIT</code> due to flowchart FC-2370.
+## However, this is a change in name only, and doesn't affect core 
+## rope values.
+		CS	ATTCHBIT	# NO, UNSET FLAG
 		MASK	FLAGWRD7
 		TS	FLAGWRD7
 		
 		TCF	+4
 
 TOGETHER	CS	FLAGWRD7	# ATTACHED, SET FLAG FOR INTEGRATION
-		MASK	BIT2
+## <b>Reconstruction:</b> <code>BIT2</code> (in the Comanche 55 baseline)
+## has been changed to <code>ATTCHBIT</code> due to flowchart FC-2370.
+## However, this is a change in name only, and doesn't affect core 
+## rope values.
+		MASK	ATTCHBIT
 		ADS	FLAGWRD7
 		
 		RELINT
@@ -2246,11 +2255,19 @@ TOGETHER	CS	FLAGWRD7	# ATTACHED, SET FLAG FOR INTEGRATION
 		EXTEND
 		BZF	+5		# CLEAR NJETSFLG (4 JETS, OR NO JETS)
 		CS	FLAGWRD1	# SET NJETSFLG (2 JETS, AC OR BD QUADS)
-		MASK	BIT15		# NJETSFLG = 1 FOR 2 JET ULLAGE (AC OR BD)
+## <b>Reconstruction:</b> <code>BIT15</code> (in the Comanche 55 baseline)
+## has been changed to <code>NJETSBIT</code> due to flowchart FC-2370.
+## However, this is a change in name only, and doesn't affect core 
+## rope values.
+		MASK	NJETSBIT	# NJETSFLG=1 FOR 2 JET ULLAGE (AC OR BD)
 		ADS	FLAGWRD1
 ## Page 733
 		TCF	+4
-		CS	BIT15		# NJETSFLG = 0 FOR 4 JET (OR 0 JET) ULLAGE
+## <b>Reconstruction:</b> <code>BIT15</code> (in the Comanche 55 baseline)
+## has been changed to <code>NJETSBIT</code> due to flowchart FC-2370.
+## However, this is a change in name only, and doesn't affect core 
+## rope values.
+		CS	NJETSBIT	# NJETSFLG=0 FOR 4 JET (OR 0 JET) ULLAGE
 		MASK	FLAGWRD1
 		TS	FLAGWRD1
 		RELINT

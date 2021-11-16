@@ -2232,15 +2232,31 @@ S41.2		CA	DAPDATR1
 		AD	-BIT14		# (OCT57777)
 		EXTEND
 		BZF	TOGETHER	# YES
-		
+
+#ifdef ReconstructionFC2370
+## <b>Reconstruction:</b> <code>BIT2</code> (in the Comanche 55 baseline)
+## has been changed to <code>ATTCHBIT</code> due to flowchart FC-2370.
+## However, this is a change in name only, and doesn't affect core 
+## rope values.
+		CS	ATTCHBIT	# NO, UNSET FLAG
+#else		
 		CS	BIT2		# NO, UNSET FLAG
+#endif
 		MASK	FLAGWRD7
 		TS	FLAGWRD7
 		
 		TCF	+4
 
 TOGETHER	CS	FLAGWRD7	# ATTACHED, SET FLAG FOR INTEGRATION
+#ifdef ReconstructionFC2370
+## <b>Reconstruction:</b> <code>BIT2</code> (in the Comanche 55 baseline)
+## has been changed to <code>ATTCHBIT</code> due to flowchart FC-2370.
+## However, this is a change in name only, and doesn't affect core 
+## rope values.
+		MASK	ATTCHBIT
+#else
 		MASK	BIT2
+#endif
 		ADS	FLAGWRD7
 		
 		RELINT
@@ -2270,11 +2286,27 @@ TOGETHER	CS	FLAGWRD7	# ATTACHED, SET FLAG FOR INTEGRATION
 		EXTEND
 		BZF	+5		# CLEAR NJETSFLG (4 JETS, OR NO JETS)
 		CS	FLAGWRD1	# SET NJETSFLG (2 JETS, AC OR BD QUADS)
+#ifdef ReconstructionFC2370
+## <b>Reconstruction:</b> <code>BIT15</code> (in the Comanche 55 baseline)
+## has been changed to <code>NJETSBIT</code> due to flowchart FC-2370.
+## However, this is a change in name only, and doesn't affect core 
+## rope values.
+		MASK	NJETSBIT	# NJETSFLG=1 FOR 2 JET ULLAGE (AC OR BD)
+#else
 		MASK	BIT15		# NJETSFLG = 1 FOR 2 JET ULLAGE (AC OR BD)
+#endif
 		ADS	FLAGWRD1
 ## Page 733
 		TCF	+4
+#ifdef ReconstructionFC2370
+## <b>Reconstruction:</b> <code>BIT15</code> (in the Comanche 55 baseline)
+## has been changed to <code>NJETSBIT</code> due to flowchart FC-2370.
+## However, this is a change in name only, and doesn't affect core 
+## rope values.
+		CS	NJETSBIT	# NJETSFLG=0 FOR 4 JET (OR 0 JET) ULLAGE
+#else
 		CS	BIT15		# NJETSFLG = 0 FOR 4 JET (OR 0 JET) ULLAGE
+#endif
 		MASK	FLAGWRD1
 		TS	FLAGWRD1
 		RELINT

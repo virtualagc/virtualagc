@@ -5,6 +5,7 @@
 
 
 
+
 ### FILE="Main.annotation"
 ## Copyright:	Public domain.
 ## Filename:	PINBALL_NOUN_TABLES.agc
@@ -21,6 +22,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##		2021-11-15 RSB	Began adapting for PCR-815.
 
 ## Page 268
 # THE FOLLOWING REFERS TO THE NOUN TABLES
@@ -327,7 +329,11 @@ NNADTAB		OCT	00000			# 00 	NOT IN USE
 		OCT	0			# 76	SPARE
 		OCT	0			# 77	SPARE
 		OCT	0			# 78	SPARE
-		OCT	0			# 79	SPARE
+## <b>Reconstruction:</b>  The following was a spare in the Comanche 55
+## baseline, but has been replaced due to PCR-815 and flowchart FC-2370.
+		OCT	04165			# 79	RATEPTC
+						# 	DBPTC
+						#	OPTPTC
 		OCT	64170			# 80	TIME TO IGNITION/CUTOFF
 						#	VG
 						#	DELTA V (ACCUMULATED)
@@ -479,7 +485,9 @@ NNTYPTAB	OCT	00000			# 00	NOT IN USE
 		OCT	0			# 76	SPARE
 		OCT	0			# 77	SPARE
 		OCT	0			# 78	SPARE
-		OCT	0			# 79	SPARE
+## <b>Reconstruction:</b>  The following was a spare in the Comanche 55
+## baseline, but has been replaced due to PCR-815 and flowchart FC-2370.
+		OCT	00113			# 79	3COMP	ELEVDEG, CDUDEG, WHOLE
 		OCT	22440			# 80	3COMP	MIN/SEC, VEL2, VEL2
 						#		(NO LOAD, DEC ONLY)
 		OCT	24512			# 81	3COMP	VEL3 FOR EACH
@@ -722,9 +730,11 @@ IDADDTAB	ECADR	TTOGO			# 40	MIN/SEC			M/S
 		OCT	0			# 78	SPARE
 ## Page 282
 		OCT	0			# 78	SPARE
-		OCT	0			# 79	SPARE
-		OCT	0			# 79	SPARE
-		OCT	0			# 79	SPARE
+## <b>Reconstruction:</b>  3 spares in the Comanche 55 baseline were replaced by RATEPTC,
+## DBPTC, and OPTPTC, per PCR-815 and FC-2370.
+		ECADR	RATEPTC			# 79	ELEV DEG		ARTH
+		ECADR	DBPTC			# 79	CDU DEG			CDU
+		ECADR	OPTPTC			# 79	WHOLE			ARTH
 		ECADR	TTOGO			# 80	MIN/SEC			M/S
 		ECADR	VGDISP			# 80	VEL2			DP4
 		ECADR	DVTOTAL			# 80	VEL2			DP4
@@ -831,7 +841,9 @@ RUTMXTAB	OCT	16351			# 40	M/S, DP3, DP3
 		OCT	0			# 76	SPARE
 		OCT	0			# 77	SPARE
 		OCT	0			# 78	SPARE
-		OCT	0			# 79	SPARE
+## <b>Reconstruction:</b>  The following was a spare in the Comanche 55
+## baseline, but has been replaced due to PCR-815 and flowchart FC-2370.
+		OCT	103			# 79	ARTH, CDU
 		OCT	24511			# 80	M/S, DP4, DP4
 		OCT	16347			# 81	DP3, DP3, DP3
 		OCT	16347			# 82	DP3, DP3, DP3

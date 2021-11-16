@@ -5,6 +5,7 @@
 
 
 
+
 ### FILE="Main.annotation"
 ## Copyright:	Public domain.
 ## Filename:	ERASABLE_ASSIGNMENTS.agc
@@ -3310,6 +3311,12 @@ SAVBNK		EQUALS	GENRET	+1	# B(1) S-S SAVE EBANK FOR R61 SUBROUTINE
 
 # CRS61.1 STORAGE FOR AUTOPILOT BANK.	(3D)
 SAVEDCDU	EQUALS	SAVBNK	+1	# B(3)TMP
+
+## <b>Reconstruction:</b>  RATEPTC, DBPTC, and OPTPTC were added
+## per PCR-815 and flowchart FC-2370.  They overlap SAVEDCDU.
+RATEPTC		EQUALS	SAVBNK +1
+DBPTC		EQUALS	RATEPTC +1
+OPTPTC		EQUALS	DBPTC +1
 
 # R61 STORAGE.				(1D)
 ## Page 116

@@ -5,6 +5,7 @@
 
 
 
+
 ### FILE="Main.annotation"
 ## Copyright:	Public domain.
 ## Filename:	FRESH_START_AND_RESTART.agc
@@ -497,17 +498,25 @@ STARTSUB	CAF	LDNPHAS1	# SET POINTER SO NEXT 20MS DOWNRUPT WILL
 		TS	DNTMGOTO	# CAUSE THE CURRENT DOWNLIST TO BE
 					# INTERRUPTED AND START SENDING FROM THE
 					# BEGINNING OF THE CURRENT DOWNLIST.
-		CAF	POSMAX
-		TS	TIME3		# 37777 TO TIME3.
-		AD	MINUS2
-		TS	TIME4		# 37775 TO TIME4.
-		AD	NEGONE
-		TS	TIME5		# 37774 TO TIME5.
+## <b>Reconstruction:</b> In the Comanche 55 baseline, variables 
+## TIME3, TIME4, and TIME5 are successively set here (in that order).
+## Due to Colossus 2D flowchart FC-2020, however, the ordering and
+## positioning of those operations has been changed.  Unfortunately,
+## I do not know the PCR governing this.  Although the Colossus 2D
+## flowchart is used, the notes within it indicate that the relevant
+## sheet (8) is unchanged from Colossus 2C.
+		CAF	OCT37774	# 37774 TO TIME5
+		TS	TIME5
+		AD	ONE		# 37775 TO TIME4
+		TS	TIME4
 
 STARTSB2	CAF	OCT77603	# TURN OFF UPLINK ACTY, TEMP CAUTION, KR,
 		EXTEND			# FLASH, OP. ERROR, LEAVE OTHERS UNCHANGED
 		WAND	DSALMOUT
 
+## <b>Reconstruction:</b> See the preceding annotation.
+		CAF	POSMAX		# 37777 to TIME3.
+		TS	TIME3
 		CAF	OCT74777	# TURN OFF TEST ALARMS, STANDBY ENABLE.
 		EXTEND
 		WAND	CHAN13

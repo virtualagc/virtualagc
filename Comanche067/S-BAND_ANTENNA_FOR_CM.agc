@@ -5,6 +5,7 @@
 
 
 
+
 ### FILE="Main.annotation"
 ## Copyright:	Public domain.
 ## Filename:	S-BAND_ANTENNA_FOR_CM.agc
@@ -21,6 +22,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##		2021-11-11 RSB	Made adjustments for PCR-832.1.
 
 ## Page 934
 		BANK	23
@@ -29,10 +31,11 @@
 		
 		COUNT*	$$/R05
 		EBANK=	EMSALT
-		
-SBANDANT	TC	BANKCALL	# V 64 E GETS US HERE
-		CADR	R02BOTH		# CHECK IF IMU IS ON AND ALIGNED
-		TC	INTPRET
+
+## <b>Reconstruction:</b>  Due to PCR-832.1 and flowchart FC-2360, a bankcall to
+## <code>R02BOTH</code> which had been present at the beginning of <code>SBANDANT</code>
+## in the Comanche 55 baseline has been removed in the Comanche 67 code.
+SBANDANT	TC	INTPRET
 		RTB	CALL
 			LOADTIME	# PICKUP CURRENT TIME SCALED B-28
 			CDUTRIG		# COMPUTE SINES AND COSINES OF CDU ANGLES
@@ -94,6 +97,7 @@ NOADJUST	VLOAD	DOT		# COMPUTE PITCH ANGLE
 			YAWANG
 		STORE	GAMMASB		# PATCH FOR CHECKOUT
 		EXIT
+
 		CA	EXTVBACT	# IS BIT 5 STILL ON
 		MASK	BIT5
 		EXTEND
@@ -109,7 +113,9 @@ NOADJUST	VLOAD	DOT		# COMPUTE PITCH ANGLE
 		CAF	BIT1		# DELAY MINIMUM TIME TO ALLOW DISPLAY IN
 		TC	BANKCALL
 		CADR	DELAYJOB
-		TCF	SBANDANT +2
+## <b>Reconstruction:</b>  Due to PCR-832.1 and flowchart FC-2360, the target
+## address of the following jump has been adjusted.
+		TCF	SBANDANT
 V06N51		VN	0651
 RCM		EQUALS	2D
 UR		EQUALS	8D
