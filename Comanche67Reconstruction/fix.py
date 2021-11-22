@@ -8,9 +8,20 @@
 import sys
 import re
 
-print("===== Title =====")
+print("===== Title =====\n")
 for line in sys.stdin:
-    line = line.strip("\n").replace("&nbsp;", "")
-    line = re.sub(line, "\[([^]]+)\]\(([^)]+)\)", "[[\2|\1]]")
+    line = line.strip("\n")
+    line = line.replace("&nbsp;", "")
+    line = re.sub("^\( \[", "([", line)
+    line = re.sub("^(\s*)\-", "\\1*", line)
+    line = re.sub("\[([^]]+)\]\(([^)]+)\)", "[[\\2|\\1]]", line)
+    line = re.sub("^####(.*)", "==\\1==", line)
+    line = re.sub("^###(.*)", "===\\1===", line)
+    line = re.sub("^##(.*)", "====\\1====", line)
+    line = re.sub("_([^_]+)_", "//\\1//", line)
+    line = line.replace("\\_", "_")
+    line = re.sub("^    ", "\t", line)
+    line = re.sub("^    ", "\t", line)
+    line = re.sub("^    ", "\t", line)
     print(line)
     
