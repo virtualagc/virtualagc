@@ -1,0 +1,34 @@
+( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+According to sheet 1 of the flowchart, only sheets 7, 9, 13, 20, and 23 were changed from Colossus 2A to Colossus 2C.
+
+## Sheet 7
+
+This is the "functional flow chart", and doesn't map in any convenient way to low-level code.
+
+## Sheet 9
+
+TWIDDLE, WAITLIST, WATLST0-:&nbsp; The flowchart says WAITEXIT&nbsp;←&nbsp;0, but that seems to be an typo (handwrite-o?) for WAITEXIT&nbsp;←&nbsp;Q, which is what the code.&nbsp; (There's an eventual RETURN VIA WAITEXIT in the flowchart, so 0 certainly couldn't be correct.)&nbsp; Other than that, the only difference between the flowchart and code seems to be the alarm code for POODOO, which has already been incorporated due to PCR-801.1.
+
+## Sheet 13
+
+WTLST5, WTABORT:&nbsp; Well, this one is a bit tricky.&nbsp; The flowchart matches the code until you get down to the very last decision on the sheet.&nbsp; If the "NO" branch is taken, the code increments the accumulator, which doesn't seem to me to be explained either by the flowchart itself or its comments.&nbsp; Then too, if any of the decision boxes on the page take the "NO" branch, then supposedly
+
+    A ← A̅
+
+There's no explanation given of what that means, but to my mind it means that every bit in the accumulator is flipped, or A&nbsp;←&nbsp;-A.&nbsp; There's no sign of that in the code, nor of anything that might correspond to it.&nbsp; Indeed, on the very next sheet of the spreadsheet (which supposedly has not changed), that operation occurs again and there's no corresponding operation in the code.&nbsp; The flowchart comments also imply that a negation has occurred.
+
+_However_, I note that the code for WTLST5+WTABORT doesn't change at all from Colossus 237 through Artemis, except for precisely one thing:&nbsp; The alarm code for PCR-801.1 changes, per PCR-801.1, and that would account for the fact that sheet 13 has changed in Colossus 2C.
+
+So, I don't understand what's going on.&nbsp; Either I'm reading the code and/or the flowchart wrong, which is sadly very possible, or else the flowchart is wrong ... but either way, whichever is wrong, it's wrong without implying that there is anything new here for Comanche 67.
+
+**Later note:** &nbsp; In retrospect, I wonder if the flowchart wasn't trying to acknowledge, however obliquely, that the CCS instruction negates operands that are -0 or \<0.
+
+## Sheet 20
+
+SVCT3, SVCT3X:&nbsp; The code seems to match the flowchart, but hasn't been changes from Comanche 55 code, so I'm at a loss as to see how the flowchart page may have changed since Colossus 2A.
+
+## Sheet 23
+
+This is an outline flowchart, and doesn't map conveniently to code details.
+

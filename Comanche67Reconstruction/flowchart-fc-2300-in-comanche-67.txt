@@ -1,0 +1,163 @@
+( [Return to the main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+We have the Colossus 2C (and 2D) revisions of FC-2300, but no list of sheets changed from prior revisions.&nbsp; Alas, that leaves us with no choice but to compare the flowchart (50 sheets!) to the reconstructed code.&nbsp; As a time-saving workaround, I'll only do the comparison for subroutines for which there is some code mismatch between Colossus 237 vs Comanche 55 vs Artemis 71.&nbsp; When all three of those versions agree for some particular subroutine, I'll skip the comparison to the flowchart, because there's no way I could resolve a conflict anyway.
+
+## Sheet 1
+
+Cover sheet only.
+
+## Sheet 2
+
+A top level flow that doesn't have enough detail for code comparison.&nbsp; More-detailed flowcharts of the same subroutines come on later sheets.
+
+## Sheet 3
+
+TESTLOOP, NORFINAL:&nbsp; In interpreting this code, it's helpful to recall that ABVAL computes the absolute value of the scalar (or length of the vector) in MPAC, but also leaves the square of the absolute value in position 34D of the pushdown list.&nbsp; In NORFINAL, in the midst of several right-shift operations, there is in interpretive instruction
+
+    DLOAD                MPAC
+
+which is rather confusing.&nbsp; I wonder if the right shifts don't convert the double-precision value in MPAC into a triple-precision value, and the purpose of the DLOAD is to truncate it back to double precision?&nbsp; If so, it's understandable in terms of the comments in the flowchart, and if not, it's non-functional anyway, so I guess it's okay.
+
+Otherwise, looks good.
+
+## Sheet 4
+
+Continuation of NORFINAL, MAXDT, DT/2COMP:&nbsp; Looks good.
+
+## Sheet 5
+
+Continuation of DT/2COMP, GETMAXDT, USEMAXDT, POOHCHK:&nbsp; Looks good.
+
+## Sheet 6
+
+Continuation of POOHCHK, TIMESTEP, RECTEST, DOSWITCH:&nbsp; Looks good.
+
+## Sheet 7
+
+Continuation of RECTEST and DOSWITCH, CALLRECT:&nbsp; Looks good.&nbsp; (RECTEST and CALLRECT identical for Colossus 237/Comanche 55/ Artemis 71.)
+
+## Sheet 8
+
+INTGRATE, DIFEQ0:&nbsp; Identical for 237/55/71.
+
+## Sheet 9
+
+ACCOMP:&nbsp; This sheet identical for 237/55/71.
+
+## Sheet 10
+
+Continuation of ACCOMP:&nbsp; This sheet identical for 237/55/71.
+
+## Sheet 11
+
+Continuation of ACCOMP:&nbsp; This sheet identical for 237/55/71.
+
+## Sheet 12
+
+Continuation of ACCOMP:&nbsp; Looks good.&nbsp; (This sheet _not_ identical for 237/55/71.)
+
+## Sheet 13
+
+GETRPSV:&nbsp; Identical for 237/55/71.
+
+## Sheet 14
+
+OBLATE:&nbsp; This sheet identical for 237/55/71 ... though frankly, I don't quite see how it matches the flowchart.
+
+## Sheet 15
+
+Continuation of OBLATE, COSPHIE, COMTERM:&nbsp; COSPHIE is identical for 237/55/71.&nbsp;&nbsp;
+
+However, the flowcharts for the continuation of OBLATE and the beginning of COMTERM do not match the reconstructed Comanche 67 code, but rather match the Comanche 55 code.&nbsp; The reconstructed code is per PCR-772.1 and PCR-776.1, and the reconstruction in that area of the code was performed by importing code from Luminary 116 or Artemis. But regardless of where the reconstructed code came from, it should definitely _differ_ from Comanche 55.&nbsp; (Unless, of course, I'm _totally_ confused about how to incorporate the PCRs, and the PCRs applied to an entirely different area of code.)
+
+I've just now double-checked, and according to the Colossus 3 and Luminary 1E GSOPs, PCR-772.1 and PCR-776.1 were supposed to have been incorporated in Comanche 67, while PCR-772.2 and PCR-776.2 were supposed to have been incorporated in Luminary 116.&nbsp; I've looked also at the Colossus 2D revision of the flowchart, and this sheet appears identical (other than title block) to the 2C revision.
+
+Actually, even the title blocks of this sheet of the 2C and 2D flowcharts appears to be identical, except that in the 2D revision a Rev. number (1) has been added, and for "COLOSSUS IIC", the "IIC" has been erased and "2D" has been added below the "COLOSSUS".&nbsp; Even the signature dates for "drawn by", "analyst", and "appr'd" haven't changed (23 OCT 68", "22 SEPT 69", "9-23-69").&nbsp; So somehow it went from 2C to 2D without even being approved.
+
+I guess it's hard to escape the conclusion that one of the following two things has happened:
+
+1. FC-2300 was being rubber-stamped at some level (whether it was a technical or managerial level I can't tell from this minimal), and neither the 2C nor 2D revisions of the flowchart can be relied upon to reflect the state of the code.&nbsp; That's kind of hard to credit, given that multiple PCRs were driving changes to this area of the code.
+2. The incorporation of PCR-772.1 and PCR-776.1 in the reconstruction has been done completely wrong, to the extent of applying to a completely different area of source code.&nbsp; That also is difficult to credit, since the reconstruction changes are due to multiple, mostly-independent analyses.&nbsp; I would be more likely to credit small areas of error.&nbsp; But nevertheless, the possibility exists.
+
+**⚠** &nbsp;Given that I'm responsible for the analyses in #2 above, I'm naturally inclined to credit possibility #1 more than #2; it's an unavoidable blind spot, I'm afraid, until a lot more time passes.&nbsp; Unfortunately, this inference seems to render the whole idea of comparing FC-2300 to code problematic.&nbsp; Unfortunately, it's the only tool I have right now, so I'll continue the comparison and hope that this level of carelessness doesn't persist throughout the entirety of FC-2300; or alternately, if the application of PCR-772.1 and PCR-776.1 were (both) completely wrong, hopefully it will show up in other flowcharts.
+
+## Sheets 16-20
+
+Continuation of COMTERM:&nbsp; Per the comments for sheet 15, I'm simply ignoring COMTERM, since the influence of PCR-772.1 persists throughout most of this subroutine.
+
+I should clarify that the flowchart does not match Comanche 55 in its entirety, since [as I explain elsewhere](memory-bank-assignments-for-comanche-67), the flowchart lacks the split-out of portions of COMTERM as new subroutines QUALITY1 and QUALITY2, used apparently to work around memory overflows in fixed bank 11.&nbsp; I simply don't know the extent to which FC-2300 matches different revisions of the code.
+
+## Sheet 21
+
+NBRANCH:&nbsp; Identical in 237/55/71.
+
+## Sheet 22
+
+GOBAQUE, INT-ABRT:&nbsp; Looks good.
+
+## Sheet 23-26
+
+GAMCOMP:&nbsp; Identical in 237/55/71.
+
+## Sheet 27
+
+DIFEQ+0, DIFEQ+1, DEFEQCOM:&nbsp; Identical in 237/55/71.
+
+## Sheet 28
+
+FBR3:&nbsp; Identical in 237/55/71.&nbsp;&nbsp;
+
+## Sheet 29-31
+
+KEPPREP:&nbsp; Identical in 237/55/71.
+
+## Sheet 32-35
+
+DIFEQ+2, ENDSTATE, AMOVED, NEXTCOL, RELOADSV:&nbsp; Identical in 237/55/71.
+
+## Sheet 36
+
+CKMID2, MID2, TIMEINC:&nbsp; CKMID2 is identical in 237/55/71.
+
+MID2 looks good.
+
+TIMEINC looks good.
+
+## Sheet 37
+
+WMATEND:&nbsp; Identical in 237/55/71.
+
+## Sheet 38-39
+
+A-PCHK, ANDOUT, PHEXIT:&nbsp; A-PCHK looks good.&nbsp; ANDOUT and PHEXIT are identical in 237/55/71.
+
+## Sheet 40
+
+Continuation of RECTOUT, INTEXIT:&nbsp; RECTOUT is identical in 237/55/71.
+
+INTEXIT:&nbsp; Recalling that BOV clears the overflow indicator (a variable) as a side effect, the only thing I observe is that the flowchart doesn't indicate that the return address is indexed by FIXLOC as the code does.&nbsp; However, that particular feature is identical in 237/55/71, so I accept it.
+
+## Sheet 41
+
+DOW..:&nbsp; Identical in 237/55/71.
+
+## Sheet 42
+
+DOW..1:&nbsp; Identical in 237/55/71.
+
+## Sheet 43
+
+RECITIFY, MINIRECT:&nbsp; Identical in 237/55/71, other than the addition of an extra program label (TINIRECT) in Artemis that doesn't affect the rope.
+
+## Sheet 44
+
+ORIGCHNG, SETMOON, CLRMOON:&nbsp; Identical in 237/55/71.
+
+## Sheet 45
+
+CHKSWITCH, RPQOK, EARSPH:&nbsp; Looks good.
+
+## Sheet 46-50
+
+Tables, not flowcharts.
+

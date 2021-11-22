@@ -1,0 +1,21 @@
+( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+We don't have a copy of PCR-807.1, "Add Present Time Option to P21".&nbsp; [This memo](https://www.ibiblio.org/apollo/Documents/Memo-Stokes700422_text.pdf#page=2) explains in passing what may be meant by the title:
+
+> ... the "present time" option available in many routines (i.e., input of zero time taken to mean current time). ...
+
+There is also a matching PCR-807.2, incorporated into Luminary 102.&nbsp; So comparison of Luminary 99 and Luminary 116 source code may reveal implementation details that could be imported into Comanche.&nbsp; Moreover, we have the [Colossus 2C revision of flowchart FC-2580 ("P21")](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=758).
+
+First consider the flowchart.&nbsp; At the top of sheet 3 in subroutine P21PROG1 there is a test of DSPTEM1 (the time just input from the DSKY); if it is zero, then goto P21PRTM on sheet 5, which loads the present time into MPAC.&nbsp; This looks pretty suspiciously like what the title of the PCR is calling for.
+
+Now, diff'ing GROUND TRACKING DETERMINATION PROGRAM - P21 of Luminary 99 vs Luminary 116 and concentrating on P21PROG1 and P21PRTM, we find in fact that the _only_ differences are:
+
+- The features from the flowchart mentioned above; and
+- DSPTEM1 is cleared to zero just prior to entering P21PROG1.
+
+I'm not sure DSPTEM1 would need to be cleared separately, but I suppose it goes along with the other change.
+
+Action:&nbsp; Conditionally assembled based on the preprocessor label Reconstruction807, import the Luminary 116 coded differences from Luminary 99 just mentioned into Comanche.&nbsp; Along the way, I found that the changes had been made, though a bit uncleanly, so I tidied them up.&nbsp; I also found several instances in which unrelated stuff (removal of unused constants) had been done in the name of Reconstruction807; I restored those constants.&nbsp;&nbsp;
+
+To summarize, the fix has been made in code.&nbsp; Restoring those constants has now cleared memory bank 07.
+

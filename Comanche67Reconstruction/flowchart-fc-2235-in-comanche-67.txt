@@ -1,0 +1,66 @@
+( [Return to the main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+Unfortunately, FC-2235 is for Colossus 2D, and we have neither a list of changes from Colossus 2A nor from 2C.&nbsp; Therefore, there's no choice other than simply to compare each sheet of the flowchart against the reconstructed code, and then to play it by ear if there's a discrepancy found.
+
+## Sheet 1
+
+Just a cover sheet with no flowcharts.
+
+## Sheet 2
+
+VBZERO, OP/INERT, IMUZEROK:&nbsp; The TEST A decision box in the flowchart is rather confusing.&nbsp; If you follow the arrows, it seems to be saying that if A=0 it goes to ALM/END, and otherwise it goes to ALM/END.&nbsp; The flowchart's comments elucidate it a little.&nbsp; The A=0 exit from the TEST A decision box, and the YES exit from the NOUN 20? decision box elsewhere on the sheet, is really a branch to XACT0Q, which does nothing other than a RETURN.&nbsp; So I guess this is a trick to work around the fact that the AGC instruction set has a branch-if-zero instruction but no return-if-zero instruction.
+
+The point of that is that by the time the NOUN 20? decision occurs, the Q register containing the return address is still the return address of the TC OP/INERT in VBZERO, so the return is to the next instruction in VBZERO, namely the TC IMUZEROK instruction.&nbsp; Whereas by the time of the TEST A decision box, Q has been incremented, so the return for the A=0 case is to the 2nd instruction after TC OP/INERT in VBZERO, namely the TC ALM/END instruction.&nbsp; Whereas otherwise, the TEST A decision exits directly to ALM/END without a return from OP/INERT.
+
+With that understanding, the sheet vs code comparison looks good.
+
+## Sheet 3
+
+Continuation of IMUZEROK, CKMODCAD:&nbsp; Looks good.&nbsp;
+
+## Sheet 4
+
+VBCOARK, IMUCOARK:&nbsp; Looks good.
+
+## Sheet 5
+
+Continuation of IMUCOARK, ICORK2:&nbsp; Looks good.
+
+## Sheet 6
+
+OPTCOARK:&nbsp; I wonder why OPTCOARK makes a point of setting EBANK to EBANK5?&nbsp; As far as I can see, all of EXTENDED VERBS is EBANK 5.&nbsp; Why all of a sudden now?&nbsp;&nbsp;
+
+But that's neither here nor there.&nbsp; All versions of Colossus do that.
+
+Looks good.
+
+## Sheet 7
+
+Continuation of OPTCOARK, OPTC1:&nbsp; For some reason, the code of OPTC1 ends with
+
+    TC	ENDEXTVB TC	ENDEXTVB
+
+with the redundant ENDEXTVB being unreachable.&nbsp; It looks as though that's often done, not just in OPTC1, but only after calling IMUSTALL, because IMUSTALL has two possible branches upon return.&nbsp; In OPTC1, there's no call to IMUSTALL, and no need to do it.
+
+In Artemis, OPTC1 ends in a single TC ENDEXTVB.&nbsp; I recall seeing a PCR/PCN/Software Anomaly Report somewhere about removing a redundant instruction, but there was no explanation of what the redundant instruction was, so I didn't worry about it.&nbsp; I wonder where I saw that?&nbsp; I see a couple of Artemis memos mentioning such stuff, but none relevant to this case, and I see ACB-97/PCR-810 which is certainly relevant to Comanche 67, but not to this case.&nbsp;&nbsp;
+
+Was the redundant TC ENDEXTVB removed here in Comanche 67, or was it removed in Artemis?&nbsp; I find no hint of it in the Artemis memos, but that's not decisive; there were certainly other changes to EXTENDED VERBS in Artemis.&nbsp; &nbsp;By the same token, I find changes in Comanche 67 EXTENDED VERBS vs Comanche 55 from 3 separate PCRs.&nbsp; But none of the other changes from Comanche 55 to Artemis were in OPTC1 or within (say) a dozen lines of it.&nbsp; Luminary 116 has no OPTC1 subroutine, so it isn't comparable.&nbsp; All of which adds up to the fact that it seems to me undecidable where the removal had been performed.
+
+**⚠&nbsp;** I've created a preprocessor constant ReconstructionFC2235 to conditionally remove the redundant TC ENDEXTVB and experimented with it.&nbsp; If enabled, there's a regression in which banks 02 and 41, formerly cleared, now have checksum discrepancies of 00001.&nbsp; While that doesn't mean that they had been "correct" previously, I'm inclined to think that it means the change should be disabled.
+
+By the way, in researching the redundant TC ENDEXTVB above, I happened to notice that the call to IMUSTALL in IMUFINEK is followed by a single TC ENDEXTVB.&nbsp; I wonder if that's correct?&nbsp; It looks like we'll get to that in a couple of sheets, so I won't worry about it now.
+
+In other words, I think that Comanche 67 is okay as-is with regard to sheet 7.
+
+## Sheet 8
+
+IMUFINEK:&nbsp; Looks good.
+
+## Sheet 9
+
+Continuation of IMUFINEK, FINEK2:&nbsp; Looks good.
+
+## Sheet 10
+
+Just tables, no flowcharts.
+

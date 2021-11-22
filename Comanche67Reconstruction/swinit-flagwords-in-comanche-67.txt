@@ -1,0 +1,24 @@
+( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+[Elsewhere](direct-manipulation-of-flagwords-in-comanche-67), we already found that only the following flags are manipulated by reconstructed Comanche 67 code:&nbsp;&nbsp;
+
+- Reconstruction772:&nbsp; MOONFLAG, MOONBIT, bit 12 flagword 0  
+- Reconstruction785:&nbsp; V50N18FL, V50N18BT, bit 15 flagword 3
+- Reconstruction787:&nbsp; .05GSW, .05GBIT, bit 3 flagword 6
+- Reconstruction812:&nbsp; XDELVFLG, XDELVBIT, bit 8 flagword 2
+
+In FRESH START AND RESTART, however, all flagwords are initialized by being loaded from the SWINIT array.&nbsp; We need to make sure that our reconstruction-related flags are initialized with reasonable values.
+
+I find that right now, MOONBIT, V50N18FL, and XDELVFLG are cleared, unaffected by reconstruction, whereas .05GSW is set due to Reconstruction787\_835.
+
+So the question is whether being cleared at startup is the correct action for MOONBIT, V50N18FL, and XDELVFLG in the reconstruction.
+
+We have the [Colossus 2D flowchart FC-2020](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=9) for "FRESH START AND RESTART".&nbsp; Sheet 1 of FC-2020 informs us that only sheet 26 differs from Colossus 2C.&nbsp; DOFSTART, which is what uses the SWINIT table to initialize the flagwords, occupies sheets 3-6.&nbsp; It should be correct for Colossus 2C.&nbsp; On sheet 6 we find the following:
+
+- Clear FLAGWRD0
+- Clear FLAGWRD2
+- Clear bits 15, 14 and 12-1 of FLAGWRD3
+- Set bit 3 of FLAGWRD6
+
+In summary, all flags relevant to the reconstruction are set or cleared properly by SWINIT for a fresh start.
+

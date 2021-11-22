@@ -1,0 +1,16 @@
+( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+We do not have a copy of PCR-961, "SIVB-TB6 E-Memory Routine".&nbsp; [Notes from the 33rd SCB Meeting](https://www.ibiblio.org/apollo/Documents/SCB33-691113.pdf) offer the following information:
+
+    All Action Items from the previous meeting were closed at this meeting. These items were as follows:                   Item                                         Action                   PCR 961                  CMC Start of TB6 (E-memory Routine)                   Action:                  Flight Software Branch (FSB).  Determine the future                                            disposition of backup initiating the S-IVB Timebase 6.                                            That is, should the ground capability be retained                                            (MSFC IU software change) or should the CMC capability                                            be retained in E-memory or moved to fixed memory.                   Closed:                  By approval of PCR 973 for incorporation of T6JOB into                                            fixed memory.
+
+Looking at the [notes from the 32nd SCB meeting](https://www.ibiblio.org/apollo/Documents/SCB-691009.pdf), I find that although PCR-961 is marked as "approved" for Apollo 12, there are remarks that&nbsp;
+
+    MSC to investigate with MSFC forflights after Apollo 12. MIT recom- mends fix memory change for Apollo 14 & subsequent if MSFCcan't handle the problem.
+
+It seems to me that it should therefore not have been marked as "approved" in the 32nd meeting notes, but rather as "pending" while awaiting the results of the MSC/MSFC investigation.&nbsp; The fact that it was marked "approved" for Apollo 12 fooled me into thinking that it actually had been approved, when all that was approved was further investigation.
+
+In point of fact, we know that the E-memory routine mentioned was not moved to fixed memory in Apollo 12, because it is [the TB6JOB program which appears in the Apollo 12 CMC pad load](https://www.ibiblio.org/apollo/Documents/padload_12_cm.pdf#page=22).&nbsp; That this pad load is the same as the TB6 job described in the PCR can be verified because [there is a listing and description of the SIVB TB6 backup program in COLOSSUS Memo #222](http://www.ibiblio.org/apollo/Documents/mission_techniques_memo_39b.pdf#page=31).&nbsp; The program listed in COLOSSUS Memo #222 is word-for-word identical to the pad-loaded program.&nbsp; And obviously, if the program was in CMC fixed memory, then there would be no need to load it separately into erasable memory.
+
+In summary, PCR-961 is _not_ applicable to Comanche 67, and I only thought it was applicable originally due to having incompletely assimilated what the SCB meeting notes reported about it.
+

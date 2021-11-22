@@ -1,0 +1,26 @@
+( [Return to the main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+We have the Colossus 2 and Colossus 2D revisions of flowchart FC-2390, with no indications of the intervening changes.&nbsp; The first step would seem to be to compare the flowcharts side-by-side, and then only compare to reconstructed source code when inter-flowchart differences are encountered.
+
+T5PHASE2, KALUPDT, NOHIAUTO, KRESUME2:&nbsp; 2/1 vs 2D/2:&nbsp; In NOHIAUTO the 2D flowchart appears to be working with bits 1-6 of Channel 31 exclusive-OR'd with the same bits of variable CH31TEMP, whereas the Colossus 2 flowchart appears to be dealing only with Channel 31 by itself.&nbsp; (Assuming the undefined symbol&nbsp;∨̶ is an exclusive OR.)&nbsp; This appears to me to be what the reconstructed code already does, and indeed had already done in Colossus 1.&nbsp; (NOHIAUTO code is unchanged from Colossus 237 through Artemis.)&nbsp; I can only assume that this is an editorial correction of an error in the Colossus 2 flowchart rather than an actual change.
+
+NOCHANGE, FREEFUNC, REINIT, SETWBODY:&nbsp; 2/2 vs 2D/3:&nbsp; Match.
+
+Continuation of SETWBODY, NORATE, ZEROER, MERUPDAT, SPNDXCHK:&nbsp; 2/3 vs 2D/4: In two places, the 2D flowchart appears to use MANTABLE -1, INDEX'd by Q, whereas the Colossus 2 flowchart uses MANTABLE, INDEX'd by Q-1.&nbsp; The result is obviously the same, though the code would differ.&nbsp; Comparing to the reconstructed code, we find that it already agrees with the Colossus 2D flowchart.&nbsp; Moreover, the code in Colossus 1 is identical.&nbsp; So once again this inter-flowchart difference appears to be an editorial correction rather than an actual change.&nbsp; The 2D flowchart also includes a handy table of FREETAU (RMANNDX, PMANNDX, MANNDX), alas illegible, whereas the Colossus 2 flowchart does not.&nbsp; &nbsp;It strikes me that the table in the flowchart&nbsp;_might_ read 0, +0.16, -0.16, 0 seconds.&nbsp; Comparing to the reconstructed code, we instead find values 0, +480, -480, 0, though nearby comments say 0, +0.10, -0.10, 0 instead.&nbsp; These values and comments are identical in Colossus 1, so it's possible I've misread (illegible) values of 0.10 in the flowchart as 0.16.&nbsp; Artemis has the same values (0, +480, -480, 0), though the comments are no longer present, so my conclusion would be that this is not something affecting code.
+
+AHFNOROT, FREECONT, HOLDFUNC, AUTOCONT, GRABANG, ENDDAMP:&nbsp; 2/4 vs 2D/5:&nbsp; Match.
+
+ATTHOLD: 2/5 vs 2D/6: Match.
+
+JETS, JLOOP, INHOLD: 2/6 vs 2D/7: Match.
+
+J6, J8, J23, NJ22, NJ23, J7, J22, J21:&nbsp; 2/7 vs 2D/8: Match.
+
+(no flowchart): 2/8 vs 2D/9:&nbsp; Match.
+
+JTIME, TAUNORM, DOJET:&nbsp; 2/9 vs 2D/10:&nbsp; Match.
+
+T6PROGM, T6PROG:&nbsp; 2/10 vs 2D/11:&nbsp; Match.
+
+In summary, looks good!
+

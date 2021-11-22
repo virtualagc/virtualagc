@@ -1,0 +1,17 @@
+( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+Here's my analysis after having done an analysis of all applicable PCRs, PCNs, and Software Anomaly Reports.&nbsp; What I'm looking for is places in the Comanche 67 incorporation where I caught explicit manipulation of flags, but missed indirect manipulation of flags due to masking of flagwords.&nbsp; Let's start with a list of all flags I found that I dealt with in the reconstruction, obtained by grep'ing for the Reconstruction_XXX_ preprocessor labels used for conditional assembly.
+
+- Reconstruction772:&nbsp; MOONFLAG, MOONBIT, bit 12 flagword 0  
+- Reconstruction785:&nbsp; V50N18FL, V50N18BT, bit 15 flagword 3
+- Reconstruction787:&nbsp; .05GSW, .05GBIT, bit 3 flagword 6
+- Reconstruction812:&nbsp; XDELVFLG, XDELVBIT, bit 8 flagword 2
+
+I guess it turns out that there are surprisingly few of them.&nbsp; Or perhaps just surprisingly few I am able to pick out by inspection.
+
+At any rate, I have searched the reconstructed source code for MOONBIT, V50N18BT, .05GBIT, XDELVBIT, FLAGWRD0, FLAGWRD2, FLAGWRD3, and FLAGWRD6, seeking any indirect manipulation of MOONFLAG, V50N18FL, or XDELVFLG.&nbsp; However, everything I found either didn't involve the right combination of flagword and flagbit, or else was already accounted for by a Reconstruction conditional assembly.
+
+In summary, I don't think I overlooked anything in this category.
+
+[See here also](swinit-flagwords-in-comanche-67).
+

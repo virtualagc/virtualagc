@@ -1,0 +1,18 @@
+( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+We have no copy of PCR-611, "Use 6-Dimensional Matrix for V67 Computations (Colossus IA)".&nbsp; [That title is taken from the Colossus 3 GSOP, section 5, indicating incorporation of the PCR into either Colossus 1 (Colossus 237) or Colossus 1A (Colossus 249)](https://www.ibiblio.org/apollo/Documents/HSI-208454.pdf#page=8).&nbsp; For other PCRs (such as [PCR-602](pcr-602-implementation-in-comanche-67)) the notation "(Colossus IA)" in the title was apparently used to narrow it down to Colossus 249, so PCR-611 originally represented a code (and possibly GSOP) change from Colossus 237 to Colossus 249.&nbsp; As with the other PCRs just mentioned, [the Colossus 3 GSOP instead titles PCR-611 as "Use 6-Dimensional Matrix for V67 (Reincorporated)" for Comanche 67](https://www.ibiblio.org/apollo/Documents/HSI-208454.pdf#page=13).&nbsp; Moreover, [MIT/IL's presentation for the Apollo 12 Flight Software Readiness Review (FSRR)](https://www.ibiblio.org/apollo/Documents/apollo_12_fsrr_slides.pdf#page=5) makes no mention of PCR-611 in its list of PCRs/PCNs incorporated into Colossus 2B or Colossus 2C.
+
+This constellation of facts has so far always caused us to infer that in Comanche 67, PCR-11 is a GSOP-only change pertaining to a code fix that actually occurred between Colossus 237 and Colossus 249.
+
+However, since we actually have the Colossus 237 and Colossus 249 source code, as well as the Colossus 1/1A GSOP and some later GSOPs, we should verify that our inference is consistent with that source material.
+
+Regarding a code change, extended verb V67 calls the routine V67CALL in log section P20-P25.&nbsp; The only change in V67CALL in Colossus 1 vs 1A is that (in 3 places) Colossus 237 uses decimal constants 54 and 108, whereas Colossus 249 uses decimal constants 36 and 90.&nbsp; Routine V67CALL is painfully short on program comments (translation: there's not a single program comment in V67CALL) but this change in constants seems reasonably consistent in a hand-waving kind of way with a change from a 9-dimensional matrix to a 6-dimensional matrix.&nbsp; That change of constants persists into Colossus 2A and Artemis (though by then there are other incomprehensible, uncommented, but seemingly unrelated differences as well), so I'd conclude that no additional changes related to 6- vs 9-dimensional matrices were made after Colossus 249, and hence that there is no code change in Colossus 2C related to PCR-611.
+
+Regarding the GSOP,
+
+- The [Colossus 1/1A GSOP has a flowchart](https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.6-end.pdf#page=94), figure 6.16-1, showing summations of 9 W-matrix elements for Colossus 1 but of 6 W-matrix elements for Colossus 1A.
+- In the [Colossus 2 GSOP](https://www.ibiblio.org/apollo/Documents/R-577-Colossus2-Martin-5.6789.pdf#page=87), figure 6.16-1 has regressed to a 9-element summation.
+- In the [Colossus 3 GSOP](https://www.ibiblio.org/apollo/Documents/HSI-208454.pdf#page=448), figure 6.16-1 once again indicates a 6-element summation.
+
+In summary, I think we can conclude that in Colossus 2C, PCR-611 is a GSOP-only change, specifically to Figure 6.16-1, without any code change.&nbsp; The associated code change as well as the GSOP change occurred previously in Colossus 1A, but the GSOP change had regressed in the Colossus 2 (and presumably Colossus 2A) GSOP(s) and needed to be restored in Colossus 2C.
+

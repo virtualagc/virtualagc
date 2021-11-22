@@ -1,0 +1,78 @@
+( [Return to Comanche 67 reconstruction page](comanche-67-reconstruction).)
+
+## Contents
+
+- How Relevant is COM-31 to COM-16?
+- COM-16 On Its Own Merits
+- Workaround Rather than Coding Change?
+- Previous Consideration of the Problem
+- Summing Up
+
+## How Relevant is COM-31 to COM-16?
+
+Executive summary:&nbsp; I think the answer to the question posed by the section title is "not very".&nbsp; Or at least, "not very _useful_".&nbsp; The best I'd be willing to say is that COM-31 wants to direct our attention to P23 in log section P20-P25, and I think that may be the right place to look.
+
+In more details:&nbsp; We currently have no copy of Software Anomaly Report COM-16, which is summarized as "ΔV≠0 at First Mark", and the summary isn't terribly informative.&nbsp; However, we do have a copy of [COM-31](https://www.ibiblio.org/apollo/Documents/COM-31.pdf), "Clear RENDWFLAG", which seems to include some information about COM-16, namely:
+
+> The last sentence of paragraph 5.1.5.1.1 in Section 5 of GSOP states: "These two flags are mutually exclusive; that is, they cannot both be equal to one."&nbsp; This statement is invalid as a result of anomaly, COM 16 in that it is possible to have both ORBWFLAG and RENDWFLAG set equal to one, which could result in incorrect W-matrix extrapolation during P00.
+
+My reading of this is that COM-16 is concerned with ORBWFLAG and RENDWFLAG (presumably really RENDWFLG) not being mutually exclusive, while COM-31 is concerned with the effect of that condition on the W-matrix extrapolation.
+
+However, there are inconsistencies here, in that:
+
+- [The MIT/IL presentation for the Apollo 12 Flight Software Readiness Review (FSRR)](https://www.ibiblio.org/apollo/Documents/apollo_12_fsrr_draft.pdf#page=7) explicitly states that COM-16 has been fixed in Comanche 67, and so does [Section 5 of the Colossus 3 GSOP](https://www.ibiblio.org/apollo/Documents/HSI-208454.pdf#page=5), which says that PCN-849 ("Fix for Com 16 Anomaly") is implemented there; but
+- COM-31 explicitly states that the anomaly it's concerned with exists in Comanche 67 (Colossus 2C) _and_ Comanche 72 (Colossus 2D) and won't be fixed until Colossus 2E; but
+- If COM-16 is fixed in Comanche 67, how could it still be causing undesirable side effects on the W-matrix in Comanche 67 and 72?
+- And not only that, but the attachment to COM-31 makes it clear that "In order for this to happen," presumably referring to the W-matrix extrapolation problem, "the ORBWFLAG must be set equal to 0 and the RENDWFLAG must be set equal to one when P23 is selected."&nbsp; So how is the problem caused by the the non-mutual-exclusivity of ORBWFLAG and RENDWFLAG?&nbsp; Looks like it doesn't even have anything to do with that.
+
+There seem to be several possibilities about how to understand the inconsistencies:
+
+- Perhaps the implementation of PCR-849/COM-16 in Comanche 67 was done wrong; or
+- Perhaps the fix was correct but what COM-31 is trying to say (badly!) is that the fix itself has created the possibility of ORBWFLAG and RENDWFLAG being non-exclusive.&nbsp; (I.e., COM-16 is not about the non-exclusivity of ORBWFLAG and RENDWFLAG at all, in spite of that being the plain reading of COM-31.)
+- Perhaps having ORBWFLAG=0 and RENDWFLAG=1 upon entry to P23 _causes_ the condition ORBWFLAG=RENDWFLAG=1 to occur later.
+
+Given all this uncertainty about what COM-31 is even trying to tell us about how it relates to COM-16, I simply can't see much we can learn from it.
+
+## COM-16 On Its Own Merits
+
+Executive summary:&nbsp; I can't find any coding changes related to COM-16, insofar as I understand it.
+
+In more detail:&nbsp; My conclusion from the preceding section is that all we know about COM-16 is:
+
+1. Its brief summary,&nbsp;"ΔV≠0 at First Mark"; and
+2. That it may pertain to program P23 _et al._ in log section P20-P25.
+
+P23, the "CISLUNAR MIDCOURSE NAVIGATION" program does involve use of star/Earth and star/Moon optical measurements, i.e., "marking" stars or landmarks on the Earth/Moon.&nbsp; In this context, a quantity referred to in the program comments as "DELTA V" is apparently referenced at DELTAX +6 in P20-P25 and in the MEASUREMENT INCORPORATION log section.&nbsp; The interpretation of the 18-word DELTAX area varies.&nbsp; It is either "THE SIX DIMENSIONAL STATE VECTOR DEVIATION FOR POSITION AND VELOCITY" or else "THE NINE DIMENSIONAL DEVIATION OF POSITION, VELOCITY, AND RADAR OR LANDMARK BIAS", but in either case, it would therefore appear that DELTAX +6 is a 3-vector that might reasonably called ΔV, though apparently the contemporary documentation (GSOP, software flowcharts) use the symbol ΔX₁.
+
+The software flowchart for P23 is FC-2600.&nbsp; In our copy of the Colossus 2C flowchart document, [FC-2600 is at revision "COLOSSUS IIA"](https://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf#page=234).&nbsp; Moreover, the markings in the table of contents imply that this is the correct revision for Colossus 2C, and thus that P23 did not change between Comanche 55 and Comanche 67.&nbsp; In the Colossus 2D flowchart document&nbsp; [FC-2600 is at revision "COLOSSUS 2D"](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=809), which should be irrelevant to Colossus 2C.&nbsp; Oddly, though, the table-of-contents markings imply that the correct FC-2600 flowchart was not yet available at the time the document was created; but perhaps the correct flowchart was later inserted and the table-of-contents not updated.
+
+The software flowchart for MEASUREMENT INCORPORATION is FC-2610.&nbsp; It is not present in our Colossus 2C flowchart document, but [FC-2610 is present in our Colossus 2D flowchart document](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=846).&nbsp; However, it is at revision "COLOSSUS II" there, implying that it has not changed since MANCHE45.&nbsp; The table-of-contents markings in the Colossus 2C flowchart document indicate that FC-2610 is up-to-date there, so it seems likely that the flowchart revision we have is correct, and that there is indeed no change from MANCHE45.
+
+If we extend the flowchart investigation to the entirety of P20-P25 related navigation programs in general, here's what we find:
+
+- P20.&nbsp; FC-2550.&nbsp; The Colossus 2C flowchart document contains [FC-2550 revision "COLOSSUS IIC"](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=712).&nbsp; Supposedly, only sheets 3, 10, 16, 41, and 45 had changed since the "COLOSSUS IIA" revision.&nbsp; I looked only at the changed sheets, and only for relevance to ΔV or DELTAX.&nbsp; The closest thing I found was display of N49DISP +2, "VELOCITY DEVIATION DISPLAY NOUN", but it doesn't seem to interesting.&nbsp; Note:&nbsp; P23 stores DELTAX +6 in N49DISP +2.
+- P21.&nbsp; FC-2580.&nbsp; The Colossus 2C flowchart document contains [FC-2580 revision "COLOSSUS 2C"](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=758).&nbsp; This does not appear to me to have anything to do with what we're looking at, but I've looked through the flowchart (it's only 7 sheets), looking for anything related to&nbsp;ΔV or DELTAX.&nbsp; I find nothing.
+- P22.&nbsp; FC-2590.&nbsp; Unchanged since Colossus II (MANCHE45).
+- R35.&nbsp; FC-2595.&nbsp; Unchanged since Colossus 237.
+- R53.&nbsp; FC-2730.&nbsp; The Colossus 2C flowchart document contains [FC-2730 revision "COLOSSUS 2C"](https://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf#page=402).&nbsp; Supposedly, only sheet 6 had changed since the "COLOSSUS IIA" revision.&nbsp; But I see nothing that seems relevant in any obvious way.
+
+The only thing it occurs to me to consider is whether the "COLOSSUS 2D" revision of FC-2600 (P23) might be useful after all, because there might be a mission "COLOSSUS 2C" revision in spite of my prior conclusions to the contrary.&nbsp; I've looked through the entire flowchart, and while there is some minor access of&nbsp;ΔX₁, I don't see anything different between what it's doing with&nbsp;ΔX₁ than what the "COLOSSUS IIA" revision of FC-2600 does with it.
+
+## Workaround Rather than Coding Change?
+
+As described above, I've found nothing actionable in the reconstructed source code related to COM-16.&nbsp;
+
+I wonder if PCN-849 mightn't be simply a workaround for COM-16, and if an actual code fix in Colossus 2C and Colossus 2D?&nbsp; Perhaps with an actual code fix following later in Colossus 2E or Colossus 3?&nbsp; If so, there's really nothing to do here.
+
+Unfortunately, we don't currently have any portion of the Colossus 2C GSOP (or the Colossus 2D GSOP) in which such workarounds would naturally be documented.
+
+On the other hand, we do have document E-2442, " [Guidance, Navigation, and Control Command Module Functional Description and Operation Using Flight Program COLOSSUS 2C (COMANCHE 67)](https://www.ibiblio.org/apollo/Documents/HSI-208615.pdf)", which would also be a possible place to find such a workaround, possibly in P22 or P23.&nbsp; Alas, in looking through the document, I find nothing that seems to have anything obviously to do with workarounds.&nbsp;
+
+## Previous Consideration of the Problem
+
+Everything I said above is my latest thinking on the subject, completely independent from [my previous investigation of it](https://github.com/virtualagc/virtualagc/issues/1140#issuecomment-778274764), in the sense that I neither consulted the previous investigation, nor remembered any details from it.&nbsp; I won't rehash details of any of that prior stuff here, except to say both that it developed in a very different way from what I've said above, but also that what I had found supports the conclusion I want to present in the following section.
+
+## Summing Up
+
+My tentative conclusion is that insofar as Colossus 2C is concerned, PCN-849/COM-16 are implemented with astronaut workarounds or problem-avoidance schemes rather than with a code change.
+

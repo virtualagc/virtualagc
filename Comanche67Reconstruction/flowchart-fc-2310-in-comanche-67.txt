@@ -1,0 +1,60 @@
+( [Return to the main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+We have the Colossus 2C revision of FC-2310, although it has serious legibility problems.&nbsp; The cover sheet seems to say that only sheets 12, 18, and 23 have changed from Colossus 2A to 2C.
+
+## Sheet 12
+
+Executive summary:&nbsp; I'm going to say a bunch of bad things here about how the flowchart doesn't match the code.&nbsp; I didn't realize when I wrote it that this is an upper-level flowchart that wouldn't match the code in detail anyway.&nbsp; For example, the main thing represented on this sheet is LAMBLOOP, which is actually covered in low-level detail on sheet 17.&nbsp; In other words, none of the bad stuff I'm going to say now about sheet 12 matters, because sheet 12 itself doesn't matter.
+
+LAMBLOOP:&nbsp; Because of legibility problems and complexity, I've tried to use the principle that if the code of Colossus 237, Comanche 55, and Artemis 71 all match, then there's no point in comparing the flowchart to the code, since even if the flowchart and code didn't match, there would be no way to resolve the discrepancy anyway.&nbsp; In the case of LAMBLOOP, the initial portion of the corresponding code is identical in 237/55/71, but it's different in the latter portion of the subroutine, and a direct flowchart comparison is needed there.&nbsp; The following detail is from the flowchart at the point where the 237/55/71 code no longer appears identical:
+
+![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/175791)
+
+And here is the corresponding reconstructed code:
+
+    BPL	RTB INITV CHECKCTR BHIZ	BON SUFFCHEK SLOPESW GOITER DLOAD	DSU T TPREV BZE SUFFCHEKGOITER CALL ITERATOR DLOAD	BZE MPAC SUFFCHEK DAD COGA STCALL	COGA LAMBLOOP
+
+Thus the decision box at the top of the graphic corresponds to the BPL to INITV (which is out of sight at the right-hand edge of the graphic).
+
+It's not so much that the code is _wrong_ with respect to the flowchart, or vice-versa, as that so many assumptions have to be made as to what the flowchart might mean that it becomes very tricky to compare them.&nbsp; For example, is this
+
+![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/175792)
+
+really equivalent to
+
+    RTB CHECKCTR
+
+Is this
+
+![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/175793)
+
+really equivalent to&nbsp;
+
+    BHIZ	BON SUFFCHEK SLOPESW GOITER DLOAD	DSU T TPREV BZE SUFFCHEKGOITER ...
+
+**⚠** &nbsp;Well, maybe it is, but it doesn't look like it to me.&nbsp; I fear that this issue has exceeded my skill or my patience, or both.&nbsp; The reconstructed code does match Artemis 71 but not (due to PCR-831.1) Colossus 237, which is not surprising since Artemis 71 is where I copied it from in resolving PCR-831.1.&nbsp;
+
+HIENERGY, LOENERGY:&nbsp; The good news is that HIENERGY and LOENERGY are identical in 237/55/71 (except that a GOTO to COMMONLM in Colossus 237 has been replaced by a CALL to COMMONLM in Comanche and Artemis).&nbsp; &nbsp; That bad news is that both of these (in the code) feed into COMMONLM, which does not even appear on the flowchart at all.&nbsp; My guess is that an entry point for COMMONLM should appear in the flowchart smack in the middle of this:
+
+![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/175794)
+
+**⚠** &nbsp;Sadly, even with this assumption, HIENERGY and LOENERGY are still doing a number of things not mentioned in the flowchart, such as adjusting the pushdown-list index and COGAMIN.&nbsp; On a good note, COMMONLM differs among 237/55/71 only in that a GOTO to LAMBLOOP in Colossus 237 has been replaced by a CALL in Comanche and Artemis.
+
+SUFFCHEK, 360LAMB, INITV, BIGTIME, NEGP:&nbsp; On another good note, these are identical in 237/55/71.&nbsp;&nbsp;
+
+## Sheet 18
+
+Continuation of LAMBLOOP (from sheet 17, _not_ sheet 12):&nbsp; As with the comments about sheet 12 above, however, the initial part of LAMBLOOP matches across 237/55/71, so the only part of the flowchart we need to care about is where it ceases to be a match:
+
+![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/175795)
+
+Which corresponds to the code
+
+    BHIZ	BON SUFFCHEK SLOPESW GOITER DLOAD	DSU T TPREV BZE SUFFCHEKGOITER
+
+Which seems to be a match.
+
+## Sheet 23
+
+TIMERAD, CIRCULAR, ABTCONIC:&nbsp; Looks good.
+

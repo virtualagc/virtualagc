@@ -1,0 +1,72 @@
+( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+We have the Colossus 2C revision of FC-2320, but no indication of which sheets were changed since the prior revision.&nbsp; I'm going to use a source-code diff of Colossus 237 vs Comanche 55 vs Artemis 71 to determine which subroutines to compare to the flowchart, ignoring all subroutines which fully match across Colossus versions.&nbsp; Note that sheet 2 of the flowchart is an upper-level flow, not suitable for comparison vs code; more-detailed flowcharts appear on subsequent sheets.
+
+## Sheet 3
+
+TFFCONIC, TFFCONMU:&nbsp; Identical across 237/55/71.
+
+## Sheet 4
+
+TFFRP/RA:&nbsp; Identical across 237/55/71.&nbsp;
+
+## Sheet 5-6
+
+CALCTPER, CALCTFF, MAXTFF1, INBOUND, SAVEDEN:&nbsp; Identical across 237/55/71.
+
+## Sheet 7-8
+
+TFFXTEST, NEGTFF, ENDTFF, MAXTFF:&nbsp; Identical across 237/55/71.
+
+## Sheet 9
+
+TFFELL, TFFELL1:&nbsp; Identical across 237/55/71.
+
+## Sheet 10
+
+T(X):&nbsp; Identical across 237/55/71.
+
+## Sheet 11
+
+TFF/TRIG, PREVGAM, VGAMCALC:&nbsp; Identical across 237/55/71.
+
+## Sheet 12
+
+FISHCALC:&nbsp; Identical across 237/55/71.
+
+## Sheet 13
+
+DELRSPL, CANTDO:&nbsp; Identical across 237/55/71.
+
+## Sheet 14
+
+Continuation of DELRSPL, GETARG:&nbsp; As for DELRSPL, it's identical across 237/55/71.
+
+Regarding GETARG, the flowchart
+
+![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/175942)
+
+indicates that the variable LONG should be initialized as an (eventual) input for subroutine LALOTORV.&nbsp; The code omits doing so.&nbsp; In examining the code for LALOTORV, it does indeed require LONG as an input, and does use LONG in its computations.
+
+However, this inconsistency in the source code persists throughout 237/55/71.&nbsp; I would infer that the flowchart is in correct in principle, but that the code fails to match the flowchart in every version.&nbsp; As a result, Comanche 67 should not be fixed.
+
+Otherwise, looks okay.
+
+## Sheet 15
+
+AUGEKUGL, K1K2LOOP, K2CALC:&nbsp; As for AUGEKUGL and K1K2LOOP, they are identical across 237/55/71.
+
+Regarding K1K2LOOP:&nbsp; Looks okay.
+
+## Sheet 16
+
+Continuation of K1K2LOOP, PHICALC, TGR26, TENT:&nbsp; The continuation of K1K2LOOP looks okay.
+
+PHICALC looks okay.
+
+TENT and TGRTENT are identical across 237/55/71.
+
+## Sheet 17-20
+
+Tables only, no flowcharts.
+

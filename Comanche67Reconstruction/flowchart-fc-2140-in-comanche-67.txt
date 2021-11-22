@@ -1,0 +1,65 @@
+( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+Unfortunately, we have only the Colossus 2D (and 2A) revision(s) of the flowchart, so if discrepancies between the flowchart and code are discovered, they'll have to be taken with a grain of salt.
+
+Unfortunately also, we don't know _a priori_ which sheets of the flowchart changed from Colossus 2A to 2C or 2D.&nbsp; Because I think it will be easier to compare flowchart vs flowchart than flowchart vs code, however, I'll begin with a detailed comparison of the 2A vs 2D flowcharts, and only then compare to code when discrepancies between the flowcharts are found.
+
+PRIOLARM:&nbsp; 2D/3 vs 2A/3.&nbsp; Looks good.
+
+VARALARM:&nbsp; 2D/3 vs 2A/3.&nbsp; Looks good.
+
+CURTAINS:&nbsp; 2D/4 vs 2A/3.&nbsp; Looks good.
+
+ALARM:&nbsp; 2D/4 vs 2A/3.&nbsp; Looks good.
+
+ALARM2:&nbsp; 2D/4 vs 2A/3.&nbsp; Looks good.
+
+BORTENT:&nbsp; 2D/4 vs 2A/3.&nbsp; Looks good.
+
+BAILOUT:&nbsp; 2D/5 vs 2A/3.&nbsp; Looks good.
+
+POODOO:&nbsp; 2D/5 vs 2A/3.&nbsp; Looks good.
+
+CCSHOLE:&nbsp; 2D/5 vs 2A/3.&nbsp; The alarm code differs.&nbsp; This is due to PCR-801.1, and the source code agrees with the flowchart.
+
+ABORT2:&nbsp; 2D/5 vs 2A/3.&nbsp; Looks good.
+
+PRIOENT:&nbsp; 2D/6 vs 2A/3.&nbsp; Looks good.
+
+LARMENT:&nbsp; 2D/7 vs 2A/4.&nbsp; Looks good.
+
+CHKFAIL1:&nbsp; 2D/8 vs 2A/4.&nbsp; Looks good.
+
+CHKFAIL2:&nbsp; 2D/8 vs 2A/4.&nbsp; No, the two flowcharts are dramatically different.&nbsp; However, the 2D flowchart agrees with the reconstructed code, which was already changed from the Comanche 55 baseline due to PCR-802.1.
+
+PROGLARM:&nbsp; 2D/9 vs 2A/4.&nbsp; No, the two flowcharts disagree.&nbsp; But the 2D flowchart agrees with the reconstructed code, _some_ of which was already changed due to PCR-802.1.
+
+MULTEXIT:&nbsp; 2D/9 vs 2A/5.&nbsp; The 2D flowchart says BAILOUT +9 in the comments for the RETURN VIA block, whereas the 2A flowchart says BAILOUT +7.&nbsp; For MULTEXIT, it just takes the address stored in the input-variable ITEMP1 and adds 1 to it.&nbsp; Thus MULTEXIT has no direct knowledge of what's the address is.&nbsp; But if we check the code from which MULTEXIT is reached, we should be able to find the table and what addresses it holds.&nbsp; In point of fact, we find that MULTEXIT is only reached in two ways:&nbsp; by flowing through from PROGLARM, or via TCF.&nbsp; However, TCF PROGLARM only appears in Comanche 55 baseline code, and has been removed from Comanche 67 due to PCR-802.1.&nbsp; PROGLARM, in turn, is reached in reconstructed code only by calls to CHKFAIL1, CHKFAIL2, or flow-through from LARMENT.&nbsp; Calls to CHKFAIL2 occur only in CHKFAIL1, and there are no calls to CHKFAIL1.&nbsp; Hence in the reconstructed code, the only way to reach MULTEXIT is by a call to LARMENT.&nbsp; LARMENT does set ITEMP1, as its own return address.&nbsp; Thus the RETURN VIA A in MULTEXIT is to the address after whatever is in the Q register at the beginning of LARMENT.&nbsp; I phrase it that way, because there are no calls to LARMENT, which can only be reached by flow-through, including indirectly through calls to PRIOENT, PRIOENT +1, BORTENT, ALARM2, and ALARM.&nbsp; But I guess where we should really be looking if the 2D flowchart is correct for at TC at BAILOUT +7 in 2D and BAILOUT +5 in 2A.&nbsp; Indeed, in the reconstructed code there is a TC BORTENT at BAILOUT +7.&nbsp; In Comanche 55 there is also a TC BORTENT at BAILOUT +7, and no TC at all at BAILOUT +5, so I can only assume this was an error in the 2D flowchart.&nbsp; As a double-check, in both 2A and 2D code, in a similar way, we should find relevant TC's at:
+
+- PRIOLARM +5:&nbsp; yes, TC PRIOENT +1
+- VARALARM +4:&nbsp; yes, TC PRIOENT
+- CURTAINS +2:&nbsp; yes, TC ALARM2
+- ABORT2:&nbsp; yes, TC ABORT2
+
+PRIOLARM +7:&nbsp; 2D/10 vs 2A/5.&nbsp; Looks good.
+
+VARALARM +6:&nbsp; 2D/10 vs 2A/5.&nbsp; Looks good.
+
+CURTAINS +4:&nbsp; 2D/10 vs 2A/5.&nbsp; Looks good.
+
+BAILOUT +9:&nbsp; 2D/11 vs 2A/5.&nbsp; The 2D flowchart says BAILOUT +9 here, whereas the 2A flowchart says BAILOUT +7, both referring to the RETURN VIA A block in MULTEXIT.&nbsp; This is what should be found (see the comment for MULTEXIT), although I think it's an error in the 2A flowchart.&nbsp; But looks good.
+
+ABORT2 +2:&nbsp; 2D/11 vs 2A/5.&nbsp; Looks good.
+
+WHIMPER -1:&nbsp; 2D/11 vs 2A/5.&nbsp; Looks good.
+
+Continuation of ABORT2 +2:&nbsp; 2D/12 vs 2A/6.&nbsp; Looks good.
+
+MR.KLEAN:&nbsp; 2D/13 vs 2A/6.&nbsp; Looks good.
+
+WHIMPER:&nbsp; 2D/13 vs 2A/6.&nbsp; Looks good.
+
+The remainder of the sheets are tables rather than flowcharts.
+
+In summary, looks good!&nbsp; No additional changes to Comanche 67 needed.
+

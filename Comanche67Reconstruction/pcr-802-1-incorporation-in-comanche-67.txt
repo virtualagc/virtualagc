@@ -1,0 +1,34 @@
+( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+We have no copy of PCR-802.1, "Save Alarm Data after Error Reset".&nbsp; There is a matching PCR-802.2 incorporated in Luminary 102, so comparison of Luminary 99 vs Luminary 116 source code could reveal implementation details for importing into Comanche 67.
+
+It's not unreasonable to suppose that the Luminary changes might be found in ALARM AND ABORT or in FRESH START AND RESTART.&nbsp; Upon comparison I find nothing relevant (that I can understand) in either.&nbsp; (Except that one unfortunately uses "POO" and "ROO" everywhere, while the other uses "P00" and "R00", making comparisons trickier.)&nbsp; Perhaps another way of getting at it is this:&nbsp; Up to 3 alarm codes are stored in FAILREG, FAILREG +1, and FAILREG +2.&nbsp; So under what conditions are these variables cleared?&nbsp; In Luminary 99, the routine SKIPSIM in FRESH START AND RESTART zeroes all three FAILREG variables, along with ERCOUNT.&nbsp; Luminary 116 does the same.&nbsp; However, in Luminary 99 SKIPSIM also has the code CA BIT12 / TS DUMPCNT, commented as "INITIALIZE DOWNLINK ERASABLE MEMORY DUMP FOR ONE PASS", while Luminary 116 does not.&nbsp; So if "save alarm data" means to allow it to be down-telemetered, and if FAILREG is normally duplicated into "downlink erasable memory", then the code in Luminary 99's SKIPSIM will prevent FAILREG from being downloadable after restart, whereas the Luminary 116 SKIPSIM will not.&nbsp; However, that's not the explanation; the reason DUMPCNT isn't modified by Luminary 116's SKIPSIM is simply that DUMPCNT doesn't exist in Luminary 116.
+
+I.e., my thoughts about&nbsp;ALARM AND ABORT and FRESH START AND RESTART are completely wrong and amount to nothing.&nbsp; Next I wondered what could be meant by an "error reset", and concluded it would be a BAILOUT or a GOTOPOOH.&nbsp; However, those routines are in the two sections we've already concluded aren't where the PCR is incorporated, so that can't be it.
+
+The [Luminary 1E GSOP, section 4](https://www.ibiblio.org/apollo/Documents/j2-80-R-567-SEC4-REV10_text.pdf#page=81), mentions that&nbsp;
+
+> ERROR RESET WILL SET R1 and R2 TO  
+> ZERO, BUT NOT AFFECT R3.
+
+In this instance, R1, R2, and R3 refer to FAILREG, FAILREG +1, and FAILREG +2 respectively.&nbsp; Thus after incorporation of PCR-802.1, we expect FAILREG and FAILREG +1 to be cleared, but not FAILREG +2.&nbsp; Aha!&nbsp; I notice that the ERCOM portion of the ERROR routine in PINBALL GAME BUTTONS AND LIGHTS indeed clears all three FAILREG variables in Luminary 99, but does not clear FAILREG +2 in Luminary 116.
+
+In trying to implement this, using preprocessor label Reconstruction802 for conditional assembly, I see that the the change has already been made as the result of the previous analysis.&nbsp; However, the previous analysis also implemented changes in ALARM AND ABORT that I hadn't identified in this analysis.&nbsp; For those changes, it's useful to look at&nbsp;
+
+- [COLOSSUS IIA flowchart FC-2140, "ALARM AND ABORT"](https://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf#page=24)
+- [COLOSSUS IID flowchart FC-2140, "ALARM AND ABORT"](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=177)
+
+Sheet 1 of the Colossus 2A flowchart describes the usage of FAILREG as follows,
+
+    ... THE FIRST ALARMCODE IS SET INTO REGISTER FAILREG, THE SECOND ALARM CODE IS SET INTO REGISTERFAILREG+1 AND THE LAST (3RD OR MORE) IS SET INTO REGISTER FAILREG+2.  SUBSEQUENTALARM CODES (4TH OR MORE) WILL REPLACE THE EXISTING ALARM CODE IN REGISTERFAILREG+2 AND ALSO SET BIT-POSITION 15 OF REGISTER FAILREG+2. ...
+
+while sheet 1 of the Colossus 2D flowchart describes it instead as
+
+    ... The firstalarm code is set into registers FAILREG and FAILREG+2.  The second alarmcode is set into registers FAILREG+1 and FAILREG+2.  The last (3rd or more)is set into register FAILREG+2.  Subsequent alarm codes (3rd or more) willreplace the existing alarm code in register FAILREG+2. ...
+
+Of course, this could be a change subsequent to Apollo 12, but it seems as though it could reasonably be covered by the PCR, so it's probably valid for Colossus 2C and Luminary 1B.&nbsp; As a side-effect, it implies a change to any code using bit 15 of FAILREG +2, since after incorporation of the PCR, bit 15 will no longer ever be set.
+
+Directly comparing the flowchart to the previously-made mods, those seem to match the Colossus 2D FC-2140 exactly.&nbsp; The setting of bit 15 of FAILREG +2 in Comanche 55 was done in MULTFAIL, which is one of the chunks of code removed by the preceding analysis.
+
+In summary, the PCR has been incorporated in code.
+

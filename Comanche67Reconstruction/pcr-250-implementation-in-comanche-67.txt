@@ -1,0 +1,22 @@
+( [Return to main Comanche 67 reconstruction page](comanche-67-reconstruction).)
+
+We do not have a copy of PCR-250, and know only its title ("MDOT in Erasable (Colossus IA)").
+
+The plain reading of the title would seem to be that MDOT is a value which should be moved into (or out of) erasable, although why Colossus IA (Colossus 249) should be referenced isn't immediately clear. In point of fact, neither Colossus&nbsp;IA nor any other revision of Colossus&nbsp;1, 2, or 3, even have a variable or constant called MDOT.&nbsp; They mostly have a variable EMDOT, which the associated program comments refer to as "MDOT".&nbsp; Colossus I (Colossus 237) is the sole exception, in that it has a fixed-memory constant MDOTHI (and an MDOTLO) that it refers to as "MDOT".&nbsp; EMDOT is the "SPS FLOW RATE", which I presume means rate of change of mass, while MDOTHI/MDOTLO may instead be upper/lower limits on the flow rate.&nbsp; Regardless, it appears as though the change from MDOTHI/MDOTLO (fixed) to EMDOT (erasable) was implemented in Colossus 1A.&nbsp; So why, then, is there a PCR for it in Colossus 2C?
+
+Here's the various documentary evidence for implementation of PCR-250:
+
+- [Colossus 3 GSOP section 2](https://www.ibiblio.org/apollo/Documents/HSI-208452.pdf#page=6):&nbsp; States that PCR-250 "Put M-Dot into Erasable" was implemented in Colossus 2.&nbsp; (By "M-Dot", I mean an M with a dot overhead, which I cannot create in this wiki.)
+- [Colossus 3 GSOP section 3](https://www.ibiblio.org/apollo/Documents/R577-section3-rev14.pdf#page=7):&nbsp; States that PCR-250 "Put M-Dot into Erasable" was implemented in Colossus 1A.
+- [Colossus 1/1A GSOP section 5](https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-start-5.2.pdf#page=8):&nbsp; States that PCR-250 "MDOT in Erasable (Colossus IA)" was implemented in Colossus 1 or Colossus 1A.
+- [Colossus 3 GSOP section 5](https://www.ibiblio.org/apollo/Documents/HSI-208454.pdf#page=9):&nbsp;&nbsp; States that PCR-250 "MDOT in Erasable (Colossus IA)" was implemented in Colossus 1 or Colossus 1A.
+- [Colossus 3 GSOP section 5](https://www.ibiblio.org/apollo/Documents/HSI-208454.pdf#page=13):&nbsp;&nbsp; States that PCR-250 "MDOT in Erasable (Reincorporated)" was implemented in Colossus 2C.
+
+In short, PCR-250 is relevant to Colossus 2C in the sense that it was "reincorporated" ... whatever that may mean.
+
+My thought is that even though the fix was coded previously, the GSOP may not have been updated properly to reflect the change in the code, and thus the "reincorporation" in Colossus 2C is a documentation-only change to the GSOP.&nbsp; We should be able to check whether such a change was needed, because our document library contains a copy of section 5 of the Colossus 2 GSOP, which (according to this theory) should still show inappropriate data related in some way to MDOT.&nbsp; Unfortunately, it's like looking for a needle in a haystack, and I haven't found the incorrect data in the Colossus 2 GSOP as of yet.
+
+It may be significant to note that while MIT/IL's presentation for the Colossus 2C flight software readiness review (FSRR) lists the software changes implemented in Colossus 2C (and 2B), it does _not_ list PCR-250 among them.&nbsp; That would be expected if PCR-250 (reincorporated) were a documentation-only change, because the FSRR presentation gives only a document-review chronology rather than an enumeration of changes to the documentation.
+
+In summary, my inference is that PCR-250 was a documentation-only change, without any coding involved.&nbsp;
+

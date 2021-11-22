@@ -1,0 +1,21 @@
+( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+We have no copy of PCR-960, "Change Constant in R52".
+
+We do have the Colossus 2C flowchart FC-2730, "R52, R53, R56", whose first sheet notes that only sheet 6 (subroutine SR52.1) was changed between Colossus 2A and Colossus 2C.&nbsp; Of course, the values of constants wouldn't necessarily be listed on a flowchart.&nbsp; However, we find one block with the operation AOPTIME&nbsp; [←](https://en.wikipedia.org/wiki/%E2%86%90_(disambiguation) "← (disambiguation)")&nbsp;MPAC + 1.3SECDP (with MPAC having been prepared by LOADTIME), accompanied by the comment PRESENT TIME PLUS 2.4 SECONDS.&nbsp; In Comanche 55 section P51-P53 code we find
+
+    1.3SECDP    2DEC    130
+
+In artemis there is no constant 1.3SECDP, but section P51-P53 does have
+
+    2.4SECDP   2DEC    240
+
+Unfortunately, the actual usage of these constants is somewhat different between Comanche55 and Artemis, so it isn't immediately clear that just substituting one for the other is what's needed.&nbsp; While we don't have the flowchart for Artemis's calculation, depending on the setting of P24FLAG it would look either like AOPTIME&nbsp;← MPAC + 2.4SECDP _or_&nbsp;AOPTIME ← MPAC + 2.4SECDP - .5SECDP.&nbsp; But I suppose that a simple substitution is probably what's called for, conditioned on preprocessor label Reconstruction960.
+
+The preceding analysis had made this change but left the preprocessor label Reconstruction960 #undef'd in gpp/defines.default, and explained that there was some confusion as to whether PCR-960 was incorporated in Comanche 67 or whether it was incorporated in Comanche 72 because the Colossus 3 GSOP lists the change as applying to Colossus 2D rather than 2C, while the SCB had approved the change for Apollo 12 (Colossus 2C).&nbsp; Admittedly, I haven't uncovered any information beyond what I had in the prior analysis, so my guess right now (that Reconstruction960 should be enabled) isn't on much more solid ground than the prior judgement (that it should not be enabled).&nbsp; I'd merely offer the following points in favor of my position:
+
+1. The change to code is extremely trivial.&nbsp; Just 3 punch-cards the way I've implemented it.&nbsp; So why would they have _not_ made this change for Apollo 12 after going through all the trouble to get it approved?
+2. The change is potentially as small as a single card, if (instead of how I've implemented it here) you simply redefined 1.3SECDP as having a value of 2.4 seconds.&nbsp; That would even agree exactly with what the flowchart says.
+
+In summary, the fix is incorporated into code and enabled.&nbsp; But we may need to revisit at some point whether or not it should be enabled if it would clear the memory bank (13) affected.
+

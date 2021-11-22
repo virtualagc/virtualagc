@@ -1,0 +1,73 @@
+( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+We have no copy of PCN-809, "Error Variance Computation for VHF Range and Alternate Line-of-Sight Measurements".&nbsp;
+
+I think it has something to do with R22 (rendezvous mark processing routine) in [Colossus 2C flowchart FC-2550](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=730), "Rendezvous Navigation".&nbsp; It's a bit tough even with the flowchart to see what's going on, but it appears to me to be something like this:
+
+1. (Sheet 20 of flowchart.) Instantaneous VHF range (distance LM is from CSM) is read into the variable VHFRANGE, using subroutine RANGERD within REND3 in R22.&nbsp; Optical angular data is alternately read into array BUFFER3 by REND2 in R22, so later on in the calculation, VHFRANGE or BUFFER3 will be current, but (I guess) not both of them.
+2. VHF range variance is not computed, but rather taken (label REND14A, bottom of sheet 24) from the pad load RVAR, referred to also as var-subscript-R.&nbsp; Optical error variance is computed by one of two different methods (sheet 25).&nbsp; Regardless of which _one_ of these 3 variances has been provided, it is stored into a variable called VARIANCE at label REND10.
+3. From that point onward (sheet 26) the VARIANCE variable is further massaged mathematically, until it is finalized at label REND10A.
+
+In other words, the idea is to modify Comanche's P20-P25 section, hopefully by importing code from Artemis, and checking in detail that the modified code matches the bottom of sheet 24 through sheet 26 of FC-2550.&nbsp; Or more specifically, REND14A and REND9 up to (but not including) label REND10A. (Since the PCN is explicitly concerned with _calculation_, I hope we don't need to concern ourselves with subroutine calls such as RANGERD that provide the input data for the computation, or with flowchart sheets in which calculations are not occurring.)
+
+- REND14A:&nbsp; code unchanged from Comanche 55 to Artemis.
+- REND9:&nbsp; code unchanged.
+- REND9A:&nbsp; code changed, but flowchart agrees with Comanche 55.
+- REND10:&nbsp; code unchanged.
+
+So ... that's not encouraging.&nbsp; The code I've identified with "error variance computation for VHF range and alternate line-of-sight measurements" is unchanged from Comanche 55 to Artemis, else where it differs, the 2C flowchart agrees with the Comanche 55 code.&nbsp; Where have I gone wrong?&nbsp; Admittedly there are code changes (Comanche 55 vs Artemis) in REND10A, REND12, and so on, even if they don't seem to have anything to do with error variance computation:
+
+- REND10A:&nbsp; Unfortunately, the Artemis code is incomprehensible to me.&nbsp; (OCT 1 and OCT 2 inexplicably in the midst of interpretive code?&nbsp; What's up with that?)&nbsp; But fortunately it doesn't matter, because the flowchart matches the Comanche 55 code.
+- REND12:&nbsp; code changed, but flowchart agrees with Comanche 55.
+
+Hmm.
+
+Given that this is a PCN rather than a PCR, it would mean that MIT/IL would have been very certain that NASA was going to approve it eventually.&nbsp; That would most likely mean that it didn't represent a feature change or any major algorithmic change, or really anything that represented any risk in terms of functionality or schedule.&nbsp; Certainly nothing associated with a specification change in the GSOP.&nbsp; So usually that would mean it was correction of some bug (perhaps a notification to NASA that a Software Anomaly Report was being fixed) _or_ fixing a textual error (rather than a specification error in the GSOP).&nbsp; The latter, of course, would involve no code changes.&nbsp; So _perhaps_ this PCN refers to a textual fix in the GSOP rather than to any code change.&nbsp; The notation in the GSOP does mention that the PCN resulted in additional GSOP changes for Colossus 2D.
+
+If we could identify the GSOP text related to this computation (or I suppose, just to R22) and compare that language post-Colossus-2C to the GSOP language pre-Colossus-2C, we might get some idea if this explanation was reasonable or not.&nbsp; There are indeed such differences, if we compare the Comanche 2 GSOP (i.e., Comanche 44/45) to the Colossus 2D GSOP (Comanche 72).&nbsp; For example, compare this equation for "measurement error variance" from the [Colossus 2D GSOP](https://www.ibiblio.org/apollo/Documents/HSI-208461.pdf#page=132)
+
+![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/174828)
+
+to the corresponding equation from the [Colossus 2 GSOP](https://www.ibiblio.org/apollo/Documents/R-577-Colossus2-Martin-5.2.pdf#page=78),
+
+![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/174829)
+
+It's the former equation which shows up as a comment in the middle of sheet 26 of the Colossus 2C flowchart.&nbsp; (Well, actually it has a minus sign in the flowchart rather than a plus sign, but that appears to me to be a typo in the flowchart comment, since the quantity seems to be calculated with an addition.)&nbsp; And a few pages farther along,
+
+![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/174837)
+
+versus
+
+![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/174836)
+
+although in this case its the latter of the two equations (Colossus 2) appearing in the Colossus 2C flowchart rather than the former (Colossus 2D).&nbsp; And here we have a bonus in the Colossus 2D flowchart, because there's a change-bar next to the equation, and the page footer _says_ that the change was due to PCR-809.
+
+And an even bigger bonus if we look at the nearby Figure 2.5-4.&nbsp; Here's the entirety of the Colossus 2D figure:
+
+![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/174838)
+
+And the entirety of the Colossus 2 figure:
+
+![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/174839)
+
+By the way, the PCR mentioned for the change bars in the Colossus 2D revision of the figure, PCR-526, "Variance for Integration Errors in Navigation", had been incorporated in Colossus 1 (Colossus 237), just as PCR-809 had been incorporated in Colossus 2C, and was certainly not a new change in Colossus 2D.&nbsp; At any rate, the effect of the Colossus 2C flowchart FC-2550 (sheet 26) seems to match both the Colossus 2D figure above and the Colossus 55 source code, which should not happen if PCN-809 involved a code change for Colossus 2C.&nbsp;&nbsp;
+
+But if the difference between the Colossus 2 and Colossus 2D flowcharts were due to a code change from PCR-526 in Colossus 237 which had never been documented in the GSOP, then it would be understandable if PCN-809 had merely updated the GSOP.
+
+Alas, we have no pre-Colossus-237 revisions of Colossus source code, but we can certainly compare Colossus 237 P20-P24 to Colossus 55, to see if there had been any intervening code changes relevant to this issue.&nbsp; There is one such difference, in REND10, namely that Colossus 249 and later all call subroutine TPMODE (which apparently sets triple-precision mode) in two places, whereas Colossus 237 only calls TPMODE in one place.&nbsp; These calls are in the midst of the variance calculation.&nbsp; It seems impossible that this difference could be due to PCR-526, even though it conforms readily enough to the issue PCR-526's title describes ... unless PCR-526 were really incorporated at Colossus 249 rather than at Colossus 237, and then it makes perfect sense.
+
+Lest you suggest that that's impossible, I'd point out the following:
+
+- The _only_ information we have about PCR-526 comes from section 5 of the Colossus GSOP.
+- Early versions of that section of the Colossus GSOP (like early versions of the Luminary GSOP) identify which PCRs and PCNs corresponded to which revisions of section 5 of the GSOP ... _not_ to which revisions of Colossus (Luminary).&nbsp; It's only long after the fact, in much later revisions of the GSOP, that somebody has gone back and written the Colossus (Luminary) revision levels into those tables.&nbsp; In this case specifically, the Colossus 2 GSOP tells us only that PCR-526 was incorporated in "revision 3" of GSOP section 5.&nbsp; The later Colossus 2D GSOP tells us that it PCR-526 was incorporated in Colossus 1 (237), but is it right?&nbsp; Or is it merely an assumption?&nbsp; Recall that Colossus 1 (237) and Colossus 1A (249) shared the same physical GSOP.
+- Easy for them to have made a mistake!
+
+So here are my tentative conclusions:
+
+1. PCN-809 merely edits the GSOP, with no code changes.
+2. The code changes occurred much earlier, due to PCR-526 being incorporated into Colossus 249.
+3. The assertions in _later_ revisions of the Colossus GSOP that&nbsp; PCR-526 was incorporated into Colossus 237 are based on mistaken assumptions.
+4. The purpose of the editing changes by PCN-809 was to document the actual code changes that had instead been made earlier by PCR-526.
+
+In summary, there was nothing to be done in code for PCN-809.&nbsp; Thankfully, this agrees with the prior analysis.
+

@@ -1,0 +1,57 @@
+( [Return to the main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+We have the Colossus 2C revision of FC-2360 without any indication of which sheets have changed, but fortunately there are only 6 sheets so it's not a big deal.
+
+## Sheet 1
+
+Cover sheet only.
+
+## Sheet 2
+
+VB64, ALM/END:&nbsp; Looks good.
+
+## Sheet 3
+
+SBANDANT, EIS0I:&nbsp; In the code, the entry to subrouting SBANDANT looks like this:
+
+    SBANDANT	TC	BANKCALL	# V 64 E GETS US HERE CADR	R02BOTH # CHECK IF IMU IS ON AND ALIGNED TC	INTPRET RTB	... LOADTIME	# PICKUP CURRENT TIME SCALED B-28 ...
+
+That portion of the flowchart, meanwhile, looks like this:
+
+![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/175944)
+
+When there's a large gap in the flowchart such as the one between entry point SBANDANT and calling LOADTIME, in my experience that's indicative of the removal of something which had been present in prior revisions of the flowchart. It seems as though what has been removed is the "bank call" to the subroutine R02BOTH.
+
+My inference would be that a call to R02BOTH had been explicitly removed from the flowchart, as opposed to having been unintentionally omitted.&nbsp; Comparing the SBANDANT source code, I find that while the call to R02BOTH is present in (say) Colossus 237, it is indeed missing from Artemis 71.&nbsp; So I would conclude that the call to R02BOTH should be removed from Comanche 67.
+
+Several questions arise from action item:
+
+- How far do the changes extend?&nbsp; For example, in Comanche 55's NOADJUST there's a TCF SBANDANT +2 (which jumps past the call to R02BOTH) which should surely be changed to TCF SBANDANT.&nbsp; But how deep does the rabbit hole go?
+- What justifies this change?&nbsp; It hardly seems as though it's the kind of thing that would be done without PCR/PCN/Software Anomaly (and probably not the latter) authorization.
+
+The answer I would supply is based on [PCR-832.1, "Remove Restriction of Running R05 only in P00"](pcr-832-1-incorporation-in-comanche-67), in which I considered the subroutine VB64, but it didn't occur to me to look at SBANDANT.&nbsp; In the PCR-832.1 analysis, I imported a change from Luminary 116 vs Luminary 99 (based on PCR-832.2).&nbsp; And indeed, if I compare SBANDANT in Luminary 116 vs Luminary 99 (and in fact if I compare the entire log section S-BAND ANTENNA FOR LM) I find that the only changes are the two I mentioned above.
+
+R02BOTH is described in source-code comments as
+
+    IMU STATUS CHECK ROUTINE R02 (SUBROUTINE UTILITY)FUNCTIONAL DESCRIPTION TO CHECK WHETHER IMU IS ON AND IF ON WHETHER IT IS ALIGNED TO AN ORIENTATION KNOWN BY THE CMC.  TO REQUEST SELECTION OF THE APPROPRIATE PROGRAM IF THE IMU IS OFF OR NOT ALIGNED TO AN ORIENTATION KNOWN BY THE CMC.  CALLED THROUGH BANKCALL
+
+This it is indeed a kind of "restriction on running R05", though not "only in P00", so I can't claim that it's a perfect match to the title of PCR-832.1.&nbsp; Still, you might be able to see it as a somewhat-related kind of afterthought.
+
+I guess my only other observation would be that if were an Artemis-only change that was somehow accidentally reflected in the Colossus 2C flowchart, you might still expect to find an Artemis PCR associated with it, or comments in the Artemis-related COLOSSUS Memos (of which we have almost all). I can't find any such reference to this issue, though admittedly the difficulty of tracking down such references is substantial and I could have overlooked some.
+
+The action item, therefore, is to include the 2 changes mentioned above in the Comanche 67 source code, under the aegis of Reconstruction832.&nbsp; Disappointingly, the checksum discrepancy of the affected bank (42) regresses somewhat, 00135&nbsp;→13047.&nbsp; But I'm convinced of my reasoning (at the moment), so let it regress!
+
+The remainder of the sheet, by the way, has code identical across 237/55/71.
+
+## Sheet 4
+
+Continuation of SBANDANT, COVCNV:&nbsp; Identical across 237/55/71.
+
+## Sheet 5
+
+Continuation of COVCNV, NOADJUST, B5OFF:&nbsp; These are all identical across 237/55/71, except that in Artemis there are two calls to PRIOCHNG in the NOADJUST subroutine.&nbsp; There is no trace of these calls to PRIOCHNG in the flowchart, so that area of the reconstructed code matches the flowchart.&nbsp; Nevertheless, just for laughs I tried adding the calls to the reconstructed code.&nbsp; It didn't magically clear up the checksum of bank 42 or have any obviously-good influence, so they are not present in the reconstruction now.
+
+## Sheet 6
+
+Table only.
+

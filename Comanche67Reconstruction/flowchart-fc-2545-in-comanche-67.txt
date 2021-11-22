@@ -1,0 +1,401 @@
+( [Return to the main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+We have the Colossus 2C revision of the flowchart.&nbsp; None of the various labor-saving tricks I like to use are available:
+
+- There is no indication of which sheets of the flowchart have changed from prior revisions, so I can't narrow it down to specific sheets.
+- We have no prior revisions of the flowchart, so I cannot do a side-by-side comparison of those flowcharts to find likely locations of changes
+- Log section TPI SEARCH, where most of the code relevant to the flowchart resides, is not present in Colossus 3 (it was deleted sometime between Artemis 25 and 28), so I cannot diff of Colossus 237 vs the reconstructed Comanche 67 vs Artemis 71.
+- The cover sheet for FC-2545 says that P17/P77 is a Luminary program as well as a Colossus program, but this turns out to be false, so I cannot compare the reconstruction to Luminary.
+
+This being the case, I have little choice other than simply to do a detailed comparison of the entire FC-2545 vs the reconstructed Comanche 67 code.&nbsp;
+
+Sheets 1-2:&nbsp; Cover page and high-level flowchart (not suitable for detailed code comparisons).
+
+Sheet 3: The flowchart for P17.1 calls GOFLASH, whereas the code calls VNPOOH.&nbsp; The principal differences between VNPOOH and GOFLASH are that GOFLASH has an explicit exit for termination whereas VNPOOH implicitly terminates to GOTOPOOH, and more importantly, that VNPOOH is in fixed-fixed while GOFLASH is in bank 10 (in the reconstruction) while P17.1 is in bank 35.&nbsp; Therefore, P17.1 cannot call GOFLASH directly, but must do so through a BANKCALL, whereas it can call VNPOOH directly.&nbsp; Thus it makes sense to use VNPOOH here, though it would be nicer if the flowchart just explicitly said "VNPOOH" rather than "GOFLASH".&nbsp; I suppose the flowchart must not have been updated at some point when the banks for P17 and GOFLASH diverged.
+
+Otherwise the sheet matches the code.
+
+Sheet 4:&nbsp; I'm having a bit of difficulty in trying to follow the computation between calling CSMSTORE and NORMEX by just winging it, so instead, here's a detailed accounting of what I see the code doing (in terms of MPAC and the pushdown list) on an interpretive instruction by interpretive instruction basis.&nbsp; The double-quote ("), sometimes known as "ditto", means the same value as in the row above.
+
+| Instruction  
+ | Flowchart  
+ | MPAC  
+ | PL0  
+ | PL2  
+ | PL34  
+ | PL36  
+ | DELHITE  
+ | E2  
+ | THETZERO  
+ |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| VLOAD / RACT3  
+ |   
+ | RACT3  
+ |   
+ |   
+ |   
+ |   
+ |   
+ |   
+ |   
+ |
+| ABVAL  
+ |   
+ | |RACT3|  
+ |   
+ |   
+ | |RACT3|²  
+ |   
+ |   
+ |   
+ |   
+ |
+| PDVL / RPASS3  
+ |   
+ | RPASS3  
+ | |RACT3|  
+ |   
+ | "  
+ |   
+ |   
+ |   
+ |   
+ |
+| UNIT  
+ |   
+ | UNIT(RPASS3)  
+ | "  
+ |   
+ | |RPASS3|²  
+ | |RPASS3|  
+ |   
+ |   
+ |   
+ |
+| PDDL  
+ |   
+ | |RACT3|  
+ | UNIT(RPASS3)  
+ |   
+ | "  
+ | "  
+ |   
+ |   
+ |   
+ |
+| BDSU / 36D  
+ |   
+ | |RPASS3| - |RACT3|  
+ | "  
+ |   
+ | "  
+ | "  
+ |   
+ |   
+ |   
+ |
+| SET / KFLAG  
+ |   
+ | "  
+ | "  
+ |   
+ | "  
+ | "  
+ |   
+ |   
+ |   
+ |
+| BMN / +2  
+ |   
+ | "  
+ | "  
+ |   
+ | "  
+ | "  
+ |   
+ |   
+ |   
+ |
+| CLEAR / KFLAG  
+ |   
+ | "  
+ | "  
+ |   
+ | "  
+ | "  
+ |   
+ |   
+ |   
+ |
+| STOVL DELHITE / 0D  
+ | 
+
+![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/176631)
+
+  
+ | UNIT(RPASS3)  
+ | "  
+ |   
+ | "  
+ | "  
+ | |RPASS3| - |RACT3|  
+ |   
+ |   
+ |
+| VXV / VPASS3  
+ |   
+ | UNIT(RPASS3) × VPASS3  
+ | "  
+ |   
+ | "  
+ | "  
+ | "  
+ |   
+ |   
+ |
+| UNIT  
+ |   
+ | UNIT(&nbsp;UNIT(RPASS3) × VPASS3&nbsp;)  
+ | "  
+ |   
+ | |&nbsp;UNIT(RPASS3) × VPASS3&nbsp;|²  
+ | |&nbsp;UNIT(RPASS3) × VPASS3&nbsp;|  
+ | "  
+ |   
+ |   
+ |
+| STOVL E2 / RACT3  
+ | 
+
+![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/176632)
+
+  
+ | RACT3  
+ | "  
+ |   
+ | "  
+ | "  
+ | "  
+ | UNIT(&nbsp;UNIT(RPASS3) × VPASS3&nbsp;)  
+ |   
+ |
+| PUSH  
+ |   
+ | RACT3  
+ | "  
+ | RACT3  
+ | "  
+ | "  
+ | "  
+ | "  
+ |   
+ |
+| VPROJ / E2  
+ |   
+ | (RACT3 · E2) E2  
+ | "  
+ | "  
+ | "  
+ | "  
+ | "  
+ | "  
+ |   
+ |
+| VSL2  
+ |   
+ | 4 (RACT3 · E2) E2  
+ | "  
+ | "  
+ | "  
+ | "  
+ | "  
+ | "  
+ |   
+ |
+| BVSU  
+ | 
+
+![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/176634)
+
+  
+ | RACT3 - 4 (RACT3 · E2) E2  
+ | "  
+ |   
+ | "  
+ | "  
+ | "  
+ | "  
+ |   
+ |
+| UNIT  
+ |   
+ | UNIT(&nbsp;RACT3 - 4 (RACT3 · E2) E2&nbsp;)  
+ | "  
+ |   
+ | |&nbsp;RACT3 - 4 (RACT3 · E2) E2 |²  
+ | |&nbsp;RACT3 - 4 (RACT3 · E2) E2 |  
+ | "  
+ | "  
+ |   
+ |
+| DOT / 0D  
+ |   
+ | UNIT(&nbsp;RACT3 - 4 (RACT3 · E2) E2&nbsp;)&nbsp;&nbsp;·&nbsp; UNIT(RPASS3)  
+ | "  
+ |   
+ | "  
+ | "  
+ | "  
+ | "  
+ |   
+ |
+| SL1  
+ |   
+ | 2 UNIT(&nbsp;RACT3 - 4 (RACT3 · E2) E2&nbsp;)&nbsp;&nbsp;·&nbsp; UNIT(RPASS3)  
+ | "  
+ |   
+ | "  
+ | "  
+ | "  
+ | "  
+ |   
+ |
+| ACOS  
+ |   
+ | ACOS(&nbsp;2 UNIT(&nbsp;RACT3 - 4 (RACT3 · E2) E2&nbsp;)&nbsp;&nbsp;·&nbsp; UNIT(RPASS3)&nbsp;)  
+ | "  
+ |   
+ | "  
+ | "  
+ | "  
+ | "  
+ |   
+ |
+| PDVL  
+ |   
+ | UNIT(RPASS3)  
+ | ACOS(&nbsp;2 UNIT(&nbsp;RACT3 - 4 (RACT3 · E2) E2&nbsp;)&nbsp;&nbsp;·&nbsp; UNIT(RPASS3)&nbsp;)  
+ |   
+ | "  
+ | "  
+ | "  
+ | "  
+ |   
+ |
+| VXV / RACT3  
+ |   
+ | UNIT(RPASS3) × RACT3  
+ | "  
+ |   
+ | "  
+ | "  
+ | "  
+ | "  
+ |   
+ |
+| DOT / E2  
+ |   
+ | ( UNIT(RPASS3) × RACT3 )&nbsp;&nbsp;·&nbsp; E2  
+ | "  
+ |   
+ | "  
+ | "  
+ | "  
+ | "  
+ |   
+ |
+| PDDL |   
+ | ACOS(&nbsp;2 UNIT(&nbsp;RACT3 - 4 (RACT3 · E2) E2&nbsp;)&nbsp;&nbsp;·&nbsp; UNIT(RPASS3)&nbsp;)  
+ | ( UNIT(RPASS3) × RACT3 )&nbsp;&nbsp;·&nbsp; E2  
+ | | " | " | " | " |   
+ |
+| SIGN |   
+ | SIGN(&nbsp;( UNIT(RPASS3) × RACT3 )&nbsp;&nbsp;·&nbsp; E2&nbsp;) \* ACOS(&nbsp;2 UNIT(&nbsp;RACT3 - 4 (RACT3 · E2) E2&nbsp;)&nbsp;&nbsp;·&nbsp; UNIT(RPASS3)&nbsp;)  
+ |   
+  
+ | | " | " | " | "  
+ |   
+ |
+| STADR  
+ |   
+ | "  
+ |   
+ |   
+ | "  
+ | "  
+ | "  
+ | "  
+ |   
+ |
+| STODL THETZERO / X1  
+ | 
+
+![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/176643)
+
+  
+ | X1,X2  
+ |   
+ |   
+ | "  
+ | "  
+ | "  
+ | "  
+ | SIGN(&nbsp;( UNIT(RPASS3) × RACT3 )&nbsp;&nbsp;·&nbsp; E2&nbsp;) \* ACOS(&nbsp;2 UNIT(&nbsp;RACT3 - 4 (RACT3 · E2) E2&nbsp;)&nbsp;&nbsp;·&nbsp; UNIT(RPASS3)&nbsp;)  
+ |
+
+In the final entry, where the paste from the flowchart says MPAC, it's referring to the value earlier in the column, namely RACT3-(RACT3·E2)E2.&nbsp; Now, there are a couple of rescalings (by a factor of 4 and 2) that I don't really understand and aren't indicated by the flowchart, but other than those, the code does seem to compute the values indicated in the flowchart for DELHITE, E2, and THETZERO.
+
+I suppose that the question we have to ask is whether those rescalings are correct; i.e.,&nbsp;
+
+- RACT3 - 4 (RACT3 · E2) E2&nbsp; &nbsp;vs&nbsp; &nbsp;RACT3 - (RACT3 · E2) E2
+- 2 UNIT(&nbsp;RACT3 - 4 (RACT3 · E2) E2&nbsp;)&nbsp;&nbsp;·&nbsp; UNIT(RPASS3)&nbsp; vs&nbsp;&nbsp;UNIT(&nbsp;RACT3 - (RACT3 · E2) E2&nbsp;)&nbsp;&nbsp;·&nbsp; UNIT(RPASS3)  
+
+Sadly, I do not know, so this is TBD.
+
+If the scaling is okay, though, I'd call this a match.
+
+Sheet 5:&nbsp; The code corresponding to VNCOMP17 is odd.&nbsp; It begins with
+
+    TS	VERBNOUN CA	VERBNOUN TCR	BANKCALL CADR	GOFLASH
+
+What is the TS VERBNOUN / CA VERBNOUN for?&nbsp; It's not on the flowchart.&nbsp; It's not setup for GOFLASH, which accept a verb/noun combo in the accumulator.&nbsp; It's not a correction for overflow, since if there were overflow in the accumulator, the CA VERBNOUN would be skipped and GOFLASH would be passed either +1 or -1.&nbsp; The value stored at VERBNOUN isn't used later ... I _think_; at least, it's not used by VNCOMP17.&nbsp;
+
+More seriously, the "recycle" exit from GOFLASH, depicted on the flowchart as&nbsp;
+
+![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/176654)
+
+turns into the following gobbledygook:
+
+    CS	MPAC # RECYCLE WITH NEW TPI TIME AD	BIT6 # OR PROCEED WITH NEW SEARCH OPTION EXTEND BZF	P17.1 TC	VNCOMP17 +3
+
+which seems to bear little relation to the flowchart, as far as I can see, which would presumably be implemented by a simple TC P17.1.
+
+TBD
+
+Sheet 6:
+
+Sheet 7:
+
+Sheet 8:
+
+Sheet 9:
+
+Sheet 10:
+
+Sheet 11:
+
+Sheet 12:
+
+Sheet 13:
+
+Sheet 14:
+
+Sheet 15:
+
+Sheet 16:
+
+Sheet 17:
+
+Sheet 18:
+

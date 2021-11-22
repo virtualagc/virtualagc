@@ -1,0 +1,35 @@
+( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+We don't have a copy of PCN-659.1, "Suppression of X Moduloing by Kepler".&nbsp;
+
+I would note, however, that PCN-659.2 (which we also don't have) applies what's presumably the same code fix to Luminary.&nbsp; So one would assume that if a code change to Comanche 67 (vs Comanche 55) is involved then we can possibly infer exactly what it is by seeing how it was done in Luminary code; though this is a little tricky, since the Luminary GSOPs aren't quite as forthcoming as the Colossus GSOPs are in disclosing precisely which revisions of Luminary are associated with which PCRs and PCNs.&nbsp; In this case, the Luminary 1E GSOP section 5 tells us that PCN-659.2 was incorporated into Luminary for Revision 4 of section 5, but doesn't enlighten us as to which revision of Luminary that correspond to.&nbsp; It does inform us, however, that additional material related to PCN-659.2 was added into the GSOP for Revision 7 of section 5, and that Revision 7 corresponds to Luminary 1C.&nbsp; Fortunately, we find that [the 28th SCB meeting approved PCN-659.2 for Luminary 1A](https://www.ibiblio.org/apollo/Documents/Memo-SCB28_text.pdf#page=8), so we can identify Luminary GSOP section 5 revision 4 with Luminary 1A.&nbsp; In other words, the code change for PCN-659.2 in Luminary, if any, should be identifiable by comparing Luminary 69 source code to Luminary 99 source code.
+
+In advance of (and probably in lieu of) trying that, I'd note that it seems unlikely that there actually is any code change in Comanche 67, since:
+
+- According to the [Colossus 3 GSOP section 5](https://www.ibiblio.org/apollo/Documents/HSI-208454.pdf#page=9), PCN-659.1 was first applied to Comanche 2 (Comanche 44/45).
+- Also according to the [Colossus 3 GSOP section 5](https://www.ibiblio.org/apollo/Documents/HSI-208454.pdf#page=13), PCN-659.1 is being "reincorporated" in Comanche 2C (Comanche 67).
+- PCN-659.1 is not listed among the PCRs/PCNs incorporated newly into Comanche 2C or 2B, according to [MIT/IL's presentation for the Apollo 12 Flight Software Readiness Review (FSRR)](https://www.ibiblio.org/apollo/Documents/apollo_12_fsrr_slides.pdf#page=5).
+
+So far, for all other PCRs/PCNs analyzed to date, this constellation of facts has always indicated that in Comanche 2C the change is GSOP-only, relating to a code change made much earlier (in this case, in Comanche 2).&nbsp; (And by analogy, PCN-659.2 would be only a GSOP change in Luminary 1C, for a code change made earlier in Luminary 1A.)
+
+However, we should attempt to:
+
+1. Confirm PCN-659.1's code change in Comanche 2 (vs Comanche 1A).
+2. Confirm that there was no additional related code change after Comanche 2 (say, in Artemis).
+3. Confirm that there was a GSOP change in Comanche 2C related to the earlier code change.
+
+With respect to confirming the Comanche 2 code change, I note the existence of a variable called XMODULO, and that in Colossus 1 (Colossus 237) and 1A (Colossus 249) this variable is subject to various manipulations in the KEPLERN routine in the CONIC SUBROUTINES log section.&nbsp; By Colossus 2 (Comanche 44) and continuing on to later Colossus revisions, XMODULO is never accessed in any way by the code.&nbsp; However, the variable itself is retained in Colossus 2 and Colossus 2A, even though not accessed.&nbsp; We have finally removed it in the current reconstruction of Comanche 67, but we've done so for unrelated reasons, namely to correct the addresses of certain pad loads.&nbsp; But that removal of XMODULO was entirely pragmatic and empirical ... it wasn't authorized by any PCR or PCN we knew about at the time.&nbsp; Hence it's possible that the removal of XMODULO (and its immediate successor in erasable, TMODULO) _may_ be the potential Comanche 67 code change authorized by PCN-659.1.
+
+(As we would expect, the same situation occurs in Luminary:&nbsp; Luminary 69 manipulates XMODULO in KEPLERN, but Luminary 97 and beyond do not access XMODULO in any way; in fact, unlike Colossus 44-55, they eliminate the XMODULO variable entirely.&nbsp; Thus it's possible that PCN-659.2 was fully implemented in Luminary 1 code, whereas PCN-659.1 was only partially implemented in Colossus 2 code.)
+
+In examining the present state of the reconstructed Comanche 67 code, I find that the elimination of XMODULO and TMODULO from ERASABLE ASSIGNMENTS has _already_ been marked with the preprocessor label "Reconstruction659", so I'd conclude that the previous analysis of this issue eventually came to the same conclusion that I've come to here.&nbsp; (I've not reexamined that prior reasoning before doing the analysis above.)
+
+As far as GSOP changes are concerned, we fortunately have both the Colossus 1/1A and Colossus 2 GSOP sections 5.&nbsp; What we find is this:
+
+- In the [Colossus 2 GSOP section 5's Figure 5.5-1](https://www.ibiblio.org/apollo/Documents/R-577-Colossus2-Martin-5.5.pdf#page=27) ("Kepler Subroutine" flowchart), the 3 sheets of the flowchart are marked with rather extensive change-bars, which the page footers attribute to PCN-659.1.
+- In the [Colossus 1/1A GSOP Figure 5.5-1](https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf#page=165), while I haven't done an extensive analysis or comparison to the source code, the change bars mentioned above are seen to be related to manipulations of the time and x.
+
+Which is as we'd expect.&nbsp; Unfortunately, we do not have the Colossus 2A GSOP to compare with the Colossus 2 and Colossus 1/1A GSOPs.&nbsp; If a GSOP change needed to be made in Colossus 2C, it would be because of an error (such as a regression) in the Colossus 2A GSOP, and we have no way of knowing if there was such an error in the Colossus 2A GSOP or not.&nbsp; We also don't have the Colossus 2C GSOP, but we do have [Figure 5.5-1 from the Colossus 2D GSOP](https://www.ibiblio.org/apollo/Documents/HSI-208461.pdf#page=329), and it shows only "editorial" change-bars (i.e., dotted-line change-bars) rather than "content" change-bars (i.e., solid lines), so we can conclude that the Colossus 2D Figure 5.5-1 is the same as the Colossus 2C Figure 5.5-1, except for the editorial changes.&nbsp; The editorial changes are actually just replacement of the subscripts "max" and "min" by "MAX" and "MIN" in a few places.&nbsp; Except for these editorial change, the Colossus 2D Figure 5.5-1 is _also_ the same as the Colossus 2 Figure 5.5-1.&nbsp; So whether or not there was a regression in the Colossus 2A Figure 5.5-1 or not, the Colossus 2C Figure 5.5-1 has returned to what it ought to be, as we'd expect.
+
+In summary, I think what all that adds up to is that the principal changes for PCN-659.1, both coding and GSOP, occurred in Comanche 2.&nbsp; However, some coding cleanup (removal of XMODULO and TMODULO) remained to be done in Colossus 2C.&nbsp; GSOP changes may or may not also have occurred in Colossus 2C, but we presently have no means to determine so; nor is it relevant to coding issues in Comanche 2C.
+

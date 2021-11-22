@@ -1,0 +1,314 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+
+## Contents
+
+- Introduction
+- Reconstruction of Authorized (and Any Other Known) Changes
+- Colossus 2C Flowcharts
+- Generic Reconstruction Details to Check
+- Administrative Details
+  - Building Reconstructed Comanche 67 Source Code
+  - Diff'ing the Reconstructed Memory Banks
+  - "Goodness" Signature
+  - Additional Useful Utility Programs
+- Available Documentation Resources
+  - Most-Useful Resources
+  - Resources That Have Proven Less Directly Useful So Far
+  - Luminary GSOP Section 5 Revisions
+
+## Introduction
+
+I think the general conclusion at this point is that a full reconstruction of Comanche 67 isn't really possible without additional information, because there are some sticking points which it's probably impossible to get around:&nbsp; The worst problem seems to be PCR-815, calls for extensive rewrite of certain Comanche 55 code, but the rewrites appear in no other version of AGC code, and specifically neither in Artemis 71 or in Luminary 116, the most-closely-related versions.&nbsp; Nevertheless, we do have a lot of material to work with, and there has been a lot of progress in areas _other_ than PCR-815.
+
+The basic gameplan for reconstructing Comanche 67, AKA Colossus 2C, is very simple:
+
+- Use Comanche 55 source code as a baseline.
+- Use PCRs, PCNs, and Software Anomalies known from contemporary documentation to have been incorporated into Comanche 67 to identify general areas in the code which were changed between Comanche 55 and Comanche 67.
+- Use all available contemporary resources to determine exactly how those changes were implemented.&nbsp; There are many such resources, listed later, but the most important are the Artemis 71 source code (and sometimes Luminary 116 source code) and Comanche 67 flowcharts.
+- Verify memory banks of reconstructed Comanche 67 source code vs the (known) contemporary Comanche 67 memory-bank checksums.
+
+## Reconstruction of Authorized (and Any Other Known) Changes  
+
+In principle, all changes from Comanche 55 through Comanche 67 should have been authorized either by the SCB (via PCRs and PCNs) or else by the ACB (via Software Anomaly Reports).&nbsp; In point of fact, developers made other changes as well, which may or may not have been documented in so-called COLOSSUS Memos.&nbsp; Nevertheless, the first step is certainly to get a list of all known authorized changes, and to implement them in the gpp/\*.gpp files.&nbsp;&nbsp;
+
+There are some tags I've been using to emphasize issues which are special in some way.&nbsp; Incidentally, they're all characters, rather than images, so you can use the browser's text-search to find them:
+
+- **☞** &nbsp;marks issues on which I'm currently working.
+- **⚠** &nbsp;marks fixes which I've implemented, but which I think may have some problem and need revisiting.
+- **☒** &nbsp;marks issues I've been unable to resolve.
+
+Issues which I haven't begun to address here in this wiki, or which I think I've resolved satisfactorily, don't require any special attention and thus aren't tagged in any special way.
+
+So here's the list of all such PCRs, PCNs, and Software Anomaly Reports that I think apply to Comanche 67, hyperlinked to descriptions of the work done to implement them.&nbsp; The contemporary source which leads us to believe that any given item is relevant specifically to Comanche 67 appears in parenthesis.
+
+- [COM-12 rev 1]([[pcn-833-com-12-rev-1-implementation-in-comanche-67]]), "Improper REPFRAC Values" (FSRR slides).&nbsp; **Summary** :&nbsp; Fix implemented in code.
+- [COM-13](com-13-implementation-in-comanche-67), "V78 Does Not Terminate" (FSRR slides).&nbsp; **Summary** :&nbsp; Fix implemented in code.
+- [COM-14](com-14-implementation-in-comanche-67), "P17 Does Not Terminate" (FSRR slides).&nbsp; **Summary** :&nbsp; Fix implemented in code.
+- [COM-15](com-15-implementation-in-comanche-67), "Coding Error in Restart Tables" (FSRR slides).&nbsp; **Summary** :&nbsp; Fix implemented in code.
+- [COM-16](com-16-implementation-in-comanche-67), "ΔV≠0 at First Mark" (FSRR slides).&nbsp; **My tentative conclusion:** &nbsp; GSOP-only fix in Colossus 2C (but perhaps a true code fix in later revisions).
+- **⚠** &nbsp; [COM-17](com-17-implementation-in-comanche-67), "Error at Ranges Greater than 163.83 NM" (FSRR slides).&nbsp; **Summary** :&nbsp; Fix implemented in code, but should be revisited.&nbsp;
+- **☒** &nbsp; [COM-18](com-18-implementation-in-comanche-67), "Software Restart (BAILOUT or POODOO)" (FSRR slides).&nbsp; **Summary** :&nbsp; I couldn't figure out what this refers to.
+- **☒** &nbsp; [COM-20](com-20-implementation-in-comanche-67), "Anomaly COL 69 Not Completely Fixed" (FSRR slides).&nbsp; **Summary** :&nbsp; Nothing could be done, because no information about COL 69 is available.
+- PCR-204, "Changes and additions of Chapter 3 of COLOSSUS GSOP" (Artemis GSOP section 3).&nbsp; **Summary** :&nbsp; From the title alone, no analysis was done.&nbsp; It's clearly a GSOP-only change, no code changes required.
+- [PCR-250](pcr-250-implementation-in-comanche-67), "MDOT in Erasable (Reincorporated)" (Artemis GSOP section 5).&nbsp; **Summary** :&nbsp; I infer that in Colossus 2C this was a GSOP-only change, no code changes required.
+- [PCR-278](pcr-278-implementation-in-comanche-67), "Fixed DUMPCNT" (Artemis GSOP section 2, FSRR slides).&nbsp; **Summary** :&nbsp; Fix implemented in code.
+- [PCR-468.1](pcr-468-1-implementation-in-comanche-67), "Change in R-32 to Program P-76 (Reincorporated)" (Artemis GSOP section 5).&nbsp; **Summary** :&nbsp; GSOP-only change, no code changes required.
+- [PCR-509](pcr-509-implementation-in-comanche-67), "Eliminate P11 Interlock in R30 (Reincorporated)" (Artemis GSOP section 5).&nbsp; **Summary** :&nbsp; GSOP-only change, no code changes required.
+- [PCR-544](pcr-544-implementation-in-comanche-67), "Change Obsolete SPS Thrust in Section 5 (Reincorporated)" (Artemis GSOP section 5).&nbsp; **Summary** :&nbsp; GSOP-only change, no code changes required.
+- [PCR-602](pcr-602-implementation-in-comanche-67), "Permanent LM State Vector Update with SURFFLAG Set (Reincorporated)" (Artemis GSOP section 5).&nbsp; **Summary** :&nbsp; GSOP-only change, no code changes required.
+- [PCR-611](pcr-611-implementation-in-comanche-67), "Use 6-Dimensional Matrix for V67 (Reincorporated)" (Artemis GSOP section 5).&nbsp; **Summary** :&nbsp; GSOP-only change, no code changes required.
+- [PCN-659.1](pcr-659-1-implementation-in-comanche-67), "Suppression of X Moduloing by Kepler (Reincorporated)" (Artemis GSOP section 5).&nbsp; **Summary** :&nbsp; Fix implemented in code.
+- [PCR-707.1](implementation-of-pcr-707-1-in-comanche-67), "Change from 1968/1969 Ephemeris Data to 1969/1970 Ephemeris Data (Reincorporated)" (Artemis GSOP section 5).&nbsp; **Summary** :&nbsp; Fix implemented in code.
+- [PCR-772.1](pcr-772-1-incorporation-in-comanche-67), "Libration Vector at Landing Time" (Artemis GSOP section 5).&nbsp; **Summary** :&nbsp; Incorporated in code.&nbsp; See also PCR-776.1 below.
+- [PCR-773.1](implementation-of-pcr-707-1-in-comanche-67), "Fix Constants for Planetary Inertial Orientation Subroutine" (Artemis GSOP section 5, FSRR slides).&nbsp; **Summary** :&nbsp; Fix implemented in code.
+- [PCR-776.1](pcr-776-1-incorporation-in-comanche-67), "Improved R2 Model Timing" (Artemis GSOP section 5, FSRR slides).&nbsp; **Summary** :&nbsp; Appears to have been accidentally incorporated during the incorporation of PCR-772.1 above.
+- [PCR-781.1](pcr-781-1-incorporation-in-comanche-67), "PIPA Bias Compensation Scale Change" (FSRR slides).&nbsp; **Summary** :&nbsp; Fix implemented in code.
+- **⚠** &nbsp; [PCR-785](pcr-785-incorporation-in-comanche-67), "Reverse V50N18 logic in P21" (Artemis GSOP sections 2 and 3, FSRR slides).&nbsp; **Summary** :&nbsp; Fix incorporated in code, including a bug fix to the preceding incorporation (substantially reducing bank 34's checksum discrepancy).&nbsp; However, there are a couple of competing possibilities of implementation, so may need to be revisited sometime.
+- [PCN-787](pcn-787-pcn-835-incorporation-in-comanche-67), "Make N63 Count during P61" (Artemis GSOP sections 2 and 5, FSRR slides).&nbsp; **Summary** :&nbsp; Fix (combined with PCN-835) incorporated in code, including a bug fix to the preceding incorporation, though it had no significant effect on banksum discrepancies.
+- [PCR-791.1](pcr-791-1-incorporation-in-comanche-67), "Do not allow Proceed response to V21, V22, V23" (Artemis GSOP section 2, FSRR slides).&nbsp; **Summary** :&nbsp; Fix incorporated in code.
+- [PCR-798.1](pcr-798-1-incorporation-in-comanche-67), "Reset GLOKFAIL in R00" (Artemis GSOP section 2, FSRR slides).&nbsp; **Summary** :&nbsp; Fix incorporated in code.
+- [PCR-799](pcr-799-incorporation-in-comanche-67), "Verb 82 Time Option" (Artemis GSOP section 5, FSRR slides).&nbsp; **Summary** :&nbsp; Fix incorporated in code, involving significant corrections in implementation detail (though not in functionality) vs the incorporation from the preceding analysis.
+- PCR-801.1, "Make BAILOUT alarms 3xxxx, POODOO alarms 2xxxx" (Artemis GSOP sections 2 and 5, FSRR slides).&nbsp; **Summary** :&nbsp; Incorporation was so straightforward in the prior analysis that I see no need to rehash it with yet another analysis.
+- [PCR-802.1](pcr-802-1-incorporation-in-comanche-67), "Save Alarm Data after 'Error Reset'" (Artemis GSOP section 2, FSRR slides).&nbsp; **Summary** :&nbsp; Fix incorporated in code.
+- [PCR-803](pcr-803-incorporation-in-comanche-67), "Change Entry Final Phase Table" (Artemis GSOP section 5, FSRR slides).&nbsp; **Summary** :&nbsp; Fix incorporated in code.&nbsp; (In the process, I found two typos in fixed constants that affect all versions of Colossus prior to Artemis.&nbsp; However, the numerical value of the error was too small to affect the assembled octals.)
+- [PCR-807.1](pcr-807-1-incorporation-in-comanche-67), "Add Present Time Option to P21" (FSRR slides).&nbsp; **Summary** :&nbsp; Fix incorporated in code.&nbsp; No functional changes from previous analysis, but in the process I reversed several gratuitous removals of constants that had been bogusly justified by invoking this PCR, and memory bank 07 has now cleared.
+- [PCN-809](pcr-809-implementation-in-comanche-67), "Error Variance Computation for VHF Range and Alternate Line-of-Sight Measurements" (Artemis GSOP section 5, FSRR slides).&nbsp; **Summary** :&nbsp; GSOP only, no change to code.
+- **⚠** &nbsp; [PCR-810](pcr-810-incorporation-into-comanche-67-reconstruction), "YAW DAP CDU sampling" (Artemis GSOP sections 2 and 3, FSRR slides).&nbsp; **Summary** :&nbsp; Fix incorporated in code, but in the process I identified changes to DAPINIT which I couldn't unambiguously decide whether or not they needed to be implemented or not.&nbsp; Their assembly is conditioned on the proprocessor label Reconstruction810Init, which is currently #undef'd.&nbsp; This may need to be revisited.
+- **⚠** &nbsp; [PCR-811](pcr-811-incorporation-in-comanche-67), "TVC DAP gain change" (Artemis GSOP section 3, FSRR slides).&nbsp; **Summary** :&nbsp; Fix from prior analysis remains in place, but I have deferred a fresh analysis because PCR-810 is too closely related and my analysis of PCR-810 too fresh in my mind for me to cleanly analyze PCR-811 right now.&nbsp; It would just be a deceptive waste of effort.
+- [PCR-812.1](pcr-812-1-incorporation-in-comanche-67), "Resetting and setting of XDELVFLG" (Artemis GSOP section 2, FSRR slides).&nbsp; **Summary** :&nbsp; Fix incorporated in code.
+- **⚠** &nbsp; [PCR-815](https://www.ibiblio.org/apollo/Documents/HSI-38170.pdf#page=6), "Digital autopilot barbecue mode routine" (Artemis GSOP sections 2 and 3, FSRR slides).&nbsp; Summary:&nbsp; [Refer to the analysis for flowchart FC-2370](flowchart-fc-2370-in-comanche-67).
+- [PCR-825.1](pcr-821-1-incorporation-in-comanche-67), "Display Option 3 in P52/P54" (FSRR slides).&nbsp; **Summary** :&nbsp; Fix incorporated in code.&nbsp; I change it somewhat from the changes made by the prior analysis.&nbsp; There were no drastic improvements to checksums as a result, though.
+- [PCR-826.1](pcr-826-1-incorporation-in-comanche-67), "Reverse P76 Display" (FSRR slides).&nbsp; **Summary** :&nbsp; Fix incorporated in code.
+- [PCR-831.1](pcr-831-1-incorporation-in-comanche-67), "Lambert Overflow Protection" (Artemis GSOP section 5, FSRR slides).&nbsp; **Summary** :&nbsp; Fix incorporated in code.&nbsp; Admittedly, there's some question as to whether the fix I incorporated really fixes PCR-831.1, or whether it actually addresses some other (as-yet unknown) PCR, PCN, or Software Anomaly.&nbsp; However, I don't feel uncertain enough about it to think it's worth revisiting.
+- [PCR-832.1](pcr-832-1-incorporation-in-comanche-67), "Remove restriction of R05 only in P00" (Artemis GSOP sections 2 and 5, FSRR slides).&nbsp; **Summary** :&nbsp; Fix incorporated in code.
+- [PCN-833](pcn-833-com-12-rev-1-implementation-in-comanche-67), "SWTOVER Check" (Artemis GSOP section 2, SCB 33, FSRR slides).&nbsp; **Summary** :&nbsp; Implemented.
+- [PCN-835](pcn-787-pcn-835-incorporation-in-comanche-67), "Change Recycle point on N63 in P61" (Artemis GSOP section 2, FSRR slides).&nbsp; **Summary** :&nbsp; Fix incorporated, see PCN-787 above.
+- [PCN-837](pcn-837-incorporated-in-comanche-67), "Change Constant Drag Controller Gains" (Artemis GSOP section 5, FSRR slides).&nbsp; **Summary** :&nbsp; Fix incorporated in code.
+- [PCN-849](com-16-implementation-in-comanche-67), "Fix for Com 16 Anomaly" (Artemis GSOP section 5, SCB 33, FSRR slides).&nbsp; **Summary** :&nbsp; Same as COM-16 above.
+- **⚠** &nbsp; [PCR-960](pcr-960-incorporation-in-comanche-67), "Change constant in R52" (SCB 32).&nbsp; **Summary** :&nbsp; Fix incorporated in code, and enabled.&nbsp; It was previously disabled.&nbsp; There is some question as to whether this PCR was incorporated in Colossus 2C or 2D, and it may need to be revisited at some point in order to clear memory bank 13.
+- [PCR-961](pcr-961-incorporation-in-comanche-67), "CMC start of TB6 (E-memory routine)" (SCB 32).&nbsp; **Summary** :&nbsp; PCR-961 turns out not to be applicable to Colossus 2C.
+
+## Colossus 2C Flowcharts
+
+As mentioned above, all software changes from Colossus 2A to Colossus 2C should, in principle, be governed by PCRs, PCNs, and Software Anomaly Reports.&nbsp; In practice, however, there are always changes made unofficially by software developers, which they simply regard as being good programming practices below a level of significance requiring some sort of official approval process.&nbsp; (It's just human nature, folks!)&nbsp; Besides that, my ability to track down all of the implications of a PCR is limited, particularly when in most cases I don't have a copy of the PCR itself, but only a vague description of it.&nbsp; The art of tracking down the implications of those vague descriptions often involves identifying the software flowcharts associated with the change, and comparing those flowcharts to baseline code to see what may be different.
+
+The software flowcharts available to us are provided by two documents, E-2456 (purportedly the Colossus 2C flowcharts) and E-2456 Rev 1 (purportedly the Colossus 2D flowcharts).&nbsp; These two documents have many flaws, of which the principal ones are that the documents are incomplete (some flowcharts simply not being included) and often out-of-date.&nbsp; Regarding the latter, Colossus 2C flowcharts often appear in the Colossus 2D document.
+
+Each individual flowchart is marked with the software revision it covers:&nbsp; Colossus 1, 2, 2A, 2C, or 2D.&nbsp; Now, a flowchart marked Colossus 1, 2, or 2A has certainly not changed between Colossus 2A and 2C, and can thus be ignored.&nbsp; You would think that a Colossus 2D flowchart could also be ignored, since while it may contain some changes that appear in Colossus 2C, it must also contain changes solely from Colossus 2D, and we have no idea which is which.&nbsp; But that's not entirely true, since a Colossus 2D flowchart will sometimes (but not always) tell you which sheets had changed since Colossus 2C, so you can sometimes derive most of a Colossus 2C flowchart from a 2D flowchart.&nbsp;
+
+So ... an idea has formed in my brain:&nbsp; If I compare each flowchart sheet which I can guarantee pertains specifically to Colossus 2C (vs 1, 2, 2A, or 2D) vs the reconstructed source code, I may be able to identify additional changes not caught so far in the PCR/PCN/Software Anomaly Report analysis performed already.
+
+To that end, here is a list of all flowcharts either specific to Colossus 2C or 2D.&nbsp; The hyperlinks at the beginnings of the lines point to the flowcharts, while those at the ends of the lines point to the analyses.&nbsp; There's also a new emoji,&nbsp;&nbsp;☺, which I use to indicate that the analysis actually identified a code change that previous analyses had overlooked.
+
+- **☺** [FC-2020 "FRESH START AND RESTART", Colossus 2D](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=9).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2020-in-comanche-67), one new change (from sheet 8) was incorporated, and another potential change (from sheet 26) was rejected as probably being for Colossus 2D.&nbsp; The incorporated change (in bank 05) did not significantly affect the goodness signature of the reconstruction.  
+- [FC-2050 "THE EXECUTIVE", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=75).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2050-in-comanche-67), there were no differences between flowchart and code.  
+- [FC-2060 "WAITLIST", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=95).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2060-in-comanche-67), I found discrepancies between the code and the flowchart, but believe either that I or the flowchart are in error, and not that there are addition code changes needed in Comanche 67.
+- [FC-2070 "SERVICE ROUTINES", Colossus 2D](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=119).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2070-in-comanche-67), there are no differences between flowchart and code.
+- [FC-2100 "RTB OP CODES", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf#page=8).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2100-in-comanche-67), there are some discrepancies between flowchart and code.&nbsp; However, it appears that that's because the flowchart has some errors in it, and not because the code requires any modifications.
+- [FC-2110 "SINGLE PRECISION SUBROUTINES", Colossus 2D](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=155).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2110-in-comanche-67), the code seems to match the flowchart.  
+- [FC-2140 "ALARM AND ABORT", Colossus 2D](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=177).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2140-in-comanche-67), the code matches the 2D flowchart, and other than a slight error in the 2A flowchart, no changes were found between Colossus 2A and 2D that weren't accounted for by Colossus 2C PCR changes already made.  
+- [FC-2150 "KEYRUPT AND UPRUPT", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=193).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2150-in-comanche-67), it looks like the code matches the flowchart.
+- [FC-2220 "P06 - GNCS POWER DOWN", Colossus 2D](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=257).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2220-in-comanche-67), while the code disagrees with the flowchart, that seems to be entirely because the flowchart is packed with errors. The end conclusion is that there are no actionable changes to Comanche 67 required.  
+- **⚠** &nbsp; [FC-2235 "IMU EXTENDED VERBS", Colossus 2D](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=265).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2235-in-comanche-67), no changes are required to Comanche 67 code.&nbsp; A redundant instruction was discovered that is absent in Artemis, but I have been unable to determine whether or not to remove it in Comanche 67.&nbsp; It is currently _not_ removed in Comanche 67, though, because enabling the removal would cause banks 02 and 41 (formerly cleared) to regress to having banksum discrepancies of 00001.
+- [FC-2240 "SXTMARK", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=275).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2240-in-comanche-67), the flowchart matches the reconstructed code.
+- [FC-2242 "R57 - OPTICS CALIBRATION ROUTINE", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=285).&nbsp; Summary:&nbsp; According to the&nbsp; [analysis](https://slimwiki.com/virtual-agc-project/flowchart-fc-2242-in-comanche-67), everything is good.
+- [FC-2280 "LATITUDE LONGITUDE SUBROUTINES", Colossus 2D](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=292).&nbsp; Summary:&nbsp; According to the&nbsp; [analysis](https://slimwiki.com/virtual-agc-project/flowchart-fc-2280-in-comanche-67), there are no Comanche 67 specific issues to incorporate in code.
+- [FC-2283 "PLANETARY INERTIAL ORIENTATION SUBROUTINE (PIOS)", Colossus 2D](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=305).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2283-in-comanche-67), the code matches the flowchart.  
+- [FC-2290 "INTEGRATION INITIALIZATION", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf#page=34).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2290-in-comanche-67), the code matches the flowchart (modulo some errors on the flowchart's part).  
+- **⚠** &nbsp; [FC-2300 "ORBITAL INTEGRATION", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf#page=60).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2300-in-comanche-67), the flowchart is seriously out of date in some places; or alternately, the incorporation of PCR-772.1 and PCR-776.1 is seriously misguided.&nbsp; My belief at this point is that it's the former ... but it could be the latter.
+- [FC-2310 "CONIC SUBROUTINES", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf#page=110).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2310-in-comanche-67), the flowchart matches the reconstructed code.
+- [FC-2320 "TIME OF FREE FALL", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=393).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2320-in-comanche-67), there are coding errors which do not match the flowchart, but those coding errors persist across all software versions and don't require correction in Comanche 67.  
+- [FC-2325 "RENDEZVOUS PARAMETERS DISPLAY", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=413).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2325-in-comanche-67), there are no flowchart changes from Colossus 2 to Colossus 2C, other than rolling the revision number for some reason.
+- **☺** [FC-2360 "R05 - S-BAND ANTENNA", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=467).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2360-in-comanche-67), there was a discrepancy between the flowchart and code which probably represents a code change that wasn't identified in the analysis of PCR-832.1.&nbsp; The appropriate code fix has been made, though unfortunately it actually causes a slight regression in the checksum of bank 42 where it resides.  
+- [FC-2363 "SET/CLEAR PREFERRED ATTITUDE FLAG", Colossus 2D](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=480).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2363-in-comanche-67), the code matches the flowchart.  
+- **⚠** &nbsp; [FC-2370 "DAP INTERFACE AND SERVICE ROUTINES", Colossus 2D](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=483).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2370-in-comanche-67), there were differences between the flowchart and code, of which the most significant is the addition of V79 ("BBQ Mode" of PCR-815), which I had not attempted to deal with in the (several) prior analyses.&nbsp; I have now implemented PCR-815, and incorporated the FC-2370 changes unrelated to PCR-815.&nbsp; I distinguish between "implemented" and "incorporated" here, because there are many details of my PCR-815 implementation which even if correct may not match the original Comanche 67, so this needs to be revisited.
+- [FC-2390 "RCS DAP PHASE 2", Colossus 2D](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=525).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2390-in-comanche-67), looks good as-is.  
+- [FC-2430 "TVC START-UP AND EXECUTIVE ROUTINES", Colossus 2D](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=556).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2430-in-comanche-67), looks good as-is.  
+- [FC-2440 "TVC DAP", Colossus 2D](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=592).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2440-in-comanche-67), looks good as-is.
+- **⚠** &nbsp; [FC-2460 "ROLL AUTOPILOT", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=613).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2460-for-comanche-67), in the ROLLSET subroutine there's not only a mismatch between the flowchart and reconstructed code, but also actual errors in the flowchart and/or the code. However, since the code persists in Artemis, I accept it as being okay.  
+- [FC-2530 "P01, P02, P03, P07 - PRELAUNCH INITIALIZATION & GYRO COMPASSING", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=620).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2530-in-comanche-67), the reconstruction code us okay.
+- **☞** &nbsp; [FC-2545 "TPI SEARCH PROGRAMS - P17 & P77", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=694).&nbsp; Summary:&nbsp; According to the [analysis](flowchart-fc-2545-in-comanche-67), TBD  
+- [FC-2550 "RENDEZVOUS NAVIGATION", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=712)
+- [FC-2580 "GROUND TRACK DETERMINATION - P21", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=758)
+- [FC-2600 "P23 - CISLUNAR MIDCOURSE NAVIGATION", Colossus 2D](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=809)  
+- [FC-2606 "V94 (R64)", Colossus 2D](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=843)  
+- [FC-2620 "P30/P31 - EXTERNAL DELTA VELOCITY", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=862)  
+- [FC-2631 "R36 - RENDEZVOUS OUT-OF-PLANE DISPLAY", Colossus 2D](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=926)  
+- [FC-2640 "P35, P75 - TRANSFER PHASE MIDCOURSE TARGETING", Colossus 2D](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=933)
+- [FC-2641 "COMMON TARGETING SUBROUTINES INITVEL, MIDGIM, PERIAPO, SELECTMU, PRECSET", Colossus 2D](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=936)
+- [FC-2642 "P37 - RETURN TO EARTH", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf#page=268)  
+- [FC-2670 "P76 - TARGET DELTA V", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf#page=338)  
+- [FC-2730 "R52, R53, R56", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf#page=402)  
+- [FC-2650 "ORBITAL PARAMETERS DISPLAY", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1022)  
+- [FC-2670 "P76 - TARGET DELTA V", Colossus 2D](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1047)
+- [FC-2680 "P40, P41 - THRUST PROGRAMS", Colossus 2D](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1053)
+- [FC-2681 "CLOKTASK & CLOCKJOB", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1112)
+- [FC-2683 "SERVICER", Colossus 2D](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1129)
+- [FC-2700 "P47 - THRUST MONITOR", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1166)
+- [FC-2720 "P52 - IMU REALIGNMENT", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1176)
+- [FC-2730 "R52, R53, R56", Colossus 2D](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1209)
+- [FC-2760 "P60's", Colossus 2D](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1227)
+- [FC-2770 "REENTRY CONTROL", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1262)
+- [FC-2780 "ENTRY DIGITAL AUTOPILOT", Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1293)
+
+TBD
+
+## Generic Reconstruction Details to Check
+
+In the preceding section various items are marked with&nbsp;⚠&nbsp;to indicate that they should be revisited and perhaps rechecked, while other items are marked with ☒ to indicate they're certainly wrong and need new insights or information to progress.&nbsp; While working through the PCRs, PCNs, and Software Anomalies in the preceding section, though, I also encountered generic effects that were likely to cause my analyses (and hence my reconstructions) to be incomplete.&nbsp; I thought it would be worthwhile to list those generic trouble-causers here, so that they could be rechecked yet again after the reconstruction work above had been completed.
+
+- [Flags](direct-manipulation-of-flagwords-in-comanche-67):&nbsp; In incorporating changes that involve creating a new flag (i.e. a bit-field within a "flag word"), it's natural to investigate them in the code by grep'ing for the flag by symbol name.&nbsp; But the software sometime manipulates flagbits by manipulating the bits in the flagwords, and it's easy to forget to grep for the flagwords.&nbsp; Perhaps that's best illustrated by example:&nbsp; To clear the PINBRFLG flag, the code may do something like TC DNFLAG / ADRES PINBRFLG, which is easily found by grep'ing for PINBRFLG.&nbsp; But the code may instead have done something like this instead, which it's easy to forget to grep:&nbsp; CS PINBRBIT / MASK FLAGWRD4 / TS FLAGWRD4.&nbsp; But even grep'ing for PINBRBIT isn't safe, because the code could have done CS BIT6 / MASK FLAGWRD4 / TS FLAGWRD4 instead, since PINBRBIT = BIT6.&nbsp; &nbsp; **Summary** :&nbsp; I don't think I overlooked anything like this.
+- [Flags:](swinit-flagwords-in-comanche-67)&nbsp; Beyond what's described in the item above, FRESH START AND RESTART has a routine called DOFSTART which sets/clears a whole bunch of flagwords at startup time using the data from the SWINIT table, and that usage might not be caught even by the precautions in the preceding item.&nbsp; A special effort should be made to vet the SWINIT table, and possibly DOFSTART.&nbsp; Of course, errors in SWINIT will show up in the checksum of the bank (05) containing the table.&nbsp; **Summary** :&nbsp; This checks out precisely as it should.
+- **☞** [Memory-bank assignments](memory-bank-assignments-for-comanche-67):&nbsp; I've relocated nothing from one memory bank to another, except where there's pretty overwhelming evidence that I was supposed to do so.&nbsp; Thus I've allowed memory banks to overflow whenever they needed do.&nbsp; But obviously, some things while have changed banks simply for the purpose of memory conservation, or would even have moved to other log sections.&nbsp; This will have to be figured out at some point.
+
+## Administrative Details
+
+### Building Reconstructed Comanche 67 Source Code
+
+[A branch called "comanche67" has been added to the GitHub repo](https://github.com/virtualagc/virtualagc/tree/comanche67), whose folder Comanche067/ holds the reconstructed code.&nbsp; However, it has proven useful to sometimes make changes in&nbsp;_other_&nbsp;folders (particularly yaYUL/), so it is sometimes possible that other folder have changes not yet merged into the main (non-comanche67) branch as well.
+
+Because there are many, many PCRs, PCNs, and Software Anomalies being incorporated into the reconstructed code, it is sometimes necessary to easily selectively unroll code changes which, bluntly, have turned out poorly.&nbsp; To that end, reconstructed code is not incorporated&nbsp;_directly_&nbsp;into AGC source files.&nbsp; Rather, it is incorporated into a series of files which are almost exactly like AGC source code, but which have C-language-style preprocessor directives (such as #ifdef and #endif) to conditionally include or discard changes from the baseline Comanche 55 code.&nbsp; For example, consider code in the reconstructed Comanche 67 which differs from the baseline Comanche 55 due to PCR-815.&nbsp; We handle that by using #define to define a preprocessor constant called "Reconstruction815", and then actually make that change as follows
+
+'''
+    #ifdef Reconstruction815## <b>Reconstruction:</b> ... justification for the change ...... Reconstructed Comanche 67 source code goes here ...#else... Baseline Comanche 55 source code goes here ...#endif
+'''
+
+This kind of code can't be processed directly by the AGC assembler, yaYUL, so the source files have to first be run through a C-language-type preprocessor to remove/keep the appropriate blocks of AGC code.&nbsp; After such preprocessing, what's left over is pure AGC source code, which can be assembled by yaYUL.&nbsp; (By the way, the ##-style comment is not necessary for the preprocessor, but is desirable for documentation purposes in the final, reconstructed source code, and typically reference the PCR, PCN, or Software Anomaly behind the change.&nbsp; Such blocks of ##-style comments can contain any number of lines and any HTML, but conventionally must have a first line beginning with the string "\<b\>Reconstruction:\</b\>".)
+
+The preprocessor-directive-laden files conventionally are named identically to the AGC source-code files, but have the filename extension ".gpp" rather than ".agc".&nbsp; The \*.gpp files are stored in the folder Comanche067/gpp/.&nbsp; Thus all reconstruction editing is done in the files Comanche067/gpp/\*.gpp rather than in the files Comanche067/\*.agc.&nbsp; The \*.agc files, rather, are created anew at assembly time whenever the \*.gpp files on which they are based have changed.
+
+As for which specific Comanche 67 reconstructions are included by the preprocessing and which are discarded, there is a file called Comanche067/gpp/defines.default which contains the appropriate #define directives.&nbsp; Typically, the overall preprocessor label "PreferredReconstruction" is defined (which can be done at the 'make' command line), which causes defines.default to #define a bunch of specific labels to activate the reconstructions for the specific PCRs, PCNs, and Software Anomalies.&nbsp;&nbsp;
+
+The makefile Comanch067/Makefile performs the preprocessing automatically.&nbsp;&nbsp; [The GNU General-Purpose Preprocessor (GPP)](https://directory.fsf.org/wiki/GPP)&nbsp;must be installed.&nbsp; For example, the commands
+
+'''
+    cd PathToComanche067/ReconstructionLevel=PreferredReconstruction make
+'''
+
+would make sure that all \*.agc files are regenerated by preprocessing gpp/\*.gpp files, using (my) preferred set of Comanche 67 patches, and then would assemble the reconstructed code.&nbsp; On the other hand,
+
+'''
+    cd PathToComanche067/ReconstructionLevel=NoReconstruction make
+'''
+
+would discard all of the patches, and hence would simply assemble the Comanche 55 baseline.
+
+Eventually, if the reconstruction were successful, the Makefile would be modified to remove the preprocessing, discarding the gpp/\*.gpp files, and the \*.agc files would simply be the "official" source files.
+
+### Diff'ing the Reconstructed Memory Banks
+
+Something which is also useful is automatically diff'ing reconstructed-Comanche code vs the known-good memory-bank checksums.&nbsp; This diff'ing is performed by the following more-typical command for assembling reconstructed Comanche 67:
+
+'''
+    cd PathToComanche067/ReconstructionLevel=PreferredReconstruction make || make diffComanche067sums
+'''
+
+Actually, because I'm lazy, there's a script called build.sh which does this, as well as a cleanup in advance.
+
+### "Goodness" Signature
+
+Reconstruction of the Comanche 67 source code would be regarded as truly having succeeded if all 36 memory-bank checksums were correct.&nbsp; Until that time comes, however, a more-flexible metric is needed for judging whether the reconstruction process is advancing or regressing.&nbsp; I can't say this topic has been given too much thought, but I have been using a metric I call the "goodness" signature, or just "the signature", which has the form&nbsp;_AA-BB-CC-DD-EE-FF-GG-HH_.&nbsp; Each of those 7 fields is a 2-digit number (zero-padded), where:
+
+- _AA_&nbsp;= number of banks with correct checksums
+- _BB_&nbsp;= number of banks whose difference from the correct checksum is in the range 01-07
+- _CC_&nbsp;= number of banks whose difference from the correct checksum is in the range 010-077
+- _DD_&nbsp;= number of banks whose difference from the correct checksum is in the range 0100-0777
+- _EE_&nbsp;= number of banks whose difference from the correct checksum is in the range 01000-07777
+- _FF_&nbsp;= number of banks whose difference from the correct checksum is in the range 010000-077777
+- _GG_&nbsp;= number of banks which have overflowed available memory and whose checksums are thus irrelevant
+
+Or in other words, zero-digit errors, single-digits errors, double-digit errors, and so on.&nbsp; (Recall that bank checksum consist of five octal digits.)
+
+The build command listed in the preceding section automatically computes the goodness signature.
+
+On the day I'm writing this (10/24/2021), for example, the signature of the Comanche 67 reconstruction is
+
+'''
+    05-05-04-06-05-09-02
+'''
+
+whereas the signature of the Comanche 55 baseline is the (considerably worse!)
+
+'''
+    00-00-00-04-15-17-00
+'''
+
+### Additional Useful Utility Programs
+
+[The Python2 program check\_buggers.py](https://github.com/virtualagc/virtualagc/blob/comanche67/Tools/check_buggers.py)&nbsp;is the basis for "make diffComanche067sums" mentioned earlier.&nbsp; Since it's probably not used outside that context, I won't elaborate on it further here.
+
+[The Python3 program bankToBankReference.py](https://github.com/virtualagc/virtualagc/blob/comanche67/Comanche067/bankToBankReference.py)&nbsp;is a filter for the assembly listing produced by the AGC assembler (yaYUL).&nbsp; What you can do with it is to select two memory banks from the command line, which I call the "source bank" and the "target bank".&nbsp; The filter then prints&nbsp;_just_&nbsp;those lines from the assembly listing which reside in the source bank but whose operand is in the target bank.&nbsp; The usage is
+
+'''
+    bankToBankReference.py SOURCEBANK TARGETBANK <ASSEMBLY.lst
+'''
+
+where&nbsp;_SOURCEBANK_&nbsp;is 00, 01, ..., 43 (all octal) and&nbsp;_TARGETBANK_&nbsp;is E0, ..., E7, 00, 01, ..., 43.&nbsp; For example, I have used it in the Comanche 67 reconstruction in the form
+
+'''
+    bankToBankReference.py 02 27 <MAIN.agc.lst
+'''
+
+to find every place that code in bank 02 references bank 27.&nbsp; The idea is to track down why fixes in one memory bank may have had side effects in banks which weren't directly changed.
+
+[The Python3 program symbolBankCompare.py](https://github.com/virtualagc/virtualagc/blob/comanche67/Comanche067/symbolBankCompare.py)&nbsp;compares two assembly listings produced by the AGC assembler (yaYUL), presumably of two different versions of AGC software.&nbsp; It finds all of the symbols in common between the two versions, and lists just those which have moved to a different memory bank between versions.&nbsp; The idea is to help in figuring out why fixes may have overflowed memory banks, and what objects may need to be moved to other banks to cure those oveflows.&nbsp; the usage is:
+
+'''
+    symbolBankCompare.py VERSION1.lst VERSION2.lst
+'''
+
+I'd think that the principal usage in the Comanche 67 reconstruction would be as
+
+'''
+    symbolBankCompare.py Comanche055.lst Artemis071.lst
+'''
+
+## Available Documentation Resources
+
+### Most-Useful Resources
+
+- Known-Good Memory-Bank Checksums:
+  - For manufacturing releases of Comanche, including Comanche 55 and Comanche 67:&nbsp;&nbsp; [Drawing 2021153G](https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n91/mode/1up)
+  - For manufacturing releases of Artemis:&nbsp;&nbsp; [Drawing 2021154](https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n93/mode/1up).
+- Known-Good AGC Source Code:
+  - For&nbsp; [Comanche 55](https://github.com/virtualagc/virtualagc/tree/master/Comanche055)
+  - For&nbsp; [Luminary 116](https://github.com/virtualagc/virtualagc/tree/master/Luminary116)
+  - [For Artemis 71](https://github.com/virtualagc/virtualagc/tree/master/Artemis071)
+- Apollo G&N software flowcharts:
+  - For Colossus 2C, Comanche 67:&nbsp;&nbsp; [Document E-2456](http://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf)
+  - For Colossus 2D, Comanche 72:&nbsp;&nbsp; [Document E-2456 Rev 1](http://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf).&nbsp; Note that these flowcharts are incomplete snapshots of whatever was available at the time, hence Colossus 2C flowcharts which are missing from the Colossus 2C document (preceding item) sometimes appear in the Colossus 2D document (this item).
+- PCR, PCN, and Software Anomaly Reports (or in lieu of those, lists of their&nbsp;_titles_).&nbsp; There is no master list available to us, unfortunately, but I think that everything directly relevant to Comanche 67 is listed in the&nbsp; [our Document Library's section titled "Mission-Specific Documentation: Apollo 12"](https://www.ibiblio.org/apollo/links2.html#Apollo12).&nbsp; At&nbsp;_this_&nbsp;writing, the relevant items are Software Anomaly Report having numbers COM-_N_&nbsp;and the PCRs and PCNs prefixed with the string "(COLOSSUS)" (such as "(COLOSSUS) PCR-812.2").&nbsp; Sometimes, however, changes to Comanche 67 mirrored corresponding changes to Luminary 116, so it sometimes happens that Luminary PCRs/PCNs can be relevant as well.&nbsp; Be aware as well that a Software Anomaly Report may be an indication&nbsp;_either_&nbsp;that the anomaly was observed in Comanche 67&nbsp;_or else_&nbsp;that it was fixed in Comanche 67.
+- [Memo, "Final Apollo 12 (Mission H1) prelaunch erasable load (COMANCHE 67)"](http://www.ibiblio.org/apollo/Documents/padload_12_cm.pdf)
+- [COLOSSUS Memo #203, "PCR815/V79/R64/PTC - ORBRATE Routine"](https://www.ibiblio.org/apollo/Documents/COL203.pdf)
+
+### Resources That Have Proven Less Directly Useful So Far
+
+- "Guidance, Navigation and Control, Command Module Functional Description and Operation Using Flight Program Colossus 2C (Comanche 67)":&nbsp;&nbsp; [Document E-2442](http://www.ibiblio.org/apollo/Documents/HSI-208615.pdf)
+- Parts of GSOP documents:
+  - Colossus 3, Document R-577.&nbsp; Principally used, so far, for getting lists of relevant PCRs and PCNs.
+    - [Section 2](http://www.ibiblio.org/apollo/Documents/HSI-208452.pdf), "Data Links"
+    - [Section 3](http://www.ibiblio.org/apollo/Documents/R577-section3-rev14.pdf), "Digital Autopilots"
+    - [Section 5](http://www.ibiblio.org/apollo/Documents/HSI-208454.pdf), "Guidance Equations"
+  - Colossus 2D (Comanche 72), Document R-577.&nbsp; Principally used, so far, for observing the change bars relative to the preceding GSOP document version (i.e., Comanche 67).
+    - [Section 5](http://www.ibiblio.org/apollo/Documents/HSI-208461.pdf), "Guidance Equations"
+  - Luminary 1E, Document&nbsp; [R-567](http://www.ibiblio.org/apollo/links.html#Guidance_System_Operations_Plans_GSOP).&nbsp; Principally used for getting lists of relevant PCRs and PCNs.
+- [Minutes of October 15 1969 SCB meeting](http://www.ibiblio.org/apollo/Documents/SCB-691009.pdf).&nbsp; Principally used for getting lists of relevant PCRs and PCNs.
+- [MIT/IL presentation for the mission "H" Apollo 12 Flight Software Readiness Review (FSRR)](https://www.ibiblio.org/apollo/Documents/apollo_12_fsrr_slides.pdf).&nbsp; Yet one more time, principally used for getting lists of relevant PCRs and PCNs.
+- [Table 4-1](https://www.ibiblio.org/apollo/Documents/a042186.pdf#page=39)&nbsp;of "Software Systems Development: A CSDL Project History" lists the size (in words) of Comanche 67.&nbsp; This may or may not be accurate, and has been of no use to date.&nbsp; However, time will tell.
+- [COLOSSUS Memos](https://www.ibiblio.org/apollo/links2.html#ColossusMemos)&nbsp;describing revision-to-revision changes in Artemis (Colossus 3).&nbsp; Artemis was forked from Comanche 67 and its entire development took place in parallel to the development of Comanche 72 and Comanche 108, which were also forked from Comanche 67.&nbsp; Therefore, if a particular software change occurred during Artemis development, one can conclude from that the change did&nbsp;_not_&nbsp;occur between Comanche 55 and Comanche 67.&nbsp; (I could make similar statements about COLOSSUS Memos describing revision-to-revision changes from Comanche 68 through Comanche 108, but unfortunately we don't currently have even one of those memos.)
+- Colossus&nbsp; [PCRs, PCNs](https://www.ibiblio.org/apollo/links2.html#PcrsPcns), and&nbsp; [Software Anomaly Reports](https://www.ibiblio.org/apollo/links2.html#Anomalies)&nbsp;implemented in Artemis, Comanche 72, or Comanche 108 development, similarly, were not implemented between Comanche 55 and Comanche 67.
+
+### Luminary GSOP Section 5 Revisions
+
+A situation I've often encountered in analyzing the PCRs and PCNs for the Comanche 67 reconstruction is that there are twin PCRs/PCNs for Colossus and Luminary, and that it is easier to determine the precise coding details of the incorporation of the PCR from the Luminary code (of which we have the source code for more revisions) than from the Colossus code.&nbsp; Typically, the twinned PCRs will have numbers of the form PCR-_XXX_.1 for Colossus and PCR-_XXX_.2 for Luminary, though there are exceptions.&nbsp; In most cases, what little documentation there is for these twinned Luminary PCRs/PCNs comes from the [lists of incorporated PCRs/PCNs found near the beginning of Section 5 of the Luminary 1E GSOP](https://www.ibiblio.org/apollo/Documents/j2-80-R-567-SEC5-REV11_text.pdf#page=7).
+
+But there's a problem with that particular documentation, not shared by the other sections of the Luminary 1E GSOP or any section of the Colossus 3 GSOP, in that most of the incorporated PCRs and PCNs are identified _not_ by the Luminary revision at which they were incorporated, but rather by the revision level of GSOP section 5 in which they were incorporated.&nbsp; That makes it very tough to look at the lists of incorporated PCRs/PCNs and simply say "PCR-_XXX_ was incorporated into Luminary _YYY_".&nbsp; So rather than having to address this same problem over and over again on a PCR-by-PCR basis, I'd like to establish here, once and for all, how the Luminary 1E GSOP section 5 revisions relate to Luminary revisions.
+
+- Section 5 Revisions 0-3:&nbsp; Luminary 1 (Luminary 69).&nbsp; Revision 3 of section 5 lists just two incorporated items, namely PCN-858 and PCR-761.1, the latter of which is "R-2 Lunar Potential Model".&nbsp; From [LUMINARY Memo #75](https://www.ibiblio.org/apollo/Documents/LUM75_text.pdf), "R-2 Lunar Potential Model Added to LUMINARY", we find explicitly that this model was added in Luminary 69, specifically LUM69 Rev 2, the final flight version of Apollo 10.&nbsp; Hence, revision 3 corresponds to Luminary 1.&nbsp; Presumably all earlier revisions of section 5 represent Luminary 1 (or earlier) as well.
+- Section 5 Revision 4:&nbsp; Luminary 1A (Luminary 99).&nbsp; The PCRs/PCNs of section 5 overlap substantially with those listed in the memo titled " [What is LUMINARY 1A?](https://www.ibiblio.org/apollo/Documents/Memo-SCB28_text.pdf)", written prior to the beginning of Luminary 1A development.
+- Section 5 Revisions 5 and 6:&nbsp; Luminary 1B (Luminary 116).&nbsp; Regarding revision 5, the PCRs/PCNs of section 5 are all listed in the memo titled " [What is LUMINARY 1B?](https://www.ibiblio.org/apollo/Documents/what_is_luminary_1b.pdf)", written prior to the beginning of Luminary 1B development.&nbsp; Regarding section 6:&nbsp; According to [LUMINARY Memo #103](https://www.ibiblio.org/apollo/Documents/LUM103_text.pdf), PCR-848 was incorporated in Luminary 109 and PCR-854 was incorporated in Luminary 112.&nbsp; According to section 2 of the Luminary GSOP (which isn't so stingy with revision info as section 5), PCR-855 was implemented in Luminary 1B.&nbsp; Those are the only 3 PCRs listed in revision 6, and all of them are from Luminary 1B.
+- Section 5 Revisions 7 and 8:&nbsp; Luminary 1C (Luminary 131).&nbsp; (Stated explicitly in the GSOP.)
+- Section 5 Revision 9:&nbsp; Luminary 1D (Luminary 178).&nbsp; (Stated explicitly in the GSOP.)
+- Section 5 Revisions 10 and 11:&nbsp; Luminary 1E (Luminary 210).&nbsp; (Stated explicitly in the GSOP.)
+

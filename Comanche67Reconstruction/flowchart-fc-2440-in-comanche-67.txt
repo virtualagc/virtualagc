@@ -1,0 +1,40 @@
+( [Return to the main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+We have the Colossus 2 and 2D revisions of flowchart FC-2440, with no indication of which sheets have changed, so the strategy is to compare the flowcharts side-by-side and only compare vs reconstructed code if differences between the flowcharts are detected.
+
+PITCHDAP, PSTROKER, PCDUDOTS:&nbsp; 2/1 vs 2D/2,3:&nbsp; Matched
+
+PINTEGRL: 2/2 vs 2D/3:&nbsp; Well, in the gloss for the Colossus 2 2 flowchart, it purports to compute ω&nbsp;sub y, whereas 2D purports to compute (ω&nbsp;sub y) dot.&nbsp; However, the two flowcharts use the same actual operations for the computation, so I suppose I can say that they match.
+
+PERORLIM, PFORWARD, FWFLTR, 1DAPCAS:&nbsp; 2/2 vs 2D/4: Match.
+
+2DAPCAS, 3DAPCAS, OPTVARK: 2/2,3 vs 2D/5:&nbsp; In 2DAPCAS, the Colossus 2 flowchart has DAP3&nbsp;←&nbsp;DAP2 where the 2D flowchart has DAP3&nbsp;←&nbsp;4 \* DAP2.&nbsp; The reconstructed code already has this modification, due to PCR-811.&nbsp; Similarly in OPTVARK, there's a scaling difference in computing CMDTMP, and the reconstructed code already uses the 2D scaling, due to incorporation of PCR-811.&nbsp; But it's odd, though, because the scaling shown in the Colossus 2 flowchart doesn't match the Colossus 2 (or 2A) code.&nbsp; So apparently, the Colossus 2 flowchart is in _error_ about the scaling, in _addition_ to the actual change in scaling from Colossus 2 to Colossus 2D.&nbsp;
+
+POFFSET, PACLIM, POUT: 2/3 vs 2D/6: Matches.
+
+PPRECOMP:&nbsp; 2/4 vs 2D/6: Matches
+
+PRECOMP, 2CASFLTR: 2/4 vs 2D/7:&nbsp; Matches, except that in the 2D revision of the flowchart, 2CASFLTR has an entry point 3CASFLTR that's missing from the Colossus 2 revision.&nbsp; The program label 3CASFLTR is already present in all revisions of Colossus 2X, though never referenced.&nbsp; I guess this is just an editorial correction.
+
+DELBARP, PCOPYCYC, PCOPY, PMISC, PDAPEND: 2/5 vs 2D/8,9:&nbsp; Matches
+
+YAWDAP: 2/6 vs 2D/9: Matches.
+
+YSTROKER: 2/6 vs 2D/10:&nbsp; Matches.
+
+YCDUDOTS:&nbsp; 2/(missing) vs 2D/10:&nbsp; In the Colossus 2 flowchart, YSTROKER is followed immediately by YINTEGRL, whereas in the 2D flowchart YCDUDOTS intervenes between YSTROKER and YINTEGRL.&nbsp; YCDUDOTS's reconstructed code seems to match the 2D flowchart for it, although it would be nice if the 2D flowchart mentioned modular subtractions rather than just subtractions.
+
+YINTEGRL:&nbsp; 2/6 vs 2D/11:&nbsp; Matches
+
+YERORLIM, YFORWARD:&nbsp; 2/7 vs 2D/11:&nbsp; Matches
+
+YOFFSET, YACLIM, YOUT:&nbsp; 2/8 vs 2D/12:&nbsp; Matches
+
+YPRECOMP, YCOPYCYC, YDAPEND: 2/9,10 vs 2D/13:&nbsp; Matches.
+
+ERRORLIM, RLIMTEST:&nbsp; 2/10 vs 2D/14:&nbsp; Matches
+
+ACTLIM: 2/10 vs 2D/15:&nbsp; Both the Colossus 2 and 2D flowcharts express their CMDTMP computation peculiarly (and a little differently from each other), but if I understand properly what they're getting at, they seem to be saying the same thing.&nbsp; So I'd say the two match.
+
+In summary, it seems to me there's a match, other than already-known differences due to PCR-811.
+

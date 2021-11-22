@@ -1,0 +1,57 @@
+( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+We do not have a copy of PCR-602, "Permanent LM State Vector Update with SURFFLAG Set (Colossus IA)".&nbsp; The reason for the parenthesized notation "Colossus IA"&nbsp; in the title of the PCR would appear to be that our knowledge of the title ultimately derives from section 5 of the Colossus 1/1A (Colossus 237/249) GSOP, and the notation "Colossus IA" is meant to tell us that the change pertains to Colossus 249 rather than to Colossus 237.
+
+Indeed, on [GSOP page 5.1-38A (Colossus 249 only)](https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-start-5.2.pdf#page=47) we find the following change-barred text, attributed to PCR-602 in the page footer:
+
+    3. If SURFFLAG is zero,the LM state
+       vector is extrapolated to time Tf,
+       The switch SURFFLAG indicates
+       whether or not the LM is on the
+       surface of the moon. This flag is
+       set to one (zero) by means of a
+       special DSKY verb by the astronaut
+       when he receives voice confirmation
+       that the LM has landed on (lifted off
+       from) the lunar surface. 
+
+(What I called "Tf" above is really t-subscript-F, but I can't make anything that looks like that in this wiki software.)&nbsp; Whereas on page 5.1-30 (Colossus 237 only), we instead find the following, with no change bar, and no attribution to PCR-602:
+
+    3. The LM state vector is extrapolated
+       to time Tf. 
+
+These notations in the GSOP relate to programs P40, P41, and P47, so we should find differences between the Colossus 237 and Colossus 249 software log sections P40-47 related to this as a code change.&nbsp; However, we do not find any such differences.&nbsp; Widening our view a bit, in the INTEGRATION INITIALIZATION log section we do find a difference related to SURFFLAG, in which the Colossus 249 has the following code near the beginning of the AVETOMID routine, and Colossus 237 does not:
+
+    BON # FOR	SURFFLAG	#     CSM	SETCOAST	# DONT DO LM ONLY... Colossus 237 code ...
+
+which I suppose is somewhat like what the GSOP describes.
+
+Unfortunately, the code at this point in INTEGRATION INITIALIZATION changes substantially in later revisions of Colossus, so I can't point (say) to the Artemis AVETOMID code and assert that it's the same as the Colossus 249 code.&nbsp; However, if we compare the INTEGRATION INITIALIZATION code for AVETOMID in the Comanche 55 baseline to Artemis, while we do find some minor differences, we can't find anything seemingly related to usage of SURFFLAG.&nbsp; So I would still conclude that there are no code changes from Colossus 2A through Colossus 3 related to the GSOP descriptions given above.
+
+What else do we know about PCR-602?
+
+1. In section 5 of the Colossus GSOP ( [Colossus 1/1A](https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-start-5.2.pdf#page=8) or [Colossus 3](https://www.ibiblio.org/apollo/Documents/HSI-208454.pdf#page=8)), PCR-602, "Permanent LM State Vector Update with SURFFLAG Set (Colossus IA)", is listed as having been incorporated into Colossus 1 or Colossus 1A.
+2. Also in [section 5 of the Colossus 3 GSOP](https://www.ibiblio.org/apollo/Documents/HSI-208454.pdf#page=13), PCR-602, "Permanent LM State Vector Update with SURFFLAG Set (Reincorporated)", is listed as having been "reincorporated" into Colossus 2C.
+3. [The Colossus 3 GSOP language (p. 5.1-33) describing SURFFLAG](https://www.ibiblio.org/apollo/Documents/HSI-208454.pdf#page=58) is word-for-word identical to that of Colossus 1A given above, nor are there any other differences related to SURFFLAG between the Colossus 3 and Colossus 1A descriptions elsewhere in the GSOP, as far as I can see.
+4. PCR-602 is not listed among the incorporated PCRs for Colossus 2C or 2B in [MIT/IL's presentation for the Apollo 12 Flight Software Readiness Review (FSRR)](https://www.ibiblio.org/apollo/Documents/apollo_12_fsrr_slides.pdf#page=5).
+
+I've [argued elsewhere](pcr-250-implementation-in-comanche-67) that conditions #1, #2, and #4 above are indicative of a GSOP-only change in Colossus 2C for the software change that originally occurred in Colossus 1A.&nbsp;
+
+Well, that's a lot digest.&nbsp; I'd summarize what's been said so far as:
+
+1. PCR-602 resulted in a code change to Colossus 249 vs Colossus 237, and a corresponding descriptive change in the GSOP, in the form of p. 5.1-38 vs p. 5.1-38A for Colossus 1 vs Colossus 1A.
+2. There were no PCR-602 related code changes between Colossus 2A and Colossus 3, so there were no PCR-602 related code changes in Colossus 2C vs Colossus 2A.
+3. Therefore, in Colossus 2C, "reincorporation" of PCR-602 was a GSOP-only change.
+4. _But_ there were no GSOP changes mentioning SURFFLAG after Colossus 1A.
+
+Of course, a wording change in the GSOP related to PCR-602 doesn't necessarily have to mention SURFFLAG explicitly, so item #4 above doesn't necessarily contradict item #3.&nbsp; But if there _were_ GSOP changes (not mentioning SURRFLAG but still related to PCR-602), then what were they?
+
+Fortunately, we have the [Colossus 2 (Comanche 44, 45) GSOP's section 5](https://www.ibiblio.org/apollo/Documents/R-577-Colossus2-Martin-5.1.pdf#page=48), and when I examine it I find that the language from 5.1-38 described earlier has regressed from the Colossus 1A description to the Colossus 1 description, i.e.,
+
+    3. The LM state vector is extrapolated
+       to time Tf. 
+
+whereas, as mentioned earlier, the Colossus 3 GSOP language once again matches the Colossus 1A GSOP language.&nbsp; Thus, it appears to me that in Colossus 2, PCR-602 is trying to restore the GSOP language on p. 5.1-38 that had regressed.
+
+To summarize, I think that reincorporation of PCR-602 really is a documentation-only change, without code changes.
+

@@ -1,0 +1,42 @@
+( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+As usual, we don't have a copy of PCR-810, "YAW DAP CDU sampling".&nbsp;
+
+Here's a little additional information.&nbsp; According to Mission Techniques Memo #41a, "H2 Odds and Ends", there was an ACB request outstanding for Colossus 2D, namely&nbsp;
+
+> ACB 97&nbsp; &nbsp; &nbsp; Delete redundant line inadvertently inserted [in] implementation  
+> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; of PCR 810.
+
+So whatever the implementation of PCR-810 was at least we know a little bug it left behind that we can look for.&nbsp; Also, it tells us that the PCR certainly involves code and isn't GSOP-only.
+
+My thought is that perhaps this PCR has to do with the YAWDAP routine (as opposed to YAW DAP) in the TVCDAPS section.&nbsp; The YAWDAP routine sets up T5RUPT to call the PITCHDAP routine, which sets up T5RUPT to call YAWDAP, thus alternating with each T5RUPT.&nbsp; The YAWDAP and PITCHDAP routines do internally read the CDUX, CDUY, and CDUZ special registers, thus fetching the CDU data.&nbsp;&nbsp;
+
+The PCR is thus telling us there's something amiss with the YAWDAP routine.&nbsp; We have the "TVC DAP" flowcharts which cover YAWDAP:
+
+- [Colossus 2 FC-2440](http://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf#page=205)
+- [Colossus 2D FC-2440](http://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=592).&nbsp; YAWDAP begins on sheet 9.
+
+In comparing the Comanche 55 and Artemis 71 versions of TVCDAPS, we find that they are largely the same, but with a handful of areas where we need to selectively decide what to keep from Comanche 55 and what to import from Artemis:
+
+- At the top, Comanche 55 and Artemis have different bank selections.&nbsp; I think we must ignore those at the present time.
+- Shortly after the beginning of PITCHDAP (yes, I know that from the PCR title it doesn't seem likely we're supposed to change PITCHDAP), there's a section of code called PSTROKER in Comanche 55 that's missing from Artemis.&nbsp; According to the Colossus 2D flowchart, we need to retain it as-is.&nbsp; In fact, there are no other differences between PITCHDAP in Comanche 55 and Artemis, so the entire subroutine is kept as is.
+- Similarly, shortly after the beginning of YAWDAP there's a section of code called YSTROKER that's missing from Artemis.&nbsp; However, it is in the flowchart, so we keep it.
+- Following the YSTROKER section, Artemis has a section called YCDUDOTS, followed by YINTEGRL.&nbsp; Comanche 55 does not have YCDUDOTS, and proceed directly to YINTEGRL.&nbsp; But YCDUDOTS is in the flowchart, so we import it from Artemis.&nbsp; YINTEGRL involves two new variables, YCDUYPST and YCDUZPST, that don't exist in Comanche 55.
+- Much later in the code, in the DAPINIT subroutine, we find that Artemis initializes YCDUYPST and YCDUZPST.&nbsp; The [Colossus 2D flowchart FC-2430](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=564) ("TVC Start-up and Executive Routines") for DAPINIT does _not_ show this initialization; rather, it shows only the same initialization of PCDUYPST and PCDUZPST as Comanche 55.&nbsp; This is dubious, since it means that YCDUYPST and YCDUZPST wouldn't be initialized on the first pass through YAWDAP.
+- Still later in the code, in 2DAPCAS, we find that Artemis has a two-instruction sequence (DDOUBL / DDOUBL) missing from Comanche 55.&nbsp; The flowchart (FC-2440 sheet 5) has this, so we must import it from Artemis.&nbsp; Very near that, in OPTVARK,&nbsp; Comanche 55 has a DDOUBL / DDOUBL where Artemis has merely a single DDOUBL.&nbsp; The same flowchart sheet just mentioned agrees with Artemis.
+
+Other than the question of the (lack of) initialization of&nbsp;YCDUYPST and YCDUZPST, this all seems quite straightforward.&nbsp; The problem with the lacking initialization is that while we'd like to just throw our hands in the air and say "the initialization must have been added to DAPINIT in a later revision of the software," that's a bit difficult to swallow when we realize that:
+
+1. Artemis (Colossus 3) was forked from Comanche 67 (Colossus 2C), rather than being a natural continuation from Colossus 2E.
+2. Therefore, there would have to be two separate PCRs or PCNs for correcting the problem, one for Colossus 3 and one for Colossus 2E.&nbsp; For that matter, Skylark forked from Artemis somewhere between Artemis 3 and Artemis 19, so it's even possible that there would be a third PCR, for Skylark.&nbsp; Actually, while we do not have Skylark source code at present, we do have its "Programmed Guidance Equations" document, which attempts to be a faithful representation of the program in a kind of pseudo-code.&nbsp; According to it, [Skylark's DAPINIT routine did indeed initialize YCDUYPST and YCDUZPST](https://www.ibiblio.org/apollo/Documents/programmed-guidance-equations-skylark-002.pdf#page=119).&nbsp;
+3. There are no known PCRs, PCNs, Software Anomaly Reports, or ACB requests relating to the initialization problem.&nbsp;&nbsp;
+4. It wouldn't be terribly surprising if there was a PCR we didn't know about ... but two (or even three) of them, and we no record of any?
+
+Is this more likely, or is it more likely that somebody simply forgot to update the DAPINIT flowchart?&nbsp; Well, unfortunately it's hard to say.
+
+Here's my game plan for implementing this in Comanche 67:&nbsp; Introduce new preprocessor constants Reconstruction810 and Reconstruction810Init for conditional assembly.&nbsp; Use the latter only for adding initialization of YCDUYPST and YCDUZPST to DAPINIT, and use the former for all of the other changes listed earlier.&nbsp; That way, the initialization can be easily enabled or disabled as desired.
+
+When I went to make these changes, I found that they were already all in place due to prior analysis, except for the ReconstructionInit ones.&nbsp; So at least I've added a little new stuff to the mix.&nbsp; I did find that I may have overreached a bit, because the changes in 2DAPCAS and OPTVARK were attributed to PCR-811 instead of PCR-810; in other words, they're real changes, but just not justified by PCR-810 (if the prior analysis is correct).
+
+⚠&nbsp;In summary, the PCR was implemented in code.&nbsp; I found that the ReconstructionInit changes made the "goodness signature" of the build marginally worse, so I've temporarily disabled them.&nbsp; They can be revisited later.
+

@@ -1,0 +1,29 @@
+( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+As usual, we have no copy of PCR-798.1, "Reset GLOKFAIL in R00".&nbsp; Also as usual with this PCR naming scheme, there is a dual PCR-798.2 incorporated into Luminary 102.&nbsp; Thus comparison of Luminary 99 source code vs Luminary 116 source code should reveal a detailed implementation which can be imported into Comanche 67.
+
+The TBD provides the following explanation of GLOKFAIL:
+
+> DESIRED ANGLES YIELD GIMBAL LOCK -  
+> CALCGA COMPUTES DESIRED IMU GIMBAL  
+> ANGLES FROM A SET OF N.B. VECTORS AND  
+> DESIRED S.M. VECTORS FOR PRELAUNCH  
+> AND INFLIGHT ALIGNMENT PROGRAMS. IF  
+> THE DESIRED IMU ATTITUDE WILL RESULT  
+> IN A MIDDLE GIMBAL ANGLE OF GREATER  
+> THAN 60°, GLOK FAIL (BIT 14 OF FLAG-  
+> WORD 3) IS SET AND PROGRAM ALARM IS  
+> DISPLAYED.&nbsp;
+
+The PROGRAM ALARM mentioned is 00401, though I guess this isn't really relevant to incorporation of the PCR.
+
+Comparing Luminary 99 vs Luminary 116, grep'ing for GLOKFAIL, the only difference is that in ROO of FRESH START AND RESTART, the instructions TC DOWNFLAG / ADRES GLOCKFAIL are added between clearing of R04FLAG and MUNFLAG.&nbsp;&nbsp;
+
+We also have the ["COLOSSUS II-D" revision of flowchart FC-2020](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=9), "FRESH START AND RESTART", which is kind enough to tell us that the only "COLOSSUS II-C" sheets different from "COLOSUSS II-A" and "COLOSSUS II-D" are 6, 8, and 26.&nbsp; Sheets 6 and 8 seem irrelevant to this issue, but sheet 26 of routine RAKE does show GLOKFAIL being cleared.&nbsp; However, it is cleared between clearing of 3AXISFLG and POOFLAG, which leads me to believe that the details of implementation of the PCR in fact differ between Luminary 116 and Comanche 67.&nbsp;
+
+In point of fact, the implementation is _very_ different, in that Luminary simply has a sequence of TC UPFLAG and TC DOWNFLAG instructions to set or clear the flag bits, whereas Comanche has a table of 12 flag words (FLAGTABL) which it negates and uses to fill up the 12-word array of flagwords (STATE) in reverse order.&nbsp; I.e., it first fills STATE[11] (FLAGWRD11) with -FLAGTABL[11], and then downward until reaching STATE[0] (FLAGWRD0) and filling it with -FLAGTABL[0].&nbsp; There are no actual flagwords 10 and 11, but the STATE[] array allows for them anyway.&nbsp; All of this is completely inconsistent (in terms of implementation, not effect) with FC-2020.&nbsp; Thus to insure that GLOKFAIL is set/reset properly, we need only make sure that the FLAGTABL[3] is correct.&nbsp; In this case, it means that bit 14 of FLAGTABL[3] must be 1.
+
+This is incorporated in Comanche 67 by introducing a preprocessor constant Reconstruction798 for conditional assembly, and setting bit 14 of FLAGTABL[3].&nbsp; I find this has already been done due to the previous analysis.
+
+In summary, the PCR has been incorporated into the code.
+

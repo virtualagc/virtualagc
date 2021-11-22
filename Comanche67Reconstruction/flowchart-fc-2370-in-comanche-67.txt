@@ -1,0 +1,145 @@
+( [Return to the main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+## Executive Summary
+
+I believe I've implemented FC-2370 into the reconstructed code, including PCR-815 (BBQ Mode).&nbsp; I say "implemented" rather than "incorporated" because I doubt some of the details.&nbsp; Several proprocessor constants for conditional assembly had to be introduced; see the table.&nbsp; There were quite a few points at which PCR-815 could have been implemented differently than I did, which will all need to be revisited, perhaps many times.&nbsp; Memory banks 43 and 16 were completely filled in the implementation process, but no memory banks were made to overflow.&nbsp; Unfortunately, these changes did not cause any dramatic improvement in banksum discrepancies.&nbsp; In fact, the "goodness signature" remains identical before-vs-after 08-02-04-06-04-10-02.&nbsp; So it is likely that the implementation was incorrect in many details.
+
+## Flowchart-To-Flowchart Comparison
+
+We have the Colossus 2A and Colossus 2D revisions of the flowchart. My strategy will be to do a side-by-side comparison of these two revisions to determine potential code changes in 2D.&nbsp; I will then try to determine what, if any, actions are required to reconstruct Colossus 2C.
+
+- STABLISH:&nbsp; 2A/2 vs 2D/2:&nbsp; Matches.
+- NODAPUP:&nbsp; 2A/2 vs 2D/2,3:&nbsp; Matches.
+- RCSDAPUP:&nbsp; 2A/3 vs 2D/4:&nbsp; Matches.
+- SATSTKON:&nbsp; 2A/4 vs 2D/5:&nbsp; Matches
+- DAPDISP:&nbsp; 2A/5 vs 2D/6:&nbsp; Matches
+- DONOUN46:&nbsp; 2A/5,6 vs 2D/7,8:&nbsp; Matches
+- DONOUN47:&nbsp; 2A/6,7 vs 2D/8,9:&nbsp; Matches
+- DONOUN48:&nbsp; 2A/7 vs 2D/10:&nbsp; Matches
+- V79, RATEMANU, RATECOMP, PTCROLL:&nbsp; 2A/absent vs 2D/10,11,12:&nbsp; Refer to the V79 section.
+- S41.2 _et al._:&nbsp; 2A/8,9 vs 2D/13,14,15,16:&nbsp; Matches.&nbsp; But there are some provisos:
+  - The 2D flowchart goes out of its way to set/clear ATTCHFLG, whereas the 2A flowchart instead says "bit 2 of FLAGWRD7".&nbsp; These are admittedly the same.&nbsp; Correspondingly, in the Comanche 55 code you find that BIT2 is used to mask FLAGWRD7, whereas in Artemis you find that ATTCHBIT masks FLAGWRD7.&nbsp; ATTCHBIT = BIT2, so there's no change in the core-rope values.&nbsp; Nevertheless, I've added this change to Comanche 67, conditionally assembled according to the preprocessor symbol ReconstructionFC2370.
+  - Similarly, what is "bit 15 of FLAGWRD1" in the 2A flowchart is "NJETSFLG" in the 2D flowchart.&nbsp; Thus I've changed BIT15 to NJETSFLG in the reconstruction, again conditioned on ReconstructionFC2370.
+  - And something else I noticed:&nbsp; In Comanche 55, S41.2 is positioned near the end of the log section, whereas in Artemis it's much closer to the middle ... i.e., the ordering of the source code (in section P40-P47) has changed.&nbsp; Of course, that could mean nothing, and so far I've done nothing with it.
+- S40.14:&nbsp; 2A/10 vs 2D/17:&nbsp; Matches.
+- S40.15:&nbsp; 2A/absent vs 2D/17:&nbsp; Matched the reconstructed code.&nbsp; (The code actually already had changes, just to the comments, previously incorporated due to PCR-811.)
+- ENATMA:&nbsp; 2A/11 vs 2D/18:&nbsp; Mismatch, however the difference was already incorporated due to PCR-785.
+- V60:&nbsp; 2A/12 vs 2D/18:&nbsp; Mismatch.&nbsp; The variables referred to in the 2A flowchart as CPHI, CTHETA, CPSI are referred to in the 2D flowchart as CPHIX, CPHIX +1, CPHIX +2.&nbsp; &nbsp;In point of fact, though, Comanche 55 source code already uses CPHIX, in spite of what the flowchart say.&nbsp; I do notice that CPHIX is at a different location in Artemis erasable than in Comanche 55 erasable, but have no way to know if that's relevant or not.
+- V61:&nbsp; 2A/12 vs 2D/18:&nbsp; Matches.&nbsp; The 2A flowchart refers to "bit 9 of FLAGWRD0" whereas the 2D flowchart refers to "NEEDLFLG".&nbsp; However, Comanche 55 code already used NEEDLFLG, regardless of flowchart.
+- V62:&nbsp; 2A/12 vs 2D/19:&nbsp; Matches.&nbsp; Same comment as for V61.
+- V63:&nbsp; 2A/13 vs 2D/19:&nbsp; Matches.&nbsp; Same comment as for V61.
+- NEEDLER _et al._:&nbsp; 2A/14,15 vs 2D/20,21,22,23:&nbsp; Matches.
+- STICKCHK:&nbsp; 2A/16 vs 2D/23:&nbsp; Matches
+- SETMAXDB:&nbsp; 2A/16 vs 2D/24:&nbsp; Matches
+- SETMINDB:&nbsp; 2A/16 vs 2D/24:&nbsp; Matches
+- AMBGUPDT:&nbsp; 2A/17 vs. 2D/25:&nbsp; Matches
+- DPADD:&nbsp; 2A/18,19 vs 2D/26,27:&nbsp; Matches
+- SMALLMP:&nbsp; 2A/20 vs 2D/28:&nbsp; Matches
+
+## V79  
+
+### Background
+
+The V79 subroutine is missing from the Colossus 2C flowchart because it is newly-introduced in Colossus 2C.&nbsp; Here's are some factoids of greater or lesser relevance:
+
+- This is the so-called "BBQ mode", described in detail by [COLOSSUS Memo #203](https://www.ibiblio.org/apollo/Documents/COL203.pdf), "PCR815/V79/ R64/PTC - ORBRATE Routine".&nbsp;
+- There is also considerable [GSOP description](https://www.ibiblio.org/apollo/Documents/HSI-208472.pdf#page=29), though unfortunately we have only the Colossus 2E GSOP, at which point PCR-292 and PCR-867 had caused the behavior to change somewhat from Colossus 2C.
+- [PCR-815](https://www.ibiblio.org/apollo/Documents/HSI-38170.pdf#page=6) (referenced in the Memo #203's title) is itself titled "Digital autopilot barbecue mode routine".&nbsp; An SCB description of the PCR is
+> This PCR changes the command module digital autopilot to provide a convenient way of setting up automatic GNCS attitude control for the cislunar passive thermal control and for orbit rate torquing around the moon.&nbsp;
+- Note also [COLOSSUS Memo #217](https://www.ibiblio.org/apollo/Documents/COL217.pdf), "Performance of R64 Y axis option at a rate = .0507 with CDUX = 180 deg", though it is not extremely useful since its perspective is largely that of an end-user as opposed to an implementer.
+- Incorporation of PCR-292 (Colossus 2E, "Add Time Display to V79", of which we have no copy) at some point between Comanche 84 and 89 is described by COLOSSUS Memo #243 as "a coding error in R64 was corrected".&nbsp; PCR-292 was also incorporated into Artemis at some point between Artemis 25 and 28, which COLOSSUS Memo #260 describes as follows:
+> A time delay option was added to R64.&nbsp; V06N16 (Rl, R2, R3=0) is displayed initially; a PROCEED with zero time causes the selected rate control to be immediately effective. A non-zero time (G.E.T.) may be loaded which will delay the implementation of the selected rate control until the specified G.E.T.&nbsp; The uplink activity light is turned on when the rate control starts.&nbsp; This option is not available during P00; if R64 is selected during P00, the V06N16 display is bypassed and rate control proceeds immediately with no uplink activity light.&nbsp; (PCR 292)
+- PCR-867 (Colossus 2E, "Make R64Y Rotation Fix") is also something we don't have.
+
+Previous analysis of the BBQ-mode issue had gone nowhere and did not end up incorporating any code into the reconstruction.
+
+### First Confusing Side-Issue
+
+_One_ confusing point is that in the flowchart document, we find several places where "R64" appears in the table of contents, title blocks, etc., but not in the actual flowcharts.&nbsp; We find this in FC-2360 (titled "R64 (R05) - S-Band Antenna") and in FC-2606 (titled "V94 (R64)" or Cislunar Tracking).&nbsp; I think that as far as FC-2360 is concerned, it has nothing whatever to do with the (real) R64 for V79.&nbsp; In FC-2360, while the table of contents does reference R64, that reference has disappeared in the title block of the flowchart, which simply reads "R05 S-Band Antenna".&nbsp;
+
+As far as FC-2606 is concerned, I am not quite as certain.&nbsp; But as near as I can make out, V94 has nothing to do with BBQ mode.&nbsp; So I'm going to say it should just be ignored.
+
+### Second Confusing Side-Issue
+
+_Another_ confusing point (to me) is that all of the documentation discusses R64, but we can only find a flowchart for V79.&nbsp; Nowhere can we find a flowchart for R64 itself.&nbsp;
+
+As far as I can tell, the Colossus autopilot _always_ had of automatically maintaining a constant roll from a given initial orientation, and thus PCR-815 requires no additional code to implement that behavior.&nbsp; The problem, rather, was that a series cumbersome steps was needed for the astronauts to maneuver to the desired initial orientation, set up the deadband, set up the roll rate, and then initiate the automatic operation.&nbsp; V79 instead provides an easier way of entering those parameters and starting the automatic guidance, though I guess maneuvering to the initial orientation was still something that needed to be done separately beforehand.&nbsp;
+
+In other words, given that there's no need of any additional code beyond this parameter-input functionality, I guess that V79 and R64 are really one and the same thing; the V79 flowchart comprises the entirety of R64.
+
+### General Analysis
+
+Unfortunately, now a lot more guessing begins!
+
+1. Where should the code go?&nbsp; Well, firstly, the entry point should be called "V79" just as in the flowchart.&nbsp;
+2. V79 itself should go into EXTENDED VERBS, since that's what V79 is.&nbsp; If there were an actual entry point called "R64" in the flowchart, and V79 called R64, then perhaps R64 should go elsewhere, but there isn't a separate R64.&nbsp; So I presume the entirety of V79's flowchart should probably go into EXTENDED VERBS.
+3. Where in EXTENDED VERBS?&nbsp; 
+  - What immediately precedes V79 in the _flowchart_ is DONOUN48.&nbsp; In the _code_, in fan-out table GOEXTVB, what immediately follows the table position where V79 will appear is:&nbsp; TC LEMVEC / TC CSMVEC / TC V82PERF / TC V83PERF / ....&nbsp; &nbsp;In the actual code (rather than the fan-out table) of EXTENDED VERBS, DONOUN48 is immediately followed by V82PERF.&nbsp; (LEMVEC and CSMVEC are off in the boonies somewher.)&nbsp; It seems to me that putting V79 in between DONOUN48 and V82PERF in the code makes a kind of sense.&nbsp; Unfortunately, placing it there causes severe regressions, and we drop from the current 8 resolved memory banks to just 6.&nbsp; So this is not a good place to put it.
+  - Moving V79 to later in EXTENDED VERBS restores first one of the resolved banks, and then the other.&nbsp; (And moving it still later doesn't change that.)&nbsp; While experimenting with that, I observed the code (as opposed to the table entries) for V76, V77, and V87 appear consecutively, and putting&nbsp; V79 between the code for V77 and V87 appears somewhat logical.&nbsp; All of the 8 resolved memory banks remain resolved with that placement, and there are no other obviously-bad side effects, so that seems to be a good placement ... for now.
+4. What memory bank should V79 be?&nbsp; Well, GOEXTVB is in bank 43, so V79 must start there as well.&nbsp; Bank 43 has only 9 words remaining at this point in the reconstruction, so there's not enough space there for everything, and therefore the remainder will have to be placed in a different bank.
+5. In what memory bank should the "remainder" of V79 go?&nbsp; In the most efficient basic (as opposed to interpretive) coding I have been able to devise so far, RATEMANU can fit in bank 43 (with 0 words to spare) and from RATECOMP onward can fit in bank 16 (with 0 words to spare).&nbsp; Interpretive coding might make it smaller, but my _guess_&nbsp;at this point is that doing so would be unlikely to save the 8 words necessary to cram the remainder into bank 17 instead.&nbsp; Of course, the remainder could also be split among several banks.&nbsp; Or stuff could be moved out of other banks.
+6. New erasables:&nbsp; RATEPTC, DBPTC, OPTPTC.&nbsp; COLOSSUS Memo #203 mentions that "The erasable locations used for N79 are shared locations so data in N79 is not necessarily saved from the previous use of V79", referring to where the data entered via V06N79 (and used by V79/R64).&nbsp; Although V79 had disappeared from Colossus 3, the RATEPTC and DBPTC (but not OPTPTC) variables persist.&nbsp; You can see references to them in the table IDADDTAB in PINBALL NOUN TABLES, and see them allocated in ERASABLE ASSIGNMENTS, where they are inserted between SAVBNK and R61CNTR.&nbsp; 
+  - Adding the references in PINBALL NOUN TABLES clearly must be done, and must be done in exactly one way.&nbsp; Since that turns out to be tricky, I separate the analysis into a separate section.&nbsp;&nbsp;
+  - ERASABLE ASSIGNMENTS requires a bit of thought, because the area used in Artemis may not be appropriate for Comanche, and because at this stage of the reconstruction we are pretty confident of the layout of erasable memory, and don't want to add or subtract words from it that would displace the addresses of the succeeding variables.&nbsp; So in Artemis, RATEPTC/DBPTC occupy 2 words of memory between SAVBNK and R61CNTR, whereas in Comanche 55, there is already a 3-word variable (SAVEDCDU) occupying that position.&nbsp; Thus the amount of space that would be provided by sharing SAVEDCDU would be perfect for RATEPTC/DBPTC/OPTPTC.&nbsp; The comments indicate that SAVEDCDU is "CRS61.1 STORAGE FOR AUTOPILOT BANK" and that it is "TMP", so the question is whether CRS61.1 and BBQ mode can ever need this space simultaneously.&nbsp;
+
+### PINBALL NOUN TABLES
+
+In PINBALL NOUN TABLES, it seems that the variables (RATEPTC, DBPTC, OPTPTC) set up by V06N79 must be added to 4 separate tables:&nbsp; IDADDTAB&nbsp;&nbsp;NNADTAB, NNTYPTAB, and RUTMXTAB.
+
+IDADDTAB:&nbsp; This is actually straightforward, because there's only one way to do it, so there's no need to discuss it.&nbsp; The other tables are trickier, since the entries are encoded and Artemis has no 3rd component for V06N79, so we can't just blindly copy what Artemis has.
+
+NNADTAB:&nbsp; In Artemis, the value is 24165₈.&nbsp; As I figure it, for "mixed nouns" (N40 through N99) such as N79, the entries in NNADTAB are encoded as follows:
+
+- Bit 15:&nbsp; "No load".&nbsp; This means that if any data is entered, the DSKY's OPR ERR indicator lamp will be illuminated.&nbsp; We wouldn't expect this bit to be set for our situation, and indeed it is not set in 24165₈.
+- Bit 14:&nbsp; "Decimal only".&nbsp; This means that octal data is entered, the OPR ERR lamp will be illuminated.&nbsp; This bit is set in 24165₈, which makes sense if only RATEPTC and DBPTC are being entered in Artemis, but once OPTPTC comes into the mix I'm not sure it makes sense for Comanche 67.&nbsp; I think it should probably be 0 for us.
+- Bit 13:&nbsp; "Octal only"?&nbsp; At any rate, it doesn't apply to our case and should be 0.
+- Bits 12-11:&nbsp; &nbsp;The number of variables which will be affected, minus 1.&nbsp; In other words, 0=spare, 1=two components, 2=three components.&nbsp; (There's no option for just one component.)&nbsp; Thus we'd need to have a value of 2 for Comanche 67, but would expect a value of 1 for Artemis, and indeed that's exactly what we find.
+- Bits 10-1:&nbsp; An offset into IDADDTAB of the 3 consecutive ECADRs pointing to the (2 or 3) variables which are going to be affected.&nbsp; For N79, this would appear to be (79-40)\*3=117₁₀=165₈.&nbsp; And indeed, that's what we already find in 24165₈.
+
+NNTYPTAB:&nbsp; In Artemis, the value if 00113₈.&nbsp; It appears to me that for mixed nouns, the value is parses as follows:
+
+- Bits 15-11:&nbsp; Scale-factor constant code for component 3 (or 0 if no 3rd component).
+- Bits 10-6:&nbsp; Scale-factor constant&nbsp;code&nbsp;for component 2 (or 0 if no 2nd component, though given how NNADTAB is encoded, I don't see how that's possible).
+- Bits 5-1:&nbsp; Scale-factor constant&nbsp;code&nbsp;for component 1.
+
+The "scaling-factor constant code number".&nbsp; The comments in the Comanche 55 source code list the following possible values (in binary):
+
+    #	00000 WHOLE USE ARITH#	00000 DP TIME SEC (XXX.XX SEC)	USE ARITHDP1#	00001 SPARE#	00010 CDU DEGREES USE CDU DEGREES#	00010 Y OPTICS DEGREES USE Y OPTICS DEGREES#	00011 DP DEGREES (90) XX.XXX DEG	USE ARITHDP3#	00100 DP DEGREES (360) XXX.XX DEG	USE ARITHDP4#	00101 DEGREES (180) XXX.XX DEG	USE ARITH#	00110 WEIGHT2 (XXXXX. LBS) USE ARITH1#	00111 POSITION5 (XXX.XX NAUTICAL MILES)# USE ARITHDP3#	01000 POSITION4 (XXXX.X NAUTICAL MILES)# USE ARITHDP3#	01001 VELOCITY2 (XXXXX. FT/SEC)	USE ARITHDP4#	01010 VELOCITY3 (XXXX.X FT/SEC)	USE ARITHDP3#	01011 ELEVATION DEGREES (89.999 MAX)	USE ARITH#	01100 TRIM DEGREES (XXX.XX DEG)	USE ARITH#	01101 INERTIA (XXXXXBB. SLUG FT FT)	USE ARITH#	01101 THRUST MOMENT (XXXXXBB. FT LBS)	USE ARITH#	01110 VELOCITY/2VS (XXXXX. FT/SEC)	USE ARITHDP4#	01111 POSITION6 (XXXX.X NAUT MI)	USE ARITHDP3#	10000 DRAG ACCELERATION (XXX.XX G)	USE ARITHDP2#	10001 POSITION8 (XXXX.X NAUT MI)	USE ARITHDP3#	10010 POSITION9 (XXXXX. FT) USE ARITHDP4#	10011 VELOCITY4 (XXXX.X FT/SEC)	USE ARITHDP2
+
+Parsing out 00113₈, we find that in Artemis,
+
+- Component #1 (RATEPTC) has the code 01011, or "ELEVATION DEGREES (89.999 MAX)"
+- Component #2 (DBPTC) has the code 00010,&nbsp; or "CDU DEGREES" or "Y OPTICS DEGREES"
+- Component #3 (unused in Artemis) has the code 00000, or "WHOLE"
+
+I don't have much idea whether the first two of these make any sense or not.&nbsp; COLOSSUS Memo #203 tells us that the first component is "displayed to .0001 deg/sec" while the second component is "displayed to .01 deg".&nbsp; But there don't seem to be any scaling-factor constants consistent with the former (so 01011 is the closest).&nbsp; &nbsp;As for the latter, [the "Keyboard and Display Program and Operation" document](https://www.ibiblio.org/apollo/hrst/archive/1706.pdf#page=70) tells use that
+
+    00010             CDU Degrees (XXX.XX deg.)00010             Y Optics Degrees (XX.XXX deg.)
+
+Well, I suppose it must be right, even if I don't quite understand it.&nbsp; As far as the third component is concerned, though, "WHOLE" seems exactly right.&nbsp; So it appears to me that the Artemis value works fine for Comanche 67.
+
+RUTMXTAB:&nbsp; In Artemis the value is 00103₈.&nbsp; These values are also parsed out into 3 components, as
+
+- Bits 15-11:&nbsp; Scale-factor routine code for component 3 (or 0 if no 3rd component).
+- Bits 10-6:&nbsp; Scale-factor routine&nbsp;code&nbsp;for component 2 (or 0 if no 2nd component).
+- Bits 5-1:&nbsp; Scale-factor routine&nbsp;code&nbsp;for component 1.
+
+The Comanche 55 source code lists the possible scale-factor routine codes as:
+
+    # 00000 OCTAL ONLY#	00001 STRAIGHT FRACTIONAL#	00010 CDU DEGREES (XXX.XX)#	00011 ARITHMETIC SF#	00100 ARITH DP1	OUT (MULT BY 2EXP14 AT END)	IN (STRAIGHT)#	00101 ARITH DP2	OUT (STRAIGHT) IN (SL 7 AT END)#	00110 Y OPTICS DEGREES (XX.XXX MAX 89.999)#	00111 ARITH DP3	OUT (SL 7 AT END) IN (STRAIGHT)#	01000 WHOLE HOURS IN R1, WHOLE MINUTES (MOD 60) IN R2,# SECONDS (MOD 60) 0XX.XX IN R3.  ***ALARMS IF USED WITH OCTAL#	01001 MINUTES (MOD 60) IN D1D2, D3 BLANK, SECONDS (MOD 60) IN D4D5# LIMITS TO 59B59 IF MAG EXCEEDS THIS VALUE.# ALARMS IF USED WITH OCTAL******** IN (ALARM)#	01010 ARITH DP4	OUT (STRAIGHT) IN (SL 3 AT END)#	01011 ARITH1 SF	OUT (MULT BY 2EXP14 AT END)	IN (STRAIGHT)#	01100 2 INTEGERS IN D1D2, D4D5, D3 BLANK.# ALARMS IF USED WITH OCTAL ******** IN (ALARM)#	01101 DP STRAIGHT FRACTIONAL
+
+Parsing out 00103₈, we find that in Artemis,
+
+- Component #1 (RATEPTC) has the code 00011, or "ARITHMETIC SF"
+- Component #2 (DBPTC) has the code 00010,&nbsp; or "CDU DEGREES (XXX.XX)"
+- Component #3 (unused in Artemis) has the code 00000, or "OCTAL ONLY"
+
+Assuming that the first two are correct for Comanche 67 as well, I'd note only that "OCTAL ONLY" seems like exactly what's needed for OPTPTC, so the Artemis value seems appropriate for Comanche 67.
+
+## Preprocessor Labels for Conditional Assembly
+
+- For incorporation of FC-2370 _other than_ V79/R64/PCR-815:&nbsp; ReconstructionFC2370.
+- For incorporation of V79/R64/PCR-815 specifically:&nbsp; Reconstruction815.&nbsp; Additionally, if Reconstruction815 is #define'd then both of the following must be defined (and assigned values) as well:
+  - Memory bank to use for subroutine RATEMANU _et seq._:&nbsp; bankRATEMANU
+  - Memory bank to use for subroutine RATECOMP _et seq._:&nbsp; bankRATECOMP
+

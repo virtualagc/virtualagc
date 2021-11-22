@@ -1,0 +1,56 @@
+( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+We have no copy of PCN-787, "Make N63 Count During P61", or of PCN-835, "Change Recycle Point on N63 in P61".&nbsp; I'm addressing the two PCNs together since with the crude tools I can bring to bear it seems likely that in fixing one I'd likely accidentally fix the other as well anyway.
+
+Software flowchart FC-2760 covers the P6_X_ programs, with the flowchart for P61 beginning on sheet 2:
+
+- ["COLOSSUS IIA" revision of FC-2760](https://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf#page=421)
+- ["COLOSSUS 2D" revision of FC-2760](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1228)
+
+Thus we are lacking the Colossus 2C revision of the flowchart entirely, and have to rely on the Colossus 2D revision.&nbsp; A side-by-side comparison of the two P61 flowcharts reveals the following differences:
+
+1. Preceding NEWRNVN, the 2D flowchart has label AGIN,MON, with the assignment EXTVBACT [←](https://en.wikipedia.org/wiki/%E2%86%90_(disambiguation))2000₈&nbsp;("Lock out extended verbs")
+2. Following return from STARTEN1, the 2D flowchart clears flagword 6 bit 3 (.05GSW, "Enable TICKTTE to decrement TTE")
+3. In P61.1, preceding start of NEWMODEX, the 2A flowchart has a loop of 4 bubbles displaying a flashing V06N63 and updating the current time in MPAC, looping for every "recycle" of GOFLASH.&nbsp; Whereas the 2D flowchart instead has a single GOFLASH bubble for displaying flashing V16N63 and "recycles" after the GOFLASH to AGIN,MON.
+
+Presumably item #2 is what "makes N63 count" and items #1 and #3 "change recycle point on N63".
+
+Additionally, though, I note that S61.2, "NOUN 60 and NOUN 63 CALCULATION SUBROUTINE", beginning at [sheet 12 for Colossus 2A](https://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf#page=431) and [sheet 22 for Colossus 2D](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1248), may have some relevance as well.&nbsp; Though I haven't compared them in great detail, I observe a difference in the calculation of TTE.&nbsp; Near the bottom of sheet 12/23 for Colossus 2A/D, with the current contents of MPAC described at that point as
+
+    MPAC = time of flight to EMS altitude from present position.
+
+you find the following for Colossus 2A,
+
+    TTE1 ← -MPAC TIME TILL ENTRY (.05G) (NEGATIVE AS IN COUNTDOWN) FOR N63 DISPLAYTTE ← -MPAC 
+
+as opposed to the following for Colossus 2D,
+
+    TTE1 ← MPAC Time till entry (.05g) stored positiveTTE2 ← -(MPAC + MM)  Negative for N63 displayTTE ← PIPTIME - (MPAC + MM) 
+
+Meanwhile, the DISPTARG routine also differs.&nbsp; In 2A,
+
+    DTEAROT ← KTETA1 ∙ MPAC - TTE1 TTE = -(TIME OF FREE FALL)
+
+while in 2D
+
+    DTEAROT ← KTETA1 ∙ MPAC + TTE1 TTE = time of free fall
+
+This stuff in S61.2 seems as though it _might_ be relevant, though I'm not sure exactly what to make of it, since it doesn't seem to have anything immediately to do with what the titles of the PCRs describe and thus might be something specific to Colossus 2D rather than to 2C.&nbsp; The Comanche 55 baseline and earlier revisions of Colossus don't even _have_ the variable TTE2.&nbsp; On the other hand, S61.2 is called between differences #2 and #3 (which are very close together) itemized above, so it certainly seems relevant in terms of proximity.&nbsp; In Artemis, TTE2 is used by the TICKTTE routine in the SERVICER207 log section.&nbsp; TICKTTE does not exist in Colossus 2A and prior, and it seems to do the actual countdown of TTE.&nbsp; We have revisions of the SERVICER flowchart:
+
+- ["COLOSSUS II" revision of FC-2683, "SERVICER"](https://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf#page=365)
+- ["COLOSSUS 2D" revision of FC-2683, "SEVICER"](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1129)
+
+We readily find TICKTTE in the 2D SERVICER flowchart (sheet 17) but as expected, not in the Colossus 2 revision (sheet 14), and TICKTTE is certainly seen to be using TTE2.&nbsp; Therefore, S61.2 must calculate TTE2.&nbsp; Therefore, presumably, we should adopt the S61.2 changes as-is.
+
+And of course, we must also define TTE2 in ERASABLE ASSIGNMENTS.
+
+The incorporation of the PCRs thus involves a new preprocessor label, "Reconstruction787\_835", for use in conditional assembly, and all of the modifications listed above.&nbsp; In making the mods, I found them already in place due to the previous analysis, but I've replaced the preprocessor labels Reconstruction787 and Reconstruction835 used previously, since I think they reflect the order in which the PCNs were analyzed rather than any logical partitioning between them.&nbsp; The previous analysis had not noticed the change in DISPTARG, however, so that change is a new one contributed by this analysis.
+
+**Note:** &nbsp; Regarding the flowchart EXTVBACT [←](https://en.wikipedia.org/wiki/%E2%86%90_(disambiguation))2000₈&nbsp;("Lock out extended verbs"), I notice that Artemis uses
+
+    AGIN,MON	CA	BIT14 # LOCK OUT EXTENDED VERBS.(REDUNDANT ON TS	EXTVBACT	#  INITIAL PASS)
+
+which actually corresponds to&nbsp;EXTVBACT←20000₈&nbsp;instead.&nbsp; Unfortunately, back in the day, it seems never to have occurred to anybody to _write down_ the interpretations of the various bit-flags stored in EXTVBACT.&nbsp; The best one can do to interpret them seems to be poring through the source code (or Norton's "Programmed Guidance Equation" documents) and simply tabulating what bits in EXTVBACT each subroutine uses.&nbsp; Yuck!&nbsp; My impression is that the flowchart is in error, and that 20000₈&nbsp;is the proper value.&nbsp; On the other hand, the prior analysis noticed something I did not in the current analysis, namely that the [FRESH START AND RESTART flowchart FC-2020](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=14) sets the .05GSW flag at startup, not by name, but using the SWINIT array to manipulate FLAGWRD6.
+
+In summary, the changes were implemented, though errors in both the prior analysis and the current analysis were discovered in the process and were reconciled.&nbsp; There remains an alternate method of implementing one of the changes, which seems more logical but which conflicts with the way Artemis does it, so perhaps it could be revisited but it's probably not worth it.
+

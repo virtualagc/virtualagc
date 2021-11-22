@@ -1,0 +1,44 @@
+( [Return to the main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+We have only the Colossus 2D revision of FC-2280 at the moment, and no indication of which sheets of it may differ from prior revisions (if any).&nbsp; So there's little alternative other than to simply compare each sheet of the flowchart to the reconstructed code, and then playing any discrepancies that may be uncovered by ear.
+
+## Sheet 1
+
+Just a cover sheet, no flowcharts.
+
+## Sheet 2
+
+LAT-LONG, CALLTRP:&nbsp; In the code, ALPHAv is pushed onto the stack, which is not mentioned in the flowchart, without any functional purpose as far as I understand (at least on this sheet of the flowchart).&nbsp; However, both Artemis and Colossus 237 do this as well, so even if it really turns out to be pointless it's still not anything specific to Comanche 67.
+
+## Sheet 3
+
+Continuation of CALLTRP:&nbsp; Looks like a match.
+
+## Sheet 4
+
+Continuation of CALLTRP:&nbsp; Note that the ARCTAN subroutine (sheet 5) stores its result in THETA while presumably leaving it in MPAC as well.&nbsp; (Actually, the documentation in the source code says this.)&nbsp; With that in mind, looks like a match.
+
+## Sheet 5
+
+ARCTAN, CLROVFLW, ARCTANXXX, ATAN=90:&nbsp; Note that there are two places on this sheet with operation blocks clearing OVFIND, such as:
+
+![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/175568)
+
+In the code we find these implemented as branch-on-overflow instructions, BOV.&nbsp; BOV _additionally_ clears OVFIND, so this is not a discrepancy.
+
+In CLROVFLW, the decision MPAC=0? incorrectly shows branching to ARCTAN if true (which would result in an endless loop), but the code instead branches to ARCTANXX, which indeed has the subsequent behavior shown in the flowchart.&nbsp; In other words, the flowchart is in error.
+
+Sheet 6
+
+Continuation of CLROVFLW, NEGCOS, NEGOUT, ARCTANXX:&nbsp; The code corresponding to&nbsp;
+
+![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/175572)
+
+uses an SR1, thus appearing to divide by 2 in the computation of THETA rather than to multiply by two.&nbsp; All versions of Colossus code, including Artemis, use this same SR1.
+
+The code corresponding to "No" branch after the decision box IS -THETA&nbsp;≥&nbsp;0? appears to me to compute -THETA+1/2 rather than the THETA+1/2 indicated by the flowchart.&nbsp; All Colossus code versions do, including Artemis.&nbsp;&nbsp;
+
+## Sheet 7-13
+
+After the above, I'm beginning to see that further comparisons of FC-2280 are pointless, because the source code of LATITUDE LONGITUDE SUBROUTINES is shown by diffs to be identical (other than memory-bank selection) across all currently-available versions of Colossus, including Colossus 237, Comanche 55, and especially Artemis72.&nbsp; Therefore, no matter what discrepancies between the code and flowchart I find, I'm _always_ going to argue that since the code never changes, there's no Comanche 67 specific issue.&nbsp; That being the case, why continue the comparisons?
+

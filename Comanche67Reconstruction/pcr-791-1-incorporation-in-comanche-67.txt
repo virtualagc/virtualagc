@@ -1,0 +1,34 @@
+( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+We have no copy of PCR-791.1, "Do not allow PROCEED response to V21, V22, V23".&nbsp; As usual with this PCR naming pattern, there is a matching Luminary PCR-791.2, incorporated in Luminary 116 (according to [section 2 of the Luminary 1E GSOP](https://www.ibiblio.org/apollo/Documents/j2-80-R-567-SEC2-REV12_text.pdf#page=12)).&nbsp; Thus diff'ing Luminary 99 vs Luminary 116 source code may reveal the details of the change, and those details could be importable into Comanche.&nbsp;
+
+This explanation from the [Apollo Block II Operations Handbook](https://www.ibiblio.org/apollo/Documents/SM2A-03-BLOCKII-4.6_4.8.pdf#page=17)&nbsp;(1970) may provide slightly more detail:
+
+> PRO KEY: A PRO key input is rejected if verb windows show a V21, V22, or V23.&nbsp; V33E must  
+> be used for these cases, e.g., a V21 PRO (or V25E PRO) will be rejected; a V25 PRO will  
+> not. For the V21, V22, V23 and PRO cases, PRO lights OPR ERR light.&nbsp;
+
+Similar explanations appear in the [Program Notes for Colossus 3 and Luminary 1E](https://www.ibiblio.org/apollo/Documents/msc05225.pdf)&nbsp;and other contemporary documents.
+
+This is a bit tricky to isolate in the code.&nbsp; However, in grep'ing around, in the log section PINBALL GAME BUTTONS AND LIGHTS I notice that Luminary 116 inserts code not present in Luminary 99 at the beginning of the PROCKEY routine.&nbsp; It doesn't really tell us what PROCKEY does, but from the name it seems as though it could be the response to a PROCEED key. As it turns out, that's correct:&nbsp; The T4RUPT interrupt-service routine monitors the state of the PROCEED pushbutton every 120 milliseconds, and at some point calls PROCKEY it notices that the button has been pressed.
+
+Anyway, the inserted code at the start of PROCKEY is:
+
+            CS VERBREG # DONT ALLOW PROCEED DURING LOAD. AD VBSP2LD* # DEC 22 EXTEND DIM A EXTEND BZF CHARALRM
+
+And it later adds the following, also missing from Luminary 99:
+
+    VBSP2LD*	DEC 22 # VB22 = BLOAD
+
+Look at what this code does:&nbsp; It first takes the contents of VERBREG and subtracts 22, so if VERBREG is 21, 22, or 23, after subtraction the accumulator will hold -1, 0, or +1, whereas all other verbs will result in accumulator \< -1 or accumulator \> +1.&nbsp; The DIM instruction moves everything 1 closer to 0, so the original verbs 21, 22, or 23 now result in the accumulator holding 0, whereas all other verbs result in a non-zero accumulator.&nbsp; Finally, BZF CHARALRM branches to CHARALRM _if and only if_ the original verb was 21, 22, or 23.
+
+There is a slight mystery here, in that in Luminary 116, the original PROCKEY routine of Luminary 99 has been relabeled "PROCKEY1" rather than simply becoming unlabeled.&nbsp; The label PROCKEY1 is unnecessary, since PROCKEY1 is never referenced, either in Luminary 116 or in any revision of Luminary or Colossus whatever.&nbsp; Perhaps it was just easier (cardpunch-machine-wise) to add the 1 to the end of PROCKEY than to remove the string "PROCKEY" entirely.&nbsp; Or perhaps the label PROCKEY1 was intended for use in digital simulations to make sure that the bypass for V21/22/23 was working.&nbsp; Whatever!&nbsp; It doesn't matter for us:&nbsp; The only important question was whether it implied that some additional mods were needed elsewhere in the software, but it definitely doesn't do so.
+
+This would seem to completely implement the titular description of the PCR, unless there's some subtlety that's escaping me or some additional demands in the body of the PCR.
+
+Using the preprocessor label "Reconstruction791" for conditional assembly, the code mentioned above has been added to PROCKEY in Comanche 67.
+
+When I tried to change the code, I found that it had already been changed as described, due to the prior attempt at analysis.&nbsp; In the process I did find that a change due to PCR-801.1 had been accidentally conditioned on Reconstruction791 rather than Reconstruction801, so I fixed that error, but it has no effect on the rope image.
+
+Summary:&nbsp; Incorporated in code.&nbsp; One could still question the positioning of the VBSP2LD\* constant in the source code, or whether it should perhaps be moved to fixed-fixed as has happened in Artemis.&nbsp; As of now, Comanche 67 (like Luminary 116) has both banks 40 and 41 are used for PINBALL GAME BUTTONS AND LIGHTS, and separate copies of the same constant are needed for the different banks if the constants aren't in fixed-fixed.&nbsp; Given that the same setup persists in Luminary all the way through Luminary 210, however, it seems unlikely that it was cleaned up any in Colossus 2_X_.
+

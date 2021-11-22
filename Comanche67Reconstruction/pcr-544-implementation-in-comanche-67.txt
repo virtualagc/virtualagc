@@ -1,0 +1,22 @@
+( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+
+We have no copy of PCN-544, "Change Obsolete SPS Thrust in Section 5".&nbsp; From the title alone, it would seem that in Comanche 67 this is a documentation change to section 5 of the Comanche GSOP rather than a code change.
+
+As additional verification, though, I'd observe that:
+
+- According to [section 5 of the Colossus 3 GSOP](https://www.ibiblio.org/apollo/Documents/HSI-208454.pdf#page=8), PCN-544 was implemented in either Colossus 1 (Colossus 237) or Colossus 1A (Colossus 249).&nbsp; Interestingly, in [section 5 of the Colossus 1/1A GSOP](https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-start-5.2.pdf#page=5), PCN-544 is listed with a different but consistent title, "Correction to Fixed Memory Constant", more indicative of a software change.
+- Also according to [section 5 of the Colossus 3 GSOP](https://www.ibiblio.org/apollo/Documents/HSI-208454.pdf#page=13), PCN-544 is only being "reincorporated" in Colossus 2C (Comanche 67).
+- According to the [MIT/IL presentation for the Apollo 12 Flight Software Readiness Review (FSRR)](https://www.ibiblio.org/apollo/Documents/apollo_12_fsrr_slides.pdf#page=5), PCN-544 is not listed as having been newly implemented in Colossus 2B or Colossus 2C.
+
+I've [argued elsewhere](pcr-250-implementation-in-comanche-67) that this combination of conditions is indicative of a documentation-only change in Comanche 67, with no change to code.
+
+Finally, we do have section 5 of the Colossus 1/1A GSOP in our Document Library ( [beginning through section 5.2](https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-start-5.2.pdf), [section 5.3 through 5.5](https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.3-5.5.pdf), [section 5.6 onward](https://www.ibiblio.org/apollo/NARA-SW/R-577-sec5-rev4-5.6-end.pdf)), so we can look in it and see if SPS thrust is marked as a change as we expect.&nbsp; (Of course, even if it is so marked, that doesn't necessarily imply there's no code change; and if it isn't so marked, that doesn't imply there was a code change; but at least it would test our expectations.)&nbsp; We do indeed find such a change, on both pages 5.9-2 (Colossus 1 only) and 5.9-2A (Colossus 1A only), in which constant Fₛₚₛ (according to p. 5.3-21, the "prestored nominal thrust based on the engine selection switch Sₑ" for program P40) is assigned a value of 20,500 pounds, marked with a change-bar, which the page footer indicates was due to PCN-544.&nbsp; In terms of code, there's no fixed constant called "FSPS" or any reasonable variation that I've found, but in log section P40-P47 there is
+
+    FENG 2DEC	9.1188544 B-7	# SPS THRUST (20500LBS), SC.AT B+7 NEWT/E4
+
+which appears in every revision of Colossus 1, 2, or 3 available to us at present.&nbsp; Moreover, this is the only meaningful context in which "20500" or "20,500" appears in any of the AGC program comments for available software versions.
+
+So it would seem we have reasonable grounds for supposing that FENG is&nbsp;Fₛₚₛ and that it never changed in code after Colossus 237.
+
+In summary, I infer that in Comanche 67, PCN-544 is a documentation-only change, representing a code change that happened previously in Colossus 237.
+

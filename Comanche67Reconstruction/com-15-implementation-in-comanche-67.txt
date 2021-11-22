@@ -1,0 +1,18 @@
+( [Return to main Comanche 67 reconstruction page](comanche-67-reconstruction).)
+
+We have a copy of [Software Anomaly Report COM-15](https://www.ibiblio.org/apollo/Documents/COM-15.pdf), whose complaint reads
+
+> Storing of gimbal angles at liftoff for initialization of attitude errors in P11 is not properly restart protected (period of anomaly is maximum TLIFTOFF + 2 seconds)
+
+and whose recommended fix is
+
+> Provide proper EBANK declaration for restart of MATRXJOB.
+
+Looking at the code for MATRXJOB (in log section P11) in the Comanche 55 baseline, we see that it is using variables like OGC, which are in erasable bank E5, which is consistent with the pseudo-op EBANK= QPLACES which appears a dozen or so lines above the start of MATRXJOB.
+
+On the other hand, in the RESTART TABLES log section, determining the assembler's understanding of the erasable bank for 2CADR MATRXJOB is a bit tricky, but appears to be governed by the pseudo-op EBANK= RRECTCSM in the the FRESH START AND RESTART log section, which would be bank E3, and therefore wrong.&nbsp; Note that there are many intervening EBANK= pseudo-ops, but they are all one-shots, applying only to the single line following them, rather than being persistent as EBANK= RRECTCSM is.&nbsp; (Actually, I realized belatedly that I could just parse assembled doubleword from the 2CADR MATRXJOB to determine the erasable bank, and it does indeed turn out to be E3.)
+
+The fix, therefore, is to simply insert an appropriate EBANK= _SOMETHING_ in front of the 2CADR MATRXJOB, which I've done using the preprocessor label "ReconstructionCOM15" for conditional assembly.&nbsp;
+
+(Actually, while I did perform all of the analysis and fix described above, when I did so I found that the fix was already in place, conditional instead on "ReconstructionGAP".&nbsp; Prior to consideration of COM-15, Mike had obtained [a small portion of the core-rope image for true-rather-than-reconstructed Comanche 67](https://github.com/virtualagc/virtualagc/issues/1140#issuecomment-906835766).&nbsp; Analysis of that rope fragment had revealed the same problem later found to be described by COM-15, as well as the same fix.&nbsp; At this writing, there are other fixes having nothing to do with COM-15 conditioned on ReconstructionGAP in the reconstructed code, made due to the same analysis of the rope-image fragment.&nbsp; The COM-15 fix, as I say, is _now_ conditioned on ReconstructionCOM15 rather than on ReconstructionGAP, since I think that better reflects the cause-and-effect.)
+
