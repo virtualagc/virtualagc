@@ -1,378 +1,381 @@
-( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
 
-## Contents
+====== Memory Bank Assignments for Comanche 67 ======
 
-- General Considerations
-- Memory Bank 11
-  - Bank 11 Idea #1:&nbsp; QUALITY1/QUALITY2?
-  - Bank 11 Idea #2:&nbsp; Suspicious Entry Points in Flowcharts?
-  - Bank 11 Idea #3:&nbsp; Stray Tags for SETLOC?
-  - Bank 11 Idea #4:&nbsp; Entities Referenced from Other Banks?
-  - Bank 11 Idea #5:&nbsp; Entities That Relocated Between Comanche 55 and Artemis
-  - Bank 11 Summary
-- Memory Bank 23
-- Memory Bank 37
-- Preprocessor Labels for Conditional Assembly
+([[comanche-67-reconstruction|Return to main Comanche 67 reconstruction page.]])
 
-## General Considerations
+===== General Considerations =====
 
-Unfortunately, I've tried to deal with the problem of memory-bank overflow many times before, with no luck at all, so I was finally left with little alternative while incorporating PCRs, PCNs, and Software Anomaly reports into the Comanche 67 reconstruction than to just let them persist until the very end of that incorporation process.&nbsp; Which is where I am now, other than a couple of PCRs (such as PCR-815) that simply resisted all my efforts and therefore have remained unincorporated.
+Unfortunately, I've tried to deal with the problem of memory-bank overflow many times before, with no luck at all, so I was finally left with little alternative while incorporating PCRs, PCNs, and Software Anomaly reports into the Comanche 67 reconstruction than to just let them persist until the very end of that incorporation process. Which is where I am now, other than a couple of PCRs (such as PCR-815) that simply resisted all my efforts and therefore have remained unincorporated.
 
-But as far as memory-bank reassignments are concerned, I'm really groping around without much idea of a method.&nbsp; In other words, expect a lot of stream-of-consciousness here, as opposed to a structured discourse.&nbsp;
+But as far as memory-bank reassignments are concerned, I'm really groping around without much idea of a method. In other words, expect a lot of stream-of-consciousness here, as opposed to a structured discourse.
 
-Because my approach is unfortunately going to be necessarily so chaotic, there are going to be a _lot_ of ideas proposed as to stuff that can be moved around, and it may take a long time to settle upon some combination of those ideas for final acceptance.&nbsp; Therefore, there will be separate preprocessor labels for conditional assembly for each of the distinct ideas.&nbsp; Rather than spread those ideas around randomly in what seems destined to become a very long, very rambling discussion, I've collected all of the Reconstruction_XXX_ labels at the very end of the page for easy reference.
+Because my approach is unfortunately going to be necessarily so chaotic, there are going to be a //lot// of ideas proposed as to stuff that can be moved around, and it may take a long time to settle upon some combination of those ideas for final acceptance. Therefore, there will be separate preprocessor labels for conditional assembly for each of the distinct ideas. Rather than spread those ideas around randomly in what seems destined to become a very long, very rambling discussion, I've collected all of the Reconstruction//XXX// labels at the very end of the page for easy reference.
 
 Right now (6:00 am, 2021-10-30), here's the situation with memory-bank fills in the Comanche 67 reconstruction:
 
-    Bugger word mismatch in bank 16; actual 47747 != expected 67526 (diff = 17557); remaining =  40 words	Bugger word mismatch in bank 17; actual 63340 != expected 65757 (diff = 02417); remaining =  32 words	Bugger word mismatch in bank 30; actual 77072 != expected 77025 (diff = 00045); remaining =  23 words	Bugger word mismatch in bank 14; actual 74206 != expected 57433 (diff = 14553); remaining =  19 words	Bugger word mismatch in bank 15; actual 63346 != expected 71421 (diff = 06053); remaining =  18 words	Bugger word mismatch in bank 20; actual 66052 != expected 66674 (diff = 00622); remaining =  18 words	Bugger word mismatch in bank 04; actual 72022 != expected 71744 (diff = 00056); remaining =  16 words	Bugger word mismatch in bank 31; actual 65340 != expected 65305 (diff = 00033); remaining =  14 words	Bugger word mismatch in bank 27; actual 62202 != expected 61634 (diff = 00346); remaining =  12 words	Bugger word mismatch in bank 34; actual 50274 != expected 50336 (diff = 00042); remaining =  12 words	Bugger word mismatch in bank 12; actual 46221 != expected 46261 (diff = 00040); remaining =  11 words	Bugger word mismatch in bank 21; actual 52465 != expected 73176 (diff = 20511); remaining =  10 words	Bugger word mismatch in bank 24; actual 51405 != expected 76767 (diff = 25362); remaining =  10 words	Bugger word mismatch in bank 05; actual 73342 != expected 61753 (diff = 11367); remaining =   9 words	Bugger word mismatch in bank 43; actual 13116 != expected 64017 (diff = 50701); remaining =   9 words	Bugger word mismatch in bank 01; actual 56134 != expected 42616 (diff = 13316); remaining =   7 words	Bugger word mismatch in bank 13; actual 75072 != expected 52653 (diff = 22217); remaining =   7 words	Bugger word mismatch in bank 32; actual 45606 != expected 45660 (diff = 00052); remaining =   7 words	Bugger word mismatch in bank 35; actual 63110 != expected 70764 (diff = 05654); remaining =   5 words	Bugger word mismatch in bank 36; actual 77255 != expected 77271 (diff = 00014); remaining =   5 words	Bugger word mismatch in bank 42; actual 76137 != expected 76002 (diff = 00135); remaining =   5 words	Bugger word mismatch in bank 25; actual 72430 != expected 72422 (diff = 00006); remaining =   3 words	Bugger word mismatch in bank 22; actual 64416 != expected 64526 (diff = 00110); remaining =   2 words	Bugger word mismatch in bank 26; actual 51110 != expected 74406 (diff = 23276); remaining =   1 words	Bugger word mismatch in bank 33; actual 71402 != expected 71506 (diff = 00104); remaining =   1 words	Bugger word mismatch in bank 40; actual 71664 != expected 71026 (diff = 00636); remaining =   1 words	Bugger word mismatch in bank 10; actual 47242 != expected 47263 (diff = 00021); remaining =   0 words	Bugger word mismatch in bank 23; actual 71347 != expected 21333 (diff = 50014); overflow  =  14 words	Bugger word mismatch in bank 37; actual 06231 != expected 74641 (diff = 66410); overflow  =  14 words	Bugger word mismatch in bank 11; actual 22334 != expected 73456 (diff = 51122); overflow  =  26 words
+	''Bugger word mismatch in bank 16; actual 47747 != expected 67526 (diff = 17557); remaining =  40 words	''
+	''Bugger word mismatch in bank 17; actual 63340 != expected 65757 (diff = 02417); remaining =  32 words	''
+	''Bugger word mismatch in bank 30; actual 77072 != expected 77025 (diff = 00045); remaining =  23 words	''
+	''Bugger word mismatch in bank 14; actual 74206 != expected 57433 (diff = 14553); remaining =  19 words	''
+	''Bugger word mismatch in bank 15; actual 63346 != expected 71421 (diff = 06053); remaining =  18 words	''
+	''Bugger word mismatch in bank 20; actual 66052 != expected 66674 (diff = 00622); remaining =  18 words	''
+	''Bugger word mismatch in bank 04; actual 72022 != expected 71744 (diff = 00056); remaining =  16 words	''
+	''Bugger word mismatch in bank 31; actual 65340 != expected 65305 (diff = 00033); remaining =  14 words	''
+	''Bugger word mismatch in bank 27; actual 62202 != expected 61634 (diff = 00346); remaining =  12 words	''
+	''Bugger word mismatch in bank 34; actual 50274 != expected 50336 (diff = 00042); remaining =  12 words	''
+	''Bugger word mismatch in bank 12; actual 46221 != expected 46261 (diff = 00040); remaining =  11 words	''
+	''Bugger word mismatch in bank 21; actual 52465 != expected 73176 (diff = 20511); remaining =  10 words	''
+	''Bugger word mismatch in bank 24; actual 51405 != expected 76767 (diff = 25362); remaining =  10 words	''
+	''Bugger word mismatch in bank 05; actual 73342 != expected 61753 (diff = 11367); remaining =   9 words	''
+	''Bugger word mismatch in bank 43; actual 13116 != expected 64017 (diff = 50701); remaining =   9 words	''
+	''Bugger word mismatch in bank 01; actual 56134 != expected 42616 (diff = 13316); remaining =   7 words	''
+	''Bugger word mismatch in bank 13; actual 75072 != expected 52653 (diff = 22217); remaining =   7 words	''
+	''Bugger word mismatch in bank 32; actual 45606 != expected 45660 (diff = 00052); remaining =   7 words	''
+	''Bugger word mismatch in bank 35; actual 63110 != expected 70764 (diff = 05654); remaining =   5 words	''
+	''Bugger word mismatch in bank 36; actual 77255 != expected 77271 (diff = 00014); remaining =   5 words	''
+	''Bugger word mismatch in bank 42; actual 76137 != expected 76002 (diff = 00135); remaining =   5 words	''
+	''Bugger word mismatch in bank 25; actual 72430 != expected 72422 (diff = 00006); remaining =   3 words	''
+	''Bugger word mismatch in bank 22; actual 64416 != expected 64526 (diff = 00110); remaining =   2 words	''
+	''Bugger word mismatch in bank 26; actual 51110 != expected 74406 (diff = 23276); remaining =   1 words	''
+	''Bugger word mismatch in bank 33; actual 71402 != expected 71506 (diff = 00104); remaining =   1 words	''
+	''Bugger word mismatch in bank 40; actual 71664 != expected 71026 (diff = 00636); remaining =   1 words	''
+	''Bugger word mismatch in bank 10; actual 47242 != expected 47263 (diff = 00021); remaining =   0 words	''
+	''Bugger word mismatch in bank 23; actual 71347 != expected 21333 (diff = 50014); overflow  =  14 words	''
+	''Bugger word mismatch in bank 37; actual 06231 != expected 74641 (diff = 66410); overflow  =  14 words	''
+	''Bugger word mismatch in bank 11; actual 22334 != expected 73456 (diff = 51122); overflow  =  26 words''
 
-Thus there are overflows in banks 11, 23, and 37, whereas there's lots of space available in banks 16, 17, 30, and so on.&nbsp; Moreover, the "goodness signature" of the reconstruction, for reference, is
+Thus there are overflows in banks 11, 23, and 37, whereas there's lots of space available in banks 16, 17, 30, and so on. Moreover, the "goodness signature" of the reconstruction, for reference, is
 
-    06-01-08-06-03-09-03
+	''06-01-08-06-03-09-03''
 
-However, the original developers wouldn't have been presented with the problem in this fashion.&nbsp; In other words, they didn't have the option of waiting until the end of the whole reconstruction process and then just moving stuff from where memory was needed then to where it was available then. Rather, they incorporated the PCRs in some particular order in time and had to deal with bank overflows in the order they occurred during development.&nbsp; So what we really need to know is this:&nbsp; In what order was the incorporation of PCRs, PCNs, and Software Anomaly Reports completed originally?&nbsp; If we knew that, then we could selectively disable all of the Reconstruction_XXX_ conditional assemblies that had not yet been incorporated, to see what the memory-fill situation was at that particular moment in time.&nbsp; The original developers _might_ have simply moved stuff from where it was most needed to where it was most available, but only from where it was most available at that specific point in the development.
+However, the original developers wouldn't have been presented with the problem in this fashion. In other words, they didn't have the option of waiting until the end of the whole reconstruction process and then just moving stuff from where memory was needed then to where it was available then. Rather, they incorporated the PCRs in some particular order in time and had to deal with bank overflows in the order they occurred during development. So what we really need to know is this: In what order was the incorporation of PCRs, PCNs, and Software Anomaly Reports completed originally? If we knew that, then we could selectively disable all of the Reconstruction//XXX// conditional assemblies that had not yet been incorporated, to see what the memory-fill situation was at that particular moment in time. The original developers //might// have simply moved stuff from where it was most needed to where it was most available, but only from where it was most available at that specific point in the development.
 
 If we can find any status reports, some of that PCR-completion info might be found in them.
 
-Alternately, can we roughly deduce the ordering of PCR incorporations _without_ access to status reports?&nbsp; We could if we had the relevant COLOSSUS Memos tracking the revision-to-revision changes.&nbsp; But we don't have them for Colossus 2C.&nbsp;
+Alternately, can we roughly deduce the ordering of PCR incorporations //without// access to status reports? We could if we had the relevant COLOSSUS Memos tracking the revision-to-revision changes. But we don't have them for Colossus 2C.
 
 Suppose we make the following assumptions, probably all wrong, but perhaps somewhat correct in spirit?
 
-1. Only banks 11, 23 and 37 need be of concern, and they became of concern in the order of the highest-numbered PCR or PCN within them, and only as that final PCR's incorporation was completed.&nbsp;
+1. Only banks 11, 23 and 37 need be of concern, and they became of concern in the order of the highest-numbered PCR or PCN within them, and only as that final PCR's incorporation was completed.
 2. Once a bank becomes of concern, all higher-numbered PCR/PCN reconstructions can be disabled in order to find out which bank(s) had the most available free space when the overflow first occurred.
 3. Stuff is then moved from the concerning bank to one of the banks with the most remaining space at that time.
 4. We can guess what stuff may have been moved by observing what stuff has changed banks from Comanche 55 to Artemis, which chunks of code have their own SETLOCs, and so on.
 
 To that end, here are the Reconstructions affecting the overflowing banks:
 
-- Bank 11:
-  - PCR-772.1:&nbsp; +142, -120, +5
-- Bank 23:
-  - PCR-799:&nbsp; +15, +4
-- Bank 37:
-  - PCR-785:&nbsp; +2, +2
-  - PCR-787:&nbsp; +7
-  - PCR-807.1:&nbsp; +3, +1, +3
+* Bank 11:
+	* PCR-772.1: +142, -120, +5
+* Bank 23:
+	* PCR-799: +15, +4
+* Bank 37:
+	* PCR-785: +2, +2
+	* PCR-787: +7
+	* PCR-807.1: +3, +1, +3
 
-So ... if the approach described above makes any sense at all, bank 11 will have been the first one found to overflow, since 772 \< 785 \< 787 \< 799 \< 807, and perhaps should be the first memory bank to be dealt with.
+So ... if the approach described above makes any sense at all, bank 11 will have been the first one found to overflow, since 772 < 785 < 787 < 799 < 807, and perhaps should be the first memory bank to be dealt with.
 
-## Memory Bank 11
+===== Memory Bank 11 =====
 
-To determine what banks may have had open space at that point in development, we should disable reconstructions for PCRs higher than 772.&nbsp; In doing so, we find the following:
+To determine what banks may have had open space at that point in development, we should disable reconstructions for PCRs higher than 772. In doing so, we find the following:
 
-    Bugger word mismatch in bank 16; actual 54012 != expected 67526 (diff = 13514); remaining =  47 words	Bugger word mismatch in bank 17; actual 63416 != expected 65757 (diff = 02341); remaining =  32 words	Bugger word mismatch in bank 20; actual 74475 != expected 66674 (diff = 05601); remaining =  31 words	Bugger word mismatch in bank 30; actual 77136 != expected 77025 (diff = 00111); remaining =  23 words        Bugger word mismatch in bank 12; actual 50741 != expected 46261 (diff = 02460); remaining = 19 words 	...	Bugger word mismatch in bank 11; actual 02370 != expected 73456 (diff = 71066); overflow  =  26 words
+	''Bugger word mismatch in bank 16; actual 54012 != expected 67526 (diff = 13514); remaining =  47 words	''
+	''Bugger word mismatch in bank 17; actual 63416 != expected 65757 (diff = 02341); remaining =  32 words	''
+	''Bugger word mismatch in bank 20; actual 74475 != expected 66674 (diff = 05601); remaining =  31 words	''
+	''Bugger word mismatch in bank 30; actual 77136 != expected 77025 (diff = 00111); remaining =  23 words        ''
+	''Bugger word mismatch in bank 12; actual 50741 != expected 46261 (diff = 02460); remaining = 19 words 	''
+	''...	''
+	''Bugger word mismatch in bank 11; actual 02370 != expected 73456 (diff = 71066); overflow  =  26 words''
 
-So to my mind, it would be natural to seek out some way to move chunks from bank 11 into bank 16, 17, or 20.&nbsp; Although in some known cases, the developers seem to have tried to move stuff not into banks with the most space, but rather into successively-higher banks from where the offending chunk had started.
+So to my mind, it would be natural to seek out some way to move chunks from bank 11 into bank 16, 17, or 20. Although in some known cases, the developers seem to have tried to move stuff not into banks with the most space, but rather into successively-higher banks from where the offending chunk had started.
 
-### Bank 11 Idea #1:&nbsp; QUALITY1/QUALITY2?
+==== Bank 11 Idea #1: QUALITY1/QUALITY2? ====
 
-(Executive summary:&nbsp; No!)
+(Executive summary: No!)
 
-Indeed in Comanche 2A, a chunk of COMTERM in bank 11 had been carved out and moved ... but to a combination of banks 13 and 12 rather than the banks I predicted.&nbsp; The chunks, were called QUALITY1 and QUALITY2 respectively after being moved.&nbsp; Bank 13 had considerably less space available (only 7 words), so you'd guess that stuff was moved to bank 12 first, and then only added to bank 13 when bank 12 proved inadequate.&nbsp; However, as [noted elsewhere](pcr-772-1-incorporation-in-comanche-67), PCR-772.1 has introduced such radical changes that the previous implementations from Comanche 2A of QUALITY1 and/or QUALITY2 are completely inadequate in Comanche 2C; nor does any other available Luminary/Colossus version have QUALITY1/QUALITY2 code post-PCR-772.1 on which to model such an approach.&nbsp; In other words, the approach of spilling stuff over from COMTERM in bank 11 into banks 12 and 13 could reflect what actually happened in Colossus 2C, but we no longer have any guide as to how to implement the code that would have been carved out.
+Indeed in Comanche 2A, a chunk of COMTERM in bank 11 had been carved out and moved ... but to a combination of banks 13 and 12 rather than the banks I predicted. The chunks, were called QUALITY1 and QUALITY2 respectively after being moved. Bank 13 had considerably less space available (only 7 words), so you'd guess that stuff was moved to bank 12 first, and then only added to bank 13 when bank 12 proved inadequate. However, as [[pcr-772-1-incorporation-in-comanche-67|noted elsewhere]], PCR-772.1 has introduced such radical changes that the previous implementations from Comanche 2A of QUALITY1 and/or QUALITY2 are completely inadequate in Comanche 2C; nor does any other available Luminary/Colossus version have QUALITY1/QUALITY2 code post-PCR-772.1 on which to model such an approach. In other words, the approach of spilling stuff over from COMTERM in bank 11 into banks 12 and 13 could reflect what actually happened in Colossus 2C, but we no longer have any guide as to how to implement the code that would have been carved out.
 
-The Comanche/Luminary software flowcharts have an interesting property in general:&nbsp; Minor changes to them are often made in a way that make it seem obvious to us that changes have been made, even though we may not quite know what those changes were.&nbsp; In particular, when material has been removed from a flowchart, there is often a noticeable gap.&nbsp; Consider the following page from the Comanche 2C flowchart for COMTERM:
+The Comanche/Luminary software flowcharts have an interesting property in general: Minor changes to them are often made in a way that make it seem obvious to us that changes have been made, even though we may not quite know what those changes were. In particular, when material has been removed from a flowchart, there is often a noticeable gap. Consider the following page from the Comanche 2C flowchart for COMTERM:
 
-![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/175051)
+{{../bank11Idea1A.png}}
 
-Do you notice that there's a gap prior to the MOONFLAG decision box, and another one above the MPAC&nbsp;←&nbsp;COSPHI/2 box?&nbsp; When I look at those gaps, I wonder what could have been there, once upon a time, before Colossus 2C.&nbsp; Could it perhaps have been something to do with QUALITY1, QUALITY2, and QUALITY3 (the return point to COMTERM from QUALITY2)?&nbsp; &nbsp;Look at this chunk of code from Comanche 2A's COMTERM:
+Do you notice that there's a gap prior to the MOONFLAG decision box, and another one above the MPAC←COSPHI/2 box? When I look at those gaps, I wonder what could have been there, once upon a time, before Colossus 2C. Could it perhaps have been something to do with QUALITY1, QUALITY2, and QUALITY3 (the return point to COMTERM from QUALITY2)? Look at this chunk of code from Comanche 2A's COMTERM:
 
-                     ... VAD	BOV FV GOBAQUE STCALL	FV QUALITY1QUALITY3	DSQ # J22 TERM X R**4 IN 2D,  SCALED B61 # AS VECTOR.              ...
+'''
+		... 
+		VAD	BOV 
+			FV 
+			GOBAQUE 
+		STCALL	FV 
+			QUALITY1
+QUALITY3	DSQ 			# J22 TERM X R**4 IN 2D,  SCALED B61 
+					# AS VECTOR.              
+		...
+'''
 
-Notice that the instructions prior to calling QUALITY1 _exactly match_ the flowchart boxes above the first gap in the flowchart.&nbsp; Using my imagination, such as it is, I've filled in the missing bits of the flowchart, as follows:
+Notice that the instructions prior to calling QUALITY1 //exactly match// the flowchart boxes above the first gap in the flowchart. Using my imagination, such as it is, I've filled in the missing bits of the flowchart, as follows:
 
-![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/175101)
+{{../bank11Idea1B.png}}
 
-This actually matches the structure of the Colossus 2A code pretty closely, vis-a-vis QUALITY1, QUALITY2, and QUALITY3.&nbsp; To be brutally critical, the block for MPAC&nbsp;←&nbsp;COSPHI/2 should come just _before_ the return from QUALITY2 to QUALITY3, rather than just after it as I've shown.&nbsp; However, there's a pretty big gap at the top of the next sheet (not shown) as well, so perhaps the return occurs instead on the very next sheet, and the gap on this sheet where I've imagined the return from QUALITY2 to QUALITY3 represents the removal of something else.&nbsp; Perhaps something associated with PCR-772.1 or PCR-776.1 ... because, remember, the changes associated with PCR-772.1 and PCR-776.1 would have been made on this flowchart in addition to simple removal of the red stuff I've speculatively added.
+This actually matches the structure of the Colossus 2A code pretty closely, vis-a-vis QUALITY1, QUALITY2, and QUALITY3. To be brutally critical, the block for MPAC←COSPHI/2 should come just //before// the return from QUALITY2 to QUALITY3, rather than just after it as I've shown. However, there's a pretty big gap at the top of the next sheet (not shown) as well, so perhaps the return occurs instead on the very next sheet, and the gap on this sheet where I've imagined the return from QUALITY2 to QUALITY3 represents the removal of something else. Perhaps something associated with PCR-772.1 or PCR-776.1 ... because, remember, the changes associated with PCR-772.1 and PCR-776.1 would have been made on this flowchart in addition to simple removal of the red stuff I've speculatively added.
 
-For our purposes, however, the exact details don't really matter, because the conclusion is pretty much the same: QUALITY1 and QUALITY2 _really are_ inlined in Comanche 2C.&nbsp; It's not merely that somebody neglected to note them on the flowchart.&nbsp; No!&nbsp; They _had been_ accounted for on the flowchart previously, but now have actively been removed from it.&nbsp; Assuming, of course, that my vision of what goes into the gaps is in the right ballpark.
+For our purposes, however, the exact details don't really matter, because the conclusion is pretty much the same: QUALITY1 and QUALITY2 //really are// inlined in Comanche 2C. It's not merely that somebody neglected to note them on the flowchart. No! They //had been// accounted for on the flowchart previously, but now have actively been removed from it. Assuming, of course, that my vision of what goes into the gaps is in the right ballpark.
 
-My inference: whatever code was moved from bank 11 to elsewhere (bank 12? bank 13?) in Colossus 2C, it was _not_ sliced out of the middle of COMTERM as QUALITY1 and QUALITY2 were.&nbsp; It's something else entirely.
+My inference: whatever code was moved from bank 11 to elsewhere (bank 12? bank 13?) in Colossus 2C, it was //not// sliced out of the middle of COMTERM as QUALITY1 and QUALITY2 were. It's something else entirely.
 
-### Bank 11 Idea #2:&nbsp; Suspicious Entry Points in Flowcharts?
+==== Bank 11 Idea #2: Suspicious Entry Points in Flowcharts? ====
 
-The discussion above brings up another possibility:&nbsp; Suppose we successively looked at all of the flowcharts associated with the code in bank 11, looking for suspicious entry-point labels that had no obvious reason to exist.&nbsp; For example, if we had Comanche 2A code that looked like
+The discussion above brings up another possibility: Suppose we successively looked at all of the flowcharts associated with the code in bank 11, looking for suspicious entry-point labels that had no obvious reason to exist. For example, if we had Comanche 2A code that looked like
 
-    ...              Instruction 1 Instruction 2 Instruction 3 Instruction 4 ...
+'''
+		...              
+		Instruction 1 
+		Instruction 2 
+		Instruction 3 
+		Instruction 4 
+		...
+'''
 
 and yet the corresponding flowchart looked something like
 
-    ...              Instruction 1 Instruction 2Label  Instruction 3 Instruction 4...
+'''
+		...              
+		Instruction 1 
+		Instruction 2
+Label		Instruction 3 
+		Instruction 4
+		...
+'''
 
 and we weren't aware of Label being referenced anywhere else, mightn't that mean that the code from Label onward had been relocated?
 
 To actually look through all of the flowcharts for bank 11, we need an inventory of all program labels in bank 11, in the order in which they occur:
 
-- P34-P35, P74-P75:&nbsp; INITVEL, HAVEGUES, INITVEL1 - INITVEL7, INITVELX.&nbsp; INITVEL (and presumably the others) are covered by FC-2628, which we don't have; indeed, it's not even listed in any of the flowchart documents' tables of contents.&nbsp; In short, not helpful!
-- P32-P33, P72-P73:&nbsp; CSINEXT1.&nbsp; The flowchart, FC-2626 is unfortunately for Colossus 2A.&nbsp; It does not even show an entry point for CSINEXT1, even though all revisions of Comanche from 44 through 55 have it, and have relocated it to a different bank (11, of course) different from the other code surrounding it.&nbsp; In Artemis it is moved to bank 16.&nbsp; (There's not quite enough room in bank 16 right now, and moving CSINEXT1 doesn't magically fix any banksums.)&nbsp; In short, not helpful!
-- **☞** P51-P53:&nbsp; S52.2, S52.2A, S52.2.1.&nbsp; This forms a nice, self-contained chunk, comprising a single page of the flowchart (sheet 9 of FC-2720).&nbsp; It's 26 words, exactly the size of bank 11's overflow.&nbsp; It's interpretive code, so it's easy to move.&nbsp; It has its own SETLOC (S52/2).&nbsp; But alas, it's in bank 11 in every revision of Colossus we have, from Colossus 237 through Artemis.&nbsp; It seems unlikely it would have moved and then moved back. (On the other hand, that's exactly what I claim has happened with QUALITY1/QUALITY2 ... so, maybe!) At any rate, moving it to banks 16 or 17 (the only ones with room for it) does not magically fix bank 11's banksum.&nbsp; (_Later update_, after fixing up bank 23's overflow and bank 10's and 33's banksums:&nbsp; Still uninspiring.)
-- INTEGRATION INITIALIZATION:&nbsp; ALOADED.&nbsp; This is only 7 words.&nbsp; I haven't messed around with it.
-- ORBITAL INTEGRATION:&nbsp; KEPPREP, FBR3, ACCOMP, GETRPSV, GAMCOMP, GOBAQUE, INT-ABRT, OBLATE, COMTERM, NBRANCH, COSPHIE, MATRIX, DIFEQTAB, TIMESTEP, RECTEST, CALLRECT, INTGRATE, DIFEQ0, CHKSWTCH, RPQOK, EARSPH, DOSWITCH, ORIGCHNG, RECTIFY, MINIRECT, DIFEQ+0, DIFEQ+1, DIFEQ+2, NEXTCOL, ENDSTATE, AMOVED, RELOADSV, DEFEQCOM, WMATEND, DOW.., DOW..1.&nbsp; And constants at end of bank: 3/5, THREE/8, .3D, 3/64, DP1/4, 3/32, 15/16, 3/4, 7/12, 9/16, 5/128, DP2/3, OCT17.&nbsp; So ... KEPPREP begins on sheet 29 of FC-2300.&nbsp; Alas, I see no funny entry points in the flowchart that might signal a memory-bank change.
+* P34-P35, P74-P75: INITVEL, HAVEGUES, INITVEL1 - INITVEL7, INITVELX. INITVEL (and presumably the others) are covered by FC-2628, which we don't have; indeed, it's not even listed in any of the flowchart documents' tables of contents. In short, not helpful!
+* P32-P33, P72-P73: CSINEXT1. The flowchart, FC-2626 is unfortunately for Colossus 2A. It does not even show an entry point for CSINEXT1, even though all revisions of Comanche from 44 through 55 have it, and have relocated it to a different bank (11, of course) different from the other code surrounding it. In Artemis it is moved to bank 16. (There's not quite enough room in bank 16 right now, and moving CSINEXT1 doesn't magically fix any banksums.) In short, not helpful!
+* **☞** P51-P53: S52.2, S52.2A, S52.2.1. This forms a nice, self-contained chunk, comprising a single page of the flowchart (sheet 9 of FC-2720). It's 26 words, exactly the size of bank 11's overflow. It's interpretive code, so it's easy to move. It has its own SETLOC (S52/2). But alas, it's in bank 11 in every revision of Colossus we have, from Colossus 237 through Artemis. It seems unlikely it would have moved and then moved back. (On the other hand, that's exactly what I claim has happened with QUALITY1/QUALITY2 ... so, maybe!) At any rate, moving it to banks 16 or 17 (the only ones with room for it) does not magically fix bank 11's banksum. (//Later update//, after fixing up bank 23's overflow and bank 10's and 33's banksums: Still uninspiring.)
+* INTEGRATION INITIALIZATION: ALOADED. This is only 7 words. I haven't messed around with it.
+* ORBITAL INTEGRATION: KEPPREP, FBR3, ACCOMP, GETRPSV, GAMCOMP, GOBAQUE, INT-ABRT, OBLATE, COMTERM, NBRANCH, COSPHIE, MATRIX, DIFEQTAB, TIMESTEP, RECTEST, CALLRECT, INTGRATE, DIFEQ0, CHKSWTCH, RPQOK, EARSPH, DOSWITCH, ORIGCHNG, RECTIFY, MINIRECT, DIFEQ+0, DIFEQ+1, DIFEQ+2, NEXTCOL, ENDSTATE, AMOVED, RELOADSV, DEFEQCOM, WMATEND, DOW.., DOW..1. And constants at end of bank: 3/5, THREE/8, .3D, 3/64, DP1/4, 3/32, 15/16, 3/4, 7/12, 9/16, 5/128, DP2/3, OCT17. So ... KEPPREP begins on sheet 29 of FC-2300. Alas, I see no funny entry points in the flowchart that might signal a memory-bank change.
 
-So that doesn't seem to have helped very much, though I guess that S52.2_x_ still has some potential, so I've marked it for possible revisiting.
+So that doesn't seem to have helped very much, though I guess that S52.2//x// still has some potential, so I've marked it for possible revisiting.
 
-### Bank 11 Idea #3:&nbsp; Stray Tags for SETLOC?
+==== Bank 11 Idea #3: Stray Tags for SETLOC? ====
 
-Looking for stray SETLOCs in bank 11 that don't actually change to a different bank could indicate a chunk of code that had moved to a different bank previously and might move again.&nbsp; Here's a list of the bank 11 SETLOCs:
+Looking for stray SETLOCs in bank 11 that don't actually change to a different bank could indicate a chunk of code that had moved to a different bank previously and might move again. Here's a list of the bank 11 SETLOCs:
 
-- SETLOC INTVEL, 150 (0226) words:&nbsp; INITVEL through INITVELX.
-- SETLOC CSIPROG5, 43 (053) words:&nbsp; CSINEXT1.
-- SETLOC S52/2, 26 (032) words:&nbsp; S52.2 through S52.2.1.
-- SETLOC INTINIT1, 7 words: ALOADED.
-- SETLOC ORBITAL, 774 (01406) words:&nbsp; KEPPREP through DOW..1.
-- SETLOC ORBITAL1, 25 (031) words:&nbsp; 3/5 through OCT17.
+* SETLOC INTVEL, 150 (0226) words: INITVEL through INITVELX.
+* SETLOC CSIPROG5, 43 (053) words: CSINEXT1.
+* SETLOC S52/2, 26 (032) words: S52.2 through S52.2.1.
+* SETLOC INTINIT1, 7 words: ALOADED.
+* SETLOC ORBITAL, 774 (01406) words: KEPPREP through DOW..1.
+* SETLOC ORBITAL1, 25 (031) words: 3/5 through OCT17.
 
-The only thing that seems curious is ORBITAL1, containing constants used in ORBITAL.&nbsp; Since the constants are all used by interpretive code, ORBITAL1 could be different than ORBITAL, but in fact ORBITAL and ORBITAL1 are both always the same in every revision of Colossus we have, from Colossus 237 through Artemis 72.&nbsp; So why even have it at all?&nbsp; Of course, once ORBITAL1 had been defined originally, there would never have been any reason to get rid of it, but why even have it in the first place.&nbsp; On the other hand, if we look at Luminary 116, we find that ORBITAL is bank 11, but ORBITAL1 is bank 12 ... so it has not only moved, but actually moved to the bank we might have predicted it would move to.&nbsp; Although in our case, bank 12 isn't big enough to hold it, and the fact that it's a single SETLOC doesn't support the idea that the block may have been split across memory banks.&nbsp; And it's not quite the number of words we need, but it's very close.&nbsp; For our situation, only banks 16 and 17 are big enough to hold 25 extra words, and I've tried moving the block to all of them.&nbsp; However, I don't think it's right:&nbsp; Some of the constants in the block are used in bank 12, which has a pretty low banksum discrepancy (00040) if ORBITAL1 is kept at 11, but the banksum discrepancy blows up to 5 digits if ORBITAL1 is changed to 16, 17, or 30.&nbsp; In other words, I don't think that ORBITAL1 has moved.
+The only thing that seems curious is ORBITAL1, containing constants used in ORBITAL. Since the constants are all used by interpretive code, ORBITAL1 could be different than ORBITAL, but in fact ORBITAL and ORBITAL1 are both always the same in every revision of Colossus we have, from Colossus 237 through Artemis 72. So why even have it at all? Of course, once ORBITAL1 had been defined originally, there would never have been any reason to get rid of it, but why even have it in the first place. On the other hand, if we look at Luminary 116, we find that ORBITAL is bank 11, but ORBITAL1 is bank 12 ... so it has not only moved, but actually moved to the bank we might have predicted it would move to. Although in our case, bank 12 isn't big enough to hold it, and the fact that it's a single SETLOC doesn't support the idea that the block may have been split across memory banks. And it's not quite the number of words we need, but it's very close. For our situation, only banks 16 and 17 are big enough to hold 25 extra words, and I've tried moving the block to all of them. However, I don't think it's right: Some of the constants in the block are used in bank 12, which has a pretty low banksum discrepancy (00040) if ORBITAL1 is kept at 11, but the banksum discrepancy blows up to 5 digits if ORBITAL1 is changed to 16, 17, or 30. In other words, I don't think that ORBITAL1 has moved.
 
-When I earlier tried moving S52.2 _et al._ to banks 16 or 17, I don't think I examined the effect on bank 12's banksum.&nbsp; The answer is that no matter where I move SETLOC S52/2 to (16, 17, or 30), bank 12's banksum discrepancy drops from 00040 to 00017.&nbsp; Not enough on its own to tempt me to try it, but seemingly an indication that chopping stuff out of the middle of bank 11 is the right thing for improving bank 12.&nbsp; What if I were to move both SETLOC S52/2 and SETLOC INTINIT1 (subroutine ALOADED), 26+7=33 words, out of bank 11 at the same time?&nbsp; In Colossus 1, there was no SETLOC INTINIT1, and ALOADED was simply under SETLOC INTINIT (bank 13) with a bunch of other code.&nbsp; But in Comanche 2, ALOADED was split off into SETLOC INTINIT1 by itself, in order to move it to bank 11.&nbsp; So INTINIT1 _has_ changed banks before, but there's no hint of it wandering around from bank to bank, and no hint of any other bank it might like to move to.&nbsp; Regardless, it's something interesting to try, and from the standpoint of bank 12's checksum, it doesn't really matter what bank we choose, so just for that purpose we can try moving S52/2 to bank 16 or 17 (again) and moving INTINIT1 to bank 13 (where it was originally in Colossus 1).&nbsp; When I try&nbsp; this, bank 12's banksum discrepancy drops to 00010.&nbsp; (Incidentally, moving INTINIT1 to bank 12 blows up bank 12's banksum discrepancy.)&nbsp; Also, bank 30's discrepancy drops by a tidy amount, from 00045 to 00027.&nbsp; My presumption is that bank 12 and bank 30 reference items in bank 11 (perhaps almost the same list of entities), and benefit from the same changes in the addresses of those entities.
+When I earlier tried moving S52.2 //et al.// to banks 16 or 17, I don't think I examined the effect on bank 12's banksum. The answer is that no matter where I move SETLOC S52/2 to (16, 17, or 30), bank 12's banksum discrepancy drops from 00040 to 00017. Not enough on its own to tempt me to try it, but seemingly an indication that chopping stuff out of the middle of bank 11 is the right thing for improving bank 12. What if I were to move both SETLOC S52/2 and SETLOC INTINIT1 (subroutine ALOADED), 26+7=33 words, out of bank 11 at the same time? In Colossus 1, there was no SETLOC INTINIT1, and ALOADED was simply under SETLOC INTINIT (bank 13) with a bunch of other code. But in Comanche 2, ALOADED was split off into SETLOC INTINIT1 by itself, in order to move it to bank 11. So INTINIT1 //has// changed banks before, but there's no hint of it wandering around from bank to bank, and no hint of any other bank it might like to move to. Regardless, it's something interesting to try, and from the standpoint of bank 12's checksum, it doesn't really matter what bank we choose, so just for that purpose we can try moving S52/2 to bank 16 or 17 (again) and moving INTINIT1 to bank 13 (where it was originally in Colossus 1). When I try this, bank 12's banksum discrepancy drops to 00010. (Incidentally, moving INTINIT1 to bank 12 blows up bank 12's banksum discrepancy.) Also, bank 30's discrepancy drops by a tidy amount, from 00045 to 00027. My presumption is that bank 12 and bank 30 reference items in bank 11 (perhaps almost the same list of entities), and benefit from the same changes in the addresses of those entities.
 
 **☞** To summarize the preceding paragraph, there's some reason, though not an overwhelmingly good reason from the argument so far, to think that the following steps might be warranted:
 
 1. Moving SETLOC S52/2 to some bank other than 11 (likely 16 or 17), combined with
 2. Moving SETLOC INTINIT1 to bank 13.
 
-These two steps have the combined effect of getting rid of the overflow of memory bank 11, of reducing memory bank 12's banksum discrepancy from 00040 to 00010, and of reducing bank 30's banksum discrepancy from 00045 to 00027.&nbsp; I have implemented but not enabled this change in the reconstruction.&nbsp; &nbsp;(_Later update_, after fixing up bank 23's overflow and bank 10's and 33's banksums:&nbsp; Still uninspiring.)
+These two steps have the combined effect of getting rid of the overflow of memory bank 11, of reducing memory bank 12's banksum discrepancy from 00040 to 00010, and of reducing bank 30's banksum discrepancy from 00045 to 00027. I have implemented but not enabled this change in the reconstruction. (//Later update//, after fixing up bank 23's overflow and bank 10's and 33's banksums: Still uninspiring.)
 
-### Bank 11 Idea #4:&nbsp; Entities Referenced from Other Banks?
+==== Bank 11 Idea #4: Entities Referenced from Other Banks? ====
 
-It might be worthwhile to get a list of which entities in bank 11 are being referenced by banks 12 and bank 30, because that could act as a kind of microscope to more-clearly pinpoint where in bank 11 we're having a problem, and to determine the exact number of words which need to be removed (or added) in bank 11.&nbsp; As it happens&nbsp;—&nbsp;Aw, shucks, he said humbly, you don't need to applaud my foresight so loudly!&nbsp;—&nbsp;I have already created a Python3 script called bankToBankReference.py which can do this very thing, and you can find [further description of it on the main reconstruction page](comanche-67-reconstruction), and what we find is the following, ordered by banksum discrepancy:
+It might be worthwhile to get a list of which entities in bank 11 are being referenced by banks 12 and bank 30, because that could act as a kind of microscope to more-clearly pinpoint where in bank 11 we're having a problem, and to determine the exact number of words which need to be removed (or added) in bank 11. As it happens—Aw, shucks, he said humbly, you don't need to applaud my foresight so loudly!—I have already created a Python3 script called bankToBankReference.py which can do this very thing, and you can find [[comanche-67-reconstruction|further description of it on the main reconstruction page]], and what we find is the following, ordered by banksum discrepancy:
 
-    Bugger word mismatch in bank 36; actual 77255 != expected 77271 (diff = 00014); remaining =   5 words  INITVEL RECTIFY	Bugger word mismatch in bank 12; actual 46221 != expected 46261 (diff = 00040); remaining =  11 words  DP1/4	Bugger word mismatch in bank 30; actual 77072 != expected 77025 (diff = 00045); remaining =  23 words  INITVEL	Bugger word mismatch in bank 27; actual 62202 != expected 61634 (diff = 00346); remaining =  12 words  RECTIFY	Bugger word mismatch in bank 35; actual 63110 != expected 70764 (diff = 05654); remaining =   5 words  INITVEL MINIRECT	Bugger word mismatch in bank 15; actual 63346 != expected 71421 (diff = 06053); remaining =  18 words  S52.2	Bugger word mismatch in bank 05; actual 73342 != expected 61753 (diff = 11367); remaining =   9 words  DP1/4	Bugger word mismatch in bank 14; actual 74206 != expected 57433 (diff = 14553); remaining =  19 words  DP0 S52.2	Bugger word mismatch in bank 16; actual 47747 != expected 67526 (diff = 17557); remaining =  40 words  HAVEGUESS	Bugger word mismatch in bank 13; actual 75072 != expected 52653 (diff = 22217); remaining =   7 words  MINIRECT DPZERO RECTIFY ALOADED CHKSWTCH ORIGCHNG KEPPREP .3D TIMESTEP	Bugger word mismatch in bank 23; actual 71347 != expected 21333 (diff = 50014); overflow  =  14 words  CSINEXT1
+	''Bugger word mismatch in bank 36; actual 77255 != expected 77271 (diff = 00014); remaining =   5 words  INITVEL RECTIFY	''
+	''Bugger word mismatch in bank 12; actual 46221 != expected 46261 (diff = 00040); remaining =  11 words  DP1/4	''
+	''Bugger word mismatch in bank 30; actual 77072 != expected 77025 (diff = 00045); remaining =  23 words  INITVEL	''
+	''Bugger word mismatch in bank 27; actual 62202 != expected 61634 (diff = 00346); remaining =  12 words  RECTIFY	''
+	''Bugger word mismatch in bank 35; actual 63110 != expected 70764 (diff = 05654); remaining =   5 words  INITVEL MINIRECT	''
+	''Bugger word mismatch in bank 15; actual 63346 != expected 71421 (diff = 06053); remaining =  18 words  S52.2	''
+	''Bugger word mismatch in bank 05; actual 73342 != expected 61753 (diff = 11367); remaining =   9 words  DP1/4	''
+	''Bugger word mismatch in bank 14; actual 74206 != expected 57433 (diff = 14553); remaining =  19 words  DP0 S52.2	''
+	''Bugger word mismatch in bank 16; actual 47747 != expected 67526 (diff = 17557); remaining =  40 words  HAVEGUESS	''
+	''Bugger word mismatch in bank 13; actual 75072 != expected 52653 (diff = 22217); remaining =   7 words  MINIRECT DPZERO RECTIFY ALOADED CHK''SWTCH ORIGCHNG KEPPREP .3D TIMESTEP	
+	''Bugger word mismatch in bank 23; actual 71347 != expected 21333 (diff = 50014); overflow  =  14 words  CSINEXT1''
 
-Obviously, only the low-discrepancy banks are actually of interest to us, since a few address changes of referenced symbols aren't going to have huge effects on huge discrepancies.&nbsp; But wait!&nbsp; INITVEL is actually at address 11,2000, so how could moving stuff out of bank 11 affect bank 30's banksum, if all it references from bank 11 is INITVEL.&nbsp; Well obviously, because it must reference the banks we've moved stuff into as well, namely banks 13 and either bank 16 or 17.&nbsp; Oh no, this deal's getting worse all the time!
+Obviously, only the low-discrepancy banks are actually of interest to us, since a few address changes of referenced symbols aren't going to have huge effects on huge discrepancies. But wait! INITVEL is actually at address 11,2000, so how could moving stuff out of bank 11 affect bank 30's banksum, if all it references from bank 11 is INITVEL. Well obviously, because it must reference the banks we've moved stuff into as well, namely banks 13 and either bank 16 or 17. Oh no, this deal's getting worse all the time!
 
-Bank 12, it turns out, references nothing at all in banks 13, 16, or 17, so the entire effect on its banksum is the movement within bank 11 of DP1/4.&nbsp; Since DP1/4 is near the end of the bank, that's not a very sensitive microscope, since it just tells us that at least 040 (32 decimal) words should be removed from somewhere in bank 11.&nbsp; I say "at least", because recall that bank 11 overflows by 26 words, so DP1/4 isn't really going to change its address (i.e., reduce it below 11,3777) until 9 words have been removed.&nbsp; By removing 33 words, we've only reduced the address of DP1/4 by 33-9=24, hence the reduction of the banksum discrepancy of bank 12 by 24=030 (octal).&nbsp; We'd need to remove 8 more words from bank 11 to get the banksum discrepancy of 12 to 00000.
+Bank 12, it turns out, references nothing at all in banks 13, 16, or 17, so the entire effect on its banksum is the movement within bank 11 of DP1/4. Since DP1/4 is near the end of the bank, that's not a very sensitive microscope, since it just tells us that at least 040 (32 decimal) words should be removed from somewhere in bank 11. I say "at least", because recall that bank 11 overflows by 26 words, so DP1/4 isn't really going to change its address (i.e., reduce it below 11,3777) until 9 words have been removed. By removing 33 words, we've only reduced the address of DP1/4 by 33-9=24, hence the reduction of the banksum discrepancy of bank 12 by 24=030 (octal). We'd need to remove 8 more words from bank 11 to get the banksum discrepancy of 12 to 00000.
 
 Bank 30 references nothing at all in bank 16 or 17, but in bank 13 it references:
 
-- 13,2363 It's not referenced, but here's where ALOADED (7 words) gets inserted when it's moved from bank 11.&nbsp; Thus all the stuff below gets moved upward by 7.
-- 13,2370 LAT-LONG, referenced twice  
-- 13,2441 LALOTORV
-- 13,2601 SETRE
-- 13,3071 CSMPREC
-- 13,3114 CSMCONIC
-- 13,3162 INTEGRV
-- 13,3442 INTSTALL, referenced twice
+* 13,2363 It's not referenced, but here's where ALOADED (7 words) gets inserted when it's moved from bank 11. Thus all the stuff below gets moved upward by 7.
+* 13,2370 LAT-LONG, referenced twice  
+* 13,2441 LALOTORV
+* 13,2601 SETRE
+* 13,3071 CSMPREC
+* 13,3114 CSMCONIC
+* 13,3162 INTEGRV
+* 13,3442 INTSTALL, referenced twice
 
-So naively, you'd suppose that since there were 9 references, all on the same side (address-wise) of the inserted 7 words, that there would be an adjustment of bank 30's banksum by 9\*7=63 words.&nbsp; Since the banksum discrepancy had been 00045 (37 decimal) to start with and since we know it gets smaller in absolute value by more than 045-027=016, it must cross 0 and change sign.&nbsp; I.e., the banksum discrepancy of bank 30 after moving ALOADED into bank 13 should be |37-63|=26 (00032), which it is not.&nbsp; Well, I said it was naive.&nbsp; One reason is that arguments of the kind I just gave assume that addition is associative, i.e. that (a+b)+c=a+(b+c), so that if (say) I want to add 63 at the end of a calculation that it's just as good as adding in 7 at nine arbitrary points in the calculation of the sum.&nbsp; But sometimes AGC addition is not associative, because of the way the AGC handles arithmetical overflow, which is as follows:&nbsp; The maximum positive integer is 16383, and if a sum exceeds the maximum positive integer, then you subtract 16383 from the sum.&nbsp; For example, 16383+1 gives 1.&nbsp; Similarly, if a sum is less than the minimum negative integer, -16383, then 16383 is added to the sum.&nbsp; So consider the following addition:&nbsp;
+So naively, you'd suppose that since there were 9 references, all on the same side (address-wise) of the inserted 7 words, that there would be an adjustment of bank 30's banksum by 9\*7=63 words. Since the banksum discrepancy had been 00045 (37 decimal) to start with and since we know it gets smaller in absolute value by more than 045-027=016, it must cross 0 and change sign. I.e., the banksum discrepancy of bank 30 after moving ALOADED into bank 13 should be |37-63|=26 (00032), which it is not. Well, I said it was naive. One reason is that arguments of the kind I just gave assume that addition is associative, i.e. that (a+b)+c=a+(b+c), so that if (say) I want to add 63 at the end of a calculation that it's just as good as adding in 7 at nine arbitrary points in the calculation of the sum. But sometimes AGC addition is not associative, because of the way the AGC handles arithmetical overflow, which is as follows: The maximum positive integer is 16383, and if a sum exceeds the maximum positive integer, then you subtract 16383 from the sum. For example, 16383+1 gives 1. Similarly, if a sum is less than the minimum negative integer, -16383, then 16383 is added to the sum. So consider the following addition:
 
-    (16383 + 1) + -1  →  (1) + -1  →  0
+	(16383 + 1) + -1  →  (1) + -1  →  0
 
 If addition were always associative, then it would be the same as
 
-    16383 + (1 + -1) → 16383 + (0) → 16383
+	16383 + (1 + -1) → 16383 + (0) → 16383
 
-Obviously, though, it is not.&nbsp; The upshot is that although AGC addition is commutative in the sense that a+b=b+a for any given _pair_ of numbers, we still can't assume for a triplet or more of numbers that (a+b)+c=(a+c)+b, which is exactly the assumption I was making with my banksum 13 argument above.&nbsp; For example, take the numbers I was using earlier:&nbsp;
+Obviously, though, it is not. The upshot is that although AGC addition is commutative in the sense that a+b=b+a for any given //pair// of numbers, we still can't assume for a triplet or more of numbers that (a+b)+c=(a+c)+b, which is exactly the assumption I was making with my banksum 13 argument above. For example, take the numbers I was using earlier:
 
-    (16383 + 1) + -1 → (1) + -1 → 0
+	(16383 + 1) + -1 → (1) + -1 → 0
 
 but
 
-    (16383 + -1) + 1 → (16382) + 1 → 16383
+	(16383 + -1) + 1 → (16382) + 1 → 16383
 
-Regardless of why my estimation of the banksum discrepancy of bank 13 was wrong, though, the lesson is clear:&nbsp; Since the checksum of bank 30 changed signs in the of moving 7 words into bank 13 from bank 11, it probably isn't telling us we would need to move more words into bank 13 (if bank 30's discrepancy were completely due to this).
+Regardless of why my estimation of the banksum discrepancy of bank 13 was wrong, though, the lesson is clear: Since the checksum of bank 30 changed signs in the of moving 7 words into bank 13 from bank 11, it probably isn't telling us we would need to move more words into bank 13 (if bank 30's discrepancy were completely due to this).
 
-### Bank 11 Idea #5:&nbsp; Entities That Relocated Between Comanche 55 and Artemis
+==== Bank 11 Idea #5: Entities That Relocated Between Comanche 55 and Artemis ====
 
-Another thing we might try is to look at labels currently in bank 11 which had changed banks from Comanche 55 to Artemis.&nbsp; Once again, we already have a program for this, namely symbolBankCompare.py.&nbsp; Here's the full list:
+Another thing we might try is to look at labels currently in bank 11 which had changed banks from Comanche 55 to Artemis. Once again, we already have a program for this, namely symbolBankCompare.py. Here's the full list:
 
-- 11 -\> 15:&nbsp; DP1/4.&nbsp; In Artemis, this is actually an alias for the already-existing constant D1/4, so it's a removal of a constant rather than a movement of one.
-- 11 -\> 16:&nbsp; 
-  - CSINEXT1 (in SETLOC CSIPROG5, 43 words)
-  - INITVEL6, INITVEL7 (in SETLOC INTVEL in Comanche55 or SETLOC INTVEL1 in Artemis, 9 words)
+* 11 → 15: DP1/4. In Artemis, this is actually an alias for the already-existing constant D1/4, so it's a removal of a constant rather than a movement of one.
+* 11 → 16: 
+	* CSINEXT1 (in SETLOC CSIPROG5, 43 words)
+	* INITVEL6, INITVEL7 (in SETLOC INTVEL in Comanche55 or SETLOC INTVEL1 in Artemis, 9 words)
 
-I tried moving CSINEXT1 to bank 16, which unfortunately doesn't have quite enough room for it, although used in combination with ReconstructionBank16\_Constants bank 16 does have enough room. Interestingly, this operation drops the bank 12 discrepancy to 00002, though I can't claim that overall the goodness signature is unambiguously improved.&nbsp; &nbsp;(_Later update_, after fixing up bank 23's overflow and bank 10's and 33's banksums:&nbsp; Still uninspiring.)
+I tried moving CSINEXT1 to bank 16, which unfortunately doesn't have quite enough room for it, although used in combination with ReconstructionBank16_Constants bank 16 does have enough room. Interestingly, this operation drops the bank 12 discrepancy to 00002, though I can't claim that overall the goodness signature is unambiguously improved. (Later update, after fixing up bank 23's overflow and bank 10's and 33's banksums: Still uninspiring.)
 
-One may wonder (I did!) whether CSINEXT1 mightn't have changed in some way our PCR-based reconstructions haven't captured, and hence may be a different size than I've said it is.&nbsp; I've tried tracing through the flowchart ( [sheets 14 and part of 15 of FC-2626](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=888)).&nbsp; Unfortunately, the latest version we have (in the Colossus 2D flowchart document) is for Colossus 2A, and the sheets I mentioned are actually from Colossus 2.&nbsp; The entry points CSINEXT1 and CSINEXT2 are not even shown (even though they exist in both Colossus 2 and 2A), though the entry point for CSINEXT1 would be at the very top of sheet 14.&nbsp; The computation itself is extraordinarily complex and difficult to follow.&nbsp; So I can't honestly claim that I can verify the code vs the flowchart.&nbsp; All I can say for sure is that the appropriate entry points aren't shown on the flowchart.
+One may wonder (I did!) whether CSINEXT1 mightn't have changed in some way our PCR-based reconstructions haven't captured, and hence may be a different size than I've said it is. I've tried tracing through the flowchart ( [[https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=888|sheets 14 and part of 15 of FC-2626]]). Unfortunately, the latest version we have (in the Colossus 2D flowchart document) is for Colossus 2A, and the sheets I mentioned are actually from Colossus 2. The entry points CSINEXT1 and CSINEXT2 are not even shown (even though they exist in both Colossus 2 and 2A), though the entry point for CSINEXT1 would be at the very top of sheet 14. The computation itself is extraordinarily complex and difficult to follow. So I can't honestly claim that I can verify the code vs the flowchart. All I can say for sure is that the appropriate entry points aren't shown on the flowchart.
 
-For what it's worth, I have determined that the correct number of words to remove from bank 11 to fix bank 12's checksum is 41, and thus relocating CSINEXT1 removes 2 words too many.&nbsp; However, as I mentioned before, we don't know that that's the entire problem with bank 12 anyway.
+For what it's worth, I have determined that the correct number of words to remove from bank 11 to fix bank 12's checksum is 41, and thus relocating CSINEXT1 removes 2 words too many. However, as I mentioned before, we don't know that that's the entire problem with bank 12 anyway.
 
-### Bank 11 Summary
+==== Bank 11 Summary ====
 
-1. An idea _without_ promise:&nbsp; Splitting out QUALITY1/QUALITY2 as was done in Colossus 2 and 2A (and Luminary 1 and 1A) was _not_ done in Colossus 2C.
-2. An idea with promise:&nbsp; Moving SETLOC tag S52/2 to bank 16 or 17, combined with moving tag INTINIT1 to bank 13.
-3. An idea with promise:&nbsp; Moving SETLOC tag CSIPROG5 to bank 16, combined with aliasing of some constants.
+1. An idea //without// promise: Splitting out QUALITY1/QUALITY2 as was done in Colossus 2 and 2A (and Luminary 1 and 1A) was //not// done in Colossus 2C.
+2. An idea with promise: Moving SETLOC tag S52/2 to bank 16 or 17, combined with moving tag INTINIT1 to bank 13.
+3. An idea with promise: Moving SETLOC tag CSIPROG5 to bank 16, combined with aliasing of some constants.
 
-Judging #2 and #3 as "promising" is based on two observations:&nbsp; That they eliminate overflow in bank 11, and that they substantially reduce the banksum discrepancy of bank 12.&nbsp; However, due to the nature of bank 12's dependence on bank 11&nbsp;&nbsp;—&nbsp; namely that it merely accesses a single constant at the very end of the bank&nbsp;&nbsp;—&nbsp; _anything_ that removes a reasonable number of words from the middle of bank 11 is going to substantially improve bank 12.&nbsp; In other words, looking at bank 12 as a proxy for the goodness of a fix to bank 12 is a very poor barometer indeed.
+Judging #2 and #3 as "promising" is based on two observations: That they eliminate overflow in bank 11, and that they substantially reduce the banksum discrepancy of bank 12. However, due to the nature of bank 12's dependence on bank 11— namely that it merely accesses a single constant at the very end of the bank— //anything// that removes a reasonable number of words from the middle of bank 11 is going to substantially improve bank 12. In other words, looking at bank 12 as a proxy for the goodness of a fix to bank 12 is a very poor barometer indeed.
 
 Nor do these "promising" ideas dramatically improve the reconstruction's "goodness signature":
 
-- 06-01-08-06-03-09-03:&nbsp; No change  
-- 06-02-06-07-04-09-02:&nbsp; S52/2 to bank 16 and INTINIT1 to bank 13
-- 06-02-07-07-03-09-02:&nbsp;&nbsp;S52/2 to bank 17 and INTINIT1 to bank 13
-- 06-02-06-07-03-10-02:&nbsp; CSIPROG5 to bank 16 and aliasing of some constants
+* 06-01-08-06-03-09-03: No change  
+* 06-02-06-07-04-09-02: S52/2 to bank 16 and INTINIT1 to bank 13
+* 06-02-07-07-03-09-02:S52/2 to bank 17 and INTINIT1 to bank 13
+* 06-02-06-07-03-10-02: CSIPROG5 to bank 16 and aliasing of some constants
 
 Given these relatively marginal changes, I don't accept any of them at the present time.
 
-## Memory Bank 23
+===== Memory Bank 23 =====
 
 As noted earlier, in our reference Comanche 67 build without any bank-to-bank relocations, bank 23 overflows by 14 words.
 
-Let's start with an inventory of bank 23, in order of increasing addresses.&nbsp; I've underlined fixed constants.
+Let's start with an inventory of bank 23, in order of increasing addresses. I've underlined fixed constants.
 
-- SETLOC COMGEOM1, 109 (0155) words:&nbsp; SXTNB, SXTLOGIC, CALCXA, SXTANG, SXTANG1, SXTALARM, ZNB=S1.
-- SETLOC POWFLIT2, 109 (0155) words:&nbsp; LOG, NEARLY1, CLOG2/32, EARROT1, EARROT2, OVERADAY, 1/WIE, NB2NB1, ZERINFLT, HALFNFLT, NB1NB2, 10DEGS-, 270DEG, 20DEGS-, 20DEG-.&nbsp;
-- SETLOC R30LOC, 302 (0456) words:&nbsp; V82CALL, V82GOFF, V82GOFLP, V82STALL, FLAGGON, OPTIONVN, V16N44, TFFBANK, V82GOFF1, ISTIMEOK, STRTDEC1, OTHSHIP, BOTHSHIP, THISSHIP, GETNOW, V06N16X, 1/RTMUM, 1/RTMUE, MINPERM, MINPERE, EARTHPAD, MOONPAD, BOTHPAD, SPLRET1, TICKTPER, TICKTFF, TICKTEST, DOTICK, TFFTICK, TPERTICK, V82GON, V82REDSP, V82GON1, NEXTLINE, MOONGON, EARTHGON, V82GON2, CANDEL, SPLRET, V82GON3, SR30.1, TFFCALLS, STORHAP0, STORHPER, DOTPER, SKIPTPER, MAXCHK, MAXNM.
-- SETLOC P11FOUR, 46 (056) words:&nbsp; REDOSAT, SATSTICK, STIKBITS, 100MST5, 2SATSTCK.
-- SETLOC P20S2, 53 (065) words:&nbsp; BVECTORS, PI/4.0, GETUM
-- SETLOC P20S2, 2 words:&nbsp;&nbsp;DP1MIN.
-- SETLOC CSIPROG4, 41 (051) words:&nbsp; CSINEXT, CIRCL, NTP/2.
-- SETLOC INFLIGHT, 186 (0272) words:&nbsp; CALCGTA, ARCTRIG, TRIG1, TRIG2, CALCGA, CALCGA1, GIMLOCK1, AXISGEN, AXISGEN1, AXISGEN2, AXISGEN3, QTSN45, .166....
-- SETLOC POWFLITE, 163 (0243) words:&nbsp; CDUTRIG, CD\*TR\*G, CDUTRIGS, CD\*TR\*GS, TR\*GL\*\*P, QUICTRIG, NBSM, CDU\*SMNB, TRG\*SMNG, C\*MM\*N1, C\*MM\*N2, CDU\*NBSM, TRG\*NBSM, C\*MM\*N3, \*SMNB\*, \*NBSM\*, AX\*SR\*T, R\*TL\*\*P, LOOP2, LOOP1, TSTPOINT, SINESLOC, INDEX1.
-- SETLOC POWFLIT1:&nbsp; 24 (030) words:&nbsp; SMCDURES.
+* SETLOC COMGEOM1, 109 (0155) words: SXTNB, SXTLOGIC, CALCXA, SXTANG, SXTANG1, SXTALARM, ZNB=S1.
+* SETLOC POWFLIT2, 109 (0155) words: LOG, NEARLY1, CLOG2/32, EARROT1, EARROT2, OVERADAY, 1/WIE, NB2NB1, ZERINFLT, HALFNFLT, NB1NB2, 10DEGS-, 270DEG, 20DEGS-, 20DEG-.
+* SETLOC R30LOC, 302 (0456) words: V82CALL, V82GOFF, V82GOFLP, V82STALL, FLAGGON, OPTIONVN, V16N44, TFFBANK, V82GOFF1, ISTIMEOK, STRTDEC1, OTHSHIP, BOTHSHIP, THISSHIP, GETNOW, V06N16X, 1/RTMUM, 1/RTMUE, MINPERM, MINPERE, EARTHPAD, MOONPAD, BOTHPAD, SPLRET1, TICKTPER, TICKTFF, TICKTEST, DOTICK, TFFTICK, TPERTICK, V82GON, V82REDSP, V82GON1, NEXTLINE, MOONGON, EARTHGON, V82GON2, CANDEL, SPLRET, V82GON3, SR30.1, TFFCALLS, STORHAP0, STORHPER, DOTPER, SKIPTPER, MAXCHK, MAXNM.
+* SETLOC P11FOUR, 46 (056) words: REDOSAT, SATSTICK, STIKBITS, 100MST5, 2SATSTCK.
+* SETLOC P20S2, 53 (065) words: BVECTORS, PI/4.0, GETUM
+* SETLOC P20S2, 2 words:DP1MIN.
+* SETLOC CSIPROG4, 41 (051) words: CSINEXT, CIRCL, NTP/2.
+* SETLOC INFLIGHT, 186 (0272) words: CALCGTA, ARCTRIG, TRIG1, TRIG2, CALCGA, CALCGA1, GIMLOCK1, AXISGEN, AXISGEN1, AXISGEN2, AXISGEN3, QTSN45, .166....
+* SETLOC POWFLITE, 163 (0243) words: CDUTRIG, CD*TR*G, CDUTRIGS, CD*TR*GS, TR*GL**P, QUICTRIG, NBSM, CDU*SMNB, TRG*SMNG, C*MM*N1, C*MM*N2, CDU*NBSM, TRG*NBSM, C*MM*N3, *SMNB*, *NBSM*, AX*SR*T, R*TL**P, LOOP2, LOOP1, TSTPOINT, SINESLOC, INDEX1.
+* SETLOC POWFLIT1: 24 (030) words: SMCDURES.
 
 And the entities moved from bank 23 from Comanche 55 through Artemis were:
 
-- 23 -\> 21:&nbsp; SATSTICK (25 words), STIKBITS (1 word)
-- 23 -\> 24:&nbsp; OPTIONVN (1 word)
-- 23 -\> 26:&nbsp; NEARLY1 (2 words), REDOSAT (17 words)
-- 23 -\> FF:&nbsp; 100MST5 (1 word), 2SATSTCK (2 words)
+* 23 → 21: SATSTICK (25 words), STIKBITS (1 word)
+* 23 → 24: OPTIONVN (1 word)
+* 23 → 26: NEARLY1 (2 words), REDOSAT (17 words)
+* 23 → FF: 100MST5 (1 word), 2SATSTCK (2 words)
 
-So between Comanche 55 and Artemis, SETLOC P11FOUR was split up and moved in its entirety to 3 separate banks.&nbsp; Indeed, the only other things moved were the fixed constants&nbsp;NEARLY1 (from SETLOC POWFLIT2) and OPTIONVN (from SETLOC R30LOC).&nbsp; So SETLOC P11FOUR and its various component parts would seem like prime candidates for relocation.&nbsp; For the code moved (SATSTICK and REDOSAT), however, the destination banks used for them in Artemis are awful choice, since they have nothing like the necessary space available.
+So between Comanche 55 and Artemis, SETLOC P11FOUR was split up and moved in its entirety to 3 separate banks. Indeed, the only other things moved were the fixed constantsNEARLY1 (from SETLOC POWFLIT2) and OPTIONVN (from SETLOC R30LOC). So SETLOC P11FOUR and its various component parts would seem like prime candidates for relocation. For the code moved (SATSTICK and REDOSAT), however, the destination banks used for them in Artemis are awful choice, since they have nothing like the necessary space available.
 
-Another really badly inappropriate choice would be moving 2SATSTCK to fixed-fixed as Artemis did, since in the reference version of the reconstruction, both fixed-fixed banks (02 and 03) have correct checksums and are therefore assumed to be correct.&nbsp; We don't want to move anything into them.&nbsp; 100MST5 wouldn't be a problem in that regard, since it's really just an aliasing to an existing fixed-fixed constant rather than a relocation.
+Another really badly inappropriate choice would be moving 2SATSTCK to fixed-fixed as Artemis did, since in the reference version of the reconstruction, both fixed-fixed banks (02 and 03) have correct checksums and are therefore assumed to be correct. We don't want to move anything into them. 100MST5 wouldn't be a problem in that regard, since it's really just an aliasing to an existing fixed-fixed constant rather than a relocation.
 
-The most immediately-attractive option to my mind is to treat SATSTICK as Artemis does:&nbsp; Put it in a new SETLOC tag P11THREE, and locate P11THREE in a different bank, which for us would have to be 16, 17, or 30.&nbsp; This, alas, produces an indifferent result.
+The most immediately-attractive option to my mind is to treat SATSTICK as Artemis does: Put it in a new SETLOC tag P11THREE, and locate P11THREE in a different bank, which for us would have to be 16, 17, or 30. This, alas, produces an indifferent result.
 
-The only other obvious possibility is to keep what we would have placed in tag P11THREE in place in bank 23, but to move the rest of P11FOUR elsewhere.&nbsp; Since that only means moving REDOSAT (17 words), we're left with quite a few choices of destination bank:&nbsp; 04, 14, 15, 16, 17, 20, 30.&nbsp; The results are astounding:
+The only other obvious possibility is to keep what we would have placed in tag P11THREE in place in bank 23, but to move the rest of P11FOUR elsewhere. Since that only means moving REDOSAT (17 words), we're left with quite a few choices of destination bank: 04, 14, 15, 16, 17, 20, 30. The results are astounding:
 
-- 06-01-08-06-03-09-03:&nbsp; Reference.&nbsp; Banks cleared are 00, 02, 03, 06, 07, 41.&nbsp;&nbsp;
-- 06-02-04-07-06-09-02:&nbsp; Bank 04.&nbsp; Banks cleared are 00, 02, 03, 06, 07, 41.&nbsp; Bank 04&nbsp;discrepancy:&nbsp; 00056&nbsp;→&nbsp;03340
-- 07-02-07-05-05-08-02:&nbsp; Bank 14.&nbsp; Banks cleared are 00, 02, 03, 06, 10, 33, 41.&nbsp; Bank 14&nbsp;discrepancy:&nbsp; 14553&nbsp;→&nbsp;11407
-- 08-02-04-07-04-09-02:&nbsp; Bank 15.&nbsp; Banks cleared are 00, 02, 03, 06, 07, 10, 33, 41.&nbsp; Bank 15&nbsp;discrepancy:&nbsp; 06053&nbsp;→&nbsp;06763  
-- 08-02-05-06-04-09-02:&nbsp; Bank 16.&nbsp; Banks cleared are 00, 02, 03, 06, 07, 10, 33, 41.&nbsp; Bank 16&nbsp;discrepancy:&nbsp; 17557&nbsp;→&nbsp;23237
-- 08-02-04-08-02-10-02:&nbsp; Bank 17.&nbsp; Banks cleared are 00, 02, 03, 06, 07, 10, 33, 41.&nbsp; Bank 17&nbsp;discrepancy:&nbsp; 02417&nbsp;→&nbsp;11301
-- 08-02-04-07-04-09-02:&nbsp; Bank 20.&nbsp; Banks cleared are 00, 02, 03, 06, 07, 10, 33, 41.&nbsp; Bank 20&nbsp;discrepancy:&nbsp; 00622&nbsp;→&nbsp;00745
-- 08-02-05-06-04-09-02:&nbsp; Bank 30.&nbsp; Banks cleared are 00, 02, 03, 06, 07, 10, 33, 41.&nbsp; Bank 30 discrepancy:&nbsp; 00045&nbsp;→&nbsp;03372  
+* 06-01-08-06-03-09-03: Reference. Banks cleared are 00, 02, 03, 06, 07, 41.
+* 06-02-04-07-06-09-02: Bank 04. Banks cleared are 00, 02, 03, 06, 07, 41. Bank 04discrepancy: 00056→03340
+* 07-02-07-05-05-08-02: Bank 14. Banks cleared are 00, 02, 03, 06, 10, 33, 41. Bank 14discrepancy: 14553→11407
+* 08-02-04-07-04-09-02: Bank 15. Banks cleared are 00, 02, 03, 06, 07, 10, 33, 41. Bank 15discrepancy: 06053→06763  
+* 08-02-05-06-04-09-02: Bank 16. Banks cleared are 00, 02, 03, 06, 07, 10, 33, 41. Bank 16discrepancy: 17557→23237
+* 08-02-04-08-02-10-02: Bank 17. Banks cleared are 00, 02, 03, 06, 07, 10, 33, 41. Bank 17discrepancy: 02417→11301
+* 08-02-04-07-04-09-02: Bank 20. Banks cleared are 00, 02, 03, 06, 07, 10, 33, 41. Bank 20discrepancy: 00622→00745
+* 08-02-05-06-04-09-02: Bank 30. Banks cleared are 00, 02, 03, 06, 07, 10, 33, 41. Bank 30 discrepancy: 00045→03372  
 
-Hint (in case you didn't see the significance):&nbsp; The number of banks with correct banksums increases from 6 to 8 for some of these choices; banks 10 and 31 are suddenly correct, checksum-wise.
+Hint (in case you didn't see the significance): The number of banks with correct banksums increases from 6 to 8 for some of these choices; banks 10 and 31 are suddenly correct, checksum-wise.
 
-In case you were wondering, regardless of the bank chosen, bank 23's checksum discrepancy is 21100.&nbsp; So ... I think it's clear that relocating to bank 15, 16, 17, or 20 is probably the right thing to do.&nbsp; (Not 30, because its already-very-low banksum discrepancy gets messed up.)&nbsp; But which one?&nbsp; Or should P11FOUR perhaps be further subdivided and multiple target banks be used as in Artemis?&nbsp;
+In case you were wondering, regardless of the bank chosen, bank 23's checksum discrepancy is 21100. So ... I think it's clear that relocating to bank 15, 16, 17, or 20 is probably the right thing to do. (Not 30, because its already-very-low banksum discrepancy gets messed up.) But which one? Or should P11FOUR perhaps be further subdivided and multiple target banks be used as in Artemis?
 
-**☞** If we were to choose among the 4 banks mentioned, bank 16 has a marginally better goodness signature; bank 20, on the other hand, has the smallest detrimental effect on the banksum discrepancy of the target bank.&nbsp; Moreover, bank 20 has the smallest number of free words, so by using it, we leave behind larger contiguous ranges of free memory.&nbsp;
+**☞** If we were to choose among the 4 banks mentioned, bank 16 has a marginally better goodness signature; bank 20, on the other hand, has the smallest detrimental effect on the banksum discrepancy of the target bank. Moreover, bank 20 has the smallest number of free words, so by using it, we leave behind larger contiguous ranges of free memory.
 
-### Is Bank 20 the Correct Choice?
+==== Is Bank 20 the Correct Choice? ====
 
-I've temporarily left the relocation to bank 20 in place, and see how it goes, because I like getting rid of the overflow in memory bank 23, and I like banks 10 and 33 having correct checksums even more.&nbsp; But I'd really, really like to know if it's correct as opposed to merely being convenient.
+I've temporarily left the relocation to bank 20 in place, and see how it goes, because I like getting rid of the overflow in memory bank 23, and I like banks 10 and 33 having correct checksums even more. But I'd really, really like to know if it's correct as opposed to merely being convenient.
 
-I don't even really know any way at the moment to approach the question.&nbsp; So I'll start out by doing what I know how to do:&nbsp; Inventorying the contents of bank 20:
+I don't even really know any way at the moment to approach the question. So I'll start out by doing what I know how to do: Inventorying the contents of bank 20:
 
-- SETLOC VAC5LOC, 53 words:&nbsp; VAC5STOR, V5LOOP1, V5OUT1, V5LOOP2, V5OUT2, EIGHTEEN
-- SETLOC MANUSTUF, 56 words:&nbsp; MANUSTAT, HIGHGAIN, CONTMANU, MANUCALL, UPDTCALL
-- SETLOC MANUSTUF, 7 words:&nbsp; ZEROERROR
-- SETLOC R36CM, 13 words:&nbsp; R36, OPTION36
-- SETLOC P11FOUR, 17 words:&nbsp; REDOSAT
-- SETLOC DAPS6, 32 words:&nbsp; S40.81, RATEZRO, INCRSVG, LOTHRUST
-- SETLOC DAPS6, 157 words:&nbsp; PRE40.6, S40.6, RSTRTST, GDTSETUP, GIMDTEST, OUTPUT, GIMTRIM, ENDS40.6, OCT02200, -4ACTDEG, +2ACTDEG, S41.2, TOGETHER, BDFAIL
-- SETLOC DAPS6,&nbsp; 26 words:&nbsp; DEC409, DEC46, S40.14, CONTONE, CONTTWO
-- SETLOC DAPS2, 502 words:&nbsp; PITCHDAP, PSTROKER, PCDUDOTS, RLIMTEST, PINTEGRL, PERORLIM, PFORWARD, POFFSET, PACLIM, POUT, PPRECOMP, DELBARP, PCOPYCYC, PDAPEND, PCOPY, PMISC, YAWDAP, YSTROKER, YCDUDOTS, YINTEGRL, YERORLIM, YFORWARD, YOFFSET, YACLIM, YOUT, YPRECOMP, DELBARY, YCOPYCYC, YDAPEND, YCOPY, YMISC, DAPINIT, ERRORLIM, ACTLIM, FWDFLTR, 1DAPCAS, 2DAPCAS, 3DAPCAS, OPTVARK, PRECOMP, 2CASFLTR, 3CASFLTR, ACTSAT, 1/ACTSAT, PITCHT5, DAPT5, YAWT5, 1/RTLIM, 1-E(-AT), E(-AT)
-- SETLOC DAPS2, 73 words:&nbsp; STRKTSTI, STRKCHK, TSTINIT, FCADDY, FREVS, FCARD, FCARD1, FCARD2, FCARD3, FCARD4, FCARD5, FCARD6, HACK, HACKWLST, STROKILL, REVUP
-- SETLOC DAPS1, 86 words:&nbsp; CM/DAPON, NOTYET, CM/DAPIC, CM/DAP2C, CM/SWIC1, -CDUT+1, T5IDLER1
+* SETLOC VAC5LOC, 53 words: VAC5STOR, V5LOOP1, V5OUT1, V5LOOP2, V5OUT2, EIGHTEEN
+* SETLOC MANUSTUF, 56 words: MANUSTAT, HIGHGAIN, CONTMANU, MANUCALL, UPDTCALL
+* SETLOC MANUSTUF, 7 words: ZEROERROR
+* SETLOC R36CM, 13 words: R36, OPTION36
+* SETLOC P11FOUR, 17 words: REDOSAT
+* SETLOC DAPS6, 32 words: S40.81, RATEZRO, INCRSVG, LOTHRUST
+* SETLOC DAPS6, 157 words: PRE40.6, S40.6, RSTRTST, GDTSETUP, GIMDTEST, OUTPUT, GIMTRIM, ENDS40.6, OCT02200, -4ACTDEG, +2ACTDEG, S41.2, TOGETHER, BDFAIL
+* SETLOC DAPS6, 26 words: DEC409, DEC46, S40.14, CONTONE, CONTTWO
+* SETLOC DAPS2, 502 words: PITCHDAP, PSTROKER, PCDUDOTS, RLIMTEST, PINTEGRL, PERORLIM, PFORWARD, POFFSET, PACLIM, POUT, PPRECOMP, DELBARP, PCOPYCYC, PDAPEND, PCOPY, PMISC, YAWDAP, YSTROKER, YCDUDOTS, YINTEGRL, YERORLIM, YFORWARD, YOFFSET, YACLIM, YOUT, YPRECOMP, DELBARY, YCOPYCYC, YDAPEND, YCOPY, YMISC, DAPINIT, ERRORLIM, ACTLIM, FWDFLTR, 1DAPCAS, 2DAPCAS, 3DAPCAS, OPTVARK, PRECOMP, 2CASFLTR, 3CASFLTR, ACTSAT, 1/ACTSAT, PITCHT5, DAPT5, YAWT5, 1/RTLIM, 1-E(-AT), E(-AT)
+* SETLOC DAPS2, 73 words: STRKTSTI, STRKCHK, TSTINIT, FCADDY, FREVS, FCARD, FCARD1, FCARD2, FCARD3, FCARD4, FCARD5, FCARD6, HACK, HACKWLST, STROKILL, REVUP
+* SETLOC DAPS1, 86 words: CM/DAPON, NOTYET, CM/DAPIC, CM/DAP2C, CM/SWIC1, -CDUT+1, T5IDLER1
 
 Well, if there's anything worthwhile in that list for providing a rationale for using bank 20, it's not obvious to me.
 
 TBD
 
-## Memory Bank 37
+===== Memory Bank 37 =====
 
 Well, once again, let's start with an inventory of the contents of bank 37, in order of increasing address:
 
-- BANK 37 (without SETLOC), 1 word:&nbsp; EBRN1
-- SETLOC P20S, 115 words:&nbsp; PROG21, P21PROG1, P21PROG2, P21CONT, P21VSAVE, P21DSP, P21PRTM, 600SEC, P21ONENN, V06N43, V6N34, K.01
-- SETLOC P11TWO, 68 words:&nbsp; ATTDISP1, ATTDISPR, NOPOLYM
-- SETLOC P20S, 82 words:&nbsp; PROG20, P20.1, P20.2, P20.3, PIKUP20, P20R52JB, OCT203
-- SETLOC P20S, 53 words:&nbsp; R57, R57A, MARKDISP, R57B, ENDR57, P23ABRT, V06N87NB, V59NB, V51NB, 19.77DEG
-- SETLOC RENDEZ, 97 words:&nbsp; R21CSM, R23CSM, R23CSM1, R21C1, R21CSMA, R21CSM1, R21END, V53, V0694, R61CSM, R61C1, R61END, DECRM61
-- SETLOC CDHTAG3, 16 words:&nbsp; DISDVLVC
-- SETLOC CDHTAG3, 28 words:&nbsp; ADVANCE
-- SETLOC SERVICES, 382 words:&nbsp; PREREAD, REDO5.31, PREREAD1, READACCS, PIPSDONE, REDO5.5, NOSAVPIP, CHEKAVEG, MAKESERV, AVEGOUT, AVOUTCAD, OMNITOR, 0.5SEC, QUIKREAD, CHKCTR, SERVICER, PIPCHECK, PIPLOOP, DVTOTUP, TICKTTE, AVERAGEG, AVGEND, SERVEXIT, -MAXDELV, JTAGTIME, 2.5SEC, MDOTFAIL, NORMLIZE, PIPASR, REPIP1, REPIP3, DODELVZ, REREADAC, CHKTEMX, DONEADR, CALCGRAV,&nbsp; ITISMOON, CALCRVG, KPIP, KPIP1, -MUDT(E), -MUDT(M), 2SEC(22), DPI/20, RESQ, 20J, 2J
-- SETLOC BODYATT, 195 words:&nbsp; CM/POSE, SPVQUIT, CM/POSE2, CM/TRIO, CM/ATUP, CMTR1, DOGAMDOT, NOGAMDOT, CMTR2, REDOPOSE, CM/POSE3, CORANGOV, -KVSCALE, TCDU, REPOSADR
+* BANK 37 (without SETLOC), 1 word: EBRN1
+* SETLOC P20S, 115 words: PROG21, P21PROG1, P21PROG2, P21CONT, P21VSAVE, P21DSP, P21PRTM, 600SEC, P21ONENN, V06N43, V6N34, K.01
+* SETLOC P11TWO, 68 words: ATTDISP1, ATTDISPR, NOPOLYM
+* SETLOC P20S, 82 words: PROG20, P20.1, P20.2, P20.3, PIKUP20, P20R52JB, OCT203
+* SETLOC P20S, 53 words: R57, R57A, MARKDISP, R57B, ENDR57, P23ABRT, V06N87NB, V59NB, V51NB, 19.77DEG
+* SETLOC RENDEZ, 97 words: R21CSM, R23CSM, R23CSM1, R21C1, R21CSMA, R21CSM1, R21END, V53, V0694, R61CSM, R61C1, R61END, DECRM61
+* SETLOC CDHTAG3, 16 words: DISDVLVC
+* SETLOC CDHTAG3, 28 words: ADVANCE
+* SETLOC SERVICES, 382 words: PREREAD, REDO5.31, PREREAD1, READACCS, PIPSDONE, REDO5.5, NOSAVPIP, CHEKAVEG, MAKESERV, AVEGOUT, AVOUTCAD, OMNITOR, 0.5SEC, QUIKREAD, CHKCTR, SERVICER, PIPCHECK, PIPLOOP, DVTOTUP, TICKTTE, AVERAGEG, AVGEND, SERVEXIT, -MAXDELV, JTAGTIME, 2.5SEC, MDOTFAIL, NORMLIZE, PIPASR, REPIP1, REPIP3, DODELVZ, REREADAC, CHKTEMX, DONEADR, CALCGRAV, ITISMOON, CALCRVG, KPIP, KPIP1, -MUDT(E), -MUDT(M), 2SEC(22), DPI/20, RESQ, 20J, 2J
+* SETLOC BODYATT, 195 words: CM/POSE, SPVQUIT, CM/POSE2, CM/TRIO, CM/ATUP, CMTR1, DOGAMDOT, NOGAMDOT, CMTR2, REDOPOSE, CM/POSE3, CORANGOV, -KVSCALE, TCDU, REPOSADR
 
-Digression:&nbsp; All other considerations aside, from the list above, DISDVLVC looks ripe for relocation, since: a) it's purely interpretive; b) it's slightly bigger than bank 37's overflow; c) There are plenty of other banks with spare room to accept it, namely 04, 14, 15, 16, 17, 30 ... and if (see the preceding section) we make slight adjustments, 20; d) for some slightly suspicious reason, its SETLOC (CDHTAG3) has already been split into two parts anyway.&nbsp; Regarding the latter point, there are various CDHTAG_x_ tags for SETLOC:&nbsp; CDHTAG, CDHTAG1, CDHTAG2, CDHTAG3, CDHTAGS.&nbsp; Curiously, CDHTAG1 has been defined in every revision of Colossus 2 (but not 1 or 3), and never actually used for SETLOC (or for anything else).&nbsp; I wonder why?&nbsp; It seems likely that it had been used for something previously (i.e., in some revision of Comanche earlier than any we possess), but stopped being used.&nbsp; As it happens, DISDVLVC is the first source line encounteed for any of the CDHTAG_x_ SETLOCs.&nbsp; Could DISDVLVC at one time have been under a SETLOC CDHTAG1, but then later changed to CDHTAG3?&nbsp; Well, who knows?&nbsp; But just for the sake of argument, I've tried putting DISDVLVC under a SETLOC CDHTAG1, and then moving CDHTAG1 around to various banks.&nbsp; At any rate, the results of relocating DISDVLVC as described do (obviously) remove the memory overflow from bank 37, but don't accomplish anything inspiring in terms of checksum resolution.&nbsp; So relocation of DISDLVLC is not currently enabled.&nbsp; End of the digression.
+Digression: All other considerations aside, from the list above, DISDVLVC looks ripe for relocation, since: a) it's purely interpretive; b) it's slightly bigger than bank 37's overflow; c) There are plenty of other banks with spare room to accept it, namely 04, 14, 15, 16, 17, 30 ... and if (see the preceding section) we make slight adjustments, 20; d) for some slightly suspicious reason, its SETLOC (CDHTAG3) has already been split into two parts anyway. Regarding the latter point, there are various CDHTAG//x// tags for SETLOC: CDHTAG, CDHTAG1, CDHTAG2, CDHTAG3, CDHTAGS. Curiously, CDHTAG1 has been defined in every revision of Colossus 2 (but not 1 or 3), and never actually used for SETLOC (or for anything else). I wonder why? It seems likely that it had been used for something previously (i.e., in some revision of Comanche earlier than any we possess), but stopped being used. As it happens, DISDVLVC is the first source line encounteed for any of the CDHTAG//x// SETLOCs. Could DISDVLVC at one time have been under a SETLOC CDHTAG1, but then later changed to CDHTAG3? Well, who knows? But just for the sake of argument, I've tried putting DISDVLVC under a SETLOC CDHTAG1, and then moving CDHTAG1 around to various banks. At any rate, the results of relocating DISDVLVC as described do (obviously) remove the memory overflow from bank 37, but don't accomplish anything inspiring in terms of checksum resolution. So relocation of DISDLVLC is not currently enabled. End of the digression.
 
 Here's a list of symbols that have moved out of bank 37 between Comanche 55 and Artemis 71:
 
-- 37 -\> 33, 68 words (entirety of SETLOC P11TWO):&nbsp; P11TWO, ATTDISP1, ATTDISPR, NOPOLYM
-- 37 -\> 36, 82 words (part of SETLOC P20S):&nbsp; PROG20, PIKUP20, P20R52JB
-- 37 -\> FF:&nbsp; V6N34
+* 37 → 33, 68 words (entirety of SETLOC P11TWO): P11TWO, ATTDISP1, ATTDISPR, NOPOLYM
+* 37 → 36, 82 words (part of SETLOC P20S): PROG20, PIKUP20, P20R52JB
+* 37 → FF: V6N34
 
-Movement of V6N34 to fixed-fixed should be ignored, since fixed-fixed already has correct checksums.&nbsp; For the former two cases, none of our memory banks has the space to hold 68 or 82 extra words.&nbsp; But regarding the two, the code from P11TWO would be the more attractive for relocation than the code from P20S, if only because it's interpretive rather than basic and therefore is easier. Of the contents of P11TWO, we can only afford (memory-wise) to move a single one of the three choices; ATTDISP1 is the most attractive prospect for relocation since it is the smallest (17+2 words).
+Movement of V6N34 to fixed-fixed should be ignored, since fixed-fixed already has correct checksums. For the former two cases, none of our memory banks has the space to hold 68 or 82 extra words. But regarding the two, the code from P11TWO would be the more attractive for relocation than the code from P20S, if only because it's interpretive rather than basic and therefore is easier. Of the contents of P11TWO, we can only afford (memory-wise) to move a single one of the three choices; ATTDISP1 is the most attractive prospect for relocation since it is the smallest (17+2 words).
 
 TBD
 
-## Preprocessor Labels for Conditional Assembly
+===== Preprocessor Labels for Conditional Assembly =====
 
 Here are the preprocessor labels for conditional assembly that I use (in gpp/defines.default) for my experiments involving moving stuff to either banks.
 
-Additionally, unlike the ReconstructionXXX labels for PCRs, PCNs, and Software Anomalies, many of the preprocessor labels defined below don't depend merely on being #define'd vs #undef'd; rather, they are _always_ #define'd, but have a numerical value representing a target bank number to which code is supposed to be moved.
+Additionally, unlike the ReconstructionXXX labels for PCRs, PCNs, and Software Anomalies, many of the preprocessor labels defined below don't depend merely on being #define'd vs #undef'd; rather, they are //always// #define'd, but have a numerical value representing a target bank number to which code is supposed to be moved.
 
-| Preprocessor Label for Conditional Assembly | Corresponding SETLOC Tag | Default #define (Comanche 55 baseline) | Other Allowed #define  
- | Comment  
- |
-| --- | --- | --- | --- | --- |
-| ReconstructionBank11\_S522  
- | S52/2  
- | #define_Label_&nbsp;11  
- | 16, 17, 30  
- |   
- |
-| ReconstructionBank11\_INTINIT1  
- | INTINIT1  
- | #define_Label_&nbsp;11  
- | 13  
- |   
- |
-| ReconstructionBank11\_CSIPROG5  
- | CSIPROG5  
- | #define_Label_&nbsp;11  
- | 16  
- |   
- |
-| ReconstructionBank11\_INTVEL1  
- | INTVEL1  
- | #define&nbsp;_Label_&nbsp;11  
- | 16  
- | INTVEL1 does not exist in Comanche 55, but in Artemis is used for subroutines INITVEL6 and INITVEL7, which are in INTVEL in Comanche 55.  
- |
-| ReconstructionBank16\_Constants  
- | n/a  
- | #undef&nbsp;_Label_&nbsp;  
- | #define&nbsp;_Label_&nbsp;  
- | Eliminates the 3 constants V06N89\*, FCORFRAC, and TMINFIRE from bank 16, by aliasing them to existing fixed-fixed constants, as is done in Artemis.  
- |
-| ReconstructionBank23\_P11THREE  
- | P11THREE  
- | #define&nbsp;_Label_&nbsp;23  
- | 16, 17, 30  
- | SETLOC tag P11THREE doesn't exist in any Colossus version except Artemis.&nbsp; However, it must have existed at some point and been removed, because there have always been tags P11ONE, P11TWO, and P11FOUR.&nbsp; Note that if _both_ ReconstructionBank23\_P11THREE _and_ ReconstructionBank23\_P11FOUR retain their default values of 23, then SETLOC tag P11THREE is not defined, and all of the contents which would have been put in SETLOC P11THREE appear instead in SETLOC P11FOUR (as it does in Comanche 55.)  
- |
-| **☞** ReconstructionBank23\_P11FOUR  
- | P11FOUR  
- | #define&nbsp;_Label_&nbsp;23  
- | 04, 14, 15, 16, 17, 20, 30  
- |   
- |
-| **☞**** &nbsp;**ReconstructionBank23\_SATSTICK\_to\_P11THREE  
- | P11THREE  
- | #undef&nbsp;_Label_&nbsp;  
- | #define&nbsp;_Label_&nbsp;  
- | Moves SATSTICK from SETLOC P11FOUR to P11THREE  
- |
-| ReconstructionBank23\_100MST5  
- | n/a  
- | #undef&nbsp;_Label_&nbsp;  
- | #define&nbsp;_Label_&nbsp;  
- | Eliminates the variable 100MST5 by aliasing it to an existing fixed-fixed constant.  
- |
-| ReconstructionBank37\_CDHTAG1  
- | CDHTAG1  
- | #define _Label_ 26  
- | 04, 14, 15, 16, 17, 20, 30  
- |   
- |
-| ReconstructionBank37\_DISDVLVC\_to\_CDHTAG1  
- | n/a  
- | #undef&nbsp;_Label_&nbsp;  
- | #define&nbsp;_Label_&nbsp;  
- | Moves DISDVLVC from SETLOC CDHTAG3 to CDHTAG1  
- |
+| Preprocessor Label for Conditional Assembly         | Corresponding SETLOC Tag | Default #define (Comanche 55 baseline)   | Other Allowed #define                                  | Comment                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+|-----------------------------------------------------|--------------------------|------------------------------------------|--------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ReconstructionBank11_S522                           | S52/2                    | #define ReconstructionBank11_S522 11     | 16, 17, 30                                             |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ReconstructionBank11_INTINIT1                       | INTINIT1                 | #define ReconstructionBank11_INTINIT1 11 | 13                                                     |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ReconstructionBank11_CSIPROG5                       | CSIPROG5                 | #define ReconstructionBank11_CSIPROG5 11 | 16                                                     |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ReconstructionBank11_INTVEL1                        | INTVEL1                  | #define ReconstructionBank11_INTVEL1 11  | 16                                                     | INTVEL1 does not exist in Comanche 55, but in Artemis is used for subroutines INITVEL6 and INITVEL7, which are in INTVEL in Comanche 55.                                                                                                                                                                                                                                                                                                                                                                         |
+| ReconstructionBank16_Constants                      | n/a                      | #undef                                   | #define ReconstructionBank16_Constants                 | Eliminates the 3 constants V06N89*, FCORFRAC, and TMINFIRE from bank 16, by aliasing them to existing fixed-fixed constants, as is done in Artemis.                                                                                                                                                                                                                                                                                                                                                              |
+| ReconstructionBank23_P11THREE                       | P11THREE                 | #define ReconstructionBank23_P11THREE 23 | 16, 17, 30                                             | SETLOC tag P11THREE doesn't exist in any Colossus version except Artemis. However, it must have existed at some point and been removed, because there have always been tags P11ONE, P11TWO, and P11FOUR. Note that if //both// ReconstructionBank23_P11THREE and ReconstructionBank23//_//P11FOUR retain their default values of 23, then SETLOC tag P11THREE is not defined, and all of the contents which would have been put in SETLOC P11THREE appear instead in SETLOC P11FOUR (as it does in Comanche 55.) |
+| **☞** ReconstructionBank23_P11FOUR                  | P11FOUR                  | #define ReconstructionBank23_P11FOUR 23  | 04, 14, 15, 16, 17, 20, 30                             |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| **☞ **ReconstructionBank23_SATSTICK//_//to_P11THREE | P11THREE                 | #undef                                   | #define  ReconstructionBank23_SATSTICK//_//to_P11THREE | Moves SATSTICK from SETLOC P11FOUR to P11THREE                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ReconstructionBank23_100MST5                        | n/a                      | #undef                                   | #define ReconstructionBank23_100MST5                   | Eliminates the variable 100MST5 by aliasing it to an existing fixed-fixed constant.                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ReconstructionBank37_CDHTAG1                        | CDHTAG1                  | #define ReconstructionBank37_CDHTAG1 26  | 04, 14, 15, 16, 17, 20, 30                             |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ReconstructionBank37_DISDVLVC//_//to_CDHTAG1        | n/a                      | #undef                                   | #define ReconstructionBank37_DISDVLVC//_//to_CDHTAG1   | Moves DISDVLVC from SETLOC CDHTAG3 to CDHTAG1                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 

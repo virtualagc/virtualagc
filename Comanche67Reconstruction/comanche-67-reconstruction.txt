@@ -3,22 +3,6 @@ Wiki-Format: zim 0.4
 
 ====== Comanche 67 Reconstruction ======
 
-===== Contents =====
-
-* Introduction
-* Reconstruction of Authorized (and Any Other Known) Changes
-* Colossus 2C Flowcharts
-* Generic Reconstruction Details to Check
-* Administrative Details
-	* Building Reconstructed Comanche 67 Source Code
-	* Diff'ing the Reconstructed Memory Banks
-	* "Goodness" Signature
-	* Additional Useful Utility Programs
-* Available Documentation Resources
-	* Most-Useful Resources
-	* Resources That Have Proven Less Directly Useful So Far
-	* Luminary GSOP Section 5 Revisions
-
 ===== Introduction =====
 
 I think the general conclusion at this point is that a full reconstruction of Comanche 67 isn't really possible without additional information, because there are some sticking points which it's probably impossible to get around:  The worst problem seems to be PCR-815, calls for extensive rewrite of certain Comanche 55 code, but the rewrites appear in no other version of AGC code, and specifically neither in Artemis 71 or in Luminary 116, the most-closely-related versions.  Nevertheless, we do have a lot of material to work with, and there has been a lot of progress in areas //other// than PCR-815.
@@ -172,7 +156,7 @@ Because there are many, many PCRs, PCNs, and Software Anomalies being incorporat
 '''
 
 #ifdef Reconstruction815
-## <b>Reconstruction:</b> ... justification for the change ...
+==== <b>Reconstruction:</b> ... justification for the change ...====
 ... Reconstructed Comanche 67 source code goes here ...
 #else
 ... Baseline Comanche 55 source code goes here ...
@@ -245,14 +229,14 @@ whereas the signature of the Comanche 55 baseline is the (considerably worse!)
 
 ==== Additional Useful Utility Programs ====
 
-[[https://github.com/virtualagc/virtualagc/blob/comanche67/Tools/check_buggers.py|The Python2 program check_buggers.py]] is the basis for "make diffComanche067sums" mentioned earlier.  Since it's probably not used outside that context, I won't elaborate on it further here.
+[[https://github.com/virtualagc/virtualagc/blob/comanche67/Tools/check//buggers.py|The Python2 program check//buggers.py]] is the basis for "make diffComanche067sums" mentioned earlier.  Since it's probably not used outside that context, I won't elaborate on it further here.
 
 [[https://github.com/virtualagc/virtualagc/blob/comanche67/Comanche067/bankToBankReference.py|The Python3 program bankToBankReference.py]] is a filter for the assembly listing produced by the AGC assembler (yaYUL).  What you can do with it is to select two memory banks from the command line, which I call the "source bank" and the "target bank".  The filter then prints //just// those lines from the assembly listing which reside in the source bank but whose operand is in the target bank.  The usage is
 
 '''
-bankToBankReference.py 
+bankToBankReference.py SOURCEBANK TARGETBANK <ASSEMBLY.lst
 '''
-//SOURCEBANK// //TARGETBANK//'' <ASSEMBLY.lst''
+
 
 where //SOURCEBANK// is 00, 01, ..., 43 (all octal) and //TARGETBANK// is E0, ..., E7, 00, 01, ..., 43.  For example, I have used it in the Comanche 67 reconstruction in the form
 
@@ -290,7 +274,7 @@ symbolBankCompare.py Comanche055.lst Artemis071.lst
 	* For Colossus 2C, Comanche 67:  [[http://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf|Document E-2456]]
 	* For Colossus 2D, Comanche 72:  [[http://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf|Document E-2456 Rev 1]].  Note that these flowcharts are incomplete snapshots of whatever was available at the time, hence Colossus 2C flowcharts which are missing from the Colossus 2C document (preceding item) sometimes appear in the Colossus 2D document (this item).
 * PCR, PCN, and Software Anomaly Reports (or in lieu of those, lists of their //titles//).  There is no master list available to us, unfortunately, but I think that everything directly relevant to Comanche 67 is listed in the  [[https://www.ibiblio.org/apollo/links2.html#Apollo12|our Document Library's section titled "Mission-Specific Documentation: Apollo 12"]].  At //this// writing, the relevant items are Software Anomaly Report having numbers COM-//N// and the PCRs and PCNs prefixed with the string "(COLOSSUS)" (such as "(COLOSSUS) PCR-812.2").  Sometimes, however, changes to Comanche 67 mirrored corresponding changes to Luminary 116, so it sometimes happens that Luminary PCRs/PCNs can be relevant as well.  Be aware as well that a Software Anomaly Report may be an indication //either// that the anomaly was observed in Comanche 67 //or else// that it was fixed in Comanche 67.
-* [[http://www.ibiblio.org/apollo/Documents/padload_12_cm.pdf|Memo, "Final Apollo 12 (Mission H1) prelaunch erasable load (COMANCHE 67)"]]
+* [[http://www.ibiblio.org/apollo/Documents/padload//12//cm.pdf|Memo, "Final Apollo 12 (Mission H1) prelaunch erasable load (COMANCHE 67)"]]
 * [[https://www.ibiblio.org/apollo/Documents/COL203.pdf|COLOSSUS Memo #203, "PCR815/V79/R64/PTC - ORBRATE Routine"]]
 
 ==== Resources That Have Proven Less Directly Useful So Far ====
@@ -303,9 +287,9 @@ symbolBankCompare.py Comanche055.lst Artemis071.lst
 		* [[http://www.ibiblio.org/apollo/Documents/HSI-208454.pdf|Section 5]], "Guidance Equations"
 	* Colossus 2D (Comanche 72), Document R-577.  Principally used, so far, for observing the change bars relative to the preceding GSOP document version (i.e., Comanche 67).
 		* [[http://www.ibiblio.org/apollo/Documents/HSI-208461.pdf|Section 5]], "Guidance Equations"
-	* Luminary 1E, Document  [[http://www.ibiblio.org/apollo/links.html#Guidance_System_Operations_Plans_GSOP|R-567]].  Principally used for getting lists of relevant PCRs and PCNs.
+	* Luminary 1E, Document  [[http://www.ibiblio.org/apollo/links.html#Guidance//System//Operations//Plans//GSOP|R-567]].  Principally used for getting lists of relevant PCRs and PCNs.
 * [[http://www.ibiblio.org/apollo/Documents/SCB-691009.pdf|Minutes of October 15 1969 SCB meeting]].  Principally used for getting lists of relevant PCRs and PCNs.
-* [[https://www.ibiblio.org/apollo/Documents/apollo_12_fsrr_slides.pdf|MIT/IL presentation for the mission "H" Apollo 12 Flight Software Readiness Review (FSRR)]].  Yet one more time, principally used for getting lists of relevant PCRs and PCNs.
+* [[https://www.ibiblio.org/apollo/Documents/apollo//12//fsrr_slides.pdf|MIT/IL presentation for the mission "H" Apollo 12 Flight Software Readiness Review (FSRR)]].  Yet one more time, principally used for getting lists of relevant PCRs and PCNs.
 * [[https://www.ibiblio.org/apollo/Documents/a042186.pdf#page=39|Table 4-1]] of "Software Systems Development: A CSDL Project History" lists the size (in words) of Comanche 67.  This may or may not be accurate, and has been of no use to date.  However, time will tell.
 * [[https://www.ibiblio.org/apollo/links2.html#ColossusMemos|COLOSSUS Memos]] describing revision-to-revision changes in Artemis (Colossus 3).  Artemis was forked from Comanche 67 and its entire development took place in parallel to the development of Comanche 72 and Comanche 108, which were also forked from Comanche 67.  Therefore, if a particular software change occurred during Artemis development, one can conclude from that the change did //not// occur between Comanche 55 and Comanche 67.  (I could make similar statements about COLOSSUS Memos describing revision-to-revision changes from Comanche 68 through Comanche 108, but unfortunately we don't currently have even one of those memos.)
 * Colossus  [[https://www.ibiblio.org/apollo/links2.html#PcrsPcns|PCRs, PCNs]], and [[https://www.ibiblio.org/apollo/links2.html#Anomalies|Software Anomaly Reports]] implemented in Artemis, Comanche 72, or Comanche 108 development, similarly, were not implemented between Comanche 55 and Comanche 67.
@@ -318,7 +302,7 @@ But there's a problem with that particular documentation, not shared by the othe
 
 * Section 5 Revisions 0-3:  Luminary 1 (Luminary 69).  Revision 3 of section 5 lists just two incorporated items, namely PCN-858 and PCR-761.1, the latter of which is "R-2 Lunar Potential Model".  From [[https://www.ibiblio.org/apollo/Documents/LUM75_text.pdf|LUMINARY Memo #75]], "R-2 Lunar Potential Model Added to LUMINARY", we find explicitly that this model was added in Luminary 69, specifically LUM69 Rev 2, the final flight version of Apollo 10.  Hence, revision 3 corresponds to Luminary 1.  Presumably all earlier revisions of section 5 represent Luminary 1 (or earlier) as well.
 * Section 5 Revision 4:  Luminary 1A (Luminary 99).  The PCRs/PCNs of section 5 overlap substantially with those listed in the memo titled "[[https://www.ibiblio.org/apollo/Documents/Memo-SCB28_text.pdf|What is LUMINARY 1A?]]", written prior to the beginning of Luminary 1A development.
-* Section 5 Revisions 5 and 6:  Luminary 1B (Luminary 116).  Regarding revision 5, the PCRs/PCNs of section 5 are all listed in the memo titled "[[https://www.ibiblio.org/apollo/Documents/what_is_luminary_1b.pdf|What is LUMINARY 1B?]]", written prior to the beginning of Luminary 1B development.  Regarding section 6:  According to [[https://www.ibiblio.org/apollo/Documents/LUM103_text.pdf|LUMINARY Memo #103]], PCR-848 was incorporated in Luminary 109 and PCR-854 was incorporated in Luminary 112.  According to section 2 of the Luminary GSOP (which isn't so stingy with revision info as section 5), PCR-855 was implemented in Luminary 1B.  Those are the only 3 PCRs listed in revision 6, and all of them are from Luminary 1B.
+* Section 5 Revisions 5 and 6:  Luminary 1B (Luminary 116).  Regarding revision 5, the PCRs/PCNs of section 5 are all listed in the memo titled "[[https://www.ibiblio.org/apollo/Documents/what//is//luminary//1b.pdf|What is LUMINARY 1B?]]", written prior to the beginning of Luminary 1B development.  Regarding section 6:  According to [[https://www.ibiblio.org/apollo/Documents/LUM103//text.pdf|LUMINARY Memo #103]], PCR-848 was incorporated in Luminary 109 and PCR-854 was incorporated in Luminary 112.  According to section 2 of the Luminary GSOP (which isn't so stingy with revision info as section 5), PCR-855 was implemented in Luminary 1B.  Those are the only 3 PCRs listed in revision 6, and all of them are from Luminary 1B.
 * Section 5 Revisions 7 and 8:  Luminary 1C (Luminary 131).  (Stated explicitly in the GSOP.)
 * Section 5 Revision 9:  Luminary 1D (Luminary 178).  (Stated explicitly in the GSOP.)
 * Section 5 Revisions 10 and 11:  Luminary 1E (Luminary 210).  (Stated explicitly in the GSOP.)

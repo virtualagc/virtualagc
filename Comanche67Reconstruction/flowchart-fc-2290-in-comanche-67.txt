@@ -1,186 +1,177 @@
-( [Return to the main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
 
-We have the Colossus 2C revision of FC-2290 (and if usable for legibility purposes, that for 2D as well), but no enumeration of the sheets changed since prior revisions.&nbsp; Therefore, there is little choice other than to compare each sheet vs the reconstructed code.&nbsp; That'll be a big bunch of no fun!
+====== Flowchart FC-2290 Incorporation in Comanche 67 ======
 
-## Sheet 1
+([[comanche-67-reconstruction|Return to the main Comanche 67 reconstruction page.]])
+
+We have the Colossus 2C revision of FC-2290 (and if usable for legibility purposes, that for 2D as well), but no enumeration of the sheets changed since prior revisions. Therefore, there is little choice other than to compare each sheet vs the reconstructed code. That'll be a big bunch of no fun!
+
+==== Sheet 1 ====
 
 Just the cover page, no flowcharts.
 
-## Sheet 2
+==== Sheet 2 ====
 
-This sheet appears to be kind of a top-level summary of the program flow, without enough detail for comparison to code.&nbsp; The subroutines it appears to cover seem to be covered in later sheets, in more detail.
+This sheet appears to be kind of a top-level summary of the program flow, without enough detail for comparison to code. The subroutines it appears to cover seem to be covered in later sheets, in more detail.
 
-## Sheet 3
+==== Sheet 3 ====
 
-STATEINT, STATINT1, SETIFLGS, NOINT, ENDINT:&nbsp; Looks okay to me.
+STATEINT, STATINT1, SETIFLGS, NOINT, ENDINT: Looks okay to me.
 
-## Sheet 4
+==== Sheet 4 ====
 
-STATEUP, STATEND:&nbsp; Looks okay to me.
+STATEUP, STATEND: Looks okay to me.
 
-## Sheet 5
+==== Sheet 5 ====
 
-ATOPCSM, ATOPLEM, PTOACSM, PTOALEM:&nbsp; The code for ATOPCSM sets CMOONFLG prior to calling SVDWN1, which the flowchart does not.&nbsp; However, this seems to be a common feature (Colossus 237 + Comanche 55 + Artemis 71), so I guess it's okay.
+ATOPCSM, ATOPLEM, PTOACSM, PTOALEM: The code for ATOPCSM sets CMOONFLG prior to calling SVDWN1, which the flowchart does not. However, this seems to be a common feature (Colossus 237 + Comanche 55 + Artemis 71), so I guess it's okay.
 
 And similarly for ATOPLEM (rather than ATOPCSM), but with LMOONFLG (rather than CMOONFLG).
 
 In other respects, the code matches the flowchart.
 
-## Sheet 6
+==== Sheet 6 ====
 
-CSMPREC, LEMPREC, IFLAGP:&nbsp; &nbsp;I didn't do the comparison, since the code for Colossus 237, Comanche 55, and Artemis 71 is all identical for these subroutines.&nbsp; So even if I found code discrepancies, I would always conclude that there were no issues specific to Comanche 67 that needed to be addressed.
+CSMPREC, LEMPREC, IFLAGP: I didn't do the comparison, since the code for Colossus 237, Comanche 55, and Artemis 71 is all identical for these subroutines. So even if I found code discrepancies, I would always conclude that there were no issues specific to Comanche 67 that needed to be addressed.
 
-## Sheet 7
+==== Sheet 7 ====
 
-CSMCONIC, LEMCONIC, IFLAGC:&nbsp; See comment for sheet 6.
+CSMCONIC, LEMCONIC, IFLAGC: See comment for sheet 6.
 
-## Sheet 8
+==== Sheet 8 ====
 
-INTEGRVS, INTEGRV, INTEGRV1, INTEGRV2, ALOADED:&nbsp; See comment for sheet 6.&nbsp; (The only difference between the different code revisions is that ALOADED may have a different memory bank from revision to revision.&nbsp; However, this is not a difference about which the flowchart can provide any information.)
+INTEGRVS, INTEGRV, INTEGRV1, INTEGRV2, ALOADED: See comment for sheet 6. (The only difference between the different code revisions is that ALOADED may have a different memory bank from revision to revision. However, this is not a difference about which the flowchart can provide any information.)
 
-## Sheet 9
+==== Sheet 9 ====
 
-RVCON:&nbsp; See comment for sheet 6.
+RVCON: See comment for sheet 6.
 
-## Sheet 10
+==== Sheet 10 ====
 
-INTSTALL, ERASTAL1, ERASTAL2, ALLSTALL:&nbsp; Looks good to me.
+INTSTALL, ERASTAL1, ERASTAL2, ALLSTALL: Looks good to me.
 
-## Sheet 11
+==== Sheet 11 ====
 
-OKTOGRAB:&nbsp; By the way, there's more confusion and flow-of-consciousness in the analysis here even than is usual.&nbsp; The executive summary is that it all works out okay in the end.
+OKTOGRAB: By the way, there's more confusion and flow-of-consciousness in the analysis here even than is usual. The executive summary is that it all works out okay in the end.
 
 To focus the discussion, here's the complete flowchart:
 
-![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/175587)
+{{../fc2290Sheet11.png}}
 
-There is a code-to-flowchart discrepancy, in that the reconstructed code (taken from the Comanche 55 baseline) indicates that after the TEST L decision box, either bit 14, 13, or 12 of flagword 10D is set (for L = 0, 1, or 2 respectively), while the flowchart instead indicates bit 14, 13, or _13_ instead.&nbsp;
+There is a code-to-flowchart discrepancy, in that the reconstructed code (taken from the Comanche 55 baseline) indicates that after the TEST L decision box, either bit 14, 13, or 12 of flagword 10D is set (for L = 0, 1, or 2 respectively), while the flowchart instead indicates bit 14, 13, or //13// instead.
 
 Trying to figure out which is correct caused me to look at other flowcharts and software versions, here's what I found for OKTOGRAB:
 
-| Mission | Colossus | Luminary |
-| --- | --- | --- |
-| Apollo 10  
- |   
- | 14,13,12 (code)  
- |
-| Apollo 11  
- | 14,13,12 (code)  
- | 14,14,14 (code)  
- |
-| Apollo 12  
- | 14,13, **13** (FC-2290)  
- | 14,14,14 (code)  
- |
-| Apollo 13  
- | 14,13, **13** (FC-2290)  
- | 14,14,14 (code) 14,14,14 (FC-3350)  
- |
-| Apollo 15-17  
- | 14,14,14 (code)  
- |   
- |
+| Mission      | Colossus            | Luminary                           |
+|--------------|---------------------|------------------------------------|
+| Apollo 10    |                     | 14,13,12 (code)                    |
+| Apollo 11    | 14,13,12 (code)     | 14,14,14 (code)                    |
+| Apollo 12    | 14,13, 13 (FC-2290) | 14,14,14 (code)                    |
+| Apollo 13    | 14,13, 13 (FC-2290) | 14,14,14 (code) 14,14,14 (FC-3350) |
+| Apollo 15-17 | 14,14,14 (code)     |                                    |
+|
 
-By the way, code using 14,14,14 doesn't even have anything equivalent to the TEST L decision box shown in the flowchart.&nbsp; It's also helpful in deciphering this stuff to know the various symbolic labels being used, because they differ:
+By the way, code using 14,14,14 doesn't even have anything equivalent to the TEST L decision box shown in the flowchart. It's also helpful in deciphering this stuff to know the various symbolic labels being used, because they differ:
 
-- Flagword 10D:&nbsp; FLGWRD10, RASFLAG, STATE +10D.&nbsp;
-- Bit 14 mask:&nbsp; BIT14, INTFLBIT
-- Bit 13 mask:&nbsp; BIT13
-- Bit 12 mask:&nbsp; BIT12
-- Flag bit 14 of flagword 10D:&nbsp; INTFLAG
-- Flag bit 13 of flagword 10D:&nbsp; (none in Comanche 55)
-- Flag bit 12 of flagword 10D:&nbsp; (none in Comanche 55)
+* Flagword 10D: FLGWRD10, RASFLAG, STATE +10D.
+* Bit 14 mask: BIT14, INTFLBIT
+* Bit 13 mask: BIT13
+* Bit 12 mask: BIT12
+* Flag bit 14 of flagword 10D: INTFLAG
+* Flag bit 13 of flagword 10D: (none in Comanche 55)
+* Flag bit 12 of flagword 10D: (none in Comanche 55)
 
-So, I've been scrounging around in the contemporary documentation to get any clue as to what's going on.&nbsp; In Luminary 29, LUMINARY Memo #34 tells us that
+So, I've been scrounging around in the contemporary documentation to get any clue as to what's going on. In Luminary 29, LUMINARY Memo #34 tells us that
 
-> APSFLAG moved from Bit 12 of FLAGWRD1 to Bit 13 of FLGWRD10
+	APSFLAG moved from Bit 12 of FLAGWRD1 to Bit 13 of FLGWRD10
 
-while other documentation indicates that this assignment of APSFLAG persisted in Luminary 210.&nbsp; LUMINARY Memo #4 tells us that in Luminary 34,&nbsp;
+while other documentation indicates that this assignment of APSFLAG persisted in Luminary 210. LUMINARY Memo #4 tells us that in Luminary 34,
 
-> The Fresh Start coding which initializes the FLAGWORDs was modified so that Bit 13 of FLGWRD10 (APSFLAG) is not altered. This was necessitated by PCR 419 which placed the DAP in utter reliance on this bit. It is now necessary to padload this FLAGWORD to octal 0 for Descent or octal 10000 for Ascent.
+	The Fresh Start coding which initializes the FLAGWORDs was modified so that Bit 13 of FLGWRD10 (APSFLAG) is not altered. This was necessitated by PCR 419 which placed the DAP in utter reliance on this bit. It is now necessary to padload this FLAGWORD to octal 0 for Descent or octal 10000 for Ascent.
 
-Unfortunately, we don't have a copy of PCR-419 ("Stage-verify discrete").&nbsp; But the difference between APSFLAG set/clear is the difference between ascent/descent stage, while the difference between the L=0,1,2 cases in OKTOGRAB is the difference between calling the subroutines INTSTALL, ERASTAL1, and ERASTAL2.&nbsp; These two things are unrelated.&nbsp; So if the purpose of bit 13 of FLGWRD10 had already been reassigned by Luminary 34, it's pretty clear that the behavior of OKTOGRAB in Luminary 69 (Apollo 10) was incorrect.&nbsp; However, APSFLAG also clearly has nothing to do with Colossus at all, so fixing OKTOGRAB in Luminary 1A may not have driven any corresponding change in Colossus.
+Unfortunately, we don't have a copy of PCR-419 ("Stage-verify discrete"). But the difference between APSFLAG set/clear is the difference between ascent/descent stage, while the difference between the L=0,1,2 cases in OKTOGRAB is the difference between calling the subroutines INTSTALL, ERASTAL1, and ERASTAL2. These two things are unrelated. So if the purpose of bit 13 of FLGWRD10 had already been reassigned by Luminary 34, it's pretty clear that the behavior of OKTOGRAB in Luminary 69 (Apollo 10) was incorrect. However, APSFLAG also clearly has nothing to do with Colossus at all, so fixing OKTOGRAB in Luminary 1A may not have driven any corresponding change in Colossus.
 
-In the Programmed Guidance Equations document for Colossus 3, Norton refers to bit 13 of FLGWRD10 as INTGRAB, which he says "means restarted" if set and "got a restart" if cleared in discussing the subroutine INTWAKE.&nbsp; Curiously, there is no reference anywhere in code to a symbol called "INTGRAB".&nbsp; In Colossus 3, flagword 10 bit 13 is called REINTFLG.&nbsp; But in all revisions of Luminary, Colossus 1, and Colossus 2, REINTFLG is instead flagword 10 bit 7.&nbsp; So the flag was apparently moved at some point, both for Colossus and Luminary, but having entirely different functionality in the two cases.
+In the Programmed Guidance Equations document for Colossus 3, Norton refers to bit 13 of FLGWRD10 as INTGRAB, which he says "means restarted" if set and "got a restart" if cleared in discussing the subroutine INTWAKE. Curiously, there is no reference anywhere in code to a symbol called "INTGRAB". In Colossus 3, flagword 10 bit 13 is called REINTFLG. But in all revisions of Luminary, Colossus 1, and Colossus 2, REINTFLG is instead flagword 10 bit 7. So the flag was apparently moved at some point, both for Colossus and Luminary, but having entirely different functionality in the two cases.
 
-The flagword tables at the ends of FC-2290 for either Colossus 2C and 2D also continue to refer to REINTFLG as flagword 10 bit 7, so the flowchart clearly does not think it is manipulating REINTFLG when it manipulates bit 13 of flagword 10.&nbsp; But in fact, as far as flagword 10 is concerned, those tables reference only bits INTFLAG and REINTFLG ... so why are the flowcharts also manipulating bit 13?&nbsp; Actually, it is a bit more complicated than that, FC-2290's flag tables don't actually specify the flagword and bit mask for INTFLAG, even though they do for every other flag listed.&nbsp; Perhaps it considers the entire bit-field consisting of bits 14-12 of flagword 10 as the flag?&nbsp; Thus if the field is 000 then the flag is clear, but if it's anything else then it's set?&nbsp; Perhaps so, but if so, it certainly doesn't say so.
+The flagword tables at the ends of FC-2290 for either Colossus 2C and 2D also continue to refer to REINTFLG as flagword 10 bit 7, so the flowchart clearly does not think it is manipulating REINTFLG when it manipulates bit 13 of flagword 10. But in fact, as far as flagword 10 is concerned, those tables reference only bits INTFLAG and REINTFLG ... so why are the flowcharts also manipulating bit 13? Actually, it is a bit more complicated than that, FC-2290's flag tables don't actually specify the flagword and bit mask for INTFLAG, even though they do for every other flag listed. Perhaps it considers the entire bit-field consisting of bits 14-12 of flagword 10 as the flag? Thus if the field is 000 then the flag is clear, but if it's anything else then it's set? Perhaps so, but if so, it certainly doesn't say so.
 
-In order to find the answers to those questions, it seems to me that the first thing to do is to find out what the differences are between the ways that Luminary 69 and Luminary 99 handle flagword 10 (RASFLAG, FLGWRD10, or STATE +10D).&nbsp; And indeed, where does the code for Luminary 69 even access bits 13 and 12 of flagword 10?&nbsp; Let's compare the AGC source files for those revisions of Luminary, with respect to bits 14-12 of flagword 10:
+In order to find the answers to those questions, it seems to me that the first thing to do is to find out what the differences are between the ways that Luminary 69 and Luminary 99 handle flagword 10 (RASFLAG, FLGWRD10, or STATE +10D). And indeed, where does the code for Luminary 69 even access bits 13 and 12 of flagword 10? Let's compare the AGC source files for those revisions of Luminary, with respect to bits 14-12 of flagword 10:
 
-- ALARM AND ABORT:&nbsp; No difference, no access to bits 13 and 12.
-- AOSTASK AND AOSJOB:&nbsp; No difference, no access to bits 13 and 12 except in the context of APSFLAG (bit 13).
-- BURN, BABY, BURN -- MASTER IGNITION ROUTINE:&nbsp; Difference, but only in the context of APSFLAG.&nbsp; No access to bits 13 and 12 except in the context of APSFLAG.
-- EXTENDED VERBS:&nbsp; No difference, no access to bits 13 and 12 except in the context of APSFLAG.&nbsp; But note that bit 14 affects bit 13 and vice versa.
-- FLAGWORD ASSIGNMENTS:&nbsp; No difference.
-- FRESH START AND RESTART:&nbsp; No difference, no access to bits 13 and 12 except in the context of APSFLAG.
-- INTEGRATION INITIALIZATION:&nbsp; Difference.&nbsp; Luminary 69 incorporates different logic in INTSTALL, INTWAKE, and OKTOGRAB with respect to RASFLAG than Luminary 99 does; it's reminiscent to the Comanche 55 logic, but I haven't compared it in detail.&nbsp; In particular, Luminary 69 does use bits 13 _and_ 12 similarly to Comanche 55.
-- P40-P47:&nbsp; No difference, no access to bits 13 and 12 except in the context of APSFLAG.
-- P70-P71:&nbsp; No difference, no access to bits 13 and 12 except in the context of APSFLAG.
-- P76:&nbsp; Identical files, and flagword 10 appears only in comments.
-- Q,R-AXES RCS AUTOPILOT:&nbsp; No difference, no access to bits 13 and 12 except in the context of APSFLAG.
-- SERVICER:&nbsp; No difference, no access to bits 13 and 12 except in the context of APSFLAG.
+* ALARM AND ABORT: No difference, no access to bits 13 and 12.
+* AOSTASK AND AOSJOB: No difference, no access to bits 13 and 12 except in the context of APSFLAG (bit 13).
+* BURN, BABY, BURN -- MASTER IGNITION ROUTINE: Difference, but only in the context of APSFLAG. No access to bits 13 and 12 except in the context of APSFLAG.
+* EXTENDED VERBS: No difference, no access to bits 13 and 12 except in the context of APSFLAG. But note that bit 14 affects bit 13 and vice versa.
+* FLAGWORD ASSIGNMENTS: No difference.
+* FRESH START AND RESTART: No difference, no access to bits 13 and 12 except in the context of APSFLAG.
+* INTEGRATION INITIALIZATION: Difference. Luminary 69 incorporates different logic in INTSTALL, INTWAKE, and OKTOGRAB with respect to RASFLAG than Luminary 99 does; it's reminiscent to the Comanche 55 logic, but I haven't compared it in detail. In particular, Luminary 69 does use bits 13 //and// 12 similarly to Comanche 55.
+* P40-P47: No difference, no access to bits 13 and 12 except in the context of APSFLAG.
+* P70-P71: No difference, no access to bits 13 and 12 except in the context of APSFLAG.
+* P76: Identical files, and flagword 10 appears only in comments.
+* Q,R-AXES RCS AUTOPILOT: No difference, no access to bits 13 and 12 except in the context of APSFLAG.
+* SERVICER: No difference, no access to bits 13 and 12 except in the context of APSFLAG.
 
-So at least in the Luminary, the use of bit 13 of flagword 10 throughout the most of the program (as APSFLAG) is inconsistent with how it's used in INTEGRATION INITIALIZATION.&nbsp; Moreover, bit 12 is never used anywhere except in INTEGRATION INITIALIZATION.
+So at least in the Luminary, the use of bit 13 of flagword 10 throughout the most of the program (as APSFLAG) is inconsistent with how it's used in INTEGRATION INITIALIZATION. Moreover, bit 12 is never used anywhere except in INTEGRATION INITIALIZATION.
 
-But it doesn't appear to me that the inconsistent usage of bit 13 of flagword 10 in Luminary 69 actually causes a problem.&nbsp; The logic in INTEGRATION INITIALIZATION is that the subroutines INTSTALL, ERASTAL1, and ERASTAL2 do the same thing, but set the flags in flagword 10 differently:&nbsp; INSTALL sets bit 14, ERASTAL1 sets bit 13, and ERASTALL2 sets bit 12.&nbsp; Similarly when a wakeup occurs that is undone.&nbsp; But the fact is that Luminary 69 never calls ERASTAL1 or ERASTAL2 at all, but rather always calls INTSTALL.&nbsp; So INTEGRATION INITIALIZATION never actually sets bits 13 or 12 anyway.&nbsp; Therefore, nothing is lost in Luminary 99 when the logic for bits 13-12 and for ERASTAL1 and ERASTAL2 (and corresponding wake-up logic) is discarded.
+But it doesn't appear to me that the inconsistent usage of bit 13 of flagword 10 in Luminary 69 actually causes a problem. The logic in INTEGRATION INITIALIZATION is that the subroutines INTSTALL, ERASTAL1, and ERASTAL2 do the same thing, but set the flags in flagword 10 differently: INSTALL sets bit 14, ERASTAL1 sets bit 13, and ERASTALL2 sets bit 12. Similarly when a wakeup occurs that is undone. But the fact is that Luminary 69 never calls ERASTAL1 or ERASTAL2 at all, but rather always calls INTSTALL. So INTEGRATION INITIALIZATION never actually sets bits 13 or 12 anyway. Therefore, nothing is lost in Luminary 99 when the logic for bits 13-12 and for ERASTAL1 and ERASTAL2 (and corresponding wake-up logic) is discarded.
 
-What is the situation in Colossus?&nbsp; Well, I find that ERASTAL1 and 2 are never called in Colossus either.&nbsp; Not in any version of Colossus.&nbsp; So functionally, it doesn't even matter whether the TEST L decision box in the Colossus 2C/2D flowcharts chooses 14,13,12 or 14,13,13 or 14,14,14.&nbsp; But one thing is clear, and that is that whatever the behavior of INTSTALL/ERASTAL1/ERASTAL2, it is undone by INTWAKE/ERASWAK1/ERASWAK2 (sheet 12).&nbsp; So we need to look at what those subroutines do ... and what they do is to flow into the WAKE subroutine, which (among other things) clears bit 14, bit 13, or bit _12_.&nbsp; I.e., the flowchart for ERASTAL2 claims to set bit 13, but WAKE ends up clearing bit 12.
+What is the situation in Colossus? Well, I find that ERASTAL1 and 2 are never called in Colossus either. Not in any version of Colossus. So functionally, it doesn't even matter whether the TEST L decision box in the Colossus 2C/2D flowcharts chooses 14,13,12 or 14,13,13 or 14,14,14. But one thing is clear, and that is that whatever the behavior of INTSTALL/ERASTAL1/ERASTAL2, it is undone by INTWAKE/ERASWAK1/ERASWAK2 (sheet 12). So we need to look at what those subroutines do ... and what they do is to flow into the WAKE subroutine, which (among other things) clears bit 14, bit 13, or bit //12//. I.e., the flowchart for ERASTAL2 claims to set bit 13, but WAKE ends up clearing bit 12.
 
-Finally!&nbsp; We can conclude that the flowchart for OKTOGRAB is in error, and it must be referring to bits 14,13,12 of flagword 10 rather than to 14,13,13.
+Finally! We can conclude that the flowchart for OKTOGRAB is in error, and it must be referring to bits 14,13,12 of flagword 10 rather than to 14,13,13.
 
-With that understanding, the reconstructed code is correct with respect to the flowchart.&nbsp; Which is a shame, since it would be great to import the simplified Artemis logic and save a few words of memory.
+With that understanding, the reconstructed code is correct with respect to the flowchart. Which is a shame, since it would be great to import the simplified Artemis logic and save a few words of memory.
 
-## Sheet 12
+==== Sheet 12 ====
 
-INTWAKE, GOBAC, INTWAKE0, ERASWAK1, INTWAKE1, ERASWAK2:&nbsp; The code in INTWAKE does not match the Colossus 2C flowchart operations TBASE2&nbsp;←&nbsp;QPRET and QPRET&nbsp;←&nbsp;TBASE2, in that the code indexes these QPRET with FIXLOC.&nbsp; It _does_ match the Colossus 2D flowchart.&nbsp; However, the code has this indexing in all versions of Colossus (or at least in Colossus 237 and Artemis), so I'm inclined to believe that this is an error in the flowchart that was suddenly editorially corrected in the Colossus 2D flowchart, but was nevertheless the actual situation all along.
+INTWAKE, GOBAC, INTWAKE0, ERASWAK1, INTWAKE1, ERASWAK2: The code in INTWAKE does not match the Colossus 2C flowchart operations TBASE2←QPRET and QPRET←TBASE2, in that the code indexes these QPRET with FIXLOC. It //does// match the Colossus 2D flowchart. However, the code has this indexing in all versions of Colossus (or at least in Colossus 237 and Artemis), so I'm inclined to believe that this is an error in the flowchart that was suddenly editorially corrected in the Colossus 2D flowchart, but was nevertheless the actual situation all along.
 
 Other than that probably flowchart error, looks like a match.
 
-## Sheet 13
+==== Sheet 13 ====
 
-WAKE, WAKE1:&nbsp; To my way of thinking, the code for the LOCCTR = -1 decision box doesn't seem to match the code, because the comments imply that LOCCTR could be 0, in which case the CCS instruction used to implement the decision would fail.&nbsp; However, the same code appears in Colossus 237 and Artemis, so I guess the comment in the 2C flowchart may be in error.
+WAKE, WAKE1: To my way of thinking, the code for the LOCCTR = -1 decision box doesn't seem to match the code, because the comments imply that LOCCTR could be 0, in which case the CCS instruction used to implement the decision would fail. However, the same code appears in Colossus 237 and Artemis, so I guess the comment in the 2C flowchart may be in error.
 
-## Sheet 14
+==== Sheet 14 ====
 
-INTWAKEU, INTWAKEM, INTWAKEC, INTWAKLM, INTWAKEX, INTWAKUP:&nbsp; Looks good.
+INTWAKEU, INTWAKEM, INTWAKEC, INTWAKLM, INTWAKEX, INTWAKUP: Looks good.
 
-## Sheet 15
+==== Sheet 15 ====
 
-Continuations of INTWAKUP:&nbsp; Looks good.
+Continuations of INTWAKUP: Looks good.
 
 Sheet 16
 
-AVETOMID, INT/W:&nbsp; Looks good.
+AVETOMID, INT/W: Looks good.
 
-## Sheet 17
+==== Sheet 17 ====
 
-SETCOAST:&nbsp; Looks good.
+SETCOAST: Looks good.
 
-## Sheet 18
+==== Sheet 18 ====
 
-Continuation of SETCOAST:&nbsp; Looks good.
+Continuation of SETCOAST: Looks good.
 
-## Sheet 19
+==== Sheet 19 ====
 
-MIDTOAV1, MIDTOAV2, ENDMID2, NOTIME, ENDMID1, THISVINT:&nbsp; In MIDTOAV2, for some reason, the order of CLEAR MID1FLAG and loading TIMEDELT into MPAC are swapped in the code vs. the flowchart.&nbsp; Which makes no particular sense, since it doesn't even improve the instruction packing.&nbsp; But it makes no difference functionally, and it appears to be the way it had been done since Colossus 237, so I guess it's probably close enough!
+MIDTOAV1, MIDTOAV2, ENDMID2, NOTIME, ENDMID1, THISVINT: In MIDTOAV2, for some reason, the order of CLEAR MID1FLAG and loading TIMEDELT into MPAC are swapped in the code vs. the flowchart. Which makes no particular sense, since it doesn't even improve the instruction packing. But it makes no difference functionally, and it appears to be the way it had been done since Colossus 237, so I guess it's probably close enough!
 
 Otherwise, looks good.
 
-## Sheet 20
+==== Sheet 20 ====
 
-Continuation of ENTMID1:&nbsp; Looks good.
+Continuation of ENTMID1: Looks good.
 
-## Sheet 21
+==== Sheet 21 ====
 
-USEPIOS:&nbsp; Looks good.
+USEPIOS: Looks good.
 
-## Sheet 22
+==== Sheet 22 ====
 
-MOVEACSM, MOVEALEM, MOVEPCSM, MOVEPLEM:&nbsp; The flowchart misspells NUVCSM and NUVLEM, but I suppose that's ignorable.
+MOVEACSM, MOVEALEM, MOVEPCSM, MOVEPLEM: The flowchart misspells NUVCSM and NUVLEM, but I suppose that's ignorable.
 
 Looks good otherwise.
 
-## Sheet 23-26
+==== Sheet 23-26 ====
 
 Just tables, no flowcharts.
 

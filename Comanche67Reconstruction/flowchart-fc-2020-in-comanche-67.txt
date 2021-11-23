@@ -1,18 +1,76 @@
-( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
 
-The flowchart is for Colossus 2D.&nbsp; But according to sheet 1 of the flowchart, only sheets 6, 8, 26, 48, 49, and 50 differ from Colossus 2A, and of those, sheet 26 had changes&nbsp;_both_&nbsp;for Colossus 2C and 2D.&nbsp; Some of this was analyzed for the PCR/PCN incorporation, but probably not all of it, so let's start from scratch, and look at these sheets one-by-one, in detail.
+====== Flowchart FC-2020 in Comanche 67 ======
 
-## Sheet 6
+([[comanche-67-reconstruction|Return to main Comanche 67 reconstruction page.]])
 
-This sheet applies to part of the DOFSTART subroutine in FRESH START AND RESTART, and specifically to the following code (in its current state of reconstruction at this writing).&nbsp; I've taken the liberty of adjusting whitespace a little to make the comparison easier.
+The flowchart is for Colossus 2D. But according to sheet 1 of the flowchart, only sheets 6, 8, 26, 48, 49, and 50 differ from Colossus 2A, and of those, sheet 26 had changes//both//for Colossus 2C and 2D. Some of this was analyzed for the PCR/PCN incorporation, but probably not all of it, so let's start from scratch, and look at these sheets one-by-one, in detail.
 
-    CA	SWINIT TS	STATE CA	FLAGWRD1 MASK	NOP01BIT	# LEAVE NODOP01 FLAG UNTOUCHED AD	SWINIT +1 TS	FLAGWRD1 CA SWINIT +2 TS	STATE +2 CA	FLAGWRD3 MASK	BIT13 # REFSMMAT FLAG AD	SWINIT +3 TS	FLAGWRD3 EXTEND DCA	SWINIT +4 DXCH	STATE +4 EXTEND DCA	SWINIT +6 DXCH	STATE +6 CA	FLAGWRD8 MASK	OCT6200 # CMOONFLG, LMOONFLG, AND SUFFLAG AD	SWINIT	+8D TS	FLAGWRD8 CA	SWINIT +9D TS	STATE +9D EXTEND DCA	SWINIT +10D DXCH	STATE +10DENDRSTRT	TC	POSTJUMP CADR	DUMMYJOB +2	# DOES A RELINT.	(IN A SWITCHED BANK.)
+==== Sheet 6 ====
+
+This sheet applies to part of the DOFSTART subroutine in FRESH START AND RESTART, and specifically to the following code (in its current state of reconstruction at this writing). I've taken the liberty of adjusting whitespace a little to make the comparison easier.
+
+'''
+		CA	SWINIT 
+		TS	STATE 
+				
+		CA	FLAGWRD1 
+		MASK	NOP01BIT	# LEAVE NODOP01 FLAG UNTOUCHED 
+		AD	SWINIT +1 
+		TS	FLAGWRD1 
+				
+		CA 	SWINIT +2 
+		TS	STATE +2 
+				
+		CA	FLAGWRD3 
+		MASK	BIT13 		# REFSMMAT FLAG 
+		AD	SWINIT +3 
+		TS	FLAGWRD3 
+				
+		EXTEND 
+		DCA	SWINIT +4 
+		DXCH	STATE +4 
+
+		EXTEND 
+		DCA	SWINIT +6 
+		DXCH	STATE +6 
+
+		CA	FLAGWRD8 
+		MASK	OCT6200 	# CMOONFLG, LMOONFLG, AND SUFFLAG 
+		AD	SWINIT	+8D 
+		TS	FLAGWRD8 
+
+		CA	SWINIT +9D 
+		TS	STATE +9D 
+				
+		EXTEND 	
+		DCA	SWINIT +10D 
+		DXCH	STATE +10D
+
+ENDRSTRT   	TC	POSTJUMP 
+		CADR	DUMMYJOB +2	# DOES A RELINT.	(IN A SWITCHED BANK.)
+'''
+
 
 and
 
-    SWINIT OCT	0 OCT	0 OCT	0 OCT	0 OCT	0 OCT	00200 OCT	00004 # .05GSW OCT	0 OCT	0 OCT	0 OCT	0 OCT	0
+'''
+SWINIT		OCT     0 
+		OCT     0 
+		OCT     0 
+        	OCT     0 
+        	OCT     0 
+        	OCT     00200
+        	OCT     00004 	     # .05GSW 
+        	OCT     0 
+        	OCT     0 
+        	OCT     0 
+        	OCT     0 
+        	OCT     0
+'''
 
-The various flagwords are aliased so FLAGWRD0 = STATE +0, ..., FLAGWRD9 = STATE +9, FLGWRD10 = STATE +10, and FLGWRD11 = STATE +11.&nbsp; So we can simply step through the codes and/or flowchart blocks in order, finding:
+The various flagwords are aliased so FLAGWRD0 = STATE +0, ..., FLAGWRD9 = STATE +9, FLGWRD10 = STATE +10, and FLGWRD11 = STATE +11. So we can simply step through the codes and/or flowchart blocks in order, finding:
 
 1. Flowchart clears FLAGWRD0 and so does the code.
 2. Flowchart clears FLAGWRD1 except that bit 12 is left as-is, and so does the code.
@@ -27,27 +85,27 @@ The various flagwords are aliased so FLAGWRD0 = STATE +0, ..., FLAGWRD9 = STATE 
 
 It's a bit silly to have to spell it all out like this, but with some flagwords being dealt with by the code individually (in single precision) and others being dealt with in pairs (in double precision), it's a bit tricky to insure that there's a 1-to-1 correspondence between flowchart and code otherwise.
 
-## Sheet 8
+==== Sheet 8 ====
 
-STARTSUB and part of STARTSB2:&nbsp; The code sets the TIME3, TIME4, and TIME5 variables in a different order than the flowchart, but it sets them to the same values.&nbsp; And otherwise, the code seems to match the flowchart.
+STARTSUB and part of STARTSB2: The code sets the TIME3, TIME4, and TIME5 variables in a different order than the flowchart, but it sets them to the same values. And otherwise, the code seems to match the flowchart.
 
-However, the setting of TIME3 is concerning, because in the code it occurs prior to label STARTSB2, whereas on the flowchart it occurs after the label.&nbsp; STARTSB2 is called from ENEMA, which means that if the code is correct as-is, there's a risk of TIME3 not getting reset properly by ENEMA.&nbsp;
+However, the setting of TIME3 is concerning, because in the code it occurs prior to label STARTSB2, whereas on the flowchart it occurs after the label. STARTSB2 is called from ENEMA, which means that if the code is correct as-is, there's a risk of TIME3 not getting reset properly by ENEMA.
 
-Comparing to Artemis, I find that:&nbsp; a) Artemis sets TIME3, TIME4, and TIME5 in the order specified by the flowchart; and b) sets TIME3 after STARTSB2.
+Comparing to Artemis, I find that: a) Artemis sets TIME3, TIME4, and TIME5 in the order specified by the flowchart; and b) sets TIME3 after STARTSB2.
 
-I conclude that Artemis-like code for setting TIME3 through TIME5 should be imported into Comanche 67.&nbsp; I presume this relates to some PCR/PCN, but I don't know which one, so I introduce the preprocessor label ReconstructionFC2020 and conditionally assemble the fix based on that label.&nbsp; The goodness signature is unchanged by this fix, although the banksum discrepancy of bank 5 (in which the fix has been made) is somewhat if not significantly reduced.
+I conclude that Artemis-like code for setting TIME3 through TIME5 should be imported into Comanche 67. I presume this relates to some PCR/PCN, but I don't know which one, so I introduce the preprocessor label ReconstructionFC2020 and conditionally assemble the fix based on that label. The goodness signature is unchanged by this fix, although the banksum discrepancy of bank 5 (in which the fix has been made) is somewhat if not significantly reduced.
 
-## Sheet 26
+==== Sheet 26 ====
 
-Subroutine RAKE.&nbsp; As mentioned earlier, this sheet has changes both for Colossus 2C and 2D, so if any discrepancies between the flowchart and code are discovered, we'll have to be careful.&nbsp; Without even looking at the code, one change in the flowchart stands out, block "CLEAR BIT 9 OF FLAGWRD3", commented "ALLOW BACKWARDS INTEGRATION - POOFLAG".&nbsp; It stands out because it is typewritten, whereas everything else on the page is hand-written, so it's likely one of the 2C or 2D changes.
+Subroutine RAKE. As mentioned earlier, this sheet has changes both for Colossus 2C and 2D, so if any discrepancies between the flowchart and code are discovered, we'll have to be careful. Without even looking at the code, one change in the flowchart stands out, block "CLEAR BIT 9 OF FLAGWRD3", commented "ALLOW BACKWARDS INTEGRATION - POOFLAG". It stands out because it is typewritten, whereas everything else on the page is hand-written, so it's likely one of the 2C or 2D changes.
 
-In order to implement this in the code, bit 9 would have to be set in the fixed constant FLAGTABL +3.&nbsp; As it happens, that very constant has already been changed in the reconstruction due to PCR-798, whose incorporation caused bit 14 of FLAGWRD3 to be cleared.&nbsp; In other words, it's very possible that just as the clearing of bit 14 is the Colossus 2C change to sheet 8 we expected, perhaps the clearing of bit 9 is a Colossus 2D change only.
+In order to implement this in the code, bit 9 would have to be set in the fixed constant FLAGTABL +3. As it happens, that very constant has already been changed in the reconstruction due to PCR-798, whose incorporation caused bit 14 of FLAGWRD3 to be cleared. In other words, it's very possible that just as the clearing of bit 14 is the Colossus 2C change to sheet 8 we expected, perhaps the clearing of bit 9 is a Colossus 2D change only.
 
 Indeed, those are the only two differences I find, so I conclude that CLEAR BIT 9 OF FLAGWRD3 is indeed only for Colossus 2D, and should not be incorporated into Comanche 67.
 
-As confirmation, I find PCN-965, "Define POOFLAG", incorporated in Colossus 2D.&nbsp; If POOFLAG was not even defined until Colossus 2D, it seems very unlikely it was used in Colossus 2C.&nbsp; Of course, they fact that the label POOFLAG wasn't defined in Colossus 2C doesn't mean that the operations on the flag couldn't have occurred.&nbsp; So perhaps the change in Colossus 2D was simply to give the flag a name.
+As confirmation, I find PCN-965, "Define POOFLAG", incorporated in Colossus 2D. If POOFLAG was not even defined until Colossus 2D, it seems very unlikely it was used in Colossus 2C. Of course, they fact that the label POOFLAG wasn't defined in Colossus 2C doesn't mean that the operations on the flag couldn't have occurred. So perhaps the change in Colossus 2D was simply to give the flag a name.
 
-## Sheets 48, 49, 50
+==== Sheets 48, 49, 50 ====
 
-These are merely tables of subroutine calls and of registers/channels.&nbsp; They are not flowcharts.
+These are merely tables of subroutine calls and of registers/channels. They are not flowcharts.
 

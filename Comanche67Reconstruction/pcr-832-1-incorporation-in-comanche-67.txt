@@ -1,16 +1,21 @@
-( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
 
-We have no copy of PCR-832.1, "Remove Restriction of Running R05 only in P00".&nbsp; There is a matching PCR-832.2, incorporated into Luminary 109, so source-code comparison of Luminary 99 vs Luminary 116 could reveal implementation details portable into Comanche.&nbsp; LUMINARY Memo #100 provides slightly more information that probably applies to Comanche as well:
+====== PCR-832.1 Incorporation in Comanche 67 ======
 
-> Verb 64 was modified so that it could be used at any time to select R05.
+([[comanche-67-reconstruction|Return to main Comanche 67 reconstruction page.]])
 
-Thus the PCR appears to ask merely for removal of a constraint that is checked when V64 is first selected.&nbsp; This occurs in EXTENDED VERBS, which calls the subroutine VB64.&nbsp; The first thing VB64 does is to call CHKPOOH.&nbsp; CHKPOOH, in turn, simply returns if P00 is active and aborts with an alarm if not.&nbsp; So the only change the PCR seems to need is to remove TC CHKPOOH from VB64 in EXTENDED\_VERBS.&nbsp; Indeed, we find exactly that change in Luminary 116 vs Luminary 99.&nbsp; I don't believe we have any flowcharts to cross-check against.
+We have no copy of PCR-832.1, "Remove Restriction of Running R05 only in P00". There is a matching PCR-832.2, incorporated into Luminary 109, so source-code comparison of Luminary 99 vs Luminary 116 could reveal implementation details portable into Comanche. LUMINARY Memo #100 provides slightly more information that probably applies to Comanche as well:
 
-Action:&nbsp; Define preprocessor label Reconstruction832, and use it to conditionally assemble the removal of TC CHKPOOH just mentioned in Comanche.&nbsp;
+	Verb 64 was modified so that it could be used at any time to select R05.
 
-In implementing this, I found that this change had already been made as a result of the prior analysis, but _also_ that an INHINT had been removed from VB64 because of the [Colossus 2C revision of flowchart FC-2360](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=467), "R05 S-BAND ANTENNA", which I failed here to notice was relevant.&nbsp; In spite of my claim above that no flowcharts were relevant, sheet 2 of FC-2360 does in fact have a flowchart for FC-2360, and Comanche 55's INHINT is indeed missing.&nbsp; As it happens, the INHINT was never present in Luminary 99, and thus my code-comparison of Luminary 99 vs Luminary 116 failed to detect its absence.&nbsp; It's a pity I didn't think to diff VB64 for Comanche 55 vs Luminary 99.&nbsp; So that's two things it didn't occur to me to check that would have revealed my error.&nbsp; Oh well!
+Thus the PCR appears to ask merely for removal of a constraint that is checked when V64 is first selected. This occurs in EXTENDED VERBS, which calls the subroutine VB64. The first thing VB64 does is to call CHKPOOH. CHKPOOH, in turn, simply returns if P00 is active and aborts with an alarm if not. So the only change the PCR seems to need is to remove TC CHKPOOH from VB64 in EXTENDED_VERBS. Indeed, we find exactly that change in Luminary 116 vs Luminary 99. I don't believe we have any flowcharts to cross-check against.
+
+Action: Define preprocessor label Reconstruction832, and use it to conditionally assemble the removal of TC CHKPOOH just mentioned in Comanche.
+
+In implementing this, I found that this change had already been made as a result of the prior analysis, but //also// that an INHINT had been removed from VB64 because of the [[https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=467|Colossus 2C revision of flowchart FC-2360]], "R05 S-BAND ANTENNA", which I failed here to notice was relevant. In spite of my claim above that no flowcharts were relevant, sheet 2 of FC-2360 does in fact have a flowchart for FC-2360, and Comanche 55's INHINT is indeed missing. As it happens, the INHINT was never present in Luminary 99, and thus my code-comparison of Luminary 99 vs Luminary 116 failed to detect its absence. It's a pity I didn't think to diff VB64 for Comanche 55 vs Luminary 99. So that's two things it didn't occur to me to check that would have revealed my error. Oh well!
 
 In summary, fix incorporated into software.
 
-**Later note:** &nbsp; [See also the discussion of flowchart FC-2360](flowchart-fc-2360-in-comanche-67).
+**Later note:**  [[flowchart-fc-2360-in-comanche-67|See also the discussion of flowchart FC-2360]].
 

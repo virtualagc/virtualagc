@@ -1,74 +1,79 @@
-( [Return to the main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
 
-We have only the Colossus 2C revision of FC-2460, and no indication of what may have changed from prior revisions.&nbsp; Given the possibility that this could be relevant to PCR-815, we need to give it careful scrutiny.&nbsp; The technique I'll use is to diff the Colossus 237 code vs the reconstructed Comanche 67 code vs the Artemis 71 code, and closely compare any differences vs the flowchart.&nbsp; The subroutines covered by the flowchart are all in the TVCROLLDAP log section unless otherwise stated.
+====== Flowchart FC-2460 Incorporation in Comanche 67 ======
+
+([[comanche-67-reconstruction|Return to the main Comanche 67 reconstruction page.]])
+
+We have only the Colossus 2C revision of FC-2460, and no indication of what may have changed from prior revisions. Given the possibility that this could be relevant to PCR-815, we need to give it careful scrutiny. The technique I'll use is to diff the Colossus 237 code vs the reconstructed Comanche 67 code vs the Artemis 71 code, and closely compare any differences vs the flowchart. The subroutines covered by the flowchart are all in the TVCROLLDAP log section unless otherwise stated.
 
 Here are all of the entry points (program labels) I find in the flowchart, roughly in the order I encounter them:
 
-ROLLDAP:&nbsp; Code matches across 237/67/71.
+ROLLDAP: Code matches across 237/67/71.
 
-DURATION:&nbsp; Code matches across 237/67/71.
+DURATION: Code matches across 237/67/71.
 
-ROLLOGIC:&nbsp; Code matches across 237/67/71.
+ROLLOGIC: Code matches across 237/67/71.
 
-DELOGAC:&nbsp; Code matches across 237/67/71.
+DELOGAC: Code matches across 237/67/71.
 
-ROLLON:&nbsp; Code matches across 237/67/71.
+ROLLON: Code matches across 237/67/71.
 
-ONROLL:&nbsp; Code matches across 237/67/71.
+ONROLL: Code matches across 237/67/71.
 
-DVOK:&nbsp; Code matches across 237/67/71.
+DVOK: Code matches across 237/67/71.
 
-RATELIM:&nbsp; Code matches across 237/67/71.
+RATELIM: Code matches across 237/67/71.
 
-ROLLSET:&nbsp; The code changes from Colossus 237 to reconstructed Comanche 67, so the flowchart needs to be compared vs the reconstructed code in detail:
+ROLLSET: The code changes from Colossus 237 to reconstructed Comanche 67, so the flowchart needs to be compared vs the reconstructed code in detail:
 
-- The code begins with a TS TEMREG, which is neither mentioned in the flowchart, nor seems to make any sense given that TEMREG is overwritten a couple of instructions later without ever having used the value stored there.&nbsp; Nor is it some kind of overflow test, since the next instruction is an EXTEND (which obviously should not be skipped past).&nbsp; All revisions of Colossus have this behavior, though, so at least temporarily I'll pretend it's okay.
-- The flowchart indicates that after the decision DOES A-OGARATE OVERFLOW?, the accumulator will be loaded with NEGMAX for -OVFL and with POSMAX for +OVFL.&nbsp; It appears to me that the code is implemented in the opposite way, i.e., POSMAX for -OVFL and NEGMAX for +OVFL.&nbsp; The same implementation persists in Artemis, while in Colossus 237, POSMAX and NEGMAX aren't referenced at all.
-- I have the same comment for the OVERFLOW? decision, i.e., that NEGMAX and POSMAX are reversed, etc.
+* The code begins with a TS TEMREG, which is neither mentioned in the flowchart, nor seems to make any sense given that TEMREG is overwritten a couple of instructions later without ever having used the value stored there. Nor is it some kind of overflow test, since the next instruction is an EXTEND (which obviously should not be skipped past). All revisions of Colossus have this behavior, though, so at least temporarily I'll pretend it's okay.
+* The flowchart indicates that after the decision DOES A-OGARATE OVERFLOW?, the accumulator will be loaded with NEGMAX for -OVFL and with POSMAX for +OVFL. It appears to me that the code is implemented in the opposite way, i.e., POSMAX for -OVFL and NEGMAX for +OVFL. The same implementation persists in Artemis, while in Colossus 237, POSMAX and NEGMAX aren't referenced at all.
+* I have the same comment for the OVERFLOW? decision, i.e., that NEGMAX and POSMAX are reversed, etc.
 
-_Otherwise_, there seems to be a match.&nbsp; I'm not sure what to make of this.&nbsp; Perhaps I'm simply mistaken.&nbsp; The [Programmed Guidance Equations for Colossus 3](https://www.ibiblio.org/apollo/Documents/programmed-guidance-equations-colossus-3-002_text.pdf#page=130) (which is abstracted from the code rather than the flowchart) says this about the beginning of ROLLSET:
+//Otherwise//, there seems to be a match. I'm not sure what to make of this. Perhaps I'm simply mistaken. The [[https://www.ibiblio.org/apollo/Documents/programmed-guidance-equations-colossus-3-002_text.pdf#page=130|Programmed Guidance Equations for Colossus 3]] (which is abstracted from the code rather than the flowchart) says this about the beginning of ROLLSET:
 
-![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/176437)
+{{../rollset.png}}
 
-It's a bit tricky seeing what this is supposed to mean, since taken literally it doesn't seem to mean much of anything.&nbsp; I refer to expressions like "(2\*\*_X_ - 2\*\*_Y_) sgn TS".&nbsp; If taken literally, in the two places such an expression appears above, 2\*\*_X_&nbsp;- 2\*\*_Y_, binary, would be&nbsp;_X_-_Y_ consecutive 1's, followed by some number of consecutive 0's depending on the scaling.&nbsp; And in our case here,&nbsp;_X_-_Y_&nbsp;is always 14, so the expression would always give 37777 (POSMAX), presumably multiplied by the arithmetical sign of TS, so +OVFL would give POSMAX and -OVFL would give NEGMAX.&nbsp; _Except_ that the 37777 would be scaled by something and thus wouldn't be POSMAX at all.&nbsp; Nevertheless, it seems to vaguely agree that +OVFL should result in POSMAX and -OVFL should result in NEGMAX.
+It's a bit tricky seeing what this is supposed to mean, since taken literally it doesn't seem to mean much of anything. I refer to expressions like "(2\*\*//X// - 2\*\*//Y//) sgn TS". If taken literally, in the two places such an expression appears above, 2\*\*//X//- 2\*\*//Y//, binary, would be//X//-//Y// consecutive 1's, followed by some number of consecutive 0's depending on the scaling. And in our case here,//X//-//Y//is always 14, so the expression would always give 37777 (POSMAX), presumably multiplied by the arithmetical sign of TS, so +OVFL would give POSMAX and -OVFL would give NEGMAX. //Except// that the 37777 would be scaled by something and thus wouldn't be POSMAX at all. Nevertheless, it seems to vaguely agree that +OVFL should result in POSMAX and -OVFL should result in NEGMAX.
 
-In the end, I'm afraid that I have to conclude that the code and flowchart don't match, and that one or the other is badly mistaken, but that I don't know how to resolve it.&nbsp; Comanche 55 (and thus reconstructed Comanche 67) agrees with Artemis, and I don't see much alternative than to just let it that way.
+In the end, I'm afraid that I have to conclude that the code and flowchart don't match, and that one or the other is badly mistaken, but that I don't know how to resolve it. Comanche 55 (and thus reconstructed Comanche 67) agrees with Artemis, and I don't see much alternative than to just let it that way.
 
-NEWROLL:&nbsp; Code matches across 237/67/71.
+NEWROLL: Code matches across 237/67/71.
 
-MAXTFIRE:&nbsp; Code matches across 237/67/71.
+MAXTFIRE: Code matches across 237/67/71.
 
-NOMXFIRE:&nbsp; Code matches across 237/67/71.
+NOMXFIRE: Code matches across 237/67/71.
 
-FIREPLUG:&nbsp; Code matches across 237/67/71.
+FIREPLUG: Code matches across 237/67/71.
 
-FIRELOOK:&nbsp; Code matches across 237/67/71.
+FIRELOOK: Code matches across 237/67/71.
 
-NOROLL:&nbsp; Code matches across 237/67/71.
+NOROLL: Code matches across 237/67/71.
 
-JETROLL:&nbsp; Code matches across 237/67/71.
+JETROLL: Code matches across 237/67/71.
 
-NOROLL1:&nbsp; Code matches across 237/67/71.
+NOROLL1: Code matches across 237/67/71.
 
-KILLJETS:&nbsp; Code matches across 237/67/71.
+KILLJETS: Code matches across 237/67/71.
 
-SAMEJETS:&nbsp; Code matches across 237/67/71.
+SAMEJETS: Code matches across 237/67/71.
 
-+TORQUE:&nbsp; Code matches across 237/67/71.
++TORQUE: Code matches across 237/67/71.
 
--TORQUE:&nbsp; Code matches across 237/67/71.
+*TORQUE: Code matches across 237/67/71.
 
-NO.9-11:&nbsp; Code matches across 237/67/71.
+NO.9-11: Code matches across 237/67/71.
 
-NO.13-15:&nbsp; Code matches across 237/67/71.
+NO.13-15: Code matches across 237/67/71.
 
-NO.12-10:&nbsp; Code matches across 237/67/71.
+NO.12-10: Code matches across 237/67/71.
 
-NO.16-14:&nbsp; Code matches across 237/67/71.
+NO.16-14: Code matches across 237/67/71.
 
-T6ENABL:&nbsp; Code matches across 237/67/71.
+T6ENABL: Code matches across 237/67/71.
 
-RDAPEND:&nbsp; Code matches across 237/67/71.
+RDAPEND: Code matches across 237/67/71.
 
 Additionally, the fixed constants defined at the end of TVCROLLDAP appear to be identical, though there is some economizing with TMINFIRE in Artemis 71, as well as removal there if 1/MINLIM.
 

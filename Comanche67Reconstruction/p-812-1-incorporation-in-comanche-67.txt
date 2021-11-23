@@ -1,97 +1,129 @@
-( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
 
-We have no copy of PCR-812.1, "Resetting and setting of XDELVFLG".&nbsp; There is a matching PCR-812.2, "Resetting and setting of the External&nbsp; [Δ](https://en.wikipedia.org/wiki/%CE%94)V Flag", which we also don't have, which was incorporated into Luminary 106.&nbsp; Therefore, diffs of Luminary 99 source code vs Luminary 116 source code could reveal details of the implementation which could be imported into Comanche.
+====== PCR-812.1 Incorporation in Comanche 67 ======
 
-One method of investigation is to compare each usage of XDELVFLG or XDELVBIT in Luminary 99 vs Luminary 116, and then comparing discrepancies against the software flowcharts wherever possible.&nbsp; So here is an enumeration of all occurrences, ignoring all changes in program comments:
+([[comanche-67-reconstruction|Return to main Comanche 67 reconstruction page.]])
 
-- FLAGWORD ASSIGNMENTS:&nbsp; No differences relevant to XDELVFLG.
-- LAMBERT AIMPOINT GUIDANCE:&nbsp; Only Luminary 99 uses XDELVFLG.&nbsp; It is cleared in P31.
-- P30,P37:&nbsp; The code is slightly different in the vicinity of XDELVFLG for some probably-unrelated reason.&nbsp; Insofar as relevance to XDELVFLG is concerned, the principal difference seems to be that Luminary 99 sets XDELVFLG after program label PARAM30, whereas Luminary 116 sets XDELVFLG before reaching PARAM30.
-- P32-P35, P72-P75:&nbsp; The files are identical.
-- P34-P35, P74-P75:&nbsp; In Luminary 99, XDELVFLG is cleared at program label NOCHG.&nbsp; In Luminary 116, it is cleared at the end of INITVELX.
-- P40-P47:&nbsp; The files are identical.
-- STABLE ORBIT - P38-P39:&nbsp; Only Luminary 99 uses XDELVFLG.&nbsp; It is cleared in routine DSPLY81.
+We have no copy of PCR-812.1, "Resetting and setting of XDELVFLG". There is a matching PCR-812.2, "Resetting and setting of the External [[https://en.wikipedia.org/wiki/%CE%94|Δ]]V Flag", which we also don't have, which was incorporated into Luminary 106. Therefore, diffs of Luminary 99 source code vs Luminary 116 source code could reveal details of the implementation which could be imported into Comanche.
 
-Alas, the selection of sections using XDELVFLG | XDELVBIT differs somewhat in Comanche, and not all of the sections listed above even exist in Comanche.&nbsp; Or vice-versa.
+One method of investigation is to compare each usage of XDELVFLG or XDELVBIT in Luminary 99 vs Luminary 116, and then comparing discrepancies against the software flowcharts wherever possible. So here is an enumeration of all occurrences, ignoring all changes in program comments:
+
+* FLAGWORD ASSIGNMENTS: No differences relevant to XDELVFLG.
+* LAMBERT AIMPOINT GUIDANCE: Only Luminary 99 uses XDELVFLG. It is cleared in P31.
+* P30,P37: The code is slightly different in the vicinity of XDELVFLG for some probably-unrelated reason. Insofar as relevance to XDELVFLG is concerned, the principal difference seems to be that Luminary 99 sets XDELVFLG after program label PARAM30, whereas Luminary 116 sets XDELVFLG before reaching PARAM30.
+* P32-P35, P72-P75: The files are identical.
+* P34-P35, P74-P75: In Luminary 99, XDELVFLG is cleared at program label NOCHG. In Luminary 116, it is cleared at the end of INITVELX.
+* P40-P47: The files are identical.
+* STABLE ORBIT - P38-P39: Only Luminary 99 uses XDELVFLG. It is cleared in routine DSPLY81.
+
+Alas, the selection of sections using XDELVFLG | XDELVBIT differs somewhat in Comanche, and not all of the sections listed above even exist in Comanche. Or vice-versa.
 
 Here's a similar itemization of differences in usage between Comanche 55 and Artemis 71:
 
-- ERASABLE ASSIGNMENTS:&nbsp; No relevant differences
-- P30,P37 in Comanche 55 vs P30-P31 in Artemis 71:&nbsp; In Comanche 55, P30 sets XDELVFLG while P31 clears XDELVFLG.&nbsp; In Artemis, P30 sets XDELVFLG, as does P36A.
-- P32-P33, P72-P73:&nbsp; No relevant differences.
-- P34-P35, P74-P75:&nbsp; In Comanche 55, XDELVFLG is cleared at program label NOCHG.&nbsp; In Artemis 71, it is cleared at the end of INITVELX
-- P37,P70:&nbsp; No relevant differences
-- P40-P47:&nbsp; There appear to be extensive differences, but I think that may be due to rearrangement of subroutines.&nbsp; However, XDELVFLG is neither set nor cleared in either Comanche 55 or Artemis 71; all usages are merely tests of the flag.
-- STABLE\_ORBIT - P38-P39:&nbsp; Only Comanche 55 uses XDELVFLG.&nbsp; It is cleared in DSPLY81.
+* ERASABLE ASSIGNMENTS: No relevant differences
+* P30,P37 in Comanche 55 vs P30-P31 in Artemis 71: In Comanche 55, P30 sets XDELVFLG while P31 clears XDELVFLG. In Artemis, P30 sets XDELVFLG, as does P36A.
+* P32-P33, P72-P73: No relevant differences.
+* P34-P35, P74-P75: In Comanche 55, XDELVFLG is cleared at program label NOCHG. In Artemis 71, it is cleared at the end of INITVELX
+* P37,P70: No relevant differences
+* P40-P47: There appear to be extensive differences, but I think that may be due to rearrangement of subroutines. However, XDELVFLG is neither set nor cleared in either Comanche 55 or Artemis 71; all usages are merely tests of the flag.
+* STABLE_ORBIT - P38-P39: Only Comanche 55 uses XDELVFLG. It is cleared in DSPLY81.
 
 There doesn't seem to be much to work with here!
 
-Let's try another approach.&nbsp; Indices appearing at the ends of the software flowchart documents presumably are intended to list every usage within the flowcharts of the indexed items.&nbsp; So in principle&nbsp;—&nbsp;if the documents were actually _complete_&nbsp;and _up-to-date_&nbsp;—&nbsp;we could simply find every usage of XDELVFLG and compare the relevant flowchart to the Comanche 55 code to see where the usage of XDELVFLG needed to be changed.&nbsp;
+Let's try another approach. Indices appearing at the ends of the software flowchart documents presumably are intended to list every usage within the flowcharts of the indexed items. So in principle—if the documents were actually //complete//and //up-to-date//—we could simply find every usage of XDELVFLG and compare the relevant flowchart to the Comanche 55 code to see where the usage of XDELVFLG needed to be changed.
 
-Here is the XDELVFLG index in the Colossus 2D flowchart document.&nbsp; Since a lot of the flowcharts are missing or are funky versions, I've added my own boldface for the flowcharts which are actually present in the book, and have marked in parenthesis what revisions they are:
+Here is the XDELVFLG index in the Colossus 2D flowchart document. Since a lot of the flowcharts are missing or are funky versions, I've added my own boldface for the flowcharts which are actually present in the book, and have marked in parenthesis what revisions they are:
 
-    XDELVFLG FC-2620 P30, P31 S-1,6   C-10 (Colossus 2C)         FC-2626 P32, P72--CSI S-9 (Colossus 2A)         FC-2627 P33, P73--CDH S-6 (Colossus 2)         FC-2070 Service Routines                    C-6 (Colossus 2D)         FC-2630 P34/P74 TPI Targeting               C-16 (Colossus 2A)         FC-2642 P37 Return to Earth                 C-14 (Colossus 2D)         FC-2644 P38/P78; P39/P79                    C-7 (Colossus 2A)         FC-2680 Thrust Programs (P40, P41)                  T-4,32 (Colossus 2D)
+'''
+XDELVFLG	FC-2620 P30, P31 S-1,6   C-10 					(Colossus 2C)         
+		FC-2626 P32, P72--CSI S-9 					(Colossus 2A)         
+		FC-2627 P33, P73--CDH S-6 					(Colossus 2)         
+		FC-2070 Service Routines                    C-6 		(Colossus 2D)         
+		FC-2630 P34/P74 TPI Targeting               C-16 		(Colossus 2A)         
+		FC-2642 P37 Return to Earth                 C-14 		(Colossus 2D)         
+		FC-2644 P38/P78; P39/P79                    C-7 		(Colossus 2A)         
+		FC-2680 Thrust Programs (P40, P41)                  T-4,32 	(Colossus 2D)
+'''
 
-Here's what I think the S-_X_, C-_X_, T-_X_ notations mean for flags (like XDELVFLG):
+Here's what I think the S-//X//, C-//X//, T-//X// notations mean for flags (like XDELVFLG):
 
-- _X_ is a sheet number.
-- S means the usage is Setting the flag.&nbsp;
-- C means the usage is Clearing the flag.
-- T means the usage is a Testing the flag.
+* //X// is a sheet number.
+* S means the usage is Setting the flag.
+* C means the usage is Clearing the flag.
+* T means the usage is a Testing the flag.
 
-These notations aren't always right: For example, there's no reference to XDELVFLG on sheet 1 of FC-2620, and certainly no setting of it, but there is on sheet 6.&nbsp; Other times, the sheet number might be off by 1 or 2:&nbsp; In fact, XDELVFLG is set on sheet 2 of FC-2620, not sheet 1.&nbsp; Still, it's better than nothing.
+These notations aren't always right: For example, there's no reference to XDELVFLG on sheet 1 of FC-2620, and certainly no setting of it, but there is on sheet 6. Other times, the sheet number might be off by 1 or 2: In fact, XDELVFLG is set on sheet 2 of FC-2620, not sheet 1. Still, it's better than nothing.
 
-Here is the XDELVFLG index in the Colossus 2C flowchart document:&nbsp;
+Here is the XDELVFLG index in the Colossus 2C flowchart document:
 
-    XDELVFLG FC-2620 P30, P31 S-1,6 C-10XDELVFLG FC-2626 P32, P72 - CSI S-9XDELVFLG FC-2627 P33, P73 - CDH S-6XDELVFLG FC-2630 TPI TARGETTING C-16XDELVFLG FC-2642 RETURN TO EARTH C-14 (Colossus 2C)XDELVFLG FC-2644 P38-P78; P39-P79 C-7XDELVFLG FC-2680 THRUST PROGRAMS T-4,32XDELVFLG FC-2682 STEERING T-6 (Colossus 2)
+'''
+XDELVFLG FC-2620 P30, P31 		S-1,6 	C-10
+XDELVFLG FC-2626 P32, P72 - CSI 	S-9
+XDELVFLG FC-2627 P33, P73 - CDH 	S-6
+XDELVFLG FC-2630 TPI TARGETTING 		C-16
+XDELVFLG FC-2642 RETURN TO EARTH 		C-14 			(Colossus 2C)
+XDELVFLG FC-2644 P38-P78; P39-P79 		C-7
+XDELVFLG FC-2680 THRUST PROGRAMS 			T-4,32
+XDELVFLG FC-2682 STEERING 				T-6 		(Colossus 2)
+'''
+
 
 I suppose we can ignore all of the flowcharts earlier than Colossus 2C, so in principle, from the index excerpts above we only have to compare the following flowcharts vs Colossus 55 code:
 
-    FC-2070 Service Routines                    C-6FC-2620 P30, P31 S-1,6   C-10FC-2642 RETURN TO EARTH C-14FC-2680 Thrust Programs (P40, P41)                  T-4,32
+	''FC-2070 Service Routines                    C-6''
+	''FC-2620 P30, P31 S-1,6   		    C-10''
+	''FC-2642 RETURN TO EARTH 		    C-14''
+	''FC-2680 Thrust Programs (P40, P41)                  T-4,32''
 
-FC-2070 C-6:&nbsp; This actually turns out to be sheet 7, which according to notations on sheet 1 is unfortunately the only sheet that differs between Colossus 2C and 2D.&nbsp; However, this sheet is not a flowchart, but rather a table of which flags correspond to which bits of which words of which flagwords.&nbsp; I suppose that it's in the index because XDELVFLG is one of those flags, though why it has a C-_X_ notation is unclear.&nbsp; Since FC-2070 covers general-purpose subroutines, we wouldn't expect its flowchart to be manipulating any _specific_ flags anyway.
+FC-2070 C-6: This actually turns out to be sheet 7, which according to notations on sheet 1 is unfortunately the only sheet that differs between Colossus 2C and 2D. However, this sheet is not a flowchart, but rather a table of which flags correspond to which bits of which words of which flagwords. I suppose that it's in the index because XDELVFLG is one of those flags, though why it has a C-//X// notation is unclear. Since FC-2070 covers general-purpose subroutines, we wouldn't expect its flowchart to be manipulating any //specific// flags anyway.
 
-FC-2620 S-1,6:&nbsp; S-1 is really sheet 2.&nbsp; Unfortunately, sheets 2, 4, 5, and 6 weren't drawn entirely correctly, and are pretty meaningless as they stand.&nbsp; I've fixed them up as I think they should have been drawn, and my corrections (including the original sheet 3) follow.&nbsp; The change is that a RETURN VIA P30/31RT block has been added at the end of subroutine PARAM30, that a "recycle" return has been added to GOFLASHR in P30/P31, and that dashed boxes have been added around subroutines P30/P31 and PARAM30. Of course, at some point you may ask yourself how much I'm legitimately correcting, and how much I'm simply tailoring the flowchart to look more like Comanche 55.&nbsp; Fair enough.&nbsp; But there's no doubt, for example, that GOFLASHR has 4 possible returns, and the flowchart had shown only 3 of them.
+FC-2620 S-1,6: S-1 is really sheet 2. Unfortunately, sheets 2, 4, 5, and 6 weren't drawn entirely correctly, and are pretty meaningless as they stand. I've fixed them up as I think they should have been drawn, and my corrections (including the original sheet 3) follow. The change is that a RETURN VIA P30/31RT block has been added at the end of subroutine PARAM30, that a "recycle" return has been added to GOFLASHR in P30/P31, and that dashed boxes have been added around subroutines P30/P31 and PARAM30. Of course, at some point you may ask yourself how much I'm legitimately correcting, and how much I'm simply tailoring the flowchart to look more like Comanche 55. Fair enough. But there's no doubt, for example, that GOFLASHR has 4 possible returns, and the flowchart had shown only 3 of them.
 
-![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/174943)
+{{../pcr812A.png}}
 
-![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/174937)
+{{../pcr812B.png}}
 
-![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/174929)
+{{../pcr812C.png}}
 
-![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/174930)
+{{../pcr812D.png}}
 
-![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/174932)
+{{../pcr812E.png}}
 
-Tracing through routine P30 in the corrected flowchart, without worrying about descending into subroutine calls, we find that XDELVFLG should be set after calling (and returning from) CNTNUP30, and should be set again after calling (and returning from) PARAM30.&nbsp; In point of fact, Comanche 55 has only the latter, so the former must be added to Comanche 67.&nbsp; As far as the subroutines called by R30 are concerned, if the index is correct we should need to worry about them; nevertheless, tracing through their code we find the following:
+Tracing through routine P30 in the corrected flowchart, without worrying about descending into subroutine calls, we find that XDELVFLG should be set after calling (and returning from) CNTNUP30, and should be set again after calling (and returning from) PARAM30. In point of fact, Comanche 55 has only the latter, so the former must be added to Comanche 67. As far as the subroutines called by R30 are concerned, if the index is correct we should need to worry about them; nevertheless, tracing through their code we find the following:
 
-- P30/P31:&nbsp; I don't see anything here relevant to XDELVFLG, and the Comanche 55 code matches the (corrected) flowchart.
-- CNTNUP30:&nbsp; Code matches flowchart, other than that the flowchart doesn't mention any verb/noun combination (Comanche 55 uses V06N33) in connection with GOFLASH, but GOFLASH has to be initialized with some verb/noun combination loaded into the accumulator.
-- S30.1:&nbsp; I haven't compared in detail; I just note that neither the code nor the flowchart appears to reference XDELVFLG.
-- PARAM30:&nbsp; And similarly for PARAM30.
+* P30/P31: I don't see anything here relevant to XDELVFLG, and the Comanche 55 code matches the (corrected) flowchart.
+* CNTNUP30: Code matches flowchart, other than that the flowchart doesn't mention any verb/noun combination (Comanche 55 uses V06N33) in connection with GOFLASH, but GOFLASH has to be initialized with some verb/noun combination loaded into the accumulator.
+* S30.1: I haven't compared in detail; I just note that neither the code nor the flowchart appears to reference XDELVFLG.
+* PARAM30: And similarly for PARAM30.
 
-FC-2620 C-10.&nbsp; Incidentally, the flowchart goes on (incorrectly again) to redraw some of the items I've corrected above.&nbsp; In particular, the tail end of PARAM30 and DISPMGA can be seen on sheet 10.&nbsp; I'm not going to the trouble of repairing the flowchart drawings again, so you'll just have to use your imagination.&nbsp; This sheet of the flowchart depicts the very end of routine P31, and if we were to correct the flowchart, to agree with it the code must end with something I'd code as
+FC-2620 C-10. Incidentally, the flowchart goes on (incorrectly again) to redraw some of the items I've corrected above. In particular, the tail end of PARAM30 and DISPMGA can be seen on sheet 10. I'm not going to the trouble of repairing the flowchart drawings again, so you'll just have to use your imagination. This sheet of the flowchart depicts the very end of routine P31, and if we were to correct the flowchart, to agree with it the code must end with something I'd code as
 
-    TC PARAM30TC DOWNFLAGADRES XDELVFLGTCF GOTOPOOH
+'''
+		TC 	PARAM30
+		TC 	DOWNFLAG
+		ADRES	XDELVFLG
+		TCF 	GOTOPOOH
+'''
 
 In point of fact, that's exactly what the Comanche 55 P31 does end with.
 
-FC-2642 C-14.&nbsp; Sheet 1 of the flowchart mentions that only sheet 17 has changes from Colossus 2 to Colossus 2C, so that's the only sheet of interest.&nbsp; At the same time, the only reference to XDELVFLG is on sheet 14.&nbsp; So there's nothing here that should differ from the Comanche 55 source code.&nbsp; But I've looked at sheet 17, and there is indeed nothing.&nbsp; I've also looked at sheet 14, which immediately follows program label P37W; both the code and the flowchart do clear XDELVFLG at that point.
+FC-2642 C-14. Sheet 1 of the flowchart mentions that only sheet 17 has changes from Colossus 2 to Colossus 2C, so that's the only sheet of interest. At the same time, the only reference to XDELVFLG is on sheet 14. So there's nothing here that should differ from the Comanche 55 source code. But I've looked at sheet 17, and there is indeed nothing. I've also looked at sheet 14, which immediately follows program label P37W; both the code and the flowchart do clear XDELVFLG at that point.
 
-FC-2680 T-4,32.&nbsp; Sheet 1 notes that sheets 15 and 51 update the flowchart from Colossus 2C to 2D, so sheets 4 and 32 (in theory, the only ones that interest us) should be valid for Colossus 2C.&nbsp; As we expect, there is a test of XDELVFLG on sheet for, in the P40CSM subroutine.&nbsp; We shouldn't care, since the PCR is about setting and resetting XDELVFLG rather than testing it, but I've compared to the Comanche 55 code anyway, and it appears to match.&nbsp; &nbsp; Similarly for sheet 32, in the vicinity of the XDELVFLG test, the code (S40.1) and flowchart match.
+FC-2680 T-4,32. Sheet 1 notes that sheets 15 and 51 update the flowchart from Colossus 2C to 2D, so sheets 4 and 32 (in theory, the only ones that interest us) should be valid for Colossus 2C. As we expect, there is a test of XDELVFLG on sheet for, in the P40CSM subroutine. We shouldn't care, since the PCR is about setting and resetting XDELVFLG rather than testing it, but I've compared to the Comanche 55 code anyway, and it appears to match.  Similarly for sheet 32, in the vicinity of the XDELVFLG test, the code (S40.1) and flowchart match.
 
-To summarize what we've just done, we've checked all of the references to XDELVFLG in the Colossus 2C flowchart (dependent on the flowchart index actually have listed all of them), and found that they all exist and are correct in the Comanche 55 code, _except_ that XDELVFLG should be set after returning from CNTNUP30 in routine P30, and the Comanche 55 code does not do that.
+To summarize what we've just done, we've checked all of the references to XDELVFLG in the Colossus 2C flowchart (dependent on the flowchart index actually have listed all of them), and found that they all exist and are correct in the Comanche 55 code, //except// that XDELVFLG should be set after returning from CNTNUP30 in routine P30, and the Comanche 55 code does not do that.
 
-That covers every instance (in theory) where the flowchart sets/clears XDELVFLG and the Comanche 55 code does not.&nbsp; For completeness, we should also go the other direction:&nbsp; Check every reference to XDELVFLG in Comanche 55 code and see if it appears correctly in the flowcharts:
+That covers every instance (in theory) where the flowchart sets/clears XDELVFLG and the Comanche 55 code does not. For completeness, we should also go the other direction: Check every reference to XDELVFLG in Comanche 55 code and see if it appears correctly in the flowcharts:
 
-- P30,P37, 2 instance: Already checked in FC-2620 above.
-- P32-P33, P72-P73, 1 instance:&nbsp; ADVANCE function in FC-2626.&nbsp; Not checked above, because flowchart (sheet 8) is same as for Colossus 2.&nbsp; But usage matches.
-- P34-P35, P74-P75, 1 instance:&nbsp; NOCHG function in S34/35.5 in FC-2630.&nbsp; Not checked above, because flowchart is same as for Colossus 2A.
-- P37,P70, 1 instance:&nbsp; Already checked in FC-2642 above.
-- P40-P47, 3 instances:&nbsp; Already checked in FC-2680 above.
-- STABLE ORBIT - P38-P39, 1 instance:&nbsp; DSPLY81 function in FC-2644.&nbsp; Not checked above, because flowchart is same as for Colossus 2A.&nbsp; But usage matches.
+* P30,P37, 2 instance: Already checked in FC-2620 above.
+* P32-P33, P72-P73, 1 instance: ADVANCE function in FC-2626. Not checked above, because flowchart (sheet 8) is same as for Colossus 2. But usage matches.
+* P34-P35, P74-P75, 1 instance: NOCHG function in S34/35.5 in FC-2630. Not checked above, because flowchart is same as for Colossus 2A.
+* P37,P70, 1 instance: Already checked in FC-2642 above.
+* P40-P47, 3 instances: Already checked in FC-2680 above.
+* STABLE ORBIT - P38-P39, 1 instance: DSPLY81 function in FC-2644. Not checked above, because flowchart is same as for Colossus 2A. But usage matches.
 
-Finally!&nbsp; Unless there are direct manipulations of the flagword that I've missed, the only change should be to set XDELVFLG after returning from CNTNUP30 in P30.&nbsp; This change should be conditionally assembled based on preprocessor label Reconstruction812.&nbsp; Indeed, on checking the current state of the reconstruction, I find that exactly this fix exists due to the prior analysis.
+Finally! Unless there are direct manipulations of the flagword that I've missed, the only change should be to set XDELVFLG after returning from CNTNUP30 in P30. This change should be conditionally assembled based on preprocessor label Reconstruction812. Indeed, on checking the current state of the reconstruction, I find that exactly this fix exists due to the prior analysis.
 
 In summary, fixed in software, but no change from prior analysis.
 

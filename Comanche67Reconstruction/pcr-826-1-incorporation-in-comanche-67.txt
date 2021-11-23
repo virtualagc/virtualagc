@@ -1,19 +1,24 @@
-( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
 
-Of course, we don't have a copy of PCR-826.1, "Reverse P76 Display".&nbsp; There is a matching PCR-826.2 that was incorporated in Luminary 1B.&nbsp; LUMINARY Memo #92 has a bit more explanation:
+====== PCR-826.1 Incorporation in Comanche 67 ======
 
-> As a result of this change the first display in P76 will be noun 34 and the second will be noun 84.
+([[comanche-67-reconstruction|Return to main Comanche 67 reconstruction page.]])
 
-That's actually an error, by the way, since it's noun 33 rather than 34.&nbsp;&nbsp;
+Of course, we don't have a copy of PCR-826.1, "Reverse P76 Display". There is a matching PCR-826.2 that was incorporated in Luminary 1B. LUMINARY Memo #92 has a bit more explanation:
+
+	As a result of this change the first display in P76 will be noun 34 and the second will be noun 84.
+
+That's actually an error, by the way, since it's noun 33 rather than 34.
 
 We have flowchart FC-2670, "P-76 Target Delta V" for both
 
-- [Colossus 2C](https://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf#page=338)
-- [Colossus 2D](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1047)
+* [[https://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf#page=338|Colossus 2C]]
+* [[https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1047|Colossus 2D]]
 
-though only the former is really of interest.&nbsp; Looking through it, we see immediately that almost the first thing in P76 is a GOFLASH with V06N33 followed by a GOFLASH with V06N84.&nbsp; (Apparently Comanche used N33 where Luminary used N34.)&nbsp; And that seems to be it!&nbsp; Indeed, comparing the flowchart to Comanche 55 source code, we see that these are reversed (V06N84 followed by V06N33).&nbsp; The only real question is whether the definitions of the fixed constants V06N84 and V06N33 are also reverse, in addition to the order in which they're used?&nbsp; I don't see why they would be, since it would just be pointless extra effort; in fact, though, Luminary 99 and Luminary 116 allocated the fixed constants in the same order as each other, and the same order as Comanche 55, so I warrant that Comanche 67 allocates the fixed constants in that same order as well.
+though only the former is really of interest. Looking through it, we see immediately that almost the first thing in P76 is a GOFLASH with V06N33 followed by a GOFLASH with V06N84. (Apparently Comanche used N33 where Luminary used N34.) And that seems to be it! Indeed, comparing the flowchart to Comanche 55 source code, we see that these are reversed (V06N84 followed by V06N33). The only real question is whether the definitions of the fixed constants V06N84 and V06N33 are also reverse, in addition to the order in which they're used? I don't see why they would be, since it would just be pointless extra effort; in fact, though, Luminary 99 and Luminary 116 allocated the fixed constants in the same order as each other, and the same order as Comanche 55, so I warrant that Comanche 67 allocates the fixed constants in that same order as well.
 
-Action item:&nbsp; Conditionally assembled based on preprocessor label Reconstruction826, reverse the order of V06N84 and V06N33 in the GOFLASH calls at the beginning of P76.&nbsp; In making this change, the prior analysis had done so already, in the same way, though at that time PCR-826.1 was unknown.
+Action item: Conditionally assembled based on preprocessor label Reconstruction826, reverse the order of V06N84 and V06N33 in the GOFLASH calls at the beginning of P76. In making this change, the prior analysis had done so already, in the same way, though at that time PCR-826.1 was unknown.
 
 In summary, the PCR was fixed in code.
 

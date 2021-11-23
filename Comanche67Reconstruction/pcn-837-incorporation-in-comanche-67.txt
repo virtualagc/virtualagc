@@ -1,87 +1,54 @@
-( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+
+====== PCN-837 Incorporation in Comanche 67 ======
+
+([[comanche-67-reconstruction|Return to main Comanche 67 reconstruction page.]])
 
 We have no copy of PCR-837, "Change Constant Drag Controller Gains".
 
-I think the starting point on this is the CONSTD subroutine (and thereabouts) in REENTRY CONTROL, along with various constants associated with it.&nbsp; I'm not sure what all those constants are, but the ENTRY LEXICON lists various ones that seem suspicious.&nbsp; Some insight may be provided by [Figure 7.0-10, "CONSTANT DRAG CONTROL"](https://www.ibiblio.org/apollo/Documents/HSI-208461.pdf#page=466), in the Colossus 2D GSOP.&nbsp; That figure looks like this:
+I think the starting point on this is the CONSTD subroutine (and thereabouts) in REENTRY CONTROL, along with various constants associated with it. I'm not sure what all those constants are, but the ENTRY LEXICON lists various ones that seem suspicious. Some insight may be provided by [[https://www.ibiblio.org/apollo/Documents/HSI-208461.pdf#page=466|Figure 7.0-10, "CONSTANT DRAG CONTROL"]], in the Colossus 2D GSOP. That figure looks like this:
 
-![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/174976)
+{{../pcr837.png}}
 
-The Colossus 2D GSOP also helpfully has a [table of constants](https://www.ibiblio.org/apollo/Documents/HSI-208461.pdf#page=459) a few pages prior to that, and list the values of the constants in the flowchart above as:
+The Colossus 2D GSOP also helpfully has a [[https://www.ibiblio.org/apollo/Documents/HSI-208461.pdf#page=459|table of constants]] a few pages prior to that, and list the values of the constants in the flowchart above as:
 
-- C16, "CONSTD GAIN ON DRAG" = 0.01
-- C17, "CONSTD GAIN ON RDOT" = 0.002
-- C20, "MAX DRAG FOR DOWN-LIFT" = 210 FPSS
+* C16, "CONSTD GAIN ON DRAG" = 0.01
+* C17, "CONSTD GAIN ON RDOT" = 0.002
+* C20, "MAX DRAG FOR DOWN-LIFT" = 210 FPSS
 
 These are the same values as in the Colossus 3 GSOP as well.
 
-In the Colossus 2 GSOP (and in the Colossus 1/1A GSOP as well), on the other hand, the figure is identical but the [table of constants](https://www.ibiblio.org/apollo/Documents/R-577-Colossus2-Martin-5.6789.pdf#page=97) differs slightly, and here is a complete list of the differences:
+In the Colossus 2 GSOP (and in the Colossus 1/1A GSOP as well), on the other hand, the figure is identical but the [[https://www.ibiblio.org/apollo/Documents/R-577-Colossus2-Martin-5.6789.pdf#page=97|table of constants]] differs slightly, and here is a complete list of the differences:
 
-| Constant  
- | Description  
- | Colossus 2 Value | Colossus 2D Value  
- |
-| --- | --- | --- | --- |
-| C17  
- | CONSTD GAIN ON RDOT  
- | .001  
- | .002  
- |
-| C20  
- | MAX DRAG FOR DOWN-LIFT  
- | 175 FPSS  
- | 210 FPSS  
- |
-| KA2  
- | FACTOR IN KA CALC  
- | Q7F/GS  
- | 0.2 G'S  
- |
+| Constant | Description            | Colossus 2 Value | Colossus 2D Value |
+|----------|------------------------|------------------|-------------------|
+| C17      | CONSTD GAIN ON RDOT    | .001             | .002              |
+| C20      | MAX DRAG FOR DOWN-LIFT | 175 FPSS         | 210 FPSS          |
+| KA2      | FACTOR IN KA CALC      | Q7F/GS           | 0.2 G'S           |
 
-The weird notation "Q7F/GS" apparently means to take the value of one of the other constants, Q7F (always 6 FPSS), and divide it by another of the constants, GS (always 32.2 FPSS), so KA2 should always be 6/32.2=0.1863354; in point of fact, it has the same value in all versions of Colossus, identified in program comments as .2/25=0.008.&nbsp; But it's always the same, regardless of what the value is, so the weirdness shouldn't really concern us.
 
-The relevant constants are apparently all defined in REENTRY CONTROL, so comparing Comanche 55 to Artemis may give us a reasonable sense if C17 and C20 are our only concerns, or if there are others to worry about as well.&nbsp; We find the following differences:
+The weird notation "Q7F/GS" apparently means to take the value of one of the other constants, Q7F (always 6 FPSS), and divide it by another of the constants, GS (always 32.2 FPSS), so KA2 should always be 6/32.2=0.1863354; in point of fact, it has the same value in all versions of Colossus, identified in program comments as .2/25=0.008. But it's always the same, regardless of what the value is, so the weirdness shouldn't really concern us.
 
-| Constant | Description | Colossus 2A Value | Colossus 3 Value  
- |
-| --- | --- | --- | --- |
-| C17  
- | CONSTD GAIN ON RDOT  
- | .001  
- | .002  
- |
-| C20  
- | MAX DRAG FOR DOWN-LIFT  
- | 175 FPSS  
- | 210/805  
- |
-| KB1  
- | OPTIMIZED UPCONTROL GAIN  
- | 3.4  
- | 2.5  
- |
-| KB2  
- | OPTIMIZED UPCONTROL GAIN  
- | 0.0034  
- | 0.0025  
- |
-| Q21  
- | FACTOR IN Q2 CALCULATION  
- | 500/21600  
- | 3500/21600  
- |
-| Q22  
- | FACTOR IN Q2 CALCULATION  
- | -1152/21600  
- | -1992/21600  
- |
+The relevant constants are apparently all defined in REENTRY CONTROL, so comparing Comanche 55 to Artemis may give us a reasonable sense if C17 and C20 are our only concerns, or if there are others to worry about as well. We find the following differences:
 
-Actually, the constants in REENTRY CONTROL don't include C17, but rather K2D which equals -C17, but for ease of comparison I've shown C17 instead.&nbsp; Similarly, in REENTRY CONTROL we're not given KB1 and KB2, but rather 1/KB1 and -1/KB2, but since it's KB1 and KB2 that are shown in the GSOP, I've shown them here as well.
+| Constant | Description              | Colossus 2A Value | Colossus 3 Value |
+|----------|--------------------------|-------------------|------------------|
+| C17      | CONSTD GAIN ON RDOT      | .001              | .002             |
+| C20      | MAX DRAG FOR DOWN-LIFT   | 175 FPSS          | 210/805          |
+| KB1      | OPTIMIZED UPCONTROL GAIN | 3.4               | 2.5              |
+| KB2      | OPTIMIZED UPCONTROL GAIN | 0.0034            | 0.0025           |
+| Q21      | FACTOR IN Q2 CALCULATION | 500/21600         | 3500/21600       |
+| Q22      | FACTOR IN Q2 CALCULATION | -1152/21600       | -1992/21600      |
 
-As far as the KB1 and KB2 differences are concerned, we can completely ignore them since the table in the Colossus 3 GSOP notes that KB1 and KB2 were changed due to PCR-342.&nbsp; PCR-342 was incorporated in Colossus 3, so its changes were not present in Comanche 67.
 
-Regarding Q21 and Q22, they are used by the STARTENT routine in REENTRY CONTROL to compute the value Q2, "FINAL PHASE RANGE", and for nothing else.&nbsp; We do have the [Colossus 2C flowchart FC-2770](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1262), "REENTRY CONTROL", and STARTENT is covered on sheet 6.&nbsp; On it, we specifically find that Q2&nbsp; [←](https://en.wikipedia.org/wiki/%E2%86%90_(disambiguation) "← (disambiguation)")500 LAD - 1152 (with the values simply written out, and no reference to Q21 and Q22 at all).&nbsp; For what it's worth, the [Colossus 2D GSOP shows the identical calculation](https://www.ibiblio.org/apollo/Documents/HSI-208461.pdf#page=460).
+Actually, the constants in REENTRY CONTROL don't include C17, but rather K2D which equals -C17, but for ease of comparison I've shown C17 instead. Similarly, in REENTRY CONTROL we're not given KB1 and KB2, but rather 1/KB1 and -1/KB2, but since it's KB1 and KB2 that are shown in the GSOP, I've shown them here as well.
 
-Thus as far as I can tell, PCR-837 boils down simply to making the changes to the constants C17 and C20 in REENTRY CONTROL that are listed above.&nbsp; We do that with conditional assembly controlled by the preprocessor constant Reconstruction837.&nbsp; The change was already in place due to the prior analysis.
+As far as the KB1 and KB2 differences are concerned, we can completely ignore them since the table in the Colossus 3 GSOP notes that KB1 and KB2 were changed due to PCR-342. PCR-342 was incorporated in Colossus 3, so its changes were not present in Comanche 67.
+
+Regarding Q21 and Q22, they are used by the STARTENT routine in REENTRY CONTROL to compute the value Q2, "FINAL PHASE RANGE", and for nothing else. We do have the [[https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1262|Colossus 2C flowchart FC-2770]], "REENTRY CONTROL", and STARTENT is covered on sheet 6. On it, we specifically find that Q2 [[https://en.wikipedia.org/wiki/%E2%86%90_(disambiguation|←]] "← (disambiguation)")500 LAD - 1152 (with the values simply written out, and no reference to Q21 and Q22 at all). For what it's worth, the [[https://www.ibiblio.org/apollo/Documents/HSI-208461.pdf#page=460|Colossus 2D GSOP shows the identical calculation]].
+
+Thus as far as I can tell, PCR-837 boils down simply to making the changes to the constants C17 and C20 in REENTRY CONTROL that are listed above. We do that with conditional assembly controlled by the preprocessor constant Reconstruction837. The change was already in place due to the prior analysis.
 
 In summary, the fix was incorporated in code.
 

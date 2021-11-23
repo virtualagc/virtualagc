@@ -1,38 +1,46 @@
-( [Return to main Comanche 67 reconstruction flowchart.](comanche-67-reconstruction))
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
 
-Unfortunately, flowchart FC-2110 is for Colossus 2D and there's no indication of which sheets may differ from the 2C revision.&nbsp; Fortunately, there only 4 sheets, so I'll just go through the whole thing and try to figure out any discrepancies vs code if/when I come to them.
+====== Flowchart FC-2110 in Comanche 67 ======
 
-## Sheet 1
+([[comanche-67-reconstruction|Return to main Comanche 67 reconstruction flowchart.]])
+
+Unfortunately, flowchart FC-2110 is for Colossus 2D and there's no indication of which sheets may differ from the 2C revision. Fortunately, there only 4 sheets, so I'll just go through the whole thing and try to figure out any discrepancies vs code if/when I come to them.
+
+==== Sheet 1 ====
 
 Just the cover page, no flowcharts
 
-## Sheet 2
+==== Sheet 2 ====
 
-SPCOS, SPSIN, SPT:&nbsp; Apparently the input value for SPCOS is in units of revolutions, so adding 1/2 to it is that same as adding 1/4 revolution.
+SPCOS, SPSIN, SPT: Apparently the input value for SPCOS is in units of revolutions, so adding 1/2 to it is that same as adding 1/4 revolution.
 
-There is a conflict between the flowchart for SPSIN and the code.&nbsp; Here's the flowchart:
+There is a conflict between the flowchart for SPSIN and the code. Here's the flowchart:
 
-![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/175377)
+{{../fc2110Sheet2.png}}
 
 And here's the code:
 
-    SPSIN TS	TEMK TCF	SPT CS	TEMKSPT ...
+	''SPSIN 	TS	TEMK ''
+			''TCF	SPT ''
+			''CS	TEMKSPT ''
+			''...''
 
-_Naively_, it would appear as though the code simply jumps past the flowchart's decision box, as if the overflow test result was always "No".&nbsp; But that doesn't happen:&nbsp; The TS instruction has a feature in that if A contains overflow, then TS skips the next instruction, so actually TS TEMK is an overflow test.&nbsp; Thus upon overflow, the code proceeds (correctly according to the flowchart) to CS TEMK.&nbsp; The problem is that the flowchart should say A←-TEMK at that point.
+//Naively//, it would appear as though the code simply jumps past the flowchart's decision box, as if the overflow test result was always "No". But that doesn't happen: The TS instruction has a feature in that if A contains overflow, then TS skips the next instruction, so actually TS TEMK is an overflow test. Thus upon overflow, the code proceeds (correctly according to the flowchart) to CS TEMK. The problem is that the flowchart should say A←-TEMK at that point.
 
 But I don't think this error, whatever the origin, requires changes to Comanche 67, since Artemis (and Colossus 237, for that matter) have exactly the same code.
 
-SPT seems fine, given that there's not much of it on this sheet.&nbsp; :-)
+SPT seems fine, given that there's not much of it on this sheet. :-)
 
-## Sheet 3
+==== Sheet 3 ====
 
-Continuation of SPT:&nbsp; &nbsp;This computation is a bit tricky to follow, in that I can't seem to get the signs to come out right in the following flowchart blocks:
+Continuation of SPT: This computation is a bit tricky to follow, in that I can't seem to get the signs to come out right in the following flowchart blocks:
 
-![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/175577)
+{{../fc2110Sheet3.png}}
 
-Other than that the code seems to match the flowchart.&nbsp; Rather than waste more time on it than I already have, I'm afraid I'm just going to bail on it, and observe that the same code is used in Artemis and Colossus 1, so it's probably right in Colossus 2C.
+Other than that the code seems to match the flowchart. Rather than waste more time on it than I already have, I'm afraid I'm just going to bail on it, and observe that the same code is used in Artemis and Colossus 1, so it's probably right in Colossus 2C.
 
-## Sheet 4
+==== Sheet 4 ====
 
-POLLEY, ARG90:&nbsp; Looks right to me.
+POLLEY, ARG90: Looks right to me.
 

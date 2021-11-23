@@ -1,33 +1,89 @@
-( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
 
-As usual, no copy of PCR-825.1, "Display Option 3 in P52/P54" is presently available.&nbsp; There is a twin PCR-825.2 that was incorporated in Luminary 106.&nbsp; Therefore, a source-code comparison of Luminary 99 vs Luminary 116 could reveal implementation details which might be portable into Comanche.
+====== PCR-821.1 Incorporation in Comanche 67 ======
 
-P52 is covered by the [Colossus 2C flowchart FC-2720](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1176), "P52 IMU REALIGNMENT", which helpfully points out that only sheets 1 and 23 differ from Colossus 2.&nbsp; Comparing those sheets to the Comanche 55 source code, we find the following:
+([[comanche-67-reconstruction|Return to main Comanche 67 reconstruction page.]])
 
-- Sheet 1, routine PROG52:&nbsp; When the PFRATFLG-cleared condition is found, according to the flowchart 3, is loaded into the accumulator ("SET LGC ASSUMED OPTION TO 00003") and then into OPTION2; whereas Comanche 55 instead loads 2 into the accumulator and then into OPTION2.&nbsp; This corresponds to the behavior of Luminary 116 code vs Luminary 99 code.&nbsp; If option OPTION2 == 3, then P52C is later executed; that was already present in Comanche 55 and agrees with the flowchart, but I guess there just wasn't any way to activate that option before, and thus no way to execute P52C.&nbsp; P52C itself is unchanged as well (though it differs from what's in Luminary).
-- Sheet 23, routine COARFINE:&nbsp; According to the flowchart, a block of instructions beginning with TC BANKCALL / CADR IMUCOARS and ending with CADR IMUSTALL / TC CURTAINS should be replaced by a call to COARSUB, which is apparently a _new_ routine (FC-2710).
+As usual, no copy of PCR-825.1, "Display Option 3 in P52/P54" is presently available. There is a twin PCR-825.2 that was incorporated in Luminary 106. Therefore, a source-code comparison of Luminary 99 vs Luminary 116 could reveal implementation details which might be portable into Comanche.
 
-Unfortunately, the Colossus 2C flowchart document is not current with respect to FC-2710, and only contains the Colossus 2A revision.&nbsp; In the Colossus 2D flowchart document, the Foreword informs us that FC-2710 has been removed since "it is not accurate for Colossus 2D".&nbsp; In other words, we have no useful flowchart for COARSUB.&nbsp; While we do have a COARSUB in Artemis, we have to ask ourselves this:&nbsp; If the Comanche 67 COARSUB is inaccurate for Colossus 2D, why would we expect it to be accurate for Artemis?
+P52 is covered by the [[https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1176|Colossus 2C flowchart FC-2720]], "P52 IMU REALIGNMENT", which helpfully points out that only sheets 1 and 23 differ from Colossus 2. Comparing those sheets to the Comanche 55 source code, we find the following:
 
-On the other hand, we do have essentially all of the Artemis-based COLOSSUS Memos, so we actually have a fighting chance to figure out how or if the Artemis COARSUB differs from the Comanche 67 COARSUB from which it was originally forked.&nbsp; Speaking in general, if the Comanche 67 COARSUB were functionally identical to the Comanche 55 COARSUB, we'd expect it to contain essentially the same stuff as was pulled out of COARFINE on sheet 23 of FC-2710 (as explained above).&nbsp; And it does, sort of.&nbsp; Here's the full list of stuff pulled from COARFINE in Comanche 67:
+* Sheet 1, routine PROG52: When the PFRATFLG-cleared condition is found, according to the flowchart 3, is loaded into the accumulator ("SET LGC ASSUMED OPTION TO 00003") and then into OPTION2; whereas Comanche 55 instead loads 2 into the accumulator and then into OPTION2. This corresponds to the behavior of Luminary 116 code vs Luminary 99 code. If option OPTION2 == 3, then P52C is later executed; that was already present in Comanche 55 and agrees with the flowchart, but I guess there just wasn't any way to activate that option before, and thus no way to execute P52C. P52C itself is unchanged as well (though it differs from what's in Luminary).
+* Sheet 23, routine COARFINE: According to the flowchart, a block of instructions beginning with TC BANKCALL / CADR IMUCOARS and ending with CADR IMUSTALL / TC CURTAINS should be replaced by a call to COARSUB, which is apparently a //new// routine (FC-2710).
 
-    TC	BANKCALL CADR	IMUCOARS	# PERFORM COARSE ALIGNMENT TC	BANKCALL CADR	IMUSTALL	# REQUEST MODE SWITCH TC	CURTAINS TC	BANKCALL CADR	IMUFIN20 TC	BANKCALL CADR	IMUSTALL TC	CURTAINS	# TEST FOR MALFUNCTION
+Unfortunately, the Colossus 2C flowchart document is not current with respect to FC-2710, and only contains the Colossus 2A revision. In the Colossus 2D flowchart document, the Foreword informs us that FC-2710 has been removed since "it is not accurate for Colossus 2D". In other words, we have no useful flowchart for COARSUB. While we do have a COARSUB in Artemis, we have to ask ourselves this: If the Comanche 67 COARSUB is inaccurate for Colossus 2D, why would we expect it to be accurate for Artemis?
+
+On the other hand, we do have essentially all of the Artemis-based COLOSSUS Memos, so we actually have a fighting chance to figure out how or if the Artemis COARSUB differs from the Comanche 67 COARSUB from which it was originally forked. Speaking in general, if the Comanche 67 COARSUB were functionally identical to the Comanche 55 COARSUB, we'd expect it to contain essentially the same stuff as was pulled out of COARFINE on sheet 23 of FC-2710 (as explained above). And it does, sort of. Here's the full list of stuff pulled from COARFINE in Comanche 67:
+
+'''
+		TC	BANKCALL 
+		CADR	IMUCOARS	# PERFORM COARSE ALIGNMENT 
+		TC	BANKCALL 
+		CADR	IMUSTALL	# REQUEST MODE SWITCH 
+		TC	CURTAINS 
+		TC	BANKCALL 
+		CADR	IMUFIN20 
+		TC	BANKCALL 
+		CADR	IMUSTALL 
+		TC	CURTAINS	# TEST FOR MALFUNCTION
+'''
 
 And here's Artemis's COARSUB:
 
-    COARSUB CA	Q TS	QMINSTALLOOP	CA	MODECADR	# IS IMU IN USE? EXTEND BZF	CORSCALL	# NO, GO AHEAD WITH COARSE ALIGN CAF	1SEC # YES, SO WAIT A SEC TC	BANKCALL CADR	DELAYJOB TC	STALLOOP	# AND TRY AGAINCORSCALL	TC	BANKCALL CADR	IMUCOARS	# PERFORM COARSE ALIGN TC	BANKCALL CADR	IMUSTALL TC	217ALARM	# BAD END TC	BANKCALL CADR	IMUFIN20	# PERFORM FINE ALIGN TC	BANKCALL CADR	IMUSTALL TC	217ALARM	# BAD END TC	QMIN217ALARM	INHINT # JUST LIKE 'CURTAINS', NOW DEPARTED CA	Q TC	ALARM2 OCT	00217 TC	ALMCADR # RETURN TO USER
+'''
+COARSUB		CA      Q 
+		TS	QMINSTALLOOP	
+		CA	MODECADR	# IS IMU IN USE? 
+		EXTEND 
+		BZF	CORSCALL	# NO, GO AHEAD WITH COARSE ALIGN 
+		CAF	1SEC 		# YES, SO WAIT A SEC 
+		TC	BANKCALL 
+		CADR	DELAYJOB 
+		TC	STALLOOP	# AND TRY AGAIN
+CORSCALL	TC      BANKCALL 
+		CADR	IMUCOARS	# PERFORM COARSE ALIGN 
+		TC	BANKCALL 
+		CADR	IMUSTALL 
+		TC	217ALARM	# BAD END 
+		TC	BANKCALL 
+		CADR	IMUFIN20	# PERFORM FINE ALIGN 
+		TC	BANKCALL 
+		CADR	IMUSTALL 
+		TC	217ALARM	# BAD END 
+		TC	QMIN
+217ALARM	INHINT			# JUST LIKE 'CURTAINS', NOW DEPARTED 
+		CA	Q 
+		TC	ALARM2 
+		OCT	00217 
+		TC	ALMCADR 	# RETURN TO USER
+'''
 
-The CA Q / TS QMIN at the top and the TC QMIN are obvious and inescapable, so they're no mystery; they'd have to be there, no matter what.&nbsp; From CORSCALL onward, we see exactly the stuff pulled from COARFINE in Colossus 67, except that 217ALARM replaces CURTAINS.&nbsp; STALLOOP is completely new, however, and has the clear purpose of pausing the alignment process until the IMU becomes available.&nbsp; Thus the Artemis COARSUB seems completely plausible for use in Comanche 67, if only we can figure out how to either justify or reject STALLOOP and 217ALARM by using the COLOSSUS Memos or from examination of the differences between Luminary 99 and Luminary 116.
+The CA Q / TS QMIN at the top and the TC QMIN are obvious and inescapable, so they're no mystery; they'd have to be there, no matter what. From CORSCALL onward, we see exactly the stuff pulled from COARFINE in Colossus 67, except that 217ALARM replaces CURTAINS. STALLOOP is completely new, however, and has the clear purpose of pausing the alignment process until the IMU becomes available. Thus the Artemis COARSUB seems completely plausible for use in Comanche 67, if only we can figure out how to either justify or reject STALLOOP and 217ALARM by using the COLOSSUS Memos or from examination of the differences between Luminary 99 and Luminary 116.
 
-The change from CURTAINS to 217ALARM:&nbsp; They are precisely the same, except that CURTAINS is in section ALARM AND ABORT, while 217ALARM is in section P51-P3, and presumably in a different memory bank.&nbsp; In point of fact, CURTAINS (in both Comanche 55 and in Luminary) is in fixed-fixed memory, and is accessible from everywhere.&nbsp; The only plausible explanation for eliminating CURTAINS in favor of 217ALARM would seem to be if you had determined that it was called from only a single memory bank, in which case you could save space in fixed-fixed by moving CURTAINS (and renaming it) to the one bank in which it was used.&nbsp; In Comanche 55, it is called from more than one bank, so it's not a plausible change without the associated movement of code from one bank to another.&nbsp; Rummaging around in the COLOSSUS Memos, we find that CURTAINS was delete due to ACB-92/PCR-1018 in Artemis 19 or prior.&nbsp; Hence, it was still present in Comanche 67, and Comanche 67 has no 217ALARM subroutine.
+The change from CURTAINS to 217ALARM: They are precisely the same, except that CURTAINS is in section ALARM AND ABORT, while 217ALARM is in section P51-P3, and presumably in a different memory bank. In point of fact, CURTAINS (in both Comanche 55 and in Luminary) is in fixed-fixed memory, and is accessible from everywhere. The only plausible explanation for eliminating CURTAINS in favor of 217ALARM would seem to be if you had determined that it was called from only a single memory bank, in which case you could save space in fixed-fixed by moving CURTAINS (and renaming it) to the one bank in which it was used. In Comanche 55, it is called from more than one bank, so it's not a plausible change without the associated movement of code from one bank to another. Rummaging around in the COLOSSUS Memos, we find that CURTAINS was delete due to ACB-92/PCR-1018 in Artemis 19 or prior. Hence, it was still present in Comanche 67, and Comanche 67 has no 217ALARM subroutine.
 
-Presence of STALLOOP in COARSUB:&nbsp; I find that Luminary 116 has a subroutine called COARSE which is identical to COARSUB functionally.&nbsp; (Not identical in terms of using the same program labels, program comments, etc.)&nbsp; COARSE is also present in Luminary 99, but _without_ the portion corresponding to STALLOOP.&nbsp; &nbsp;
+Presence of STALLOOP in COARSUB: I find that Luminary 116 has a subroutine called COARSE which is identical to COARSUB functionally. (Not identical in terms of using the same program labels, program comments, etc.) COARSE is also present in Luminary 99, but //without// the portion corresponding to STALLOOP. 
 
 My inference is that in Comanche 67, COARSUB should simply be
 
-    COARSUB CA	Q TS	QMIN TC	BANKCALL CADR	IMUCOARS	# PERFORM COARSE ALIGN TC	BANKCALL CADR	IMUSTALL TC	CURTAINS	# BAD END TC	BANKCALL CADR	IMUFIN20	# PERFORM FINE ALIGN TC	BANKCALL CADR	IMUSTALL TC	CURTAINS	# BAD END TC	QMIN
+'''
+COARSUB		CA      Q 
+		TS	QMIN 
+		TC	BANKCALL 
+		CADR	IMUCOARS	# PERFORM COARSE ALIGN 
+		TC	BANKCALL 
+		CADR	IMUSTALL 
+		TC	CURTAINS	# BAD END 
+		TC	BANKCALL 
+		CADR	IMUFIN20	# PERFORM FINE ALIGN 
+		TC	BANKCALL 
+		CADR	IMUSTALL 
+		TC	CURTAINS	# BAD END 
+		TC	QMIN
+'''
 
-Fix to code is conditionally assembled based on the preprocessor label Reconstruction825.&nbsp; When making the fixes, I found that the prior analysis had made them as well, but with some differences:&nbsp; It had used 2 separate preprocessor labels, Reconstruction825 and ReconstructionCOAR, but I replace the latter.&nbsp; COARSUB had contained STALLOOP, but I've eliminated it.&nbsp; The prior analysis had found two places where the 10-instruction block was replaced by COARSUB.&nbsp; The "other" one that I hadn't identified here is in routine P51 (=P53).&nbsp; P51, like COARSUB itself, is covered by FC-2710, which we don't have for Colossus 2C.&nbsp; From the COLOSSUS Memo #244, sometime in Artemis 3-19, "code reduction was accomplished in P51-P53 by making duplicate code into a subroutine ... (ACB 87)".&nbsp; That probably is not this, but if it is, then using COARSUB in P51 (=P53) was not been done in Colossus 67.&nbsp; I should mention that in Artemis 1, "P51-53 was replaced with a new, more compact version", so there could easily have been code duplication other than COARSUB in Artemis 3-19.&nbsp; However Luminary 116 does have this change in P51 (=P53), so I accept it as well.
+Fix to code is conditionally assembled based on the preprocessor label Reconstruction825. When making the fixes, I found that the prior analysis had made them as well, but with some differences: It had used 2 separate preprocessor labels, Reconstruction825 and ReconstructionCOAR, but I replace the latter. COARSUB had contained STALLOOP, but I've eliminated it. The prior analysis had found two places where the 10-instruction block was replaced by COARSUB. The "other" one that I hadn't identified here is in routine P51 (=P53). P51, like COARSUB itself, is covered by FC-2710, which we don't have for Colossus 2C. From the COLOSSUS Memo #244, sometime in Artemis 3-19, "code reduction was accomplished in P51-P53 by making duplicate code into a subroutine ... (ACB 87)". That probably is not this, but if it is, then using COARSUB in P51 (=P53) was not been done in Colossus 67. I should mention that in Artemis 1, "P51-53 was replaced with a new, more compact version", so there could easily have been code duplication other than COARSUB in Artemis 3-19. However Luminary 116 does have this change in P51 (=P53), so I accept it as well.
 
 In summary, the fix was made in code.
 
