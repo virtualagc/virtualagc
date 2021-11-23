@@ -25,7 +25,7 @@ My reading of this is that COM-16 is concerned with ORBWFLAG and RENDWFLAG (pres
 
 However, there are inconsistencies here, in that:
 
-* [[https://www.ibiblio.org/apollo/Documents/apollo//12//fsrr_draft.pdf#page=7|The MIT/IL presentation for the Apollo 12 Flight Software Readiness Review (FSRR)]] explicitly states that COM-16 has been fixed in Comanche 67, and so does [[https://www.ibiblio.org/apollo/Documents/HSI-208454.pdf#page=5|Section 5 of the Colossus 3 GSOP]], which says that PCN-849 ("Fix for Com 16 Anomaly") is implemented there; but
+* [[https://www.ibiblio.org/apollo/Documents/apollo_12_fsrr_draft.pdf#page=7|The MIT/IL presentation for the Apollo 12 Flight Software Readiness Review (FSRR)]] explicitly states that COM-16 has been fixed in Comanche 67, and so does [[https://www.ibiblio.org/apollo/Documents/HSI-208454.pdf#page=5|Section 5 of the Colossus 3 GSOP]], which says that PCN-849 ("Fix for Com 16 Anomaly") is implemented there; but
 * COM-31 explicitly states that the anomaly it's concerned with exists in Comanche 67 (Colossus 2C) //and// Comanche 72 (Colossus 2D) and won't be fixed until Colossus 2E; but
 * If COM-16 is fixed in Comanche 67, how could it still be causing undesirable side effects on the W-matrix in Comanche 67 and 72?
 * And not only that, but the attachment to COM-31 makes it clear that "In order for this to happen," presumably referring to the W-matrix extrapolation problem, "the ORBWFLAG must be set equal to 0 and the RENDWFLAG must be set equal to one when P23 is selected." So how is the problem caused by the the non-mutual-exclusivity of ORBWFLAG and RENDWFLAG? Looks like it doesn't even have anything to do with that.
