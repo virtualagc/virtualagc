@@ -1,152 +1,65 @@
-( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+
+====== PCR-803 Incorporation in Comanche 67 ======
+
+([[comanche-67-reconstruction|Return to main Comanche 67 reconstruction page.]])
 
 We do not have a copy of PCR-803, "Change Entry Final Phase Table".
 
-There's information about this in the&nbsp; [Colossus 3 GSOP, section 5, Figure 7.0-14a, "Final Phase Reference Sheet"](https://www.ibiblio.org/apollo/Documents/HSI-208454.pdf#page=469), which is a table. Here are just the relevant rows of the table:
+There's information about this in the [[https://www.ibiblio.org/apollo/Documents/HSI-208454.pdf#page=469|Colossus 3 GSOP, section 5, Figure 7.0-14a, "Final Phase Reference Sheet"]], which is a table. Here are just the relevant rows of the table:
 
-| VREF (FPS) | RDOTREF (FPS)  
- | DREFR (FPSS) | DR/DRDOT F2 (NM/FPS)  
- | DR/DA F1 (NM/FPSS)  
- | RTOGO (NM)  
- | DR/DL/D F3 (NM)  
- |
-| --- | --- | --- | --- | --- | --- | --- |
-| 994  
- | -690.9  
- | 41.15  
- | .002507  
- | -.0346  
- | 3.7\*  
- | 6.10 X2  
- |
-| 2103  
- | -719  
- | 60.  
- | .003582  
- | -.05551  
- | 10.4\*  
- | 10.91 X2  
- |
-| 3922  
- | -694  
- | 81.5  
- | .007039  
- | -.09034  
- | 23.6\*  
- | 21.64 X2  
- |
-|   
- |   
- |   
- |   
- |   
- |   
- |   
- |
-|   
- |   
- |   
- |   
- |   
- |   
- |   
- |
-|   
- |   
- |   
- |   
- |   
- |   
- |   
- |
-|   
- |   
- |   
- |   
- |   
- |   
- |   
- |
-| 15951  
- | -416  
- | 125.2  
- | .07683  
- | -.7500x  
- | 210.3  
- | 465.5  
- |
-| 18357  
- | -566  
- | 120.4  
- | .09982  
- | -1.000x  
- | 266.8  
- | 682.7  
- |
-| 20829  
- | -781  
- | 95.4  
- | .1335  
- | -1.000x  
- | 344.3  
- | 980.5  
- |
-|   
- |   
- |   
- |   
- |   
- |   
- |   
- |
-|   
- |   
- |   
- |   
- |   
- |   
- |   
- |
-|   
- |   
- |   
- |   
- |   
- |   
- |   
- |
-|   
- |   
- |   
- |   
- | x Changed by PCR #288  
- | \*Changed by PCR #803  
- |   
- |
+| VREF (FPS) | RDOTREF (FPS) | DREFR (FPSS) | DR/DRDOT F2 (NM/FPS) | DR/DA F1 (NM/FPSS)    | RTOGO (NM)           | DR/DL/D F3 (NM) |
+|------------|---------------|--------------|----------------------|-----------------------|----------------------|-----------------|
+| 994        | -690.9        | 41.15        | .002507              | -.0346                | 3.7*                 | 6.10 X2         |
+| 2103       | -719          | 60.          | .003582              | -.05551               | 10.4*                | 10.91 X2        |
+| 3922       | -694          | 81.5         | .007039              | -.09034               | 23.6*                | 21.64 X2        |
+|            |               |              |                      |                       |                      |                 |
+|            |               |              |                      |                       |                      |                 |
+|            |               |              |                      |                       |                      |                 |
+|            |               |              |                      |                       |                      |                 |
+| 15951      | -416          | 125.2        | .07683               | -.7500x               | 210.3                | 465.5           |
+| 18357      | -566          | 120.4        | .09982               | -1.000x               | 266.8                | 682.7           |
+| 20829      | -781          | 95.4         | .1335                | -1.000x               | 344.3                | 980.5           |
+|            |               |              |                      |                       |                      |                 |
+|            |               |              |                      |                       |                      |                 |
+|            |               |              |                      |                       |                      |                 |
+|            |               |              |                      | x Changed by PCR #288 | *Changed by PCR #803 |                 |
 
-So the change clearly has something to do with the "variable" RTOGO, which the software's ENTRY LEXICON section tells us is the "RANGE TO GO (FINAL PHASE)", with a maximum value of 2700 nm, and a "computer name" (whatever that may be) of FX +2.&nbsp; The lexicon also tells us that the "variable" RTOGO is the "RANGE ANGLE TO SPLASH FROM EMSALT FT ABOVE FISCHER RADIUS (in NM), with a maximum value of 1 revolution, which is obviously not the same thing.&nbsp; So the conclusion I'd draw is that "RTOGO" is just something used for descriptive purposes, and varies with context, while FX +2 is the actual variable as far as software is concerned.&nbsp; Inspection of the software itself confirms this, since FX +2 is used by the code, and RTOGO merely appears in program comments.&nbsp; In point of fact, FX +2 is used in precisely one place in the code, in BACK2 of the PREFINAL subroutine of the REENTRY CONTROL section.&nbsp; Not that that really matters, but I think it does tell us that FX and particularly FX +2 really is the subject matter of PCR-803.
+
+So the change clearly has something to do with the "variable" RTOGO, which the software's ENTRY LEXICON section tells us is the "RANGE TO GO (FINAL PHASE)", with a maximum value of 2700 nm, and a "computer name" (whatever that may be) of FX +2. The lexicon also tells us that the "variable" RTOGO is the "RANGE ANGLE TO SPLASH FROM EMSALT FT ABOVE FISCHER RADIUS (in NM), with a maximum value of 1 revolution, which is obviously not the same thing. So the conclusion I'd draw is that "RTOGO" is just something used for descriptive purposes, and varies with context, while FX +2 is the actual variable as far as software is concerned. Inspection of the software itself confirms this, since FX +2 is used by the code, and RTOGO merely appears in program comments. In point of fact, FX +2 is used in precisely one place in the code, in BACK2 of the PREFINAL subroutine of the REENTRY CONTROL section. Not that that really matters, but I think it does tell us that FX and particularly FX +2 really is the subject matter of PCR-803.
 
 FX itself is a 6-word array in erasable, which the ENTRY LEXICON tells us are "EXTRA COMPUTER ERASABLE LOCATIONS NOT SHOWN ON FLOW CHARTS" (gee, thanks, flowcharts!), and
 
-    # FX DRANGE/D L/D = F3 2700 NM## FX +1 AREF 805 FPSS## FX +2 RTOGO 2700 NM## FX +3 RDOTREF VSAT/4## FX +4 DRANGE/D RDOT = F2 21600/2VS NM/FPS## FX +5 DRANGE/D DRAG = F1 2700/805 NM/FPSS
+	''# FX DRANGE/D L/D = F3 2700 NM''
+	''#''
+	''# FX +1 AREF 805 FPSS''
+	''#''
+	''# FX +2 RTOGO 2700 NM''
+	''#''
+	''# FX +3 RDOTREF VSAT/4''
+	''#''
+	''# FX +4 DRANGE/D RDOT = F2 21600/2VS NM/FPS''
+	''#''
+	''# FX +5 DRANGE/D DRAG = F1 2700/805 NM/FPSS''
 
-Obviously it would have been easier for us if FX was in fixed memory, since we could just have changed the values according to the table given earlier.&nbsp; Since FX is in erasable, though, we have to figure out just how those values get set.
+Obviously it would have been easier for us if FX was in fixed memory, since we could just have changed the values according to the table given earlier. Since FX is in erasable, though, we have to figure out just how those values get set.
 
-Perhaps FX/RTOGO are pad-loaded. But if so, they don't appear in either the [Comanche 55 pad load](https://www.ibiblio.org/apollo/Documents/padload_11_cm.pdf) or the [Comanche 67 pad load](https://www.ibiblio.org/apollo/Documents/padload_12_cm.pdf) in any obvious way.&nbsp; Besides, ERASABLE ASSIGNMENTS supplies an entirely different interpretation of FX, with the comment that "OVERWRITES NEXT 5 LOCS IN P67", so presumably FX is actually a shared memory area.&nbsp; (Actually, there's also a comment stating that it is "OVERLAY 1 in EBANK 7", which seems to confirm that.)&nbsp;&nbsp;
+Perhaps FX/RTOGO are pad-loaded. But if so, they don't appear in either the [[https://www.ibiblio.org/apollo/Documents/padload//11//cm.pdf|Comanche 55 pad load]] or the [[https://www.ibiblio.org/apollo/Documents/padload//12//cm.pdf|Comanche 67 pad load]] in any obvious way. Besides, ERASABLE ASSIGNMENTS supplies an entirely different interpretation of FX, with the comment that "OVERWRITES NEXT 5 LOCS IN P67", so presumably FX is actually a shared memory area. (Actually, there's also a comment stating that it is "OVERLAY 1 in EBANK 7", which seems to confirm that.)
 
-No, the FX array is overwritten by the afore-mentioned BACK2 in REENTRY CONTROL.&nbsp; BACK2 begins with a loop which overwrites FX +5, then FX +4, ..., then FX.&nbsp; The code is a bit incomprehensible, so it may be more valuable to look at the flowchart,&nbsp; [Colossus 2C FC-2770, "Reentry Control"](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1262).&nbsp; Unfortunately, we don't have any earlier revision to compare with Comanche 55.&nbsp; For Colossus 2C, BACK2 actually begins on [sheet 25](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1287).&nbsp; The flowchart indeed clarifies everything, since it is clear from it that each element of FX is created by combining 2 elements of the fixed-memory array VREFER, in a linear combination involving the additional variable GRAD.&nbsp; Thus the changes tabulated earlier are due to changes in the fixed-memory table VREFER.
+No, the FX array is overwritten by the afore-mentioned BACK2 in REENTRY CONTROL. BACK2 begins with a loop which overwrites FX +5, then FX +4, ..., then FX. The code is a bit incomprehensible, so it may be more valuable to look at the flowchart, [[https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1262|Colossus 2C FC-2770, "Reentry Control"]]. Unfortunately, we don't have any earlier revision to compare with Comanche 55. For Colossus 2C, BACK2 actually begins on [[https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1287|sheet 25]]. The flowchart indeed clarifies everything, since it is clear from it that each element of FX is created by combining 2 elements of the fixed-memory array VREFER, in a linear combination involving the additional variable GRAD. Thus the changes tabulated earlier are due to changes in the fixed-memory table VREFER.
 
-Comparing the Comanche 55 and Artemis VREFER arrays, we do indeed find 3 entries with comments implying that they are RTOGO changed from earlier values to 3.7, 10.4, and 23.6, so those would seem to be no-brainers.&nbsp; However, we also find:
+Comparing the Comanche 55 and Artemis VREFER arrays, we do indeed find 3 entries with comments implying that they are RTOGO changed from earlier values to 3.7, 10.4, and 23.6, so those would seem to be no-brainers. However, we also find:
 
-- 1 RTOGO value changed in a tiny way that seems to suggest correction of an error
-- 1 RDOTREF value changed in a tiny way that suggest correction of an error
-- 3 DR/DA values that are roughly (but not precisely) doubled.
+* 1 RTOGO value changed in a tiny way that seems to suggest correction of an error
+* 1 RDOTREF value changed in a tiny way that suggest correction of an error
+* 3 DR/DA values that are roughly (but not precisely) doubled.
 
-Are we to import these changes as well?&nbsp; The 3 DR/DA values would seem to relate directly to the ones tabulated earlier which are marked as "changed by PCR #288".&nbsp; According to [COLOSSUS Memo #271](http://www.ibiblio.org/apollo/Documents/COL-271.pdf), PCR-288 was incorporated in Colossus 2E; therefore those 3 values _do not_ apply to Colossus 2C.
+Are we to import these changes as well? The 3 DR/DA values would seem to relate directly to the ones tabulated earlier which are marked as "changed by PCR #288". According to [[http://www.ibiblio.org/apollo/Documents/COL-271.pdf|COLOSSUS Memo #271]], PCR-288 was incorporated in Colossus 2E; therefore those 3 values //do not// apply to Colossus 2C.
 
-As far as the tiny error corrections are concerned, I compared with the original scanned pages of Comanche 55 and Artemis 72.&nbsp; They are transcription errors in Comanche 55!&nbsp; They were never detected because the the significance was too low to affect their assembled octal values. The Artemis values are correct not just for Comanche 2C but for Comanche 55 as well.&nbsp; I found the errors in all versions of Colossus prior to Artemis.
+As far as the tiny error corrections are concerned, I compared with the original scanned pages of Comanche 55 and Artemis 72. They are transcription errors in Comanche 55! They were never detected because the the significance was too low to affect their assembled octal values. The Artemis values are correct not just for Comanche 2C but for Comanche 55 as well. I found the errors in all versions of Colossus prior to Artemis.
 
-What that adds up to is that 3 values need to be changed in the RTOGO section of VREFER, conditionally assembled via the preprocessor label Reconstruction803. (And of course, the typos need to be corrected in all versions of Colossus, but that's an independent matter.)&nbsp; I found that the 3 values had already been corrected as a result of the prior analysis.
+What that adds up to is that 3 values need to be changed in the RTOGO section of VREFER, conditionally assembled via the preprocessor label Reconstruction803. (And of course, the typos need to be corrected in all versions of Colossus, but that's an independent matter.) I found that the 3 values had already been corrected as a result of the prior analysis.
 
 In summary, change incorporated.
 

@@ -8,7 +8,7 @@
 import sys
 import re
 
-print("===== Title =====\n")
+#print("===== Title =====\n")
 for line in sys.stdin:
     line = line.strip("\n")
     line = line.replace("&nbsp;", "")
@@ -23,5 +23,6 @@ for line in sys.stdin:
     line = re.sub("^    ", "\t", line)
     line = re.sub("^    ", "\t", line)
     line = re.sub("^    ", "\t", line)
+    line = re.sub("^>\s+", "\t", line)
     print(line)
     

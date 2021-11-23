@@ -1,64 +1,69 @@
-( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
 
-We have the Colossus 2A and 2D revisions of the flowchart.&nbsp; My strategy is to do a side-by-side comparison of the two revisions of the flowchart, and to compare the flowchart vs reconstructed source code only when the two flowcharts differ.
+====== Flowchart FC-2430 Incorporation in Comanche 67 ======
 
-TVCDAPON, MRCLEAN, ENDMRC, TVCINIT1:&nbsp; 2A/1,2 vs 2D/2,3:&nbsp; Matched.
+([[comanche-67-reconstruction|Return to main Comanche 67 reconstruction page.]])
 
-Continuation of TVCINIT1, TVCINIT2:&nbsp; 2A/3 vs 2D/4:&nbsp; Matched.
+We have the Colossus 2A and 2D revisions of the flowchart. My strategy is to do a side-by-side comparison of the two revisions of the flowchart, and to compare the flowchart vs reconstructed source code only when the two flowcharts differ.
 
-TVCINIT3:&nbsp; 2A/3 vs 2D/5:&nbsp; Matched
+TVCDAPON, MRCLEAN, ENDMRC, TVCINIT1: 2A/1,2 vs 2D/2,3: Matched.
 
-ATTINIT:&nbsp; 2A/4 vs 2D/6:&nbsp; Matched
+Continuation of TVCINIT1, TVCINIT2: 2A/3 vs 2D/4: Matched.
 
-NEEDLEIN, TVCINIT4:&nbsp; 2A/5 vs 2D/7,8:&nbsp; Matched
+TVCINIT3: 2A/3 vs 2D/5: Matched
 
-DAPINIT:&nbsp; 2A/6 vs 2D/9:&nbsp; Matched
+ATTINIT: 2A/4 vs 2D/6: Matched
 
-TVCEXEC, ROLLPREP, NEEDLEUP:&nbsp; 2A/7 vs 2D/10,11:&nbsp; Matched.
+NEEDLEIN, TVCINIT4: 2A/5 vs 2D/7,8: Matched
 
-VARGAINS, GAINCHNG, EXECCOPY:&nbsp; 2A/8 vs 2D/12,13:&nbsp; Matched, but the 2D flowchart explicitly mentions in GAINCHNG that FIXCW and S40.15 are called via IBNKCALL, whereas the 2A flowchart does not.&nbsp; I wonder if that means GAINCHNG or FIXCW or S40.15 have moved so that they are no longer in the same bank?&nbsp; However, in Comanche 55 they are already called via IBNKCALL, so this is probably just an editorial clarification.
+DAPINIT: 2A/6 vs 2D/9: Matched
 
-1SHOTCHK:&nbsp; 2A/9 vs 2D/13:&nbsp; Matched.
+TVCEXEC, ROLLPREP, NEEDLEUP: 2A/7 vs 2D/10,11: Matched.
 
-1SHOTOK, TEMPSET:&nbsp; 2A/9,10 vs 2D/14:&nbsp; Matched
+VARGAINS, GAINCHNG, EXECCOPY: 2A/8 vs 2D/12,13: Matched, but the 2D flowchart explicitly mentions in GAINCHNG that FIXCW and S40.15 are called via IBNKCALL, whereas the 2A flowchart does not. I wonder if that means GAINCHNG or FIXCW or S40.15 have moved so that they are no longer in the same bank? However, in Comanche 55 they are already called via IBNKCALL, so this is probably just an editorial clarification.
 
-CORSETUP:&nbsp; 2A/10 vs 2D/15:&nbsp; Matched
+1SHOTCHK: 2A/9 vs 2D/13: Matched.
 
-CG.CORR:&nbsp; 2A/11 vs 2D/15: Matched
+1SHOTOK, TEMPSET: 2A/9,10 vs 2D/14: Matched
 
-CORCOPY:&nbsp; 2A/11 vs 2D/16:&nbsp; Matched
+CORSETUP: 2A/10 vs 2D/15: Matched
 
-CNTRCOPY:&nbsp; 2A/11 vs 2D/17:&nbsp; Matched
+CG.CORR: 2A/11 vs 2D/15: Matched
 
-REDOTVC, EXECPHS:&nbsp; 2A/12 vs 2D/18:&nbsp; Matched
+CORCOPY: 2A/11 vs 2D/16: Matched
 
-TVCDAPHS, FINCOPY:&nbsp; 2A/12 vs 2D/19:&nbsp; Matched.&nbsp; But the upon entering FINCOPY the 2A flowchart's comments mention that "RESTART OCCURRED DURING PITCHCOPY OR YAWCOPY SUBROUTINE", whereas the 2D flowchart's comments instead mention PCOPY and YCOPY.&nbsp; I suppose that this is simply an editorial correction.
+CNTRCOPY: 2A/11 vs 2D/17: Matched
 
-ENABL1:&nbsp; 2A/12 vs 2D/20:&nbsp; Matched.
+REDOTVC, EXECPHS: 2A/12 vs 2D/18: Matched
 
-ENABL2:&nbsp; 2A/13 vs 2D/20:&nbsp; Matched.
+TVCDAPHS, FINCOPY: 2A/12 vs 2D/19: Matched. But the upon entering FINCOPY the 2A flowchart's comments mention that "RESTART OCCURRED DURING PITCHCOPY OR YAWCOPY SUBROUTINE", whereas the 2D flowchart's comments instead mention PCOPY and YCOPY. I suppose that this is simply an editorial correction.
 
-CMDSOUT, PHSCHK2:&nbsp; 2A/14 vs 2D/21:&nbsp; Matched
+ENABL1: 2A/12 vs 2D/20: Matched.
 
-CHKSTRK:&nbsp; 2A/14 vs 2D/22:&nbsp; Matched.&nbsp; The 2D flowchart specifically indicates that TVCINIT4 is called via POSTJUMP, whereas the 2A flowchart doesn't mention POSTJUMP.&nbsp; However, Comanche 55 code does already call TVCINIT4 via POSTJUMP anyway.
+ENABL2: 2A/13 vs 2D/20: Matched.
 
-EXRSTRT:&nbsp; 2A/15 vs 2D/22:&nbsp; Matched.
+CMDSOUT, PHSCHK2: 2A/14 vs 2D/21: Matched
 
-MASSPROP, LEMTEST, LEMYES, LEMNO, STOINST:&nbsp; 2A/16 vs 2D/23:&nbsp; Matched
+CHKSTRK: 2A/14 vs 2D/22: Matched. The 2D flowchart specifically indicates that TVCINIT4 is called via POSTJUMP, whereas the 2A flowchart doesn't mention POSTJUMP. However, Comanche 55 code does already call TVCINIT4 via POSTJUMP anyway.
 
-DXTEST:&nbsp; 2A/16 vs 2D/24:&nbsp; Matched
+EXRSTRT: 2A/15 vs 2D/22: Matched.
 
-FIXCW:&nbsp; 2A/17 vs 2D/24:&nbsp; Matched
+MASSPROP, LEMTEST, LEMYES, LEMNO, STOINST: 2A/16 vs 2D/23: Matched
 
-PEGGY, BOKKEP2, ENDMASSP:&nbsp; 2A/18 vs 2D/25:&nbsp; Matched
+DXTEST: 2A/16 vs 2D/24: Matched
 
-(Text only): 2A/19 vs 2D/26,27:&nbsp; Matched.&nbsp; (I only checked numerical constants.)
+FIXCW: 2A/17 vs 2D/24: Matched
 
-PRESWTCH, SWICHOVR: 2A/20 vs 2D/28:&nbsp; Matched
+PEGGY, BOKKEP2, ENDMASSP: 2A/18 vs 2D/25: Matched
 
-MCLEANJR:&nbsp; 2A/20,21 vs 2D/29,30: The 2A flowchart indicates the operation REPFRAL&nbsp;←&nbsp;FREPFRAC, whereas the 2D flowchart instead indicates REPFRAC&nbsp;←&nbsp;FREPFRAC.&nbsp; There is no REPFRAL in any version of Colossus.&nbsp; Colossus 2C uses REPRAC just as the 2D flowchart indicates.&nbsp; This must be an editorial correction to the flowchart rather than a change.&nbsp; With that understanding, the flowcharts match.
+(Text only): 2A/19 vs 2D/26,27: Matched. (I only checked numerical constants.)
 
-LOADCOEFF:&nbsp; 2A/22 vs 2D/31:&nbsp; Well, the 2A flowchart says "LOAOCOEF" rather than "LOADCOEFF", an obvious error (verified vs code).&nbsp; Otherwise, we seem to have a match.
+PRESWTCH, SWICHOVR: 2A/20 vs 2D/28: Matched
+
+MCLEANJR: 2A/20,21 vs 2D/29,30: The 2A flowchart indicates the operation REPFRAL←FREPFRAC, whereas the 2D flowchart instead indicates REPFRAC←FREPFRAC. There is no REPFRAL in any version of Colossus. Colossus 2C uses REPRAC just as the 2D flowchart indicates. This must be an editorial correction to the flowchart rather than a change. With that understanding, the flowcharts match.
+
+LOADCOEFF: 2A/22 vs 2D/31: Well, the 2A flowchart says "LOAOCOEF" rather than "LOADCOEFF", an obvious error (verified vs code). Otherwise, we seem to have a match.
 
 In summary, seems okay as is!
 

@@ -1,23 +1,27 @@
-( [Return to main Comanche 67 reconstruction page](comanche-67-reconstruction).)
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
 
-We don't have a copy of PCR-278 "Fixed DUMPCNT".&nbsp; &nbsp;Obviously it has something to do with the variable DUMPCNT.
+====== PCR-278 Incorporation in Comanche 67 ======
 
-On the face of it, PCR-277 seems likely to be related to PCR-277 ("A fix to DUMPCNT"), implemented for Luminary 1B (also Apollo 12, just like Comanche 67), though we don't have a copy of that either.&nbsp; Nevertheless, naively, it seems likely that whatever change occurred to DUMPCNT between Luminary 1A and 1B is likely to be the same as whatever happened to DUMPCNT between Comanche 2A and 2C.&nbsp; If, moreover, that corresponds to whatever Artemis does with DUMPCNT, it would seem to be a strong confirmation. As it happens, DUMPCNT is present in Luminary 1A (DOWN-TELEMETRY PROGRAM, ERASABLE ASSIGNMENTS, and FRESH START AND RESTART) but has disappeared entirely in Luminary 1B.
+([[comanche-67-reconstruction|Return to main Comanche 67 reconstruction page]].)
 
-Likewise, DUMPCNT is present in Colossus 2A (DOWN-TELEMETRY PROGRAM and ERASABLE ASSIGNMENTS only), but has disappeared entirely from Artemis, which is forked from Colossus 2C.&nbsp; The Artemis-based [COLOSSUS Memos in our Document Library](https://www.ibiblio.org/apollo/links2.html#ColossusMemos) describing the revision-to-revision changes in Artemis don't mention DUMPCNT at all, so that would presumably imply that DUMPCNT had been removed from Colossus 2C as well.
+We don't have a copy of PCR-278 "Fixed DUMPCNT". Obviously it has something to do with the variable DUMPCNT.
 
-Comparing Luminary 99 (1A) and Luminary 116 (1B) source code, it appears that DUMPCNT was used as a counter (from 1 to 4, shifted into bits 14-12) in an automated down-telemetering of blocks of erasable memory.&nbsp; I would like to confirm this from the Sundance, Luminary 1, or Luminary 1A GSOP's section 2 ("Data Links"), but unfortunately we don't have any copy of a Sundance or Luminary GSOP of an early enough revision to cover it.&nbsp; In point of fact, the earliest GSOP section 2 (Sundance, Luminary, _or_ Colossus) we have in the document library is for Luminary 1C (LM131 Rev. 1), and whatever change PCR-277 or PCR-278 implemented for the down-telemetry would already have been in place at that point.&nbsp; (Actually, some very early GSOP documents, such as R-547, do contain small "Data Links" sections, but not of sufficient detail to be useful for our present inquiry.)
+On the face of it, PCR-277 seems likely to be related to PCR-277 ("A fix to DUMPCNT"), implemented for Luminary 1B (also Apollo 12, just like Comanche 67), though we don't have a copy of that either. Nevertheless, naively, it seems likely that whatever change occurred to DUMPCNT between Luminary 1A and 1B is likely to be the same as whatever happened to DUMPCNT between Comanche 2A and 2C. If, moreover, that corresponds to whatever Artemis does with DUMPCNT, it would seem to be a strong confirmation. As it happens, DUMPCNT is present in Luminary 1A (DOWN-TELEMETRY PROGRAM, ERASABLE ASSIGNMENTS, and FRESH START AND RESTART) but has disappeared entirely in Luminary 1B.
+
+Likewise, DUMPCNT is present in Colossus 2A (DOWN-TELEMETRY PROGRAM and ERASABLE ASSIGNMENTS only), but has disappeared entirely from Artemis, which is forked from Colossus 2C. The Artemis-based [[https://www.ibiblio.org/apollo/links2.html#ColossusMemos|COLOSSUS Memos in our Document Library]] describing the revision-to-revision changes in Artemis don't mention DUMPCNT at all, so that would presumably imply that DUMPCNT had been removed from Colossus 2C as well.
+
+Comparing Luminary 99 (1A) and Luminary 116 (1B) source code, it appears that DUMPCNT was used as a counter (from 1 to 4, shifted into bits 14-12) in an automated down-telemetering of blocks of erasable memory. I would like to confirm this from the Sundance, Luminary 1, or Luminary 1A GSOP's section 2 ("Data Links"), but unfortunately we don't have any copy of a Sundance or Luminary GSOP of an early enough revision to cover it. In point of fact, the earliest GSOP section 2 (Sundance, Luminary, //or// Colossus) we have in the document library is for Luminary 1C (LM131 Rev. 1), and whatever change PCR-277 or PCR-278 implemented for the down-telemetry would already have been in place at that point. (Actually, some very early GSOP documents, such as R-547, do contain small "Data Links" sections, but not of sufficient detail to be useful for our present inquiry.)
 
 LUMINARY Memo #91 ("LUMINARY Revisions 100-105") fortunately has some additional information which confirms our ideas, in that among the changes for Luminary 102 it mentions:
 
-    6) PCR 277 was implemented. (A fixed DUMPCNT) The erasable
-       DUMPCNT was deleted as part of this PCR.
+	6) PCR 277 was implemented. (A fixed DUMPCNT) The erasable DUMPCNT was deleted as part of this PCR.
 
-Unfortunately, we largely lack copies of COLOSSUS Memos for Comanche, so I can't produce a COLOSSUS Memo corresponding to LUMINARY Memo #91 to prove that DUMPCNT is removed in Colossus 2C.&nbsp; Nevertheless, it seems to me that it's a pretty strong inference that PCR-278 does indeed remove it.
+Unfortunately, we largely lack copies of COLOSSUS Memos for Comanche, so I can't produce a COLOSSUS Memo corresponding to LUMINARY Memo #91 to prove that DUMPCNT is removed in Colossus 2C. Nevertheless, it seems to me that it's a pretty strong inference that PCR-278 does indeed remove it.
 
-That being the case, the implementation of PCR-278 would seem to involve importing just the changes in Artemis's DOWN-TELEMETRY PROGRAM and ERASABLE ASSIGNMENTS related to the removal of DUMPCNT.&nbsp; I've done this using the preprocessor label "Reconstruction278" for conditional assembly ... though having gone through all of the analysis above, I confirm that [Mike had already implemented the identical fix](https://github.com/virtualagc/virtualagc/issues/1140#issuecomment-751512373).
+That being the case, the implementation of PCR-278 would seem to involve importing just the changes in Artemis's DOWN-TELEMETRY PROGRAM and ERASABLE ASSIGNMENTS related to the removal of DUMPCNT. I've done this using the preprocessor label "Reconstruction278" for conditional assembly ... though having gone through all of the analysis above, I confirm that [[https://github.com/virtualagc/virtualagc/issues/1140#issuecomment-751512373|Mike had already implemented the identical fix]].
 
-I do note that the program comments go out of their way to mention that V21N01 can be used to modify DUMPCNT.&nbsp; But no changes have been made to V21N01, since that's simply a general-purpose way to load a value into an erasable address nothing specifically to do with DUMPCNT.
+I do note that the program comments go out of their way to mention that V21N01 can be used to modify DUMPCNT. But no changes have been made to V21N01, since that's simply a general-purpose way to load a value into an erasable address nothing specifically to do with DUMPCNT.
 
-Summary:&nbsp; Fixed!
+Summary: Fixed!
 

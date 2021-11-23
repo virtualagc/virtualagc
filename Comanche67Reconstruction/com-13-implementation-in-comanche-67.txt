@@ -1,14 +1,19 @@
-( [Return to main Comanche 67 reconstruction page](comanche-67-reconstruction).)
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
 
-We have a copy of [Software Anomaly Report COM-13](http://www.ibiblio.org/apollo/Documents/COM-13.pdf), whose problem description is
+====== COM-13 Incorporation In Comanche 67 ======
 
-> The Noun 29 display in V78 (LAUNCHAZ CHANGE ) does not permit termination of the extended verb by a V34 response, in violation of basic groundrules
+([[comanche-67-reconstruction|Return to main Comanche 67 reconstruction page]].)
+
+We have a copy of [[http://www.ibiblio.org/apollo/Documents/COM-13.pdf|Software Anomaly Report COM-13]], whose problem description is
+
+	The Noun 29 display in V78 (LAUNCHAZ CHANGE ) does not permit termination of the extended verb by a V34 response, in violation of basic groundrules
 
 and whose recommended fix for Colossus 2C is
 
-> Let V34E terminate the extended verb.
+	Let V34E terminate the extended verb.
 
-V78, for changing gyrocompass launch azimuth, is job AZMTHCG1 in log section IMU CALIBRATION AND ALIGNMENT.&nbsp; In comparing AZMTHCG1 in Comanche 55 vs Artemis 71, I see that the only difference is in a call to the GOFLASH subroutine, which has 3 possible responses: "terminate", "proceed", or "recycle".&nbsp; In Comanche 55, the "terminate" response simply mimics the "recycle" response, whereas in Artemis 71 it actually terminates.&nbsp; So I suppose that the change from Artemis should be imported into Comanche 67's IMU\_CALIBRATION\_AND\_ALIGNMENT.gpp.&nbsp; I've done that using the preprocessor label "ReconstructionCOM13" for conditional assembly.
+V78, for changing gyrocompass launch azimuth, is job AZMTHCG1 in log section IMU CALIBRATION AND ALIGNMENT. In comparing AZMTHCG1 in Comanche 55 vs Artemis 71, I see that the only difference is in a call to the GOFLASH subroutine, which has 3 possible responses: "terminate", "proceed", or "recycle". In Comanche 55, the "terminate" response simply mimics the "recycle" response, whereas in Artemis 71 it actually terminates. So I suppose that the change from Artemis should be imported into Comanche 67's IMU//CALIBRATION//AND_ALIGNMENT.gpp. I've done that using the preprocessor label "ReconstructionCOM13" for conditional assembly.
 
-Incidentally, I note also that in Artemis, AZMTHCG1 has moved to a different memory bank (33&nbsp;→43).&nbsp; I've not chosen to duplicate that in Comanche 67, however, since the banksum discrepancy of bank 33 is very low at this writing.&nbsp; (The fix for COM-13 slightly worsens the discrepancy, from 00003 to 00004, but still very low.)
+Incidentally, I note also that in Artemis, AZMTHCG1 has moved to a different memory bank (33→43). I've not chosen to duplicate that in Comanche 67, however, since the banksum discrepancy of bank 33 is very low at this writing. (The fix for COM-13 slightly worsens the discrepancy, from 00003 to 00004, but still very low.)
 

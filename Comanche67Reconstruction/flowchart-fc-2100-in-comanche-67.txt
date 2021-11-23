@@ -1,107 +1,129 @@
-( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
 
-Alas, our copy of FC-2100 is "PRELIMINARY", so we don't know if it is in final form or not.&nbsp; We do also have the [Colossus 2D revision of FC-2020](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=138), and while we don't know what the differences are between Colossus 2D and the "final" form of Colossus 2C, it's possible we may have to consult it at some point.&nbsp; But I'm afraid we may just have to accept that the comparison between flowchart and code could turn out to be inconclusive.&nbsp; (Although in retrospect, I'm not sure the two revisions of the flowchart are actually different, other than the fact that the 2D flowchart has been redrawn much more legibly and has an added index page at the end.&nbsp; So I'm not sure it was really necessary to examine the code in the first place.&nbsp; I probably could have been just as effective, with less hair-pulling, by simply comparing the two flowcharts.&nbsp; But I haven't tried it, so that's just a guess.)
+====== Flowchart FC-2100 Incorporation in Comanche 67 ======
+
+([[comanche-67-reconstruction|Return to main Comanche 67 reconstruction page.]])
+
+Alas, our copy of FC-2100 is "PRELIMINARY", so we don't know if it is in final form or not. We do also have the [[https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=138|Colossus 2D revision of FC-2020]], and while we don't know what the differences are between Colossus 2D and the "final" form of Colossus 2C, it's possible we may have to consult it at some point. But I'm afraid we may just have to accept that the comparison between flowchart and code could turn out to be inconclusive. (Although in retrospect, I'm not sure the two revisions of the flowchart are actually different, other than the fact that the 2D flowchart has been redrawn much more legibly and has an added index page at the end. So I'm not sure it was really necessary to examine the code in the first place. I probably could have been just as effective, with less hair-pulling, by simply comparing the two flowcharts. But I haven't tried it, so that's just a guess.)
 
 Moreover, we have no list of sheets that may have changed from Colossus 2A to 2C, so we have little choice but to examine all 16 sheets of the flowchart, which is presumably the entire RTB OP CODES log section of code.
 
-## Sheet 1
+==== Sheet 1 ====
 
-Not flowcharts, just an index.&nbsp; Nothing to see here.
+Not flowcharts, just an index. Nothing to see here.
 
-## Sheet 2
+==== Sheet 2 ====
 
-LOADTIME, SLOAD2, NEWMODE:&nbsp; Looks the same to me.
+LOADTIME, SLOAD2, NEWMODE: Looks the same to me.
 
-## Sheet 3
+==== Sheet 3 ====
 
-CDULOGIC:&nbsp; Looks the same to me.
+CDULOGIC: Looks the same to me.
 
-## Sheet 4
+==== Sheet 4 ====
 
-READPIPS, VECMODE, VMODE, NEWMODE:&nbsp; Looks the same, except that the flowchart seems to be in error in its representation of NEWMODE.&nbsp; It is consistently in error, on multiple sheets, both in the 2C and 2D revisions.&nbsp; Schematically, here's what the flowchart says:
+READPIPS, VECMODE, VMODE, NEWMODE: Looks the same, except that the flowchart seems to be in error in its representation of NEWMODE. It is consistently in error, on multiple sheets, both in the 2C and 2D revisions. Schematically, here's what the flowchart says:
 
-![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/175356)
+{{../fc2100Sheet4.png}}
 
-where _N_&nbsp;has a variety of different values on different sheets of the flowchart, such as -1, +0, etc.&nbsp; What the NEWMODE code does, of course, is always MODE&nbsp;←&nbsp;A.
+where //N //has a variety of different values on different sheets of the flowchart, such as -1, +0, etc. What the NEWMODE code does, of course, is always MODE←A.
 
-## Sheet 5
+==== Sheet 5 ====
 
-SIGNAGREE, 1STO2S, NEWMODE (again):&nbsp; Looks the same to me, modulo the NEWMODE flowchart error described above.
+SIGNAGREE, 1STO2S, NEWMODE (again): Looks the same to me, modulo the NEWMODE flowchart error described above.
 
-## Sheet 6
+==== Sheet 6 ====
 
-V1STO2S, TPMODE, NEWMODE (again):&nbsp; Looks the same to me, modulo the NEWMODE flowchart error described above.
+V1STO2S, TPMODE, NEWMODE (again): Looks the same to me, modulo the NEWMODE flowchart error described above.
 
-## Sheet 7
+==== Sheet 7 ====
 
-2V1STO2S, SLOAD2 (again), NEWMODE (again):&nbsp; Looks the same to me, modulo the NEWMODE flowchart error described above.&nbsp;&nbsp;
+2V1STO2S, SLOAD2 (again), NEWMODE (again): Looks the same to me, modulo the NEWMODE flowchart error described above.
 
-## Sheet 8
+==== Sheet 8 ====
 
-1TO2SUB:&nbsp; Understanding the code corresponding to this sheet is tricky, because you have to take into account the special characteristic of the TS instruction when the accumulator contains overflow.&nbsp; In that case, after storing the accumulator in the operand, it:
+1TO2SUB: Understanding the code corresponding to this sheet is tricky, because you have to take into account the special characteristic of the TS instruction when the accumulator contains overflow. In that case, after storing the accumulator in the operand, it:
 
-- It loads the accumulator with +1 or -1, depending on whether the overflow was + or -.  
-- It _skips_ the instruction following it, and instead goes to the second instruction following it.
+* It loads the accumulator with +1 or -1, depending on whether the overflow was + or -.  
+* It //skips// the instruction following it, and instead goes to the second instruction following it.
 
 Thus TS doubles as a test for overflow.
 
 With that understanding, the code and flowchart seem to match.
 
-## Sheet 9
+==== Sheet 9 ====
 
-INCRCDUS:&nbsp; As mentioned above, INCRCDUS is never executed, so it doesn't matter functionally whether the code matches the flowchart or not.&nbsp; But we're looking for errors in the reconstruction of the Comanche 67 core rope rather than errors in its functionality, so unfortunately we still need to check it.
+INCRCDUS: As mentioned above, INCRCDUS is never executed, so it doesn't matter functionally whether the code matches the flowchart or not. But we're looking for errors in the reconstruction of the Comanche 67 core rope rather than errors in its functionality, so unfortunately we still need to check it.
 
 Still, it looks like the code and flowchart match.
 
-## Sheet 10
+==== Sheet 10 ====
 
-VECMODE (again), VMODE (again), NEWMODE (again), CDUINC:&nbsp; Seems okay to me.
+VECMODE (again), VMODE (again), NEWMODE (again), CDUINC: Seems okay to me.
 
-## Sheet 11
+==== Sheet 11 ====
 
-Continuation of CDUINC:&nbsp; &nbsp;See the comments in sheet 8 about the subtleties of the TS instruction.&nbsp; With that understanding, the flowchart and code seem to match.
+Continuation of CDUINC: See the comments in sheet 8 about the subtleties of the TS instruction. With that understanding, the flowchart and code seem to match.
 
-## Sheet 12
+==== Sheet 12 ====
 
-PULSEIMU, VECSGNAG:&nbsp; I guess they look okay.
+PULSEIMU, VECSGNAG: I guess they look okay.
 
-## Sheet 13
+==== Sheet 13 ====
 
-TRANSP1, TRANSP2:&nbsp; More flowchart errors, in both the 2C and 2D revisions.&nbsp; The flowchart incorrectly shows duplication of one element of a pair of matrix elements into the other element of the pair.&nbsp; Whereas the code correctly shows transposition of the two elements of each pair.&nbsp; It's clear both from the naming of the subroutines and from the comments in the flowchart that it is the code which is correct.&nbsp; So no change to the code is needed.
+TRANSP1, TRANSP2: More flowchart errors, in both the 2C and 2D revisions. The flowchart incorrectly shows duplication of one element of a pair of matrix elements into the other element of the pair. Whereas the code correctly shows transposition of the two elements of each pair. It's clear both from the naming of the subroutines and from the comments in the flowchart that it is the code which is correct. So no change to the code is needed.
 
-## Sheet 14
+==== Sheet 14 ====
 
-SIGNMPAC, DPMODE, SLOAD2 (again), NEWMODE (again):&nbsp; There's an error in the flowchart.&nbsp; Here's the offending portion of the original flowchart:
+SIGNMPAC, DPMODE, SLOAD2 (again), NEWMODE (again): There's an error in the flowchart. Here's the offending portion of the original flowchart:
 
-![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/175368)
+{{../fc2100Sheet14A.png}}
 
 And here's my corrected redrawing:
 
-![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/175369)
+{{../fc2100Sheet14B.png}}
 
 And here's the associated code:
 
-    CCS	ADPMODE CAF	ZERO # SETS MPAC +2 TO ZERO IN THE PROCESS TCF	SLOAD2 +2 TCF	+1 EXTEND DCS	DPOSMAX TCF	SLOAD2 ...SLOAD2 DXCH	MPAC CAF	ZERO # ZERO MPAC +2 TS	MPAC +2 # AND DECLARE DP MODE
+'''
+	CCS	A
+DPMODE	CAF	ZERO 	# SETS MPAC +2 TO ZERO IN THE PROCESS 
+	TCF	SLOAD2 +2 
+	TCF	+1 
+	EXTEND 
+	DCS	DPOSMAX 
+	TCF	SLOAD2 
+	...
+SLOAD2	DXCH	MPAC 
+	CAF	ZERO 	# ZERO MPAC +2 
+	TS	MPAC +2 # AND DECLARE DP MODE
+'''
 
-The corrected flowchart now agrees with the code, but so what?&nbsp; Why do I believe that the code is correct and the flowchart is not?&nbsp; First, note that DPMODE is called from a number of places in the program.&nbsp; There's no explanation given either in code or in flowchart what DPMODE does, but from the name of it, you'd suppose that it might set double-precision mode.&nbsp; According to ERASABLE ASSIGNMENTS, the variable MODE stores the current precision mode, with +1 for TP, +0 for DP, or -1 for vector.&nbsp; The way one sets the mode is apparently to load +1, +0, or -1 into the accumulator and then call NEWMODE.&nbsp; In the code or corrected flowchart, DPMODE does that, along with additionally setting MPAC +2 (the 3rd word of a triple-precision value) to 0.&nbsp; In the uncorrected flowchart ... well, DPMODE does nothing like that at all, and indeed nothing recognizable as being useful.
+The corrected flowchart now agrees with the code, but so what? Why do I believe that the code is correct and the flowchart is not? First, note that DPMODE is called from a number of places in the program. There's no explanation given either in code or in flowchart what DPMODE does, but from the name of it, you'd suppose that it might set double-precision mode. According to ERASABLE ASSIGNMENTS, the variable MODE stores the current precision mode, with +1 for TP, +0 for DP, or -1 for vector. The way one sets the mode is apparently to load +1, +0, or -1 into the accumulator and then call NEWMODE. In the code or corrected flowchart, DPMODE does that, along with additionally setting MPAC +2 (the 3rd word of a triple-precision value) to 0. In the uncorrected flowchart ... well, DPMODE does nothing like that at all, and indeed nothing recognizable as being useful.
 
 In summary, sheet 14 of the flowchart is messed up, but the code is correct, hence there's nothing to do for Comanche 67.
 
-## Sheet 15
+==== Sheet 15 ====
 
-NORMUNX1, NORMUNIT, NOSHIFT:&nbsp; Unfortunately, the 2C revision of the flowchart is almost unreadable, but it seems to agree with the very-legible 2D revision of the flowchart, so that's the revision I'll use for this sheet.&nbsp; It seems to agree with the code.
+NORMUNX1, NORMUNIT, NOSHIFT: Unfortunately, the 2C revision of the flowchart is almost unreadable, but it seems to agree with the very-legible 2D revision of the flowchart, so that's the revision I'll use for this sheet. It seems to agree with the code.
 
-## Sheet 16
+==== Sheet 16 ====
 
-OFFTUNIT:&nbsp; I don't understand at a glance the code corresponding to this sheet, so I'm afraid I'll have to work through it in a detailed fashion.&nbsp; Here it is:
+OFFTUNIT: I don't understand at a glance the code corresponding to this sheet, so I'm afraid I'll have to work through it in a detailed fashion. Here it is:
+'''
 
-    INDEX	MPAC +2 TS	37DOFFTUNIT	TC	POSTJUMP CADR	UNIT +1 # SKIP THE "TC VECAGREE" DONE AT UNIT
+		INDEX	MPAC +2 
+		TS	37D
+OFFTUNIT	TC      POSTJUMP 
+		CADR	UNIT +1 # SKIP THE "TC VECAGREE" DONE AT UNIT
+'''
 
-And here's the flowchart:&nbsp;
+And here's the flowchart:
 
-![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/175370)
+{{../fc2100Sheet15.png}}
 
-On entry, MPAC +2 will be either FIXLOC (if we're in the midst of a call to NORMUNIT) or FIXLOC +1 (if in NORMUNX1); I guess that corresponds to PL0 or PL1 in the pushdown list.&nbsp; Meanwhile, A will be either 13 (decimal) if all three components of the input vector are "small" (i.e., their more-significant words are 0) or +0 otherwise.&nbsp; But it doesn't really matter what A is for either the flowchart or code.
+On entry, MPAC +2 will be either FIXLOC (if we're in the midst of a call to NORMUNIT) or FIXLOC +1 (if in NORMUNX1); I guess that corresponds to PL0 or PL1 in the pushdown list. Meanwhile, A will be either 13 (decimal) if all three components of the input vector are "small" (i.e., their more-significant words are 0) or +0 otherwise. But it doesn't really matter what A is for either the flowchart or code.
 
 So the instructions INDEX MPAC +2 / TS 37D will either store A at FIXLOC +37D or else at FIXLOC +38D; i.e., in PL37 or PL38.
 

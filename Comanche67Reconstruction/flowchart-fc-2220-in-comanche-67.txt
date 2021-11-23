@@ -1,90 +1,110 @@
-( [Return to the main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
 
-FC-2220 is for Colossus 2D, and we unfortunately have no list of sheets changed between Colossus 2D and 2C or 2A.&nbsp; Therefore, there's little choice other than simply to compare each sheet of the flowchart to the reconstructed code.
+====== Flowchart FC-2220 Incorporation in Comanche 67 ======
 
-## Sheet 1
+([[comanche-67-reconstruction|Return to the main Comanche 67 reconstruction page.]])
+
+FC-2220 is for Colossus 2D, and we unfortunately have no list of sheets changed between Colossus 2D and 2C or 2A. Therefore, there's little choice other than simply to compare each sheet of the flowchart to the reconstructed code.
+
+==== Sheet 1 ====
 
 Just a cover sheet, no flowcharts.
 
-## Sheet 2
+==== Sheet 2 ====
 
-P06, PRESTAND:&nbsp; What the flowchart refers to as SCALSAV, the code refers to as SCALSAVE, but I guess that's okay since there is no actual SCALSAV variable in the code and thus the two couldn't be confused.&nbsp; Otherwise, looks good.
+P06, PRESTAND: What the flowchart refers to as SCALSAV, the code refers to as SCALSAVE, but I guess that's okay since there is no actual SCALSAV variable in the code and thus the two couldn't be confused. Otherwise, looks good.
 
-## Sheet 3
+==== Sheet 3 ====
 
-Continuation of PRESTAND:&nbsp; At the end of the sheet, the flowchart indicates that upon a PROCEED (in GOPERF1) there is a flow-through to the next sheet.&nbsp; For convenience, here's what that looks like:
+Continuation of PRESTAND: At the end of the sheet, the flowchart indicates that upon a PROCEED (in GOPERF1) there is a flow-through to the next sheet. For convenience, here's what that looks like:
 
-![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/175495)
+{{../fc2220Sheet3.png}}
 
-I can see neither the flow-through to the next sheet nor or the operations at the top of the next sheet in the code.&nbsp; According to the documentation of GOPERF1 in DISPLAY INTERFACE ROUTINES, there are three possible returns:&nbsp; Terminate, Proceed, and Enter.&nbsp; In the code, _all_ of those simply recycle GOPERF1, and not just the V32,V33,V34 choices shown on the flowchart.
+I can see neither the flow-through to the next sheet nor or the operations at the top of the next sheet in the code. According to the documentation of GOPERF1 in DISPLAY INTERFACE ROUTINES, there are three possible returns: Terminate, Proceed, and Enter. In the code, //all// of those simply recycle GOPERF1, and not just the V32,V33,V34 choices shown on the flowchart.
 
 If this is new behavior added since Colossus 2A, it does not persist in Artemis, which uses the same PRESTAND processing as Colossus 2A (or Colossus 237, for that matter).
 
-One might suppose that _perhaps_ the flowchart is confused, and what it is trying to say is that GOPERF1 itself performs the operations listed at the top of the next sheet.&nbsp; However, TURN ON STANDBY LIGHT is already accomplished by PRESTAND, even before calling GOPERF1.&nbsp; Whereas BLANK DSKY is definitely not something GOPERF1 is supposed to be doing, according to its documentation.&nbsp; (The flowchart says explicitly that 00062 is displayed in R1 by GOPERF1, so the DSKY definitely is not blanked by GOPERF1.)
+One might suppose that //perhaps// the flowchart is confused, and what it is trying to say is that GOPERF1 itself performs the operations listed at the top of the next sheet. However, TURN ON STANDBY LIGHT is already accomplished by PRESTAND, even before calling GOPERF1. Whereas BLANK DSKY is definitely not something GOPERF1 is supposed to be doing, according to its documentation. (The flowchart says explicitly that 00062 is displayed in R1 by GOPERF1, so the DSKY definitely is not blanked by GOPERF1.)
 
 I can only suppose that the flowchart is partially confused in its representation of the call to GOPERF1, and completely confused thereafter.
 
-## Sheet 4
+==== Sheet 4 ====
 
-Continuation of PRESTAND, POSTAND:&nbsp; See the comments for sheet 3 about the continuation of PRESTAND.&nbsp;&nbsp;
+Continuation of PRESTAND, POSTAND: See the comments for sheet 3 about the continuation of PRESTAND.
 
-Regarding POSTAND, the flowchart remains a bit confused in that it has blocks for both TURN OFF STANDBY LIGHT and CLEAR BIT 11 OF CHANNEL 13.&nbsp; The latter is the method for accomplishing the former.
+Regarding POSTAND, the flowchart remains a bit confused in that it has blocks for both TURN OFF STANDBY LIGHT and CLEAR BIT 11 OF CHANNEL 13. The latter is the method for accomplishing the former.
 
 But none of that seems to lead to any changes in the reconstructed code.
 
-## Sheet 5
+==== Sheet 5 ====
 
-Continuation of POSTAND:&nbsp; The flowchart becomes a bit muddled when the call to SCALPREP is reached.
+Continuation of POSTAND: The flowchart becomes a bit muddled when the call to SCALPREP is reached.
 
-![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/175497)
+{{../fc2220Sheet5.png}}
 
-SCALPREP (according to the documentation in the code) is supposed to have two possible returns:&nbsp; the first one upon failure and the second one upon success.&nbsp; So the first instruction after TC SCALPREP should recycle SCALPREP, while the second should flow through the code.&nbsp; The flowchart only shows the latter.&nbsp; Perhaps it just considers the former obvious.&nbsp; The block that calls SCALPREP is also in error, in that it states that SCALPREP is on sheet 6 of the flowchart, whereas it is actually on sheet 7.&nbsp; I regard these as minor errors in the flowchart, with no impact on code.
+SCALPREP (according to the documentation in the code) is supposed to have two possible returns: the first one upon failure and the second one upon success. So the first instruction after TC SCALPREP should recycle SCALPREP, while the second should flow through the code. The flowchart only shows the latter. Perhaps it just considers the former obvious. The block that calls SCALPREP is also in error, in that it states that SCALPREP is on sheet 6 of the flowchart, whereas it is actually on sheet 7. I regard these as minor errors in the flowchart, with no impact on code.
 
-Then there is more confusion, as the flowchart indicates that SCALSAV is loaded into MPAC.&nbsp; Whereas the code, on the other hand, actually subtracts SCALSAV from MPAC:
+Then there is more confusion, as the flowchart indicates that SCALSAV is loaded into MPAC. Whereas the code, on the other hand, actually subtracts SCALSAV from MPAC:
 
-    EXTEND # T1,T2 AND SCALER OK DCS	SCALSAVE DAS	MPAC # FORM DP DIFFERENCE OF POSTSTANDBY SCALER
+'''
+			EXTEND 			# T1,T2 AND SCALER OK 
+			DCS	SCALSAVE 
+			DAS	MPAC 		# FORM DP DIFFERENCE OF POSTSTANDBY SCALER
+'''
 
-The comments in the code and flowchart match at this point, so at least the flowchart comments agree that a subtraction is taking place, even if the operation block does not.&nbsp; (Recall that I had pointed out earlier that what the flowchart refers to as SCALSAV, the code refers to as SCALSAVE, so that at least is not significant.)&nbsp; Artemis uses the same code here as Comanche 55, so I can only suppose that this is yet another error in the flowchart.
+The comments in the code and flowchart match at this point, so at least the flowchart comments agree that a subtraction is taking place, even if the operation block does not. (Recall that I had pointed out earlier that what the flowchart refers to as SCALSAV, the code refers to as SCALSAVE, so that at least is not significant.) Artemis uses the same code here as Comanche 55, so I can only suppose that this is yet another error in the flowchart.
 
 Other than these flowchart errors, the sheet and the code agree.
 
-## Sheet 6
+==== Sheet 6 ====
 
-Continuation of POSTAND, POSTCOM:&nbsp; The decision box at the top of sheet 6 does not agree with the code:
+Continuation of POSTAND, POSTCOM: The decision box at the top of sheet 6 does not agree with the code:
 
-![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/175502)
+{{../fc2220Sheet6.png}}
 
 Versus:
 
-    CCS	MPAC TC	POSTCOM # IF DP DIFF NET +, NO SCALER OVERFLOW TC	POSTCOM # BETWEEN PRE AND POST STANDBY. TC	+1 # IF DP DIFF NET -, SCALER OVERFLOWED.  ADD CAF	BIT10 # BIT 10 TO HIGH DIFF TO CORRECT. ADS	MPACPOSTCOM ...
+'''
+			CCS	MPAC 
+			TC	POSTCOM 	# IF DP DIFF NET +, NO SCALER OVERFLOW 
+			TC	POSTCOM 	# BETWEEN PRE AND POST STANDBY. 
+			TC	+1 		# IF DP DIFF NET -, SCALER OVERFLOWED.  ADD 
+			CAF	BIT10 		# BIT 10 TO HIGH DIFF TO CORRECT. 
+			ADS	MPAC
+POSTCOM     		...
+'''
 
-The 4 instructions after a CCS should be the \>0, =+0, \<0, and =-0 branches, so to logically agree with the flowchart, the 2nd TC POSTCOM should actually be TC +2.&nbsp; But perhaps since MPAC was actually computed (on sheet 5) by a subtraction, and a subtraction like _X_ - _X_&nbsp; gives the result -0.&nbsp; In other words, it's impossible for MPAC to contain +0 if formed by a subtraction.&nbsp; The code/flowchart may be relying on that fact, in which case it wouldn't really matter what the +0 branch from the CCS MPAC does.&nbsp; But it's confusing to say that the test is for MPAC \> 0 when it's really going to be implemented for MPAC&nbsp;≥&nbsp;0.&nbsp; I suppose it may just be that the flowchart was drawn _after_ the code was originally written, and that nobody was going to go back and fix the code to match the logically-accurate description in the flowchart.&nbsp; Maybe.&nbsp; At any rate, the Artemis code agrees with the Comanche 55 code, so whatever the explanation, there's no change to Comanche 67 code needed.
+
+The 4 instructions after a CCS should be the \>0, =+0, \<0, and =-0 branches, so to logically agree with the flowchart, the 2nd TC POSTCOM should actually be TC +2. But perhaps since MPAC was actually computed (on sheet 5) by a subtraction, and a subtraction like //X// - //X// gives the result -0. In other words, it's impossible for MPAC to contain +0 if formed by a subtraction. The code/flowchart may be relying on that fact, in which case it wouldn't really matter what the +0 branch from the CCS MPAC does. But it's confusing to say that the test is for MPAC \> 0 when it's really going to be implemented for MPAC≥0. I suppose it may just be that the flowchart was drawn //after// the code was originally written, and that nobody was going to go back and fix the code to match the logically-accurate description in the flowchart. Maybe. At any rate, the Artemis code agrees with the Comanche 55 code, so whatever the explanation, there's no change to Comanche 67 code needed.
 
 In other respects, everything looks good.
 
-## Sheet 7
+==== Sheet 7 ====
 
-SCALPREP:&nbsp; After return from FINETIME +1, the code has a RELINT instruction not reflected in the flowchart.&nbsp; This RELINT is also present in Artemis (and Colossus 237), so I expect it's okay.
+SCALPREP: After return from FINETIME +1, the code has a RELINT instruction not reflected in the flowchart. This RELINT is also present in Artemis (and Colossus 237), so I expect it's okay.
 
 However, the flowchart gets the operation block following the return from FINETIME +1 completely wrong:
 
-![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/175505)
+{{../fc2220Sheet7A.png}}
 
-As the comments in the flowchart indicate, FINETIME +1 returns with the current clock reading in A, L and the operation block wants to add 0, 5 to it, presumably storing it in MPAC.&nbsp; What the operation block actually shows is that MPAC is doubled.&nbsp; The code, on the other hand, correctly implements the flowchart's _comments_, as translated into flowchart terms thusly:
+As the comments in the flowchart indicate, FINETIME +1 returns with the current clock reading in A, L and the operation block wants to add 0, 5 to it, presumably storing it in MPAC. What the operation block actually shows is that MPAC is doubled. The code, on the other hand, correctly implements the flowchart's //comments//, as translated into flowchart terms thusly:
 
-    A,L ↔ MPAC,MPAC+1A,L ← 0,00020MPAC,MPAC+1 ← MPAC,MPAC+1 + A,L
+	''A,L ↔ MPAC,MPAC+1''
+	''A,L ← 0,00020''
+	''MPAC,MPAC+1 ← MPAC,MPAC+1 + A,L''
 
-Though I admit I'm not totally clear as to why 00020 (symbolically, BIT5) represents 5 ms.&nbsp; The code agrees with Artemis, though, so I expect it's right.
+Though I admit I'm not totally clear as to why 00020 (symbolically, BIT5) represents 5 ms. The code agrees with Artemis, though, so I expect it's right.
 
 And then there's this:
 
-![](https://slimwiki.com/api/accounts/virtual-agc-project/attachments/175506)
+{{../fc2220Sheet7B.png}}
 
-However unclear the meaning of MPAC +1&nbsp;←&nbsp;MASK(00037₈) may be, the flowchart's comments seem to agree with the code in saying that the current contents of MPAC +1 need to have the least-significant 5 bits zeroed.&nbsp; But the decision box is bonkers, in that it seems to be testing the value just saved in MPAC +1 (with zeroed lowest 5 bits), whereas (according to the code) it is supposed to be testing the value of MPAC +1 _prior_ to zeroing out the lowest 5 bits, and indeed, just testing those lower (unzeroed) 5 bits rather than the full value of the word.&nbsp; From the decision box, it's impossible to tell which exit is zero and which is non-zero, but at least the code does use MPAC +2 and (MPAC +2)+1 to determine the flow of control
+However unclear the meaning of MPAC +1←MASK(00037₈) may be, the flowchart's comments seem to agree with the code in saying that the current contents of MPAC +1 need to have the least-significant 5 bits zeroed. But the decision box is bonkers, in that it seems to be testing the value just saved in MPAC +1 (with zeroed lowest 5 bits), whereas (according to the code) it is supposed to be testing the value of MPAC +1 //prior// to zeroing out the lowest 5 bits, and indeed, just testing those lower (unzeroed) 5 bits rather than the full value of the word. From the decision box, it's impossible to tell which exit is zero and which is non-zero, but at least the code does use MPAC +2 and (MPAC +2)+1 to determine the flow of control
 
-What a mess!&nbsp; We're left to fall back yet again on the lame observation that the Comanche 55 code agrees with Artemis, so there's likely no need to modify the reconstructed Comanche 67 code.
+What a mess! We're left to fall back yet again on the lame observation that the Comanche 55 code agrees with Artemis, so there's likely no need to modify the reconstructed Comanche 67 code.
 
-## Sheet 8
+==== Sheet 8 ====
 
-Just tables!&nbsp; Not flowcharts packed with errors!&nbsp; Yay, nothing to check!
+Just tables! Not flowcharts packed with errors! Yay, nothing to check!
 

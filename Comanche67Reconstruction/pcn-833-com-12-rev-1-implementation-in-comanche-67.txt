@@ -1,25 +1,30 @@
 Content-Type: text/x-zim-wiki
 Wiki-Format: zim 0.4
 
-( [Return to main Comanche 67 reconstruction page]([[comanche-67-reconstruction]]).)
+====== PCN-833/COM-12 Rev 1 Incorporation in Comanche 67 ======
 
-We have a copy of [Software Anomaly Report COM-12](http://www.ibiblio.org/apollo/Documents/COM-12.pdf), though unfortunately not of COM-12 Rev 1.&nbsp; Here's how COM-12 describes the problem:
+([[comanche-67-reconstruction|Return to main Comanche 67 reconstruction page]].)
 
-> The S40.8 code which enables TVC cg-tracking does not distinguish between pre- and post-switchover (V46, docked) TVC DAP states; hence it continues to load the cg-tracking gain REPFRAC from the high-bandwidth pad-load erasable EREPFRAC + 1, instead of from the low-bandwidth fixed-memory constant FREPFRAC.
+We have a copy of [[http://www.ibiblio.org/apollo/Documents/COM-12.pdf|Software Anomaly Report COM-12]], though unfortunately not of COM-12 Rev 1. Here's how COM-12 describes the problem:
+
+	The S40.8 code which enables TVC cg-tracking does not distinguish between pre- and post-switchover (V46, docked) TVC DAP states; hence it continues to load the cg-tracking gain REPFRAC from the high-bandwidth pad-load erasable EREPFRAC + 1, instead of from the low-bandwidth fixed-memory constant FREPFRAC.
 
 And here's the code fix it recommends for Colossus 2C:
 
-> Insert code in the cg-tracking-enable logic to: check for switchover; if post-switchover use FREPFRAC + 1 otherwise check LM-ON/OFF etc. as currently coded.
+	Insert code in the cg-tracking-enable logic to: check for switchover; if post-switchover use FREPFRAC + 1 otherwise check LM-ON/OFF etc. as currently coded.
 
-Seems reasonably straightforward.&nbsp; Simple comparison of S40.8 source code (log section P40-P47) in Comanche 55 vs Artemis 71 yields a few lines of code based on a short new subroutine called FREPSET, which seems to do exactly what is described in COM-12's recommendations, if you interpret "FREPFRAC + 1" as meaning the double-word value at FREPFRAC.&nbsp; Therefore, that code has been imported into P40-P47.gpp from Artemis 71 into Comanche 67, and conditionally assembled, using the preprocessor label Reconstruction833.&nbsp; I.e.,
+Seems reasonably straightforward. Simple comparison of S40.8 source code (log section P40-P47) in Comanche 55 vs Artemis 71 yields a few lines of code based on a short new subroutine called FREPSET, which seems to do exactly what is described in COM-12's recommendations, if you interpret "FREPFRAC + 1" as meaning the double-word value at FREPFRAC. Therefore, that code has been imported into P40-P47.gpp from Artemis 71 into Comanche 67, and conditionally assembled, using the preprocessor label Reconstruction833. I.e.,
 
-'''
-    #ifdef Reconstruction833...#endif
-'''
+	'''
+	#ifdef Reconstruction833
+	...
+	#endif
+	'''
 
-The analysis above was made independently of PCN-833, given that I didn't consult the notes about PCN-833 and had forgotten it.&nbsp; We do not have a copy of PCN-833, and know only its title, "SWTOVER Check".
 
-The reason that PCN-833 is referenced in the title of this article, and that Reconstruction833 is used as the preprocessing label for conditional assembly, is that PCN-833 is apparently the PCN providing notice to NASA that COM-12 has been implemented.&nbsp; This is an inference on my part, based on the fact that&nbsp; [PCN-833 had already been implemented in the reconstruction](https://github.com/virtualagc/virtualagc/issues/1140#issuecomment-751895248) prior to COM-12 becoming available, or indeed any awareness of COM-12 at all, but nevertheless produced precisely the same code changes as described above.&nbsp;&nbsp;
+The analysis above was made independently of PCN-833, given that I didn't consult the notes about PCN-833 and had forgotten it. We do not have a copy of PCN-833, and know only its title, "SWTOVER Check".
+
+The reason that PCN-833 is referenced in the title of this article, and that Reconstruction833 is used as the preprocessing label for conditional assembly, is that PCN-833 is apparently the PCN providing notice to NASA that COM-12 has been implemented. This is an inference on my part, based on the fact that [[https://github.com/virtualagc/virtualagc/issues/1140#issuecomment-751895248|PCN-833 had already been implemented in the reconstruction]] prior to COM-12 becoming available, or indeed any awareness of COM-12 at all, but nevertheless produced precisely the same code changes as described above.
 
 In retrospect, it seems rather remarkable to me that knowledge of the brief title "SWTOVER Check" leads one to the same code changes as the relatively-detailed description provided by COM-12 does.
 

@@ -1,41 +1,67 @@
-( [Return to main Comanche 67 reconstruction page](comanche-67-reconstruction).)
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
 
-Unfortunately, we have no copy of Software Anomaly Report COM-17.&nbsp; The brief description we have of it is "Error at Ranges Greater than 163.83 nm".
+====== COM-17 Incorporation in Comanche 67 ======
 
-16383 and -16383 are, of course, the maximum and minimum 15-bit 1's-complement integers, so it's not surprising that exceeding that range might result in errors in single-precision values.&nbsp;
+([[comanche-67-reconstruction|Return to main Comanche 67 reconstruction page]].)
 
-Several contemporary documents describe astronaut entry into the DSKY of VHF ranges (V87, "SET VHF RANGE FLAG") up to 327.67 by using negative values.&nbsp; Entries of positive values (+0 to +16383, in hundredths of nautical miles) are used as-is, but entries of negative values (-0 to -16383) are first converted using the formula 32767+_VALUE_, so that _VALUE_=-0 is interpreted as 327.67 nm,&nbsp;_VALUE_=-1 as 327.66 nm, ...,&nbsp;_VALUE_=-16383 as 163.84.&nbsp; Perhaps COM-17 has something to do with a problem in this procedure, such as improper signed vs unsigned computations either in setting the range or in later using the previously-set range.
+Unfortunately, we have no copy of Software Anomaly Report COM-17. The brief description we have of it is "Error at Ranges Greater than 163.83 nm".
 
-The full procedure for entering the VHF range as described in [the Apollo 11 CSM operations checklist](http://www.ibiblio.org/apollo/Documents/Apollo11_Checklist_CSM107.pdf#page=38) is&nbsp;
+16383 and -16383 are, of course, the maximum and minimum 15-bit 1's-complement integers, so it's not surprising that exceeding that range might result in errors in single-precision values.
 
-    V87EV06 N02E3703E
+Several contemporary documents describe astronaut entry into the DSKY of VHF ranges (V87, "SET VHF RANGE FLAG") up to 327.67 by using negative values. Entries of positive values (+0 to +16383, in hundredths of nautical miles) are used as-is, but entries of negative values (-0 to -16383) are first converted using the formula 32767+//VALUE//, so that //VALUE//=-0 is interpreted as 327.67 nm,//VALUE//=-1 as 327.66 nm, ...,//VALUE//=-16383 as 163.84. Perhaps COM-17 has something to do with a problem in this procedure, such as improper signed vs unsigned computations either in setting the range or in later using the previously-set range.
 
-where 3703 is a "machine address", presumably at which the range is stored.&nbsp; I don't recall where to find an explanation of what "machine addresses" are, but I think they probably correspond to the "pseudo-addresses" defined in [AGC4 Memo #9](https://www.ibiblio.org/apollo/Documents/agc4_memo9_rev_june1967.pdf#page=6).&nbsp; Thus 3703 corresponds to address E7,1703, which in Comanche 55 is indeed variable RM, "DOWNLINK OF VHF RANGE".&nbsp; &nbsp;(Not to be confused with RM = RADIUS OF MOON, as referenced in various AGC program comments).&nbsp; The effect of V87E alone is to set VHFRFLAG, the entire effect of which appears to be to allow routine R22 (log section P20-P25) to utilize VHF range data.&nbsp;
+The full procedure for entering the VHF range as described in [[http://www.ibiblio.org/apollo/Documents/Apollo11//Checklist//CSM107.pdf#page=38|the Apollo 11 CSM operations checklist]] is
+	'''
+	
+	V87E
+	V06 N02E
+	3703E
+	'''
 
-So if any of this is relevant to COM-17, it would seem natural to look for differences in Artemis vs the Comanche 55 baseline as to how RM is handled.&nbsp; It appears to me that the culprit is the RANGERD3 subroutine, used when RM is negative.&nbsp; At one point in RANGERD3, there is an attempt to do a double-precision multiply of RM (stored in MPAC) with a constant called CONVRNGE.&nbsp; However, in the Comanche 55 baseline code, while RANGERD3 loads RM (stripped down to just 14 bits) into MPAC, it does not clear MPAC +1; thus the DMP that occurs then will be using garbage bits for one of RM's words.&nbsp; In the Artemis version of RANGERD3, however, there are slight changes to RANGERD3 which, as the program comments note, indirectly "CLEAR MPAC +1".&nbsp;&nbsp;
 
-We also have the software flowchart covering RANGERD3, namely [FC-2550](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=712) [revision](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=744) ["COLOSSUS IIC"](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=712).&nbsp; It specifically notes that a single-precision RM (stripped to 14 bits) is being multiplied by a double-precision CONVRNGE.&nbsp; Specifically, the flowchart indicates the following calculation when RM is negative:
+where 3703 is a "machine address", presumably at which the range is stored. I don't recall where to find an explanation of what "machine addresses" are, but I think they probably correspond to the "pseudo-addresses" defined in [[https://www.ibiblio.org/apollo/Documents/agc4//memo9//rev_june1967.pdf#page=6|AGC4 Memo #9]]. Thus 3703 corresponds to address E7,1703, which in Comanche 55 is indeed variable RM, "DOWNLINK OF VHF RANGE". (Not to be confused with RM = RADIUS OF MOON, as referenced in various AGC program comments). The effect of V87E alone is to set VHFRFLAG, the entire effect of which appears to be to allow routine R22 (log section P20-P25) to utilize VHF range data.
 
-    MPAC ← RM(BITS 14-1) × CONVRNGE + RANGEB14
+So if any of this is relevant to COM-17, it would seem natural to look for differences in Artemis vs the Comanche 55 baseline as to how RM is handled. It appears to me that the culprit is the RANGERD3 subroutine, used when RM is negative. At one point in RANGERD3, there is an attempt to do a double-precision multiply of RM (stored in MPAC) with a constant called CONVRNGE. However, in the Comanche 55 baseline code, while RANGERD3 loads RM (stripped down to just 14 bits) into MPAC, it does not clear MPAC +1; thus the DMP that occurs then will be using garbage bits for one of RM's words. In the Artemis version of RANGERD3, however, there are slight changes to RANGERD3 which, as the program comments note, indirectly "CLEAR MPAC +1".
+
+We also have the software flowchart covering RANGERD3, namely [[https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=712|FC-2550]] [[https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=744|revision]] [[https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=712|"COLOSSUS IIC"]]. It specifically notes that a single-precision RM (stripped to 14 bits) is being multiplied by a double-precision CONVRNGE. Specifically, the flowchart indicates the following calculation when RM is negative:
+
+	''MPAC ← RM(BITS 14-1) × CONVRNGE + RANGEB14''
 
 Superficially, this appears to be a mismatch vs the Artemis algorithm in RANGERD3, which is coded as:
 
-    ...SLOAD	DMP MPAC # CLEAR MPAC +1	CONVRNGE	# CONVERT FROM NM TO METERS AND SCALE B-27DAD CONVRNGE	# VALUE IN METERS OF SIGN BIT SCALED B-27...
+'''
+		...
+	SLOAD	DMP
+		MPAC 		# CLEAR MPAC +1
+		CONVRNGE	# CONVERT FROM NM TO METERS AND SCALE B-27
+	DAD
+		CONVRNGE	# VALUE IN METERS OF SIGN BIT SCALED B-27
+		...
+'''
 
 However, it turns out that the constants CONVRGE and RANGEB14 are identical, so there is actually a match with the flowchart after all.
 
-The obvious solution is to import Artemis's RANGERD3 code into Comanche 67.&nbsp; Unfortunately, the _obvious_ ways of doing this have the unfortunate side effect of causing fixed-memory bank 02 no longer to have a correct checksum, but instead to have a checksum discrepancy of 00001, because the size of bank 27 changes as a result.&nbsp; Well, perhaps bank 02 _should_ have a discrepancy of 00001 in the current state of the reconstruction; who's to say? For the present, however, I'm going to ignore that possibility and assume that bank 02 should be unaffected by whatever our fix for COM-17 turns out to be.&nbsp; Also, bank 27 (in which this code resides) has a banksum discrepancy of only 00032 prior to the COM-17 fix, so it would be nice if the banksum discrepancy didn't get blown up either.
+The obvious solution is to import Artemis's RANGERD3 code into Comanche 67. Unfortunately, the //obvious// ways of doing this have the unfortunate side effect of causing fixed-memory bank 02 no longer to have a correct checksum, but instead to have a checksum discrepancy of 00001, because the size of bank 27 changes as a result. Well, perhaps bank 02 //should// have a discrepancy of 00001 in the current state of the reconstruction; who's to say? For the present, however, I'm going to ignore that possibility and assume that bank 02 should be unaffected by whatever our fix for COM-17 turns out to be. Also, bank 27 (in which this code resides) has a banksum discrepancy of only 00032 prior to the COM-17 fix, so it would be nice if the banksum discrepancy didn't get blown up either.
 
-The reason bank 02 gets messed up is _only_ that it references VHFREAD in bank 27.&nbsp; If VHFREAD doesn't move, then everything in bank 02 is good.&nbsp; The ordering of the code in Comanche's bank 27 is:
+The reason bank 02 gets messed up is //only// that it references VHFREAD in bank 27. If VHFREAD doesn't move, then everything in bank 02 is good. The ordering of the code in Comanche's bank 27 is:
 
-    ...RANGERD3 (code)LIGHTON (code)RANGEB14 (double-word constant)OCT17 (single-word constant)OC40200 (single-word constant)CONVRNGE (double-word constant)VHFREAD (code)...
+	''...''
+	''RANGERD3 (code)''
+	''LIGHTON (code)''
+	''RANGEB14 (double-word constant)''
+	''OCT17 (single-word constant)''
+	''OC40200 (single-word constant)''
+	''CONVRNGE (double-word constant)''
+	''VHFREAD (code)''
+	''...''
 
-Thus to keep VHFREAD at the same address after the COM-17 fix as before, it's necessary to preserve the length of RANGERD3+LIGHTON+RANGEB14+OCT17+OC40200+CONVRNGE.&nbsp; Unfortunately, this leaves us with a lot of stuff to play around with, because:
+Thus to keep VHFREAD at the same address after the COM-17 fix as before, it's necessary to preserve the length of RANGERD3+LIGHTON+RANGEB14+OCT17+OC40200+CONVRNGE. Unfortunately, this leaves us with a lot of stuff to play around with, because:
 
-- There are several possible ways to code the fix in RANGERD3.
-- As already mentioned, constants RANGEB14 and CONVRNGE actually have identical values, so there's no need to have both.&nbsp; (In Artemis, RANGEB14 is removed entirely.)
-- The constant OC40200 is referenced nowhere, and is completely unnecessary.&nbsp; (In Artemis, OC40200 is removed entirely.)
-- The value of the constant OCT17 is duplicated elsewhere in the code.&nbsp; (In Artemis, it is replaced by "OCT17 EQUALS LOW4", where LOW4 is in fixed-fixed.)
+* There are several possible ways to code the fix in RANGERD3.
+* As already mentioned, constants RANGEB14 and CONVRNGE actually have identical values, so there's no need to have both. (In Artemis, RANGEB14 is removed entirely.)
+* The constant OC40200 is referenced nowhere, and is completely unnecessary. (In Artemis, OC40200 is removed entirely.)
+* The value of the constant OCT17 is duplicated elsewhere in the code. (In Artemis, it is replaced by "OCT17 EQUALS LOW4", where LOW4 is in fixed-fixed.)
 
-⚠&nbsp;I have coded the fix in what seems to be the least-obtuse way that preserves bank 02, using the preprocessor label "ReconstructionCOM17" for conditional assembly.&nbsp; The banksum discrepancy for bank 27 changes from 00032 to 01427 ... which isn't _terrible_, but it seems to me that this fix is probably wrong in some detail and needs to be revisited later.&nbsp;&nbsp;
+⚠I have coded the fix in what seems to be the least-obtuse way that preserves bank 02, using the preprocessor label "ReconstructionCOM17" for conditional assembly. The banksum discrepancy for bank 27 changes from 00032 to 01427 ... which isn't //terrible//, but it seems to me that this fix is probably wrong in some detail and needs to be revisited later.
 

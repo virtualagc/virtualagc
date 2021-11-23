@@ -1,18 +1,23 @@
-( [Return to main Comanche 67 reconstruction page](comanche-67-reconstruction).)
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
 
-We have a copy of [Software Anomaly Report COM-14](https://www.ibiblio.org/apollo/Documents/COM-14.pdf), which describes the problem as
+====== COM-14 Incorporation In Comanche 67 ======
 
-> Only the first and final P17 displays exit properly on V34 response; intermediate displays (V06N72, V06N58 ) merely recycle the display, in violation of basic groundrules
+([[comanche-67-reconstruction|Return to main Comanche 67 reconstruction page]].)
+
+We have a copy of [[https://www.ibiblio.org/apollo/Documents/COM-14.pdf|Software Anomaly Report COM-14]], which describes the problem as
+
+	Only the first and final P17 displays exit properly on V34 response; intermediate displays (V06N72, V06N58 ) merely recycle the display, in violation of basic groundrules
 
 and the coding fix for Colossus 2C as
 
-> Let V34E terminate the program activity.
+	Let V34E terminate the program activity.
 
-It appears to me that P17 (log section TPI SEARCH) handles these intermediate displays by loading the accumulator with either the constant V06N72 or V06N58, and than calling the subroutine VNCOMP17, which in turn calls GOFLASH.&nbsp; GOFLASH has three possible responses:&nbsp; "terminate", "proceed", or "recycle".&nbsp; However, in VNCOMP17, the "terminate" reponse simply causes the display to recycle rather than actually terminating.&nbsp; (Actually, it's slightly different, because the actual "recycle" response has additional logic which is apparently supposed to reload the TPI time before recycling, whereas the "terminate" response doesn't mimic that addition logic.&nbsp; But I don't think that's important here.)
+It appears to me that P17 (log section TPI SEARCH) handles these intermediate displays by loading the accumulator with either the constant V06N72 or V06N58, and than calling the subroutine VNCOMP17, which in turn calls GOFLASH. GOFLASH has three possible responses: "terminate", "proceed", or "recycle". However, in VNCOMP17, the "terminate" reponse simply causes the display to recycle rather than actually terminating. (Actually, it's slightly different, because the actual "recycle" response has additional logic which is apparently supposed to reload the TPI time before recycling, whereas the "terminate" response doesn't mimic that addition logic. But I don't think that's important here.)
 
-The question is, What should "terminate" do instead?&nbsp; I.e., what's the correct way to terminate P17?&nbsp; Unfortunately, as far as I can see, Artemis has no comparable code (i.e., no P17 at all), and we have no later revisions of Comanche either.&nbsp; So I can't do the usual trick of just porting whatever Artemis does into Comanche 67.
+The question is, What should "terminate" do instead? I.e., what's the correct way to terminate P17? Unfortunately, as far as I can see, Artemis has no comparable code (i.e., no P17 at all), and we have no later revisions of Comanche either. So I can't do the usual trick of just porting whatever Artemis does into Comanche 67.
 
-Program 17 has software flowchart FC-2545, which is missing from our Colossus 2C flowchart document.&nbsp; However, [FC-2545 revision "COLOSSUS IIC"](https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=694) appears in our Colossus 2D flowchart document.&nbsp; The flowchart for VNCOMP17 appears on sheet 5, and shows that the "terminate" response is a simple TC GOTOPOOH.
+Program 17 has software flowchart FC-2545, which is missing from our Colossus 2C flowchart document. However, [[https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=694|FC-2545 revision "COLOSSUS IIC"]] appears in our Colossus 2D flowchart document. The flowchart for VNCOMP17 appears on sheet 5, and shows that the "terminate" response is a simple TC GOTOPOOH.
 
-This has been implemented in TPI\_SEARCH.gpp using the proprocessor label "ReconstructionCOM14" for conditional assembly.&nbsp; The fix is in memory bank 35, whose banksum discrepancy isn't affected in any significant way.
+This has been implemented in TPI_SEARCH.gpp using the proprocessor label "ReconstructionCOM14" for conditional assembly. The fix is in memory bank 35, whose banksum discrepancy isn't affected in any significant way.
 

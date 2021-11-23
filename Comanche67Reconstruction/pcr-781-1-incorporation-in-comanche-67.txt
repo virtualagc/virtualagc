@@ -1,25 +1,30 @@
-( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
 
-We do not have a copy of PCR-781.1, "PIPA Bias Compensation Scale Change".&nbsp;
+====== PCR-781.1 Incorporation in Comanche 67 ======
 
-As usual with this kind of PCR numbering pattern, there is a matching Luminary PCR-781.2, of which we also have no copy, but for which we have source-code revisions that can be compared.&nbsp; According to [LUMINARY Memo #92](https://www.ibiblio.org/apollo/Documents/LUM92_text.pdf), PCR-781.2 was incorporated into Luminary 106.&nbsp; Thus the "before" and "after" Luminary source-code revisions for comparison would be Luminary 99 and Luminary 116.&nbsp; However, the memo continues and gives the following helpful information:
+([[comanche-67-reconstruction|Return to main Comanche 67 reconstruction page.]])
 
-    As a result of this PCR the following three padloads should be loaded
-    at 1/4 of their former values: PBIASX, PBIASY, and PBIASZ.
+We do not have a copy of PCR-781.1, "PIPA Bias Compensation Scale Change".
+
+As usual with this kind of PCR numbering pattern, there is a matching Luminary PCR-781.2, of which we also have no copy, but for which we have source-code revisions that can be compared. According to [[https://www.ibiblio.org/apollo/Documents/LUM92_text.pdf|LUMINARY Memo #92]], PCR-781.2 was incorporated into Luminary 106. Thus the "before" and "after" Luminary source-code revisions for comparison would be Luminary 99 and Luminary 116. However, the memo continues and gives the following helpful information:
+
+	As a result of this PCR the following three padloads should be loaded
+	at 1/4 of their former values: PBIASX, PBIASY, and PBIASZ.
 
 It appears as though these three variables may be accessed by the code either individually, or else by the name PIPABIAS, which is aliased to PBIASX thus creating a vector.
 
 In Luminary, such access occurs as follows:
 
-1. IMU COMPENSATION PACKAGE log section:&nbsp; A single multiplication by 16 (MP BIT4) is replaced with a multiplication by 64 (MP BIT6).
-2. LUNAR LANDING GUIDANCE EQUATIONS log section:&nbsp; There are various changes, but the only seemingly-relevant one to my eyes is that the fixed constant BIASFACT is changed from B-28 to B-26.
+1. IMU COMPENSATION PACKAGE log section: A single multiplication by 16 (MP BIT4) is replaced with a multiplication by 64 (MP BIT6).
+2. LUNAR LANDING GUIDANCE EQUATIONS log section: There are various changes, but the only seemingly-relevant one to my eyes is that the fixed constant BIASFACT is changed from B-28 to B-26.
 
 As far as pulling these changes into Comanche 67 is concerned:
 
-1. IMU COMPENSATION PACKAGE log section:&nbsp; In the Comanche 55 baseline, the multiplication that is MP BIT4 in Luminary 99 is instead MP BIT1.&nbsp; This should presumably become MP BIT3 in Comanche 67.&nbsp; Indeed, if we look at Artemis, we find that it has become MP BIT3 there.
-2. LUNAR LANDING GUIDANCE EQUATIONS log section:&nbsp; BIASFACT, it turns out, is used only in Luminary and doesn't appear in Colossus at all, because it's part of program P66 which is completely different in Luminary vs. Colossus.
+1. IMU COMPENSATION PACKAGE log section: In the Comanche 55 baseline, the multiplication that is MP BIT4 in Luminary 99 is instead MP BIT1. This should presumably become MP BIT3 in Comanche 67. Indeed, if we look at Artemis, we find that it has become MP BIT3 there.
+2. LUNAR LANDING GUIDANCE EQUATIONS log section: BIASFACT, it turns out, is used only in Luminary and doesn't appear in Colossus at all, because it's part of program P66 which is completely different in Luminary vs. Colossus.
 
 I've incorporated the changed multiplication into Comanche 67's IMU COMPENSATION PACKAGE, using the preprocessor constant for conditional assembly.
 
-In summary, the PCR-781.1 has been incorporated.&nbsp; It clears Bank 06's banksum discrepancy, so yay!
+In summary, the PCR-781.1 has been incorporated. It clears Bank 06's banksum discrepancy, so yay!
 

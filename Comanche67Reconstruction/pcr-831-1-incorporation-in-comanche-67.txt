@@ -1,37 +1,55 @@
-( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
 
-We don't have a copy of PCR-831.1, "Lambert Overflow Protection".&nbsp; There is a matching PCR-831.2, incorporated in Luminary 1B, so source-code comparison of Luminary 99 vs Luminary 116 may reveal implementation details.
+PCR-831.1 Incorporation in Comanche 67
 
-We also have the [Colossus 2C flowchart FC-2310](https://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf#page=110), "Conic Subroutines", which covers the LAMBERT subroutine.&nbsp; According to sheet 1, only 3 sheets (other than sheet 1) differ in Colossus 2C from Colossus 2A.&nbsp; Unfortunately, sheet 1 is almost illegible, so it's hard to tell which sheets those are.&nbsp; I read them as 12, 18, and 22 or 23; I'm least confident about the latter.&nbsp; Unfortunately, quite a lot of FC-2310 has moderate-to-severe legibility problems.
+([[comanche-67-reconstruction|Return to main Comanche 67 reconstruction page.]])
+
+We don't have a copy of PCR-831.1, "Lambert Overflow Protection". There is a matching PCR-831.2, incorporated in Luminary 1B, so source-code comparison of Luminary 99 vs Luminary 116 may reveal implementation details.
+
+We also have the [[https://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf#page=110|Colossus 2C flowchart FC-2310]], "Conic Subroutines", which covers the LAMBERT subroutine. According to sheet 1, only 3 sheets (other than sheet 1) differ in Colossus 2C from Colossus 2A. Unfortunately, sheet 1 is almost illegible, so it's hard to tell which sheets those are. I read them as 12, 18, and 22 or 23; I'm least confident about the latter. Unfortunately, quite a lot of FC-2310 has moderate-to-severe legibility problems.
 
 On sheet 12, LAMBLOOP, you indeed see 2 separate tests for overflow, though the Comanche 55 CONIC SUBROUTINES code already has those tests in place.
 
-On sheet 18 we also find an overflow test.&nbsp; However for some reason, another representation of LAMBLOOP began on sheet 17 and this is just a continuation of it, so it's not surprising that it has once again agreed with the Comanche 55 code.
+On sheet 18 we also find an overflow test. However for some reason, another representation of LAMBLOOP began on sheet 17 and this is just a continuation of it, so it's not surprising that it has once again agreed with the Comanche 55 code.
 
-On sheet 23, TIMETHET, we again find an overflow test.&nbsp; Again, it is already present in Comanche 55 source code.
+On sheet 23, TIMETHET, we again find an overflow test. Again, it is already present in Comanche 55 source code.
 
-So ... the approach of trying to work backward from the flowchart is getting us nowhere, and we need a different approach.&nbsp; In doing a source-code comparison of CONIC SUBROUTINES for Luminary 99 vs Luminary 116, we find that _only_ change (apart from a change of alarm 00607 to 20607 that would be expected from PCR-801.2) is the replacement of&nbsp;
+So ... the approach of trying to work backward from the flowchart is getting us nowhere, and we need a different approach. In doing a source-code comparison of CONIC SUBROUTINES for Luminary 99 vs Luminary 116, we find that //only// change (apart from a change of alarm 00607 to 20607 that would be expected from PCR-801.2) is the replacement of
 
-    BHIZ	CALL SUFFCHEK
+'''
+		BHIZ	CALL 
+			SUFFCHEK
+'''
 
 in Luminary 99 by
 
-                    BHIZ            BON                                SUFFCHEK                                SLOPESW                                GOITER                DLOAD           DSU                                T                                TPREV                BZE                                SUFFCHEKGOITER          CALL
+'''
+		BHIZ    BON                                
+			SUFFCHEK                                
+			SLOPESW                                
+			GOITER                
+		DLOAD   DSU                                
+			T                                
+			TPREV                
+		BZE     SUFFCHEK
+GOITER		CALL
+'''
 
-in Luminary 116.&nbsp; The latter corresponds exactly to the 4 blocks at the bottom of sheet 18 of flowchart FC-2310, so it's a change that clearly needs to be incorporated into Comanche 67; the question is whether the justification for it is PCR-831.1 or not.&nbsp; The comment next to these blocks in the flowchart informs us that
+in Luminary 116. The latter corresponds exactly to the 4 blocks at the bottom of sheet 18 of flowchart FC-2310, so it's a change that clearly needs to be incorporated into Comanche 67; the question is whether the justification for it is PCR-831.1 or not. The comment next to these blocks in the flowchart informs us that
 
-> Even though i has gone to zero the time t₂₁&nbsp;may have converged in a minimal sense.&nbsp; Go to SUFFCHECK for this minimal convergence test.
+	Even though i has gone to zero the time t_{21} may have converged in a minimal sense. Go to SUFFCHECK for this minimal convergence test.
 
-The "i" referred to is apparently a variable called ITERCTR, which is decremented on every pass through LAMBLOOP, and which is tested immediately prior to the algorithm mods we're discussing.&nbsp; But what does any of this have to do with overflow protection?&nbsp; I can't claim to understand what the algorithm is doing, but it seems to me that something like the following _may_ be going on:
+The "i" referred to is apparently a variable called ITERCTR, which is decremented on every pass through LAMBLOOP, and which is tested immediately prior to the algorithm mods we're discussing. But what does any of this have to do with overflow protection? I can't claim to understand what the algorithm is doing, but it seems to me that something like the following //may// be going on:
 
-- Normally, the algorithm wants to terminate when&nbsp;t₂₁ (T) is "close enough" (within ϵ) of the "desired" value of t₂₁.&nbsp; 
-- But it's possible for the algorithm to reach a state where t₂₁ does not change from iteration to iteration of the loop, in which case it just keeps going until ITERCTR reaches 0.&nbsp; 
-- But in all these extra passes through the loop, without making any actual progress in terms of t₂₁, calculation overflows can occur.&nbsp; 
-- So the added code preempts the possibility of such unnecessary overflows by detecting the condition of t₂₁ being stuck, i.e. it checks whether T==TPREV.
+* Normally, the algorithm wants to terminate when t_{21} (T) is "close enough" (within ϵ) of the "desired" value of t₂₁. 
+* But it's possible for the algorithm to reach a state where t_{21} does not change from iteration to iteration of the loop, in which case it just keeps going until ITERCTR reaches 0. 
+* But in all these extra passes through the loop, without making any actual progress in terms of t_{21}, calculation overflows can occur. 
+* So the added code preempts the possibility of such unnecessary overflows by detecting the condition of t_{21} being stuck, i.e. it checks whether T==TPREV.
 
-If this so-called "reasoning" is true, or reasonably close to being true, then we can rationalize that the added code really does address the titular issue of Lambert overflow protection.&nbsp; Alas, so far I cannot find any additional explanatory documentation, so my rationalization will either have to stand or fall on its own merits.&nbsp; How dreadful!
+If this so-called "reasoning" is true, or reasonably close to being true, then we can rationalize that the added code really does address the titular issue of Lambert overflow protection. Alas, so far I cannot find any additional explanatory documentation, so my rationalization will either have to stand or fall on its own merits. How dreadful!
 
-Actions:&nbsp; Import the Luminary 99/116 code-change described above into Comanche, conditionally assembling it based on the preprocessor label Reconstruction831.&nbsp; In fact, though, the change had already been made due to the prior analysis.
+Actions: Import the Luminary 99/116 code-change described above into Comanche, conditionally assembling it based on the preprocessor label Reconstruction831. In fact, though, the change had already been made due to the prior analysis.
 
-Summary:&nbsp; PCR incorporated in code.
+Summary: PCR incorporated in code.
 

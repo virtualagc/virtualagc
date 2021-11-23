@@ -1,15 +1,20 @@
-( [Return to main Comanche 67 reconstruction page](comanche-67-reconstruction).)
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
+
+====== COM-18 Incorporation in Comanche 67 ======
+
+([[comanche-67-reconstruction|Return to main Comanche 67 reconstruction page]].)
 
 Unfortunately, we don't have a copy of Software Anomaly Report COM-18, and know only the brief summary "Software Restart (BAILOUT or POODOO)".
 
-It's at this point that I realize I have never really needed to understand the difference between a BAILOUT and a POODOO, and consequently have never learned, and cannot now find a reasonable summary of the difference.&nbsp; Here's the explanation given at the beginning of&nbsp; [the ALARM AND ABORT flowchart FC-2140](https://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf#page=24):
+It's at this point that I realize I have never really needed to understand the difference between a BAILOUT and a POODOO, and consequently have never learned, and cannot now find a reasonable summary of the difference. Here's the explanation given at the beginning of [[https://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf#page=24|the ALARM AND ABORT flowchart FC-2140]]:
 
-- BAILOUT:&nbsp; Terminates in a software restart. Used by alarm conditions such as no vac areas available, too many tasks, etc.
-- POODOO: Clears AVEGFLAG and V37FLAG. Inactivates all restart groups and terminates in a software restart, and GOTOPOOH and flash verb 37 for operator to select new major mode. Used by alarm conditions such as an attempt to take the square root of a negative number, illegal flashing display, etc.
+* BAILOUT: Terminates in a software restart. Used by alarm conditions such as no vac areas available, too many tasks, etc.
+* POODOO: Clears AVEGFLAG and V37FLAG. Inactivates all restart groups and terminates in a software restart, and GOTOPOOH and flash verb 37 for operator to select new major mode. Used by alarm conditions such as an attempt to take the square root of a negative number, illegal flashing display, etc.
 
-To me, that appears to mean that BAILOUT will attempt to restart jobs that are in progress, whereas GOTOPOOH is a completely clean reset that doesn't attempt to restart any jobs.&nbsp;
+To me, that appears to mean that BAILOUT will attempt to restart jobs that are in progress, whereas GOTOPOOH is a completely clean reset that doesn't attempt to restart any jobs.
 
-In an algorithmic sense, the principal difference seems to be that GOTOPOOH executes the code called ABORT2, whereas BAILOUT does not ... though ABORT2 seems to have the capability itself to turn a POODOO into a BAILOUT, midstream.&nbsp; In the Comanche 55 baseline, ABORT2 does this if it discovers if the V37FLBIT flagbit ("AVERAGE G ON") is set.&nbsp; In Artemis, it does it additionally if bit 14 of EXTVBACT ("EXTENDED VERBS ACTIVE") is set.&nbsp; So I _suppose_ that COM-18 could be demanding this additional behavior in ABORT2 for Comanche 67.&nbsp; In fact, this change could _not_ appear in Comanche 67, from the following reasoning:
+In an algorithmic sense, the principal difference seems to be that GOTOPOOH executes the code called ABORT2, whereas BAILOUT does not ... though ABORT2 seems to have the capability itself to turn a POODOO into a BAILOUT, midstream. In the Comanche 55 baseline, ABORT2 does this if it discovers if the V37FLBIT flagbit ("AVERAGE G ON") is set. In Artemis, it does it additionally if bit 14 of EXTVBACT ("EXTENDED VERBS ACTIVE") is set. So I //suppose// that COM-18 could be demanding this additional behavior in ABORT2 for Comanche 67. In fact, this change could //not// appear in Comanche 67, from the following reasoning:
 
 1. Artemis (revision 0) was forked from Comanche 67; and
 2. PCR-1117.1 implemented this very change in Artemis 63, according to COLOSSUS Memo #301.

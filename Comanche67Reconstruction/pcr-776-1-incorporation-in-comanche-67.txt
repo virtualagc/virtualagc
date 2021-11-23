@@ -1,21 +1,26 @@
-( [Return to main Comanche 67 reconstruction page.](comanche-67-reconstruction))
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.4
 
-We have no copy of PCR-776.1, "Improved R2 Model Timing".&nbsp; As usual in this kind of PCR numbering pattern, there is a corresponding PCR-776.2 for Luminary, so in principle we can compare the "before" and "after" Luminary source code to determine the precise coding details of the change, and then simply import the change into the Comanche 67 if necessary. PCR-776.2 was incorporated into Luminary 1B, so Luminary 1A (Luminary 99) is the "before" and Luminary 1B (Luminary 116) is the "after".
+====== PCR-776.1 Incorporation in Comanche 67 ======
 
-However, there are obviously _many_ changes between Luminary 99 and 116, so we want to narrow it down as to where we need to look.&nbsp; The R2 model itself had been incorporated in an earlier Luminary version due to PCR-761.1, "R-2 Lunar Potential Model".&nbsp; Presumably the "improved R2 model timing" changes would have been made somewhere in that previously-added R2 lunar potential model code.&nbsp; Because of [LUMINARY Memo #75](https://www.ibiblio.org/apollo/Documents/LUM75_text.pdf), we know specifically that PCR-761.1 had been incorporated into the Luminary code [LUM69R2](https://github.com/virtualagc/virtualagc/tree/master/LUM69R2) in our GitHub repository, that it had not yet been incorporated into [Luminary069](https://github.com/virtualagc/virtualagc/tree/master/Luminary069), and that this incorporation was the only difference between those Luminary revisions.&nbsp; So all-in-all, it's pretty easy to figure out where the R2 model code is located in Luminary.&nbsp; The Luminary source-code changed by the original addition of the R2 model in LUM69R2 is as follows, with the line numbers taken from Luminary069/\*.agc source files:
+([[comanche-67-reconstruction|Return to main Comanche 67 reconstruction page.]])
 
-1. CONTROLLED\_CONSTANTS.agc, line 339 changed
-2. ERASABLE\_ASSIGNMENTS.agc, 2 lines added after line 810
-3. INTEGRATION\_INITIALIZATION.agc, line 1046 changed
-4. ORBITAL\_INTEGRATION.agc, from line 402 (in COMTERM routine) to the beginning of the NBRANCH routine.
-5. TAGS\_FOR\_RELATIVE\_SETLOC\_AND\_BLANK\_BLANK\_CARDS.agc, one line added after line 110.
+We have no copy of PCR-776.1, "Improved R2 Model Timing". As usual in this kind of PCR numbering pattern, there is a corresponding PCR-776.2 for Luminary, so in principle we can compare the "before" and "after" Luminary source code to determine the precise coding details of the change, and then simply import the change into the Comanche 67 if necessary. PCR-776.2 was incorporated into Luminary 1B, so Luminary 1A (Luminary 99) is the "before" and Luminary 1B (Luminary 116) is the "after".
+
+However, there are obviously //many// changes between Luminary 99 and 116, so we want to narrow it down as to where we need to look. The R2 model itself had been incorporated in an earlier Luminary version due to PCR-761.1, "R-2 Lunar Potential Model". Presumably the "improved R2 model timing" changes would have been made somewhere in that previously-added R2 lunar potential model code. Because of [[https://www.ibiblio.org/apollo/Documents/LUM75_text.pdf|LUMINARY Memo #75]], we know specifically that PCR-761.1 had been incorporated into the Luminary code [[https://github.com/virtualagc/virtualagc/tree/master/LUM69R2|LUM69R2]] in our GitHub repository, that it had not yet been incorporated into [[https://github.com/virtualagc/virtualagc/tree/master/Luminary069|Luminary069]], and that this incorporation was the only difference between those Luminary revisions. So all-in-all, it's pretty easy to figure out where the R2 model code is located in Luminary. The Luminary source-code changed by the original addition of the R2 model in LUM69R2 is as follows, with the line numbers taken from Luminary069/\*.agc source files:
+
+1. CONTROLLED_CONSTANTS.agc, line 339 changed
+2. ERASABLE_ASSIGNMENTS.agc, 2 lines added after line 810
+3. INTEGRATION_INITIALIZATION.agc, line 1046 changed
+4. ORBITAL_INTEGRATION.agc, from line 402 (in COMTERM routine) to the beginning of the NBRANCH routine.
+5. TAGS\//FOR\//RELATIVE\//SETLOC\//AND\//BLANK\//BLANK_CARDS.agc, one line added after line 110.
 
 If we compared the contents of Luminary 116 (related to those affected areas of LUM69R2) to the current state of the Comanche 67 reconstruction, we find the following (using the same numbering as above):
 
-1. The single line involved is a constant, J4REQ/J3, and it is located in ORBITAL\_INTEGRATION.gpp in Comanche rather than CONTROLLED\_CONSTANTS.agc in Luminary, but it has the same numerical value, and thus is unrelated to PCR-776.1.
-2. This is simply an allocation of 2 variables in erasable.&nbsp; The same allocations are made in Comanche as in Luminary, though the specific address and surrounding variables not surprisingly differ.&nbsp; Anyway, it seems unlikely that change in model timing would have caused a movement of variable allocations.
-3. This is a single fixed constant, TIMEDELT, having a value of 2000 in LUM69R2 vs a value of 1250 in the Comanche 55 baseline.&nbsp; However, it is consistently 2000 in all revisions of Luminary (_after_ Luminary 116), and consistently 1250 in all revisions of Colossus (including Artemis), so I think this difference has nothing to do with any improvement in model timing.
-4. This area of the code had already been imported as-is from Luminary 116 into Comanche 67 as part of the incorporation of [PCR-772.1](pcr-772-1-incorporation-in-comanche-67).
+1. The single line involved is a constant, J4REQ/J3, and it is located in ORBITAL_INTEGRATION.gpp in Comanche rather than CONTROLLED_CONSTANTS.agc in Luminary, but it has the same numerical value, and thus is unrelated to PCR-776.1.
+2. This is simply an allocation of 2 variables in erasable. The same allocations are made in Comanche as in Luminary, though the specific address and surrounding variables not surprisingly differ. Anyway, it seems unlikely that change in model timing would have caused a movement of variable allocations.
+3. This is a single fixed constant, TIMEDELT, having a value of 2000 in LUM69R2 vs a value of 1250 in the Comanche 55 baseline. However, it is consistently 2000 in all revisions of Luminary (//after// Luminary 116), and consistently 1250 in all revisions of Colossus (including Artemis), so I think this difference has nothing to do with any improvement in model timing.
+4. This area of the code had already been imported as-is from Luminary 116 into Comanche 67 as part of the incorporation of [[pcr-772-1-incorporation-in-comanche-67|PCR-772.1]].
 5. This change had already disappeared by Colossus 2A and Luminary 1A, and it is not relevant to PCR-776.1.
 
 In summary, I'd infer that whatever the changes needed for incorporation of PCR-776.1, they affected the same areas of ORBITAL INTEGRATION as PCR-772.1 had, and that I therefore had inadvertently incorporated PCR-776.1 at the same time as I incorporated PCR-772.1.
