@@ -27,7 +27,7 @@ With that understanding, looks good.
 
 ==== Sheet 6 ====
 
-UPRPT1: So ... just to remind myself about something which confuses me but which would be obvious to anyone who worked regularly with AGC code: The MP instruction is not exactly an integer multiply, but rather a multiplication of two fractional values in the range (-1, 1). While you can interpret the operands as integers, the end result isn't going to be OPERAND1\*OPERAND2, but rather OPERAND1\*OPERAND2 shifted right by 14 bits, with the MSW of the result in A and the LSW in L. So the code performs a multiplication by 01000 (which I would naively think of as a left shift by 9), whereas the code and flowchart comments speak of a right shift by 5. That's because a left shift of 9 followed by a right shift of 14 is a right shift of 5. (End of discussion of the confusing-to-me-but-obvious-to-expert topic.)
+UPRPT1: So ... just to remind myself about something which confuses me but which would be obvious to anyone who worked regularly with AGC code: The MP instruction is not exactly an integer multiply, but rather a multiplication of two fractional values in the range (-1, 1). While you can interpret the operands as integers, the end result isn't going to be OPERAND1*OPERAND2, but rather OPERAND1*OPERAND2 shifted right by 14 bits, with the MSW of the result in A and the LSW in L. So the code performs a multiplication by 01000 (which I would naively think of as a left shift by 9), whereas the code and flowchart comments speak of a right shift by 5. That's because a left shift of 9 followed by a right shift of 14 is a right shift of 5. (End of discussion of the confusing-to-me-but-obvious-to-expert topic.)
 
 With that understanding, looks good.
 

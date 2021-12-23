@@ -14,7 +14,7 @@ The basic gameplan for reconstructing Comanche 67, AKA Colossus 2C, is very simp
 * Use all available contemporary resources to determine exactly how those changes were implemented.  There are many such resources, listed later, but the most important are the Artemis 71 source code (and sometimes Luminary 116 source code) and Comanche 67 flowcharts.
 * Verify memory banks of reconstructed Comanche 67 source code vs the (known) contemporary Comanche 67 memory-bank checksums.
 
-===== Reconstruction of Authorized (and Any Other Known) Changes =====
+===== Incorporation of Authorized (and Any Other Known) Changes =====
 
 In principle, all changes from Comanche 55 through Comanche 67 should have been authorized either by the SCB (via PCRs and PCNs) or else by the ACB (via Software Anomaly Reports).  In point of fact, developers made other changes as well, which may or may not have been documented in so-called COLOSSUS Memos.  Nevertheless, the first step is certainly to get a list of all known authorized changes, and to implement them in the gpp/*.gpp files.  
 
@@ -75,7 +75,7 @@ So here's the list of all such PCRs, PCNs, and Software Anomaly Reports that I t
 * **⚠**  [[pcr-960-incorporation-in-comanche-67|PCR-960]], "Change constant in R52" (SCB 32).  **Summary** :  Fix incorporated in code, and enabled.  It was previously disabled.  There is some question as to whether this PCR was incorporated in Colossus 2C or 2D, and it may need to be revisited at some point in order to clear memory bank 13.
 * [[pcr-961-incorporation-in-comanche-67|PCR-961]], "CMC start of TB6 (E-memory routine)" (SCB 32).  **Summary** :  PCR-961 turns out not to be applicable to Colossus 2C.
 
-===== Colossus 2C Flowcharts =====
+===== Incorporation of Colossus 2C Flowcharts =====
 
 As mentioned above, all software changes from Colossus 2A to Colossus 2C should, in principle, be governed by PCRs, PCNs, and Software Anomaly Reports.  In practice, however, there are always changes made unofficially by software developers, which they simply regard as being good programming practices below a level of significance requiring some sort of official approval process.  (It's just human nature, folks!)  Besides that, my ability to track down all of the implications of a PCR is limited, particularly when in most cases I don't have a copy of the PCR itself, but only a vague description of it.  The art of tracking down the implications of those vague descriptions often involves identifying the software flowcharts associated with the change, and comparing those flowcharts to baseline code to see what may be different.
 
@@ -138,9 +138,9 @@ To that end, here is a list of all flowcharts either specific to Colossus 2C or 
 * [[https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1262|FC-2770 "REENTRY CONTROL", Colossus 2C]]
 * [[https://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1293|FC-2780 "ENTRY DIGITAL AUTOPILOT", Colossus 2C]]
 
-===== Generic Reconstruction Details to Check =====
+===== Generic Reconstruction Details to Check or Incorporate =====
 
-In the preceding section various items are marked with ⚠ to indicate that they should be revisited and perhaps rechecked, while other items are marked with ☒ to indicate they're certainly wrong and need new insights or information to progress.  While working through the PCRs, PCNs, and Software Anomalies in the preceding section, though, I also encountered generic effects that were likely to cause my analyses (and hence my reconstructions) to be incomplete.  I thought it would be worthwhile to list those generic trouble-causers here, so that they could be rechecked yet again after the reconstruction work above had been completed.
+In the preceding sections various items are marked with **⚠** to indicate that they should be revisited and perhaps rechecked, while other items are marked with ☒ to indicate they're certainly wrong and need new insights or information to progress.  While working through the PCRs, PCNs, Software Anomalies, and flowcharts in the preceding sections, though, I also encountered generic effects that were likely to cause my analyses (and hence my reconstructions) to be incomplete.  I thought it would be worthwhile to list those generic trouble-causers here, so that they could be rechecked yet again after the reconstruction work above had been completed.
 
 * [[direct-manipulation-of-flagwords-in-comanche-67|Flags]]:  In incorporating changes that involve creating a new flag (i.e. a bit-field within a "flag word"), it's natural to investigate them in the code by grep'ing for the flag by symbol name.  But the software sometime manipulates flagbits by manipulating the bits in the flagwords, and it's easy to forget to grep for the flagwords.  Perhaps that's best illustrated by example:  To clear the PINBRFLG flag, the code may do something like TC DNFLAG / ADRES PINBRFLG, which is easily found by grep'ing for PINBRFLG.  But the code may instead have done something like this instead, which it's easy to forget to grep:  CS PINBRBIT / MASK FLAGWRD4 / TS FLAGWRD4.  But even grep'ing for PINBRBIT isn't safe, because the code could have done CS BIT6 / MASK FLAGWRD4 / TS FLAGWRD4 instead, since PINBRBIT = BIT6.    **Summary**:  I don't think I overlooked anything like this.
 * [[swinit-flagwords-in-comanche-67|Flags:]]  Beyond what's described in the item above, FRESH START AND RESTART has a routine called DOFSTART which sets/clears a whole bunch of flagwords at startup time using the data from the SWINIT table, and that usage might not be caught even by the precautions in the preceding item.  A special effort should be made to vet the SWINIT table, and possibly DOFSTART.  Of course, errors in SWINIT will show up in the checksum of the bank (05) containing the table.  **Summary**:  This checks out precisely as it should.
@@ -152,20 +152,20 @@ In the preceding section various items are marked with ⚠ to indicate that they
 
 [[https://github.com/virtualagc/virtualagc/tree/comanche67|A branch called "comanche67" has been added to the GitHub repo]], whose folder Comanche067/ holds the reconstructed code.  However, it has proven useful to sometimes make changes in //other// folders (particularly yaYUL/), so it is sometimes possible that other folder have changes not yet merged into the main (non-comanche67) branch as well.
 
-Because there are many, many PCRs, PCNs, and Software Anomalies being incorporated into the reconstructed code, it is sometimes necessary to easily selectively unroll code changes which, bluntly, have turned out poorly.  To that end, reconstructed code is not incorporated //directly// into AGC source files.  Rather, it is incorporated into a series of files which are almost exactly like AGC source code, but which have C-language-style preprocessor directives (such as #ifdef and #endif) to conditionally include or discard changes from the baseline Comanche 55 code.  For example, consider code in the reconstructed Comanche 67 which differs from the baseline Comanche 55 due to PCR-815.  We handle that by using #define to define a preprocessor constant called "Reconstruction815", and then actually make that change as follows
+Because there are many, many PCRs, PCNs, Software Anomalies, and flowcharts being incorporated into the reconstructed code, it is sometimes necessary to easily selectively unroll code changes which, bluntly, have turned out poorly.  To that end, reconstructed code is not incorporated //directly// into AGC source files.  Rather, it is incorporated into a series of files which are almost exactly like AGC source code, but which have C-language-style preprocessor directives (such as #ifdef and #endif) to conditionally include or discard changes from the baseline Comanche 55 code.  For example, consider code in the reconstructed Comanche 67 which differs from the baseline Comanche 55 due to PCR-815.  We handle that by using #define to define a preprocessor constant called "Reconstruction815", and then actually make that change as follows
 '''
 
 #ifdef Reconstruction815
-==== <b>Reconstruction:</b> ... justification for the change ...====
+## <b>Reconstruction:</b> ... justification for the change ...
 ... Reconstructed Comanche 67 source code goes here ...
 #else
 ... Baseline Comanche 55 source code goes here ...
 #endif
 '''
 
-This kind of code can't be processed directly by the AGC assembler, yaYUL, so the source files have to first be run through a C-language-type preprocessor to remove/keep the appropriate blocks of AGC code.  After such preprocessing, what's left over is pure AGC source code, which can be assembled by yaYUL.  (By the way, the ##-style comment is not necessary for the preprocessor, but is desirable for documentation purposes in the final, reconstructed source code, and typically reference the PCR, PCN, or Software Anomaly behind the change.  Such blocks of ##-style comments can contain any number of lines and any HTML, but conventionally must have a first line beginning with the string "\<b\>Reconstruction:\</b\>".)
+This kind of code can't be processed directly by the AGC assembler, yaYUL, so the source files have to first be run through a C-language-type preprocessor to remove/keep the appropriate blocks of AGC code.  After such preprocessing, what's left over is pure AGC source code, which can be assembled by yaYUL.  (By the way, the ##-style comment is not necessary for the preprocessor, but is desirable for documentation purposes in the final, reconstructed source code, and typically reference the PCR, PCN, Software Anomaly, or flowchart behind the change.  Such blocks of ##-style comments can contain any number of lines and any HTML, but conventionally must have a first line beginning with the string "<b>Reconstruction:</b>".)
 
-The preprocessor-directive-laden files conventionally are named identically to the AGC source-code files, but have the filename extension ".gpp" rather than ".agc".  The \*.gpp files are stored in the folder Comanche067/gpp/.  Thus all reconstruction editing is done in the files Comanche067/gpp/\*.gpp rather than in the files Comanche067/\*.agc.  The \*.agc files, rather, are created anew at assembly time whenever the \*.gpp files on which they are based have changed.
+The preprocessor-directive-laden files conventionally are named identically to the AGC source-code files, but have the filename extension ".gpp" rather than ".agc".  The *.gpp files are stored in the folder Comanche067/gpp/.  Thus all reconstruction editing is done in the files Comanche067/gpp/*.gpp rather than in the files Comanche067/*.agc.  The *.agc files, rather, are created anew at assembly time whenever the *.gpp files on which they are based have changed.
 
 As for which specific Comanche 67 reconstructions are included by the preprocessing and which are discarded, there is a file called Comanche067/gpp/defines.default which contains the appropriate #define directives.  Typically, the overall preprocessor label "PreferredReconstruction" is defined (which can be done at the 'make' command line), which causes defines.default to #define a bunch of specific labels to activate the reconstructions for the specific PCRs, PCNs, and Software Anomalies.  
 
@@ -176,7 +176,7 @@ cd PathToComanche067/
 ReconstructionLevel=PreferredReconstruction make
 '''
 
-would make sure that all \*.agc files are regenerated by preprocessing gpp/\*.gpp files, using (my) preferred set of Comanche 67 patches, and then would assemble the reconstructed code.  On the other hand,
+would make sure that all *.agc files are regenerated by preprocessing gpp/*.gpp files, using (my) preferred set of Comanche 67 patches, and then would assemble the reconstructed code.  On the other hand,
 
 '''
 cd PathToComanche067/
@@ -185,7 +185,7 @@ ReconstructionLevel=NoReconstruction make
 
 would discard all of the patches, and hence would simply assemble the Comanche 55 baseline.
 
-Eventually, if the reconstruction were successful, the Makefile would be modified to remove the preprocessing, discarding the gpp/\*.gpp files, and the \*.agc files would simply be the "official" source files.
+Eventually, if the reconstruction were successful, the Makefile would be modified to remove the preprocessing, discarding the gpp/*.gpp files, and the *.agc files would simply be the "official" source files.
 
 ==== Diff'ing the Reconstructed Memory Banks ====
 
@@ -258,6 +258,31 @@ I'd think that the principal usage in the Comanche 67 reconstruction would be as
 symbolBankCompare.py Comanche055.lst Artemis071.lst
 '''
 
+
+==== These Notes Documenting the Reconstruction ====
+
+These notes, aside from being intended to organize and document the effort of reconstructing Comanche 67 source code, started out also as an experiment to see whether using a wiki was an efficient tool for this purpose.  I think the experiment was a great success, with some provisos.
+
+Initially, I decided to use [[https://slimwiki.com/|SlimWiki]], because it was a service that was online, free (for 3 or fewer editors), simple, and had almost all the features I wanted.  Not that I expected anyone else to directly edit this wiki.  Regardless of there being only a single editor, though, for various reasons I won't bore anyone with here, I felt that a wiki-like system would be more fit-for-task than a word processor, a markdown editor, or an WYSIWYG HTML editor.
+
+However, I had some misgivings.  Virtual AGC is an open-source project and I'd like the reconstruction notes to be available indefinitely, whereas there's no guarantee at all that a free service (or a paid service, for that matter) will continue to be available on that basis.  In fact, it almost certainly won't.  I contented myself with the fact that I could export the SlimWiki in "markdown"  format, or in HTML ... if I paid ($20/month subscription) to do so.  Again, this is not really compatible with an open-source project.  As an aside, I'd mention that once I did decide to pay up after all, the exporting facility wasn't really that great, as compared (say) to mediawiki.  Whichever exporting format was used, //extensive// manual editing was needed afterward.  So the truth was that getting the data out of SlimWiki (and converting it to a viewer-friendly format) once it had been put in there would be a very expensive proposition.
+
+After some brief experimentation, I decided that [[https://zim-wiki.org/index.html|Zim]], which is software that gives you a wiki-like WYSIWYG editing environment that's local to your desktop computer, would be a better choice.  Aside from giving complete control over the files at all times, it is free, open-source software available for Linux, Windows, or Mac.  The data format is textual, so the data is suitable for storage in a repository like GitHub.  And Zim, like SlimWiki, has //almost// all the features I want.  Most importantly, though, the export to HTML seems perfect.  Thus the exported web pages can be published online, although obviously the wiki itself cannot be edited online.  Zim also can export to markdown, LaTeX (and thus PDF), and other formats, should those prove valuable.
+
+For whatever it's worth, notes are available as a Zim wiki in the [[https://github.com/virtualagc/virtualagc/tree/gh-pages/Comanche67Reconstruction|Virtual AGC GitHub repository]].
+
+As far as actually using Zim is concerned, I'd note the following:  Zim has not yet reached a 1.0 release.  Zim version 0.6//X// has some bugs that hinder usage and lacks various features (such as rendering of tables) that I've relied upon.  Zim 0.7//X// has worked well for me, and although I assume that later versions will be even better, I'd recommend using nothing earlier than 0.7//X//.
+
+I'd also note that the styles chosen by default for rendering tables in exported HTML are miserable in the Zim version I've been using.  Whereas tables are rendered beautifully in Zim itself.  Fortunately, Zim allows you to customize the HTML template used for the exported files, and even has a built-in facility for doing so (Edit/Templates/html/Default from the main menu), so the styling of the exported HTML is actually very flexible.  I personally felt that I had to add the following to the CSS section of the HTML templates, in order to somewhat-mimic the styling Zim uses internally:
+
+'''
+table, th, td	{ border: 1px solid gray; }
+table		{ border-collapse: collapse; }
+th		{ background-color: lightgray; }
+'''
+
+
+Regarding the markdown export from Zim, I observe that it looks great.  I base that on using the [[https://github.com/retext-project/retext|ReText markdown editor,]] another free, open-source software program.  [[ReText]] only "supports" Linux, but since it's a Python program, it's probably usable elsewhere as well.  (I note that I can only follow the hyperlinks properly using "preview" mode in ReText v. 7.//X//, whereas I can't follow them in [[ReText]] 4.//X//.  But that's obviously a problem in [[ReText]] rather than in the exported markdown itself.)  Regarding the exported LaTeX, or rather the PDF created from the LaTeX, it's a mixed bag, sometimes great, sometimes less so.
 
 ===== Available Documentation Resources =====
 

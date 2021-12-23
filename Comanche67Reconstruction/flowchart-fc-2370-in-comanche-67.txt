@@ -100,7 +100,7 @@ NNADTAB: In Artemis, the value is 24165₈. As I figure it, for "mixed nouns" (N
 * Bit 14: "Decimal only". This means that octal data is entered, the OPR ERR lamp will be illuminated. This bit is set in 24165₈, which makes sense if only RATEPTC and DBPTC are being entered in Artemis, but once OPTPTC comes into the mix I'm not sure it makes sense for Comanche 67. I think it should probably be 0 for us.
 * Bit 13: "Octal only"? At any rate, it doesn't apply to our case and should be 0.
 * Bits 12-11: The number of variables which will be affected, minus 1. In other words, 0=spare, 1=two components, 2=three components. (There's no option for just one component.) Thus we'd need to have a value of 2 for Comanche 67, but would expect a value of 1 for Artemis, and indeed that's exactly what we find.
-* Bits 10-1: An offset into IDADDTAB of the 3 consecutive ECADRs pointing to the (2 or 3) variables which are going to be affected. For N79, this would appear to be (79-40)\*3=117₁₀=165₈. And indeed, that's what we already find in 24165₈.
+* Bits 10-1: An offset into IDADDTAB of the 3 consecutive ECADRs pointing to the (2 or 3) variables which are going to be affected. For N79, this would appear to be (79-40)*3=117₁₀=165₈. And indeed, that's what we already find in 24165₈.
 
 NNTYPTAB: In Artemis, the value if 00113₈. It appears to me that for mixed nouns, the value is parses as follows:
 
