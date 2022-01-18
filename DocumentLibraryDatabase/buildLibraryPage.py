@@ -1011,7 +1011,7 @@ def makeSensiblePublicationDate(record):
                 outString = month + "/" + year
         else:
             outString = year
-    return outString
+    return outString, year
 
 # Uses info from the document record to create a "mouse hover" (using the title
 # attribute of the href) to show supplemental data about a file for download.
@@ -1091,8 +1091,12 @@ def addOrg(dict):
             html += " (" + dict["Organization"] + ")"
     html += "</code>"
     return html
-    
-def documentEntryHTML(record, showComment):    
+
+hrForYearChange = False
+lastYear = ""
+firstEntry = True
+def documentEntryHTML(record, showComment):  
+    global lastYear, firstEntry
     html = ""
     if "recent" in record and record["recent"]:
         html = "<img src=\"new.png\">"
@@ -1147,7 +1151,12 @@ def documentEntryHTML(record, showComment):
         portion = record["Portion"]
         portion = portion[:1].lower() + portion[1:]
         html += ", " + portion
-    published = makeSensiblePublicationDate(record)
+    published,year = makeSensiblePublicationDate(record)
+    if hrForYearChange:
+        if not firstEntry and year != lastYear:
+            html = "<hr>" + html
+        firstEntry = False
+        lastYear = year
     if published != "":
         html += ", " + published
     else:
@@ -1305,7 +1314,7 @@ tableOfContentsSpec = [
     { "anchor"  : "Different", "title" : "Something Different", "keywords" : ["something different"], "blurb" : blurbSomethingDifferent },
      
     { "anchor" : "EngineeringDrawings", "title" : "Electrical and Mechanical Design", "keywords" : [ "Engineering Drawings", "Drawing Tree" ], "blurb" : blurbElectroMechanical },
-    { "anchor" : "Everything", "title" : "Everything", "blurb" : blurbEverything, "all" : True, "lineNumbers" : True }
+    { "anchor" : "Everything", "title" : "Everything", "blurb" : blurbEverything, "all" : True, "lineNumbers" : True, "hr" : True }
 ]
 
 # Step 1:  Read the entire database into the lines[] array from stdin.
@@ -1602,6 +1611,11 @@ if "anchor" in tableOfContentsSpec[1] and tableOfContentsSpec[1]["anchor"] == "R
 # Step 5B:  Output all other sections, based on the parameters in 
 # tableOfContentsSpec[].  
 for n in range(2, len(tableOfContentsSpec)):
+    hrForYearChange = False
+    if "hr" in tableOfContentsSpec[n]:
+        hrForYearChange = True
+        firstEntry = True
+        lastYear = ""
     if "anchor" not in tableOfContentsSpec[n]:
         continue
     # Convert all keywords and targets being searched for to lower case.
