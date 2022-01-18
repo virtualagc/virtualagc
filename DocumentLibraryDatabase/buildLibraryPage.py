@@ -23,6 +23,7 @@
 #               2021-09-20 RSB  First fully-functional version, I think.
 #               2021-10-27 RSB  Added "ACB-" document-number prefix for 
 #                               ACB requests.
+#               2022-01-18 RSB  Added the Study Guides section.
 #
 # Usage:
 #	./buildLibraryPage.py <DocumentLibraryDatabase.tsv >../links2.html
@@ -1249,6 +1250,7 @@ tableOfContentsSpec = [
     { "anchor" : "AGS", "title" : "Abort Guidance System (AGS)", "blurb" : blurbAGS, "keywords" : [ "AGS" ] },
     { "anchor" : "LVDC", "title" : "Launch Vehicle Digital Computer (LVDC) and Friends", "blurb" : blurbLVDC, "keywords" : [ "LVDC", "LVDA", "FCC", "IU" ] },
     { "anchor" : "Experience", "title" : "Apollo Experience Reports", "keywords" : ["Experience report"]},
+    { "anchor" : "StudyGuides", "title" : "Training and Study Guides", "keywords" : ["Training", "Study Guide"]},
     { "anchor" : "SystemsHandbooks", "title" : "Systems Handbooks", "keywords" : ["systems handbook"]},
     { "anchor" : "OperationsHandbooks", "title" : "Operations Handbooks", "keywords" : ["operations handbook"]},
     { "anchor" : "OperationalDataBooks", "title" : "Operational Data Books", "keywords" : ["operational data book"]},
