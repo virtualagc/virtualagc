@@ -698,7 +698,8 @@ If none of the sections above coincides with your special interests, this
 section may help.  It contains <i>every</i> item in our Document Library, 
 whether or not those documents were already included in the preceding sections.
 (Excluding, of course, some G&N system engineering drawings, as explained
-in the immediately-preceding section.)
+in the immediately-preceding section.)  The entries are ordered by 
+publication date.
 <br><br>
 If you <i>still</i> can't find what you need after you've looked in this 
 section, you might consider using the Google searchbar that appears near the 
@@ -1149,6 +1150,8 @@ def documentEntryHTML(record, showComment):
     published = makeSensiblePublicationDate(record)
     if published != "":
         html += ", " + published
+    else:
+        html += " (not dated)"
     Authors = record["Authors"]
     if len(Authors) > 0:
         html += ", by " + addOrg(Authors[0])
