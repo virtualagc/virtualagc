@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14...3.21)
 project(virtualAGC
-LANGUAGES C CXX
+	LANGUAGES C CXX  
 HOMEPAGE_URL "https://github.com/virtualagc/virtualagc")
 
 include(CTest)

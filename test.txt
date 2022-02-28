@@ -1,0 +1,2122 @@
+Apollo Guidance Computer (AGC) assembler, version "2020-12-24", built Feb 28 2022, target BLK1
+(c)2003-2005,2009-2010,2016-2018,2021 Ronald S. Burkey
+Refer to http://www.ibiblio.org/apollo/index.html for more information.
+Pass #1
+Pass #2
+000001,000001:                                                                                          	# Copyright:    Public domain
+000002,000002:                                                                                          	# Filename:     piPeripheral.agc
+000003,000003:                                                                                          	# Purpose:      Code for the short tutorial on AGC bare-metal programming
+000004,000004:                                                                                          	#               from http://www.ibiblio.org/apollo/DIY.html.
+000005,000005:                                                                                          	# Mod History:  2017-12-07 RSB  Wrote.
+000006,000006:                                                                                          	#               2017-12-09 RSB  Added displaying the current time and date
+000007,000007:                                                                                          	#                               from input channels 040-042 supplied by the
+000008,000008:                                                                                          	#                               template peripheral program (piPeriperal.py)
+000009,000009:                                                                                          	#                               when it's used with its --time=1 cli switch.
+000010,000010:                                                                                          	#               2017-12-24 RSB  Added the stuff for supporting --imu and --gps.
+000011,000011:                                                                                          	#               2017-12-25 RSB  Added higher-resolution lat,lon data.  Deleted
+000012,000012:                                                                                          	#                               the toggling of COMP ACTY on keystroke.  Replaced
+000013,000013:                                                                                          	#                               use of PRO key for cycling through modes with
+000014,000014:                                                                                          	#                               + (for cycling forward) and - (for cycling
+000015,000015:                                                                                          	#                               backward).
+000016,000016: 
+000017,000017:                                                                                          	# It extends the simple template program described in the tutorial by
+000018,000018:                                                                                          	# receiving and displaying various data on input channels for a fake
+000019,000019:                                                                                          	# peripheral device defined by the program piPeripheral.py, and
+000020,000020:                                                                                          	# sometimes spitting the unpacked data back out on similarly-defined
+000021,000021:                                                                                          	# output channels 043-050.  The input data supported is
+000022,000022:                                                                                          	# 1's-complement.  Here are the channels, all inputs unless
+000023,000023:                                                                                          	# explicitly stated otherwise:
+000024,000024:                                                                                          	#       Second          Least-significant 6 bits of channel 040
+000025,000025:                                                                                          	#       Minute          Next higher 6 bits of channel 040
+000026,000026:                                                                                          	#                       (Most-significant 3 bits of channel 040 unused)
+000027,000027:                                                                                          	#       Hour            Least-significant 5 bits of channel 041
+000028,000028:                                                                                          	#       Day             Next higher 5 bits of channel 041
+000029,000029:                                                                                          	#       Month           Next higher 4 bits of channel 041
+000030,000030:                                                                                          	#                       (Most-significant bit of channel 041 unused)
+000031,000031:                                                                                          	#       Year            Channel 042.
+000032,000032:                                                                                          	#       Mode or year    Output channel 043.  If the value is <100,
+000033,000033:                                                                                          	#                       it is the current display mode, otherwise the
+000034,000034:                                                                                          	#                       mode is 0 and it is the year.
+000035,000035:                                                                                          	#       (TBD)           Output channels 044-050 contain data that's
+000036,000036:                                                                                          	#                       dependent on the display mode, but generally
+000037,000037:                                                                                          	#                       reflects what is actually being displayed
+000038,000038:                                                                                          	#                       on the DSKY.  At present, though, it always
+000039,000039:                                                                                          	#                       reflects mode 0 evem for other modes, namely,
+000040,000040:                                                                                          	#                       044 is the month, 045 is the day, 046 is
+000041,000041:                                                                                          	#                       the hour, 047 is the minute, and 050 is the
+000042,000042:                                                                                          	#                       second.  In other modes, they will be something
+000043,000043:                                                                                          	#                       else.
+000044,000044:                                                                                          	#       X acceleration  Channel 051, mm/sec/sec
+000045,000045:                                                                                          	#       Y acceleration  Channel 052, mm/sec/sec
+000046,000046:                                                                                          	#       Z acceleration  Channel 053, mm/sec/sec
+000047,000047:                                                                                          	#       X mag field     Channel 054, in units of 0.0001 gauss
+000048,000048:                                                                                          	#       Y mag field     Channel 055, in units of 0.0001 gauss
+000049,000049:                                                                                          	#       Z mag field     Channel 056, in units of 0.0001 gauss
+000050,000050:                                                                                          	#       X gyro          Channel 057, in units of 0.1 dps
+000051,000051:                                                                                          	#       Y gyro          Channel 060, in units of 0.1 dps
+000052,000052:                                                                                          	#       Y gyro          Channel 061, in units of 0.1 dps
+000053,000053:                                                                                          	#       baro pressure   Channel 062, in units of 0.1 hPa
+000054,000054:                                                                                          	#       temperature     Channel 063, in units of 0.01 degrees C
+000055,000055:                                                                                          	#       latitude10      Channel 064. int(latitude*10)
+000056,000056:                                                                                          	#       longitude10     Channel 065. int(longitude*10)
+000057,000057:                                                                                          	#       altitude        Channel 066, meters
+000058,000058:                                                                                          	#       ground speed    Channel 067, kph
+000059,000059:                                                                                          	#       bearing         Channel 070, 0.1 degrees from true North.
+000060,000060:                                                                                          	#       latitudeFrac    Channel 071, int(10000*(fractional part of latitude*10))
+000061,000061:                                                                                          	#       longitudeFrac   Channel 072, int(10000*(fractional part of longitude*10))
+000062,000062:                                                                                          	# ... though actually, for channels 051-063 & 066-072, the values from the input
+000063,000063:                                                                                          	# ports are simply displayed (after conversion to decimal) as-is, so
+000064,000064:                                                                                          	# the their interpretations and units aren't enforced by the AGC.
+000065,000065:                                                                                          	# Note that the X, Y, and Z axes mentioned above are relative to
+000066,000066:                                                                                          	# the sensor board, and I don't know how that relates to DSKY axes.
+000067,000067:                                                                                          	# On the DSKY, what is displayed depends on the selected
+000068,000068:                                                                                          	# display-mode, which you can cycle through with the PRO key.  The
+000069,000069:                                                                                          	# mode is always shown in the PROG area, and is:
+000070,000070:                                                                                          	#       00              time-display mode
+000071,000071:                                                                                          	#       01              acceleration-display mode
+000072,000072:                                                                                          	#       02              magnetometer-display mode
+000073,000073:                                                                                          	#       03              gyro-display mode
+000074,000074:                                                                                          	#       04              weather-sensor-display mode
+000075,000075:                                                                                          	#       05              GPS-location-display mode
+000076,000076:                                                                                          	#       06              GPS-track-display mode
+000077,000077:                                                                                          	#       07              High-res latitude display mode
+000078,000078:                                                                                          	#       08              High-res longitude display mode
+000079,000079:                                                                                          	# Specifically, here's what's shown on the display in the
+000080,000080:                                                                                          	# various display modes.  For the time-display mode:
+000081,000081:                                                                                          	#       PROG            00
+000082,000082:                                                                                          	#       VERB            blank
+000083,000083:                                                                                          	#       NOUN            seconds
+000084,000084:                                                                                          	#       R1              hour, minute, separated by a blank
+000085,000085:                                                                                          	#       R2              month, day, separated by a blank
+000086,000086:                                                                                          	#       R3              year, prefixed by a blank
+000087,000087:                                                                                          	# For the acceleration-display mode:
+000088,000088:                                                                                          	#       PROG            01
+000089,000089:                                                                                          	#       VERB            blank
+000090,000090:                                                                                          	#       NOUN            blank
+000091,000091:                                                                                          	#       R1              X acceleration mm/sec/sec
+000092,000092:                                                                                          	#       R2              Y acceleration mm/sec/sec
+000093,000093:                                                                                          	#       R3              Z acceleration mm/sec/sec
+000094,000094:                                                                                          	# For the magnetometer-display mode:
+000095,000095:                                                                                          	#       PROG            02
+000096,000096:                                                                                          	#       VERB            blank
+000097,000097:                                                                                          	#       NOUN            blank
+000098,000098:                                                                                          	#       R1              X magnetometer 0.0001 gauss
+000099,000099:                                                                                          	#       R2              Y magnetometer 0.0001 gauss
+000100,000100:                                                                                          	#       R3              Z magnetometer 0.0001 gauss
+000101,000101:                                                                                          	# For the gyro-display mode:
+000102,000102:                                                                                          	#       PROG            03
+000103,000103:                                                                                          	#       VERB            blank
+000104,000104:                                                                                          	#       NOUN            blank
+000105,000105:                                                                                          	#       R1              X gyro 0.1 dps
+000106,000106:                                                                                          	#       R2              Y gyro 0.1 dps
+000107,000107:                                                                                          	#       R3              Z gyro 0.1 dps
+000108,000108:                                                                                          	# For the weather-sensor-display mode:
+000109,000109:                                                                                          	#       PROG            04
+000110,000110:                                                                                          	#       VERB            blank
+000111,000111:                                                                                          	#       NOUN            blank
+000112,000112:                                                                                          	#       R1              pressure 0.1 hPa
+000113,000113:                                                                                          	#       R2              temperature 0.01 degrees C
+000114,000114:                                                                                          	#       R3              blank
+000115,000115:                                                                                          	# For the GPS-location-display mode:
+000116,000116:                                                                                          	#       PROG            05
+000117,000117:                                                                                          	#       VERB            blank
+000118,000118:                                                                                          	#       NOUN            blank
+000119,000119:                                                                                          	#       R1              latitude, XX.XX
+000120,000120:                                                                                          	#       R2              longitude, XXX.XX
+000121,000121:                                                                                          	#       R3              altitude, meters
+000122,000122:                                                                                          	# For the GPS-track-display mode:
+000123,000123:                                                                                          	#       PROG            06
+000124,000124:                                                                                          	#       VERB            blank
+000125,000125:                                                                                          	#       NOUN            blank
+000126,000126:                                                                                          	#       R1              ground speed, kph
+000127,000127:                                                                                          	#       R2              direction, 0.1 degrees from true North
+000128,000128:                                                                                          	#       R3              blank
+000129,000129:                                                                                          	# For the hi-res-latitude-display mode:
+000130,000130:                                                                                          	#       PROG            07
+000131,000131:                                                                                          	#       VERB            blank
+000132,000132:                                                                                          	#       NOUN            blank
+000133,000133:                                                                                          	#       R1              latitude, XX
+000134,000134:                                                                                          	#       R2              latitude, .XXXXX
+000135,000135:                                                                                          	#       R3              longitude, XXX.XX
+000136,000136:                                                                                          	# For the hi-res-longitude-display mode:
+000137,000137:                                                                                          	#       PROG            08
+000138,000138:                                                                                          	#       VERB            blank
+000139,000139:                                                                                          	#       NOUN            blank
+000140,000140:                                                                                          	#       R1              latitude, XX.XXX
+000141,000141:                                                                                          	#       R2              latitude, XXX
+000142,000142:                                                                                          	#       R3              longitude, .XXXXX
+000143,000143:                                                                                          	# The output channels used are:
+000144,000144:                                                                                          	#       Year            Channel 043
+000145,000145:                                                                                          	#       Month           Channel 044
+000146,000146:                                                                                          	#       Day             Channel 045
+000147,000147:                                                                                          	#       Hour            Channel 046
+000148,000148:                                                                                          	#       Minute          Channel 047
+000149,000149:                                                                                          	#       Second          Channel 050
+000150,000150:                                                                                          	# The piPeripheral.py template for peripheral programs provides and interprets
+000151,000151:                                                                                          	# this additional data if its --time=1 command-line switch is used.
+000152,000152: 
+000153,000153:                                                                                          	# Special registers.
+MAIN/MAIN.agc:154: Fatal Error: Operand "EQUALS" not resolved.
+000154,000154: ???????           00000        A                           EQUALS     0                  	#
+MAIN/MAIN.agc:155: Fatal Error: Operand "EQUALS" not resolved.
+000155,000155: ???????           00000        L                           EQUALS     1                  	# L AND Q ARE BOTH CHANNELS AND REGISTERS.
+MAIN/MAIN.agc:156: Fatal Error: Operand "EQUALS" not resolved.
+000156,000156: ???????           00000        Q                           EQUALS     2                  	#
+MAIN/MAIN.agc:157: Fatal Error: Operand "EQUALS" not resolved.
+000157,000157: ???????           00000        EBANK                       EQUALS     3                  	#
+MAIN/MAIN.agc:158: Fatal Error: Operand "EQUALS" not resolved.
+000158,000158: ???????           00000        FBANK                       EQUALS     4                  	#
+MAIN/MAIN.agc:159: Fatal Error: Operand "EQUALS" not resolved.
+000159,000159: ???????           00000        Z                           EQUALS     5                  	# ADJACENT TO FBANK AND BBANK FOR DXCH Z
+MAIN/MAIN.agc:160: Fatal Error: Operand "EQUALS" not resolved.
+000160,000160: ???????           00000        BBANK                       EQUALS     6                  	# (DTCB) AND DXCH FBANK (DTCF).
+000161,000161:                                                                                          	# REGISTER 7 IS A ZERO-SOURCE, USED BY ZL.
+MAIN/MAIN.agc:162: Fatal Error: Operand "EQUALS" not resolved.
+000162,000162: ???????           00000        ARUPT                       EQUALS     10                 	# INTERRUPT STORAGE.
+MAIN/MAIN.agc:163: Fatal Error: Operand "EQUALS" not resolved.
+000163,000163: ???????           00000        LRUPT                       EQUALS     11                 	#
+MAIN/MAIN.agc:164: Fatal Error: Operand "EQUALS" not resolved.
+000164,000164: ???????           00000        QRUPT                       EQUALS     12                 	#
+MAIN/MAIN.agc:165: Fatal Error: Operand "EQUALS" not resolved.
+000165,000165: ???????           00000        SAMPTIME                    EQUALS     13                 	# SAMPLED TIME 1 & 2.
+MAIN/MAIN.agc:166: Fatal Error: Operand "EQUALS" not resolved.
+000166,000166: ???????           00000        ZRUPT                       EQUALS     15                 	# (13 AND 14 ARE SPARES.)
+MAIN/MAIN.agc:167: Fatal Error: Operand "EQUALS" not resolved.
+000167,000167: ???????           00000        BANKRUPT                    EQUALS     16                 	# USUALLY HOLDS FBANK OR BBANK.
+MAIN/MAIN.agc:168: Fatal Error: Operand "EQUALS" not resolved.
+000168,000168: ???????           00000        BRUPT                       EQUALS     17                 	# RESUME ADDRESS AS WELL.
+MAIN/MAIN.agc:169: Fatal Error: Operand "EQUALS" not resolved.
+000169,000169: ???????           00000        CYR                         EQUALS     20                 	#
+MAIN/MAIN.agc:170: Fatal Error: Operand "EQUALS" not resolved.
+000170,000170: ???????           00000        SR                          EQUALS     21                 	#
+MAIN/MAIN.agc:171: Fatal Error: Operand "EQUALS" not resolved.
+000171,000171: ???????           00000        CYL                         EQUALS     22                 	#
+MAIN/MAIN.agc:172: Fatal Error: Operand "EQUALS" not resolved.
+000172,000172: ???????           00000        EDOP                        EQUALS     23                 	# EDITS INTERPRETIVE OPERATION CODE PAIRS.
+MAIN/MAIN.agc:173: Fatal Error: Operand "EQUALS" not resolved.
+000173,000173: ???????           00000        TIME2                       EQUALS     24                 	#
+MAIN/MAIN.agc:174: Fatal Error: Operand "EQUALS" not resolved.
+000174,000174: ???????           00000        TIME1                       EQUALS     25                 	#
+MAIN/MAIN.agc:175: Fatal Error: Operand "EQUALS" not resolved.
+000175,000175: ???????           00000        TIME3                       EQUALS     26                 	#
+MAIN/MAIN.agc:176: Fatal Error: Operand "EQUALS" not resolved.
+000176,000176: ???????           00000        TIME4                       EQUALS     27                 	#
+MAIN/MAIN.agc:177: Fatal Error: Operand "EQUALS" not resolved.
+000177,000177: ???????           00000        TIME5                       EQUALS     30                 	#
+MAIN/MAIN.agc:178: Fatal Error: Operand "EQUALS" not resolved.
+000178,000178: ???????           00000        TIME6                       EQUALS     31                 	#
+000179,000179: 
+MAIN/MAIN.agc:180: Fatal Error: Operand "SETLOC" not resolved.
+000180,000180: ???????           00000                                    SETLOC     67                 	#
+MAIN/MAIN.agc:181: Fatal Error: Operand "ERASE" not resolved.
+000181,000181: ???????           00000        NEWJOB                      ERASE                         	# Allocate a variable at the location checked by the Night Watchman.
+000182,000182: 
+000183,000183:                                                                                          	# More variables.
+MAIN/MAIN.agc:184: Fatal Error: Operand "ERASE" not resolved.
+000184,000184: ???????           00000        KEYBUF                      ERASE                         	# 040 when empty, 0-037 when holding a keycode
+MAIN/MAIN.agc:185: Fatal Error: Operand "ERASE" not resolved.
+000185,000185: ???????           00000        LAST040                     ERASE                         	# Most recent value from input channel 040.
+MAIN/MAIN.agc:186: Fatal Error: Operand "ERASE" not resolved.
+000186,000186: ???????           00000        SECOND                      ERASE                         	# Storage for components of time
+MAIN/MAIN.agc:187: Fatal Error: Operand "ERASE" not resolved.
+000187,000187: ???????           00000        MINUTE                      ERASE                         	#
+MAIN/MAIN.agc:188: Fatal Error: Operand "ERASE" not resolved.
+000188,000188: ???????           00000        HOUR                        ERASE                         	#
+MAIN/MAIN.agc:189: Fatal Error: Operand "ERASE" not resolved.
+000189,000189: ???????           00000        DAY                         ERASE                         	#
+MAIN/MAIN.agc:190: Fatal Error: Operand "ERASE" not resolved.
+000190,000190: ???????           00000        MONTH                       ERASE                         	#
+MAIN/MAIN.agc:191: Fatal Error: Operand "ERASE" not resolved.
+000191,000191: ???????           00000        YEAR                        ERASE                         	#
+MAIN/MAIN.agc:192: Fatal Error: Operand "ERASE" not resolved.
+000192,000192: ???????           00000        SIGN                        ERASE                         	# For buffering sign+digits in conversion of integer to decimal string.
+MAIN/MAIN.agc:193: Fatal Error: Operand "ERASE" not resolved.
+000193,000193: ???????           00000        DIGIT1                      ERASE                         	#
+MAIN/MAIN.agc:194: Fatal Error: Operand "ERASE" not resolved.
+000194,000194: ???????           00000        DIGIT2                      ERASE                         	#
+MAIN/MAIN.agc:195: Fatal Error: Operand "ERASE" not resolved.
+000195,000195: ???????           00000        DIGIT3                      ERASE                         	#
+MAIN/MAIN.agc:196: Fatal Error: Operand "ERASE" not resolved.
+000196,000196: ???????           00000        DIGIT4                      ERASE                         	#
+MAIN/MAIN.agc:197: Fatal Error: Operand "ERASE" not resolved.
+000197,000197: ???????           00000        DIGIT5                      ERASE                         	#
+MAIN/MAIN.agc:198: Fatal Error: Operand "ERASE" not resolved.
+000198,000198: ???????           00000        SIGNA                       ERASE                         	# For buffering sign+digits in conversion of integer to decimal string.
+MAIN/MAIN.agc:199: Fatal Error: Operand "ERASE" not resolved.
+000199,000199: ???????           00000        DIGIT1A                     ERASE                         	#
+MAIN/MAIN.agc:200: Fatal Error: Operand "ERASE" not resolved.
+000200,000200: ???????           00000        DIGIT2A                     ERASE                         	#
+MAIN/MAIN.agc:201: Fatal Error: Operand "ERASE" not resolved.
+000201,000201: ???????           00000        DIGIT3A                     ERASE                         	#
+MAIN/MAIN.agc:202: Fatal Error: Operand "ERASE" not resolved.
+000202,000202: ???????           00000        DIGIT4A                     ERASE                         	#
+MAIN/MAIN.agc:203: Fatal Error: Operand "ERASE" not resolved.
+000203,000203: ???????           00000        DIGIT5A                     ERASE                         	#
+MAIN/MAIN.agc:204: Fatal Error: Operand "ERASE" not resolved.
+000204,000204: ???????           00000        DSPR                        ERASE                         	# Return address for DSPxxxx functions.
+MAIN/MAIN.agc:205: Fatal Error: Operand "ERASE" not resolved.
+000205,000205: ???????           00000        DIGIT25                     ERASE                         	#
+MAIN/MAIN.agc:206: Fatal Error: Operand "ERASE" not resolved.
+000206,000206: ???????           00000        DIGIT31                     ERASE                         	#
+MAIN/MAIN.agc:207: Fatal Error: Operand "ERASE" not resolved.
+000207,000207: ???????           00000        DIVISOR                     ERASE                         	# A dummy variable used to store divisors.
+MAIN/MAIN.agc:208: Fatal Error: Operand "ERASE" not resolved.
+000208,000208: ???????           00000        DSPMODE                     ERASE                         	# display-mode: 0 time, 1 acceleration, 2 magnetometer, etc.
+MAIN/MAIN.agc:209: Fatal Error: Operand "ERASE" not resolved.
+000209,000209: ???????           00000        LLLOW                       ERASE                         	# LS word of lat or lon
+MAIN/MAIN.agc:210: Fatal Error: Operand "ERASE" not resolved.
+000210,000210: ???????           00000        LLHIGH                      ERASE                         	# MS word of lat or lon.
+MAIN/MAIN.agc:211: Fatal Error: Operand "ERASE" not resolved.
+000211,000211: ???????           00000        LLRET                       ERASE                         	# Return address for LL2.
+000212,000212: 
+MAIN/MAIN.agc:213: Fatal Error: Operand "SETLOC" not resolved.
+000213,000213: ???????           00000                                    SETLOC     4000               	# The interrupt-vector table.
+000214,000214: 
+000215,000215:                                                                                          	# Come here at power-up or GOJAM
+MAIN/MAIN.agc:216: Fatal Error: Operand "INHINT" not resolved.
+000216,000216: ???????           00000                                    INHINT                        	# Disable interrupts for a moment.
+000217,000217:                                                                                          	# Set up the TIME3 interrupt, T3RUPT.  TIME3 is a 15-bit
+000218,000218:                                                                                          	# register at address 026, which automatically increments every
+000219,000219:                                                                                          	# 10 ms, and a T3RUPT interrupt occurs when the timer
+000220,000220:                                                                                          	# overflows.  Thus if it is initially loaded with 037774,
+000221,000221:                                                                                          	# and overflows when it hits 040000, then it will
+000222,000222:                                                                                          	# interrupt after 40 ms.
+MAIN/MAIN.agc:223: Fatal Error: Operand "BANK" not resolved.
+000223,000223: ???????           00000                                    BANK       0                  	#
+000224,000224: 
+MAIN/MAIN.agc:225: Fatal Error: Operand "CA" not resolved.
+000225,000225: ???????           00000                                    CA         EIGHT              	#
+MAIN/MAIN.agc:226: Fatal Error: Operand "CA" not resolved.
+000226,000226: ???????           00000                                    CA         O37774             	#
+MAIN/MAIN.agc:227: Fatal Error: Operand "TS" not resolved.
+000227,000227: ???????           00000                                    TS         TIME3              	#
+MAIN/MAIN.agc:228: Fatal Error: Operand "TCF" not resolved.
+000228,000228: ???????           00000                                    TCF        STARTUP            	# Go to your "real" code.
+000229,000229: 
+MAIN/MAIN.agc:230: Fatal Error: Operand "RESUME" not resolved.
+000230,000230: ???????           00000                                    RESUME                        	# T6RUPT
+MAIN/MAIN.agc:231: Fatal Error: Operand "NOOP" not resolved.
+000231,000231: ???????           00000                                    NOOP                          	#
+MAIN/MAIN.agc:232: Fatal Error: Operand "NOOP" not resolved.
+000232,000232: ???????           00000                                    NOOP                          	#
+MAIN/MAIN.agc:233: Fatal Error: Operand "NOOP" not resolved.
+000233,000233: ???????           00000                                    NOOP                          	#
+000234,000234: 
+MAIN/MAIN.agc:235: Fatal Error: Operand "RESUME" not resolved.
+000235,000235: ???????           00000                                    RESUME                        	# T5RUPT
+MAIN/MAIN.agc:236: Fatal Error: Operand "NOOP" not resolved.
+000236,000236: ???????           00000                                    NOOP                          	#
+MAIN/MAIN.agc:237: Fatal Error: Operand "NOOP" not resolved.
+000237,000237: ???????           00000                                    NOOP                          	#
+MAIN/MAIN.agc:238: Fatal Error: Operand "NOOP" not resolved.
+000238,000238: ???????           00000                                    NOOP                          	#
+000239,000239: 
+MAIN/MAIN.agc:240: Fatal Error: Operand "DXCH" not resolved.
+000240,000240: ???????           00000                                    DXCH       ARUPT              	# T3RUPT
+MAIN/MAIN.agc:241: Fatal Error: Operand "EXTEND" not resolved.
+000241,000241: ???????           00000                                    EXTEND                        	# Back up A, L, and Q registers
+MAIN/MAIN.agc:242: Fatal Error: Operand "QXCH" not resolved.
+000242,000242: ???????           00000                                    QXCH       QRUPT              	#
+MAIN/MAIN.agc:243: Fatal Error: Operand "TCF" not resolved.
+000243,000243: ???????           00000                                    TCF        T3RUPT             	#
+000244,000244: 
+MAIN/MAIN.agc:245: Fatal Error: Operand "RESUME" not resolved.
+000245,000245: ???????           00000                                    RESUME                        	# T4RUPT
+MAIN/MAIN.agc:246: Fatal Error: Operand "NOOP" not resolved.
+000246,000246: ???????           00000                                    NOOP                          	#
+MAIN/MAIN.agc:247: Fatal Error: Operand "NOOP" not resolved.
+000247,000247: ???????           00000                                    NOOP                          	#
+MAIN/MAIN.agc:248: Fatal Error: Operand "NOOP" not resolved.
+000248,000248: ???????           00000                                    NOOP                          	#
+000249,000249: 
+MAIN/MAIN.agc:250: Fatal Error: Operand "DXCH" not resolved.
+000250,000250: ???????           00000                                    DXCH       ARUPT              	# KEYRUPT1
+MAIN/MAIN.agc:251: Fatal Error: Operand "EXTEND" not resolved.
+000251,000251: ???????           00000                                    EXTEND                        	# Back up A, L, and Q registers
+MAIN/MAIN.agc:252: Fatal Error: Operand "QXCH" not resolved.
+000252,000252: ???????           00000                                    QXCH       QRUPT              	#
+MAIN/MAIN.agc:253: Fatal Error: Operand "TCF" not resolved.
+000253,000253: ???????           00000                                    TCF        KEYRUPT            	#
+000254,000254: 
+MAIN/MAIN.agc:255: Fatal Error: Operand "DXCH" not resolved.
+000255,000255: ???????           00000                                    DXCH       ARUPT              	# KEYRUPT2
+MAIN/MAIN.agc:256: Fatal Error: Operand "EXTEND" not resolved.
+000256,000256: ???????           00000                                    EXTEND                        	# Back up A, L, and Q registers
+MAIN/MAIN.agc:257: Fatal Error: Operand "QXCH" not resolved.
+000257,000257: ???????           00000                                    QXCH       QRUPT              	#
+MAIN/MAIN.agc:258: Fatal Error: Operand "TCF" not resolved.
+000258,000258: ???????           00000                                    TCF        KEYRUPT            	#
+000259,000259: 
+MAIN/MAIN.agc:260: Fatal Error: Operand "RESUME" not resolved.
+000260,000260: ???????           00000                                    RESUME                        	# UPRUPT
+MAIN/MAIN.agc:261: Fatal Error: Operand "NOOP" not resolved.
+000261,000261: ???????           00000                                    NOOP                          	#
+MAIN/MAIN.agc:262: Fatal Error: Operand "NOOP" not resolved.
+000262,000262: ???????           00000                                    NOOP                          	#
+MAIN/MAIN.agc:263: Fatal Error: Operand "NOOP" not resolved.
+000263,000263: ???????           00000                                    NOOP                          	#
+000264,000264: 
+MAIN/MAIN.agc:265: Fatal Error: Operand "RESUME" not resolved.
+000265,000265: ???????           00000                                    RESUME                        	# DOWNRUPT
+MAIN/MAIN.agc:266: Fatal Error: Operand "NOOP" not resolved.
+000266,000266: ???????           00000                                    NOOP                          	#
+MAIN/MAIN.agc:267: Fatal Error: Operand "NOOP" not resolved.
+000267,000267: ???????           00000                                    NOOP                          	#
+MAIN/MAIN.agc:268: Fatal Error: Operand "NOOP" not resolved.
+000268,000268: ???????           00000                                    NOOP                          	#
+000269,000269: 
+MAIN/MAIN.agc:270: Fatal Error: Operand "RESUME" not resolved.
+000270,000270: ???????           00000                                    RESUME                        	# RADAR RUPT
+MAIN/MAIN.agc:271: Fatal Error: Operand "NOOP" not resolved.
+000271,000271: ???????           00000                                    NOOP                          	#
+MAIN/MAIN.agc:272: Fatal Error: Operand "NOOP" not resolved.
+000272,000272: ???????           00000                                    NOOP                          	#
+MAIN/MAIN.agc:273: Fatal Error: Operand "NOOP" not resolved.
+000273,000273: ???????           00000                                    NOOP                          	#
+000274,000274: 
+MAIN/MAIN.agc:275: Fatal Error: Operand "RESUME" not resolved.
+000275,000275: ???????           00000                                    RESUME                        	# RUPT10
+MAIN/MAIN.agc:276: Fatal Error: Operand "NOOP" not resolved.
+000276,000276: ???????           00000                                    NOOP                          	#
+MAIN/MAIN.agc:277: Fatal Error: Operand "NOOP" not resolved.
+000277,000277: ???????           00000                                    NOOP                          	#
+MAIN/MAIN.agc:278: Fatal Error: Operand "NOOP" not resolved.
+000278,000278: ???????           00000                                    NOOP                          	#
+000279,000279: 
+000280,000280:                                                                                          	# The interrupt-service routine for the TIME3 interrupt every 40 ms.
+MAIN/MAIN.agc:281: Fatal Error: Operand "CAF" not resolved.
+000281,000281: ???????           00000        T3RUPT                      CAF        O37774             	# Schedule another TIME3 interrupt in 40 ms.
+MAIN/MAIN.agc:282: Fatal Error: Operand "TS" not resolved.
+000282,000282: ???????           00000                                    TS         TIME3              	#
+000283,000283: 
+000284,000284:                                                                                          	# And resume the main program
+MAIN/MAIN.agc:285: Fatal Error: Operand "DXCH" not resolved.
+000285,000285: ???????           00000                                    DXCH       ARUPT              	# Restore A, L, and Q, and exit the interrupt
+MAIN/MAIN.agc:286: Fatal Error: Operand "EXTEND" not resolved.
+000286,000286: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:287: Fatal Error: Operand "QXCH" not resolved.
+000287,000287: ???????           00000                                    QXCH       QRUPT              	#
+MAIN/MAIN.agc:288: Fatal Error: Operand "RESUME" not resolved.
+000288,000288: ???????           00000                                    RESUME                        	#
+000289,000289: 
+000290,000290:                                                                                          	# Interrupt-service code for DSKY keycode
+MAIN/MAIN.agc:291: Fatal Error: Operand "EXTEND" not resolved.
+000291,000291: ???????           00000        KEYRUPT                     EXTEND                        	#
+MAIN/MAIN.agc:292: Fatal Error: Operand "READ" not resolved.
+000292,000292: ???????           00000                                    READ       15                 	# Read the DSKY keycode input channel
+MAIN/MAIN.agc:293: Fatal Error: Operand "MASK" not resolved.
+000293,000293: ???????           00000                                    MASK       O37                	# Get rid of all but lowest 5 bits.
+MAIN/MAIN.agc:294: Fatal Error: Operand "TS" not resolved.
+000294,000294: ???????           00000                                    TS         KEYBUF             	# Save the keycode for later.
+MAIN/MAIN.agc:295: Fatal Error: Operand "CA" not resolved.
+000295,000295: ???????           00000                                    CA         ZERO               	# Clear the input channel.
+MAIN/MAIN.agc:296: Fatal Error: Operand "EXTEND" not resolved.
+000296,000296: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:297: Fatal Error: Operand "WRITE" not resolved.
+000297,000297: ???????           00000                                    WRITE      15                 	#
+MAIN/MAIN.agc:298: Fatal Error: Operand "DXCH" not resolved.
+000298,000298: ???????           00000                                    DXCH       ARUPT              	# Restore A, L, and Q, and exit the interrupt
+MAIN/MAIN.agc:299: Fatal Error: Operand "EXTEND" not resolved.
+000299,000299: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:300: Fatal Error: Operand "QXCH" not resolved.
+000300,000300: ???????           00000                                    QXCH       QRUPT              	#
+MAIN/MAIN.agc:301: Fatal Error: Operand "RESUME" not resolved.
+000301,000301: ???????           00000                                    RESUME                        	#
+000302,000302: 
+MAIN/MAIN.agc:303: Fatal Error: Operand "RELINT" not resolved.
+000303,000303: ???????           00000        STARTUP                     RELINT                        	# Reenable interrupts.
+000304,000304:                                                                                          	# Initialization
+MAIN/MAIN.agc:305: Fatal Error: Operand "CA" not resolved.
+000305,000305: ???????           00000                                    CA         NOKEY              	# Clear the keypad buffer variable
+MAIN/MAIN.agc:306: Fatal Error: Operand "TS" not resolved.
+000306,000306: ???????           00000                                    TS         KEYBUF             	# to initially hold an illegal keycode.
+MAIN/MAIN.agc:307: Fatal Error: Operand "CA" not resolved.
+000307,000307: ???????           00000                                    CA         ZERO               	#
+MAIN/MAIN.agc:308: Fatal Error: Operand "TS" not resolved.
+000308,000308: ???????           00000                                    TS         DSPMODE            	# Display mode.
+000309,000309: 
+000310,000310:                                                                                          	# Prepare the display in mode 0
+MAIN/MAIN.agc:311: Fatal Error: Operand "TC" not resolved.
+000311,000311: ???????           00000                                    TC         BLANKALL           	# Completely blank the display
+MAIN/MAIN.agc:312: Fatal Error: Operand "CA" not resolved.
+000312,000312: ???????           00000                                    CA         DSPMODE            	# Write the display mode to PROG.
+MAIN/MAIN.agc:313: Fatal Error: Operand "TC" not resolved.
+000313,000313: ???????           00000                                    TC         DSPPROG            	#
+000314,000314: 
+MAIN/MAIN.agc:315: Fatal Error: Operand "EXTEND" not resolved.
+000315,000315: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:316: Fatal Error: Operand "READ" not resolved.
+000316,000316: ???????           00000                                    READ       40                 	#
+MAIN/MAIN.agc:317: Fatal Error: Operand "TS" not resolved.
+000317,000317: ???????           00000                                    TS         LAST040            	#
+MAIN/MAIN.agc:318: Fatal Error: Operand "CS" not resolved.
+000318,000318: ???????           00000        MAINLOOP                    CS         NEWJOB             	# Tickle the Night Watchman.
+000319,000319: 
+000320,000320:                                                                                          	#----------------------------------------------------------------------
+000321,000321:                                                                                          	# Check if there's a keycode ready, and process the keycode
+000322,000322:                                                                                          	# if there is.
+MAIN/MAIN.agc:323: Fatal Error: Operand "CA" not resolved.
+000323,000323: ???????           00000                                    CA         NOKEY              	#
+MAIN/MAIN.agc:324: Fatal Error: Operand "XCH" not resolved.
+000324,000324: ???????           00000                                    XCH        KEYBUF             	# Mark keycode buffer as empty and get keycode into A.
+MAIN/MAIN.agc:325: Fatal Error: Operand "INDEX" not resolved.
+000325,000325: ???????           00000                                    INDEX      A                  	#
+MAIN/MAIN.agc:326: Fatal Error: Operand "TCF" not resolved.
+000326,000326: ???????           00000                                    TCF        KEYTABL            	#
+MAIN/MAIN.agc:327: Fatal Error: Operand "TCF" not resolved.
+000327,000327: ???????           00000        KEYTABL                     TCF        ENDKYCK            	# unused
+MAIN/MAIN.agc:328: Fatal Error: Operand "TCF" not resolved.
+000328,000328: ???????           00000                                    TCF        ENDKYCK            	# 1
+MAIN/MAIN.agc:329: Fatal Error: Operand "TCF" not resolved.
+000329,000329: ???????           00000                                    TCF        ENDKYCK            	# 2
+MAIN/MAIN.agc:330: Fatal Error: Operand "TCF" not resolved.
+000330,000330: ???????           00000                                    TCF        ENDKYCK            	# 3
+MAIN/MAIN.agc:331: Fatal Error: Operand "TCF" not resolved.
+000331,000331: ???????           00000                                    TCF        ENDKYCK            	# 4
+MAIN/MAIN.agc:332: Fatal Error: Operand "TCF" not resolved.
+000332,000332: ???????           00000                                    TCF        ENDKYCK            	# 5
+MAIN/MAIN.agc:333: Fatal Error: Operand "TCF" not resolved.
+000333,000333: ???????           00000                                    TCF        ENDKYCK            	# 6
+MAIN/MAIN.agc:334: Fatal Error: Operand "TCF" not resolved.
+000334,000334: ???????           00000                                    TCF        ENDKYCK            	# 7
+MAIN/MAIN.agc:335: Fatal Error: Operand "TCF" not resolved.
+000335,000335: ???????           00000                                    TCF        ENDKYCK            	# 8
+MAIN/MAIN.agc:336: Fatal Error: Operand "TCF" not resolved.
+000336,000336: ???????           00000                                    TCF        ENDKYCK            	# 9
+MAIN/MAIN.agc:337: Fatal Error: Operand "TCF" not resolved.
+000337,000337: ???????           00000                                    TCF        ENDKYCK            	# unused
+MAIN/MAIN.agc:338: Fatal Error: Operand "TCF" not resolved.
+000338,000338: ???????           00000                                    TCF        ENDKYCK            	# unused
+MAIN/MAIN.agc:339: Fatal Error: Operand "TCF" not resolved.
+000339,000339: ???????           00000                                    TCF        ENDKYCK            	# unused
+MAIN/MAIN.agc:340: Fatal Error: Operand "TCF" not resolved.
+000340,000340: ???????           00000                                    TCF        ENDKYCK            	# unused
+MAIN/MAIN.agc:341: Fatal Error: Operand "TCF" not resolved.
+000341,000341: ???????           00000                                    TCF        ENDKYCK            	# unused
+MAIN/MAIN.agc:342: Fatal Error: Operand "TCF" not resolved.
+000342,000342: ???????           00000                                    TCF        ENDKYCK            	# unused
+MAIN/MAIN.agc:343: Fatal Error: Operand "TCF" not resolved.
+000343,000343: ???????           00000                                    TCF        ENDKYCK            	# 0
+MAIN/MAIN.agc:344: Fatal Error: Operand "TCF" not resolved.
+000344,000344: ???????           00000                                    TCF        ENDKYCK            	# VERB
+MAIN/MAIN.agc:345: Fatal Error: Operand "TCF" not resolved.
+000345,000345: ???????           00000                                    TCF        ENDKYCK            	# RSET
+MAIN/MAIN.agc:346: Fatal Error: Operand "TCF" not resolved.
+000346,000346: ???????           00000                                    TCF        ENDKYCK            	# unused
+MAIN/MAIN.agc:347: Fatal Error: Operand "TCF" not resolved.
+000347,000347: ???????           00000                                    TCF        ENDKYCK            	# unused
+MAIN/MAIN.agc:348: Fatal Error: Operand "TCF" not resolved.
+000348,000348: ???????           00000                                    TCF        ENDKYCK            	# unused
+MAIN/MAIN.agc:349: Fatal Error: Operand "TCF" not resolved.
+000349,000349: ???????           00000                                    TCF        ENDKYCK            	# unused
+MAIN/MAIN.agc:350: Fatal Error: Operand "TCF" not resolved.
+000350,000350: ???????           00000                                    TCF        ENDKYCK            	# unused
+MAIN/MAIN.agc:351: Fatal Error: Operand "TCF" not resolved.
+000351,000351: ???????           00000                                    TCF        ENDKYCK            	# unused
+MAIN/MAIN.agc:352: Fatal Error: Operand "TCF" not resolved.
+000352,000352: ???????           00000                                    TCF        ENDKYCK            	# KEY REL
+MAIN/MAIN.agc:353: Fatal Error: Operand "TCF" not resolved.
+000353,000353: ???????           00000                                    TCF        DSPMODE+           	# +
+MAIN/MAIN.agc:354: Fatal Error: Operand "TCF" not resolved.
+000354,000354: ???????           00000                                    TCF        DSPMODE-           	# -
+MAIN/MAIN.agc:355: Fatal Error: Operand "TCF" not resolved.
+000355,000355: ???????           00000                                    TCF        ENDKYCK            	# ENTR
+MAIN/MAIN.agc:356: Fatal Error: Operand "TCF" not resolved.
+000356,000356: ???????           00000                                    TCF        ENDKYCK            	# unused
+MAIN/MAIN.agc:357: Fatal Error: Operand "TCF" not resolved.
+000357,000357: ???????           00000                                    TCF        ENDKYCK            	# CLR
+MAIN/MAIN.agc:358: Fatal Error: Operand "TCF" not resolved.
+000358,000358: ???????           00000                                    TCF        ENDKYCK            	# NOUN
+MAIN/MAIN.agc:359: Fatal Error: Operand "TCF" not resolved.
+000359,000359: ???????           00000                                    TCF        ENDKYCK            	# NOKEY
+000360,000360: 
+MAIN/MAIN.agc:361: Fatal Error: Operand "CA" not resolved.
+000361,000361: ???????           00000        DSPMODE+                    CA         DSPMODE            	# Increment display mode.
+MAIN/MAIN.agc:362: Fatal Error: Operand "AD" not resolved.
+000362,000362: ???????           00000                                    AD         ONE                	#
+MAIN/MAIN.agc:363: Fatal Error: Operand "TS" not resolved.
+000363,000363: ???????           00000                                    TS         DSPMODE            	#
+MAIN/MAIN.agc:364: Fatal Error: Operand "AD" not resolved.
+000364,000364: ???????           00000                                    AD         MINUS8             	# Check for wraparound
+MAIN/MAIN.agc:365: Fatal Error: Operand "EXTEND" not resolved.
+000365,000365: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:366: Fatal Error: Operand "BZMF" not resolved.
+000366,000366: ???????           00000                                    BZMF       RETRIG             	# No wraparound
+MAIN/MAIN.agc:367: Fatal Error: Operand "CA" not resolved.
+000367,000367: ???????           00000                                    CA         ZERO               	# Wraparound to 0.
+MAIN/MAIN.agc:368: Fatal Error: Operand "TS" not resolved.
+000368,000368: ???????           00000                                    TS         DSPMODE            	#
+MAIN/MAIN.agc:369: Fatal Error: Operand "TCF" not resolved.
+000369,000369: ???????           00000                                    TCF        RETRIG             	#
+000370,000370: 
+MAIN/MAIN.agc:371: Fatal Error: Operand "CA" not resolved.
+000371,000371: ???????           00000        DSPMODE-                    CA         DSPMODE            	# Decrement display mode.
+MAIN/MAIN.agc:372: Fatal Error: Operand "EXTEND" not resolved.
+000372,000372: ???????           00000                                    EXTEND                        	# but pre-check for wraparound.
+MAIN/MAIN.agc:373: Fatal Error: Operand "BZF" not resolved.
+000373,000373: ???????           00000                                    BZF        WILLWRAP           	#
+MAIN/MAIN.agc:374: Fatal Error: Operand "AD" not resolved.
+000374,000374: ???????           00000                                    AD         MINUS1             	#
+MAIN/MAIN.agc:375: Fatal Error: Operand "TS" not resolved.
+000375,000375: ???????           00000                                    TS         DSPMODE            	#
+MAIN/MAIN.agc:376: Fatal Error: Operand "TCF" not resolved.
+000376,000376: ???????           00000                                    TCF        RETRIG             	#
+MAIN/MAIN.agc:377: Fatal Error: Operand "CA" not resolved.
+000377,000377: ???????           00000        WILLWRAP                    CA         EIGHT              	#
+MAIN/MAIN.agc:378: Fatal Error: Operand "TS" not resolved.
+000378,000378: ???????           00000                                    TS         DSPMODE            	#
+MAIN/MAIN.agc:379: Fatal Error: Operand "TCF" not resolved.
+000379,000379: ???????           00000                                    TCF        RETRIG             	#
+000380,000380: 
+MAIN/MAIN.agc:381: Fatal Error: Operand "CA" not resolved.
+000381,000381: ???????           00000        RETRIG                      CA         MINUS1             	# Trigger immediate redisplay.
+MAIN/MAIN.agc:382: Fatal Error: Operand "TS" not resolved.
+000382,000382: ???????           00000                                    TS         LAST040            	#
+MAIN/MAIN.agc:383: Fatal Error: Operand "TCR" not resolved.
+000383,000383: ???????           00000                                    TCR        BLANKALL           	#
+000384,000384: 
+MAIN/MAIN.agc:385: Fatal Error: Operand "NOOP" not resolved.
+000385,000385: ???????           00000        ENDKYCK                     NOOP                          	#
+000386,000386: 
+000387,000387:                                                                                          	#----------------------------------------------------------------------
+000388,000388:                                                                                          	# We've now handled the keystrokes, so we need to update the display.
+000389,000389:                                                                                          	# However, we only do that when data is changed.  We are guaranteed
+000390,000390:                                                                                          	# by our bogus piPeripheral device that all of the input channels we're
+000391,000391:                                                                                          	# interested in just change once per second, and that the LAST channel
+000392,000392:                                                                                          	# written is 040.  So we only do something when we see that 040 has
+000393,000393:                                                                                          	# changed, and we know at that point that we have an entire second
+000394,000394:                                                                                          	# to handle our business.
+MAIN/MAIN.agc:395: Fatal Error: Operand "CA" not resolved.
+000395,000395: ???????           00000                                    CA         LAST040            	#
+MAIN/MAIN.agc:396: Fatal Error: Operand "EXTEND" not resolved.
+000396,000396: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:397: Fatal Error: Operand "RXOR" not resolved.
+000397,000397: ???????           00000                                    RXOR       40                 	# XOR last reading of channel 040 with current value.
+MAIN/MAIN.agc:398: Fatal Error: Operand "EXTEND" not resolved.
+000398,000398: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:399: Fatal Error: Operand "BZF" not resolved.
+000399,000399: ???????           00000                                    BZF        MAINLOOP           	# Hasn't changed, so just keep looping.
+MAIN/MAIN.agc:400: Fatal Error: Operand "EXTEND" not resolved.
+000400,000400: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:401: Fatal Error: Operand "READ" not resolved.
+000401,000401: ???????           00000                                    READ       40                 	#
+MAIN/MAIN.agc:402: Fatal Error: Operand "TS" not resolved.
+000402,000402: ???????           00000                                    TS         LAST040            	#
+000403,000403: 
+MAIN/MAIN.agc:404: Fatal Error: Operand "CA" not resolved.
+000404,000404: ???????           00000                                    CA         DSPMODE            	#
+MAIN/MAIN.agc:405: Fatal Error: Operand "TCR" not resolved.
+000405,000405: ???????           00000                                    TCR        DSPPROG            	#
+000406,000406: 
+000407,000407:                                                                                          	# Okay, input-channel 040 has changed, so all other input channels
+000408,000408:                                                                                          	# are ripe for the plucking.  Proceed with displaying.
+000409,000409:                                                                                          	# But exactly what we need to do along those lines depends on the
+000410,000410:                                                                                          	# display mode, which we handle with a jump-table.  Note that
+000411,000411:                                                                                          	# 0 <= DSPMODE <= 8.
+MAIN/MAIN.agc:412: Fatal Error: Operand "INDEX" not resolved.
+000412,000412: ???????           00000                                    INDEX      DSPMODE            	# JUMP!
+MAIN/MAIN.agc:413: Fatal Error: Operand "TCF" not resolved.
+000413,000413: ???????           00000                                    TCF        MODETABL           	#
+MAIN/MAIN.agc:414: Fatal Error: Operand "TCF" not resolved.
+000414,000414: ???????           00000        MODETABL                    TCF        MODE0              	#
+MAIN/MAIN.agc:415: Fatal Error: Operand "TCF" not resolved.
+000415,000415: ???????           00000                                    TCF        MODE1              	#
+MAIN/MAIN.agc:416: Fatal Error: Operand "TCF" not resolved.
+000416,000416: ???????           00000                                    TCF        MODE2              	#
+MAIN/MAIN.agc:417: Fatal Error: Operand "TCF" not resolved.
+000417,000417: ???????           00000                                    TCF        MODE3              	#
+MAIN/MAIN.agc:418: Fatal Error: Operand "TCF" not resolved.
+000418,000418: ???????           00000                                    TCF        MODE4              	#
+MAIN/MAIN.agc:419: Fatal Error: Operand "TCF" not resolved.
+000419,000419: ???????           00000                                    TCF        MODE5              	#
+MAIN/MAIN.agc:420: Fatal Error: Operand "TCF" not resolved.
+000420,000420: ???????           00000                                    TCF        MODE6              	#
+MAIN/MAIN.agc:421: Fatal Error: Operand "TCF" not resolved.
+000421,000421: ???????           00000                                    TCF        MODE7              	#
+MAIN/MAIN.agc:422: Fatal Error: Operand "TCF" not resolved.
+000422,000422: ???????           00000                                    TCF        MODE8              	#
+000423,000423: 
+000424,000424:                                                                                          	#----------------------------------------------------------------------
+000425,000425:                                                                                          	# Display-mode 0.
+000426,000426: 
+000427,000427:                                                                                          	# We now know that the time has changed.  Unpack the time
+000428,000428:                                                                                          	# data to get and save year/month/day/hour/minute/second.
+000429,000429:                                                                                          	# Division is tricky.  The dividend is double precision (2 words)
+000430,000430:                                                                                          	# and the divisor is single-precision (1 word).  Put the MSW
+000431,000431:                                                                                          	# of the dividend (in our case always 0) in A and the LSW
+000432,000432:                                                                                          	# into L.  Moreover, the divisor must be in erasable memory
+000433,000433:                                                                                          	# (and not just that, but the 10 address-bit subset of erasable
+000434,000434:                                                                                          	# memory).
+MAIN/MAIN.agc:435: Fatal Error: Operand "CA" not resolved.
+000435,000435: ???????           00000        MODE0                       CA         LAST040            	#
+MAIN/MAIN.agc:436: Fatal Error: Operand "TS" not resolved.
+000436,000436: ???????           00000                                    TS         L                  	# Minutes,seconds are quotient,remainder of (channel 040)/64.
+MAIN/MAIN.agc:437: Fatal Error: Operand "CA" not resolved.
+000437,000437: ???????           00000                                    CA         D64                	#
+MAIN/MAIN.agc:438: Fatal Error: Operand "TS" not resolved.
+000438,000438: ???????           00000                                    TS         DIVISOR            	#
+MAIN/MAIN.agc:439: Fatal Error: Operand "CA" not resolved.
+000439,000439: ???????           00000                                    CA         ZERO               	#
+MAIN/MAIN.agc:440: Fatal Error: Operand "EXTEND" not resolved.
+000440,000440: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:441: Fatal Error: Operand "DV" not resolved.
+000441,000441: ???????           00000                                    DV         DIVISOR            	#
+MAIN/MAIN.agc:442: Fatal Error: Operand "TS" not resolved.
+000442,000442: ???????           00000                                    TS         MINUTE             	#
+MAIN/MAIN.agc:443: Fatal Error: Operand "CA" not resolved.
+000443,000443: ???????           00000                                    CA         L                  	#
+MAIN/MAIN.agc:444: Fatal Error: Operand "TS" not resolved.
+000444,000444: ???????           00000                                    TS         SECOND             	#
+MAIN/MAIN.agc:445: Fatal Error: Operand "EXTEND" not resolved.
+000445,000445: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:446: Fatal Error: Operand "READ" not resolved.
+000446,000446: ???????           00000                                    READ       41                 	# Get months,days,hours from (channel 041).
+MAIN/MAIN.agc:447: Fatal Error: Operand "TS" not resolved.
+000447,000447: ???????           00000                                    TS         L                  	#
+MAIN/MAIN.agc:448: Fatal Error: Operand "CA" not resolved.
+000448,000448: ???????           00000                                    CA         D1024              	#
+MAIN/MAIN.agc:449: Fatal Error: Operand "TS" not resolved.
+000449,000449: ???????           00000                                    TS         DIVISOR            	#
+MAIN/MAIN.agc:450: Fatal Error: Operand "CA" not resolved.
+000450,000450: ???????           00000                                    CA         ZERO               	#
+MAIN/MAIN.agc:451: Fatal Error: Operand "EXTEND" not resolved.
+000451,000451: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:452: Fatal Error: Operand "DV" not resolved.
+000452,000452: ???????           00000                                    DV         DIVISOR            	# A is now months and L is days,hours
+MAIN/MAIN.agc:453: Fatal Error: Operand "TS" not resolved.
+000453,000453: ???????           00000                                    TS         MONTH              	#
+MAIN/MAIN.agc:454: Fatal Error: Operand "CA" not resolved.
+000454,000454: ???????           00000                                    CA         D32                	#
+MAIN/MAIN.agc:455: Fatal Error: Operand "TS" not resolved.
+000455,000455: ???????           00000                                    TS         DIVISOR            	#
+MAIN/MAIN.agc:456: Fatal Error: Operand "CA" not resolved.
+000456,000456: ???????           00000                                    CA         ZERO               	#
+MAIN/MAIN.agc:457: Fatal Error: Operand "EXTEND" not resolved.
+000457,000457: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:458: Fatal Error: Operand "DV" not resolved.
+000458,000458: ???????           00000                                    DV         DIVISOR            	#
+MAIN/MAIN.agc:459: Fatal Error: Operand "TS" not resolved.
+000459,000459: ???????           00000                                    TS         DAY                	#
+MAIN/MAIN.agc:460: Fatal Error: Operand "CA" not resolved.
+000460,000460: ???????           00000                                    CA         L                  	#
+MAIN/MAIN.agc:461: Fatal Error: Operand "TS" not resolved.
+000461,000461: ???????           00000                                    TS         HOUR               	#
+MAIN/MAIN.agc:462: Fatal Error: Operand "EXTEND" not resolved.
+000462,000462: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:463: Fatal Error: Operand "READ" not resolved.
+000463,000463: ???????           00000                                    READ       42                 	# Get year
+MAIN/MAIN.agc:464: Fatal Error: Operand "TS" not resolved.
+000464,000464: ???????           00000                                    TS         YEAR               	#
+000465,000465: 
+000466,000466:                                                                                          	# Now display date&time on DSKY.  Also, at least for
+000467,000467:                                                                                          	# testing purposes, spit it back on output
+000468,000468:                                                                                          	# channels 043-050.
+MAIN/MAIN.agc:469: Fatal Error: Operand "CA" not resolved.
+000469,000469: ???????           00000                                    CA         YEAR               	#
+MAIN/MAIN.agc:470: Fatal Error: Operand "EXTEND" not resolved.
+000470,000470: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:471: Fatal Error: Operand "WRITE" not resolved.
+000471,000471: ???????           00000                                    WRITE      43                 	#
+MAIN/MAIN.agc:472: Fatal Error: Operand "TCR" not resolved.
+000472,000472: ???????           00000                                    TCR        DSPR3Y             	# Display digits for year.
+MAIN/MAIN.agc:473: Fatal Error: Operand "CA" not resolved.
+000473,000473: ???????           00000                                    CA         MONTH              	#
+MAIN/MAIN.agc:474: Fatal Error: Operand "EXTEND" not resolved.
+000474,000474: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:475: Fatal Error: Operand "WRITE" not resolved.
+000475,000475: ???????           00000                                    WRITE      44                 	#
+MAIN/MAIN.agc:476: Fatal Error: Operand "CA" not resolved.
+000476,000476: ???????           00000                                    CA         DAY                	#
+MAIN/MAIN.agc:477: Fatal Error: Operand "EXTEND" not resolved.
+000477,000477: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:478: Fatal Error: Operand "WRITE" not resolved.
+000478,000478: ???????           00000                                    WRITE      45                 	#
+MAIN/MAIN.agc:479: Fatal Error: Operand "TCR" not resolved.
+000479,000479: ???????           00000                                    TCR        DSPR2MD            	# Display digits for month, day.
+MAIN/MAIN.agc:480: Fatal Error: Operand "CA" not resolved.
+000480,000480: ???????           00000                                    CA         HOUR               	#
+MAIN/MAIN.agc:481: Fatal Error: Operand "EXTEND" not resolved.
+000481,000481: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:482: Fatal Error: Operand "WRITE" not resolved.
+000482,000482: ???????           00000                                    WRITE      46                 	#
+MAIN/MAIN.agc:483: Fatal Error: Operand "CA" not resolved.
+000483,000483: ???????           00000                                    CA         MINUTE             	#
+MAIN/MAIN.agc:484: Fatal Error: Operand "EXTEND" not resolved.
+000484,000484: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:485: Fatal Error: Operand "WRITE" not resolved.
+000485,000485: ???????           00000                                    WRITE      47                 	#
+MAIN/MAIN.agc:486: Fatal Error: Operand "TCR" not resolved.
+000486,000486: ???????           00000                                    TCR        DSPR1HM            	# Display digits for hour, minute
+MAIN/MAIN.agc:487: Fatal Error: Operand "CA" not resolved.
+000487,000487: ???????           00000                                    CA         SECOND             	#
+MAIN/MAIN.agc:488: Fatal Error: Operand "EXTEND" not resolved.
+000488,000488: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:489: Fatal Error: Operand "WRITE" not resolved.
+000489,000489: ???????           00000                                    WRITE      50                 	#
+MAIN/MAIN.agc:490: Fatal Error: Operand "TCR" not resolved.
+000490,000490: ???????           00000                                    TCR        DSPNOUN            	#
+000491,000491: 
+MAIN/MAIN.agc:492: Fatal Error: Operand "NOOP" not resolved.
+000492,000492: ???????           00000        ENDTMCK                     NOOP                          	#
+000493,000493: 
+MAIN/MAIN.agc:494: Fatal Error: Operand "TCF" not resolved.
+000494,000494: ???????           00000                                    TCF        MAINLOOP           	#
+000495,000495: 
+000496,000496:                                                                                          	#----------------------------------------------------------------------
+000497,000497:                                                                                          	# Display-mode 1.
+MAIN/MAIN.agc:498: Fatal Error: Operand "EXTEND" not resolved.
+000498,000498: ???????           00000        MODE1                       EXTEND                        	#
+MAIN/MAIN.agc:499: Fatal Error: Operand "READ" not resolved.
+000499,000499: ???????           00000                                    READ       051                	#
+MAIN/MAIN.agc:500: Fatal Error: Operand "TC" not resolved.
+000500,000500: ???????           00000                                    TC         DSPR1              	#
+MAIN/MAIN.agc:501: Fatal Error: Operand "EXTEND" not resolved.
+000501,000501: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:502: Fatal Error: Operand "READ" not resolved.
+000502,000502: ???????           00000                                    READ       052                	#
+MAIN/MAIN.agc:503: Fatal Error: Operand "TC" not resolved.
+000503,000503: ???????           00000                                    TC         DSPR2              	#
+MAIN/MAIN.agc:504: Fatal Error: Operand "EXTEND" not resolved.
+000504,000504: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:505: Fatal Error: Operand "READ" not resolved.
+000505,000505: ???????           00000                                    READ       053                	#
+MAIN/MAIN.agc:506: Fatal Error: Operand "TC" not resolved.
+000506,000506: ???????           00000                                    TC         DSPR3              	#
+MAIN/MAIN.agc:507: Fatal Error: Operand "TCF" not resolved.
+000507,000507: ???????           00000                                    TCF        MAINLOOP           	#
+000508,000508: 
+000509,000509:                                                                                          	#----------------------------------------------------------------------
+000510,000510:                                                                                          	# Display-mode 2.
+MAIN/MAIN.agc:511: Fatal Error: Operand "EXTEND" not resolved.
+000511,000511: ???????           00000        MODE2                       EXTEND                        	#
+MAIN/MAIN.agc:512: Fatal Error: Operand "READ" not resolved.
+000512,000512: ???????           00000                                    READ       054                	#
+MAIN/MAIN.agc:513: Fatal Error: Operand "TC" not resolved.
+000513,000513: ???????           00000                                    TC         DSPR1              	#
+MAIN/MAIN.agc:514: Fatal Error: Operand "EXTEND" not resolved.
+000514,000514: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:515: Fatal Error: Operand "READ" not resolved.
+000515,000515: ???????           00000                                    READ       055                	#
+MAIN/MAIN.agc:516: Fatal Error: Operand "TC" not resolved.
+000516,000516: ???????           00000                                    TC         DSPR2              	#
+MAIN/MAIN.agc:517: Fatal Error: Operand "EXTEND" not resolved.
+000517,000517: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:518: Fatal Error: Operand "READ" not resolved.
+000518,000518: ???????           00000                                    READ       056                	#
+MAIN/MAIN.agc:519: Fatal Error: Operand "TC" not resolved.
+000519,000519: ???????           00000                                    TC         DSPR3              	#
+MAIN/MAIN.agc:520: Fatal Error: Operand "TCF" not resolved.
+000520,000520: ???????           00000                                    TCF        MAINLOOP           	#
+000521,000521: 
+000522,000522:                                                                                          	#----------------------------------------------------------------------
+000523,000523:                                                                                          	# Display-mode 3.
+MAIN/MAIN.agc:524: Fatal Error: Operand "EXTEND" not resolved.
+000524,000524: ???????           00000        MODE3                       EXTEND                        	#
+MAIN/MAIN.agc:525: Fatal Error: Operand "READ" not resolved.
+000525,000525: ???????           00000                                    READ       057                	#
+MAIN/MAIN.agc:526: Fatal Error: Operand "TC" not resolved.
+000526,000526: ???????           00000                                    TC         DSPR1              	#
+MAIN/MAIN.agc:527: Fatal Error: Operand "EXTEND" not resolved.
+000527,000527: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:528: Fatal Error: Operand "READ" not resolved.
+000528,000528: ???????           00000                                    READ       060                	#
+MAIN/MAIN.agc:529: Fatal Error: Operand "TC" not resolved.
+000529,000529: ???????           00000                                    TC         DSPR2              	#
+MAIN/MAIN.agc:530: Fatal Error: Operand "EXTEND" not resolved.
+000530,000530: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:531: Fatal Error: Operand "READ" not resolved.
+000531,000531: ???????           00000                                    READ       061                	#
+MAIN/MAIN.agc:532: Fatal Error: Operand "TC" not resolved.
+000532,000532: ???????           00000                                    TC         DSPR3              	#
+MAIN/MAIN.agc:533: Fatal Error: Operand "TCF" not resolved.
+000533,000533: ???????           00000                                    TCF        MAINLOOP           	#
+000534,000534: 
+000535,000535:                                                                                          	#----------------------------------------------------------------------
+000536,000536:                                                                                          	# Display-mode 4.
+MAIN/MAIN.agc:537: Fatal Error: Operand "EXTEND" not resolved.
+000537,000537: ???????           00000        MODE4                       EXTEND                        	#
+MAIN/MAIN.agc:538: Fatal Error: Operand "READ" not resolved.
+000538,000538: ???????           00000                                    READ       062                	#
+MAIN/MAIN.agc:539: Fatal Error: Operand "TC" not resolved.
+000539,000539: ???????           00000                                    TC         DSPR1              	#
+MAIN/MAIN.agc:540: Fatal Error: Operand "EXTEND" not resolved.
+000540,000540: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:541: Fatal Error: Operand "READ" not resolved.
+000541,000541: ???????           00000                                    READ       063                	#
+MAIN/MAIN.agc:542: Fatal Error: Operand "TC" not resolved.
+000542,000542: ???????           00000                                    TC         DSPR2              	#
+MAIN/MAIN.agc:543: Fatal Error: Operand "TCF" not resolved.
+000543,000543: ???????           00000                                    TCF        MAINLOOP           	#
+000544,000544: 
+000545,000545:                                                                                          	#----------------------------------------------------------------------
+000546,000546:                                                                                          	# Display-mode 5.
+000547,000547: 
+MAIN/MAIN.agc:548: Fatal Error: Operand "EXTEND" not resolved.
+000548,000548: ???????           00000        MODE5                       EXTEND                        	# Process latitude.
+MAIN/MAIN.agc:549: Fatal Error: Operand "READ" not resolved.
+000549,000549: ???????           00000                                    READ       064                	#
+MAIN/MAIN.agc:550: Fatal Error: Operand "TS" not resolved.
+000550,000550: ???????           00000                                    TS         LLHIGH             	#
+MAIN/MAIN.agc:551: Fatal Error: Operand "EXTEND" not resolved.
+000551,000551: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:552: Fatal Error: Operand "READ" not resolved.
+000552,000552: ???????           00000                                    READ       071                	#
+MAIN/MAIN.agc:553: Fatal Error: Operand "TS" not resolved.
+000553,000553: ???????           00000                                    TS         LLLOW              	#
+MAIN/MAIN.agc:554: Fatal Error: Operand "TCR" not resolved.
+000554,000554: ???????           00000                                    TCR        LL2                	#
+MAIN/MAIN.agc:555: Fatal Error: Operand "TCR" not resolved.
+000555,000555: ???????           00000                                    TCR        DIG2R1             	# Display in R1.
+000556,000556: 
+MAIN/MAIN.agc:557: Fatal Error: Operand "EXTEND" not resolved.
+000557,000557: ???????           00000                                    EXTEND                        	# Process longitude.
+MAIN/MAIN.agc:558: Fatal Error: Operand "READ" not resolved.
+000558,000558: ???????           00000                                    READ       065                	#
+MAIN/MAIN.agc:559: Fatal Error: Operand "TS" not resolved.
+000559,000559: ???????           00000                                    TS         LLHIGH             	#
+MAIN/MAIN.agc:560: Fatal Error: Operand "EXTEND" not resolved.
+000560,000560: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:561: Fatal Error: Operand "READ" not resolved.
+000561,000561: ???????           00000                                    READ       072                	#
+MAIN/MAIN.agc:562: Fatal Error: Operand "TS" not resolved.
+000562,000562: ???????           00000                                    TS         LLLOW              	#
+MAIN/MAIN.agc:563: Fatal Error: Operand "TCR" not resolved.
+000563,000563: ???????           00000                                    TCR        LL2                	#
+MAIN/MAIN.agc:564: Fatal Error: Operand "TCR" not resolved.
+000564,000564: ???????           00000                                    TCR        DIG2R2             	# Display in R2.
+000565,000565: 
+MAIN/MAIN.agc:566: Fatal Error: Operand "EXTEND" not resolved.
+000566,000566: ???????           00000                                    EXTEND                        	# Process altitude
+MAIN/MAIN.agc:567: Fatal Error: Operand "READ" not resolved.
+000567,000567: ???????           00000                                    READ       066                	#
+MAIN/MAIN.agc:568: Fatal Error: Operand "TC" not resolved.
+000568,000568: ???????           00000                                    TC         DSPR3              	#
+MAIN/MAIN.agc:569: Fatal Error: Operand "TCF" not resolved.
+000569,000569: ???????           00000                                    TCF        MAINLOOP           	#
+000570,000570: 
+000571,000571:                                                                                          	#----------------------------------------------------------------------
+000572,000572:                                                                                          	# Display-mode 6.
+MAIN/MAIN.agc:573: Fatal Error: Operand "EXTEND" not resolved.
+000573,000573: ???????           00000        MODE6                       EXTEND                        	#
+MAIN/MAIN.agc:574: Fatal Error: Operand "READ" not resolved.
+000574,000574: ???????           00000                                    READ       067                	#
+MAIN/MAIN.agc:575: Fatal Error: Operand "TC" not resolved.
+000575,000575: ???????           00000                                    TC         DSPR1              	#
+MAIN/MAIN.agc:576: Fatal Error: Operand "EXTEND" not resolved.
+000576,000576: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:577: Fatal Error: Operand "READ" not resolved.
+000577,000577: ???????           00000                                    READ       070                	#
+MAIN/MAIN.agc:578: Fatal Error: Operand "TC" not resolved.
+000578,000578: ???????           00000                                    TC         DSPR2              	#
+MAIN/MAIN.agc:579: Fatal Error: Operand "TCF" not resolved.
+000579,000579: ???????           00000                                    TCF        MAINLOOP           	#
+000580,000580: 
+000581,000581:                                                                                          	#----------------------------------------------------------------------
+000582,000582:                                                                                          	# Display-mode 7.
+MAIN/MAIN.agc:583: Fatal Error: Operand "EXTEND" not resolved.
+000583,000583: ???????           00000        MODE7                       EXTEND                        	# Process latitude.
+MAIN/MAIN.agc:584: Fatal Error: Operand "READ" not resolved.
+000584,000584: ???????           00000                                    READ       064                	#
+MAIN/MAIN.agc:585: Fatal Error: Operand "TS" not resolved.
+000585,000585: ???????           00000                                    TS         LLHIGH             	#
+MAIN/MAIN.agc:586: Fatal Error: Operand "EXTEND" not resolved.
+000586,000586: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:587: Fatal Error: Operand "READ" not resolved.
+000587,000587: ???????           00000                                    READ       071                	#
+MAIN/MAIN.agc:588: Fatal Error: Operand "TS" not resolved.
+000588,000588: ???????           00000                                    TS         LLLOW              	#
+MAIN/MAIN.agc:589: Fatal Error: Operand "TCR" not resolved.
+000589,000589: ???????           00000                                    TCR        LL5                	#
+MAIN/MAIN.agc:590: Fatal Error: Operand "TCR" not resolved.
+000590,000590: ???????           00000                                    TCR        DIG2R1             	# Display in R1.
+MAIN/MAIN.agc:591: Fatal Error: Operand "TCR" not resolved.
+000591,000591: ???????           00000                                    TCR        A2DIG              	#
+MAIN/MAIN.agc:592: Fatal Error: Operand "TCR" not resolved.
+000592,000592: ???????           00000                                    TCR        DIG2R2             	#
+000593,000593: 
+MAIN/MAIN.agc:594: Fatal Error: Operand "EXTEND" not resolved.
+000594,000594: ???????           00000                                    EXTEND                        	# Process longitude.
+MAIN/MAIN.agc:595: Fatal Error: Operand "READ" not resolved.
+000595,000595: ???????           00000                                    READ       065                	#
+MAIN/MAIN.agc:596: Fatal Error: Operand "TS" not resolved.
+000596,000596: ???????           00000                                    TS         LLHIGH             	#
+MAIN/MAIN.agc:597: Fatal Error: Operand "EXTEND" not resolved.
+000597,000597: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:598: Fatal Error: Operand "READ" not resolved.
+000598,000598: ???????           00000                                    READ       072                	#
+MAIN/MAIN.agc:599: Fatal Error: Operand "TS" not resolved.
+000599,000599: ???????           00000                                    TS         LLLOW              	#
+MAIN/MAIN.agc:600: Fatal Error: Operand "TCR" not resolved.
+000600,000600: ???????           00000                                    TCR        LL2                	#
+MAIN/MAIN.agc:601: Fatal Error: Operand "TCR" not resolved.
+000601,000601: ???????           00000                                    TCR        DIG2R3             	# Display in R2.
+000602,000602: 
+MAIN/MAIN.agc:603: Fatal Error: Operand "TCF" not resolved.
+000603,000603: ???????           00000                                    TCF        MAINLOOP           	#
+000604,000604: 
+000605,000605:                                                                                          	#----------------------------------------------------------------------
+000606,000606:                                                                                          	# Display-mode 8.
+000607,000607: 
+MAIN/MAIN.agc:608: Fatal Error: Operand "EXTEND" not resolved.
+000608,000608: ???????           00000        MODE8                       EXTEND                        	# Process latitude.
+MAIN/MAIN.agc:609: Fatal Error: Operand "READ" not resolved.
+000609,000609: ???????           00000                                    READ       064                	#
+MAIN/MAIN.agc:610: Fatal Error: Operand "TS" not resolved.
+000610,000610: ???????           00000                                    TS         LLHIGH             	#
+MAIN/MAIN.agc:611: Fatal Error: Operand "EXTEND" not resolved.
+000611,000611: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:612: Fatal Error: Operand "READ" not resolved.
+000612,000612: ???????           00000                                    READ       071                	#
+MAIN/MAIN.agc:613: Fatal Error: Operand "TS" not resolved.
+000613,000613: ???????           00000                                    TS         LLLOW              	#
+MAIN/MAIN.agc:614: Fatal Error: Operand "TCR" not resolved.
+000614,000614: ???????           00000                                    TCR        LL2                	#
+MAIN/MAIN.agc:615: Fatal Error: Operand "TCR" not resolved.
+000615,000615: ???????           00000                                    TCR        DIG2R1             	# Display in R1.
+000616,000616: 
+MAIN/MAIN.agc:617: Fatal Error: Operand "EXTEND" not resolved.
+000617,000617: ???????           00000                                    EXTEND                        	# Process longitude.
+MAIN/MAIN.agc:618: Fatal Error: Operand "READ" not resolved.
+000618,000618: ???????           00000                                    READ       065                	#
+MAIN/MAIN.agc:619: Fatal Error: Operand "TS" not resolved.
+000619,000619: ???????           00000                                    TS         LLHIGH             	#
+MAIN/MAIN.agc:620: Fatal Error: Operand "EXTEND" not resolved.
+000620,000620: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:621: Fatal Error: Operand "READ" not resolved.
+000621,000621: ???????           00000                                    READ       072                	#
+MAIN/MAIN.agc:622: Fatal Error: Operand "TS" not resolved.
+000622,000622: ???????           00000                                    TS         LLLOW              	#
+MAIN/MAIN.agc:623: Fatal Error: Operand "TCR" not resolved.
+000623,000623: ???????           00000                                    TCR        LL5                	#
+MAIN/MAIN.agc:624: Fatal Error: Operand "TCR" not resolved.
+000624,000624: ???????           00000                                    TCR        DIG2R2             	# Display in R2.
+MAIN/MAIN.agc:625: Fatal Error: Operand "TCR" not resolved.
+000625,000625: ???????           00000                                    TCR        A2DIG              	#
+MAIN/MAIN.agc:626: Fatal Error: Operand "TCR" not resolved.
+000626,000626: ???????           00000                                    TCR        DIG2R3             	#
+000627,000627: 
+MAIN/MAIN.agc:628: Fatal Error: Operand "TCF" not resolved.
+000628,000628: ???????           00000                                    TCF        MAINLOOP           	#
+000629,000629: 
+000630,000630: 
+000631,000631: 
+000632,000632:                                                                                          	#######################################################################################################################################
+000633,000633:                                                                                          	# This ends the main loop, which continues forever, so we can put other functions
+000634,000634:                                                                                          	# below this point.
+000635,000635: 
+000636,000636:                                                                                          	# Blank all of the numerical displays.
+MAIN/MAIN.agc:637: Fatal Error: Operand "CA" not resolved.
+000637,000637: ???????           00000        BLANKALL                    CA         OPCODEP            	#
+MAIN/MAIN.agc:638: Fatal Error: Operand "EXTEND" not resolved.
+000638,000638: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:639: Fatal Error: Operand "WRITE" not resolved.
+000639,000639: ???????           00000                                    WRITE      10                 	#
+MAIN/MAIN.agc:640: Fatal Error: Operand "CA" not resolved.
+000640,000640: ???????           00000                                    CA         OPCODEV            	#
+MAIN/MAIN.agc:641: Fatal Error: Operand "EXTEND" not resolved.
+000641,000641: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:642: Fatal Error: Operand "WRITE" not resolved.
+000642,000642: ???????           00000                                    WRITE      10                 	#
+MAIN/MAIN.agc:643: Fatal Error: Operand "CA" not resolved.
+000643,000643: ???????           00000                                    CA         OPCODEN            	#
+MAIN/MAIN.agc:644: Fatal Error: Operand "EXTEND" not resolved.
+000644,000644: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:645: Fatal Error: Operand "WRITE" not resolved.
+000645,000645: ???????           00000                                    WRITE      10                 	#
+MAIN/MAIN.agc:646: Fatal Error: Operand "CA" not resolved.
+000646,000646: ???????           00000                                    CA         OPCODR11           	#
+MAIN/MAIN.agc:647: Fatal Error: Operand "EXTEND" not resolved.
+000647,000647: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:648: Fatal Error: Operand "WRITE" not resolved.
+000648,000648: ???????           00000                                    WRITE      10                 	#
+MAIN/MAIN.agc:649: Fatal Error: Operand "CA" not resolved.
+000649,000649: ???????           00000                                    CA         OPCDR123           	#
+MAIN/MAIN.agc:650: Fatal Error: Operand "EXTEND" not resolved.
+000650,000650: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:651: Fatal Error: Operand "WRITE" not resolved.
+000651,000651: ???????           00000                                    WRITE      10                 	#
+MAIN/MAIN.agc:652: Fatal Error: Operand "CA" not resolved.
+000652,000652: ???????           00000                                    CA         OPCDR145           	#
+MAIN/MAIN.agc:653: Fatal Error: Operand "EXTEND" not resolved.
+000653,000653: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:654: Fatal Error: Operand "WRITE" not resolved.
+000654,000654: ???????           00000                                    WRITE      10                 	#
+MAIN/MAIN.agc:655: Fatal Error: Operand "CA" not resolved.
+000655,000655: ???????           00000                                    CA         OPCDR212           	#
+MAIN/MAIN.agc:656: Fatal Error: Operand "EXTEND" not resolved.
+000656,000656: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:657: Fatal Error: Operand "WRITE" not resolved.
+000657,000657: ???????           00000                                    WRITE      10                 	#
+MAIN/MAIN.agc:658: Fatal Error: Operand "CA" not resolved.
+000658,000658: ???????           00000                                    CA         OPCDR234           	#
+MAIN/MAIN.agc:659: Fatal Error: Operand "EXTEND" not resolved.
+000659,000659: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:660: Fatal Error: Operand "WRITE" not resolved.
+000660,000660: ???????           00000                                    WRITE      10                 	#
+MAIN/MAIN.agc:661: Fatal Error: Operand "CA" not resolved.
+000661,000661: ???????           00000                                    CA         OPR25R31           	#
+MAIN/MAIN.agc:662: Fatal Error: Operand "EXTEND" not resolved.
+000662,000662: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:663: Fatal Error: Operand "WRITE" not resolved.
+000663,000663: ???????           00000                                    WRITE      10                 	#
+MAIN/MAIN.agc:664: Fatal Error: Operand "CA" not resolved.
+000664,000664: ???????           00000                                    CA         OPCDR323           	#
+MAIN/MAIN.agc:665: Fatal Error: Operand "EXTEND" not resolved.
+000665,000665: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:666: Fatal Error: Operand "WRITE" not resolved.
+000666,000666: ???????           00000                                    WRITE      10                 	#
+MAIN/MAIN.agc:667: Fatal Error: Operand "CA" not resolved.
+000667,000667: ???????           00000                                    CA         OPCDR345           	#
+MAIN/MAIN.agc:668: Fatal Error: Operand "EXTEND" not resolved.
+000668,000668: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:669: Fatal Error: Operand "WRITE" not resolved.
+000669,000669: ???????           00000                                    WRITE      10                 	#
+MAIN/MAIN.agc:670: Fatal Error: Operand "CA" not resolved.
+000670,000670: ???????           00000                                    CA         ZERO               	#
+MAIN/MAIN.agc:671: Fatal Error: Operand "TS" not resolved.
+000671,000671: ???????           00000                                    TS         DIGIT31            	#
+MAIN/MAIN.agc:672: Fatal Error: Operand "TS" not resolved.
+000672,000672: ???????           00000                                    TS         DIGIT25            	#
+MAIN/MAIN.agc:673: Fatal Error: Operand "RETURN" not resolved.
+000673,000673: ???????           00000                                    RETURN                        	#
+000674,000674: 
+000675,000675:                                                                                          	# Convert an integer in the accumulator to SIGN/DIGIT1/.../DIGIT5.  At the end, all 5 DIGITx
+000676,000676:                                                                                          	# variables will have values from 0-9, and SIGN will be 0 for + or 1 for -.  Note: calls no
+000677,000677:                                                                                          	# other routines.
+MAIN/MAIN.agc:678: Fatal Error: Operand "TS" not resolved.
+000678,000678: ???????           00000        CONV10                      TS         L                  	# Save the argument
+MAIN/MAIN.agc:679: Fatal Error: Operand "EXTEND" not resolved.
+000679,000679: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:680: Fatal Error: Operand "BZF" not resolved.
+000680,000680: ???????           00000                                    BZF        CONV10Z            	# Argument is 0.
+MAIN/MAIN.agc:681: Fatal Error: Operand "EXTEND" not resolved.
+000681,000681: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:682: Fatal Error: Operand "BZMF" not resolved.
+000682,000682: ???????           00000                                    BZMF       CONV10M            	# Argument is negative, we'll need to invert
+MAIN/MAIN.agc:683: Fatal Error: Operand "CA" not resolved.
+000683,000683: ???????           00000        CONV10Z                     CA         ZERO               	# Record the sign as positive (0 -> SIGN).
+MAIN/MAIN.agc:684: Fatal Error: Operand "TS" not resolved.
+000684,000684: ???????           00000                                    TS         SIGN               	#
+MAIN/MAIN.agc:685: Fatal Error: Operand "CA" not resolved.
+000685,000685: ???????           00000        CONV10P                     CA         TEN                	#
+MAIN/MAIN.agc:686: Fatal Error: Operand "TS" not resolved.
+000686,000686: ???????           00000                                    TS         DIVISOR            	#
+MAIN/MAIN.agc:687: Fatal Error: Operand "CA" not resolved.
+000687,000687: ???????           00000                                    CA         ZERO               	# Note that L still contains the original argument.
+MAIN/MAIN.agc:688: Fatal Error: Operand "EXTEND" not resolved.
+000688,000688: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:689: Fatal Error: Operand "DV" not resolved.
+000689,000689: ???????           00000                                    DV         DIVISOR            	#
+MAIN/MAIN.agc:690: Fatal Error: Operand "LXCH" not resolved.
+000690,000690: ???????           00000                                    LXCH       A                  	# Save remainder as digit 5 and put quotient into L.
+MAIN/MAIN.agc:691: Fatal Error: Operand "TS" not resolved.
+000691,000691: ???????           00000                                    TS         DIGIT5             	#
+MAIN/MAIN.agc:692: Fatal Error: Operand "CA" not resolved.
+000692,000692: ???????           00000                                    CA         ZERO               	#
+MAIN/MAIN.agc:693: Fatal Error: Operand "EXTEND" not resolved.
+000693,000693: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:694: Fatal Error: Operand "DV" not resolved.
+000694,000694: ???????           00000                                    DV         DIVISOR            	#
+MAIN/MAIN.agc:695: Fatal Error: Operand "LXCH" not resolved.
+000695,000695: ???????           00000                                    LXCH       A                  	#
+MAIN/MAIN.agc:696: Fatal Error: Operand "TS" not resolved.
+000696,000696: ???????           00000                                    TS         DIGIT4             	#
+MAIN/MAIN.agc:697: Fatal Error: Operand "CA" not resolved.
+000697,000697: ???????           00000                                    CA         ZERO               	#
+MAIN/MAIN.agc:698: Fatal Error: Operand "EXTEND" not resolved.
+000698,000698: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:699: Fatal Error: Operand "DV" not resolved.
+000699,000699: ???????           00000                                    DV         DIVISOR            	#
+MAIN/MAIN.agc:700: Fatal Error: Operand "LXCH" not resolved.
+000700,000700: ???????           00000                                    LXCH       A                  	#
+MAIN/MAIN.agc:701: Fatal Error: Operand "TS" not resolved.
+000701,000701: ???????           00000                                    TS         DIGIT3             	#
+MAIN/MAIN.agc:702: Fatal Error: Operand "CA" not resolved.
+000702,000702: ???????           00000                                    CA         ZERO               	#
+MAIN/MAIN.agc:703: Fatal Error: Operand "EXTEND" not resolved.
+000703,000703: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:704: Fatal Error: Operand "DV" not resolved.
+000704,000704: ???????           00000                                    DV         DIVISOR            	#
+MAIN/MAIN.agc:705: Fatal Error: Operand "LXCH" not resolved.
+000705,000705: ???????           00000                                    LXCH       A                  	#
+MAIN/MAIN.agc:706: Fatal Error: Operand "TS" not resolved.
+000706,000706: ???????           00000                                    TS         DIGIT2             	#
+MAIN/MAIN.agc:707: Fatal Error: Operand "CA" not resolved.
+000707,000707: ???????           00000                                    CA         ZERO               	#
+MAIN/MAIN.agc:708: Fatal Error: Operand "EXTEND" not resolved.
+000708,000708: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:709: Fatal Error: Operand "DV" not resolved.
+000709,000709: ???????           00000                                    DV         DIVISOR            	#
+MAIN/MAIN.agc:710: Fatal Error: Operand "LXCH" not resolved.
+000710,000710: ???????           00000                                    LXCH       A                  	#
+MAIN/MAIN.agc:711: Fatal Error: Operand "TS" not resolved.
+000711,000711: ???????           00000                                    TS         DIGIT1             	#
+MAIN/MAIN.agc:712: Fatal Error: Operand "RETURN" not resolved.
+000712,000712: ???????           00000                                    RETURN                        	#
+000713,000713: 
+000714,000714:                                                                                          	# Lat an lon are each input on two input channels, a more-significant one containing the integer part of
+000715,000715:                                                                                          	# the value times 10, and a less-significant on containing the fractional part of the value times 10, times
+000716,000716:                                                                                          	# 10000.  The LL2 function assumes that those values have been stored in variables called LLHIGH and LLLOW,
+000717,000717:                                                                                          	# respectively, and create SIGN, DIGIT1, ..., DIGIT5 containing the value in the form +/- XXX.XX.
+MAIN/MAIN.agc:718: Fatal Error: Operand "EXTEND" not resolved.
+000718,000718: ???????           00000        LL2                         EXTEND                        	#
+MAIN/MAIN.agc:719: Fatal Error: Operand "QXCH" not resolved.
+000719,000719: ???????           00000                                    QXCH       LLRET              	#
+MAIN/MAIN.agc:720: Fatal Error: Operand "CA" not resolved.
+000720,000720: ???????           00000                                    CA         LLLOW              	# Process LS word
+MAIN/MAIN.agc:721: Fatal Error: Operand "TCR" not resolved.
+000721,000721: ???????           00000                                    TCR        CONV10             	# Convert to (SIGN, DIGIT1, ..., DIGIT5)
+MAIN/MAIN.agc:722: Fatal Error: Operand "TCR" not resolved.
+000722,000722: ???????           00000                                    TCR        PATT5DIG           	#
+MAIN/MAIN.agc:723: Fatal Error: Operand "TCR" not resolved.
+000723,000723: ???????           00000                                    TCR        DIG2A              	# Move SIGN/DIGITx to SIGNA/DIGITxA
+MAIN/MAIN.agc:724: Fatal Error: Operand "CA" not resolved.
+000724,000724: ???????           00000                                    CA         LLHIGH             	# Process MS word
+MAIN/MAIN.agc:725: Fatal Error: Operand "TCR" not resolved.
+000725,000725: ???????           00000                                    TCR        CONV10             	# Convert to SIGN/DIGITx
+MAIN/MAIN.agc:726: Fatal Error: Operand "TCR" not resolved.
+000726,000726: ???????           00000                                    TCR        PATT5DIG           	#
+MAIN/MAIN.agc:727: Fatal Error: Operand "CA" not resolved.
+000727,000727: ???????           00000                                    CA         DIGIT2             	# Rearrange the DIGITx values somewhat. (Multiply by 10.)
+MAIN/MAIN.agc:728: Fatal Error: Operand "TS" not resolved.
+000728,000728: ???????           00000                                    TS         DIGIT1             	#
+MAIN/MAIN.agc:729: Fatal Error: Operand "CA" not resolved.
+000729,000729: ???????           00000                                    CA         DIGIT3             	#
+MAIN/MAIN.agc:730: Fatal Error: Operand "TS" not resolved.
+000730,000730: ???????           00000                                    TS         DIGIT2             	#
+MAIN/MAIN.agc:731: Fatal Error: Operand "CA" not resolved.
+000731,000731: ???????           00000                                    CA         DIGIT4             	#
+MAIN/MAIN.agc:732: Fatal Error: Operand "TS" not resolved.
+000732,000732: ???????           00000                                    TS         DIGIT3             	#
+MAIN/MAIN.agc:733: Fatal Error: Operand "CA" not resolved.
+000733,000733: ???????           00000                                    CA         DIGIT5             	#
+MAIN/MAIN.agc:734: Fatal Error: Operand "TS" not resolved.
+000734,000734: ???????           00000                                    TS         DIGIT4             	#
+MAIN/MAIN.agc:735: Fatal Error: Operand "CA" not resolved.
+000735,000735: ???????           00000                                    CA         DIGIT2A            	#
+MAIN/MAIN.agc:736: Fatal Error: Operand "TS" not resolved.
+000736,000736: ???????           00000                                    TS         DIGIT5             	#
+MAIN/MAIN.agc:737: Fatal Error: Operand "EXTEND" not resolved.
+000737,000737: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:738: Fatal Error: Operand "QXCH" not resolved.
+000738,000738: ???????           00000                                    QXCH       LLRET              	#
+MAIN/MAIN.agc:739: Fatal Error: Operand "RETURN" not resolved.
+000739,000739: ???????           00000                                    RETURN                        	#
+000740,000740:                                                                                          	# Similarly, the LL5 function puts the integral lat or lon in SIGN,DIGITx and 5 decimal places in SIGNA,DIGITxA.
+MAIN/MAIN.agc:741: Fatal Error: Operand "EXTEND" not resolved.
+000741,000741: ???????           00000        LL5                         EXTEND                        	#
+MAIN/MAIN.agc:742: Fatal Error: Operand "QXCH" not resolved.
+000742,000742: ???????           00000                                    QXCH       LLRET              	#
+MAIN/MAIN.agc:743: Fatal Error: Operand "CA" not resolved.
+000743,000743: ???????           00000                                    CA         LLLOW              	# Process LS word
+MAIN/MAIN.agc:744: Fatal Error: Operand "TCR" not resolved.
+000744,000744: ???????           00000                                    TCR        CONV10             	# Convert to (SIGN, DIGIT1, ..., DIGIT5)
+MAIN/MAIN.agc:745: Fatal Error: Operand "TCR" not resolved.
+000745,000745: ???????           00000                                    TCR        PATT5DIG           	#
+MAIN/MAIN.agc:746: Fatal Error: Operand "TCR" not resolved.
+000746,000746: ???????           00000                                    TCR        DIG2A              	# Move SIGN/DIGITx to SIGNA/DIGITxA
+MAIN/MAIN.agc:747: Fatal Error: Operand "CA" not resolved.
+000747,000747: ???????           00000                                    CA         LLHIGH             	# Process MS word
+MAIN/MAIN.agc:748: Fatal Error: Operand "TCR" not resolved.
+000748,000748: ???????           00000                                    TCR        CONV10             	# Convert to SIGN/DIGITx
+MAIN/MAIN.agc:749: Fatal Error: Operand "TCR" not resolved.
+000749,000749: ???????           00000                                    TCR        PATT5DIG           	#
+MAIN/MAIN.agc:750: Fatal Error: Operand "CA" not resolved.
+000750,000750: ???????           00000                                    CA         DIGIT5             	# Rearrange the DIGITx values somewhat. (Divide by 10.)
+MAIN/MAIN.agc:751: Fatal Error: Operand "TS" not resolved.
+000751,000751: ???????           00000                                    TS         DIGIT1A            	#
+MAIN/MAIN.agc:752: Fatal Error: Operand "CA" not resolved.
+000752,000752: ???????           00000                                    CA         DIGIT4             	#
+MAIN/MAIN.agc:753: Fatal Error: Operand "TS" not resolved.
+000753,000753: ???????           00000                                    TS         DIGIT5             	#
+MAIN/MAIN.agc:754: Fatal Error: Operand "CA" not resolved.
+000754,000754: ???????           00000                                    CA         DIGIT3             	#
+MAIN/MAIN.agc:755: Fatal Error: Operand "TS" not resolved.
+000755,000755: ???????           00000                                    TS         DIGIT4             	#
+MAIN/MAIN.agc:756: Fatal Error: Operand "CA" not resolved.
+000756,000756: ???????           00000                                    CA         DIGIT2             	#
+MAIN/MAIN.agc:757: Fatal Error: Operand "TS" not resolved.
+000757,000757: ???????           00000                                    TS         DIGIT3             	#
+MAIN/MAIN.agc:758: Fatal Error: Operand "CA" not resolved.
+000758,000758: ???????           00000                                    CA         DIGIT1             	#
+MAIN/MAIN.agc:759: Fatal Error: Operand "TS" not resolved.
+000759,000759: ???????           00000                                    TS         DIGIT2             	#
+MAIN/MAIN.agc:760: Fatal Error: Operand "EXTEND" not resolved.
+000760,000760: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:761: Fatal Error: Operand "QXCH" not resolved.
+000761,000761: ???????           00000                                    QXCH       LLRET              	#
+MAIN/MAIN.agc:762: Fatal Error: Operand "RETURN" not resolved.
+000762,000762: ???????           00000                                    RETURN                        	#
+000763,000763: 
+000764,000764:                                                                                          	# Transfer set of SIGN/DIGITx to SIGNA/DIGITxA
+MAIN/MAIN.agc:765: Fatal Error: Operand "CA" not resolved.
+000765,000765: ???????           00000        DIG2A                       CA         SIGN               	#
+MAIN/MAIN.agc:766: Fatal Error: Operand "TS" not resolved.
+000766,000766: ???????           00000                                    TS         SIGNA              	#
+MAIN/MAIN.agc:767: Fatal Error: Operand "CA" not resolved.
+000767,000767: ???????           00000                                    CA         DIGIT1             	#
+MAIN/MAIN.agc:768: Fatal Error: Operand "TS" not resolved.
+000768,000768: ???????           00000                                    TS         DIGIT1A            	#
+MAIN/MAIN.agc:769: Fatal Error: Operand "CA" not resolved.
+000769,000769: ???????           00000                                    CA         DIGIT2             	#
+MAIN/MAIN.agc:770: Fatal Error: Operand "TS" not resolved.
+000770,000770: ???????           00000                                    TS         DIGIT2A            	#
+MAIN/MAIN.agc:771: Fatal Error: Operand "CA" not resolved.
+000771,000771: ???????           00000                                    CA         DIGIT3             	#
+MAIN/MAIN.agc:772: Fatal Error: Operand "TS" not resolved.
+000772,000772: ???????           00000                                    TS         DIGIT3A            	#
+MAIN/MAIN.agc:773: Fatal Error: Operand "CA" not resolved.
+000773,000773: ???????           00000                                    CA         DIGIT4             	#
+MAIN/MAIN.agc:774: Fatal Error: Operand "TS" not resolved.
+000774,000774: ???????           00000                                    TS         DIGIT4A            	#
+MAIN/MAIN.agc:775: Fatal Error: Operand "CA" not resolved.
+000775,000775: ???????           00000                                    CA         DIGIT5             	#
+MAIN/MAIN.agc:776: Fatal Error: Operand "TS" not resolved.
+000776,000776: ???????           00000                                    TS         DIGIT5A            	#
+MAIN/MAIN.agc:777: Fatal Error: Operand "RETURN" not resolved.
+000777,000777: ???????           00000                                    RETURN                        	#
+000778,000778:                                                                                          	# ... and vice-versa.
+MAIN/MAIN.agc:779: Fatal Error: Operand "CA" not resolved.
+000779,000779: ???????           00000        A2DIG                       CA         SIGNA              	#
+MAIN/MAIN.agc:780: Fatal Error: Operand "TS" not resolved.
+000780,000780: ???????           00000                                    TS         SIGN               	#
+MAIN/MAIN.agc:781: Fatal Error: Operand "CA" not resolved.
+000781,000781: ???????           00000                                    CA         DIGIT1A            	#
+MAIN/MAIN.agc:782: Fatal Error: Operand "TS" not resolved.
+000782,000782: ???????           00000                                    TS         DIGIT1             	#
+MAIN/MAIN.agc:783: Fatal Error: Operand "CA" not resolved.
+000783,000783: ???????           00000                                    CA         DIGIT2A            	#
+MAIN/MAIN.agc:784: Fatal Error: Operand "TS" not resolved.
+000784,000784: ???????           00000                                    TS         DIGIT2             	#
+MAIN/MAIN.agc:785: Fatal Error: Operand "CA" not resolved.
+000785,000785: ???????           00000                                    CA         DIGIT3A            	#
+MAIN/MAIN.agc:786: Fatal Error: Operand "TS" not resolved.
+000786,000786: ???????           00000                                    TS         DIGIT3             	#
+MAIN/MAIN.agc:787: Fatal Error: Operand "CA" not resolved.
+000787,000787: ???????           00000                                    CA         DIGIT4A            	#
+MAIN/MAIN.agc:788: Fatal Error: Operand "TS" not resolved.
+000788,000788: ???????           00000                                    TS         DIGIT4             	#
+MAIN/MAIN.agc:789: Fatal Error: Operand "CA" not resolved.
+000789,000789: ???????           00000                                    CA         DIGIT5A            	#
+MAIN/MAIN.agc:790: Fatal Error: Operand "TS" not resolved.
+000790,000790: ???????           00000                                    TS         DIGIT5             	#
+MAIN/MAIN.agc:791: Fatal Error: Operand "RETURN" not resolved.
+000791,000791: ???????           00000                                    RETURN                        	#
+000792,000792: 
+000793,000793:                                                                                          	# The argument was negative.  Must invert.
+MAIN/MAIN.agc:794: Fatal Error: Operand "CA" not resolved.
+000794,000794: ???????           00000        CONV10M                     CA         ONE                	# Record the sign as negative (1 -> SIGN).
+MAIN/MAIN.agc:795: Fatal Error: Operand "TS" not resolved.
+000795,000795: ???????           00000                                    TS         SIGN               	#
+MAIN/MAIN.agc:796: Fatal Error: Operand "CA" not resolved.
+000796,000796: ???????           00000                                    CA         L                  	# Invert the argument to make it positive.
+MAIN/MAIN.agc:797: Fatal Error: Operand "COM" not resolved.
+000797,000797: ???????           00000                                    COM                           	#
+MAIN/MAIN.agc:798: Fatal Error: Operand "TS" not resolved.
+000798,000798: ???????           00000                                    TS         L                  	#
+MAIN/MAIN.agc:799: Fatal Error: Operand "TCF" not resolved.
+000799,000799: ???????           00000                                    TCF        CONV10P            	# Go back to the processing for positive numbers.
+000800,000800: 
+000801,000801:                                                                                          	# Packs two digits previously formed by CONV10 into a suitable
+000802,000802:                                                                                          	# form for output.  The channel 10 opcode has to be added in afterward.
+000803,000803:                                                                                          	# Suitable for PROG, VERB, and NOUN areas.  Result returned in A.
+000804,000804:                                                                                          	# Note: calls no other routines.
+MAIN/MAIN.agc:805: Fatal Error: Operand "CA" not resolved.
+000805,000805: ???????           00000        PACK2DIG                    CA         DIGIT5             	#
+MAIN/MAIN.agc:806: Fatal Error: Operand "INDEX" not resolved.
+000806,000806: ???????           00000                                    INDEX      A                  	#
+MAIN/MAIN.agc:807: Fatal Error: Operand "CA" not resolved.
+000807,000807: ???????           00000                                    CA         DIGPATTS           	#
+MAIN/MAIN.agc:808: Fatal Error: Operand "TS" not resolved.
+000808,000808: ???????           00000                                    TS         DIGIT5             	#
+MAIN/MAIN.agc:809: Fatal Error: Operand "CA" not resolved.
+000809,000809: ???????           00000                                    CA         DIGIT4             	#
+MAIN/MAIN.agc:810: Fatal Error: Operand "INDEX" not resolved.
+000810,000810: ???????           00000                                    INDEX      A                  	#
+MAIN/MAIN.agc:811: Fatal Error: Operand "CA" not resolved.
+000811,000811: ???????           00000                                    CA         DIGPATTS           	#
+MAIN/MAIN.agc:812: Fatal Error: Operand "TS" not resolved.
+000812,000812: ???????           00000                                    TS         DIGIT4             	#
+MAIN/MAIN.agc:813: Fatal Error: Operand "EXTEND" not resolved.
+000813,000813: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:814: Fatal Error: Operand "MP" not resolved.
+000814,000814: ???????           00000                                    MP         D32                	# Shift by 5 places.
+MAIN/MAIN.agc:815: Fatal Error: Operand "CA" not resolved.
+000815,000815: ???????           00000                                    CA         DIGIT5             	#
+MAIN/MAIN.agc:816: Fatal Error: Operand "AD" not resolved.
+000816,000816: ???????           00000                                    AD         L                  	#
+MAIN/MAIN.agc:817: Fatal Error: Operand "RETURN" not resolved.
+000817,000817: ???????           00000                                    RETURN                        	#
+000818,000818: 
+000819,000819:                                                                                          	# Convert DIGIT1 ... DIGIT5 to their DSKY patterns.  Note: calls no other
+000820,000820:                                                                                          	# routines.
+MAIN/MAIN.agc:821: Fatal Error: Operand "CA" not resolved.
+000821,000821: ???????           00000        PATT5DIG                    CA         DIGIT1             	#
+MAIN/MAIN.agc:822: Fatal Error: Operand "INDEX" not resolved.
+000822,000822: ???????           00000                                    INDEX      A                  	#
+MAIN/MAIN.agc:823: Fatal Error: Operand "CA" not resolved.
+000823,000823: ???????           00000                                    CA         DIGPATTS           	#
+MAIN/MAIN.agc:824: Fatal Error: Operand "TS" not resolved.
+000824,000824: ???????           00000                                    TS         DIGIT1             	#
+MAIN/MAIN.agc:825: Fatal Error: Operand "CA" not resolved.
+000825,000825: ???????           00000                                    CA         DIGIT2             	#
+MAIN/MAIN.agc:826: Fatal Error: Operand "INDEX" not resolved.
+000826,000826: ???????           00000                                    INDEX      A                  	#
+MAIN/MAIN.agc:827: Fatal Error: Operand "CA" not resolved.
+000827,000827: ???????           00000                                    CA         DIGPATTS           	#
+MAIN/MAIN.agc:828: Fatal Error: Operand "TS" not resolved.
+000828,000828: ???????           00000                                    TS         DIGIT2             	#
+MAIN/MAIN.agc:829: Fatal Error: Operand "CA" not resolved.
+000829,000829: ???????           00000                                    CA         DIGIT3             	#
+MAIN/MAIN.agc:830: Fatal Error: Operand "INDEX" not resolved.
+000830,000830: ???????           00000                                    INDEX      A                  	#
+MAIN/MAIN.agc:831: Fatal Error: Operand "CA" not resolved.
+000831,000831: ???????           00000                                    CA         DIGPATTS           	#
+MAIN/MAIN.agc:832: Fatal Error: Operand "TS" not resolved.
+000832,000832: ???????           00000                                    TS         DIGIT3             	#
+MAIN/MAIN.agc:833: Fatal Error: Operand "CA" not resolved.
+000833,000833: ???????           00000                                    CA         DIGIT4             	#
+MAIN/MAIN.agc:834: Fatal Error: Operand "INDEX" not resolved.
+000834,000834: ???????           00000                                    INDEX      A                  	#
+MAIN/MAIN.agc:835: Fatal Error: Operand "CA" not resolved.
+000835,000835: ???????           00000                                    CA         DIGPATTS           	#
+MAIN/MAIN.agc:836: Fatal Error: Operand "TS" not resolved.
+000836,000836: ???????           00000                                    TS         DIGIT4             	#
+MAIN/MAIN.agc:837: Fatal Error: Operand "CA" not resolved.
+000837,000837: ???????           00000                                    CA         DIGIT5             	#
+MAIN/MAIN.agc:838: Fatal Error: Operand "INDEX" not resolved.
+000838,000838: ???????           00000                                    INDEX      A                  	#
+MAIN/MAIN.agc:839: Fatal Error: Operand "CA" not resolved.
+000839,000839: ???????           00000                                    CA         DIGPATTS           	#
+MAIN/MAIN.agc:840: Fatal Error: Operand "TS" not resolved.
+000840,000840: ???????           00000                                    TS         DIGIT5             	#
+MAIN/MAIN.agc:841: Fatal Error: Operand "RETURN" not resolved.
+000841,000841: ???????           00000                                    RETURN                        	#
+000842,000842: 
+000843,000843:                                                                                          	# Display the number in the accumulator as decimal in DSKY PROG
+MAIN/MAIN.agc:844: Fatal Error: Operand "EXTEND" not resolved.
+000844,000844: ???????           00000        DSPPROG                     EXTEND                        	#
+MAIN/MAIN.agc:845: Fatal Error: Operand "QXCH" not resolved.
+000845,000845: ???????           00000                                    QXCH       DSPR               	#
+MAIN/MAIN.agc:846: Fatal Error: Operand "TCR" not resolved.
+000846,000846: ???????           00000                                    TCR        CONV10             	#
+MAIN/MAIN.agc:847: Fatal Error: Operand "TCR" not resolved.
+000847,000847: ???????           00000                                    TCR        PACK2DIG           	#
+MAIN/MAIN.agc:848: Fatal Error: Operand "AD" not resolved.
+000848,000848: ???????           00000                                    AD         OPCODEP            	#
+MAIN/MAIN.agc:849: Fatal Error: Operand "EXTEND" not resolved.
+000849,000849: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:850: Fatal Error: Operand "WRITE" not resolved.
+000850,000850: ???????           00000                                    WRITE      10                 	#
+MAIN/MAIN.agc:851: Fatal Error: Operand "EXTEND" not resolved.
+000851,000851: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:852: Fatal Error: Operand "QXCH" not resolved.
+000852,000852: ???????           00000                                    QXCH       DSPR               	#
+MAIN/MAIN.agc:853: Fatal Error: Operand "RETURN" not resolved.
+000853,000853: ???????           00000                                    RETURN                        	#
+000854,000854: 
+000855,000855:                                                                                          	# Display the number in the accumulator as decimal in DSKY VERB
+MAIN/MAIN.agc:856: Fatal Error: Operand "EXTEND" not resolved.
+000856,000856: ???????           00000        DSPVERB                     EXTEND                        	#
+MAIN/MAIN.agc:857: Fatal Error: Operand "QXCH" not resolved.
+000857,000857: ???????           00000                                    QXCH       DSPR               	#
+MAIN/MAIN.agc:858: Fatal Error: Operand "TCR" not resolved.
+000858,000858: ???????           00000                                    TCR        CONV10             	#
+MAIN/MAIN.agc:859: Fatal Error: Operand "TCR" not resolved.
+000859,000859: ???????           00000                                    TCR        PACK2DIG           	#
+MAIN/MAIN.agc:860: Fatal Error: Operand "AD" not resolved.
+000860,000860: ???????           00000                                    AD         OPCODEV            	#
+MAIN/MAIN.agc:861: Fatal Error: Operand "EXTEND" not resolved.
+000861,000861: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:862: Fatal Error: Operand "WRITE" not resolved.
+000862,000862: ???????           00000                                    WRITE      10                 	#
+MAIN/MAIN.agc:863: Fatal Error: Operand "EXTEND" not resolved.
+000863,000863: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:864: Fatal Error: Operand "QXCH" not resolved.
+000864,000864: ???????           00000                                    QXCH       DSPR               	#
+MAIN/MAIN.agc:865: Fatal Error: Operand "RETURN" not resolved.
+000865,000865: ???????           00000                                    RETURN                        	#
+000866,000866: 
+000867,000867:                                                                                          	# Display the number in the accumulator as decimal in DSKY NOUN
+MAIN/MAIN.agc:868: Fatal Error: Operand "EXTEND" not resolved.
+000868,000868: ???????           00000        DSPNOUN                     EXTEND                        	#
+MAIN/MAIN.agc:869: Fatal Error: Operand "QXCH" not resolved.
+000869,000869: ???????           00000                                    QXCH       DSPR               	#
+MAIN/MAIN.agc:870: Fatal Error: Operand "TCR" not resolved.
+000870,000870: ???????           00000                                    TCR        CONV10             	#
+MAIN/MAIN.agc:871: Fatal Error: Operand "TCR" not resolved.
+000871,000871: ???????           00000                                    TCR        PACK2DIG           	#
+MAIN/MAIN.agc:872: Fatal Error: Operand "AD" not resolved.
+000872,000872: ???????           00000                                    AD         OPCODEN            	#
+MAIN/MAIN.agc:873: Fatal Error: Operand "EXTEND" not resolved.
+000873,000873: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:874: Fatal Error: Operand "WRITE" not resolved.
+000874,000874: ???????           00000                                    WRITE      10                 	#
+MAIN/MAIN.agc:875: Fatal Error: Operand "EXTEND" not resolved.
+000875,000875: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:876: Fatal Error: Operand "QXCH" not resolved.
+000876,000876: ???????           00000                                    QXCH       DSPR               	#
+MAIN/MAIN.agc:877: Fatal Error: Operand "RETURN" not resolved.
+000877,000877: ???????           00000                                    RETURN                        	#
+000878,000878: 
+000879,000879:                                                                                          	# Display the number in the accumulator as decimal in DSKY R1.
+MAIN/MAIN.agc:880: Fatal Error: Operand "EXTEND" not resolved.
+000880,000880: ???????           00000        DSPR1                       EXTEND                        	#
+MAIN/MAIN.agc:881: Fatal Error: Operand "QXCH" not resolved.
+000881,000881: ???????           00000                                    QXCH       DSPR               	#
+MAIN/MAIN.agc:882: Fatal Error: Operand "TCR" not resolved.
+000882,000882: ???????           00000                                    TCR        CONV10             	#
+MAIN/MAIN.agc:883: Fatal Error: Operand "TCR" not resolved.
+000883,000883: ???????           00000                                    TCR        PATT5DIG           	#
+MAIN/MAIN.agc:884: Fatal Error: Operand "EXTEND" not resolved.
+000884,000884: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:885: Fatal Error: Operand "QXCH" not resolved.
+000885,000885: ???????           00000                                    QXCH       DSPR               	#
+000886,000886:                                                                                          	# Fall through to DIG2R1.
+000887,000887: 
+000888,000888:                                                                                          	# Display the number in SIGN/DIGITx in DSKY R1
+MAIN/MAIN.agc:889: Fatal Error: Operand "EXTEND" not resolved.
+000889,000889: ???????           00000        DIG2R1                      EXTEND                        	#
+MAIN/MAIN.agc:890: Fatal Error: Operand "QXCH" not resolved.
+000890,000890: ???????           00000                                    QXCH       DSPR               	#
+MAIN/MAIN.agc:891: Fatal Error: Operand "CA" not resolved.
+000891,000891: ???????           00000                                    CA         DIGIT1             	# First write DIGIT1
+MAIN/MAIN.agc:892: Fatal Error: Operand "AD" not resolved.
+000892,000892: ???????           00000                                    AD         OPCODR11           	#
+MAIN/MAIN.agc:893: Fatal Error: Operand "EXTEND" not resolved.
+000893,000893: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:894: Fatal Error: Operand "WRITE" not resolved.
+000894,000894: ???????           00000                                    WRITE      10                 	#
+MAIN/MAIN.agc:895: Fatal Error: Operand "CA" not resolved.
+000895,000895: ???????           00000                                    CA         DIGIT2             	# Next, DIGIT2 and DIGIT3
+MAIN/MAIN.agc:896: Fatal Error: Operand "EXTEND" not resolved.
+000896,000896: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:897: Fatal Error: Operand "MP" not resolved.
+000897,000897: ???????           00000                                    MP         D32                	#
+MAIN/MAIN.agc:898: Fatal Error: Operand "CA" not resolved.
+000898,000898: ???????           00000                                    CA         DIGIT3             	#
+MAIN/MAIN.agc:899: Fatal Error: Operand "ADS" not resolved.
+000899,000899: ???????           00000                                    ADS        L                  	#
+MAIN/MAIN.agc:900: Fatal Error: Operand "CA" not resolved.
+000900,000900: ???????           00000                                    CA         OPCDR123           	#
+MAIN/MAIN.agc:901: Fatal Error: Operand "ADS" not resolved.
+000901,000901: ???????           00000                                    ADS        L                  	#
+MAIN/MAIN.agc:902: Fatal Error: Operand "CA" not resolved.
+000902,000902: ???????           00000                                    CA         SIGN               	#
+MAIN/MAIN.agc:903: Fatal Error: Operand "EXTEND" not resolved.
+000903,000903: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:904: Fatal Error: Operand "BZF" not resolved.
+000904,000904: ???????           00000                                    BZF        DSPR1POS           	#
+MAIN/MAIN.agc:905: Fatal Error: Operand "TCF" not resolved.
+000905,000905: ???????           00000                                    TCF        DSPR1NPS           	#
+MAIN/MAIN.agc:906: Fatal Error: Operand "CA" not resolved.
+000906,000906: ???????           00000        DSPR1POS                    CA         SIGNBIT            	#
+MAIN/MAIN.agc:907: Fatal Error: Operand "ADS" not resolved.
+000907,000907: ???????           00000                                    ADS        L                  	#
+MAIN/MAIN.agc:908: Fatal Error: Operand "CA" not resolved.
+000908,000908: ???????           00000        DSPR1NPS                    CA         L                  	#
+MAIN/MAIN.agc:909: Fatal Error: Operand "EXTEND" not resolved.
+000909,000909: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:910: Fatal Error: Operand "WRITE" not resolved.
+000910,000910: ???????           00000                                    WRITE      10                 	#
+MAIN/MAIN.agc:911: Fatal Error: Operand "CA" not resolved.
+000911,000911: ???????           00000                                    CA         DIGIT4             	# And finally, DIGIT4 and DIGIT5
+MAIN/MAIN.agc:912: Fatal Error: Operand "EXTEND" not resolved.
+000912,000912: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:913: Fatal Error: Operand "MP" not resolved.
+000913,000913: ???????           00000                                    MP         D32                	#
+MAIN/MAIN.agc:914: Fatal Error: Operand "CA" not resolved.
+000914,000914: ???????           00000                                    CA         DIGIT5             	#
+MAIN/MAIN.agc:915: Fatal Error: Operand "ADS" not resolved.
+000915,000915: ???????           00000                                    ADS        L                  	#
+MAIN/MAIN.agc:916: Fatal Error: Operand "CA" not resolved.
+000916,000916: ???????           00000                                    CA         OPCDR145           	#
+MAIN/MAIN.agc:917: Fatal Error: Operand "ADS" not resolved.
+000917,000917: ???????           00000                                    ADS        L                  	#
+MAIN/MAIN.agc:918: Fatal Error: Operand "CA" not resolved.
+000918,000918: ???????           00000                                    CA         SIGN               	#
+MAIN/MAIN.agc:919: Fatal Error: Operand "EXTEND" not resolved.
+000919,000919: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:920: Fatal Error: Operand "BZF" not resolved.
+000920,000920: ???????           00000                                    BZF        DSPR1NNG           	#
+MAIN/MAIN.agc:921: Fatal Error: Operand "CA" not resolved.
+000921,000921: ???????           00000                                    CA         SIGNBIT            	#
+MAIN/MAIN.agc:922: Fatal Error: Operand "ADS" not resolved.
+000922,000922: ???????           00000                                    ADS        L                  	#
+MAIN/MAIN.agc:923: Fatal Error: Operand "CA" not resolved.
+000923,000923: ???????           00000        DSPR1NNG                    CA         L                  	#
+MAIN/MAIN.agc:924: Fatal Error: Operand "EXTEND" not resolved.
+000924,000924: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:925: Fatal Error: Operand "WRITE" not resolved.
+000925,000925: ???????           00000                                    WRITE      10                 	#
+MAIN/MAIN.agc:926: Fatal Error: Operand "EXTEND" not resolved.
+000926,000926: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:927: Fatal Error: Operand "QXCH" not resolved.
+000927,000927: ???????           00000                                    QXCH       DSPR               	#
+MAIN/MAIN.agc:928: Fatal Error: Operand "RETURN" not resolved.
+000928,000928: ???????           00000                                    RETURN                        	#
+000929,000929: 
+000930,000930:                                                                                          	# Display the number in the accumulator as decimal in DSKY R2
+MAIN/MAIN.agc:931: Fatal Error: Operand "EXTEND" not resolved.
+000931,000931: ???????           00000        DSPR2                       EXTEND                        	#
+MAIN/MAIN.agc:932: Fatal Error: Operand "QXCH" not resolved.
+000932,000932: ???????           00000                                    QXCH       DSPR               	#
+MAIN/MAIN.agc:933: Fatal Error: Operand "TCR" not resolved.
+000933,000933: ???????           00000                                    TCR        CONV10             	#
+MAIN/MAIN.agc:934: Fatal Error: Operand "TCR" not resolved.
+000934,000934: ???????           00000                                    TCR        PATT5DIG           	#
+MAIN/MAIN.agc:935: Fatal Error: Operand "EXTEND" not resolved.
+000935,000935: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:936: Fatal Error: Operand "QXCH" not resolved.
+000936,000936: ???????           00000                                    QXCH       DSPR               	#
+000937,000937:                                                                                          	# Fall through to DIG2R2.
+000938,000938: 
+000939,000939:                                                                                          	# Display the number in SIGN/DIGITx in DSKY R2
+MAIN/MAIN.agc:940: Fatal Error: Operand "EXTEND" not resolved.
+000940,000940: ???????           00000        DIG2R2                      EXTEND                        	#
+MAIN/MAIN.agc:941: Fatal Error: Operand "QXCH" not resolved.
+000941,000941: ???????           00000                                    QXCH       DSPR               	#
+MAIN/MAIN.agc:942: Fatal Error: Operand "CA" not resolved.
+000942,000942: ???????           00000                                    CA         DIGIT5             	# Save DIGIT5 for DSPR3 routine.
+MAIN/MAIN.agc:943: Fatal Error: Operand "TS" not resolved.
+000943,000943: ???????           00000                                    TS         DIGIT25            	#
+MAIN/MAIN.agc:944: Fatal Error: Operand "CA" not resolved.
+000944,000944: ???????           00000                                    CA         DIGIT1             	# First, DIGIT1 and DIGIT2
+MAIN/MAIN.agc:945: Fatal Error: Operand "EXTEND" not resolved.
+000945,000945: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:946: Fatal Error: Operand "MP" not resolved.
+000946,000946: ???????           00000                                    MP         D32                	#
+MAIN/MAIN.agc:947: Fatal Error: Operand "CA" not resolved.
+000947,000947: ???????           00000                                    CA         DIGIT2             	#
+MAIN/MAIN.agc:948: Fatal Error: Operand "ADS" not resolved.
+000948,000948: ???????           00000                                    ADS        L                  	#
+MAIN/MAIN.agc:949: Fatal Error: Operand "CA" not resolved.
+000949,000949: ???????           00000                                    CA         OPCDR212           	#
+MAIN/MAIN.agc:950: Fatal Error: Operand "ADS" not resolved.
+000950,000950: ???????           00000                                    ADS        L                  	#
+MAIN/MAIN.agc:951: Fatal Error: Operand "CA" not resolved.
+000951,000951: ???????           00000                                    CA         SIGN               	#
+MAIN/MAIN.agc:952: Fatal Error: Operand "EXTEND" not resolved.
+000952,000952: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:953: Fatal Error: Operand "BZF" not resolved.
+000953,000953: ???????           00000                                    BZF        DSPR2POS           	#
+MAIN/MAIN.agc:954: Fatal Error: Operand "TCF" not resolved.
+000954,000954: ???????           00000                                    TCF        DSPR2NPS           	#
+MAIN/MAIN.agc:955: Fatal Error: Operand "CA" not resolved.
+000955,000955: ???????           00000        DSPR2POS                    CA         SIGNBIT            	#
+MAIN/MAIN.agc:956: Fatal Error: Operand "ADS" not resolved.
+000956,000956: ???????           00000                                    ADS        L                  	#
+MAIN/MAIN.agc:957: Fatal Error: Operand "CA" not resolved.
+000957,000957: ???????           00000        DSPR2NPS                    CA         L                  	#
+MAIN/MAIN.agc:958: Fatal Error: Operand "EXTEND" not resolved.
+000958,000958: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:959: Fatal Error: Operand "WRITE" not resolved.
+000959,000959: ???????           00000                                    WRITE      10                 	#
+MAIN/MAIN.agc:960: Fatal Error: Operand "CA" not resolved.
+000960,000960: ???????           00000                                    CA         DIGIT3             	# Next, DIGIT3 and DIGIT4
+MAIN/MAIN.agc:961: Fatal Error: Operand "EXTEND" not resolved.
+000961,000961: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:962: Fatal Error: Operand "MP" not resolved.
+000962,000962: ???????           00000                                    MP         D32                	#
+MAIN/MAIN.agc:963: Fatal Error: Operand "CA" not resolved.
+000963,000963: ???????           00000                                    CA         DIGIT4             	#
+MAIN/MAIN.agc:964: Fatal Error: Operand "ADS" not resolved.
+000964,000964: ???????           00000                                    ADS        L                  	#
+MAIN/MAIN.agc:965: Fatal Error: Operand "CA" not resolved.
+000965,000965: ???????           00000                                    CA         OPCDR234           	#
+MAIN/MAIN.agc:966: Fatal Error: Operand "ADS" not resolved.
+000966,000966: ???????           00000                                    ADS        L                  	#
+MAIN/MAIN.agc:967: Fatal Error: Operand "CA" not resolved.
+000967,000967: ???????           00000                                    CA         SIGN               	#
+MAIN/MAIN.agc:968: Fatal Error: Operand "EXTEND" not resolved.
+000968,000968: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:969: Fatal Error: Operand "BZF" not resolved.
+000969,000969: ???????           00000                                    BZF        DSPR2NNG           	#
+MAIN/MAIN.agc:970: Fatal Error: Operand "CA" not resolved.
+000970,000970: ???????           00000                                    CA         SIGNBIT            	#
+MAIN/MAIN.agc:971: Fatal Error: Operand "ADS" not resolved.
+000971,000971: ???????           00000                                    ADS        L                  	#
+MAIN/MAIN.agc:972: Fatal Error: Operand "CA" not resolved.
+000972,000972: ???????           00000        DSPR2NNG                    CA         L                  	#
+MAIN/MAIN.agc:973: Fatal Error: Operand "EXTEND" not resolved.
+000973,000973: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:974: Fatal Error: Operand "WRITE" not resolved.
+000974,000974: ???????           00000                                    WRITE      10                 	#
+MAIN/MAIN.agc:975: Fatal Error: Operand "CA" not resolved.
+000975,000975: ???????           00000                                    CA         DIGIT5             	# Finally, DIGIT5 (and R3 DIGIT1)
+MAIN/MAIN.agc:976: Fatal Error: Operand "EXTEND" not resolved.
+000976,000976: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:977: Fatal Error: Operand "MP" not resolved.
+000977,000977: ???????           00000                                    MP         D32                	#
+MAIN/MAIN.agc:978: Fatal Error: Operand "CA" not resolved.
+000978,000978: ???????           00000                                    CA         DIGIT31            	#
+MAIN/MAIN.agc:979: Fatal Error: Operand "AD" not resolved.
+000979,000979: ???????           00000                                    AD         L                  	#
+MAIN/MAIN.agc:980: Fatal Error: Operand "AD" not resolved.
+000980,000980: ???????           00000                                    AD         OPR25R31           	#
+MAIN/MAIN.agc:981: Fatal Error: Operand "EXTEND" not resolved.
+000981,000981: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:982: Fatal Error: Operand "WRITE" not resolved.
+000982,000982: ???????           00000                                    WRITE      10                 	#
+MAIN/MAIN.agc:983: Fatal Error: Operand "EXTEND" not resolved.
+000983,000983: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:984: Fatal Error: Operand "QXCH" not resolved.
+000984,000984: ???????           00000                                    QXCH       DSPR               	#
+MAIN/MAIN.agc:985: Fatal Error: Operand "RETURN" not resolved.
+000985,000985: ???????           00000                                    RETURN                        	#
+000986,000986: 
+000987,000987:                                                                                          	# Display the number in the accumulator as decimal in DSKY R3
+MAIN/MAIN.agc:988: Fatal Error: Operand "EXTEND" not resolved.
+000988,000988: ???????           00000        DSPR3                       EXTEND                        	#
+MAIN/MAIN.agc:989: Fatal Error: Operand "QXCH" not resolved.
+000989,000989: ???????           00000                                    QXCH       DSPR               	#
+MAIN/MAIN.agc:990: Fatal Error: Operand "TCR" not resolved.
+000990,000990: ???????           00000                                    TCR        CONV10             	#
+MAIN/MAIN.agc:991: Fatal Error: Operand "TCR" not resolved.
+000991,000991: ???????           00000                                    TCR        PATT5DIG           	#
+MAIN/MAIN.agc:992: Fatal Error: Operand "EXTEND" not resolved.
+000992,000992: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:993: Fatal Error: Operand "QXCH" not resolved.
+000993,000993: ???????           00000                                    QXCH       DSPR               	#
+000994,000994:                                                                                          	# Fall through to DIG2R3.
+000995,000995: 
+000996,000996:                                                                                          	# Display the number in SIGN/DIGITx in DSKY R3
+MAIN/MAIN.agc:997: Fatal Error: Operand "EXTEND" not resolved.
+000997,000997: ???????           00000        DIG2R3                      EXTEND                        	#
+MAIN/MAIN.agc:998: Fatal Error: Operand "QXCH" not resolved.
+000998,000998: ???????           00000                                    QXCH       DSPR               	#
+MAIN/MAIN.agc:999: Fatal Error: Operand "CA" not resolved.
+000999,000999: ???????           00000                                    CA         DIGIT1             	# Save DIGIT1 for DSPR2 routine.
+MAIN/MAIN.agc:1000: Fatal Error: Operand "TS" not resolved.
+001000,001000: ???????           00000                                    TS         DIGIT31            	#
+MAIN/MAIN.agc:1001: Fatal Error: Operand "CA" not resolved.
+001001,001001: ???????           00000                                    CA         DIGIT25            	# First, (R2 DIGIT5 and) DIGIT1
+MAIN/MAIN.agc:1002: Fatal Error: Operand "EXTEND" not resolved.
+001002,001002: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1003: Fatal Error: Operand "MP" not resolved.
+001003,001003: ???????           00000                                    MP         D32                	#
+MAIN/MAIN.agc:1004: Fatal Error: Operand "CA" not resolved.
+001004,001004: ???????           00000                                    CA         DIGIT1             	#
+MAIN/MAIN.agc:1005: Fatal Error: Operand "AD" not resolved.
+001005,001005: ???????           00000                                    AD         L                  	#
+MAIN/MAIN.agc:1006: Fatal Error: Operand "AD" not resolved.
+001006,001006: ???????           00000                                    AD         OPR25R31           	#
+MAIN/MAIN.agc:1007: Fatal Error: Operand "EXTEND" not resolved.
+001007,001007: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1008: Fatal Error: Operand "WRITE" not resolved.
+001008,001008: ???????           00000                                    WRITE      10                 	#
+MAIN/MAIN.agc:1009: Fatal Error: Operand "CA" not resolved.
+001009,001009: ???????           00000                                    CA         DIGIT2             	# Next, DIGIT2 and DIGIT3
+MAIN/MAIN.agc:1010: Fatal Error: Operand "EXTEND" not resolved.
+001010,001010: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1011: Fatal Error: Operand "MP" not resolved.
+001011,001011: ???????           00000                                    MP         D32                	#
+MAIN/MAIN.agc:1012: Fatal Error: Operand "CA" not resolved.
+001012,001012: ???????           00000                                    CA         DIGIT3             	#
+MAIN/MAIN.agc:1013: Fatal Error: Operand "ADS" not resolved.
+001013,001013: ???????           00000                                    ADS        L                  	#
+MAIN/MAIN.agc:1014: Fatal Error: Operand "CA" not resolved.
+001014,001014: ???????           00000                                    CA         OPCDR323           	#
+MAIN/MAIN.agc:1015: Fatal Error: Operand "ADS" not resolved.
+001015,001015: ???????           00000                                    ADS        L                  	#
+MAIN/MAIN.agc:1016: Fatal Error: Operand "CA" not resolved.
+001016,001016: ???????           00000                                    CA         SIGN               	#
+MAIN/MAIN.agc:1017: Fatal Error: Operand "EXTEND" not resolved.
+001017,001017: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1018: Fatal Error: Operand "BZF" not resolved.
+001018,001018: ???????           00000                                    BZF        DSPR3POS           	#
+MAIN/MAIN.agc:1019: Fatal Error: Operand "TCF" not resolved.
+001019,001019: ???????           00000                                    TCF        DSPR3NPS           	#
+MAIN/MAIN.agc:1020: Fatal Error: Operand "CA" not resolved.
+001020,001020: ???????           00000        DSPR3POS                    CA         SIGNBIT            	#
+MAIN/MAIN.agc:1021: Fatal Error: Operand "ADS" not resolved.
+001021,001021: ???????           00000                                    ADS        L                  	#
+MAIN/MAIN.agc:1022: Fatal Error: Operand "CA" not resolved.
+001022,001022: ???????           00000        DSPR3NPS                    CA         L                  	#
+MAIN/MAIN.agc:1023: Fatal Error: Operand "EXTEND" not resolved.
+001023,001023: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1024: Fatal Error: Operand "WRITE" not resolved.
+001024,001024: ???????           00000                                    WRITE      10                 	#
+MAIN/MAIN.agc:1025: Fatal Error: Operand "CA" not resolved.
+001025,001025: ???????           00000                                    CA         DIGIT4             	# And finally, DIGIT4 and DIGIT5
+MAIN/MAIN.agc:1026: Fatal Error: Operand "EXTEND" not resolved.
+001026,001026: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1027: Fatal Error: Operand "MP" not resolved.
+001027,001027: ???????           00000                                    MP         D32                	#
+MAIN/MAIN.agc:1028: Fatal Error: Operand "CA" not resolved.
+001028,001028: ???????           00000                                    CA         DIGIT5             	#
+MAIN/MAIN.agc:1029: Fatal Error: Operand "ADS" not resolved.
+001029,001029: ???????           00000                                    ADS        L                  	#
+MAIN/MAIN.agc:1030: Fatal Error: Operand "CA" not resolved.
+001030,001030: ???????           00000                                    CA         OPCDR345           	#
+MAIN/MAIN.agc:1031: Fatal Error: Operand "ADS" not resolved.
+001031,001031: ???????           00000                                    ADS        L                  	#
+MAIN/MAIN.agc:1032: Fatal Error: Operand "CA" not resolved.
+001032,001032: ???????           00000                                    CA         SIGN               	#
+MAIN/MAIN.agc:1033: Fatal Error: Operand "EXTEND" not resolved.
+001033,001033: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1034: Fatal Error: Operand "BZF" not resolved.
+001034,001034: ???????           00000                                    BZF        DSPR3NNG           	#
+MAIN/MAIN.agc:1035: Fatal Error: Operand "CA" not resolved.
+001035,001035: ???????           00000                                    CA         SIGNBIT            	#
+MAIN/MAIN.agc:1036: Fatal Error: Operand "ADS" not resolved.
+001036,001036: ???????           00000                                    ADS        L                  	#
+MAIN/MAIN.agc:1037: Fatal Error: Operand "CA" not resolved.
+001037,001037: ???????           00000        DSPR3NNG                    CA         L                  	#
+MAIN/MAIN.agc:1038: Fatal Error: Operand "EXTEND" not resolved.
+001038,001038: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1039: Fatal Error: Operand "WRITE" not resolved.
+001039,001039: ???????           00000                                    WRITE      10                 	#
+MAIN/MAIN.agc:1040: Fatal Error: Operand "EXTEND" not resolved.
+001040,001040: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1041: Fatal Error: Operand "QXCH" not resolved.
+001041,001041: ???????           00000                                    QXCH       DSPR               	#
+MAIN/MAIN.agc:1042: Fatal Error: Operand "RETURN" not resolved.
+001042,001042: ???????           00000                                    RETURN                        	#
+001043,001043: 
+001044,001044:                                                                                          	# Display the number in YEAR as a year in DSKY R3.  (Similar to
+001045,001045:                                                                                          	# DSPR3, except no sign bit, and first digit is blank.)
+MAIN/MAIN.agc:1046: Fatal Error: Operand "EXTEND" not resolved.
+001046,001046: ???????           00000        DSPR3Y                      EXTEND                        	#
+MAIN/MAIN.agc:1047: Fatal Error: Operand "QXCH" not resolved.
+001047,001047: ???????           00000                                    QXCH       DSPR               	#
+MAIN/MAIN.agc:1048: Fatal Error: Operand "CA" not resolved.
+001048,001048: ???????           00000                                    CA         YEAR               	#
+MAIN/MAIN.agc:1049: Fatal Error: Operand "TCR" not resolved.
+001049,001049: ???????           00000                                    TCR        CONV10             	#
+MAIN/MAIN.agc:1050: Fatal Error: Operand "TCR" not resolved.
+001050,001050: ???????           00000                                    TCR        PATT5DIG           	#
+MAIN/MAIN.agc:1051: Fatal Error: Operand "CA" not resolved.
+001051,001051: ???????           00000                                    CA         ZERO               	# Save first digit (a blank) for DSPR2 routine.
+MAIN/MAIN.agc:1052: Fatal Error: Operand "TS" not resolved.
+001052,001052: ???????           00000                                    TS         DIGIT31            	#
+001053,001053: 
+MAIN/MAIN.agc:1054: Fatal Error: Operand "CA" not resolved.
+001054,001054: ???????           00000                                    CA         DIGIT25            	# First, (R2 DIGIT5 and) DIGIT1 (blank)
+MAIN/MAIN.agc:1055: Fatal Error: Operand "EXTEND" not resolved.
+001055,001055: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1056: Fatal Error: Operand "MP" not resolved.
+001056,001056: ???????           00000                                    MP         D32                	#
+MAIN/MAIN.agc:1057: Fatal Error: Operand "CA" not resolved.
+001057,001057: ???????           00000                                    CA         ZERO               	#
+MAIN/MAIN.agc:1058: Fatal Error: Operand "AD" not resolved.
+001058,001058: ???????           00000                                    AD         L                  	#
+MAIN/MAIN.agc:1059: Fatal Error: Operand "AD" not resolved.
+001059,001059: ???????           00000                                    AD         OPR25R31           	#
+MAIN/MAIN.agc:1060: Fatal Error: Operand "EXTEND" not resolved.
+001060,001060: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1061: Fatal Error: Operand "WRITE" not resolved.
+001061,001061: ???????           00000                                    WRITE      10                 	#
+MAIN/MAIN.agc:1062: Fatal Error: Operand "CA" not resolved.
+001062,001062: ???????           00000                                    CA         DIGIT2             	# Next, DIGIT2 and DIGIT3
+MAIN/MAIN.agc:1063: Fatal Error: Operand "EXTEND" not resolved.
+001063,001063: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1064: Fatal Error: Operand "MP" not resolved.
+001064,001064: ???????           00000                                    MP         D32                	#
+MAIN/MAIN.agc:1065: Fatal Error: Operand "CA" not resolved.
+001065,001065: ???????           00000                                    CA         DIGIT3             	#
+MAIN/MAIN.agc:1066: Fatal Error: Operand "AD" not resolved.
+001066,001066: ???????           00000                                    AD         L                  	#
+MAIN/MAIN.agc:1067: Fatal Error: Operand "AD" not resolved.
+001067,001067: ???????           00000                                    AD         OPCDR323           	#
+MAIN/MAIN.agc:1068: Fatal Error: Operand "EXTEND" not resolved.
+001068,001068: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1069: Fatal Error: Operand "WRITE" not resolved.
+001069,001069: ???????           00000                                    WRITE      10                 	#
+001070,001070: 
+MAIN/MAIN.agc:1071: Fatal Error: Operand "CA" not resolved.
+001071,001071: ???????           00000                                    CA         DIGIT4             	# And finally, DIGIT4 and DIGIT5
+MAIN/MAIN.agc:1072: Fatal Error: Operand "EXTEND" not resolved.
+001072,001072: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1073: Fatal Error: Operand "MP" not resolved.
+001073,001073: ???????           00000                                    MP         D32                	#
+MAIN/MAIN.agc:1074: Fatal Error: Operand "CA" not resolved.
+001074,001074: ???????           00000                                    CA         DIGIT5             	#
+MAIN/MAIN.agc:1075: Fatal Error: Operand "AD" not resolved.
+001075,001075: ???????           00000                                    AD         L                  	#
+MAIN/MAIN.agc:1076: Fatal Error: Operand "AD" not resolved.
+001076,001076: ???????           00000                                    AD         OPCDR345           	#
+MAIN/MAIN.agc:1077: Fatal Error: Operand "EXTEND" not resolved.
+001077,001077: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1078: Fatal Error: Operand "WRITE" not resolved.
+001078,001078: ???????           00000                                    WRITE      10                 	#
+001079,001079: 
+MAIN/MAIN.agc:1080: Fatal Error: Operand "EXTEND" not resolved.
+001080,001080: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1081: Fatal Error: Operand "QXCH" not resolved.
+001081,001081: ???????           00000                                    QXCH       DSPR               	#
+MAIN/MAIN.agc:1082: Fatal Error: Operand "RETURN" not resolved.
+001082,001082: ???????           00000                                    RETURN                        	#
+001083,001083: 
+001084,001084:                                                                                          	# Display the numbers in MONTH and DAY as two 2-digit fields in DSKY R2.
+MAIN/MAIN.agc:1085: Fatal Error: Operand "EXTEND" not resolved.
+001085,001085: ???????           00000        DSPR2MD                     EXTEND                        	#
+MAIN/MAIN.agc:1086: Fatal Error: Operand "QXCH" not resolved.
+001086,001086: ???????           00000                                    QXCH       DSPR               	#
+001087,001087: 
+MAIN/MAIN.agc:1088: Fatal Error: Operand "CA" not resolved.
+001088,001088: ???????           00000                                    CA         MONTH              	#
+MAIN/MAIN.agc:1089: Fatal Error: Operand "TCR" not resolved.
+001089,001089: ???????           00000                                    TCR        CONV10             	#
+MAIN/MAIN.agc:1090: Fatal Error: Operand "TCR" not resolved.
+001090,001090: ???????           00000                                    TCR        PACK2DIG           	#
+MAIN/MAIN.agc:1091: Fatal Error: Operand "AD" not resolved.
+001091,001091: ???????           00000                                    AD         OPCDR212           	#
+MAIN/MAIN.agc:1092: Fatal Error: Operand "EXTEND" not resolved.
+001092,001092: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1093: Fatal Error: Operand "WRITE" not resolved.
+001093,001093: ???????           00000                                    WRITE      10                 	#
+001094,001094: 
+MAIN/MAIN.agc:1095: Fatal Error: Operand "CA" not resolved.
+001095,001095: ???????           00000                                    CA         DAY                	#
+MAIN/MAIN.agc:1096: Fatal Error: Operand "TCR" not resolved.
+001096,001096: ???????           00000                                    TCR        CONV10             	#
+MAIN/MAIN.agc:1097: Fatal Error: Operand "CA" not resolved.
+001097,001097: ???????           00000                                    CA         DIGIT5             	#
+MAIN/MAIN.agc:1098: Fatal Error: Operand "INDEX" not resolved.
+001098,001098: ???????           00000                                    INDEX      A                  	#
+MAIN/MAIN.agc:1099: Fatal Error: Operand "CA" not resolved.
+001099,001099: ???????           00000                                    CA         DIGPATTS           	#
+MAIN/MAIN.agc:1100: Fatal Error: Operand "TS" not resolved.
+001100,001100: ???????           00000                                    TS         DIGIT5             	#
+MAIN/MAIN.agc:1101: Fatal Error: Operand "CA" not resolved.
+001101,001101: ???????           00000                                    CA         DIGIT4             	#
+MAIN/MAIN.agc:1102: Fatal Error: Operand "INDEX" not resolved.
+001102,001102: ???????           00000                                    INDEX      A                  	#
+MAIN/MAIN.agc:1103: Fatal Error: Operand "CA" not resolved.
+001103,001103: ???????           00000                                    CA         DIGPATTS           	#
+MAIN/MAIN.agc:1104: Fatal Error: Operand "AD" not resolved.
+001104,001104: ???????           00000                                    AD         OPCDR234           	#
+MAIN/MAIN.agc:1105: Fatal Error: Operand "EXTEND" not resolved.
+001105,001105: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1106: Fatal Error: Operand "WRITE" not resolved.
+001106,001106: ???????           00000                                    WRITE      10                 	#
+001107,001107: 
+MAIN/MAIN.agc:1108: Fatal Error: Operand "CA" not resolved.
+001108,001108: ???????           00000                                    CA         DIGIT5             	#
+MAIN/MAIN.agc:1109: Fatal Error: Operand "TS" not resolved.
+001109,001109: ???????           00000                                    TS         DIGIT25            	#
+MAIN/MAIN.agc:1110: Fatal Error: Operand "EXTEND" not resolved.
+001110,001110: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1111: Fatal Error: Operand "MP" not resolved.
+001111,001111: ???????           00000                                    MP         D32                	#
+MAIN/MAIN.agc:1112: Fatal Error: Operand "CA" not resolved.
+001112,001112: ???????           00000                                    CA         L                  	#
+MAIN/MAIN.agc:1113: Fatal Error: Operand "AD" not resolved.
+001113,001113: ???????           00000                                    AD         DIGIT31            	#
+MAIN/MAIN.agc:1114: Fatal Error: Operand "AD" not resolved.
+001114,001114: ???????           00000                                    AD         OPR25R31           	#
+MAIN/MAIN.agc:1115: Fatal Error: Operand "EXTEND" not resolved.
+001115,001115: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1116: Fatal Error: Operand "WRITE" not resolved.
+001116,001116: ???????           00000                                    WRITE      10                 	#
+001117,001117: 
+MAIN/MAIN.agc:1118: Fatal Error: Operand "EXTEND" not resolved.
+001118,001118: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1119: Fatal Error: Operand "QXCH" not resolved.
+001119,001119: ???????           00000                                    QXCH       DSPR               	#
+MAIN/MAIN.agc:1120: Fatal Error: Operand "RETURN" not resolved.
+001120,001120: ???????           00000                                    RETURN                        	#
+001121,001121: 
+001122,001122:                                                                                          	# Display the numbers in HOUR and MINUTE as two 2-digit fields in DSKY R1.
+MAIN/MAIN.agc:1123: Fatal Error: Operand "EXTEND" not resolved.
+001123,001123: ???????           00000        DSPR1HM                     EXTEND                        	#
+MAIN/MAIN.agc:1124: Fatal Error: Operand "QXCH" not resolved.
+001124,001124: ???????           00000                                    QXCH       DSPR               	#
+001125,001125: 
+MAIN/MAIN.agc:1126: Fatal Error: Operand "CA" not resolved.
+001126,001126: ???????           00000                                    CA         HOUR               	#
+MAIN/MAIN.agc:1127: Fatal Error: Operand "TCR" not resolved.
+001127,001127: ???????           00000                                    TCR        CONV10             	#
+001128,001128: 
+MAIN/MAIN.agc:1129: Fatal Error: Operand "CA" not resolved.
+001129,001129: ???????           00000                                    CA         DIGIT4             	#
+MAIN/MAIN.agc:1130: Fatal Error: Operand "INDEX" not resolved.
+001130,001130: ???????           00000                                    INDEX      A                  	#
+MAIN/MAIN.agc:1131: Fatal Error: Operand "CA" not resolved.
+001131,001131: ???????           00000                                    CA         DIGPATTS           	#
+MAIN/MAIN.agc:1132: Fatal Error: Operand "AD" not resolved.
+001132,001132: ???????           00000                                    AD         OPCODR11           	#
+MAIN/MAIN.agc:1133: Fatal Error: Operand "EXTEND" not resolved.
+001133,001133: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1134: Fatal Error: Operand "WRITE" not resolved.
+001134,001134: ???????           00000                                    WRITE      10                 	#
+001135,001135: 
+MAIN/MAIN.agc:1136: Fatal Error: Operand "CA" not resolved.
+001136,001136: ???????           00000                                    CA         DIGIT5             	#
+MAIN/MAIN.agc:1137: Fatal Error: Operand "INDEX" not resolved.
+001137,001137: ???????           00000                                    INDEX      A                  	#
+MAIN/MAIN.agc:1138: Fatal Error: Operand "CA" not resolved.
+001138,001138: ???????           00000                                    CA         DIGPATTS           	#
+MAIN/MAIN.agc:1139: Fatal Error: Operand "EXTEND" not resolved.
+001139,001139: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1140: Fatal Error: Operand "MP" not resolved.
+001140,001140: ???????           00000                                    MP         D32                	#
+MAIN/MAIN.agc:1141: Fatal Error: Operand "CA" not resolved.
+001141,001141: ???????           00000                                    CA         L                  	#
+MAIN/MAIN.agc:1142: Fatal Error: Operand "AD" not resolved.
+001142,001142: ???????           00000                                    AD         OPCDR123           	#
+MAIN/MAIN.agc:1143: Fatal Error: Operand "EXTEND" not resolved.
+001143,001143: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1144: Fatal Error: Operand "WRITE" not resolved.
+001144,001144: ???????           00000                                    WRITE      10                 	#
+001145,001145: 
+MAIN/MAIN.agc:1146: Fatal Error: Operand "CA" not resolved.
+001146,001146: ???????           00000                                    CA         MINUTE             	#
+MAIN/MAIN.agc:1147: Fatal Error: Operand "TCR" not resolved.
+001147,001147: ???????           00000                                    TCR        CONV10             	#
+MAIN/MAIN.agc:1148: Fatal Error: Operand "TCR" not resolved.
+001148,001148: ???????           00000                                    TCR        PACK2DIG           	#
+MAIN/MAIN.agc:1149: Fatal Error: Operand "AD" not resolved.
+001149,001149: ???????           00000                                    AD         OPCDR145           	#
+MAIN/MAIN.agc:1150: Fatal Error: Operand "EXTEND" not resolved.
+001150,001150: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1151: Fatal Error: Operand "WRITE" not resolved.
+001151,001151: ???????           00000                                    WRITE      10                 	#
+001152,001152: 
+MAIN/MAIN.agc:1153: Fatal Error: Operand "EXTEND" not resolved.
+001153,001153: ???????           00000                                    EXTEND                        	#
+MAIN/MAIN.agc:1154: Fatal Error: Operand "QXCH" not resolved.
+001154,001154: ???????           00000                                    QXCH       DSPR               	#
+MAIN/MAIN.agc:1155: Fatal Error: Operand "RETURN" not resolved.
+001155,001155: ???????           00000                                    RETURN                        	#
+001156,001156: 
+001157,001157:                                                                                          	# Define any constants that are needed.
+001158,001158: ???????           37774        O37774             OCT      37774                         	#
+001159,001159: ???????           00000        ZERO               OCT      0                             	#
+001160,001160: ???????           00001        ONE                OCT      1                             	#
+001161,001161: ???????           00002        TWO                OCT      2                             	#
+001162,001162: ???????           00004        FOUR               OCT      4                             	#
+001163,001163: ???????           00010        EIGHT              DEC      8          B-14               	#
+001164,001164: ???????           77776        MINUS1             DEC      -1         B-14               	#
+001165,001165: ???????           77767        MINUS8             DEC      -8         B-14               	#
+001166,001166: ???????           00012        TEN                DEC      10         B-14               	#
+001167,001167: ???????           00037        O37                OCT      37                            	# Mask with lowest 5 bits set.
+001168,001168: ???????           00077        O77                OCT      77                            	# Mask with lowest 6 bits set.
+001169,001169: ???????           00040        NOKEY              OCT      40                            	#
+001170,001170: ???????           00040        D32                DEC      32         B-14               	#
+001171,001171: ???????           00100        D64                DEC      64         B-14               	#
+001172,001172: ???????           02000        D1024              DEC      1024       B-14               	#
+001173,001173: ???????           54000        OPCODEP            DEC      11         B11                	#
+001174,001174: ???????           50000        OPCODEV            DEC      10         B11                	#
+001175,001175: ???????           44000        OPCODEN            DEC      9          B11                	#
+001176,001176: ???????           40000        OPCODR11           DEC      8          B11                	#
+001177,001177: ???????           34000        OPCDR123           DEC      7          B11                	#
+001178,001178: ???????           30000        OPCDR145           DEC      6          B11                	#
+001179,001179: ???????           24000        OPCDR212           DEC      5          B11                	#
+001180,001180: ???????           20000        OPCDR234           DEC      4          B11                	#
+001181,001181: ???????           14000        OPR25R31           DEC      3          B11                	#
+001182,001182: ???????           10000        OPCDR323           DEC      2          B11                	#
+001183,001183: ???????           04000        OPCDR345           DEC      1          B11                	#
+001184,001184: ???????           02000        SIGNBIT            DEC      1          B10                	#
+001185,001185:                                                                                          	# DSKY digit patterns for the digit 0-9.
+001186,001186: ???????           00025        DIGPATTS           DEC      21         B-14               	#
+001187,001187: ???????           00003                           DEC      3          B-14               	#
+001188,001188: ???????           00031                           DEC      25         B-14               	#
+001189,001189: ???????           00033                           DEC      27         B-14               	#
+001190,001190: ???????           00017                           DEC      15         B-14               	#
+001191,001191: ???????           00036                           DEC      30         B-14               	#
+001192,001192: ???????           00034                           DEC      28         B-14               	#
+001193,001193: ???????           00023                           DEC      19         B-14               	#
+001194,001194: ???????           00035                           DEC      29         B-14               	#
+001195,001195: ???????           00037                           DEC      31         B-14               	#
+001196,001196: 
+001197,001197: 
+Removing the duplicated lines... 
+
+Symbol-table file written.
+
+
+Usage Table for Fixed-Memory Banks
+----------------------------------
+Bank 01:  0000/2000 words used.
+Bank 02:  0000/2000 words used.
+Bank 03:  0000/2000 words used.
+Bank 04:  0000/2000 words used.
+Bank 05:  0000/2000 words used.
+Bank 06:  0000/2000 words used.
+Bank 07:  0000/2000 words used.
+Bank 10:  0000/2000 words used.
+Bank 11:  0000/2000 words used.
+Bank 12:  0000/2000 words used.
+Bank 13:  0000/2000 words used.
+Bank 14:  0000/2000 words used.
+Bank 15:  0000/2000 words used.
+Bank 16:  0000/2000 words used.
+Bank 17:  0000/2000 words used.
+Bank 20:  0000/2000 words used.
+Bank 21:  0000/2000 words used.
+Bank 22:  0000/2000 words used.
+Bank 23:  0000/2000 words used.
+Bank 24:  0000/2000 words used.
+Bank 25:  0000/2000 words used.
+Bank 26:  0000/2000 words used.
+Bank 27:  0000/2000 words used.
+Bank 30:  0000/2000 words used.
+Bank 31:  0000/2000 words used.
+Bank 32:  0000/2000 words used.
+Bank 33:  0000/2000 words used.
+Bank 34:  0000/2000 words used.
+
+
+Symbol Table
+------------
+(Legend:  I=Invalid, C=Constant, E=Erasable, F=Fixed, ?=Error)
+
+<i>(Legend:  I=Invalid, C=Constant, E=Erasable, F=Fixed, ?=Error)</i><br><br>
+     1,I:   A            ???????  		    43,I:   DSPR1POS     ???????  		    82,I:   MODE0        ???????  
+     2,I:   ARUPT        ???????  		    44,I:   DSPR2        ???????  		    83,I:   MODE1        ???????  
+     3,I:   A2DIG        ???????  		    45,I:   DSPR2MD      ???????  		    84,I:   MODE2        ???????  
+  ==============================  		    46,I:   DSPR2NNG     ???????  		    85,I:   MODE3        ???????  
+     4,I:   BANKRUPT     ???????  		    47,I:   DSPR2NPS     ???????  		    86,I:   MODE4        ???????  
+     5,I:   BBANK        ???????  		    48,I:   DSPR2POS     ???????  		    87,I:   MODE5        ???????  
+     6,I:   BLANKALL     ???????  		    49,I:   DSPR3        ???????  		    88,I:   MODE6        ???????  
+     7,I:   BRUPT        ???????  		    50,I:   DSPR3NNG     ???????  		    89,I:   MODE7        ???????  
+  ==============================  		    51,I:   DSPR3NPS     ???????  		    90,I:   MODE8        ???????  
+     8,I:   CONV10       ???????  		    52,I:   DSPR3POS     ???????  		    91,I:   MONTH        ???????  
+     9,I:   CONV10M      ???????  		    53,I:   DSPR3Y       ???????  		  ==============================  
+    10,I:   CONV10P      ???????  		    54,I:   DSPVERB      ???????  		    92,I:   NEWJOB       ???????  
+    11,I:   CONV10Z      ???????  		    55,I:   D1024        ???????  		    93,I:   NOKEY        ???????  
+    12,I:   CYL          ???????  		    56,I:   D32          ???????  		  ==============================  
+    13,I:   CYR          ???????  		    57,I:   D64          ???????  		    94,I:   ONE          ???????  
+  ==============================  		  ==============================  		    95,I:   OPCDR123     ???????  
+    14,I:   DAY          ???????  		    58,I:   EBANK        ???????  		    96,I:   OPCDR145     ???????  
+    15,I:   DIGIT1       ???????  		    59,I:   EDOP         ???????  		    97,I:   OPCDR212     ???????  
+    16,I:   DIGIT1A      ???????  		    60,I:   EIGHT        ???????  		    98,I:   OPCDR234     ???????  
+    17,I:   DIGIT2       ???????  		    61,I:   ENDKYCK      ???????  		    99,I:   OPCDR323     ???????  
+    18,I:   DIGIT2A      ???????  		    62,I:   ENDTMCK      ???????  		   100,I:   OPCDR345     ???????  
+    19,I:   DIGIT25      ???????  		  ==============================  		   101,I:   OPCODEN      ???????  
+    20,I:   DIGIT3       ???????  		    63,I:   FBANK        ???????  		   102,I:   OPCODEP      ???????  
+    21,I:   DIGIT3A      ???????  		    64,I:   FOUR         ???????  		   103,I:   OPCODEV      ???????  
+    22,I:   DIGIT31      ???????  		  ==============================  		   104,I:   OPCODR11     ???????  
+    23,I:   DIGIT4       ???????  		    65,I:   HOUR         ???????  		   105,I:   OPR25R31     ???????  
+    24,I:   DIGIT4A      ???????  		  ==============================  		   106,I:   O37          ???????  
+    25,I:   DIGIT5       ???????  		    66,I:   KEYBUF       ???????  		   107,I:   O37774       ???????  
+    26,I:   DIGIT5A      ???????  		    67,I:   KEYRUPT      ???????  		   108,I:   O77          ???????  
+    27,I:   DIGPATTS     ???????  		    68,I:   KEYTABL      ???????  		  ==============================  
+    28,I:   DIG2A        ???????  		  ==============================  		   109,I:   PACK2DIG     ???????  
+    29,I:   DIG2R1       ???????  		    69,I:   L            ???????  		   110,I:   PATT5DIG     ???????  
+    30,I:   DIG2R2       ???????  		    70,I:   LAST040      ???????  		  ==============================  
+    31,I:   DIG2R3       ???????  		    71,I:   LLHIGH       ???????  		   111,I:   Q            ???????  
+    32,I:   DIVISOR      ???????  		    72,I:   LLLOW        ???????  		   112,I:   QRUPT        ???????  
+    33,I:   DSPMODE      ???????  		    73,I:   LLRET        ???????  		  ==============================  
+    34,I:   DSPMODE+     ???????  		    74,I:   LL2          ???????  		   113,I:   RETRIG       ???????  
+    35,I:   DSPMODE-     ???????  		    75,I:   LL5          ???????  		  ==============================  
+    36,I:   DSPNOUN      ???????  		    76,I:   LRUPT        ???????  		   114,I:   SAMPTIME     ???????  
+    37,I:   DSPPROG      ???????  		  ==============================  		   115,I:   SECOND       ???????  
+    38,I:   DSPR         ???????  		    77,I:   MAINLOOP     ???????  		   116,I:   SIGN         ???????  
+    39,I:   DSPR1        ???????  		    78,I:   MINUS1       ???????  		   117,I:   SIGNA        ???????  
+    40,I:   DSPR1HM      ???????  		    79,I:   MINUS8       ???????  		   118,I:   SIGNBIT      ???????  
+    41,I:   DSPR1NNG     ???????  		    80,I:   MINUTE       ???????  		   119,I:   SR           ???????  
+    42,I:   DSPR1NPS     ???????  		    81,I:   MODETABL     ???????  		   120,I:   STARTUP      ???????  
+
+  ==============================  		   126,I:   TIME5        ???????  		  ==============================  
+   121,I:   TEN          ???????  		   127,I:   TIME6        ???????  		   131,I:   YEAR         ???????  
+   122,I:   TIME1        ???????  		   128,I:   TWO          ???????  		  ==============================  
+   123,I:   TIME2        ???????  		   129,I:   T3RUPT       ???????  		   132,I:   Z            ???????  
+   124,I:   TIME3        ???????  		  ==============================  		   133,I:   ZERO         ???????  
+   125,I:   TIME4        ???????  		   130,I:   WILLWRAP     ???????  		   134,I:   ZRUPT        ???????  
+
+Unresolved symbols:  134
+Fatal errors:  822
+Warnings:  0

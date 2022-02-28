@@ -215,6 +215,9 @@ main(int argc, char *argv[])
   // RSB: Jordan made this an option, but I think it should be the default.
   int OutputSymbols = 1;	// 0;
   char *SymbolFile = NULL;
+  FILE *RAMFile = fopen("RAM.mif", "w");
+  FILE *ROMFile = fopen("ROM.mif", "r");
+  
 
   // Parse the command-line options.
   for (i = 1; i < argc; i++)
@@ -566,12 +569,12 @@ main(int argc, char *argv[])
                             GuessBugger, Bank, (Block1 ? 06000 : 02000) + Value);
                     }
                 }
-            }
+            } 
           // Output the binary data.
           for (Offset = 0; Offset < 02000; Offset++)
             {
               Value = ObjectCode[Bank][Offset] << 1;
-
+              fprintf(RAMFile, "Bank %d, Offset, %o, opcode %o \n", Bank, Offset, Value);
               // Add in the parity bits if requested
               if (Hardware)
                 // The AGC hardware used bit 15 for parity
