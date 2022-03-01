@@ -2620,8 +2620,9 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
                             }
                           else
                             {
-                              bank = ParseInputRecord.ProgramCounter.SReg
-                                  / 02000;
+		              //I added the +7 such that 2->9 and 3->10
+                              bank = (ParseInputRecord.ProgramCounter.SReg
+                                  / 02000) + 7;
                             }
 
                           for (i = 0; i < ParseOutputRecord.NumWords; i++)

@@ -216,7 +216,29 @@ main(int argc, char *argv[])
   int OutputSymbols = 1;	// 0;
   char *SymbolFile = NULL;
   FILE *RAMFile = fopen("RAM.mif", "w");
-  FILE *ROMFile = fopen("ROM.mif", "r");
+  FILE *ROMFile = fopen("ROM.mif", "w");
+  
+  fprintf(RAMFile, "DEPTH =  2048\n");
+  fprintf(RAMFile, "WIDTH =  15\n");
+  fprintf(RAMFile, "ADDRESS_RADIX = OCT\n");
+  fprintf(RAMFile, "DATA_RADIX = OCT\n");
+  fprintf(RAMFile, "\n");
+  fprintf(RAMFile, "CONTENT BEGIN\n");
+  fprintf(RAMFile, "\n");
+
+  fprintf(ROMFile, "DEPTH =  8192\n");
+  fprintf(ROMFile, "WIDTH =  15\n");
+  fprintf(ROMFile, "ADDRESS_RADIX = OCT\n");
+  fprintf(ROMFile, "DATA_RADIX = OCT\n");
+  fprintf(ROMFile, "\n");
+  fprintf(ROMFile, "CONTENT BEGIN\n");
+  fprintf(ROMFile, "\n");
+
+  for(int i = 0; i < 2048; i++)
+  {
+    fprintf(RAMFile, "%.4o : %.5o\n", i, 0);
+  } 
+
   
 
   // Parse the command-line options.
@@ -505,13 +527,12 @@ main(int argc, char *argv[])
       uint16_t Bugger, GuessBugger;
 
       printf("\n");
-      for (BankRaw = (Block1 ? 1 : 0); BankRaw < (Block1 ? 035 : 044);
+
+      for (BankRaw = (9); BankRaw < 11;
           BankRaw++)
         {
-          // Compute the actual bank number.
-          Bank = BankRaw;
-          if (Bank < 4 && !Hardware && !Block1)	// flip-flop 0,1 with 2,3 when not building for hardware targets
-            Bank ^= 2;
+	  Bank = BankRaw;
+        
           // Add bugger info to the bank.
           if (!NoChecksums)
             {
@@ -573,8 +594,98 @@ main(int argc, char *argv[])
           // Output the binary data.
           for (Offset = 0; Offset < 02000; Offset++)
             {
-              Value = ObjectCode[Bank][Offset] << 1;
-              fprintf(RAMFile, "Bank %d, Offset, %o, opcode %o \n", Bank, Offset, Value);
+	      int mifAddress;
+              Value = ObjectCode[Bank][Offset];
+              // Add in the parity bits if requested
+              mifAddress = ((Bank - 9) * 1024) + Offset; 
+              fprintf(ROMFile, "%.4o : %.5o\n", mifAddress, Value);
+          
+              if (Hardware)
+                // The AGC hardware used bit 15 for parity
+                Value = (Value & 0100000)  |
+                        (Parities[Bank][Offset] << 14) |
+                        ((Value & 077776) >> 1);
+              else if (Parity)
+                // yaAGC uses bit position 1 for parity
+                Value |= Parities[Bank][Offset];
+
+              fputc(Value >> 8, OutputFile);
+              fputc(Value, OutputFile);
+            }
+        }
+ 
+
+      for (BankRaw = (0); BankRaw < 9;
+          BankRaw++)
+        {
+	  Bank = BankRaw;
+        
+          // Add bugger info to the bank.
+          if (!NoChecksums)
+            {
+              if (Block1)
+                {
+                  if (Bank == 0)
+                    Offset = 02000;
+                  else if (Bank == 1)
+                    Offset = 04000;
+                  else
+                    Offset = 06000;
+                }
+              else
+                {
+                  if (Bank == 2)
+                    Offset = 04000;
+                  else if (Bank == 3)
+                    Offset = 06000;
+                  else
+                    Offset = 02000;
+                }
+              Value = GetBankCount(Bank);
+              if (Value > 0)
+                {
+                  if (!Block1 && !blk2)
+                    {
+                      if (Value < 01776)
+                        {
+                          ObjectCode[Bank][Value] = Value + Offset;
+                          Parities[Bank][Value] = CalculateParity(Value + Offset);
+                          Value++;
+                        }
+                      if (Value < 01777)
+                        {
+                          ObjectCode[Bank][Value] = Value + Offset;
+                          Parities[Bank][Value] = CalculateParity(Value + Offset);
+                          Value++;
+                        }
+                    }
+                  if (Value < 02000)
+                    {
+                      for (Bugger = Offset = 0; Offset < Value; Offset++) {
+                        Bugger = Add(Bugger, ObjectCode[Bank][Offset]);
+                      }
+                      if ((0 == (040000 & Bugger)) || posChecksums)
+                        GuessBugger = Add(Bank, 077777 & ~Bugger);
+                      else
+                        GuessBugger = Add(077777 & ~Bank, 077777 & ~Bugger);
+                      ObjectCode[Bank][Value] = GuessBugger;
+                      Parities[Bank][Value] = CalculateParity(GuessBugger);
+                      printf("Bugger word %05o at %02o,%04o.\n", GuessBugger, Bank,
+                          (Block1 ? 06000 : 02000) + Value);
+                      if (HtmlOut != NULL)
+                        fprintf(HtmlOut, "Bugger word %05o at %02o,%04o.\n",
+                            GuessBugger, Bank, (Block1 ? 06000 : 02000) + Value);
+                    }
+                }
+            } 
+          // Output the binary data.
+          for (Offset = 0; Offset < 02000; Offset++)
+            {
+              int mifAddress;
+              Value = ObjectCode[Bank][Offset];
+              
+	      mifAddress = ((2 + Bank) * 1024) + Offset;
+              fprintf(ROMFile, "%.4o : %.5o\n", mifAddress, Value);
               // Add in the parity bits if requested
               if (Hardware)
                 // The AGC hardware used bit 15 for parity

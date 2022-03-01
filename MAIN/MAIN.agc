@@ -222,7 +222,7 @@ LLRET				ERASE				# Return address for LL2.
                                                                 # interrupt after 40 ms.
                                 BANK            0                                 
                                                                 
-                                CA              EIGHT
+                                CA              0 
                                 CA              O37774
                                 TS              TIME3
                                 TCF             STARTUP         # Go to your "real" code.
