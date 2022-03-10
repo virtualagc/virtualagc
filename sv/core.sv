@@ -10,7 +10,7 @@ module Core
    output logic RAM_write_en, stall);
 
   /////////////////////////FETCH STAGE///////////////////////////////
-  logic stall_D;
+  logic stall_D, flush_E, flush_W;
   logic [14:0] pc_F, pc_1_F, next_pc_F;
 
 
@@ -33,10 +33,10 @@ module Core
          if (!rst_l) begin
             pc_D <= 'o4000;
          end
-         else if (clear_D) begin
+         else if (flush_E) begin
             pc_D <= 'o4000;
          end
-         else if (en) begin
+         else if (~stall_D) begin
             pc_D <= pc_F;
          end
     end
@@ -77,7 +77,7 @@ module Core
             rs2_data_E <= 'd0;
             IO_read_data_E <= 'd0; 
          end
-         else if (clear_D) begin 
+         else if (flush_E | flush_W | stall_D) begin 
             ctrl_E <= 'd0;
             rs1_data_E <= 'd0;
             rs2_data_E <= 'd0;
@@ -124,16 +124,19 @@ module Core
             ctrl_W <= 'd0;
             old_pc_W <= 'd0;
             alu_out_W <= 'd0;
+            flush_W <= 'd0;
          end
-         else if (clear_D) begin
+         else if (1'b0) begin
             ctrl_W <= 'd0;
             old_pc_W <= 'd0;
-            alu_out_W <= 'd0; 
+            alu_out_W <= 'd0;
+            flush_W <= 'd0; 
          end
-         else if (en) begin
+         else if (1'b1) begin
             ctrl_W <= ctrl_E;
             old_pc_W <= pc_;
             alu_out_W <= 'd0;
+            flush_W <= flush_E;
          end 
     end
 
@@ -160,15 +163,8 @@ module Core
   assign IO_write_en = ctrl_W.IO_write_en;
   
 
+  //STALL UNIT
 
-
-
-
-
-
-
- 
-  
-
+  stall_logic stall(.ctrl_D, .ctrl_E, .ctrl_W, .stall, .branch_E, .flush_E);
 
 endmodule : Core

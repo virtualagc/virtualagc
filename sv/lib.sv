@@ -230,3 +230,40 @@ module register_file
    output logic [14:0] rs1_data_D, rs2_data_D);
    
 endmodule: register_file
+
+module branching_logic 
+  (input logic eq_0, sign_bit,
+   input branch_t, ctrl_branch,
+   output logic branch);
+
+  assign branch = (branch==BZF && eq_0) ? 1'b1 : (branch == BZF && (eq_0 || sign_bit) ? 1'b1 : 1'b0;
+      
+
+endmodule: branching_logic
+    
+module stall_logic
+  (input ctrl_t ctrl_D, ctrl_E, ctrl_W,
+   input logic branch_E,
+   output logic stall, flush);
+
+
+  always_comb begin
+    flush = 1'b0;
+    
+    if(branch_E) begin
+       flush = 1'b1;
+    end
+  end
+
+
+  always_comb begin
+    stall = 1'b0
+    if ((ctrl_D.rs1_sel==ctrl_E.wr1 && ctrl_E.wr1_en) ||(ctrl_D.rs2_sel==ctrl_E.wr2 && ctrl_E.wr2_en)) begin
+        stall = 1'b1;
+    end
+    else if ((ctrl_D.K==ctrl_E.K && (ctrl_E.RAM_write_en || ctrl_E.IO_write_en)) || (ctrl_D.K==ctrl_W.K && (ctrl_W.RAM_write_en || ctrl_W.IO_write_en)))
+        stall = 1'b1;
+    end
+  end
+
+endmodule: stall_logic

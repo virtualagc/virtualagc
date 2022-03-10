@@ -70,6 +70,12 @@ typedef enum logic  {
     OLD_PC,
 } rd_t
 
+typedef enum logic  {
+    NO_BRANCH,
+    BZF,
+    BZFK,
+} branch_t
+
 typedef struct packed {
     alu_op_t alu_op;      // The ALU operation to perform
     logic data_read_en;   // whether or not we're loading the data
@@ -81,12 +87,13 @@ typedef struct packed {
     reg_t rs2_sel;        //read register 2
     alu_src1_t alu_src1;
     alu_src2_t alu_src2;
-    logic branch;
+    branch_t branch;
     rd_t rd;              // what data is writing back
     logic RAM_write_en;
-    logic IO_read_en;
+    logic [2:0] IO_read_sel;
     logic IO_write_en;
     logic [12:0] K;
+    logic [14:0] pc;
 } ctrl_signals_t;
 
 
