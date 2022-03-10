@@ -18,7 +18,7 @@ module Core
             .sum(pc_1_F), .cout());
 
 
-  register #($bits(pc_F), USER_TEXT_START) PC_Register(.clk, .rst_l,
+  register #($bits(pc_F), 'o4000) PC_Register(.clk, .rst_l,
             .en(~stall_D), .clear(1'b0), .D(next_pc_F),
             .Q(pc_F));
 
@@ -28,6 +28,21 @@ module Core
 
   assign ROM_read_address = pc_F;
 
+  //fetch decode register
+   always_ff @(posedge clock, negedge rst_l) begin
+         if (!rst_l) begin
+            pc_D <= 'o4000;
+         end
+         else if (clear_D) begin
+            pc_D <= 'o4000;
+         end
+         else if (en) begin
+            pc_D <= pc_F;
+         end
+    end
+
+  
+
   /////////////////////////DECODE STAGE////////////////////////////
 
   logic [14:0] instr_D, rs1_data_D, rs2_data_D, IO_read_data_D;
@@ -35,9 +50,11 @@ module Core
   logic [11:0] k_D;
 
   assign IO_read_data_D = IO_read_data;
+  assign IO_read_sel = ctrl_D.IO_read_sel;
   assign instr_D = ROM_read_data;
 
-  decoder Decoder(.rst_l, .instr(instr_D), .ctrl_signals(ctrl_D), .clock, .k(k_D));
+
+  decoder Decoder(.rst_l, .instr(instr_D), .ctrl_signals(ctrl_D), .clock);
 
   //TODO donny make address thing  
  
@@ -53,33 +70,95 @@ module Core
   //decode execute register
   logic [14:0] rs1_data_E, rs2_data_E, IO_read_data_E, k_E;
 
-   always_ff @(posedge clock, negedge rst_l) begin
+    always_ff @(posedge clock, negedge rst_l) begin
          if (!rst_l) begin 
             ctrl_E <= 'd0;
             rs1_data_E <= 'd0;
             rs2_data_E <= 'd0;
-            k_E <= 'd0;
             IO_read_data_E <= 'd0; 
          end
          else if (clear_D) begin 
             ctrl_E <= 'd0;
             rs1_data_E <= 'd0;
             rs2_data_E <= 'd0;
-            k_E <= 'd0;
             IO_read_data_E <= 'd0;  
          end
          else if (en) begin
             ctrl_E <= ctrl_D;
             rs1_data_E <= rs1_data_D;
             rs2_data_E <= rs2_data_D;
-            k_E <= k_D;
             IO_read_data_E <= IO_read_data_D; 
          end 
     end
 
-  /////////////////////////EXECUTE STAGE//////////////////////////
+ /////////////////////////EXECUTE STAGE//////////////////////////
+  logic [29:0] alu_src1_E, rs1rs2_data_E, alu_out_E;
+  logic [14:0] alu_src2_E;
   
+  assign rs1rs2_data_E = {rs1_data_E,rs2_data_E};
+  
+  assign read_data_E = RAM_read_data;
 
+  mux #(3, $bits(rs1rs2_data_E)) ALU1_Mux(.in({rs1rs2_data_E, 15'd0, rs1_data_E, 18'd0, ctrl_E.k}),
+      .sel(ctrl_E.alu_src1), .out(alu_src1_E));
+
+  //TODO should it be K or address?
+  mux #(4, $bits(alu_src2)) ALU_2_Mux(.in({read_data_E, rs2_data_E, IO_read_data_E, ctrl_E.k}),
+            .sel(ctrl_E.alu_src2),
+            .out(alu_src2_E));
+
+  
+  alu ALU(.src1(alu_src1_E), .src2(alu_src2_E), .out(alu_out_E), sign_bit(sign_bit_E), eq_0(eq_0_E),
+          .op(ctrl_E.alu_op));
+
+
+  //TODO make this logic
+  branching_logic Branch(.eq_0(eq_0_E, .sign_bit(sign_bit_E), .ctrl_branch(ctrl.branch_E),
+                         .branch(branch_E));
+  
+  //Execute Writeback Register
+  logic [14:0] old_pc_W
+
+   always_ff @(posedge clock, negedge rst_l) begin
+         if (!rst_l) begin 
+            ctrl_W <= 'd0;
+            old_pc_W <= 'd0;
+            alu_out_W <= 'd0;
+         end
+         else if (clear_D) begin
+            ctrl_W <= 'd0;
+            old_pc_W <= 'd0;
+            alu_out_W <= 'd0; 
+         end
+         else if (en) begin
+            ctrl_W <= ctrl_E;
+            old_pc_W <= pc_;
+            alu_out_W <= 'd0;
+         end 
+    end
+
+  ///////////////////////////WRITEBACK STAGE////////////////////////////
+
+  logic [29:0] data_W;
+
+  mux #(2, $bits(data_W)) PC_Mux(.in({15'd0,ctrl_W.pc,alu_out_W}),
+            .sel(ctrl_W.rd),
+            .out(data_W));
+
+  //higher bits wr1 lower bits wr2
+  assign wr1_data_W = data_W[29:15];
+  assign wr2_data_W = data_W[14:0];
+
+  //data address upper bits data lower bits
+  assign RAM_write_address = data_W[29:15];
+  assign RAM_write_data = data_W[14:0];
+  assign RAM_write_en = ctrl_en.RAM_write_en;
+
+  //data channel upper bits data w
+  assign IO_write_sel = data_W[17:15];
+  assign IO_write_data = data_W[14:0];
+  assign IO_write_en = ctrl_W.IO_write_en;
+  
 
 
 
