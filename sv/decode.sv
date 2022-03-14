@@ -118,6 +118,9 @@ module decoder
               end
             endcase
           end
+          //halt
+          3'd3 : begin
+          end
           //INDEX
           5'd5 : begin
           end
