@@ -4,27 +4,33 @@
 
 module decoder
   (input logic rst_l, clock,
-   input [14:0] instr,
+   input [14:0] instr, read_data_E
    ouput ctrl_t ctrl_D);
 
   logic [2:0] opcode, next_byte, lowest_byte;
   logic [1:0] next2_bits;
-  logic extra_code1, extra_code2, in_ROM, in_RAM, is_reg, addr_is_0;
+  logic [14:0] instr_F;
+  logic extra_code1, extra_code2, in_ROM, in_RAM, is_reg, addr_is_0, index1, index2;
 
   register #(1, 1'b0) reg(.clk, .rst_l,
             .en(1'b1), .clear(1'b0), .D(extra_code1),
             .Q(extra_code2));
+  register #(1, 1'b0) reg(.clk, .rst_l,
+            .en(1'b1), .clear(1'b0), .D(index1),
+            .Q(index2));
 
 
+  
+  assign instr_F = (index2) ? read_data_E + instr : instr;
   assign clk = clock;
-  assign is_ROM = (instr[11:0] >= 'o2000) ? 1'b1 : 1'b0;
-  assign is_RAM = ((instr[11:0] < 'o2000) && (instr[11:0] >= 'd13) ? 1'b1 : 1'b0;
-  assign is_reg = (instr[11:0] < 'd13) ? 1'b1 : 1'b0;
-  assign opcode = instr[14:12];
-  assign next_byte = instr[11:9];
-  assign last_byte = instr[2:0];
-  assign next2_bits = instr[11:10];
-  assign addr_is_0 = instr[11:0]==12'b0;
+  assign is_ROM = (instr_F[11:0] >= 'o2000) ? 1'b1 : 1'b0;
+  assign is_RAM = ((instr_F[11:0] < 'o2000) && (instr_F[11:0] >= 'd13) ? 1'b1 : 1'b0;
+  assign is_reg = (instr_F[11:0] < 'd13) ? 1'b1 : 1'b0;
+  assign opcode = instr_F[14:12];
+  assign next_byte = instr_F[11:9];
+  assign last_byte = instr_F[2:0];
+  assign next2_bits = instr_F[11:10];
+  assign addr_is_0 = instr_F[11:0]==12'b0;
 
 
   
@@ -46,8 +52,11 @@ module decoder
     IO_read_sel: 3'b0,
     IO_write_en: 1'b0
     K: 12'b0,
-    pc: 15'b0
+    pc: 15'b0,
+    halt: 1'b0
 } ctrl_signals_t;
+    index1 = 1'b0;
+    extra_code1 = 1'b0;
     unique case (extra_code2)
       1'b1 : begin
         unique case(opcode)
@@ -108,6 +117,9 @@ module decoder
                                 ctrl_signals.illegal_instr = 1'b1;
               end
             endcase
+          end
+          //INDEX
+          5'd5 : begin
           end
           3'd6 : begin
             unique case(in_ROM)
