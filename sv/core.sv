@@ -7,7 +7,7 @@ module Core
    output logic [14:0] RAM_write_data, IO_write_data,
    output logic [14:0] ROM_address, RAM_read_address, RAM_write_address,
    output logic [2:0] IO_read_sel, IO_write_sel,
-   output logic RAM_write_en, stall);
+   output logic RAM_write_en, stall, halt);
 
   /////////////////////////FETCH STAGE///////////////////////////////
   logic stall_D, flush_E, flush_W;
@@ -161,7 +161,7 @@ module Core
   assign IO_write_sel = data_W[17:15];
   assign IO_write_data = data_W[14:0];
   assign IO_write_en = ctrl_W.IO_write_en;
-  
+  assign halt = ctrl_W.halt;
 
   //STALL UNIT
 

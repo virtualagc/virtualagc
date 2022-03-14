@@ -11,6 +11,11 @@ module TB;
 
   //TODO instantiate ROM, RAM, core and IO
 
+
+  initial begin
+    wait(halt);
+    #finish;
+  end
   
 
   initial begin

@@ -94,6 +94,7 @@ typedef struct packed {
     logic IO_write_en;
     logic [12:0] K;
     logic [14:0] pc;
+    logic halt;
 } ctrl_signals_t;
 
 
