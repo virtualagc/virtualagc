@@ -224,10 +224,178 @@ endmodule: countFSM
 
 //TODO donny fill out register file
 module register_file 
-  (input logic rst_l, clock, wr1_en, we2_en,
+  (input logic rst_l, clock, wr1_en, wr2_en,
    input logic [14:0] wr1_data, wr2_data,
    input reg_t rs1_sel, rs2_sel, wr1_sel, wr2_sel,
-   output logic [14:0] rs1_data_D, rs2_data_D);
+   output logic [14:0] rs1_data, rs2_data,
+   output logic [2:0] bits_EB, bits_FB);
+
+  logic [14:0] reg_A, reg_L, 
+               reg_Q, 
+               reg_BB,
+               reg_CYR, reg_SR, reg_CYL, reg_SL,
+               reg_TIME1, reg_TIME2;
+
+  always_ff @(posedge clock, negedge rst_l) begin
+  // Register file writes
+    if (~rst_1) begin
+    // Reset Case
+      reg_A <= 15'd0;
+      reg_L <= 15'd0;
+      reg_Q <= 15'd0;
+      reg_BB[14:9] <= 6'd0;
+      reg_CYR <= 15'd0;
+      reg_SR <= 15'd0;
+      reg_SL <= 15'd0;
+      reg_TIME1 <= 15'd0;
+      reg_TIME2 <= 15'd0
+    end
+    else if (~(wr1_en | wr2_en)) begin
+    // No Write Case
+      reg_A <= reg_A;
+      reg_L <= reg_L;
+      reg_BB[14:9] <= reg_BB[14:9];
+      reg_CYR <= reg_CYR;
+      reg_SR <= reg_SR;
+      reg_SL <= reg_SL;
+      reg_TIME1 <= reg_TIME1;
+      reg_TIME2 <= reg_TIME2;
+    end
+    else begin
+    // Write Case
+    // NOTE: If attempt a write of both data ports to same reg, port 2 has precedence.
+      unique case (wr1_sel)
+      // From Write Port 1
+        // Accumulators
+        A: reg_A <= wr1_data;
+        L: reg_L <= wr1_data;
+
+        // Link register
+        Q: reg_Q <= wr1_data;
+
+        // Bank registers
+        EB: reg_BB[11:9] <= wr1_data[11:9];
+        FB: reg_BB[14:12] <= wr1_data[14:12];
+        BB: reg_BB[14:9] <= wr1_data[14:9];
+        
+        // Editing registers
+        CYR: reg_CYR <= {wr1_data[0], wr1_data[14:1]};
+        SR: reg_SR <= {wr1_data[14], wr1_data[14:1]};
+        CYL: reg_CYL <= {wr1_data[13:0], wr1_data[14]};
+        SL: reg_SL <= {wr1_data[13:0], 1'b0};
+
+        // Timers
+        TIME1: reg_TIME1 <= wr1_data;
+        TIME2: reg_TIME2 <= wr1_data;
+      endcase
+
+      unique case (wr2_sel)
+      // From Write Port 2
+        // Accumulators
+        A: reg_A <= wr2_data;
+        L: reg_L <= wr2_data;
+
+        // Link register
+        Q: reg_Q <= wr2_data;
+
+        // Bank registers (only write to pertinent bits)
+        EB: reg_BB[11:9] <= wr2_data[11:9];
+        FB: reg_BB[14:12] <= wr2_data[14:12];
+        BB: reg_BB[14:9] <= wr2_data[14:9];
+        
+        // Editing registers (shifted value is written)
+        CYR: reg_CYR <= {wr2_data[0], wr2_data[14:1]};
+        SR: reg_SR <= {wr2_data[14], wr2_data[14:1]};
+        CYL: reg_CYL <= {wr2_data[13:0], wr2_data[14]};
+        SL: reg_SL <= {wr2_data[13:0], 1'b0};
+
+        // Timers
+        TIME1: reg_TIME1 <= wr2_data;
+        TIME2: reg_TIME2 <= wr2_data;
+      endcase 
+    end
+  end
+  
+  always_comb begin
+  // Register file reads
+    // To Read Port 1
+    if (rs1_sel == wr1_sel)
+    // Forwarding Case 1
+      rs1_data = wr1_data;
+    else if (rs1_sel == wr2_sel)
+    // Forwarding Case 2
+      rs1_data = wr2_data;
+    else begin
+    // Common Case
+      unique case (rs1_sel)
+        // Accumulators
+        A: rs1_data = reg_A;
+        L: rs1_data = reg_L;
+
+        // Link register
+        Q: rs1_data = reg_Q;
+
+        // Bank registers
+        EB: rs1_data = {3'd0, reg_BB[11:9], 9'd0};
+        FB: rs1_data = {reg_BB[14:12], 13'd0};
+        BB: rs1_data = {reg_BB[14:9], 9'd0};
+
+        // Zero
+        ZERO: rs1_data = 15'd0;
+
+        // Editing registers
+        CYR: rs1_data = reg_CYR;
+        SR: rs1_data = reg_SR;
+        CYL: rs1_data = reg_CYL;
+        SL: rs1_data = reg_SL;
+        
+        // Timers
+        TIME1: rs1_data = reg_TIME1;
+        TIME2: rs1_data = reg_TIME2;
+      endcase
+    end
+
+    // To Read Port 2
+    if (rs2_sel == wr1_sel)
+    // Forwarding Case 1
+      rs1_data = wr1_data;
+    else if (rs2_sel == wr2_sel)
+    // Forwarding Case 2
+      rs2_data = wr2_data;
+    else begin
+    // Common Case
+      unique case (rs2_sel)
+        // Accumulators
+        A: rs2_data = reg_A;
+        L: rs2_data = reg_L;
+
+        // Link register
+        Q: rs2_data = reg_Q;
+
+        // Bank registers
+        EB: rs2_data = {3'd0, reg_BB[11:9], 9'd0};
+        FB: rs2_data = {reg_BB[14:12], 13'd0};
+        BB: rs2_data = {reg_BB[14:9], 9'd0};
+
+        // Zero
+        ZERO: rs2_data = 15'd0;
+
+        // Editing registers
+        CYR: rs2_data = reg_CYR;
+        SR: rs2_data = reg_SR;
+        CYL: rs2_data = reg_CYL;
+        SL: rs2_data = reg_SL;
+        
+        // Timers
+        TIME1: rs2_data = reg_TIME1;
+        TIME2: rs2_data = reg_TIME2;
+      endcase
+    end
+
+    // Bank bit output taps for address translation module
+    bits_EB = reg_BB[11:9];
+    bits_FB = reg_BB[14:12];
+  end 
    
 endmodule: register_file
 
