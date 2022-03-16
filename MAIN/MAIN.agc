@@ -156,27 +156,17 @@ L               		EQUALS          1               # L AND Q ARE BOTH CHANNELS AN
 Q               		EQUALS          2
 EBANK           		EQUALS          3
 FBANK           		EQUALS          4
-Z               		EQUALS          5               # ADJACENT TO FBANK AND BBANK FOR DXCH Z
-BBANK           		EQUALS          6               # (DTCB) AND DXCH FBANK (DTCF).
+
+BBANK           		EQUALS          5               # (DTCB) AND DXCH FBANK (DTCF).
                                                         	# REGISTER 7 IS A ZERO-SOURCE, USED BY ZL.
-ARUPT           		EQUALS          10              # INTERRUPT STORAGE.
-LRUPT           		EQUALS          11
-QRUPT           		EQUALS          12
-SAMPTIME        		EQUALS          13              # SAMPLED TIME 1 & 2.
-ZRUPT           		EQUALS          15              # (13 AND 14 ARE SPARES.)
-BANKRUPT        		EQUALS          16              # USUALLY HOLDS FBANK OR BBANK.
-BRUPT           		EQUALS          17              # RESUME ADDRESS AS WELL.
+
+
 CYR             		EQUALS          20
 SR              		EQUALS          21
 CYL             		EQUALS          22
 EDOP            		EQUALS          23              # EDITS INTERPRETIVE OPERATION CODE PAIRS.
 TIME2           		EQUALS          24
 TIME1           		EQUALS          25
-TIME3           		EQUALS          26
-TIME4           		EQUALS          27
-TIME5           		EQUALS          30
-TIME6           		EQUALS          31
-
                                 SETLOC          67
 NEWJOB                          ERASE                           # Allocate a variable at the location checked by the Night Watchman.
 
