@@ -18,21 +18,20 @@
 `define INTERNAL_DEFINES_VH_
 
 typedef enum logic [3:0] {
-    ALU_AD,                // AD, ADS, #these last 3 don't mater NOOP, EXTND, INDEX
-    ALU_SU,                // SU, BZF, BZFM
-    ALU_AUG,                 // AUG
-    ALU_RET,                 // RETURN, TC, TCAA, TCF, L, TS
-    ALU_COM,                // COM
-    ALU_READ,               // READ, WRITE
-    ALU_ZL,                 // ZL, ZQ
-    ALU_MP,                //MP, SQUARE
-    ALU_DIM,                // DIM
-    ALU_OR,                 // OR, ROR, WOR
-    ALU_AND,                // AND, RAND, MASK, WAND
-    ALU_XOR,                  //RXOR
-    ALU_INCR,                //INCR
-    ALU_DV,                  //DV
-    ALU_QXCH,                //QXCH, LXCH, XLQ, XCH
+    ALU_AD,                // AD, ADS, DOUBLE #these last 3 don't mater NOOP, EXTND, INDEX = alu_out[29:15] = alu_src_1 + alu_src_2
+    ALU_SU,                // SU -> alu_out[29:15] = alu_src_1 - alu_src_2
+    ALU_AUG,               // AUG alu_out -> alu_out[29:15] = alu_src_2 incremented away from 0
+    ALU_COM,               // COM -> alu_out[29:15] = ~alu_src_2
+    ALU_READ,              // READ, WRITE, RETURN, TC, TCAA, TCF, L, TS, CA -> alu_out[29:15] = alu_src_2
+    ALU_BRANCH,            // BZF, BZMF -> alu_out[29:15] = alu_src_1
+    ALU_MP,                // MP, SQUARE -> alu_out[29:0] = alu_src_1 * alu_src_2
+    ALU_DIM,               // DIM -> alu_out[29:15] = alu_src_2 incremented towards 0
+    ALU_OR,                // OR, ROR, WOR -> alu_out[29:15] = alu_src_1 | alu_src_2
+    ALU_AND,               // AND, RAND, MASK, WAND -> alu_out[29:15] = alu_src_1 & alu_src_2
+    ALU_XOR,               // RXOR -> alu_out[29:15] = alu_src_1 ^ alu_src_2
+    ALU_INCR,              // INCR -> alu_out[29:15] = alu_src_2 + 15'd1
+    ALU_DV,                // DV -> alu_out[29:15] = alu_src_1[29:0] / alu_src_2
+    ALU_QXCH,              // QXCH, LXCH, XLQ, XCH -> alu_out[29:0] = {alu_src_1[29:15], alu_src_2}
 } alu_op_t;
 
 typedef enum logic [3:0] {
@@ -42,7 +41,7 @@ typedef enum logic [3:0] {
     EB,
     FB, 
     BB,
-    O,
+    ZERO,
     CYR,
     SR,
     CYL,
