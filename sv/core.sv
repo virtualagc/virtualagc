@@ -54,7 +54,7 @@ module Core
   assign instr_D = ROM_read_data;
 
 
-  decoder Decoder(.rst_l, .instr(instr_D), .ctrl_signals(ctrl_D), .clock, .index_data);
+  decoder Decoder(.rst_l, .instr(instr_D), .ctrl_signals(ctrl_D), .clock, .index_data, .pc(pc_D));
 
   mux #(2, $bits(index_data)) Index_mux(.in({read_data_E,ctrl_E.K}),
             .sel(ctrl_E.index),
