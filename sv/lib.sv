@@ -405,7 +405,7 @@ module branching_logic
    input branch_t, ctrl_branch,
    output logic branch);
 
-  assign branch = (branch==BZF && eq_0) ? 1'b1 : (branch == BZF && (eq_0 || sign_bit) ? 1'b1 : 1'b0;
+  assign branch = (branch==BRANCH) ? 1'b1 : (branch==BZF && eq_0) ? 1'b1 : (branch == BZF && (eq_0 || sign_bit) ? 1'b1 : 1'b0;
       
 
 endmodule: branching_logic

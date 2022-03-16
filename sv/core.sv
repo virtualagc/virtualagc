@@ -10,9 +10,10 @@ module Core
    output logic RAM_write_en, stall, halt);
 
   /////////////////////////FETCH STAGE///////////////////////////////
-  logic stall_D, flush_E, flush_W;
+  logic stall_D, flush_E, flush_W, flush_DE;
   logic [14:0] pc_F, pc_1_F, next_pc_F;
 
+  assign flush_DE = flush_E | flush_W | stall_D;
 
   adder #($bits(pc_F)) Next_PC_Adder(.A(pc_E), .B('d1), .cin(1'b0),
             .sum(pc_1_F), .cout());
@@ -54,7 +55,7 @@ module Core
   assign instr_D = ROM_read_data;
 
 
-  decoder Decoder(.rst_l, .instr(instr_D), .ctrl_signals(ctrl_D), .clock, .index_data, .pc(pc_D));
+  decoder Decoder(.rst_l, .instr(instr_D), .ctrl_signals(ctrl_D), .clock, .index_data, .pc(pc_D), .flush(flush_DE));
 
   mux #(2, $bits(index_data)) Index_mux(.in({read_data_E,ctrl_E.K}),
             .sel(ctrl_E.index),
@@ -81,13 +82,13 @@ module Core
             rs2_data_E <= 'd0;
             IO_read_data_E <= 'd0; 
          end
-         else if (flush_E | flush_W | stall_D) begin 
+         else if (flush_DE) begin 
             ctrl_E <= 'd0;
             rs1_data_E <= 'd0;
             rs2_data_E <= 'd0;
             IO_read_data_E <= 'd0;  
          end
-         else if (en) begin
+         else if (1'b1) begin
             ctrl_E <= ctrl_D;
             rs1_data_E <= rs1_data_D;
             rs2_data_E <= rs2_data_D;

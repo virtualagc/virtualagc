@@ -3,7 +3,7 @@
 `default_nettype none
 
 module decoder
-  (input logic rst_l, clock,
+  (input logic rst_l, clock, flush,
    input [14:0] instr, index_data,
    input [11:0] pc,
    ouput ctrl_t ctrl_D);
@@ -15,10 +15,10 @@ module decoder
 
   //TODO stalling stuff
   register #(1, 1'b0) reg(.clk, .rst_l,
-            .en(1'b1), .clear(1'b0), .D(extra_code1),
+            .en(1'b1), .clear(flush), .D(extra_code1),
             .Q(extra_code2));
   register #(1, 1'b0) reg(.clk, .rst_l,
-            .en(1'b1), .clear(1'b0), .D(index1),
+            .en(1'b1), .clear(flush), .D(index1),
             .Q(index2));
 
 
