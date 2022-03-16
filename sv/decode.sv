@@ -53,6 +53,7 @@ module decoder
     IO_write_en: 1'b0
     K: 12'b0,
     pc: 15'b0,
+    index: EXTEND,
     halt: 1'b0
 } ctrl_signals_t;
     index1 = 1'b0;
@@ -194,6 +195,9 @@ module decoder
          end
          3'd5 : begin
            unique case (next2_bits)
+             //INDEX
+             2'd0 : begin
+             end
              //TS Note: TCAA is special case of TS
              2'd2 : begin
              end

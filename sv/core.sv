@@ -45,7 +45,7 @@ module Core
 
   /////////////////////////DECODE STAGE////////////////////////////
 
-  logic [14:0] instr_D, rs1_data_D, rs2_data_D, IO_read_data_D, read_data_E;
+  logic [14:0] instr_D, rs1_data_D, rs2_data_D, IO_read_data_D, read_data_E, index_data;
   ctrl_t ctrl_D, ctrl_E, ctrl_F;
   logic [11:0] k_D;
 
@@ -54,10 +54,14 @@ module Core
   assign instr_D = ROM_read_data;
 
 
-  decoder Decoder(.rst_l, .instr(instr_D), .ctrl_signals(ctrl_D), .clock, .read_data_E);
+  decoder Decoder(.rst_l, .instr(instr_D), .ctrl_signals(ctrl_D), .clock, .index_data);
+
+  mux #(2, $bits(index_data)) Index_mux(.in({read_data_E,ctrl_E.K}),
+            .sel(ctrl_E.index),
+            .out(data_W));
 
   //TODO donny make address thing  
- 
+  
 
   
 
