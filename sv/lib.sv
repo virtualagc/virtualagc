@@ -254,6 +254,7 @@ module register_file
     // No Write Case
       reg_A <= reg_A;
       reg_L <= reg_L;
+      reg_Q <= reg_Q;
       reg_BB[14:9] <= reg_BB[14:9];
       reg_CYR <= reg_CYR;
       reg_SR <= reg_SR;
