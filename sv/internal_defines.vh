@@ -40,8 +40,7 @@ typedef enum logic [3:0] {
     L,
     Q,
     EB,
-    FB,
-    Z,  //TODO should we get rid of this from the reg file?
+    FB, 
     BB,
     O,
     CYR,
@@ -50,31 +49,31 @@ typedef enum logic [3:0] {
     SL,
     TIME1,
     TIME2,
-} reg_t
+} reg_t;
 
 typedef enum logic [1:0] {
     K1,
     RS1_DATA1,
     RS1_RS2_DATA1,
-} alu_src1_t
+} alu_src1_t;
 
 typedef enum logic [1:0] {
     READ_DATA2,
     RS2_DATA2,
     IO_READ_DATA2,
     ADDR2,
-} alu_src2_t
+} alu_src2_t;
 
 typedef enum logic  {
     ALU_OUT,
     OLD_PC,
-} rd_t
+} rd_t;
 
 typedef enum logic  {
     NO_BRANCH,
     BZF,
     BZFK,
-} branch_t
+} branch_t;
 
 typedef struct packed {
     alu_op_t alu_op;      // The ALU operation to perform
