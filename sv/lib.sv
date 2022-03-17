@@ -254,7 +254,7 @@ module register_file
     // No Write Case
       reg_A <= reg_A;
       reg_L <= reg_L;
-      reg_Q <= reg_Q;
+      reg_Q <= reg_Q; 
       reg_BB[14:9] <= reg_BB[14:9];
       reg_CYR <= reg_CYR;
       reg_SR <= reg_SR;
@@ -399,6 +399,61 @@ module register_file
   end 
    
 endmodule: register_file
+
+module addr_translate_ROM
+  (input  logic [11:0] addr_soft,
+   input  logic [2:0] bits_FB,
+   output logic [13:0] addr_ROM);
+
+  logic [13:0] offset_bank, addr_bank;
+  logic [11:0] addr_norm_to_ROM, addr_norm_to_bank;
+  logic addr_is_fixed;
+
+  always_comb begin
+    // Check if addr_soft points to fixed ROM
+    addr_is_fixed = $unsigned(addr_soft) >= $unsigned(12'o4000);
+
+    // If addr_soft point to fixed ROM, this value is selected
+    // 12'o4000 is lowest software fixed ROM address
+    // Fixed region of ROM occupy until address 12'o4000 (non-inclusive)
+    addr_norm_to_ROM = $unsigned(addr_soft) - $unsigned(12'o4000);
+
+    // 12'o2000 is lowest software banked ROM address
+    // Banked region of ROM occupy address 12'o4000 and higher
+    addr_norm_to_bank = $unsigned(addr_soft) + $unsigned(12'o2000);
+
+    // 12'o2000 is size of each bank
+    offset_bank = $unsigned({2'd0, 12'o2000}) * $unsigned({11'd0, bits_FB});
+
+    // If addr_soft point to banked ROM, this value is selected
+    addr_bank = $unsigned(addr_norm_to_bank) + $unsigned(offset_bank);
+
+    // Select fixed or banked translation
+    addr_ROM = (addr_is_fixed) ? {2'd0, addr_norm_to_ROM} : addr_bank;
+  end
+
+endmodule: addr_translate_ROM
+
+module addr_translate_r
+  (input  logic [11:0] addr_k
+   input  logic [2:0] bits_EB, bits_FB,
+   output logic [13:0] addr_ROM,
+   output logic [10:0] addr_RAM);
+
+  addr_translate_ROM translate_read_ROM (.addr_soft(addr_k),
+                                         .bits_FB(bits_FB),
+                                         .addr_ROM);
+
+endmodule: addr_translate_r
+
+module addr_translate_w
+  (input  logic [11:0] addr_k
+   input  logic [2:0] bits_EB,
+   input  logic en_write,
+   output logic [10:0] addr_RAM,
+   output logic en_write_final);
+
+endmodule: addr_translate_w
 
 module branching_logic 
   (input logic eq_0, sign_bit,
