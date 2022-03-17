@@ -73,6 +73,10 @@ typedef enum logic  {
     BZF,
     BZFK,
 } branch_t;
+typedef enum logic  {
+    EXTEND,
+    NEXTEND,
+}index_t;
 
 typedef struct packed {
     alu_op_t alu_op;      // The ALU operation to perform
@@ -92,6 +96,7 @@ typedef struct packed {
     logic IO_write_en;
     logic [12:0] K;
     logic [14:0] pc;
+    index_t index;
     logic halt;
 } ctrl_signals_t;
 

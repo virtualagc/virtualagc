@@ -3,8 +3,9 @@
 `default_nettype none
 
 module decoder
-  (input logic rst_l, clock,
-   input [14:0] instr, read_data_E
+  (input logic rst_l, clock, flush,
+   input [14:0] instr, index_data,
+   input [11:0] pc,
    ouput ctrl_t ctrl_D);
 
   logic [2:0] opcode, next_byte, lowest_byte;
@@ -12,16 +13,17 @@ module decoder
   logic [14:0] instr_F;
   logic extra_code1, extra_code2, in_ROM, in_RAM, is_reg, addr_is_0, index1, index2;
 
+  //TODO stalling stuff
   register #(1, 1'b0) reg(.clk, .rst_l,
-            .en(1'b1), .clear(1'b0), .D(extra_code1),
+            .en(1'b1), .clear(flush), .D(extra_code1),
             .Q(extra_code2));
   register #(1, 1'b0) reg(.clk, .rst_l,
-            .en(1'b1), .clear(1'b0), .D(index1),
+            .en(1'b1), .clear(flush), .D(index1),
             .Q(index2));
 
 
   
-  assign instr_F = (index2) ? read_data_E + instr : instr;
+  assign instr_F = (index2) ? index_data + instr : instr;
   assign clk = clock;
   assign is_ROM = (instr_F[11:0] >= 'o2000) ? 1'b1 : 1'b0;
   assign is_RAM = ((instr_F[11:0] < 'o2000) && (instr_F[11:0] >= 'd13) ? 1'b1 : 1'b0;
@@ -49,10 +51,11 @@ module decoder
     branch: NO_BRANCH,
     rd: ALU_OUT,            
     RAM_write_en: 1'b0,
-    IO_read_sel: 3'b0,
+    IO_read_sel: instr_F[2:0],
     IO_write_en: 1'b0
-    K: 12'b0,
-    pc: 15'b0,
+    K: instr_F[11:0],
+    pc: pc,
+    index: EXTEND,
     halt: 1'b0
 } ctrl_signals_t;
     index1 = 1'b0;
@@ -64,30 +67,49 @@ module decoder
             unique case(next_byte)
               //READ
               3'd0 : begin
-                alu_op = ALU_READ;
-                data_read_en = 1'b0
+                ctrl.alu_op = ALU_READ;
+                ctrl.wr1_en = 1'b1;
+                ctrl.alu_src2 = IO_READ_DATA2;
               end
               //WRITE
               3'd1 : begin
+                ctrl.alu_op = ALU_READ;
+                ctrl.alu_src2 = IO_READ_DATA2;
+                ctrl.IO_write_en: 1'b1;
               end
               //RAND
               3'd2 : begin
+                ctrl.alu_op = ALU_AND;
+                ctrl.alu_src2 = IO_READ_DATA2;
+                ctrl.wr1_en = 1'b1;
               end
               //WAND
               3'd3 : begin
+                ctrl.alu_op = ALU_AND;
+                ctrl.alu_src2 = IO_READ_DATA2;
+                ctrl.IO_write_en: 1'b1;
               end
               //ROR
               3'd4 : begin
+                ctrl.alu_op = ALU_OR;
+                ctrl.alu_src2 = IO_READ_DATA2;
+                ctrl.wr1_en = 1'b1;
               end
               //WOR
               3'd5 : begin
+                ctrl.alu_op = ALU_OR;
+                ctrl.alu_src2 = IO_READ_DATA2;
+                ctrl.IO_write_en: 1'b1;
               end
               //RXOR
               3'd6 : begin
+                ctrl.alu_op = ALU_XOR;
+                ctrl.alu_src2 = IO_READ_DATA2;
+                ctrl.wr1_en = 1'b1;
               end
               default: begin
                 `display(rst_l, "Encountered unknown/unimplemented instr 0x%05o." ,instr);
-                                ctrl_signals.illegal_instr = 1'b1;
+                                ctrl.halt = 1'b1;
               end
             endcase
           end
@@ -95,9 +117,18 @@ module decoder
             unique case(is_ROM)
               //BZF
               1'b1 : begin
+                ctrl.alu_op = ALU_BRANCH;
+                ctrl.alu_src1 = K1;
+                ctrl.branch = BZF;
               end
               //DV
               defualt :  begin
+                ctrl.alu_op = ALU_DV;
+                ctrl.wr2_sel = L;
+                ctrl.wr1_en = 1'b1;
+                ctrl.wr2_en = 1'b1;
+                ctrl.rs2_sel = L;
+                ctrl.alu_src1 = RS1_RS2_DATA1; 
               end
             endcase
           end
@@ -105,41 +136,93 @@ module decoder
             unique case(next2_bits)
               //QXCH
               2'd1 : begin
+                ctrl.alu_op = ALU_QXCH;
+                ctrl.rs1_sel = Q;
+                ctrl.wr2_sel = Q;
+                ctrl.wr2_en = 1'b1;
+                ctrl.rs2_sel = instr_F[3:0];
+                ctrl.wr1_sel = instr_F[3:0];
+                if(is_reg) begin
+                  ctrl.alu_src2 = RS2_DATA2;
+                  ctrl.wr1_en = 1'b1;
+                end
+                else begin
+                  ctrl.RAN_write_en = 1'b1;
+                end
               end
               //AUG
               2'd2 : begin
+                ctrl.rs2_sel = instr_F[3:0];
+                ctrl.wr1_sel = instr_F[3:0];
+                ctrl.alu_op = ALU_AUG;
+                if(is_reg) begin
+                  ctrl.alu_src2 = RS2_DATA2;
+                  ctrl.wr1_en = 1'b1;
+                end
+                else begin
+                  ctrl.RAM_write_out = 1'b1;
+                end
               end  
               //DIM
               2'd3 : begin
+                ctrl.rs2_sel = instr_F[3:0];
+                ctrl.wr1_sel = instr_F[3:0];
+                ctrl.alu_op = ALU_DIM;
+                if(is_reg) begin
+                  ctrl.alu_src2 = RS2_DATA2;
+                  ctrl.wr1_en = 1'b1;
+                end
+                else begin
+                  ctrl.RAM_write_out = 1'b1;
+                end               
               end
               default: begin
                 `display(rst_l, "Encountered unknown/unimplemented instr 0x%05o." ,instr);
-                                ctrl_signals.illegal_instr = 1'b1;
+                                ctrl.halt = 1'b1;
               end
             endcase
           end
           //halt
           3'd3 : begin
+            ctrl.halt = 1'b1;
           end
           //INDEX
           5'd5 : begin
+            ctrl_index = EXTEND;
+            index1 = 1'b1;
           end
           3'd6 : begin
             unique case(in_ROM)
               //BZMF
               1'b1 : begin
+                ctrl.alu_op = ALU_BRANCH;
+                ctrl.alu_src1 = K1;
+                ctrl.branch = BZMF;
               end
               //SU
               default : begin
+                ctrl.wr1_en = 1'b1;
+                ctrl.alu_op = ALU_SU;
+                ctrl.rs2_sel = instr_F[3:0]
+                if(is_reg) begin
+                  ctrl.alu_src2 = RS2_DATA2;
+                end
               end
             endcase
           end
           //MP Note SQUARE is special case of MP
           3'd7 : begin
+            ctrl.alu_op = ALU_MP;
+            ctrl.wr1_sel = A;
+            ctrl.wr2_sel = L;
+            ctrl.wr1_en = 1'b1;
+            ctrl.wr2_en = 1'b1;
+            ctrl.rs2_sel = L;
+            ctrl.alu_src1 = RS1_RS2_DATA1;
           end
           default : begin
             `display(rst_l, "Encountered unknown/unimplemented instr 0x%05o." ,instr);
-                                ctrl_signals.illegal_instr = 1'b1;
+                                ctrl_signals.halt = 1'b1;
            end
         endcase
       end
@@ -150,66 +233,173 @@ module decoder
             unique case(last_byte)
               //RETURN
               3'd2 : begin
+                ctrl.alu_op = ALU_READ;
+                ctrl.rs2_sel = Q;
+                ctrl.alu_src2 = RS2_DATA2;
+                ctrl.wr1_sel = Q;
+                ctrl.wr1_en = 1'b1;
+                ctrl.rd = OLD_PC;
+                ctrl.branch = BRANCH;
               end
               //EXTEND
               3'd6 : begin
+                extra_code1 = 1'b1;
               end
               // TC/XLQ
               default : begin
+                ctrl.alu_op = ALU_READ;
+                ctrl.alu_src2 = K2;
+                ctrl.wr1_sel = Q;
+                ctrl.wr1_en = 1'b1;
+                ctrl.branch = BRANCH;
+                ctrl.rd = OLD_PC;
               end
             endcase
          end
          //TCF
          3'd1 : begin
+           ctrl.alu_op = ALU_READ;
+           ctrl.alu_src2 = K2;
+           ctrl.branch = BRANCH; 
+         
          end
          3'd2 : begin
            unique case(next2_bits)
              //LXCH ZL
-             2'd1 : begin 
+             2'd1 : begin               
+               ctrl.alu_op = ALU_QXCH;
+               ctrl.rs1_sel = L;
+               ctrl.wr2_sel = L;
+               ctrl.wr2_en = 1'b1;
+               ctrl.rs2_sel = instr_F[3:0];
+               ctrl.wr1_sel = instr_F[3:0];
+               if(is_reg) begin
+                 ctrl.alu_src2 = RS2_DATA2;
+                 ctrl.wr1_en = 1'b1;
+               end
+               else begin
+                 ctrl.RAM_write_en = 1'b1;
+               end
              end
              //INCR
              2'd2 : begin
+               ctrl.alu_op = ALU_INCR;
+               ctrl.rs2_sel = instr_F[3:0];
+               ctrl.wr1_sel = instr_F[3:0];
+               if(is_reg) begin
+                 ctrl.alu_src2 = RS2_DATA2;
+                 ctrl.wr1_en = 1'b1;
+               end
+               else begin
+                 ctrl.RAM_write_en = 1'b1;
+               end
              end
              //ADS
              2'd3 : begin
+               ctrl.alu_op = ALU_AD;
+               ctrl.rs2_sel = instr_F[3:0];
+               ctrl.wr2_sel = instr_F[3:0];
+               if(is_reg) begin
+                 ctrl.alu_src2 = RS2_DATA2;
+                 ctrl.wr2_en = 1'b1;
+               end
+               else begin
+                 ctrl.RAM_write_en = 1'b1;
+               end
              end
              default : begin
               `display(rst_l, "Encountered unknown/unimplemented instr 0x%05o." ,instr);
-                                ctrl_signals.illegal_instr = 1'b1;
+                                ctrl_signals.halt = 1'b1;
              end
            endcase
          end
          //CA
          3'd3 : begin
+           ctrl.wr1_en = 1'b1;
+           ctrl.alu_op = ALU_READ;
+           ctrl.rs2_sel = instr_F[3:0]
+           if(is_reg) begin
+             ctrl.alu_src2 = RS2_DATA2;
+           end
          end
          3'd4 : begin
-           unique case(addr_is_0)
-             //COM
-             1'b1 : begin
-             end
-             //CS
-             default : begin
-             end
-           endcase
+           //CS
+           ctrl.wr1_en = 1'b1;
+           ctrl.alu_op = ALU_COM;
+           ctrl.rs2_sel = instr_F[3:0]
+           if(is_reg) begin
+             ctrl.alu_src2 = RS2_DATA2;
+           end
          end
          3'd5 : begin
            unique case (next2_bits)
-             //TS Note: TCAA is special case of TS
+             //INDEX
+             2'd0 : begin
+               ctrl_index = NEXTEND;
+               index1 = 1'b1;
+             end
              2'd2 : begin
+               //TCAA
+               if(instr_F[9:0]==10'd6) begin
+                 ctrl.alu_op = ALU_READ;
+                 ctrl.alu_src2 = RS2_DATA2;
+                 ctrl.branch = BRANCH;
+               end
+               //TS
+               else begin
+                 ctrl.alu_op = ALU_READ;
+                 ctrl.alu_src2 = RS2_DATA;
+                 if(is_reg) begin
+                   ctrl.wr2_sel = instr_F[3:0];
+                   ctrl.wr2_en = 1'b1;
+                 end
+                 else begin
+                   ctrl.RAM_write_en = 1'b1;
+                 end
+
+               end
+               
              end
              //XCH
              2'd3 : begin
+               ctrl.alu_op = ALU_QXCH;
+               ctrl.rs1_sel = A;
+               ctrl.wr2_sel = A;
+               ctrl.wr2_en = 1'b1;
+               ctrl.rs2_sel = instr_F[3:0];
+               ctrl.wr1_sel = instr_F[3:0];
+               if(is_reg) begin
+                 ctrl.alu_src2 = RS2_DATA2;
+                 ctrl.wr1_en = 1'b1;
+               end
+               else begin
+                 ctrl.RAM_write_en = 1'b1;
+               end
              end
+
+             
              `display(rst_l, "Encountered unknown/unimplemented instr 0x%05o." ,instr);
-                                ctrl_signals.illegal_instr = 1'b1;
+                                ctrl_signals.halt = 1'b1;
              end
            endcase
          end
          //AD/DOUBLE
          3'd6 : begin
+           ctrl.wr1_en = 1'b1;
+           ctrl.alu_op = ALU_AD;
+           ctrl.rs2_sel = instr_F[3:0]
+           if(is_reg) begin
+             ctrl.alu_src2 = RS2_DATA2;
+           end
          end
          //MASK
          2'd7 : begin
+           ctrl.wr1_en = 1'b1;
+           ctrl.alu_op = ALU_AND;
+           ctrl.rs2_sel = instr_F[3:0]
+           if(is_reg) begin
+             ctrl.alu_src2 = RS2_DATA2;
+           end
          end
        endcase
      end
