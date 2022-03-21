@@ -158,6 +158,9 @@ endmodule: ones_comp_add_sub
 // CONSTRUCTING THE ALU MULTIPLIER
 //
 
+// Altera 2's complement lmp_mult megafunction
+// Convert operands 1c -> 2c
+// Convert product 2c -> 1c
 module ones_comp_mult (
     output logic [(2 * `NUM_BIT)-1:0] prod,
     output logic underflow_flag,
@@ -181,6 +184,50 @@ module ones_comp_mult (
                                 .twos_comp(prod_twos_comp));
 
 endmodule: ones_comp_mult
+
+//
+// CONSTRUCTING THE ALU DIVIDER
+//
+
+// Altera 2's complement LPM_DIVIDE megafunction
+// Convert numerator, denominator 1c -> 2c
+// Convert quotient, remainder 2c -> 1c
+module ones_comp_div (
+    output logic ['NUM_BIT-1:0] quot, remain,
+    output logic underflow_flag,
+    input  logic [(2 * `NUM_BIT)-1:0] numer,
+    input  logic [`NUM_BIT-1:0] denom
+);
+    logic [(2 * `NUM_BIT)-1:0] numer_twos_comp;
+    logic [`NUM_BIT-1:0] quot_twos_comp, quot_twos_comp_pre, 
+                         remain_twos_comp, denom_twos_comp;
+    logic [1:0] underflow_flag_pre;
+
+    convert_1c_2c #(2) numer_2c (.twos_comp(numer_twos_comp),
+                                 .ones_comp(numer));
+
+    convert_1c_2c #(1) denom_2c (.twos_comp(denom_twos_comp),
+                                 .ones_comp(denom));
+
+    agc_div div_2c (.quotient(quot_twos_comp_pre),
+                    .remain(remain_twos_comp),
+                    .numer(numer_twos_comp),
+                    .denom(denom_twos_comp));
+
+    assign quot_twos_comp = quot_twos_comp_pre[(2 * `NUM_BIT)-1:'NUM_BIT];
+
+    convert_2c_1c #(1) quot_2c (.ones_comp(quot),
+                                .underflow_flag(underflow_flag_pre[1]),
+                                .twos_comp(quot_twos_comp));
+
+    convert_2c_1c #(1) remain_2c (.ones_comp(remain),
+                                  .underflow_flag(underflow_flag_pre[0]),
+                                  .twos_comp(remain_twos_comp));
+
+    // 2 possible sources of conversion underflow
+    assign underflow_flag = underflow_flag_pre[1] | underflow_flag_pre[0];
+
+endmodule: ones_comp_div
 
 
 
