@@ -62,11 +62,6 @@ module Core
             .sel(ctrl_E.index),
             .out(data_W));
 
-  //TODO donny make address thing  
-  
-
-  
-
   register_file reg(.rst_l, .clock, .rs1_sel(ctrl_D.rs1_sel), .rs2_sel(ctrl_D.rs2_sel),
                     .wr1_data(ctrl_W.wr1_data), .wr2_data(ctrl_W.wr2_data),
                     .wr1_sel(ctrl_W.wr1_sel), .wr2_sel(ctrl_W.wr2_sel),
@@ -113,12 +108,13 @@ module Core
             .sel(ctrl_E.alu_src2),
             .out(alu_src2_E));
 
+  assign sign_bit_E = alu_src2_E[14];
   
-  alu ALU(.src1(alu_src1_E), .src2(alu_src2_E), .out(alu_out_E), sign_bit(sign_bit_E), eq_0(eq_0_E),
-          .op(ctrl_E.alu_op));
+  
+ 
+  arithmetic_logic_unit ALU(.src1(alu_src1_E), .src2(alu_src2_E), .result(alu_out_E), .res_eq_0(eq_0_E),
+          .operation_sel(ctrl_E.alu_op));
 
-
-  //TODO make this logic
   branching_logic Branch(.eq_0(eq_0_E, .sign_bit(sign_bit_E), .ctrl_branch(ctrl.branch_E),
                          .branch(branch_E));
   
@@ -159,18 +155,20 @@ module Core
   assign wr2_data_W = data_W[14:0];
 
   //data address upper bits data lower bits
-  assign RAM_write_address = data_W[29:15];
   assign RAM_write_data = data_W[14:0];
-  assign RAM_write_en = ctrl_en.RAM_write_en;
 
   //data channel upper bits data w
   assign IO_write_sel = data_W[17:15];
   assign IO_write_data = data_W[14:0];
   assign IO_write_en = ctrl_W.IO_write_en;
   assign halt = ctrl_W.halt;
+ 
+  //hooking up the address translation 
+  addr_translate addr (.addr_pc(PC_F), .addr_r(ctrl_D.K), .addr_w(data_W[29:15]), bits_EB_r(ctrl_D.EB), bits_EB_w(ctrl_W.EB), bits_FB_r(ctrl_W.FB), .en_write(ctrl_W.RAM_write_en), .addr_ROM_pc(ROM_pc_address),  .addr_ROM_r(ROM_constant_address), .addr_RAM_r(RAM_read_address), addr_RAM_w(RAM_write_address), .en_write_final(RAM_write_en));
+
+
 
   //STALL UNIT
-
   stall_logic stall(.ctrl_D, .ctrl_E, .ctrl_W, .stall, .branch_E, .flush_E);
 
 endmodule : Core

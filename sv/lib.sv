@@ -529,7 +529,7 @@ endmodule: addr_translate_w
 // All address translation contained within a single module
 module addr_translate
   (input  logic [11:0] addr_pc, addr_r, addr_w,
-   input  logic [2:0] bits_EB, bits_FB,
+   input  logic [2:0] bits_EB_r, bits_FB_r, bits_EB_w
    input  logic en_write,
    output logic [13:0] addr_ROM_pc, addr_ROM_r,
    output logic [10:0] addr_RAM_r, addr_RAM_w,
@@ -540,13 +540,13 @@ module addr_translate
                                     .addr_ROM(addr_ROM_pc));
 
    addr_translate_r translate_r (.addr_k(addr_r),
-                                 .bits_EB(bits_EB),
-                                 .bits_FB(bits_FB),
+                                 .bits_EB(bits_EB_r),
+                                 .bits_FB(bits_FB_r),
                                  .addr_ROM(addr_ROM_r),
                                  .addr_RAM(addr_RAM_r));
 
    addr_translate_w translate_w (.addr_k(addr_w),
-                                 .bits_EB(bits_EB),
+                                 .bits_EB(bits_EB_w),
                                  .en_write(en_write),
                                  .addr_RAM(addr_RAM_w),
                                  .en_write_final(en_write_final));
