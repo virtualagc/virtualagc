@@ -6,6 +6,7 @@ module decoder
   (input logic rst_l, clock, flush,
    input [14:0] instr, index_data,
    input [11:0] pc,
+   input [2:0] bits_FB, bits_EB,
    ouput ctrl_t ctrl_D);
 
   logic [2:0] opcode, next_byte, lowest_byte;
@@ -56,7 +57,9 @@ module decoder
     K: instr_F[11:0],
     pc: pc,
     index: EXTEND,
-    halt: 1'b0
+    halt: 1'b0,
+    EB: bits_EB,
+    FB: bits_FB
 } ctrl_signals_t;
     index1 = 1'b0;
     extra_code1 = 1'b0;

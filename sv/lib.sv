@@ -601,9 +601,14 @@ module arithmetic_logic_unit
         result = res_mult;
       end
       ALU_DIM: begin
-        sel_subtract = ~source_2[14];
-        add_sub_src_1 = 15'd1;
-        result[29:15] = res_add_sub;
+        if (res_eq_0) begin
+          result = source_2;
+        end
+        else begin
+          sel_subtract = ~source_2[14];
+          add_sub_src_1 = 15'd1;
+          result[29:15] = res_add_sub;
+        end
       end
       ALU_OR: begin
         result[29:15] = source_1[29:15] | source_2;
@@ -628,7 +633,7 @@ module arithmetic_logic_unit
     endcase
 
     // Set the zero flag
-    res_eq_0 = (result == 30'd0);
+    res_eq_0 = (src2 == 15'd0 || sr2 == 15'h7FFF);
 
   end
 

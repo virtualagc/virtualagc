@@ -98,6 +98,8 @@ typedef struct packed {
     logic [14:0] pc;
     index_t index;
     logic halt;
+    logic [2:0] EB;
+    logic [2:0] FB;
 } ctrl_signals_t;
 
 

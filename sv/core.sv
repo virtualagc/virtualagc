@@ -49,13 +49,14 @@ module Core
   logic [14:0] instr_D, rs1_data_D, rs2_data_D, IO_read_data_D, read_data_E, index_data;
   ctrl_t ctrl_D, ctrl_E, ctrl_F;
   logic [11:0] k_D;
+  logic [2:0] bits_FB, bits_EB;
 
   assign IO_read_data_D = IO_read_data;
   assign IO_read_sel = ctrl_D.IO_read_sel;
   assign instr_D = ROM_read_data;
 
 
-  decoder Decoder(.rst_l, .instr(instr_D), .ctrl_signals(ctrl_D), .clock, .index_data, .pc(pc_D), .flush(flush_DE));
+  decoder Decoder(.rst_l, .instr(instr_D), .ctrl_signals(ctrl_D), .clock, .index_data, .pc(pc_D), .flush(flush_DE), .bits_FB, .bits_EB);
 
   mux #(2, $bits(index_data)) Index_mux(.in({read_data_E,ctrl_E.K}),
             .sel(ctrl_E.index),
@@ -70,7 +71,7 @@ module Core
                     .wr1_data(ctrl_W.wr1_data), .wr2_data(ctrl_W.wr2_data),
                     .wr1_sel(ctrl_W.wr1_sel), .wr2_sel(ctrl_W.wr2_sel),
                     .wr1_en(ctrl_W.wr1_en), .wr2_en(ctrl_W.wr2_en),
-                    .rs1_data_D, .rs2_data_D);
+                    .rs1_data_D, .rs2_data_D, .bits_FB, .bits_EB);
 
   //decode execute register
   logic [14:0] rs1_data_E, rs2_data_E, IO_read_data_E, k_E;
