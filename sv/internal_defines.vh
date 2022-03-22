@@ -1,21 +1,21 @@
+
 /**
  * internal_defines.vh
  *
- * RISC-V 32-bit Processor
+ * 
  *
- * ECE 18-447
- * Carnegie Mellon University
+ * capstone
+ * 
  *
  * This contains the definitions of constants and types that are used by the
- * core of the RISC-V processor, such as control signals and ALU operations.
+ * core of the AGC processor, such as control signals and ALU operations.
  **/
 
 /*----------------------------------------------------------------------------*
  *  You may edit this file and add or change any files in the src directory.  *
  *----------------------------------------------------------------------------*/
 
-`ifndef INTERNAL_DEFINES_VH_
-`define INTERNAL_DEFINES_VH_
+
 
 typedef enum logic [3:0] {
     ALU_AD,                // AD, ADS, DOUBLE #these last 3 don't mater NOOP, EXTND, INDEX = alu_out[29:15] = alu_src_1 + alu_src_2
@@ -31,7 +31,7 @@ typedef enum logic [3:0] {
     ALU_XOR,               // RXOR -> alu_out[29:15] = alu_src_1 ^ alu_src_2
     ALU_INCR,              // INCR -> alu_out[29:15] = alu_src_2 + 15'd1
     ALU_DV,                // DV -> alu_out[29:15] = alu_src_1[29:0] / alu_src_2
-    ALU_QXCH,              // QXCH, LXCH, XLQ, XCH -> alu_out[29:0] = {alu_src_1[29:15], alu_src_2}
+    ALU_QXCH              // QXCH, LXCH, XLQ, XCH -> alu_out[29:0] = {alu_src_1[29:15], alu_src_2}
 } alu_op_t;
 
 typedef enum logic [3:0] {
@@ -47,35 +47,36 @@ typedef enum logic [3:0] {
     CYL,
     SL,
     TIME1,
-    TIME2,
+    TIME2
 } reg_t;
 
 typedef enum logic [1:0] {
     K1,
     RS1_DATA1,
-    RS1_RS2_DATA1,
+    RS1_RS2_DATA1
 } alu_src1_t;
 
 typedef enum logic [1:0] {
     READ_DATA2,
     RS2_DATA2,
     IO_READ_DATA2,
-    ADDR2,
+    ADDR2
 } alu_src2_t;
 
 typedef enum logic  {
     ALU_OUT,
-    OLD_PC,
+    OLD_PC
 } rd_t;
 
-typedef enum logic  {
+typedef enum logic [1:0] {
     NO_BRANCH,
     BZF,
-    BZFK,
+    BZFK
 } branch_t;
+
 typedef enum logic  {
     EXTEND,
-    NEXTEND,
+    NEXTEND
 }index_t;
 
 typedef struct packed {
@@ -100,7 +101,7 @@ typedef struct packed {
     logic halt;
     logic [2:0] EB;
     logic [2:0] FB;
-} ctrl_signals_t;
+} ctrl_t;
 
 
 
