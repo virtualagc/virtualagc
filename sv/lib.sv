@@ -16,7 +16,8 @@
 
 // Force the compiler to throw an error if any variables are undeclared
 `default_nettype none
-`include "internal_defines.vh" 
+`include "internal_defines.vh"
+`include "comp_units.sv" 
 /*--------------------------------------------------------------------------------------------------------------------
  * Combinational Components
  *--------------------------------------------------------------------------------------------------------------------*/

@@ -1,5 +1,6 @@
 `define NUM_BIT 15
 `include "agc_mult/agc_mult_bb.v"
+`include "agc_div/agc_div_bb.v"
 
 // Classical gate-level half adder
 module half_adder ( 
