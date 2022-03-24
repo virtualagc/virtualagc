@@ -16,7 +16,7 @@
 
 // Force the compiler to throw an error if any variables are undeclared
 `default_nettype none
-`include "internal_defines.vh" 
+ 
 /*--------------------------------------------------------------------------------------------------------------------
  * Combinational Components
  *--------------------------------------------------------------------------------------------------------------------*/
@@ -238,7 +238,7 @@ module register_file
 
   always_ff @(posedge clock, negedge rst_l) begin
   // Register file writes
-    if (~rst_1) begin
+    if (~rst_l) begin
     // Reset Case
       reg_A <= 15'd0;
       reg_L <= 15'd0;
@@ -248,7 +248,7 @@ module register_file
       reg_SR <= 15'd0;
       reg_SL <= 15'd0;
       reg_TIME1 <= 15'd0;
-      reg_TIME2 <= 15'd0
+      reg_TIME2 <= 15'd0;
     end
     else if (~(wr1_en | wr2_en)) begin
     // No Write Case
@@ -479,7 +479,7 @@ module addr_translate_RAM
 endmodule: addr_translate_RAM
 
 module addr_translate_r
-  (input  logic [11:0] addr_k
+  (input  logic [11:0] addr_k,
    input  logic [2:0] bits_EB, bits_FB,
    output logic [13:0] addr_ROM,
    output logic [10:0] addr_RAM);
@@ -509,7 +509,7 @@ module addr_translate_r
 endmodule: addr_translate_r
 
 module addr_translate_w
-  (input  logic [11:0] addr_k
+  (input  logic [11:0] addr_k,
    input  logic [2:0] bits_EB,
    input  logic en_write,
    output logic [10:0] addr_RAM,
@@ -529,14 +529,14 @@ endmodule: addr_translate_w
 // All address translation contained within a single module
 module addr_translate
   (input  logic [11:0] addr_pc, addr_r, addr_w,
-   input  logic [2:0] bits_EB_r, bits_FB_r, bits_EB_w
+   input  logic [2:0] bits_EB_r, bits_FB_r, bits_EB_w,
    input  logic en_write,
    output logic [13:0] addr_ROM_pc, addr_ROM_r,
    output logic [10:0] addr_RAM_r, addr_RAM_w,
    output logic en_write_final);
 
    addr_translate_ROM translate_pc (.addr_soft(addr_pc),
-                                    .bits_FB(bits_FB),
+                                    .bits_FB(bits_FB_r),
                                     .addr_ROM(addr_ROM_pc));
 
    addr_translate_r translate_r (.addr_k(addr_r),
@@ -633,7 +633,7 @@ module arithmetic_logic_unit
     endcase
 
     // Set the zero flag
-    res_eq_0 = (src2 == 15'd0 || sr2 == 15'h7FFF);
+    res_eq_0 = (source_2 == 15'd0 || source_2 == 15'h7FFF);
 
   end
 
@@ -657,10 +657,10 @@ endmodule: arithmetic_logic_unit
 
 module branching_logic 
   (input logic eq_0, sign_bit,
-   input branch_t, ctrl_branch,
+   input branch_t ctrl_branch,
    output logic branch);
 
-  assign branch = (branch==BRANCH) ? 1'b1 : (branch==BZF && eq_0) ? 1'b1 : (branch == BZF && (eq_0 || sign_bit) ? 1'b1 : 1'b0;
+  assign branch = (ctrl_branch==BRANCH) ? 1'b1 : (ctrl_branch==BZF && eq_0) ? 1'b1 : (ctrl_branch == BZF && (eq_0 || sign_bit)) ? 1'b1 : 1'b0;
       
 
 endmodule: branching_logic
@@ -681,13 +681,13 @@ module stall_logic
 
 
   always_comb begin
-    stall = 1'b0
-    if ((ctrl_D.rs1_sel==ctrl_E.wr1 && ctrl_E.wr1_en) ||(ctrl_D.rs2_sel==ctrl_E.wr2 && ctrl_E.wr2_en)) begin
+    stall = 1'b0;
+    if ((ctrl_D.rs1_sel==ctrl_E.wr1 && ctrl_E.wr1_en) || (ctrl_D.rs2_sel==ctrl_E.wr2 && ctrl_E.wr2_en)) begin
         stall = 1'b1;
     end
     else if ((ctrl_D.K==ctrl_E.K && (ctrl_E.RAM_write_en || ctrl_E.IO_write_en)) || (ctrl_D.K==ctrl_W.K && (ctrl_W.RAM_write_en || ctrl_W.IO_write_en)))
         stall = 1'b1;
     end
-  end
+
 
 endmodule: stall_logic

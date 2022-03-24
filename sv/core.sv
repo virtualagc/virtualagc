@@ -1,6 +1,6 @@
 `default_nettype none
 
-`include "internal_defines.vh"
+
 module Core
   (input logic clock, reset_n,
    input logic [14:0] ROM_pc_data, ROM_constant_data, RAM_read_data, IO_read_data,
@@ -10,11 +10,12 @@ module Core
    output logic RAM_write_en, stall, halt, IO_write_en);
 
   /////////////////////////FETCH STAGE///////////////////////////////
-  logic stall_D, flush_E, flush_W, flush_DE, branch_E, rst_l;
+  logic stall_D, flush_E, flush_W, flush_DE, branch_E, rst_l, clk;
   logic [11:0] pc_F, pc_1_F, next_pc_F, pc_E, pc_D;
 
   assign flush_DE = flush_E | flush_W | stall_D;
   assign rst_l = reset_n;
+  assign clk = clock;
 
   adder #($bits(pc_F)) Next_PC_Adder(.A(pc_E), .B('d1), .cin(1'b0),
             .sum(pc_1_F), .cout());
@@ -57,7 +58,7 @@ module Core
   assign instr_D = ROM_pc_data;
 
 
-  decoder Decoder(.rst_l, .instr(instr_D), .ctrl_signals(ctrl_D), .clock, .index_data, .pc(pc_D), .flush(flush_DE), .bits_FB, .bits_EB);
+  decode Decoder(.rst_l, .instr(instr_D), .ctrl_D, .clock, .index_data, .pc(pc_D), .flush(flush_DE), .bits_FB, .bits_EB);
 
   mux #(2, $bits(index_data)) Index_mux(.in({read_data_E,ctrl_E.K}),
             .sel(ctrl_E.index),
@@ -67,7 +68,7 @@ module Core
                     .wr1_data(wr1_data_W), .wr2_data(wr2_data_W),
                     .wr1_sel(ctrl_W.wr1_sel), .wr2_sel(ctrl_W.wr2_sel),
                     .wr1_en(ctrl_W.wr1_en), .wr2_en(ctrl_W.wr2_en),
-                    .rs1_data_D, .rs2_data_D, .bits_FB, .bits_EB);
+                    .rs1_data(rs1_data_D), .rs2_data(rs2_data_D), .bits_FB, .bits_EB);
 
   //decode execute register
   logic [14:0] rs1_data_E, rs2_data_E, IO_read_data_E, k_E;
@@ -114,7 +115,7 @@ module Core
   
   
  
-  arithmetic_logic_unit ALU(.src1(alu_src1_E), .src2(alu_src2_E), .result(alu_out_E), .res_eq_0(eq_0_E),
+  arithmetic_logic_unit ALU(.source_1(alu_src1_E), .source_2(alu_src2_E), .result(alu_out_E), .res_eq_0(eq_0_E),
           .operation_sel(ctrl_E.alu_op));
 
   branching_logic Branch(.eq_0(eq_0_E), .sign_bit(sign_bit_E), .ctrl_branch(ctrl.branch_E),
@@ -168,6 +169,6 @@ module Core
 
 
   //STALL UNIT
-  stall_logic stl(.ctrl_D, .ctrl_E, .ctrl_W, .stall, .branch_E, .flush_E);
+  stall_logic stl(.ctrl_D, .ctrl_E, .ctrl_W, .stall, .branch_E, .flush(flush_E));
 
 endmodule : Core

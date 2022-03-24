@@ -1,45 +1,45 @@
-`include "internal_defines.vh"
-
 `default_nettype none
 
-module decoder
+module decode
   (input logic rst_l, clock, flush,
    input [14:0] instr, index_data,
    input [11:0] pc,
    input [2:0] bits_FB, bits_EB,
-   ouput ctrl_t ctrl_D);
+   output ctrl_t ctrl_D);
 
+ 
+  ctrl_t ctrl;
   logic [2:0] opcode, next_byte, lowest_byte;
   logic [1:0] next2_bits;
   logic [14:0] instr_F;
-  logic extra_code1, extra_code2, in_ROM, in_RAM, is_reg, addr_is_0, index1, index2;
+  logic extra_code1, extra_code2, is_ROM, is_RAM, is_reg, addr_is_0, index1, index2, clk;
 
-  //TODO stalling stuff
-  register #(1, 1'b0) reg(.clk, .rst_l,
+  assign clk = clock;
+
+  register #(1, 1'b0) rg1(.clk, .rst_l,
             .en(1'b1), .clear(flush), .D(extra_code1),
             .Q(extra_code2));
-  register #(1, 1'b0) reg(.clk, .rst_l,
+  register #(1, 1'b0) rg2(.clk, .rst_l,
             .en(1'b1), .clear(flush), .D(index1),
             .Q(index2));
 
 
-  
+  assign ctrl_D = ctrl;
   assign instr_F = (index2) ? index_data + instr : instr;
   assign clk = clock;
-  assign is_ROM = (instr_F[11:0] >= 'o2000) ? 1'b1 : 1'b0;
-  assign is_RAM = ((instr_F[11:0] < 'o2000) && (instr_F[11:0] >= 'd13) ? 1'b1 : 1'b0;
+  assign is_ROM = (instr_F[11:0] > 'o1777) ? 1'b1 : 1'b0;
+  assign is_RAM = ((instr_F[11:0] < 'o2000) && (instr_F[11:0] > 'd12)) ? 1'b1 : 1'b0;
   assign is_reg = (instr_F[11:0] < 'd13) ? 1'b1 : 1'b0;
   assign opcode = instr_F[14:12];
   assign next_byte = instr_F[11:9];
-  assign last_byte = instr_F[2:0];
   assign next2_bits = instr_F[11:10];
   assign addr_is_0 = instr_F[11:0]==12'b0;
 
 
   
   always_comb begin
-    ctrl_signals = '{
-    alu_op: ALU_ADD,      
+    ctrl = '{
+    alu_op: ALU_AD,      
     data_read_en: 1'b1,
     wr1_sel: A,
     wr2_sel: A,  
@@ -53,14 +53,14 @@ module decoder
     rd: ALU_OUT,            
     RAM_write_en: 1'b0,
     IO_read_sel: instr_F[2:0],
-    IO_write_en: 1'b0
+    IO_write_en: 1'b0,
     K: instr_F[11:0],
     pc: pc,
     index: EXTEND,
     halt: 1'b0,
     EB: bits_EB,
     FB: bits_FB
-} ctrl_signals_t;
+};
     index1 = 1'b0;
     extra_code1 = 1'b0;
     unique case (extra_code2)
@@ -78,7 +78,7 @@ module decoder
               3'd1 : begin
                 ctrl.alu_op = ALU_READ;
                 ctrl.alu_src2 = IO_READ_DATA2;
-                ctrl.IO_write_en: 1'b1;
+                ctrl.IO_write_en = 1'b1;
               end
               //RAND
               3'd2 : begin
@@ -90,7 +90,7 @@ module decoder
               3'd3 : begin
                 ctrl.alu_op = ALU_AND;
                 ctrl.alu_src2 = IO_READ_DATA2;
-                ctrl.IO_write_en: 1'b1;
+                ctrl.IO_write_en = 1'b1;
               end
               //ROR
               3'd4 : begin
@@ -102,7 +102,7 @@ module decoder
               3'd5 : begin
                 ctrl.alu_op = ALU_OR;
                 ctrl.alu_src2 = IO_READ_DATA2;
-                ctrl.IO_write_en: 1'b1;
+                ctrl.IO_write_en = 1'b1;
               end
               //RXOR
               3'd6 : begin
@@ -111,7 +111,7 @@ module decoder
                 ctrl.wr1_en = 1'b1;
               end
               default: begin
-                `display(rst_l, "Encountered unknown/unimplemented instr 0x%05o." ,instr);
+                $display(rst_l, "Encountered unknown/unimplemented instr 0x%05o." ,instr);
                                 ctrl.halt = 1'b1;
               end
             endcase
@@ -125,7 +125,7 @@ module decoder
                 ctrl.branch = BZF;
               end
               //DV
-              defualt :  begin
+              default :  begin
                 ctrl.alu_op = ALU_DV;
                 ctrl.wr2_sel = L;
                 ctrl.wr1_en = 1'b1;
@@ -180,7 +180,7 @@ module decoder
                 end               
               end
               default: begin
-                `display(rst_l, "Encountered unknown/unimplemented instr 0x%05o." ,instr);
+                $display(rst_l, "Encountered unknown/unimplemented instr 0x%05o." ,instr);
                                 ctrl.halt = 1'b1;
               end
             endcase
@@ -191,11 +191,11 @@ module decoder
           end
           //INDEX
           5'd5 : begin
-            ctrl_index = EXTEND;
+            ctrl.index = EXTEND;
             index1 = 1'b1;
           end
           3'd6 : begin
-            unique case(in_ROM)
+            unique case(is_ROM)
               //BZMF
               1'b1 : begin
                 ctrl.alu_op = ALU_BRANCH;
@@ -206,7 +206,7 @@ module decoder
               default : begin
                 ctrl.wr1_en = 1'b1;
                 ctrl.alu_op = ALU_SU;
-                ctrl.rs2_sel = instr_F[3:0]
+                ctrl.rs2_sel = instr_F[3:0];
                 if(is_reg) begin
                   ctrl.alu_src2 = RS2_DATA2;
                 end
@@ -224,7 +224,7 @@ module decoder
             ctrl.alu_src1 = RS1_RS2_DATA1;
           end
           default : begin
-            `display(rst_l, "Encountered unknown/unimplemented instr 0x%05o." ,instr);
+            $display(rst_l, "Encountered unknown/unimplemented instr 0x%05o." ,instr);
                                 ctrl_signals.halt = 1'b1;
            end
         endcase
@@ -233,7 +233,7 @@ module decoder
       default : begin
         unique case(opcode)
           3'd0 : begin
-            unique case(last_byte)
+            unique case(instr_F[11:0])
               //RETURN
               3'd2 : begin
                 ctrl.alu_op = ALU_READ;
@@ -311,7 +311,7 @@ module decoder
                end
              end
              default : begin
-              `display(rst_l, "Encountered unknown/unimplemented instr 0x%05o." ,instr);
+              $display(rst_l, "Encountered unknown/unimplemented instr 0x%05o." ,instr);
                                 ctrl_signals.halt = 1'b1;
              end
            endcase
@@ -320,7 +320,7 @@ module decoder
          3'd3 : begin
            ctrl.wr1_en = 1'b1;
            ctrl.alu_op = ALU_READ;
-           ctrl.rs2_sel = instr_F[3:0]
+           ctrl.rs2_sel = instr_F[3:0];
            if(is_reg) begin
              ctrl.alu_src2 = RS2_DATA2;
            end
@@ -329,7 +329,7 @@ module decoder
            //CS
            ctrl.wr1_en = 1'b1;
            ctrl.alu_op = ALU_COM;
-           ctrl.rs2_sel = instr_F[3:0]
+           ctrl.rs2_sel = instr_F[3:0];
            if(is_reg) begin
              ctrl.alu_src2 = RS2_DATA2;
            end
@@ -338,7 +338,7 @@ module decoder
            unique case (next2_bits)
              //INDEX
              2'd0 : begin
-               ctrl_index = NEXTEND;
+               ctrl.index = NEXTEND;
                index1 = 1'b1;
              end
              2'd2 : begin
@@ -351,7 +351,7 @@ module decoder
                //TS
                else begin
                  ctrl.alu_op = ALU_READ;
-                 ctrl.alu_src2 = RS2_DATA;
+                 ctrl.alu_src2 = RS2_DATA2;
                  if(is_reg) begin
                    ctrl.wr2_sel = instr_F[3:0];
                    ctrl.wr2_en = 1'b1;
@@ -380,8 +380,8 @@ module decoder
                end
              end
 
-             
-             `display(rst_l, "Encountered unknown/unimplemented instr 0x%05o." ,instr);
+             default : begin
+               $display(rst_l, "Encountered unknown/unimplemented instr 0x%05o." ,instr);
                                 ctrl_signals.halt = 1'b1;
              end
            endcase
@@ -390,16 +390,16 @@ module decoder
          3'd6 : begin
            ctrl.wr1_en = 1'b1;
            ctrl.alu_op = ALU_AD;
-           ctrl.rs2_sel = instr_F[3:0]
+           ctrl.rs2_sel = instr_F[3:0];
            if(is_reg) begin
              ctrl.alu_src2 = RS2_DATA2;
            end
          end
          //MASK
-         2'd7 : begin
+         3'd7 : begin
            ctrl.wr1_en = 1'b1;
            ctrl.alu_op = ALU_AND;
-           ctrl.rs2_sel = instr_F[3:0]
+           ctrl.rs2_sel = instr_F[3:0];
            if(is_reg) begin
              ctrl.alu_src2 = RS2_DATA2;
            end
@@ -408,5 +408,5 @@ module decoder
      end
    endcase
   end
-endmodule: decoder
+endmodule: decode
 

@@ -60,7 +60,7 @@ typedef enum logic [1:0] {
     READ_DATA2,
     RS2_DATA2,
     IO_READ_DATA2,
-    ADDR2
+    K2
 } alu_src2_t;
 
 typedef enum logic  {
@@ -69,9 +69,10 @@ typedef enum logic  {
 } rd_t;
 
 typedef enum logic [1:0] {
+    BRANCH,
     NO_BRANCH,
     BZF,
-    BZFK
+    BZMF
 } branch_t;
 
 typedef enum logic  {
