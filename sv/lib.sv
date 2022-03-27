@@ -15,9 +15,7 @@
  *----------------------------------------------------------------------------*/
 
 // Force the compiler to throw an error if any variables are undeclared
-`default_nettype none
-`include "internal_defines.vh"
-`include "comp_units.sv" 
+
 /*--------------------------------------------------------------------------------------------------------------------
  * Combinational Components
  *--------------------------------------------------------------------------------------------------------------------*/
@@ -239,7 +237,7 @@ module register_file
 
   always_ff @(posedge clock, negedge rst_l) begin
   // Register file writes
-    if (~rst_1) begin
+    if (~rst_l) begin
     // Reset Case
       reg_A <= 15'd0;
       reg_L <= 15'd0;
@@ -249,72 +247,63 @@ module register_file
       reg_SR <= 15'd0;
       reg_SL <= 15'd0;
       reg_TIME1 <= 15'd0;
-      reg_TIME2 <= 15'd0
-    end
-    else if (~(wr1_en | wr2_en)) begin
-    // No Write Case
-      reg_A <= reg_A;
-      reg_L <= reg_L;
-      reg_Q <= reg_Q; 
-      reg_BB[14:9] <= reg_BB[14:9];
-      reg_CYR <= reg_CYR;
-      reg_SR <= reg_SR;
-      reg_SL <= reg_SL;
-      reg_TIME1 <= reg_TIME1;
-      reg_TIME2 <= reg_TIME2;
+      reg_TIME2 <= 15'd0;
     end
     else begin
-    // Write Case
+    // Common Case
     // NOTE: If attempt a write of both data ports to same reg, port 2 has precedence.
-      unique case (wr1_sel)
-      // From Write Port 1
-        // Accumulators
-        A: reg_A <= wr1_data;
-        L: reg_L <= wr1_data;
+      if (wr1_en) begin
+        unique case (wr1_sel)
+        // From Write Port 1
+          // Accumulators
+          A: reg_A <= wr1_data;
+          L: reg_L <= wr1_data;
 
-        // Link register
-        Q: reg_Q <= wr1_data;
+          // Link register
+          Q: reg_Q <= wr1_data;
 
-        // Bank registers
-        EB: reg_BB[11:9] <= wr1_data[11:9];
-        FB: reg_BB[14:12] <= wr1_data[14:12];
-        BB: reg_BB[14:9] <= wr1_data[14:9];
-        
-        // Editing registers
-        CYR: reg_CYR <= {wr1_data[0], wr1_data[14:1]};
-        SR: reg_SR <= {wr1_data[14], wr1_data[14:1]};
-        CYL: reg_CYL <= {wr1_data[13:0], wr1_data[14]};
-        SL: reg_SL <= {wr1_data[13:0], 1'b0};
+          // Bank registers
+          EB: reg_BB[11:9] <= wr1_data[11:9];
+          FB: reg_BB[14:12] <= wr1_data[14:12];
+          BB: reg_BB[14:9] <= wr1_data[14:9];
+          
+          // Editing registers
+          CYR: reg_CYR <= {wr1_data[0], wr1_data[14:1]};
+          SR: reg_SR <= {wr1_data[14], wr1_data[14:1]};
+          CYL: reg_CYL <= {wr1_data[13:0], wr1_data[14]};
+          SL: reg_SL <= {wr1_data[13:0], 1'b0};
 
-        // Timers
-        TIME1: reg_TIME1 <= wr1_data;
-        TIME2: reg_TIME2 <= wr1_data;
-      endcase
+          // Timers
+          TIME1: reg_TIME1 <= wr1_data;
+          TIME2: reg_TIME2 <= wr1_data;
+        endcase
+      end
+      if (wr2_en) begin
+        unique case (wr2_sel)
+        // From Write Port 2
+          // Accumulators
+          A: reg_A <= wr2_data;
+          L: reg_L <= wr2_data;
 
-      unique case (wr2_sel)
-      // From Write Port 2
-        // Accumulators
-        A: reg_A <= wr2_data;
-        L: reg_L <= wr2_data;
+          // Link register
+          Q: reg_Q <= wr2_data;
 
-        // Link register
-        Q: reg_Q <= wr2_data;
+          // Bank registers (only write to pertinent bits)
+          EB: reg_BB[11:9] <= wr2_data[11:9];
+          FB: reg_BB[14:12] <= wr2_data[14:12];
+          BB: reg_BB[14:9] <= wr2_data[14:9];
+          
+          // Editing registers (shifted value is written)
+          CYR: reg_CYR <= {wr2_data[0], wr2_data[14:1]};
+          SR: reg_SR <= {wr2_data[14], wr2_data[14:1]};
+          CYL: reg_CYL <= {wr2_data[13:0], wr2_data[14]};
+          SL: reg_SL <= {wr2_data[13:0], 1'b0};
 
-        // Bank registers (only write to pertinent bits)
-        EB: reg_BB[11:9] <= wr2_data[11:9];
-        FB: reg_BB[14:12] <= wr2_data[14:12];
-        BB: reg_BB[14:9] <= wr2_data[14:9];
-        
-        // Editing registers (shifted value is written)
-        CYR: reg_CYR <= {wr2_data[0], wr2_data[14:1]};
-        SR: reg_SR <= {wr2_data[14], wr2_data[14:1]};
-        CYL: reg_CYL <= {wr2_data[13:0], wr2_data[14]};
-        SL: reg_SL <= {wr2_data[13:0], 1'b0};
-
-        // Timers
-        TIME1: reg_TIME1 <= wr2_data;
-        TIME2: reg_TIME2 <= wr2_data;
-      endcase 
+          // Timers
+          TIME1: reg_TIME1 <= wr2_data;
+          TIME2: reg_TIME2 <= wr2_data;
+        endcase
+      end 
     end
   end
   
@@ -401,6 +390,152 @@ module register_file
    
 endmodule: register_file
 
+module IO_register_file
+  (input  logic [14:0] data_write1, data_write2
+                       data_DSKY_VERB, 
+                       data_DSKY_NOUN,
+                       data_DSKY_NEW,
+                       data_AXI_MISSION_TIME,
+                       data_AXI_APOGEE,
+                       data_AXI_PERIGEE,
+   input  IO_reg_t sel_read1, sel_read2, 
+                   sel_write1, sel_write2,
+   input  logic en_write1, en_write2, 
+                rst_l, clock,
+   output logic [14:0] data_read1, data_read2);
+
+  logic [14:0] data_DSKY_REG_1_HIGH,
+               data_DSKY_REG_1_LOW,
+               data_DSKY_REG_2_HIGH,
+               data_DSKY_REG_2_LOW,
+               data_DSKY_REG_3_HIGH,
+               data_DSKY_REG_3_LOW,
+               data_DSKY_PROG_NUM,
+               data_DSKY_LAMPS,
+               data_AXI_CALC_RES;
+
+  logic write1_valid, write2_valid;
+
+  always_ff @(posedge clock, negedge rst_l) begin
+  // Output register writes
+    if (~rst_1) begin
+    // Reset Case
+      data_DSKY_REG_1_HIGH <= 15'd0;
+      data_DSKY_REG_1_LOW <= 15'd0;
+      data_DSKY_REG_2_HIGH <= 15'd0;
+      data_DSKY_REG_2_LOW <= 15'd0;
+      data_DSKY_REG_3_HIGH <= 15'd0;
+      data_DSKY_REG_3_LOW <= 15'd0;
+      data_DSKY_PROG_NUM[4:0] <= 5'd0;
+      // TODO: Isolate pertinent bits
+      data_DSKY_LAMPS <= 15'd0;
+      data_AXI_CALC_RES <= 15'd0;
+    end
+    else begin
+    // Common Case
+    // NOTE: If attempt a write of both data ports to same reg, port 2 has precedence.
+      if (en_write1) begin
+        unique case (sel_write1)
+          DSKY_REG_1_HIGH: data_DSKY_REG_1_HIGH <= data_write1;
+          DSKY_REG_1_LOW: data_DSKY_REG_1_LOW <= data_write1;
+          DSKY_REG_2_HIGH: data_DSKY_REG_2_HIGH <= data_write1;
+          DSKY_REG_2_LOW: data_DSKY_REG_2_LOW <= data_write1;
+          DSKY_REG_3_HIGH: data_DSKY_REG_3_HIGH <= data_write1;
+          DSKY_REG_3_LOW: data_DSKY_REG_3_LOW <= data_write1;
+          DSKY_PROG_NUM: data_DSKY_PROG_NUM[4:0] <= data_write1[4:0];
+          // TODO: Isolate pertinent bits
+          DSKY_LAMPS: data_DSKY_LAMPS <= data_write1;
+          AXI_CALC_RES: data_AXY_CALC_RES <= data_write1;
+          default: begin
+          // Necessary as not all I/O registers writeable
+          end
+        endcase
+      end
+      if (en_write2) begin
+        unique case (sel_write2)
+          DSKY_REG_1_HIGH: data_DSKY_REG_1_HIGH <= data_write2;
+          DSKY_REG_1_LOW: data_DSKY_REG_1_LOW <= data_write2;
+          DSKY_REG_2_HIGH: data_DSKY_REG_2_HIGH <= data_write2;
+          DSKY_REG_2_LOW: data_DSKY_REG_2_LOW <= data_write2;
+          DSKY_REG_3_HIGH: data_DSKY_REG_3_HIGH <= data_write2;
+          DSKY_REG_3_LOW: data_DSKY_REG_3_LOW <= data_write2;
+          DSKY_PROG_NUM: data_DSKY_PROG_NUM[4:0] <= data_write2[4:0];
+          // TODO: Isolate pertinent bits
+          DSKY_LAMPS: data_DSKY_LAMPS <= data_write2;
+          AXI_CALC_RES: data_AXY_CALC_RES <= data_write2;
+          default: begin
+          // Necessary as not all I/O registers writeable
+          end
+        endcase
+      end
+    end
+  end
+  
+  always_comb begin
+  // I/O register reads
+    // Check for valid writes
+    write1_valid = (~sel_write1[3] | (sel_write1[2:0] == 3'd0));
+    write2_valid = (~sel_write2[3] | (sel_write2[2:0] == 3'd0)); 
+    // To Read Port 1
+    if (write1_valid & (sel_read1 == sel_write1))
+    // Forwarding Case 1
+      data_read1 = data_write1;
+    else if (write2_valid & (sel_read1 == sel_write2))
+    // Forwarding Case 2
+      data_read1 = data_write2;
+    else begin
+    // Common Case
+      unique case (rs1_sel)
+        DSKY_REG_1_HIGH: data_read1 = data_DSKY_REG_1_HIGH;
+        DSKY_REG_1_LOW: data_read1 = data_DSKY_REG_1_LOW;
+        DSKY_REG_2_HIGH: data_read1 = data_DSKY_REG_2_HIGH;
+        DSKY_REG_2_LOW: data_read1 = data_DSKY_REG_2_LOW;
+        DSKY_REG_3_HIGH: data_read1 = data_DSKY_REG_3_HIGH;
+        DSKY_REG_3_LOW: data_read1 = data_DSKY_REG_3_LOW;
+        DSKY_PROG_NUM: data_read1[4:0] = data_DSKY_PROG_NUM[4:0];
+        // TODO: Isolate pertinent bits
+        DSKY_LAMPS: data_read1 = data_DSKY_LAMPS;
+        AXI_CALC_RES: data_read1 = data_AXI_CALC_RES;
+        DSKY_VERB: data_read1 = data_DSKY_VERB;
+        DSKY_NOUN: data_read1 = data_DSKY_NOUN;
+        DSKY_NEW: data_read1[0] = data_DSKY_NEW[0];
+        AXI_MISSION_TIME: data_read1 = data_AXI_MISSION_TIME;
+        AXI_APOGEE: data_read1 = data_AXI_APOGEE;
+        ACI_PERIGEE: data_read1 = data_AXI_PERIGEE;
+      endcase
+    end
+    // To Read Port 2
+    if (write1_valid & (sel_read2 == sel_write1))
+    // Forwarding Case 1
+      data_read2 = data_write1;
+    else if (write2_valid & (sel_read2 == sel_write2))
+    // Forwarding Case 2
+      data_read2 = data_write2;
+    else begin
+    // Common Case
+      unique case (rs1_sel)
+        DSKY_REG_1_HIGH: data_read2 = data_DSKY_REG_1_HIGH;
+        DSKY_REG_1_LOW: data_read2 = data_DSKY_REG_1_LOW;
+        DSKY_REG_2_HIGH: data_read2 = data_DSKY_REG_2_HIGH;
+        DSKY_REG_2_LOW: data_read2 = data_DSKY_REG_2_LOW;
+        DSKY_REG_3_HIGH: data_read2 = data_DSKY_REG_3_HIGH;
+        DSKY_REG_3_LOW: data_read2 = data_DSKY_REG_3_LOW;
+        DSKY_PROG_NUM: data_read2[4:0] = data_DSKY_PROG_NUM[4:0];
+        // TODO: Isolate pertinent bits
+        DSKY_LAMPS: data_read2 = data_DSKY_LAMPS;
+        AXI_CALC_RES: data_read2 = data_AXI_CALC_RES;
+        DSKY_VERB: data_read2 = data_DSKY_VERB;
+        DSKY_NOUN: data_read2 = data_DSKY_NOUN;
+        DSKY_NEW: data_read2[0] = data_DSKY_NEW[0];
+        AXI_MISSION_TIME: data_read2 = data_AXI_MISSION_TIME;
+        AXI_APOGEE: data_read2 = data_AXI_APOGEE;
+        ACI_PERIGEE: data_read2 = data_AXI_PERIGEE;
+      endcase
+    end
+  end
+
+endmodule: IO_register_file
+
 module addr_translate_ROM
   (input  logic [11:0] addr_soft,
    input  logic [2:0] bits_FB,
@@ -480,7 +615,7 @@ module addr_translate_RAM
 endmodule: addr_translate_RAM
 
 module addr_translate_r
-  (input  logic [11:0] addr_k
+  (input  logic [11:0] addr_k,
    input  logic [2:0] bits_EB, bits_FB,
    output logic [13:0] addr_ROM,
    output logic [10:0] addr_RAM);
@@ -510,7 +645,7 @@ module addr_translate_r
 endmodule: addr_translate_r
 
 module addr_translate_w
-  (input  logic [11:0] addr_k
+  (input  logic [11:0] addr_k,
    input  logic [2:0] bits_EB,
    input  logic en_write,
    output logic [10:0] addr_RAM,
@@ -530,24 +665,24 @@ endmodule: addr_translate_w
 // All address translation contained within a single module
 module addr_translate
   (input  logic [11:0] addr_pc, addr_r, addr_w,
-   input  logic [2:0] bits_EB, bits_FB,
+   input  logic [2:0] bits_EB_r, bits_FB_r, bits_EB_w,
    input  logic en_write,
    output logic [13:0] addr_ROM_pc, addr_ROM_r,
    output logic [10:0] addr_RAM_r, addr_RAM_w,
    output logic en_write_final);
 
    addr_translate_ROM translate_pc (.addr_soft(addr_pc),
-                                    .bits_FB(bits_FB),
+                                    .bits_FB(bits_FB_r),
                                     .addr_ROM(addr_ROM_pc));
 
    addr_translate_r translate_r (.addr_k(addr_r),
-                                 .bits_EB(bits_EB),
-                                 .bits_FB(bits_FB),
+                                 .bits_EB(bits_EB_r),
+                                 .bits_FB(bits_FB_r),
                                  .addr_ROM(addr_ROM_r),
                                  .addr_RAM(addr_RAM_r));
 
    addr_translate_w translate_w (.addr_k(addr_w),
-                                 .bits_EB(bits_EB),
+                                 .bits_EB(bits_EB_w),
                                  .en_write(en_write),
                                  .addr_RAM(addr_RAM_w),
                                  .en_write_final(en_write_final));
@@ -602,9 +737,14 @@ module arithmetic_logic_unit
         result = res_mult;
       end
       ALU_DIM: begin
-        sel_subtract = ~source_2[14];
-        add_sub_src_1 = 15'd1;
-        result[29:15] = res_add_sub;
+        if (res_eq_0) begin
+          result = source_2;
+        end
+        else begin
+          sel_subtract = ~source_2[14];
+          add_sub_src_1 = 15'd1;
+          result[29:15] = res_add_sub;
+        end
       end
       ALU_OR: begin
         result[29:15] = source_1[29:15] | source_2;
@@ -629,7 +769,7 @@ module arithmetic_logic_unit
     endcase
 
     // Set the zero flag
-    res_eq_0 = (result == 30'd0);
+    res_eq_0 = (source_2 == 15'd0 || source_2 == 15'h7FFF);
 
   end
 
@@ -653,10 +793,10 @@ endmodule: arithmetic_logic_unit
 
 module branching_logic 
   (input logic eq_0, sign_bit,
-   input branch_t, ctrl_branch,
+   input branch_t ctrl_branch,
    output logic branch);
 
-  assign branch = (branch==BRANCH) ? 1'b1 : (branch==BZF && eq_0) ? 1'b1 : (branch == BZF && (eq_0 || sign_bit) ? 1'b1 : 1'b0;
+  assign branch = (ctrl_branch==BRANCH) ? 1'b1 : (ctrl_branch==BZF && eq_0) ? 1'b1 : (ctrl_branch == BZF && (eq_0 || sign_bit)) ? 1'b1 : 1'b0;
       
 
 endmodule: branching_logic
@@ -677,13 +817,13 @@ module stall_logic
 
 
   always_comb begin
-    stall = 1'b0
-    if ((ctrl_D.rs1_sel==ctrl_E.wr1 && ctrl_E.wr1_en) ||(ctrl_D.rs2_sel==ctrl_E.wr2 && ctrl_E.wr2_en)) begin
+    stall = 1'b0;
+    if ((ctrl_D.rs1_sel==ctrl_E.wr1 && ctrl_E.wr1_en) || (ctrl_D.rs2_sel==ctrl_E.wr2 && ctrl_E.wr2_en)) begin
         stall = 1'b1;
     end
     else if ((ctrl_D.K==ctrl_E.K && (ctrl_E.RAM_write_en || ctrl_E.IO_write_en)) || (ctrl_D.K==ctrl_W.K && (ctrl_W.RAM_write_en || ctrl_W.IO_write_en)))
         stall = 1'b1;
     end
-  end
+
 
 endmodule: stall_logic
