@@ -102,7 +102,7 @@ module agc_ram (
 		altsyncram_component.clock_enable_input_a = "BYPASS",
 		altsyncram_component.clock_enable_input_b = "BYPASS",
 		altsyncram_component.clock_enable_output_b = "BYPASS",
-		altsyncram_component.init_file = "../../tests/mifFiles/RAM.mif",
+		altsyncram_component.init_file = "RAM.mif",
 		altsyncram_component.init_file_layout = "PORT_B",
 		altsyncram_component.intended_device_family = "Cyclone V",
 		altsyncram_component.lpm_type = "altsyncram",

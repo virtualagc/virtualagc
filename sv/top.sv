@@ -47,7 +47,7 @@ module TB;
   
 
   initial begin
-    #100000
+    #1000
     $finish;
   end
 endmodule : TB
