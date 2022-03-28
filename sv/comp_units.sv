@@ -51,14 +51,14 @@ module ripple_carry_adder (
         for (i = 0; i < `NUM_BIT; i++) begin: full_adder_array
             if (i == 0) begin
                 // Low order adder takes overall c_in
-                full_adder (.sum(sum[0]),
+                full_adder a1(.sum(sum[0]),
                             .c_out(c_out_array[0]),
                             .x(x[0]), .y(y[0]),
                             .c_in(c_in));
             end
             else begin
                 // following adders take c_out of prev adder
-                full_adder (.sum(sum[i]),
+                full_adder a2(.sum(sum[i]),
                             .c_out(c_out_array[i]),
                             .x(x[i]), .y(y[i]),
                             .c_in(c_out_array[i-1]));
@@ -74,7 +74,7 @@ endmodule: ripple_carry_adder
 // Convert from one's complement, to two's complement
 // Based around ripple carry adder
 module convert_1c_2c 
-(# parameter WIDTH_MULT = 1;)
+#( parameter WIDTH_MULT = 1)
 (   
     output logic [(WIDTH_MULT * `NUM_BIT)-1:0] twos_comp,
     input  logic [(WIDTH_MULT * `NUM_BIT)-1:0] ones_comp
@@ -92,7 +92,7 @@ endmodule: convert_1c_2c
 // Convert from two's complement, to one's complement
 // Based around ripple carry adder
 module convert_2c_1c 
-(# parameter WIDTH_MULT = 1;)
+#( parameter WIDTH_MULT = 1)
 (
     output logic [(WIDTH_MULT * `NUM_BIT)-1:0] ones_comp,
     output logic underflow_flag,
@@ -142,7 +142,7 @@ endmodule: ones_comp_adder
 module ones_comp_add_sub (
     output logic [`NUM_BIT-1:0] sum,
     input  logic [`NUM_BIT-1:0] x, y,
-    input  logic subtract;
+    input  logic subtract
 );
     logic [`NUM_BIT-1:0] y_operand;
 
@@ -173,7 +173,7 @@ module ones_comp_mult (
     convert_1c_2c #(1) x_2c (.twos_comp(x_twos_comp),
                              .ones_comp(x));
 
-    convert_1c_2c #(1) y_2c (.twos_comp(y_twos_comp).
+    convert_1c_2c #(1) y_2c (.twos_comp(y_twos_comp),
                              .ones_comp(y));
 
     agc_mult mult_2c (.result(prod_twos_comp),
@@ -181,7 +181,7 @@ module ones_comp_mult (
                       .datab(y_twos_comp));
 
     convert_2c_1c #(2) prod_1c (.ones_comp(prod),
-                                .underflow_flag(underflow_flag)
+                                .underflow_flag(underflow_flag),
                                 .twos_comp(prod_twos_comp));
 
 endmodule: ones_comp_mult
@@ -194,7 +194,7 @@ endmodule: ones_comp_mult
 // Convert numerator, denominator 1c -> 2c
 // Convert quotient, remainder 2c -> 1c
 module ones_comp_div (
-    output logic ['NUM_BIT-1:0] quot, remain,
+    output logic [`NUM_BIT-1:0] quot, remain,
     output logic underflow_flag,
     input  logic [(2 * `NUM_BIT)-1:0] numer,
     input  logic [`NUM_BIT-1:0] denom
@@ -215,7 +215,7 @@ module ones_comp_div (
                     .numer(numer_twos_comp),
                     .denom(denom_twos_comp));
 
-    assign quot_twos_comp = quot_twos_comp_pre[(2 * `NUM_BIT)-1:'NUM_BIT];
+    assign quot_twos_comp = quot_twos_comp_pre[(2 * `NUM_BIT)-1:`NUM_BIT];
 
     convert_2c_1c #(1) quot_2c (.ones_comp(quot),
                                 .underflow_flag(underflow_flag_pre[1]),

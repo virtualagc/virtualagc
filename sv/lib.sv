@@ -818,7 +818,7 @@ module stall_logic
 
   always_comb begin
     stall = 1'b0;
-    if ((ctrl_D.rs1_sel==ctrl_E.wr1 && ctrl_E.wr1_en) || (ctrl_D.rs2_sel==ctrl_E.wr2 && ctrl_E.wr2_en)) begin
+    if ((((ctrl_D.rs1_sel==ctrl_E.wr1_sel)  || (ctrl_D.rs2_sel==ctrl_E.wr1_sel)) && ctrl_E.wr1_en) || (((ctrl_D.rs1_sel==ctrl_E.wr2_sel) || (ctrl_D.rs2_sel==ctrl_E.wr2_sel)) && ctrl_E.wr2_en)) begin
         stall = 1'b1;
     end
     else if ((ctrl_D.K==ctrl_E.K && (ctrl_E.RAM_write_en || ctrl_E.IO_write_en)) || (ctrl_D.K==ctrl_W.K && (ctrl_W.RAM_write_en || ctrl_W.IO_write_en)))

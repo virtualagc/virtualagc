@@ -150,7 +150,7 @@ module decode
                   ctrl.wr1_en = 1'b1;
                 end
                 else begin
-                  ctrl.RAN_write_en = 1'b1;
+                  ctrl.RAM_write_en = 1'b1;
                 end
               end
               //AUG
@@ -163,7 +163,7 @@ module decode
                   ctrl.wr1_en = 1'b1;
                 end
                 else begin
-                  ctrl.RAM_write_out = 1'b1;
+                  ctrl.RAM_write_en = 1'b1;
                 end
               end  
               //DIM
@@ -176,7 +176,7 @@ module decode
                   ctrl.wr1_en = 1'b1;
                 end
                 else begin
-                  ctrl.RAM_write_out = 1'b1;
+                  ctrl.RAM_write_en = 1'b1;
                 end               
               end
               default: begin
@@ -225,7 +225,7 @@ module decode
           end
           default : begin
             $display(rst_l, "Encountered unknown/unimplemented instr 0x%05o." ,instr);
-                                ctrl_signals.halt = 1'b1;
+                                ctrl.halt = 1'b1;
            end
         endcase
       end
@@ -312,7 +312,7 @@ module decode
              end
              default : begin
               $display(rst_l, "Encountered unknown/unimplemented instr 0x%05o." ,instr);
-                                ctrl_signals.halt = 1'b1;
+                                ctrl.halt = 1'b1;
              end
            endcase
          end
@@ -382,7 +382,7 @@ module decode
 
              default : begin
                $display(rst_l, "Encountered unknown/unimplemented instr 0x%05o." ,instr);
-                                ctrl_signals.halt = 1'b1;
+                                ctrl.halt = 1'b1;
              end
            endcase
          end

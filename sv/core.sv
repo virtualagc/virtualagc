@@ -103,11 +103,11 @@ module Core
   
   assign read_data_E = RAM_read_data;
 
-  mux #(3, $bits(rs1rs2_data_E)) ALU1_Mux(.in({rs1rs2_data_E, 15'd0, rs1_data_E, 18'd0, ctrl_E.k}),
+  mux #(3, $bits(rs1rs2_data_E)) ALU1_Mux(.in({rs1rs2_data_E, 15'd0, rs1_data_E, 18'd0, ctrl_E.K}),
       .sel(ctrl_E.alu_src1), .out(alu_src1_E));
 
   //TODO should it be K or address?
-  mux #(4, $bits(alu_src2_E)) ALU_2_Mux(.in({read_data_E, rs2_data_E, IO_read_data_E, ctrl_E.k}),
+  mux #(4, $bits(alu_src2_E)) ALU_2_Mux(.in({read_data_E, rs2_data_E, IO_read_data_E, ctrl_E.K}),
             .sel(ctrl_E.alu_src2),
             .out(alu_src2_E));
 
@@ -118,7 +118,7 @@ module Core
   arithmetic_logic_unit ALU(.source_1(alu_src1_E), .source_2(alu_src2_E), .result(alu_out_E), .res_eq_0(eq_0_E),
           .operation_sel(ctrl_E.alu_op));
 
-  branching_logic Branch(.eq_0(eq_0_E), .sign_bit(sign_bit_E), .ctrl_branch(ctrl.branch_E),
+  branching_logic Branch(.eq_0(eq_0_E), .sign_bit(sign_bit_E), .ctrl_branch(ctrl_E.branch),
                          .branch(branch_E));
   
   //Execute Writeback Register
