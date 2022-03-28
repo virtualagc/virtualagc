@@ -218,25 +218,25 @@ main(int argc, char *argv[])
   FILE *RAMFile = fopen("RAM.mif", "w");
   FILE *ROMFile = fopen("ROM.mif", "w");
   
-  fprintf(RAMFile, "DEPTH =  2048\n");
-  fprintf(RAMFile, "WIDTH =  15\n");
-  fprintf(RAMFile, "ADDRESS_RADIX = OCT\n");
-  fprintf(RAMFile, "DATA_RADIX = OCT\n");
+  fprintf(RAMFile, "DEPTH =  2048;\n");
+  fprintf(RAMFile, "WIDTH =  15;\n");
+  fprintf(RAMFile, "ADDRESS_RADIX = OCT;\n");
+  fprintf(RAMFile, "DATA_RADIX = OCT;\n");
   fprintf(RAMFile, "\n");
   fprintf(RAMFile, "CONTENT BEGIN\n");
   fprintf(RAMFile, "\n");
 
-  fprintf(ROMFile, "DEPTH =  8192\n");
-  fprintf(ROMFile, "WIDTH =  15\n");
-  fprintf(ROMFile, "ADDRESS_RADIX = OCT\n");
-  fprintf(ROMFile, "DATA_RADIX = OCT\n");
+  fprintf(ROMFile, "DEPTH =  10240;\n");
+  fprintf(ROMFile, "WIDTH =  15;\n");
+  fprintf(ROMFile, "ADDRESS_RADIX = OCT;\n");
+  fprintf(ROMFile, "DATA_RADIX = OCT;\n");
   fprintf(ROMFile, "\n");
   fprintf(ROMFile, "CONTENT BEGIN\n");
   fprintf(ROMFile, "\n");
 
   for(int i = 0; i < 2048; i++)
   {
-    fprintf(RAMFile, "%.4o : %.5o\n", i, 0);
+    fprintf(RAMFile, "%.4o : %.5o;\n", i, 0);
   } 
 
   
@@ -598,7 +598,7 @@ main(int argc, char *argv[])
               Value = ObjectCode[Bank][Offset];
               // Add in the parity bits if requested
               mifAddress = ((Bank - 9) * 1024) + Offset; 
-              fprintf(ROMFile, "%.4o : %.5o\n", mifAddress, Value);
+              fprintf(ROMFile, "%.4o : %.5o;\n", mifAddress, Value);
           
               if (Hardware)
                 // The AGC hardware used bit 15 for parity
@@ -685,7 +685,7 @@ main(int argc, char *argv[])
               Value = ObjectCode[Bank][Offset];
               
 	      mifAddress = ((2 + Bank) * 1024) + Offset;
-              fprintf(ROMFile, "%.4o : %.5o\n", mifAddress, Value);
+              fprintf(ROMFile, "%.4o : %.5o;\n", mifAddress, Value);
               // Add in the parity bits if requested
               if (Hardware)
                 // The AGC hardware used bit 15 for parity

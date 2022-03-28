@@ -1,1206 +1,133 @@
-Apollo Guidance Computer (AGC) assembler, version "2020-12-24", built Mar  1 2022, target AGC4
+Apollo Guidance Computer (AGC) assembler, version "2020-12-24", built Mar 28 2022, target AGC4
 (c)2003-2005,2009-2010,2016-2018,2021 Ronald S. Burkey
 Refer to http://www.ibiblio.org/apollo/index.html for more information.
 Pass #1
 Pass #2
 Pass #3
-000001,000001:                                                                                          	# Copyright:    Public domain
-000002,000002:                                                                                          	# Filename:     piPeripheral.agc
-000003,000003:                                                                                          	# Purpose:      Code for the short tutorial on AGC bare-metal programming
-000004,000004:                                                                                          	#               from http://www.ibiblio.org/apollo/DIY.html.
-000005,000005:                                                                                          	# Mod History:  2017-12-07 RSB  Wrote.
-000006,000006:                                                                                          	#               2017-12-09 RSB  Added displaying the current time and date
-000007,000007:                                                                                          	#                               from input channels 040-042 supplied by the
-000008,000008:                                                                                          	#                               template peripheral program (piPeriperal.py)
-000009,000009:                                                                                          	#                               when it's used with its --time=1 cli switch.
-000010,000010:                                                                                          	#               2017-12-24 RSB  Added the stuff for supporting --imu and --gps.
-000011,000011:                                                                                          	#               2017-12-25 RSB  Added higher-resolution lat,lon data.  Deleted
-000012,000012:                                                                                          	#                               the toggling of COMP ACTY on keystroke.  Replaced
-000013,000013:                                                                                          	#                               use of PRO key for cycling through modes with
-000014,000014:                                                                                          	#                               + (for cycling forward) and - (for cycling
-000015,000015:                                                                                          	#                               backward).
-000016,000016: 
-000017,000017:                                                                                          	# It extends the simple template program described in the tutorial by
-000018,000018:                                                                                          	# receiving and displaying various data on input channels for a fake
-000019,000019:                                                                                          	# peripheral device defined by the program piPeripheral.py, and
-000020,000020:                                                                                          	# sometimes spitting the unpacked data back out on similarly-defined
-000021,000021:                                                                                          	# output channels 043-050.  The input data supported is
-000022,000022:                                                                                          	# 1's-complement.  Here are the channels, all inputs unless
-000023,000023:                                                                                          	# explicitly stated otherwise:
-000024,000024:                                                                                          	#       Second          Least-significant 6 bits of channel 040
-000025,000025:                                                                                          	#       Minute          Next higher 6 bits of channel 040
-000026,000026:                                                                                          	#                       (Most-significant 3 bits of channel 040 unused)
-000027,000027:                                                                                          	#       Hour            Least-significant 5 bits of channel 041
-000028,000028:                                                                                          	#       Day             Next higher 5 bits of channel 041
-000029,000029:                                                                                          	#       Month           Next higher 4 bits of channel 041
-000030,000030:                                                                                          	#                       (Most-significant bit of channel 041 unused)
-000031,000031:                                                                                          	#       Year            Channel 042.
-000032,000032:                                                                                          	#       Mode or year    Output channel 043.  If the value is <100,
-000033,000033:                                                                                          	#                       it is the current display mode, otherwise the
-000034,000034:                                                                                          	#                       mode is 0 and it is the year.
-000035,000035:                                                                                          	#       (TBD)           Output channels 044-050 contain data that's
-000036,000036:                                                                                          	#                       dependent on the display mode, but generally
-000037,000037:                                                                                          	#                       reflects what is actually being displayed
-000038,000038:                                                                                          	#                       on the DSKY.  At present, though, it always
-000039,000039:                                                                                          	#                       reflects mode 0 evem for other modes, namely,
-000040,000040:                                                                                          	#                       044 is the month, 045 is the day, 046 is
-000041,000041:                                                                                          	#                       the hour, 047 is the minute, and 050 is the
-000042,000042:                                                                                          	#                       second.  In other modes, they will be something
-000043,000043:                                                                                          	#                       else.
-000044,000044:                                                                                          	#       X acceleration  Channel 051, mm/sec/sec
-000045,000045:                                                                                          	#       Y acceleration  Channel 052, mm/sec/sec
-000046,000046:                                                                                          	#       Z acceleration  Channel 053, mm/sec/sec
-000047,000047:                                                                                          	#       X mag field     Channel 054, in units of 0.0001 gauss
-000048,000048:                                                                                          	#       Y mag field     Channel 055, in units of 0.0001 gauss
-000049,000049:                                                                                          	#       Z mag field     Channel 056, in units of 0.0001 gauss
-000050,000050:                                                                                          	#       X gyro          Channel 057, in units of 0.1 dps
-000051,000051:                                                                                          	#       Y gyro          Channel 060, in units of 0.1 dps
-000052,000052:                                                                                          	#       Y gyro          Channel 061, in units of 0.1 dps
-000053,000053:                                                                                          	#       baro pressure   Channel 062, in units of 0.1 hPa
-000054,000054:                                                                                          	#       temperature     Channel 063, in units of 0.01 degrees C
-000055,000055:                                                                                          	#       latitude10      Channel 064. int(latitude*10)
-000056,000056:                                                                                          	#       longitude10     Channel 065. int(longitude*10)
-000057,000057:                                                                                          	#       altitude        Channel 066, meters
-000058,000058:                                                                                          	#       ground speed    Channel 067, kph
-000059,000059:                                                                                          	#       bearing         Channel 070, 0.1 degrees from true North.
-000060,000060:                                                                                          	#       latitudeFrac    Channel 071, int(10000*(fractional part of latitude*10))
-000061,000061:                                                                                          	#       longitudeFrac   Channel 072, int(10000*(fractional part of longitude*10))
-000062,000062:                                                                                          	# ... though actually, for channels 051-063 & 066-072, the values from the input
-000063,000063:                                                                                          	# ports are simply displayed (after conversion to decimal) as-is, so
-000064,000064:                                                                                          	# the their interpretations and units aren't enforced by the AGC.
-000065,000065:                                                                                          	# Note that the X, Y, and Z axes mentioned above are relative to
-000066,000066:                                                                                          	# the sensor board, and I don't know how that relates to DSKY axes.
-000067,000067:                                                                                          	# On the DSKY, what is displayed depends on the selected
-000068,000068:                                                                                          	# display-mode, which you can cycle through with the PRO key.  The
-000069,000069:                                                                                          	# mode is always shown in the PROG area, and is:
-000070,000070:                                                                                          	#       00              time-display mode
-000071,000071:                                                                                          	#       01              acceleration-display mode
-000072,000072:                                                                                          	#       02              magnetometer-display mode
-000073,000073:                                                                                          	#       03              gyro-display mode
-000074,000074:                                                                                          	#       04              weather-sensor-display mode
-000075,000075:                                                                                          	#       05              GPS-location-display mode
-000076,000076:                                                                                          	#       06              GPS-track-display mode
-000077,000077:                                                                                          	#       07              High-res latitude display mode
-000078,000078:                                                                                          	#       08              High-res longitude display mode
-000079,000079:                                                                                          	# Specifically, here's what's shown on the display in the
-000080,000080:                                                                                          	# various display modes.  For the time-display mode:
-000081,000081:                                                                                          	#       PROG            00
-000082,000082:                                                                                          	#       VERB            blank
-000083,000083:                                                                                          	#       NOUN            seconds
-000084,000084:                                                                                          	#       R1              hour, minute, separated by a blank
-000085,000085:                                                                                          	#       R2              month, day, separated by a blank
-000086,000086:                                                                                          	#       R3              year, prefixed by a blank
-000087,000087:                                                                                          	# For the acceleration-display mode:
-000088,000088:                                                                                          	#       PROG            01
-000089,000089:                                                                                          	#       VERB            blank
-000090,000090:                                                                                          	#       NOUN            blank
-000091,000091:                                                                                          	#       R1              X acceleration mm/sec/sec
-000092,000092:                                                                                          	#       R2              Y acceleration mm/sec/sec
-000093,000093:                                                                                          	#       R3              Z acceleration mm/sec/sec
-000094,000094:                                                                                          	# For the magnetometer-display mode:
-000095,000095:                                                                                          	#       PROG            02
-000096,000096:                                                                                          	#       VERB            blank
-000097,000097:                                                                                          	#       NOUN            blank
-000098,000098:                                                                                          	#       R1              X magnetometer 0.0001 gauss
-000099,000099:                                                                                          	#       R2              Y magnetometer 0.0001 gauss
-000100,000100:                                                                                          	#       R3              Z magnetometer 0.0001 gauss
-000101,000101:                                                                                          	# For the gyro-display mode:
-000102,000102:                                                                                          	#       PROG            03
-000103,000103:                                                                                          	#       VERB            blank
-000104,000104:                                                                                          	#       NOUN            blank
-000105,000105:                                                                                          	#       R1              X gyro 0.1 dps
-000106,000106:                                                                                          	#       R2              Y gyro 0.1 dps
-000107,000107:                                                                                          	#       R3              Z gyro 0.1 dps
-000108,000108:                                                                                          	# For the weather-sensor-display mode:
-000109,000109:                                                                                          	#       PROG            04
-000110,000110:                                                                                          	#       VERB            blank
-000111,000111:                                                                                          	#       NOUN            blank
-000112,000112:                                                                                          	#       R1              pressure 0.1 hPa
-000113,000113:                                                                                          	#       R2              temperature 0.01 degrees C
-000114,000114:                                                                                          	#       R3              blank
-000115,000115:                                                                                          	# For the GPS-location-display mode:
-000116,000116:                                                                                          	#       PROG            05
-000117,000117:                                                                                          	#       VERB            blank
-000118,000118:                                                                                          	#       NOUN            blank
-000119,000119:                                                                                          	#       R1              latitude, XX.XX
-000120,000120:                                                                                          	#       R2              longitude, XXX.XX
-000121,000121:                                                                                          	#       R3              altitude, meters
-000122,000122:                                                                                          	# For the GPS-track-display mode:
-000123,000123:                                                                                          	#       PROG            06
-000124,000124:                                                                                          	#       VERB            blank
-000125,000125:                                                                                          	#       NOUN            blank
-000126,000126:                                                                                          	#       R1              ground speed, kph
-000127,000127:                                                                                          	#       R2              direction, 0.1 degrees from true North
-000128,000128:                                                                                          	#       R3              blank
-000129,000129:                                                                                          	# For the hi-res-latitude-display mode:
-000130,000130:                                                                                          	#       PROG            07
-000131,000131:                                                                                          	#       VERB            blank
-000132,000132:                                                                                          	#       NOUN            blank
-000133,000133:                                                                                          	#       R1              latitude, XX
-000134,000134:                                                                                          	#       R2              latitude, .XXXXX
-000135,000135:                                                                                          	#       R3              longitude, XXX.XX
-000136,000136:                                                                                          	# For the hi-res-longitude-display mode:
-000137,000137:                                                                                          	#       PROG            08
-000138,000138:                                                                                          	#       VERB            blank
-000139,000139:                                                                                          	#       NOUN            blank
-000140,000140:                                                                                          	#       R1              latitude, XX.XXX
-000141,000141:                                                                                          	#       R2              latitude, XXX
-000142,000142:                                                                                          	#       R3              longitude, .XXXXX
-000143,000143:                                                                                          	# The output channels used are:
-000144,000144:                                                                                          	#       Year            Channel 043
-000145,000145:                                                                                          	#       Month           Channel 044
-000146,000146:                                                                                          	#       Day             Channel 045
-000147,000147:                                                                                          	#       Hour            Channel 046
-000148,000148:                                                                                          	#       Minute          Channel 047
-000149,000149:                                                                                          	#       Second          Channel 050
-000150,000150:                                                                                          	# The piPeripheral.py template for peripheral programs provides and interprets
-000151,000151:                                                                                          	# this additional data if its --time=1 command-line switch is used.
-000152,000152: 
-000153,000153:                                                                                          	# Special registers.
-000154,000154: ???????                        A                  EQUALS   0                             	#
-000155,000155: ???????                        L                  EQUALS   1                             	# L AND Q ARE BOTH CHANNELS AND REGISTERS.
-000156,000156: ???????                        Q                  EQUALS   2                             	#
-000157,000157: ???????                        EBANK              EQUALS   3                             	#
-000158,000158: ???????                        FBANK              EQUALS   4                             	#
-000159,000159: ???????                        Z                  EQUALS   5                             	# ADJACENT TO FBANK AND BBANK FOR DXCH Z
-000160,000160: ???????                        BBANK              EQUALS   6                             	# (DTCB) AND DXCH FBANK (DTCF).
-000161,000161:                                                                                          	# REGISTER 7 IS A ZERO-SOURCE, USED BY ZL.
-000162,000162: ???????                        ARUPT              EQUALS   10                            	# INTERRUPT STORAGE.
-000163,000163: ???????                        LRUPT              EQUALS   11                            	#
-000164,000164: ???????                        QRUPT              EQUALS   12                            	#
-000165,000165: ???????                        SAMPTIME           EQUALS   13                            	# SAMPLED TIME 1 & 2.
-000166,000166: ???????                        ZRUPT              EQUALS   15                            	# (13 AND 14 ARE SPARES.)
-000167,000167: ???????                        BANKRUPT           EQUALS   16                            	# USUALLY HOLDS FBANK OR BBANK.
-000168,000168: ???????                        BRUPT              EQUALS   17                            	# RESUME ADDRESS AS WELL.
-000169,000169: ???????                        CYR                EQUALS   20                            	#
-000170,000170: ???????                        SR                 EQUALS   21                            	#
-000171,000171: ???????                        CYL                EQUALS   22                            	#
-000172,000172: ???????                        EDOP               EQUALS   23                            	# EDITS INTERPRETIVE OPERATION CODE PAIRS.
-000173,000173: ???????                        TIME2              EQUALS   24                            	#
-000174,000174: ???????                        TIME1              EQUALS   25                            	#
-000175,000175: ???????                        TIME3              EQUALS   26                            	#
-000176,000176: ???????                        TIME4              EQUALS   27                            	#
-000177,000177: ???????                        TIME5              EQUALS   30                            	#
-000178,000178: ???????                        TIME6              EQUALS   31                            	#
-000179,000179: 
-000180,000180:    0067                                           SETLOC   67                            	#
-000181,000181:    0067                        NEWJOB             ERASE                                  	# Allocate a variable at the location checked by the Night Watchman.
-000182,000182: 
-000183,000183:                                                                                          	# More variables.
-000184,000184:    0070                        KEYBUF             ERASE                                  	# 040 when empty, 0-037 when holding a keycode
-000185,000185:    0071                        LAST040            ERASE                                  	# Most recent value from input channel 040.
-000186,000186:    0072                        SECOND             ERASE                                  	# Storage for components of time
-000187,000187:    0073                        MINUTE             ERASE                                  	#
-000188,000188:    0074                        HOUR               ERASE                                  	#
-000189,000189:    0075                        DAY                ERASE                                  	#
-000190,000190:    0076                        MONTH              ERASE                                  	#
-000191,000191:    0077                        YEAR               ERASE                                  	#
-000192,000192:    0100                        SIGN               ERASE                                  	# For buffering sign+digits in conversion of integer to decimal string.
-000193,000193:    0101                        DIGIT1             ERASE                                  	#
-000194,000194:    0102                        DIGIT2             ERASE                                  	#
-000195,000195:    0103                        DIGIT3             ERASE                                  	#
-000196,000196:    0104                        DIGIT4             ERASE                                  	#
-000197,000197:    0105                        DIGIT5             ERASE                                  	#
-000198,000198:    0106                        SIGNA              ERASE                                  	# For buffering sign+digits in conversion of integer to decimal string.
-000199,000199:    0107                        DIGIT1A            ERASE                                  	#
-000200,000200:    0110                        DIGIT2A            ERASE                                  	#
-000201,000201:    0111                        DIGIT3A            ERASE                                  	#
-000202,000202:    0112                        DIGIT4A            ERASE                                  	#
-000203,000203:    0113                        DIGIT5A            ERASE                                  	#
-000204,000204:    0114                        DSPR               ERASE                                  	# Return address for DSPxxxx functions.
-000205,000205:    0115                        DIGIT25            ERASE                                  	#
-000206,000206:    0116                        DIGIT31            ERASE                                  	#
-000207,000207:    0117                        DIVISOR            ERASE                                  	# A dummy variable used to store divisors.
-000208,000208:    0120                        DSPMODE            ERASE                                  	# display-mode: 0 time, 1 acceleration, 2 magnetometer, etc.
-000209,000209:    0121                        LLLOW              ERASE                                  	# LS word of lat or lon
-000210,000210:    0122                        LLHIGH             ERASE                                  	# MS word of lat or lon.
-000211,000211:    0123                        LLRET              ERASE                                  	# Return address for LL2.
-000212,000212: 
-000213,000213:    4000                                           SETLOC   4000                          	# The interrupt-vector table.
-000214,000214: 
-000215,000215:                                                                                          	# Come here at power-up or GOJAM
-000216,000216:    4000           00004                           INHINT                                 	# Disable interrupts for a moment.
-000217,000217:                                                                                          	# Set up the TIME3 interrupt, T3RUPT.  TIME3 is a 15-bit
-000218,000218:                                                                                          	# register at address 026, which automatically increments every
-000219,000219:                                                                                          	# 10 ms, and a T3RUPT interrupt occurs when the timer
-000220,000220:                                                                                          	# overflows.  Thus if it is initially loaded with 037774,
-000221,000221:                                                                                          	# and overflows when it hits 040000, then it will
-000222,000222:                                                                                          	# interrupt after 40 ms.
-000223,000223: 00,2000                                           BANK     0                             	#
-000224,000224: 
-000225,000225: 00,2000           30000                           CA       0                             	#
-000226,000226: 00,2001           33375                           CA       O37774                        	#
-000227,000227: 00,2002           54026                           TS       TIME3                         	#
-000228,000228: 00,2003           12075                           TCF      STARTUP                       	# Go to your "real" code.
-000229,000229: 
-000230,000230: 00,2004           50017                           RESUME                                 	# T6RUPT
-000231,000231: 00,2005           12006                           NOOP                                   	#
-000232,000232: 00,2006           12007                           NOOP                                   	#
-000233,000233: 00,2007           12010                           NOOP                                   	#
-000234,000234: 
-000235,000235: 00,2010           50017                           RESUME                                 	# T5RUPT
-000236,000236: 00,2011           12012                           NOOP                                   	#
-000237,000237: 00,2012           12013                           NOOP                                   	#
-000238,000238: 00,2013           12014                           NOOP                                   	#
-000239,000239: 
-000240,000240: 00,2014           52011                           DXCH     ARUPT                         	# T3RUPT
-000241,000241: 00,2015           00006                           EXTEND                                 	# Back up A, L, and Q registers
-000242,000242: 00,2016           22012                           QXCH     QRUPT                         	#
-000243,000243: 00,2017           12054                           TCF      T3RUPT                        	#
-000244,000244: 
-000245,000245: 00,2020           50017                           RESUME                                 	# T4RUPT
-000246,000246: 00,2021           12022                           NOOP                                   	#
-000247,000247: 00,2022           12023                           NOOP                                   	#
-000248,000248: 00,2023           12024                           NOOP                                   	#
-000249,000249: 
-000250,000250: 00,2024           52011                           DXCH     ARUPT                         	# KEYRUPT1
-000251,000251: 00,2025           00006                           EXTEND                                 	# Back up A, L, and Q registers
-000252,000252: 00,2026           22012                           QXCH     QRUPT                         	#
-000253,000253: 00,2027           12062                           TCF      KEYRUPT                       	#
-000254,000254: 
-000255,000255: 00,2030           52011                           DXCH     ARUPT                         	# KEYRUPT2
-000256,000256: 00,2031           00006                           EXTEND                                 	# Back up A, L, and Q registers
-000257,000257: 00,2032           22012                           QXCH     QRUPT                         	#
-000258,000258: 00,2033           12062                           TCF      KEYRUPT                       	#
-000259,000259: 
-000260,000260: 00,2034           50017                           RESUME                                 	# UPRUPT
-000261,000261: 00,2035           12036                           NOOP                                   	#
-000262,000262: 00,2036           12037                           NOOP                                   	#
-000263,000263: 00,2037           12040                           NOOP                                   	#
-000264,000264: 
-000265,000265: 00,2040           50017                           RESUME                                 	# DOWNRUPT
-000266,000266: 00,2041           12042                           NOOP                                   	#
-000267,000267: 00,2042           12043                           NOOP                                   	#
-000268,000268: 00,2043           12044                           NOOP                                   	#
-000269,000269: 
-000270,000270: 00,2044           50017                           RESUME                                 	# RADAR RUPT
-000271,000271: 00,2045           12046                           NOOP                                   	#
-000272,000272: 00,2046           12047                           NOOP                                   	#
-000273,000273: 00,2047           12050                           NOOP                                   	#
-000274,000274: 
-000275,000275: 00,2050           50017                           RESUME                                 	# RUPT10
-000276,000276: 00,2051           12052                           NOOP                                   	#
-000277,000277: 00,2052           12053                           NOOP                                   	#
-000278,000278: 00,2053           12054                           NOOP                                   	#
-000279,000279: 
-000280,000280:                                                                                          	# The interrupt-service routine for the TIME3 interrupt every 40 ms.
-000281,000281: 00,2054           33375        T3RUPT             CAF      O37774                        	# Schedule another TIME3 interrupt in 40 ms.
-000282,000282: 00,2055           54026                           TS       TIME3                         	#
-000283,000283: 
-000284,000284:                                                                                          	# And resume the main program
-000285,000285: 00,2056           52011                           DXCH     ARUPT                         	# Restore A, L, and Q, and exit the interrupt
-000286,000286: 00,2057           00006                           EXTEND                                 	#
-000287,000287: 00,2060           22012                           QXCH     QRUPT                         	#
-000288,000288: 00,2061           50017                           RESUME                                 	#
-000289,000289: 
-000290,000290:                                                                                          	# Interrupt-service code for DSKY keycode
-000291,000291: 00,2062           00006        KEYRUPT            EXTEND                                 	#
-000292,000292: 00,2063           00015                           READ     15                            	# Read the DSKY keycode input channel
-000293,000293: 00,2064           73406                           MASK     O37                           	# Get rid of all but lowest 5 bits.
-000294,000294: 00,2065           54070                           TS       KEYBUF                        	# Save the keycode for later.
-000295,000295: 00,2066           33376                           CA       ZERO                          	# Clear the input channel.
-000296,000296: 00,2067           00006                           EXTEND                                 	#
-000297,000297: 00,2070           01015                           WRITE    15                            	#
-000298,000298: 00,2071           52011                           DXCH     ARUPT                         	# Restore A, L, and Q, and exit the interrupt
-000299,000299: 00,2072           00006                           EXTEND                                 	#
-000300,000300: 00,2073           22012                           QXCH     QRUPT                         	#
-000301,000301: 00,2074           50017                           RESUME                                 	#
-000302,000302: 
-000303,000303: 00,2075           00003        STARTUP            RELINT                                 	# Reenable interrupts.
-000304,000304:                                                                                          	# Initialization
-000305,000305: 00,2076           33410                           CA       NOKEY                         	# Clear the keypad buffer variable
-000306,000306: 00,2077           54070                           TS       KEYBUF                        	# to initially hold an illegal keycode.
-000307,000307: 00,2100           33376                           CA       ZERO                          	#
-000308,000308: 00,2101           54120                           TS       DSPMODE                       	# Display mode.
-000309,000309: 
-000310,000310:                                                                                          	# Prepare the display in mode 0
-000311,000311: 00,2102           02465                           TC       BLANKALL                      	# Completely blank the display
-000312,000312: 00,2103           30120                           CA       DSPMODE                       	# Write the display mode to PROG.
-000313,000313: 00,2104           02753                           TC       DSPPROG                       	#
-000314,000314: 
-000315,000315: 00,2105           00006                           EXTEND                                 	#
-000316,000316: 00,2106           00040                           READ     40                            	#
-000317,000317: 00,2107           54071                           TS       LAST040                       	#
-000318,000318: 00,2110           40067        MAINLOOP           CS       NEWJOB                        	# Tickle the Night Watchman.
-000319,000319: 
-000320,000320:                                                                                          	#----------------------------------------------------------------------
-000321,000321:                                                                                          	# Check if there's a keycode ready, and process the keycode
-000322,000322:                                                                                          	# if there is.
-000323,000323: 00,2111           33410                           CA       NOKEY                         	#
-000324,000324: 00,2112           56070                           XCH      KEYBUF                        	# Mark keycode buffer as empty and get keycode into A.
-000325,000325: 00,2113           50000                           INDEX    A                             	#
-000326,000326: 00,2114           12115                           TCF      KEYTABL                       	#
-000327,000327: 00,2115           12203        KEYTABL            TCF      ENDKYCK                       	# unused
-000328,000328: 00,2116           12203                           TCF      ENDKYCK                       	# 1
-000329,000329: 00,2117           12203                           TCF      ENDKYCK                       	# 2
-000330,000330: 00,2120           12203                           TCF      ENDKYCK                       	# 3
-000331,000331: 00,2121           12203                           TCF      ENDKYCK                       	# 4
-000332,000332: 00,2122           12203                           TCF      ENDKYCK                       	# 5
-000333,000333: 00,2123           12203                           TCF      ENDKYCK                       	# 6
-000334,000334: 00,2124           12203                           TCF      ENDKYCK                       	# 7
-000335,000335: 00,2125           12203                           TCF      ENDKYCK                       	# 8
-000336,000336: 00,2126           12203                           TCF      ENDKYCK                       	# 9
-000337,000337: 00,2127           12203                           TCF      ENDKYCK                       	# unused
-000338,000338: 00,2130           12203                           TCF      ENDKYCK                       	# unused
-000339,000339: 00,2131           12203                           TCF      ENDKYCK                       	# unused
-000340,000340: 00,2132           12203                           TCF      ENDKYCK                       	# unused
-000341,000341: 00,2133           12203                           TCF      ENDKYCK                       	# unused
-000342,000342: 00,2134           12203                           TCF      ENDKYCK                       	# unused
-000343,000343: 00,2135           12203                           TCF      ENDKYCK                       	# 0
-000344,000344: 00,2136           12203                           TCF      ENDKYCK                       	# VERB
-000345,000345: 00,2137           12203                           TCF      ENDKYCK                       	# RSET
-000346,000346: 00,2140           12203                           TCF      ENDKYCK                       	# unused
-000347,000347: 00,2141           12203                           TCF      ENDKYCK                       	# unused
-000348,000348: 00,2142           12203                           TCF      ENDKYCK                       	# unused
-000349,000349: 00,2143           12203                           TCF      ENDKYCK                       	# unused
-000350,000350: 00,2144           12203                           TCF      ENDKYCK                       	# unused
-000351,000351: 00,2145           12203                           TCF      ENDKYCK                       	# unused
-000352,000352: 00,2146           12203                           TCF      ENDKYCK                       	# KEY REL
-000353,000353: 00,2147           12156                           TCF      DSPMODE+                      	# +
-000354,000354: 00,2150           12167                           TCF      DSPMODE-                      	# -
-000355,000355: 00,2151           12203                           TCF      ENDKYCK                       	# ENTR
-000356,000356: 00,2152           12203                           TCF      ENDKYCK                       	# unused
-000357,000357: 00,2153           12203                           TCF      ENDKYCK                       	# CLR
-000358,000358: 00,2154           12203                           TCF      ENDKYCK                       	# NOUN
-000359,000359: 00,2155           12203                           TCF      ENDKYCK                       	# NOKEY
-000360,000360: 
-000361,000361: 00,2156           30120        DSPMODE+           CA       DSPMODE                       	# Increment display mode.
-000362,000362: 00,2157           63377                           AD       ONE                           	#
-000363,000363: 00,2160           54120                           TS       DSPMODE                       	#
-000364,000364: 00,2161           63404                           AD       MINUS8                        	# Check for wraparound
-000365,000365: 00,2162           00006                           EXTEND                                 	#
-000366,000366: 00,2163           62200                           BZMF     RETRIG                        	# No wraparound
-000367,000367: 00,2164           33376                           CA       ZERO                          	# Wraparound to 0.
-000368,000368: 00,2165           54120                           TS       DSPMODE                       	#
-000369,000369: 00,2166           12200                           TCF      RETRIG                        	#
-000370,000370: 
-000371,000371: 00,2167           30120        DSPMODE-           CA       DSPMODE                       	# Decrement display mode.
-000372,000372: 00,2170           00006                           EXTEND                                 	# but pre-check for wraparound.
-000373,000373: 00,2171           12175                           BZF      WILLWRAP                      	#
-000374,000374: 00,2172           63403                           AD       MINUS1                        	#
-000375,000375: 00,2173           54120                           TS       DSPMODE                       	#
-000376,000376: 00,2174           12200                           TCF      RETRIG                        	#
-000377,000377: 00,2175           33402        WILLWRAP           CA       EIGHT                         	#
-000378,000378: 00,2176           54120                           TS       DSPMODE                       	#
-000379,000379: 00,2177           12200                           TCF      RETRIG                        	#
-000380,000380: 
-000381,000381: 00,2200           33403        RETRIG             CA       MINUS1                        	# Trigger immediate redisplay.
-000382,000382: 00,2201           54071                           TS       LAST040                       	#
-000383,000383: 00,2202           02465                           TCR      BLANKALL                      	#
-000384,000384: 
-000385,000385: 00,2203           12204        ENDKYCK            NOOP                                   	#
-000386,000386: 
-000387,000387:                                                                                          	#----------------------------------------------------------------------
-000388,000388:                                                                                          	# We've now handled the keystrokes, so we need to update the display.
-000389,000389:                                                                                          	# However, we only do that when data is changed.  We are guaranteed
-000390,000390:                                                                                          	# by our bogus piPeripheral device that all of the input channels we're
-000391,000391:                                                                                          	# interested in just change once per second, and that the LAST channel
-000392,000392:                                                                                          	# written is 040.  So we only do something when we see that 040 has
-000393,000393:                                                                                          	# changed, and we know at that point that we have an entire second
-000394,000394:                                                                                          	# to handle our business.
-000395,000395: 00,2204           30071                           CA       LAST040                       	#
-000396,000396: 00,2205           00006                           EXTEND                                 	#
-000397,000397: 00,2206           06040                           RXOR     40                            	# XOR last reading of channel 040 with current value.
-000398,000398: 00,2207           00006                           EXTEND                                 	#
-000399,000399: 00,2210           12110                           BZF      MAINLOOP                      	# Hasn't changed, so just keep looping.
-000400,000400: 00,2211           00006                           EXTEND                                 	#
-000401,000401: 00,2212           00040                           READ     40                            	#
-000402,000402: 00,2213           54071                           TS       LAST040                       	#
-000403,000403: 
-000404,000404: 00,2214           30120                           CA       DSPMODE                       	#
-000405,000405: 00,2215           02753                           TCR      DSPPROG                       	#
-000406,000406: 
-000407,000407:                                                                                          	# Okay, input-channel 040 has changed, so all other input channels
-000408,000408:                                                                                          	# are ripe for the plucking.  Proceed with displaying.
-000409,000409:                                                                                          	# But exactly what we need to do along those lines depends on the
-000410,000410:                                                                                          	# display mode, which we handle with a jump-table.  Note that
-000411,000411:                                                                                          	# 0 <= DSPMODE <= 8.
-000412,000412: 00,2216           50120                           INDEX    DSPMODE                       	# JUMP!
-000413,000413: 00,2217           12220                           TCF      MODETABL                      	#
-000414,000414: 00,2220           12231        MODETABL           TCF      MODE0                         	#
-000415,000415: 00,2221           12317                           TCF      MODE1                         	#
-000416,000416: 00,2222           12331                           TCF      MODE2                         	#
-000417,000417: 00,2223           12343                           TCF      MODE3                         	#
-000418,000418: 00,2224           12355                           TCF      MODE4                         	#
-000419,000419: 00,2225           12364                           TCF      MODE5                         	#
-000420,000420: 00,2226           12410                           TCF      MODE6                         	#
-000421,000421: 00,2227           12417                           TCF      MODE7                         	#
-000422,000422: 00,2230           12442                           TCF      MODE8                         	#
-000423,000423: 
-000424,000424:                                                                                          	#----------------------------------------------------------------------
-000425,000425:                                                                                          	# Display-mode 0.
-000426,000426: 
-000427,000427:                                                                                          	# We now know that the time has changed.  Unpack the time
-000428,000428:                                                                                          	# data to get and save year/month/day/hour/minute/second.
-000429,000429:                                                                                          	# Division is tricky.  The dividend is double precision (2 words)
-000430,000430:                                                                                          	# and the divisor is single-precision (1 word).  Put the MSW
-000431,000431:                                                                                          	# of the dividend (in our case always 0) in A and the LSW
-000432,000432:                                                                                          	# into L.  Moreover, the divisor must be in erasable memory
-000433,000433:                                                                                          	# (and not just that, but the 10 address-bit subset of erasable
-000434,000434:                                                                                          	# memory).
-000435,000435: 00,2231           30071        MODE0              CA       LAST040                       	#
-000436,000436: 00,2232           54001                           TS       L                             	# Minutes,seconds are quotient,remainder of (channel 040)/64.
-000437,000437: 00,2233           33412                           CA       D64                           	#
-000438,000438: 00,2234           54117                           TS       DIVISOR                       	#
-000439,000439: 00,2235           33376                           CA       ZERO                          	#
-000440,000440: 00,2236           00006                           EXTEND                                 	#
-000441,000441: 00,2237           10117                           DV       DIVISOR                       	#
-000442,000442: 00,2240           54073                           TS       MINUTE                        	#
-000443,000443: 00,2241           30001                           CA       L                             	#
-000444,000444: 00,2242           54072                           TS       SECOND                        	#
-000445,000445: 00,2243           00006                           EXTEND                                 	#
-000446,000446: 00,2244           00041                           READ     41                            	# Get months,days,hours from (channel 041).
-000447,000447: 00,2245           54001                           TS       L                             	#
-000448,000448: 00,2246           33413                           CA       D1024                         	#
-000449,000449: 00,2247           54117                           TS       DIVISOR                       	#
-000450,000450: 00,2250           33376                           CA       ZERO                          	#
-000451,000451: 00,2251           00006                           EXTEND                                 	#
-000452,000452: 00,2252           10117                           DV       DIVISOR                       	# A is now months and L is days,hours
-000453,000453: 00,2253           54076                           TS       MONTH                         	#
-000454,000454: 00,2254           33411                           CA       D32                           	#
-000455,000455: 00,2255           54117                           TS       DIVISOR                       	#
-000456,000456: 00,2256           33376                           CA       ZERO                          	#
-000457,000457: 00,2257           00006                           EXTEND                                 	#
-000458,000458: 00,2260           10117                           DV       DIVISOR                       	#
-000459,000459: 00,2261           54075                           TS       DAY                           	#
-000460,000460: 00,2262           30001                           CA       L                             	#
-000461,000461: 00,2263           54074                           TS       HOUR                          	#
-000462,000462: 00,2264           00006                           EXTEND                                 	#
-000463,000463: 00,2265           00042                           READ     42                            	# Get year
-000464,000464: 00,2266           54077                           TS       YEAR                          	#
-000465,000465: 
-000466,000466:                                                                                          	# Now display date&time on DSKY.  Also, at least for
-000467,000467:                                                                                          	# testing purposes, spit it back on output
-000468,000468:                                                                                          	# channels 043-050.
-000469,000469: 00,2267           30077                           CA       YEAR                          	#
-000470,000470: 00,2270           00006                           EXTEND                                 	#
-000471,000471: 00,2271           01043                           WRITE    43                            	#
-000472,000472: 00,2272           03237                           TCR      DSPR3Y                        	# Display digits for year.
-000473,000473: 00,2273           30076                           CA       MONTH                         	#
-000474,000474: 00,2274           00006                           EXTEND                                 	#
-000475,000475: 00,2275           01044                           WRITE    44                            	#
-000476,000476: 00,2276           30075                           CA       DAY                           	#
-000477,000477: 00,2277           00006                           EXTEND                                 	#
-000478,000478: 00,2300           01045                           WRITE    45                            	#
-000479,000479: 00,2301           03301                           TCR      DSPR2MD                       	# Display digits for month, day.
-000480,000480: 00,2302           30074                           CA       HOUR                          	#
-000481,000481: 00,2303           00006                           EXTEND                                 	#
-000482,000482: 00,2304           01046                           WRITE    46                            	#
-000483,000483: 00,2305           30073                           CA       MINUTE                        	#
-000484,000484: 00,2306           00006                           EXTEND                                 	#
-000485,000485: 00,2307           01047                           WRITE    47                            	#
-000486,000486: 00,2310           03341                           TCR      DSPR1HM                       	# Display digits for hour, minute
-000487,000487: 00,2311           30072                           CA       SECOND                        	#
-000488,000488: 00,2312           00006                           EXTEND                                 	#
-000489,000489: 00,2313           01050                           WRITE    50                            	#
-000490,000490: 00,2314           02777                           TCR      DSPNOUN                       	#
-000491,000491: 
-000492,000492: 00,2315           12316        ENDTMCK            NOOP                                   	#
-000493,000493: 
-000494,000494: 00,2316           12110                           TCF      MAINLOOP                      	#
-000495,000495: 
-000496,000496:                                                                                          	#----------------------------------------------------------------------
-000497,000497:                                                                                          	# Display-mode 1.
-000498,000498: 00,2317           00006        MODE1              EXTEND                                 	#
-000499,000499: 00,2320           00051                           READ     051                           	#
-000500,000500: 00,2321           03011                           TC       DSPR1                         	#
-000501,000501: 00,2322           00006                           EXTEND                                 	#
-000502,000502: 00,2323           00052                           READ     052                           	#
-000503,000503: 00,2324           03067                           TC       DSPR2                         	#
-000504,000504: 00,2325           00006                           EXTEND                                 	#
-000505,000505: 00,2326           00053                           READ     053                           	#
-000506,000506: 00,2327           03153                           TC       DSPR3                         	#
-000507,000507: 00,2330           12110                           TCF      MAINLOOP                      	#
-000508,000508: 
-000509,000509:                                                                                          	#----------------------------------------------------------------------
-000510,000510:                                                                                          	# Display-mode 2.
-000511,000511: 00,2331           00006        MODE2              EXTEND                                 	#
-000512,000512: 00,2332           00054                           READ     054                           	#
-000513,000513: 00,2333           03011                           TC       DSPR1                         	#
-000514,000514: 00,2334           00006                           EXTEND                                 	#
-000515,000515: 00,2335           00055                           READ     055                           	#
-000516,000516: 00,2336           03067                           TC       DSPR2                         	#
-000517,000517: 00,2337           00006                           EXTEND                                 	#
-000518,000518: 00,2340           00056                           READ     056                           	#
-000519,000519: 00,2341           03153                           TC       DSPR3                         	#
-000520,000520: 00,2342           12110                           TCF      MAINLOOP                      	#
-000521,000521: 
-000522,000522:                                                                                          	#----------------------------------------------------------------------
-000523,000523:                                                                                          	# Display-mode 3.
-000524,000524: 00,2343           00006        MODE3              EXTEND                                 	#
-000525,000525: 00,2344           00057                           READ     057                           	#
-000526,000526: 00,2345           03011                           TC       DSPR1                         	#
-000527,000527: 00,2346           00006                           EXTEND                                 	#
-000528,000528: 00,2347           00060                           READ     060                           	#
-000529,000529: 00,2350           03067                           TC       DSPR2                         	#
-000530,000530: 00,2351           00006                           EXTEND                                 	#
-000531,000531: 00,2352           00061                           READ     061                           	#
-000532,000532: 00,2353           03153                           TC       DSPR3                         	#
-000533,000533: 00,2354           12110                           TCF      MAINLOOP                      	#
-000534,000534: 
-000535,000535:                                                                                          	#----------------------------------------------------------------------
-000536,000536:                                                                                          	# Display-mode 4.
-000537,000537: 00,2355           00006        MODE4              EXTEND                                 	#
-000538,000538: 00,2356           00062                           READ     062                           	#
-000539,000539: 00,2357           03011                           TC       DSPR1                         	#
-000540,000540: 00,2360           00006                           EXTEND                                 	#
-000541,000541: 00,2361           00063                           READ     063                           	#
-000542,000542: 00,2362           03067                           TC       DSPR2                         	#
-000543,000543: 00,2363           12110                           TCF      MAINLOOP                      	#
-000544,000544: 
-000545,000545:                                                                                          	#----------------------------------------------------------------------
-000546,000546:                                                                                          	# Display-mode 5.
-000547,000547: 
-000548,000548: 00,2364           00006        MODE5              EXTEND                                 	# Process latitude.
-000549,000549: 00,2365           00064                           READ     064                           	#
-000550,000550: 00,2366           54122                           TS       LLHIGH                        	#
-000551,000551: 00,2367           00006                           EXTEND                                 	#
-000552,000552: 00,2370           00071                           READ     071                           	#
-000553,000553: 00,2371           54121                           TS       LLLOW                         	#
-000554,000554: 00,2372           02575                           TCR      LL2                           	#
-000555,000555: 00,2373           03017                           TCR      DIG2R1                        	# Display in R1.
-000556,000556: 
-000557,000557: 00,2374           00006                           EXTEND                                 	# Process longitude.
-000558,000558: 00,2375           00065                           READ     065                           	#
-000559,000559: 00,2376           54122                           TS       LLHIGH                        	#
-000560,000560: 00,2377           00006                           EXTEND                                 	#
-000561,000561: 00,2400           00072                           READ     072                           	#
-000562,000562: 00,2401           54121                           TS       LLLOW                         	#
-000563,000563: 00,2402           02575                           TCR      LL2                           	#
-000564,000564: 00,2403           03075                           TCR      DIG2R2                        	# Display in R2.
-000565,000565: 
-000566,000566: 00,2404           00006                           EXTEND                                 	# Process altitude
-000567,000567: 00,2405           00066                           READ     066                           	#
-000568,000568: 00,2406           03153                           TC       DSPR3                         	#
-000569,000569: 00,2407           12110                           TCF      MAINLOOP                      	#
-000570,000570: 
-000571,000571:                                                                                          	#----------------------------------------------------------------------
-000572,000572:                                                                                          	# Display-mode 6.
-000573,000573: 00,2410           00006        MODE6              EXTEND                                 	#
-000574,000574: 00,2411           00067                           READ     067                           	#
-000575,000575: 00,2412           03011                           TC       DSPR1                         	#
-000576,000576: 00,2413           00006                           EXTEND                                 	#
-000577,000577: 00,2414           00070                           READ     070                           	#
-000578,000578: 00,2415           03067                           TC       DSPR2                         	#
-000579,000579: 00,2416           12110                           TCF      MAINLOOP                      	#
-000580,000580: 
-000581,000581:                                                                                          	#----------------------------------------------------------------------
-000582,000582:                                                                                          	# Display-mode 7.
-000583,000583: 00,2417           00006        MODE7              EXTEND                                 	# Process latitude.
-000584,000584: 00,2420           00064                           READ     064                           	#
-000585,000585: 00,2421           54122                           TS       LLHIGH                        	#
-000586,000586: 00,2422           00006                           EXTEND                                 	#
-000587,000587: 00,2423           00071                           READ     071                           	#
-000588,000588: 00,2424           54121                           TS       LLLOW                         	#
-000589,000589: 00,2425           02623                           TCR      LL5                           	#
-000590,000590: 00,2426           03017                           TCR      DIG2R1                        	# Display in R1.
-000591,000591: 00,2427           02666                           TCR      A2DIG                         	#
-000592,000592: 00,2430           03075                           TCR      DIG2R2                        	#
-000593,000593: 
-000594,000594: 00,2431           00006                           EXTEND                                 	# Process longitude.
-000595,000595: 00,2432           00065                           READ     065                           	#
-000596,000596: 00,2433           54122                           TS       LLHIGH                        	#
-000597,000597: 00,2434           00006                           EXTEND                                 	#
-000598,000598: 00,2435           00072                           READ     072                           	#
-000599,000599: 00,2436           54121                           TS       LLLOW                         	#
-000600,000600: 00,2437           02575                           TCR      LL2                           	#
-000601,000601: 00,2440           03161                           TCR      DIG2R3                        	# Display in R2.
-000602,000602: 
-000603,000603: 00,2441           12110                           TCF      MAINLOOP                      	#
-000604,000604: 
-000605,000605:                                                                                          	#----------------------------------------------------------------------
-000606,000606:                                                                                          	# Display-mode 8.
-000607,000607: 
-000608,000608: 00,2442           00006        MODE8              EXTEND                                 	# Process latitude.
-000609,000609: 00,2443           00064                           READ     064                           	#
-000610,000610: 00,2444           54122                           TS       LLHIGH                        	#
-000611,000611: 00,2445           00006                           EXTEND                                 	#
-000612,000612: 00,2446           00071                           READ     071                           	#
-000613,000613: 00,2447           54121                           TS       LLLOW                         	#
-000614,000614: 00,2450           02575                           TCR      LL2                           	#
-000615,000615: 00,2451           03017                           TCR      DIG2R1                        	# Display in R1.
-000616,000616: 
-000617,000617: 00,2452           00006                           EXTEND                                 	# Process longitude.
-000618,000618: 00,2453           00065                           READ     065                           	#
-000619,000619: 00,2454           54122                           TS       LLHIGH                        	#
-000620,000620: 00,2455           00006                           EXTEND                                 	#
-000621,000621: 00,2456           00072                           READ     072                           	#
-000622,000622: 00,2457           54121                           TS       LLLOW                         	#
-000623,000623: 00,2460           02623                           TCR      LL5                           	#
-000624,000624: 00,2461           03075                           TCR      DIG2R2                        	# Display in R2.
-000625,000625: 00,2462           02666                           TCR      A2DIG                         	#
-000626,000626: 00,2463           03161                           TCR      DIG2R3                        	#
-000627,000627: 
-000628,000628: 00,2464           12110                           TCF      MAINLOOP                      	#
-000629,000629: 
-000630,000630: 
-000631,000631: 
-000632,000632:                                                                                          	#######################################################################################################################################
-000633,000633:                                                                                          	# This ends the main loop, which continues forever, so we can put other functions
-000634,000634:                                                                                          	# below this point.
-000635,000635: 
-000636,000636:                                                                                          	# Blank all of the numerical displays.
-000637,000637: 00,2465           33414        BLANKALL           CA       OPCODEP                       	#
-000638,000638: 00,2466           00006                           EXTEND                                 	#
-000639,000639: 00,2467           01010                           WRITE    10                            	#
-000640,000640: 00,2470           33415                           CA       OPCODEV                       	#
-000641,000641: 00,2471           00006                           EXTEND                                 	#
-000642,000642: 00,2472           01010                           WRITE    10                            	#
-000643,000643: 00,2473           33416                           CA       OPCODEN                       	#
-000644,000644: 00,2474           00006                           EXTEND                                 	#
-000645,000645: 00,2475           01010                           WRITE    10                            	#
-000646,000646: 00,2476           33417                           CA       OPCODR11                      	#
-000647,000647: 00,2477           00006                           EXTEND                                 	#
-000648,000648: 00,2500           01010                           WRITE    10                            	#
-000649,000649: 00,2501           33420                           CA       OPCDR123                      	#
-000650,000650: 00,2502           00006                           EXTEND                                 	#
-000651,000651: 00,2503           01010                           WRITE    10                            	#
-000652,000652: 00,2504           33421                           CA       OPCDR145                      	#
-000653,000653: 00,2505           00006                           EXTEND                                 	#
-000654,000654: 00,2506           01010                           WRITE    10                            	#
-000655,000655: 00,2507           33422                           CA       OPCDR212                      	#
-000656,000656: 00,2510           00006                           EXTEND                                 	#
-000657,000657: 00,2511           01010                           WRITE    10                            	#
-000658,000658: 00,2512           33423                           CA       OPCDR234                      	#
-000659,000659: 00,2513           00006                           EXTEND                                 	#
-000660,000660: 00,2514           01010                           WRITE    10                            	#
-000661,000661: 00,2515           33424                           CA       OPR25R31                      	#
-000662,000662: 00,2516           00006                           EXTEND                                 	#
-000663,000663: 00,2517           01010                           WRITE    10                            	#
-000664,000664: 00,2520           33425                           CA       OPCDR323                      	#
-000665,000665: 00,2521           00006                           EXTEND                                 	#
-000666,000666: 00,2522           01010                           WRITE    10                            	#
-000667,000667: 00,2523           33426                           CA       OPCDR345                      	#
-000668,000668: 00,2524           00006                           EXTEND                                 	#
-000669,000669: 00,2525           01010                           WRITE    10                            	#
-000670,000670: 00,2526           33376                           CA       ZERO                          	#
-000671,000671: 00,2527           54116                           TS       DIGIT31                       	#
-000672,000672: 00,2530           54115                           TS       DIGIT25                       	#
-000673,000673: 00,2531           00002                           RETURN                                 	#
-000674,000674: 
-000675,000675:                                                                                          	# Convert an integer in the accumulator to SIGN/DIGIT1/.../DIGIT5.  At the end, all 5 DIGITx
-000676,000676:                                                                                          	# variables will have values from 0-9, and SIGN will be 0 for + or 1 for -.  Note: calls no
-000677,000677:                                                                                          	# other routines.
-000678,000678: 00,2532           54001        CONV10             TS       L                             	# Save the argument
-000679,000679: 00,2533           00006                           EXTEND                                 	#
-000680,000680: 00,2534           12537                           BZF      CONV10Z                       	# Argument is 0.
-000681,000681: 00,2535           00006                           EXTEND                                 	#
-000682,000682: 00,2536           62703                           BZMF     CONV10M                       	# Argument is negative, we'll need to invert
-000683,000683: 00,2537           33376        CONV10Z            CA       ZERO                          	# Record the sign as positive (0 -> SIGN).
-000684,000684: 00,2540           54100                           TS       SIGN                          	#
-000685,000685: 00,2541           33405        CONV10P            CA       TEN                           	#
-000686,000686: 00,2542           54117                           TS       DIVISOR                       	#
-000687,000687: 00,2543           33376                           CA       ZERO                          	# Note that L still contains the original argument.
-000688,000688: 00,2544           00006                           EXTEND                                 	#
-000689,000689: 00,2545           10117                           DV       DIVISOR                       	#
-000690,000690: 00,2546           22000                           LXCH     A                             	# Save remainder as digit 5 and put quotient into L.
-000691,000691: 00,2547           54105                           TS       DIGIT5                        	#
-000692,000692: 00,2550           33376                           CA       ZERO                          	#
-000693,000693: 00,2551           00006                           EXTEND                                 	#
-000694,000694: 00,2552           10117                           DV       DIVISOR                       	#
-000695,000695: 00,2553           22000                           LXCH     A                             	#
-000696,000696: 00,2554           54104                           TS       DIGIT4                        	#
-000697,000697: 00,2555           33376                           CA       ZERO                          	#
-000698,000698: 00,2556           00006                           EXTEND                                 	#
-000699,000699: 00,2557           10117                           DV       DIVISOR                       	#
-000700,000700: 00,2560           22000                           LXCH     A                             	#
-000701,000701: 00,2561           54103                           TS       DIGIT3                        	#
-000702,000702: 00,2562           33376                           CA       ZERO                          	#
-000703,000703: 00,2563           00006                           EXTEND                                 	#
-000704,000704: 00,2564           10117                           DV       DIVISOR                       	#
-000705,000705: 00,2565           22000                           LXCH     A                             	#
-000706,000706: 00,2566           54102                           TS       DIGIT2                        	#
-000707,000707: 00,2567           33376                           CA       ZERO                          	#
-000708,000708: 00,2570           00006                           EXTEND                                 	#
-000709,000709: 00,2571           10117                           DV       DIVISOR                       	#
-000710,000710: 00,2572           22000                           LXCH     A                             	#
-000711,000711: 00,2573           54101                           TS       DIGIT1                        	#
-000712,000712: 00,2574           00002                           RETURN                                 	#
-000713,000713: 
-000714,000714:                                                                                          	# Lat an lon are each input on two input channels, a more-significant one containing the integer part of
-000715,000715:                                                                                          	# the value times 10, and a less-significant on containing the fractional part of the value times 10, times
-000716,000716:                                                                                          	# 10000.  The LL2 function assumes that those values have been stored in variables called LLHIGH and LLLOW,
-000717,000717:                                                                                          	# respectively, and create SIGN, DIGIT1, ..., DIGIT5 containing the value in the form +/- XXX.XX.
-000718,000718: 00,2575           00006        LL2                EXTEND                                 	#
-000719,000719: 00,2576           22123                           QXCH     LLRET                         	#
-000720,000720: 00,2577           30121                           CA       LLLOW                         	# Process LS word
-000721,000721: 00,2600           02532                           TCR      CONV10                        	# Convert to (SIGN, DIGIT1, ..., DIGIT5)
-000722,000722: 00,2601           02726                           TCR      PATT5DIG                      	#
-000723,000723: 00,2602           02651                           TCR      DIG2A                         	# Move SIGN/DIGITx to SIGNA/DIGITxA
-000724,000724: 00,2603           30122                           CA       LLHIGH                        	# Process MS word
-000725,000725: 00,2604           02532                           TCR      CONV10                        	# Convert to SIGN/DIGITx
-000726,000726: 00,2605           02726                           TCR      PATT5DIG                      	#
-000727,000727: 00,2606           30102                           CA       DIGIT2                        	# Rearrange the DIGITx values somewhat. (Multiply by 10.)
-000728,000728: 00,2607           54101                           TS       DIGIT1                        	#
-000729,000729: 00,2610           30103                           CA       DIGIT3                        	#
-000730,000730: 00,2611           54102                           TS       DIGIT2                        	#
-000731,000731: 00,2612           30104                           CA       DIGIT4                        	#
-000732,000732: 00,2613           54103                           TS       DIGIT3                        	#
-000733,000733: 00,2614           30105                           CA       DIGIT5                        	#
-000734,000734: 00,2615           54104                           TS       DIGIT4                        	#
-000735,000735: 00,2616           30110                           CA       DIGIT2A                       	#
-000736,000736: 00,2617           54105                           TS       DIGIT5                        	#
-000737,000737: 00,2620           00006                           EXTEND                                 	#
-000738,000738: 00,2621           22123                           QXCH     LLRET                         	#
-000739,000739: 00,2622           00002                           RETURN                                 	#
-000740,000740:                                                                                          	# Similarly, the LL5 function puts the integral lat or lon in SIGN,DIGITx and 5 decimal places in SIGNA,DIGITxA.
-000741,000741: 00,2623           00006        LL5                EXTEND                                 	#
-000742,000742: 00,2624           22123                           QXCH     LLRET                         	#
-000743,000743: 00,2625           30121                           CA       LLLOW                         	# Process LS word
-000744,000744: 00,2626           02532                           TCR      CONV10                        	# Convert to (SIGN, DIGIT1, ..., DIGIT5)
-000745,000745: 00,2627           02726                           TCR      PATT5DIG                      	#
-000746,000746: 00,2630           02651                           TCR      DIG2A                         	# Move SIGN/DIGITx to SIGNA/DIGITxA
-000747,000747: 00,2631           30122                           CA       LLHIGH                        	# Process MS word
-000748,000748: 00,2632           02532                           TCR      CONV10                        	# Convert to SIGN/DIGITx
-000749,000749: 00,2633           02726                           TCR      PATT5DIG                      	#
-000750,000750: 00,2634           30105                           CA       DIGIT5                        	# Rearrange the DIGITx values somewhat. (Divide by 10.)
-000751,000751: 00,2635           54107                           TS       DIGIT1A                       	#
-000752,000752: 00,2636           30104                           CA       DIGIT4                        	#
-000753,000753: 00,2637           54105                           TS       DIGIT5                        	#
-000754,000754: 00,2640           30103                           CA       DIGIT3                        	#
-000755,000755: 00,2641           54104                           TS       DIGIT4                        	#
-000756,000756: 00,2642           30102                           CA       DIGIT2                        	#
-000757,000757: 00,2643           54103                           TS       DIGIT3                        	#
-000758,000758: 00,2644           30101                           CA       DIGIT1                        	#
-000759,000759: 00,2645           54102                           TS       DIGIT2                        	#
-000760,000760: 00,2646           00006                           EXTEND                                 	#
-000761,000761: 00,2647           22123                           QXCH     LLRET                         	#
-000762,000762: 00,2650           00002                           RETURN                                 	#
-000763,000763: 
-000764,000764:                                                                                          	# Transfer set of SIGN/DIGITx to SIGNA/DIGITxA
-000765,000765: 00,2651           30100        DIG2A              CA       SIGN                          	#
-000766,000766: 00,2652           54106                           TS       SIGNA                         	#
-000767,000767: 00,2653           30101                           CA       DIGIT1                        	#
-000768,000768: 00,2654           54107                           TS       DIGIT1A                       	#
-000769,000769: 00,2655           30102                           CA       DIGIT2                        	#
-000770,000770: 00,2656           54110                           TS       DIGIT2A                       	#
-000771,000771: 00,2657           30103                           CA       DIGIT3                        	#
-000772,000772: 00,2660           54111                           TS       DIGIT3A                       	#
-000773,000773: 00,2661           30104                           CA       DIGIT4                        	#
-000774,000774: 00,2662           54112                           TS       DIGIT4A                       	#
-000775,000775: 00,2663           30105                           CA       DIGIT5                        	#
-000776,000776: 00,2664           54113                           TS       DIGIT5A                       	#
-000777,000777: 00,2665           00002                           RETURN                                 	#
-000778,000778:                                                                                          	# ... and vice-versa.
-000779,000779: 00,2666           30106        A2DIG              CA       SIGNA                         	#
-000780,000780: 00,2667           54100                           TS       SIGN                          	#
-000781,000781: 00,2670           30107                           CA       DIGIT1A                       	#
-000782,000782: 00,2671           54101                           TS       DIGIT1                        	#
-000783,000783: 00,2672           30110                           CA       DIGIT2A                       	#
-000784,000784: 00,2673           54102                           TS       DIGIT2                        	#
-000785,000785: 00,2674           30111                           CA       DIGIT3A                       	#
-000786,000786: 00,2675           54103                           TS       DIGIT3                        	#
-000787,000787: 00,2676           30112                           CA       DIGIT4A                       	#
-000788,000788: 00,2677           54104                           TS       DIGIT4                        	#
-000789,000789: 00,2700           30113                           CA       DIGIT5A                       	#
-000790,000790: 00,2701           54105                           TS       DIGIT5                        	#
-000791,000791: 00,2702           00002                           RETURN                                 	#
-000792,000792: 
-000793,000793:                                                                                          	# The argument was negative.  Must invert.
-000794,000794: 00,2703           33377        CONV10M            CA       ONE                           	# Record the sign as negative (1 -> SIGN).
-000795,000795: 00,2704           54100                           TS       SIGN                          	#
-000796,000796: 00,2705           30001                           CA       L                             	# Invert the argument to make it positive.
-000797,000797: 00,2706           40000                           COM                                    	#
-000798,000798: 00,2707           54001                           TS       L                             	#
-000799,000799: 00,2710           12541                           TCF      CONV10P                       	# Go back to the processing for positive numbers.
-000800,000800: 
-000801,000801:                                                                                          	# Packs two digits previously formed by CONV10 into a suitable
-000802,000802:                                                                                          	# form for output.  The channel 10 opcode has to be added in afterward.
-000803,000803:                                                                                          	# Suitable for PROG, VERB, and NOUN areas.  Result returned in A.
-000804,000804:                                                                                          	# Note: calls no other routines.
-000805,000805: 00,2711           30105        PACK2DIG           CA       DIGIT5                        	#
-000806,000806: 00,2712           50000                           INDEX    A                             	#
-000807,000807: 00,2713           33430                           CA       DIGPATTS                      	#
-000808,000808: 00,2714           54105                           TS       DIGIT5                        	#
-000809,000809: 00,2715           30104                           CA       DIGIT4                        	#
-000810,000810: 00,2716           50000                           INDEX    A                             	#
-000811,000811: 00,2717           33430                           CA       DIGPATTS                      	#
-000812,000812: 00,2720           54104                           TS       DIGIT4                        	#
-000813,000813: 00,2721           00006                           EXTEND                                 	#
-000814,000814: 00,2722           73411                           MP       D32                           	# Shift by 5 places.
-000815,000815: 00,2723           30105                           CA       DIGIT5                        	#
-000816,000816: 00,2724           60001                           AD       L                             	#
-000817,000817: 00,2725           00002                           RETURN                                 	#
-000818,000818: 
-000819,000819:                                                                                          	# Convert DIGIT1 ... DIGIT5 to their DSKY patterns.  Note: calls no other
-000820,000820:                                                                                          	# routines.
-000821,000821: 00,2726           30101        PATT5DIG           CA       DIGIT1                        	#
-000822,000822: 00,2727           50000                           INDEX    A                             	#
-000823,000823: 00,2730           33430                           CA       DIGPATTS                      	#
-000824,000824: 00,2731           54101                           TS       DIGIT1                        	#
-000825,000825: 00,2732           30102                           CA       DIGIT2                        	#
-000826,000826: 00,2733           50000                           INDEX    A                             	#
-000827,000827: 00,2734           33430                           CA       DIGPATTS                      	#
-000828,000828: 00,2735           54102                           TS       DIGIT2                        	#
-000829,000829: 00,2736           30103                           CA       DIGIT3                        	#
-000830,000830: 00,2737           50000                           INDEX    A                             	#
-000831,000831: 00,2740           33430                           CA       DIGPATTS                      	#
-000832,000832: 00,2741           54103                           TS       DIGIT3                        	#
-000833,000833: 00,2742           30104                           CA       DIGIT4                        	#
-000834,000834: 00,2743           50000                           INDEX    A                             	#
-000835,000835: 00,2744           33430                           CA       DIGPATTS                      	#
-000836,000836: 00,2745           54104                           TS       DIGIT4                        	#
-000837,000837: 00,2746           30105                           CA       DIGIT5                        	#
-000838,000838: 00,2747           50000                           INDEX    A                             	#
-000839,000839: 00,2750           33430                           CA       DIGPATTS                      	#
-000840,000840: 00,2751           54105                           TS       DIGIT5                        	#
-000841,000841: 00,2752           00002                           RETURN                                 	#
-000842,000842: 
-000843,000843:                                                                                          	# Display the number in the accumulator as decimal in DSKY PROG
-000844,000844: 00,2753           00006        DSPPROG            EXTEND                                 	#
-000845,000845: 00,2754           22114                           QXCH     DSPR                          	#
-000846,000846: 00,2755           02532                           TCR      CONV10                        	#
-000847,000847: 00,2756           02711                           TCR      PACK2DIG                      	#
-000848,000848: 00,2757           63414                           AD       OPCODEP                       	#
-000849,000849: 00,2760           00006                           EXTEND                                 	#
-000850,000850: 00,2761           01010                           WRITE    10                            	#
-000851,000851: 00,2762           00006                           EXTEND                                 	#
-000852,000852: 00,2763           22114                           QXCH     DSPR                          	#
-000853,000853: 00,2764           00002                           RETURN                                 	#
-000854,000854: 
-000855,000855:                                                                                          	# Display the number in the accumulator as decimal in DSKY VERB
-000856,000856: 00,2765           00006        DSPVERB            EXTEND                                 	#
-000857,000857: 00,2766           22114                           QXCH     DSPR                          	#
-000858,000858: 00,2767           02532                           TCR      CONV10                        	#
-000859,000859: 00,2770           02711                           TCR      PACK2DIG                      	#
-000860,000860: 00,2771           63415                           AD       OPCODEV                       	#
-000861,000861: 00,2772           00006                           EXTEND                                 	#
-000862,000862: 00,2773           01010                           WRITE    10                            	#
-000863,000863: 00,2774           00006                           EXTEND                                 	#
-000864,000864: 00,2775           22114                           QXCH     DSPR                          	#
-000865,000865: 00,2776           00002                           RETURN                                 	#
-000866,000866: 
-000867,000867:                                                                                          	# Display the number in the accumulator as decimal in DSKY NOUN
-000868,000868: 00,2777           00006        DSPNOUN            EXTEND                                 	#
-000869,000869: 00,3000           22114                           QXCH     DSPR                          	#
-000870,000870: 00,3001           02532                           TCR      CONV10                        	#
-000871,000871: 00,3002           02711                           TCR      PACK2DIG                      	#
-000872,000872: 00,3003           63416                           AD       OPCODEN                       	#
-000873,000873: 00,3004           00006                           EXTEND                                 	#
-000874,000874: 00,3005           01010                           WRITE    10                            	#
-000875,000875: 00,3006           00006                           EXTEND                                 	#
-000876,000876: 00,3007           22114                           QXCH     DSPR                          	#
-000877,000877: 00,3010           00002                           RETURN                                 	#
-000878,000878: 
-000879,000879:                                                                                          	# Display the number in the accumulator as decimal in DSKY R1.
-000880,000880: 00,3011           00006        DSPR1              EXTEND                                 	#
-000881,000881: 00,3012           22114                           QXCH     DSPR                          	#
-000882,000882: 00,3013           02532                           TCR      CONV10                        	#
-000883,000883: 00,3014           02726                           TCR      PATT5DIG                      	#
-000884,000884: 00,3015           00006                           EXTEND                                 	#
-000885,000885: 00,3016           22114                           QXCH     DSPR                          	#
-000886,000886:                                                                                          	# Fall through to DIG2R1.
-000887,000887: 
-000888,000888:                                                                                          	# Display the number in SIGN/DIGITx in DSKY R1
-000889,000889: 00,3017           00006        DIG2R1             EXTEND                                 	#
-000890,000890: 00,3020           22114                           QXCH     DSPR                          	#
-000891,000891: 00,3021           30101                           CA       DIGIT1                        	# First write DIGIT1
-000892,000892: 00,3022           63417                           AD       OPCODR11                      	#
-000893,000893: 00,3023           00006                           EXTEND                                 	#
-000894,000894: 00,3024           01010                           WRITE    10                            	#
-000895,000895: 00,3025           30102                           CA       DIGIT2                        	# Next, DIGIT2 and DIGIT3
-000896,000896: 00,3026           00006                           EXTEND                                 	#
-000897,000897: 00,3027           73411                           MP       D32                           	#
-000898,000898: 00,3030           30103                           CA       DIGIT3                        	#
-000899,000899: 00,3031           26001                           ADS      L                             	#
-000900,000900: 00,3032           33420                           CA       OPCDR123                      	#
-000901,000901: 00,3033           26001                           ADS      L                             	#
-000902,000902: 00,3034           30100                           CA       SIGN                          	#
-000903,000903: 00,3035           00006                           EXTEND                                 	#
-000904,000904: 00,3036           13040                           BZF      DSPR1POS                      	#
-000905,000905: 00,3037           13042                           TCF      DSPR1NPS                      	#
-000906,000906: 00,3040           33427        DSPR1POS           CA       SIGNBIT                       	#
-000907,000907: 00,3041           26001                           ADS      L                             	#
-000908,000908: 00,3042           30001        DSPR1NPS           CA       L                             	#
-000909,000909: 00,3043           00006                           EXTEND                                 	#
-000910,000910: 00,3044           01010                           WRITE    10                            	#
-000911,000911: 00,3045           30104                           CA       DIGIT4                        	# And finally, DIGIT4 and DIGIT5
-000912,000912: 00,3046           00006                           EXTEND                                 	#
-000913,000913: 00,3047           73411                           MP       D32                           	#
-000914,000914: 00,3050           30105                           CA       DIGIT5                        	#
-000915,000915: 00,3051           26001                           ADS      L                             	#
-000916,000916: 00,3052           33421                           CA       OPCDR145                      	#
-000917,000917: 00,3053           26001                           ADS      L                             	#
-000918,000918: 00,3054           30100                           CA       SIGN                          	#
-000919,000919: 00,3055           00006                           EXTEND                                 	#
-000920,000920: 00,3056           13061                           BZF      DSPR1NNG                      	#
-000921,000921: 00,3057           33427                           CA       SIGNBIT                       	#
-000922,000922: 00,3060           26001                           ADS      L                             	#
-000923,000923: 00,3061           30001        DSPR1NNG           CA       L                             	#
-000924,000924: 00,3062           00006                           EXTEND                                 	#
-000925,000925: 00,3063           01010                           WRITE    10                            	#
-000926,000926: 00,3064           00006                           EXTEND                                 	#
-000927,000927: 00,3065           22114                           QXCH     DSPR                          	#
-000928,000928: 00,3066           00002                           RETURN                                 	#
-000929,000929: 
-000930,000930:                                                                                          	# Display the number in the accumulator as decimal in DSKY R2
-000931,000931: 00,3067           00006        DSPR2              EXTEND                                 	#
-000932,000932: 00,3070           22114                           QXCH     DSPR                          	#
-000933,000933: 00,3071           02532                           TCR      CONV10                        	#
-000934,000934: 00,3072           02726                           TCR      PATT5DIG                      	#
-000935,000935: 00,3073           00006                           EXTEND                                 	#
-000936,000936: 00,3074           22114                           QXCH     DSPR                          	#
-000937,000937:                                                                                          	# Fall through to DIG2R2.
-000938,000938: 
-000939,000939:                                                                                          	# Display the number in SIGN/DIGITx in DSKY R2
-000940,000940: 00,3075           00006        DIG2R2             EXTEND                                 	#
-000941,000941: 00,3076           22114                           QXCH     DSPR                          	#
-000942,000942: 00,3077           30105                           CA       DIGIT5                        	# Save DIGIT5 for DSPR3 routine.
-000943,000943: 00,3100           54115                           TS       DIGIT25                       	#
-000944,000944: 00,3101           30101                           CA       DIGIT1                        	# First, DIGIT1 and DIGIT2
-000945,000945: 00,3102           00006                           EXTEND                                 	#
-000946,000946: 00,3103           73411                           MP       D32                           	#
-000947,000947: 00,3104           30102                           CA       DIGIT2                        	#
-000948,000948: 00,3105           26001                           ADS      L                             	#
-000949,000949: 00,3106           33422                           CA       OPCDR212                      	#
-000950,000950: 00,3107           26001                           ADS      L                             	#
-000951,000951: 00,3110           30100                           CA       SIGN                          	#
-000952,000952: 00,3111           00006                           EXTEND                                 	#
-000953,000953: 00,3112           13114                           BZF      DSPR2POS                      	#
-000954,000954: 00,3113           13116                           TCF      DSPR2NPS                      	#
-000955,000955: 00,3114           33427        DSPR2POS           CA       SIGNBIT                       	#
-000956,000956: 00,3115           26001                           ADS      L                             	#
-000957,000957: 00,3116           30001        DSPR2NPS           CA       L                             	#
-000958,000958: 00,3117           00006                           EXTEND                                 	#
-000959,000959: 00,3120           01010                           WRITE    10                            	#
-000960,000960: 00,3121           30103                           CA       DIGIT3                        	# Next, DIGIT3 and DIGIT4
-000961,000961: 00,3122           00006                           EXTEND                                 	#
-000962,000962: 00,3123           73411                           MP       D32                           	#
-000963,000963: 00,3124           30104                           CA       DIGIT4                        	#
-000964,000964: 00,3125           26001                           ADS      L                             	#
-000965,000965: 00,3126           33423                           CA       OPCDR234                      	#
-000966,000966: 00,3127           26001                           ADS      L                             	#
-000967,000967: 00,3130           30100                           CA       SIGN                          	#
-000968,000968: 00,3131           00006                           EXTEND                                 	#
-000969,000969: 00,3132           13135                           BZF      DSPR2NNG                      	#
-000970,000970: 00,3133           33427                           CA       SIGNBIT                       	#
-000971,000971: 00,3134           26001                           ADS      L                             	#
-000972,000972: 00,3135           30001        DSPR2NNG           CA       L                             	#
-000973,000973: 00,3136           00006                           EXTEND                                 	#
-000974,000974: 00,3137           01010                           WRITE    10                            	#
-000975,000975: 00,3140           30105                           CA       DIGIT5                        	# Finally, DIGIT5 (and R3 DIGIT1)
-000976,000976: 00,3141           00006                           EXTEND                                 	#
-000977,000977: 00,3142           73411                           MP       D32                           	#
-000978,000978: 00,3143           30116                           CA       DIGIT31                       	#
-000979,000979: 00,3144           60001                           AD       L                             	#
-000980,000980: 00,3145           63424                           AD       OPR25R31                      	#
-000981,000981: 00,3146           00006                           EXTEND                                 	#
-000982,000982: 00,3147           01010                           WRITE    10                            	#
-000983,000983: 00,3150           00006                           EXTEND                                 	#
-000984,000984: 00,3151           22114                           QXCH     DSPR                          	#
-000985,000985: 00,3152           00002                           RETURN                                 	#
-000986,000986: 
-000987,000987:                                                                                          	# Display the number in the accumulator as decimal in DSKY R3
-000988,000988: 00,3153           00006        DSPR3              EXTEND                                 	#
-000989,000989: 00,3154           22114                           QXCH     DSPR                          	#
-000990,000990: 00,3155           02532                           TCR      CONV10                        	#
-000991,000991: 00,3156           02726                           TCR      PATT5DIG                      	#
-000992,000992: 00,3157           00006                           EXTEND                                 	#
-000993,000993: 00,3160           22114                           QXCH     DSPR                          	#
-000994,000994:                                                                                          	# Fall through to DIG2R3.
-000995,000995: 
-000996,000996:                                                                                          	# Display the number in SIGN/DIGITx in DSKY R3
-000997,000997: 00,3161           00006        DIG2R3             EXTEND                                 	#
-000998,000998: 00,3162           22114                           QXCH     DSPR                          	#
-000999,000999: 00,3163           30101                           CA       DIGIT1                        	# Save DIGIT1 for DSPR2 routine.
-001000,001000: 00,3164           54116                           TS       DIGIT31                       	#
-001001,001001: 00,3165           30115                           CA       DIGIT25                       	# First, (R2 DIGIT5 and) DIGIT1
-001002,001002: 00,3166           00006                           EXTEND                                 	#
-001003,001003: 00,3167           73411                           MP       D32                           	#
-001004,001004: 00,3170           30101                           CA       DIGIT1                        	#
-001005,001005: 00,3171           60001                           AD       L                             	#
-001006,001006: 00,3172           63424                           AD       OPR25R31                      	#
-001007,001007: 00,3173           00006                           EXTEND                                 	#
-001008,001008: 00,3174           01010                           WRITE    10                            	#
-001009,001009: 00,3175           30102                           CA       DIGIT2                        	# Next, DIGIT2 and DIGIT3
-001010,001010: 00,3176           00006                           EXTEND                                 	#
-001011,001011: 00,3177           73411                           MP       D32                           	#
-001012,001012: 00,3200           30103                           CA       DIGIT3                        	#
-001013,001013: 00,3201           26001                           ADS      L                             	#
-001014,001014: 00,3202           33425                           CA       OPCDR323                      	#
-001015,001015: 00,3203           26001                           ADS      L                             	#
-001016,001016: 00,3204           30100                           CA       SIGN                          	#
-001017,001017: 00,3205           00006                           EXTEND                                 	#
-001018,001018: 00,3206           13210                           BZF      DSPR3POS                      	#
-001019,001019: 00,3207           13212                           TCF      DSPR3NPS                      	#
-001020,001020: 00,3210           33427        DSPR3POS           CA       SIGNBIT                       	#
-001021,001021: 00,3211           26001                           ADS      L                             	#
-001022,001022: 00,3212           30001        DSPR3NPS           CA       L                             	#
-001023,001023: 00,3213           00006                           EXTEND                                 	#
-001024,001024: 00,3214           01010                           WRITE    10                            	#
-001025,001025: 00,3215           30104                           CA       DIGIT4                        	# And finally, DIGIT4 and DIGIT5
-001026,001026: 00,3216           00006                           EXTEND                                 	#
-001027,001027: 00,3217           73411                           MP       D32                           	#
-001028,001028: 00,3220           30105                           CA       DIGIT5                        	#
-001029,001029: 00,3221           26001                           ADS      L                             	#
-001030,001030: 00,3222           33426                           CA       OPCDR345                      	#
-001031,001031: 00,3223           26001                           ADS      L                             	#
-001032,001032: 00,3224           30100                           CA       SIGN                          	#
-001033,001033: 00,3225           00006                           EXTEND                                 	#
-001034,001034: 00,3226           13231                           BZF      DSPR3NNG                      	#
-001035,001035: 00,3227           33427                           CA       SIGNBIT                       	#
-001036,001036: 00,3230           26001                           ADS      L                             	#
-001037,001037: 00,3231           30001        DSPR3NNG           CA       L                             	#
-001038,001038: 00,3232           00006                           EXTEND                                 	#
-001039,001039: 00,3233           01010                           WRITE    10                            	#
-001040,001040: 00,3234           00006                           EXTEND                                 	#
-001041,001041: 00,3235           22114                           QXCH     DSPR                          	#
-001042,001042: 00,3236           00002                           RETURN                                 	#
-001043,001043: 
-001044,001044:                                                                                          	# Display the number in YEAR as a year in DSKY R3.  (Similar to
-001045,001045:                                                                                          	# DSPR3, except no sign bit, and first digit is blank.)
-001046,001046: 00,3237           00006        DSPR3Y             EXTEND                                 	#
-001047,001047: 00,3240           22114                           QXCH     DSPR                          	#
-001048,001048: 00,3241           30077                           CA       YEAR                          	#
-001049,001049: 00,3242           02532                           TCR      CONV10                        	#
-001050,001050: 00,3243           02726                           TCR      PATT5DIG                      	#
-001051,001051: 00,3244           33376                           CA       ZERO                          	# Save first digit (a blank) for DSPR2 routine.
-001052,001052: 00,3245           54116                           TS       DIGIT31                       	#
-001053,001053: 
-001054,001054: 00,3246           30115                           CA       DIGIT25                       	# First, (R2 DIGIT5 and) DIGIT1 (blank)
-001055,001055: 00,3247           00006                           EXTEND                                 	#
-001056,001056: 00,3250           73411                           MP       D32                           	#
-001057,001057: 00,3251           33376                           CA       ZERO                          	#
-001058,001058: 00,3252           60001                           AD       L                             	#
-001059,001059: 00,3253           63424                           AD       OPR25R31                      	#
-001060,001060: 00,3254           00006                           EXTEND                                 	#
-001061,001061: 00,3255           01010                           WRITE    10                            	#
-001062,001062: 00,3256           30102                           CA       DIGIT2                        	# Next, DIGIT2 and DIGIT3
-001063,001063: 00,3257           00006                           EXTEND                                 	#
-001064,001064: 00,3260           73411                           MP       D32                           	#
-001065,001065: 00,3261           30103                           CA       DIGIT3                        	#
-001066,001066: 00,3262           60001                           AD       L                             	#
-001067,001067: 00,3263           63425                           AD       OPCDR323                      	#
-001068,001068: 00,3264           00006                           EXTEND                                 	#
-001069,001069: 00,3265           01010                           WRITE    10                            	#
-001070,001070: 
-001071,001071: 00,3266           30104                           CA       DIGIT4                        	# And finally, DIGIT4 and DIGIT5
-001072,001072: 00,3267           00006                           EXTEND                                 	#
-001073,001073: 00,3270           73411                           MP       D32                           	#
-001074,001074: 00,3271           30105                           CA       DIGIT5                        	#
-001075,001075: 00,3272           60001                           AD       L                             	#
-001076,001076: 00,3273           63426                           AD       OPCDR345                      	#
-001077,001077: 00,3274           00006                           EXTEND                                 	#
-001078,001078: 00,3275           01010                           WRITE    10                            	#
-001079,001079: 
-001080,001080: 00,3276           00006                           EXTEND                                 	#
-001081,001081: 00,3277           22114                           QXCH     DSPR                          	#
-001082,001082: 00,3300           00002                           RETURN                                 	#
-001083,001083: 
-001084,001084:                                                                                          	# Display the numbers in MONTH and DAY as two 2-digit fields in DSKY R2.
-001085,001085: 00,3301           00006        DSPR2MD            EXTEND                                 	#
-001086,001086: 00,3302           22114                           QXCH     DSPR                          	#
-001087,001087: 
-001088,001088: 00,3303           30076                           CA       MONTH                         	#
-001089,001089: 00,3304           02532                           TCR      CONV10                        	#
-001090,001090: 00,3305           02711                           TCR      PACK2DIG                      	#
-001091,001091: 00,3306           63422                           AD       OPCDR212                      	#
-001092,001092: 00,3307           00006                           EXTEND                                 	#
-001093,001093: 00,3310           01010                           WRITE    10                            	#
-001094,001094: 
-001095,001095: 00,3311           30075                           CA       DAY                           	#
-001096,001096: 00,3312           02532                           TCR      CONV10                        	#
-001097,001097: 00,3313           30105                           CA       DIGIT5                        	#
-001098,001098: 00,3314           50000                           INDEX    A                             	#
-001099,001099: 00,3315           33430                           CA       DIGPATTS                      	#
-001100,001100: 00,3316           54105                           TS       DIGIT5                        	#
-001101,001101: 00,3317           30104                           CA       DIGIT4                        	#
-001102,001102: 00,3320           50000                           INDEX    A                             	#
-001103,001103: 00,3321           33430                           CA       DIGPATTS                      	#
-001104,001104: 00,3322           63423                           AD       OPCDR234                      	#
-001105,001105: 00,3323           00006                           EXTEND                                 	#
-001106,001106: 00,3324           01010                           WRITE    10                            	#
-001107,001107: 
-001108,001108: 00,3325           30105                           CA       DIGIT5                        	#
-001109,001109: 00,3326           54115                           TS       DIGIT25                       	#
-001110,001110: 00,3327           00006                           EXTEND                                 	#
-001111,001111: 00,3330           73411                           MP       D32                           	#
-001112,001112: 00,3331           30001                           CA       L                             	#
-001113,001113: 00,3332           60116                           AD       DIGIT31                       	#
-001114,001114: 00,3333           63424                           AD       OPR25R31                      	#
-001115,001115: 00,3334           00006                           EXTEND                                 	#
-001116,001116: 00,3335           01010                           WRITE    10                            	#
-001117,001117: 
-001118,001118: 00,3336           00006                           EXTEND                                 	#
-001119,001119: 00,3337           22114                           QXCH     DSPR                          	#
-001120,001120: 00,3340           00002                           RETURN                                 	#
-001121,001121: 
-001122,001122:                                                                                          	# Display the numbers in HOUR and MINUTE as two 2-digit fields in DSKY R1.
-001123,001123: 00,3341           00006        DSPR1HM            EXTEND                                 	#
-001124,001124: 00,3342           22114                           QXCH     DSPR                          	#
-001125,001125: 
-001126,001126: 00,3343           30074                           CA       HOUR                          	#
-001127,001127: 00,3344           02532                           TCR      CONV10                        	#
-001128,001128: 
-001129,001129: 00,3345           30104                           CA       DIGIT4                        	#
-001130,001130: 00,3346           50000                           INDEX    A                             	#
-001131,001131: 00,3347           33430                           CA       DIGPATTS                      	#
-001132,001132: 00,3350           63417                           AD       OPCODR11                      	#
-001133,001133: 00,3351           00006                           EXTEND                                 	#
-001134,001134: 00,3352           01010                           WRITE    10                            	#
-001135,001135: 
-001136,001136: 00,3353           30105                           CA       DIGIT5                        	#
-001137,001137: 00,3354           50000                           INDEX    A                             	#
-001138,001138: 00,3355           33430                           CA       DIGPATTS                      	#
-001139,001139: 00,3356           00006                           EXTEND                                 	#
-001140,001140: 00,3357           73411                           MP       D32                           	#
-001141,001141: 00,3360           30001                           CA       L                             	#
-001142,001142: 00,3361           63420                           AD       OPCDR123                      	#
-001143,001143: 00,3362           00006                           EXTEND                                 	#
-001144,001144: 00,3363           01010                           WRITE    10                            	#
-001145,001145: 
-001146,001146: 00,3364           30073                           CA       MINUTE                        	#
-001147,001147: 00,3365           02532                           TCR      CONV10                        	#
-001148,001148: 00,3366           02711                           TCR      PACK2DIG                      	#
-001149,001149: 00,3367           63421                           AD       OPCDR145                      	#
-001150,001150: 00,3370           00006                           EXTEND                                 	#
-001151,001151: 00,3371           01010                           WRITE    10                            	#
-001152,001152: 
-001153,001153: 00,3372           00006                           EXTEND                                 	#
-001154,001154: 00,3373           22114                           QXCH     DSPR                          	#
-001155,001155: 00,3374           00002                           RETURN                                 	#
-001156,001156: 
-001157,001157:                                                                                          	# Define any constants that are needed.
-001158,001158: 00,3375           37774        O37774             OCT      37774                         	#
-001159,001159: 00,3376           00000        ZERO               OCT      0                             	#
-001160,001160: 00,3377           00001        ONE                OCT      1                             	#
-001161,001161: 00,3400           00002        TWO                OCT      2                             	#
-001162,001162: 00,3401           00004        FOUR               OCT      4                             	#
-001163,001163: 00,3402           00010        EIGHT              DEC      8          B-14               	#
-001164,001164: 00,3403           77776        MINUS1             DEC      -1         B-14               	#
-001165,001165: 00,3404           77767        MINUS8             DEC      -8         B-14               	#
-001166,001166: 00,3405           00012        TEN                DEC      10         B-14               	#
-001167,001167: 00,3406           00037        O37                OCT      37                            	# Mask with lowest 5 bits set.
-001168,001168: 00,3407           00077        O77                OCT      77                            	# Mask with lowest 6 bits set.
-001169,001169: 00,3410           00040        NOKEY              OCT      40                            	#
-001170,001170: 00,3411           00040        D32                DEC      32         B-14               	#
-001171,001171: 00,3412           00100        D64                DEC      64         B-14               	#
-001172,001172: 00,3413           02000        D1024              DEC      1024       B-14               	#
-001173,001173: 00,3414           54000        OPCODEP            DEC      11         B11                	#
-001174,001174: 00,3415           50000        OPCODEV            DEC      10         B11                	#
-001175,001175: 00,3416           44000        OPCODEN            DEC      9          B11                	#
-001176,001176: 00,3417           40000        OPCODR11           DEC      8          B11                	#
-001177,001177: 00,3420           34000        OPCDR123           DEC      7          B11                	#
-001178,001178: 00,3421           30000        OPCDR145           DEC      6          B11                	#
-001179,001179: 00,3422           24000        OPCDR212           DEC      5          B11                	#
-001180,001180: 00,3423           20000        OPCDR234           DEC      4          B11                	#
-001181,001181: 00,3424           14000        OPR25R31           DEC      3          B11                	#
-001182,001182: 00,3425           10000        OPCDR323           DEC      2          B11                	#
-001183,001183: 00,3426           04000        OPCDR345           DEC      1          B11                	#
-001184,001184: 00,3427           02000        SIGNBIT            DEC      1          B10                	#
-001185,001185:                                                                                          	# DSKY digit patterns for the digit 0-9.
-001186,001186: 00,3430           00025        DIGPATTS           DEC      21         B-14               	#
-001187,001187: 00,3431           00003                           DEC      3          B-14               	#
-001188,001188: 00,3432           00031                           DEC      25         B-14               	#
-001189,001189: 00,3433           00033                           DEC      27         B-14               	#
-001190,001190: 00,3434           00017                           DEC      15         B-14               	#
-001191,001191: 00,3435           00036                           DEC      30         B-14               	#
-001192,001192: 00,3436           00034                           DEC      28         B-14               	#
-001193,001193: 00,3437           00023                           DEC      19         B-14               	#
-001194,001194: 00,3440           00035                           DEC      29         B-14               	#
-001195,001195: 00,3441           00037                           DEC      31         B-14               	#
-001196,001196: 
-001197,001197: 
+000001,000001:                                                                                          	# Special registers.
+000002,000002: ???????                        A                  EQUALS   0                             	#
+000003,000003: ???????                        L                  EQUALS   1                             	# L AND Q ARE BOTH CHANNELS AND REGISTERS.
+000004,000004: ???????                        Q                  EQUALS   2                             	#
+000005,000005: ???????                        EBANK              EQUALS   3                             	#
+000006,000006: ???????                        FBANK              EQUALS   4                             	#
+000007,000007: ???????                        Z                  EQUALS   5                             	# ADJACENT TO FBANK AND BBANK FOR DXCH Z
+000008,000008: ???????                        BBANK              EQUALS   6                             	# (DTCB) AND DXCH FBANK (DTCF).
+000009,000009:                                                                                          	# REGISTER 7 IS A ZERO-SOURCE, USED BY ZL.
+000010,000010: ???????                        ARUPT              EQUALS   10                            	# INTERRUPT STORAGE.
+000011,000011: ???????                        LRUPT              EQUALS   11                            	#
+000012,000012: ???????                        QRUPT              EQUALS   12                            	#
+000013,000013: ???????                        SAMPTIME           EQUALS   13                            	# SAMPLED TIME 1 & 2.
+000014,000014: ???????                        ZRUPT              EQUALS   15                            	# (13 AND 14 ARE SPARES.)
+000015,000015: ???????                        BANKRUPT           EQUALS   16                            	# USUALLY HOLDS FBANK OR BBANK.
+000016,000016: ???????                        BRUPT              EQUALS   17                            	# RESUME ADDRESS AS WELL.
+000017,000017: ???????                        CYR                EQUALS   20                            	#
+000018,000018: ???????                        SR                 EQUALS   21                            	#
+000019,000019: ???????                        CYL                EQUALS   22                            	#
+000020,000020: ???????                        EDOP               EQUALS   23                            	# EDITS INTERPRETIVE OPERATION CODE PAIRS.
+000021,000021: ???????                        TIME2              EQUALS   24                            	#
+000022,000022: ???????                        TIME1              EQUALS   25                            	#
+000023,000023: ???????                        TIME3              EQUALS   26                            	#
+000024,000024: ???????                        TIME4              EQUALS   27                            	#
+000025,000025: ???????                        TIME5              EQUALS   30                            	#
+000026,000026: ???????                        TIME6              EQUALS   31                            	#
+000027,000027:    0067                                           SETLOC   67                            	#
+000028,000028:    0067                        NEWJOB             ERASE                                  	# Allocate a variable at the location checked by the Night Watchman.
+000029,000029:                                                                                          	# More variables.
+000030,000030:    0070                        KEYBUF             ERASE                                  	# 040 when empty, 0-037 when holding a keycode
+000031,000031:    0071                        LAST040            ERASE                                  	# Most recent value from input channel 040.
+000032,000032:    0072                        SECOND             ERASE                                  	# Storage for components of time
+000033,000033:    0073                        MINUTE             ERASE                                  	#
+000034,000034:    0074                        HOUR               ERASE                                  	#
+000035,000035:    0075                        DAY                ERASE                                  	#
+000036,000036:    0076                        MONTH              ERASE                                  	#
+000037,000037:    0077                        YEAR               ERASE                                  	#
+000038,000038:    0100                        SIGN               ERASE                                  	# For buffering sign+digits in conversion of integer to decimal string.
+000039,000039:    0101                        DIGIT1             ERASE                                  	#
+000040,000040:    0102                        DIGIT2             ERASE                                  	#
+000041,000041:    0103                        DIGIT3             ERASE                                  	#
+000042,000042:    0104                        DIGIT4             ERASE                                  	#
+000043,000043:    0105                        DIGIT5             ERASE                                  	#
+000044,000044:    0106                        SIGNA              ERASE                                  	# For buffering sign+digits in conversion of integer to decimal string.
+000045,000045:    0107                        DIGIT1A            ERASE                                  	#
+000046,000046:    0110                        DIGIT2A            ERASE                                  	#
+000047,000047:    0111                        DIGIT3A            ERASE                                  	#
+000048,000048:    0112                        DIGIT4A            ERASE                                  	#
+000049,000049:    0113                        DIGIT5A            ERASE                                  	#
+000050,000050:    0114                        DSPR               ERASE                                  	# Return address for DSPxxxx functions.
+000051,000051:    0115                        DIGIT25            ERASE                                  	#
+000052,000052:    0116                        DIGIT31            ERASE                                  	#
+000053,000053:    0117                        DIVISOR            ERASE                                  	# A dummy variable used to store divisors.
+000054,000054:    0120                        DSPMODE            ERASE                                  	# display-mode: 0 time, 1 acceleration, 2 magnetometer, etc.
+000055,000055:    0121                        LLLOW              ERASE                                  	# LS word of lat or lon
+000056,000056:    0122                        LLHIGH             ERASE                                  	# MS word of lat or lon.
+000057,000057:    0123                        LLRET              ERASE                                  	# Return address for LL2.
+000058,000058:    4000                                           SETLOC   4000                          	# The interrupt-vector table.
+000059,000059:                                                                                          	# Come here at power-up or GOJAM
+000060,000060:                                                                                          	# Come here at power-up or GOJAM
+000061,000061:    4000           00004                           INHINT                                 	# Disable interrupts for a moment.
+000062,000062:    4001           14054                           TCF      STARTUP                       	# Go to your "real" code.
+000063,000063:    4002           14003                           NOOP                                   	#
+000064,000064:    4003           14004                           NOOP                                   	#
+000065,000065: 
+000066,000066:    4004           50017                           RESUME                                 	# T6RUPT
+000067,000067:    4005           14006                           NOOP                                   	#
+000068,000068:    4006           14007                           NOOP                                   	#
+000069,000069:    4007           14010                           NOOP                                   	#
+000070,000070: 
+000071,000071:    4010           14011                           NOOP                                   	# T5RUPT
+000072,000072:    4011           14012                           NOOP                                   	#
+000073,000073:    4012           14013                           NOOP                                   	#
+000074,000074:    4013           14014                           NOOP                                   	#
+000075,000075: 
+000076,000076:    4014           14015                           NOOP                                   	# T3RUPT
+000077,000077:    4015           14016                           NOOP                                   	#
+000078,000078:    4016           14017                           NOOP                                   	#
+000079,000079:    4017           14020                           NOOP                                   	#
+000080,000080: 
+000081,000081:    4020           50017                           RESUME                                 	# T4RUPT
+000082,000082:    4021           14022                           NOOP                                   	#
+000083,000083:    4022           14023                           NOOP                                   	#
+000084,000084:    4023           14024                           NOOP                                   	#
+000085,000085: 
+000086,000086:    4024           50017                           RESUME                                 	# KEYRUPT1
+000087,000087:    4025           14026                           NOOP                                   	#
+000088,000088:    4026           14027                           NOOP                                   	#
+000089,000089:    4027           14030                           NOOP                                   	#
+000090,000090: 
+000091,000091:    4030           50017                           RESUME                                 	# KEYRUPT2
+000092,000092:    4031           14032                           NOOP                                   	#
+000093,000093:    4032           14033                           NOOP                                   	#
+000094,000094:    4033           14034                           NOOP                                   	#
+000095,000095: 
+000096,000096:    4034           50017                           RESUME                                 	# UPRUPT
+000097,000097:    4035           14036                           NOOP                                   	#
+000098,000098:    4036           14037                           NOOP                                   	#
+000099,000099:    4037           14040                           NOOP                                   	#
+000100,000100: 
+000101,000101:    4040           50017                           RESUME                                 	# DOWNRUPT
+000102,000102:    4041           14042                           NOOP                                   	#
+000103,000103:    4042           14043                           NOOP                                   	#
+000104,000104:    4043           14044                           NOOP                                   	#
+000105,000105: 
+000106,000106:    4044           50017                           RESUME                                 	# RADAR RUPT
+000107,000107:    4045           14046                           NOOP                                   	#
+000108,000108:    4046           14047                           NOOP                                   	#
+000109,000109:    4047           14050                           NOOP                                   	#
+000110,000110: 
+000111,000111:    4050           50017                           RESUME                                 	# RUPT10
+000112,000112:    4051           14052                           NOOP                                   	#
+000113,000113:    4052           14053                           NOOP                                   	#
+000114,000114:    4053           14054                           NOOP                                   	#
+000115,000115: 
+000116,000116: 
+000117,000117:    4054           24000        STARTUP            INCR     A                             	#
+000118,000118:    4055           24000                           INCR     A                             	#
+000119,000119:    4056           24050                           INCR     50                            	#50 is some randome address that should be set to zero
+000120,000120:    4057           30050                           CA       50                            	#
+000121,000121:    4060           00006                           EXTEND                                 	#
+000122,000122:    4061           30051                           DCA      50                            	#
+000123,000123: 
+000124,000124: 
 Removing the duplicated lines... 
 
 Symbol-table file written.
@@ -1208,9 +135,9 @@ Symbol-table file written.
 
 Usage Table for Fixed-Memory Banks
 ----------------------------------
-Bank 00:  1442/2000 words used.
+Bank 00:  0000/2000 words used.
 Bank 01:  0000/2000 words used.
-Bank 02:  0001/2000 words used.
+Bank 02:  0062/2000 words used.
 Bank 03:  0000/2000 words used.
 Bank 04:  0000/2000 words used.
 Bank 05:  0000/2000 words used.
@@ -1248,62 +175,54 @@ Bank 43:  0000/2000 words used.
 
 Symbol Table
 ------------
-     1,C:   A            0000000  		    43,F:   DSPR1POS     00,3040  		    82,F:   MODE0        00,2231  
-     2,C:   ARUPT        0000010  		    44,F:   DSPR2        00,3067  		    83,F:   MODE1        00,2317  
-     3,F:   A2DIG        00,2666  		    45,F:   DSPR2MD      00,3301  		    84,F:   MODE2        00,2331  
-  ==============================  		    46,F:   DSPR2NNG     00,3135  		    85,F:   MODE3        00,2343  
-     4,C:   BANKRUPT     0000016  		    47,F:   DSPR2NPS     00,3116  		    86,F:   MODE4        00,2355  
-     5,C:   BBANK        0000006  		    48,F:   DSPR2POS     00,3114  		    87,F:   MODE5        00,2364  
-     6,F:   BLANKALL     00,2465  		    49,F:   DSPR3        00,3153  		    88,F:   MODE6        00,2410  
-     7,C:   BRUPT        0000017  		    50,F:   DSPR3NNG     00,3231  		    89,F:   MODE7        00,2417  
-  ==============================  		    51,F:   DSPR3NPS     00,3212  		    90,F:   MODE8        00,2442  
-     8,F:   CONV10       00,2532  		    52,F:   DSPR3POS     00,3210  		    91,E:   MONTH           0076  
-     9,F:   CONV10M      00,2703  		    53,F:   DSPR3Y       00,3237  		  ==============================  
-    10,F:   CONV10P      00,2541  		    54,F:   DSPVERB      00,2765  		    92,E:   NEWJOB          0067  
-    11,F:   CONV10Z      00,2537  		    55,F:   D1024        00,3413  		    93,F:   NOKEY        00,3410  
-    12,C:   CYL          0000022  		    56,F:   D32          00,3411  		  ==============================  
-    13,C:   CYR          0000020  		    57,F:   D64          00,3412  		    94,F:   ONE          00,3377  
-  ==============================  		  ==============================  		    95,F:   OPCDR123     00,3420  
-    14,E:   DAY             0075  		    58,C:   EBANK        0000003  		    96,F:   OPCDR145     00,3421  
-    15,E:   DIGIT1          0101  		    59,C:   EDOP         0000023  		    97,F:   OPCDR212     00,3422  
-    16,E:   DIGIT1A         0107  		    60,F:   EIGHT        00,3402  		    98,F:   OPCDR234     00,3423  
-    17,E:   DIGIT2          0102  		    61,F:   ENDKYCK      00,2203  		    99,F:   OPCDR323     00,3425  
-    18,E:   DIGIT2A         0110  		    62,F:   ENDTMCK      00,2315  		   100,F:   OPCDR345     00,3426  
-    19,E:   DIGIT25         0115  		  ==============================  		   101,F:   OPCODEN      00,3416  
-    20,E:   DIGIT3          0103  		    63,C:   FBANK        0000004  		   102,F:   OPCODEP      00,3414  
-    21,E:   DIGIT3A         0111  		    64,F:   FOUR         00,3401  		   103,F:   OPCODEV      00,3415  
-    22,E:   DIGIT31         0116  		  ==============================  		   104,F:   OPCODR11     00,3417  
-    23,E:   DIGIT4          0104  		    65,E:   HOUR            0074  		   105,F:   OPR25R31     00,3424  
-    24,E:   DIGIT4A         0112  		  ==============================  		   106,F:   O37          00,3406  
-    25,E:   DIGIT5          0105  		    66,E:   KEYBUF          0070  		   107,F:   O37774       00,3375  
-    26,E:   DIGIT5A         0113  		    67,F:   KEYRUPT      00,2062  		   108,F:   O77          00,3407  
-    27,F:   DIGPATTS     00,3430  		    68,F:   KEYTABL      00,2115  		  ==============================  
-    28,F:   DIG2A        00,2651  		  ==============================  		   109,F:   PACK2DIG     00,2711  
-    29,F:   DIG2R1       00,3017  		    69,C:   L            0000001  		   110,F:   PATT5DIG     00,2726  
-    30,F:   DIG2R2       00,3075  		    70,E:   LAST040         0071  		  ==============================  
-    31,F:   DIG2R3       00,3161  		    71,E:   LLHIGH          0122  		   111,C:   Q            0000002  
-    32,E:   DIVISOR         0117  		    72,E:   LLLOW           0121  		   112,C:   QRUPT        0000012  
-    33,E:   DSPMODE         0120  		    73,E:   LLRET           0123  		  ==============================  
-    34,F:   DSPMODE+     00,2156  		    74,F:   LL2          00,2575  		   113,F:   RETRIG       00,2200  
-    35,F:   DSPMODE-     00,2167  		    75,F:   LL5          00,2623  		  ==============================  
-    36,F:   DSPNOUN      00,2777  		    76,C:   LRUPT        0000011  		   114,C:   SAMPTIME     0000013  
-    37,F:   DSPPROG      00,2753  		  ==============================  		   115,E:   SECOND          0072  
-    38,E:   DSPR            0114  		    77,F:   MAINLOOP     00,2110  		   116,E:   SIGN            0100  
-    39,F:   DSPR1        00,3011  		    78,F:   MINUS1       00,3403  		   117,E:   SIGNA           0106  
-    40,F:   DSPR1HM      00,3341  		    79,F:   MINUS8       00,3404  		   118,F:   SIGNBIT      00,3427  
-    41,F:   DSPR1NNG     00,3061  		    80,E:   MINUTE          0073  		   119,C:   SR           0000021  
-    42,F:   DSPR1NPS     00,3042  		    81,F:   MODETABL     00,2220  		   120,F:   STARTUP      00,2075  
-
-  ==============================  		   126,C:   TIME5        0000030  		  ==============================  
-   121,F:   TEN          00,3405  		   127,C:   TIME6        0000031  		   131,E:   YEAR            0077  
-   122,C:   TIME1        0000025  		   128,F:   TWO          00,3400  		  ==============================  
-   123,C:   TIME2        0000024  		   129,F:   T3RUPT       00,2054  		   132,C:   Z            0000005  
-   124,C:   TIME3        0000026  		  ==============================  		   133,F:   ZERO         00,3376  
-   125,C:   TIME4        0000027  		   130,F:   WILLWRAP     00,2175  		   134,C:   ZRUPT        0000015  
+     1,C:   A            0000000  		  ==============================  		                                  
+     2,C:   ARUPT        0000010  		    37,E:   NEWJOB          0067  		                                  
+  ==============================  		  ==============================  		                                  
+     3,C:   BANKRUPT     0000016  		    38,C:   Q            0000002  		                                  
+     4,C:   BBANK        0000006  		    39,C:   QRUPT        0000012  		                                  
+     5,C:   BRUPT        0000017  		  ==============================  		                                  
+  ==============================  		    40,C:   SAMPTIME     0000013  		                                  
+     6,C:   CYL          0000022  		    41,E:   SECOND          0072  		                                  
+     7,C:   CYR          0000020  		    42,E:   SIGN            0100  		                                  
+  ==============================  		    43,E:   SIGNA           0106  		                                  
+     8,E:   DAY             0075  		    44,C:   SR           0000021  		                                  
+     9,E:   DIGIT1          0101  		    45,F:   STARTUP         4054  		                                  
+    10,E:   DIGIT1A         0107  		  ==============================  		                                  
+    11,E:   DIGIT2          0102  		    46,C:   TIME1        0000025  		                                  
+    12,E:   DIGIT2A         0110  		    47,C:   TIME2        0000024  		                                  
+    13,E:   DIGIT25         0115  		    48,C:   TIME3        0000026  		                                  
+    14,E:   DIGIT3          0103  		    49,C:   TIME4        0000027  		                                  
+    15,E:   DIGIT3A         0111  		    50,C:   TIME5        0000030  		                                  
+    16,E:   DIGIT31         0116  		    51,C:   TIME6        0000031  		                                  
+    17,E:   DIGIT4          0104  		  ==============================  		                                  
+    18,E:   DIGIT4A         0112  		    52,E:   YEAR            0077  		                                  
+    19,E:   DIGIT5          0105  		  ==============================  		                                  
+    20,E:   DIGIT5A         0113  		    53,C:   Z            0000005  		                                  
+    21,E:   DIVISOR         0117  		    54,C:   ZRUPT        0000015  		                                  
+    22,E:   DSPMODE         0120  		                                  		                                  
+    23,E:   DSPR            0114  		                                  		                                  
+  ==============================  		                                  		                                  
+    24,C:   EBANK        0000003  		                                  		                                  
+    25,C:   EDOP         0000023  		                                  		                                  
+  ==============================  		                                  		                                  
+    26,C:   FBANK        0000004  		                                  		                                  
+  ==============================  		                                  		                                  
+    27,E:   HOUR            0074  		                                  		                                  
+  ==============================  		                                  		                                  
+    28,E:   KEYBUF          0070  		                                  		                                  
+  ==============================  		                                  		                                  
+    29,C:   L            0000001  		                                  		                                  
+    30,E:   LAST040         0071  		                                  		                                  
+    31,E:   LLHIGH          0122  		                                  		                                  
+    32,E:   LLLOW           0121  		                                  		                                  
+    33,E:   LLRET           0123  		                                  		                                  
+    34,C:   LRUPT        0000011  		                                  		                                  
+  ==============================  		                                  		                                  
+    35,E:   MINUTE          0073  		                                  		                                  
+    36,E:   MONTH           0076  		
 
 Unresolved symbols:  0
 Fatal errors:  0
 Warnings:  0
 
-Bugger word 57615 at 00,3444.
-Bugger word 67776 at 02,2003.
+Bugger word 67634 at 02,2064.
