@@ -391,7 +391,7 @@ module register_file
 endmodule: register_file
 
 module IO_register_file
-  (input  logic [14:0] data_write1, data_write2
+  (input  logic [14:0] data_write1, data_write2,
                        data_DSKY_VERB, 
                        data_DSKY_NOUN,
                        data_DSKY_NEW,
@@ -418,7 +418,7 @@ module IO_register_file
 
   always_ff @(posedge clock, negedge rst_l) begin
   // Output register writes
-    if (~rst_1) begin
+    if (~rst_l) begin
     // Reset Case
       data_DSKY_REG_1_HIGH <= 15'd0;
       data_DSKY_REG_1_LOW <= 15'd0;
@@ -445,7 +445,7 @@ module IO_register_file
           DSKY_PROG_NUM: data_DSKY_PROG_NUM[4:0] <= data_write1[4:0];
           // TODO: Isolate pertinent bits
           DSKY_LAMPS: data_DSKY_LAMPS <= data_write1;
-          AXI_CALC_RES: data_AXY_CALC_RES <= data_write1;
+          AXI_CALC_RES: data_AXI_CALC_RES <= data_write1;
           default: begin
           // Necessary as not all I/O registers writeable
           end
@@ -462,7 +462,7 @@ module IO_register_file
           DSKY_PROG_NUM: data_DSKY_PROG_NUM[4:0] <= data_write2[4:0];
           // TODO: Isolate pertinent bits
           DSKY_LAMPS: data_DSKY_LAMPS <= data_write2;
-          AXI_CALC_RES: data_AXY_CALC_RES <= data_write2;
+          AXI_CALC_RES: data_AXI_CALC_RES <= data_write2;
           default: begin
           // Necessary as not all I/O registers writeable
           end
@@ -485,7 +485,7 @@ module IO_register_file
       data_read1 = data_write2;
     else begin
     // Common Case
-      unique case (rs1_sel)
+      unique case (sel_read1)
         DSKY_REG_1_HIGH: data_read1 = data_DSKY_REG_1_HIGH;
         DSKY_REG_1_LOW: data_read1 = data_DSKY_REG_1_LOW;
         DSKY_REG_2_HIGH: data_read1 = data_DSKY_REG_2_HIGH;
@@ -501,7 +501,7 @@ module IO_register_file
         DSKY_NEW: data_read1[0] = data_DSKY_NEW[0];
         AXI_MISSION_TIME: data_read1 = data_AXI_MISSION_TIME;
         AXI_APOGEE: data_read1 = data_AXI_APOGEE;
-        ACI_PERIGEE: data_read1 = data_AXI_PERIGEE;
+        AXI_PERIGEE: data_read1 = data_AXI_PERIGEE;
       endcase
     end
     // To Read Port 2
@@ -513,7 +513,7 @@ module IO_register_file
       data_read2 = data_write2;
     else begin
     // Common Case
-      unique case (rs1_sel)
+      unique case (sel_read1)
         DSKY_REG_1_HIGH: data_read2 = data_DSKY_REG_1_HIGH;
         DSKY_REG_1_LOW: data_read2 = data_DSKY_REG_1_LOW;
         DSKY_REG_2_HIGH: data_read2 = data_DSKY_REG_2_HIGH;
@@ -529,7 +529,7 @@ module IO_register_file
         DSKY_NEW: data_read2[0] = data_DSKY_NEW[0];
         AXI_MISSION_TIME: data_read2 = data_AXI_MISSION_TIME;
         AXI_APOGEE: data_read2 = data_AXI_APOGEE;
-        ACI_PERIGEE: data_read2 = data_AXI_PERIGEE;
+        AXI_PERIGEE: data_read2 = data_AXI_PERIGEE;
       endcase
     end
   end
