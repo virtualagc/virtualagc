@@ -116,12 +116,13 @@ typedef struct packed {
     logic RAM_write_en;
     logic [2:0] IO_read_sel;
     logic IO_write_en;
-    logic [12:0] K;
+    logic [11:0] K;
     logic [14:0] pc;
     index_t index;
     logic halt;
     logic [2:0] EB;
     logic [2:0] FB;
+    logic in_ROM;
 } ctrl_t;
 
 

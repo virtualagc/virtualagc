@@ -1,0 +1,13 @@
+rmapats_mop.o: rmapats.m
+	@/afs/ece.cmu.edu/support/synopsys/synopsys.release/vcs-mx_vK-2015.09/linux64/bin/cgmop1  -pic -gen_obj rmapats.m rmapats_mop.o; rm -f rmapats.m; touch rmapats.m; touch rmapats_mop.o
+
+rmapats.o: rmapats.c
+	@$(CC) $(CFLAGS) -c -fPIC -o rmapats.o rmapats.c
+rmapats%.o: rmapats%.c
+	@$(CC) $(CFLAGS) -c -fPIC -o $@ $<
+rmar.o: rmar.c
+	@$(CC) $(CFLAGS) -c -fPIC -o rmar.o rmar.c
+rmar%.o: rmar%.c
+	@$(CC) $(CFLAGS) -c -fPIC -o $@ $<
+
+include filelist.hsopt.objs

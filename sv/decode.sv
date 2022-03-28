@@ -26,7 +26,6 @@ module decode
 
   assign ctrl_D = ctrl;
   assign instr_F = (index2) ? index_data + instr : instr;
-  assign clk = clock;
   assign is_ROM = (instr_F[11:0] > 'o1777) ? 1'b1 : 1'b0;
   assign is_RAM = ((instr_F[11:0] < 'o2000) && (instr_F[11:0] > 'd12)) ? 1'b1 : 1'b0;
   assign is_reg = (instr_F[11:0] < 'd13) ? 1'b1 : 1'b0;
@@ -59,7 +58,8 @@ module decode
     index: EXTEND,
     halt: 1'b0,
     EB: bits_EB,
-    FB: bits_FB
+    FB: bits_FB,
+    in_ROM: is_ROM
 };
     index1 = 1'b0;
     extra_code1 = 1'b0;
