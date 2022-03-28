@@ -235,6 +235,10 @@ module register_file
                reg_CYR, reg_SR, reg_CYL, reg_SL,
                reg_TIME1, reg_TIME2;
 
+  always_ff @(posedge clock) begin
+      $display("A = %o", reg_A);
+  end
+
   always_ff @(posedge clock, negedge rst_l) begin
   // Register file writes
     if (~rst_l) begin

@@ -42,7 +42,7 @@ module TB;
 
   initial begin
     wait(halt);
-    #finish;
+    $finish;
   end
   
 
