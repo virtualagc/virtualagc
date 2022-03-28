@@ -701,7 +701,10 @@ main(int argc, char *argv[])
             }
         }
     }
-
+  fprintf(ROMFile, "END;\n");
+  fprintf(RAMFile, "END;\n");
+  fclose(RAMFile);
+  fclose(ROMFile);
   // All done!
   RetVal = 0;
   Done:
