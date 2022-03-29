@@ -88,9 +88,9 @@ typedef enum logic  {
     OLD_PC
 } rd_t;
 
-typedef enum logic [1:0] {
-    BRANCH,
+typedef enum logic [1:0] { 
     NO_BRANCH,
+    BRANCH,
     BZF,
     BZMF
 } branch_t;
