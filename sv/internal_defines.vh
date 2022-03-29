@@ -77,10 +77,10 @@ typedef enum logic [1:0] {
 } alu_src1_t;
 
 typedef enum logic [1:0] {
-    READ_DATA2,
-    RS2_DATA2,
+    K2,
     IO_READ_DATA2,
-    K2
+    RS2_DATA2,
+    READ_DATA2 
 } alu_src2_t;
 
 typedef enum logic  {

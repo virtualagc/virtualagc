@@ -1,18 +1,15 @@
 # Begin_DVE_Session_Save_Info
 # DVE restart session
-# Saved on Tue Mar 29 17:20:30 2022
+# Saved on Tue Mar 29 18:15:56 2022
 # Designs open: 1
 #   Sim: /afs/ece.cmu.edu/usr/cabernar/Private/capstone/virtualagc/sv/simv
-# Toplevel windows open: 3
+# Toplevel windows open: 2
 # 	TopLevel.1
 # 	TopLevel.2
-# 	TopLevel.3
 #   Source.1: _vcs_unit__546175923
-#   Wave.1: 12 signals
-#   Wave.2: 1 signals
-#   Group count = 2
-#   Group Group1 signal count = 12
-#   Group Group2 signal count = 1
+#   Wave.1: 18 signals
+#   Group count = 1
+#   Group Group1 signal count = 18
 # End_DVE_Session_Save_Info
 
 # DVE version: K-2015.09_Full64
@@ -62,21 +59,7 @@ gui_sync_global -id ${TopLevel.2} -option true
 
 # MDI window settings
 set Wave.1 Wave.1
-gui_update_layout -id ${Wave.1} {{show_state maximized} {dock_state undocked} {dock_on_new_line false} {child_wave_left 423} {child_wave_right 1031} {child_wave_colname 209} {child_wave_colvalue 209} {child_wave_col1 0} {child_wave_col2 1}}
-
-# End MDI window settings
-
-
-# Create and position top-level window: TopLevel.3
-
-set TopLevel.3 TopLevel.3
-
-# Docked window settings
-gui_sync_global -id ${TopLevel.3} -option true
-
-# MDI window settings
-set Wave.2 Wave.2
-gui_update_layout -id ${Wave.2} {{show_state maximized} {dock_state undocked} {dock_on_new_line false} {child_wave_left 423} {child_wave_right 1031} {child_wave_colname 209} {child_wave_colvalue 209} {child_wave_col1 0} {child_wave_col2 1}}
+gui_update_layout -id ${Wave.1} {{show_state maximized} {dock_state undocked} {dock_on_new_line false} {child_wave_left 427} {child_wave_right 1043} {child_wave_colname 211} {child_wave_colvalue 212} {child_wave_col1 0} {child_wave_col2 1}}
 
 # End MDI window settings
 
@@ -105,17 +88,11 @@ gui_set_time_units 1ps
 # Global: Signal Groups
 
 
-set _session_group_1 Group1
-gui_sg_create "$_session_group_1"
-set Group1 "$_session_group_1"
-
-gui_sg_addsignal -group "$_session_group_1" { TB.core.clock TB.core.reset_n TB.core.pc_F TB.core.pc_1_F TB.core.next_pc_F TB.core.pc_E TB.core.pc_D TB.core.instr_D TB.core.ctrl_D TB.core.ctrl_E TB.core.ctrl_F TB.core.ctrl_W }
-
-set _session_group_2 Group2
+set _session_group_2 Group1
 gui_sg_create "$_session_group_2"
-set Group2 "$_session_group_2"
+set Group1 "$_session_group_2"
 
-gui_sg_addsignal -group "$_session_group_2" { TB.core.Decoder.recent_reset }
+gui_sg_addsignal -group "$_session_group_2" { TB.core.clock TB.core.reset_n TB.core.pc_F TB.core.pc_1_F TB.core.next_pc_F TB.core.pc_E TB.core.pc_D TB.core.alu_out_E TB.core.instr_D TB.core.ctrl_D TB.core.ctrl_E TB.core.ctrl_F TB.core.ctrl_W TB.core.alu_src1_E TB.core.alu_src2_E TB.core.read_data_E TB.core.rs2_data_E TB.core.IO_read_data_E }
 
 # Global: Highlighting
 
@@ -145,18 +122,17 @@ gui_list_set_filter -id ${Hier.1} -list { {Package 1} {All 0} {Process 1} {VirtP
 gui_list_set_filter -id ${Hier.1} -text {*}
 gui_change_design -id ${Hier.1} -design Sim
 catch {gui_list_expand -id ${Hier.1} TB}
-catch {gui_list_expand -id ${Hier.1} TB.core}
-catch {gui_list_select -id ${Hier.1} {TB.core.Decoder}}
+catch {gui_list_select -id ${Hier.1} {TB.core}}
 gui_view_scroll -id ${Hier.1} -vertical -set 0
 gui_view_scroll -id ${Hier.1} -horizontal -set 0
 
 # Data 'Data.1'
 gui_list_set_filter -id ${Data.1} -list { {Buffer 1} {Input 1} {Others 1} {Linkage 1} {Output 1} {LowPower 1} {Parameter 1} {All 1} {Aggregate 1} {LibBaseMember 1} {Event 1} {Assertion 1} {Constant 1} {Interface 1} {BaseMembers 1} {Signal 1} {$unit 1} {Inout 1} {Variable 1} }
 gui_list_set_filter -id ${Data.1} -text {*}
-gui_list_show_data -id ${Data.1} {TB.core.Decoder}
+gui_list_show_data -id ${Data.1} {TB.core}
 gui_show_window -window ${Data.1}
-catch { gui_list_select -id ${Data.1} {TB.core.Decoder.recent_reset }}
-gui_view_scroll -id ${Data.1} -vertical -set 59
+catch { gui_list_select -id ${Data.1} {TB.core.read_data_E TB.core.rs2_data_E TB.core.IO_read_data_E }}
+gui_view_scroll -id ${Data.1} -vertical -set 540
 gui_view_scroll -id ${Data.1} -horizontal -set 0
 gui_view_scroll -id ${Hier.1} -vertical -set 0
 gui_view_scroll -id ${Hier.1} -horizontal -set 0
@@ -176,11 +152,13 @@ set origWaveHeight [gui_get_pref_value -category Wave -key waveRowHeight]
 gui_list_set_height -id Wave -height 25
 set origGroupCreationState [gui_list_create_group_when_add -wave]
 gui_list_create_group_when_add -wave -disable
-gui_wv_zoom_timerange -id ${Wave.1} 0 337
+gui_wv_zoom_timerange -id ${Wave.1} 830 1171
 gui_list_add_group -id ${Wave.1} -after {New Group} {Group1}
 gui_seek_criteria -id ${Wave.1} {Any Edge}
 
 
+
+gui_set_env TOGGLE::DEFAULT_WAVE_WINDOW ${Wave.1}
 gui_set_pref_value -category Wave -key exclusiveSG -value $groupExD
 gui_list_set_height -id Wave -height $origWaveHeight
 if {$origGroupCreationState} {
@@ -195,50 +173,16 @@ gui_list_set_insertion_bar  -id ${Wave.1} -group Group1  -position in
 
 gui_view_scroll -id ${Wave.1} -vertical -set 0
 gui_show_grid -id ${Wave.1} -enable false
-
-# View 'Wave.2'
-gui_wv_sync -id ${Wave.2} -switch false
-set groupExD [gui_get_pref_value -category Wave -key exclusiveSG]
-gui_set_pref_value -category Wave -key exclusiveSG -value {false}
-set origWaveHeight [gui_get_pref_value -category Wave -key waveRowHeight]
-gui_list_set_height -id Wave -height 25
-set origGroupCreationState [gui_list_create_group_when_add -wave]
-gui_list_create_group_when_add -wave -disable
-gui_wv_zoom_timerange -id ${Wave.2} 0 337
-gui_list_add_group -id ${Wave.2} -after {New Group} {Group2}
-gui_seek_criteria -id ${Wave.2} {Any Edge}
-
-
-
-gui_set_env TOGGLE::DEFAULT_WAVE_WINDOW ${Wave.2}
-gui_set_pref_value -category Wave -key exclusiveSG -value $groupExD
-gui_list_set_height -id Wave -height $origWaveHeight
-if {$origGroupCreationState} {
-	gui_list_create_group_when_add -wave -enable
-}
-if { $groupExD } {
- gui_msg_report -code DVWW028
-}
-gui_list_set_filter -id ${Wave.2} -list { {Buffer 1} {Input 1} {Others 1} {Linkage 1} {Output 1} {Parameter 1} {All 1} {Aggregate 1} {LibBaseMember 1} {Event 1} {Assertion 1} {Constant 1} {Interface 1} {BaseMembers 1} {Signal 1} {$unit 1} {Inout 1} {Variable 1} }
-gui_list_set_filter -id ${Wave.2} -text {*}
-gui_list_set_insertion_bar  -id ${Wave.2} -group Group2  -position in
-
-gui_view_scroll -id ${Wave.2} -vertical -set 0
-gui_show_grid -id ${Wave.2} -enable false
 # Restore toplevel window zorder
 # The toplevel window could be closed if it has no view/pane
-if {[gui_exist_window -window ${TopLevel.2}]} {
-	gui_set_active_window -window ${TopLevel.2}
-	gui_set_active_window -window ${Wave.1}
-}
 if {[gui_exist_window -window ${TopLevel.1}]} {
 	gui_set_active_window -window ${TopLevel.1}
 	gui_set_active_window -window ${Source.1}
 	gui_set_active_window -window ${DLPane.1}
 }
-if {[gui_exist_window -window ${TopLevel.3}]} {
-	gui_set_active_window -window ${TopLevel.3}
-	gui_set_active_window -window ${Wave.2}
+if {[gui_exist_window -window ${TopLevel.2}]} {
+	gui_set_active_window -window ${TopLevel.2}
+	gui_set_active_window -window ${Wave.1}
 }
 #</Session>
 

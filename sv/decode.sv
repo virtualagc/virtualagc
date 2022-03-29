@@ -255,7 +255,9 @@ module decode
               end
               // TC/XLQ
               default : begin
-                if (~recent_reset) begin
+                //resent reset gets rid of edge case with reset 
+                //12d'4 is IHINT and we are treading that as a NOOP
+                if (~recent_reset & (~(instr_F[11:0]==12'd4))) begin
                   ctrl.alu_op = ALU_READ;
                   ctrl.alu_src2 = K2;
                   ctrl.wr1_sel = Q;
