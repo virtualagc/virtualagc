@@ -31,6 +31,7 @@ module Core
             .sel(branch_E),
             .out(next_pc_F));
 
+  
 
   //fetch decode register
    always_ff @(posedge clock, negedge rst_l) begin
@@ -44,8 +45,6 @@ module Core
             pc_D <= pc_F;
          end
     end
-
-  
 
   /////////////////////////DECODE STAGE////////////////////////////
 
@@ -75,14 +74,63 @@ module Core
   logic [14:0] rs1_data_E, rs2_data_E, IO_read_data_E, k_E;
 
     always_ff @(posedge clock, negedge rst_l) begin
-         if (!rst_l) begin 
-            ctrl_E <= 'd0;
-            rs1_data_E <= 'd0;
+         if (!rst_l) begin  
+            ctrl_E <= '{
+            alu_op: ALU_AD,
+            data_read_en: 1'b1,
+            wr1_sel: A,
+            wr2_sel: A,
+            wr1_en: 1'b0,
+            wr2_en: 1'b0,
+            rs1_sel: A,
+            rs2_sel: A,
+            alu_src1: RS1_DATA1,
+            alu_src2: READ_DATA2,
+            branch: NO_BRANCH,
+            rd: ALU_OUT,
+            RAM_write_en: 1'b0,
+            IO_read_sel: 3'b0,
+            IO_write_en: 1'b0,
+            K: 12'b0,
+            pc: 12'b0,
+            index: EXTEND,
+            halt: 1'b0,
+            EB: 3'b0,
+            FB: 3'b0,
+            in_ROM: 3'b0
+            };
+
+           rs1_data_E <= 'd0;
             rs2_data_E <= 'd0;
             IO_read_data_E <= 'd0; 
          end
          else if (flush_DE) begin 
-            ctrl_E <= 'd0;
+            ctrl_E <= '{
+            alu_op: ALU_AD,
+            data_read_en: 1'b1,
+            wr1_sel: A,
+            wr2_sel: A,
+            wr1_en: 1'b0,
+            wr2_en: 1'b0,
+            rs1_sel: A,
+            rs2_sel: A,
+            alu_src1: RS1_DATA1,
+            alu_src2: READ_DATA2,
+            branch: NO_BRANCH,
+            rd: ALU_OUT,
+            RAM_write_en: 1'b0,
+            IO_read_sel: 3'b0,
+            IO_write_en: 1'b0,
+            K: 12'b0,
+            pc: 12'b0,
+            index: EXTEND,
+            halt: 1'b0,
+            EB: 3'b0,
+            FB: 3'b0,
+            in_ROM: 3'b0
+            };
+
+
             rs1_data_E <= 'd0;
             rs2_data_E <= 'd0;
             IO_read_data_E <= 'd0;  
@@ -127,7 +175,31 @@ module Core
 
   always_ff @(posedge clock, negedge rst_l) begin
          if (!rst_l) begin 
-            ctrl_W <= 'd0;
+            ctrl_W <= '{
+            alu_op: ALU_AD,
+            data_read_en: 1'b1,
+            wr1_sel: A,
+            wr2_sel: A,
+            wr1_en: 1'b0,
+            wr2_en: 1'b0,
+            rs1_sel: A,
+            rs2_sel: A,
+            alu_src1: RS1_DATA1,
+            alu_src2: READ_DATA2,
+            branch: NO_BRANCH,
+            rd: ALU_OUT,
+            RAM_write_en: 1'b0,
+            IO_read_sel: 3'b0,
+            IO_write_en: 1'b0,
+            K: 12'b0,
+            pc: 12'b0,
+            index: EXTEND,
+            halt: 1'b0,
+            EB: 3'b0,
+            FB: 3'b0,
+            in_ROM: 3'b0
+            };
+
             alu_out_W <= 'd0;
             flush_W <= 'd0;
          end       
@@ -155,7 +227,7 @@ module Core
   assign RAM_write_data = data_W[14:0];
 
   //data channel upper bits data w
-  assign IO_write_sel = data_W[17:15];
+  assign IO_write_sel = ctrl_W.K[3:0]; 
   assign IO_write_data = data_W[14:0];
   assign IO_write_en = ctrl_W.IO_write_en;
   assign halt = ctrl_W.halt;

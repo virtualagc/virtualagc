@@ -89,8 +89,8 @@ typedef enum logic  {
 } rd_t;
 
 typedef enum logic [1:0] {
-    BRANCH,
     NO_BRANCH,
+    BRANCH,
     BZF,
     BZMF
 } branch_t;

@@ -12,7 +12,7 @@ module decode
   logic [2:0] opcode, next_byte, lowest_byte;
   logic [1:0] next2_bits;
   logic [14:0] instr_F;
-  logic extra_code1, extra_code2, is_ROM, is_RAM, is_reg, addr_is_0, index1, index2, clk;
+  logic extra_code1, extra_code2, is_ROM, is_RAM, is_reg, addr_is_0, index1, index2, clk, recent_reset;
 
   assign clk = clock;
 
@@ -22,6 +22,11 @@ module decode
   register #(1, 1'b0) rg2(.clk, .rst_l,
             .en(1'b1), .clear(flush), .D(index1),
             .Q(index2));
+
+  register #(1, 1'b1) rg3(.clk, .rst_l,
+            .en(1'b1), .clear(1'b0), .D(1'b0),
+            .Q(recent_reset));
+
 
 
   assign ctrl_D = ctrl;
@@ -250,12 +255,14 @@ module decode
               end
               // TC/XLQ
               default : begin
-                ctrl.alu_op = ALU_READ;
-                ctrl.alu_src2 = K2;
-                ctrl.wr1_sel = Q;
-                ctrl.wr1_en = 1'b1;
-                ctrl.branch = BRANCH;
-                ctrl.rd = OLD_PC;
+                if (~recent_reset) begin
+                  ctrl.alu_op = ALU_READ;
+                  ctrl.alu_src2 = K2;
+                  ctrl.wr1_sel = Q;
+                  ctrl.wr1_en = 1'b1;
+                  ctrl.branch = BRANCH;
+                  ctrl.rd = OLD_PC;
+                end
               end
             endcase
          end

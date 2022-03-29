@@ -16,7 +16,8 @@ module TB;
   initial begin
     clock = 1'b0;
     reset_n = 1'b1;
-    reset_n <= #1 1'b1;
+    reset_n <= #1 1'b0;
+    reset_n <= #2 1'b1;
     forever #5 clock = ~clock;
   end
 
