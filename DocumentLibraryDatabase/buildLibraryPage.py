@@ -24,6 +24,9 @@
 #               2021-10-27 RSB  Added "ACB-" document-number prefix for 
 #                               ACB requests.
 #               2022-01-18 RSB  Added the Study Guides section.
+#               2022-07-03 RSB  Tracked whether or not items are categorized
+#                               (as opposed to merely appearing in the 
+#                               Everything section).
 #
 # Usage:
 #	./buildLibraryPage.py <DocumentLibraryDatabase.tsv >../links2.html
@@ -273,6 +276,9 @@ lenLocal = len(local)
 
 hoverColor = "#e0e0e0"
 fancyHeaderAndFooter = True
+#frowny = "&#128547;" # 😣
+#frowny = "&#128533;" # 😕
+frowny = "&#128558;" # 😮
 
 fileHeader = """<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
@@ -701,6 +707,11 @@ whether or not those documents were already included in the preceding sections.
 in the immediately-preceding section.)  The entries are ordered by 
 publication date.
 <br><br>
+If an item appears <i>only</i> in this section, then perhaps it should be
+categorized better!  If so, you'll find it marked with the emoji """ \
++ frowny + """. Feedback about additional sections for the library or
+membership of individual documents in specific library sections is welcome.
+<br><br>
 If you <i>still</i> can't find what you need after you've looked in this 
 section, you might consider using the Google searchbar that appears near the 
 top of this page. It has the great advantage of searching not only document 
@@ -1095,11 +1106,14 @@ def addOrg(dict):
 hrForYearChange = False
 lastYear = ""
 firstEntry = True
+everything = False
 def documentEntryHTML(record, showComment):  
     global lastYear, firstEntry
     html = ""
     if "recent" in record and record["recent"]:
         html = "<img src=\"new.png\">"
+    if everything and ("Categorized" not in record or not record["Categorized"]):
+        html += frowny
     URLs = record["URLs"]
     DocumentNumbers = record["DocumentNumbers"]
     target = ""
@@ -1379,7 +1393,8 @@ for line in lines[1:]:
         "DayFile": "",
         "YearFile": "",
         "PathFile": "",
-        "EpochFile": 0
+        "EpochFile": 0,
+        "Categorized": False
     }
     lineNumber += 1
     # Now work on each field individually.
@@ -1572,6 +1587,7 @@ if "anchor" in tableOfContentsSpec[0] and tableOfContentsSpec[0]["anchor"] == "D
 
 # Step 5A:  "Recent Additions" section.
 if "anchor" in tableOfContentsSpec[1] and tableOfContentsSpec[1]["anchor"] == "RecentAdditions":
+    everything = False
     print("<hr>")
     print("<a name=\"RecentAdditions\"></a>")
     print("<h1>" + tableOfContentsSpec[1]["title"] + "</h1>")
@@ -1611,6 +1627,9 @@ if "anchor" in tableOfContentsSpec[1] and tableOfContentsSpec[1]["anchor"] == "R
 # Step 5B:  Output all other sections, based on the parameters in 
 # tableOfContentsSpec[].  
 for n in range(2, len(tableOfContentsSpec)):
+    numTotal = 0
+    numUncategorized = 0
+    everything = (n == len(tableOfContentsSpec) - 1)
     hrForYearChange = False
     if "hr" in tableOfContentsSpec[n]:
         hrForYearChange = True
@@ -1679,11 +1698,19 @@ for n in range(2, len(tableOfContentsSpec)):
                     if documentNumberB["Number"].startswith(documentNumberA):
                         matched = True
         if matched:
+            if not everything:
+                record["Categorized"] = True
+            else:
+                numTotal += 1
+                if not record["Categorized"]:
+                    numUncategorized += 1
             print("<li>" + documentEntryHTML(record, True) + "</li>")
     if "lineNumbers" in tableOfContentsSpec[n] and tableOfContentsSpec[n]["lineNumbers"]:
         print("</ol>")
     else:
         print("</ul>")
+
+print("%d of %d documents appear <i>only</i> in this section (%s), and perhaps might therefore be categorized better than they are right now." % (numUncategorized, numTotal, frowny))
 
 # Final step: Cleanup.
 if fancyHeaderAndFooter:
@@ -1731,4 +1758,4 @@ if False:
                 print("Archives: " + str(record["Archives"]))
                 print("Sponsors: " + str(record["Sponsors"]))
                 print("Disclaimer: " + record["Disclaimer"])
-                print("Epochs: File=%d Added=%d" % (record["EpochFile"], record["EpochAdded"]))
+                print("Epochs: File=%d Added=%d" % (record["EpochFile"], record["EpochAdded"]))      
