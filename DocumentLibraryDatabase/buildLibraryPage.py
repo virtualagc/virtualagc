@@ -674,35 +674,33 @@ related to them, I'd like to present it anyway.
 """
 
 blurbElectroMechanical = """
-There are two significant categories of Document Library items which cannot be
-contained fully within the structure of this web page.  I refer to electrical 
-and mechanical engineering drawings of the CM and LM G&N systems, primarily
-by the MIT Instrumentation Laboratory, and to engineering drawings of the 
-Lunar Module, primarily by Grumman Aerospace Engineering. (Drawings of the
-CSM, by North American Aviation, we unfortunately have little expectation of
-accessing in bulk.)  Examples of the MIT/IL drawings are the AGC circuit 
-schematics or the mechanical drawings of the physical design 
-of the DSKY. There are around 100,000 such drawings presently (September 2021)
-in the library, with the number expected to reach around 500,000 eventually.
-Therefore, they cannot each be listed here individually.
+Electrical and mechanical engineering drawings of Apollo systems cannot be 
+represented well in this Document Library page, because there are hundreds of 
+thousands of them.
 <br><br>
-Large numbers of engineering drawings are presented here <i>indirectly</i>, 
-in the form of "drawing trees".  For example, Apollo 11 contained 2 G&N 
+Large numbers of engineering drawings are presented here <i>indirectly</i>, in
+two ways.  The first way is
+in the form of "drawing trees".  For example, Apollo 11 contained 2 Guidance
+& Navigation
 systems, one for the CM (drawing 2014999-101) and one for the LM 
-(drawing 6014999-091). Each of them comprises a set of drawings, one for each
-of their sub-assemblies.  And each of those comprises yet another set of 
-drawings, one for each of their sub-sub-assemblies.  And so on.  Only the
-two top-level drawings are explicitly presented here, in the form of links to
-separate "drawing tree" pages dedicated to them.  It is those separate 
-drawing tree pages, rather than this Document Library page, which allow you to 
-navigate throughout their drawing hierarchies.
+(drawing 6014999-091). Each of these, in turn, represents a set of drawings, 
+with one drawing for each
+of its assemblies.  And each of those assembly drawings represents yet another 
+set of 
+drawings, one for each of its subassemblies.  And so on.  But only the
+two top-level drawings for any given mission are explicitly presented here.  
+It is those top-level drawings that serve as a portal to allow you to 
+navigate throughout the entire hierarchy of drawings. The second way engineering
+drawings are represented indirectly is in the
+guise of NARA-SW (National Archives, Ft. Worth) aperture-card boxes, each of
+which holds ~1800 microform images of drawings.  This aperture-card box 
+form is useful for seeing
+entire groups of engineering drawings that have been newly added to the 
+Document Library as new aperture-card boxes are scanned.
 <br><br>
-To find specific engineering drawings outside the context of the drawing trees
-in which they reside, however, you won't be able to browse your way through 
-a sequential list of them.  Instead, I'd recommend going to our <blockquote>
+You also have the option of instead going to our 
 <a href="TipueSearch.html">G&N engineering-drawing search engine</a>
-</blockquote>
-which allows you to find engineering drawings by fragments of drawing numbers 
+ which allows you to find engineering drawings by fragments of drawing numbers 
 or drawing titles.  Or you can try our <a href="ElectroMechanical.html">
 Electro-Mechanical page</a>, which may provide additional resources or 
 related information.
@@ -1337,7 +1335,7 @@ tableOfContentsSpec = [
     { "anchor"  : "Fury", "title" : "Sound and Fury", "keywords" : ["Sound and fury"], "blurb" : blurbSoundAndFury },
     { "anchor"  : "Different", "title" : "Something Different", "keywords" : ["something different"], "blurb" : blurbSomethingDifferent },
      
-    { "anchor" : "EngineeringDrawings", "title" : "Electrical and Mechanical Design", "keywords" : [ "Engineering Drawings", "Drawing Tree" ], "blurb" : blurbElectroMechanical },
+    { "anchor" : "EngineeringDrawings", "title" : "Electrical and Mechanical Design", "keywords" : [ "Engineering Drawings", "Drawing Tree", "NARASW" ], "blurb" : blurbElectroMechanical },
     { "anchor" : "Everything", "title" : "Everything", "blurb" : blurbEverything, "all" : True, "lineNumbers" : True, "hr" : True }
 ]
 
