@@ -629,6 +629,15 @@ any longer. Fortunately, that has turned out to be false, although there may
 be enough truth in it to make us very uncomfortable.
 """
 
+blurbIMCC = """
+This section relates to the Integrated Mission Control Center (IMCC), and
+to its facilities, particularly the Mission Control Center in 
+Houston (MCC-Houston) and the Real Time Computer Complex (RTCC).  Emphasis is
+on the physical facilities and their development and history, rather than 
+anything they accomplished in so far as specific Gemini or Apollo missions 
+are concerned.
+"""
+
 blurbSoundAndFury = """
 The title of this section is a little misleading, in that many people, upon 
 seeing the lead-in "sound and fury ...", would immediately fill in the ending 
@@ -1324,6 +1333,7 @@ tableOfContentsSpec = [
     { "anchor" : "StatusReports", "title" : "Status Reports", "keywords" : ["Status report"]},
     { "anchor" : "Press", "title" : "The Press", "keywords" : ["Press"]},
     { "anchor" : "OBC", "title" : "Gemini On-Board Computer (OBC)", "keywords" : ["OBC"]},
+    { "anchor" : "IMCC", "title" : "Integrated Mission Control Center (IMCC)", "keywords" : ["IMCC"], "blurb" : blurbIMCC},
     { "anchor"  : "Fury", "title" : "Sound and Fury", "keywords" : ["Sound and fury"], "blurb" : blurbSoundAndFury },
     { "anchor"  : "Different", "title" : "Something Different", "keywords" : ["something different"], "blurb" : blurbSomethingDifferent },
      
@@ -1758,4 +1768,4 @@ if False:
                 print("Archives: " + str(record["Archives"]))
                 print("Sponsors: " + str(record["Sponsors"]))
                 print("Disclaimer: " + record["Disclaimer"])
-                print("Epochs: File=%d Added=%d" % (record["EpochFile"], record["EpochAdded"]))      
+                print("Epochs: File=%d Added=%d" % (record["EpochFile"], record["EpochAdded"]))         
