@@ -99,6 +99,7 @@ You
 
 
 
+
                     will be prompted for a password, which is
                     "virtualagc".]</font></li>
               </ul>
@@ -183,6 +184,7 @@ the
 
 
 
+
               VM</a><br>
             <br>
             or <br>
@@ -198,6 +200,7 @@ the
           </td>
           <td valign="middle"><a
               href="Downloads/VirtualAGC-Ubuntu-14.04-32-2017-08-31.tar.xz">2017-08-31,
+
 
 
 
@@ -248,6 +251,7 @@ the
           </td>
           <td valign="middle"><a
               href="Downloads/VirtualAGC-Windows-2017-08-31.tar.xz">2017-08-31,
+
 
 
 
@@ -325,6 +329,7 @@ the
 
 
 
+
               21MB</a></td>
           <td valign="top"><a
               href="#Installer_for_Ubuntu_14.04_32-bit_x86">Using Ubuntu
@@ -357,11 +362,13 @@ the
 
 
 
+
               23MB</a><br>
           </td>
           <td valign="top"><a
               href="download.html#Installer_for_Ubuntu_14.04_32-bit_x86">Using
 Ubuntu
+
 
 
 
@@ -412,11 +419,13 @@ Ubuntu
 
 
 
+
               42MB</a><br>
           </td>
           <td valign="top"><a
               href="download.html#Installer_for_Ubuntu_14.04_32-bit_x86">Using
 Ubuntu
+
 
 
 
@@ -471,6 +480,7 @@ Ubuntu
 
 
 
+
                 installer</a><br>
             </font> </td>
         </tr>
@@ -481,6 +491,7 @@ Ubuntu
           </td>
           <td valign="top"><a
               href="Downloads/VirtualAGC-Raspbian-2017-03-29.tar.xz">2017-03-29,
+
 
 
 
@@ -546,6 +557,7 @@ Ubuntu
 
 
 
+
               23MB</a></td>
           <td valign="top"><a href="#Installer_for_Windows">Using
               Windows tarball</a></td>
@@ -571,6 +583,7 @@ Ubuntu
       <ul>
         <li><a href="#Characteristics_of_the_Virtual_AGC_VM">Characteristics
 of
+
 
 
 
@@ -674,6 +687,7 @@ to
 
 
 
+
           this page</a>) FreeBSD as well even though the latter is not
         obvious from the VirtualBox website.<br>
       </li>
@@ -694,6 +708,7 @@ to
           href="#Downloading_and_Building_Virtual_AGC">download the
           Virtual AGC source code, and perhaps build it yourself</a>.&nbsp;
 This
+
 
 
 
@@ -751,6 +766,7 @@ This
     <p>The virtual-machine approach should work with any host system
       supported by <a href="http://www.virtualbox.org">VirtualBox</a>:&nbsp;
 namely,
+
 
 
 
@@ -945,6 +961,7 @@ namely,
 
 
 
+
           4.3.40</a>, but it should work with later versions as
         well.&nbsp; If you have a different version, you may find
         yourself wanting to reinstall VirtualBox's "guest additions"; if
@@ -1044,6 +1061,7 @@ a
 
 
 
+
         script</a> that does the same thing.&nbsp; Just put it somewhere
       (say in the "home" directory, /home/virtualagc/), and then from a
       command-line run the following command:<br>
@@ -1119,6 +1137,7 @@ about
 
 
 
+
           configuring it</a>.<br>
       </li>
     </ol>
@@ -1153,6 +1172,7 @@ about
       <li> The popup window that appears will ask you for the location
         of the program you want to run.&nbsp; It is C:\Users\<i>YourNameHere</i>\VirtualAGC\bin\VirtualAGC.exe.</li>
       <li> After the shortcut has been created on the desktop, <i>right</i>-click
+
 
 
 
@@ -1223,10 +1243,12 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">t
 
 
 
+
         instructions for development using Code::Blocks on our GitHub
         wiki</a>, as well as <a
         href="https://github.com/virtualagc/virtualagc/wiki/VisualDebugging">the
 instructions
+
 
 
 
@@ -1279,11 +1301,13 @@ the
 
 
 
+
       Source Code<br>
     </h3>
     <p>The complete up-to-the-moment source code is available from <a
         href="https://github.com/virtualagc/virtualagc">GitHub</a>.&nbsp;
 There
+
 
 
 
@@ -1339,6 +1363,7 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
 
 
 
+
       instructions at the GitHub repository</a> may (or may not) be more
     up-to-date than those here.<br>
     <h3><a name="CMake-Based_Builds"></a>CMake-Based Builds</h3>
@@ -1363,6 +1388,7 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
       Michael!), and if the "official" instructions below don't appeal
       to you, or if you simply like the idea of using CMake, Michael's <a
 href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-CMake">documentation
+
 
 
 
@@ -1452,6 +1478,18 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
           modified manually to add -fPIC to the compiler command lines.)</li>
       </ul>
     </ul>
+    Additionally, though I have never encountered it myself, I have
+    heard hints of Linux systems in which the Python 2 interpreter is no
+    longer installed by default.&nbsp; If so, you need to install it,
+    because the Virtual AGC build process invokes some Python 2 scripts
+    and will fail if Python 2 is not present.&nbsp; Don't worry!&nbsp;
+    You can have both Python 2 and Python 3 (which will presumably be
+    the default on these systems); they can coexist without any
+    problem.&nbsp; On Ubuntu, Debian, or Linux Mint, for example, a good
+    place to start might be with "sudo apt-get install python2.7-dev",
+    but without having one of these hypothetical problematic systems in
+    front of me, I unfortunately can't say for sure.<br>
+    <br>
     Here's how to build Virtual AGC:<br>
     <ul>
       <li>In the Virtual AGC source directory, run "make install" or
@@ -1486,6 +1524,7 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
       override the C compiler and the C++ compiler.&nbsp; See the
       comments in <a
         href="https://github.com/virtualagc/virtualagc/blob/master/Makefile">the
+
 
 
 
@@ -1641,6 +1680,7 @@ That
 
 
 
+
     isn't the latest version of FreeBSD (version 11), but it's much
     easier to install than FreeBSD proper, and should be 100% equivalent
     for the same version numbers.&nbsp; At any rate, I know nothing
@@ -1718,6 +1758,7 @@ That
     <ol>
       <li><a
 href="http://www.oracle.com/technetwork/server-storage/developerstudio/downloads/index.html">Install
+
 
 
 
@@ -1838,6 +1879,7 @@ version
 
 
 
+
           of Xcode for your version of Mac OS X</a> ... of course!&nbsp;
         I use Xcode 4.6.3.<br>
       </li>
@@ -1885,6 +1927,7 @@ version
         installed.&nbsp; In my case, I found that the location was
         /opt/local/Library/Frameworks/wxWidgets.framework/Versions/wxGTK/2.8/bin.&nbsp;
 You
+
 
 
 
@@ -1978,8 +2021,7 @@ You
           export CC=clang
           git clone https://github.com/virtualagc/virtualagc.git
           cd virtualagc
-          make MACOSX=yes FORCE_clang=yes clean install
-</pre>
+          make MACOSX=yes FORCE_clang=yes clean install<br></pre>Additionally, though, it appears as though Apple no longer installs Python 2 in MacOS 12.3 or later.&nbsp; There are some Python 2 scripts in the Virtual AGC source tree which the build process needs in order to run.&nbsp; Therefore, prior to the running the <tt>make</tt> command shown above, you may need to explicitly install Python 2.&nbsp; It may be best for you to google installation procedures yourself, but at least as of this writing, <a href="https://www.python.org/downloads/release/python-2718/">the MacOS installer for the so-called "final" release of Python 2, namely Python 2.7.18, can be found at python.org</a>.<br>
     <blockquote>
       <blockquote> </blockquote>
     </blockquote>
@@ -1987,8 +2029,7 @@ You
     <table summary="" cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
-          <td valign="middle" align="center"><img alt=""
-              src="greenCheckmark.png" width="72" height="75"><br>
+          <td valign="middle" align="center"><img alt="" src="greenCheckmark.png" width="72" height="75"><br>
           </td>
           <td valign="middle" align="center"><big><big><b>This works!<br>
                 </b> <small><small><small><i>Last verified (Andy
@@ -2083,14 +2124,12 @@ Within
         /usr/local/bin, /usr/local/include, /usr/local/lib, and so
         on.&nbsp; The Virtual AGC makefiles are hard-coded to assume
         these installation locations.&nbsp; Note, however, that the
-        Virtual AGC binaries you are going to create are <span
-          style="font-style: italic;">not</span> installed under
+        Virtual AGC binaries you are going to create are <span style="font-style: italic;">not</span> installed under
         /usr/local, because while the Virtual AGC apps are being created
         using <b>Msys</b>, <b>Msys</b> is not needed to run them ...
         they are simply Windows programs like any other.<br>
       </li>
-      <li>Obtain a source zipfile of <a
-          href="http://www.wxwidgets.org/">wxWidgets, version 2.8.12</a>,
+      <li>Obtain a source zipfile of <a href="http://www.wxwidgets.org/">wxWidgets, version 2.8.12</a>,
         or as close to this 2.8.x version as is available.&nbsp; Of the
         several varieties offered for download (wxAll, wxMSW, wxGTK,
         ...) chose wxMSW, and make sure you get the source code rather
@@ -2138,8 +2177,7 @@ and
     <table summary="" cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
-          <td valign="middle" align="center"><img alt=""
-              src="greenCheckmark.png" width="72" height="75"><br>
+          <td valign="middle" align="center"><img alt="" src="greenCheckmark.png" width="72" height="75"><br>
           </td>
           <td valign="middle" align="center"><big><big><b>This works!</b><small><small><small><i><br>
                         Last verified (RSB): 2021-05-26</i></small></small></small><br>
@@ -2147,8 +2185,7 @@ and
         </tr>
       </tbody>
     </table>
-    <p>I probably don't need to describe what <a
-        href="https://webassembly.org/">WebAssembly (Wasm)</a> is, since
+    <p>I probably don't need to describe what <a href="https://webassembly.org/">WebAssembly (Wasm)</a> is, since
       anybody interested enough in reading about how to build Virtual
       AGC for it almost certainly would know much more about it than I
       do anyway.&nbsp; Nevertheless, here's what little I do know.&nbsp;
@@ -2172,16 +2209,13 @@ and
     peripherals you desire.&nbsp; In principle, I suppose, you could
     build an entire CM or LM simulation within your browser.<br>
     <p>Many thanks to Michael Franzl for creating this Virtual AGC
-      port.&nbsp; Note that <a
-        href="https://github.com/michaelfranzl/webAGC">Michael's code is
+      port.&nbsp; Note that <a href="https://github.com/michaelfranzl/webAGC">Michael's code is
         provided in a separate repository (webAGC)</a>, rather than
       being integrated within the Virtual AGC software repository.&nbsp;
-      Additionally, it includes <a
-        href="https://github.com/michaelfranzl/webAGC/tree/dev/demo">demo
+      Additionally, it includes <a href="https://github.com/michaelfranzl/webAGC/tree/dev/demo">demo
 
         code for integrating webAGC into your website</a> (including a
-      DSKY model) as well as a <a
-        href="https://michaelfranzl.github.io/webAGC/demo/">fun live
+      DSKY model) as well as a <a href="https://michaelfranzl.github.io/webAGC/demo/">fun live
         demo</a>.&nbsp; Any description I would give of Michael's live
       demo would likely be obsolete by the time you read it, but it's
       worth noting that (at least at this writing) you have to use the
@@ -2196,8 +2230,7 @@ and
       the AGC program used in the Apollo 11 LM, while Validation is a
       "modern" AGC program originally written by me to test the
       simulated AGC CPU.&nbsp; Some very basic instructions for running
-      <a href="index.html#Playing_with_Luminary_">Luminary099</a> or <a
-        href="index.html#Running_the_Validation_Suite_">Validation</a>
+      <a href="index.html#Playing_with_Luminary_">Luminary099</a> or <a href="index.html#Running_the_Validation_Suite_">Validation</a>
       can be found on our website home page.&nbsp; <br>
     </p>
     <p>Of course, for some years there has already been a JavaScript
@@ -2219,8 +2252,7 @@ and
       to asm.js, but that emscripten now seems to target WebAssembly
       rather than asm.js, so that train may have left the station!<br>
     </p>
-    <p>Here's my interpretation of <a
-        href="https://github.com/virtualagc/virtualagc#webassembly">Michael's
+    <p>Here's my interpretation of <a href="https://github.com/virtualagc/virtualagc#webassembly">Michael's
 
         build instructions</a> for Linux Mint 19 or later, 64-bit.&nbsp;
       I personally normally use Linux Mint 17, but these instructions
@@ -2237,8 +2269,7 @@ and
 
         In the case of Mint 19, there are prebuilt installers you can
         download from the cmake website.&nbsp; For example, I installed
-        a <a
-href="https://github.com/Kitware/CMake/releases/download/v3.20.2/cmake-3.20.2-linux-x86_64.sh">prebuilt
+        a <a href="https://github.com/Kitware/CMake/releases/download/v3.20.2/cmake-3.20.2-linux-x86_64.sh">prebuilt
 
           cmake 3.20.2 from a script</a>.<br>
       </li>
@@ -2310,8 +2341,7 @@ https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-13/wasi-sdk-1
       </blockquote>
     </blockquote>
     <ul>
-      <li>Installation of <a
-          href="https://github.com/WebAssembly/binaryen">binaryen</a>.</li>
+      <li>Installation of <a href="https://github.com/WebAssembly/binaryen">binaryen</a>.</li>
     </ul>
     <blockquote>
       <blockquote><tt>wget https://github.com/WebAssembly/binaryen.git</tt><tt><br>
@@ -2396,8 +2426,7 @@ https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-13/wasi-sdk-1
         WebAssembly, WebRTC etc., the browser insists that content be
         served over the network. This doesn't mean that servers need to
         have any 'business logic' implemented; they can just be static
-        content delivery pipes. In this sense, the<span>&nbsp;</span></span><code
-        style="box-sizing: border-box; font-family: SFMono-Regular,
+        content delivery pipes. In this sense, the<span>&nbsp;</span></span><code style="box-sizing: border-box; font-family: SFMono-Regular,
         Consolas, &quot;Liberation Mono&quot;, Menlo, monospace;
         font-size: 11.9px; padding: 0.2em 0.4em; margin: 0px;
         background-color: var(--color-markdown-code-bg); border-radius:
@@ -2434,8 +2463,7 @@ https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-13/wasi-sdk-1
     <table summary="" cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
-          <td valign="middle" align="center"><img alt=""
-              src="yellowQuestion.png" width="70" height="75"><br>
+          <td valign="middle" align="center"><img alt="" src="yellowQuestion.png" width="70" height="75"><br>
           </td>
           <td valign="middle" align="center"><big><big><b>Still okay?</b></big></big><br>
           </td>
@@ -2463,8 +2491,7 @@ https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-13/wasi-sdk-1
     itself is, it's obviously only marginally useful until such time as
     there's a DSKY.&nbsp; You should be able to do command-line
     debugging, however, so you could in theory run and debug AGC code.<br>
-    <h2><a name="Running_the_Validation_Suite"
-        id="Running_the_Validation_Suite"></a>Running the Validation
+    <h2><a name="Running_the_Validation_Suite" id="Running_the_Validation_Suite"></a>Running the Validation
       Suite of the simulated AGC<br>
     </h2>
     Having installed the software as above, you can test the emulated
@@ -2497,8 +2524,7 @@ https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-13/wasi-sdk-1
     </ol>
     If this doesn't work for some reason, refer to the trouble-shooting
     info in the <a href="faq.html">FAQ</a>.<br>
-    <h2><a name="Some_Resource_Issues_on_Slower"
-        id="Some_Resource_Issues_on_Slower"></a>Some Resource Issues on
+    <h2><a name="Some_Resource_Issues_on_Slower" id="Some_Resource_Issues_on_Slower"></a>Some Resource Issues on
       Slower Computers, Such as Raspberry Pi<br>
     </h2>
     On new but slow computers like Raspberry Pi, or old computers such
@@ -2544,19 +2570,18 @@ https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-13/wasi-sdk-1
         text-transform: none; white-space: normal; widows: 1;
         word-spacing: 0px; -webkit-text-stroke-width: 0px; display:
         inline !important; float: none; background-color: rgb(255, 255,
-        255);"> This page is available under the <a
-          href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
+        255);"> This page is available under the <a href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 Commons
 
           No Rights Reserved License</a></span><br>
-      <i><font size="-1">Last modified by <a
-            href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2021-11-12.<br>
+      <i><font size="-1">Last modified by <a href="mailto:info@sandroid.org">Ronald Burkey</a> on
+          2022-07-09.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
               by ibiblio.org" src="hosted.png" width="300" height="100"></a><br>
         </font></i> </center>
     <br>
-  </body>
-</html>
+  
+
+</body></html>
