@@ -1,5 +1,5 @@
 /*
- * Copyright 2009,2010,2016-2021 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2009,2010,2016-2022 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -142,6 +142,9 @@
  *                              wxALIGN_CENTER_HORIZONTAL in horizontal sizers.
  *              2021-08-24 RSB  Added Luminary 96, removed 99R2. Changed Apollo 12 from FP7
  *                              to FP6.
+ *              2022-07-17 RSB  Fixed an "assertion error" that appears at startup when
+ *                              the newly-released wxWidgets 3.2 is used and VirtualAGC.cfg
+ *                              doesn't exist yet.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -2342,6 +2345,19 @@ void
 VirtualAGC::SetDefaultConfiguration(void)
 {
   missionRadioButtons[ID_LUMINARY131BUTTON - ID_FIRSTMISSION]->SetValue(true);
+  if (DropDown) // 2022-07-17.
+    {
+      DeviceAGCversionDropDownList->SetSelection(0);
+      for (int drop = 0; drop < DeviceAGCversionDropDownList->GetCount();
+          drop++)
+        {
+          if (DeviceAGCversionDropDownList->GetString(drop) == wxT("Apollo 11 Lunar Module"))
+            {
+              DeviceAGCversionDropDownList->SetSelection(drop);
+              break;
+            }
+        }
+    }
   AgcCustomFilename->SetValue(wxT(""));
   FlightProgram6Button->SetValue(true);
   if (!maximumSquish)
