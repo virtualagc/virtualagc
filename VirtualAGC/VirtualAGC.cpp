@@ -146,6 +146,7 @@
  *                              the newly-released wxWidgets 3.2 is used and VirtualAGC.cfg
  *                              doesn't exist yet. Made window border resizable and removed
  *                              wxCLIP_CHILDREN in attempt to fix some sizing issues.
+ *                              Added --font-floor.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -170,6 +171,7 @@ int noSquish = 0;
 int dropdownSquish = 1;
 int maximumSquish = 0;
 int maximizeAtStartup = 0;
+long fontFloor = 8;
 
 /*
  * The following array specifies most properties of "missions" (i.e., specific
@@ -457,8 +459,8 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
     }
   if (ReallySmall)
     DropDown = true;
-  if (Points < 8)
-    Points = 8;
+  if (Points < fontFloor)
+    Points = fontFloor;
   Font.SetPointSize(Points);
   SetFont(Font);
 
@@ -2042,6 +2044,10 @@ VirtualAgcApp::OnInit()
         {
           maximizeAtStartup = 1;
         }
+      else if (ArgStart.IsSameAs(wxT("--font-floor")))
+        {
+          ArgEnd.ToLong(&fontFloor);
+        }
       else
         {
           Help: printf("USAGE:\n");
@@ -2086,6 +2092,9 @@ VirtualAgcApp::OnInit()
           printf("\tmaximization button, nor is it generally resizable.\n");
           printf("\tso --maximize is actually the only method provided of\n");
           printf("\tmaximizing the program anyway.\n");
+          printf("--font-floor=N\n");
+          printf("\tSets the minimum allowed font size, in integers.  The\n");
+          printf("\tdefault is 8.\n");
           exit(1);
         }
     }
