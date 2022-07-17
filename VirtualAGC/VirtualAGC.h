@@ -1,5 +1,5 @@
 /*
- * Copyright 2009,2016,2017,2019, 2020 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2009,2016,2017,2019,2020 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -247,7 +247,7 @@ public:
   virtual ~Simulation() {};
   Simulation(wxWindow* parent, int id, const wxString& title,
       const wxPoint& pos = wxDefaultPosition,
-      const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE);
+      const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE | wxRESIZE_BORDER);
   void
   WriteSimulationLabel(wxString Label);
   unsigned char Keycodes[8192];

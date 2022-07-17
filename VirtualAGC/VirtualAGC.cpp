@@ -144,7 +144,8 @@
  *                              to FP6.
  *              2022-07-17 RSB  Fixed an "assertion error" that appears at startup when
  *                              the newly-released wxWidgets 3.2 is used and VirtualAGC.cfg
- *                              doesn't exist yet.
+ *                              doesn't exist yet. Made window border resizable and removed
+ *                              wxCLIP_CHILDREN in attempt to fix some sizing issues.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -431,8 +432,8 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
     wxFrame(parent, id, title, pos, size,
         maximumSquish ?
             (maximizeAtStartup ? wxMAXIMIZE : 0) :
-            (wxCAPTION | wxMINIMIZE_BOX | wxCLOSE_BOX | wxCLIP_CHILDREN
-                | wxSYSTEM_MENU))
+            (wxCAPTION | wxMINIMIZE_BOX | wxCLOSE_BOX // | wxCLIP_CHILDREN
+                | wxSYSTEM_MENU | wxRESIZE_BORDER))
 {
 
   // We auto-adjust fonts and image sizes if the screen size is too small.
