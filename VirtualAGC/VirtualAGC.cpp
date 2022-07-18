@@ -147,6 +147,12 @@
  *                              doesn't exist yet. Made window border resizable and removed
  *                              wxCLIP_CHILDREN in attempt to fix some sizing issues.
  *                              Added --font-floor.
+ *              2022-07-18 RSB  I'm told that on some platforms, the text color (which
+ *                              should be black unless explicitly grayed out) is unreadably
+ *                              light on some platforms now that wxWidgets 3.2 is installed.
+ *                              On the theory that the default color isn't being initialized
+ *                              the way I expect, I now try to explicitly set it to black.
+ *
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -549,6 +555,8 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
           wxT("AGC Simulation Type"), wxDefaultPosition, wxDefaultSize);
       SimTypeLabel2 = new wxStaticText(this, wxID_ANY,
           wxT("AGC Simulation Type"), wxDefaultPosition, wxDefaultSize);
+      SimTypeLabel->SetForegroundColour(wxColor (0, 0, 0));
+      SimTypeLabel2->SetForegroundColour(wxColor (0, 0, 0));
     }
   for (int i = ID_FIRSTMISSION; i < ID_AGCCUSTOMBUTTON; i++)
     {
@@ -2100,6 +2108,7 @@ VirtualAgcApp::OnInit()
     }
 
   MainFrame = new VirtualAGC(NULL, wxID_ANY, wxEmptyString);
+  MainFrame->SetForegroundColour(wxColor (0, 0, 0));
   SetTopWindow(MainFrame);
   MainFrame->Show();
   return true;

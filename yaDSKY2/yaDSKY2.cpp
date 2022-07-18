@@ -1452,7 +1452,7 @@ yaDskyApp::OnInit ()
 	}
     }
 
-  MainWindow->recordingFileOpen) = false;
+  MainWindow->recordingFileOpen = false;
 
   MainWindow->Timer = new TimerClass ();
   MainWindow->Timer->Start (PULSE_INTERVAL);
