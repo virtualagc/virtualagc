@@ -84,6 +84,13 @@
  *		                I'm not sure it really should be, but it
  *		                seems to fix some sizing problems that have
  *		                appeared with wxWidgets 3.2.
+ *		2022-07-18 RSB  Apparently, on some platforms,
+ *		                recordingFileOpen (and potentially lots
+ *		                of other stuff is not being initialized,
+ *		                and hence yaDSKY2 fails at startup when it
+ *		                tries to write to garbage file pointers.
+ *		                Now it's explicitly initialized.  But
+ *		                who knows what else may be lurking?
  *
  * The yaDSKY2 program is intended to be a completely identical drop-in
  * replacement for the yaDSKY program as it exists at 2009-03-06.
@@ -1444,6 +1451,8 @@ yaDskyApp::OnInit ()
 	  Fin.Close ();
 	}
     }
+
+  MainWindow->recordingFileOpen) = false;
 
   MainWindow->Timer = new TimerClass ();
   MainWindow->Timer->Start (PULSE_INTERVAL);
