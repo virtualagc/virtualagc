@@ -1258,7 +1258,7 @@ tableOfContentsSpec = [
     { "anchor" : "GSOPs", "title" : "Guidance System Operations Plans (GSOP)", "sortKey" : myDashSortKey, "keywords" : [ "GSOP" ], "blurb" : blurbGSOPs },
     { "anchor" : "ReferenceCards", "title" : "Quick-Reference Cards, Data Cards, Cue Cards", "keywords" : ["Reference cards"]},
     { "anchor" : "PadLoads", "title" : "AGC Pad Loads", "sortKey" : myMissionSortKey, "keywords" : [ "Pad load" ], "blurb" : blurbPadloads },
-    { "anchor" : "EMPs", "title" : "Erasable Memory Programs (EMP)", "keywords" : ["Erasable memory programs"]},
+    { "anchor" : "EMPs", "title" : "Erasable Memory Programs (EMP)", "keywords" : ["Erasable memory programs", "EMP"]},
     { "anchor" : "AssemblyListings", "title" : "Software Listings", "keywords" : ["Assembly listing", "release table"], "blurb" : blurbAssemblyListing },
     { "anchor" : "MathFlow", "title" : "Math Flow", "keywords" : [ "Guidance equations" ], "blurb" : blurbMathFlow },
     { "anchor" : "SGAMemos", "title" : "Space Guidance Analysis Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Space Guidance Analysis Memo"], "blurb" : blurbSGA },
@@ -1766,4 +1766,4 @@ if False:
                 print("Archives: " + str(record["Archives"]))
                 print("Sponsors: " + str(record["Sponsors"]))
                 print("Disclaimer: " + record["Disclaimer"])
-                print("Epochs: File=%d Added=%d" % (record["EpochFile"], record["EpochAdded"]))         
+                print("Epochs: File=%d Added=%d" % (record["EpochFile"], record["EpochAdded"]))            
