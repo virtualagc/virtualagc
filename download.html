@@ -100,6 +100,7 @@ You
 
 
 
+
                     will be prompted for a password, which is
                     "virtualagc".]</font></li>
               </ul>
@@ -185,6 +186,7 @@ the
 
 
 
+
               VM</a><br>
             <br>
             or <br>
@@ -200,6 +202,7 @@ the
           </td>
           <td valign="middle"><a
               href="Downloads/VirtualAGC-Ubuntu-14.04-32-2017-08-31.tar.xz">2017-08-31,
+
 
 
 
@@ -251,6 +254,7 @@ the
           </td>
           <td valign="middle"><a
               href="Downloads/VirtualAGC-Windows-2017-08-31.tar.xz">2017-08-31,
+
 
 
 
@@ -330,6 +334,7 @@ the
 
 
 
+
               21MB</a></td>
           <td valign="top"><a
               href="#Installer_for_Ubuntu_14.04_32-bit_x86">Using Ubuntu
@@ -363,11 +368,13 @@ the
 
 
 
+
               23MB</a><br>
           </td>
           <td valign="top"><a
               href="download.html#Installer_for_Ubuntu_14.04_32-bit_x86">Using
 Ubuntu
+
 
 
 
@@ -420,11 +427,13 @@ Ubuntu
 
 
 
+
               42MB</a><br>
           </td>
           <td valign="top"><a
               href="download.html#Installer_for_Ubuntu_14.04_32-bit_x86">Using
 Ubuntu
+
 
 
 
@@ -481,6 +490,7 @@ Ubuntu
 
 
 
+
                 installer</a><br>
             </font> </td>
         </tr>
@@ -491,6 +501,7 @@ Ubuntu
           </td>
           <td valign="top"><a
               href="Downloads/VirtualAGC-Raspbian-2017-03-29.tar.xz">2017-03-29,
+
 
 
 
@@ -558,6 +569,7 @@ Ubuntu
 
 
 
+
               23MB</a></td>
           <td valign="top"><a href="#Installer_for_Windows">Using
               Windows tarball</a></td>
@@ -583,6 +595,7 @@ Ubuntu
       <ul>
         <li><a href="#Characteristics_of_the_Virtual_AGC_VM">Characteristics
 of
+
 
 
 
@@ -688,6 +701,7 @@ to
 
 
 
+
           this page</a>) FreeBSD as well even though the latter is not
         obvious from the VirtualBox website.<br>
       </li>
@@ -708,6 +722,7 @@ to
           href="#Downloading_and_Building_Virtual_AGC">download the
           Virtual AGC source code, and perhaps build it yourself</a>.&nbsp;
 This
+
 
 
 
@@ -766,6 +781,7 @@ This
     <p>The virtual-machine approach should work with any host system
       supported by <a href="http://www.virtualbox.org">VirtualBox</a>:&nbsp;
 namely,
+
 
 
 
@@ -962,6 +978,7 @@ namely,
 
 
 
+
           4.3.40</a>, but it should work with later versions as
         well.&nbsp; If you have a different version, you may find
         yourself wanting to reinstall VirtualBox's "guest additions"; if
@@ -1062,6 +1079,7 @@ a
 
 
 
+
         script</a> that does the same thing.&nbsp; Just put it somewhere
       (say in the "home" directory, /home/virtualagc/), and then from a
       command-line run the following command:<br>
@@ -1138,6 +1156,7 @@ about
 
 
 
+
           configuring it</a>.<br>
       </li>
     </ol>
@@ -1172,6 +1191,7 @@ about
       <li> The popup window that appears will ask you for the location
         of the program you want to run.&nbsp; It is C:\Users\<i>YourNameHere</i>\VirtualAGC\bin\VirtualAGC.exe.</li>
       <li> After the shortcut has been created on the desktop, <i>right</i>-click
+
 
 
 
@@ -1244,10 +1264,12 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">t
 
 
 
+
         instructions for development using Code::Blocks on our GitHub
         wiki</a>, as well as <a
         href="https://github.com/virtualagc/virtualagc/wiki/VisualDebugging">the
 instructions
+
 
 
 
@@ -1302,11 +1324,13 @@ the
 
 
 
+
       Source Code<br>
     </h3>
     <p>The complete up-to-the-moment source code is available from <a
         href="https://github.com/virtualagc/virtualagc">GitHub</a>.&nbsp;
 There
+
 
 
 
@@ -1364,6 +1388,7 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
 
 
 
+
       instructions at the GitHub repository</a> may (or may not) be more
     up-to-date than those here.<br>
     <h3><a name="CMake-Based_Builds"></a>CMake-Based Builds</h3>
@@ -1388,6 +1413,7 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
       Michael!), and if the "official" instructions below don't appeal
       to you, or if you simply like the idea of using CMake, Michael's <a
 href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-CMake">documentation
+
 
 
 
@@ -1478,17 +1504,22 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
           modified manually to add -fPIC to the compiler command lines.)</li>
       </ul>
     </ul>
-    Additionally, though I have never encountered it myself, I have
-    heard hints of Linux systems in which the Python 2 interpreter is no
-    longer installed by default.&nbsp; If so, you need to install it,
-    because the Virtual AGC build process invokes some Python 2 scripts
-    and will fail if Python 2 is not present.&nbsp; Don't worry!&nbsp;
-    You can have both Python 2 and Python 3 (which will presumably be
-    the default on these systems); they can coexist without any
-    problem.&nbsp; On Ubuntu, Debian, or Linux Mint, for example, a good
-    place to start might be with "sudo apt-get install python2.7-dev",
-    but without having one of these hypothetical problematic systems in
-    front of me, I unfortunately can't say for sure.<br>
+    I have lately started encountering systems (Linux Mint and Ubuntu,
+    I'm looking at <i>you</i>!) for which the Virtual AGC build
+    procedure described below fails, due the operating system being
+    configured in such a way that the Python interpreter cannot be found
+    even though we (Virtual AGC) are referencing it as described in
+    Python documentation.&nbsp; If you try the following from a command
+    line,<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; <tt>/usr/bin/env python</tt><br>
+    <br>
+    and it fails to actually run Python, then you have this issue and
+    must fix it before proceeding.&nbsp; On some versions of Linux Mint
+    and Ubuntu, there are packages called "python-is-python2" and
+    "python-is-python3" which can fix the problem.&nbsp; On some
+    versions, just reinstalling Python 3 or Python 2 will fix the
+    problem.<br>
     <br>
     Here's how to build Virtual AGC:<br>
     <ul>
@@ -1524,6 +1555,7 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
       override the C compiler and the C++ compiler.&nbsp; See the
       comments in <a
         href="https://github.com/virtualagc/virtualagc/blob/master/Makefile">the
+
 
 
 
@@ -1681,6 +1713,7 @@ That
 
 
 
+
     isn't the latest version of FreeBSD (version 11), but it's much
     easier to install than FreeBSD proper, and should be 100% equivalent
     for the same version numbers.&nbsp; At any rate, I know nothing
@@ -1758,6 +1791,7 @@ That
     <ol>
       <li><a
 href="http://www.oracle.com/technetwork/server-storage/developerstudio/downloads/index.html">Install
+
 
 
 
@@ -1880,6 +1914,7 @@ version
 
 
 
+
           of Xcode for your version of Mac OS X</a> ... of course!&nbsp;
         I use Xcode 4.6.3.<br>
       </li>
@@ -1927,6 +1962,7 @@ version
         installed.&nbsp; In my case, I found that the location was
         /opt/local/Library/Frameworks/wxWidgets.framework/Versions/wxGTK/2.8/bin.&nbsp;
 You
+
 
 
 
@@ -2021,7 +2057,7 @@ You
           export CC=clang
           git clone https://github.com/virtualagc/virtualagc.git
           cd virtualagc
-          make MACOSX=yes FORCE_clang=yes clean install<br></pre>Additionally, though, it appears as though Apple no longer installs Python 2 in MacOS 12.3 or later.&nbsp; There are some Python 2 scripts in the Virtual AGC source tree which the build process needs in order to run.&nbsp; Therefore, prior to the running the <tt>make</tt> command shown above, you may need to explicitly install Python 2.&nbsp; It may be best for you to google installation procedures yourself, but at least as of this writing, <a href="https://www.python.org/downloads/release/python-2718/">the MacOS installer for the so-called "final" release of Python 2, namely Python 2.7.18, can be found at python.org</a>.<br>
+          make MACOSX=yes FORCE_clang=yes clean install<br></pre>On some versions of Mac OS, the Virtual AGC build procedure can no longer find the Python interpreter, and our build procedure thus fails.&nbsp; You can diagnose this problem by running<br><br>&nbsp;&nbsp;&nbsp;<tt> /usr/bin/env python</tt><br><br>from a command line.&nbsp; If it fails, then Virtual AGC will fail to build.&nbsp; It's almost certain that you actually <i>do</i> have a Python interpreter installed, however, but the command <tt>env python</tt> simply isn't set up correctly.&nbsp; I don't have any great advice as to how to solve the problem in a "Mac" way, so you may have to google it. Some users have found that you may be able to fix the problem by explicitly installing Python 2, which apparently is no longer installed by default for Mac OS 12.3 or later.&nbsp; As of this writing, <a href="https://www.python.org/downloads/release/python-2718/">the MacOS installer for the so-called "final" release of Python 2, namely Python 2.7.18, can be found at python.org</a>.&nbsp; <br>
     <blockquote>
       <blockquote> </blockquote>
     </blockquote>
@@ -2575,7 +2611,7 @@ Commons
 
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2022-07-09.<br>
+          2022-07-27.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
