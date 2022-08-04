@@ -152,7 +152,10 @@
  *                              light on some platforms now that wxWidgets 3.2 is installed.
  *                              On the theory that the default color isn't being initialized
  *                              the way I expect, I now try to explicitly set it to black.
- *
+ *              2022-08-04 RSB  Added a line to the 'simulate' file created by this program
+ *                              that I hope may make some kinds of debugging easier.  At
+ *                              least on Linux.  It might do nothing on Mac OS for all I
+ *                              know, but it shouldn't hurt anything.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -3150,6 +3153,7 @@ VirtualAGC::FormScript(void)
         }
 
       Fout.Write(wxT("export PIDS\n"));
+      Fout.Write(wxT("ps auxww | grep '\\.\\./bin/'\n"));
       Fout.Write(localExecutableDirectory + wxT("/SimStop\n"));
 #ifdef __APPLE__
       // In Mac OS X, starting LM_Simulator starts a child process which
