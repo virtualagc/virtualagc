@@ -1,4 +1,4 @@
-# Copyright 2003-2007,2009-2010,2016-2018,2020 Ronald S. Burkey <info@sandroid.org>
+# Copyright 2003-2007,2009-2010,2016-2018,2020,2022 Ronald S. Burkey <info@sandroid.org>
 #
 # This file is part of yaAGC.
 #
@@ -195,6 +195,11 @@
 #				the NVER version code.
 #		2020-12-24 RSB	Added Comanche045 and Manche45R2.
 #		2021-08-24 RSB	Added Luminary096 and removed LUM99R2.
+#		2022-08-07 RSB	Now allows copy the desktop icon to a *nix 
+#				desktop to fail, as this is reported to fail
+#				with Ubuntu running under WSL on Windows.
+#				Also, adds a prominent warning if Tcl/Tk is not
+#				found.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -795,14 +800,21 @@ else
 	@echo "Icon=$$HOME/VirtualAGC/Resources/ApolloPatch2-transparent.png" >>$(iTMP)
 	@echo "Path=$$HOME/VirtualAGC/Resources" >>$(iTMP)
 	chmod +x $(iTMP)
-	mv $(iTMP) $$HOME/Desktop/VirtualAGC.desktop
+	-mv $(iTMP) $$HOME/Desktop/VirtualAGC.desktop
 	@echo ""
 	@echo "================================================================"
-	@echo "Run Virtual AGC from its desktop icon."
-	@echo "Or else, run Virtual AGC from a command-line as follows:"
+	@echo "Run Virtual AGC from its desktop icon.  If the icon doesn't"
+	@echo "exist or doesen't work, run Virtual AGC from a command-line"
+	@echo "as follows:"
 	@echo "  cd ~/VirtualAGC/Resources"
 	@echo "  ../bin/VirtualAGC"
 	@echo "================================================================"
+	@if ! which wish >/dev/null ; then \
+	echo "Important: Tcl/Tk not found. You should install it, or else" ; \
+	echo "simulations may silently fail!  You do NOT need to rebuild " ; \
+	echo "Virtual AGC after installing Tcl/Tk." ; \
+	echo "================================================================" ; \
+	fi
 endif
 endif
 endif

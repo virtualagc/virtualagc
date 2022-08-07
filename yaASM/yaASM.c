@@ -1,5 +1,5 @@
 /*
- * Copyright 2011,2012,2019,2020 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2011,2012,2019,2020,2022 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -61,6 +61,12 @@
  *              2020-12-06 RSB  Changed character stuffed at end of input
  *                              line buffer to avoid a clang warning for
  *                              signed vs unsigned characters.
+ *              2022-08-07 RSB  Removed the assembler's timestamp from
+ *                              the assembly listing, in favor of a
+ *                              yaASM revision code (1.0).  Also,
+ *                              the latest compiler version now detects
+ *                              a potential string overflow, which I've
+ *                              worked around.
  */
 
 #include <stdlib.h>
@@ -71,6 +77,8 @@
 #include <stdint.h>
 #include <time.h>
 #include "./yaASM.h"
+
+#define REVISION "1.0"
 
 // Command-line options.
 static int HalfWordMode = 0; // Can change during assembly.
@@ -774,7 +782,7 @@ Pass(enum PassType_t PassType)
       time_t t;
       time(&t);
       printf(
-          "Listing created by OBC assembler yaASM (build " __DATE__ " " __TIME__ ")" NL);
+          "Listing created by OBC assembler yaASM rev " REVISION NL);
       printf("Source file %s processed %s" NL, Input, (char *) ctime(&t));
     }
 
@@ -1660,7 +1668,17 @@ Pass(enum PassType_t PassType)
                           ErrorCount++;
                           MaxWord--;
                         }
-                      sprintf(Symbols[NumSymbols].Name, "(%s)", Key.Name);
+                      // In the sprintf below, the input and output strings have the
+                      // same amount of space allocated to them, but the formatting
+                      // adds two characters.  The .Name field is sized to accommodate
+                      // this, but the compiler doesn't know this and detects a
+                      // possible overflow.  The string 'keyname' is allocated with
+                      // 2 less characters.
+                      {
+                        SymbolName_t keyname = { 0 };
+                        strncpy(keyname, Key.Name, sizeof(keyname) - 1);
+                        sprintf(Symbols[NumSymbols].Name, "(%s)", keyname);
+                      }
                       Symbols[NumSymbols].Address.HalfWordMode = 0;
                       Symbols[NumSymbols].Address.Module = 0;
                       Symbols[NumSymbols].Address.Page = 017;

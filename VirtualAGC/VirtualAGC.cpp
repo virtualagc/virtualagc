@@ -156,6 +156,8 @@
  *                              that I hope may make some kinds of debugging easier.  At
  *                              least on Linux.  It might do nothing on Mac OS for all I
  *                              know, but it shouldn't hurt anything.
+ *              2022-08-07 RSB  Expanded the extra line to 'simulate' to include detection
+ *                              of the .tcl program it might be running.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -3153,7 +3155,7 @@ VirtualAGC::FormScript(void)
         }
 
       Fout.Write(wxT("export PIDS\n"));
-      Fout.Write(wxT("ps auxww | grep '\\.\\./bin/'\n"));
+      Fout.Write(wxT("ps auxww | egrep '\\.\\./bin/|VirtualAGC.tcl'\n"));
       Fout.Write(localExecutableDirectory + wxT("/SimStop\n"));
 #ifdef __APPLE__
       // In Mac OS X, starting LM_Simulator starts a child process which

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011,2020 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2011,2020,2022 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -22,6 +22,9 @@
  * Compiler:    GNU gcc.
  * Reference:   http://www.ibibio.org/apollo
  * Mods:        2011-12-23 RSB  Split off from yaASM.c
+ *              2022-08-07 RSB  Increased symbol-name size by 2 to
+ *                              account for possible overflow when
+ *                              adding parentheses to the name.
  */
 
 #ifndef yaASM_H
@@ -79,10 +82,11 @@ typedef struct
   enum SymbolType_t Type, RefType;
   Address_t Address;
   int Value;
-  char Name[MAX_SYMSIZE + 1];
+  char Name[MAX_SYMSIZE + 2 + 1]; // The 2 is for added formatting.
   char RefName[MAX_SYMSIZE + 1]; // For EQU or SYN.
   int Line; // Source-code line at which the symbol is defined.
 } Symbol_t;
+typedef char SymbolName_t[MAX_SYMSIZE + 1];
 #define MAXSYMBOLS 4096
 typedef Symbol_t SymbolList_t[MAXSYMBOLS];
 
