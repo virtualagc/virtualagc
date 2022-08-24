@@ -35,7 +35,7 @@ Other branches of the repository often contain very different files. Here are so
 * 36,864 words of read-only memory, equivalent to 69,120 bytes.
 * Maximum of about 85,000 CPU instructions executed per second.
 * Dimensions: 24"×12.5"×6".
-* Weight: 70.1 pounds.
+* Weight: 70.1 pounds (31.8kg).
 * Power supply: 2.5A of current at 28V DC
 * Real DSKY.
 
