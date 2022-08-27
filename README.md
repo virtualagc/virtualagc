@@ -72,6 +72,8 @@ http://www.ibiblio.org/apollo/faq.html
 
 # Requirements
 
+**Caution:** The requirements in this README may not be fully up-to-date vs the official ones listed on [the Virtual AGC website](http://www.ibiblio.org/apollo/download.html#Downloading_and_Building_Virtual_AGC).  You are advised to consult the website.
+
 * Tcl/Tk is required for all platforms.
 
 ## Linux
@@ -126,10 +128,7 @@ More information at http://www.ibiblio.org/apollo/download.html#Build
 
 # Building the Virtual AGC software
 
-```
-cd yaAGC
-make
-```
+**Caution:** The instructions in this README may not be fully up-to-date vs the official ones listed on [the Virtual AGC website](http://www.ibiblio.org/apollo/download.html#Downloading_and_Building_Virtual_AGC).  You are advised to consult the website.
 
 ## Linux
 
