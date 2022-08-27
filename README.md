@@ -34,8 +34,8 @@ Other branches of the repository often contain very different files. Here are so
 * 2048 words of RAM. A "word" was 15 bits of data—therefore just under 2 bytes (16 bits) of data—and so the total RAM was just 3840 bytes.
 * 36,864 words of read-only memory, equivalent to 69,120 bytes.
 * Maximum of about 85,000 CPU instructions executed per second.
-* Dimensions: 24"×12.5"×6".
-* Weight: 70.1 pounds.
+* Dimensions: 24"×12.5"×6" (60cm×30cm×15cm).
+* Weight: 70.1 pounds (31.8kg).
 * Power supply: 2.5A of current at 28V DC
 * Real DSKY.
 
@@ -46,8 +46,8 @@ Another important part of the guidance system was the [Display/Keyboard unit](ht
 The Lunar Module had a single DSKY, positioned between the two astronauts where it could be operated by either of them. The Command Module actually had two DSKYs. One of the CM's DSKYs was only the main control panel, while the other was positioned near the optical equipment used to mark the positions of stars or other landmarks.
 
 # DSKY Specifications
-* Dimensions: 8"×8"×7"
-* Weight: 17.5 pounds.
+* Dimensions: 8"×8"×7" (20.3cm×21cm×17.8cm)
+* Weight: 17.5 pounds (7.94kg)
 
 Perhaps the most important part of the guidance system was the [Inertial Measurement Unit](https://en.wikipedia.org/wiki/Apollo_PGNCS)—or just "IMU" for short. The IMU continuously kept track of the acceleration and rotation of the spacecraft, and reported this information back to the AGC. By mathematically processing this data, the AGC could know on a moment-by-moment basis the orientation and position of the spacecraft.
 
