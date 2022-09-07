@@ -59,6 +59,9 @@ document.write(headerTemplate.replace("@TITLE@","Gemini Spacecraft").replace("@S
 
 
 
+
+
+
             yaPanel section</a> for various other user-interface related
           peripheral devices.)<br>
         </li>
@@ -72,8 +75,9 @@ document.write(headerTemplate.replace("@TITLE@","Gemini Spacecraft").replace("@S
         <li><a href="#Software_Examples">Software Examples</a><br>
         </li>
       </ul>
-      <li><a href="#Virtual_AGC_simulation_software">Virtual AGC
-          simulation software</a></li>
+      <li><a href="#Virtual_AGC_simulation_software">Our "Modern" OBC
+          Development Tools<br>
+        </a></li>
       <ul>
         <li><a href="#Downloads">Downloads</a><br>
         </li>
@@ -147,6 +151,9 @@ document.write(headerTemplate.replace("@TITLE@","Gemini Spacecraft").replace("@S
 
 
 
+
+
+
       Vehicle Digital Computer (LVDC)</a> was.&nbsp; The OBC and the
     LVDC are extraordinarily similar at the CPU level.<br>
     <br>
@@ -173,6 +180,9 @@ document.write(headerTemplate.replace("@TITLE@","Gemini Spacecraft").replace("@S
     </table>
     <br>
     <h2><a name="Peripheral_Devices" id="Peripheral_Devices"></a>Peripheral
+
+
+
 
 
 
@@ -265,11 +275,17 @@ document.write(headerTemplate.replace("@TITLE@","Gemini Spacecraft").replace("@S
 
 
 
+
+
+
       Documentation</h2>
     Sadly, documentation we've been able to collect for the OBC lags far
     behind that of the AGC or even that of the Abort Guidance System
     (AGS).&nbsp; What little survives that we have been able to access
     can be found in our <a href="links2.html#OBC">Document Library</a>.&nbsp;
+
+
+
 
     There's a lot of unique stuff there contributed by original Gemini
     developers.<br>
@@ -311,8 +327,14 @@ Tomayko's
 
 
 
+
+
+
       Computers in Spaceflight, Chapter 1, section 4</a>, and from <a
       href="Documents/GeminiSoftwareHistory.pdf"> this short memo</a>.&nbsp;
+
+
+
 
 
 
@@ -925,6 +947,9 @@ Tomayko's
 
 
 
+
+
+
       of Memory Words</h3>
     I should make it clear that in this section I'm describing my
     perspective on the organization of OBC memory, in terms of how the
@@ -1108,6 +1133,9 @@ specify
 
 
 
+
+
+
         the current syllable:&nbsp; 00 for syllable 0, 01 for syllable
         1, and 10 for syllable 2.&nbsp; After the <span
           style="font-family: courier new,courier,monospace;">HOP</span>
@@ -1131,6 +1159,9 @@ specify
         selects between "normal" mode (<span style="font-family: Courier
           New,Courier,monospace;">H=0</span>) and "half-word" mode (<span
           style="font-family: Courier New,Courier,monospace;">H=1</span>),
+
+
+
 
 
 
@@ -1185,14 +1216,17 @@ specify
 
 
 
+
+
+
       Sequencing</h3>
     You may naïvely suppose (I did!) if you did not read the preceding
     section in great detail, that the everyday usage of the words "word"
-    and "syllable" applies similarly in stepping through the OBC (or
-    LVDC) instructions.&nbsp; In proceeding through a sentence of
-    natural language like English, you use up all of the syllables in a
-    word before proceeding to the next word.&nbsp; So you might suppose
-    that OBC instructions would sequence in a manner something like the
+    and "syllable" applies similarly in stepping through the OBC
+    instructions.&nbsp; In proceeding through a sentence of natural
+    language like English, you use up all of the syllables in a word
+    before proceeding to the next word.&nbsp; So you might suppose that
+    OBC instructions would sequence in a manner something like the
     following:&nbsp; word <span style="font-style: italic; font-family:
       Helvetica,Arial,sans-serif;">N</span> syllable 0, word <span
       style="font-style: italic; font-family:
@@ -1225,6 +1259,9 @@ specify
     the syllable manually by executing an instruction (<big><span
         style="font-family: Courier New,Courier,monospace;">HOP</span></big>)&nbsp;
 and
+
+
+
 
 
 
@@ -1340,6 +1377,9 @@ and
 
 
 
+
+
+
                 Location we want to HOP to.</span><br>
             </div>
             <br>
@@ -1362,6 +1402,9 @@ and
                 TARGET&nbsp;&nbsp;&nbsp;
                 ...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 #
+
+
+
 
 
 
@@ -1426,6 +1469,9 @@ In
 
 
 
+
+
+
             other words, 4 other instructions not involving
             multiplication or division can be performed in the interval
             between <span style="font-family: Courier
@@ -1438,6 +1484,9 @@ In
             <div style="margin-left: 40px;"><span style="font-family:
                 Courier New,Courier,monospace;">RESULT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 #
+
+
+
 
 
 
@@ -1468,10 +1517,16 @@ In
 
 
 
+
+
+
                 The result won't be available<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 NOP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 #
+
+
+
 
 
 
@@ -1483,6 +1538,9 @@ In
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 SPQ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 #
+
+
+
 
 
 
@@ -1522,6 +1580,9 @@ In
 
 
 
+
+
+
             (The <span style="font-family: Courier
               New,Courier,monospace;">PRO</span> instruction is
             essentially equivalent to the <a
@@ -1550,6 +1611,9 @@ In
 
 
 
+
+
+
                 0<span style="font-style: italic;">YX&nbsp;&nbsp;&nbsp;</span></span><span
                 style="font-family: Courier New,Courier,monospace;">#
                 Same as "PRO YX"</span><br>
@@ -1559,7 +1623,13 @@ In
 
 
 
+
+
+
                 4<span style="font-style: italic;">YX</span>&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -1572,6 +1642,9 @@ In
             constant as operand, and that constant was placed directly
             into the bits A9-A1.)&nbsp; For example, to read MDIU
             keystroke data, <span style="font-style: italic;">X</span>=3
+
+
+
 
 
 
@@ -1604,6 +1677,9 @@ In
             <div style="margin-left: 40px;"><span style="font-family:
                 Courier New,Courier,monospace;">RESULT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 #
+
+
+
 
 
 
@@ -1648,6 +1724,9 @@ In
 
 
 
+
+
+
                 Allocate variable for output.<br>
                 ARG1&nbsp;&nbsp;&nbsp;&nbsp; DEC&nbsp;&nbsp;&nbsp;&nbsp;
                 56<br>
@@ -1658,6 +1737,9 @@ In
                 &nbsp;&nbsp;&nbsp; ARG2<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 STO&nbsp;&nbsp;&nbsp;&nbsp; RESULT&nbsp;</span>&nbsp;&nbsp;
+
+
+
 
 
 
@@ -1689,6 +1771,9 @@ In
             <div style="margin-left: 40px;"><span style="font-family:
                 Courier New,Courier,monospace;">RESULT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 #
+
+
+
 
 
 
@@ -1730,6 +1815,9 @@ In
                 &nbsp;&nbsp;&nbsp; DEC&nbsp;&nbsp;&nbsp;&nbsp; 56</span><br>
               <span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CLA&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -1781,11 +1869,17 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
             to logically AND together octal 37 and octal 52):<br>
             <br>
             <div style="margin-left: 40px;"><span style="font-family:
                 Courier New,Courier,monospace;">RESULT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 #
+
+
+
 
 
 
@@ -1841,6 +1935,9 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
               Allocate variable for output.<br>
               K56&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               DEC&nbsp;&nbsp;&nbsp;&nbsp; 56<br>
@@ -1860,6 +1957,9 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
               The result won't be available<br>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               NOP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -1869,10 +1969,16 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
               for a while, so kill some time.<br>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               SPQ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 #
+
+
+
 
 
 
@@ -1915,6 +2021,9 @@ for
 
 
 
+
+
+
               various instructions</a>.<br>
             <br>
             Assembly-language examples:<br>
@@ -1926,6 +2035,9 @@ for
                 FINISH<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...</span><br>
               <span style="font-family: Courier New,Courier,monospace;">FINISH&nbsp;&nbsp;
+
+
+
 
 
 
@@ -2058,6 +2170,9 @@ for
 
 
 
+
+
+
               various instructions</a>.<br>
             <br>
             There assembly-language syntax for this instruction is:<br>
@@ -2117,11 +2232,17 @@ for
 
 
 
+
+
+
                 Never gets here!<br>
               </span> <span style="font-family: Courier
                 New,Courier,monospace;">FINISH&nbsp;&nbsp;
                 ...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 #
+
+
+
 
 
 
@@ -2140,12 +2261,18 @@ for
 
 
 
+
+
+
                 Comes to here!<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 TRA&nbsp;&nbsp;&nbsp;&nbsp; BAILOUT<br>
                 FINISH2&nbsp;
                 ...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 #
+
+
+
 
 
 
@@ -2198,10 +2325,16 @@ for
 
 
 
+
+
+
                 Allocate a variable</span><br style="font-family:
                 Courier New,Courier,monospace;">
               <span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 STO&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -2289,6 +2422,9 @@ for
 
 
 
+
+
+
               various instructions</a>.<br>
             <br>
             There assembly-language syntax for this instruction is:<br>
@@ -2302,6 +2438,9 @@ for
             constant as operand, and that constant was placed directly
             into the bits A6-A1.)&nbsp; For example, to read the MDIU
             data-ready bit, <span style="font-style: italic;">X</span>=1
+
+
+
 
 
 
@@ -2358,6 +2497,9 @@ for
 
 
 
+
+
+
                 Variable for counting loop iterations.<br>
                 K1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 DEC&nbsp;&nbsp;&nbsp;&nbsp; 1<br>
@@ -2377,6 +2519,9 @@ for
 
 
 
+
+
+
                 Do stuff<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 CLA&nbsp;&nbsp;&nbsp;&nbsp; LOOPCTR&nbsp;&nbsp; #
@@ -2388,6 +2533,9 @@ for
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 ...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 #
+
+
+
 
 
 
@@ -2427,6 +2575,9 @@ for
     field.&nbsp; So, for example, if X=3 and Y=4, the instruction would
     be <span style="font-family: courier new,courier,monospace;">PRO43</span>.&nbsp;
 That's
+
+
+
 
 
 
@@ -2476,6 +2627,9 @@ That's
             buffered in the <a href="#Uplink">Digital Command System</a>
             (DCS) to be read into bits M1-M24 of the accumulator.&nbsp;
             Or, reads data from the <a href="#Rendezvous_Radar">Rendezvous
+
+
+
 
 
 
@@ -2586,6 +2740,9 @@ That's
             "Digit select weight 2" and "Digit select weight 4" to
             select the next digit position to which a display value will
             be output to the <a href="#yaMDIU_the_MDIU_Emulation">MDIU</a>.&nbsp;
+
+
+
 
 
 
@@ -2858,6 +3015,9 @@ That's
 
 
 
+
+
+
             RESET switch.<br>
           </td>
         </tr>
@@ -2931,6 +3091,9 @@ That's
           </td>
           <td style="vertical-align: middle;">Reads a keystroke that has
             been buffered in the <a href="#yaMDIU_the_MDIU_Emulation">MDIU</a>.&nbsp;
+
+
+
 
 
 
@@ -3024,6 +3187,9 @@ That's
 
 
 
+
+
+
             MALF light.<br>
           </td>
         </tr>
@@ -3073,6 +3239,9 @@ That's
 
 
 
+
+
+
             COMP light.<br>
           </td>
         </tr>
@@ -3095,8 +3264,14 @@ That's
 
 
 
+
+
+
             Initiates winding of the <a
               href="Gemini.html#Auxiliary_Tape_Memory_ATM">ATM</a>.&nbsp;
+
+
+
 
 
 
@@ -3130,8 +3305,14 @@ That's
 
 
 
+
+
+
             Initiates rewinding of the <a
               href="Gemini.html#Auxiliary_Tape_Memory_ATM">ATM</a>.&nbsp;
+
+
+
 
 
 
@@ -3141,6 +3322,9 @@ That's
             negative, however, I don't think that outputting a positive
             or zero value stops the rewinding.&nbsp; Instead, use <a
               href="Gemini.html#Auxiliary_Tape_Memory_ATM">PRO14</a>.&nbsp;
+
+
+
 
 
 
@@ -3161,6 +3345,9 @@ That's
           </td>
           <td style="vertical-align: middle;">For incrementally
             adjusting the delta-V displays of the <a href="#IVI">IVI</a>.&nbsp;
+
+
+
 
 
 
@@ -3383,6 +3570,9 @@ That's
 
 
 
+
+
+
     That's the opposite of present ordering of the columns in the table
     below and could be confusing, for which I apologize, but as I said
     above, I'm too lazy to rewrite the table.<br>
@@ -3431,6 +3621,9 @@ That's
             Computer mode 2<br>
           </td>
           <td style="vertical-align: middle;"> From the <a href="#PCDP">PCDP</a>'s
+
+
+
 
 
 
@@ -3646,6 +3839,9 @@ That's
 
 
 
+
+
+
             START switch<br>
           </td>
         </tr>
@@ -3700,6 +3896,9 @@ That's
 
 
 
+
+
+
               System</a> (IS), to trigger beginning of a new downlink
             cycle every 2.4 seconds.<br>
           </td>
@@ -3713,6 +3912,9 @@ That's
             Velocity error count not zero<br>
           </td>
           <td style="vertical-align: middle;">From the <a href="#IVI">IVI</a>.&nbsp;
+
+
+
 
 
 
@@ -3954,6 +4156,9 @@ That's
 
 
 
+
+
+
             FADE-IN.&nbsp; This is a signal from a relay, but anything
             beyond that is TBD.<br>
           </td>
@@ -4011,6 +4216,9 @@ That's
             transfer<br>
           </td>
           <td style="vertical-align: middle;">From the <a href="#PCDP">PCDP</a>'s
+
+
+
 
 
 
@@ -4147,6 +4355,9 @@ but
 
 
 
+
+
+
     the assembler creates them transparently, and the programmer doesn't
     have to know about them unless he suddenly finds himself out of
     memory.&nbsp; In this example, <span style="font-family: Courier
@@ -4201,6 +4412,9 @@ but
 
 
 
+
+
+
         The input variable <span style="font-family: Courier
           New,Courier,monospace;">ALPHA2</span> was a first guess at the
         result, to speed up the computation.<br>
@@ -4227,40 +4441,32 @@ but
     Sadly, I'm not aware of what most of the other routines actually
     did.&nbsp; Though not a subroutine as such, the code identified as
     the "Executer" was very important and deserves some special
-    attention.&nbsp; Also known as <big><font><font size="2"
-          color="black"><big>the executive program (commonly called Hard
-            Core), it was assigned to sector 00 and contained
-            code&nbsp;common to all mode programs</big></font></font></big><big><font><font
-          size="2" color="black"><big> (Pre-Launch, Ascent, Catch-up,
-            Rendezvous, Re-entry)</big></font></font></big><big><font><font
-          size="2" color="black"><big>, such as:<br>
-          </big></font></font></big>
+    attention.&nbsp; Also known as <font><font color="black">the
+        executive program (commonly called Hard Core), it was assigned
+        to sector 00 and contained code&nbsp;common to all mode programs</font></font><font><font
+        color="black"> (Pre-Launch, Ascent, Catch-up, Rendezvous,
+        Re-entry)</font></font><font><font color="black">, such as:<br>
+      </font></font>
     <ul>
-      <li><big><font><font size="2" color="black"><big>resetting
-                discrete outputs</big></font></font></big></li>
-      <li><big><font><font size="2" color="black"><big>reading time
-                programs</big></font></font></big></li>
-      <li><big><font><font size="2" color="black"><big>subroutines</big></font></font></big></li>
-      <li><big><font><font size="2" color="black"><big>timing programs</big></font></font></big></li>
-      <li><big><font><font size="2" color="black"><big>go-nogo-go
-                routine</big></font></font></big></li>
-      <li><big><font><font size="2" color="black"><big>setting computer
-                malfunction light</big></font></font></big></li>
-      <li><big><font><font size="2" color="black"><big>AGE routine</big></font></font></big></li>
-      <li><big><font><font size="2" color="black"><big>logic to jump to
-                the mode programs<br>
-              </big></font></font></big></li>
+      <li><font><font color="black">resetting discrete outputs</font></font></li>
+      <li><font><font color="black">reading time programs</font></font></li>
+      <li><font><font color="black">subroutines</font></font></li>
+      <li><font><font color="black">timing programs</font></font></li>
+      <li><font><font color="black">go-nogo-go routine</font></font></li>
+      <li><font><font color="black">setting computer malfunction light</font></font></li>
+      <li><font><font color="black">AGE routine</font></font></li>
+      <li><font><font color="black">logic to jump to the mode programs<br>
+          </font></font></li>
     </ul>
-    <big><font><font size="2" color="black"><big>The Executer and
-            whatever mode program happened to be active functioned
-            somewhat like coroutines.&nbsp; After each pass through a
-            mode program, there was always a return to the beginning of
-            the&nbsp;executive program, where the discrete outputs were
-            set, time was read again, and so forth.&nbsp; After the
-            Executer pass, control was passed back to the mode program
-            again, and this process of cycling back and forth between
-            the Executor and the mode program continued.<br>
-            <br>
+    <font><font color="black">The Executer and whatever mode program
+        happened to be active functioned somewhat like coroutines.&nbsp;
+        After each pass through a mode program, there was always a
+        return to the beginning of the&nbsp;executive program, where the
+        discrete outputs were set, time was read again, and so
+        forth.&nbsp; After the Executer pass, control was passed back to
+        the mode program again, and this process of cycling back and
+        forth between the Executor and the mode program continued.<br>
+      </font></font><big><font><font size="2" color="black"><big><br>
           </big></font></font></big> There's also a little information
     available on placement of some of these subroutines (and other
     programs) in memory ... though, other than the Executer and MDIU
@@ -4470,6 +4676,9 @@ but
         <li>Wait 1.5 ms.</li>
         <li><span style="font-family: courier new,courier,monospace;">CLD27</span>.&nbsp;
 (Reads
+
+
+
 
 
 
@@ -4837,6 +5046,9 @@ documentation
 
 
 
+
+
+
     does not precisely describe how data is read from the ATM.&nbsp; But
     the following is my best guess as to how the actual OBC/ATM
     interface works.&nbsp;<br>
@@ -4859,6 +5071,9 @@ documentation
           New,Courier,monospace;">CLD14</span> and <span
           style="font-family: Courier New,Courier,monospace;">CLD15</span>.&nbsp;
 I
+
+
+
 
 
 
@@ -4938,6 +5153,9 @@ I
 
 
 
+
+
+
       Assembly Language</h2>
     I've given a number of examples of OBC assembly-language above,
     particularly where describing the various CPU instructions, but I'd
@@ -4984,6 +5202,9 @@ I
       <li><a href="Documents/GeminiCharlieLeistCodeSnippetMethod.pdf">
           Explanation of the coding method</a>.</li>
       <li><span style="font-style: italic;">Design diagrams</span>.&nbsp;
+
+
+
 
 
 
@@ -5099,6 +5320,9 @@ I
 
 
 
+
+
+
     At this point, these programs are very much works in progress, and I
     don't claim that they are fully debugged or even that they will run
     on your computer.&nbsp; For this reason, they have not made their
@@ -5148,6 +5372,9 @@ I
         term for names of variables or constants, though for the purpose
         of describing syntax I'll symbolize all such things as <span
           style="font-family: Courier New,Courier,monospace;">LHS</span>.)
+
+
+
 
 
 
@@ -5228,6 +5455,9 @@ I
         and <span style="font-family: Courier New,Courier,monospace;">OPERAND</span>
         are not.&nbsp; <span style="font-weight: bold; color: rgb(153,
           51, 0);">yaASM </span><span style="color: rgb(153, 51, 0);">treats
+
+
+
 
 
 
@@ -5340,27 +5570,16 @@ I
               New,Courier,monospace;">CODE</span> directive is
             encountered.<br>
             <br>
-            The concept of a "module" (<span style="font-family: Courier
-              New,Courier,monospace; font-style: italic;">M</span>) is
-            completely different in Gemini OBC vs. Apollo LVDC, and yet
-            in some quirk of fate can be treated identically by the
-            assembler.&nbsp; In OBC, the program modules (I, II, III,
-            IV, V, and IV) can be loaded at runtime from the <a
+            The term "module" (<span style="font-family: Courier
+              New,Courier,monospace; font-style: italic;">M</span>)
+            refers to the program modules (I, II, III, IV, V, and VI)
+            that can be loaded at runtime from the <a
               href="#Auxiliary_Tape_Memory_ATM">Auxiliary Tape Memory</a>,
-            thus overlaying each other, although module I was intended
-            to always be present.&nbsp; In LVDC, in contrast, there were
-            up to 8 memory modules installed in the computer, each
-            equivalent to 2/3 of the total OBC memory, and there was no
-            ATM.&nbsp; But as far as the assembler is concerned, these
-            two very different types of "modules" can each be treated
-            simply as independent memory areas.&nbsp; To make the
-            handling consistent, <span style="font-weight: bold;">yaASM</span>
-            allows 8 modules numbered 0-7 for either case.&nbsp; For
-            OBC, module 0 corresponds to program module I, 1 corresponds
-            to II, and so on.<br>
-            <br>
-            The discussion that follows pertains solely to the Gemini
-            OBC.<br>
+            thus overlaying each other.&nbsp; Module I, however, was
+            intended to always be present.&nbsp; <span
+              style="font-weight: bold;">yaASM</span> allows 8 modules
+            numbered 0-7.&nbsp; Module 0 corresponds to program module
+            I, 1 corresponds to II, and so on.<br>
             <br>
             <span style="font-weight: bold;">yaASM</span> expects to
             assemble a complete set of program modules as a single
@@ -5413,6 +5632,9 @@ The
 
 
 
+
+
+
             same situation could occur with left-hand symbols as well;
             for example, if there were two modules for the exact same
             area of memory, and the entry points for both were at the
@@ -5434,6 +5656,9 @@ The
             next variable or constant declaration encountered should be
             assembled at address <span style="font-style: italic;
               font-family: Courier New,Courier,monospace;"> M-PP-S-WWW</span>.&nbsp;
+
+
+
 
 
 
@@ -5639,6 +5864,9 @@ There
 
 
 
+
+
+
             is no convention for storing values in memory with the
             binary point at any location other than fully to the left or
             fully to the right of all the bits; it's up to the
@@ -5709,6 +5937,9 @@ In
 
 
 
+
+
+
             the example shown at right, two variables (<span
               style="font-family: Courier New,Courier,monospace;">A</span>
             and <span style="font-family: Courier
@@ -5770,6 +6001,9 @@ In
 
 
 
+
+
+
                 ... code ...</span></small><br>
           </td>
         </tr>
@@ -5790,16 +6024,17 @@ In
     samples.<br>
     <br>
     <h2><a name="Virtual_AGC_simulation_software"
-        id="Virtual_AGC_simulation_software"></a>Virtual AGC simulation
-      software</h2>
+        id="Virtual_AGC_simulation_software"></a>Our "Modern" OBC
+      Development Tools<br>
+    </h2>
     In the foregoing sections I've talked about the characteristics of
     the Gemini OBC itself.&nbsp; In this section I discuss simulation
-    software provided by the Virtual AGC project to simulate the OBC
-    &amp; friends.&nbsp; Some of the software discussed below exists,
-    but some of the description below is speculation about software that
-    I <span style="font-style: italic;">might</span> create in the
-    future, and how I might go about doing it. I apologise for
-    that.&nbsp; Nevertheless some significant software is available
+    software provided by the Virtual AGC project to process OBC source
+    code and emulate the OBC.&nbsp; Some of the software discussed below
+    exists, but some of the description below is speculation about
+    software that I <span style="font-style: italic;">might</span>
+    create in the future, and how I might go about doing it. I apologise
+    for that.&nbsp; Nevertheless some significant software is available
     already.<br>
     <h3><a name="Downloads" id="Downloads"></a>Downloads</h3>
     As mentioned earlier, I have created a new <a
@@ -5812,60 +6047,10 @@ In
 
 
 
-    At this point, these programs are very much works in progress, and I
-    don't claim that they are fully debugged or even that they will run
-    on your computer.&nbsp; Therefore, they have not made their way into
-    the Virtual AGC software source or binary distribution as of
-    yet.&nbsp; But you can still download the source code for them from
-    our subversion repository, or you can download the binaries for
-    various platforms right here:<br>
+
+
+
     <br>
-    <div style="text-align: center;"><span style="color: rgb(255, 0,
-        0);"><span style="font-style: italic;">Most recent update
-          builds: 2012-01-08</span></span><br>
-    </div>
-    <table summary="" style="text-align: left; width: 60%; margin-left:
-      auto; margin-right: auto;" cellspacing="2" cellpadding="2"
-      border="1">
-      <tbody>
-        <tr>
-          <th style="vertical-align: top;">Operating System<br>
-          </th>
-          <th style="vertical-align: top;">yaASM (Assembler)<br>
-          </th>
-          <th style="vertical-align: top;">yaOBC (Emulator)<br>
-          </th>
-          <th style="vertical-align: top;">Test source file<br>
-          </th>
-        </tr>
-        <tr>
-          <td style="vertical-align: top;">Linux 'x86<br>
-          </td>
-          <td style="vertical-align: top;"><a href="Downloads/yaASM">yaASM</a></td>
-          <td style="vertical-align: top;"><a href="Downloads/yaOBC">yaOBC</a><br>
-          </td>
-          <td style="vertical-align: top;"><a href="Downloads/Test.obc">Test.obc</a></td>
-        </tr>
-        <tr>
-          <td style="vertical-align: top;">Windows<br>
-          </td>
-          <td style="vertical-align: top;"><a href="Downloads/yaASM.exe">yaASM.exe</a></td>
-          <td style="vertical-align: top;"><a href="Downloads/yaOBC.exe">yaOBC.exe</a><br>
-          </td>
-          <td style="vertical-align: top;"><a href="Downloads/Test.obc">Test.obc</a></td>
-        </tr>
-        <tr>
-          <td style="vertical-align: top;">Mac OS X<br>
-          </td>
-          <td style="vertical-align: top;"><a
-              href="Downloads/yaASM-macosx">yaASM-macosx</a></td>
-          <td style="vertical-align: top;"><a
-              href="Downloads/yaOBC-macosx">yaOBC-macosx</a><br>
-          </td>
-          <td style="vertical-align: top;"><a href="Downloads/Test.obc">Test.obc</a></td>
-        </tr>
-      </tbody>
-    </table>
     <br>
     In brief, <span style="font-weight: bold;">yaASM</span> is a
     command-line tool which:<br>
@@ -5888,35 +6073,13 @@ In
         can be executed<br>
       </li>
     </ul>
-    There's no nice setup program as of yet, so you have to do a few
-    manual steps to set up these programs before using them the first
-    time:<br>
-    <ol>
-      <li>Create an empty folder in some convenient place on your
-        computer.</li>
-      <li>Download the files specific to your computer type, and put
-        them in the folder you just created.</li>
-      <li>From a command-line, 'cd' to the folder.<br>
-      </li>
-      <li>On Linux or Mac OS X, you'll want to run the command "chmod +x
-        ya*" to make sure that the programs are marked as being
-        executable.&nbsp; (Since Windows has no security to speak of, it
-        will happily execute any file you download, so we don't have to
-        worry about this extra step.)<br>
-      </li>
-      <li>On Windows or Mac OS X, the download process may have renamed
-        your Test.obc file to Test.obc.txt.&nbsp; The instructions below
-        assume that the file is actually named Test.obc as I intended
-        it, so you might want to rename it back.<br>
-      </li>
-    </ol>
-    Having done these steps, the programs should be ready to run.&nbsp;
     More-detailed explanations are available in the sections
     specifically devoted to <span style="font-weight: bold;">yaASM</span>
     and <span style="font-weight: bold;">yaOBC</span> below, but at its
     most basic, here are the commands you'd use to assemble the test OBC
-    assembly-language source-code file, and then run the assembled
-    program in the emulator/debugger from the command-line in Windows:<br>
+    assembly-language source-code file, using sample OBC code provided
+    in the file Test.obc, and then run the assembled program in the
+    emulator/debugger from the command-line in Windows:<br>
     <br>
     <div style="margin-left: 40px;"><span style="font-family: Courier
         New,Courier,monospace;">yaASM --input=Test.obc &gt;Test.lst</span><br
@@ -5931,30 +6094,6 @@ In
     etc.&nbsp; You can also view the assembly listing, Test.lst, in any
     convenient text editor you happen to have handy, such as Notepad or
     Wordpad.<br>
-    <br>
-    The steps are very slightly different if you're not using
-    Windows.&nbsp; On Linux, you'd have to replace <span
-      style="font-family: Courier New,Courier,monospace;">yaASM</span>
-    and <span style="font-family: Courier New,Courier,monospace;">yaOBC</span>
-    by <span style="font-family: Courier New,Courier,monospace;">./yaASM</span>
-    and <span style="font-family: Courier New,Courier,monospace;">./yaOBC</span>.&nbsp;
-On
-
-
-
-
-
-    Mac OS X you'd have to replace them by <span style="font-family:
-      Courier New,Courier,monospace;">./yaASM-macosx</span> and <span
-      style="font-family: Courier New,Courier,monospace;">./yaOBC-macosx</span>.&nbsp;
-But
-
-
-
-
-
-    otherwise, the programs should operate in exactly the same manner on
-    any of the platforms.<br>
     <br>
     By the way, I follow the convention that OBC source files have names
     of the form *.obc, OBC executables have names of the form *.bin, and
@@ -5971,6 +6110,9 @@ But
     This is an <span style="font-style: italic;">actual existing
       program</span> described in <a
 href="Documents/GeminiCatchUpAndRendezvousAnalysisAndSimulationReport4.pdf">this
+
+
+
 
 
 
@@ -6096,6 +6238,9 @@ href="Documents/GeminiCatchUpAndRendezvousAnalysisAndSimulationReport4.pdf">this
       style="font-weight: bold;">BENCH7</span>.&nbsp; The dynamic
     simulation program, referred to in Report #4 as the "dynamic
     environment", is created as <span style="font-weight: bold;">MAIN7</span>.&nbsp;
+
+
+
 
 
 
@@ -6230,12 +6375,6 @@ href="Documents/GeminiCatchUpAndRendezvousAnalysisAndSimulationReport4.pdf">this
       verbosity that has any observable effect is "-v -v -v -v -v -v".<br>
     </div>
     <br>
-    --lvdc<br>
-    <div style="margin-left: 40px;"> This switch causes the program to
-      emulate the Apollo LVDC computer.&nbsp; The default, when the
-      switch is missing, is the Gemini OBC is emulated.<br>
-      <br>
-    </div>
     --binary=<span style="font-style: italic;">Filename</span><br>
     <div style="margin-left: 40px;"> This specifies the name of a binary
       file containing the complete contents of memory/ATM at startup,
@@ -6406,6 +6545,9 @@ href="Documents/GeminiCatchUpAndRendezvousAnalysisAndSimulationReport4.pdf">this
 
 
 
+
+
+
       but those defaults are meaningful only in Windows.&nbsp; On Linux,
       the comport names are generally one of the following
       instead:&nbsp; /dev/ttyS0, /dev/ttyS1, ..., /dev/ttyUSB0,
@@ -6449,6 +6591,9 @@ href="Documents/GeminiCatchUpAndRendezvousAnalysisAndSimulationReport4.pdf">this
         New,Courier,monospace;">
       <span style="font-family: Courier New,Courier,monospace;">0-00-2-000&nbsp;&nbsp;&nbsp;
 START&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -6658,6 +6803,9 @@ START&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
         <a href="Gemini.html#Location-Field_Parsing_by_the_Debugger">See
           the section below on parsing the <span style="font-style:
             italic;">Location</span> field</a>.&nbsp; Note that program
@@ -6707,11 +6855,17 @@ START&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
           in which case a HOP constant is formed with the half-word mode
           flag reset to 0.&nbsp; (The value of <span style="font-style:
             italic;">Module</span> is ignored, since the OBC HOP
           constant has no field associated with it.)</li>
         <li>An address of the form "H-<span style="font-style: italic;">Module-Sector-Syllable-Word</span>",
+
+
+
 
 
 
@@ -6774,13 +6928,22 @@ A
 
 
 
+
+
+
     numbering system is used in which <span style="font-style: italic;">Module</span>=0
 
 
 
 
 
+
+
+
     corresponds to Program Module I, <span style="font-style: italic;">Module</span>=1
+
+
+
 
 
 
@@ -6795,6 +6958,9 @@ A
     contents of main memory" and not merely as Program Module I.&nbsp;
     Therefore, as time progresses and various program modules are loaded
     from ATM into main memory, <span style="font-style: italic;">Module</span>=0
+
+
+
 
 
 
@@ -6820,6 +6986,9 @@ A
       <li>An existing constant's name.</li>
       <li>An existing variable's name.</li>
       <li>An address of the form "<span style="font-style: italic;">Module-Sector-Syllable-Word</span>",
+
+
+
 
 
 
@@ -6917,6 +7086,9 @@ A
             style="font-style: italic;">X</span>, with <span
             style="font-style: italic;">X</span> being a floating-point
           number.&nbsp; If <span style="font-style: italic;">X</span>==1.0
+
+
+
 
 
 
@@ -7048,24 +7220,18 @@ A
     debugged or tested.<br>
     <br>
     <span style="font-weight: bold;">yaASM</span> is an assembler for
-    Gemini OBC and <a href="LVDC.html">LVDC</a> assembly language
-    files, outputting a binary executable suitable for being used with <a
-      href="#yaOBC_the_OBC_CPU_Emulation"><span style="font-weight:
-        bold;">yaOBC</span></a> or <span style="font-weight: bold;">yaLVDC</span>
-    simulation software.&nbsp; The assembly language for OBC is as <a
-      href="#Gemini_Assembly_Language">defined above</a>, while the
-    assembly-language for LVDC is defined on the <a
-      href="LVDC.html#LVDC_Assembly_Language">LVDC page</a>.&nbsp; Of
-    course, the reason this combined approach is used is because of the
-    great similarities between the two computers and their instruction
-    sets.<br>
+    Gemini OBC assembly language files, outputting a binary executable
+    suitable for being used with <a href="#yaOBC_the_OBC_CPU_Emulation"><span
+        style="font-weight: bold;">yaOBC</span></a> simulation
+    software.&nbsp; The assembly language for OBC is as <a
+      href="#Gemini_Assembly_Language">defined above</a>.<br>
     <br>
     By convention, but not by any requirement of the assembler, Gemini
-    OBC and LVDC source-code files have the filename extensions .obc and
-    .lvdc, respectively.&nbsp; This convention arises from the existence
-    (or potential existence) of CPU-specific syntax highlighters when
-    viewing such source code.&nbsp; The assembler does not care what the
-    filename extensions are.<br>
+    OBC source-code files have the filename extension .obc.&nbsp; This
+    convention arises from the existence (or potential existence) of
+    CPU-specific syntax highlighters when viewing such source
+    code.&nbsp; The assembler does not care what the filename extensions
+    are.<br>
     <br>
     Note that at present, <span style="font-weight: bold;">yaASM</span>
     simply aborts with an error message upon the first source-code error
@@ -7093,19 +7259,6 @@ A
         style="font-style: italic;">OPTIONS</span> and exits.<br>
     </div>
     <br>
-    --lvdc<br>
-    <div style="margin-left: 40px;"><span style="font-style: italic;">(Option
-
-
-
-
-
-        present, but not currently correctly functional.)</span> This
-      switch causes assembly to occur for the LVDC computer.&nbsp; The
-      default, when the switch is missing, is to assemble for the Gemini
-      OBC.<br>
-      <br>
-    </div>
     --hwm<br>
     <div style="margin-left: 40px;"> Equivalent to putting the directive
       <span style="font-family: Courier New,Courier,monospace;">HALF</span>
@@ -7135,18 +7288,7 @@ A
       source file itself.<br>
     </div>
     <br>
-    The formats of the binary output files are identical for Gemini OBC
-    vs. LVDC.&nbsp; The Gemini OBC has 3 syllables per memory word,
-    whereas the LVDC has 2 syllables per memory word, bus syllable 2 is
-    simply cleared to 0 for the LVDC binary output files.&nbsp; It's
-    true that the the LVDC has up to 8 memory modules, whereas the
-    Gemini OBC has only 1 ... but the OBC has up to 6 program modules
-    (which we logically extend to 8) while the LVDC has only 1; so we
-    economize and use the same output format for both.&nbsp; LVDC
-    syllables are theoretically 14 bits rather than 13 bits, but the
-    extra bit is a parity bit that is accessible only in hardware, and
-    therefore is not supported.&nbsp; Otherwise, the file formats are
-    the same:<br>
+    The format of the binary output file is as follows:<br>
     <ul>
       <li>The binary file consists of a sequence of 16-bit integers.</li>
       <li>Most of the output integers contain a 13-bit syllable, aligned
@@ -7194,6 +7336,9 @@ A
     since we won't simulate all of the Gemini peripherals, many of the
     controls and readouts won't be functional.&nbsp; <a
       name="yaMDIU_the_MDIU_Emulation" id="yaMDIU_the_MDIU_Emulation"></a>Recall
+
+
+
 
 
 
@@ -7378,6 +7523,9 @@ A
 
 
 
+
+
+
               Library</a>.</li>
           <li>Developers' notes.</li>
         </ul>
@@ -7430,6 +7578,9 @@ A
 
 
 
+
+
+
                         things were new in the 50s, 60s and 70s.&nbsp;
                         In the late 50s, I participated in a panel
                         discussion on local TV to explain to the public
@@ -7468,9 +7619,15 @@ A
 
 
 
+
+
+
                         I wish I had kept all his notes.</span></font><font
                       size="2" face="arial,helvetica,sansserif"><span
                         style="font-size: 10pt; font-family: Arial;">&nbsp;
+
+
+
 
 
 
@@ -7486,6 +7643,9 @@ A
 
 
 
+
+
+
                         As I recall, the values of the constants were
                         determined by tracking satellites that were
                         already in orbit.&nbsp; The constants were to
@@ -7493,6 +7653,9 @@ A
                         down to those selected in the OBC.</span></font><font
                       size="2" face="arial,helvetica,sansserif"><span
                         style="font-size: 10pt; font-family: Arial;">&nbsp;
+
+
+
 
 
 
@@ -7552,6 +7715,9 @@ A
 
 
 
+
+
+
                         There are machine-dependent features, it seems,
                         so the program must either have been FORTRAN II
                         or a mix of II and IV.</span>]</span></font><br>
@@ -7590,6 +7756,9 @@ A
 
 
 
+
+
+
                           someone else will come forward with
                           clarification.</span></font></li>
                     <li class="MsoNormal" style=""><font size="2"
@@ -7601,6 +7770,9 @@ A
                         face="arial,helvetica,sansserif"><span
                           style="font-size: 10pt; font-family: Arial;">Changing
 the
+
+
+
 
 
 
@@ -7638,6 +7810,9 @@ the
                       MARS [type of memory element used] inventor was
                       probably <a
                         href="http://www.spoke.com/info/pFeUHpV/AlbertVinal">Al
+
+
+
 
 
 
@@ -7695,6 +7870,9 @@ the
 
 
 
+
+
+
                       mode, and up to six terms were used for the
                       "environment"</span><span style="font-family:
                       Arial;">simulation and accuracy comparisons.
@@ -7703,6 +7881,9 @@ the
                       everything else in memory, or the speed required.
                       We</span> <span style="font-family: Arial;">needed
 the
+
+
+
 
 
 
@@ -7738,6 +7919,9 @@ the
                     color="navy" face="arial,helvetica,sansserif"><span
                       style="font-size: 10pt; font-family: Arial;">Consider
 this
+
+
+
 
 
 
@@ -8001,6 +8185,9 @@ NOP
 
 
 
+
+
+
                                     did not use any memory locations and
                                     thus would not heat up the memory.</span></font></div>
                             </div>
@@ -8028,6 +8215,9 @@ NOP
                                     style="font-size: 10pt; color:
                                     black;">NOP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 Again
+
+
+
 
 
 
@@ -8061,6 +8251,9 @@ Again
                                       style="font-size: 10pt; color:
                                       black;">NOP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 Again
+
+
+
 
 
 
@@ -8158,6 +8351,9 @@ Cool
 
 
 
+
+
+
                                     memory</span></font></div>
                             </div>
                             <div style="margin-left: 40px; font-family:
@@ -8202,6 +8398,9 @@ Cool
                                     style="font-size: 10pt; color:
                                     black;">NOP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 Cool
+
+
+
 
 
 
@@ -8258,6 +8457,9 @@ Cool
 
 
 
+
+
+
                                       memory</span></font></div>
                               </div>
                             </div>
@@ -8309,6 +8511,9 @@ Cool
 
 
 
+
+
+
                         <font><font><font><font size="2" color="black"
                                 face="arial,helvetica,sansserif"><font
                                   size="2" color="black"
@@ -8322,11 +8527,17 @@ Cool
 
 
 
+
+
+
                                       is something the programmer did by
                                       hand calculations. You got no help
                                       from the assembler on this topic.
                                       Fixed point scaling of numbers in
                                       Gemini&nbsp;made the programmer <b>always,
+
+
+
 
 
 
@@ -8474,6 +8685,9 @@ Cool
 
 
 
+
+
+
                       Inc. (who won the communications part) use our
                       design concept.</span></font> <font size="2"
                     face="arial,helvetica,sansserif"><span
@@ -8494,6 +8708,9 @@ Cool
 
 
 
+
+
+
                       in Huntsville as the switch selector had to have
                       the highest reliability as there were four of
                       those boxes on each rocket, one for the Instrument
@@ -8501,6 +8718,9 @@ Cool
                       propulsion and all</span></font> <font size="2"
                     face="arial,helvetica,sansserif"><span
                       style="font-size: 10pt; font-family: Arial;">commands
+
+
+
 
 
 
@@ -8551,6 +8771,9 @@ Cool
 
 
 
+
+
+
                           response to "</small></font></font><font
                       style="font-style: italic;"><font size="3"
                         lang="0" color="black"><small>How much
@@ -8560,6 +8783,9 @@ Cool
                           style="font-style: italic;">")</span>&nbsp; As
                         much as a Turing Machine and more!</small></font>
                     <font size="3" lang="0" color="#000000"><small>Limits
+
+
+
 
 
 
@@ -8641,6 +8867,9 @@ Cool
                 <td style="vertical-align: top; background-color:
                   rgb(204, 255, 255);"><small><font style="font-style:
                       italic;"><font size="3" lang="0" color="#000000"><small>(In
+
+
+
 
 
 
@@ -8728,6 +8957,9 @@ Cool
 
 
 
+
+
+
                                 step size in the simulation was
                                 controlled using 7090 console
                                 keys.&nbsp; A family of results could be
@@ -8788,9 +9020,13 @@ Commons
 
 
 
+
+
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
-            href="mailto:info@sandroid.org">Ronald Burkey</a> on 2021-11-19.<br>
+            href="mailto:info@sandroid.org">Ronald Burkey</a> on
+          2022-09-07.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
