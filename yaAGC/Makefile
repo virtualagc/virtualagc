@@ -140,18 +140,24 @@ CFLAGS2 = \
 	-O3 \
 	-flto \
 	-fwhole-program-vtables \
-	-fvirtual-function-elimination
+	-fvirtual-function-elimination \
+	-matomics \
+	-mbulk-memory
 
 LDFLAGS2 = \
 	--no-entry \
 	--export-dynamic \
-	--unresolved-symbols=import-functions \
+	--import-undefined \
 	-L ${WASI_SDK_PATH}/share/wasi-sysroot/lib/wasm32-wasi \
 	-lc \
 	--export=malloc \
 	--export=free \
 	--import-memory \
-	--lto-O3
+	--lto-O3 \
+	--shared-memory \
+	--no-check-features \
+	--initial-memory=196608 \
+	--max-memory=262144
 endif
 
 # Alberto Galdo's iPhone mod.
@@ -214,11 +220,6 @@ yaAGC:	$(OBJECTS) checkdec.o libyaAGC.a ${NATIVE_WINAGC}
 
 yaAGC.wasm: wasm.o agc_engine.o agc_engine_init.o agc_utilities.o ringbuffer_api.o ringbuffer.o
 	${WASI_SDK_PATH}/bin/wasm-ld ${LDFLAGS2} -o $@ $^
-	wasm-opt $@ -Oz -o $@
-	wasm-strip $@
-
-yaAGC.wast: yaAGC.wasm
-	wasm2wat $< > $@
 
 libyaAGC.a: ${LIBOBJECTS}
 ifdef IPHONE
