@@ -2437,104 +2437,27 @@ and
         build instructions</a> for Linux Mint 19 or later, 64-bit.&nbsp;
       I personally normally use Linux Mint 17, but these instructions
       won't work in Mint 17 or earlier because of library-versioning
-      problems.&nbsp; First, here are the one-time setups:<br>
+      problems.&nbsp; First, here is the one-time setup:<br>
     </p>
     <ul>
-      <li>Installation of cmake:&nbsp; "<tt>sudo apt-get install cmake</tt>"
-        may work for you.&nbsp; However, if you end up needing to build
-        wask-sdk from source (see below!) then you'll need cmake of at
-        least 3.13.&nbsp; On Mint 19 you get only 3.10 from the official
-        Mint repository, so you need to make some other provision for
-        installing a later version of <a href="https://cmake.org/">cmake</a>.&nbsp;
-
-        In the case of Mint 19, there are prebuilt installers you can
-        download from the cmake website.&nbsp; For example, I installed
-        a <a href="https://github.com/Kitware/CMake/releases/download/v3.20.2/cmake-3.20.2-linux-x86_64.sh">prebuilt
-
-          cmake 3.20.2 from a script</a>.<br>
-      </li>
-      <li>Installation of wasi-sdk.&nbsp; Among other things this gets
-        you the <b>clang</b> and <b>llvm</b> programs, each of which
-        must be at least version 12.&nbsp; For the sake of argument
+      <li>Installation of wasi-sdk. For the sake of argument
         let's suppose the installation directory will be
-        ~/wasi-sdk.&nbsp; <i>Do not confuse the wasi-sdk version with
-          the clang/llvm version!</i>&nbsp; Release 12 of wasi-sdk only
-        contains clang/llvm 11 and you need clang/llvm 12.<br>
+        ~/wasi-sdk.&nbsp; You can simply
+        download the prebuilt release 16 tarball:<br>
       </li>
-      <ul>
-        <li>If wasi-sdk 13 has already been released at some point—which
-          as of <i>this</i> writing it has not been—then you can simply
-          download a prebuilt release 13 tarball:<br>
-        </li>
-      </ul>
     </ul>
     <blockquote>
       <blockquote>
         <blockquote>
           <p><tt>cd ~/wasi-sdk<br>
               wget
-https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-13/wasi-sdk-13.0-linux.tar.gz<br>
-              tar xvf wasi-sdk-13.0-linux.tar.gz<br>
-            </tt><tt>export WASI_SDK_PATH=~/wasi-sdk</tt></p>
+https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/wasi-sdk-16.0-linux.tar.gz<br>
+              tar xvf wasi-sdk-16.0-linux.tar.gz<br>
+            </tt><tt>export WASI_SDK_PATH=~/wasi-sdk/wasi-sdk-16.0</tt></p>
         </blockquote>
       </blockquote>
     </blockquote>
-    <ul>
-      <ul>
-        <li>But if wasi-sdk 13 has <i>not</i> yet been released, then
-          you'll have to build wasi-sdk from source.&nbsp; Probably the
-          latest version of code in the wasi-sdk repository would be
-          fine, but to use the specific version we've tested, do as
-          follows:</li>
-      </ul>
-    </ul>
-    <blockquote>
-      <blockquote>
-        <blockquote>
-          <p><tt>cd ~</tt><tt><br>
-            </tt><tt>git clone --recurse-submodules
-              https://github.com/WebAssembly/wasi-sdk.git # about 1.5 GB
-              download</tt><tt><br>
-            </tt><tt>cd wasi-sdk</tt><tt><br>
-            </tt><tt>git checkout
-              a927856376271224d30c5d7732c00a0b359eaa45 # to use the
-              specific version we've tested.</tt><tt><br>
-            </tt><tt>make<br>
-            </tt><tt>export
-              WASI_SDK_PATH=~/wasi-sdk/build/install/opt/wasi-sdk</tt></p>
-        </blockquote>
-      </blockquote>
-    </blockquote>
-    <ul>
-      <li>Installation of <a href="https://github.com/WebAssembly/wabt">wabt</a>,
-        <a href="https://github.com/WebAssembly/binaryen">binaryen</a>:<br>
-      </li>
-    </ul>
-    <blockquote>
-      <blockquote>
-        <p><tt>wget https://github.com/WebAssembly/wabt.git</tt><tt><br>
-          </tt><tt>cd wabt</tt><tt><br>
-          </tt><tt><i>... follow the instructions in the wabt README.md
-              ...</i><br>
-            sudo make install<br>
-            cd ..</tt></p>
-      </blockquote>
-    </blockquote>
-    <ul>
-      <li>Installation of <a href="https://github.com/WebAssembly/binaryen">binaryen</a>.</li>
-    </ul>
-    <blockquote>
-      <blockquote><tt>wget https://github.com/WebAssembly/binaryen.git</tt><tt><br>
-          cd binaryen</tt><tt><i><br>
-            ... follow the instructions in the binaryen README.md ...</i></tt><tt><br>
-          sudo make install<br>
-          cd ..<br>
-        </tt></blockquote>
-    </blockquote>
-    In the instructions above, note that the executable program files
-    for wabt and binaryen will end up in your /usr/local/bin directory,
-    as opposed to /usr/bin, so you'll want to make sure that
-    /usr/local/bin is in your <tt>PATH</tt>.&nbsp; Note also that
+    Note that
     although I called this a one-time setup, the environment variable <tt>WASI_SDK_PATH</tt>
     will remain set only in this particular instance of the command line
     window, and will not persist if you open another command line
