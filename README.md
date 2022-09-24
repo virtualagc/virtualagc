@@ -118,11 +118,7 @@ On Fedora 22 or later you may encounter that the wxWidgets doesn't have the wx-c
 
 ## WebAssembly
 
-* Requires `clang` from the LLVM project, plus a C standard library which compiles down to WASI system calls. Clang can directly emit WebAssembly since version 8.  [wasi-sdk](https://github.com/WebAssembly/wasi-sdk) provides a WebAssembly toolchain (clang plus C/C++ standard libraries).  A build from the source of [wasi-sdk revision a927856 ("use llvm 12.0.0 release")](https://github.com/WebAssembly/wasi-sdk/tree/a927856376271224d30c5d7732c00a0b359eaa45) has been tested with the Virtual AGC components listed in the section "WebAssembly" below, but the project also [supplies pre-built packages](https://github.com/WebAssembly/wasi-sdk/releases) for various platforms which should work just as well. In the build scripts of Virtual AGC, it is assumed that `wasi-sdk` is installed at `/opt/wasi-sdk`, but you can customize this path (see section "WebAssembly" below).
-* Requires `wasm-opt` (from the `binaryen` package) for WebAssembly code optimization.
-* Requires `wasm-strip` (from the `wabt` package) to minimize the size of the WebAssembly code.
-* Optionally, `wasm2wat` (from the `wabt` package) to translate binary code to human-readable text representation.
-
+* [wasi-sdk version 16](https://github.com/WebAssembly/wasi-sdk/releases/tag/wasi-sdk-16) provides a WebAssembly toolchain (consisting of the compiler `clang` from the LLVM project, and the C/C++ standard library `wasi-libc` that can compile to WASI system calls).
 
 More information at http://www.ibiblio.org/apollo/download.html#Build
 
@@ -264,11 +260,11 @@ Unfortunately the ACA simulation (joystick) programs do not work in this environ
 
 ## WebAssembly
 
-In the Virtual AGC build scripts, it is assumed that `wasi-sdk` is installed
-at `/opt/wasi-sdk`. You can customize the path by setting
-`WASI_SDK_PATH=/path/to/wasi-sdk` on the command line when executing `make`.
+The Virtual AGC build scripts assume that `wasi-sdk` is installed
+at the filesystem location `/opt/wasi-sdk`. You can customize this path by setting
+the environment variable `WASI_SDK_PATH` to `/path/to/wasi-sdk` when running `make`.
 
-For all builds to WebAssembly, put `WASI=yes` before `make`.
+For all WebAssembly builds, set the environment variable `WASI` to `yes` when running `make`.
 
 Currently, only the following Virtual AGC components can be compiled for the
 WebAssembly target:
@@ -282,14 +278,12 @@ To build, simply `cd` into the root directory and do:
 
 `WASI=yes make yaAGC`
 
-This will produce `yaAGC.wasm` (about 100 kB).
+This will produce `yaAGC.wasm` (roughly 32 kB). You could use tools like `wasm-opt` (from the
+`binaryen` package) and `wasm-strip` (from the `wabt` package) to optimize the code and reduce its
+size.
 
-To additionally get a text representation, go into the `yaAGC` directory and
-run:
-
-`make yaAGC.wast`
-
-This will produce `yaAGC.wast` (about 900 kB).
+To additionally get a text representation of the generated WebAssembly code, you could use the tool
+`wasm2wat` (from the `wabt` package).
 
 
 # Endnotes
