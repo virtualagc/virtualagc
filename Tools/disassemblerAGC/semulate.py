@@ -12,7 +12,7 @@ History:        2022-09-28 RSB  Split off from disassemblerAGC.py.
 I've invented the term "semulate" to embody the idea of semi-emulation.
 The idea is this:  erasable (and register) locations for which we don't
 know the value (or perhaps just don't know it easily) at assembly time
-are assign the value -1.  Those which we can (easily) know the value at
+are assign the value -1.  Those for which we can (easily) know the value at
 assembly time, since perhaps they arise from instruction sequences like
     CA  FIXED
     TS  ERASABLE
@@ -20,26 +20,13 @@ instead have the correct value stored in them.  And this is adjusted every
 time there's some kind of write to erasable/registers.
 
 This is imperfect not only in the sense of being incomplete, but also in 
-the sense that choices have to be made sometimes of whether to:
-
-    a)  Disassmble a lot of stuff correctly, while realizing that a little
-        bit of it is going to be bogus; or
-    b)  Taking no chances at all that there will be errors, but disassembling
-        a much smaller proportion of the rope.
-
-For example:  A CCS instruction is *almost* always followed by 4 basic 
-instructions, so normally after disassembling the CCS it's also safe to 
-disassemble the 4 instructions following it.  But this isn't *always*
-the case ... so it's possible that by disassembling all 4 words following
-a CCS, we *might* disassemble a data word, and this might be interpreted
-as a TC or a write to a memory-bank control register.  So should we 
-disassemble all 4 words after the CCS, or when we see a CCS should we just
-throw up our hands and ignore all of the code following it?  The latter
-seems rather extreme, so my choice is to go with the former.
-
-Perhaps there should be a command-line option to select the strategy, but
-there isn't one right now.
+the sense that it's not always possible to determine if a given memory
+location contains a basic instruction vs data (or vs an interpretive
+opcode).  This decision is made by the calling program, rather than by
+semulate() itself, however.
 """
+
+from registers import *
 
 # Get the value stored at a 12-bit address, if possible.  If impossible
 # at assembly-time, -1 is returned.  The addresses are as follows:
@@ -81,47 +68,68 @@ def get12bit(erasable, core, EB, FB, FEB, address):
 def put10bit(erasable, iochannels, EB, address, value):
     if address < 0:
         return
-    if address in [1, 2]:
-        iochannels[address] = value
     offset = address % 0o400
     if address >= 0o1400:
         if EB == 0:
+            # This step is to make sure that special registers
+            # in bank E0 are treated correctly below.
             address = offset
-            # Fall through to address < 0o1400 to take advantage
-            # of adjusting BB to EB/FB and vice-versa.
         elif EB == -1:
-            for i in range(1, 8):
-                erasable[i][offset] = -1
             value = -1
+            for i in range(1, 8):
+                erasable[i][offset] = value
+            EB = 0
             address = offset
-            # Fall through to address < 0o1400 to take advantage
-            # of adjusting BB to EB/FB and vice-versa.
+            # Pass through to treat special registers properly.
+    if address in [1, 2]:       # L or Q
+        erasable[0][address] = value
+        iochannels[address] = value
+    elif address == 6: # BB
+        if value == -1:
+            erasable[0][6] = -1 # BB
+            erasable[0][3] = -1 # EB
+            erasable[0][4] = -1 # FB
         else:
-            erasable[(EB >> 8) & 7][offset] = value
-            return
-    if address < 0o1400:
-        if address == 6: # BB
-            if value != -1:
-                value &= 0o76007
-            erasable[address // 0o400][offset] = value
-            if value == -1:
-                erasable[0][3] = -1 # EB
-                erasable[0][4] = -1 # FB
+            erasable[0][6] = value & 0o76007    # BB
+            erasable[0][3] = (value & 0o7) << 8 # EB
+            erasable[0][4] = value & 0o76000    # FB
+    elif address in [3, 4]: # EB or FB
+        if value == -1:
+            erasable[0][address] = -1
+            erasable[0][6] = -1 # BB
+        else:
+            if address == 3:
+                value &= 0o03400
             else:
-                erasable[0][3] = (value & 0o7) << 8 # EB
-                erasable[0][4] = value & 0o76000    # FB
-        if address in [3, 4]: # EB or FB
-            if value != -1:
-                if address == 3:
-                    value &= 0o03400
-                else:
-                    value &= 0o76000
-            erasable[address // 0o400][offset] = value
-            if value == -1:
-                erasable[0][6] = -1 # BB
-            elif erasable[0][3] != -1 and erasable[0][4] != -1:
+                value &= 0o76000
+            erasable[0][address] = value
+            if erasable[0][3] != -1 and erasable[0][4] != -1:
                 erasable[0][6] = (erasable[0][4] & 0o76000) \
-                                | ((erasable[0][3] >> 8) & 0o7)
+                    | ((erasable[0][3] >> 8) & 0o7)
+            else:
+                erasable[0][6] = -1
+    elif address == 0o20:       # CYR
+        if value != -1:
+            b = value & 1
+            value = (value >> 1) | (b << 14)
+        erasable[0][address] = value
+    elif address == 0o21:       # SR
+        if value != -1:
+            value = (value >> 1) | (value & 0o40000)
+        erasable[0][address] = value
+    elif address == 0o22:       # CYL
+        if value != -1:
+            b = value & 0o40000
+            value = ((value << 1) & 0o77777) | (b >> 14)
+        erasable[0][address] = value
+    elif address == 0o23:       # EDOP
+        if value != -1:
+            value = (value >> 7) & 0o177
+        erasable[0][address] = value
+    elif address < 0o1400:
+        erasable[address // 0o400][offset] = value
+    else: # address >= 0o1400
+        erasable[(EB >> 8) & 7][offset] = value
 
 # Add two 1's-complement 15-bit values.  I don't try to account for
 # a 16th bit in (say) the accumulator or for overflow, because I don't
@@ -145,6 +153,15 @@ def semulate(core, erasable, iochannels, opcode, operand):
     Z = erasable[0][5]
     BB = erasable[0][6]
     FEB = iochannels[7]
+    if not operand.isdigit():
+        try:
+            if opcode in ["WRITE", "WOR", "WAND", "READ", 
+                          "ROR", "RAND", "RXOR"]: 
+                operand = iochannelsByName[operand]
+            else:
+                operand = registersByName[operand]
+        except:
+            pass
     try:
         address12 = int(operand, 8)
         address10 = address12 & 0o1777
@@ -158,7 +175,7 @@ def semulate(core, erasable, iochannels, opcode, operand):
             A = -1
         else:
             A = addOnesComplement(A, value)
-        erasable[0][0] = A
+        put10bit(erasable, iochannels, 0, 0, A)
         
     elif opcode == "ADS":
         value = get12bit(erasable, core, EB, FB, FEB, address10)
@@ -166,7 +183,7 @@ def semulate(core, erasable, iochannels, opcode, operand):
             A = -1
         else:
             A = addOnesComplement(A, value)
-        erasable[0][0] = A
+        put10bit(erasable, iochannels, 0, 0, A)
         put10bit(erasable, iochannels, EB, address10, A)
         
     elif opcode == "AUG":
@@ -183,7 +200,7 @@ def semulate(core, erasable, iochannels, opcode, operand):
         
     elif opcode == "CA":
         A = get12bit(erasable, core, EB, FB, FEB, address12)
-        erasable[0][0] = A
+        put10bit(erasable, iochannels, 0, 0, A)
     
     elif opcode == "CCS":
         value = get12bit(erasable, core, EB, FB, FEB, address10)
@@ -196,18 +213,18 @@ def semulate(core, erasable, iochannels, opcode, operand):
                 A = value - 1
             else:
                 A = 0
-        erasable[0][0] = A
+        put10bit(erasable, iochannels, 0, 0, A)
     
     elif opcode == "COM":
         if A != -1:
             A = 0o77777 & ~A
-            erasable[0][0] = A
+            put10bit(erasable, iochannels, 0, 0, A)
      
     elif opcode == "CS":
         A = get12bit(erasable, core, EB, FB, FEB, address12)
         if A != -1:
             A = 0o77777 & ~A
-        erasable[0][0] = A
+        put10bit(erasable, iochannels, 0, 0, A)
     
     elif opcode == "DAS":
         # TBD ... I'll figure this one out later.
@@ -218,25 +235,25 @@ def semulate(core, erasable, iochannels, opcode, operand):
     elif opcode == "DCA":
         A = get12bit(erasable, core, EB, FB, FEB, address12)
         L = get12bit(erasable, core, EB, FB, FEB, address12+1)
-        erasable[0][0] = A
-        erasable[0][1] = L
+        put10bit(erasable, iochannels, 0, 0, A)
+        put10bit(erasable, iochannels, 0, 1, L)
     
     elif opcode == "DCOM":
         if A != -1:
             A = 0o77777 & ~A
         if L != -1:
             L = 0o77777 & ~L
-        erasable[0][0] = A
-        erasable[0][1] = L
+        put10bit(erasable, iochannels, 0, 0, A)
+        put10bit(erasable, iochannels, 0, 1, L)
     
     elif opcode == "DCS":
         A = get12bit(erasable, core, EB, FB, FEB, address12)
         L = get12bit(erasable, core, EB, FB, FEB, address12+1)
         if A != -1:
-            erasable[0][0] = 0o77777 & ~A
+            put10bit(erasable, iochannels, 0, 0, 0o77777 & ~A)        
         if L != -1:
-            erasable[0][1] = 0o77777 & ~L
-    
+            put10bit(erasable, iochannels, 0, 1, 0o77777 & ~L)
+                
     elif opcode == "DDOUBL":
         # TBD ... use DAS code, once I figure that out.
         pass
@@ -254,33 +271,32 @@ def semulate(core, erasable, iochannels, opcode, operand):
     elif opcode == "DOUBLE":
         if A != -1:
             A = addOnesComplement(A, A)
-            erasable[0][0] = A
+            put10bit(erasable, iochannels, 0, 0, A)        
 
     elif opcode == "DTCB":
-        erasable[0][0] = Z
-        erasable[0][1] = BB
-        erasable[0][5] = A
-        erasable[0][6] = L
+        put10bit(erasable, iochannels, 0, 0, Z)        
+        put10bit(erasable, iochannels, 0, 1, BB)        
+        put10bit(erasable, iochannels, 0, 5, A)        
+        put10bit(erasable, iochannels, 0, 6, L)        
     
     elif opcode == "DTCF":
-        erasable[0][0] = FB
-        erasable[0][1] = Z
-        erasable[0][4] = A
-        erasable[0][5] = L
+        put10bit(erasable, iochannels, 0, 0, FB)        
+        put10bit(erasable, iochannels, 0, 1, Z)        
+        put10bit(erasable, iochannels, 0, 4, A)        
+        put10bit(erasable, iochannels, 0, 5, L)        
     
     elif opcode == "DV":
         # Deliberately not implementing.
-        erasable[0][0] = -1
-        erasable[0][1] = -1
-        pass
+        put10bit(erasable, iochannels, 0, 0, -1)
+        put10bit(erasable, iochannels, 0, 1, -1)
     
     elif opcode == "DXCH":
         valueA = get12bit(erasable, core, EB, FB, FEB, address10)
         valueL = get12bit(erasable, core, EB, FB, FEB, address10+1)
         put10bit(erasable, iochannels, EB, address10, A)
         put10bit(erasable, iochannels, EB, address10+1, L)
-        erasable[0][0] = valueA
-        erasable[0][1] = valueL
+        put10bit(erasable, iochannels, 0, 0, valueA)
+        put10bit(erasable, iochannels, 0, 1, valueL)
 
     elif opcode in ["EDRUPT", "EXTEND"]:
         pass
@@ -297,7 +313,7 @@ def semulate(core, erasable, iochannels, opcode, operand):
     elif opcode == "LXCH":
         value = get12bit(erasable, core, EB, FB, FEB, address10)
         put10bit(erasable, iochannels, EB, address10, L)
-        erasable[0][1] = value
+        put10bit(erasable, iochannels, 0, 0, value)
     
     elif opcode == "MASK":
         value = get12bit(erasable, core, EB, FB, FEB, address10)
@@ -305,8 +321,8 @@ def semulate(core, erasable, iochannels, opcode, operand):
             put10bit(erasable, iochannels, EB, address10, value & A)
     
     elif opcode == "MP":
-        erasable[0][0] = -1
-        erasable[0][1] = -1
+        put10bit(erasable, iochannels, 0, 0, -1)
+        put10bit(erasable, iochannels, 0, 1, -1)
     
     elif opcode == "MSU":
         value = get12bit(erasable, core, EB, FB, FEB, address10)
@@ -316,7 +332,7 @@ def semulate(core, erasable, iochannels, opcode, operand):
             A = (A + value) & 0o77777
             if A & 0o40000 != 0:
                 A = addOnesComplement(A, 0o77776)
-        erasable[0][0] = A
+        put10bit(erasable, iochannels, 0, 0, A)
     
     elif opcode in ["NOOP", "OVSK"]:
         pass
@@ -324,7 +340,8 @@ def semulate(core, erasable, iochannels, opcode, operand):
     elif opcode == "QXCH":
         value = get12bit(erasable, core, EB, FB, FEB, address10)
         put10bit(erasable, iochannels, EB, address10, Q)
-        erasable[0][2] = value
+        put10bit(erasable, iochannels, 0, 2, value)
+
     
     elif opcode == "RAND":
         if A == -1 or address10 >= len(iochannels) \
@@ -332,14 +349,16 @@ def semulate(core, erasable, iochannels, opcode, operand):
             A = -1
         else:
             A = A & iochannels[address10]
-        erasable[0][0] = A
+        put10bit(erasable, iochannels, 0, 0, A)
+
     
     elif opcode == "READ":
         if address10 >= len(iochannels):
             A = -1
         else:
             A = iochannels[address10]
-        erasable[0][0] = A
+        put10bit(erasable, iochannels, 0, 0, A)
+
     
     elif opcode in ["RELINT", "RESUME", "RETURN"]:
         pass
@@ -350,19 +369,19 @@ def semulate(core, erasable, iochannels, opcode, operand):
             A = -1
         else:
             A = A | iochannels[address10]
-        erasable[0][0] = A
-    
+        put10bit(erasable, iochannels, 0, 0, A)
+
     elif opcode == "RXOR":
         if A == -1 or address10 >= len(iochannels) \
                 or iochannels[address10] == -1:
             A = -1
         else:
             A = A ^ iochannels[address10]
-        erasable[0][0] = A
+        put10bit(erasable, iochannels, 0, 0, A)
     
     elif opcode == "SQUARE":
-        erasable[0][0] = -1
-        erasable[0][1] = -1
+        put10bit(erasable, iochannels, 0, 0, -1)
+        put10bit(erasable, iochannels, 0, 1, -1)
     
     elif opcode == "SU":
         value = get12bit(erasable, core, EB, FB, FEB, address12)
@@ -370,7 +389,7 @@ def semulate(core, erasable, iochannels, opcode, operand):
             A = -1
         else:
             A = addOnesComplement(A, 0o77777 & ~value)
-        erasable[0][0] = A
+        put10bit(erasable, iochannels, 0, 0, A)
 
     elif opcode in ["TC", "TCF", "TCAA", "TCF"]:
         pass
@@ -386,8 +405,8 @@ def semulate(core, erasable, iochannels, opcode, operand):
                 value = A & iochannels[address10]
             iochannels[address10] = value
             if address10 in [1, 2]:
-                erasable[0][address10] = value
-    
+                put10bit(erasable, iochannels, 0, address10, value)
+
     elif opcode == "WOR":
         if address10 >= 0 and address10 < len(iochannels):
             if A == -1 or iochannels[address10] == -1:
@@ -396,26 +415,28 @@ def semulate(core, erasable, iochannels, opcode, operand):
                 value = A | iochannels[address10]
             iochannels[address10] = value
             if address10 in [1, 2]:
-                erasable[0][address10] = value
-    
+                put10bit(erasable, iochannels, 0, address10, value)
+
     elif opcode == "WRITE":
         if address10 >= 0 and address10 < len(iochannels):
             iochannels[address10] = A
             if address10 in [1, 2]:
-                erasable[0][address10] = A
+                put10bit(erasable, iochannels, 0, address10, A)
     
     elif opcode == "XCH":
         value = get12bit(erasable, core, EB, FB, FEB, address10)
         put10bit(erasable, iochannels, EB, address10, A)
-        erasable[0][0] = value
+        put10bit(erasable, iochannels, 0, 0, value)
     
     elif opcode in ["XLQ", "XXALQ"]:
         pass
       
     elif opcode == "ZL":
-        erasable[0][1] = 0
+        put10bit(erasable, iochannels, 0, 1, 0)
+
 
     elif opcode == "ZQ":
-        erasable[0][2] = 0
+        put10bit(erasable, iochannels, 0, 2, 0)
+
 
 

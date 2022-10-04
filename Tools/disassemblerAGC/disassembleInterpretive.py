@@ -243,35 +243,36 @@ def adjustOpcodePerArgument(core, bank, offset, interpreterCodesField,
             msg += " (%d, %d)" % ior[5]
         print(msg)
 
-    nCode = interpreterCodesField[0][1]
-    canIndex = (nCode & 2) != 0
-    argument = core[bank][offset]
-    if canIndex and (argument & 0o40000) != 0:
-        if isLeft:
-            increment = 1
-        else:
-            increment = 2
-        argument = (increment + ~argument) & 0o77777
-        #print("%03o, inverted argument %05o" % (nCode, argument))
-        #for ior in interpreterCodesField:
-        #    printInterpreterCodesField(ior)
-    for ior in interpreterCodesField:
-        if len(ior) == 3:
-            return ior[0], ior[2], ior
-        elif len(ior) > 3:
-            if ior[3] == 0:
-                return ior[0], ior[2], ior
-            if ior[3] == 1:
-                mask = maskSwitch
+    if offset < 0o2000:
+        nCode = interpreterCodesField[0][1]
+        canIndex = (nCode & 2) != 0
+        argument = core[bank][offset]
+        if canIndex and (argument & 0o40000) != 0:
+            if isLeft:
+                increment = 1
             else:
-                mask = maskShift
-            if (ior[4] & mask) == argument & mask:
+                increment = 2
+            argument = (increment + ~argument) & 0o77777
+            #print("%03o, inverted argument %05o" % (nCode, argument))
+            #for ior in interpreterCodesField:
+            #    printInterpreterCodesField(ior)
+        for ior in interpreterCodesField:
+            if len(ior) == 3:
                 return ior[0], ior[2], ior
-        else:
-            print("Internal error:", ior)
-    print("Not found: %05o %05o %05o" % (argument, maskSwitch, maskShift))
-    for ior in interpreterCodesField:
-        printInterpreterCodesField(ior)
+            elif len(ior) > 3:
+                if ior[3] == 0:
+                    return ior[0], ior[2], ior
+                if ior[3] == 1:
+                    mask = maskSwitch
+                else:
+                    mask = maskShift
+                if (ior[4] & mask) == argument & mask:
+                    return ior[0], ior[2], ior
+            else:
+                print("Internal error:", ior)
+    #print("Not found: %05o %05o %05o" % (argument, maskSwitch, maskShift))
+    #for ior in interpreterCodesField:
+    #    printInterpreterCodesField(ior)
     return "??????", 0, ()
 
 # Returns a list of triples and two booleans.  The first boolean indicates
@@ -309,12 +310,14 @@ def disassembleInterpretive(core, bank, offset, stadr):
             left = "STORE"
         elif storeType == 0o24000:
             left = "STOVL"
-        if left != "??????":
+        if left == "??????":
+            disassembly.append((left, "", ""))
+        else:
             #disassembly.append((left, "", eInverse(sword & 0o1776)))
             disassembly.append((left, "", "%05o" % (sword & 0o1776)))
-            if left != "STORE":
+            if left != "STORE" and offset < 0o2000:
                 word = core[bank][offset]
-                if left == "STCALL" or 0 == (0o40000 & word):  # Extra argument?
+                if left == "STCALL" or 0 == (0o40000 & word):  # Extra arg?
                     if left == "STCALL":
                         disassembly.append(("", "", fInverse(word)))
                     else:
@@ -358,6 +361,8 @@ def disassembleInterpretive(core, bank, offset, stadr):
             stadr = True
         rawNumArgs = numLeftArgs + numRightArgs
         for i in range(rawNumArgs):
+            if offset+i >= 0o2000:
+                break
             word = core[bank][offset + i]
             if word == 0o77626: # STADR
                 break

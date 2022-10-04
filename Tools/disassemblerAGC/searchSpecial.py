@@ -790,7 +790,8 @@ def searchSpecial(core):
                             opcode, operand, extended = \
                                 disassembleBasic(core[bank][offset], extended)
                         if symbol == "no":
-                            print("%02o %04o %04o %s %s %r" % (bank, testOffset, offset, opcode, operand, extended))
+                            print("%02o %04o %04o %s %s %r" % (bank, testOffset, 
+                                offset, opcode, operand, extended))
                         lastOffset = offset
                         required = pattern[iPat][0]
                         desiredOpcodes = pattern[iPat][1]
@@ -815,7 +816,8 @@ def searchSpecial(core):
                             fixedFixed = bank * 0o2000 + testOffset
                         specialSubroutines[symbol] = (bank, testOffset, 
                                                       fixedFixed, searchPattern,
-                                                      symbol, searchPattern["dataWords"])
+                                                      symbol, 
+                                                      searchPattern["dataWords"])
                         iPat = 0
                         while not pattern[iPat][0]: 
                             iPat += 1
@@ -836,7 +838,8 @@ def searchSpecial(core):
                                         fixedFixed = bank * 0o2000 + offset
                                     specialSubroutines[symbol] = \
                                         (bank, offset, fixedFixed, 
-                                         searchPattern, symbol, searchPattern["pattern"])
+                                         searchPattern, symbol, 
+                                         searchPattern["pattern"])
                                     continue
                                 else: # Does not match!
                                     break
@@ -852,6 +855,6 @@ def searchSpecial(core):
                     for p in pattern:
                         ops = p[2]
                         if symbol in ops:
-                            # print("Replace", symbol, "by %04o" % specialSubroutines[symbol][2])
-                            ops[ops.index(symbol)] = "%04o" % specialSubroutines[symbol][2]
+                            ops[ops.index(symbol)] = "%04o" % \
+                                            specialSubroutines[symbol][2]
                             

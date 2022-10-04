@@ -50,6 +50,8 @@ specialOnly = False
 pattern = False
 symbol = "SYMBOL"
 specsFilename = ""
+findFilename = ""
+descent = False
 entryPoints = [
     { "inBasic": True, "bank": 0o2, "offset": 0o0000, 
         "eb": 0, "fb": 0, "feb": 0, "symbol": "(go)" },
@@ -76,53 +78,71 @@ entryPoints = [
 ]
 
 entryCount = 0
+pBanks = ""
+oBanks = ""
 for param in sys.argv[1:]:
     if param == "--help":
-        print("Usage:")
-        print("\tdisassemblerAGC.py [OPTIONS] <CORE >DISASSEMBLY")
-        print("The input CORE is by default a .binsource file.  The OPTIONS:")
-        print("  --basic=A    Add basic address (NNNN or NN,NNNN octal)")
-        print("               to list of entry points.  Multiple --basic")
-        print("               switches can be used.  The interrupt lead-ins")
-        print("               are always present by default, as well as an")
-        print("               'special subroutines' that are known.")
-        print("  --interp=A   Add interpretive address (NNNN or NN,NNNN octal)")
-        print("               to list of entry points.  Multiple --interp")
-        print("               switched can be used.")
-        print("  --bin        CORE is a .bin file as output by yaYUL.")
-        print("  --hardware   CORE is a 'hardware' style .bin file.  If --bin")
-        print("               is present, --hardware overrides it.")
-        print("  --debug      Turn on some debugging messages.")
-        print("  --dump       Dump the octals w/o disassembly.")
-        print("  --special    Only print deduced special subroutines.")
-        print("  --dtest      By default, the first instruction is basic, and")
-        print("               and the test range is bank 02, from address 4000")
-        print("               to 4050, but these can be changed with the extra")
-        print("               switches --dint --dbank=N, --dstart=N, --dend==N,")
-        print("               where the parameter is an octal number.")
-        print("               Note that for --dstart and --dend.")
-        print("  --pattern=S  This is similar to --dtest, and takes the same")
-        print("               optional extra command-line switches, but instead")
-        print("               of providing a disassembly, instead provides a")
-        print("               draft sample pattern (which typically requires")
-        print("               manual tweaking) for use in searchSpecial.py.")
-        print("               Note that --pattern overrides --dtest.  S is the")
-        print("               symbol for the subroutine for the pattern.")
-        print("  --specs=F    Reads multiple pattern specifications from a file")
-        print("               (F), similar to those used by --dtest and --pattern.")
-        print("               Outputs patterns in a form useful for subsequent")
-        print("               free-form matching in an alternate AGC version.")
-        print("               F is an ASCII file, with lines of the form:")
-        print("                     SYMBOL BANK START [END] [I]")
-        print("               END is optional, because if it is missing for a")
-        print("               given line, then the START from the next line of")
-        print("               the file is used as the END of the preceding line.")
-        print("               The optional parameter 'I' is literal, and means")
-        print("               that the starting location is interpretive rather")
-        print("               than basic (which is the default).")
-        print("               This switch overrides --pattern and --dtest.")
-        print("Note that for --bin and --hardware, we can't necessarily")
-        print("determine that locations are unused vs merely containing 00000.")
+        print('''
+          Usage:    
+                 disassemblerAGC.py [OPTIONS] <CORE >DISASSEMBLY    
+          The input CORE is by default a .binsource file.  The OPTIONS:    
+            --basic=A   Add basic address (NNNN or NN,NNNN octal)    
+                        to list of entry points.  Multiple --basic    
+                        switches can be used.  The interrupt lead-ins    
+                        are always present by default, as well as an    
+                        'special subroutines' that are known.    
+            --interp=A  Add interpretive address (NNNN or NN,NNNN octal)    
+                        to list of entry points.  Multiple --interp    
+                        switched can be used.    
+            --bin       CORE is a .bin file as output by yaYUL.    
+            --hardware  CORE is a 'hardware' style .bin file.  If --bin    
+                        is present, --hardware overrides it.    
+            --debug     Turn on some debugging messages.    
+            --dump      Dump the octals w/o disassembly.    
+            --special   Only print deduced special subroutines.    
+            --dtest     By default, the first instruction is basic, and    
+                        and the test range is bank 02, from address 4000    
+                        to 4050, but these can be changed with the extra    
+                        switches --dint --dbank=N, --dstart=N, --dend==N,    
+                        where the parameter is an octal number.    
+                        Note that for --dstart and --dend.    
+            --pattern=S This is similar to --dtest, and takes the same    
+                        optional extra command-line switches, but instead    
+                        of providing a disassembly, instead provides a    
+                        draft sample pattern (which typically requires    
+                        manual tweaking) for use in searchSpecial.py.    
+                        Note that --pattern overrides --dtest.  S is the    
+                        symbol for the subroutine for the pattern.    
+            --specs=F   Reads multiple pattern specifications from a file    
+                        (F), similar to those used by --dtest and
+                        --pattern. Outputs patterns in a form useful for
+                        subsequent free-form matching in an alternate AGC
+                        version. F is an ASCII file, with lines of the
+                        form:    
+                               SYMBOL BANK START [END] [I]    
+                        END is optional, because if it is missing for a    
+                        given line, then the START from the next line of    
+                        the file is used as the END of the preceding line.    
+                        The optional parameter 'I' is literal, and means    
+                        that the starting location is interpretive rather    
+                        than basic (which is the default).    
+                        This switch overrides --pattern and --dtest.
+            --find=F    Uses a specifications file as created by --specs,
+                        and tries to find all of the patterns therein ...
+                        presumably in a different rope than the one from 
+                        which the file was created.
+            --prio=B,... A list of banks (octal) which are searched first
+                        with the --find switch.  By default, the banks are
+                        searched in the order 00, 01, 02, ..., 43.
+            --only=B,... A list of banks (octal) for --find.  If present,
+                        only the listed banks are searched.
+            --descent   Disassemble with recursive descent, to try and reach
+                        all of the reachable code.  This is not presently
+                        functional.
+               
+          Note that for --bin and --hardware, we can't necessarily    
+          determine that locations are unused vs merely containing 00000.    
+        ''')
         sys.exit(0)
     elif param[:8] == "--basic=":
         bank, offset = toFixed(param[8:])
@@ -169,6 +189,14 @@ for param in sys.argv[1:]:
         specialOnly = True
     elif param[:8] == "--specs=":
         specsFilename = param[8:]
+    elif param[:7] == "--find=":
+        findFilename = param[7:]
+    elif param[:7] == "--prio=":
+        pBanks = param[7:]
+    elif param[:7] == "--only=":
+        oBanks = param[7:]
+    elif param == "--descent":
+        descent = True
     else:
         print("Unrecognized option", param)
         sys.exit(1)
