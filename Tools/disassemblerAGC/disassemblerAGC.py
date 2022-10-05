@@ -376,13 +376,21 @@ if cli.specsFilename != "":
     # command line into memory as the patternSpecs list.
     f = open(cli.specsFilename, "r")
     patternSpecs = []
+    lastBank = 0
     for line in f:
-        fields = line.strip().split()
+        fields = line.upper().split("#")[0].strip().split()
         if len(fields) == 0:
             continue
         for i in range(len(fields)):
+            # Remove any extraneous comma at the end of the field.
+            if fields[i][-1:] == "," and fields[i][:-1].isdigit():
+                fields[i] = fields[i][:-1]
             if fields[i].isdigit():
                 fields[i] = int(fields[i], 8) % 0o2000
+        if fields[1] == ".":
+            fields[1] = lastBank
+        elif isinstance(fields[1], int):
+            lastBank = fields[1]
         patternSpec = { "symbol": fields[0], "dbank": fields[1], 
                         "dstart": fields[2], "inBasic": True}
         for i in range(3, len(fields)):
@@ -512,7 +520,9 @@ if cli.findFilename != "":
         for symbol in symbols:
             desiredPatterns = desiredMatches[basicOrInterpretive][symbol]
             if len(desiredPatterns) <= indexIntoPatterns:
-                print("Implementation error")
+                print("Implementation error A", "%02o" % bank, 
+                    "%04o" % address, symbol, indexIntoPatterns, 
+                    len(desiredPatterns), desiredPatterns)
                 sys.exit(1)
             desiredPattern = desiredPatterns[indexIntoPatterns]
             #print("\t\t%s %s" % (symbol, desiredPattern))
@@ -564,7 +574,7 @@ if cli.findFilename != "":
                     # match.  Otherwise, it should be the case
                     # that the symbols list is now empty.
                     if len(symbols) > 1:
-                        print("Implementation error")
+                        print("Implementation error B")
                         sys.exit(1)
                     elif len(symbols) == 0:
                         continue
@@ -582,6 +592,10 @@ if cli.findFilename != "":
     for basicOrInterpretive in ["basic", "interpretive"]:
         for symbol in symbolsSought[basicOrInterpretive]:
             print("%s (%s) not found" % (symbol, basicOrInterpretive))
+    print("Total matched: %d (b), %d (i)" % \
+        (len(symbolsFound["basic"]), len(symbolsFound["interpretive"])))
+    print("Total missed:  %d (b), %d (i)" % \
+        (len(symbolsSought["basic"]), len(symbolsSought["interpretive"])))
     sys.exit(0)
     
 #=============================================================================
@@ -800,7 +814,7 @@ if cli.descent:
                     disAll = disassembleInterpretive(core, bank, offset)
                     for dis in disAll:
                         if disassembly[bank][offset] != unusedDisassembly:
-                            print("Implementation error")
+                            print("Implementation error C")
                             sys.exit(1)
                         disassembly[bank][offset] = dis
                         offset += 1

@@ -91,9 +91,15 @@ A specification file is simply an ASCII file with a sequence of lines, one for e
 
     SYMBOL BANK START [END] ["I"]
 
-`SYMBOL` is the literal name of the program label.  `BANK` is a 2-digit octal number in the range 00 through 43.  `START` (and `END` if present) are 4-digit octal numbers in the range 2000 through 3777.  `START` gives the address (within the baseline) of the `SYMBOL`.  `END`, meanwhile, is the first address following the subroutine.  The reason `END` is optional is that if it is omitted, the `START` from the next symbol will be used.  This makes it quick and easy to read the information off of an assembly listing.  
+`SYMBOL` is the literal name of the program label.  Moreover, it's automatically converted to upper case, so if it's more convenient to enter symbols in lower case, feel free to do so.  
 
-Note that addresses in fixed-fixed continue to use this convention, rather than being represented by the address ranges 4000 through 7777.
+`BANK` is a 2-digit octal number in the range 00 through 43.  As a shorthand notation, you can use the literal '.' in place of a number, and the disassembler inserts the bank number from the preceding line (or at any rate, from the most-recent line in which a bank number was numerically defined).
+
+`START` (and `END` if present) are 4-digit octal numbers in the range 2000 through 3777.  `START` gives the address (within the baseline) of the `SYMBOL`.  `END`, meanwhile, is the first address following the subroutine.  The reason `END` is optional is that if it is omitted, the `START` from the next symbol will be used. 
+
+Note that addresses in fixed-fixed continue to use this NN,NNNN convention, rather than being represented by the address ranges 4000 through 7777.
+
+You can also include comments, which are transparently discarded by the processing.  A comment is any text preceded by the character '#'.
 
 **Note:**  It goes without saying, but I'll say it anyway:  You don't need to include any of the "special" subroutines in the specification, since the disassembler already has found them for you.
 
@@ -101,7 +107,12 @@ By default, the *first* instruction in `START` is assumed to be a basic instruct
 
 One thing to beware of in omitting the `END` parameter, is that you want the patterns to be long enough so that there are unique matches, and the interval between two successive symbols may not be long enough to achieve that.  For example, among the "special" subroutines, `BANKCALL` and `IBNKCALL` actually have *identical* patterns, and the only way disassemblerAGC.py distinguishes them is that `IBNKCALL` is known to always follow `BANKCALL` in memory.  Unfortunately, that's not something you're able to specify in specification files.  On the other hand, while I said above that `END` is the end of the subroutine, that's not really so.  It's merely the end of the *pattern* being matched.  So you could bunch several subroutines within a single `START` to `END` interval if you liked, thus making the match-pattern much longer and presumably more unique.
 
-A sample specifications file is Comanche055.specs in the source tree.  I'd lean towards recommending creating separate specification files for each bank of the baseline, and naming them with a convention like AGCVERSION-BANKNUM.specs, such as Comanche055-02.specs for bank 02.
+The following sample specifications files are in the source tree:
+
+* Comanche055.specs &mdash; Just a few things I was playing around with in debugging the disassembler.
+* Comanche067_aborted_reconstruction_20221005.specs &mdash; My attempt at creating a specifications file from a reconstruction of Comanche 67 I had been making (see GitHub issue #1140) but eventually had to abandon only partially completed.  The specification file covers only banks 06 through 13, which correspond to rope memory module B2.  I didn't include *all* program labels in those banks, of course, but just chose a few dozen per bank, roughly evenly spaced.
+
+In spite of the filenames mentioned above, I'd lean towards recommending creating separate specification files for each bank of the baseline, and naming them with a convention like AGCVERSION-BANKNUM.specs, such as Comanche055-02.specs for bank 02.
 
 ## Creating a Pattern-Matching File from a Specifications File
 
