@@ -219,3 +219,23 @@ you'd instead get
     TRANSPOS (interpretive) not found
     S17.1 (interpretive) not found
 
+As another example, use these Comanche 55 (Apollo 11) patterns for matching in Manche45R2 (Apollo 10):
+
+    disassemblerAGC.py --find=Comanche055.patterns --bin <Manche45R2.bin
+
+You get (after a little editing):
+
+    BANKCALL = 02,2662
+    SWCALL = 02,2666
+    POSTJUMP = 02,2701
+    BANKJUMP = 02,2704
+    POODOO = 02,3721
+    DISP45 = 15,2020
+    NEWDELHI = 22,3026
+    P17 = 35,3155
+    TRANSPOS = 22,2334
+    S17.1 = 36,2000
+    ABORT2 (basic) not found
+    COMPTGO (basic) not found
+
+It's not terribly surprising that `COMPTGO` isn't found, since Manche45R2 does not in fact have a `COMPTGO`.  As for `ABORT2`, Manche45R2 does indeed have that, but it differs from the one in Comanche 55. So it's a good thing it isn't found.
