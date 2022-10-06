@@ -37,9 +37,21 @@ provides a list of the options.
 
 Additionally, there are test files with names of the form *.spec which can be used with diassemblerAGC.py's --spec command-line switch.
 
-# Program: TBD
+# Program: specifyAGC.py
 
-TBD
+The program specifyAGC.py is used for auto-generating a "specifications" file (explained in the section "Envisaged Workflow" below) from an AGC assembly listing.  That's a task which would otherwise need to be performed manually, and while it's relatively easy to do so, it can be time-consuming.  Therefore, automating it can be useful.
+
+An assembly listing is normally output automatically by the process of assembling AGC source code using the `yaYUL` assembler, as in 
+
+    yaYUL ... >AGCPROGRAM.lst
+
+The specifyAGC.py program is used as follows:
+
+    specifyAGC.py [--min=8] &lt;AGCPROGRAM.lst >AGCPROGRAM.specs
+
+The --min option is explained later.
+
+The only dependency is the disassembleInterpretive.py module, also required by disassemblerAGC.py as explained earlier.
 
 # Envisaged Workflow
 
@@ -53,7 +65,7 @@ The workflow which disassemblerAGC.py aids is essentially the following.  (Sampl
 
  1. Determine the memory locations of various subroutines common to all (or at least a wide range) of AGC software versions.  I refer to these as the "special subroutines".  There is a built-in mechanism for 25-30 such common subroutines built into disassemblerAGC.py, which has been tested across a variety of software versions.  (Retread 44, Aurora 12, Sunburst 37, Comanche 55, Luminary 210, Artemis 72).  Presumably, the number of supported special subroutines will increase over time.
  2. Choose an AGC software version (or versions) to be used as baseline(s) for reconstructing the software of the dumped rope module.  For example, in reconstructing a Comanche 72 dump, the baseline versions might be the (fully known) Comanche 55 software and the (incomplete but partially reconstructed) Comanche 67 software.
- 3. For the *baseline* software version(s), create "specifications" for all of the subroutines it's desirable to located within the dumped rope.  This needn't be done all at once; for example, it could be done a bank at a time.  The "specification" is basically just a summary of information from the assembly listings of the baseline, and is very quick and easy to construct, although the more subroutines that are chosen, the more time it takes to do so.  Eventually, it may be possible to automate this process, but for now it is manual.
+ 3. For the *baseline* software version(s), create "specifications" for all of the subroutines it's desirable to located within the dumped rope.  This can be done in an automated way (program specifyAGC.py) or manually.  If manually, it needn't be done all at once; for example, it could be done a bank at a time.  The "specification" is basically just a summary of information from the assembly listings of the baseline, and is very quick and easy to construct, although the more subroutines that are chosen, the more time it takes to do so. 
  4. Use disassemblerAGC.py to process the specification file(s), which creates file(s) of "patterns" for pattern matching.
  5. Use disassemblerAGC.py to search the dump of the core rope.
 
@@ -107,22 +119,29 @@ By default, the *first* instruction in `START` is assumed to be a basic instruct
 
 One thing to beware of in omitting the `END` parameter, is that you want the patterns to be long enough so that there are unique matches, and the interval between two successive symbols may not be long enough to achieve that.  For example, among the "special" subroutines, `BANKCALL` and `IBNKCALL` actually have *identical* patterns, and the only way disassemblerAGC.py distinguishes them is that `IBNKCALL` is known to always follow `BANKCALL` in memory.  Unfortunately, that's not something you're able to specify in specification files.  On the other hand, while I said above that `END` is the end of the subroutine, that's not really so.  It's merely the end of the *pattern* being matched.  So you could bunch several subroutines within a single `START` to `END` interval if you liked, thus making the match-pattern much longer and presumably more unique.
 
+Creating a specifications file is relatively easy, but the program specifyAGC.py is available to do so in an automated way.  It requires as input only the assembly listing for the baseline AGC software version being used, as produced by `yaYUL`.  Of course, it applies no human judgement to this process, so there are some circumstances where a specification file created manually may be superior in certain ways.  The command is simply
+
+    specifyAGC.py [--min=N] &lt;AGCPROGRAM.py >AGCPROGRAM.specs
+
+The --min option is available to help guard against the danger of making patterns which are so short that they have *many* matches, most of which would be wrong.  For example, if you had a pattern that consisted only of (say) a single TC, it would match any TC in the rope module being reconstructed.  By default, all specifications must be at least 8 words long &mdash; i.e., by default, --min=8.  But you can imagine circumstances where you might want to make it smaller for a few special symbols, or longer.
+
+In order to meet the minimum-length requirement, specifyAGC.py will attempt to combine the scopes for successive symbols until the combined scope is greater than the required minimum.  However, there are always going to be very short scopes which simply cannot be combined, in which case specifyAGC.py simply rejects them without creating specifications for.  In either case, though, comments are added to the specifications file at the points where these compromises occur, to explain what has happened.
+
 The following sample specifications files are in the source tree:
 
 * Comanche055.specs &mdash; Just a few things I was playing around with in debugging the disassembler.
-* Comanche067_aborted_reconstruction_20221005.specs &mdash; My attempt at creating a specifications file from a reconstruction of Comanche 67 I had been making (see GitHub issue #1140) but eventually had to abandon only partially completed.  The specification file covers only banks 06 through 13, which correspond to rope memory module B2.  I didn't include *all* program labels in those banks, of course, but just chose a few dozen per bank, roughly evenly spaced.
-
-In spite of the filenames mentioned above, I'd lean towards recommending creating separate specification files for each bank of the baseline, and naming them with a convention like AGCVERSION-BANKNUM.specs, such as Comanche055-02.specs for bank 02.
+* Comanche067_aborted_reconstruction_20221005.specs &mdash; My attempt at manually creating a specifications file from a reconstruction of Comanche 67 I had been making (see GitHub issue #1140) but eventually had to abandon only partially completed.  The specification file covers only banks 06 through 13, which correspond to rope memory module B2.  I didn't include *all* program labels in those banks, of course, but just chose a few dozen per bank, roughly evenly spaced.
+* Comanche055-autogenerated.specs &mdash; A full specifications file for Comanche 55, autogenerated by specifyAGC.py with its default setting for minimum length.
 
 ## Creating a Pattern-Matching File from a Specifications File
 
 The command is 
 
-    disassemblerAGC.py --specs=SPECIFICATION.spec <BASELINE.binsource >PATTERNS.patterns
+    disassemblerAGC.py --specs=SPECIFICATION.spec &lt;BASELINE.binsource >PATTERNS.patterns
 
 For example,
 
-    disassemblerAGC.py --specs=Comanche055.spec <Comanche055.binsource >Comanche055.patterns
+    disassemblerAGC.py --specs=Comanche055.spec &lt;Comanche055.binsource >Comanche055.patterns
 
 You never have any reason I'm aware of to look at the .patterns file, but it looks something like this:
 
@@ -172,7 +191,9 @@ For example,
 
     disassemblerAGC.py --find=Comanche055.patterns <Comanche072-B2.binsource
 
-The search is entirely brute force, and does take some time to complete.  By default, it searches banks 00, 01, ..., 43 for the patterns whose first instruction is basic, and then searches banks 00, 01, ..., 43 again for the patterns whose first instruction is interpretive.
+The search is entirely brute force, and does take some time to complete ... though with that said, it's not too bad.  On my computer, for example, doing a full match of Comanche 55 patterns vs a Manche45R2 rope takes 77 seconds.  (In case you're interested, that's a total of 1222 basic program labels and 629 interpretive program labels, of which all but 9 of each are found by the matching process.)
+
+By default, disassemblerAGC.py searches banks 00, 01, ..., 43 for the patterns whose first instruction is basic, and then searches banks 00, 01, ..., 43 again for the patterns whose first instruction is interpretive.
 
 Within each bank, it simplemindedly disassembles a range starting at address 2000 in the bank, and sees if there are matches to any of the patterns.  Then it *restarts* the disassembly at address 2001, 2002, and so on, in succession.
 

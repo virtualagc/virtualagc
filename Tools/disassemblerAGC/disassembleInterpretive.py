@@ -28,10 +28,7 @@ from engineering import endOfImplementation
 # as they must be handled differently.
 interpreterOpcodesRaw = (
     ( "ABS", 0o0130, 0 ), 
-    # ( "ABVAL", 0o0130, 0 ), 
-    # ( "ARCCOS", 0o0050, 0 ), 
     ( "ACOS", 0o0050, 0 ),
-    # ( "ARCSIN", 0o0040, 0 ), 
     ( "ASIN", 0o0040, 0 ),
     ( "AXC,1", 0o0016, 1 ), ( "AXC,2", 0o0012, 1 ),
     ( "AXT,1", 0o0006, 1 ), ( "AXT,2", 0o0002, 1 ),
@@ -41,7 +38,6 @@ interpreterOpcodesRaw = (
     ( "BDSU*", 0o0157, 1, 0, 0o000000, ( 1, 0 ) ),
     ( "BHIZ", 0o0146, 1 ), ( "BMN", 0o0136, 1 ),
     ( "BOFCLR", 0o0162, 2, 1, 0o000241 ), 
-    # ( "BOF", 0o0162, 2, 1, 0o000341 ),
     ( "BOFF", 0o0162, 2, 1, 0o000341 ), 
     ( "BOFINV", 0o0162, 2, 1, 0o000141 ),
     ( "BOFSET", 0o0162, 2, 1, 0o000041 ), 
@@ -86,8 +82,6 @@ interpreterOpcodesRaw = (
     ( "INCR,2", 0o0062, 1 ),
     ( "INVERT", 0o0162, 1, 1, 0o000161 ), 
     ( "INVGO", 0o0162, 2, 1, 0o000121 ),
-    #( "ITA", 0o0156, 1 ), 
-    #( "ITCQ", 0o0160, 0 ), 
     ( "LXA,1", 0o0026, 1 ),
     ( "LXA,2", 0o0022, 1 ), 
     ( "LXC,1", 0o0036, 1 ), 
@@ -192,7 +186,15 @@ interpreterOpcodesRaw = (
     ( "XCHX,1", 0o0056, 1 ),
     ( "XCHX,2", 0o0052, 1 ), 
     ( "XSU,1", 0o0116, 1 ), 
-    ( "XSU,2", 0o0112, 1 ) )
+    ( "XSU,2", 0o0112, 1 ),
+    # Some opcodes have aliases.  Move the less-preferred aliases below here.
+    ( "ABVAL", 0o0130, 0 ), 
+    ( "ARCCOS", 0o0050, 0 ), 
+    ( "ARCSIN", 0o0040, 0 ), 
+    ( "BOF", 0o0162, 2, 1, 0o000341 ),
+    ( "ITA", 0o0156, 1 ), 
+    ( "ITCQ", 0o0160, 0 ), 
+)
 # Convert the raw data above into a forms keyed by instruction name and by
 # numerical code.
 interpreterOpcodes = {}
