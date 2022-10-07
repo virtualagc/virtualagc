@@ -15,6 +15,7 @@ History:        2022-09-25 RSB  Created.
                                 TC/CADR or TC/2CADR. which I believe is just
                                 BANKCALL, IBNKCALL, POSTJUMP, USPRCADR for
                                 the former and NOVAC, FINDVAC for the latter.
+                2022-10-05 RSB  Working for core rope, I think.
 """
 
 #=============================================================================
@@ -94,17 +95,27 @@ readCoreRope(core, cli, numCoreBanks, sizeCoreBank)
 
 searchSpecial.searchSpecial(core)
 
+if cli.findFilename != "":
+    print('# Matches for "special" symbols or --flex symbols.')
+    print("# Note: The special symbols found here match some")
+    print("# AGC version, but may not match the specific")
+    print("# baseline.  Matches vs the specific baseline may")
+    print("# appear later, among the common-fixed banks.")
 specialFixedFixed = {}
 for symbol in sorted(searchSpecial.specialSubroutines):
-    address = searchSpecial.specialSubroutines[symbol]
-    fAddress = searchSpecial.specialSubroutines[symbol][2]
-    if cli.specialOnly:
+    addressTuple = searchSpecial.specialSubroutines[symbol]
+    bank = addressTuple[0]
+    address = addressTuple[1]
+    fAddress = addressTuple[2]
+    if cli.specialOnly or cli.findFilename != "":
         if fAddress != -1:
             print("%s = %04o" % (symbol, fAddress))
+        elif bank != -1 and address != -1:
+            print("%s = %02o,%04o" % (symbol, bank, address + 0o2000))
         else:
-            print(symbol, "not found")
+            print("#", symbol, "not found")
     if fAddress != -1:
-        specialFixedFixed[fAddress] = address
+        specialFixedFixed[fAddress] = addressTuple
         cli.entryPoints.append(    
             {   "symbol": symbol,
                 "inBasic": True, 
@@ -376,30 +387,35 @@ if cli.specsFilename != "":
     # command line into memory as the patternSpecs list.
     f = open(cli.specsFilename, "r")
     patternSpecs = []
+    erasableSpecs = []
     lastBank = 0
     for line in f:
         fields = line.upper().split("#")[0].strip().split()
         if len(fields) == 0:
             continue
-        for i in range(len(fields)):
-            # Remove any extraneous comma at the end of the field.
-            if fields[i][-1:] == "," and fields[i][:-1].isdigit():
-                fields[i] = fields[i][:-1]
-            if fields[i].isdigit():
-                fields[i] = int(fields[i], 8) % 0o2000
-        if fields[1] == ".":
-            fields[1] = lastBank
-        elif isinstance(fields[1], int):
-            lastBank = fields[1]
-        patternSpec = { "symbol": fields[0], "dbank": fields[1], 
-                        "dstart": fields[2], "inBasic": True}
-        for i in range(3, len(fields)):
-            if fields[i] == "I":
-                patternSpec["inBasic"] = False
-            elif isinstance(fields[i], int):
-                patternSpec["dend"] = fields[i]
-        patternSpecs.append(patternSpec)
+        if fields[0] != "+":    # Spec for core rope.
+            for i in range(len(fields)):
+                # Remove any extraneous comma at the end of the field.
+                if fields[i][-1:] == "," and fields[i][:-1].isdigit():
+                    fields[i] = fields[i][:-1]
+                if fields[i].isdigit():
+                    fields[i] = int(fields[i], 8) % 0o2000
+            if fields[1] == ".":
+                fields[1] = lastBank
+            elif isinstance(fields[1], int):
+                lastBank = fields[1]
+            patternSpec = { "symbol": fields[0], "dbank": fields[1], 
+                            "dstart": fields[2], "inBasic": True}
+            for i in range(3, len(fields)):
+                if fields[i] == "I":
+                    patternSpec["inBasic"] = False
+                elif isinstance(fields[i], int):
+                    patternSpec["dend"] = fields[i]
+            patternSpecs.append(patternSpec)
+        elif len(fields) == 3:  # Spec for erasable.
+            erasableSpecs.append(line.strip())
     f.close()
+
     for i in range(len(patternSpecs)):
         if "dend" not in patternSpecs[i]:
             patternSpecs[i]["dend"] = patternSpecs[i+1]["dstart"]
@@ -416,7 +432,10 @@ if cli.specsFilename != "":
                          patternSpec["dbank"], patternSpec["dstart"], 
                          patternSpec["dend"], printSpec, 
                          patternSpec["inBasic"])
-
+    # And write out the erasable specs, which we're just passing through
+    # as-is:
+    for spec in erasableSpecs:
+        print(spec)
     sys.exit(0)
 
 # Command-line switch:  --pattern
@@ -441,7 +460,7 @@ if cli.pattern:
                      cli.dbank, cli.dstart, cli.dend, printPattern, 
                      cli.dbasic)
     print(indent + '     ],')
-    print(indent + '    "ranges": [[0o%02o, 0o0000, 0o2000]]' % bank)
+    print(indent + '    "ranges": [[0o%02o, 0o0000, 0o2000]]' % cli.dbank)
     print(indent + '}],')
     sys.exit(0)
 
@@ -463,8 +482,15 @@ if cli.dtest:
 # Command-line switch:  --find
 if cli.findFilename != "":
 
+    print("# Matches in common-fixed vs the specific baseline appear below.")
+    print("# Note:  Symbols of the form RSBnnnnn, where nnnnn is a decimal")
+    print("# number, do not appear in baseline source code.  They apply")
+    print("# to code that is unlabeled in the baseline but that immediately")
+    print("# succeeds data rather than succeeding other code.")
+
     # First step: Read in the entire pattern file into the dictionaries
     # desiredMatches
+    erasableSpecs = []
     desiredMatches = { "basic": {}, "interpretive": {}}
     maxPatternLength = { "basic": 0, "interpretive": 0}
     basicOrInterpretive = "(none)"
@@ -472,7 +498,19 @@ if cli.findFilename != "":
 
     f = open(cli.findFilename, "r")
     for line in f:
-        if line[:1] != '\t':
+        if line[:2] == "+ ": # Erasable specs
+            fields = line.strip().split()
+            symbols = fields[1].replace("['", "").replace("']", "").split("','")
+            references = fields[2].replace("[(", "").replace(")]", "").split("),(")
+            for i in range(len(references)):
+                references[i] = references[i][1:-1]
+                r1 = references[i].split("',")
+                r2 = r1[1].split(",'")
+                references[i] = (r1[0], int(r2[0]), r2[1])
+            erasableSpecs.append({  "symbols": symbols,
+                                    "references": references,
+                                    "referencedAddresses": [] })
+        elif line[:1] != '\t': # Core rope specs
             fields = line.strip().split()
             symbol = fields[0]
             basicOrInterpretive = fields[1]
@@ -556,7 +594,8 @@ if cli.findFilename != "":
         for bank in findBanks:
             if len(symbolsSought[basicOrInterpretive]) == 0:
                 break
-            print("Checking bank %02o" % bank, "for", basicOrInterpretive)
+            print("# Matches for", basicOrInterpretive, 
+                    "code in bank %02o." % bank)
             for address in range(0o2000, sizeCoreBank + 0o2000):
                 if len(symbolsSought[basicOrInterpretive]) == 0:
                     break
@@ -591,11 +630,105 @@ if cli.findFilename != "":
     #print("symbolsSought =", symbolsSought)
     for basicOrInterpretive in ["basic", "interpretive"]:
         for symbol in symbolsSought[basicOrInterpretive]:
-            print("%s (%s) not found" % (symbol, basicOrInterpretive))
-    print("Total matched: %d (b), %d (i)" % \
+            print("# %s (%s) not found" % (symbol, basicOrInterpretive))
+    print("# Total matched: %d (b), %d (i)" % \
         (len(symbolsFound["basic"]), len(symbolsFound["interpretive"])))
-    print("Total missed:  %d (b), %d (i)" % \
+    print("# Total missed:  %d (b), %d (i)" % \
         (len(symbolsSought["basic"]), len(symbolsSought["interpretive"])))
+        
+    # At this point, the program labels have undergone matching.  We'd now
+    # like to use the results of those matches for erasable matching as well.
+    # The idea is that each erasable symbol defined in baseline erasable, we
+    # have a list of the subroutines that reference them, and the lines of
+    # the subroutine that do so.  For any of those subroutines that have been
+    # matched above, we can go to those lines of the subroutines in the 
+    # rope dump and find the address being used.  If it's the same address
+    # for all of the references, then we can assume that that's the address
+    # associated with that particular erasable symbol in the rope dump.
+    for spec in erasableSpecs:
+        symbols = spec["symbols"]
+        references = spec["references"]
+        for reference in references:
+            programLabel = reference[0]
+            if programLabel in symbolsFound["basic"]:
+                location = symbolsFound["basic"][programLabel]
+                foundBasic = True
+            elif programLabel in symbolsFound["interpretive"]:
+                location = symbolsFound["interpretive"][programLabel]
+                foundBasic = False
+            else:
+                spec["referencedAddresses"].append("(none)")
+                continue
+            bank = location[0]
+            lineNumber = reference[1]
+            address = location[1] + lineNumber
+            referenceType = reference[2]
+            context = core[bank][address % 0o2000]
+            if False and "SNTH" in symbols:
+                print(programLabel, lineNumber, "%02o,%04o" % (bank, address),
+                        referenceType, "%05o" % context)
+            if referenceType == 'B':
+                context &= 0o1777
+                if context < 0o1400:
+                    referenced1 = context // 0o400
+                    referenced2 = 0o1400 + (context % 0o400)
+                    referencedAddress = "E%o,%04o" % (referenced1, referenced2)
+                else:
+                    referenced2 = 0o1400 + (context % 0o400)
+                    referencedAddress = "E?,%04o" % referenced2
+            elif referenceType in ['S', 'A']:
+                context &= 0o3777
+                referenced1 = context // 0o400
+                referenced2 = 0o1400 + (context % 0o400)
+                referencedAddress = "E%o,%04o" % (referenced1, referenced2)  
+            elif referenceType == "I":
+                print("Implementation error")
+                sys.exit(1)
+            spec["referencedAddresses"].append(referencedAddress)
+        # Information about all code references to this erasable symbol
+        # collected.  We now have to perform some statistics to decide
+        # what we can report about what address we can report for this
+        # symbol.
+        sSymbols = str(symbols).replace("[", "").replace("]", "")
+        sSymbols = sSymbols.replace("'", "")
+        stats = {}
+        for i in range(len(spec["references"])):
+            programLabel = spec["references"][i]
+            a = spec["referencedAddresses"][i]
+            if a == "(none)":
+                continue
+            if a not in stats:
+                stats[a] = [programLabel]
+            else:
+                stats[a].append(programLabel)
+        keys = list(stats.keys())
+        certain = False
+        if len(keys) == 1:
+            certain = True
+            chosen = keys[0]
+        elif len(keys) == 2:
+            if (keys[0][1] == "?" or keys[1][1] == "?") \
+                    and keys[0][2:] == keys[1][2:]:
+                if keys[0][1].isdigit():
+                    chosen = keys[0]
+                else:
+                    chosen = keys[1]
+                certain = True 
+            else:
+                chosen = "E?,????" 
+        else:
+            chosen = "E?,????"
+        if not certain:
+            for stat in stats:
+                msg = "# " + stat + ": "
+                for p in stats[stat]:
+                    if len(msg) > 70:
+                        print(msg)
+                        msg = "#          "
+                    msg += " %s +%dD" % (p[0], p[1])
+                print(msg)
+        print(sSymbols, "=", chosen)
+          
     sys.exit(0)
     
 #=============================================================================

@@ -52,6 +52,7 @@ symbol = "SYMBOL"
 specsFilename = ""
 findFilename = ""
 descent = False
+flexFilename = ""
 entryPoints = [
     { "inBasic": True, "bank": 0o2, "offset": 0o0000, 
         "eb": 0, "fb": 0, "feb": 0, "symbol": "(go)" },
@@ -99,20 +100,30 @@ for param in sys.argv[1:]:
                         is present, --hardware overrides it.    
             --debug     Turn on some debugging messages.    
             --dump      Dump the octals w/o disassembly.    
-            --special   Only print deduced special subroutines.    
             --dtest     By default, the first instruction is basic, and    
                         and the test range is bank 02, from address 4000    
                         to 4050, but these can be changed with the extra    
                         switches --dint --dbank=N, --dstart=N, --dend==N,    
                         where the parameter is an octal number.    
                         Note that for --dstart and --dend.    
+            --special   Only print deduced special subroutines.    
             --pattern=S This is similar to --dtest, and takes the same    
                         optional extra command-line switches, but instead    
                         of providing a disassembly, instead provides a    
                         draft sample pattern (which typically requires    
                         manual tweaking) for use in searchSpecial.py.    
                         Note that --pattern overrides --dtest.  S is the    
-                        symbol for the subroutine for the pattern.    
+                        symbol for the subroutine for the pattern.
+            --flex=F    If you have a file whose contents are patterns
+                        such as those produced by the --pattern switch
+                        described above, and possibly manually tweaked
+                        afterward, you can use the --flex=F to read in
+                        that file of patterns and append them to the 
+                        special-subroutines search.  (See --special above.)
+                        This is a more-flexible kind of search than those
+                        performed in an automated way by the --specs/--find
+                        switches (see below), though limited by its 
+                        inability to perform erasable matches.
             --specs=F   Reads multiple pattern specifications from a file    
                         (F), similar to those used by --dtest and
                         --pattern. Outputs patterns in a form useful for
@@ -191,6 +202,8 @@ for param in sys.argv[1:]:
         specsFilename = param[8:]
     elif param[:7] == "--find=":
         findFilename = param[7:]
+    elif param[:7] == "--flex=":
+        flexFilename = param[7:]
     elif param[:7] == "--prio=":
         pBanks = param[7:]
     elif param[:7] == "--only=":

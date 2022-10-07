@@ -15,7 +15,9 @@ Purpose:        Search for the locations of subroutines which are "special"
 History:        2022-09-28 RSB  Split off from disassemblerAGC.py.
 """
 
+import sys
 from disassembleBasic import disassembleBasic
+import parseCommandLine as cli
 
 """
 A relatively general-purpose algorithm that we can reuse for a 
@@ -731,6 +733,80 @@ searchPatterns = {
                     "ranges": [[0o02, "COMFLAG", 0o2000]]
                 }],
 }
+
+# If necessary, import patterns from a file specified by the --flex
+# command-line switch, and append them to the searchPatterns dictionary
+# above prior to searching for the special subroutines.
+if cli.flexFilename != "":
+    f = open(cli.flexFilename, "r")
+    count = 0
+    inPatterns = False
+    for line in f:
+        line = line.strip().replace(" ", "")
+        if line[-1:] == ",":
+            line = line[:-1]
+        count += 1
+        if count == 1: # Key (symbol)
+            fields = line.split(":")
+            symbol = fields[0].replace('"', '')
+            flexDict = {
+                "dataWords": 0,
+                "noReturn": False,
+                "pattern": [],
+                "ranges": []
+                }
+        elif count == 2: # dataWords
+            fields = line.split(":")
+            dataWords = int(fields[1].replace(",", ""))
+            flexDict["dataWords"] = dataWords
+        elif count == 3: # noReturn
+            fields = line.split(":")
+            noReturn = (fields[1] == "True,")
+            flexDict["noReturn"] = noReturn
+        elif count == 4: # pattern
+            inPatterns = True
+        elif inPatterns: # lines of the pattern
+            if line == "]": # End of the pattern?
+                inPatterns = False
+                continue
+            if "True" in line:
+                required = True
+                line = line[6:]
+            else:
+                required = False
+                line = line[7:]
+            fields = line.split("],[")
+            fields[0] = fields[0].replace("[", "").replace("]", "")
+            fields[1] = fields[1].replace("[", "").replace("]", "")
+            opcodeFields = fields[0].split('","')
+            operandFields = fields[1].split('","')
+            for i in range(len(opcodeFields)):
+                opcodeFields[i] = \
+                    opcodeFields[i].replace('"', '').replace(",", "")
+            for i in range(len(operandFields)):
+                operandFields[i] = \
+                    operandFields[i].replace('"', '').replace(",", "")
+            if opcodeFields == ['']:
+                opcodeFields = []
+            if operandFields == ['']:
+                operandFields = []
+            flexDict["pattern"].append([required, opcodeFields, operandFields])
+        elif line == "}]":
+            searchPatterns[symbol] = [flexDict]
+            count = 0
+            inPatterns = False
+        else: # ranges
+            fields = line.split(":")
+            fields = fields[1].split("],[")
+            for field in fields:
+                field = field.replace("[", "").replace("]", "")
+                rangeFields = field.split(",")
+                for i in range(len(rangeFields)):
+                    if "0o" == rangeFields[i][:2]:
+                        rangeFields[i] = rangeFields[i][2:]
+                    rangeFields[i] = int(rangeFields[i], 8)
+                flexDict["ranges"].append(rangeFields)
+    f.close()
 
 # Search for all the special patterns listed above.
 specialSubroutines = {}
