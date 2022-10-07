@@ -55,6 +55,34 @@ The only dependency is the disassembleInterpretive.py module, also required by d
 
 # Envisaged Workflow
 
+## In a Nutshell
+
+Without further ado, I'll describe the workflow in the tersest possible terms here.  If you like, the remaining subsections under this "Envisage Workflow" section flesh out the topic much more.
+
+The task at hand is this:  Given an octal dump of a set of physical rope-memory modules, we want to reconstruct the AGC source code that would assemble to give that identical rope.  I'll refer to this dump "the Rope".  This reconstruction is to be performed with the aid of the already-known source code of a similar AGC software version (or versions), which I'll call "the Baseline(s)".  In short, we want to reconstruct source code for the Rope by using the Baseline(s).
+
+Requirements:
+
+* The Rope, in the form of a binsource (or bin) file, which for the sake of discussion I'll assume is ROPE.binsource.
+* The Baseline, in the form of:
+    * Its assembly listing, as output by yaYUL, which I'll assume is BASELINE.lst.
+    * Its rope file, either transcribed manually or else output by yaYUL, while I'll assume is BASELINE.binsource.
+
+The basic processing chain is as follows.
+
+    specifyAGC.py &lt;BASELINE.lst >BASELINE.specs [OPTIONS]
+    disassemblerAGC.py --specs=BASELINE.specs &lt;BASELINE.binsource >BASELINES.patterns
+    disassemblerAGC.py --find=BASELINE.patterns &lt;ROPE.binsource >ROPE.matches [OPTIONS]
+
+The only real option with specifyAGC.py the `--min=N` switch (present default is `--min=8`) which basically sets a floor on the size of the number of words in a subroutine.  I like to use `--min=12` if the BASELINE is Comanche 55.
+
+For disassemblerAGC.py (with the `--find` switch), there are several useful or necessary OPTIONS:
+
+* To use ROPE.bin as input rather than ROPE.binsource, you have to use the `--bin` option.
+* There's often a handful of subroutines in an AGC software version at that are so similar to each other that they can be mistaken for each other during matching.  The `--skip=S` option causes the first match for subroutine `S` to be skipped. (And repeating the option multiple times causes multiple matches of `S` to be skipped.)  If the BASELINE is Comanche 55 and `--min=12` is used for specifyAGC.py, I find that I need to use `--skip=IRIGY --skip=-TORQUE --skip=TABYCOM --skip=ASMBLWY --skip=ATOPLEM` to avoid `IRIGY` being confused with `IRIGX`, `-TORQUE` being confused with `+TORQUE`, and so on.
+
+A good test of the process is to use ROPE=BASELINE in the final processing step above, and verify that all program labels and erasable variables are properly found in the ROPE.matches file.  If I test Comanche 55 in this way, for example, I find that 1,367 program labels are defined and matched correctly, while 847 erasable variables are identified, though only 819 are fully matched; that's at least partially because this is a work in progress and I haven't fully debugged it yet!
+
 ## Introduction
 
 The program disassemblerAGC.py is not intended to be a complete disassembly system for the AGC, but rather a tool in a workflow intended to solve a specific problem, which is as follows.  Suppose that an octal dump of a core-rope module of some AGC software version is available.  We would like to provide AGC source code which assembles to those given octal values.  Moreover, we would like it to be fully AGC source code, with symbolic program labels and variable names, as well as program comments.
@@ -134,7 +162,7 @@ Each erasable-specification line has three fields, separated by spaces.  Each li
 * The third field is a python list of tuples.  Each tuple represents a location in rope memory at which code (either basic or interpretive) accesses the erasable memory location via one of the symbols listed in the preceding bullet.  The three components of the tuple are:
     * The name of a subroutine, as a single-quoted string.  It must be one of the subroutines having a specification in fixed memory.
     * The offset (words or lines of code, in decimal) from the top of the subroutine at which the reference to the erasable occurs.  Thus if the reference were in the first line, 0; in the second line, 1; and so on.
-    * The "type" of reference.  This is a single character, single-quoted, interpreted as follows:  'B' if the erasable is referenced as the operand of a basic instruction; 'A' if the erasable is referenced as the argument of an interpretive instruction; 'S' if the erasable is referenced inline with an interpretive `STORE`, `STCALL`, `STODL`, or `STOVL` instruction.
+    * The "type" of reference.  This is a single character, single-quoted, interpreted as follows:  'B' if the erasable is referenced as the operand of a single-word basic instruction like CA or XCH; 'C' if a complemented basic instruction like -CCS; 'D' if a double-word basic instruction like DCA or DXCH; 'A' if the erasable is referenced as the argument of an interpretive instruction; 'L' if it's the argument for an index instruction such as LXC,1; 'S' if the erasable is referenced inline with an interpretive `STORE`, `STCALL`, `STODL`, or `STOVL` instruction.
 
 For example, 
 
@@ -158,6 +186,8 @@ Creating a specifications file is relatively easy, but the program specifyAGC.py
 The --min option is available to help guard against the danger of making patterns which are so short that they have *many* matches, most of which would be wrong.  For example, if you had a pattern that consisted only of (say) a single TC, it would match any TC in the rope module being reconstructed.  By default, all specifications must be at least 8 words long &mdash; i.e., by default, --min=8.  But you can imagine circumstances where you might want to make it smaller for a few special symbols, or longer.
 
 In order to meet the minimum-length requirement, specifyAGC.py will attempt to combine the scopes for successive symbols until the combined scope is greater than the required minimum.  However, there are always going to be very short scopes which simply cannot be combined, in which case specifyAGC.py simply rejects them without creating specifications for.  In either case, though, comments are added to the specifications file at the points where these compromises occur, to explain what has happened.
+
+**Note:** Sometimes the situation arises in which unlabeled code immediately follows data in rope memory, thus leaving no way that's obvious (to specifyAGC.py) to reach that code.  In this case, specifyAGC.py automatically creates a label for it that wasn't present in the original source code.  Such a label has the form "R*BB*,*AAAA*", where *BB*,*AAAA* is the address at which the originally-unlabeled code starts.  For example, the label `R12,3456` might be created at address 12,3456.
 
 The following sample specifications files are in the source tree:
 
@@ -219,7 +249,7 @@ Besides the lines above, describing the code in fixed memory, if there are any s
 
 The command is
 
-    disassemblerAGC.py --find=PATTERNS.patterns <ROPEDUMP.binsource
+    disassemblerAGC.py [OPTIONS] --find=PATTERNS.patterns <ROPEDUMP.binsource
 
 For example,
 
@@ -305,6 +335,19 @@ You get (after a little editing):
     COMPTGO (basic) not found
 
 It's not terribly surprising that `COMPTGO` isn't found, since Manche45R2 does not in fact have a `COMPTGO`.  As for `ABORT2`, Manche45R2 does indeed have that, but it differs from the one in Comanche 55. So it's a good thing it isn't found.
+
+Another thing which can cause a problem when using the default settings is that &mdash; depending on the `--min` setting used earlier with the specifyAGC.py program &mdash; it can happen the multiple subroutines end of with identical patterns.  Or more commonly, one the patterns may be identical to the initial portion of the other.  This can cause one of those subroutines to be matched as being located where the other subroutine actually resides, while the other subroutine isn't matched at all.  One way to work around this is to instruct the disassembler to *skip* one or more matches for a subroutine.  This is done using a command-line option like
+
+    --skip=PROGRAMLABEL
+
+which means to skip the first match found for `PROGRAMLABEL`.  You can use as many of these `--skip` options as you like, even with the same program label.  So if you used (say) two switches like the one above, it would skip the first two matches for `PROGRAMLABEL`.  This sounds rather *ad hoc*, but in my experience so far it normally seems to come up when you have several nearly-identical subroutines that work on 3-dimensional axes, or for pitch, roll, and yaw.  You'd expect that three such subroutines would remain in the identical order in all program versions.  So you might expect to be able to use the `--skip` options in a relatively-consistent way across program versions as well.
+
+For example, I have been processing Comanche 55 with "specifyAGC.py --min=12", and I find that I need to use
+
+    disassemblerAGC.py --skip=IRIGY --skip=TORQUE --skip=TABYCOM --skip=ASMBLWY --skip=ATOPLEM ...
+
+if I expect it to find all of the defined program labels at the proper locations.
+
 
 Regarding erasable matches, they appear in this output as well, at the end of it, and appear similarly to those lines above.  However, that is work in progress and there are some subtleties about it that I'm not yet prepared to discuss.
 

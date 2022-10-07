@@ -16,6 +16,11 @@ History:        2022-09-25 RSB  Created.
                                 BANKCALL, IBNKCALL, POSTJUMP, USPRCADR for
                                 the former and NOVAC, FINDVAC for the latter.
                 2022-10-05 RSB  Working for core rope, I think.
+                2022-10-06 RSB  Added erasable matching.
+                2022-10-07 RSB  Accounted for differences between address 
+                                encoding of single-word vs double-word basic
+                                instructions. Fixed encoding for interpretive
+                                arguments.
 """
 
 #=============================================================================
@@ -483,10 +488,9 @@ if cli.dtest:
 if cli.findFilename != "":
 
     print("# Matches in common-fixed vs the specific baseline appear below.")
-    print("# Note:  Symbols of the form RSBnnnnn, where nnnnn is a decimal")
-    print("# number, do not appear in baseline source code.  They apply")
-    print("# to code that is unlabeled in the baseline but that immediately")
-    print("# succeeds data rather than succeeding other code.")
+    print("# Note:  Symbols of the form 'Rbb,aaaa' do not appear in baseline")
+    print("# source code.  They apply to code that is unlabeled in the")
+    print("# baseline but that immediately succeeds data.")
 
     # First step: Read in the entire pattern file into the dictionaries
     # desiredMatches
@@ -544,11 +548,14 @@ if cli.findFilename != "":
     basicOrInterpretive = "basic"
     def match(core, erasable, iochannels,
                   occasion, bank, address, opcode, operand):
-        global symbols, indexIntoPatterns
+        global symbols, indexIntoPatterns, cli
         
         # Turn current disassembled location into a pattern.
         pattern = patternize(occasion, opcode, operand)
-        #print("%02o,%04o %s ?" % (bank, address, pattern))
+        if False and bank == 0o16 and address >= 0o3631 and address <=0o3652:
+            print("%02o,%04o %s ?" % \
+                (bank, address, pattern), occasion, opcode, 
+                operand, file=sys.stderr)
         
         # Now try to match the pattern with those read from the specs file.
         if len(symbols) == 0:
@@ -569,9 +576,16 @@ if cli.findFilename != "":
                 #       desiredPattern, pattern)
                 forElimination.append(symbol)
             elif indexIntoPatterns == len(desiredPatterns) - 1:
-                # Match!
-                symbols = [symbol]
-                return True
+                # Match!  However, if it's one of those symbols we're
+                # supposed to skip the initial matches for, then let's do
+                # that instead.
+                if symbol not in cli.skips \
+                        or cli.skips[symbol] == 0:
+                    symbols = [symbol]
+                    return True
+                else:
+                    cli.skips[symbol] -= 1
+                    forElimination.append(symbol)
         for symbol in forElimination:
             symbols.remove(symbol)
         indexIntoPatterns += 1
@@ -645,6 +659,9 @@ if cli.findFilename != "":
     # rope dump and find the address being used.  If it's the same address
     # for all of the references, then we can assume that that's the address
     # associated with that particular erasable symbol in the rope dump.
+    print("# Matches for variables in erasable memory appear below.")
+    totalCertainErasables = 0
+    totalUncertainErasables = 0
     for spec in erasableSpecs:
         symbols = spec["symbols"]
         references = spec["references"]
@@ -664,10 +681,11 @@ if cli.findFilename != "":
             address = location[1] + lineNumber
             referenceType = reference[2]
             context = core[bank][address % 0o2000]
-            if False and "SNTH" in symbols:
-                print(programLabel, lineNumber, "%02o,%04o" % (bank, address),
-                        referenceType, "%05o" % context)
-            if referenceType == 'B':
+            if referenceType in ["B", "C", "D"]:
+                if referenceType == 'C':
+                    context = ~context
+                elif referenceType == 'D':
+                    context -= 1
                 context &= 0o1777
                 if context < 0o1400:
                     referenced1 = context // 0o400
@@ -676,14 +694,15 @@ if cli.findFilename != "":
                 else:
                     referenced2 = 0o1400 + (context % 0o400)
                     referencedAddress = "E?,%04o" % referenced2
-            elif referenceType in ['S', 'A']:
+            elif referenceType in ['S', 'A', 'L', 'I']:
+                if referenceType == 'I':
+                    context = ~context
+                if referenceType != 'L':
+                    context -= 1
                 context &= 0o3777
                 referenced1 = context // 0o400
                 referenced2 = 0o1400 + (context % 0o400)
                 referencedAddress = "E%o,%04o" % (referenced1, referenced2)  
-            elif referenceType == "I":
-                print("Implementation error")
-                sys.exit(1)
             spec["referencedAddresses"].append(referencedAddress)
         # Information about all code references to this erasable symbol
         # collected.  We now have to perform some statistics to decide
@@ -727,8 +746,17 @@ if cli.findFilename != "":
                         msg = "#          "
                     msg += " %s +%dD" % (p[0], p[1])
                 print(msg)
-        print(sSymbols, "=", chosen)
-          
+        total = 0
+        for stat in stats:
+            total += len(stats[stat])
+        print(sSymbols, "=", chosen, "(%d)" % total)
+        if certain:
+            totalCertainErasables += 1
+        else:
+            totalUncertainErasables += 1
+     
+    print("# Total matched:", totalCertainErasables)
+    print("# Total unmatched or partially matched:", totalUncertainErasables)    
     sys.exit(0)
     
 #=============================================================================

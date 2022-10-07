@@ -11,6 +11,9 @@ History:        2022-10-05 RSB  Wrote.  This version seems to work
                                 labels in core rope.
                 2022-10-06 RSB  Began implementing variable names in
                                 erasable.
+                2022-10-07 RSB  Accounted for different address encoding
+                                for double-word basic instructions vs
+                                single-word instructions.
 """
 
 import sys
@@ -212,8 +215,12 @@ for line in sys.stdin:
         continue
     fields = line.strip().split("#")
     line = fields[0].strip()
+
+    left = line[65:73].strip()
     
     addressField = line[24:31].strip()
+    if left in ["=", "EQUALS"] and addressField == "":
+        continue
     if addressField == "" or addressField[:4] == "0000":
         addressField = line[15:22].strip()
     fields = addressField.split(",")
@@ -264,7 +271,6 @@ for line in sys.stdin:
         continue
     
     locationType = "u"
-    left = line[65:73].strip()
     if left in interpreterOpcodes or left.isdigit():
         if symbol == "":
             locationType = "i"
@@ -292,7 +298,6 @@ print("# The minimum length of specifications is set "
       "to %d words." % minLength)
 print("# Core rope:")
 nonCode = ['u', 'd', 'D']
-rsbCount = 0
 for bank in range(0o44):
     offset = 0
     while True:
@@ -309,11 +314,9 @@ for bank in range(0o44):
         
         # We have reached code.  If it doesn't already have a
         # symbolic label, we invent one for it, of the form
-        # RSBnnnnn, where nnnnn is a number that increments with 
-        # each label.
+        # Rbb,aaaa, where bb,aaaa is the address.
         if symbol == "":
-            symbol = "RSB%05d" % rsbCount
-            rsbCount += 1
+            symbol = "R%02o,%04o" % (bank, offset + 0o2000)
             rope[offset][bank][0] = rope[offset][bank][0].upper()
             rope[offset][bank][1] = symbol
     
@@ -376,7 +379,22 @@ for address in range(0o400):
 # subroutine in which it is referenced and the offset from the start
 # of the subroutine.  After patterns are matched, those can then be
 # converted to absolute addresses.
+
+# Detects interpretive opcodes that don't decrement their stand-alone
+# arguments, and hence are marked as type 'L' rather than 'A'.
+def dontDecrement(opcode):
+    return ("," in opcode) or \
+        opcode in ["CALL", "STQ", "GOTO", "STCALL", "BHIZ", "BMN",
+                   "BOV", "BOVB", "BPL", "BZE", "CLRGO"]
+
 for bank in range(0o44):
+    lastLastLeft = ""
+    lastLastRight = ""
+    lastLeft = ""
+    lastRight = ""
+    lastLeftComma = False
+    lastRightComma = False
+    argCount = 0
     lastSymbol = ""
     sinceSymbol = 0
     for offset in range(0o2000):
@@ -386,7 +404,8 @@ for bank in range(0o44):
             continue
         if location[0] in ['B', 'I']:
             lastSymbol = location[1]
-            sinceSymbol = 0
+            sinceSymbol = -1
+        sinceSymbol += 1
         if lastSymbol == "":
             print("Implementation error: Bad lastSymbol at %02o,%04o" \
                     % (bank, offset + 0o2000))
@@ -394,20 +413,42 @@ for bank in range(0o44):
         # This tracks just "pure" references to the symbols, as opposed to
         # (for example) SYMBOL +5.  I'd like to do the latter as well, but
         # I don't quite see how to do it for now.
+        if location[2] != "":
+            argCount = -1
+            lastLastLeft = lastLeft
+            lastLastRight = lastRight
+            lastLeft = location[2]
+            lastRight = ""
+            if len(operand) == 1:
+                lastRight = operand[0]
+            lastLeftComma = dontDecrement(lastLeft)
+            lastRightComma = dontDecrement(lastRight)
+        argCount += 1
         if len(operand) == 1 and operand[0] in erasableBySymbol:
             if location[0] in ['b', 'B']:
-                referenceType = 'B'
-            elif location[0] in ['i', 'I']:
-                if location[2] in ["STORE", "STCALL", "STODL", "STOVL"]:
-                    referenceType = 'S'
-                elif offset > 0:
-                    previous = rope[offset - 1][bank]
-                    if previous[2] == "STADR" or previous[3] == "STADR":
-                        referenceType = 'I'
-                    else:
-                        referenceType = 'A'
+                if location[2] in ["DAS", "DCA", "DCS", "DXCH"]:
+                    referenceType = 'D'
+                elif location[2][0] == "-":
+                    referenceType = 'C'
                 else:
-                    continue
+                    referenceType = 'B'
+            elif location[0] in ['i', 'I']:
+                referenceType = 'A'
+                if lastLastLeft == "STADR" or lastLastRight == "STADR":
+                    referenceType = 'I'
+                elif location[2] in ["STORE", "STCALL", "STODL", "STOVL"]:
+                    referenceType = 'S'
+                elif argCount == 1 and lastLeftComma:
+                    referenceType = 'L'
+                    lastLeftComma = False
+                elif argCount >= 1 and lastRightComma and offset < 0o1777:
+                    nextLoc = rope[offset + 1][bank]
+                    if nextLoc[0] not in ['i', 'I'] or \
+                            nextLoc[2] != "":
+                        referenceType = 'L'
+                        lastRightComma = False
+                #else:
+                #    continue
             else:
                 continue
             symbolInfo = erasableBySymbol[operand[0]]
@@ -415,17 +456,15 @@ for bank in range(0o44):
             a = symbolInfo[1]
             erasable[a][b]["references"].append((lastSymbol,sinceSymbol,
                                                     referenceType))
-        sinceSymbol += 1
 
 # Output erasable specifications.  There are 4 types:
-#   B   Operand of basic instruction
+#   B   Operand of a single-word basic instruction (like XCH or CA)
+#   C   A complemented basic instruction (like -CCS)
+#   D	Operand of a double-word basic instruction (like DXCH or DCA).
 #   S   Inline operand of interpretive STORE, STCALL, STODL, or STOVL
 #   A   Normal argument of interpretive.
+#   L   Normal argument of an interpretive index opcode such as LXC,1.
 #   I   Interpretive argument preceded by STADR.
-# I think the "I" type shouldn't actually be possible, since STADR's purpose
-# is to work around a poor sign bit in the interpretive argument, which
-# can't occur when the argument is an erasable address; at any rate, there
-# are none in Comanche 55, but plenty of the other three types.
 
 # The output lines have space-delimited fields as follows:
 #   The literal "+"

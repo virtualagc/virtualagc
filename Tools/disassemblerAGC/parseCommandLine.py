@@ -6,6 +6,7 @@ Copyright:      None - the author (Ron Burkey) declares this software to
 Filename:       parseCommandLine.py
 Purpose:        Parses command line for disassemblerAGC.py
 History:        2022-09-28 RSB  Split off from disassemblerAGC.py.
+                2022-10-07 RSB  Added --skip.
 """
 
 import sys
@@ -53,6 +54,7 @@ specsFilename = ""
 findFilename = ""
 descent = False
 flexFilename = ""
+skips = {}
 entryPoints = [
     { "inBasic": True, "bank": 0o2, "offset": 0o0000, 
         "eb": 0, "fb": 0, "feb": 0, "symbol": "(go)" },
@@ -150,6 +152,13 @@ for param in sys.argv[1:]:
             --descent   Disassemble with recursive descent, to try and reach
                         all of the reachable code.  This is not presently
                         functional.
+            --skip=S    In using the --find option, it just so happens that 
+                        there may be several matchs for some symbol S defined
+                        in the specification file.  One options for dealing
+                        that situation is to instruct the disassembler to skip
+                        the first match it finds for that symbol.  Using this
+                        switch twice tells the disassmbler to skip the first 
+                        2 matches of the symbol.  And so on.
                
           Note that for --bin and --hardware, we can't necessarily    
           determine that locations are unused vs merely containing 00000.    
@@ -206,6 +215,12 @@ for param in sys.argv[1:]:
         flexFilename = param[7:]
     elif param[:7] == "--prio=":
         pBanks = param[7:]
+    elif param[:7] == "--skip=":
+        skip = param[7:]
+        if skip not in skips:
+            skips[skip] = 1
+        else:
+            skips[skip] += 1
     elif param[:7] == "--only=":
         oBanks = param[7:]
     elif param == "--descent":
