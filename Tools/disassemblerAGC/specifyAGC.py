@@ -390,7 +390,7 @@ for address in range(0o400):
 def dontDecrement(opcode):
     return ("," in opcode) or \
         opcode in ["CALL", "STQ", "GOTO", "STCALL", "BHIZ", "BMN",
-                   "BOV", "BOVB", "BPL", "BZE", "CLRGO"]
+                   "BOV", "BOVB", "BPL", "BZE", "CLRGO", "SETGO"]
 
 for bank in range(0o44):
     lastLastLeft = ""
@@ -429,6 +429,8 @@ for bank in range(0o44):
             lastLeftComma = dontDecrement(lastLeft)
             lastRightComma = dontDecrement(lastRight)
         argCount += 1
+        #print("%02o,%04o '%s' '%s' '%s' '%s'" % (bank, offset+0o2000, lastLeft, \
+        #                                lastRight, lastLastLeft, lastLastRight))
         if len(operand) == 1 and operand[0] in erasableBySymbol:
             if location[0] in ['b', 'B']:
                 if location[2] in ["DAS", "DCA", "DCS", "DXCH"]:
@@ -441,6 +443,8 @@ for bank in range(0o44):
                 referenceType = 'A'
                 if lastLastLeft == "STADR" or lastLastRight == "STADR":
                     referenceType = 'I'
+                elif location[2] == "0":
+                    referenceType = "L"
                 elif location[2] in ["STORE", "STCALL", "STODL", "STOVL"]:
                     referenceType = 'S'
                 elif argCount == 1 and lastLeftComma:
@@ -461,8 +465,10 @@ for bank in range(0o44):
             a = symbolInfo[1]
             erasable[a][b]["references"].append((lastSymbol,sinceSymbol,
                                                     referenceType))
-
-# Output erasable specifications.  There are 4 types:
+        lastLastLeft = ""
+        lastLastRight = ""
+        
+# Output erasable specifications.  There are several types:
 #   B   Operand of a single-word basic instruction (like XCH or CA)
 #   C   A complemented basic instruction (like -CCS)
 #   D	Operand of a double-word basic instruction (like DXCH or DCA).

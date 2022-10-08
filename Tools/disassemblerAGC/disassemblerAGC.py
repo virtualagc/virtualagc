@@ -159,11 +159,12 @@ if cli.checkFilename != "":
 searchSpecial.searchSpecial(core)
 
 if cli.findFilename != "":
-    print('# Matches for "special" symbols or --flex symbols.')
-    print("# Note: The special symbols found here match some")
-    print("# AGC version, but may not match the specific")
-    print("# baseline.  Matches vs the specific baseline may")
-    print("# appear later, among the common-fixed banks.")
+    print("┌─────────────────────────────────────────────────────────────────┐")
+    print('│ Matches for "special" symbols or --flex symbols appear below.   │')
+    print("│ Note: The special symbols found here match some AGC version,    │")
+    print("│ but may not match the selected baseline.  Matches vs the        │")
+    print("│ specific baseline may appear later, in the core section.        │")
+    print("└─────────────────────────────────────────────────────────────────┘")
 specialFixedFixed = {}
 for symbol in sorted(searchSpecial.specialSubroutines):
     addressTuple = searchSpecial.specialSubroutines[symbol]
@@ -172,11 +173,12 @@ for symbol in sorted(searchSpecial.specialSubroutines):
     fAddress = addressTuple[2]
     if cli.specialOnly or cli.findFilename != "":
         if fAddress != -1:
-            print("%s = %04o" % (symbol, fAddress))
+            print("%-8s = %04o" % (symbol, fAddress))
         elif bank != -1 and address != -1:
-            print("%s = %02o,%04o" % (symbol, bank, address + 0o2000))
+            print("%-8s = %02o,%04o" % (symbol, bank, address + 0o2000))
         else:
-            print("#", symbol, "not found")
+            # print("%-8s" % symbol, "not found")
+            pass
     if fAddress != -1:
         specialFixedFixed[fAddress] = addressTuple
         cli.entryPoints.append(    
@@ -544,12 +546,12 @@ if cli.dtest:
     
 # Command-line switch:  --find
 if cli.findFilename != "":
-    debugTrigger = True
-    
-    print("# Matches in common-fixed vs the specific baseline appear below.")
-    print("# Note:  Symbols of the form 'Rbb,aaaa' do not appear in baseline")
-    print("# source code.  They apply to code that is unlabeled in the")
-    print("# baseline but that immediately succeeds data.")
+    print("┌─────────────────────────────────────────────────────────────────┐")
+    print("│ Matches of the core rope vs the specific baseline appear below. │")
+    print("│ Note:  Symbols of the form 'Rbb,aaaa' do not appear in baseline │")
+    print("│ source code.  They apply to code that is unlabeled in the       │")
+    print("│ baseline but that immediately succeeds data.                    │")
+    print("└─────────────────────────────────────────────────────────────────┘")
 
     # First step: Read in the entire pattern file into the dictionaries
     # desiredMatches
@@ -621,15 +623,6 @@ if cli.findFilename != "":
                   occasion, bank, address, opcode, operand):
         global symbols, indexIntoPatterns, cli
           
-        if False and bank == 0o16 and address == 0o2504 \
-                and indexIntoPatterns == 0:
-            print("===", basicOrInterpretive)
-            print(symbols)
-            for i in range(0o2504, 0o2520):
-                print("%02o,%04o: %r" % (bank, i, coreUsed[bank][i % 0o2000]))
-            print("S40.131" in symbols)
-            print("===")
-          
         # Turn current disassembled location into a pattern.
         pattern = patternize(occasion, opcode, operand)
         
@@ -678,14 +671,13 @@ if cli.findFilename != "":
             dummy[i] = int(dummy[i], 8)
             findBanks.remove(dummy[i])
         findBanks = dummy + findBanks
-    for basicOrInterpretive in ["basic", "interpretive"]:
-        inBasic = (basicOrInterpretive == "basic")
-        for bank in findBanks:
-            if len(symbolsSought[basicOrInterpretive]) == 0:
-                break
-            print("# Matches for", basicOrInterpretive, 
-                    "code in bank %02o." % bank)
-            for address in range(0o2000, sizeCoreBank + 0o2000):
+    for bank in findBanks:
+        #print("# Match bank %02o." % bank)
+        for address in range(0o2000, sizeCoreBank + 0o2000):
+            for basicOrInterpretive in ["basic", "interpretive"]:
+                inBasic = (basicOrInterpretive == "basic")
+                if len(symbolsSought[basicOrInterpretive]) == 0:
+                    break
                 if len(symbolsSought[basicOrInterpretive]) == 0:
                     break
                 if cli.disjoint and coreUsed[bank][address % 0o2000]:
@@ -701,9 +693,6 @@ if cli.findFilename != "":
                                 break
                     if ok:
                         symbols.append(symbol)
-                if "MOVEALEM" in symbols and debugTrigger:
-                    debugTrigger = False
-                    print("MOVEALEM triggered at %02o,%04o" % (bank, address))
                 indexIntoPatterns = 0
                 end = address + maxPatternLength[basicOrInterpretive]
                 if end > sizeCoreBank + 0o2000:
@@ -736,16 +725,14 @@ if cli.findFilename != "":
                         "basic": desiredMatches["basic"].keys(),
                         "interpretive": desiredMatches["interpretive"].keys()
                         }
-                    print("%s = %02o,%04o" % (symbol, bank, address))
+                    if bank in [2, 3]:
+                        print("%-8s = %04o (%02o,%04o)" % \
+                            (symbol, 0o2000 * bank + address % 0o2000,
+                             bank, address))
+                    else:
+                        print("%-8s = %02o,%04o" % (symbol, bank, address))
     #print("symbolsFound =", symbolsFound)
     #print("symbolsSought =", symbolsSought)
-    for basicOrInterpretive in ["basic", "interpretive"]:
-        for symbol in symbolsSought[basicOrInterpretive]:
-            print("# %s (%s) not found" % (symbol, basicOrInterpretive))
-    print("# Total matched: %d (b), %d (i)" % \
-        (len(symbolsFound["basic"]), len(symbolsFound["interpretive"])))
-    print("# Total missed:  %d (b), %d (i)" % \
-        (len(symbolsSought["basic"]), len(symbolsSought["interpretive"])))
         
     # At this point, the program labels have undergone matching.  We'd now
     # like to use the results of those matches for erasable matching as well.
@@ -756,9 +743,12 @@ if cli.findFilename != "":
     # rope dump and find the address being used.  If it's the same address
     # for all of the references, then we can assume that that's the address
     # associated with that particular erasable symbol in the rope dump.
-    print("# Matches for variables in erasable memory appear below.")
+    print("┌─────────────────────────────────────────────────────────────────┐")
+    print("│ Matches for variables in erasable memory appear below.          │")
+    print("└─────────────────────────────────────────────────────────────────┘")
     totalCertainErasables = 0
     totalUncertainErasables = 0
+    totalUnreferencedErasables = 0
     for spec in erasableSpecs:
         symbols = spec["symbols"]
         references = spec["references"]
@@ -799,14 +789,17 @@ if cli.findFilename != "":
                 context &= 0o3777
                 referenced1 = context // 0o400
                 referenced2 = 0o1400 + (context % 0o400)
-                referencedAddress = "E%o,%04o" % (referenced1, referenced2)  
+                if context > 0o03:
+                    referencedAddress = "E?,%04o" % referenced2
+                else:
+                    referencedAddress = "E%o,%04o" % (referenced1, referenced2)  
             spec["referencedAddresses"].append(referencedAddress)
         # Information about all code references to this erasable symbol
         # collected.  We now have to perform some statistics to decide
         # what we can report about what address we can report for this
         # symbol.
-        sSymbols = str(symbols).replace("[", "").replace("]", "")
-        sSymbols = sSymbols.replace("'", "")
+        sSymbols = str(sorted(symbols)).replace("[", "").replace("]", "")
+        sSymbols = sSymbols.replace("'", "").replace(", ", " = ")
         stats = {}
         for i in range(len(spec["references"])):
             programLabel = spec["references"][i]
@@ -834,33 +827,79 @@ if cli.findFilename != "":
                 chosen = "E?,????" 
         else:
             chosen = "E?,????"
-        if not certain:
-            for stat in stats:
-                msg = "# " + stat + ": "
-                for p in stats[stat]:
-                    if len(msg) > 70:
-                        print(msg)
-                        msg = "#          "
-                    msg += " %s +%dD" % (p[0], p[1])
-                print(msg)
         total = 0
         for stat in stats:
             total += len(stats[stat])
-        print(sSymbols, "=", chosen, "(%d)" % total)
-        if certain:
+        if not certain:
+            print("┌─────────────────────────────────────────────────────────────────┐")
+            if total == 0:
+                print("│ Unable to detect references to the following variable.          │")
+            else:
+                print("│ Discrepancies for review:                                       │")
+            for stat in stats:
+                msg = stat + ":"
+                for p in stats[stat]:
+                    if len(msg) > 48:
+                        print("│ %-63s │" % msg)
+                        msg = "        "
+                    msg += "  %s +%o" % (p[0], p[1])
+                print("│ %-63s │" % msg)
+            print("└─────────────────────────────────────────────────────────────────┘")
+        elif chosen[:3] in ["E0,", "E1,", "E2,"]:
+            bank = int(chosen[1], 8)
+            address = int(chosen[3:], 8)
+            chosen = "%04o (%s)" % (0o400 * bank + address % 0o400, chosen)
+        total = 0
+        for stat in stats:
+            total += len(stats[stat])
+        print("%-8s" % sSymbols, "=", chosen, "(%d references)" % total)
+        if total == 0:
+            totalUnreferencedErasables += 1
+        elif certain:
             totalCertainErasables += 1
         else:
             totalUncertainErasables += 1
      
-    print("# Total matched:", totalCertainErasables)
-    print("# Total unmatched or partially matched:", totalUncertainErasables) 
+    print()
+    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    print("Summary of the match process.")
+    print()
+    print("Special subroutines:")
+    found = 0
+    notFound = 0
+    for symbol in sorted(searchSpecial.specialSubroutines):
+        addressTuple = searchSpecial.specialSubroutines[symbol]
+        bank = addressTuple[0]
+        address = addressTuple[1]
+        fAddress = addressTuple[2]
+        if fAddress == -1 and (bank == -1 or address == -1):
+            print("%-8s" % symbol, "not found")
+            notFound += 1
+        else:
+            found += 1
+    print("Total matched:", found)
+    print("Total unmatched:", notFound)     
+    print()
+    print("Core:")
+    for basicOrInterpretive in ["basic", "interpretive"]:
+        for symbol in symbolsSought[basicOrInterpretive]:
+            print("%s (%s) not found" % (symbol, basicOrInterpretive))
+    print("Total matched: %d (basic), %d (interpretive)" % \
+        (len(symbolsFound["basic"]), len(symbolsFound["interpretive"])))
+    print("Total unmatched:  %d (basic), %d (interpretive)" % \
+        (len(symbolsSought["basic"]), len(symbolsSought["interpretive"])))
+    print()
+    print("Erasable:")
+    print("Total matched:", totalCertainErasables)
+    print("Total unmatched or partially matched:", totalUncertainErasables) 
+    print("Total unreferenced by code:", totalUnreferencedErasables)
     
     if cli.checkFilename != "":
         print()
-        print("==============================================================")
-        print("Checking matches vs baseline assembly listing.")
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print("Cross-check vs baseline assembly listing.")
         print()
-        print("Rope:")
+        print("Core:")
         coreMatch = 0
         coreMismatch = 0
         for basic in symbolsFound:
@@ -884,13 +923,15 @@ if cli.findFilename != "":
                     coreMatch += 1
                 else:
                     coreMismatch += 1
-                    print("%s is at %02o,%04o but should be at %02o,%04o" \
+                    print("%-8s is at %02o,%04o but should be at %02o,%04o" \
                         % (symbol, bank1, address1 + 0o2000,
                             bank2, address2 + 0o2000))
                             
-        print("Total program label matches =", coreMatch)
-        print("Total program label mismatches =", coreMismatch)
-        
+        print("Total matched =", coreMatch)
+        print("Total unmatched =", coreMismatch)
+        print()
+        print("Erasable:")
+        print("TBD")
       
     sys.exit(0)
     
