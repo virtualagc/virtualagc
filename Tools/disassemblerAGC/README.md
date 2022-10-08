@@ -76,12 +76,31 @@ The basic processing chain is as follows.
 
 The only real option with specifyAGC.py the `--min=N` switch (present default is `--min=8`) which basically sets a floor on the size of the number of words in a subroutine.  I like to use `--min=12` if the BASELINE is Comanche 55.
 
-For disassemblerAGC.py (with the `--find` switch), there are several useful or necessary OPTIONS:
+For disassemblerAGC.py (with the `--find` switch), there are several useful or necessary OPTIONS.
 
-* To use ROPE.bin as input rather than ROPE.binsource, you have to use the `--bin` option.
-* There's often a handful of subroutines in an AGC software version at that are so similar to each other that they can be mistaken for each other during matching.  The `--skip=S` option causes the first match for subroutine `S` to be skipped. (And repeating the option multiple times causes multiple matches of `S` to be skipped.)  If the BASELINE is Comanche 55 and `--min=12` is used for specifyAGC.py, I find that I need to use `--skip=IRIGY --skip=-TORQUE --skip=TABYCOM --skip=ASMBLWY --skip=ATOPLEM` to avoid `IRIGY` being confused with `IRIGX`, `-TORQUE` being confused with `+TORQUE`, and so on.
+For one thing, to use ROPE.bin as input rather than ROPE.binsource, you also have to add the `--bin` switch.
 
-A good test of the process is to use ROPE=BASELINE in the final processing step above, and verify that all program labels and erasable variables are properly found in the ROPE.matches file.  If I test Comanche 55 in this way, for example, I find that 1,367 program labels are defined and matched correctly, while 847 erasable variables are identified, though only 819 are fully matched; that's at least partially because this is a work in progress and I haven't fully debugged it yet!
+For another, there's often a handful of code chunks in an AGC software version at that are so similar to each other that they can be mistaken for each other during matching.  One way to get around this is to use a bigger `--min` setting in specifyAGC.py, since longer patterns are less likely to be confused with each other.  But this may not be enough; long jump tables &dash; i.e., sequences of `TC` or `TCF` instructions &mdash; are a good example.  The disassembler has some built-in heuristics to try to work around the problem, but in spite of everything it's still possible for the condition to occur.  But there are disassembler command-line options that may help out:
+
+* The `--skip=S` option causes the first match for code-chunk `S` to be skipped during matching. And repeating the option multiple times causes multiple matches of code-chunk `S` to be skipped.
+* The `--hint=S1@S2` option (with a literal '@') tells the disassembler that code-chunk `S1` is at a higher memory location than `S2` &mdash; i.e., that it is either at a higher bank, or else at a higher offset within the same bank.  As many of these can be used as you like.
+* The `--ignore=S` option simply says that code chunk `S` is too irritating to deal with, and just to ignore it completely during matching.
+
+For example, if the Comanche 55 baseline is processed using `--min=8` within specifyAGC.py, the following switches are needed for disassemblerAGC.py during matching:
+
+    TBD
+
+Whereas with `--min=12`, the following are needed instead:
+
+    TBD
+
+Unfortunately, applying the same switches when trying to match the ROPE against the BASELINE may not work equally well as when matching BASELINE vs the same BASELINE, since some of the problematic chunks of code may have been moved around between versions.  But life isn't perfect, is it? 
+
+A good test of the process is to use ROPE=BASELINE in the final disassemblerAGC.py step above, and verify that all program labels and erasable variables are properly found in the ROPE.matches file.  One thing that helps in doing this is to add the command-line option
+
+    --check=BASELINE.lst
+
+which checks all of the matched symbols against the symbol table in BASELINE.lst.  If I test Comanche 55 in this way, for example, I find that 1,367 program labels are defined and matched correctly, while 847 erasable variables are identified, though only 819 are fully matched; that's at least partially because this is a work in progress and I haven't fully debugged it yet!
 
 ## Introduction
 

@@ -6,7 +6,8 @@ Copyright:      None - the author (Ron Burkey) declares this software to
 Filename:       parseCommandLine.py
 Purpose:        Parses command line for disassemblerAGC.py
 History:        2022-09-28 RSB  Split off from disassemblerAGC.py.
-                2022-10-07 RSB  Added --skip.
+                2022-10-07 RSB  Added --skip and --check.
+                2022-10-08 RSB  Added --overlap, --hint, --ignore
 """
 
 import sys
@@ -54,7 +55,11 @@ specsFilename = ""
 findFilename = ""
 descent = False
 flexFilename = ""
+checkFilename = ""
 skips = {}
+disjoint = True
+hintAfter = {}
+ignore = []
 entryPoints = [
     { "inBasic": True, "bank": 0o2, "offset": 0o0000, 
         "eb": 0, "fb": 0, "feb": 0, "symbol": "(go)" },
@@ -159,6 +164,14 @@ for param in sys.argv[1:]:
                         the first match it finds for that symbol.  Using this
                         switch twice tells the disassmbler to skip the first 
                         2 matches of the symbol.  And so on.
+            --check=F   Specifies an assembly-listing file that can be used for
+                        double-checking the matches found.
+            --overlap   By default program-label specifications are assumed to
+                        be disjoint.  If they can overlap, use this switch.
+            --hint=S1@S2 This is a hint that subroutine S1 must be at a higher
+                        memory address than subroutine S2.  As many --hint
+                        switches can be used as desired.
+            --ignore=S  Simply ignore subroutine S.
                
           Note that for --bin and --hardware, we can't necessarily    
           determine that locations are unused vs merely containing 00000.    
@@ -209,6 +222,8 @@ for param in sys.argv[1:]:
         specialOnly = True
     elif param[:8] == "--specs=":
         specsFilename = param[8:]
+    elif param[:8] == "--check=":
+        checkFilename = param[8:]
     elif param[:7] == "--find=":
         findFilename = param[7:]
     elif param[:7] == "--flex=":
@@ -223,8 +238,18 @@ for param in sys.argv[1:]:
             skips[skip] += 1
     elif param[:7] == "--only=":
         oBanks = param[7:]
+    elif param[:7] == "--hint=":
+        fields = param[7:].split("@")
+        if fields[0] in hintAfter:
+            hintAfter[fields[0]].append(fields[1])
+        else:
+            hintAfter[fields[0]] = [fields[1]]
     elif param == "--descent":
         descent = True
+    elif param == "--overlap":
+        disjoint = False
+    elif param[:9] == "--ignore=":
+        ignore.append(param[9:])
     else:
         print("Unrecognized option", param)
         sys.exit(1)

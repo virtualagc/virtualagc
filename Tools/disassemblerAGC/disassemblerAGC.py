@@ -20,7 +20,9 @@ History:        2022-09-25 RSB  Created.
                 2022-10-07 RSB  Accounted for differences between address 
                                 encoding of single-word vs double-word basic
                                 instructions. Fixed encoding for interpretive
-                                arguments.
+                                arguments.  Began adding --check.
+                2022-10-08 RSB  Added some ordering enforcement, including
+                                --hint.
 """
 
 #=============================================================================
@@ -93,6 +95,62 @@ import searchSpecial
 # Read the input file.
 
 readCoreRope(core, cli, numCoreBanks, sizeCoreBank)
+
+#=============================================================================
+# Read the --check file.
+
+checkErasable = {}
+checkCore = {}
+underline = "------------"
+divider = "=============================="
+def addCheckSymbol(line, offset0, offset1, offset2):
+    global checkErasable, checkCore
+    fields = line.strip().split()
+    while underline in fields:
+        fields.remove(underline)
+    while divider in fields:
+        fields.remove(divider)
+    for i in range(0, len(fields), 3):
+        if "E" not in fields[i] and "F" not in fields[i]:
+            continue
+        symbol = fields[i+1].strip()
+        address = fields[i+2].strip()
+        addressFields = address.split(",")
+        if len(addressFields) == 1:
+            value = int(addressFields[0], 8)
+            if value < 0o1400:
+                bank = value // 0o400
+                offset = value % 0o400
+                checkErasable[symbol] = (bank, offset)
+            else:
+                bank = value // 0o2000
+                offset = value % 0o2000
+                checkCore[symbol] = (bank, offset)
+        else:
+            offset = int(addressFields[1], 8)
+            if addressFields[0][0] == "E":
+                bank = int(addressFields[0][1:], 8)
+                checkErasable[symbol] = (bank, offset % 0o400)
+            else:        
+                bank = int(addressFields[0], 8)
+                checkCore[symbol] = (bank, offset % 0o2000)
+
+if cli.checkFilename != "":
+    f = open(cli.checkFilename, "r")
+    inSymbols = False
+    for line in f:
+        if line[:12] == "Symbol Table":
+            inSymbols = True
+            continue
+        if "Unresolved symbols" == line[:18]:
+            inSymbols = False
+            continue
+        if not inSymbols:
+            continue
+        addCheckSymbol(line, 7, 12, 25)
+        addCheckSymbol(line, 55, 60, 73)
+        addCheckSymbol(line, 103, 108, 121)   
+    f.close
 
 #=============================================================================
 # Search for special symbols like INTPRET, BANKCALL, ....  Their addresses
@@ -486,7 +544,8 @@ if cli.dtest:
     
 # Command-line switch:  --find
 if cli.findFilename != "":
-
+    debugTrigger = True
+    
     print("# Matches in common-fixed vs the specific baseline appear below.")
     print("# Note:  Symbols of the form 'Rbb,aaaa' do not appear in baseline")
     print("# source code.  They apply to code that is unlabeled in the")
@@ -499,13 +558,15 @@ if cli.findFilename != "":
     maxPatternLength = { "basic": 0, "interpretive": 0}
     basicOrInterpretive = "(none)"
     symbol = "(none)"
+    desiredOrdering = { "basic": [], "interpretive": [] }
 
     f = open(cli.findFilename, "r")
     for line in f:
         if line[:2] == "+ ": # Erasable specs
             fields = line.strip().split()
             symbols = fields[1].replace("['", "").replace("']", "").split("','")
-            references = fields[2].replace("[(", "").replace(")]", "").split("),(")
+            references = fields[2].replace("[(", "").replace(")]", "")
+            references = references.split("),(")
             for i in range(len(references)):
                 references[i] = references[i][1:-1]
                 r1 = references[i].split("',")
@@ -519,8 +580,14 @@ if cli.findFilename != "":
             symbol = fields[0]
             basicOrInterpretive = fields[1]
             desiredMatches[basicOrInterpretive][symbol] = []
+            desiredOrdering[basicOrInterpretive].append(symbol)
         else:
             desiredMatches[basicOrInterpretive][symbol].append(line.strip())
+    for symbol in cli.ignore:
+        for basicOrInterpretive in ["basic", "interpretive"]:
+            if symbol in desiredMatches[basicOrInterpretive]:
+                desiredMatches[basicOrInterpretive].pop(symbol)
+                desiredOrdering[basicOrInterpretive].remove(symbol)
     f.close()
     for basicOrInterpretive in ["basic", "interpretive"]:
         for symbol in desiredMatches[basicOrInterpretive]:
@@ -542,6 +609,10 @@ if cli.findFilename != "":
     # can eliminate all of them, at which point we move on to the next
     # location.
     
+    coreUsed = []
+    for bank in range(0o44):
+        coreUsed.append([False]*0o2000)
+    
     # Response function for disassembleRange().
     symbols = []
     indexIntoPatterns = 0
@@ -549,15 +620,22 @@ if cli.findFilename != "":
     def match(core, erasable, iochannels,
                   occasion, bank, address, opcode, operand):
         global symbols, indexIntoPatterns, cli
-        
+          
+        if False and bank == 0o16 and address == 0o2504 \
+                and indexIntoPatterns == 0:
+            print("===", basicOrInterpretive)
+            print(symbols)
+            for i in range(0o2504, 0o2520):
+                print("%02o,%04o: %r" % (bank, i, coreUsed[bank][i % 0o2000]))
+            print("S40.131" in symbols)
+            print("===")
+          
         # Turn current disassembled location into a pattern.
         pattern = patternize(occasion, opcode, operand)
-        if False and bank == 0o16 and address >= 0o3631 and address <=0o3652:
-            print("%02o,%04o %s ?" % \
-                (bank, address, pattern), occasion, opcode, 
-                operand, file=sys.stderr)
         
         # Now try to match the pattern with those read from the specs file.
+        if cli.disjoint and coreUsed[bank][address % 0o2000]:
+            symbols = []
         if len(symbols) == 0:
             #print("I am here")
             return True
@@ -570,10 +648,7 @@ if cli.findFilename != "":
                     len(desiredPatterns), desiredPatterns)
                 sys.exit(1)
             desiredPattern = desiredPatterns[indexIntoPatterns]
-            #print("\t\t%s %s" % (symbol, desiredPattern))
             if desiredPattern != pattern:
-                #print("Eliminating", symbol, indexIntoPatterns, 
-                #       desiredPattern, pattern)
                 forElimination.append(symbol)
             elif indexIntoPatterns == len(desiredPatterns) - 1:
                 # Match!  However, if it's one of those symbols we're
@@ -613,7 +688,22 @@ if cli.findFilename != "":
             for address in range(0o2000, sizeCoreBank + 0o2000):
                 if len(symbolsSought[basicOrInterpretive]) == 0:
                     break
-                symbols = list(symbolsSought[basicOrInterpretive])
+                if cli.disjoint and coreUsed[bank][address % 0o2000]:
+                    continue
+                symbols = []
+                for symbol in desiredOrdering[basicOrInterpretive]:
+                    ok = True
+                    if symbol in cli.hintAfter:
+                        for before in cli.hintAfter[symbol]:
+                            if before in desiredOrdering["basic"] or \
+                                    before in desiredOrdering["interpretive"]:
+                                ok = False
+                                break
+                    if ok:
+                        symbols.append(symbol)
+                if "MOVEALEM" in symbols and debugTrigger:
+                    debugTrigger = False
+                    print("MOVEALEM triggered at %02o,%04o" % (bank, address))
                 indexIntoPatterns = 0
                 end = address + maxPatternLength[basicOrInterpretive]
                 if end > sizeCoreBank + 0o2000:
@@ -634,7 +724,14 @@ if cli.findFilename != "":
                     symbol = symbols[0]
                     symbolsFound[basicOrInterpretive][symbol] \
                         = (bank, address)
+                    endAddress = address + \
+                        len(desiredMatches[basicOrInterpretive][symbol])
+                    for a in range(address, endAddress):
+                        if False and bank == 0o16 and a >=0o2504 and a < 0o2520:
+                            print(symbol, "overwriting %02o,%04o" % (bank, a))
+                        coreUsed[bank][a % 0o2000] = True
                     del desiredMatches[basicOrInterpretive][symbol]
+                    desiredOrdering[basicOrInterpretive].remove(symbol)
                     symbolsSought = { 
                         "basic": desiredMatches["basic"].keys(),
                         "interpretive": desiredMatches["interpretive"].keys()
@@ -756,7 +853,45 @@ if cli.findFilename != "":
             totalUncertainErasables += 1
      
     print("# Total matched:", totalCertainErasables)
-    print("# Total unmatched or partially matched:", totalUncertainErasables)    
+    print("# Total unmatched or partially matched:", totalUncertainErasables) 
+    
+    if cli.checkFilename != "":
+        print()
+        print("==============================================================")
+        print("Checking matches vs baseline assembly listing.")
+        print()
+        print("Rope:")
+        coreMatch = 0
+        coreMismatch = 0
+        for basic in symbolsFound:
+            for symbol in symbolsFound[basic]:
+                bank1 = symbolsFound[basic][symbol][0]
+                address1 = symbolsFound[basic][symbol][1] % 0o2000
+                if symbol in checkCore:
+                    bank2 = checkCore[symbol][0]
+                    address2 = checkCore[symbol][1]
+                else:
+                    fields = symbol.split(",")
+                    if len(fields) == 2 and fields[0][0] == "R" \
+                            and fields[0][1:].isdigit() \
+                            and fields[1].isdigit():
+                        bank2 = int(fields[0][1:], 8)
+                        address2 = int(fields[1], 8) % 0o2000
+                    else:
+                        print("Implementation error:  Symbol check", symbol)
+                        continue
+                if bank1 == bank2 and address1 == address2:
+                    coreMatch += 1
+                else:
+                    coreMismatch += 1
+                    print("%s is at %02o,%04o but should be at %02o,%04o" \
+                        % (symbol, bank1, address1 + 0o2000,
+                            bank2, address2 + 0o2000))
+                            
+        print("Total program label matches =", coreMatch)
+        print("Total program label mismatches =", coreMismatch)
+        
+      
     sys.exit(0)
     
 #=============================================================================

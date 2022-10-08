@@ -147,7 +147,7 @@ ParsersBlock2 = {
 }
 
 debug = False
-minLength = 8
+minLength = 12
 for param in sys.argv[1:]:
     if param == "--debug":
         debug = True
@@ -172,7 +172,7 @@ for param in sys.argv[1:]:
                     analyzed the assembly listing.
         --min=N     Sets a minimum length (in words, decimal) for the 
                     specification of any individual symbol.  The default is 
-                    8.  If possible, adjacent symbol scopes will be combined
+                    12.  If possible, adjacent symbol scopes will be combined
                     to meet this minimum requirement, but scopes will be 
                     rejected if they are shorter than the minimum and cannot 
                     be combined.
@@ -263,7 +263,12 @@ for line in sys.stdin:
         continue
     octal2 = line[38:46].strip()
     
-    symbol = line[46:54].strip()
+    # We ignore symbols attached to pure interpretive operands, since we 
+    # have no way to disassemble starting at one of them.
+    if left == "":
+        symbol = ""
+    else:
+        symbol = line[46:54].strip()
     
     if not fixed:
         if symbol != "":

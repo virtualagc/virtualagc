@@ -325,7 +325,8 @@ def disassembleInterpretive(core, bank, offset, stadr):
                     else:
                         disassembly.append(("", "", "%05o" % word))
     else:                       # Not STORE, STCALL, STODL, or STOVL
-        canPushDown = False
+        leftCanPushDown = False
+        rightCanPushDown = False
         leftField = (0o177 & cword) - 1
         rightField = (0o177 & ((cword) >> 7)) - 1   # -1 if none.
         left = "??????"
@@ -340,18 +341,27 @@ def disassembleInterpretive(core, bank, offset, stadr):
                 = adjustOpcodePerArgument(core, bank, offset, 
                                     leftInterpreterCodes, True)
             if numLeftArgs > 0:
-                canPushDown = (leftField & 1) != 0 \
-                            and leftField not in [0o115, 0o117]
+                if (leftField & 1) != 0 \
+                            and leftField not in [0o115, 0o117]:
+                    leftCanPushDown = True
         if rightField == -1:
             right = ""
         elif rightField in interpreterCodes:
             rightInterpreterCodes = interpreterCodes[rightField]
             right, numRightArgs, rightInterpreterCodes = \
                 adjustOpcodePerArgument(core, bank, 
-                offset + numLeftArgs, rightInterpreterCodes, False)
+                    offset + numLeftArgs, rightInterpreterCodes, False)
             if numRightArgs > 0:
-                canPushDown = (rightField & 1) != 0 \
-                            and rightField not in [0o115, 0o117]
+                if (rightField & 1) != 0 \
+                            and rightField not in [0o115, 0o117]:
+                    rightCanPushDown = True
+        canPushDown = 0
+        if rightCanPushDown:
+            canPushDown = 1
+            if leftCanPushDown:
+                canPushDown = 2
+        elif (right == "" or numRightArgs == 0) and leftCanPushDown:
+            canPushDown = 1
         disassembly.append((left, right, ""))
         if left == "EXIT" or right == "EXIT":
             exit = True
@@ -368,7 +378,7 @@ def disassembleInterpretive(core, bank, offset, stadr):
             word = core[bank][offset + i]
             if word == 0o77626: # STADR
                 break
-            if i == rawNumArgs - 1 and (word & 0o40000) != 0 and canPushDown:
+            if i >= rawNumArgs - canPushDown and (word & 0o40000) != 0:
                 break
             disassembly.append(("", "", "%05o" % word))
     return disassembly, stadr, exit
