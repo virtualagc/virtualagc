@@ -60,6 +60,7 @@ skips = {}
 disjoint = True
 hintAfter = {}
 ignore = []
+avoid = []
 entryPoints = [
     { "inBasic": True, "bank": 0o2, "offset": 0o0000, 
         "eb": 0, "fb": 0, "feb": 0, "symbol": "(go)" },
@@ -172,6 +173,9 @@ for param in sys.argv[1:]:
                         memory address than subroutine S2.  As many --hint
                         switches can be used as desired.
             --ignore=S  Simply ignore subroutine S.
+            --avoid=BB,NNNN-MMMM Specify a fixed address range which should be 
+                        avoided by the matching process.  You can use as many
+                        of these switches as necessary. 
                
           Note that for --bin and --hardware, we can't necessarily    
           determine that locations are unused vs merely containing 00000.    
@@ -250,6 +254,11 @@ for param in sys.argv[1:]:
         disjoint = False
     elif param[:9] == "--ignore=":
         ignore.append(param[9:])
+    elif param[:8] == "--avoid=":
+        fields = param[8:].split("-")
+        leftFields = fields[0].split(",")
+        avoid.append((int(leftFields[0], 8), int(leftFields[1], 8), 
+                        int(fields[1], 8)))
     else:
         print("Unrecognized option", param)
         sys.exit(1)

@@ -8,6 +8,7 @@ Purpose:        Disassemble a word from an interpretive location.
 History:        2022-09-28 RSB  Split off from disassemblerAGC.py.
 """
 
+import sys
 from engineering import endOfImplementation
 
 # Disassemble a word for an interpretive location. 
@@ -245,6 +246,9 @@ def adjustOpcodePerArgument(core, bank, offset, interpreterCodesField,
             msg += " (%d, %d)" % ior[5]
         print(msg)
 
+    if False and bank == 0o36 and offset == 0o1422:
+        print("%02o,%04o" % (bank, offset), interpreterCodesField, isLeft, file=sys.stderr)
+        sys.exit(1)
     if offset < 0o2000:
         nCode = interpreterCodesField[0][1]
         canIndex = (nCode & 2) != 0

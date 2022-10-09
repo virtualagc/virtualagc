@@ -14,6 +14,7 @@ History:        2022-10-05 RSB  Wrote.  This version seems to work
                 2022-10-07 RSB  Accounted for different address encoding
                                 for double-word basic instructions vs
                                 single-word instructions.
+                2022-10-09 RSB  Fixed erasables, I hope!
 """
 
 import sys
@@ -63,7 +64,7 @@ ParsersBlock2 = {
     "CA": 'b',
     "CAE": 'b',
     "CAF": 'b',
-    "CADR": 'd',
+    #"CADR": 'd',
     "CCS": 'b',
     #"CHECK=": 'd',
     "COM": 'b',
@@ -219,8 +220,11 @@ for line in sys.stdin:
     left = line[65:73].strip()
     
     addressField = line[24:31].strip()
-    if left in ["=", "EQUALS"] and addressField == "":
+    if left in ["=", "EQUALS"] and (addressField == "" or addressField.isdigit()):
         continue
+    if left == "ERASE" and addressField == "" and line[74:82].strip().isdigit() and \
+            line[85:93].strip() == "-" and line[96:104].strip().isdigit():
+        addressField = line[74:82].strip()
     if addressField == "" or addressField[:4] == "0000":
         addressField = line[15:22].strip()
     fields = addressField.split(",")
@@ -264,12 +268,11 @@ for line in sys.stdin:
     octal2 = line[38:46].strip()
     
     # We ignore symbols attached to pure interpretive operands, since we 
-    # have no way to disassemble starting at one of them.
+    # have no way to disassemble starting at one of them.  
     if left == "":
         symbol = ""
     else:
         symbol = line[46:54].strip()
-    
     if not fixed:
         if symbol != "":
             erasable[offset][bank]["symbols"].append(symbol)
@@ -294,6 +297,14 @@ for line in sys.stdin:
     rope[offset][bank] = [locationType, symbol, left, right]
     if octal2 != "":
         rope[offset + 1][bank] = [locationType.lower(), "", "", []]
+
+# This function converts a symbol name into a form that won't cause 
+# us problems later when our output file is read back by 
+# disassemblerAGC.py.  Specifically, we don't like the character
+# "'" in symbol names, so we replace it by "!", which as far as I
+# can tell isn't used in AGC symbol names.
+def normalize(symbol):
+    return symbol.replace("'", "!")
 
 # Convert the contents of the rope array into specifications.
 # Each bank can be analyzed separately.
@@ -336,7 +347,7 @@ for bank in range(0o44):
             lookaheadSymbol = lookahead[1]
             if lookaheadType in nonCode or lookaheadSymbol != "":
                 if newOffset < offset + minLength:
-                    if lookaheadType in nonCode:
+                    if lookaheadType != locationType:
                         # The scope is irreparably too short and will
                         # be rejected.
                         offset = newOffset
@@ -358,7 +369,7 @@ for bank in range(0o44):
                 if len(symbolList) > 1:
                     print("# Due to specified minimum length, "
                           "combined scopes of symbols", symbolList)
-                print("%s %02o %04o %04o %s" % (symbol, bank, 
+                print("%s %02o %04o %04o %s" % (normalize(symbol), bank, 
                     offset + 0o2000, newOffset + 0o2000, interpretive))
                 offset = newOffset
                 found = True
@@ -386,23 +397,27 @@ for address in range(0o400):
 # converted to absolute addresses.
 
 # Detects interpretive opcodes that don't decrement their stand-alone
-# arguments, and hence are marked as type 'L' rather than 'A'.
+# arguments, and hence the arguments are marked as type 'L' rather than 'A'.
 def dontDecrement(opcode):
     return ("," in opcode) or \
         opcode in ["CALL", "STQ", "GOTO", "STCALL", "BHIZ", "BMN",
-                   "BOV", "BOVB", "BPL", "BZE", "CLRGO", "SETGO"]
+                   "BOV", "BOVB", "BPL", "BZE", "CLRGO", "SETGO",
+                   "BOFF", "BOFCLR", "BOFINV", "BOFSET", "BON", "BONCLR",
+                   "BONINV", "BONSET"]
 
 for bank in range(0o44):
-    lastLastLeft = ""
-    lastLastRight = ""
     lastLeft = ""
     lastRight = ""
     lastLeftComma = False
     lastRightComma = False
+    left = ""
+    right = ""
     argCount = 0
     lastSymbol = ""
     sinceSymbol = 0
     for offset in range(0o2000):
+        lastLastLeft = ""
+        lastLastRight = ""
         location = rope[offset][bank]
         if location[0] not in ['b', 'B', 'i', 'I']:
             lastSymbol = ""
@@ -423,11 +438,32 @@ for bank in range(0o44):
             lastLastLeft = lastLeft
             lastLastRight = lastRight
             lastLeft = location[2]
-            lastRight = ""
+            left = lastLeft
             if len(operand) == 1:
                 lastRight = operand[0]
+            else:
+                lastRight = ""
             lastLeftComma = dontDecrement(lastLeft)
             lastRightComma = dontDecrement(lastRight)
+            numLeftArgs = 0
+            numRightArgs = 0
+            argTypes = ['A']*4
+            if location[0] in ['i', 'I']:
+                if lastLeft in interpreterOpcodes:
+                    numLeftArgs = interpreterOpcodes[lastLeft][2]
+                    if lastRight in interpreterOpcodes:
+                        numRightArgs = interpreterOpcodes[lastRight][2]
+                elif lastLeft == "STCALL":
+                    numLeftArgs = 1
+                i = 0
+                for j in range(numLeftArgs):
+                    if lastLeftComma:
+                        argTypes[i] = 'L'
+                    i += 1
+                for j in range(numRightArgs):
+                    if lastRightComma:
+                        argTypes[i] = 'L'
+                    i += 1      
         argCount += 1
         #print("%02o,%04o '%s' '%s' '%s' '%s'" % (bank, offset+0o2000, lastLeft, \
         #                                lastRight, lastLastLeft, lastLastRight))
@@ -444,20 +480,11 @@ for bank in range(0o44):
                 if lastLastLeft == "STADR" or lastLastRight == "STADR":
                     referenceType = 'I'
                 elif location[2] == "0":
-                    referenceType = "L"
+                    referenceType = "E"
                 elif location[2] in ["STORE", "STCALL", "STODL", "STOVL"]:
                     referenceType = 'S'
-                elif argCount == 1 and lastLeftComma:
-                    referenceType = 'L'
-                    lastLeftComma = False
-                elif argCount >= 1 and lastRightComma and offset < 0o1777:
-                    nextLoc = rope[offset + 1][bank]
-                    if nextLoc[0] not in ['i', 'I'] or \
-                            nextLoc[2] != "":
-                        referenceType = 'L'
-                        lastRightComma = False
-                #else:
-                #    continue
+                elif argCount > 0:
+                    referenceType = argTypes[argCount - 1]
             else:
                 continue
             symbolInfo = erasableBySymbol[operand[0]]
@@ -465,8 +492,6 @@ for bank in range(0o44):
             a = symbolInfo[1]
             erasable[a][b]["references"].append((lastSymbol,sinceSymbol,
                                                     referenceType))
-        lastLastLeft = ""
-        lastLastRight = ""
         
 # Output erasable specifications.  There are several types:
 #   B   Operand of a single-word basic instruction (like XCH or CA)
@@ -475,7 +500,8 @@ for bank in range(0o44):
 #   S   Inline operand of interpretive STORE, STCALL, STODL, or STOVL
 #   A   Normal argument of interpretive.
 #   L   Normal argument of an interpretive index opcode such as LXC,1.
-#   I   Interpretive argument preceded by STADR.
+#   I   Interpretive STXXX preceded by STADR.
+#   E   Interpretive argument which doesn't decrement and has no bank number.
 
 # The output lines have space-delimited fields as follows:
 #   The literal "+"
@@ -490,6 +516,12 @@ print("# Erasables")
 for bank in range(8):
     for i in range(len(erasable)):
         data = erasable[i][bank]
+        for i in range(len(data["symbols"])):
+            data["symbols"][i] = normalize(data["symbols"][i])
+        for i in range(len(data["references"])):
+            d = list(data["references"][i])
+            d[0] = normalize(d[0])
+            data["references"][i] = tuple(d)
         if len(data["symbols"]) > 0 and len(data["references"]) > 0:
             print("+", str(data["symbols"]).replace(" ",""),
                   str(data["references"]).replace(" ", ""))

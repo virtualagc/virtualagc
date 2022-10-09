@@ -1,4 +1,4 @@
-**Important note:**  This is *experimental* code that's under initial development.  It presently does only a portion of the job it's intended for.
+**Important note:**  This is *experimental* code that's under initial development.  It presently works only for mature Block II AGC code, but not for Block I code or for early Block II code for the so-called "BLK2" architecture.
 
 # Introduction
 
@@ -79,6 +79,13 @@ The first two step build the pattern file used for all subsequent pattern-matchi
 
 The only useful option possible with specifyAGC.py is the `--min=N` switch (present default is `--min=12`), which basically sets a lower limit to the number of words in a named chunk of source code that the disassembler will attempt to deal with.
 
+The first three steps listed can be accomplished by the single command
+
+    cd .../BASELINE
+    workflow.sh BASELINE [OPTIONS]
+
+Make sure that the Tools/disassemblerAGC/ directory is in your PATH first.  The OPTIONS mentioned, are the ones for disassemblerAGC.py.
+
 For disassemblerAGC.py (with the `--find` switch), there are several useful or necessary OPTIONS.
 
 For one thing, to use ROPE.bin as input rather than ROPE.binsource, you also have to add the `--bin` switch.
@@ -88,8 +95,9 @@ For another, there's often a handful of code chunks in an AGC software version a
 * The `--skip=S` option causes the first match for code-chunk `S` to be skipped during matching. And repeating the option multiple times causes multiple matches of code-chunk `S` to be skipped.
 * The `--hint=S1@S2` option (with a literal '@') tells the disassembler that code-chunk `S1` is at a higher memory location than `S2` &mdash; i.e., that it is either at a higher bank, or else at a higher offset within the same bank.  As many of these can be used as you like.
 * The `--ignore=S` option simply says that code chunk `S` is too irritating to deal with, and just to ignore it completely during matching.
+* The `--avoid=BB,NNNN-MMMM` option says to avoid the address range during matches.  This is very much a last resort, but I've seen it arise in the following way:  tables of `CADR` pseudo-ops disassemble the same way as jump tables of `TC` instructions do, causing jump tables to erroneously match them.  The other OPTIONS listed above aren't effective in avoiding this problem.
 
-Of these, the most useful is likely `--hint`, though that's a matter of personal preference.
+In my (limited) experience, `--hint` solves the majority of problems.
 
 For example, if the Comanche 55 baseline is processed using `--min=8` within specifyAGC.py, the following switches are needed for disassemblerAGC.py:
 
@@ -101,6 +109,39 @@ Whereas with `--min=12` (the default) you need only the simpler combination of o
     --hint=MISCJUMP@UNAJUMP --hint=MISCJUMP@INDJUMP --hint=-TORQUE@+TORQUE --hint=TABYCOM@TABPCOM --hint=ASMBLWY@ASMBLWP
 
 Unfortunately, applying the same switches when trying to match the ROPE against the BASELINE may not work equally well as when matching the BASELINE vs the BASELINE, since some of the problematic chunks of code may have been moved around between versions.  But life isn't perfect, is it? 
+
+Below are some worked examples as of *this* writing.  I find that as I find and fix bugs in disassemblerAGC.py and specifyAGC.py, the command-line switches for workflow.sh sometimes change slightly, so that may be true of the worked examples as well. 
+
+### Baseline Retread 44
+
+BASELINE Retread 44 works only partially, because it is early ("BLK2") code which isn't yet supported.  
+
+### Baseline Sunburst 37
+
+    workflow.sh Sunburst37 --hint=R22,2112@MISCJUMP --hint=MISCJUMP@INDJUMP --hint=INDJUMP@UNAJUMP \
+                           --avoid=05,2136-2176 --hint=PDVL@PDDL --hint=JACCESTR@JACCESTQ
+
+TBD
+
+### Baseline Colossus 237
+
+    workflow.sh Colossus237 --hint=MISCJUMP@UNAJUMP --hint=MISCJUMP@INDJUMP --hint=-TORQUE@+TORQUE \
+                            --hint=TABYCOM@TABPCOM --hint=ASMBLWY@ASMBLWP  --skip=9DWTESTJ
+
+TBD
+
+### Baseline Comanche 55 and Artemis 72
+
+    workflow.sh Comanche055 --hint=MISCJUMP@UNAJUMP --hint=MISCJUMP@INDJUMP --hint=-TORQUE@+TORQUE \
+                            --hint=TABYCOM@TABPCOM --hint=ASMBLWY@ASMBLWP  --skip=9DWTESTJ
+
+Works perfectly.  Artemis072 works perfectly as well, with the same command-line switches.
+
+### Baseline Luminary 210
+
+    workflow.sh Luminary210 --hint=NEWPHASE@MISCJUMP --hint=MISCJUMP@INDJUMP --hint=INDJUMP@UNAJUMP --skip=NEWPHASE
+
+Works perfectly. 
 
 ## Introduction
 
@@ -275,6 +316,8 @@ For example,
     disassemblerAGC.py --find=Comanche055.patterns <Comanche072-B2.binsource
 
 The search is entirely brute force, and does take some time to complete ... though with that said, it's not too bad.  On my computer, for example, doing a full match of Comanche 55 patterns vs a Manche45R2 rope takes 77 seconds.  (In case you're interested, that's a total of 1222 basic program labels and 629 interpretive program labels, of which all but 9 of each are found by the matching process.)
+
+Note that this also creates a file called disassemblerAGC.core which shows all of the core-memory locations at which the disassembler has matched code from the BASELINE.
 
 By default, disassemblerAGC.py searches banks 00, 01, ..., 43 for the patterns whose first instruction is basic, and then searches banks 00, 01, ..., 43 again for the patterns whose first instruction is interpretive.
 
