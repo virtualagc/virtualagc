@@ -1,22 +1,30 @@
-**Important note:**  This is *experimental* code that's under initial development.  It presently works only for mature Block II AGC code, but not for Block I code or for early Block II code for the so-called "BLK2" architecture.
-
 # Introduction
 
-This is an attempt to create a disassembler for octal dumps of AGC core ropes, facilitating recreation of their original source code.  As such, I hope it will be a tool for a very limited purpose, and not really a general-purpose utility.
+This is an attempt to create a disassembler for octal dumps of AGC core ropes, facilitating reconstruction of their original source code.  It targets a pretty-specific concept of a workflow for that disassembly process rather than aiming to be a general-purpose tool.  As far as AGC software prospectively available to us at some point, there are three different versions of the AGC language which are incompatible to a greater or lesser degree.  Ranked from earliest to latest, they are:
 
-Disassembly is envisaged as having the following stages:
+* Block I (Sunrise, Corona, Solarium, Sunspot, *et al.*)
+* BLK2 (Retread, Sundial, *et al.*)
+* Block II (Aurora, Sunburst, Luminary, Colossus, Comanche, Artemis, Skylark, *et al.*)
 
-  * Rough disassembly into numerical form.  In other words, all "basic" and "interpreter" instructions identified correctly, but their operands being numerical in nature.
-  * Symbol assignments.
-  * Final regeneration with program comments.
+At the moment, the work on the disassembler applies only to Block II, which covers the vast majority of AGC software available to us. However, the other two are important as well, for recovery of Sundial, Sunrise, and possibly Corona source code in the future.  Therefore, support for BLK2 and Block I will hopefully be added as well.
 
-None of these steps can be accomplished perfectly if performed automatically, for a variety of reasons, so the best case is simply to reduce the amount of manual intervention needed to a minimum.  Of course, there is no guarantee of perfect accuracy in the final two steps even if there is human intervention, though errors in these steps do not affect the accuracy of core ropes assembled from the reconstructed AGC source code.
+Disassembly of a rope-memory dump is envisaged as having the following stages:
 
-# Program: disassemblerAGC.py
+ 1. Creation of *patterns* of selected baseline versions of AGC source code believed to be similar to the rope memory's software version.
+ 2. *Pattern matching* to determine which sections of baseline code correspond to which sections of the rope memory; i.e., assignment of rope-memory addresses to baseline symbols.
+ 3. Cut-and-paste of baseline source code to create reconstructed rope source code.
 
-This is the program which attempts to perform the rough disassembly, in which basic and interpretive instructions are correct, but their arguments are represented only numerically.
+The latter is a manual operation, or at least outside of the scope of what I'm attempting here, but the first two stages can be mostly automated according to our discussion here.
 
-The program is partitioned into a number of modules from which it imports functionality, including
+# Provided Software
+
+The there are are three upper-level programs,
+
+* disassemblyAGC.py &mdash; a Python 3 disassembler and pattern-matcher for comparing two AGC software versions.
+* specifyAGC.py &mdash; a Python 3 generator of "specifications" files for disassemblerAGC.py's all-important `--find` option.
+* workflow.sh &mdash; a bash script that manages commonly-needed sequence of disassemblyAGC.py and specifyAGC.py operations.
+
+The top-level programs are directly executable from a command line.  They rely on a number of additional Python modules that aren't directly executable by the user:
 
   * disassembleBasic.py &mdash; disassemble a single basic (i.e., assembly language) memory word.
   * disassembleInterpretive.py &mdash; disassemble a memory word containing 1 or 2 packed interpreter instructions, plus all of the memory words containing the arguments for those instructions.
@@ -27,55 +35,38 @@ The program is partitioned into a number of modules from which it imports functi
   * semulate.py &mdash; does as much CPU emulation as is possible at assembly time, to track changes to memory-bank selection registers.
   * registers.py &mdash; contains lists of named CPU registers and i/o channels.
 
-However, among these only the top-level program (`disassemblerAGC.py`) is directly executable, and it is the only file (in Linux or Mac OS) which has its executable permission-bit set.
-
-The command
+Both of the Python program accept a `--help` option that provides a description of the various other options available, some of which are also described in the text that follow:
 
     disassemblerAGC.py --help
+    specifyAGC.py --help
 
-provides a list of the options.
+As far as workflow.sh is concerned, it is presently invoked as
 
-Additionally, there are test files with names of the form *.spec which can be used with diassemblerAGC.py's --spec command-line switch.
+    workflow.sh BASELINE [OPTIONS]
 
-# Program: specifyAGC.py
+where the available options are those associated with disassemblerAGC.py's `--find` option (but not the `--find` option itself):  `--hint`, `--skip`, `--avoid`, `--ignore`, ....
 
-The program specifyAGC.py is used for auto-generating a "specifications" file (explained in the section "Envisaged Workflow" below) from an AGC assembly listing.  That's a task which would otherwise need to be performed manually, and while it's relatively easy to do so, it can be time-consuming.  Therefore, automating it can be useful.
-
-An assembly listing is normally output automatically by the process of assembling AGC source code using the `yaYUL` assembler, as in 
-
-    yaYUL ... >AGCPROGRAM.lst
-
-The specifyAGC.py program is used as follows:
-
-    specifyAGC.py [--min=8] &lt;AGCPROGRAM.lst >AGCPROGRAM.specs
-
-The --min option is explained later.
-
-The only dependency is the disassembleInterpretive.py module, also required by disassemblerAGC.py as explained earlier.
-
-# Envisaged Workflow
+# Envisaged Workflow<a name="Envisaged"></a>
 
 ## In a Nutshell
 
-Without further ado, I'll describe the workflow in the tersest possible terms here.  If you like, the remaining subsections under this "Envisage Workflow" section flesh out the topic much more.
+Without further ado, I'll describe the workflow in the tersest possible terms here.  If you like, the remaining subsections under this "Envisage Workflow" section flesh out the topic much more, and [a later section](#Comanche072B2) provides a still-more-detailed example.
 
 The task at hand is this:  Given an octal dump of a set of physical rope-memory modules, we want to reconstruct the AGC source code that would assemble to give that identical rope.  I'll refer to this dump "the Rope".  This reconstruction is to be performed with the aid of the already-known source code of a similar AGC software version (or versions), which I'll call "the Baseline(s)".  In short, we want to reconstruct source code for the Rope by using the Baseline(s).
 
 Requirements:
 
 * The Rope, in the form of a binsource (or bin) file, which for the sake of discussion I'll assume is ROPE.binsource.
-* The Baseline, in the form of:
-    * Its assembly listing, as output by yaYUL, which I'll assume is BASELINE.lst.
-    * Its rope file, either transcribed manually or else output by yaYUL, while I'll assume is BASELINE.binsource.
+* The Baseline, in the form of its assembly listing, as output by yaYUL, which I'll assume is BASELINE.lst; and its rope file, either transcribed manually or else output by yaYUL, which I'll assume is BASELINE.binsource.
 
 The basic processing chain is as follows.
 
-    specifyAGC.py &lt;BASELINE.lst >BASELINE.specs [OPTIONS]
-    disassemblerAGC.py --specs=BASELINE.specs &lt;BASELINE.binsource >BASELINES.patterns
-    disassemblerAGC.py --find=BASELINE.patterns &lt;BASELINE.binsource --check=BASELINE.lst >BASELINE.matches [OPTIONS]
-    disassemblerAGC.py --find=BASELINE.patterns &lt;ROPE.binsource >ROPE.matches [OPTIONS]
+    specifyAGC.py <BASELINE.lst >BASELINE.specs [OPTIONS]
+    disassemblerAGC.py --specs=BASELINE.specs <BASELINE.binsource >BASELINES.patterns
+    disassemblerAGC.py --find=BASELINE.patterns <BASELINE.binsource --check=BASELINE.lst >BASELINE.matches [OPTIONS]
+    disassemblerAGC.py --find=BASELINE.patterns <ROPE.binsource >ROPE.matches [OPTIONS]
 
-The first two step build the pattern file used for all subsequent pattern-matching operations.  The third step is a check of that process; the report file will generally indicate that not all symbols were matched properly, and it's incumbent on you to determine the necessary command-line options which cause the test to pass 100%.  (More on that below.)  The fourth step is the actual attempt to discover information about the ROPE.
+The first two step build the pattern file used for all subsequent pattern-matching operations.  The third step is a check of that process; its report file (BASELINE.matches) will generally indicate that not all symbols were matched properly, and it's incumbent on you to determine the necessary command-line options which cause the test to pass 100%.  (More on that below.)  The fourth step is the actual attempt to discover information about the ROPE.
 
 The only useful option possible with specifyAGC.py is the `--min=N` switch (present default is `--min=12`), which basically sets a lower limit to the number of words in a named chunk of source code that the disassembler will attempt to deal with.
 
@@ -84,13 +75,9 @@ The first three steps listed can be accomplished by the single command
     cd .../BASELINE
     workflow.sh BASELINE [OPTIONS]
 
-Make sure that the Tools/disassemblerAGC/ directory is in your PATH first.  The OPTIONS mentioned, are the ones for disassemblerAGC.py.
+Make sure that the Tools/disassemblerAGC/ directory is in your PATH first.  The OPTIONS mentioned are the ones for disassemblerAGC.py's `--find` switch.  For one thing, to use ROPE.bin as input rather than ROPE.binsource, you also have to add the `--bin` switch.  And if ROPE.bin is in so-called "hardware" format, you additonally have to add `--hardware`.
 
-For disassemblerAGC.py (with the `--find` switch), there are several useful or necessary OPTIONS.
-
-For one thing, to use ROPE.bin as input rather than ROPE.binsource, you also have to add the `--bin` switch.
-
-For another, there's often a handful of code chunks in an AGC software version at that are so similar to each other that they can be mistaken for each other during matching.  That's why the testing mentioned above usually fails when no command-line options are used.  One way to get around this a little bit is to use a bigger `--min` setting in specifyAGC.py, since longer patterns are less likely to be confused with each other.  But this may not be enough; long jump tables &dash; i.e., sequences of `TC` or `TCF` instructions &mdash; are a good example of that, because you're unlikely to want to make the search patterns longer than the biggest jump tables in the code.  The disassembler has some built-in heuristics to try to work around the problem, but in spite of everything it's still possible for the condition to occur.  Here are the disassembler command-line options that rescue you:
+For another, there's often a handful of code chunks in an AGC software version that are so similar to each other that they can be mistaken for each other during matching.  That's why the testing mentioned above usually fails when no command-line options are used.  One way to get around this a little bit is to use a bigger `--min` setting in specifyAGC.py, since longer patterns are less likely to be confused with each other.  But this may not be enough; long jump tables &mdash; i.e., sequences of `TC` or `TCF` instructions &mdash; are a good example of that, because you're unlikely to want to make the search patterns longer than the biggest jump tables in the code.  The disassembler has some built-in heuristics to try to work around the problem, but in spite of everything it's still possible for the condition to occur.  Here are the disassembler command-line options that rescue you:
 
 * The `--skip=S` option causes the first match for code-chunk `S` to be skipped during matching. And repeating the option multiple times causes multiple matches of code-chunk `S` to be skipped.
 * The `--hint=S1@S2` option (with a literal '@') tells the disassembler that code-chunk `S1` is at a higher memory location than `S2` &mdash; i.e., that it is either at a higher bank, or else at a higher offset within the same bank.  As many of these can be used as you like.
@@ -110,7 +97,7 @@ Whereas with `--min=12` (the default) you need only the simpler combination of o
 
 Unfortunately, applying the same switches when trying to match the ROPE against the BASELINE may not work equally well as when matching the BASELINE vs the BASELINE, since some of the problematic chunks of code may have been moved around between versions.  But life isn't perfect, is it? 
 
-Below are some worked examples as of *this* writing.  I find that as I find and fix bugs in disassemblerAGC.py and specifyAGC.py, the command-line switches for workflow.sh sometimes change slightly, so that may be true of the worked examples as well. 
+Below are some worked examples of generating match-patterns using workflow.sh, as of *this* writing.  I find that as I find and fix bugs in disassemblerAGC.py and specifyAGC.py, the command-line switches for workflow.sh sometimes change slightly, so that may be true of the worked examples as well. A more fully-worked-out example involving comparison of BASELINE vs ROPE appears later, in [a later section](#Comanche072B2).
 
 ### Baseline Retread 44
 
@@ -121,38 +108,38 @@ BASELINE Retread 44 works only partially, because it is early ("BLK2") code whic
     workflow.sh Sunburst37 --hint=R22,2112@MISCJUMP --hint=MISCJUMP@INDJUMP --hint=INDJUMP@UNAJUMP \
                            --avoid=05,2136-2176 --hint=PDVL@PDDL --hint=JACCESTR@JACCESTQ
 
-TBD
-
 ### Baseline Colossus 237
 
     workflow.sh Colossus237 --hint=MISCJUMP@UNAJUMP --hint=MISCJUMP@INDJUMP --hint=-TORQUE@+TORQUE \
                             --hint=TABYCOM@TABPCOM --hint=ASMBLWY@ASMBLWP  --skip=9DWTESTJ
-
-TBD
 
 ### Baseline Comanche 55 and Artemis 72
 
     workflow.sh Comanche055 --hint=MISCJUMP@UNAJUMP --hint=MISCJUMP@INDJUMP --hint=-TORQUE@+TORQUE \
                             --hint=TABYCOM@TABPCOM --hint=ASMBLWY@ASMBLWP  --skip=9DWTESTJ
 
-Works perfectly.  Artemis072 works perfectly as well, with the same command-line switches.
+Artemis072 uses the same command-line switches.
+
+### Baseline Luminary131
+
+    workflow.sh Luminary131 --hint=AFTRGUID@NEWPHASE --hint=NEWPHASE@MISCJUMP --hint=MISCJUMP@UNAJUMP \
+                            --hint=MISCJUMP@INDJUMP --skip=NEWPHASE --skip=NEWGUID
 
 ### Baseline Luminary 210
 
-    workflow.sh Luminary210 --hint=NEWPHASE@MISCJUMP --hint=MISCJUMP@INDJUMP --hint=INDJUMP@UNAJUMP --skip=NEWPHASE
+    workflow.sh Luminary210 --hint=NEWPHASE@MISCJUMP --hint=MISCJUMP@INDJUMP --hint=INDJUMP@UNAJUMP \
+                            --skip=NEWPHASE
 
-Works perfectly. 
-
-## Introduction
+## Background
 
 The program disassemblerAGC.py is not intended to be a complete disassembly system for the AGC, but rather a tool in a workflow intended to solve a specific problem, which is as follows.  Suppose that an octal dump of a core-rope module of some AGC software version is available.  We would like to provide AGC source code which assembles to those given octal values.  Moreover, we would like it to be fully AGC source code, with symbolic program labels and variable names, as well as program comments.
 
 The underlying assumption is that the core-rope module is of a software version which is similar but not identical to other software versions existing in our collection.  Large chunks of the code will therefore be identical to existing code, and simply be pasted in, with appropriate adjustment of memory locations.  The problem is making the identification between matching chunks of code in the two software versions, so we know how those addresses must be changed.
 
-The workflow which disassemblerAGC.py aids is essentially the following.  (Sample invocations of disassemblerAGC.py to achieve these steps are given after the summary.)
+The workflow which disassemblerAGC.py aids is essentially the following:
 
- 1. Determine the memory locations of various subroutines common to all (or at least a wide range) of AGC software versions.  I refer to these as the "special subroutines".  There is a built-in mechanism for 25-30 such common subroutines built into disassemblerAGC.py, which has been tested across a variety of software versions.  (Retread 44, Aurora 12, Sunburst 37, Comanche 55, Luminary 210, Artemis 72).  Presumably, the number of supported special subroutines will increase over time.
- 2. Choose an AGC software version (or versions) to be used as baseline(s) for reconstructing the software of the dumped rope module.  For example, in reconstructing a Comanche 72 dump, the baseline versions might be the (fully known) Comanche 55 software and the (incomplete but partially reconstructed) Comanche 67 software.
+ 1. Determine the memory locations of various subroutines common to all (or at least a wide range) of AGC software versions.  I refer to these as the "special subroutines".  There is a built-in mechanism for 25-30 such common subroutines built into disassemblerAGC.py, which has been tested across a variety of software versions. 
+ 2. Choose an AGC software version (or versions) to be used as baseline(s) for reconstructing the software of the dumped rope module.  For example, in reconstructing a Comanche 72 dump, the baseline versions might be the (fully known) Comanche 55 software, along with additional baselines Artemis 72 and Luminary 131.
  3. For the *baseline* software version(s), create "specifications" for all of the subroutines it's desirable to locate within the dumped rope.  This can be done in an automated way (program specifyAGC.py) or manually.  If manually, it needn't be done all at once; for example, it could be done a bank at a time.  The "specification" is basically just a summary of information from the assembly listings of the baseline, and can be very quick and easy to construct, although the more subroutines that are chosen, the more time it takes to do so. It also becomes much more difficult to do manually if matches for erasable locations are desired.  So all in all, the automated process is usually best.
  4. Use disassemblerAGC.py to process the specification file(s), which creates file(s) of "patterns" for pattern matching.
  5. Use disassemblerAGC.py to search the dump of the core rope.
@@ -241,29 +228,23 @@ And finally, it says that all of these references are from interpretive code, wi
 
 Creating a specifications file is relatively easy, but the program specifyAGC.py is available to do so in an automated way.  It requires as input only the assembly listing for the baseline AGC software version being used, as produced by `yaYUL`.  Of course, it applies no human judgement to this process, so there are some circumstances where a specification file created manually may be superior in certain ways.  The command is simply
 
-    specifyAGC.py [--min=N] &lt;AGCPROGRAM.py >AGCPROGRAM.specs
+    specifyAGC.py [--min=N] <AGCPROGRAM.py >AGCPROGRAM.specs
 
-The --min option is available to help guard against the danger of making patterns which are so short that they have *many* matches, most of which would be wrong.  For example, if you had a pattern that consisted only of (say) a single TC, it would match any TC in the rope module being reconstructed.  By default, all specifications must be at least 8 words long &mdash; i.e., by default, --min=8.  But you can imagine circumstances where you might want to make it smaller for a few special symbols, or longer.
+The --min option is available to help guard against the danger of making patterns which are so short that they have *many* matches, most of which would be wrong.  For example, if you had a pattern that consisted only of (say) a single TC, it would match any TC in the rope module being reconstructed.  By default, all specifications must be at least 12 (14 octal) words long &mdash; i.e., by default, --min=12.  But you can imagine circumstances where you might want to make it smaller for or longer.
 
 In order to meet the minimum-length requirement, specifyAGC.py will attempt to combine the scopes for successive symbols until the combined scope is greater than the required minimum.  However, there are always going to be very short scopes which simply cannot be combined, in which case specifyAGC.py simply rejects them without creating specifications for.  In either case, though, comments are added to the specifications file at the points where these compromises occur, to explain what has happened.
 
-**Note:** Sometimes the situation arises in which unlabeled code immediately follows data in rope memory, thus leaving no way that's obvious (to specifyAGC.py) to reach that code.  In this case, specifyAGC.py automatically creates a label for it that wasn't present in the original source code.  Such a label has the form "R*BB*,*AAAA*", where *BB*,*AAAA* is the address at which the originally-unlabeled code starts.  For example, the label `R12,3456` might be created at address 12,3456.
-
-The following sample specifications files are in the source tree:
-
-* Comanche055.specs &mdash; Just a few things I was playing around with in debugging the disassembler.
-* Comanche067_aborted_reconstruction_20221005.specs &mdash; My attempt at manually creating a specifications file from a reconstruction of Comanche 67 I had been making (see GitHub issue #1140) but eventually had to abandon only partially completed.  The specification file covers only banks 06 through 13, which correspond to rope memory module B2.  I didn't include *all* program labels in those banks, of course, but just chose a few dozen per bank, roughly evenly spaced.
-* Comanche055-autogenerated.specs &mdash; A full specifications file for Comanche 55, autogenerated by specifyAGC.py with its default setting for minimum length.
+**Note:** Sometimes the situation arises in which unlabeled code immediately follows data in rope memory thus leaving no way that's obvious (from specifyAGC.py's point of view) to reach that code.  In this case, specifyAGC.py automatically creates a label for it that wasn't present in the original source code.  Such a label has the form "R*BB*,*AAAA*", where *BB*,*AAAA* is the address at which the originally-unlabeled code starts.  For example, the label `R12,3456` might be created at address 12,3456.
 
 ## Creating a Pattern-Matching File from a Specifications File
 
 The command is 
 
-    disassemblerAGC.py --specs=SPECIFICATION.spec &lt;BASELINE.binsource >PATTERNS.patterns
+    disassemblerAGC.py --specs=SPECIFICATION.spec <BASELINE.binsource >PATTERNS.patterns
 
 For example,
 
-    disassemblerAGC.py --specs=Comanche055.spec &lt;Comanche055.binsource >Comanche055.patterns
+    disassemblerAGC.py --specs=Comanche055.spec <Comanche055.binsource >Comanche055.patterns
 
 You never have any reason I'm aware of to look at the .patterns file, but it looks something like this:
 
@@ -397,21 +378,6 @@ You get (after a little editing):
     COMPTGO (basic) not found
 
 It's not terribly surprising that `COMPTGO` isn't found, since Manche45R2 does not in fact have a `COMPTGO`.  As for `ABORT2`, Manche45R2 does indeed have that, but it differs from the one in Comanche 55. So it's a good thing it isn't found.
-
-Another thing which can cause a problem when using the default settings is that &mdash; depending on the `--min` setting used earlier with the specifyAGC.py program &mdash; it can happen the multiple subroutines end of with identical patterns.  Or more commonly, one the patterns may be identical to the initial portion of the other.  This can cause one of those subroutines to be matched as being located where the other subroutine actually resides, while the other subroutine isn't matched at all.  One way to work around this is to instruct the disassembler to *skip* one or more matches for a subroutine.  This is done using a command-line option like
-
-    --skip=PROGRAMLABEL
-
-which means to skip the first match found for `PROGRAMLABEL`.  You can use as many of these `--skip` options as you like, even with the same program label.  So if you used (say) two switches like the one above, it would skip the first two matches for `PROGRAMLABEL`.  This sounds rather *ad hoc*, but in my experience so far it normally seems to come up when you have several nearly-identical subroutines that work on 3-dimensional axes, or for pitch, roll, and yaw.  You'd expect that three such subroutines would remain in the identical order in all program versions.  So you might expect to be able to use the `--skip` options in a relatively-consistent way across program versions as well.
-
-For example, I have been processing Comanche 55 with "specifyAGC.py --min=12", and I find that I need to use
-
-    disassemblerAGC.py --skip=IRIGY --skip=TORQUE --skip=TABYCOM --skip=ASMBLWY --skip=ATOPLEM ...
-
-if I expect it to find all of the defined program labels at the proper locations.
-
-
-Regarding erasable matches, they appear in this output as well, at the end of it, and appear similarly to those lines above.  However, that is work in progress and there are some subtleties about it that I'm not yet prepared to discuss.
 
 # An Alternate Workflow
 
@@ -576,5 +542,37 @@ I get the output
 You'll notice that all four of the subroutines I mentioned now appear among the "special" ones, which normally wouldn't be the case.
 
 By the way, I should mention that *only* special subroutines that are in fixed-fixed memory can be used as labels in flexible operands at the present time.  Thus although `BLANKDSP` and `NVSUB` are shown here as having been found, the disassembler doesn't actually treat them as being special.  On the other hand, `JAMPROC` and `JAMTERM` are in fixed-fixed memory, and the disassembler treats them just like any other special subroutine.
+
+#Example: Comanche 72 Module B2<a name="Comanche072B2"></a>
+
+Here's a worked-out example for the following scenario:  We have the dump of rope module B2 for Comanche 72 (Apollo 13 CM), in the form of a partial `--bin --hardware` file.  There are a total of 6 rope modules, B1 through B6, each of which contains 6 memory banks:
+
+  * B1 = banks 00 through 05
+  * B2 = banks 06 through 13 (octal)
+  * B3 = banks 14 through 21
+  * B4 = banks 22 through 27
+  * B5 = banks 30 through 35
+  * B6 = banks 36 through 43
+
+But we only have module B2.  
+
+The closest AGC software version to Comanche 72 for which we actually have source code is Comanche 55, though there is also [*very* partially (incomplete) reconstructed code for Comanche 67https://github.com/virtualagc/virtualagc/issues/1140](URL), and we do have [engineering drawing 2021153](https://archive.org/details/apertureCardBox467Part2NARASW_images/page/n91/mode/1up?view=theater), which lists all of the memory bank checksums for Comanche 55, 67, and 72.  If any of those of Comanche 72 matched those of Comanche 55 or 67, perhaps we could import those memory banks to supplement module B2.
+
+Alas, there's no agreement between the checksums of Comanche 55 and Comanche 72.  On the other hand, there is agreement of several memory banks between Comanche 67 and 72, namely:  00, 02, 03, 05, 33, 35.  The question would then be, Are those any of the banks in Comanche 67 which are believed to have already been reconstructed?  The possibly-correctly reconstructed banks of Comanche 67 are:  00, 02, 03, 41.  
+
+To summarize all of that, the Comanche 72 material we have to work with is:
+
+  * (Possibly) Bank 00 of the Comanche 67 reconstruction.
+  * (Possibly) Bank 02 of the Comanche 67 reconstruction.
+  * (Possibly) Bank 03 of the Comanche 67 reconstruction.
+  * Bank 06 of the Comanche 72 module B2 dump.
+  * Bank 07 of the Comanche 72 module B2 dump.
+  * Bank 10 of the Comanche 72 module B2 dump.
+  * Bank 11 of the Comanche 72 module B2 dump.
+  * Bank 12 of the Comanche 72 module B2 dump.
+  * Bank 13 of the Comanche 72 module B2 dump.
+
+So our first step would seem to be to create a *full* `--bin --hardware` file, in which data from the memory banks just mentioned appear at the proper places, while the remainder of the space is filled with 00000 (plus parity=0), which would indicate unused positions in the rope.
+
 
 
