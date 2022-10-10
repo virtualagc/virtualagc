@@ -8,6 +8,8 @@ Purpose:        Parses command line for disassemblerAGC.py
 History:        2022-09-28 RSB  Split off from disassemblerAGC.py.
                 2022-10-07 RSB  Added --skip and --check.
                 2022-10-08 RSB  Added --overlap, --hint, --ignore
+                2022-10-09 RSB  Added --avoid
+                2022-10-10 RSB  Added --parity.
 """
 
 import sys
@@ -61,6 +63,7 @@ disjoint = True
 hintAfter = {}
 ignore = []
 avoid = []
+parity = False
 entryPoints = [
     { "inBasic": True, "bank": 0o2, "offset": 0o0000, 
         "eb": 0, "fb": 0, "feb": 0, "symbol": "(go)" },
@@ -175,7 +178,10 @@ for param in sys.argv[1:]:
             --ignore=S  Simply ignore subroutine S.
             --avoid=BB,NNNN-MMMM Specify a fixed address range which should be 
                         avoided by the matching process.  You can use as many
-                        of these switches as necessary. 
+                        of these switches as necessary.
+            --parity    By default, the parity bit is ignored in input --bin
+                        files and --hardware files.  The --parity switch 
+                        enables it.  Binsource files are not affected.
                
           Note that for --bin and --hardware, we can't necessarily    
           determine that locations are unused vs merely containing 00000.    
@@ -259,6 +265,8 @@ for param in sys.argv[1:]:
         leftFields = fields[0].split(",")
         avoid.append((int(leftFields[0], 8), int(leftFields[1], 8), 
                         int(fields[1], 8)))
+    elif param == "--parity":
+        parity = True
     else:
         print("Unrecognized option", param)
         sys.exit(1)

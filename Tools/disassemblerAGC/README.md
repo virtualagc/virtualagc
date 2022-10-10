@@ -23,6 +23,7 @@ The there are are three upper-level programs,
 * disassemblyAGC.py &mdash; a Python 3 disassembler and pattern-matcher for comparing two AGC software versions.
 * specifyAGC.py &mdash; a Python 3 generator of "specifications" files for disassemblerAGC.py's all-important `--find` option.
 * workflow.sh &mdash; a bash script that manages commonly-needed sequence of disassemblyAGC.py and specifyAGC.py operations.
+* pieceworkAGC.py &mdash; a Python 3 program that can combine bits and pieces of AGC bin files (either "normal" or "hardware" varieties) to produce another AGC bin file (always in the "hardware" variety).
 
 The top-level programs are directly executable from a command line.  They rely on a number of additional Python modules that aren't directly executable by the user:
 
@@ -35,10 +36,11 @@ The top-level programs are directly executable from a command line.  They rely o
   * semulate.py &mdash; does as much CPU emulation as is possible at assembly time, to track changes to memory-bank selection registers.
   * registers.py &mdash; contains lists of named CPU registers and i/o channels.
 
-Both of the Python program accept a `--help` option that provides a description of the various other options available, some of which are also described in the text that follow:
+All of the Python programs accept a `--help` option that provides a description of the various other options available, some of which are also described in the text that follow:
 
     disassemblerAGC.py --help
     specifyAGC.py --help
+    pieceworkAGC.py --help
 
 As far as workflow.sh is concerned, it is presently invoked as
 
@@ -572,7 +574,20 @@ To summarize all of that, the Comanche 72 material we have to work with is:
   * Bank 12 of the Comanche 72 module B2 dump.
   * Bank 13 of the Comanche 72 module B2 dump.
 
-So our first step would seem to be to create a *full* `--bin --hardware` file, in which data from the memory banks just mentioned appear at the proper places, while the remainder of the space is filled with 00000 (plus parity=0), which would indicate unused positions in the rope.
+So our first step would seem to be to create a *full* `--bin --hardware` file, in which data from the memory banks just mentioned appear at the proper places, while the remainder of the space is filled with 00000 (plus parity=0), which would indicate unused positions in the rope.  This can be done with the pieceworkAGC.py program, an invocation of which might look like the following:
 
+    pieceworkAGC.py --add=Comanche067.bin,0,0,0,0,2,3 \
+                    --add=Comanche072-B2.bin,1,1,6,6,7,10,11,12,13 \
+                    >Comanche072-partial.bin
+
+The first `--add` switch says that from Comanche067.bin &mdash; which is specified to have no parity bits, to be in `--bin` format rather than `--hardware` format, and to contain a lowest bank number of 00 &mdash; we're supposed to extract banks 00, 02, and 03.
+
+The second `--add` switch says that from Comanche072-B2.bin &mdash; which has parity bits, is in `--hardware` format, and which has a lowest bank number of 06 &mdash; we're supposed to extract banks 06, 07, 10, 11, 12, and 13.
+
+Altogether, Comanche072-partial.bin is produced, having just banks 00, 02, 03, 06, 07, 10, 11, 12, and 13 filled in with data, and the remainder filled with 00000 (plus 0 parity), which is what an unused memory location looks like.  This file then formes our ROPE file, against which we wish to match the patterns of the BASELINEs.
+
+Recall that Comanche 72 was for the Apollo 13 Command Module.  I've already said that Comanche 55 (Apollo 11 CM) is *the* baseline to use, but at the same time, it would also make sense to do matches vs the Comanche 67 (Apollo 12 CM) reconstruction, Artemis 72 (Apollo 14 CM), and Luminary 131 (Apollo 13 LM).
+
+TBD
 
 
