@@ -246,9 +246,13 @@ def adjustOpcodePerArgument(core, bank, offset, interpreterCodesField,
             msg += " (%d, %d)" % ior[5]
         print(msg)
 
-    if False and bank == 0o36 and offset == 0o1422:
-        print("%02o,%04o" % (bank, offset), interpreterCodesField, isLeft, file=sys.stderr)
-        sys.exit(1)
+    # Note that by the time this function is called, offset (0 .. 0o1777)
+    # has already incremented past the opcodes and is pointing to the 
+    # first argument.
+    if False and (bank == 0o36 and offset == 0o1030):
+        print("%02o,%04o" % (bank, offset+0o2000-1), interpreterCodesField, 
+                            isLeft, file=sys.stderr)
+        #sys.exit(1)
     if offset < 0o2000:
         nCode = interpreterCodesField[0][1]
         canIndex = (nCode & 2) != 0
@@ -272,7 +276,11 @@ def adjustOpcodePerArgument(core, bank, offset, interpreterCodesField,
                     mask = maskSwitch
                 else:
                     mask = maskShift
-                if (ior[4] & mask) == argument & mask:
+                if True: # bank == 0o36 and offset == 0o1033:
+                    print("Here", "%02o,%04o %05o %05o %05o" % \
+                        (bank, offset+0o2000-1, mask, ior[4], \
+                        argument), ior, file=sys.stderr)
+                if (ior[4] & mask & ~3) == (argument & mask & ~3):
                     return ior[0], ior[2], ior
             else:
                 print("Internal error:", ior)

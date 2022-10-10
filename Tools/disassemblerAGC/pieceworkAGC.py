@@ -24,25 +24,25 @@ for param in sys.argv[1:]:
             pieceworkAGC.py [OPTIONS] >OUTPUT.bin
             
         Without OPTIONS, a core dump (in disassemblerAGC.py --hardware
-        format) is produced on stdout, with all locations marked as
-        unused.  There's only one option, which can be used as many
+        --parity format) is produced on stdout, with all locations marked
+        as unused.  There's only one OPTION, which can be used as many
         times as desired:
         
             --add=F,P,H,S,B1[,B2[,B3[...]]]
             
         This option says to add data to the rope image from a file:
         
-            F           is the filename.
+            F           The filename.
             P           0 if the file has no parity bits, 1 if it does.
             H           0 if it's a --bin file, 1 for a --hardware file.
-            S           is the lowest bank number (octal) in file F,
+            S           The lowest bank number (octal) in file F,
                         which is expected to contain contiguous banks
                         in the order appropriate to whether it's a
                         --bin or a --hardware file.  Thus the lowest
                         bank number in F is not necessarily at the 
                         smallest offset in F.
-            B1,B2,...   is a list of the banks (octal) which are to be
-                        extract from F and added to the output core.
+            B1,B2,...   A list of the banks (octal) which are to be
+                        extracted from F and added to the output core.
         ''')
         sys.exit(0)
     elif param[:6] == "--add=":
