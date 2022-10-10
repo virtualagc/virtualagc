@@ -66,7 +66,7 @@ The basic processing chain is as follows.
     specifyAGC.py <BASELINE.lst >BASELINE.specs [OPTIONS]
     disassemblerAGC.py --specs=BASELINE.specs <BASELINE.binsource >BASELINES.patterns
     disassemblerAGC.py --find=BASELINE.patterns <BASELINE.binsource --check=BASELINE.lst >BASELINE.matches [OPTIONS]
-    disassemblerAGC.py --find=BASELINE.patterns <ROPE.binsource >ROPE.matches [OPTIONS]
+    disassemblerAGC.py --find=BASELINE.patterns <ROPE.bin >ROPE.matches --parity --hardware [OPTIONS]
 
 The first two step build the pattern file used for all subsequent pattern-matching operations.  The third step is a check of that process; its report file (BASELINE.matches) will generally indicate that not all symbols were matched properly, and it's incumbent on you to determine the necessary command-line options which cause the test to pass 100%.  (More on that below.)  The fourth step is the actual attempt to discover information about the ROPE.
 
@@ -77,7 +77,7 @@ The first three steps listed can be accomplished by the single command
     cd .../BASELINE
     workflow.sh BASELINE [OPTIONS]
 
-Make sure that the Tools/disassemblerAGC/ directory is in your PATH first.  The OPTIONS mentioned are the ones for disassemblerAGC.py's `--find` switch.  For one thing, to use ROPE.bin as input rather than ROPE.binsource, you also have to add the `--bin` switch.  And if ROPE.bin is in so-called "hardware" format, you additonally have to add `--hardware`.
+Make sure that the Tools/disassemblerAGC/ directory is in your PATH first.  The OPTIONS mentioned are the ones for disassemblerAGC.py's `--find` switch.  
 
 For another, there's often a handful of code chunks in an AGC software version that are so similar to each other that they can be mistaken for each other during matching.  That's why the testing mentioned above usually fails when no command-line options are used.  One way to get around this a little bit is to use a bigger `--min` setting in specifyAGC.py, since longer patterns are less likely to be confused with each other.  But this may not be enough; long jump tables &mdash; i.e., sequences of `TC` or `TCF` instructions &mdash; are a good example of that, because you're unlikely to want to make the search patterns longer than the biggest jump tables in the code.  The disassembler has some built-in heuristics to try to work around the problem, but in spite of everything it's still possible for the condition to occur.  Here are the disassembler command-line options that rescue you:
 
@@ -100,6 +100,12 @@ Whereas with `--min=12` (the default) you need only the simpler combination of o
 Unfortunately, applying the same switches when trying to match the ROPE against the BASELINE may not work equally well as when matching the BASELINE vs the BASELINE, since some of the problematic chunks of code may have been moved around between versions.  But life isn't perfect, is it? 
 
 Below are some worked examples of generating match-patterns using workflow.sh, as of *this* writing.  I find that as I find and fix bugs in disassemblerAGC.py and specifyAGC.py, the command-line switches for workflow.sh sometimes change slightly, so that may be true of the worked examples as well. A more fully-worked-out example involving comparison of BASELINE vs ROPE appears later, in [a later section](#Comanche072B2).
+
+*After* the match-patterns are generated is when the final command (of the four listed above) comes into play
+
+    disassemblerAGC.py --find=BASELINE.patterns <ROPE.bin >ROPE.matches --parity --hardware [OPTIONS]
+
+A rope dump will typically be in `--hardware` format rather than `--bin` or binsource format, and will will typically include parity bits.  That will always be the case for ROPE files created by the pieceworkAGC.py program.  But of course, if not, then use of the `--hardware --parity` switches needs to be reconsidered.
 
 ### Baseline Retread 44
 
