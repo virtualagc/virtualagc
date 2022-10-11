@@ -99,7 +99,7 @@ Whereas with `--min=12` (the default) you need only the simpler combination of o
 
 Unfortunately, applying the same switches when trying to match the ROPE against the BASELINE may not work equally well as when matching the BASELINE vs the BASELINE, since some of the problematic chunks of code may have been moved around between versions.  But life isn't perfect, is it? 
 
-Below are some worked examples of generating match-patterns using workflow.sh, as of *this* writing.  I find that as I find and fix bugs in disassemblerAGC.py and specifyAGC.py, the command-line switches for workflow.sh sometimes change slightly, so that may be true of the worked examples as well. A more fully-worked-out example involving comparison of BASELINE vs ROPE appears later, in [a later section](#Comanche072B2).
+The next few subsections are some worked examples of generating match-patterns using workflow.sh, as of *this* writing.  I find that as I find and fix bugs in disassemblerAGC.py and specifyAGC.py, the command-line switches for workflow.sh sometimes change slightly, so that may be true of the worked examples as well. A more fully-worked-out example involving comparison of BASELINE vs ROPE appears later, in [a later section](#Comanche072B2).
 
 *After* the match-patterns are generated is when the final command (of the four listed above) comes into play
 

@@ -6,6 +6,7 @@ Copyright:      None - the author (Ron Burkey) declares this software to
 Filename:       disassemblerInterpretive.py
 Purpose:        Disassemble a word from an interpretive location.
 History:        2022-09-28 RSB  Split off from disassemblerAGC.py.
+                2022-10-11 RSB  Fixed apparent bug in STXXX detection.
 """
 
 import sys
@@ -249,9 +250,10 @@ def adjustOpcodePerArgument(core, bank, offset, interpreterCodesField,
     # Note that by the time this function is called, offset (0 .. 0o1777)
     # has already incremented past the opcodes and is pointing to the 
     # first argument.
-    if False and (bank == 0o36 and offset == 0o1030):
-        print("%02o,%04o" % (bank, offset+0o2000-1), interpreterCodesField, 
-                            isLeft, file=sys.stderr)
+    if False:
+        if bank == 0o36 and offset == 0o1030:
+            print("%02o,%04o" % (bank, offset+0o2000-1), interpreterCodesField, 
+                                isLeft, file=sys.stderr)
         #sys.exit(1)
     if offset < 0o2000:
         nCode = interpreterCodesField[0][1]
@@ -275,12 +277,13 @@ def adjustOpcodePerArgument(core, bank, offset, interpreterCodesField,
                 if ior[3] == 1:
                     mask = maskSwitch
                 else:
-                    mask = maskShift
-                if True: # bank == 0o36 and offset == 0o1033:
-                    print("Here", "%02o,%04o %05o %05o %05o" % \
-                        (bank, offset+0o2000-1, mask, ior[4], \
-                        argument), ior, file=sys.stderr)
-                if (ior[4] & mask & ~3) == (argument & mask & ~3):
+                    mask = maskShift & ~0o377
+                if False: 
+                    if bank == 0o27 and offset + 0o2000 == 0o2106:
+                        print("Here", "%02o,%04o %05o %05o %05o" % \
+                            (bank, offset+0o2000-1, mask, ior[4], \
+                            argument), ior, file=sys.stderr)
+                if (ior[4] & mask) == (argument & mask):
                     return ior[0], ior[2], ior
             else:
                 print("Internal error:", ior)
@@ -301,6 +304,7 @@ def adjustOpcodePerArgument(core, bank, offset, interpreterCodesField,
 #   ("", "", ARGUMENT)
 # The input arguments are self-explanatory, except stadr.  This is 
 # True if the last instruction previously was STADR, and False otherwise.
+cannotPushUp = [0o115, 0o117, 0o45, 0o47]
 def disassembleInterpretive(core, bank, offset, stadr):
     disassembly = []
     word = core[bank][offset]
@@ -315,6 +319,7 @@ def disassembleInterpretive(core, bank, offset, stadr):
     if stadr or sword & 0o40000 == 0:
         stadr = False
         left = "??????"
+        '''
         storeType = 0o74000 & sword
         if storeType == 0o34000:
             left = "STCALL"
@@ -323,6 +328,16 @@ def disassembleInterpretive(core, bank, offset, stadr):
         elif storeType == 0o00000:
             left = "STORE"
         elif storeType == 0o24000:
+            left = "STOVL"
+        '''
+        storeType = 0o70000 & sword
+        if storeType == 0o30000:
+            left = "STCALL"
+        elif storeType == 0o10000:
+            left = "STODL"
+        elif storeType == 0o00000:
+            left = "STORE"
+        elif storeType == 0o20000:
             left = "STOVL"
         if left == "??????":
             disassembly.append((left, "", ""))
@@ -347,6 +362,11 @@ def disassembleInterpretive(core, bank, offset, stadr):
         numRightArgs = 0
         leftInterpreterCodes = []
         rightInterpreterCodes = []
+        if False:
+            add = offset + 0o2000 - 1
+            if bank == 0o32 and add == 0o2042:
+                print("%02o,%04o %05o %03o %03o" % (bank, add,
+                        word, leftField, rightField), file=sys.stderr)
         if leftField in interpreterCodes:
             leftInterpreterCodes = interpreterCodes[leftField]
             left, numLeftArgs, leftInterpreterCodes \
@@ -354,7 +374,7 @@ def disassembleInterpretive(core, bank, offset, stadr):
                                     leftInterpreterCodes, True)
             if numLeftArgs > 0:
                 if (leftField & 1) != 0 \
-                            and leftField not in [0o115, 0o117]:
+                            and leftField not in cannotPushUp:
                     leftCanPushDown = True
         if rightField == -1:
             right = ""
@@ -365,7 +385,7 @@ def disassembleInterpretive(core, bank, offset, stadr):
                     offset + numLeftArgs, rightInterpreterCodes, False)
             if numRightArgs > 0:
                 if (rightField & 1) != 0 \
-                            and rightField not in [0o115, 0o117]:
+                            and rightField not in cannotPushUp:
                     rightCanPushDown = True
         canPushDown = 0
         if rightCanPushDown:

@@ -220,13 +220,16 @@ for line in sys.stdin:
     left = line[65:73].strip()
     
     addressField = line[24:31].strip()
-    if left in ["=", "EQUALS"] and (addressField == "" or addressField.isdigit()):
+    if left in ["=", "EQUALS", "CHECK="] and \
+            (addressField == "" or addressField.isdigit()):
         continue
     if left == "ERASE" and addressField == "" and line[74:82].strip().isdigit() and \
             line[85:93].strip() == "-" and line[96:104].strip().isdigit():
         addressField = line[74:82].strip()
     if addressField == "" or addressField[:4] == "0000":
         addressField = line[15:22].strip()
+        if addressField[:1] == "?":
+            continue
     fields = addressField.split(",")
     fixed = True
     if fields[0] == "":
