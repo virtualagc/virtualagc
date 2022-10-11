@@ -458,7 +458,7 @@ if cli.specsFilename != "":
         fields = line.upper().split("#")[0].strip().split()
         if len(fields) == 0:
             continue
-        if fields[0] != "+":    # Spec for core rope.
+        if fields[0] != "+" and fields[1] != "=": # Spec for core rope.
             for i in range(len(fields)):
                 # Remove any extraneous comma at the end of the field.
                 if fields[i][-1:] == "," and fields[i][:-1].isdigit():
@@ -477,7 +477,7 @@ if cli.specsFilename != "":
                 elif isinstance(fields[i], int):
                     patternSpec["dend"] = fields[i]
             patternSpecs.append(patternSpec)
-        elif len(fields) == 3:  # Spec for erasable.
+        elif len(fields) in [3, 5]:  # Spec for erasable or program label aliases.
             erasableSpecs.append(line.strip())
     f.close()
 
@@ -508,7 +508,7 @@ if cli.pattern:
     indent = '                '
     
     # A response function for disassembleRange().
-    def printPattern(core, erasalbe, iochannels,
+    def printPattern(core, erasable, iochannels,
                      occasion, bank, address, opcode, operand):
         operandString = '"' + operand + '"'
         if len(operand) == 4 and operand.isdigit():
@@ -557,6 +557,7 @@ if cli.findFilename != "":
     # First step: Read in the entire pattern file into the dictionaries
     # desiredMatches
     erasableSpecs = []
+    programLabelAliasSpecs = {}
     desiredMatches = { "basic": {}, "interpretive": {}}
     maxPatternLength = { "basic": 0, "interpretive": 0}
     basicOrInterpretive = "(none)"
@@ -565,9 +566,12 @@ if cli.findFilename != "":
 
     f = open(cli.findFilename, "r")
     for line in f:
-        if line[:2] == "+ ": # Erasable specs
-            fields = line.strip().split()
-            symbols = fields[1].replace("['", "").replace("']", "").split("','")
+        fields = line.strip().split()
+        if len(fields) < 1:
+            continue
+        if fields[0] == "+": # Erasable specs
+            symbols = \
+                fields[1].replace("['", "").replace("']", "").split("','")
             references = fields[2].replace("[(", "").replace(")]", "")
             references = references.split("),(")
             for i in range(len(references)):
@@ -578,8 +582,12 @@ if cli.findFilename != "":
             erasableSpecs.append({  "symbols": symbols,
                                     "references": references,
                                     "referencedAddresses": [] })
+        elif len(fields) > 1 and fields[1] == "=": # Program label alias specs
+            if fields[2] not in programLabelAliasSpecs:
+                programLabelAliasSpecs[fields[2]] = []
+            programLabelAliasSpecs[fields[2]].append((int(fields[4], 8), 
+                                                          fields[0]))
         elif line[:1] != '\t': # Core rope specs
-            fields = line.strip().split()
             symbol = fields[0]
             basicOrInterpretive = fields[1]
             desiredMatches[basicOrInterpretive][symbol] = []
@@ -741,12 +749,29 @@ if cli.findFilename != "":
                         "basic": desiredMatches["basic"].keys(),
                         "interpretive": desiredMatches["interpretive"].keys()
                         }
+                    nSymbol = norm(symbol)
                     if bank in [2, 3]:
                         print("%-8s = %04o (%02o,%04o)" % \
-                            (norm(symbol), 0o2000 * bank + address % 0o2000,
+                            (nSymbol, 0o2000 * bank + address % 0o2000,
                              bank, address))
+                        if nSymbol in programLabelAliasSpecs:
+                            for spec in programLabelAliasSpecs[nSymbol]:
+                                print("%-8s = %04o (%02o,%04o)" % \
+                                    (spec[1], 0o2000 * bank + \
+                                     address % 0o2000 + spec[0],
+                                     bank, address + spec[0]))
+                                symbolsFound[basicOrInterpretive][spec[1]] = \
+                                    (bank, address + spec[0]) 
+                                    
                     else:
-                        print("%-8s = %02o,%04o" % (norm(symbol), bank, address))
+                        print("%-8s = %02o,%04o" % (nSymbol, bank, address))
+                        if nSymbol in programLabelAliasSpecs:
+                            for spec in programLabelAliasSpecs[nSymbol]:
+                                print("%-8s = %02o,%04o" % (spec[1], bank, \
+                                                        address + spec[0]))
+                                symbolsFound[basicOrInterpretive][spec[1]] = \
+                                    (bank, address + spec[0])
+
     #print("symbolsFound =", symbolsFound)
     #print("symbolsSought =", symbolsSought)
         

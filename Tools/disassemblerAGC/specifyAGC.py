@@ -342,7 +342,8 @@ for bank in range(0o44):
         # Let's look ahead, to find either the next symbol or
         # else a change to data, either one of which would be
         # the end of scope for the current code area.
-        symbolList = [symbol]
+        #symbolList = [symbol]
+        derivedSymbols = {}
         found = False
         for newOffset in range(offset + 1, 0o2000):
             lookahead = rope[newOffset][bank]
@@ -350,6 +351,7 @@ for bank in range(0o44):
             lookaheadSymbol = lookahead[1]
             if lookaheadType in nonCode or lookaheadSymbol != "":
                 if newOffset < offset + minLength:
+                    derivedSymbols[lookaheadSymbol] = newOffset - offset
                     if lookaheadType != locationType:
                         # The scope is irreparably too short and will
                         # be rejected.
@@ -361,7 +363,7 @@ for bank in range(0o44):
                         break
                     # The scope is too short, but is eligible for
                     # combination with the next scope.
-                    symbolList.append(lookaheadSymbol)
+                    #symbolList.append(lookaheadSymbol)
                     lookahead[1] = "{" + lookahead[1] + "}"
                     lookahead[0] = lookahead[0].lower()
                     continue
@@ -369,11 +371,14 @@ for bank in range(0o44):
                     interpretive = "I"
                 else:
                     interpretive = ""
-                if len(symbolList) > 1:
-                    print("# Due to specified minimum length, "
-                          "combined scopes of symbols", symbolList)
+                #if len(symbolList) > 1:
+                #    print("# Due to specified minimum length, "
+                #          "combined scopes of symbols", symbolList)
                 print("%s %02o %04o %04o %s" % (normalize(symbol), bank, 
                     offset + 0o2000, newOffset + 0o2000, interpretive))
+                for derivedSymbol in derivedSymbols:
+                    print("%s = %s + %o" % (derivedSymbol, symbol, \
+                                        derivedSymbols[derivedSymbol]))
                 offset = newOffset
                 found = True
                 break
