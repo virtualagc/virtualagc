@@ -185,7 +185,16 @@ for param in sys.argv[1:]:
 # Initialization of data structures.
 rope = []
 for address in range(0o2000):
-    rope.append([['u', "", "", []]]*0o44)
+    # type, symbol, left, right, reference. Each reference is a triple:
+    # (
+    #   referenced symbol, 
+    #   referring symbol, 
+    #   offset into referring symbol,
+    #   reference type
+    # )
+    rope.append([])
+    for bank in range(0o44):
+        rope[-1].append(['u', "", "", [], ()])
 erasable = []
 for address in range(0o400):
     erasable.append([])
@@ -297,9 +306,9 @@ for line in sys.stdin:
     
     right = line[74:112].strip().split()
     
-    rope[offset][bank] = [locationType, symbol, left, right]
+    rope[offset][bank] = [locationType, symbol, left, right, []]
     if octal2 != "":
-        rope[offset + 1][bank] = [locationType.lower(), "", "", []]
+        rope[offset + 1][bank] = [locationType.lower(), "", "", [], []]
 
 # This function converts a symbol name into a form that won't cause 
 # us problems later when our output file is read back by 
@@ -346,6 +355,8 @@ for bank in range(0o44):
         derivedSymbols = {}
         found = False
         for newOffset in range(offset + 1, 0o2000):
+            if len(rope[newOffset][bank][4]) == 4:
+                print("- %s %s %d %s" % rope[newOffset][bank][4])
             lookahead = rope[newOffset][bank]
             lookaheadType = lookahead[0]
             lookaheadSymbol = lookahead[1]
@@ -377,8 +388,9 @@ for bank in range(0o44):
                 print("%s %02o %04o %04o %s" % (normalize(symbol), bank, 
                     offset + 0o2000, newOffset + 0o2000, interpretive))
                 for derivedSymbol in derivedSymbols:
-                    print("%s = %s + %o" % (derivedSymbol, symbol, \
-                                        derivedSymbols[derivedSymbol]))
+                    print("%s = %s + %o" % (normalize(derivedSymbol), 
+                                     normalize(symbol), \
+                                     derivedSymbols[derivedSymbol]))
                 offset = newOffset
                 found = True
                 break
@@ -398,7 +410,7 @@ for address in range(0o400):
         for symbol in erasable[address][bank]["symbols"]:
             erasableBySymbol[symbol] = (bank, address)
 
-# Analyze the erasable and rope to determine where erasable references 
+# Analyze the erasable and rope to determine where *references* 
 # appear within the rope.  Each reference is identified by the 
 # subroutine in which it is referenced and the offset from the start
 # of the subroutine.  After patterns are matched, those can then be
@@ -438,6 +450,15 @@ for bank in range(0o44):
             print("Implementation error: Bad lastSymbol at %02o,%04o" \
                     % (bank, offset + 0o2000))
         operand = location[3]
+        if len(operand) == 1:
+            # Try to determine if the operand is a simple numeric.
+            rem = operand[0]
+            if operand[0][:1] in ["+", "-"]:
+                rem = operand[0][1:]
+            if rem[-1:] == "D":
+                rem = rem[:-1]
+            if len(rem) > 0 and rem.isdigit():
+                continue
         # This tracks just "pure" references to the symbols, as opposed to
         # (for example) SYMBOL +5.  I'd like to do the latter as well, but
         # I don't quite see how to do it for now.
@@ -500,6 +521,17 @@ for bank in range(0o44):
             a = symbolInfo[1]
             erasable[a][b]["references"].append((lastSymbol,sinceSymbol,
                                                     referenceType))
+        elif len(operand) == 1 and operand[0] not in erasableBySymbol:
+            if location[0] in ['b', 'B']:
+                if lastLeft in ["TC", "TCF", "AD", "BZF", "BZMF", "CA",
+                                "CS", "MASK", "MP"]:
+                    rope[offset][bank][4] = (operand[0], lastSymbol, sinceSymbol, "b")
+                elif lastLeft in ["DCA", "DCS"]:
+                    rope[offset][bank][4] = (operand[0], lastSymbol, sinceSymbol, "d")
+            elif location[0] in ['i', 'I']:
+                pass
+            else:
+                continue
         
 # Output erasable specifications.  There are several types:
 #   B   Operand of a single-word basic instruction (like XCH or CA)
@@ -533,6 +565,13 @@ for bank in range(8):
         if len(data["symbols"]) > 0 and len(data["references"]) > 0:
             print("+", str(data["symbols"]).replace(" ",""),
                   str(data["references"]).replace(" ", ""))
+print("# Fixed references")
+for bank in range(0o44):
+    for i in range(0o2000):
+        data = rope[i][bank][4]
+        if len(data) < 4 or data[3] == "":
+            continue
+        print("-", normalize(data[0]), normalize(data[1]), "%o" % data[2], data[3])
                   
 if debug:
     # Print a report of the contents of the rope and erasable.

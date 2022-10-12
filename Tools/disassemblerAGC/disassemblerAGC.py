@@ -458,7 +458,7 @@ if cli.specsFilename != "":
         fields = line.upper().split("#")[0].strip().split()
         if len(fields) == 0:
             continue
-        if fields[0] != "+" and fields[1] != "=": # Spec for core rope.
+        if fields[0] not in [ "+", "-" ] and fields[1] != "=": # Spec for core
             for i in range(len(fields)):
                 # Remove any extraneous comma at the end of the field.
                 if fields[i][-1:] == "," and fields[i][:-1].isdigit():
@@ -558,6 +558,7 @@ if cli.findFilename != "":
     # desiredMatches
     erasableSpecs = []
     programLabelAliasSpecs = {}
+    fixedReferences = {}
     desiredMatches = { "basic": {}, "interpretive": {}}
     maxPatternLength = { "basic": 0, "interpretive": 0}
     basicOrInterpretive = "(none)"
@@ -582,6 +583,14 @@ if cli.findFilename != "":
             erasableSpecs.append({  "symbols": symbols,
                                     "references": references,
                                     "referencedAddresses": [] })
+        elif fields[0] == "-": # Specs for references to fixed.
+            referencedSymbol = fields[1]
+            if referencedSymbol not in fixedReferences:
+                fixedReferences[referencedSymbol] = []
+            fixedReferences[referencedSymbol].append( 
+                (fields[2], int(fields[3], 8), fields[4])
+            )
+            
         elif len(fields) > 1 and fields[1] == "=": # Program label alias specs
             if fields[2] not in programLabelAliasSpecs:
                 programLabelAliasSpecs[fields[2]] = []
@@ -905,6 +914,84 @@ if cli.findFilename != "":
         else:
             totalUncertainErasables += 1
      
+    print("┌─────────────────────────────────────────────────────────────────┐")
+    print("│ Matches for references to fixed memory appear below.            │")
+    print("└─────────────────────────────────────────────────────────────────┘")
+    # Quick pass to get a list of all the references.
+    # keys are the referenced symbol, values are lists of triples,
+    # (referencing symbol, offset within symbol, 12-bit address)
+    observedReferences = {}
+    fixedFound = {}
+    for referencedSymbol in sorted(fixedReferences):
+        if referencedSymbol in symbolsFound["basic"] or \
+                referencedSymbol in symbolsFound["interpretive"]:
+                    continue
+        for references in fixedReferences[referencedSymbol]:
+            referringSymbol = references[0]
+            offsetFromReferrer = references[1]
+            referenceType = references[2]
+            if referringSymbol in symbolsFound["basic"]:
+                location = symbolsFound["basic"][referringSymbol]
+            elif referringSymbol in symbolsFound["interpretive"]:
+                location = symbolsFound["interpretive"][referringSymbol]
+            else:
+                continue
+            if referencedSymbol not in observedReferences:
+                observedReferences[referencedSymbol] = []
+            bank = location[0]
+            offset = (location[1] + offsetFromReferrer) % 0o2000
+            context = core[bank][offset]
+            if referenceType in ['b', 'd']:
+                address12 = context & 0o7777
+                if referenceType == 'd':
+                    address12 -= 1
+                if address12 < 0o2000:
+                    continue
+                observedReferences[referencedSymbol].append([address12, references])
+    # Final pass to check for consistency and print report.
+    for referencedSymbol in sorted(observedReferences):
+        #print("here A", referencedSymbol, observedReferences[referencedSymbol], file=sys.stderr)
+        references = observedReferences[referencedSymbol]
+        referencesByAddress = {}
+        for reference in references:
+            #print("here B", reference, references, file=sys.stderr)
+            referencingSymbol = reference[1][0]
+            offsetWithinReference = reference[1][1]
+            address12 = reference[0]
+            if address12 not in referencesByAddress:
+                referencesByAddress[address12] = {}
+            if referencingSymbol not in referencesByAddress[address12]:
+                referencesByAddress[address12][referencingSymbol] = []
+            referencesByAddress[address12][referencingSymbol].append(offsetWithinReference)
+        keys = list(referencesByAddress.keys())
+        if len(keys) == 0:
+            continue
+        elif len(keys) == 1:
+            address12 = keys[0]
+            if address12 >= 0o4000:
+                bank = address12 // 0o2000
+                add = 0o2000 + address12 % 0o2000
+                print("%-8s = %04o (%02o,%04o) (%d references)" % (referencedSymbol, \
+                                                address12, bank, add, len(references)))  
+                fixedFound[referencedSymbol] = (bank, add)
+            else:
+                bank = "??"
+                add = address12
+                print("%-8s = ??,%04o (%d references)" % (referencedSymbol, \
+                                                address12, len(references)))  
+                fixedFound[referencedSymbol] = (bank, add)
+        elif len(keys) == 2 and (keys[0] % 0o2000 == keys[1] % 0o2000) \
+                and (keys[0] < 0o4000 or keys[1] < 0o4000):
+            bank = "??"
+            add = address12 % 0o2000 + 0o2000
+            print("%-8s = ??,%04o (%d reference)" % (referencedSymbol, \
+                                            address12, len(references)))  
+            fixedFound[referencedSymbol] = (bank, add)
+        else:
+            for a in sorted(referencesByAddress):
+                print("# %05o" % a)    
+            print("%s = ??,???? (%d references)" % (referencedSymbol, len(references)))
+    
     print()
     print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     print("Summary of the match process.")
@@ -990,6 +1077,7 @@ if cli.findFilename != "":
                             
         print("Total matched =", coreMatch)
         print("Total unmatched =", coreMismatch)
+        
         print()
         print("Erasable:")
         erasableMatch = 0
@@ -1020,7 +1108,34 @@ if cli.findFilename != "":
         print("Total matched =", erasableMatch)
         print("Total consistent =", erasablePartialMatch)
         print("Total mismatched =", erasableMismatch)
-            
+        
+        print()
+        print("Fixed references:")
+        fixedMatch = 0
+        fixedPartialMatch = 0
+        fixedMismatch = 0
+        for symbol in sorted(fixedFound):
+            found = fixedFound[symbol]
+            bank1 = found[0]
+            address1 = found[1]
+            bank2 = checkCore[symbol][0]
+            address2 = checkCore[symbol][1] + 0o2000
+            if bank1 == bank2 and address1 == address2:
+                fixedMatch += 1
+            elif bank1 == "??" and address1 == address2:
+                fixedPartialMatch += 1
+            else:
+                fixedMismatch += 1
+                if bank1 == "??":
+                    print("%-8s ??,%04o != %02o,%04o" % \
+                        (norm(symbol), address1, bank2, address2))
+                else:
+                    print("%-8s %02o,%04o =? %02o,%04o" % \
+                        (norm(symbol), bank1, address1, bank2, address2))
+        print("Total matched =", fixedMatch)
+        print("Total consistent =", fixedPartialMatch)
+        print("Total mismatched =", fixedMismatch)
+                
     sys.exit(0)
     
 #=============================================================================
