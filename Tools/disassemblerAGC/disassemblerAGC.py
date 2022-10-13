@@ -564,6 +564,7 @@ if cli.findFilename != "":
     basicOrInterpretive = "(none)"
     symbol = "(none)"
     desiredOrdering = { "basic": [], "interpretive": [] }
+    programAliases = set()
 
     f = open(cli.findFilename, "r")
     for line in f:
@@ -596,6 +597,7 @@ if cli.findFilename != "":
                 programLabelAliasSpecs[fields[2]] = []
             programLabelAliasSpecs[fields[2]].append((int(fields[4], 8), 
                                                           fields[0]))
+            programAliases.add(fields[0])
         elif line[:1] != '\t': # Core rope specs
             symbol = fields[0]
             basicOrInterpretive = fields[1]
@@ -832,10 +834,11 @@ if cli.findFilename != "":
                 else:
                     referenced2 = 0o1400 + (context % 0o400)
                     referencedAddress = "E?,%04o" % referenced2
-            elif referenceType in ['S', 'A', 'L', 'I', 'E']:
+            elif referenceType in ['S', 'A', 'L', 'I', 'E', 'H']:
                 if referenceType == 'I':
                     context = ~context
-                if referenceType not in ['L', 'E']:
+                if 'POSEXIT' in symbols: print("here", reference, references, file=sys.stderr)
+                if referenceType not in ['L', 'E', 'H']:
                     context -= 1
                 context &= 0o3777
                 referenced1 = context // 0o400
@@ -882,20 +885,23 @@ if cli.findFilename != "":
         for stat in stats:
             total += len(stats[stat])
         if not certain:
-            print("┌─────────────────────────────────────────────────────────────────┐")
             if total == 0:
-                print("│ Unable to detect references to the following variable.          │")
+                if False:
+                    print("┌─────────────────────────────────────────────────────────────────┐")
+                    print("│ Unable to detect references to the following variable.          │")
+                    print("└─────────────────────────────────────────────────────────────────┘")
             else:
+                print("┌─────────────────────────────────────────────────────────────────┐")
                 print("│ Discrepancies for review:                                       │")
-            for stat in stats:
-                msg = stat + ":"
-                for p in stats[stat]:
-                    if len(msg) > 48:
-                        print("│ %-63s │" % msg)
-                        msg = "        "
-                    msg += "  %s +%o" % (norm(p[0]), p[1])
-                print("│ %-63s │" % msg)
-            print("└─────────────────────────────────────────────────────────────────┘")
+                for stat in stats:
+                    msg = stat + ":"
+                    for p in stats[stat]:
+                        if len(msg) > 48:
+                            print("│ %-63s │" % msg)
+                            msg = "        "
+                        msg += "  %s +%o" % (norm(p[0]), p[1])
+                    print("│ %-63s │" % msg)
+                print("└─────────────────────────────────────────────────────────────────┘")
         elif chosen[:3] in ["E0,", "E1,", "E2,"]:
             bank = int(chosen[1], 8)
             address = int(chosen[3:], 8)
@@ -903,10 +909,8 @@ if cli.findFilename != "":
         if chosen != "E?,????":
             for symbol in symbols:
                 foundErasables[symbol] = chosen
-        total = 0
-        for stat in stats:
-            total += len(stats[stat])
-        print("%-8s" % norm(sSymbols), "=", chosen, "(%d references)" % total)
+        if total != 0:
+            print("%-8s" % norm(sSymbols), "=", chosen, "(%d references)" % total)
         if total == 0:
             totalUnreferencedErasables += 1
         elif certain:
@@ -918,14 +922,13 @@ if cli.findFilename != "":
     print("│ Matches for references to fixed memory appear below.            │")
     print("└─────────────────────────────────────────────────────────────────┘")
     # Quick pass to get a list of all the references.
-    # keys are the referenced symbol, values are lists of triples,
-    # (referencing symbol, offset within symbol, 12-bit address)
     observedReferences = {}
     fixedFound = {}
     for referencedSymbol in sorted(fixedReferences):
         if referencedSymbol in symbolsFound["basic"] or \
-                referencedSymbol in symbolsFound["interpretive"]:
-                    continue
+                referencedSymbol in symbolsFound["interpretive"] or \
+                referencedSymbol in programAliases:
+            continue
         for references in fixedReferences[referencedSymbol]:
             referringSymbol = references[0]
             offsetFromReferrer = references[1]
@@ -941,13 +944,32 @@ if cli.findFilename != "":
             bank = location[0]
             offset = (location[1] + offsetFromReferrer) % 0o2000
             context = core[bank][offset]
-            if referenceType in ['b', 'd']:
+            if referenceType in ['B', 'D']:
                 address12 = context & 0o7777
-                if referenceType == 'd':
+                if referenceType == 'D':
                     address12 -= 1
                 if address12 < 0o2000:
                     continue
-                observedReferences[referencedSymbol].append([address12, references])
+                if address < 0o4000:
+                    observedReferences[referencedSymbol].append(["??", 
+                        address12 % 0o2000, references])
+                else:
+                    observedReferences[referencedSymbol].append([
+                        address12 // 0o2000, 
+                        address12 % 0o2000, references])
+            elif referenceType in ['S', 'A', 'L', 'I', 'E', 'H', 'K']:
+                if referenceType == 'I' or \
+                        (referenceType == 'K' and (context & 0o40000) != 0):
+                    context = ~context
+                if referenceType not in ['L', 'E', 'H']:
+                    context -= 1
+                context &= 0o77777
+                if bank >= 0o20 and referenceType != 'L':
+                    context |= 0o40000
+                if bank >= 0o40:
+                    context += 0o20000
+                observedReferences[referencedSymbol].append([
+                    context // 0o2000, context % 0o2000, references]) 
     # Final pass to check for consistency and print report.
     for referencedSymbol in sorted(observedReferences):
         #print("here A", referencedSymbol, observedReferences[referencedSymbol], file=sys.stderr)
@@ -955,46 +977,66 @@ if cli.findFilename != "":
         referencesByAddress = {}
         for reference in references:
             #print("here B", reference, references, file=sys.stderr)
-            referencingSymbol = reference[1][0]
-            offsetWithinReference = reference[1][1]
-            address12 = reference[0]
-            if address12 not in referencesByAddress:
-                referencesByAddress[address12] = {}
-            if referencingSymbol not in referencesByAddress[address12]:
-                referencesByAddress[address12][referencingSymbol] = []
-            referencesByAddress[address12][referencingSymbol].append(offsetWithinReference)
+            referencingSymbol = reference[2]
+            offsetWithinReference = reference[2][1]
+            if reference[0] == "??":
+                context = "??"
+            else:
+                context = "%02o" % reference[0]
+            context += ",%04o" % reference[1]
+            if context not in referencesByAddress:
+                referencesByAddress[context] = {}
+            if referencingSymbol not in referencesByAddress[context]:
+                referencesByAddress[context][referencingSymbol] = []
+            referencesByAddress[context][referencingSymbol].append(offsetWithinReference)
         keys = list(referencesByAddress.keys())
         if len(keys) == 0:
             continue
         elif len(keys) == 1:
-            address12 = keys[0]
-            if address12 >= 0o4000:
-                bank = address12 // 0o2000
-                add = 0o2000 + address12 % 0o2000
-                print("%-8s = %04o (%02o,%04o) (%d references)" % (referencedSymbol, \
-                                                address12, bank, add, len(references)))  
-                fixedFound[referencedSymbol] = (bank, add)
+            context = keys[0]
+            fields = context.split(",")
+            sBank = fields[0]
+            if sBank == "??":
+                bank = sBank
             else:
-                bank = "??"
-                add = address12
-                print("%-8s = ??,%04o (%d references)" % (referencedSymbol, \
-                                                address12, len(references)))  
-                fixedFound[referencedSymbol] = (bank, add)
-        elif len(keys) == 2 and (keys[0] % 0o2000 == keys[1] % 0o2000) \
-                and (keys[0] < 0o4000 or keys[1] < 0o4000):
-            bank = "??"
-            add = address12 % 0o2000 + 0o2000
-            print("%-8s = ??,%04o (%d reference)" % (referencedSymbol, \
-                                            address12, len(references)))  
+                bank = int(sBank, 8)
+            add = int(fields[1], 8) + 0o2000
+            print("%-8s = %s,%04o (%d references)" % (referencedSymbol, \
+                                            sBank, add, len(references)))  
+            fixedFound[referencedSymbol] = (bank, add)
+        elif len(keys) == 2 and (keys[0][-4:] == keys[1][-4:]):
+            context = keys[0]
+            fields = context.split(",")
+            sBank = fields[0]
+            if sBank == "??":
+                bank = sBank
+            else:
+                bank = int(sBank, 8)
+            add = int(fields[1], 8) % 0o2000 + 0o2000
+            print("%-8s = ??,%04o (%d references)" % (referencedSymbol, \
+                                            add, len(references)))  
             fixedFound[referencedSymbol] = (bank, add)
         else:
             for a in sorted(referencesByAddress):
-                print("# %05o" % a)    
+                try:
+                    print("# %s" % a)    
+                except:
+                    print(a, file=sys.stderr)
+                    sys.exit(1)
             print("%s = ??,???? (%d references)" % (referencedSymbol, len(references)))
     
     print()
     print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     print("Summary of the match process.")
+    print()
+    print('Note: A "match" occurs when separate means of identifying the')
+    print("location of a label produce identical bank numbers and offsets.")
+    print('"Consistency" differs, in that the offsets into the banks are all')
+    print("identical, but that some bank numbers may have been indeterminate.")
+    print("For example:")
+    print("                 01,2345 matches 01,2345")
+    print("            ??,2345 is consistent with 01,2345")
+    print("       01,2345 mismatches 02,2345, 01,2346, and ??,2346")
     print()
     print("Special symbols:")
     found = 0
@@ -1010,21 +1052,33 @@ if cli.findFilename != "":
         else:
             found += 1
     print("Total matched:", found)
-    print("Total unmatched:", notFound)     
+    print("Total unmatched:", notFound)
+    if notFound:
+        print()
+        print("Note: Special symbols are matched using generalized patterns")
+        print("which attempt to be AGC-version agnostic, so unmatched special")
+        print("symbols above are indicative neither of the symbols")
+        print("necessarily being absent nor of a serious problem.")
     print()
     print("Core:")
     for basicOrInterpretive in ["basic", "interpretive"]:
         for symbol in symbolsSought[basicOrInterpretive]:
             print("%s (%s) not found" % (norm(symbol), basicOrInterpretive))
-    print("Total matched: %d (basic), %d (interpretive)" % \
-        (len(symbolsFound["basic"]), len(symbolsFound["interpretive"])))
-    print("Total unmatched:  %d (basic), %d (interpretive)" % \
-        (len(symbolsSought["basic"]), len(symbolsSought["interpretive"])))
+    print("Total matched: %d" % \
+        (len(symbolsFound["basic"]) + len(symbolsFound["interpretive"])))
+    print("Total unmatched:  %d" % \
+        (len(symbolsSought["basic"]) + len(symbolsSought["interpretive"])))
     print()
     print("Erasable:")
     print("Total matched:", totalCertainErasables)
     print("Total partially matched:", totalUncertainErasables) 
     print("Total unreferenced by code:", totalUnreferencedErasables)
+    if totalUnreferencedErasables > 0:
+        print()
+        print("Note: The matching process is heuristic in nature, and")
+        print('not 100% inclusive, so the "unreferenced" variables mentioned')
+        print("above are not necessarily absent from the software.")
+    print()
     print("Note: Map of core used by disassembly is in disassemblerAGC.core.")
     f = open("disassemblerAGC.core", 'w')
     for bank in range(0o44):
@@ -1118,6 +1172,8 @@ if cli.findFilename != "":
             found = fixedFound[symbol]
             bank1 = found[0]
             address1 = found[1]
+            if symbol not in checkCore:
+                continue
             bank2 = checkCore[symbol][0]
             address2 = checkCore[symbol][1] + 0o2000
             if bank1 == bank2 and address1 == address2:
@@ -1126,12 +1182,14 @@ if cli.findFilename != "":
                 fixedPartialMatch += 1
             else:
                 fixedMismatch += 1
-                if bank1 == "??":
-                    print("%-8s ??,%04o != %02o,%04o" % \
-                        (norm(symbol), address1, bank2, address2))
-                else:
-                    print("%-8s %02o,%04o =? %02o,%04o" % \
-                        (norm(symbol), bank1, address1, bank2, address2))
+                try:
+                    if isinstance(bank1, int):
+                        bank1 = "%02o" % bank1
+                    print("%-8s %s,%04o != %02o,%04o" % \
+                            (norm(symbol), bank1, address1, bank2, address2))
+                except:
+                    print(norm(symbol), bank1, address1, bank2, address2, file=sys.stderr)
+                    sys.exit(1)
         print("Total matched =", fixedMatch)
         print("Total consistent =", fixedPartialMatch)
         print("Total mismatched =", fixedMismatch)

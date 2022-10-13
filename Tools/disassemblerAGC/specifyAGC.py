@@ -19,6 +19,7 @@ History:        2022-10-05 RSB  Wrote.  This version seems to work
 
 import sys
 from disassembleInterpretive import interpreterOpcodes
+from registers import registersByName
 
 # Here's a list of opcodes and pseudo-ops I pasted in from 
 # yaYUL/Pass.c (ParsersBlock2) and then massaged a bit.
@@ -212,7 +213,9 @@ for address in range(0o400):
 # those which accept a data argument immediately following their invocation
 # via TC -- and hence characterizes those locations as data rather than as
 # basic.
+lineNumber = 0
 for line in sys.stdin:
+    lineNumber += 1
     field = line[:6]
     if len(field) != 6 or not field.isdigit():
         continue
@@ -229,8 +232,8 @@ for line in sys.stdin:
     left = line[65:73].strip()
     
     addressField = line[24:31].strip()
-    if left in ["=", "EQUALS", "CHECK="] and \
-            (addressField == "" or addressField.isdigit()):
+    if left in ["=", "EQUALS", "CHECK="] and ( addressField == "" or \
+            (len(addressField) != 4 and addressField.isdigit()) ):
         continue
     if left == "ERASE" and addressField == "" and line[74:82].strip().isdigit() and \
             line[85:93].strip() == "-" and line[96:104].strip().isdigit():
@@ -289,7 +292,15 @@ for line in sys.stdin:
         if symbol != "":
             erasable[offset][bank]["symbols"].append(symbol)
         continue
-    
+    # And I don't like symbols that are pure numerics either.
+    dummy = symbol
+    if dummy[:1] in ["+", "-"]:
+        dummy = dummy[1:]
+    if dummy[-1:] == "D":
+        dummy = dummy[:-1]
+    if dummy.isdigit():
+        symbol = ""   
+         
     locationType = "u"
     if left in interpreterOpcodes or left.isdigit():
         if symbol == "":
@@ -305,6 +316,10 @@ for line in sys.stdin:
             locationType = rope[offset - 1][bank][0].lower()
     
     right = line[74:112].strip().split()
+    if len(right) > 0:
+        dummy = right[0]
+        if dummy in registersByName:
+            right = ""
     
     rope[offset][bank] = [locationType, symbol, left, right, []]
     if octal2 != "":
@@ -409,6 +424,13 @@ for address in range(0o400):
     for bank in range(8):
         for symbol in erasable[address][bank]["symbols"]:
             erasableBySymbol[symbol] = (bank, address)
+fixedSymbols = set()
+for bank in range(0o44):
+    for offset in range(0o2000):
+        symbol = rope[offset][bank][1]
+        if symbol != "" and symbol not in erasableBySymbol:
+            fixedSymbols.add(symbol)
+fixedInterpretiveReferencesBySymbol = {}
 
 # Analyze the erasable and rope to determine where *references* 
 # appear within the rope.  Each reference is identified by the 
@@ -422,9 +444,12 @@ def dontDecrement(opcode):
     return ("," in opcode) or \
         opcode in ["CALL", "STQ", "GOTO", "STCALL", "BHIZ", "BMN",
                    "BOV", "BOVB", "BPL", "BZE", "CLRGO", "SETGO",
-                   "BOFF", "BOFCLR", "BOFINV", "BOFSET", "BON", "BONCLR",
-                   "BONINV", "BONSET"]
+                   "BOFF", "BOF", "BOFCLR", "BOFINV", "BOFSET", "BON", "BONCLR",
+                   "BONINV", "BONSET", "RTB"]
 
+branches = ["CALL", "GOTO", "STCALL", "BHIZ", "BMN", "BOV", "BOVB", "BPL", 
+            "BZE", "CLRGO", "SETGO", "BOFF", "BOF", "BOFCLR", "BOFINV", "BOFSET", 
+            "BON", "BONCLR", "BONINV", "BONSET", "RTB"]
 for bank in range(0o44):
     lastLeft = ""
     lastRight = ""
@@ -432,15 +457,17 @@ for bank in range(0o44):
     lastRightComma = False
     left = ""
     right = ""
-    argCount = 0
+    argCount = -1
     lastSymbol = ""
     sinceSymbol = 0
     for offset in range(0o2000):
+        argCount += 1
         lastLastLeft = ""
         lastLastRight = ""
         location = rope[offset][bank]
         if location[0] not in ['b', 'B', 'i', 'I']:
             lastSymbol = ""
+            argCount = -1
             continue
         if location[0] in ['B', 'I']:
             lastSymbol = location[1]
@@ -448,22 +475,13 @@ for bank in range(0o44):
         sinceSymbol += 1
         if lastSymbol == "":
             print("Implementation error: Bad lastSymbol at %02o,%04o" \
-                    % (bank, offset + 0o2000))
+                    % (bank, offset + 0o2000), location, sinceSymbol)
         operand = location[3]
-        if len(operand) == 1:
-            # Try to determine if the operand is a simple numeric.
-            rem = operand[0]
-            if operand[0][:1] in ["+", "-"]:
-                rem = operand[0][1:]
-            if rem[-1:] == "D":
-                rem = rem[:-1]
-            if len(rem) > 0 and rem.isdigit():
-                continue
         # This tracks just "pure" references to the symbols, as opposed to
         # (for example) SYMBOL +5.  I'd like to do the latter as well, but
         # I don't quite see how to do it for now.
         if location[2] != "":
-            argCount = -1
+            argCount = 0
             lastLastLeft = lastLeft
             lastLastRight = lastRight
             lastLeft = location[2]
@@ -476,7 +494,7 @@ for bank in range(0o44):
             lastRightComma = dontDecrement(lastRight)
             numLeftArgs = 0
             numRightArgs = 0
-            argTypes = ['A']*4
+            argTypes = ['A']*5
             if location[0] in ['i', 'I']:
                 if lastLeft in interpreterOpcodes:
                     numLeftArgs = interpreterOpcodes[lastLeft][2]
@@ -484,64 +502,104 @@ for bank in range(0o44):
                         numRightArgs = interpreterOpcodes[lastRight][2]
                 elif lastLeft == "STCALL":
                     numLeftArgs = 1
-                i = 0
+                i = 1
                 for j in range(numLeftArgs):
                     if lastLeftComma:
+                        argTypes[i] = 'L'
+                        if lastLeft not in branches:
+                            argTypes[i] = 'H'
+                    elif j == numLeftArgs - 1 and lastLeft in ['SSP']:
                         argTypes[i] = 'L'
                     i += 1
                 for j in range(numRightArgs):
                     if lastRightComma:
                         argTypes[i] = 'L'
-                    i += 1      
-        argCount += 1
+                        if lastRight not in branches:
+                            argTypes[i] = 'H'
+                    elif j == numRightArgs - 1 and \
+                            lastRight in ['SSP', 'CGOTO', 'CCALL']:
+                        argTypes[i] = 'L'
+                    i += 1  
+                #print("# %02o,%04o %-8s %-8s" % (bank, offset+0o2000, lastLeft,
+                #        lastRight), lastLeftComma, lastRightComma, argTypes)    
         #print("%02o,%04o '%s' '%s' '%s' '%s'" % (bank, offset+0o2000, lastLeft, \
         #                                lastRight, lastLastLeft, lastLastRight))
-        if len(operand) == 1 and operand[0] in erasableBySymbol:
-            if location[0] in ['b', 'B']:
-                if location[2] in ["DAS", "DCA", "DCS", "DXCH"]:
-                    referenceType = 'D'
-                elif location[2][0] == "-":
-                    referenceType = 'C'
-                else:
-                    referenceType = 'B'
-            elif location[0] in ['i', 'I']:
-                referenceType = 'A'
-                if lastLastLeft == "STADR" or lastLastRight == "STADR":
-                    referenceType = 'I'
-                elif location[2] == "0":
-                    referenceType = "E"
-                elif location[2] in ["STORE", "STCALL", "STODL", "STOVL"]:
-                    referenceType = 'S'
-                elif argCount > 0:
-                    referenceType = argTypes[argCount - 1]
-            else:
+        if len(operand) == 1:
+            # Try to determine if the operand is a simple numeric.
+            rem = operand[0]
+            if operand[0][:1] in ["+", "-"]:
+                rem = operand[0][1:]
+            if rem[-1:] == "D":
+                rem = rem[:-1]
+            if len(rem) > 0 and rem.isdigit():
                 continue
+        if len(operand) != 1:
+            continue
+        referenceType = ""
+        if location[0] in ['b', 'B'] and operand[0] not in erasableBySymbol:
+            if lastLeft in ["TC", "TCF", "AD", "BZF", "BZMF", "CA",
+                            "CS", "MASK", "MP"]:
+                rope[offset][bank][4] = (operand[0], lastSymbol, sinceSymbol, "B")
+            elif lastLeft in ["DCA", "DCS"]:
+                rope[offset][bank][4] = (operand[0], lastSymbol, sinceSymbol, "D")
+        elif location[0] in ['b', 'B']:
+            if location[2] in ["DAS", "DCA", "DCS", "DXCH"]:
+                referenceType = 'D'
+            elif location[2][0] == "-":
+                referenceType = 'C'
+            else:
+                referenceType = 'B'
+        elif location[0] in ['i', 'I']:
+            if operand[0][-2:] in [",1", ",2"]:
+                symbol = operand[0][:-2]
+                indexed = True
+            else:
+                symbol = operand[0]
+                indexed = False
+            if symbol not in erasableBySymbol and symbol not in fixedSymbols:
+                continue
+            fixed = True
+            if symbol in erasableBySymbol:
+                fixed = False
+            if lastLastLeft == "STADR" or lastLastRight == "STADR":
+                referenceType = 'I'
+            elif location[2] == "0":
+                referenceType = "E"
+            elif location[2] in ["STORE", "STCALL", "STODL", "STOVL", 
+                                    "STODL*", "STOVL*"]:
+                referenceType = 'S'
+            elif indexed:
+                referenceType = 'K'
+            elif argCount > 0:
+                referenceType = argTypes[argCount]
+                #print("#", referenceType, argCount, argTypes, location)
+            if referenceType != "" and fixed:
+                #print("# %02o,%04o %-8s %-8s" % \
+                #        (bank, offset+0o2000, referenceType, operand[0]))
+                if symbol not in fixedInterpretiveReferencesBySymbol:
+                    fixedInterpretiveReferencesBySymbol[symbol] = []
+                fixedInterpretiveReferencesBySymbol[symbol].append( \
+                    (lastSymbol, sinceSymbol, referenceType) )
+        else:
+            continue
+        if operand[0] in erasableBySymbol:
             symbolInfo = erasableBySymbol[operand[0]]
             b = symbolInfo[0]
             a = symbolInfo[1]
             erasable[a][b]["references"].append((lastSymbol,sinceSymbol,
                                                     referenceType))
-        elif len(operand) == 1 and operand[0] not in erasableBySymbol:
-            if location[0] in ['b', 'B']:
-                if lastLeft in ["TC", "TCF", "AD", "BZF", "BZMF", "CA",
-                                "CS", "MASK", "MP"]:
-                    rope[offset][bank][4] = (operand[0], lastSymbol, sinceSymbol, "b")
-                elif lastLeft in ["DCA", "DCS"]:
-                    rope[offset][bank][4] = (operand[0], lastSymbol, sinceSymbol, "d")
-            elif location[0] in ['i', 'I']:
-                pass
-            else:
-                continue
-        
+                    
 # Output erasable specifications.  There are several types:
 #   B   Operand of a single-word basic instruction (like XCH or CA)
 #   C   A complemented basic instruction (like -CCS)
 #   D	Operand of a double-word basic instruction (like DXCH or DCA).
 #   S   Inline operand of interpretive STORE, STCALL, STODL, or STOVL
 #   A   Normal argument of interpretive.
-#   L   Normal argument of an interpretive index opcode such as LXC,1.
+#   L   Normal argument of an interpretive that shouldn't be decremented.
 #   I   Interpretive STXXX preceded by STADR.
 #   E   Interpretive argument which doesn't decrement and has no bank number.
+#   H   Like L, but interpretive half-memory.
+#   K   Like I, but only for negative values.
 
 # The output lines have space-delimited fields as follows:
 #   The literal "+"
@@ -565,13 +623,18 @@ for bank in range(8):
         if len(data["symbols"]) > 0 and len(data["references"]) > 0:
             print("+", str(data["symbols"]).replace(" ",""),
                   str(data["references"]).replace(" ", ""))
-print("# Fixed references")
+print("# Fixed references in basic")
 for bank in range(0o44):
     for i in range(0o2000):
         data = rope[i][bank][4]
         if len(data) < 4 or data[3] == "":
             continue
         print("-", normalize(data[0]), normalize(data[1]), "%o" % data[2], data[3])
+print("# Fixed references in interpretive")
+for symbol in sorted(fixedInterpretiveReferencesBySymbol):
+    refs = fixedInterpretiveReferencesBySymbol[symbol]
+    for ref in refs:
+        print("-", normalize(symbol), normalize(ref[0]), "%o" % ref[1], ref[2])
                   
 if debug:
     # Print a report of the contents of the rope and erasable.
