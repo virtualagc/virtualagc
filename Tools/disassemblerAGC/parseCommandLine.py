@@ -10,6 +10,7 @@ History:        2022-09-28 RSB  Split off from disassemblerAGC.py.
                 2022-10-08 RSB  Added --overlap, --hint, --ignore
                 2022-10-09 RSB  Added --avoid
                 2022-10-10 RSB  Added --parity.
+                2022-10-13 RSB  Added --block1 and --blk2.
 """
 
 import sys
@@ -47,9 +48,9 @@ debug = False
 dump = False
 dtest = False
 dbasic = True
-dbank = 0o02
-dstart = 0o0000
-dend = 0o0050
+dbank = -1
+dstart = -1
+dend = -1
 specialOnly = False
 pattern = False
 symbol = "SYMBOL"
@@ -64,6 +65,8 @@ hintAfter = {}
 ignore = []
 avoid = []
 parity = False
+block1 = False
+blk2 = False
 entryPoints = [
     { "inBasic": True, "bank": 0o2, "offset": 0o0000, 
         "eb": 0, "fb": 0, "feb": 0, "symbol": "(go)" },
@@ -98,25 +101,22 @@ for param in sys.argv[1:]:
           Usage:    
                  disassemblerAGC.py [OPTIONS] <CORE >DISASSEMBLY    
           The input CORE is by default a .binsource file.  The OPTIONS:    
-            --basic=A   Add basic address (NNNN or NN,NNNN octal)    
-                        to list of entry points.  Multiple --basic    
-                        switches can be used.  The interrupt lead-ins    
-                        are always present by default, as well as an    
-                        'special subroutines' that are known.    
-            --interp=A  Add interpretive address (NNNN or NN,NNNN octal)    
-                        to list of entry points.  Multiple --interp    
-                        switched can be used.    
             --bin       CORE is a .bin file as output by yaYUL.    
             --hardware  CORE is a 'hardware' style .bin file.  If --bin    
                         is present, --hardware overrides it.    
             --debug     Turn on some debugging messages.    
             --dump      Dump the octals w/o disassembly.    
-            --dtest     By default, the first instruction is basic, and    
-                        and the test range is bank 02, from address 4000    
-                        to 4050, but these can be changed with the extra    
-                        switches --dint --dbank=N, --dstart=N, --dend==N,    
-                        where the parameter is an octal number.    
-                        Note that for --dstart and --dend.    
+            --dtest     This causes a disassembly of a range of
+                        addresses confined to a single fixed-memory bank.
+                        For Block II the default address range is 02,2000
+                        to 02,2050 with the 1st instruction being basic.
+                        For Block I, the default is 01,6000 to 01,6034.
+                        But these assumptions can be changed with the extra    
+                        switches:
+                            --dint      First instruction is interpretive.
+                            --dbank=N   Bank number is N (octal).
+                            --dstart=N  Starting offset is N (octal.
+                            --dend==N   First address not assembled.    
             --special   Only print deduced special subroutines.    
             --pattern=S This is similar to --dtest, and takes the same    
                         optional extra command-line switches, but instead    
@@ -125,6 +125,8 @@ for param in sys.argv[1:]:
                         manual tweaking) for use in searchSpecial.py.    
                         Note that --pattern overrides --dtest.  S is the    
                         symbol for the subroutine for the pattern.
+                        Note that only patterns consisting entirely of
+                        basic instructions are currently supported.
             --flex=F    If you have a file whose contents are patterns
                         such as those produced by the --pattern switch
                         described above, and possibly manually tweaked
@@ -158,9 +160,6 @@ for param in sys.argv[1:]:
                         searched in the order 00, 01, 02, ..., 43.
             --only=B,... A list of banks (octal) for --find.  If present,
                         only the listed banks are searched.
-            --descent   Disassemble with recursive descent, to try and reach
-                        all of the reachable code.  This is not presently
-                        functional.
             --skip=S    In using the --find option, it just so happens that 
                         there may be several matchs for some symbol S defined
                         in the specification file.  One options for dealing
@@ -182,6 +181,26 @@ for param in sys.argv[1:]:
             --parity    By default, the parity bit is ignored in input --bin
                         files and --hardware files.  The --parity switch 
                         enables it.  Binsource files are not affected.
+            --blk2      Enables the BLK2 variant of the disassembler.  The
+                        default is the Block II disassembler, but not the 
+                        BLK2 variant.
+            --block1    Enables the Block I varian of the disassembler.
+            --descent   Disassemble with recursive descent, to try and reach
+                        all of the reachable code.  This was originally 
+                        intended to be the default functionality of the program
+                        but is not presently functional with any degree of 
+                        usability for Block II.  And I don't intend to support 
+                        it at all for BLK2 or Block I.
+            --basic=A   (Used only with --descent; see the entry above.)
+                        Add basic address (NNNN or NN,NNNN octal)    
+                        to list of entry points.  Multiple --basic    
+                        switches can be used.  The interrupt lead-ins    
+                        are always present by default, as well as an    
+                        'special subroutines' that are known.    
+            --interp=A  (Used only with --descent; see the entry above.)
+                        Add interpretive address (NNNN or NN,NNNN octal)    
+                        to list of entry points.  Multiple --interp    
+                        switched can be used.    
                
           Note that for --bin and --hardware, we can't necessarily    
           determine that locations are unused vs merely containing 00000.    
@@ -211,6 +230,10 @@ for param in sys.argv[1:]:
         binFile = True
     elif param == "--hardware":
         hardwareFile = True
+    elif param == "--block1":
+        block1 = True
+    elif param == "--blk2":
+        blk2 = True
     elif param == "--debug":
         debug = True
     elif param == "--dump":
@@ -228,7 +251,7 @@ for param in sys.argv[1:]:
         dend = int(param[7:], 8)
     elif param == "--dint":
         dbasic = False
-    elif param == "--special":
+    elif param in ["--special", "--specials"]:
         specialOnly = True
     elif param[:8] == "--specs=":
         specsFilename = param[8:]
@@ -272,5 +295,18 @@ for param in sys.argv[1:]:
         sys.exit(1)
 if hardwareFile:
     binFile = False
-
+if block1:
+    if dbank == -1:
+        dbank = 0o01
+    if dstart == -1:
+        dstart = 0o6000
+    if dend == -1:
+        dend = 0o6034
+else: # Block II
+    if dbank == -1:
+        dbank = 0o02
+    if dstart == -1:
+        dstart = 0o2000
+    if dend == -1:
+        dend = 0o2050
 

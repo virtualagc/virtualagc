@@ -69,7 +69,7 @@ def readCoreRope(core, cli, numCoreBanks, sizeCoreBank):
                 bank = int(bankField, 8)
                 offset = 0
                 if bank < 0 or bank >= numCoreBanks:
-                    print("Illegal bank:", bank)
+                    print("Illegal bank:  %02o" % bank)
                     sys.exit(1)
                 continue
             if line[:7] == "PARITY=" or line[:9] == "NUMBANKS=" \
