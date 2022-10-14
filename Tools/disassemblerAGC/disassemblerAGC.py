@@ -99,7 +99,10 @@ elif cli.blk2:
 else:
     from disassembleBasic import disassembleBasic
 # Disassembler for a single line of interpreter instructions plus arguments.
-from disassembleInterpretive import disassembleInterpretive
+if cli.block1:
+    from disassembleInterpretiveBlockI import disassembleInterpretive
+else:
+    from disassembleInterpretive import disassembleInterpretive
 # Semi-emulation of instruction operations on erasable.
 from semulate import semulate
 # Search for "special" subroutines like INTPRET and BANKCALL.
@@ -114,6 +117,33 @@ from searchFunctions import importFlexFile, searchSpecial, specialSubroutines
 # above prior to searching for the special subroutines.
 if cli.flexFilename != "":
     importFlexFile(cli.flexFilename, searchPatterns)
+
+# Convert bank,offset pair to an address string.  The parameters are integers,
+# and if either is unknown, it should be set to -1.  Returns a pair:
+# the address string, and the fixed-fixed address integer (-1 if none).
+def getAddressString(bank, offset):
+    commonString = ""
+    bankString = "??"
+    if bank >= 0 and bank < numCoreBanks:
+        bankString = "%02o" % bank
+    offsetString = "????"
+    fAddress = -1
+    if cli.block1:
+        if bank in [1, 2]:
+            fAddress = offset % sizeCoreBank + bank * sizeCoreBank
+            commonString = "%04o" % fAddress
+        offsetString = "%04o" % (offset % sizeCoreBank + 3 * sizeCoreBank)
+        pass
+    elif offset >= 0 and offset < sizeCoreBank:
+        if bank in [2, 3]:
+            fAddress = offset % sizeCoreBank + bank * sizeCoreBank
+            commonString = "%04o" % fAddress
+        offsetString = "%04o" % (offset % sizeCoreBank + sizeCoreBank)
+    if commonString != "":
+        addressString = "%s (%s,%s)" % (commonString, bankString, offsetString)
+    else:
+        addressString = "%s,%s%7s" % (bankString, offsetString, "")
+    return addressString, fAddress
 
 #=============================================================================
 # Read the input file.
@@ -194,15 +224,9 @@ for symbol in sorted(specialSubroutines):
     addressTuple = specialSubroutines[symbol]
     bank = addressTuple[0]
     address = addressTuple[1]
-    fAddress = addressTuple[2]
+    addressString, fAddress = getAddressString(bank, address)
     if cli.specialOnly or cli.findFilename != "":
-        if fAddress != -1:
-            print("%-8s = %04o" % (symbol, fAddress))
-        elif bank != -1 and address != -1:
-            print("%-8s = %02o,%04o" % (symbol, bank, address + sizeCoreBank))
-        else:
-            # print("%-8s" % symbol, "not found")
-            pass
+        print("%-8s = %s" % (symbol, addressString))
     if fAddress != -1:
         specialFixedFixed[fAddress] = addressTuple
         cli.entryPoints.append(    

@@ -35,10 +35,10 @@ def disassembleBasic(word, extended):
         opcodeString = "CCS"   
     elif CCC == 0o20000:
         opcodeString = "INDEX" 
-        if operandString == "0016":
+        if operandString in ["0016", "RELINT"]:
             opcodeString = "RELINT"
             operandString = ""
-        elif operandString == "0017":
+        elif operandString in ["0017", "INHINT"]:
             opcodeString = "INHINT"
             operandString = ""
         elif operandString == "BRUPT": # 0025

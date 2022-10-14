@@ -9,9 +9,6 @@ History:        2022-09-28 RSB  Split off from disassemblerAGC.py.
                 2022-10-11 RSB  Fixed apparent bug in STXXX detection.
 """
 
-import sys
-from engineering import endOfImplementation
-
 # Disassemble a word for an interpretive location. 
 # I got interpreterOpcodes from yaYUL/Pass.c, and just simple-mindedly 
 # converted it to a Python3 acceptable form without regard to suitability.
@@ -250,11 +247,6 @@ def adjustOpcodePerArgument(core, bank, offset, interpreterCodesField,
     # Note that by the time this function is called, offset (0 .. 0o1777)
     # has already incremented past the opcodes and is pointing to the 
     # first argument.
-    if False:
-        if bank == 0o36 and offset == 0o1030:
-            print("%02o,%04o" % (bank, offset+0o2000-1), interpreterCodesField, 
-                                isLeft, file=sys.stderr)
-        #sys.exit(1)
     if offset < 0o2000:
         nCode = interpreterCodesField[0][1]
         canIndex = (nCode & 2) != 0
@@ -278,11 +270,6 @@ def adjustOpcodePerArgument(core, bank, offset, interpreterCodesField,
                     mask = maskSwitch
                 else:
                     mask = maskShift & ~0o377
-                if False: 
-                    if bank == 0o27 and offset + 0o2000 == 0o2106:
-                        print("Here", "%02o,%04o %05o %05o %05o" % \
-                            (bank, offset+0o2000-1, mask, ior[4], \
-                            argument), ior, file=sys.stderr)
                 if (ior[4] & mask) == (argument & mask):
                     return ior[0], ior[2], ior
             else:
@@ -319,17 +306,6 @@ def disassembleInterpretive(core, bank, offset, stadr):
     if stadr or sword & 0o40000 == 0:
         stadr = False
         left = "??????"
-        '''
-        storeType = 0o74000 & sword
-        if storeType == 0o34000:
-            left = "STCALL"
-        elif storeType == 0o14000:
-            left = "STODL"
-        elif storeType == 0o00000:
-            left = "STORE"
-        elif storeType == 0o24000:
-            left = "STOVL"
-        '''
         storeType = 0o70000 & sword
         if storeType == 0o30000:
             left = "STCALL"
@@ -362,11 +338,6 @@ def disassembleInterpretive(core, bank, offset, stadr):
         numRightArgs = 0
         leftInterpreterCodes = []
         rightInterpreterCodes = []
-        if False:
-            add = offset + 0o2000 - 1
-            if bank == 0o32 and add == 0o2042:
-                print("%02o,%04o %05o %03o %03o" % (bank, add,
-                        word, leftField, rightField), file=sys.stderr)
         if leftField in interpreterCodes:
             leftInterpreterCodes = interpreterCodes[leftField]
             left, numLeftArgs, leftInterpreterCodes \
