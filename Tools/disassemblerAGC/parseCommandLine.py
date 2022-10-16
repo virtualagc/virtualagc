@@ -11,6 +11,10 @@ History:        2022-09-28 RSB  Split off from disassemblerAGC.py.
                 2022-10-09 RSB  Added --avoid
                 2022-10-10 RSB  Added --parity.
                 2022-10-13 RSB  Added --block1 and --blk2.
+                2022-10-14 RSB  Removed --descent, --basic, and --interp.
+                                Completely restructured and partially
+                                cleaned up the --help option for (hopefully)
+                                much-more-effective usage.
 """
 
 import sys
@@ -56,7 +60,6 @@ pattern = False
 symbol = "SYMBOL"
 specsFilename = ""
 findFilename = ""
-descent = False
 flexFilename = ""
 checkFilename = ""
 skips = {}
@@ -67,30 +70,6 @@ avoid = []
 parity = False
 block1 = False
 blk2 = False
-entryPoints = [
-    { "inBasic": True, "bank": 0o2, "offset": 0o0000, 
-        "eb": 0, "fb": 0, "feb": 0, "symbol": "(go)" },
-    { "inBasic": True, "bank": 0o2, "offset": 0o0004, 
-        "eb": 0, "fb": 0, "feb": 0, "symbol": "(t6rupt)" },
-    { "inBasic": True, "bank": 0o2, "offset": 0o0010, 
-        "eb": 0, "fb": 0, "feb": 0, "symbol": "(t5rupt)" },
-    { "inBasic": True, "bank": 0o2, "offset": 0o0014, 
-        "eb": 0, "fb": 0, "feb": 0, "symbol": "(t3rupt)" },
-    { "inBasic": True, "bank": 0o2, "offset": 0o0020, 
-        "eb": 0, "fb": 0, "feb": 0, "symbol": "(t4rupt)" },
-    { "inBasic": True, "bank": 0o2, "offset": 0o0024, 
-        "eb": 0, "fb": 0, "feb": 0, "symbol": "(keyrupt1)" },
-    { "inBasic": True, "bank": 0o2, "offset": 0o0030, 
-        "eb": 0, "fb": 0, "feb": 0, "symbol": "(keyrupt2)" },
-    { "inBasic": True, "bank": 0o2, "offset": 0o0034, 
-        "eb": 0, "fb": 0, "feb": 0, "symbol": "(uprupt)" },
-    { "inBasic": True, "bank": 0o2, "offset": 0o0040, 
-        "eb": 0, "fb": 0, "feb": 0, "symbol": "(downrupt)" },
-    { "inBasic": True, "bank": 0o2, "offset": 0o0044, 
-        "eb": 0, "fb": 0, "feb": 0, "symbol": "(radar rupt)" },
-    { "inBasic": True, "bank": 0o2, "offset": 0o0050, 
-        "eb": 0, "fb": 0, "feb": 0, "symbol": "(hand controller rupt)" }
-]
 
 entryCount = 0
 pBanks = ""
@@ -98,134 +77,147 @@ oBanks = ""
 for param in sys.argv[1:]:
     if param == "--help":
         print('''
-          Usage:    
-                 disassemblerAGC.py [OPTIONS] <CORE >DISASSEMBLY    
-          The input CORE is by default a .binsource file.  The OPTIONS:    
-            --bin       CORE is a .bin file as output by yaYUL.    
-            --hardware  CORE is a 'hardware' style .bin file.  If --bin    
-                        is present, --hardware overrides it.    
-            --debug     Turn on some debugging messages.    
-            --dump      Dump the octals w/o disassembly.    
-            --dtest     This causes a disassembly of a range of
-                        addresses confined to a single fixed-memory bank.
-                        For Block II the default address range is 02,2000
-                        to 02,2050 with the 1st instruction being basic.
-                        For Block I, the default is 01,6000 to 01,6034.
-                        But these assumptions can be changed with the extra    
-                        switches:
-                            --dint      First instruction is interpretive.
-                            --dbank=N   Bank number is N (octal).
-                            --dstart=N  Starting offset is N (octal.
-                            --dend==N   First address not assembled.    
-            --special   Only print deduced special subroutines.    
-            --pattern=S This is similar to --dtest, and takes the same    
-                        optional extra command-line switches, but instead    
-                        of providing a disassembly, instead provides a    
-                        draft sample pattern (which typically requires    
-                        manual tweaking) for use in searchSpecial.py.    
-                        Note that --pattern overrides --dtest.  S is the    
-                        symbol for the subroutine for the pattern.
-                        Note that only patterns consisting entirely of
-                        basic instructions are currently supported.
-            --flex=F    If you have a file whose contents are patterns
-                        such as those produced by the --pattern switch
-                        described above, and possibly manually tweaked
-                        afterward, you can use the --flex=F to read in
-                        that file of patterns and append them to the 
-                        special-subroutines search.  (See --special above.)
-                        This is a more-flexible kind of search than those
-                        performed in an automated way by the --specs/--find
-                        switches (see below), though limited by its 
-                        inability to perform erasable matches.
-            --specs=F   Reads multiple pattern specifications from a file    
-                        (F), similar to those used by --dtest and
-                        --pattern. Outputs patterns in a form useful for
-                        subsequent free-form matching in an alternate AGC
-                        version. F is an ASCII file, with lines of the
-                        form:    
-                               SYMBOL BANK START [END] [I]    
-                        END is optional, because if it is missing for a    
-                        given line, then the START from the next line of    
-                        the file is used as the END of the preceding line.    
-                        The optional parameter 'I' is literal, and means    
-                        that the starting location is interpretive rather    
-                        than basic (which is the default).    
-                        This switch overrides --pattern and --dtest.
-            --find=F    Uses a specifications file as created by --specs,
-                        and tries to find all of the patterns therein ...
-                        presumably in a different rope than the one from 
-                        which the file was created.
-            --prio=B,... A list of banks (octal) which are searched first
-                        with the --find switch.  By default, the banks are
-                        searched in the order 00, 01, 02, ..., 43.
-            --only=B,... A list of banks (octal) for --find.  If present,
-                        only the listed banks are searched.
-            --skip=S    In using the --find option, it just so happens that 
-                        there may be several matchs for some symbol S defined
-                        in the specification file.  One options for dealing
-                        that situation is to instruct the disassembler to skip
-                        the first match it finds for that symbol.  Using this
-                        switch twice tells the disassmbler to skip the first 
-                        2 matches of the symbol.  And so on.
-            --check=F   Specifies an assembly-listing file that can be used for
-                        double-checking the matches found.
-            --overlap   By default program-label specifications are assumed to
-                        be disjoint.  If they can overlap, use this switch.
-            --hint=S1@S2 This is a hint that subroutine S1 must be at a higher
-                        memory address than subroutine S2.  As many --hint
-                        switches can be used as desired.
-            --ignore=S  Simply ignore subroutine S.
-            --avoid=BB,NNNN-MMMM Specify a fixed address range which should be 
-                        avoided by the matching process.  You can use as many
-                        of these switches as necessary.
-            --parity    By default, the parity bit is ignored in input --bin
-                        files and --hardware files.  The --parity switch 
-                        enables it.  Binsource files are not affected.
-            --blk2      Enables the BLK2 variant of the disassembler.  The
-                        default is the Block II disassembler, but not the 
-                        BLK2 variant.
-            --block1    Enables the Block I varian of the disassembler.
-            --descent   Disassemble with recursive descent, to try and reach
-                        all of the reachable code.  This was originally 
-                        intended to be the default functionality of the program
-                        but is not presently functional with any degree of 
-                        usability for Block II.  And I don't intend to support 
-                        it at all for BLK2 or Block I.
-            --basic=A   (Used only with --descent; see the entry above.)
-                        Add basic address (NNNN or NN,NNNN octal)    
-                        to list of entry points.  Multiple --basic    
-                        switches can be used.  The interrupt lead-ins    
-                        are always present by default, as well as an    
-                        'special subroutines' that are known.    
-            --interp=A  (Used only with --descent; see the entry above.)
-                        Add interpretive address (NNNN or NN,NNNN octal)    
-                        to list of entry points.  Multiple --interp    
-                        switched can be used.    
-               
-          Note that for --bin and --hardware, we can't necessarily    
-          determine that locations are unused vs merely containing 00000.    
+            This program can be used as an AGC disassembler or viewer for
+            .bin files.  Primarily, however, it is part of the workflow
+            for reconstructing AGC source code for an AGC program given
+            as just a dump of physical rope-memory modules.  Specifically,
+            it tries to deduce a list of memory addresses of program labels
+            and variables names.  Companion programs are pieceworkAGC.py
+            and specifyAGC.py.
+        
+            Usage:    
+                 disassemblerAGC.py [OPTIONS] <ROPE >DISASSEMBLY    
+                 
+            Options related to the input file:
+                Default:    The input ROPE is a .binsource file.
+                --bin       ROPE is instead a .bin file as output by yaYUL.    
+                --hardware  ROPE is a 'hardware' style .bin file, presumably
+                            created by dumping physical rope-memory modules.
+                --parity    By default, the parity bit is ignored in input 
+                            --bin files and --hardware files.  The --parity 
+                            switch enables it.  Note that without parity, we 
+                            cannot necessarily distinguish between memory 
+                            locations that are unused vs those that are merely 
+                            00000; but not all .bin files contain parity bits,
+                            and this may not be a problem anyway.  Processing
+                            of binsource files is unaffected by --parity.
+
+            Options related to AGC architecture:
+                Default:    LGC or Block II, normal variant.
+                --blk2      LGC or Block II, BLK2 variant.
+                --block1    Block I.
+            
+            Miscellaneous options:          
+                --help      Display the descriptive information you're now
+                            reading.       
+                --debug     Turn on some debugging messages. 
+                --dump      Output an octal dump of the ROPE. Don't forget
+                            to add any appropriate AGC-architecture options
+                            (see above), since those affect the selection of
+                            banks and the order in which they're output.   
+                  
+            Options related to --dtest:
+                --dtest     This outputs a disassembly of a range of
+                            addresses confined to a single fixed-memory bank.
+                            For Block II the default address range corresponds
+                            to the interrupt vector table:  i.e., 02,2000
+                            to 02,2050 for Block II, and 01,6000 to 01,6034
+                            for Block I.  But these assumptions can be changed
+                            with the options listed below.
+                --dint      The disassembly range can be mixed basic 
+                            instructions and interpreter instructions, but 
+                            by default the very first instruction in the
+                            range is basic. The --dint switch instead specifies
+                            that the first instruction is interpretive.
+                --dbank=N   Bank number is N (octal).
+                --dstart=N  Starting offset is N (octal).
+                --dend==N   Disassembly stops when reaching this address 
+                            (octal) without disassembling it.    
+                            
+            Automation:  Creation of match-patterns:                                   
+                --specs=F   Reads a baseline file (F) of pattern 
+                            specifications, typically created by the separate
+                            program specifyAGC.py. Outputs patterns in a form
+                            useful for the disassemblerAGC.py's --find option,
+                            for subsequent patterns matching within a 
+                            different (or the same) ROPE. 
+                            
+            Automation:  Analysis of a ROPE using BASELINE match-patterns:
+                --find=F    Uses a baseline match-pattern file as created by
+                            --specs (see above), and tries to find all of the
+                            patterns specified therein.
+                --hint=S1@S2 This is a hint that subroutine S1 must be at a 
+                            higher memory address than subroutine S2.  As many
+                            --hint switches can be used as desired.  A typical
+                            usage would be to work around two (or more) 
+                            match-patterns being either identical, or being 
+                            contained within one another.  Used in similar 
+                            circumstances as --skip (see below), for similar
+                            reasons, but generally the superior choice for
+                            problematic tables of TC instructions.
+                --skip=S    In using the --find option, it just so happens 
+                            that there may be several matches for some symbol S
+                            defined in the match-patterns file.  One option for
+                            dealing with that situation is to instruct the 
+                            disassembler to skip the first match it finds for
+                            that symbol.  Using this switch twice tells the 
+                            disassembler to skip the first 2 matches of the 
+                            symbol.  And so on.  Used in similar circumstances
+                            as --hint (see above), for similar reasons, but 
+                            sometimes the superior choice for small 
+                            match-patterns.
+                --ignore=S  Simply ignore subroutine S altogether when matching
+                            patterns.  This is a last-resort measure when
+                            --hint and --skip (see above) are inadequate for
+                            dealing with a problematic subroutine S.
+                --avoid=BB,NNNN-MMMM Specify a fixed address range which 
+                            should be avoided by the matching process.  You
+                            can use as many of these switches as necessary.
+                            This is a last-resort measure when a long section
+                            of data happens to disassemble compatibly to 
+                            code.  An example (the only one known, actually)
+                            is a table of CADR pseudo-ops that disassembles
+                            as a table of TC instructions.
+                --check=F   Specifies an assembly-listing file that can be 
+                            used for comparison vs the matches found. If 
+                            this switch is not present, no comparison is 
+                            performed.
+                --overlap   (Rare.) By default, overlapping of the program 
+                            chunks defined in the match-patterns file (and the 
+                            specifications file from which it was derived)
+                            is rigidly avoided by the pattern-matching.  But
+                            if they can overlap by intention (which can happen
+                            only if the match-patterns or the specifications
+                            they're derived from have been created manually
+                            rather than by automation), use this switch.
+                --prio=B,... (Rare.) A list of banks (octal) which are searched 
+                            first with the --find switch.  Without --prio, the 
+                            banks are searched in the order 00, 01, 02, ..., 
+                            43.
+                --only=B,... (Rare.) A list of banks (octal) for --find.  If
+                            present, only the listed banks are searched.
+                        
+            Options related to "special subroutines":                            
+                --special   Just print the "special subroutines" found, 
+                            without any additional processing.  
+                --flex=F    Add user-created "special subroutines" to the
+                            list of special subroutines already hardcoded,
+                            which include INTPRET etc.  F is a file containing
+                            such patterns.  Patterns can be created either
+                            manually, or with the --pattern option (see
+                            below).  
+                --pattern=S Outputs a sample pattern (which typically 
+                            requiring manual tweaking) for program label S, 
+                            suitable for pasting into searchSpecial.py or for
+                            use with the --flex option (see above). Only 
+                            patterns consisting entirely of basic
+                            instructions (rather than interpretive) are 
+                            currently supported.
+                --dbank=N   (For --pattern.) Bank number is N (octal).
+                --dstart=N  (For --pattern.) Starting offset is N (octal.
+                --dend==N   (For --pattern.) First address not assembled.    
         ''')
         sys.exit(0)
-    elif param[:8] == "--basic=":
-        bank, offset = toFixed(param[8:])
-        superbank = 0
-        if bank >= 0o40:
-            superbank = 1
-        entryCount += 1
-        entryPoints.append( { "inBasic": True, "bank": bank, 
-                             "offset": offset, "bb": bank << 10,
-                             "feb": superbank, 
-                             "symbol": "user%d" %entryCount } )
-    elif param[:9] == "--interp=":
-        bank, offset = toFixed(param[9:])
-        superbank = 0
-        if bank >= 0o40:
-            superbank = 1
-        entryCount += 1
-        entryPoints.append( { "inBasic": False, "bank": bank, 
-                             "offset": offset, "eb": 0, "fb": bank << 10,
-                             "feb": superbank, 
-                             "symbol": "user%d" %entryCount } )
     elif param == "--bin":
         binFile = True
     elif param == "--hardware":
@@ -277,8 +269,6 @@ for param in sys.argv[1:]:
             hintAfter[fields[0]].append(fields[1])
         else:
             hintAfter[fields[0]] = [fields[1]]
-    elif param == "--descent":
-        descent = True
     elif param == "--overlap":
         disjoint = False
     elif param[:9] == "--ignore=":

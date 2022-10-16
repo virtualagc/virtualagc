@@ -6,9 +6,7 @@ Copyright:      None - the author (Ron Burkey) declares this software to
 Filename:       disassemblerAGC.py
 Purpose:        Disassembler for an AGC core-rope image (i.e., a .binsource 
                 or .bin file).  I was tempted to call this program LUY (the 
-                opposite of YUL), but I've resisted the temptation.  Mostly.
-                For Block II CMC and LGC only.  Could be adapted for the
-                Block I CMC, but won't work as-is.
+                opposite of YUL), but I've resisted the temptation.  
 History:        2022-09-25 RSB  Created.
                 2022-09-28 RSB  Can now find not only INTPRET, but (I think)
                                 all subroutines with calling sequences like
@@ -26,6 +24,7 @@ History:        2022-09-25 RSB  Created.
                 2022-10-13 RSB  I consider the Block II disassembler (but not
                                 the BLK2 variant) to be working reasonably
                                 well now.
+                2022-10-14 RSB  Removed recursive descent entirely.
 """
 
 #=============================================================================
@@ -39,23 +38,13 @@ import copy
 from engineering import endOfImplementation
 # Parse command-line arguments.
 import parseCommandLine as cli
+if cli.block1:
+    from auxiliaryBlockI import *
+else:
+    from auxiliary import *
 
 #=============================================================================
 # Initialize globals.
-
-# Geometry of core and erasable memory.
-if cli.block1:
-    numCoreBanks = 0o40
-    sizeCoreBank = 0o2000
-    numErasableBanks = 1
-    sizeErasableBank = 0o2000
-    numIoChannels = 0
-else:
-    numCoreBanks = 0o44
-    sizeCoreBank = 0o2000
-    numErasableBanks = 0o10
-    sizeErasableBank = 0o400
-    numIoChannels = 8
 
 # Erasable contents.
 erasable = []
@@ -100,9 +89,9 @@ else:
     from disassembleBasic import disassembleBasic
 # Disassembler for a single line of interpreter instructions plus arguments.
 if cli.block1:
-    from disassembleInterpretiveBlockI import disassembleInterpretive
+    from disassembleInterpretiveBlockI import disassembleInterpretive, interpretiveStart
 else:
-    from disassembleInterpretive import disassembleInterpretive
+    from disassembleInterpretive import disassembleInterpretive, interpretiveStart
 # Semi-emulation of instruction operations on erasable.
 from semulate import semulate
 # Search for "special" subroutines like INTPRET and BANKCALL.
@@ -117,33 +106,6 @@ from searchFunctions import importFlexFile, searchSpecial, specialSubroutines
 # above prior to searching for the special subroutines.
 if cli.flexFilename != "":
     importFlexFile(cli.flexFilename, searchPatterns)
-
-# Convert bank,offset pair to an address string.  The parameters are integers,
-# and if either is unknown, it should be set to -1.  Returns a pair:
-# the address string, and the fixed-fixed address integer (-1 if none).
-def getAddressString(bank, offset):
-    commonString = ""
-    bankString = "??"
-    if bank >= 0 and bank < numCoreBanks:
-        bankString = "%02o" % bank
-    offsetString = "????"
-    fAddress = -1
-    if cli.block1:
-        if bank in [1, 2]:
-            fAddress = offset % sizeCoreBank + bank * sizeCoreBank
-            commonString = "%04o" % fAddress
-        offsetString = "%04o" % (offset % sizeCoreBank + 3 * sizeCoreBank)
-        pass
-    elif offset >= 0 and offset < sizeCoreBank:
-        if bank in [2, 3]:
-            fAddress = offset % sizeCoreBank + bank * sizeCoreBank
-            commonString = "%04o" % fAddress
-        offsetString = "%04o" % (offset % sizeCoreBank + sizeCoreBank)
-    if commonString != "":
-        addressString = "%s (%s,%s)" % (commonString, bankString, offsetString)
-    else:
-        addressString = "%s,%s%7s" % (bankString, offsetString, "")
-    return addressString, fAddress
 
 #=============================================================================
 # Read the input file.
@@ -229,13 +191,6 @@ for symbol in sorted(specialSubroutines):
         print("%-8s = %s" % (symbol, addressString))
     if fAddress != -1:
         specialFixedFixed[fAddress] = addressTuple
-        cli.entryPoints.append(    
-            {   "symbol": symbol,
-                "inBasic": True, 
-                "bank": fAddress // sizeCoreBank, 
-                "offset": fAddress % sizeCoreBank, 
-                "eb": 0, "fb": 0, "feb": 0   }
-        )
 
 INTPRET = specialSubroutines["INTPRET"][2]
 
@@ -347,12 +302,11 @@ def getDataWords(core, bank, offset, symbol, dataWords):
 def disassembleRange(core, erasableOnEntry, iochannelsOnEntry, bank, start, 
                      end, response, inBasic=True, autoQuit=False,
                      autoCCS=False):
-    startInterp = False
     erasable = copy.deepcopy(erasableOnEntry)
     iochannels = copy.deepcopy(iochannelsOnEntry)
     dataWords = 0
     extended = 0
-    stadr = False
+    state = interpretiveStart()
     address = start
     sinceCCS = 10
     while address < end:
@@ -422,14 +376,8 @@ def disassembleRange(core, erasableOnEntry, iochannelsOnEntry, bank, start,
                     else:
                         sinceCCS = 0
         else:
-            if startInterp:
-                print("A.1 %02o %04o" % (bank, offset))
-            disassembly, stadr, inBasic = \
-                disassembleInterpretive(core, bank, offset, stadr)
-            if startInterp:
-                print("A.1.5", disassembly)
-            if startInterp:
-                print("A.2")
+            disassembly, inBasic = \
+                disassembleInterpretive(core, bank, offset, state)
             for entry in disassembly:
                 left = entry[0]
                 right = entry[1]
@@ -441,8 +389,6 @@ def disassembleRange(core, erasableOnEntry, iochannelsOnEntry, bank, start,
                     return True
                 offset += 1
                 address += 1
-            if startInterp:
-                print("A.3")
     return False
     
 #=============================================================================
@@ -451,7 +397,11 @@ def disassembleRange(core, erasableOnEntry, iochannelsOnEntry, bank, start,
 
 # Command-line switch:  --dump
 if cli.dump:
-    for bank in [2, 3, 0, 1] + list(range(4, numCoreBanks)):
+    if cli.block1:
+        bankList = range(startingCoreBank, numCoreBanks)
+    else:
+        bankList = [2, 3, 0, 1] + list(range(4, numCoreBanks))
+    for bank in bankList:
         print()
         print("BANK=%o" % bank)
         for row in range(128):
@@ -886,7 +836,6 @@ if cli.findFilename != "":
             elif referenceType in ['S', 'A', 'L', 'I', 'E', 'H']:
                 if referenceType == 'I':
                     context = ~context
-                if 'POSEXIT' in symbols: print("here", reference, references, file=sys.stderr)
                 if referenceType not in ['L', 'E', 'H']:
                     context -= 1
                 context &= 0o3777
@@ -1021,11 +970,9 @@ if cli.findFilename != "":
                     context // sizeCoreBank, context % sizeCoreBank, references]) 
     # Final pass to check for consistency and print report.
     for referencedSymbol in sorted(observedReferences):
-        #print("here A", referencedSymbol, observedReferences[referencedSymbol], file=sys.stderr)
         references = observedReferences[referencedSymbol]
         referencesByAddress = {}
         for reference in references:
-            #print("here B", reference, references, file=sys.stderr)
             referencingSymbol = reference[2]
             offsetWithinReference = reference[2][1]
             if reference[0] == "??":
@@ -1245,285 +1192,4 @@ if cli.findFilename != "":
                 
     sys.exit(0)
     
-#=============================================================================
-# Recursive disassembly.  Each invocation tries to disassemble from the 
-# starting offset to the end of the bank, descending recursively wherever it
-# finds a transfer of control, but stopping if it finds a blocking
-# condition such as reaching a location that has already been disassembled
-# or unconditionally jumping away.  Each invocation of disassemble() is
-# passed a dictionary structured as follows:
-#   {
-#       "inBasic": ...,
-#       "bank": ..., 
-#       "offset": ...,
-#       "fb": ...,
-#       "eb": ...
-#   }
-if cli.descent:
-    if True:
 
-        # A response function for disassembleAGC() as called from
-        # disassemble().
-        def controlTransferCheck(core, erasable, iochannels, 
-                                 occasion, bank, address, left, right):
-            offset = address % sizeCoreBank
-            if cli.debug:
-                print("%02o,%04o EB=%05o FB=%05o "
-                      "FEB=%05o A=%05o L=%05o Q=%05o"
-                      "    %05o         %-12s %s" \
-                          % (bank, address, erasable[0][3], erasable[0][4],
-                             iochannels[7], erasable[0][0], erasable[0][1],
-                             erasable[0][2],
-                             core[bank][offset], left, right))
-            disassembly[bank][offset] = (left, right)
-
-            # Try to track effect on erasable and/or io channels.
-            if occasion == 1:
-                semulate(core, erasable, iochannels, left, right)
-                # More TBD.
-
-        def disassemble(erasable, iochannels, entryPoint):
-            global disassembly
-            
-            bank = entryPoint["bank"]
-            offset = entryPoint["offset"]
-            entryPointString = "%02o,%04o" % (bank, offset + sizeCoreBank)
-            if disassembly[bank][offset] != unusedDisassembly:
-                if cli.debug:
-                    print("Already ", entryPointString, 
-                        " -------------------------------")
-                return
-            if cli.debug:
-                print("Entering", entryPointString, 
-                    " ------------------------------")
-            inBasic = entryPoint["inBasic"]
-            fb = entryPoint["fb"]
-            eb = entryPoint["eb"]
-            feb = entryPoint["feb"]
-            erasable[0][3] = eb
-            erasable[0][4] = fb
-            if eb == -1 or fb == -1:
-                erasable[0][6] = -1
-            else:
-                erasable[0][6] = (fb & 0o76000) | ((eb >> 8) & 0o7)
-            iochannels[7] = feb
-            disassembleRange(core, erasable, iochannels, bank, offset, 
-                         sizeCoreBank, controlTransferCheck, inBasic, True,
-                         False)
-
-    else:
-
-        def disassemble(erasable, iochannels, entryPoint):
-            global disassembly
-            
-            bank = entryPoint["bank"]
-            offset = entryPoint["offset"]
-            entryPointString = "%02o,%04o" % (bank, offset + sizeCoreBank)
-            if disassembly[bank][offset] != unusedDisassembly:
-                if cli.debug:
-                    print("Already ", entryPointString, 
-                        " -------------------------------")
-                return
-            if cli.debug:
-                print("Entering", entryPointString, 
-                      " ------------------------------")
-            inBasic = entryPoint["inBasic"]
-            fb = entryPoint["fb"]
-            eb = entryPoint["eb"]
-            feb = entryPoint["feb"]
-            erasable[0][3] = eb
-            erasable[0][4] = fb
-            if eb == -1 or fb == -1:
-                erasable[0][6] = -1
-            else:
-                erasable[0][6] = (fb & 0o76000) | ((eb >> 8) & 0o7)
-            iochannels[7] = feb
-            lastCA = -1
-            extended = False
-            while offset < sizeCoreBank:
-                if disassembly[bank][offset] != unusedDisassembly:
-                    break
-                if inBasic: # Basic location
-                    value = core[bank][offset]
-                    if value == INTPRET and not extended:
-                        disassembly[bank][offset] = ("TC", "INTPRET")
-                        offset += 1
-                        inBasic = False
-                        continue
-                    opcode, operand, extended = \
-                        disassembleBasic(core[bank][offset], extended)
-                    if cli.debug:
-                        print("%02o,%04o eb=%05o fb=%05o feb=%05o "
-                              "A=%05o L=%05o Q=%05o"
-                              "    %05o         %-12s %s" \
-                                  % (bank, offset + sizeCoreBank, erasable[0][3], 
-                                     erasable[0][4],
-                                     iochannels[7], erasable[0][0], 
-                                     erasable[0][1],
-                                     erasable[0][2],
-                                     core[bank][offset], opcode, operand))
-                    disassembly[bank][offset] = (opcode, operand)
-                    offset += 1
-
-                    # Try to track effect on erasable and/or io channels.
-                    semulate(core, erasable, iochannels, opcode, operand)
-                    
-                    # Transfer of control? 
-                    if opcode in ["RETURN", "RESUME"]:
-                        break
-                    elif opcode in ["BZF", "BZMF"]:
-                        newErasable = copy.deepcopy(erasable)
-                        newIochannels = copy.deepcopy(iochannels)
-                        disassemble( newErasable, newIochannels,
-                                    { "inBasic": True, "bank": bank, 
-                                      "offset": int(operand, 8) % sizeCoreBank,
-                                      "eb": newErasable[0][3], 
-                                      "fb": newErasable[0][4], 
-                                      "feb": newIochannels[7] } )
-                    elif opcode in ["TC", "TCF"]:
-                        nOperand = int(operand, 8)
-                        if nOperand < sizeCoreBank: # Erasable
-                            pass
-                        elif nOperand < 0o4000:
-                            if erasable[0][4] != -1:
-                                newErasable = copy.deepcopy(erasable)
-                                if opcode == "TC":
-                                    newErasable[0][2] = offset
-                                newIochannels = copy.deepcopy(iochannels)
-                                disassemble( newErasable, newIochannels,
-                                        {   "inBasic": True, 
-                                            "bank": (erasable[0][4] >> 10) \
-                                                        & 0o37,
-                                            "offset": nOperand % sizeCoreBank,
-                                            "eb": erasable[0][3], 
-                                            "fb": erasable[0][4], 
-                                            "feb": newIochannels[7] } )
-                        else:
-                                newErasable = copy.deepcopy(erasable)
-                                newIochannels = copy.deepcopy(iochannels)
-                                disassemble( newErasable, newIochannels,
-                                        {   "inBasic": True, 
-                                            "bank": nOperand // sizeCoreBank, 
-                                            "offset": nOperand % sizeCoreBank,
-                                            "eb": newErasable[0][3], 
-                                            "fb": newErasable[0][4], 
-                                            "feb": newIochannels[7] } )
-                        # If the opcode is TC, check if it's one of those with
-                        # a funky calling sequence in which the TC is followed
-                        # by arguments rather than additional basic
-                        # instructions, or for which the TC never returns. 
-                        # Note that while INTPRET is special, it has already
-                        # been processed, so the code below is never reached.
-                        if opcode == "TC":
-                            if nOperand in specialFixedFixed:
-                                searchPattern = specialFixedFixed[nOperand][3]
-                                symbol = specialFixedFixed[nOperand][4]
-                                noReturn = searchPattern["noReturn"]
-                                dataWords = getDataWords(core, bank, 
-                                                offset, symbol,
-                                                searchPattern["dataWords"])
-                            else:
-                                symbol = ""
-                                dataWords = 0
-                                noReturn = False
-                            for i in range(dataWords):
-                                disassembly[bank][offset] = \
-                                    ("OCT", "%05o" % core[bank][offset])
-                                offset += 1
-                            if noReturn:
-                                # Even though "called" via TC, there's no
-                                # actual return from the called subroutine, 
-                                # so from the viewpoint of the disassembler
-                                # it's really a TCF instead.
-                                break
-                        # Usually, if the opcode is a TCF (which does not
-                        # return), we shouldn't continue disassembling the
-                        # succeeding word because we have no reason to 
-                        # believe that it is still basic code.  However,
-                        # heuristically thinking, there is an exception:  
-                        # In a jump table, there will be
-                        # a long series of TCF instructions.  So before
-                        # bailing out after a TCF, we should also check if 
-                        # the next instruction if a TCF too.
-                        if opcode == "TCF":
-                            opcode, operand, extended = \
-                                disassembleBasic(core[bank][offset], extended)
-                            if opcode != "TCF":
-                                break
-                    elif opcode in ["DTCB", "DTCF", "EDRUPT", "TCAA", 
-                                    "XLQ", "XXALQ"]:
-                        # TBD
-                        break
-                else:       # Interpretive location.
-                    # Recall that disassembleInterpretive() returns a list not
-                    # only of the disassembled current word, but of all its
-                    # arguments too.
-                    disAll = disassembleInterpretive(core, bank, offset)
-                    for dis in disAll:
-                        if disassembly[bank][offset] != unusedDisassembly:
-                            print("Implementation error C")
-                            sys.exit(1)
-                        disassembly[bank][offset] = dis
-                        offset += 1
-                    # We have to do extra stuff here if the instruction
-                    # transfers control, to insure that branches are
-                    # disassembled.
-                    # TBD
-                    if disAll[0][0] == "EXIT" or disAll[0][1] == "EXIT":
-                        inBasic = True
-            if cli.debug:
-                print("Leaving ", entryPointString, 
-                      " -------------------------------")
-
-    # Try disassembling, starting from each known code-entry point.
-    for entryPoint in cli.entryPoints:
-        print("Processing entry point: ", entryPoint["symbol"])
-        disassemble(copy.deepcopy(erasable), copy.deepcopy(iochannels),
-                    entryPoint) 
-
-    #========================================================================
-    # Convert bank,offset to linear address (10000-117777 octal).
-    # Output results of recursive disassembly.
-
-    def linearAddress(bank, offset):
-        return 0o10000 + sizeCoreBank * bank + offset
-
-    # Output results
-    f = open("disassemblerAGC.agc", "w")
-    basicWords = [0]*numCoreBanks
-    interpreterWords = [0]*numCoreBanks
-    for bank in range(numCoreBanks):
-        inCode = False
-        for offset in range(sizeCoreBank):
-            d = disassembly[bank][offset]
-            if len(d) == 0: # Empty location
-                inCode = False
-            else:           # Not empty location
-                if not inCode:
-                    print(file=f)
-                    print("\t\tBANK\t%o" % bank, file=f)
-                    print("\t\tSETLOC\t%o" % linearAddress(bank,offset),
-                            file=f)
-                    print(file=f) 
-                    inCode = True
-                if len(d) == 2: # Basic instructions
-                    basicWords[bank] += 1
-                    if d[0] == "":
-                        print("\t\tOCT\t%s" % d[1], file=f)
-                    else:
-                        print("\t\t%s\t%s" % d, file=f)
-                elif len(d) == 3: # Interpreter instructions
-                    interpreterWords[bank] += 1
-                    print("\t\t%s\t%s" % (d[1], d[2]), file=f)
-    f.close()
-
-    # Print summary:
-    print()
-    print("     Number of disassembled locations")
-    print("-------------------------------------------")
-    print("Bank            Basic           Interpreter")
-    print("----            -----           -----------")
-    for bank in range(numCoreBanks):
-        print(" %02o             %5d           %5d" \
-            % (bank, basicWords[bank], interpreterWords[bank]))
-            

@@ -279,8 +279,12 @@ def adjustOpcodePerArgument(core, bank, offset, interpreterCodesField,
     #    printInterpreterCodesField(ior)
     return "??????", 0, ()
 
-# Returns a list of triples and two booleans.  The first boolean indicates
-# whether or not the final instruction was STADR.  The second boolean 
+# Returns a state structure corresponding to "beginning"; which has 
+# different meanings for Block I vs Block II.
+def interpretiveStart():
+    return { "stadr": False }
+
+# Returns a list of triples and a booleans.  The boolean 
 # indicates whether or not it was EXIT.  The list of triples contains the 
 # disassembled word and all of its arguments.  The first triple in the list is
 #   (LEFT, RIGHT, ADDRESS)
@@ -289,13 +293,14 @@ def adjustOpcodePerArgument(core, bank, offset, interpreterCodesField,
 # is STCALL, STODL, STORE, or STOVL, but is "" otherwise.  Subsequent 
 # triples are simply
 #   ("", "", ARGUMENT)
-# The input arguments are self-explanatory, except stadr.  This is 
-# True if the last instruction previously was STADR, and False otherwise.
+# The state is modified in place, and for Block II all it does is indicate
+# whether or not STADR is active.
 cannotPushUp = [0o115, 0o117, 0o45, 0o47]
-def disassembleInterpretive(core, bank, offset, stadr):
+def disassembleInterpretive(core, bank, offset, state):
     disassembly = []
     word = core[bank][offset]
     cword = ~word
+    stadr = state["stadr"]
     if stadr:
         sword = cword
     else:
@@ -384,5 +389,138 @@ def disassembleInterpretive(core, bank, offset, stadr):
             if i >= rawNumArgs - canPushDown and (word & 0o40000) != 0:
                 break
             disassembly.append(("", "", "%05o" % word))
-    return disassembly, stadr, exit
+    state["stadr"] = stadr
+    return disassembly, exit
+
+#==========================================================================
+# This is stuck at the end because it isn't actually used by the
+# code above.  But it is interpreter-related data that may be imported
+# from other code.
+
+# Here's a list of opcodes and pseudo-ops I pasted in from 
+# yaYUL/Pass.c (ParsersBlock2) and then massaged a bit.
+# Pseudo-ops which allocate no rope are commented out.
+parsers = {
+    "-1DNADR": 'd',
+    "-2CADR": 'd',
+    "-2DNADR": 'd',
+    "-3DNADR": 'd',
+    "-4DNADR": 'd',
+    "-5DNADR": 'd',
+    "-6DNADR": 'd',
+    "-CCS": 'b',
+    "-DNCHAN": 'd',
+    "-DNPTR": 'd',
+    "-GENADR": 'd',
+    #"=": 'd',
+    #"=ECADR": 'd',
+    #"=MINUS": 'd',
+    "1DNADR": 'd',
+    "2BCADR": 'd',
+    "2CADR": 'd',
+    "2DEC": 'd',
+    "2DEC*": 'd',
+    "2DNADR": 'd',
+    "2FCADR": 'd',
+    "2OCT": 'd',
+    "3DNADR": 'd',
+    "4DNADR": 'd',
+    "5DNADR": 'd',
+    "6DNADR": 'd',
+    "AD": 'b',
+    "ADRES": 'd',
+    "ADS": 'b',
+    "AUG": 'b',
+    #"BANK": 'd',
+    #"BLOCK": 'd',
+    "BBCON": 'd',
+    "BBCON*": 'd',
+    #"BNKSUM": 'd',
+    "BZF": 'b',
+    "BZMF": 'b',
+    "CA": 'b',
+    "CAE": 'b',
+    "CAF": 'b',
+    "CADR": 'd',
+    "CCS": 'b',
+    #"CHECK=": 'd',
+    "COM": 'b',
+    #"COUNT": 'd',
+    #"COUNT*": 'd',
+    "CS": 'b',
+    "DAS": 'b',
+    "DCA": 'b',
+    "DCOM": 'b',
+    "DCS": 'b',
+    "DDOUBL": 'b',
+    "DEC": 'd',
+    "DEC*": 'd',
+    "DIM": 'b',
+    "DNCHAN": 'd',
+    "DNPTR": 'd',
+    "DOUBLE": 'b',
+    "DTCB": 'b',
+    "DTCF": 'b',
+    "DV": 'b',
+    "DXCH": 'b',
+    #"EBANK=": 'd',
+    "ECADR": 'd',
+    "EDRUPT": 'b',
+    #"EQUALS": 'd',
+    #"ERASE": 'd',
+    "EXTEND": 'b',
+    "FCADR": 'd',
+    "GENADR": 'd',
+    "INCR": 'b',
+    "INDEX": 'b',
+    "INHINT": 'b',
+    "LXCH": 'b',
+    "MASK": 'b',
+    "MSK": 'b',
+    #"MEMORY": 'd',
+    "MM": 'd',
+    "MP": 'b',
+    "MSU": 'b',
+    "NDX": 'b',
+    "NOOP": 'b',
+    "NV": 'd',
+    "OCT": 'd',
+    "OCTAL": 'd',
+    "OVSK": 'b',
+    "QXCH": 'b',
+    "RAND": 'b',
+    "READ": 'b',
+    "RELINT": 'b',
+    "REMADR": 'd',
+    "RESUME": 'b',
+    "RETURN": 'b',
+    "ROR": 'b',
+    "RXOR": 'b',
+    #"SBANK=": 'd',
+    #"SECSIZ": 'd',
+    #"SETLOC": 'd',
+    "SQUARE": 'b',
+    "STCALL": 'i',
+    "STODL": 'i',
+    "STODL*": 'i',
+    "STORE": 'i',
+    "STOVL": 'i',
+    "STOVL*": 'i',
+    "SU": 'b',
+    "SUBRO": 'd',
+    "TC": 'b',
+    "TCR": 'b',
+    "TCAA": 'b',
+    "TCF": 'b',
+    "TS": 'b',
+    "VN": 'd',
+    "WAND": 'b',
+    "WOR": 'b',
+    "WRITE": 'b',
+    "XCH": 'b',
+    "XLQ": 'b',
+    "XXALQ": 'b',
+    "ZL": 'b',
+    "ZQ": 'b'
+}
 

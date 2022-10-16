@@ -15,144 +15,22 @@ History:        2022-10-05 RSB  Wrote.  This version seems to work
                                 for double-word basic instructions vs
                                 single-word instructions.
                 2022-10-09 RSB  Fixed erasables, I hope!
+                2022-10-14 RSB  Began supporting --block1 and --blk2.
 """
 
 import sys
-from disassembleInterpretive import interpreterOpcodes
-from registers import registersByName
-
-# Here's a list of opcodes and pseudo-ops I pasted in from 
-# yaYUL/Pass.c (ParsersBlock2) and then massaged a bit.
-# Pseudo-ops which allocate no rope are commented out.
-ParsersBlock2 = {
-    "-1DNADR": 'd',
-    "-2CADR": 'd',
-    "-2DNADR": 'd',
-    "-3DNADR": 'd',
-    "-4DNADR": 'd',
-    "-5DNADR": 'd',
-    "-6DNADR": 'd',
-    "-CCS": 'b',
-    "-DNCHAN": 'd',
-    "-DNPTR": 'd',
-    "-GENADR": 'd',
-    #"=": 'd',
-    #"=ECADR": 'd',
-    #"=MINUS": 'd',
-    "1DNADR": 'd',
-    "2BCADR": 'd',
-    "2CADR": 'd',
-    "2DEC": 'd',
-    "2DEC*": 'd',
-    "2DNADR": 'd',
-    "2FCADR": 'd',
-    "2OCT": 'd',
-    "3DNADR": 'd',
-    "4DNADR": 'd',
-    "5DNADR": 'd',
-    "6DNADR": 'd',
-    "AD": 'b',
-    "ADRES": 'd',
-    "ADS": 'b',
-    "AUG": 'b',
-    #"BANK": 'd',
-    #"BLOCK": 'd',
-    "BBCON": 'd',
-    "BBCON*": 'd',
-    #"BNKSUM": 'd',
-    "BZF": 'b',
-    "BZMF": 'b',
-    "CA": 'b',
-    "CAE": 'b',
-    "CAF": 'b',
-    #"CADR": 'd',
-    "CCS": 'b',
-    #"CHECK=": 'd',
-    "COM": 'b',
-    #"COUNT": 'd',
-    #"COUNT*": 'd',
-    "CS": 'b',
-    "DAS": 'b',
-    "DCA": 'b',
-    "DCOM": 'b',
-    "DCS": 'b',
-    "DDOUBL": 'b',
-    "DEC": 'd',
-    "DEC*": 'd',
-    "DIM": 'b',
-    "DNCHAN": 'd',
-    "DNPTR": 'd',
-    "DOUBLE": 'b',
-    "DTCB": 'b',
-    "DTCF": 'b',
-    "DV": 'b',
-    "DXCH": 'b',
-    #"EBANK=": 'd',
-    "ECADR": 'd',
-    "EDRUPT": 'b',
-    #"EQUALS": 'd',
-    #"ERASE": 'd',
-    "EXTEND": 'b',
-    "FCADR": 'd',
-    "GENADR": 'd',
-    "INCR": 'b',
-    "INDEX": 'b',
-    "INHINT": 'b',
-    "LXCH": 'b',
-    "MASK": 'b',
-    "MSK": 'b',
-    #"MEMORY": 'd',
-    "MM": 'd',
-    "MP": 'b',
-    "MSU": 'b',
-    "NDX": 'b',
-    "NOOP": 'b',
-    "NV": 'd',
-    "OCT": 'd',
-    "OCTAL": 'd',
-    "OVSK": 'b',
-    "QXCH": 'b',
-    "RAND": 'b',
-    "READ": 'b',
-    "RELINT": 'b',
-    "REMADR": 'd',
-    "RESUME": 'b',
-    "RETURN": 'b',
-    "ROR": 'b',
-    "RXOR": 'b',
-    #"SBANK=": 'd',
-    #"SECSIZ": 'd',
-    #"SETLOC": 'd',
-    "SQUARE": 'b',
-    "STCALL": 'i',
-    "STODL": 'i',
-    "STODL*": 'i',
-    "STORE": 'i',
-    "STOVL": 'i',
-    "STOVL*": 'i',
-    "SU": 'b',
-    "SUBRO": 'd',
-    "TC": 'b',
-    "TCR": 'b',
-    "TCAA": 'b',
-    "TCF": 'b',
-    "TS": 'b',
-    "VN": 'd',
-    "WAND": 'b',
-    "WOR": 'b',
-    "WRITE": 'b',
-    "XCH": 'b',
-    "XLQ": 'b',
-    "XXALQ": 'b',
-    "ZL": 'b',
-    "ZQ": 'b'
-}
 
 debug = False
 minLength = 12
+block1 = False
+blk2 = False
 for param in sys.argv[1:]:
     if param == "--debug":
         debug = True
+    elif param == "--block1":
+        block1 = True
+    elif param == "--blk2":
+        blk2 = True
     elif param[:6] == "--min=":
         minLength = int(param[6:])
     elif param == "--help":
@@ -183,9 +61,23 @@ for param in sys.argv[1:]:
         print("Unknown parameter:", param)
         sys.exit(1)
 
+if block1:
+    from disassembleInterpretiveBlockI import interpreterOpcodes, parsers
+    from registersBlockI import registersByName
+    from auxiliaryBlockI import *
+    from checkForReferencesBlockI import checkForReferences
+elif blk2:
+    print("BLK2 not yet supported", file=sys.stderr)
+    sys.exit(1)
+else:
+    from disassembleInterpretive import interpreterOpcodes, parsers
+    from registers import registersByName
+    from auxiliary import *
+    from checkForReferences import checkForReferences
+
 # Initialization of data structures.
 rope = []
-for address in range(0o2000):
+for address in range(sizeCoreBank):
     # type, symbol, left, right, reference. Each reference is a triple:
     # (
     #   referenced symbol, 
@@ -194,12 +86,12 @@ for address in range(0o2000):
     #   reference type
     # )
     rope.append([])
-    for bank in range(0o44):
+    for bank in range(numCoreBanks):
         rope[-1].append(['u', "", "", [], ()])
 erasable = []
-for address in range(0o400):
+for address in range(sizeErasableBank):
     erasable.append([])
-    for bank in range(8):
+    for bank in range(numErasableBanks):
         erasable[address].append({ "symbols": [], "references": []})
 
 # Read and analyze the assembly listing.  Afterward, the rope array contains
@@ -242,40 +134,11 @@ for line in sys.stdin:
         addressField = line[15:22].strip()
         if addressField[:1] == "?":
             continue
-    fields = addressField.split(",")
-    fixed = True
-    if fields[0] == "":
+    if addressField == "":
         continue
-    elif len(fields) == 1 and fields[0].isdigit():
-        address = int(fields[0], 8)
-        if address < 0o1400:
-            fixed = False
-            bank = address // 0o400
-            address = (address % 0o400) + 0o1400 
-        else:
-            if address < 0o4000 or address > 0o7777:
-                continue
-            bank = address // 0o2000
-            address = (address % 0o2000) + 0o2000
-    elif len(fields) == 2 and fields[0][0] == "E" and fields[0][1].isdigit() \
-            and fields[1] != "" and fields[1].isdigit():
-        fixed = False
-        bank = int(fields[0][1], 8)
-        address = int(fields[1], 8)
-        if bank < 0 or bank > 7 or address < 0o1400 or address > 0o1777:
-            continue
-    elif len(fields) == 2 and fields[0].isdigit() \
-            and fields[1] != "" and fields[1].isdigit():
-        bank = int(fields[0], 8)
-        address = int(fields[1], 8)
-        if bank < 0 or bank > 0o43 or address < 0o2000 or address > 0o3777:
-            continue
-    else:
+    error, fixed, bank, address, offset = parseAddressString(addressField) 
+    if error or bank == -1:
         continue
-    if fixed:
-        offset = address % 0o2000
-    else:
-        offset = address % 0o400
     
     octal = line[32:37]
     if octal == "     " and fixed:
@@ -307,11 +170,11 @@ for line in sys.stdin:
             locationType = "i"
         else:
             locationType = "I"
-    elif left in ParsersBlock2:
+    elif left in parsers:
         if symbol == "":
-            locationType = ParsersBlock2[left]
+            locationType = parsers[left]
         else:
-            locationType = ParsersBlock2[left].upper()
+            locationType = parsers[left].upper()
     elif (left == "" or left.isdigit()) and offset > 0:
             locationType = rope[offset - 1][bank][0].lower()
     
@@ -341,10 +204,10 @@ print("# The minimum length of specifications is set "
       "to %d words." % minLength)
 print("# Core rope:")
 nonCode = ['u', 'd', 'D']
-for bank in range(0o44):
+for bank in range(numCoreBanks):
     offset = 0
     while True:
-        if offset >= 0o2000:
+        if offset >= sizeCoreBank:
             break
         locationInfo = rope[offset][bank]
         locationType = locationInfo[0]
@@ -359,7 +222,7 @@ for bank in range(0o44):
         # symbolic label, we invent one for it, of the form
         # Rbb,aaaa, where bb,aaaa is the address.
         if symbol == "":
-            symbol = "R%02o,%04o" % (bank, offset + 0o2000)
+            symbol = "R%02o,%04o" % (bank, offset + coreOffset)
             rope[offset][bank][0] = rope[offset][bank][0].upper()
             rope[offset][bank][1] = symbol
     
@@ -369,16 +232,18 @@ for bank in range(0o44):
         #symbolList = [symbol]
         derivedSymbols = {}
         found = False
-        for newOffset in range(offset + 1, 0o2000):
+        lookaheadType = locationType.lower()
+        for newOffset in range(offset + 1, sizeCoreBank):
             if len(rope[newOffset][bank][4]) == 4:
                 print("- %s %s %d %s" % rope[newOffset][bank][4])
             lookahead = rope[newOffset][bank]
+            lastLookaheadType = lookaheadType.lower()
             lookaheadType = lookahead[0]
             lookaheadSymbol = lookahead[1]
             if lookaheadType in nonCode or lookaheadSymbol != "":
                 if newOffset < offset + minLength:
                     derivedSymbols[lookaheadSymbol] = newOffset - offset
-                    if lookaheadType != locationType:
+                    if lookaheadType.lower() != lastLookaheadType: # locationType:
                         # The scope is irreparably too short and will
                         # be rejected.
                         offset = newOffset
@@ -401,7 +266,7 @@ for bank in range(0o44):
                 #    print("# Due to specified minimum length, "
                 #          "combined scopes of symbols", symbolList)
                 print("%s %02o %04o %04o %s" % (normalize(symbol), bank, 
-                    offset + 0o2000, newOffset + 0o2000, interpretive))
+                    offset + coreOffset, newOffset + coreOffset, interpretive))
                 for derivedSymbol in derivedSymbols:
                     print("%s = %s + %o" % (normalize(derivedSymbol), 
                                      normalize(symbol), \
@@ -420,174 +285,21 @@ for bank in range(0o44):
 
 # Make erasable searchable by symbol.
 erasableBySymbol = {}
-for address in range(0o400):
-    for bank in range(8):
+for address in range(sizeErasableBank):
+    for bank in range(numErasableBanks):
         for symbol in erasable[address][bank]["symbols"]:
             erasableBySymbol[symbol] = (bank, address)
 fixedSymbols = set()
-for bank in range(0o44):
-    for offset in range(0o2000):
+for bank in range(numCoreBanks):
+    for offset in range(sizeCoreBank):
         symbol = rope[offset][bank][1]
         if symbol != "" and symbol not in erasableBySymbol:
             fixedSymbols.add(symbol)
 fixedInterpretiveReferencesBySymbol = {}
 
-# Analyze the erasable and rope to determine where *references* 
-# appear within the rope.  Each reference is identified by the 
-# subroutine in which it is referenced and the offset from the start
-# of the subroutine.  After patterns are matched, those can then be
-# converted to absolute addresses.
-
-# Detects interpretive opcodes that don't decrement their stand-alone
-# arguments, and hence the arguments are marked as type 'L' rather than 'A'.
-def dontDecrement(opcode):
-    return ("," in opcode) or \
-        opcode in ["CALL", "STQ", "GOTO", "STCALL", "BHIZ", "BMN",
-                   "BOV", "BOVB", "BPL", "BZE", "CLRGO", "SETGO",
-                   "BOFF", "BOF", "BOFCLR", "BOFINV", "BOFSET", "BON", "BONCLR",
-                   "BONINV", "BONSET", "RTB"]
-
-branches = ["CALL", "GOTO", "STCALL", "BHIZ", "BMN", "BOV", "BOVB", "BPL", 
-            "BZE", "CLRGO", "SETGO", "BOFF", "BOF", "BOFCLR", "BOFINV", "BOFSET", 
-            "BON", "BONCLR", "BONINV", "BONSET", "RTB"]
-for bank in range(0o44):
-    lastLeft = ""
-    lastRight = ""
-    lastLeftComma = False
-    lastRightComma = False
-    left = ""
-    right = ""
-    argCount = -1
-    lastSymbol = ""
-    sinceSymbol = 0
-    for offset in range(0o2000):
-        argCount += 1
-        lastLastLeft = ""
-        lastLastRight = ""
-        location = rope[offset][bank]
-        if location[0] not in ['b', 'B', 'i', 'I']:
-            lastSymbol = ""
-            argCount = -1
-            continue
-        if location[0] in ['B', 'I']:
-            lastSymbol = location[1]
-            sinceSymbol = -1
-        sinceSymbol += 1
-        if lastSymbol == "":
-            print("Implementation error: Bad lastSymbol at %02o,%04o" \
-                    % (bank, offset + 0o2000), location, sinceSymbol)
-        operand = location[3]
-        # This tracks just "pure" references to the symbols, as opposed to
-        # (for example) SYMBOL +5.  I'd like to do the latter as well, but
-        # I don't quite see how to do it for now.
-        if location[2] != "":
-            argCount = 0
-            lastLastLeft = lastLeft
-            lastLastRight = lastRight
-            lastLeft = location[2]
-            left = lastLeft
-            if len(operand) == 1:
-                lastRight = operand[0]
-            else:
-                lastRight = ""
-            lastLeftComma = dontDecrement(lastLeft)
-            lastRightComma = dontDecrement(lastRight)
-            numLeftArgs = 0
-            numRightArgs = 0
-            argTypes = ['A']*5
-            if location[0] in ['i', 'I']:
-                if lastLeft in interpreterOpcodes:
-                    numLeftArgs = interpreterOpcodes[lastLeft][2]
-                    if lastRight in interpreterOpcodes:
-                        numRightArgs = interpreterOpcodes[lastRight][2]
-                elif lastLeft == "STCALL":
-                    numLeftArgs = 1
-                i = 1
-                for j in range(numLeftArgs):
-                    if lastLeftComma:
-                        argTypes[i] = 'L'
-                        if lastLeft not in branches:
-                            argTypes[i] = 'H'
-                    elif j == numLeftArgs - 1 and lastLeft in ['SSP']:
-                        argTypes[i] = 'L'
-                    i += 1
-                for j in range(numRightArgs):
-                    if lastRightComma:
-                        argTypes[i] = 'L'
-                        if lastRight not in branches:
-                            argTypes[i] = 'H'
-                    elif j == numRightArgs - 1 and \
-                            lastRight in ['SSP', 'CGOTO', 'CCALL']:
-                        argTypes[i] = 'L'
-                    i += 1  
-                #print("# %02o,%04o %-8s %-8s" % (bank, offset+0o2000, lastLeft,
-                #        lastRight), lastLeftComma, lastRightComma, argTypes)    
-        #print("%02o,%04o '%s' '%s' '%s' '%s'" % (bank, offset+0o2000, lastLeft, \
-        #                                lastRight, lastLastLeft, lastLastRight))
-        if len(operand) == 1:
-            # Try to determine if the operand is a simple numeric.
-            rem = operand[0]
-            if operand[0][:1] in ["+", "-"]:
-                rem = operand[0][1:]
-            if rem[-1:] == "D":
-                rem = rem[:-1]
-            if len(rem) > 0 and rem.isdigit():
-                continue
-        if len(operand) != 1:
-            continue
-        referenceType = ""
-        if location[0] in ['b', 'B'] and operand[0] not in erasableBySymbol:
-            if lastLeft in ["TC", "TCF", "AD", "BZF", "BZMF", "CA",
-                            "CS", "MASK", "MP"]:
-                rope[offset][bank][4] = (operand[0], lastSymbol, sinceSymbol, "B")
-            elif lastLeft in ["DCA", "DCS"]:
-                rope[offset][bank][4] = (operand[0], lastSymbol, sinceSymbol, "D")
-        elif location[0] in ['b', 'B']:
-            if location[2] in ["DAS", "DCA", "DCS", "DXCH"]:
-                referenceType = 'D'
-            elif location[2][0] == "-":
-                referenceType = 'C'
-            else:
-                referenceType = 'B'
-        elif location[0] in ['i', 'I']:
-            if operand[0][-2:] in [",1", ",2"]:
-                symbol = operand[0][:-2]
-                indexed = True
-            else:
-                symbol = operand[0]
-                indexed = False
-            if symbol not in erasableBySymbol and symbol not in fixedSymbols:
-                continue
-            fixed = True
-            if symbol in erasableBySymbol:
-                fixed = False
-            if lastLastLeft == "STADR" or lastLastRight == "STADR":
-                referenceType = 'I'
-            elif location[2] == "0":
-                referenceType = "E"
-            elif location[2] in ["STORE", "STCALL", "STODL", "STOVL", 
-                                    "STODL*", "STOVL*"]:
-                referenceType = 'S'
-            elif indexed:
-                referenceType = 'K'
-            elif argCount > 0:
-                referenceType = argTypes[argCount]
-                #print("#", referenceType, argCount, argTypes, location)
-            if referenceType != "" and fixed:
-                #print("# %02o,%04o %-8s %-8s" % \
-                #        (bank, offset+0o2000, referenceType, operand[0]))
-                if symbol not in fixedInterpretiveReferencesBySymbol:
-                    fixedInterpretiveReferencesBySymbol[symbol] = []
-                fixedInterpretiveReferencesBySymbol[symbol].append( \
-                    (lastSymbol, sinceSymbol, referenceType) )
-        else:
-            continue
-        if operand[0] in erasableBySymbol:
-            symbolInfo = erasableBySymbol[operand[0]]
-            b = symbolInfo[0]
-            a = symbolInfo[1]
-            erasable[a][b]["references"].append((lastSymbol,sinceSymbol,
-                                                    referenceType))
+# Analyze the erasable and rope to find references to them from code.
+checkForReferences(rope, erasable, erasableBySymbol, fixedSymbols,
+                       fixedInterpretiveReferencesBySymbol)
                     
 # Output erasable specifications.  There are several types:
 #   B   Operand of a single-word basic instruction (like XCH or CA)
@@ -611,7 +323,7 @@ for bank in range(0o44):
 #                                    Offset (decimal) from start of subroutine.
 #                                    Type of reference.
 print("# Erasables")
-for bank in range(8):
+for bank in range(numErasableBanks):
     for i in range(len(erasable)):
         data = erasable[i][bank]
         for i in range(len(data["symbols"])):
@@ -624,8 +336,8 @@ for bank in range(8):
             print("+", str(data["symbols"]).replace(" ",""),
                   str(data["references"]).replace(" ", ""))
 print("# Fixed references in basic")
-for bank in range(0o44):
-    for i in range(0o2000):
+for bank in range(numCoreBanks):
+    for i in range(sizeCoreBank):
         data = rope[i][bank][4]
         if len(data) < 4 or data[3] == "":
             continue
@@ -642,14 +354,14 @@ if debug:
     # have been miscategorized by the analysis above.
     print("============================================================")
     print("Rope:")
-    for bank in range(0o44):
+    for bank in range(numCoreBanks):
         for i in range(len(rope)):
             data = rope[i][bank]
             print("%02o,%04o  %s   %-12s %-12s" % \
-                (bank, i + 0o2000, data[0], data[1], data[2]), data[3])
+                (bank, i + coreOffset, data[0], data[1], data[2]), data[3])
     print("============================================================")
     print("Erasable:")
-    for bank in range(8):
+    for bank in range(numErasableBanks):
         for i in range(len(erasable)):
             data = erasable[i][bank]
             if len(data["symbols"]) > 0:

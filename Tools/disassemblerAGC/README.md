@@ -114,9 +114,13 @@ The next few subsections are some worked examples of generating match-patterns u
 
 A rope dump will typically be in `--hardware` format rather than `--bin` or binsource format, and will will typically include parity bits.  That will always be the case for ROPE files created by the pieceworkAGC.py program.  But of course, if not, then use of the `--hardware --parity` switches needs to be reconsidered.  Also, once you think the matching process is working as well as it can, it might not hurt to throw in `--check=BASELINE.lst`, just to see how the symbols identified in ROPE.bin differ from the BASELINE.
 
+### Baseline Solarium 55
+
+BASELINE Solarium 55 requires the `--block` disassembler command-line switch, which is not yet supported.
+
 ### Baseline Retread 44
 
-BASELINE Retread 44 works only partially, because it is early ("BLK2") code which isn't yet supported.  
+BASELINE Retread 44 requires the `--blk2` disassembler command-line switch, which is not yet supported.
 
 ### Baseline Sunburst 37
 
@@ -132,7 +136,7 @@ BASELINE Retread 44 works only partially, because it is early ("BLK2") code whic
 ### Baseline Comanche 55 and Artemis 72<a name="Comanche055"></a>
 
     workflow.sh Comanche055 --hint=MISCJUMP@UNAJUMP --hint=MISCJUMP@INDJUMP --hint=-TORQUE@+TORQUE \
-                            --hint=TABYCOM@TABPCOM --hint=ASMBLWY@ASMBLWP  --skip=9DWTESTJ
+                            --hint=TABYCOM@TABPCOM --hint=ASMBLWY@ASMBLWP
 
 Artemis072 uses the same command-line switches.
 
