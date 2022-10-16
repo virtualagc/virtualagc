@@ -49,6 +49,7 @@ def toFixed(string):
 binFile = False
 hardwareFile = False
 debug = False
+debugLevel = 0
 dump = False
 dtest = False
 dbasic = True
@@ -110,11 +111,16 @@ for param in sys.argv[1:]:
             Miscellaneous options:          
                 --help      Display the descriptive information you're now
                             reading.       
-                --debug     Turn on some debugging messages. 
                 --dump      Output an octal dump of the ROPE. Don't forget
                             to add any appropriate AGC-architecture options
                             (see above), since those affect the selection of
                             banks and the order in which they're output.   
+                --debug     Turn on some debugging messages. 
+                --debug-level=N  Set the "debugging level", default 0.  The
+                            only other defined setting is N=1, which means 
+                            that with the --find option, only code patterns
+                            are matched, without any attempt to indirectly
+                            identify symbols through references to them.
                   
             Options related to --dtest:
                 --dtest     This outputs a disassembly of a range of
@@ -228,6 +234,8 @@ for param in sys.argv[1:]:
         blk2 = True
     elif param == "--debug":
         debug = True
+    elif param[:14] == "--debug-level=":
+        debugLevel = int(param[14:])
     elif param == "--dump":
         dump = True
     elif param[:10] == "--pattern=":

@@ -27,6 +27,7 @@ numIoChannels = 0
 # and if either is unknown, it should be set to -1.  Returns a pair:
 # the address string, and the fixed-fixed address integer (-1 if none).
 def getAddressString(bank, offset):
+    offset = offset % sizeCoreBank
     commonString = ""
     bankString = "??"
     if bank >= startingCoreBank and bank < numCoreBanks:
@@ -34,9 +35,9 @@ def getAddressString(bank, offset):
     offsetString = "????"
     fAddress = -1
     if bank in [1, 2]:
-        fAddress = offset % sizeCoreBank + bank * sizeCoreBank
+        fAddress = offset + bank * sizeCoreBank
         commonString = "%04o" % fAddress
-    offsetString = "%04o" % (offset % sizeCoreBank + 3 * sizeCoreBank)
+    offsetString = "%04o" % (offset + 3 * sizeCoreBank)
     if commonString != "":
         addressString = "%s (%s,%s)" % (commonString, bankString, offsetString)
     else:

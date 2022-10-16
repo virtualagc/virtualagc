@@ -163,6 +163,8 @@ if cli.checkFilename != "":
             continue
         if not inSymbols:
             continue
+        if line[:2] != "  ":
+            continue
         addCheckSymbol(line, 7, 12, 25)
         addCheckSymbol(line, 55, 60, 73)
         addCheckSymbol(line, 103, 108, 121)   
@@ -760,266 +762,255 @@ if cli.findFilename != "":
                         "interpretive": desiredMatches["interpretive"].keys()
                         }
                     nSymbol = norm(symbol)
-                    if bank in [2, 3]:
-                        print("%-8s = %04o (%02o,%04o)" % \
-                            (nSymbol, sizeCoreBank * bank + address % sizeCoreBank,
-                             bank, address))
-                        if nSymbol in programLabelAliasSpecs:
-                            for spec in programLabelAliasSpecs[nSymbol]:
-                                print("%-8s = %04o (%02o,%04o)" % \
-                                    (spec[1], sizeCoreBank * bank + \
-                                     address % sizeCoreBank + spec[0],
-                                     bank, address + spec[0]))
-                                symbolsFound[basicOrInterpretive][spec[1]] = \
-                                    (bank, address + spec[0]) 
-                                    
-                    else:
-                        print("%-8s = %02o,%04o" % (nSymbol, bank, address))
-                        if nSymbol in programLabelAliasSpecs:
-                            for spec in programLabelAliasSpecs[nSymbol]:
-                                print("%-8s = %02o,%04o" % (spec[1], bank, \
-                                                        address + spec[0]))
-                                symbolsFound[basicOrInterpretive][spec[1]] = \
-                                    (bank, address + spec[0])
-
+                    addressString, fAddress = getAddressString(bank, address)
+                    print("%-8s = %s" % (nSymbol, addressString))
+                    if nSymbol in programLabelAliasSpecs:
+                        for spec in programLabelAliasSpecs[nSymbol]:
+                            addressString, fAddress = \
+                                getAddressString(bank, address + spec[0])
+                            print("%-8s = %s" % (spec[1], addressString))
+                            symbolsFound[basicOrInterpretive][spec[1]] = \
+                                (bank, address + spec[0])
+                            
     #print("symbolsFound =", symbolsFound)
     #print("symbolsSought =", symbolsSought)
         
-    # At this point, the program labels have undergone matching.  We'd now
-    # like to use the results of those matches for erasable matching as well.
-    # The idea is that each erasable symbol defined in baseline erasable, we
-    # have a list of the subroutines that reference them, and the lines of
-    # the subroutine that do so.  For any of those subroutines that have been
-    # matched above, we can go to those lines of the subroutines in the 
-    # rope dump and find the address being used.  If it's the same address
-    # for all of the references, then we can assume that that's the address
-    # associated with that particular erasable symbol in the rope dump.
-    foundErasables = {}
-    print("┌─────────────────────────────────────────────────────────────────┐")
-    print("│ Matches for variables in erasable memory appear below.          │")
-    print("└─────────────────────────────────────────────────────────────────┘")
-    totalCertainErasables = 0
-    totalUncertainErasables = 0
-    totalUnreferencedErasables = 0
-    for spec in erasableSpecs:
-        symbols = spec["symbols"]
-        references = spec["references"]
-        for reference in references:
-            programLabel = reference[0]
-            if programLabel in symbolsFound["basic"]:
-                location = symbolsFound["basic"][programLabel]
-                foundBasic = True
-            elif programLabel in symbolsFound["interpretive"]:
-                location = symbolsFound["interpretive"][programLabel]
-                foundBasic = False
-            else:
-                spec["referencedAddresses"].append("(none)")
-                continue
-            bank = location[0]
-            lineNumber = reference[1]
-            address = location[1] + lineNumber
-            referenceType = reference[2]
-            context = core[bank][address % sizeCoreBank]
-            if referenceType in ["B", "C", "D"]:
-                if referenceType == 'C':
-                    context = ~context
-                elif referenceType == 'D':
-                    context -= 1
-                context &= 0o1777
-                if context < 0o1400:
+    if cli.debugLevel == 0:
+        # At this point, the program labels have undergone matching.  We'd now
+        # like to use the results of those matches for erasable matching as well.
+        # The idea is that each erasable symbol defined in baseline erasable, we
+        # have a list of the subroutines that reference them, and the lines of
+        # the subroutine that do so.  For any of those subroutines that have been
+        # matched above, we can go to those lines of the subroutines in the 
+        # rope dump and find the address being used.  If it's the same address
+        # for all of the references, then we can assume that that's the address
+        # associated with that particular erasable symbol in the rope dump.
+        foundErasables = {}
+        print("┌─────────────────────────────────────────────────────────────────┐")
+        print("│ Matches for variables in erasable memory appear below.          │")
+        print("└─────────────────────────────────────────────────────────────────┘")
+        totalCertainErasables = 0
+        totalUncertainErasables = 0
+        totalUnreferencedErasables = 0
+        for spec in erasableSpecs:
+            symbols = spec["symbols"]
+            references = spec["references"]
+            for reference in references:
+                programLabel = reference[0]
+                if programLabel in symbolsFound["basic"]:
+                    location = symbolsFound["basic"][programLabel]
+                    foundBasic = True
+                elif programLabel in symbolsFound["interpretive"]:
+                    location = symbolsFound["interpretive"][programLabel]
+                    foundBasic = False
+                else:
+                    spec["referencedAddresses"].append("(none)")
+                    continue
+                bank = location[0]
+                lineNumber = reference[1]
+                address = location[1] + lineNumber
+                referenceType = reference[2]
+                context = core[bank][address % sizeCoreBank]
+                if referenceType in ["B", "C", "D"]:
+                    if referenceType == 'C':
+                        context = ~context
+                    elif referenceType == 'D':
+                        context -= 1
+                    context &= 0o1777
+                    if context < 0o1400:
+                        referenced1 = context // sizeErasableBank
+                        referenced2 = 0o1400 + (context % sizeErasableBank)
+                        referencedAddress = "E%o,%04o" % (referenced1, referenced2)
+                    else:
+                        referenced2 = 0o1400 + (context % sizeErasableBank)
+                        referencedAddress = "E?,%04o" % referenced2
+                elif referenceType in ['S', 'A', 'L', 'I', 'E', 'H']:
+                    if referenceType == 'I':
+                        context = ~context
+                    if referenceType not in ['L', 'E', 'H']:
+                        context -= 1
+                    context &= 0o3777
                     referenced1 = context // sizeErasableBank
                     referenced2 = 0o1400 + (context % sizeErasableBank)
-                    referencedAddress = "E%o,%04o" % (referenced1, referenced2)
-                else:
-                    referenced2 = 0o1400 + (context % sizeErasableBank)
-                    referencedAddress = "E?,%04o" % referenced2
-            elif referenceType in ['S', 'A', 'L', 'I', 'E', 'H']:
-                if referenceType == 'I':
-                    context = ~context
-                if referenceType not in ['L', 'E', 'H']:
-                    context -= 1
-                context &= 0o3777
-                referenced1 = context // sizeErasableBank
-                referenced2 = 0o1400 + (context % sizeErasableBank)
-                if referenceType == 'E' and context > 0o03:
-                    referencedAddress = "E?,%04o" % referenced2
-                else:
-                    referencedAddress = "E%o,%04o" % (referenced1, referenced2)  
-            spec["referencedAddresses"].append(referencedAddress)
-        # Information about all code references to this erasable symbol
-        # collected.  We now have to perform some statistics to decide
-        # what we can report about what address we can report for this
-        # symbol.
-        sSymbols = str(sorted(symbols)).replace("[", "").replace("]", "")
-        sSymbols = sSymbols.replace("'", "").replace(", ", " = ")
-        stats = {}
-        for i in range(len(spec["references"])):
-            programLabel = spec["references"][i]
-            a = spec["referencedAddresses"][i]
-            if a == "(none)":
-                continue
-            if a not in stats:
-                stats[a] = [programLabel]
-            else:
-                stats[a].append(programLabel)
-        keys = list(stats.keys())
-        certain = False
-        if len(keys) == 1:
-            certain = True
-            chosen = keys[0]
-        elif len(keys) == 2:
-            if (keys[0][1] == "?" or keys[1][1] == "?") \
-                    and keys[0][2:] == keys[1][2:]:
-                if keys[0][1].isdigit():
-                    chosen = keys[0]
-                else:
-                    chosen = keys[1]
-                certain = True 
-            else:
-                chosen = "E?,????" 
-        else:
-            chosen = "E?,????"
-        total = 0
-        for stat in stats:
-            total += len(stats[stat])
-        if not certain:
-            if total == 0:
-                if False:
-                    print("┌─────────────────────────────────────────────────────────────────┐")
-                    print("│ Unable to detect references to the following variable.          │")
-                    print("└─────────────────────────────────────────────────────────────────┘")
-            else:
-                print("┌─────────────────────────────────────────────────────────────────┐")
-                print("│ Discrepancies for review:                                       │")
-                for stat in stats:
-                    msg = stat + ":"
-                    for p in stats[stat]:
-                        if len(msg) > 48:
-                            print("│ %-63s │" % msg)
-                            msg = "        "
-                        msg += "  %s +%o" % (norm(p[0]), p[1])
-                    print("│ %-63s │" % msg)
-                print("└─────────────────────────────────────────────────────────────────┘")
-        elif chosen[:3] in ["E0,", "E1,", "E2,"]:
-            bank = int(chosen[1], 8)
-            address = int(chosen[3:], 8)
-            chosen = "%04o (%s)" % (sizeErasableBank * bank + address % sizeErasableBank, chosen)
-        if chosen != "E?,????":
-            for symbol in symbols:
-                foundErasables[symbol] = chosen
-        if total != 0:
-            print("%-8s" % norm(sSymbols), "=", chosen, "(%d references)" % total)
-        if total == 0:
-            totalUnreferencedErasables += 1
-        elif certain:
-            totalCertainErasables += 1
-        else:
-            totalUncertainErasables += 1
-     
-    print("┌─────────────────────────────────────────────────────────────────┐")
-    print("│ Matches for references to fixed memory appear below.            │")
-    print("└─────────────────────────────────────────────────────────────────┘")
-    # Quick pass to get a list of all the references.
-    observedReferences = {}
-    fixedFound = {}
-    for referencedSymbol in sorted(fixedReferences):
-        if referencedSymbol in symbolsFound["basic"] or \
-                referencedSymbol in symbolsFound["interpretive"] or \
-                referencedSymbol in programAliases:
-            continue
-        for references in fixedReferences[referencedSymbol]:
-            referringSymbol = references[0]
-            offsetFromReferrer = references[1]
-            referenceType = references[2]
-            if referringSymbol in symbolsFound["basic"]:
-                location = symbolsFound["basic"][referringSymbol]
-            elif referringSymbol in symbolsFound["interpretive"]:
-                location = symbolsFound["interpretive"][referringSymbol]
-            else:
-                continue
-            if referencedSymbol not in observedReferences:
-                observedReferences[referencedSymbol] = []
-            bank = location[0]
-            offset = (location[1] + offsetFromReferrer) % sizeCoreBank
-            context = core[bank][offset]
-            if referenceType in ['B', 'D']:
-                address12 = context & 0o7777
-                if referenceType == 'D':
-                    address12 -= 1
-                if address12 < sizeCoreBank:
+                    if referenceType == 'E' and context > 0o03:
+                        referencedAddress = "E?,%04o" % referenced2
+                    else:
+                        referencedAddress = "E%o,%04o" % (referenced1, referenced2)  
+                spec["referencedAddresses"].append(referencedAddress)
+            # Information about all code references to this erasable symbol
+            # collected.  We now have to perform some statistics to decide
+            # what we can report about what address we can report for this
+            # symbol.
+            sSymbols = str(sorted(symbols)).replace("[", "").replace("]", "")
+            sSymbols = sSymbols.replace("'", "").replace(", ", " = ")
+            stats = {}
+            for i in range(len(spec["references"])):
+                programLabel = spec["references"][i]
+                a = spec["referencedAddresses"][i]
+                if a == "(none)":
                     continue
-                if address < 0o4000:
-                    observedReferences[referencedSymbol].append(["??", 
-                        address12 % sizeCoreBank, references])
+                if a not in stats:
+                    stats[a] = [programLabel]
                 else:
+                    stats[a].append(programLabel)
+            keys = list(stats.keys())
+            certain = False
+            if len(keys) == 1:
+                certain = True
+                chosen = keys[0]
+            elif len(keys) == 2:
+                if (keys[0][1] == "?" or keys[1][1] == "?") \
+                        and keys[0][2:] == keys[1][2:]:
+                    if keys[0][1].isdigit():
+                        chosen = keys[0]
+                    else:
+                        chosen = keys[1]
+                    certain = True 
+                else:
+                    chosen = "E?,????" 
+            else:
+                chosen = "E?,????"
+            total = 0
+            for stat in stats:
+                total += len(stats[stat])
+            if not certain:
+                if total == 0:
+                    if False:
+                        print("┌─────────────────────────────────────────────────────────────────┐")
+                        print("│ Unable to detect references to the following variable.          │")
+                        print("└─────────────────────────────────────────────────────────────────┘")
+                else:
+                    print("┌─────────────────────────────────────────────────────────────────┐")
+                    print("│ Discrepancies for review:                                       │")
+                    for stat in stats:
+                        msg = stat + ":"
+                        for p in stats[stat]:
+                            if len(msg) > 48:
+                                print("│ %-63s │" % msg)
+                                msg = "        "
+                            msg += "  %s +%o" % (norm(p[0]), p[1])
+                        print("│ %-63s │" % msg)
+                    print("└─────────────────────────────────────────────────────────────────┘")
+            elif chosen[:3] in ["E0,", "E1,", "E2,"]:
+                bank = int(chosen[1], 8)
+                address = int(chosen[3:], 8)
+                chosen = "%04o (%s)" % (sizeErasableBank * bank + address % sizeErasableBank, chosen)
+            if chosen != "E?,????":
+                for symbol in symbols:
+                    foundErasables[symbol] = chosen
+            if total != 0:
+                print("%-8s" % norm(sSymbols), "=", chosen, "(%d references)" % total)
+            if total == 0:
+                totalUnreferencedErasables += 1
+            elif certain:
+                totalCertainErasables += 1
+            else:
+                totalUncertainErasables += 1
+         
+        print("┌─────────────────────────────────────────────────────────────────┐")
+        print("│ Matches for references to fixed memory appear below.            │")
+        print("└─────────────────────────────────────────────────────────────────┘")
+        # Quick pass to get a list of all the references.
+        observedReferences = {}
+        fixedFound = {}
+        for referencedSymbol in sorted(fixedReferences):
+            if referencedSymbol in symbolsFound["basic"] or \
+                    referencedSymbol in symbolsFound["interpretive"] or \
+                    referencedSymbol in programAliases:
+                continue
+            for references in fixedReferences[referencedSymbol]:
+                referringSymbol = references[0]
+                offsetFromReferrer = references[1]
+                referenceType = references[2]
+                if referringSymbol in symbolsFound["basic"]:
+                    location = symbolsFound["basic"][referringSymbol]
+                elif referringSymbol in symbolsFound["interpretive"]:
+                    location = symbolsFound["interpretive"][referringSymbol]
+                else:
+                    continue
+                if referencedSymbol not in observedReferences:
+                    observedReferences[referencedSymbol] = []
+                bank = location[0]
+                offset = (location[1] + offsetFromReferrer) % sizeCoreBank
+                context = core[bank][offset]
+                if referenceType in ['B', 'D']:
+                    address12 = context & 0o7777
+                    if referenceType == 'D':
+                        address12 -= 1
+                    if address12 < sizeCoreBank:
+                        continue
+                    if address < 0o4000:
+                        observedReferences[referencedSymbol].append(["??", 
+                            address12 % sizeCoreBank, references])
+                    else:
+                        observedReferences[referencedSymbol].append([
+                            address12 // sizeCoreBank, 
+                            address12 % sizeCoreBank, references])
+                elif referenceType in ['S', 'A', 'L', 'I', 'E', 'H', 'K']:
+                    if referenceType == 'I' or \
+                            (referenceType == 'K' and (context & 0o40000) != 0):
+                        context = ~context
+                    if referenceType not in ['L', 'E', 'H']:
+                        context -= 1
+                    context &= 0o77777
+                    if bank >= 0o20 and referenceType != 'L':
+                        context |= 0o40000
+                    if bank >= 0o40:
+                        context += 0o20000
                     observedReferences[referencedSymbol].append([
-                        address12 // sizeCoreBank, 
-                        address12 % sizeCoreBank, references])
-            elif referenceType in ['S', 'A', 'L', 'I', 'E', 'H', 'K']:
-                if referenceType == 'I' or \
-                        (referenceType == 'K' and (context & 0o40000) != 0):
-                    context = ~context
-                if referenceType not in ['L', 'E', 'H']:
-                    context -= 1
-                context &= 0o77777
-                if bank >= 0o20 and referenceType != 'L':
-                    context |= 0o40000
-                if bank >= 0o40:
-                    context += 0o20000
-                observedReferences[referencedSymbol].append([
-                    context // sizeCoreBank, context % sizeCoreBank, references]) 
-    # Final pass to check for consistency and print report.
-    for referencedSymbol in sorted(observedReferences):
-        references = observedReferences[referencedSymbol]
-        referencesByAddress = {}
-        for reference in references:
-            referencingSymbol = reference[2]
-            offsetWithinReference = reference[2][1]
-            if reference[0] == "??":
-                context = "??"
+                        context // sizeCoreBank, context % sizeCoreBank, references]) 
+        # Final pass to check for consistency and print report.
+        for referencedSymbol in sorted(observedReferences):
+            references = observedReferences[referencedSymbol]
+            referencesByAddress = {}
+            for reference in references:
+                referencingSymbol = reference[2]
+                offsetWithinReference = reference[2][1]
+                if reference[0] == "??":
+                    context = "??"
+                else:
+                    context = "%02o" % reference[0]
+                context += ",%04o" % reference[1]
+                if context not in referencesByAddress:
+                    referencesByAddress[context] = {}
+                if referencingSymbol not in referencesByAddress[context]:
+                    referencesByAddress[context][referencingSymbol] = []
+                referencesByAddress[context][referencingSymbol].append(offsetWithinReference)
+            keys = list(referencesByAddress.keys())
+            if len(keys) == 0:
+                continue
+            elif len(keys) == 1:
+                context = keys[0]
+                fields = context.split(",")
+                sBank = fields[0]
+                if sBank == "??":
+                    bank = sBank
+                else:
+                    bank = int(sBank, 8)
+                add = int(fields[1], 8) + sizeCoreBank
+                print("%-8s = %s,%04o (%d references)" % (referencedSymbol, \
+                                                sBank, add, len(references)))  
+                fixedFound[referencedSymbol] = (bank, add)
+            elif len(keys) == 2 and (keys[0][-4:] == keys[1][-4:]):
+                context = keys[0]
+                fields = context.split(",")
+                sBank = fields[0]
+                if sBank == "??":
+                    bank = sBank
+                else:
+                    bank = int(sBank, 8)
+                add = int(fields[1], 8) % sizeCoreBank + sizeCoreBank
+                print("%-8s = ??,%04o (%d references)" % (referencedSymbol, \
+                                                add, len(references)))  
+                fixedFound[referencedSymbol] = (bank, add)
             else:
-                context = "%02o" % reference[0]
-            context += ",%04o" % reference[1]
-            if context not in referencesByAddress:
-                referencesByAddress[context] = {}
-            if referencingSymbol not in referencesByAddress[context]:
-                referencesByAddress[context][referencingSymbol] = []
-            referencesByAddress[context][referencingSymbol].append(offsetWithinReference)
-        keys = list(referencesByAddress.keys())
-        if len(keys) == 0:
-            continue
-        elif len(keys) == 1:
-            context = keys[0]
-            fields = context.split(",")
-            sBank = fields[0]
-            if sBank == "??":
-                bank = sBank
-            else:
-                bank = int(sBank, 8)
-            add = int(fields[1], 8) + sizeCoreBank
-            print("%-8s = %s,%04o (%d references)" % (referencedSymbol, \
-                                            sBank, add, len(references)))  
-            fixedFound[referencedSymbol] = (bank, add)
-        elif len(keys) == 2 and (keys[0][-4:] == keys[1][-4:]):
-            context = keys[0]
-            fields = context.split(",")
-            sBank = fields[0]
-            if sBank == "??":
-                bank = sBank
-            else:
-                bank = int(sBank, 8)
-            add = int(fields[1], 8) % sizeCoreBank + sizeCoreBank
-            print("%-8s = ??,%04o (%d references)" % (referencedSymbol, \
-                                            add, len(references)))  
-            fixedFound[referencedSymbol] = (bank, add)
-        else:
-            for a in sorted(referencesByAddress):
-                try:
-                    print("# %s" % a)    
-                except:
-                    print(a, file=sys.stderr)
-                    sys.exit(1)
-            print("%s = ??,???? (%d references)" % (referencedSymbol, len(references)))
+                for a in sorted(referencesByAddress):
+                    try:
+                        print("# %s" % a)    
+                    except:
+                        print(a, file=sys.stderr)
+                        sys.exit(1)
+                print("%s = ??,???? (%d references)" % (referencedSymbol, len(references)))
     
     print()
     print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
@@ -1065,31 +1056,32 @@ if cli.findFilename != "":
     print("Total unmatched:  %d" % \
         (len(symbolsSought["basic"]) + len(symbolsSought["interpretive"])))
     print()
-    print("Erasable:")
-    print("Total matched:", totalCertainErasables)
-    print("Total partially matched:", totalUncertainErasables) 
-    print("Total unreferenced by code:", totalUnreferencedErasables)
-    if totalUnreferencedErasables > 0:
+    if cli.debugLevel == 0:
+        print("Erasable:")
+        print("Total matched:", totalCertainErasables)
+        print("Total partially matched:", totalUncertainErasables) 
+        print("Total unreferenced by code:", totalUnreferencedErasables)
+        if totalUnreferencedErasables > 0:
+            print()
+            print("Note: The matching process is heuristic in nature, and")
+            print('not 100% inclusive, so the "unreferenced" variables mentioned')
+            print("above are not necessarily absent from the software.")
         print()
-        print("Note: The matching process is heuristic in nature, and")
-        print('not 100% inclusive, so the "unreferenced" variables mentioned')
-        print("above are not necessarily absent from the software.")
-    print()
-    print("Note: Map of core used by disassembly is in disassemblerAGC.core.")
-    f = open("disassemblerAGC.core", 'w')
-    for bank in range(numCoreBanks):
-        print("BANK = %02o" % bank, file=f)
-        for offset in range(0, sizeCoreBank, 0o100):
-            row = "%04o:" % (offset + sizeCoreBank)
-            for i in range(0o100):
-                if 0 == i % 8:
-                    row += " "
-                if coreUsed[bank][offset + i]:
-                    row += "X"
-                else:
-                    row += "O"
-            print(row, file=f)
-    f.close()
+        print("Note: Map of core used by disassembly is in disassemblerAGC.core.")
+        f = open("disassemblerAGC.core", 'w')
+        for bank in range(numCoreBanks):
+            print("BANK = %02o" % bank, file=f)
+            for offset in range(0, sizeCoreBank, 0o100):
+                row = "%04o:" % (offset + sizeCoreBank)
+                for i in range(0o100):
+                    if 0 == i % 8:
+                        row += " "
+                    if coreUsed[bank][offset + i]:
+                        row += "X"
+                    else:
+                        row += "O"
+                print(row, file=f)
+        f.close()
     
     if cli.checkFilename != "":
     
@@ -1128,67 +1120,68 @@ if cli.findFilename != "":
         print("Total matched =", coreMatch)
         print("Total unmatched =", coreMismatch)
         
-        print()
-        print("Erasable:")
-        erasableMatch = 0
-        erasablePartialMatch = 0
-        erasableMismatch = 0
-        for symbol in sorted(foundErasables):
-            #print(symbol, "=", foundErasables[symbol])
-            found = foundErasables[symbol].replace("(", "").replace(")", "")
-            fields = found.split(",")
-            bank1 = fields[0][-1]
-            if bank1 != "?":
-                bank1 = int(bank1, 8)
-            address1 = int(fields[1], 8)
-            bank2 = checkErasable[symbol][0]
-            address2 = checkErasable[symbol][1] + 0o1400
-            if bank1 == bank2 and address1 == address2:
-                erasableMatch += 1
-            elif bank1 == "?" and address1 == address2:
-                erasablePartialMatch += 1
-            else:
-                erasableMismatch += 1
-                if bank1 == "?":
-                    print("%-8s E?,%04o != E%o,%04o" % \
-                        (norm(symbol), address1, bank2, address2))
+        if cli.debugLevel == 0:
+            print()
+            print("Erasable:")
+            erasableMatch = 0
+            erasablePartialMatch = 0
+            erasableMismatch = 0
+            for symbol in sorted(foundErasables):
+                #print(symbol, "=", foundErasables[symbol])
+                found = foundErasables[symbol].replace("(", "").replace(")", "")
+                fields = found.split(",")
+                bank1 = fields[0][-1]
+                if bank1 != "?":
+                    bank1 = int(bank1, 8)
+                address1 = int(fields[1], 8)
+                bank2 = checkErasable[symbol][0]
+                address2 = checkErasable[symbol][1] + 0o1400
+                if bank1 == bank2 and address1 == address2:
+                    erasableMatch += 1
+                elif bank1 == "?" and address1 == address2:
+                    erasablePartialMatch += 1
                 else:
-                    print("%-8s E%o,%04o =? E%o,%04o" % \
-                        (norm(symbol), bank1, address1, bank2, address2))
-        print("Total matched =", erasableMatch)
-        print("Total consistent =", erasablePartialMatch)
-        print("Total mismatched =", erasableMismatch)
-        
-        print()
-        print("Fixed references:")
-        fixedMatch = 0
-        fixedPartialMatch = 0
-        fixedMismatch = 0
-        for symbol in sorted(fixedFound):
-            found = fixedFound[symbol]
-            bank1 = found[0]
-            address1 = found[1]
-            if symbol not in checkCore:
-                continue
-            bank2 = checkCore[symbol][0]
-            address2 = checkCore[symbol][1] + sizeCoreBank
-            if bank1 == bank2 and address1 == address2:
-                fixedMatch += 1
-            elif bank1 == "??" and address1 == address2:
-                fixedPartialMatch += 1
-            else:
-                fixedMismatch += 1
-                try:
-                    if isinstance(bank1, int):
-                        bank1 = "%02o" % bank1
-                    print("%-8s %s,%04o != %02o,%04o" % \
+                    erasableMismatch += 1
+                    if bank1 == "?":
+                        print("%-8s E?,%04o != E%o,%04o" % \
+                            (norm(symbol), address1, bank2, address2))
+                    else:
+                        print("%-8s E%o,%04o =? E%o,%04o" % \
                             (norm(symbol), bank1, address1, bank2, address2))
-                except:
-                    print(norm(symbol), bank1, address1, bank2, address2, file=sys.stderr)
-                    sys.exit(1)
-        print("Total matched =", fixedMatch)
-        print("Total consistent =", fixedPartialMatch)
-        print("Total mismatched =", fixedMismatch)
+            print("Total matched =", erasableMatch)
+            print("Total consistent =", erasablePartialMatch)
+            print("Total mismatched =", erasableMismatch)
+            
+            print()
+            print("Fixed references:")
+            fixedMatch = 0
+            fixedPartialMatch = 0
+            fixedMismatch = 0
+            for symbol in sorted(fixedFound):
+                found = fixedFound[symbol]
+                bank1 = found[0]
+                address1 = found[1]
+                if symbol not in checkCore:
+                    continue
+                bank2 = checkCore[symbol][0]
+                address2 = checkCore[symbol][1] + sizeCoreBank
+                if bank1 == bank2 and address1 == address2:
+                    fixedMatch += 1
+                elif bank1 == "??" and address1 == address2:
+                    fixedPartialMatch += 1
+                else:
+                    fixedMismatch += 1
+                    try:
+                        if isinstance(bank1, int):
+                            bank1 = "%02o" % bank1
+                        print("%-8s %s,%04o != %02o,%04o" % \
+                                (norm(symbol), bank1, address1, bank2, address2))
+                    except:
+                        print(norm(symbol), bank1, address1, bank2, address2, file=sys.stderr)
+                        sys.exit(1)
+            print("Total matched =", fixedMatch)
+            print("Total consistent =", fixedPartialMatch)
+            print("Total mismatched =", fixedMismatch)
                 
     sys.exit(0)
     

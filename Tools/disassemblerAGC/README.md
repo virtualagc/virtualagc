@@ -116,11 +116,19 @@ A rope dump will typically be in `--hardware` format rather than `--bin` or bins
 
 ### Baseline Solarium 55
 
-BASELINE Solarium 55 requires the `--block` disassembler command-line switch, which is not yet supported.
+BASELINE Solarium 55 is a Block I program.  Support for Block I is crude as of yet.  Even so, workflow.sh may still be usable in a very preliminary, incomplete fashion as:
+
+    workflow.sh Solarium055 --block1 --debug-level=1 --hint=BMN1@UNAJUMP
+
+Here's a summary (as of this writing) of the results obtained:
+
+  * Identification of 1369 program labels is attempted.
+  * 1301 of these are found, and 68 are not.
+  * All of the 1301 found match the addresses in the Solarium 55 assembly listing.
 
 ### Baseline Retread 44
 
-BASELINE Retread 44 requires the `--blk2` disassembler command-line switch, which is not yet supported.
+BASELINE Retread 44 is a BLK2 variant of Block II, which is not yet supported.
 
 ### Baseline Sunburst 37
 
