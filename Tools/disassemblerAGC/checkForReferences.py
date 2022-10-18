@@ -26,11 +26,11 @@ def dontDecrement(opcode):
         opcode in ["CALL", "STQ", "GOTO", "STCALL", "BHIZ", "BMN",
                    "BOV", "BOVB", "BPL", "BZE", "CLRGO", "SETGO",
                    "BOFF", "BOF", "BOFCLR", "BOFINV", "BOFSET", "BON", "BONCLR",
-                   "BONINV", "BONSET", "RTB"]
+                   "BONINV", "BONSET", "RTB", "CCALL"]
 
 branches = ["CALL", "GOTO", "STCALL", "BHIZ", "BMN", "BOV", "BOVB", "BPL", 
             "BZE", "CLRGO", "SETGO", "BOFF", "BOF", "BOFCLR", "BOFINV", "BOFSET", 
-            "BON", "BONCLR", "BONINV", "BONSET", "RTB"]
+            "BON", "BONCLR", "BONINV", "BONSET", "RTB", "CCALL"]
             
 def checkForReferences(rope, erasable, erasableBySymbol,  
                         fixedSymbols, fixedInterpretiveReferencesBySymbol):            
@@ -92,7 +92,7 @@ def checkForReferences(rope, erasable, erasableBySymbol,
                         numLeftArgs = 1
                     i = 1
                     for j in range(numLeftArgs):
-                        if lastLeftComma:
+                        if lastLeftComma and j == numLeftArgs - 1:
                             argTypes[i] = 'L'
                             if lastLeft not in branches:
                                 argTypes[i] = 'H'
@@ -100,7 +100,7 @@ def checkForReferences(rope, erasable, erasableBySymbol,
                             argTypes[i] = 'L'
                         i += 1
                     for j in range(numRightArgs):
-                        if lastRightComma:
+                        if lastRightComma and j == numRightArgs - 1:
                             argTypes[i] = 'L'
                             if lastRight not in branches:
                                 argTypes[i] = 'H'

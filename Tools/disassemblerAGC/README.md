@@ -131,24 +131,33 @@ BASELINE Retread 44 is a BLK2 variant of Block II, which is not yet supported.
 ### Baseline Colossus 237
 
     workflow.sh Colossus237 --hint=MISCJUMP@UNAJUMP --hint=MISCJUMP@INDJUMP --hint=-TORQUE@+TORQUE \
-                            --hint=TABYCOM@TABPCOM --hint=ASMBLWY@ASMBLWP  --skip=9DWTESTJ
+                            --hint=TABYCOM@TABPCOM --hint=ASMBLWY@ASMBLWP
 
-### Baseline Comanche 55 and Artemis 72<a name="Comanche055"></a>
+### Baseline Comanche 55<a name="Comanche055"></a>
 
     workflow.sh Comanche055 --hint=MISCJUMP@UNAJUMP --hint=MISCJUMP@INDJUMP --hint=-TORQUE@+TORQUE \
                             --hint=TABYCOM@TABPCOM --hint=ASMBLWY@ASMBLWP
 
-Artemis072 uses the same command-line switches.
-
 ### Baseline Luminary131
 
-    workflow.sh Luminary131 --hint=AFTRGUID@NEWPHASE --hint=NEWPHASE@MISCJUMP --hint=MISCJUMP@UNAJUMP \
-                            --hint=MISCJUMP@INDJUMP --skip=NEWPHASE --skip=NEWGUID
+    workflow.sh Luminary131 --hint=MISCJUMP@UNAJUMP --hint=MISCJUMP@INDJUMP --hint=R31,2361@MISCJUMP \
+                            --hint=AFTRGUID@R31,2361
+
+### Baseline Artemis 72
+
+    workflow.sh Artemis072 --hint=MISCJUMP@UNAJUMP --hint=MISCJUMP@INDJUMP --hint=-TORQUE@+TORQUE \
+                           --hint=TABYCOM@TABPCOM --hint=ASMBLWY@ASMBLWP
 
 ### Baseline Luminary 210
 
-    workflow.sh Luminary210 --hint=NEWPHASE@MISCJUMP --hint=MISCJUMP@INDJUMP --hint=INDJUMP@UNAJUMP \
-                            --skip=NEWPHASE
+    workflow.sh Luminary210 --hint=MISCJUMP@UNAJUMP --hint=MISCJUMP@INDJUMP --hint=R31,2366@MISCJUMP \
+                            --hint=AFTRGUID@R31,2366
+
+### Observations on the Baselines
+
+Note that Colossus 237 (Colossus 1), Comanche 55 (Colossus 2), and Artemis 72 (Colossus 3) all use the same `--hint` switches.  I'd suggest that any ROPE in the Colossus series would use the same hints as these three BASELINES do, which is very convenient.
+
+The Luminary series of programs (at least for the two examples given) use the same command-line options as each other, except for the troublesome symbols `R31,2361` in the one and `R32,2366` in the other.  In both cases, these symbols are the location prior to `NEWPHASE`, which itself is the 2nd position in a jump table whose 1st entry has no label (thus causing the disassembler to invent one).  The reason this is troublesome is that in any ROPE being compared to these BASELINEs, there's likely to be a similar invented symbol, but at a different address that's not immediately apparent without poking around in the ROPE's octal dump.  (A similar observation can be made about the invented symbol `R22,2112` in Sunburst 37, though that happens to be for yet another jump table *differing* from the one containing `NEWPHASE`.)  There needs to be a more-convenient way to handle this situation than these invented symbols, in terms of dealing with comparisons to ROPEs other than the BASELINE; but as of yet, I haven't an immediate solution.
 
 ## Background
 
