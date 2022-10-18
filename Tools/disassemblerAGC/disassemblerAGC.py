@@ -119,7 +119,7 @@ checkErasable = {}
 checkCore = {}
 underline = "------------"
 divider = "=============================="
-def addCheckSymbol(line, offset0, offset1, offset2):
+def addCheckSymbols(line):
     global checkErasable, checkCore
     fields = line.strip().split()
     while underline in fields:
@@ -130,26 +130,14 @@ def addCheckSymbol(line, offset0, offset1, offset2):
         if "E" not in fields[i] and "F" not in fields[i]:
             continue
         symbol = fields[i+1].strip().replace("'", "!")
-        address = fields[i+2].strip()
-        addressFields = address.split(",")
-        if len(addressFields) == 1:
-            value = int(addressFields[0], 8)
-            if value < 0o1400:
-                bank = value // sizeErasableBank
-                offset = value % sizeErasableBank
-                checkErasable[symbol] = (bank, offset)
-            else:
-                bank = value // sizeCoreBank
-                offset = value % sizeCoreBank
-                checkCore[symbol] = (bank, offset)
+        addressString = fields[i+2].strip()
+        error, fixed, bank, address, offset = parseAddressString(addressString)
+        if error:
+            continue
+        elif fixed:
+            checkCore[symbol] = (bank, offset)
         else:
-            offset = int(addressFields[1], 8)
-            if addressFields[0][0] == "E":
-                bank = int(addressFields[0][1:], 8)
-                checkErasable[symbol] = (bank, offset % sizeErasableBank)
-            else:        
-                bank = int(addressFields[0], 8)
-                checkCore[symbol] = (bank, offset % sizeCoreBank)
+            checkErasable[symbol] = (bank, offset)
 
 if cli.checkFilename != "":
     f = open(cli.checkFilename, "r")
@@ -165,11 +153,9 @@ if cli.checkFilename != "":
             continue
         if line[:2] != "  ":
             continue
-        addCheckSymbol(line, 7, 12, 25)
-        addCheckSymbol(line, 55, 60, 73)
-        addCheckSymbol(line, 103, 108, 121)   
+        addCheckSymbols(line)
     f.close
-
+    
 #=============================================================================
 # Search for special symbols like INTPRET, BANKCALL, ....  Their addresses
 # will be stored as specialSubroutines["INTPRET"] (and so on).
@@ -298,12 +284,19 @@ def getDataWords(core, bank, offset, symbol, dataWords):
 #               want to quit on TCF instructions in the 3 words immediately 
 #               following the CCS ... but would still want to quit for a TCF
 #               in the fourth word.
-# The disassembleRange() function returns False, unless it terminates early
-# due to a response function, in which case it returns True.
+# The disassembleRange() function returns a boolean pair,
+#       responseHalt    True if terminated prematurely due to response function,
+#                       False otherwise.
+#       truncated       True if an interpretive disassembly overflowed the 
+#                       end of the chosen address range, causing an 
+#                       immediate termination, False otherwise.
 
+msgDisassembleRange = ""
 def disassembleRange(core, erasableOnEntry, iochannelsOnEntry, bank, start, 
                      end, response, inBasic=True, autoQuit=False,
                      autoCCS=False):
+    global msgDisassembleRange
+    msgDisassembleRange = ""
     erasable = copy.deepcopy(erasableOnEntry)
     iochannels = copy.deepcopy(iochannelsOnEntry)
     dataWords = 0
@@ -316,7 +309,8 @@ def disassembleRange(core, erasableOnEntry, iochannelsOnEntry, bank, start,
         if dataWords > 0:
             if response(core, erasable, iochannels, 0, bank, address, "OCT", 
                     "%05o" % core[bank][offset]):
-                return True
+                msgDisassembleRange = "%02o,%04o: dataWords > 0" % (bank, address)
+                return True, False
             dataWords -= 1
             address += 1
             continue
@@ -339,7 +333,8 @@ def disassembleRange(core, erasableOnEntry, iochannelsOnEntry, bank, start,
                         inBasic = False
             if response(core, erasable, iochannels, 
                      1, bank, address, opcode, operand):
-                return True
+                msgDisassembleRange = "%02o,%04o (basic): response True" % (bank, address)
+                return True, False
             address += 1
             
             if autoQuit:
@@ -381,6 +376,9 @@ def disassembleRange(core, erasableOnEntry, iochannelsOnEntry, bank, start,
             disassembly, inBasic = \
                 disassembleInterpretive(core, bank, offset, state)
             for entry in disassembly:
+                if address >= end:
+                    msgDisassembleRange = "%02o,%04o: address >= end" % (bank, address)
+                    return False, True
                 left = entry[0]
                 right = entry[1]
                 argument = entry[2]
@@ -388,10 +386,12 @@ def disassembleRange(core, erasableOnEntry, iochannelsOnEntry, bank, start,
                     right = argument
                 if response(core, erasable, iochannels,
                          2, bank, address, left, right):
-                    return True
+                    msgDisassembleRange = "%02o,%04o (interpretive): response True" % (bank, address)
+                    return True, False
                 offset += 1
                 address += 1
-    return False
+    msgDisassembleRange = "%02o,%04o: normal return" % (bank, address)
+    return False, False
     
 #=============================================================================
 # Perform some options (based on command-line settings), which bypass
@@ -493,10 +493,11 @@ if cli.specsFilename != "":
             print(symbol, "basic")
         else:
             print(symbol, "interpretive")
-        disassembleRange(core, erasable, iochannels,
-                         patternSpec["dbank"], patternSpec["dstart"], 
-                         patternSpec["dend"], printSpec, 
-                         patternSpec["inBasic"])
+        if disassembleRange(core, erasable, iochannels,
+                             patternSpec["dbank"], patternSpec["dstart"], 
+                             patternSpec["dend"], printSpec, 
+                             patternSpec["inBasic"])[1]:
+            print("# The pattern for %s was truncated." % symbol)
     # And write out the erasable specs, which we're just passing through
     # as-is:
     for spec in erasableSpecs:
@@ -540,9 +541,10 @@ if cli.dtest:
               % (bank, address, core[bank][address % sizeCoreBank], left, right))
         return False
     
-    disassembleRange(core, erasable, iochannels,
+    ret1, ret2 = disassembleRange(core, erasable, iochannels,
                      cli.dbank, cli.dstart, cli.dend, printDisassembly, 
                      cli.dbasic)
+    print("Disassembly return values = %r, %r" % (ret1, ret2))
     sys.exit(0)
     
 # Command-line switch:  --find
@@ -569,6 +571,8 @@ if cli.findFilename != "":
 
     f = open(cli.findFilename, "r")
     for line in f:
+        if line[:1] == "#":
+            continue
         fields = line.strip().split()
         if len(fields) < 1:
             continue
@@ -701,7 +705,7 @@ if cli.findFilename != "":
         findBanks = dummy + findBanks
     for bank in findBanks:
         #print("# Match bank %02o." % bank)
-        for address in range(sizeCoreBank, sizeCoreBank + sizeCoreBank):
+        for address in range(coreOffset, coreOffset + sizeCoreBank):
             avoiding = False
             for avoid in cli.avoid:
                 if bank == avoid[0] and address >= avoid[1] \
@@ -713,9 +717,7 @@ if cli.findFilename != "":
             for basicOrInterpretive in ["basic", "interpretive"]:
                 inBasic = (basicOrInterpretive == "basic")
                 if len(symbolsSought[basicOrInterpretive]) == 0:
-                    break
-                if len(symbolsSought[basicOrInterpretive]) == 0:
-                    break
+                    continue
                 if cli.disjoint and coreUsed[bank][address % sizeCoreBank]:
                     continue
                 symbols = []
@@ -731,11 +733,11 @@ if cli.findFilename != "":
                         symbols.append(symbol)
                 indexIntoPatterns = 0
                 end = address + maxPatternLength[basicOrInterpretive]
-                if end > sizeCoreBank + sizeCoreBank:
-                    end = sizeCoreBank + sizeCoreBank
+                if end > sizeCoreBank + coreOffset:
+                    end = sizeCoreBank + coreOffset
                 if disassembleRange(core, erasable, iochannels,
                                  bank, address, end, match, 
-                                 inBasic):
+                                 inBasic)[0]:
                     # If a match has been found at this address,
                     # the symbols list should now contain a
                     # single entry, which is the name of the
@@ -752,8 +754,6 @@ if cli.findFilename != "":
                     endAddress = address + \
                         len(desiredMatches[basicOrInterpretive][symbol])
                     for a in range(address, endAddress):
-                        if False and bank == 0o16 and a >=0o2504 and a < 0o2520:
-                            print(symbol, "overwriting %02o,%04o" % (bank, a))
                         coreUsed[bank][a % sizeCoreBank] = True
                     del desiredMatches[basicOrInterpretive][symbol]
                     desiredOrdering[basicOrInterpretive].remove(symbol)
@@ -771,6 +771,8 @@ if cli.findFilename != "":
                             print("%-8s = %s" % (spec[1], addressString))
                             symbolsFound[basicOrInterpretive][spec[1]] = \
                                 (bank, address + spec[0])
+                else:
+                    pass
                             
     #print("symbolsFound =", symbolsFound)
     #print("symbolsSought =", symbolsSought)
@@ -793,6 +795,7 @@ if cli.findFilename != "":
         totalUncertainErasables = 0
         totalUnreferencedErasables = 0
         for spec in erasableSpecs:
+            #print("spec", spec, file=sys.stderr)
             symbols = spec["symbols"]
             references = spec["references"]
             for reference in references:
@@ -817,25 +820,19 @@ if cli.findFilename != "":
                     elif referenceType == 'D':
                         context -= 1
                     context &= 0o1777
-                    if context < 0o1400:
-                        referenced1 = context // sizeErasableBank
-                        referenced2 = 0o1400 + (context % sizeErasableBank)
-                        referencedAddress = "E%o,%04o" % (referenced1, referenced2)
-                    else:
-                        referenced2 = 0o1400 + (context % sizeErasableBank)
-                        referencedAddress = "E?,%04o" % referenced2
+                    referencedAddress = getAddress12(context, True)
                 elif referenceType in ['S', 'A', 'L', 'I', 'E', 'H']:
                     if referenceType == 'I':
                         context = ~context
                     if referenceType not in ['L', 'E', 'H']:
                         context -= 1
-                    context &= 0o3777
-                    referenced1 = context // sizeErasableBank
-                    referenced2 = 0o1400 + (context % sizeErasableBank)
-                    if referenceType == 'E' and context > 0o03:
-                        referencedAddress = "E?,%04o" % referenced2
+                    if cli.block1 and referenceType == 'S':
+                        context &= 0o1777
                     else:
-                        referencedAddress = "E%o,%04o" % (referenced1, referenced2)  
+                        context &= 0o3777
+                    referencedAddress = \
+                        getAddressInterpretive11(context, referenceType, True)  
+                #print("\t%05o %s" % (context, referencedAddress), file=sys.stderr)               
                 spec["referencedAddresses"].append(referencedAddress)
             # Information about all code references to this erasable symbol
             # collected.  We now have to perform some statistics to decide
@@ -939,13 +936,13 @@ if cli.findFilename != "":
                         address12 -= 1
                     if address12 < sizeCoreBank:
                         continue
-                    if address < 0o4000:
+                    lerror, lfixed, lbank, laddress, loffset = parseAddress12(address12)
+                    if lbank == -1:
                         observedReferences[referencedSymbol].append(["??", 
-                            address12 % sizeCoreBank, references])
+                            laddress, references])
                     else:
                         observedReferences[referencedSymbol].append([
-                            address12 // sizeCoreBank, 
-                            address12 % sizeCoreBank, references])
+                            lbank, laddress, references])
                 elif referenceType in ['S', 'A', 'L', 'I', 'E', 'H', 'K']:
                     if referenceType == 'I' or \
                             (referenceType == 'K' and (context & 0o40000) != 0):
@@ -970,7 +967,7 @@ if cli.findFilename != "":
                     context = "??"
                 else:
                     context = "%02o" % reference[0]
-                context += ",%04o" % reference[1]
+                context += ",%04o" % (reference[1] % sizeCoreBank + coreOffset)
                 if context not in referencesByAddress:
                     referencesByAddress[context] = {}
                 if referencingSymbol not in referencesByAddress[context]:
@@ -987,7 +984,7 @@ if cli.findFilename != "":
                     bank = sBank
                 else:
                     bank = int(sBank, 8)
-                add = int(fields[1], 8) + sizeCoreBank
+                add = int(fields[1], 8) % sizeCoreBank + coreOffset
                 print("%-8s = %s,%04o (%d references)" % (referencedSymbol, \
                                                 sBank, add, len(references)))  
                 fixedFound[referencedSymbol] = (bank, add)
@@ -999,7 +996,7 @@ if cli.findFilename != "":
                     bank = sBank
                 else:
                     bank = int(sBank, 8)
-                add = int(fields[1], 8) % sizeCoreBank + sizeCoreBank
+                add = int(fields[1], 8) % sizeCoreBank + coreOffset
                 print("%-8s = ??,%04o (%d references)" % (referencedSymbol, \
                                                 add, len(references)))  
                 fixedFound[referencedSymbol] = (bank, add)
@@ -1058,7 +1055,7 @@ if cli.findFilename != "":
     print()
     if cli.debugLevel == 0:
         print("Erasable:")
-        print("Total matched:", totalCertainErasables)
+        print("Total matched:", totalCertainErasables, "(counts each address separately)")
         print("Total partially matched:", totalUncertainErasables) 
         print("Total unreferenced by code:", totalUnreferencedErasables)
         if totalUnreferencedErasables > 0:
@@ -1067,21 +1064,26 @@ if cli.findFilename != "":
             print('not 100% inclusive, so the "unreferenced" variables mentioned')
             print("above are not necessarily absent from the software.")
         print()
-        print("Note: Map of core used by disassembly is in disassemblerAGC.core.")
-        f = open("disassemblerAGC.core", 'w')
-        for bank in range(numCoreBanks):
-            print("BANK = %02o" % bank, file=f)
-            for offset in range(0, sizeCoreBank, 0o100):
-                row = "%04o:" % (offset + sizeCoreBank)
-                for i in range(0o100):
-                    if 0 == i % 8:
-                        row += " "
-                    if coreUsed[bank][offset + i]:
-                        row += "X"
-                    else:
-                        row += "O"
-                print(row, file=f)
-        f.close()
+        print("Fixed references:")
+        print("Total matched or partial:", len(fixedFound))
+        print("Total unmatched:", len(fixedReferences) - len(fixedFound))
+        if cli.debug:
+            print()
+            print("Note: Map of core used by disassembly is in disassemblerAGC.core.")
+            f = open("disassemblerAGC.core", 'w')
+            for bank in range(numCoreBanks):
+                print("BANK = %02o" % bank, file=f)
+                for offset in range(0, sizeCoreBank, 0o100):
+                    row = "%04o:" % (offset + sizeCoreBank)
+                    for i in range(0o100):
+                        if 0 == i % 8:
+                            row += " "
+                        if coreUsed[bank][offset + i]:
+                            row += "X"
+                        else:
+                            row += "O"
+                    print(row, file=f)
+            f.close()
     
     if cli.checkFilename != "":
     
@@ -1128,14 +1130,32 @@ if cli.findFilename != "":
             erasableMismatch = 0
             for symbol in sorted(foundErasables):
                 #print(symbol, "=", foundErasables[symbol])
+                #print(symbol, foundErasables[symbol], file=sys.stderr)
                 found = foundErasables[symbol].replace("(", "").replace(")", "")
                 fields = found.split(",")
-                bank1 = fields[0][-1]
-                if bank1 != "?":
-                    bank1 = int(bank1, 8)
-                address1 = int(fields[1], 8)
+                if len(fields) == 1:
+                    perror, pfixed, bank1, address1, poffset = \
+                        parseAddressString(fields[0])
+                    if bank1 != -1:
+                        fields = ["E%o" % bank1] + fields
+                    else:
+                        fields = ["E?"] + fields
+                        bank1 = "?"
+                    fields[1] = "%04o" % address1
+                else:
+                    bank1 = fields[0][-1:]
+                    if bank1.isdigit():
+                        bank1 = int(bank1, 8)
+                    address1 = int(fields[1], 8)
+                #bank1 = fields[0][-1]
+                #if bank1 != "?":
+                #    bank1 = int(bank1, 8)
+                #address1 = int(fields[1], 8)
                 bank2 = checkErasable[symbol][0]
-                address2 = checkErasable[symbol][1] + 0o1400
+                address2 = checkErasable[symbol][1] % sizeErasableBank + erasableOffset
+                #print("here", symbol, "foundErasables[symbol]=%s" % found,
+                #        "bank1=", bank1, "address1=%04o" % address1,
+                #        "bank2=%o" % bank2, "address2=%04o" % address2, file=sys.stderr)
                 if bank1 == bank2 and address1 == address2:
                     erasableMatch += 1
                 elif bank1 == "?" and address1 == address2:
@@ -1148,10 +1168,9 @@ if cli.findFilename != "":
                     else:
                         print("%-8s E%o,%04o =? E%o,%04o" % \
                             (norm(symbol), bank1, address1, bank2, address2))
-            print("Total matched =", erasableMatch)
+            print("Total matched =", erasableMatch, "(counts each symbol separately)")
             print("Total consistent =", erasablePartialMatch)
             print("Total mismatched =", erasableMismatch)
-            
             print()
             print("Fixed references:")
             fixedMatch = 0
@@ -1160,11 +1179,11 @@ if cli.findFilename != "":
             for symbol in sorted(fixedFound):
                 found = fixedFound[symbol]
                 bank1 = found[0]
-                address1 = found[1]
+                address1 = found[1] % sizeCoreBank + coreOffset
                 if symbol not in checkCore:
                     continue
                 bank2 = checkCore[symbol][0]
-                address2 = checkCore[symbol][1] + sizeCoreBank
+                address2 = checkCore[symbol][1] + coreOffset
                 if bank1 == bank2 and address1 == address2:
                     fixedMatch += 1
                 elif bank1 == "??" and address1 == address2:

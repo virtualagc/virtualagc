@@ -32,8 +32,8 @@ branches = ["CALL", "GOTO", "STCALL", "BHIZ", "BMN", "BOV", "BOVB", "BPL",
             "BZE", "CLRGO", "SETGO", "BOFF", "BOF", "BOFCLR", "BOFINV", "BOFSET", 
             "BON", "BONCLR", "BONINV", "BONSET", "RTB"]
             
-def checkForReferences(rope, erasable, erasableBySymbol, fixedSymbols,
-                       fixedInterpretiveReferencesBySymbol):            
+def checkForReferences(rope, erasable, erasableBySymbol,  
+                        fixedSymbols, fixedInterpretiveReferencesBySymbol):            
             
     for bank in range(numCoreBanks):
         lastLeft = ""
@@ -134,6 +134,7 @@ def checkForReferences(rope, erasable, erasableBySymbol, fixedSymbols,
                 else:
                     referenceType = 'B'
             elif location[0] in ['i', 'I']:
+                referenceType = 'A'
                 if operand[0][-2:] in [",1", ",2"]:
                     symbol = operand[0][:-2]
                     indexed = True

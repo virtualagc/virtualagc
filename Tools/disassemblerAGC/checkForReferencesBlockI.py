@@ -110,9 +110,15 @@ def checkForReferences(rope, erasable, erasableBySymbol, fixedSymbols,
                 else:
                     referenceType = 'B'
             elif location[0] in ['i', 'I']:
+                referenceType = 'A'
                 if operand[0][-2:] in [",1", ",2"]:
                     symbol = operand[0][:-2]
                     indexed = True
+                    # Maybe I should eventually deal with indexed arguments, 
+                    # but they're rare and for right now are causing me 
+                    # more trouble than they seem to be worth, so let's
+                    # just discard them.
+                    continue
                 else:
                     symbol = operand[0]
                     indexed = False

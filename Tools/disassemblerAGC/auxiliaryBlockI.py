@@ -15,18 +15,19 @@ History:        2022-10-14 RSB  Split off from disassemblerAGC.py.
 # Note that Block I banks are numbered from 0o01 to 0o34.  There is 
 # no bank 0.  We get around this by saying there are 35 banks, but
 # bank 0 is filled with the "unused" value.
-numCoreBanks = 0o35
 startingCoreBank = 1
+numCoreBanks = 0o35 # 1 .. 0o34
 sizeCoreBank = 0o2000
 coreOffset = 0o6000
-numErasableBanks = 1
+numErasableBanks = 1 # 0 only; i.e., there really aren't any "banks"
 sizeErasableBank = 0o2000
+erasableOffset = 0o0000
 numIoChannels = 0
 
 # Convert bank,offset pair to an address string.  The parameters are integers,
 # and if either is unknown, it should be set to -1.  Returns a pair:
 # the address string, and the fixed-fixed address integer (-1 if none).
-def getAddressString(bank, offset):
+def getAddressString(bank, offset, minimal=False):
     offset = offset % sizeCoreBank
     commonString = ""
     bankString = "??"
@@ -39,10 +40,43 @@ def getAddressString(bank, offset):
         commonString = "%04o" % fAddress
     offsetString = "%04o" % (offset + 3 * sizeCoreBank)
     if commonString != "":
-        addressString = "%s (%s,%s)" % (commonString, bankString, offsetString)
+        if minimal:
+            addressString = commonString
+        else:
+            addressString = "%s (%s,%s)" % (commonString, bankString, offsetString)
     else:
-        addressString = "%s,%s%7s" % (bankString, offsetString, "")
+        if minimal:
+            addressString = "%s,%s" % (bankString, offsetString)
+        else:
+            addressString = "%s,%s%7s" % (bankString, offsetString, "")
     return addressString, fAddress
+
+def getAddress12(address12, minimal=False):
+    if address12 < 0:
+        addressString = "??,????"
+    elif address12 < 0o2000:
+        if minimal:
+            addressString = "%04o" % address12
+        else:
+            addressString = "%04o (E0,%04o)" % (address12, address12)
+    elif address12 < 0o6000:
+        if minimal:
+            addressString = "%04o" % address12
+        else:
+            bank = address12 // sizeCoreBank
+            address = 0o6000 + address12 % sizeCoreBank
+            addressString = "%04o (%02o,%04o)" % (address12, bank, address)
+    elif address12 <= 0o7777:
+        addressString = "??,%04o" % (0o6000 + address12 % sizeCoreBank)
+    else:
+        addressString = "??,????"
+    return addressString
+
+def getAddressInterpretive11(address11, referenceType, minimal=False):
+    addressString = "E0,%04o" % address11
+    if minimal:
+        return addressString[3:]
+    return addressString[3:] + " (" + addressString + ")"
 
 # Convert an address in the conventional print format, i.e.,
 #       NNNN
@@ -96,7 +130,35 @@ def parseAddressString(addressString):
     except:
         pass
     return error, fixed, bank, address, offset
- 
+
+def parseAddress12(address12):
+    error = True
+    fixed = True
+    bank = 0
+    address = 0
+    offset = 0
+    if address12 <= 0:
+        pass
+    elif address12 < 0o2000:
+        error = False
+        fixed = False
+        bank = 0
+        offset = address12
+        address = address12
+    elif address12 < 0o6000:
+        error = False
+        fixed = True
+        bank = address12 // sizeCoreBank
+        offset = address12 % sizeCoreBank
+        address = 0o6000 + offset
+    elif address12 <= 0o7777:
+        error = False
+        fixed = True
+        bank = -1
+        offset = address12 % sizeCoreBank
+        address = 0o6000 + offset
+    return error, fixed, bank, address, offset
+
 if False:
     import sys
     for addressString in ["0123", "0456", "1234", "1432", "2345", 

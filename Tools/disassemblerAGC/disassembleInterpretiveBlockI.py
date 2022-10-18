@@ -183,6 +183,11 @@ def dispatcher(words, locationCounter, singleEquation=False):
         # Get leading opcode of the equation.
         word = words[locationCounter]
         locationCounter += 1
+        if (word & 0o40000) == 0:
+            # Cannot be the start of an equation.  Perhaps it is
+            # data or basic.
+            wasExit = True
+            break
         numericalOpcode = 0o177 & ((word + 1) >> 7)
         if numericalOpcode in interpreterCodes:
             symbolicOpcode = interpreterCodes[numericalOpcode][0][0]
@@ -305,6 +310,7 @@ def dispatcher(words, locationCounter, singleEquation=False):
                     elif word >= 0o32000 and word <= 0o37777:  # STORE address
                         disassembly.append(( "STORE", "", 
                             "%04o" % (0o1777 & (word - 1)) ))
+                        return disassembly, wasExit
                     elif binaryOperation:
                         disassembly.append(( "", "", "%05o" % (word - 1) ))
                         continue
@@ -329,7 +335,7 @@ def dispatcher(words, locationCounter, singleEquation=False):
             if operatorName == debugOpcode : 
                 print("Yes (%05o, %05o)" % (locationCounter, word))
             disassembly.append(( "STORE", "", "%04o" % (0o1777 & (word-1))))
-            continue
+            return disassembly, wasExit
         else:                           # No
             if operatorName == debugOpcode : 
                 print("No (%05o, %05o)" % (locationCounter, word))

@@ -116,15 +116,7 @@ A rope dump will typically be in `--hardware` format rather than `--bin` or bins
 
 ### Baseline Solarium 55
 
-BASELINE Solarium 55 is a Block I program.  Support for Block I is crude as of yet.  Even so, workflow.sh may still be usable in a very preliminary, incomplete fashion as:
-
-    workflow.sh Solarium055 --block1 --debug-level=1 --hint=BMN1@UNAJUMP
-
-Here's a summary (as of this writing) of the results obtained:
-
-  * Identification of 1369 program labels is attempted.
-  * 1301 of these are found, and 68 are not.
-  * All of the 1301 found match the addresses in the Solarium 55 assembly listing.
+    workflow.sh Solarium055 --block1 --hint=BMN1@UNAJUMP
 
 ### Baseline Retread 44
 

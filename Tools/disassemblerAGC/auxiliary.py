@@ -11,18 +11,19 @@ Purpose:        Some auxiliary data and functions used throught the
 History:        2022-10-14 RSB  Split off from disassemblerAGC.py.
 """
 
-numCoreBanks = 0o44
 startingCoreBank = 0
+numCoreBanks = 0o44 # 0 .. 43
 sizeCoreBank = 0o2000
 coreOffset = 0o2000
 numErasableBanks = 0o10
 sizeErasableBank = 0o400
+erasableOffset = 0o1400
 numIoChannels = 8
 
 # Convert bank,offset pair to an address string.  The parameters are integers,
 # and if either is unknown, it should be set to -1.  Returns a pair:
 # the address string, and the fixed-fixed address integer (-1 if none).
-def getAddressString(bank, offset):
+def getAddressString(bank, offset, minimal=False):
     offset = offset % sizeCoreBank
     commonString = ""
     bankString = "??"
@@ -35,10 +36,55 @@ def getAddressString(bank, offset):
         commonString = "%04o" % fAddress
     offsetString = "%04o" % (offset + sizeCoreBank)
     if commonString != "":
-        addressString = "%s (%s,%s)" % (commonString, bankString, offsetString)
+        if minimal:
+            addressString = commonString
+        else:
+            addressString = "%s (%s,%s)" % (commonString, bankString, offsetString)
     else:
-        addressString = "%s,%s%7s" % (bankString, offsetString, "")
+        if minimal:
+            addressString = "%s,%s" % (bankString, offsetString)
+        else:
+            addressString = "%s,%s%7s" % (bankString, offsetString, "")
     return addressString, fAddress
+
+def getAddress12(address12, minimal=False):
+    if address12 < 0:
+        addressString = "??,????"
+    elif address12 < 0o1400:
+        if minimal:
+            addressString = "%04o" % address12
+        else:
+            bank = address12 // sizeErasableBank
+            offset = address12 % sizeErasableBank
+            addressString = "%04o (E%o,%04o)" % (address12, bank, 0o1400 + offset)
+    elif address12 < 0o2000:
+        addressString = "E?,%04o" % address12
+    elif address12 < 0o4000:
+        addressString = "??,%04o" % address12
+    elif address12 <= 0o7777:
+        bank = address12 // sizeCoreBank
+        address = 0o2000 + address12 % sizeCoreBank
+        if minimal:
+            addressString = "%04o (%02o,%04o)" % (address12, bank, address)
+        else:
+            addressString = "%%04o" % address12
+    else:
+        addressString = "??,????"
+    return addressString
+
+def getAddressInterpretive11(address11, referenceType, minimal=False):
+    bank = address11 // sizeErasableBank
+    address = (address11 % sizeErasableBank) + erasableOffset
+    if referenceType == "E" and address >= erasableOffset:
+        addressString = "E?,%04o" % address
+    elif address11 < erasableOffset:
+        if minimal:
+            addressString = "%04o" % address11
+        else:
+            addressString = "%04o (E%o,%04o)" % (address11, bank, address)
+    else:
+        addressString = "E%o,%04o" % (bank, address)
+    return addressString
 
 # Convert an address in the conventional print format, i.e.,
 #       NNNN
@@ -94,7 +140,7 @@ def parseAddressString(addressString):
                 if bank >= 0 and bank < numErasableBanks and \
                         address >= 0o1400 and address < 0o2000:
                     error = False
-                    offset = address % sizeErasableBank
+                offset = address % sizeErasableBank
             else:
                 fixed = True
                 bank = int(fields[0], 8)
@@ -102,11 +148,45 @@ def parseAddressString(addressString):
                 if bank >= startingCoreBank and bank < numCoreBanks and \
                         address >= 0o2000 and address < 0o4000:
                     error = False
-                    offset = address % sizeCoreBank
+                offset = address % sizeCoreBank
     except:
         pass
     return error, fixed, bank, address, offset
  
+def parseAddress12(address12):
+    error = True
+    fixed = True
+    bank = 0
+    address = 0
+    offset = 0
+    if address12 <= 0:
+        pass
+    elif address12 < 0o1400:
+        error = False
+        fixed = False
+        bank = address12 // sizeErasableBank
+        offset = address12 % sizeErasableBank
+        address = 0o1400 + offset
+    elif address12 < 0o2000:
+        error = False
+        fixed = False
+        bank = -1
+        offset = address12 % sizeErasableBank
+        address = 0o1400 + offset
+    elif address12 < 0o4000:
+        error = False
+        fixed = True
+        bank = -1
+        offset = address12 % sizeCoreBank
+        address = 0o2000 + offset
+    elif address12 <= 0o7777:
+        error = False
+        fixed = True
+        bank = address12 // sizeCoreBank
+        offset = address12 % sizeCoreBank
+        address = 0o2000 + offset
+    return error, fixed, bank, address, offset
+
 if False:
     # Just some tests of the stuff above.
     import sys

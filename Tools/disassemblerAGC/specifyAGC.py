@@ -121,7 +121,8 @@ for line in sys.stdin:
     fields = line.strip().split("#")
     line = fields[0].strip()
 
-    left = line[65:73].strip()
+    left = line[64:73].strip()  # Begins one column early to catch
+                                # the occasional prefixed '-'.
     
     addressField = line[24:31].strip()
     if left in ["=", "EQUALS", "CHECK="] and ( addressField == "" or \
@@ -165,7 +166,14 @@ for line in sys.stdin:
         symbol = ""   
          
     locationType = "u"
-    if left in interpreterOpcodes or left.isdigit():
+    if left.isdigit():
+        if offset > 0:
+            locationType = rope[offset - 1][bank][0]
+            if symbol == "":
+                locationType = locationType.lower()
+            else:
+                locationType = locationType.upper()
+    if left in interpreterOpcodes:
         if symbol == "":
             locationType = "i"
         else:
@@ -298,8 +306,8 @@ for bank in range(numCoreBanks):
 fixedInterpretiveReferencesBySymbol = {}
 
 # Analyze the erasable and rope to find references to them from code.
-checkForReferences(rope, erasable, erasableBySymbol, fixedSymbols,
-                       fixedInterpretiveReferencesBySymbol)
+checkForReferences(rope, erasable, erasableBySymbol, 
+                    fixedSymbols, fixedInterpretiveReferencesBySymbol)
                     
 # Output erasable specifications.  There are several types:
 #   B   Operand of a single-word basic instruction (like XCH or CA)
