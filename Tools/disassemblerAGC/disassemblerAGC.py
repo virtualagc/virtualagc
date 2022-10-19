@@ -83,13 +83,13 @@ from readCoreRope import readCoreRope
 # Disassembler for a single basic instruction.
 if cli.block1:
     from disassembleBasicBlockI import disassembleBasic
-elif cli.blk2:
-    from disassembleBasicBLK2 import disassembleBasic
 else:
     from disassembleBasic import disassembleBasic
 # Disassembler for a single line of interpreter instructions plus arguments.
 if cli.block1:
     from disassembleInterpretiveBlockI import disassembleInterpretive, interpretiveStart
+elif cli.blk2:
+    from disassembleInterpretiveBLK2 import disassembleInterpretive, interpretiveStart
 else:
     from disassembleInterpretive import disassembleInterpretive, interpretiveStart
 # Semi-emulation of instruction operations on erasable.
@@ -162,6 +162,13 @@ if cli.checkFilename != "":
 
 searchSpecial(core, searchPatterns, disassembleBasic)
 
+if cli.intpret != -1:
+    INTPRET = cli.intpret
+    error, fixed, bank, address, offset = parseAddress12(INTPRET)
+    specialSubroutines["INTPRET"] = (bank, address, INTPRET)
+else:
+    INTPRET = specialSubroutines["INTPRET"][2]
+    
 if cli.findFilename != "":
     print("┌─────────────────────────────────────────────────────────────────┐")
     print('│ Matches for "special" symbols or --flex symbols appear below.   │')
@@ -169,6 +176,7 @@ if cli.findFilename != "":
     print("│ but may not match the selected baseline.  Matches vs the        │")
     print("│ specific baseline may appear later, in the core section.        │")
     print("└─────────────────────────────────────────────────────────────────┘")
+
 specialFixedFixed = {}
 for symbol in sorted(specialSubroutines):
     addressTuple = specialSubroutines[symbol]
@@ -179,8 +187,6 @@ for symbol in sorted(specialSubroutines):
         print("%-8s = %s" % (symbol, addressString))
     if fAddress != -1:
         specialFixedFixed[fAddress] = addressTuple
-
-INTPRET = specialSubroutines["INTPRET"][2]
 
 if cli.specialOnly:
     sys.exit(0)

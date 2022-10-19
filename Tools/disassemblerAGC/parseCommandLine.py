@@ -15,6 +15,7 @@ History:        2022-09-28 RSB  Split off from disassemblerAGC.py.
                                 Completely restructured and partially
                                 cleaned up the --help option for (hopefully)
                                 much-more-effective usage.
+                2022-10-18 RSB  Added --intpret.
 """
 
 import sys
@@ -71,6 +72,7 @@ avoid = []
 parity = False
 block1 = False
 blk2 = False
+intpret = -1
 
 entryCount = 0
 pBanks = ""
@@ -114,7 +116,11 @@ for param in sys.argv[1:]:
                 --dump      Output an octal dump of the ROPE. Don't forget
                             to add any appropriate AGC-architecture options
                             (see above), since those affect the selection of
-                            banks and the order in which they're output.   
+                            banks and the order in which they're output. 
+                --intpret=A Force the address of INTPRET to be at fixed-fixed
+                            address A (a 4-digit octal).  This would be used
+                            if (say) you don't have a dump of the 
+                            fixed-fixed banks that have INTPRET in them.    
                 --debug     Turn on some debugging messages. 
                 --debug-level=N  Set the "debugging level", default 0.  The
                             only other defined setting is N=1, which means 
@@ -241,6 +247,8 @@ for param in sys.argv[1:]:
     elif param[:10] == "--pattern=":
         pattern = True
         symbol = param[10:]
+    elif param[:10] == "--intpret=":
+        intpret = int(param[10:], 8)
     elif param == "--dtest":
         dtest = True
     elif param[:8] == "--dbank=":

@@ -7,7 +7,6 @@ Filename:       disassembleBasic.py
 Purpose:        Disassembler for a basic word
 History:        2022-09-28 RSB  Split off from disassemblerAGC.py.
                 2022-09-29 RSB  Replaced TC 0002 by RETURN.
-                2022-10-18 RSB  Fixed EDRUPT for BLK2.
                 
 ****************************************************************
                        *** WARNING! ****
@@ -21,7 +20,6 @@ search patterns as well!
 
 """
 
-import parseCommandLine as cli
 from registers import registersAndIoChannels
 
 # Disassemble a word containing a basic instruction.  This function comes from 
@@ -109,10 +107,7 @@ def disassembleBasic(word, extended):
                 op_str = 'RXOR'
             elif qc10 == 7:
                 op_str = 'EDRUPT'
-                if cli.blk2:
-                    arg_str = ""
-                else:
-                    arg_str = '%04o' % (word & 0o7777)
+                arg_str = '%04o' % (word & 0o7777)
         elif sq == 1:
             if qc == 0:
                 op_str = 'DV'
