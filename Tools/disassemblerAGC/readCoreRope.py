@@ -13,10 +13,11 @@ import sys
 
 # Read the input file (.bin or .binsource) into the core[] list.
 # The cli structure contains the cli.binFile and cli.hardwareFile
-# command-line parameters.
-def readCoreRope(core, cli, numCoreBanks, sizeCoreBank):
+# command-line parameters.  The file parameter is an open file,
+# such as sys.stdin.
+def readCoreRope(file, core, cli, numCoreBanks, sizeCoreBank):
     if cli.hardwareFile or cli.binFile: # .bin file.
-        data = sys.stdin.buffer.read()
+        data = file.buffer.read()
         if cli.hardwareFile:
             bank = 0
         else:
@@ -58,7 +59,7 @@ def readCoreRope(core, cli, numCoreBanks, sizeCoreBank):
     else: # .binsource file.
         bank = 2
         offset = 0
-        for line in sys.stdin:
+        for line in file:
             fields = line.split(";")    # Eliminate comments.
             line = " ".join(fields[0].strip().split())   # Simplify pesky whitespace.
             if line == "":       # Eliminate empty lines.

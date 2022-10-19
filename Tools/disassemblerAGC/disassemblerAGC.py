@@ -110,7 +110,12 @@ if cli.flexFilename != "":
 #=============================================================================
 # Read the input file.
 
-readCoreRope(core, cli, numCoreBanks, sizeCoreBank)
+if cli.dloopFilename == "":
+    readCoreRope(sys.stdin, core, cli, numCoreBanks, sizeCoreBank)
+else:
+    f = open(cli.dloopFilename, "r")
+    readCoreRope(f, core, cli, numCoreBanks, sizeCoreBank)
+    f.close()
 
 #=============================================================================
 # Read the --check file.
@@ -538,8 +543,20 @@ if cli.pattern:
     print(indent + '}],')
     sys.exit(0)
 
-# Command-line switch:  --dtest
-if cli.dtest:
+# Command-line switch:  --dtest or --dloop
+if cli.dtest or cli.dloopFilename != "":
+    labels = []
+    references = []
+    empties = [""]*sizeCoreBank
+    for i in range(numCoreBanks):
+        labels.append(copy.deepcopy(empties))
+        references.append(copy.deepcopy(empties))
+
+    # Read the optional symbol-table file.
+    if cli.symbolFilename != "":
+        f = open(cli.symbolFilename, "r")
+        
+        f.close()
 
     # A response function for disassembleRange().
     def printDisassembly(core, erasable, iochannels,
@@ -548,14 +565,57 @@ if cli.dtest:
               % (bank, address, core[bank][address % sizeCoreBank], left, right))
         return False
     
-    ret1, ret2 = disassembleRange(core, erasable, iochannels,
-                     cli.dbank, cli.dstart, cli.dend, printDisassembly, 
-                     cli.dbasic)
-    print("Disassembly return values = %r, %r" % (ret1, ret2))
+    if cli.dtest:
+        ret1, ret2 = disassembleRange(core, erasable, iochannels,
+                         cli.dbank, cli.dstart, cli.dend, printDisassembly, 
+                         cli.dbasic)
+        print("Disassembly return values = %r, %r" % (ret1, ret2))
+    elif cli.dloopFilename != "":
+        print("At the prompt, enter the parameters for disassembling a range")
+        print("of core, in the form (octal) of")
+        print("       BB SSSS EEEE [I]")
+        print("where BB is the bank, SSSS is the starting address within")
+        print("the bank, EEEE is the ending address, and I is an optional")
+        print("literal 'I' if the instruction is interpretive.  Enter the")
+        print("word QUIT to quit.")
+        while True:
+            line = input("> ")
+            fields = line.split()
+            if len(fields) == 1 and fields[0].upper() == "QUIT":
+                break
+            if len(fields) not in [3, 4]:
+                continue
+            try:
+                for i in range(3):
+                    fields[i] = int(fields[i], 8)
+                if fields[0] < startingCoreBank or fields[0] >= numCoreBanks:
+                    print("Bank out of range.")
+                    continue
+                if fields[1] < coreOffset or fields[1] >= coreOffset + sizeCoreBank:
+                    print("Starting address out of range.")
+                    continue
+                if fields[2] < coreOffset or fields[2] >= coreOffset + sizeCoreBank:
+                    print("Ending address out of range.")
+                    continue
+                if len(fields) > 3 and fields[3].upper() != "I":
+                    print("Did you mean 'I'?")
+                    continue
+                basic = True
+                if len(fields) > 3 and fields[3].upper() == 'I':
+                    basic = False
+                ret1, ret2 = disassembleRange(core, erasable, iochannels,
+                                 fields[0], fields[1], fields[2], printDisassembly, 
+                                 basic)
+                print("Disassembly return values = %r, %r" % (ret1, ret2))
+            except:
+                print("Corrupted input.")
+                continue   
     sys.exit(0)
     
 # Command-line switch:  --find
 if cli.findFilename != "":
+
+    symbolFile = open("disassemblerAGC.symbols", "w")
 
     # In the specs file and internally for this matching process, symbol names
     # that are supposed to contain an apostrophe have an exclamation point 
@@ -584,6 +644,7 @@ if cli.findFilename != "":
         if len(fields) < 1:
             continue
         if fields[0] == "+": # Erasable specs
+            print(line.strip(), file=symbolFile)
             symbols = \
                 fields[1].replace("['", "").replace("']", "").split("','")
             references = fields[2].replace("[(", "").replace(")]", "")
@@ -597,6 +658,7 @@ if cli.findFilename != "":
                                     "references": references,
                                     "referencedAddresses": [] })
         elif fields[0] == "-": # Specs for references to fixed.
+            print(line.strip(), file=symbolFile)
             referencedSymbol = fields[1]
             if referencedSymbol not in fixedReferences:
                 fixedReferences[referencedSymbol] = []
@@ -605,6 +667,7 @@ if cli.findFilename != "":
             )
             
         elif len(fields) > 1 and fields[1] == "=": # Program label alias specs
+            #print(line.strip(), file=symbolFile)
             if fields[2] not in programLabelAliasSpecs:
                 programLabelAliasSpecs[fields[2]] = []
             programLabelAliasSpecs[fields[2]].append((int(fields[4], 8), 
@@ -770,12 +833,22 @@ if cli.findFilename != "":
                         }
                     nSymbol = norm(symbol)
                     addressString, fAddress = getAddressString(bank, address)
-                    print("%-8s = %s" % (nSymbol, addressString))
+                    msg = "%-8s = %s" % (nSymbol, addressString)
+                    print(msg)
+                    if "?" not in msg:
+                        #print(msg, file=symbolFile)
+                        print("%-8s = %02o,%04o" % (nSymbol, bank, address), 
+                            file=symbolFile)
                     if nSymbol in programLabelAliasSpecs:
                         for spec in programLabelAliasSpecs[nSymbol]:
                             addressString, fAddress = \
                                 getAddressString(bank, address + spec[0])
-                            print("%-8s = %s" % (spec[1], addressString))
+                            msg = "%-8s = %s" % (spec[1], addressString)
+                            print(msg)
+                            if "?" not in msg:
+                                #print(msg, file=symbolFile)
+                                print("%-8s = %02o,%04o" % \
+                                    (spec[1], bank, address+spec[0]), file=symbolFile)
                             symbolsFound[basicOrInterpretive][spec[1]] = \
                                 (bank, address + spec[0])
                 else:
@@ -903,7 +976,13 @@ if cli.findFilename != "":
                 for symbol in symbols:
                     foundErasables[symbol] = chosen
             if total != 0:
-                print("%-8s" % norm(sSymbols), "=", chosen, "(%d references)" % total)
+                msg = "%-8s = %s" % (norm(sSymbols), chosen)
+                print(msg, "(%d references)" % total)
+                #if "?" not in chosen:
+                #    fields = norm(sSymbols).split(" = ")
+                #    for field in fields[:-1]:
+                #        msg = "%-8s = %s" % (field, chosen)
+                #        print(msg, file=symbolFile)
             if total == 0:
                 totalUnreferencedErasables += 1
             elif certain:
@@ -992,8 +1071,10 @@ if cli.findFilename != "":
                 else:
                     bank = int(sBank, 8)
                 add = int(fields[1], 8) % sizeCoreBank + coreOffset
-                print("%-8s = %s,%04o (%d references)" % (referencedSymbol, \
-                                                sBank, add, len(references)))  
+                msg = "%-8s = %s,%04o" % (referencedSymbol, sBank, add)
+                print("%s (%d references)" % (msg, len(references))) 
+                if "?" not in msg:
+                    print(msg, file=symbolFile) 
                 fixedFound[referencedSymbol] = (bank, add)
             elif len(keys) == 2 and (keys[0][-4:] == keys[1][-4:]):
                 context = keys[0]
@@ -1004,8 +1085,8 @@ if cli.findFilename != "":
                 else:
                     bank = int(sBank, 8)
                 add = int(fields[1], 8) % sizeCoreBank + coreOffset
-                print("%-8s = ??,%04o (%d references)" % (referencedSymbol, \
-                                                add, len(references)))  
+                msg = "%-8s = ??,%04o" % (referencedSymbol, add)
+                print("%s (%d references)" % (msg, len(references)))  
                 fixedFound[referencedSymbol] = (bank, add)
             else:
                 for a in sorted(referencesByAddress):
@@ -1015,6 +1096,8 @@ if cli.findFilename != "":
                         print(a, file=sys.stderr)
                         sys.exit(1)
                 print("%s = ??,???? (%d references)" % (referencedSymbol, len(references)))
+    
+    symbolFile.close()
     
     print()
     print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")

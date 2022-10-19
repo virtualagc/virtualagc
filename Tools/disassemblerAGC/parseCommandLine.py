@@ -16,6 +16,7 @@ History:        2022-09-28 RSB  Split off from disassemblerAGC.py.
                                 cleaned up the --help option for (hopefully)
                                 much-more-effective usage.
                 2022-10-18 RSB  Added --intpret.
+                2022-10-19 RSB  Added --dsymbols, --dloop
 """
 
 import sys
@@ -73,6 +74,8 @@ parity = False
 block1 = False
 blk2 = False
 intpret = -1
+symbolFilename = ""
+dloopFilename = ""
 
 entryCount = 0
 pBanks = ""
@@ -143,8 +146,29 @@ for param in sys.argv[1:]:
                             that the first instruction is interpretive.
                 --dbank=N   Bank number is N (octal).
                 --dstart=N  Starting offset is N (octal).
-                --dend==N   Disassembly stops when reaching this address 
-                            (octal) without disassembling it.    
+                --dend=N    Disassembly stops when reaching this address 
+                            (octal) without disassembling it. 
+                --dloop=B   Starts an interactive loop in which you can perform
+                            successive disassemblies (equivalent to 
+                                --dtest [--dint] --dbank --dstart --dend
+                            by entering the parameters for them from the
+                            keyboard rather than as command-line parameters.
+                            To use this feature, the bin or binsource file
+                            must be specified (B) rather than using < on the
+                            command line, since the stdin is needed for 
+                            inputting your interactive commands.
+                --dsymbols=F  Allows optional selection of a symbol-table
+                            file.  Then --dtest performs a disassembly,
+                            it then uses this symbol table to provide
+                            program labels for the code and symbolic names
+                            for operands. When disassemblyAGC.py is run
+                            with the --find automation option (see below),
+                            it automatically produces a symbol table file
+                            called disassemblerAGC.symbols which is suitable
+                            for use as F.  Such a file can also be customized
+                            by manual editing (and presumably being renamed
+                            in the process so that --find doesn't overwrite
+                            it later).   
                             
             Automation:  Creation of match-patterns:                                   
                 --specs=F   Reads a baseline file (F) of pattern 
@@ -249,6 +273,8 @@ for param in sys.argv[1:]:
         symbol = param[10:]
     elif param[:10] == "--intpret=":
         intpret = int(param[10:], 8)
+    elif param[:8] == "--dloop=":
+        dloopFilename = param[8:]
     elif param == "--dtest":
         dtest = True
     elif param[:8] == "--dbank=":
@@ -259,6 +285,8 @@ for param in sys.argv[1:]:
         dend = int(param[7:], 8)
     elif param == "--dint":
         dbasic = False
+    elif param[:11] == "--dsymbols=":
+        symbolFilename = param[11:]
     elif param in ["--special", "--specials"]:
         specialOnly = True
     elif param[:8] == "--specs=":
