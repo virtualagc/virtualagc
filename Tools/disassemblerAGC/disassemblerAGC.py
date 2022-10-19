@@ -165,7 +165,8 @@ searchSpecial(core, searchPatterns, disassembleBasic)
 if cli.intpret != -1:
     INTPRET = cli.intpret
     error, fixed, bank, address, offset = parseAddress12(INTPRET)
-    specialSubroutines["INTPRET"] = (bank, address, INTPRET)
+    specialSubroutines["INTPRET"] = (bank, address, INTPRET,
+        { "noReturn": True, "dataWords": 0 }, "INTPRET")
 else:
     INTPRET = specialSubroutines["INTPRET"][2]
     
@@ -329,9 +330,9 @@ def disassembleRange(core, erasableOnEntry, iochannelsOnEntry, bank, start,
             except:
                 nOperand = -1
             if opcode == "TC" and nOperand in specialFixedFixed:
-                    searchPattern = specialFixedFixed[nOperand][3]
                     symbol = specialFixedFixed[nOperand][4]
                     operand = symbol
+                    searchPattern = specialFixedFixed[nOperand][3]
                     noReturn = searchPattern["noReturn"]
                     dataWords = getDataWords(core, bank, offset, symbol, 
                                              searchPattern["dataWords"])
