@@ -25,6 +25,8 @@ History:        2022-09-25 RSB  Created.
                                 the BLK2 variant) to be working reasonably
                                 well now.
                 2022-10-14 RSB  Removed recursive descent entirely.
+                2022-10-20 RSB  Format of erasable references changed to
+                                allow separation of aliased erasables.
 """
 
 #=============================================================================
@@ -545,24 +547,61 @@ if cli.pattern:
 
 # Command-line switch:  --dtest or --dloop
 if cli.dtest or cli.dloopFilename != "":
-    labels = []
-    references = []
-    empties = [""]*sizeCoreBank
-    for i in range(numCoreBanks):
-        labels.append(copy.deepcopy(empties))
-        references.append(copy.deepcopy(empties))
 
     # Read the optional symbol-table file.
+    labels = {}
+    references = {}
     if cli.symbolFilename != "":
         f = open(cli.symbolFilename, "r")
-        
+        for line in f:
+            line = line.strip()
+            fields = line.split()
+            if fields[0] in ["+", "-"]:
+                referenced = fields[1]
+                referrer = fields[2]
+                index = int(fields[3], 8)
+                if referrer not in references:
+                    references[referrer] = {}
+                references[referrer][index] = (referenced, fields[0])
+            elif fields[1] == "=":
+                label = fields[0]
+                fields = fields[2].split(",")
+                bank = int(fields[0], 8)
+                offset = int(fields[1], 8) % sizeCoreBank
+                if bank not in labels:
+                    labels[bank] = {}
+                labels[bank][offset] = label
         f.close()
 
     # A response function for disassembleRange().
+    referringLabel = ""
+    indexIntoReferringLabel = 0
     def printDisassembly(core, erasable, iochannels,
                          occasion, bank, address, left, right):
-        print("%02o,%04o    %05o         %-12s %s" \
-              % (bank, address, core[bank][address % sizeCoreBank], left, right))
+        global referringLabel, indexIntoReferringLabel
+        offset = address % sizeCoreBank
+        label = ""
+        if bank in labels:
+            if offset in labels[bank]:
+                referringLabel = labels[bank][offset]
+                indexIntoReferringLabel = 0
+                label = referringLabel
+                #print("At label", label, file=sys.stderr)
+        comment = ""
+        if referringLabel in references:
+            #print(indexIntoReferringLabel, references[referringLabel], file=sys.stderr)
+            if indexIntoReferringLabel in references[referringLabel]:
+                r = references[referringLabel][indexIntoReferringLabel]
+                comment = ""
+                if r[1] == "+":
+                    comment = "# %s (erasable)" % right
+                    right = r[0]
+                elif r[1] == "-":
+                    comment = "# %s (fixed)" % right
+                    right = r[0]
+        print("%02o,%04o    %05o    %-16s%-16s%-16s%s" \
+              % (bank, address, core[bank][offset], label, left, right, comment))
+        indexIntoReferringLabel += 1
         return False
     
     if cli.dtest:
@@ -627,6 +666,7 @@ if cli.findFilename != "":
     # First step: Read in the entire pattern file into the dictionaries
     # desiredMatches
     erasableSpecs = []
+    erasableReferences = {}
     programLabelAliasSpecs = {}
     fixedReferences = {}
     desiredMatches = { "basic": {}, "interpretive": {}}
@@ -645,18 +685,27 @@ if cli.findFilename != "":
             continue
         if fields[0] == "+": # Erasable specs
             print(line.strip(), file=symbolFile)
-            symbols = \
-                fields[1].replace("['", "").replace("']", "").split("','")
-            references = fields[2].replace("[(", "").replace(")]", "")
-            references = references.split("),(")
-            for i in range(len(references)):
-                references[i] = references[i][1:-1]
-                r1 = references[i].split("',")
-                r2 = r1[1].split(",'")
-                references[i] = (r1[0], int(r2[0]), r2[1])
-            erasableSpecs.append({  "symbols": symbols,
-                                    "references": references,
-                                    "referencedAddresses": [] })
+            if False: # old method
+                symbols = \
+                    fields[1].replace("['", "").replace("']", "").split("','")
+                references = fields[2].replace("[(", "").replace(")]", "")
+                references = references.split("),(")
+                for i in range(len(references)):
+                    references[i] = references[i][1:-1]
+                    r1 = references[i].split("',")
+                    r2 = r1[1].split(",'")
+                    references[i] = (r1[0], int(r2[0]), r2[1])
+                erasableSpecs.append({  "symbols": symbols,
+                                        "references": references,
+                                        "referencedAddresses": [] })
+            else: # new method
+                symbol = fields[1]
+                referencer = fields[2]
+                index = int(fields[3], 8)
+                referenceType = fields[4]
+                if symbol not in erasableReferences:
+                    erasableReferences[symbol] = []
+                erasableReferences[symbol].append([referencer, index, referenceType, '(none)'])
         elif fields[0] == "-": # Specs for references to fixed.
             print(line.strip(), file=symbolFile)
             referencedSymbol = fields[1]
@@ -874,10 +923,12 @@ if cli.findFilename != "":
         totalCertainErasables = 0
         totalUncertainErasables = 0
         totalUnreferencedErasables = 0
-        for spec in erasableSpecs:
-            #print("spec", spec, file=sys.stderr)
-            symbols = spec["symbols"]
-            references = spec["references"]
+        #for spec in erasableSpecs:
+        for symbol in erasableReferences:
+            symbols = [symbol]
+            references = erasableReferences[symbol]
+            #symbols = spec["symbols"]
+            #references = spec["references"]
             for reference in references:
                 programLabel = reference[0]
                 if programLabel in symbolsFound["basic"]:
@@ -887,7 +938,7 @@ if cli.findFilename != "":
                     location = symbolsFound["interpretive"][programLabel]
                     foundBasic = False
                 else:
-                    spec["referencedAddresses"].append("(none)")
+                    #spec["referencedAddresses"].append("(none)")
                     continue
                 bank = location[0]
                 lineNumber = reference[1]
@@ -913,7 +964,8 @@ if cli.findFilename != "":
                     referencedAddress = \
                         getAddressInterpretive11(context, referenceType, True)  
                 #print("\t%05o %s" % (context, referencedAddress), file=sys.stderr)               
-                spec["referencedAddresses"].append(referencedAddress)
+                #spec["referencedAddresses"].append(referencedAddress)
+                reference[3] = referencedAddress
             # Information about all code references to this erasable symbol
             # collected.  We now have to perform some statistics to decide
             # what we can report about what address we can report for this
@@ -921,15 +973,28 @@ if cli.findFilename != "":
             sSymbols = str(sorted(symbols)).replace("[", "").replace("]", "")
             sSymbols = sSymbols.replace("'", "").replace(", ", " = ")
             stats = {}
-            for i in range(len(spec["references"])):
-                programLabel = spec["references"][i]
-                a = spec["referencedAddresses"][i]
-                if a == "(none)":
-                    continue
-                if a not in stats:
-                    stats[a] = [programLabel]
-                else:
-                    stats[a].append(programLabel)
+            if False: # old method
+                for i in range(len(spec["references"])):
+                    programLabel = spec["references"][i]
+                    a = spec["referencedAddresses"][i]
+                    if a == "(none)":
+                        continue
+                    if a not in stats:
+                        stats[a] = [programLabel]
+                    else:
+                        stats[a].append(programLabel)
+            else: # new method.
+                for i in range(len(erasableReferences[symbol])):
+                    programLabel = erasableReferences[symbol][i][0]
+                    index = erasableReferences[symbol][i][1]
+                    #print(symbol, erasableReferences[symbol], file=sys.stderr)
+                    a = erasableReferences[symbol][i][3]
+                    if a == "(none)":
+                        continue
+                    if a not in stats:
+                        stats[a] = [(programLabel, index)]
+                    else:
+                        stats[a].append((programLabel, index))
             keys = list(stats.keys())
             certain = False
             if len(keys) == 1:
@@ -959,6 +1024,7 @@ if cli.findFilename != "":
                 else:
                     print("┌─────────────────────────────────────────────────────────────────┐")
                     print("│ Discrepancies for review:                                       │")
+                    #print(stat, stats[stat], file=sys.stderr)
                     for stat in stats:
                         msg = stat + ":"
                         for p in stats[stat]:
@@ -1145,18 +1211,18 @@ if cli.findFilename != "":
     print()
     if cli.debugLevel == 0:
         print("Erasable:")
-        print("Total matched:", totalCertainErasables, "(counts each address separately)")
+        print("Total matched:", totalCertainErasables)
         print("Total partially matched:", totalUncertainErasables) 
         print("Total unreferenced by code:", totalUnreferencedErasables)
         if totalUnreferencedErasables > 0:
             print()
             print("Note: The matching process is heuristic in nature, and")
-            print('not 100% inclusive, so the "unreferenced" variables mentioned')
-            print("above are not necessarily absent from the software.")
+            print('not 100% inclusive, so the "unreferenced" symbols are')
+            print("not necessarily absent from the software.")
         print()
         print("Fixed references:")
         print("Total matched or partial:", len(fixedFound))
-        print("Total unmatched:", len(fixedReferences) - len(fixedFound))
+        print("Total unreferenced by code:", len(fixedReferences) - len(fixedFound))
         if cli.debug:
             print()
             print("Note: Map of core used by disassembly is in disassemblerAGC.core.")
@@ -1206,8 +1272,8 @@ if cli.findFilename != "":
                 else:
                     coreMismatch += 1
                     print("%-8s is at %02o,%04o but should be at %02o,%04o" \
-                        % (norm(symbol), bank1, address1 + sizeCoreBank,
-                            bank2, address2 + sizeCoreBank))
+                        % (norm(symbol), bank1, address1 + coreOffset,
+                            bank2, address2 + coreOffset))
                             
         print("Total matched =", coreMatch)
         print("Total unmatched =", coreMismatch)
@@ -1258,7 +1324,7 @@ if cli.findFilename != "":
                     else:
                         print("%-8s E%o,%04o =? E%o,%04o" % \
                             (norm(symbol), bank1, address1, bank2, address2))
-            print("Total matched =", erasableMatch, "(counts each symbol separately)")
+            print("Total matched =", erasableMatch)
             print("Total consistent =", erasablePartialMatch)
             print("Total mismatched =", erasableMismatch)
             print()

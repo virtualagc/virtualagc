@@ -170,6 +170,7 @@ def checkForReferences(rope, erasable, erasableBySymbol,
                 b = symbolInfo[0]
                 a = symbolInfo[1]
                 erasable[a][b]["references"].append((lastSymbol,sinceSymbol,
-                                                        referenceType))
+                                                        referenceType,
+                                                        operand[0]))
                         
 

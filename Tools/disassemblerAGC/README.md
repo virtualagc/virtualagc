@@ -18,7 +18,7 @@ The latter is a manual operation, or at least outside of the scope of what I'm a
 
 # Provided Software
 
-The there are are three upper-level programs,
+The there are are four upper-level programs,
 
 * disassemblyAGC.py &mdash; a Python 3 disassembler and pattern-matcher for comparing two AGC software versions.
 * specifyAGC.py &mdash; a Python 3 generator of "specifications" files for disassemblerAGC.py's all-important `--find` option.
@@ -48,6 +48,16 @@ Notice particularly the following disassemblerAGC.py options which I don't belie
 
 * `--dump`, which dumps the entire core in octal form.  This lets you use disassemblerAGC.py as an viewer for bin files.
 * `--dtest`, which lets you disassemble a selectable range of memory.
+* `--dloop` is like `--dtest`, but with an input loop for manually inputting disassembly ranges repeatedly without having to rerun the program every time. 
+* `--symbols=SYMBOLFILE` allows `--dtest` or `--dloop` to try and replace numeric operands with symbolic ones.  Every time `disassemblerAGC.py --find=...` is run, it produces as a byproduct a SYMBOLFILE called disassemblerAGC.symbols which is suitable for use with `--symbols`.
+
+Note that with `--dloop`, the syntax used is
+
+    disassemblerAGC.py --dloop=BASELINE.binsource
+
+rather than
+    
+    disassemblerAGC.py --dloop <BASELINE.binsource
 
 As far as workflow.sh is concerned, it is presently invoked as
 
@@ -84,7 +94,7 @@ The first three steps listed can be accomplished by the single command
     cd .../BASELINE
     workflow.sh BASELINE [OPTIONS]
 
-Make sure that the Tools/disassemblerAGC/ directory is in your PATH first.  The OPTIONS mentioned are the ones for disassemblerAGC.py's `--find` switch.  
+Make sure that the Tools/disassemblerAGC/ directory is in your PATH first.  The OPTIONS mentioned are the ones for specifyAGC.py and/or those relevant to disassemblerAGC.py's `--specs` or `--find` functionality.  
 
 For another, there's often a handful of code chunks in an AGC software version that are so similar to each other that they can be mistaken for each other during matching.  That's why the testing mentioned above usually fails when no command-line options are used.  One way to get around this a little bit is to use a bigger `--min` setting in specifyAGC.py, since longer patterns are less likely to be confused with each other.  But this may not be enough; long jump tables &mdash; i.e., sequences of `TC` or `TCF` instructions &mdash; are a good example of that, because you're unlikely to want to make the search patterns longer than the biggest jump tables in the code.  The disassembler has some built-in heuristics to try to work around the problem, but in spite of everything it's still possible for the condition to occur.  Here are the disassembler command-line options that rescue you:
 
@@ -95,7 +105,7 @@ For another, there's often a handful of code chunks in an AGC software version t
 
 In my (limited) experience, `--hint` solves the majority of problems.
 
-For example, if the Comanche 55 baseline is processed using `--min=8` within specifyAGC.py, the following switches are needed for disassemblerAGC.py:
+For example (as of *this* writing), if the Comanche 55 baseline is processed using `--min=8` within specifyAGC.py, the following switches are needed for disassemblerAGC.py:
 
     --hint=MISCJUMP@UNAJUMP --hint=MISCJUMP@INDJUMP --hint=MOVEPLEM@MOVEALEM --hint=MOVEALEM@SETMOON \
     --hint=J22@J21 --hint=J21@RWORD --hint=RWORD@YWORD --hint=3DAPCAS@2DAPCAS --ignore=SOPTION1
@@ -116,11 +126,11 @@ A rope dump will typically be in `--hardware` format rather than `--bin` or bins
 
 ### Baseline Solarium 55
 
-    workflow.sh Solarium055 --block1 --hint=BMN1@UNAJUMP
+    workflow.sh Solarium055 --block1 --hint=BMN1@UNAJUMP --skip=GOGETUNB
 
 ### Baseline Retread 44 and DAP Aurora 12
 
-DAP Aurora 12 is the BLK2 variant of Block II, and is not yet supported.  However it works pretty well if simply treated as normal Block II, with the biggest problem being that ~30 erasable variables in block E5 are mistakenly discovered in banks E3 or E7 instead.  In other words, it could be used in a pinch as-is, though it will obviously be better once BLK2 is correctly supported.
+DAP Aurora 12 is the BLK2 variant of Block II, and is not yet supported.  However it works pretty well if simply treated as normal Block II, with the biggest problem being that ~30 erasable variables in block E5 are mistakenly discovered in banks E3 or E7 instead.  In other words, it could be used in a pinch as-is, though it will obviously be better once BLK2 is correctly supported, after which point the --blk2 switch would be added to the command line:
 
     workflow.sh Aurora12    --hint=UNAJUMP@MISCJUMP --hint=MISCJUMP@INDJUMP \
                             --hint=PDVL@PDDL --hint=JACCESTR@JACCESTQ
@@ -136,33 +146,28 @@ The same comments apply more-or-less to Retread 44, which can be processed using
 ### Baseline Colossus 237
 
     workflow.sh Colossus237 --hint=MISCJUMP@UNAJUMP --hint=MISCJUMP@INDJUMP --hint=-TORQUE@+TORQUE \
-                            --hint=TABYCOM@TABPCOM --hint=ASMBLWY@ASMBLWP
+                            --hint=TABYCOM@TABPCOM --hint=ASMBLWY@ASMBLWP --skip=9DWTESTJ \
+                            --hint='NEWJ(S)@PCOPYCYC' --hint='NEWY(S)@NEWJ(S)'
 
 ### Baseline Comanche 55<a name="Comanche055"></a>
 
     workflow.sh Comanche055 --hint=MISCJUMP@UNAJUMP --hint=MISCJUMP@INDJUMP --hint=-TORQUE@+TORQUE \
-                            --hint=TABYCOM@TABPCOM --hint=ASMBLWY@ASMBLWP
+                            --hint=TABYCOM@TABPCOM --hint=ASMBLWY@ASMBLWP --skip=9DWTESTJ
 
 ### Baseline Luminary131
 
-    workflow.sh Luminary131 --hint=MISCJUMP@UNAJUMP --hint=MISCJUMP@INDJUMP --hint=R31,2361@MISCJUMP \
-                            --hint=AFTRGUID@R31,2361
+    workflow.sh Luminary131 --hint=MISCJUMP@UNAJUMP --hint=MISCJUMP@INDJUMP --hint=NEWPHASE@MISCJUMP \
+                            --skip=NEWPHASE  --hint=AFTRGUID@NEWPHASE
 
 ### Baseline Artemis 72
 
     workflow.sh Artemis072 --hint=MISCJUMP@UNAJUMP --hint=MISCJUMP@INDJUMP --hint=-TORQUE@+TORQUE \
-                           --hint=TABYCOM@TABPCOM --hint=ASMBLWY@ASMBLWP
+                           --hint=TABYCOM@TABPCOM --hint=ASMBLWY@ASMBLWP --skip=9DWTESTJ
 
 ### Baseline Luminary 210
 
-    workflow.sh Luminary210 --hint=MISCJUMP@UNAJUMP --hint=MISCJUMP@INDJUMP --hint=R31,2366@MISCJUMP \
-                            --hint=AFTRGUID@R31,2366
-
-### Observations on the Baselines
-
-Note that Colossus 237 (Colossus 1), Comanche 55 (Colossus 2), and Artemis 72 (Colossus 3) all use the same `--hint` switches.  I'd suggest that any ROPE in the Colossus series would use the same hints as these three BASELINES do, which is very convenient.
-
-The Luminary series of programs (at least for the two examples given) use the same command-line options as each other, except for the troublesome symbols `R31,2361` in the one and `R32,2366` in the other.  In both cases, these symbols are the location prior to `NEWPHASE`, which itself is the 2nd position in a jump table whose 1st entry has no label (thus causing the disassembler to invent one).  The reason this is troublesome is that in any ROPE being compared to these BASELINEs, there's likely to be a similar invented symbol, but at a different address that's not immediately apparent without poking around in the ROPE's octal dump.  (A similar observation can be made about the invented symbol `R22,2112` in Sunburst 37, though that happens to be for yet another jump table *differing* from the one containing `NEWPHASE`.)  There needs to be a more-convenient way to handle this situation than these invented symbols, in terms of dealing with comparisons to ROPEs other than the BASELINE; but as of yet, I haven't an immediate solution.
+    workflow.sh Luminary210 --hint=MISCJUMP@UNAJUMP --hint=MISCJUMP@INDJUMP --hint=NEWPHASE@MISCJUMP \
+                            --skip=NEWPHASE  --hint=AFTRGUID@NEWPHASE
 
 ## Background
 

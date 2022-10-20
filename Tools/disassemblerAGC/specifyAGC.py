@@ -16,6 +16,11 @@ History:        2022-10-05 RSB  Wrote.  This version seems to work
                                 single-word instructions.
                 2022-10-09 RSB  Fixed erasables, I hope!
                 2022-10-14 RSB  Began supporting --block1 and --blk2.
+                2022-10-20 RSB  Format of erasable references changed to
+                                allow separation of aliased erasables.
+                                By default, now no longer invents fictitious
+                                symbols like Rbb,aaaa.  A new switch,
+                                --invent, restores that functionality.
 """
 
 import sys
@@ -24,6 +29,7 @@ debug = False
 minLength = 12
 block1 = False
 blk2 = False
+invent = False
 for param in sys.argv[1:]:
     if param == "--debug":
         debug = True
@@ -33,6 +39,8 @@ for param in sys.argv[1:]:
         blk2 = True
     elif param[:6] == "--min=":
         minLength = int(param[6:])
+    elif param == "--invent":
+        invent = True
     elif param == "--help":
         print("""
         Usage:
@@ -56,6 +64,17 @@ for param in sys.argv[1:]:
                     to meet this minimum requirement, but scopes will be 
                     rejected if they are shorter than the minimum and cannot 
                     be combined.
+        --invent    By default, match-patterns begin at program labels.
+                    However, it's not necessarily true that the code following
+                    a data word always has a program label, so the code 
+                    after a data word but prior to a program label will by 
+                    default be ignored and not used for pattern matching.
+                    If the --invent switch is used, then a fictitious label
+                    of the form Rbb,aaaa (where bb is a bank number and aaaa
+                    is the address within the bank) will be invented in order
+                    to include that code.  The drawback is that since the 
+                    fictitious labels don't exist within the baseline source 
+                    code, it's a little extra effort if you need to find it.
         """)
     else:
         print("Unknown parameter:", param)
@@ -101,6 +120,7 @@ for address in range(sizeErasableBank):
 #   "d" or "D"      data, w/o or w/ a symbolic name
 #   "b" or "B"      basic, w/o or w/ a program label
 #   "i" or "I"      interpretive (including arguments), w/o or w/ a symbol
+#   "c"             code outside of the scope of a program label.
 # This program is unaware of the disassembler's "special symbols" -- i.e.,
 # those which accept a data argument immediately following their invocation
 # via TC -- and hence characterizes those locations as data rather than as
@@ -230,9 +250,14 @@ for bank in range(numCoreBanks):
         # symbolic label, we invent one for it, of the form
         # Rbb,aaaa, where bb,aaaa is the address.
         if symbol == "":
-            symbol = "R%02o,%04o" % (bank, offset + coreOffset)
-            rope[offset][bank][0] = rope[offset][bank][0].upper()
-            rope[offset][bank][1] = symbol
+            if invent:
+                symbol = "R%02o,%04o" % (bank, offset + coreOffset)
+                rope[offset][bank][0] = rope[offset][bank][0].upper()
+                rope[offset][bank][1] = symbol
+            else:
+                rope[offset][bank][0] = 'c' # Mark as code without a scope.
+                offset += 1
+                continue
     
         # Let's look ahead, to find either the next symbol or
         # else a change to data, either one of which would be
@@ -321,28 +346,40 @@ checkForReferences(rope, erasable, erasableBySymbol,
 #   H   Like L, but interpretive half-memory.
 #   K   Like I, but only for negative values.
 
-# The output lines have space-delimited fields as follows:
-#   The literal "+"
-#   List of symbols (w/o spaces)
-#   List of reference (w/o spaces).  Each reference is of the form of a
-#                                    tuple (spaces removed) with three 
-#                                    entries:
-#                                    Program label of containing subroutine.
-#                                    Offset (decimal) from start of subroutine.
-#                                    Type of reference.
 print("# Erasables")
 for bank in range(numErasableBanks):
     for i in range(len(erasable)):
         data = erasable[i][bank]
-        for i in range(len(data["symbols"])):
-            data["symbols"][i] = normalize(data["symbols"][i])
-        for i in range(len(data["references"])):
-            d = list(data["references"][i])
-            d[0] = normalize(d[0])
-            data["references"][i] = tuple(d)
-        if len(data["symbols"]) > 0 and len(data["references"]) > 0:
-            print("+", str(data["symbols"]).replace(" ",""),
-                  str(data["references"]).replace(" ", ""))
+        if False: # Original method
+            # The output lines have space-delimited fields as follows:
+            #   The literal "+"
+            #   List of symbols (w/o spaces)
+            #   List of reference (w/o spaces).  Each reference is of the form of a
+            #                                    tuple (spaces removed) with three 
+            #                                    entries:
+            #                                    Program label of containing subroutine.
+            #                                    Offset (decimal) from start of subroutine.
+            #                                    Type of reference.
+            for i in range(len(data["symbols"])):
+                data["symbols"][i] = normalize(data["symbols"][i])
+            for i in range(len(data["references"])):
+                d = list(data["references"][i])
+                d[0] = normalize(d[0])
+                data["references"][i] = tuple(d)
+            if len(data["symbols"]) > 0 and len(data["references"]) > 0:
+                print("+", str(data["symbols"]).replace(" ",""),
+                      str(data["references"]).replace(" ", ""))
+        else: # Newer method.
+            # The output lines have the format:
+            #   Literal "+"
+            #   The symbol referenced.
+            #   Program label of referencing subroutine.
+            #   Non-negative offset (octal) from program label to reference.
+            #   Type of reference.
+            for i in range(len(data["references"])):
+                d = list(data["references"][i])
+                #print(d, file=sys.stderr)
+                print("+", normalize(d[3]), normalize(d[0]), "%o" % d[1], d[2])
 print("# Fixed references in basic")
 for bank in range(numCoreBanks):
     for i in range(sizeCoreBank):
