@@ -34,7 +34,7 @@ branches = ["CALL", "GOTO", "STCALL", "BHIZ", "BMN", "BOV", "BOVB", "BPL",
             
 def checkForReferences(rope, erasable, erasableBySymbol,  
                         fixedSymbols, fixedInterpretiveReferencesBySymbol):            
-            
+    
     for bank in range(numCoreBanks):
         lastLeft = ""
         lastRight = ""
@@ -50,6 +50,12 @@ def checkForReferences(rope, erasable, erasableBySymbol,
             lastLastLeft = ""
             lastLastRight = ""
             location = rope[offset][bank]
+            for fixup in [1, 3]:
+                if location[fixup][:1] == "{" and location[fixup][-1:] == "}":
+                    location[fixup] = location[fixup][1:-1]
+            if len(location[4]) > 0 and location[4][0][:1] == "{" \
+                    and location[4][0][-1:] == "}":
+                location[4][0] = location[4][0][1:-1]
             if location[0] not in ['b', 'B', 'i', 'I']:
                 lastSymbol = ""
                 argCount = -1

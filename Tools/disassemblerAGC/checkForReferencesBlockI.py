@@ -49,6 +49,14 @@ def checkForReferences(rope, erasable, erasableBySymbol, fixedSymbols,
             lastLastLeft = ""
             lastLastRight = ""
             location = rope[offset][bank]
+            for fixup in [1, 3]:
+                if location[fixup][:1] == "{" and location[fixup][-1:] == "}":
+                    location[fixup] = location[fixup][1:-1]
+            if len(location[4]) > 0 and location[4][0][:1] == "{" \
+                    and location[4][0][-1:] == "}":
+                location[4][0] = location[4][0][1:-1]
+            #print(location, file=sys.stderr)
+            
             if location[0] not in ['b', 'B', 'i', 'I']:
                 lastSymbol = ""
                 continue
@@ -56,10 +64,6 @@ def checkForReferences(rope, erasable, erasableBySymbol, fixedSymbols,
                 lastSymbol = location[1]
                 sinceSymbol = -1
                 #print(location, file=sys.stderr)
-            elif location[0] in ['b', 'i'] and location[1][:1] == "{" \
-                    and location[1][-1:] == "}":
-                lastSymbol = location[1][1:-1]
-                sinceSymbol = -1
             sinceSymbol += 1
             if lastSymbol == "":
                 print("Implementation error: Bad lastSymbol at %02o,%04o" \
@@ -77,7 +81,10 @@ def checkForReferences(rope, erasable, erasableBySymbol, fixedSymbols,
                     lastRight = operand[0]
                 else:
                     lastRight = ""
-                    
+                
+                #if lastSymbol == "FBR3":
+                #    print(location, operand, file=sys.stderr)
+                
                 if location[0] in ['i', 'I'] \
                         and lastRight in interpreterOpcodes:
                     continue                

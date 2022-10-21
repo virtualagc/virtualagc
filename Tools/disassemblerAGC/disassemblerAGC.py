@@ -579,38 +579,78 @@ if cli.dtest or cli.dloopFilename != "":
     #        print(symbol, references[symbol])
     #sys.exit(1)
 
-    # A response function for disassembleRange().
-    referringLabel = ""
-    indexIntoReferringLabel = 0
+    # A response function for disassembleRange().  If a symbol 
+    # table is available, it's going to try to insert the 
+    # symbols instead of the numeric values.  For program labels,
+    # that's pretty straightforward.  But for operands it's 
+    # tricky, because the symbolic references are identified by
+    # the scope they're within: the program label plus the offset
+    # from the program label.  However, that scope is not necessarily
+    # the most-recently-encounters program label, because successive
+    # program chunks which are too short (in specifyAGC.py's reckoning)
+    # are combined into a single scope.  Thus the program label 
+    # associated with the scope for any given line *may* be the 
+    # most-recent one, but it could be the one before that, or the
+    # one before that, etc.  So I keep a stack of the 5 preceding
+    # labels, and check all of them.  The entries in this 
+    # referenceStack are pairs consisting of the program label for
+    # the hypothetical scope and the current offset from the beginning
+    # of that scope.  The function initializeScope() tries to set
+    # up the reference stack before the first call to printDisassembly().
+    # That's not needed if the starting address is in fact the start
+    # of a true context, but there's no guarantee of that, so 
+    # initializeScope() starts at the beginning of the bank, and
+    # works its way up to the starting address.
+    referenceStack = [["", 0], ["", 0], ["", 0], ["", 0], ["", 0]]
+    def initializeScope(core, bank, address):
+        global referenceStack
+        referenceStack = [["", 0], ["", 0], ["", 0], ["", 0], ["", 0]]
+        if bank not in labels:
+            return
+        for offset in range(address % sizeCoreBank):
+            for i in range(len(referenceStack)):
+                referenceStack[i][1] += 1
+            if offset in labels[bank]:
+                label = labels[bank][offset]
+                referenceStack = [[label, 1]] + referenceStack[:-1]            
+    
     def printDisassembly(core, erasable, iochannels,
                          occasion, bank, address, left, right):
-        global referringLabel, indexIntoReferringLabel
+        global referenceStack
         offset = address % sizeCoreBank
         label = ""
         if bank in labels:
             if offset in labels[bank]:
-                referringLabel = labels[bank][offset]
-                indexIntoReferringLabel = 0
-                label = referringLabel
+                label = labels[bank][offset]
+                referenceStack = [[label, 0]] + referenceStack[:-1]
                 #print("At label", label, file=sys.stderr)
         comment = ""
-        if referringLabel in references:
-            #print(indexIntoReferringLabel, references[referringLabel], file=sys.stderr)
-            if indexIntoReferringLabel in references[referringLabel]:
-                r = references[referringLabel][indexIntoReferringLabel]
-                comment = ""
-                if r[1] == "+":
-                    comment = "# %s (erasable)" % right
-                    right = r[0]
-                elif r[1] == "-":
-                    comment = "# %s (fixed)" % right
-                    right = r[0]
+        found = len(right) not in [4, 5] or not right.isdigit()
+        for i in range(len(referenceStack)):
+            indexIntoReferringLabel = referenceStack[i][1]
+            referenceStack[i][1] += 1
+            if found:
+                continue
+            referringLabel = referenceStack[i][0]
+            if referringLabel in references:
+                #print(indexIntoReferringLabel, references[referringLabel], file=sys.stderr)
+                if indexIntoReferringLabel in references[referringLabel]:
+                    r = references[referringLabel][indexIntoReferringLabel]
+                    comment = ""
+                    if r[1] == "+":
+                        comment = "# %s (erasable)" % right
+                        right = r[0]
+                        found = True
+                    elif r[1] == "-":
+                        comment = "# %s (fixed)" % right
+                        right = r[0]
+                        found = True
         print("%02o,%04o    %05o    %-16s%-16s%-16s%s" \
               % (bank, address, core[bank][offset], label, left, right, comment))
-        indexIntoReferringLabel += 1
         return False
     
     if cli.dtest:
+        initializeScope(core, cli.dbank, cli.dstart)
         ret1, ret2 = disassembleRange(core, erasable, iochannels,
                          cli.dbank, cli.dstart, cli.dend, printDisassembly, 
                          cli.dbasic)
@@ -648,13 +688,14 @@ if cli.dtest or cli.dloopFilename != "":
                 basic = True
                 if len(fields) > 3 and fields[3].upper() == 'I':
                     basic = False
+                initializeScope(core, fields[0], fields[1])
                 ret1, ret2 = disassembleRange(core, erasable, iochannels,
                                  fields[0], fields[1], fields[2], printDisassembly, 
                                  basic)
                 print("Disassembly return values = %r, %r" % (ret1, ret2))
             except:
                 print("Corrupted input.")
-                continue   
+                continue
     sys.exit(0)
     
 # Command-line switch:  --find

@@ -332,6 +332,8 @@ fixedSymbols = set()
 for bank in range(numCoreBanks):
     for offset in range(sizeCoreBank):
         symbol = rope[offset][bank][1]
+        if symbol[:1] == "{" and symbol[-1:] == "}":
+            symbol = symbol[1:-1]
         if symbol != "" and symbol not in erasableBySymbol:
             fixedSymbols.add(symbol)
 fixedInterpretiveReferencesBySymbol = {}
