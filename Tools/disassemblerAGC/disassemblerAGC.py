@@ -550,6 +550,7 @@ if cli.dtest or cli.dloopFilename != "":
 
     # Read the optional symbol-table file.
     labels = {}
+    programLabels = {}
     references = {}
     if cli.symbolFilename != "":
         f = open(cli.symbolFilename, "r")
@@ -571,6 +572,7 @@ if cli.dtest or cli.dloopFilename != "":
                 if bank not in labels:
                     labels[bank] = {}
                 labels[bank][offset] = label
+                programLabels[label] = (bank, offset)
         f.close()
     #print(labels)
     #print(references)
@@ -657,44 +659,53 @@ if cli.dtest or cli.dloopFilename != "":
         print("Disassembly return values = %r, %r" % (ret1, ret2))
     elif cli.dloopFilename != "":
         print("At the prompt, enter the parameters for disassembling a range")
-        print("of core, in the form (octal) of")
+        print("of core.  There are two ways of doing this.  First, specify")
+        print("octal values, in the form:")
         print("       BB SSSS EEEE [I]")
         print("where BB is the bank, SSSS is the starting address within")
         print("the bank, EEEE is the ending address, and I is an optional")
-        print("literal 'I' if the instruction is interpretive.  Enter the")
-        print("word QUIT to quit.")
+        print("literal 'I' if the instruction is interpretive.  A second")
+        print("method is to enter the name of any known program label, along")
+        print("with an octal count of the number of words to disassemble:")
+        print("       SYMBOL COUNT [I]")
+        print("Finally, you can also enter the word QUIT to quit.")
         while True:
             line = input("> ")
             fields = line.split()
             if len(fields) == 1 and fields[0].upper() == "QUIT":
                 break
-            if len(fields) not in [3, 4]:
+            if len(fields) not in [2, 3, 4]:
                 continue
             try:
-                for i in range(3):
-                    fields[i] = int(fields[i], 8)
-                if fields[0] < startingCoreBank or fields[0] >= numCoreBanks:
-                    print("Bank out of range.")
-                    continue
-                if fields[1] < coreOffset or fields[1] >= coreOffset + sizeCoreBank:
-                    print("Starting address out of range.")
-                    continue
-                if fields[2] < coreOffset or fields[2] >= coreOffset + sizeCoreBank:
-                    print("Ending address out of range.")
-                    continue
-                if len(fields) > 3 and fields[3].upper() != "I":
-                    print("Did you mean 'I'?")
-                    continue
-                basic = True
-                if len(fields) > 3 and fields[3].upper() == 'I':
-                    basic = False
-                initializeScope(core, fields[0], fields[1])
+                symbol = fields[0].upper()
+                if symbol in programLabels:
+                    bank = programLabels[symbol][0]
+                    start = programLabels[symbol][1]
+                    end = start + int(fields[1], 8)
+                    basic = len(fields) < 3 or fields[2].upper == "I"
+                else:
+                    for i in range(3):
+                        fields[i] = int(fields[i], 8)
+                    bank = fields[0]
+                    start = fields[1]
+                    end = fields[2]
+                    if bank < startingCoreBank or bank >= numCoreBanks:
+                        print("Bank out of range.")
+                        continue
+                    if start < coreOffset or start >= coreOffset + sizeCoreBank:
+                        print("Starting address out of range.")
+                        continue
+                    if end < coreOffset or end >= coreOffset + sizeCoreBank:
+                        print("Ending address out of range.")
+                        continue
+                    basic = len(fields) < 4 or fields[3].upper() != "I"
+                initializeScope(core, bank, start)
                 ret1, ret2 = disassembleRange(core, erasable, iochannels,
-                                 fields[0], fields[1], fields[2], printDisassembly, 
+                                 bank, start, end, printDisassembly, 
                                  basic)
                 print("Disassembly return values = %r, %r" % (ret1, ret2))
             except:
-                print("Corrupted input.")
+                print("Cannot interpret this request.")
                 continue
     sys.exit(0)
     
