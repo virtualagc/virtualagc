@@ -633,11 +633,67 @@ Now that we have our ROPE.bin (Comanche072-partial.bin), the next step is to mat
 
 (Note the optional `--check=Comanche055.lst` switch, which can be added to compare the differences between the matched symbols in the partial Comanche 72 rope to those from the Comanche 55 baseline.)
 
-If run as described above, this process finds about a third of the program labels and variables it seeks.  The great majority of those actually remain at the same addresses as in Comanche 55.  Nevertheless, to proceed, we'll need to look in detail at those results and *manually* adjust source code.  For that, it's helpful to perform test disassemblies of various sections of code we wonder about.  The useful command for that is
+If run the command described above, this process finds about a third of the program labels and variables it seeks.  The great majority of those actually remain at the same addresses as in Comanche 55.  Nevertheless, to proceed, we'll need to look in detail at those results and *manually* adjust source code.  For that, it's helpful to perform test disassemblies of various sections of code we wonder about.  The useful command for that is
 
     disassemblerAGC.py --dsymbols=disassemblerAGC.symbols --hardware --dloop=Comanche072-partial.bin
 
-(Recall that the `disassemblerAGC.py --find=...` that we performed earlier automatically produces a symbol table called disassemblerAGC.symbols, and we're taking advantage of that here to make our disassemblies prettier and more informative.)
+(Recall that the `disassemblerAGC.py --find=...` that we performed earlier automatically produces a symbol table called disassemblerAGC.symbols, and we're taking advantage of that here to make our disassemblies prettier and more informative.)  
+
+What this command does is to prompt you with an input loop, in which you can repeatedly describe sections of code you want to disassemble, and then to see the actual attempt at a disassembly.  For example, here's what happens when I look at 20 (octal) words starting at program label `1REV`:
+
+    At the prompt, enter the parameters for disassembling a range
+    of core.  There are two ways of doing this.  First, specify
+    octal values, in the form:
+            BB SSSS EEEE [I]
+    where BB is the bank, SSSS is the starting address within
+    the bank, EEEE is the ending address, and I is an optional
+    literal 'I' if the instruction is interpretive.  A second
+    method is to enter the name of any known program label, along
+    with an octal count of the number of words to disassemble:
+            SYMBOL COUNT [I]
+    Finally, you can also enter the word QUIT to quit.
+    > 1rev 20 i
+    12,0112    55366    1REV            SQRT            BDDV            
+    12,0113    11630                                    2PISC           # 11630 (fixed)
+    12,0114    77600                    BOV                             
+    12,0115    24116                                    STOREMAX        # 24116 (fixed)
+    12,0116    00013    STOREMAX        STORE           00012           
+    12,0117    65205                    DMP             PDDL            
+    12,0120    00023                                    00023           
+    12,0121    00011                                    00011           
+    12,0122    65301                    NORM            PDDL            
+    12,0123    00047                                    00047           
+    12,0124    56257                    SL*             DDV             
+    12,0125    20173                                    20173           
+    12,0126    50000                    BOV             BMN             
+    12,0127    24143                                    MODDONE         # 24143 (fixed)
+    12,0130    24143                                    MODDONE         # 24143 (fixed)
+    12,0131    51525    PERIODCH        PDDL            ABS             
+    Disassembly return values = False, True
+    > 
+It so happens that `1REV` in Comanche 72 apparently remains at the same address as in Comanche 55.  So perhaps a more informative example would be `PTOALEM`, which moves from 13,3004 in Comanche 55 to 13,3013 in Comanche 72:
+
+    > ptoalem 10 i
+    13,3013    47014    PTOALEM         BON             RTB             
+    13,3014    04307                                    04307           
+    13,3015    27034                                    USEPIOS         # 27034 (fixed)
+    13,3016    27023                                    MOVEPLEM        # 27023 (fixed)
+    13,3017    52014                    BON             GOTO            
+    13,3020    04304                                    04304           
+    13,3021    26751                                    SETMOON         # 26751 (fixed)
+    13,3022    26744                                    CLRMOON         # 26744 (fixed)
+    Disassembly return values = False, False
+    > 
+As compared to what the Comanche 55 assembly listing produced by yaYUL says:
+
+    057393,000427: 13,3004           47014        PTOALEM            BON      RTB                                   
+    057394,000428: 13,3005           04307                                    SURFFLAG                              
+    057395,000429: 13,3006           27025                                    USEPIOS                               
+    057396,000430: 13,3007           27014                                    MOVEPLEM                              
+    057397,000431: 13,3010           52014                           BON      GOTO                                  
+    057398,000432: 13,3011           04304                                    LMOONFLG                              
+    057399,000433: 13,3012           26742                                    SETMOON                               
+    057400,000434: 13,3013           26735                                    CLRMOON                               
 
 
 

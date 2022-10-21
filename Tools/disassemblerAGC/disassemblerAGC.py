@@ -683,6 +683,8 @@ if cli.dtest or cli.dloopFilename != "":
                     start = programLabels[symbol][1]
                     end = start + int(fields[1], 8)
                     basic = len(fields) < 3 or fields[2].upper == "I"
+                    start = start % sizeCoreBank + coreOffset
+                    end = end % sizeCoreBank + coreOffset
                 else:
                     for i in range(3):
                         fields[i] = int(fields[i], 8)
