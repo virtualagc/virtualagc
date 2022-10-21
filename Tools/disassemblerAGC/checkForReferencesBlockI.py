@@ -31,10 +31,11 @@ def dontDecrement(opcode):
 branches = ["CALL", "GOTO", "STCALL", "BHIZ", "BMN", "BOV", "BOVB", "BPL", 
             "BZE", "CLRGO", "SETGO", "BOFF", "BOF", "BOFCLR", "BOFINV", "BOFSET", 
             "BON", "BONCLR", "BONINV", "BONSET", "RTB"]
-            
+
+import sys
 def checkForReferences(rope, erasable, erasableBySymbol, fixedSymbols,
                        fixedInterpretiveReferencesBySymbol):            
-            
+
     for bank in range(startingCoreBank, numCoreBanks):
         lastLeft = ""
         lastRight = ""
@@ -47,17 +48,17 @@ def checkForReferences(rope, erasable, erasableBySymbol, fixedSymbols,
         for offset in range(sizeCoreBank):
             lastLastLeft = ""
             lastLastRight = ""
-            try:
-                location = rope[offset][bank]
-            except:
-                print("here", "%02o"%bank, "%04o"%offset, "%04o"%len(rope), 
-                    "%02o"%len(rope[0]), "%02o"%numCoreBanks)
-                hello=booger
+            location = rope[offset][bank]
             if location[0] not in ['b', 'B', 'i', 'I']:
                 lastSymbol = ""
                 continue
             if location[0] in ['B', 'I']:
                 lastSymbol = location[1]
+                sinceSymbol = -1
+                #print(location, file=sys.stderr)
+            elif location[0] in ['b', 'i'] and location[1][:1] == "{" \
+                    and location[1][-1:] == "}":
+                lastSymbol = location[1][1:-1]
                 sinceSymbol = -1
             sinceSymbol += 1
             if lastSymbol == "":
@@ -97,7 +98,7 @@ def checkForReferences(rope, erasable, erasableBySymbol, fixedSymbols,
                 continue
             referenceType = ""
             if location[0] in ['b', 'B'] and operand[0] not in erasableBySymbol:
-                if lastLeft in ["TC", "TCF", "AD", "BZF", "BZMF", "CA",
+                if lastLeft in ["TC", "TCF", "AD", "BZF", "BZMF", "CA", "CAF",
                                 "CS", "MASK", "MP"]:
                     rope[offset][bank][4] = (operand[0], lastSymbol, sinceSymbol, "B")
                 elif lastLeft in ["DCA", "DCS"]:

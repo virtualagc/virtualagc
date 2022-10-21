@@ -172,10 +172,6 @@ for line in sys.stdin:
         symbol = ""
     else:
         symbol = line[46:54].strip()
-    if not fixed:
-        if symbol != "":
-            erasable[offset][bank]["symbols"].append(symbol)
-        continue
     # And I don't like symbols that are pure numerics either.
     dummy = symbol
     if dummy[:1] in ["+", "-"]:
@@ -184,6 +180,12 @@ for line in sys.stdin:
         dummy = dummy[:-1]
     if dummy.isdigit():
         symbol = ""   
+    if not fixed:
+        if symbol != "":
+            erasable[offset][bank]["symbols"].append(symbol)
+        continue
+    if left in ["=", "EQUALS"]:
+        continue
          
     locationType = "u"
     if left.isdigit():
@@ -215,6 +217,10 @@ for line in sys.stdin:
     rope[offset][bank] = [locationType, symbol, left, right, []]
     if octal2 != "":
         rope[offset + 1][bank] = [locationType.lower(), "", "", [], []]
+    
+    #if symbol == "NOUN":
+    #    print("%02o,%04o" % (bank, offset), rope[offset][bank], file=sys.stderr)
+    #    sys.exit(1)
 
 # This function converts a symbol name into a form that won't cause 
 # us problems later when our output file is read back by 

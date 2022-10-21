@@ -17,6 +17,7 @@ History:        2022-09-28 RSB  Split off from disassemblerAGC.py.
                                 much-more-effective usage.
                 2022-10-18 RSB  Added --intpret.
                 2022-10-19 RSB  Added --dsymbols, --dloop
+                2022-10-20 RSB  Added --know.
 """
 
 import sys
@@ -76,6 +77,7 @@ blk2 = False
 intpret = -1
 symbolFilename = ""
 dloopFilename = ""
+know = {}
 
 entryCount = 0
 pBanks = ""
@@ -214,6 +216,23 @@ for param in sys.argv[1:]:
                             code.  An example (the only one known, actually)
                             is a table of CADR pseudo-ops that disassembles
                             as a table of TC instructions.
+                --know=S@BB,AAAA[,C]  (Not yet implemented.) Similar to 
+                            --intpret.  Use this to indicate that you know
+                            (irrespective of any pattern-matching) that 
+                            symbol S is at fixed address BB,AAAA in the 
+                            ROPE. The optional C (in octal) is the number
+                            of words you think should be allocated for it;
+                            no other matches can be made in the memory
+                            range BB,AAAA through BB,AAAA+C-1.  If C is 
+                            omitted, then no memory range is reserved,
+                            You can use as many of these options as
+                            you like.  Nevertheless, you should use them
+                            sparingly, *only* when you're sure that the
+                            pattern defined by the BASELINE is wrong for the
+                            ROPE (as opposed to merely being inconvenient).
+                            That's because once a symbol is given a known
+                            address in this way, it cannot be used for 
+                            matching any references it makes.
                 --check=F   Specifies an assembly-listing file that can be 
                             used for comparison vs the matches found. If 
                             this switch is not present, no comparison is 
@@ -313,6 +332,16 @@ for param in sys.argv[1:]:
             hintAfter[fields[0]].append(fields[1])
         else:
             hintAfter[fields[0]] = [fields[1]]
+    elif param[:7] == "--know=":
+        fields = param[7:].split("@")
+        symbol = fields[0]
+        fields = fields[1].split(",")
+        bank = int(fields[0], 8)
+        address = int(fields[1], 8)
+        if len(fields) == 2:
+            know[symbol] = (bank, address)
+        elif len(fields) >= 3:
+            know[symbol] = (bank, address, int(fields[2],8))
     elif param == "--overlap":
         disjoint = False
     elif param[:9] == "--ignore=":

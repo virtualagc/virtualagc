@@ -572,6 +572,12 @@ if cli.dtest or cli.dloopFilename != "":
                     labels[bank] = {}
                 labels[bank][offset] = label
         f.close()
+    #print(labels)
+    #print(references)
+    #for symbol in ["VERB", "N/VCOM", "NOUN"]:
+    #    if symbol in references:
+    #        print(symbol, references[symbol])
+    #sys.exit(1)
 
     # A response function for disassembleRange().
     referringLabel = ""
