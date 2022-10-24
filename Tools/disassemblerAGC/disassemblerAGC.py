@@ -676,7 +676,7 @@ if cli.dtest or cli.dloopFilename != "":
                 break
             if len(fields) not in [2, 3, 4]:
                 continue
-            try:
+            if True:
                 symbol = fields[0].upper()
                 if symbol in programLabels:
                     bank = programLabels[symbol][0]
@@ -706,7 +706,7 @@ if cli.dtest or cli.dloopFilename != "":
                                  bank, start, end, printDisassembly, 
                                  basic)
                 print("Disassembly return values = %r, %r" % (ret1, ret2))
-            except:
+            else:
                 print("Cannot interpret this request.")
                 continue
     sys.exit(0)

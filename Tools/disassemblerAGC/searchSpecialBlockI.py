@@ -9,6 +9,7 @@ Purpose:        Search for the locations of subroutines which are "special"
                 than everyday, run-of-the-mill subroutines.  
                 This file is for Block I only.
 History:        2022-10-13 RSB  Created.
+                2022-10-22 RSB  Added MAKECADR.
 
 See searchFunctions.py for documentation.
 """
@@ -302,6 +303,35 @@ searchPatterns = {
                         [True, ["XAQ"], [""]],
                      ],
                     "ranges": [[0o02, 0o0000, 0o2000]]
+                }],
+    "MAKECADR": [{
+                    "dataWords": 0,
+                    "noReturn": False,
+                    "pattern": [
+                        [True, ["CAF"], []],
+                        [True, ["AD"], []],
+                        [True, ["TS"], []],
+                        [True, ["AD"], []],
+                        [True, ["TS"], ["OVCTR"]],
+                        [True, ["RETURN"], [""]],
+                        [True, ["XCH"], ["OVCTR"]],
+                        [True, ["AD"], []],
+                        [True, ["TS"], []],
+                        [True, ["RETURN"], [""]],
+                     ],
+                    "ranges": [[0o02, 0o0000, 0o2000]]
+                }],
+    "BANKJUMP": [{
+                    "dataWords": 0,
+                    "noReturn": True,
+                    "pattern": [
+                        [True, ["TS"], ["BANKREG"]],
+                        [True, ["MASK"], []],
+                        [True, ["XCH"], ["Q"]],
+                        [True, ["INDEX"], ["Q"]],
+                        [True, ["TC"], ["6000"]],
+                     ],
+                    "ranges": [[0o02, "MAKECADR", 0o2000]]
                 }],
 }
 

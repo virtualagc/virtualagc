@@ -21,15 +21,18 @@ History:        2022-10-05 RSB  Wrote.  This version seems to work
                                 By default, now no longer invents fictitious
                                 symbols like Rbb,aaaa.  A new switch,
                                 --invent, restores that functionality.
+                2022-10-22 RSB  Added --qrhack
 """
 
 import sys
+import copy
 
 debug = False
 minLength = 12
 block1 = False
 blk2 = False
 invent = False
+qrhack = False
 for param in sys.argv[1:]:
     if param == "--debug":
         debug = True
@@ -41,6 +44,8 @@ for param in sys.argv[1:]:
         minLength = int(param[6:])
     elif param == "--invent":
         invent = True
+    elif param[:8] == "--qrhack":
+        qrhack = True
     elif param == "--help":
         print("""
         Usage:
@@ -75,6 +80,20 @@ for param in sys.argv[1:]:
                     to include that code.  The drawback is that since the 
                     fictitious labels don't exist within the baseline source 
                     code, it's a little extra effort if you need to find it.
+        --qrhack[=QPLACE,RETAA]  (Implemented here, but not in disassemblerAGC.py,
+                    so this option is harmless but still not useful at present.)  
+                    In some places within some code versions we find instruction 
+                    sequences like this,
+                        TC MAKECADR / TS RETAA / stuff / XCH RETAA / TC BANKJUMP
+                    while in corresponding places in other code versions we 
+                    instead find
+                        XCH Q / TS QPLACE / stuff / TC QPLACE
+                    where the "stuff" in the middle is identical.  Of course, 
+                    they won't match, as-is.  The --qrhack option attempts to 
+                    create patterns that match either.  The octal addresses 
+                    in erasable of QPLACE and RETAA in the ROPE may be specified
+                    for compatibility with disassemblerAGC.py's command-line
+                    switches, but are ignored.
         """)
     else:
         print("Unknown parameter:", param)
@@ -212,7 +231,7 @@ for line in sys.stdin:
     if len(right) > 0:
         dummy = right[0]
         if dummy in registersByName:
-            right = ""
+            right = [""] + right
     
     rope[offset][bank] = [locationType, symbol, left, right, []]
     if octal2 != "":
@@ -238,6 +257,7 @@ print("# The minimum length of specifications is set "
       "to %d words." % minLength)
 print("# Core rope:")
 nonCode = ['u', 'd', 'D']
+emptyHacks = {"inRETAA":[], "outRETAA":[], "inQPLACE":[], "outQPLACE":[]}
 for bank in range(numCoreBanks):
     offset = 0
     while True:
@@ -272,12 +292,45 @@ for bank in range(numCoreBanks):
         derivedSymbols = {}
         found = False
         lookaheadType = locationType.lower()
+        hacks = copy.deepcopy(emptyHacks)
+        hackStack = ""
+        index = 0
+        if qrhack and locationType == 'B':
+            key = ""
+            if len(locationInfo[3]) > 0:
+                if locationInfo[3][0] == "" and len(locationInfo[3]) > 0:
+                    key = locationInfo[2] + " " + locationInfo[3][1]
+                else:
+                    key = locationInfo[2] + " " + locationInfo[3][0]
+            if key in ["TC MAKECADR", "XCH Q", "XCH RETAA"]:
+                hackStack = key
         for newOffset in range(offset + 1, sizeCoreBank):
+            index += 1
             if len(rope[newOffset][bank][4]) == 4:
                 print("- %s %s %d %s" % rope[newOffset][bank][4])
             lookahead = rope[newOffset][bank]
             lastLookaheadType = lookaheadType.lower()
             lookaheadType = lookahead[0]
+            if qrhack and locationType == 'B':
+                key = ""
+                if len(lookahead[3]) > 0:
+                    if lookahead[3][0] == "" and len(lookahead[3]) > 0:
+                        key = lookahead[2] + " " + lookahead[3][1]
+                    else:
+                        key = lookahead[2] + " " + lookahead[3][0]
+                if hackStack == "TC MAKECADR" and key == "TS RETAA":
+                    hacks["inRETAA"].append(index - 1)
+                elif hackStack == "XCH Q" and key == "TS QPLACE":
+                    hacks["inQPLACE"].append(index - 1)
+                elif hackStack == "XCH RETAA" and key == "TC BANKJUMP":
+                    hacks["outRETAA"].append(index - 1)
+                else:
+                    pass
+                hackStack = ""
+                if key in ["TC MAKECADR", "XCH RETAA", "XCH Q"]:
+                    hackStack = key
+                elif key == "TC QPLACE":
+                    hacks["outQPLACE"].append(index)
             lookaheadSymbol = lookahead[1]
             if lookaheadType in nonCode or lookaheadSymbol != "":
                 if newOffset < offset + minLength:
@@ -304,8 +357,11 @@ for bank in range(numCoreBanks):
                 #if len(symbolList) > 1:
                 #    print("# Due to specified minimum length, "
                 #          "combined scopes of symbols", symbolList)
+                if not qrhack or hacks == emptyHacks:
+                    hacks = ""
                 print("%s %02o %04o %04o %s" % (normalize(symbol), bank, 
-                    offset + coreOffset, newOffset + coreOffset, interpretive))
+                    offset + coreOffset, newOffset + coreOffset, interpretive),
+                    str(hacks).replace(" ",""))
                 for derivedSymbol in derivedSymbols:
                     print("%s = %s + %o" % (normalize(derivedSymbol), 
                                      normalize(symbol), \
