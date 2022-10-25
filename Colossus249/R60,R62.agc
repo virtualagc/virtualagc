@@ -17,6 +17,7 @@
 ##				vs the already-proofed corresponding Colossus
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
+##		2021-05-30 ABS	Removed STORANG symbol not present in scans.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -224,7 +225,7 @@ VECPOINT	STQ	BOV		# SAVE RETURN ADDRESS
 VECLEAR		AXC,2	RTB
 			MIS		# READ THE PRESENT CDU ANGLES AND
 			READCDUK	# STORE THEM IN PD25, 26, 27
-STORANG		STCALL	25D
+		STCALL	25D
 			CDUTODCM	# S/C AXES TO STABLE MEMBER AXES (MIS)
 		VLOAD	VXM
 			POINTVSM	# RESOLVE THE POINTING DIRECTION VF INTO

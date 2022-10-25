@@ -17,6 +17,7 @@
 ##		2017-02-05 RSB	Proofed comment text by diff'ing vs Comanche 55
 ##				and corrected errors found.
 ##		2017-08-19 MAS	Fixed comment errors found transcribing Zerlina 56.
+##		2021-05-30 ABS	SP3SPT1 -> 2P3SPT1
 
 ## Page 1309
 # 1.0 INTRODUCTION
@@ -288,7 +289,7 @@ ENDINT		CLEAR	EXIT
 			STATEFLG
 		TC	PHASCHNG
 		OCT	20032
-SP3SPT1		=	2.3SPOT
+2P3SPT1		=	2.3SPOT
 		EXTEND
 		DCA	600SECS
 		TC	LONGCALL

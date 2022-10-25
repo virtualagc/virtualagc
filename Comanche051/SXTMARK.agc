@@ -15,6 +15,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-30 MAS  Created from Comanche 55.
+##              2021-05-30 ABS  20/SXTMK -> 10/SXTMK
 
 ## Page 222
 # PROGRAM NAME - SXTMARK					DATE - 5 APRIL 1967
@@ -603,7 +604,7 @@ MARKIT		CCS	CDUCHKWD
 		SETLOC	SXTMARK1
 		BANK
 		
-		COUNT	20/SXTMK
+		COUNT	10/SXTMK
 		
 # PROGRAM NAME - MARKDIF			DATE- 19 SEPT 1967
 #

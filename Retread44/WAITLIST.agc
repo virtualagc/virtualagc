@@ -17,6 +17,7 @@
 ## 		2016-12-27 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and fixed errors found.
 ##		2017-02-09 RSB	Comment-text fixes identified in proofing Artemis 72
+##              2021-05-30 ABS  Removed DLY2 symbol not present in scans.
 
 ## Page 118
 ## The log section named, WAITLIST, is circled in red.
@@ -33,7 +34,7 @@ WAITLIST        XCH     Q               #  SAVE DELTA T IN Q AND RETURN IN
                 INDEX   A
                 DCA     0               # PICK UP 2CADR OF TASK.
                 TS      WAITADR         # BBCON WILL REMAIN IN L.
-DLY2            CAF     WAITBB 
+                CAF     WAITBB 
                 XCH     BBANK
                 TCF     WAIT2
 

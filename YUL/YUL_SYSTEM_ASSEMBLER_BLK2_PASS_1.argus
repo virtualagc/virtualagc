@@ -65,7 +65,7 @@ R0018   QUANTITIES FILLED IN FOR REFERENCE BY GENERAL PASS 1.
  00251  B2 SUB LOC EQUALS       B2 TYP TAB
  00252  B2 COUNSP  EQUALS       B2 TYP TAB
  0027  *B2 SPCIAL  TS           C,+1          OP FOUND      SEG TEST
- 0028              SSL, ONE     N.X4          0             POLISH Q       C    FIND OUT WHETHER IT'S A POLISH OP WORD.
+ 0028              SSL, ONE     N,X4          0             POLISH Q       C    FIND OUT WHETHER IT'S A POLISH OP WORD.
  00291  B2 ELEFT P CAC          8309                        B2 ELEFTO
  00292 *B2 FLEFT P CAC          6165          2048          B2 FLEFTO      -
 
@@ -105,7 +105,7 @@ R0053              PASS 1 PROCESSING OF THE EBANK=, SBANK=, AND BNKSUM CODES.
  0054   BL2 EBANK  SWS, B22T32  N,SC,5        16,L          HEALTH              EBANK= ESTABLISHES AN E-BANK FOR PASS 2
  0056              OCT          -740                                             CHECKING OF REFERENCES.
 
- 00572  BL2 SBANK  SWS, B22T32  N,SC,3        16,L          HEALTH              SBANK= ESTABLISHES AN E-BANK FOR PASS 2
+ 00572  BL2 SBANK  SWS, B22T32  N,SC,3        16,L          HEALTH              SBANK= ESTABLISHES AN S-BANK FOR PASS 2
  00574             OCT          -744                                             CHECKING OF REFERENCES.
 
  00576  BL2 BNKSM  SWS, B22T32  N,SC,1        16,L          HEALTH              BNKSUM FORMS TC SELF PAIRS AT BANK ENDS.
@@ -548,7 +548,7 @@ P0353   BLK2 OPERATION CODE TABLES CONTINUED.  PLEASE IGNORE THE BANK ERRORS.
  0366              M,A,XA       A,D,          A,1           B,4551
  0367              M,A,XA       A,D,          A,2           B,4551
  0368              M,A,TI       A,X,          A,1           B,4541
- 0369              M,A,TX       A,X,          A,2           B,4541
+ 0369              M,A,TI       A,X,          A,2           B,4541
  0370              M,A,TA       A,D           A,            B,4011
  0371              M,A,CG       A,OT          A,O           B,4041
  0372              M,A,CC       A,AL          A,L           B,4151
@@ -561,7 +561,7 @@ P0353   BLK2 OPERATION CODE TABLES CONTINUED.  PLEASE IGNORE THE BANK ERRORS.
  0377              M,A,TA       A,IL          A,            HEAD TAIL
  0378              OCT          0
 
- 0379   CODES 69   M,A,=        A,            A,            IS EQUALS
+ 0379   CODES 60   M,A,=        A,            A,            IS EQUALS
  0380              M,A,P        A,            A,            B,4754
  0381              OCT          0
 

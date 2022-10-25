@@ -2,7 +2,7 @@
 ## Copyright:	Public domain.
 ## Filename:	ALARM_AND_ABORT.agc
 ## Purpose:	Part of the reconstructed source code for LMY99 Rev 0,
-##		otherwise known as Luminary Rev 99, the second release
+##		otherwise known as Luminary Rev 99, the third release
 ##		of the Apollo Guidance Computer (AGC) software for Apollo 11.
 ##		It differs from LMY99 Rev 1 (the flown version) only in the
 ##		placement of a single label. The corrections shown here have
@@ -26,6 +26,7 @@
 ##		2016-12-18 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-08-01 MAS	Created from LMY99 Rev 1.
+##		2021-05-30 ABS  OCT21103 -> OCT1103
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -197,7 +198,7 @@ STRTIDLE	CAF	BBSERVDL
 CCSHOLE		INHINT
 		CA	Q
 		TC	ABORT2
-OCT21103	OCT	1103
+OCT1103		OCT	1103
 CURTAINS	INHINT
 		CA	Q
 		TC	ALARM2

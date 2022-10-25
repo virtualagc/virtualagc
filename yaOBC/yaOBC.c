@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2011,2020 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * Filename:    yaOBC.c
- * Purpose:     Emulator for Gemini OBC and Apollo LVDC CPUs
+ * Purpose:     Emulator for Gemini OBC CPU
  * Compiler:    GNU gcc.
  * Reference:   http://www.ibibio.org/apollo
  * Mods:        2011-12-23 RSB  By all that's good and holy, I
@@ -27,6 +27,17 @@
  *                              horrible) to start from scratch
  *                              and accept the consequences than it
  *                              is to try and figure out old code.
+ *           	2019-09-18 RSB	Removed references to LVDC.  Back
+ *           			then, the OBC and LVDC seemed
+ *           			very similar.  Now they seem only
+ *           			*somewhat* similar, with enough
+ *           			maddening differences that I don't
+ *           			feel like cramming them both into
+ *           			the same simulator.  And it looks
+ *           			like I never really implemented any
+ *           			of it anyway.
+ *           	2020-12-06 RSB  Fixed a clang warning (PRF_TBD vs
+ *           	                PRO_TBD).
  */
 
 #include <unistd.h>
@@ -130,7 +141,7 @@ static Line_t LineBuffer;
 
 // Command-line arguments.
 #define PORT 19653
-int Lvdc = 0, Run = 0, Port = PORT, Verbosity = 0;
+int Run = 0, Port = PORT, Verbosity = 0;
 char *BinaryFile = "yaOBC.bin";
 char *SymbolFile = NULL;
 char *IoFile = "yaOBC.io";
@@ -323,7 +334,7 @@ ProCategory_t ProCategories[64] =
         { PRO_OUTPUT, PRF_MDIU }, // YX = 52
         { PRO_ILLEGAL, PRF_ILLEGAL }, // YX = 53
         { PRO_ILLEGAL, PRF_ILLEGAL }, // YX = 54
-        { PRO_TBD, PRO_TBD }, // YX = 55
+        { PRO_TBD, PRF_TBD }, // YX = 55
         { PRO_INPUT, PRF_IMU }, // YX = 56
         { PRO_ILLEGAL, PRF_ILLEGAL }, // YX = 57
         { PRO_OUTPUT, PRF_MDIU }, // YX = 60
@@ -430,7 +441,7 @@ main(int argc, char *argv[])
   pthread_win32_process_attach_np();
 #endif
 
-  printf("yaOBC emulator for Gemini OBC and Apollo LVDC computers.\n");
+  printf("yaOBC emulator for Gemini OBC computer.\n");
   printf("Built " __DATE__ ", " __TIME__ "\n");
 
   // Various setups.
@@ -643,7 +654,6 @@ ParseCommandLine(int argc, char *argv[])
             "\tyaOBC [OPTIONS]\n"
             "The allowed OPTIONS are:\n"
             "--help        Display this usage info and then exit.\n"
-            "--lvdc        Emulate Apollo LVDC. (Default is Gemini OBC.)\n"
             "--binary=F    Specifies name of file containing memory/ATM\n"
             "              contents and HOP constant. Defaults to\n"
             "              yaOBC.bin, which is normally produced by\n"
@@ -654,7 +664,7 @@ ParseCommandLine(int argc, char *argv[])
             "              table and source code for symbolic debugging.\n"
             "              If absent, debugging will be non-symbolic.\n"
             "--run         Start the emulator in a mode in which it is\n"
-            "              running the selected OBC/LVDC binary in real\n"
+            "              running the selected OBC binary in real\n"
             "              time.  The default is to start in paused mode,\n"
             "              immediately prior to running the first \n"
             "              instruction.\n"
@@ -697,8 +707,6 @@ ParseCommandLine(int argc, char *argv[])
         }
       else if (!strcmp(argv[i], "-v"))
         Verbosity++;
-      else if (!strcmp(argv[i], "--lvdc"))
-        Lvdc = 1;
       else if (!strcmp(argv[i], "--run"))
         Run = 1;
       else if (1 == sscanf(argv[i], "--port=%d", &j))
@@ -735,7 +743,7 @@ ParseCommandLine(int argc, char *argv[])
   // And print out info about the settings.
   if (Verbosity)
     {
-      printf("Emulation: %s\n", Lvdc ? "Apollo LVDC" : "Gemini OBC");
+      printf("Emulation: %s\n", "Gemini OBC");
       if (Run)
         printf("State: running in real time.\n");
       else
@@ -756,7 +764,7 @@ ParseCommandLine(int argc, char *argv[])
 
 //==========================================================================
 
-// Read the OBC/LVDC executable binary specified by the global command-line
+// Read the OBC executable binary specified by the global command-line
 // variables into RAM, returning 0 on success or non-zero on failure.
 int
 ReadBinaryFile(void)
@@ -783,13 +791,7 @@ ReadBinaryFile(void)
       printf("Unexpected end of binary file.\n");
       goto Done;
     }
-  if (Lvdc)
-    {
-      printf("Sorry, LVDC not fully implemented yet.\n");
-      goto Done;
-    }
-  else
-    BuildAddressFromObcHopRegister(RawHopRegister, &HopRegister);
+  BuildAddressFromObcHopRegister(RawHopRegister, &HopRegister);
 
   if (Verbosity)
     {
@@ -808,7 +810,7 @@ ReadBinaryFile(void)
 
 //==========================================================================
 
-// Write a OBC/LVDC executable binary representing the current OBC/LVDC
+// Write a OBC executable binary representing the current OBC
 // state, returning 0 on success or non-zero on failure.
 int
 WriteBinaryFile(char *BinaryFile)
@@ -827,13 +829,7 @@ WriteBinaryFile(char *BinaryFile)
       goto Done;
     }
 
-  if (Lvdc)
-    {
-      printf("Sorry, LVDC not fully implemented yet.\n");
-      goto Done;
-    }
-  else
-    BuildObcHopRegisterFromAddress(&HopRegister, &RawHopRegister);
+  BuildObcHopRegisterFromAddress(&HopRegister, &RawHopRegister);
 
   if (1 != fwrite(&Binary, sizeof(Binary), 1, fp) || 1 != fwrite(
       &RawHopRegister, sizeof(RawHopRegister), 1, fp) || 1 != fwrite(
@@ -856,7 +852,7 @@ WriteBinaryFile(char *BinaryFile)
 
 //==========================================================================
 
-// Read the OBC/LVDC assembly-listing specified by the global command-line
+// Read the OBC assembly-listing specified by the global command-line
 // variables into RAM, returning 0 on success or non-zero on failure.
 // The listing contains two things of interest to us:
 //   1. The source code.  Every line of source code that's of consequence
@@ -1142,24 +1138,14 @@ DisplayCurrentDebuggingLocation(void)
   memcpy(&LastDebuggedHopRegister, &HopRegister, sizeof(Address_t));
 
   // Display registers.
-  if (Lvdc)
-    Value = ILLEGAL_VALUE;
-  else
-    Value = Binary[0][(HopRegister.Word & 0400) ? RESIDUAL_SECTOR
+  Value = Binary[0][(HopRegister.Word & 0400) ? RESIDUAL_SECTOR
         : HopRegister.Page][HopRegister.Syllable][HopRegister.Word & 0377];
   BuildObcHopRegisterFromAddress(&HopRegister, &RawHopRegister);
   printf("\n");
   printf("HOP=%09o (", RawHopRegister);
-  if (Lvdc)
-    {
-      printf("????");
-    }
-  else
-    {
-      printf("ADR=");
-      PrintAddress(&HopRegister);
-      printf(" HWM=%d VAL=%05o", HopRegister.HalfWordMode, Value & BITS13);
-    }
+  printf("ADR=");
+  PrintAddress(&HopRegister);
+  printf(" HWM=%d VAL=%05o", HopRegister.HalfWordMode, Value & BITS13);
   printf(")\n");
   printf("ACC=%09o PQ=%09o (TMR:%d)\n", Accumulator & BITS26, (PqRegister
       & BITS26), ((PqRegister >> 28) & 0x07));
@@ -1181,49 +1167,42 @@ DisplayCurrentDebuggingLocation(void)
       // that we actually have.  Another thing that makes it tricky is SYN,
       // since that may give different source lines for the same address,
       // but without the proper Value field.
-      if (Lvdc)
-        {
-
-        }
-      else
-        {
-          int i;
-          memcpy(&Key.Address, &HopRegister, sizeof(Address_t));
-          if (Key.Address.Word & 0400)
-            {
-              Key.Address.Page = RESIDUAL_SECTOR;
-              Key.Address.Word &= 0377;
-            }
-          for (i = 0; i < MAX_MODULES; i++)
-            {
-              Key.Address.Module = i;
-              Result = bsearch(&Key, SourceLines, NumSourceLines,
-                  sizeof(SourceLine_t), CompareSourceByAddresses);
-              if (Result == NULL)
-                continue;
-              // If there are multiple lines associated with the same
-              // address, this might not be the first one.  Need to
-              // search backward linearly to be sure.
-              for (; Result > SourceLines && !CompareSourceByAddresses(&Key,
-                  Result - 1); Result--)
-                ;
-              // Now iterate to try to fine a match with respect
-              // to the contents of the memory location.
-              Retry: ;
-              if (Result->Value == (Value & BITS13))
-                {
-                  SourceLineFound = 1;
-                  break;
-                }
-              else
-                {
-                  Result++;
-                  if (Result < &SourceLines[NumSourceLines]
-                      && !CompareSourceByAddresses(&Key, Result))
-                    goto Retry;
-                }
-            }
-        }
+      int i;
+      memcpy(&Key.Address, &HopRegister, sizeof(Address_t));
+      if (Key.Address.Word & 0400)
+	{
+	  Key.Address.Page = RESIDUAL_SECTOR;
+	  Key.Address.Word &= 0377;
+	}
+      for (i = 0; i < MAX_MODULES; i++)
+	{
+	  Key.Address.Module = i;
+	  Result = bsearch(&Key, SourceLines, NumSourceLines,
+	      sizeof(SourceLine_t), CompareSourceByAddresses);
+	  if (Result == NULL)
+	    continue;
+	  // If there are multiple lines associated with the same
+	  // address, this might not be the first one.  Need to
+	  // search backward linearly to be sure.
+	  for (; Result > SourceLines && !CompareSourceByAddresses(&Key,
+	      Result - 1); Result--)
+	    ;
+	  // Now iterate to try to fine a match with respect
+	  // to the contents of the memory location.
+	  Retry: ;
+	  if (Result->Value == (Value & BITS13))
+	    {
+	      SourceLineFound = 1;
+	      break;
+	    }
+	  else
+	    {
+	      Result++;
+	      if (Result < &SourceLines[NumSourceLines]
+		  && !CompareSourceByAddresses(&Key, Result))
+		goto Retry;
+	    }
+	}
       if (SourceLineFound)
         {
           Address.Module = Key.Address.Module;
@@ -1238,12 +1217,7 @@ DisplayCurrentDebuggingLocation(void)
       printf("\t");
       if (Value == ILLEGAL_VALUE)
         printf("\t (Uninitialized memory)\n");
-      else if (Lvdc)
-        {
-
-        }
-      else
-        printf("\t %s  %03o\n", ObcOps[(Value >> 9) & 0x0F], Value & 0777);
+      printf("\t %s  %03o\n", ObcOps[(Value >> 9) & 0x0F], Value & 0777);
     }
 
   DisplayDebuggerPrompt();
@@ -1279,7 +1253,7 @@ BuildObcHopRegisterFromAddress(Address_t *HopRegister, uint32_t *RawHopRegister)
 void
 DisplayDebuggerPrompt(void)
 {
-  printf("%s debugger %s> ", Lvdc ? "LVDC" : "OBC",
+  printf("%s debugger %s> ", "OBC",
       (Run || DebuggerRun) ? "(running)" : "(paused)");
   fflush(stdout);
 }
@@ -1506,14 +1480,9 @@ RunOneMachineCycle(void)
   Address_t JumpHOP;
 
   // Fetch the current value pointed to by the HOP register.
-  if (Lvdc)
-    Value = ILLEGAL_VALUE;
-  else
-    {
-      hwm = HopRegister.HalfWordMode;
-      Value = Binary[0][(HopRegister.Word & 0400) ? RESIDUAL_SECTOR
-          : HopRegister.Page][HopRegister.Syllable][HopRegister.Word & 0377];
-    }
+  hwm = HopRegister.HalfWordMode;
+  Value = Binary[0][(HopRegister.Word & 0400) ? RESIDUAL_SECTOR
+      : HopRegister.Page][HopRegister.Syllable][HopRegister.Word & 0377];
 
   // Get the instruction we want to decode.
   if (Value == ILLEGAL_VALUE)
@@ -2457,7 +2426,7 @@ HalSockThreadFunction(void *Data)
       case ENET_EVENT_TYPE_RECEIVE:
         if (Verbosity > 5)
           {
-            printf("%u 0x%08X:%u \"%s\"\n", event.packet -> dataLength,
+            printf("%zu 0x%08X:%u \"%s\"\n", event.packet -> dataLength,
                 event.peer -> address.host, event.peer -> address.port,
                 event.packet -> data);
             NeedDebuggerPrompt = 1;

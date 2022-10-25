@@ -20,6 +20,7 @@
 ##              2017-06-06 HG   Transcribed
 ##		2017-06-22 RSB	Proofed comment text with
 ##				octopus/ProoferComments.
+##              2021-05-30 ABS  Aligned IAW to field boundary.
 
 ## Page 322
                 BANK            15
@@ -266,7 +267,7 @@ AXISROT1        DAD             STADR                   #   MPAC + PD2      .
 
 ## Page 328
                 DMP*            SL1                     #      MPAC         .
-                32D             +4,1                    # S1COS S2COS S3COS .
+                                32D             +4,1    # S1COS S2COS S3COS .
 
                 DSU             STADR                   #   MPAC - PD0      .
                 STORE           32D             +4,1    # S1    S2    S3

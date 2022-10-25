@@ -13,6 +13,7 @@
 ##		2011-01-06 JL	Fixed pseudo-label indentation.
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2021-05-30 ABS	ZEROD -> ZEROO
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -433,7 +434,7 @@ DOCSM1		RTB	CALL
 			SVDWN1		# STORE DOWNLINK STATE VECTOR
 		GOTO
 			FAZAB4
-ZEROD		=	ZEROVECS
+ZEROO		=	ZEROVECS
 54DD		DEC	54
 6DD		DEC	-6
 12DD		DEC	12

@@ -22,7 +22,8 @@
 ##              2017-03-19 HG   Fix operator CALL  --> VLOAD
 ##                              Fix statement CA BIT1  --> CS BIT5
 ##                              Fix operand   ENDRRD29 --> ENDR29RD
-
+##              2021-05-30 ABS  R21LEMB -> R21LEM8
+##                              R29REM0J -> R29REMOJ
 
 ## Page 494
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -907,7 +908,7 @@ R21LEM12        RTB             DAD
                 TC              INTPRET
                 BOF             CLRGO
                                 FSPASFLG                        # FIRST PASS THRU REPOSITION
-                                R21LEMB                         # NO-GO TO CONTINUOUS DESIGNATE
+                                R21LEM8                         # NO-GO TO CONTINUOUS DESIGNATE
                                 FSPASFLG                        # YES-RESET FIRST PASS FLAG
                                 R21LEM50
 R21LEM13        CCS             REPOSCNT                        # HAVE WE TRIED 60 TIMES?
@@ -918,7 +919,7 @@ R21LEM7         TS              REPOSCNT
 R21LEM50        DLOAD           GOTO
                                 REPOSTM
                                 R21LEM12        +2
-R21LEMB         DLOAD
+R21LEM8         DLOAD
                                 REPOSTM
                 STCALL          TDEC1
                                 UPPSV
@@ -4543,7 +4544,7 @@ R29             CS              RADMODES
                 CA              PRIO21                          # MODE 1; MUST REMODE.
                 TC              NOVAC
                 EBANK=          LOSCOUNT
-                2CADR           R29REM0J                        # NEEDS OWN JOB TO RADSTALL IN.
+                2CADR           R29REMOJ                        # NEEDS OWN JOB TO RADSTALL IN.
 
                 CS              DESIGBIT
                 MASK            RADMODES                        # CLEAR DESIGNATE FLAG IN RADMODES
@@ -4564,7 +4565,7 @@ SETPRPOS        CA              ONE
 # FORCE RENDEZVOUS RADAR INTO MODE 2.
 
 
-R29REM0J        CA              ONE
+R29REMOJ        CA              ONE
                 TC              WAITLIST
                 EBANK=          LOSCOUNT
                 2CADR           REMODE                          # REMODE MUST RUN AS A TASK.

@@ -16,6 +16,12 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-30 MAS  Created from Comanche 55. Removed new pad-
 ##                              loaded erasables for the R-2 potential model.
+##		2020-12-12 RSB	Expanded the justifying annotations for the steps
+##				of Mike's reconstruction and made them consistent
+##				in style to similar annotations in Comanche 44.
+##              2021-05-30 ABS  Fixed R53FLBIT value to be BIT6.
+##                              Various symbol name fixes.
+##                              Added V96ONBIT definition present in Comanche 55 scans.
 
 ## Page 37
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -418,7 +424,7 @@ RNDVZBIT	=	BIT7
 # BIT 6 FLAG 0
 R53FLAG		=	009D		# V51 INITIATED		V51 NOT INITIATED
 
-R53FLBIT	= 	BIT8
+R53FLBIT	= 	BIT6
 
 # BIT 5 FLAG 0
 F2RTE		=	010D		# IN TIME CRITICAL	NOT IN TIME CRITICAL
@@ -950,7 +956,7 @@ ENDSPBIT	=	BIT13
 CMDAPARM	=	093D		# ALOW ENTRY FIRINGS	INHIBIT ENTRY FIRING
 					# AND CALCULATIONS	AND CONTROL FUNCTION
 ## Page 58					
-CMDARMBIT	=	BIT12
+CMARMBIT	=	BIT12
 
 # BIT 11 FLAG 6
 GAMDIFSW	=	094D		# CALCULATE GAMDOT	GAMDOT NOT TO BE
@@ -1075,7 +1081,7 @@ TIMRBIT		=	BIT11
 NORMSW		=	110D		# UNIT NORMAL INPUT	LAMBERT COMPUTE ITS
 					# TO LAMBERT.		OWN UNIT NORMAL.
 					
-NORMSBIT	=	BIT10
+NDRMSBIT	=	BIT10
 
 # BIT 9 FLAG 7
 RVSW		=	111D		# DO NOT COMPUTE FINAL	COMPUTE FINAL STATE
@@ -1087,7 +1093,7 @@ RVSWBIT		=	BIT9
 # BIT 8 FLAG 7
 GONEBY		=	112D		# PASSED TARGET		APPROACHING TARGET
 
-GONBYBIT	=	BIT8
+G0NBYBIT	=	BIT8
 
 # BIT 7 FLAG 7
 #		=	113D
@@ -1203,7 +1209,7 @@ COGAFBIT	=	BIT4
 ## Page 63
 V96ONFLG	=	132D		# P00 INTEGRATION HAS	P00 INTEGRATION IS
 					# BEEN INHIBITED BY	PROCEEDING REGULARLY
-					# V96
+V96ONBIT	=	BIT3		# V96
 		
 # BIT 2 FLAG 8
 #		=	133D
@@ -2236,11 +2242,19 @@ EK2VAL		ERASE	+1		# I(2)PL  B+23 NEWTON-SEC/E+2
 EK3VAL		ERASE			# I(1)PL  B+09 NEWTONS/E+4
 FANG		ERASE			# I(1)PL SPS THRUST USED BY IMPULSIVE BURN
 
-## Between Comanche 51 and 55, two new padloaded erasables (E3J22R2M and E32C31RM)
-## were added here, and END-E3 changed to point to the latter.
+## <b>Reconstruction:</b> Between Comanche 51 and 55, two new padloaded erasables
+## (E3J22R2M and E32C31RM) were added here.
+## Those have been removed for Comanche 51.  For justification, refer to
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=9">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. 9</a>.  Note that
+## some of the variables above (EK2VAL and EK3VAL) shown as changed in the 
+## <i>Programmed Guidance Equations</i> were added between Comanche 45/2
+## to 51, and therefore don't represent changes from Comanche 51 to 55.
 
 # **** CONICSEX (PLANETARY INERT. ORIEN.) ****
 TIMSUBO		EQUALS	TEPHEM		# CSEC B-42 (TRIPLE PREC)
+## <b>Reconstruction:</b> The following line is part of the change described in the 
+## preceding annotation above, for obvious reasons: In Comanche 55 it reads "END-E3 EQUALS E32C31RM".
 END-E3		EQUALS	FANG		# LAST USED E3 ADDRESS
 
 ## Page 88
@@ -3231,7 +3245,7 @@ TTEMP		EQUALS	TMIS	+4	# B   TMP
 KV2		EQUALS	TMIS	+6	# I(6)TMP
 BIASTEMP	EQUALS	TMIS	+6	# B   TMP
 KV3		EQUALS	TMIS	+12D	# I(6)TMP
-CGF		EQUALS	TMIS	+12D	# I   TMP
+OGF		EQUALS	TMIS	+12D	# I   TMP
 
 BRATE		EQUALS	COFSKEW		# B   TMP
 TM		EQUALS	CAM		# B   TMP

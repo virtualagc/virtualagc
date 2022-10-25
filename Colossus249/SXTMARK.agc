@@ -17,6 +17,7 @@
 ##				vs the already-proofed corresponding Colossus
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
+##		2021-05-30 ABS	20/SXTMK -> 10/SXTMK
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -652,7 +653,7 @@ MARKIT		CCS	CDUCHKWD
 		SETLOC	SXTMARK1
 		BANK
 		
-		COUNT	20/SXTMK
+		COUNT	10/SXTMK
 		
 # PROGRAM NAME - MARKDIF 			DATE-  19 SEPT 1967
 #

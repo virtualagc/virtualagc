@@ -16,6 +16,12 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-30 MAS  Created from Comanche 55, and removed R-2
 ##                              lunar potential model code.
+##		2020-12-12 RSB	Restored a page number (1342) that appeared
+##				to have been removed accidentally.  Also,
+##				added or modified existing annotations 
+##				justifying the reconstruction steps, making
+##				them consistent with similar annotations in
+##				Comanche 44.
 
 ## Page 1334
 # DELETE
@@ -359,6 +365,7 @@ COMTERM		STORE	UZ
 		PDDL	DMPR
 			2
 			5/128
+## Page 1342
 		BDSU
 		DMP*
 			J4REQ/J3,2
@@ -392,6 +399,47 @@ COMTERM		STORE	UZ
 			S1		#         4
 		PUSH	BDDV*		# NORMED R  TO 0D
 			J2REQSQ,2
+## <a name="R2MODEL"></a>
+## <b>Reconstruction:</b> 65 lines of interpretive code at the point in Comanche 55
+## corresponding to this position have been
+## replaced in Comanche 51 by the 56 lines of not-obviously-related interpretive instructions
+## that follow this annotation.  (For visual convenience, we've also added a terminating 
+## annotation at the end of the block.)  This large change is indicated neither by change bars in
+## the <i>Programmed Guidance Equations</i> nor by change markers (asterisks following
+## the line sequence numbers) in the original Comanche 55 assembly listing.  Therefore,
+## a more in-depth discussion is called for. 
+## <br><br>
+## The starting point to understanding the situation is 
+## <a href="https://www.ibiblio.org/apollo/Documents/LUM75_text.pdf">LUMINARY Memo #75,
+## titled "R-2 Lunar Potential Model Added to LUMINARY", and dated April 1, 1969</a>. 
+## The memo states specifically that the new model will be implemented in Luminary 69/2
+## (the final release of the Apollo 10 LM) software, and it mentions less specifically
+## that a "similar change has been directed in COLOSSUS 2".  While by itself this doesn't 
+## tell us which specific Comanche revision the generic term "COLOSSUS 2" relates to,
+## the very next Colossus 2 software releases after April 1 were Comanche 45/2 (April 2) and 
+## Comanche 55 (April 18), so one or both of those received the update.  It may seem as though
+## there may not have been enough time between the memo (April 1) and the releases for
+## the update to have been made, but Luminary 69/2 was <i>also</i> released on April 2 &mdash;
+## and we know that it contained the update &mdash; so 
+## there was indeed enough time.  We infer that the R-2 model was indeed implemented in 
+## Comanche 55, but <i>not</i> in Comanche 51 which had already been released in March.
+## The release dates mentioned above come from the document
+## <a href="http://www.ibiblio.org/apollo/Documents/a042186.pdf#page=52">
+## <i>Software Systems Development: A CSDL Project History</i>, Table 4-6</a>,
+## and from <a href="http://www.ibiblio.org/apollo/Documents/R-700.pdf#page=170">
+## <i>MIT's Role in Project Apollo, Final Report</i>, Table 4-II</a>.
+## <br><br>
+## The next thing to understand is that we have an actual copy of a 
+## <a href="https://archive.org/details/luminary6900miti">Luminary 69 program listing</a>,
+## and that the aforementioned 
+## <a href="http://www.ibiblio.org/apollo/listings/LUM69R2/MAIN.agc.html">Luminary 69/2</a>
+## (of which we <i>don't</i> have a contemporary listing) has previously been reconstructed.
+## Together, Luminary 69 and 69/2 give us "before" and "after" snapshots, between which the
+## principal difference is the implementation of the R-2 lunar potential model.
+## <br><br>
+## The instruction block that follows has thus been constructed by removing the "after" code matched
+## from Luminary 69/2's ORBITAL INTEGRATION log section, and adding back the corresponding "before" code
+## from Luminary 69 in its place.  
 		VXSC
 			TVEC
 		STORE	TVEC
@@ -409,6 +457,11 @@ COMTERM		STORE	UZ
 		DAD	PDDL		# Y +X  B-2 TO 2D
 			2D
 		SL1	DSU
+
+## <b>Reconstruction:</b>  Notice that the following page number (1232) is out of sequence
+## with the others in this file, since it is preceded by 1342 and followed by 1344.
+## That's because it is a line number from Luminary 69, as described in the
+## preceding annotation above.
 
 ## Page 1232
 			2D
@@ -450,6 +503,9 @@ NBRANCH1	BOV
 		STORE	FV
 		BOV
 			GOBAQUE
+## <b>Reconstruction:</b> Termination of block of R-2 Lunar Potential Model 
+## code begun a couple of annotations above.
+
 ## Page 1344
 NBRANCH		SLOAD	LXA,1
 			DIFEQCNT
@@ -867,9 +923,18 @@ ASCALE		DEC	-7
 		2DEC*	4.9027780 E8 B-30*	# M
 MUEARTH		2DEC*	3.986032 E10 B-36*
 		2DEC	0
-## Between Comanche 51 and 55, the second number in J4REQ/J3 was changed from
-## 0 to -176236.02 B-25.
 J4REQ/J3	2DEC*	.4991607391 E7 B-26*
+## <b>Reconstruction:</b>  In Comanche 55, the value of the constant on 
+## the line immediately following this annotation reads -176236.02 B-25.
+## It was targeted for change in the reconstruction because on 
+## <a href="https://archive.org/details/Comanche55J2k60/page/n1353/mode/1up">
+## p. 1354 of the original Comanche 55 assembly listing</a> the line
+## has a change marker &mdash; an asterisk following the line-sequence number
+## (810). While this provides no clue as such to what the correct value <i>should</i>
+## be, the usual practice in these cases is to revert to the value from the 
+## closest previous known release, Colossus 
+## 249 (Apollo 9), and see if that helps to produce the correct memory-bank
+## checksums.  In this case, it does do so.
 		2DEC	0
 2J3RE/J2	2DEC*	-.1355426363 E5 B-27*
 		2DEC*	.3067493316 E18 B-60*

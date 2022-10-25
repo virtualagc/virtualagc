@@ -29,6 +29,7 @@
 ##				Changed 360-CDUD to 360-CDUO.
 ##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
 ##				Luminary 99 vs Comanche 55.
+##              2021-05-30 ABS  RCDUFBIT -> BIT7 to match scans.
 
 ## Page 403
 # PROGRAM NAME - KEYBOARD AND DISPLAY PROGRAM
@@ -3806,7 +3807,7 @@ TSTLTS3         CS      TSTCON3         # CALLED BY EXECUTIVE
                 
                 CS      RFAILS2
                 MASK    RADMODES
-                AD      RCDUFBIT
+                AD      BIT7
                 TS      RADMODES
                 
                 RELINT
@@ -3855,7 +3856,7 @@ ERROR           XCH     21/22REG        # RESTORE ORIGINAL C(DSPLOCK). THUS ERRO
                 
                 CS      RFAILS
                 MASK    RADMODES
-                AD      RCDUFBIT
+                AD      BIT7
                 TS      RADMODES
                 
                 CS      BIT10           # TURN OFF :TEST ALARM: OUTBIT.

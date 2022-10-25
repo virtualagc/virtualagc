@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2005,2009,2016-2018 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2003-2005,2009,2016-2018,2021 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -121,6 +121,7 @@
  *             			The result is that --block1 assembly was working essentially by
  *             			accident, and similarly was failing by accident in Mac OS X.
  *            	2018-10-12 RSB	Added --simulation stuff.
+ *            	2021-01-24 RSB  Added a "Reconstruction" marker in .lst files.
  *
  * I don't really try to duplicate the formatting used by the original
  * assembly-language code, since that format was appropriate for
@@ -1487,6 +1488,9 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
   int noOperator = 1, foundInterpreterOperandCount /*, firstInterpreterColumn*/;
   static char lastLines[10][sizeof(s)] =
     { "", "", "", "", "", "", "", "", "", "" };
+  int thisLineDoubleComment = 0;
+
+  inReconstructionComment = 0;
 
   debugLineString = s;
   debugLine = 1;
@@ -1643,6 +1647,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
 
       // If it is not a ## line and not completely blank, then we are no longer
       // in the file header.
+      thisLineDoubleComment = 0;
       for (ss = s; *ss && isspace(*ss); ss++)
         ;
       if (*ss == 0) // completely whitespace
@@ -1655,7 +1660,9 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
         }
       else if (s[0] == '#' && s[1] == '#' && 1 != sscanf(s, "## Page%d", &k)) // is a ## line
         {
-	  // Intentionally empty.
+          thisLineDoubleComment = 1;
+	  if (!inHeader && strstr(s, "Reconstruction:") != NULL)
+	    inReconstructionComment = 1;
         }
       else if (inHeader)
         {
@@ -1666,6 +1673,10 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
                   toYulOnlyLogSection);
             }
         }
+      if (!thisLineDoubleComment && inReconstructionComment)
+        inReconstructionComment = 0;
+      //if (WriteOutput && inReconstructionComment && reconstructionComments)
+      //  printf ("%s", s);
 
       // Convert the construct "#>' (column 1) used in .yul files to an
       // indented ##-style comment.

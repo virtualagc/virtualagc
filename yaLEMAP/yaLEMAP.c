@@ -1,5 +1,5 @@
 /*
- * Copyright 2005,2009,2016,2017 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2005,2009,2016,2017,2021,2022 Ronald S. Burkey <info@sandroid.org>
  * This file is part of yaAGC.
  *
  * yaAGC is free software; you can redistribute it and/or modify
@@ -67,6 +67,14 @@
  * 		2017-10-12 MAS	Cleaned up HTML and .lst formatting. Pulled
  * 		                --unpound-page over from yaYUL.
  * 		2017-11-18 RSB	Some compiler warnings fixed.
+ * 		2021-04-20 RSB  Accounted for EBCDIC mods, in yaYUL, not
+ * 		                desired here.
+ *              2021-05-24 RSB  Workaround for bad cygwin pow() function.
+ *              2021-05-24 RSB  My workarounds were bogus.  I've rolled them back.
+ *              2022-08-07 RSB  Removed the datestamp in the output listing
+ *                              in favor of a revision code (1.0), due the
+ *                              annoying revision-control effect it has on
+ *                              the output listings FP6.lst and FP8.lst.
  *
  * Note that we use yaYUL's symbol-table machinery for handling the
  * symbol table.
@@ -78,6 +86,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
+
+#define REVISION "1.0"
 
 #define MEMSIZE 010000
 static int Memory[MEMSIZE], Valid[MEMSIZE];
@@ -1293,9 +1303,13 @@ main (int argc, char *argv[])
   char *Compare = NULL;
   FILE *fp;
 
-  printf ("AGS cross-assembler yaLEMAP, " __DATE__ ", " __TIME__ "\n");
+  printf ("AGS cross-assembler yaLEMAP, rev " REVISION "\n");
   printf ("Copyright 2005,2009 Ronald S. Burkey.\n");
   printf ("Licensed under the General Public License (GPL).\n");
+
+  // Use the native collation order for sorting the symbol table.
+  ebcdic = 0;
+  honeywell = 0;
 
   Lst = fopen ("yaLEMAP.lst", "w");
   if (Lst == NULL)
@@ -1304,7 +1318,7 @@ main (int argc, char *argv[])
       return (1);
     }
 
-  fprintf (Lst, "AGS cross-assembler yaLEMAP, " __DATE__ ", " __TIME__ "\n");
+  fprintf (Lst, "AGS cross-assembler yaLEMAP rev " REVISION "\n");
   fprintf (Lst, "Copyright 2005 Ronald S. Burkey.\n");
   fprintf (Lst, "Licensed under the General Public License (GPL).\n");
 

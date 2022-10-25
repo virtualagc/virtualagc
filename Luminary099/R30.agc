@@ -20,6 +20,7 @@
 ##				side-by-side diff of Luminary 69/99/116/131/210.
 ##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
 ##				Luminary 99 vs Comanche 55.
+##		2021-05-30 ABS	TICKTIFF -> TICKTFF
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -215,7 +216,7 @@ BOTHPAD		STCALL	RPADTEM
 		STORE	TSTART82	#                 SAVE IT
 		DLOAD	BZE		# SR30.1 SETS -TPER=0 IF HPER L/
 			-TPER		# HPERMIN (300 OR 35) KFT.
-			TICKTIFF	# (-TPER = 0)
+			TICKTFF		# (-TPER = 0)
 TICKTPER	DLOAD	DAD		# (-TPER NON ZERO) TFF WAS NOT COMPUTED,
 			-TPER		# BUT WAS SET TO 59M59S.  DONT TICK TFF, DO
 			TSTART82	# TICK -TPER.  DISPLAY BOTH.
@@ -225,7 +226,7 @@ TICKTPER	DLOAD	DAD		# (-TPER NON ZERO) TFF WAS NOT COMPUTED,
 		TS	V82FLAGS	# INFORMS TICKTEST TO INCREMENT ONLY -TPER
 		TC	ENDOFJOB
 
-TICKTIFF	DLOAD	DAD		# (-TPER=0) TFF WAS COMPUTED.  TICK TFF.
+TICKTFF		DLOAD	DAD		# (-TPER=0) TFF WAS COMPUTED.  TICK TFF.
 			TFF		# DO NOT TICK -TPER.  DISPLAY TFF, BUT NOT
 			TSTART82	# -TPER.
 		STORE	TFF		# TFF CORRECTED FOR TIME SINCE V82GOFF1

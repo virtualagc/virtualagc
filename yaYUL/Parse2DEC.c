@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2004,2009 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2004,2009,2021 Ronald S. Burkey <info@sandroid.org>
 
   This file is part of yaAGC. 
 
@@ -38,12 +38,31 @@
                                spills over into the Extra field. Fix handling
                                of numbers where the exponents are all in the
                                operand field.
+                2021-05-24 RSB Workaround for bad cygwin pow() function.
+                2021-05-24 RSB I didn't react to the problem described above
+                               appropriately.  The pow() changes have been
+                               rolled back, and a different fix (fuzzDEC) has
+                               been applied for all platforms, not just cygwin.
  */
 
 #include "yaYUL.h"
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+
+static int
+fuzzedIsInt (double x)
+{
+#if 1
+#define fuzzDEC (1.0E-10)
+  // Fixed (I hope) algorithm.
+  x = fabs(fmod (x, 1.0));
+  return (x < fuzzDEC || x > 1.0 - fuzzDEC);
+#else
+  // Original algorithm.
+  return (fmod(x, 1.0) == 0.0);
+#endif
+}
 
 //-------------------------------------------------------------------------
 // Converts a string like "E+-n" or "B+-n" to a scale factor.
@@ -211,7 +230,7 @@ int Parse2DEC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
         x = -x;
     }
 
-    if (fmod(x, 1.0) == 0.0) {
+    if (fuzzedIsInt(x)) {
         // Integer: just convert directly to octal.
         Value = (int)x;
     } else {
@@ -318,7 +337,7 @@ int ParseDEC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
         x = -x;
     }
 
-    if (fmod(x, 1.0) == 0.0) {
+    if (fuzzedIsInt(x)) {
         // Integer: just convert directly to octal.
         Value = (int)x;
     } else {

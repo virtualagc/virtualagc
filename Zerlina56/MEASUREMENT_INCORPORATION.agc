@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
 ##              2017-08-28 MAS  Updated for Zerlina 56.
+##              2021-05-30 ABS  ZEROD -> ZEROO
 
 ## Page 1140
 #  INCORP1--PERFORMS THE SIX DIMENSIONAL STATE VECTOR DEVIATION FOR POSITI
@@ -421,7 +422,7 @@ DOCSM1          RTB     CALL
                         SVDWN1          # STORE DOWNLINK STATE VECTOR
                 GOTO
                         FAZAB4
-ZEROD           =       ZEROVECS
+ZEROO           =       ZEROVECS
 54DD            DEC     54
 6DD             DEC     -6
 12DD            DEC     12

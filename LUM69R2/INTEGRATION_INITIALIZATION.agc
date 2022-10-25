@@ -17,6 +17,11 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-27 MAS  Created from Luminary 69.
 ##              2019-07-27 MAS  Updated TIMEDELT to match LUM69 rev 2.
+##		2020-12-14 RSB	Tweaked the annotation relevant to the
+##				change mentioned above to conform to the
+##				style and extent of similar justifying
+##				annotations previously added to 
+##				Comanche 44 and 51.
 
 ## Page 1200
 # 1.0 INTRODUCTION
@@ -1033,9 +1038,28 @@ NOTIME          CLEAR   EXIT            # TOO LATE
 
 3CSECS          2DEC    3
 
-## The following number was changed from "2DEC  1000" betwen Luminary 69 and LUM69 rev 2,
-## as part of the introduction of the R-2 lunar potential model. This change is described
-## in Luminary memo 78.
+## <b>Reconstruction:</b> The constant defined immediately following this annotation
+## read TIMEDELT 2DEC 1000 Luminary 69. But has been changed in Luminary 69/2 due 
+## to incorporation of the R-2 Lunar Potential Model &mdash; see
+## <a href="http://www.ibiblio.org/apollo/Documents/LUM75_text.pdf">LUMINARY Memo #75</a>.
+## The constant definition has been taken without change from Luminary 99/1, which 
+## also incorporates the R-2 model. The change to TIMEDELT is described
+## <a href="http://www.ibiblio.org/apollo/Documents/LUM78_text.pdf">LUMINARY Memo #78"</a>,
+## which indicates that
+## the implementation of the R-2 model was dictated by Program Change Notice
+## (PCN) 761.1, of which we don't have a copy of the full text, but whose title
+## is "R-2 Lunar Potential Model".  The memo goes on to state that 
+## "As a further result of this PCN the value of TIMEDELT in R41 was changed from 
+## 15 seconds to 20 seconds ...".  Presumably, the "15 seconds" mentioned in the
+## memo is the value used in Luminary 94, and is therefore not a contradiction of
+## the use of 10 seconds instead in Luminary 69.
+## <br><br>
+## A point which at first may confuse is that PCN 761.1 was incorporated in 
+## Luminary 95.  So why does the change appear in Luminary 69/2?  But the 
+## confusion is only momentary after a little thought:  Luminary 95 derives from Luminary 69,
+## and Luminary 69/2 derives from Luminary 69 as well.  So what?  Luminary 69/2 
+## does not derive from Luminary 95, or vice-versa.  We don't know which of them
+## came first, and in the present context don't care.
 TIMEDELT        2DEC    2000
 
                 BANK    27

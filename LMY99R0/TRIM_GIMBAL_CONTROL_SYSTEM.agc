@@ -2,7 +2,7 @@
 ## Copyright:	Public domain.
 ## Filename:	TRIM_GIMBAL_CONTROL_SYSTEM.agc
 ## Purpose:	Part of the reconstructed source code for LMY99 Rev 0,
-##		otherwise known as Luminary Rev 99, the second release
+##		otherwise known as Luminary Rev 99, the third release
 ##		of the Apollo Guidance Computer (AGC) software for Apollo 11.
 ##		It differs from LMY99 Rev 1 (the flown version) only in the
 ##		placement of a single label. The corrections shown here have
@@ -25,6 +25,7 @@
 ##				and corrected the errors found.
 ##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##		2017-08-01 MAS	Created from LMY99 Rev 1.
+##		2021-05-30 ABS	GTSGO+DN -> GTSGO+ON
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -85,7 +86,7 @@ GTS		CAF	NEGONE		# MAKE THE NEXT PASS THROUGH THE DAP BE
 		AD	A		# FOR THE RIGHT SHIFT DUE TO EDITING.
 		TS	SAVESR
 
-GTSGO+DN	CAF	TWO		# SET INDEXER FOR R-AXIS CALCULATIONS.
+GTSGO+ON	CAF	TWO		# SET INDEXER FOR R-AXIS CALCULATIONS.
 		TCF	GOQTRIMG +1
 
 GOQTRIMG	CAF	ZERO		# SET INDEXER FOR Q-AXIS CALCULATIONS

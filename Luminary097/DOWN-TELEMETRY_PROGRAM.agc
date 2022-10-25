@@ -3,8 +3,10 @@
 ## Filename:    DOWN-TELEMETRY_PROGRAM.agc
 ## Purpose:     A section of Luminary revision 97.
 ##              It is part of the reconstructed source code for the
-##              original release of the flight software for the Lunar 
+##              second release of the flight software for the Lunar 
 ##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 11.
+##              It was created to fix two incorrect ephemeris constants in
+##              Luminary 96, as described by anomaly report LNY-59.
 ##              The code has been recreated from a copy of Luminary 99
 ##              revision 001, using asterisks indicating changed lines in
 ##              the listing and Luminary Memos #83 and #85, which list 
@@ -19,6 +21,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-28 MAS  Created from Luminary 99. Removed coding related
 ##                              to WOTEST, which was introduced in Luminary 98.
+##              2021-05-30 ABS  Removed WO1 symbol related to WOTEST.
 
 ## Page 988
 # PROGRAM NAME - DOWN TELEMETRY PROGRAM
@@ -167,7 +170,7 @@ DODOWNTM	TS	BANKRUPT
 ## of code to check whether or not it is time to write the word order bit.
 ## This was done to decrease the write frequency.
 		CA      BIT7		# SET WORD ORDER CODE TO 1. EXCEPTION- AT
-WO1		EXTEND			# THE BEGINNING OF EACH LIST THE WORD
+		EXTEND			# THE BEGINNING OF EACH LIST THE WORD
 		WOR	CHAN13		# CODE WILL BE SET BACK TO 0.
 		TC	DNTMGOTO	# GOTO APPROPRIATE PHASE OF PROGRAM
 

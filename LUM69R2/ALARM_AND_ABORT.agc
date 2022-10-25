@@ -16,6 +16,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-27 MAS  Created from Luminary 69.
+##              2021-05-30 ABS  OCT21103 -> OCT1103
 
 ## Page 1375
 #          THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION. IT MAY BE CALLED
@@ -160,7 +161,7 @@ STRTIDLE	TC	POSTJUMP	# PUT SERVICER INTO ITS "GROUND" STATE
 CCSHOLE		INHINT
 		CA	Q
 		TC	ABORT2
-OCT21103	OCT	1103
+OCT1103		OCT	1103
 CURTAINS	INHINT
 		CA	Q
 		TC	ALARM2

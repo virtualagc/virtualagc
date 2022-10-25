@@ -3,8 +3,10 @@
 ## Filename:    ERASABLE_ASSIGNMENTS.agc
 ## Purpose:     A section of Luminary revision 97.
 ##              It is part of the reconstructed source code for the
-##              original release of the flight software for the Lunar 
+##              second release of the flight software for the Lunar 
 ##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 11.
+##              It was created to fix two incorrect ephemeris constants in
+##              Luminary 96, as described by anomaly report LNY-59.
 ##              The code has been recreated from a copy of Luminary 99
 ##              revision 001, using asterisks indicating changed lines in
 ##              the listing and Luminary Memos #83 and #85, which list 
@@ -18,6 +20,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-28 MAS  Created from Luminary 99.
+##              2021-05-30 ABS  W.INDI -> W.IND1
+##                              TTPIO -> TTPI0
+##                              NETTOTKP -> NEGTOTKP
 
 ## Page 90
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -754,7 +759,7 @@ DNLRALT		EQUALS	DNLRVELZ +1	# B(1)TMP
 # INCORPORATION UNSWITCHED.			(2D)
 
 W.IND		EQUALS	PIPAGE		# B(1)
-W.INDI		EQUALS	W.IND +1	# I(1)
+W.IND1		EQUALS	W.IND +1	# I(1)
 
 # SUBROUTINE BALLANGS OF R60.			(1D)
 
@@ -1823,7 +1828,7 @@ JETRATER	EQUALS	JETRATE +2	# SCALED AT PI/4 RADIANS/SECOND
 
 DOWNTORK	ERASE	+5		# ACCUMULATED JET TORQUE COMMANDED ABOUT
 POSTORKP	EQUALS	DOWNTORK	# 	+,-P, +,-U, +,-V RESPECTIVELY.
-NETTOTKP	EQUALS	DOWNTORK +1	#	EMPLOYED EXCLUSIVELY FOR DOWNLIST.
+NEGTOTKP	EQUALS	DOWNTORK +1	#	EMPLOYED EXCLUSIVELY FOR DOWNLIST.
 POSTORKU	EQUALS	DOWNTORK +2	#	NOT INITIALIZED:  PERMITTED TO OVERFLOW
 ## Page 133
 NEGTORKU	EQUALS	DOWNTORK +3	#	SCALED AT 32 JET-SEC, OR ABOUT 2.0 JET-
@@ -2218,7 +2223,7 @@ QTEMP		ERASE			# I(1)TMP COMMON RETURN SAVE REGISTER.
 
 TCSI		ERASE	+1		# B(2)TMP CSI TIME IN CENTISECONDS
 TTPI		ERASE	+1		# B(2)TMP TPI TIME IN CENTISECONDS
-TTPIO		ERASE	+1		# B(2)TMP TTPI STORAGE FOR RECYCLE
+TTPI0		ERASE	+1		# B(2)TMP TTPI STORAGE FOR RECYCLE
 
 # P30,P40 INTERFACE.				(21D)
 

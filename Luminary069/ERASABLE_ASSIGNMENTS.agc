@@ -27,6 +27,8 @@
 ##				and fixed errors found.
 ##		2017-03-11 MAS	Corrected errors found during transcription of Luminary 116.
 ##		2017-08-11 RSB	Comment-text fixes identified from AP11ROPE.
+##              2021-05-30 ABS  W.INDI -> W.IND1
+##                              TTPIO -> TTPI0
 
 ## Page 106
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -787,7 +789,7 @@ DNLRALT         EQUALS          DNLRVELZ        +1      # B(1) TMP
 #          INCORPORATION UNSWITCHED.                                    (2D)
 
 W.IND           EQUALS          PIPAGE                  # B(1)
-W.INDI          EQUALS          W.IND           +1      # I(1)
+W.IND1          EQUALS          W.IND           +1      # I(1)
 
 
 #          SUBROUTINE BALLANGS OF R60.                                  (1D)
@@ -2328,7 +2330,7 @@ QTEMP           ERASE                                   # I(1)TMP COMMON RETURN 
 
 TCSI            ERASE           +1                      # B(2) TMP CSI TIME IN CENTISECONDS
 TTPI            ERASE           +1                      # B(2) TMP TPI TIME IN CENTISECONDS
-TTPIO           ERASE           +1                      # B(2) TMP TTPI STORAGE FOR RECYCLE
+TTPI0           ERASE           +1                      # B(2) TMP TTPI STORAGE FOR RECYCLE
 
 
 #          P30,P40 INTERFACE.                                            (21D)

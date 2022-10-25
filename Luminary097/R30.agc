@@ -3,8 +3,10 @@
 ## Filename:    R30.agc
 ## Purpose:     A section of Luminary revision 97.
 ##              It is part of the reconstructed source code for the
-##              original release of the flight software for the Lunar 
+##              second release of the flight software for the Lunar 
 ##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 11.
+##              It was created to fix two incorrect ephemeris constants in
+##              Luminary 96, as described by anomaly report LNY-59.
 ##              The code has been recreated from a copy of Luminary 99
 ##              revision 001, using asterisks indicating changed lines in
 ##              the listing and Luminary Memos #83 and #85, which list 
@@ -18,6 +20,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-28 MAS  Created from Luminary 99.
+##              2021-05-30 ABS  TICKTIFF -> TICKTFF
 
 ## Page 712
 # SUBROUTINE NAME:  V82CALL
@@ -198,7 +201,7 @@ BOTHPAD		STCALL	RPADTEM
 		STORE	TSTART82	#                 SAVE IT
 		DLOAD	BZE		# SR30.1 SETS -TPER=0 IF HPER L/
 			-TPER		# HPERMIN (300 OR 35) KFT.
-			TICKTIFF	# (-TPER = 0)
+			TICKTFF		# (-TPER = 0)
 TICKTPER	DLOAD	DAD		# (-TPER NON ZERO) TFF WAS NOT COMPUTED,
 			-TPER		# BUT WAS SET TO 59M59S.  DONT TICK TFF, DO
 			TSTART82	# TICK -TPER.  DISPLAY BOTH.
@@ -208,7 +211,7 @@ TICKTPER	DLOAD	DAD		# (-TPER NON ZERO) TFF WAS NOT COMPUTED,
 		TS	V82FLAGS	# INFORMS TICKTEST TO INCREMENT ONLY -TPER
 		TC	ENDOFJOB
 
-TICKTIFF	DLOAD	DAD		# (-TPER=0) TFF WAS COMPUTED.  TICK TFF.
+TICKTFF		DLOAD	DAD		# (-TPER=0) TFF WAS COMPUTED.  TICK TFF.
 			TFF		# DO NOT TICK -TPER.  DISPLAY TFF, BUT NOT
 			TSTART82	# -TPER.
 		STORE	TFF		# TFF CORRECTED FOR TIME SINCE V82GOFF1

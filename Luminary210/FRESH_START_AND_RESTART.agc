@@ -28,6 +28,7 @@
 ##		2017-03-15 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
 ##		2017-08-19 MAS	Fixed a label error found transcribing Zerlina 56.
+##		2021-05-30 ABS	CANTROD -> CANTROO
 
 ## Page 222
                 BANK            10
@@ -790,12 +791,12 @@ V37             TS              MMNUMBER                # SAVE MAJOR MODE
                 CA              IMODES30                # IS IMU BEINB INITIALIZED
                 MASK            BIT6
                 CCS             A
-                TCF             CANTROD
+                TCF             CANTROO
 
                 CA              BIT5                    # IS IMUZERO IN PROGRESS
                 MASK            IMODES33
                 CCS             A                       #    IF SO DAP IS OFF
-                TCF             CANTROD
+                TCF             CANTROO
 
                 CS              MMNUMBER                # IS P70 REQUESTED?
                 AD              DEC70
@@ -813,7 +814,7 @@ V37             TS              MMNUMBER                # SAVE MAJOR MODE
                 MASK            NODOBIT
                 CCS             A
                 TCF             CHECKTAB                # NO
-CANTROD         TC              ALARM
+CANTROO         TC              ALARM
                 OCT             1520
 
 V37BAD          TC              RELDSP                  # RELEASES DISPLAY FROM ASTRONAUT

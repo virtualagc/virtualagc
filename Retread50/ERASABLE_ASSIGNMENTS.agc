@@ -7,6 +7,7 @@
 ## Website:     www.ibiblio.org/apollo/Restoration.html
 ## Mod history: 2019-06-12 MAS  Recreated from Computer History Museum's
 ##				physical core-rope modules.
+##              2019-10-01 MAS  Assigned names to the UNK12xx erasables.
 
 ## Page 5
 
@@ -355,12 +356,15 @@ SMODE		ERASE
                 SETLOC          1200
 CDUIND          ERASE
 ITEMP1          ERASE
-COMMAND         ERASE
-                SETLOC          1205
-UNK1205         ERASE
-UNK1206         ERASE
-UNK1207         ERASE
-UNK1210         ERASE
+COMMAND         ERASE           +2
+
+GYRONUM         ERASE
+GYCMDIDX        ERASE           +1
+
+# GYRO PULSE TORQUE COMMANDS
+OGC             ERASE           +1
+MGC             ERASE           +1
+IGC             ERASE           +1
 ## !! END CHANGE FOR RETREAD 50 !!
 
 

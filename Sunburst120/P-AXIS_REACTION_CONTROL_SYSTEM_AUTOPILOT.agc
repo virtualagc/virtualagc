@@ -14,8 +14,12 @@
 ##		2016-11-01 RSB	More typos.
 ##		2016-12-05 RSB	Comment-proofing with octopus/ProoferComments
 ##				completed, changes made.
+##		2021-05-30 ABS	Added missing BANK and EBANK= statements.
 
 ## Page 492
+                BANK            16
+                EBANK=          DT
+
 # THE FOLLOWING T5RUPT ENTRY BEGINS THE PROGRAM WHICH CONTROLS THE P-AXIS ACTION OF THE LEM USING THE RCS JETS.
 # THE NOMINAL TIME BETWEEN THE P-AXIS RUPTS IS 100 MS IN ALL NON-IDLING MODES OF THE DAP.
 

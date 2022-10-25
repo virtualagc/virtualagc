@@ -19,6 +19,7 @@
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
 ##              2017-08-16 RSB  Fixed comment typo identified in AP11ROPE.
 ##              2017-08-26 MAS  Updated for Zerlina 56.
+##              2021-05-30 ABS  TGDCALC -> TGOCALC
 
 ## Page 738
 # PROGRAM DESCRIPTION  P40BOTH    DECEMBER 22, 1966
@@ -936,7 +937,7 @@ BDTOK           VLOAD   ABVAL
                 EXIT
                 TC      SERVCHNG
                 TC      INTPRET
-TGDCALC         SETPD   VLOAD
+TGOCALC         SETPD   VLOAD
                         0
                         VG
                 STOVL   VGPREV

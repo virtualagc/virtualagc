@@ -1,0 +1,248 @@
+# These are subroutines from the aborted reconstruction of Comanche 67 found
+# in the Comanche067/ folder of the "comanche67" branch of the Virtual AGC
+# GitHub repository.
+
+# I'm creating these specifications on the speculative notion that they could
+# be useful in processing a dumped version of the Comanche 72 rope, of which
+# I'm only aware of rope module B2 at the present time.
+
+# I've marked the few places where there's a mismatch when running these patterns
+# vs Comanche 55.
+
+# Bank 06 
+T4RUPT 06 2000
+CDRVE 06 2012
+DSPOUTSB 06 2024
+DSPLAY 06 2047
+DSPOUTB 06 2063
+PROCEEDE 06 2075
+T4JUMP 06 2116
+QUIKDSP 06 2136
+NODSPY 06 2154 2173
+IMUON 06 2174
+TNONTEST 06 2231
+PROCTNON 06 2244
+ENDTNON 06 2270
+ENDTNON2 06 2310
+ISSUP 06 2323
+OPONLY 06 2342
+ISSZERO 06 2354
+C33TEST 06 2367
+GLOCKMON 06 2427
+NOGIMRUN 06 2455 2505
+TLIM 06 2507
+iturnon . 2526
+imucage . 2555
+imuop . 2604
+pipfail . 2632
+dntmfast . 2653 # Address does not match Comanche 55
+setissw . 2665
+isswoff . 2700
+isswon . 2710
+cagesub . 2717
+ifailjmp . 2737 2750
+optmon . 2765
+setsamp . 3022
+zopalarm . 3041
+canzopt . 3070
+manudes . 3077
+mantocsc . 3112
+cscdes . 3125
+optzero . 3151
+endzopt . 3172
+zeropcdu . 3210
+ocduftst . 3224
+opfailon . 3235 3261
+1/pipa . 3262
+1/pipa1 . 3272
+irigcomp . 3331
+gcompsub . 3412
+driftsub . 3441
+1/gyro . 3474 3540
+nbdonly . 3542
+fbiassub . 3617
+lastbias . 3636 3651
+
+# Bank 07
+sxtmark 07 2002
+mkabort . 2013
+mkvacfnd . 2031
+mkreleas . 2063
+markrupt . 2104
+keycall . 2141
+markcont . 2153
+markret . 2170
+mark2 . 2225
+vacstor . 2244
+mkreject . 2301
+reject2 . 2315
+mkvb51 . 2347
+entanswr . 2370
+jamit . 2403 2426
+markit . 2430 2441
+transang . 2441 2517
+csinext2 . 2517
+k10rk2 . 2557 2577
+imuzero . 2577
+modeexit . 2640
+imucoars . 2663
+coars . 2700
+compos . 2735
+nextcdu . 2743
+chkcors . 2756
+coarserr . 2773
+comzero . 3012
+setcoars . 3027
+rndrefdr . 3060 3072
+imufine . 3073
+imufined . 3115
+noattoff . 3151
+pipuse . 3156
+pipfree . 3173
+imupulse . 3206
+gyroagre . 3231
+gyrobusy . 3252
+strtgyro . 3270
+gselect . 3316
+gmerge . 3363
+longgyro . 3426
+aug2 . 3462 3511
+endimu . 3514
+cagetest . 3524
+goodend . 3550
+aotstall . 3573
+modegood . 3612 3624
+gomanur . 3627 3651
+r02both . 3653 3672
+
+# Bank 10
+optdrive 10, 2000
+getopcmd . 2047
+cmdsetup . 2122
+posopcmd . 2144 2201
+markdif . 2203 2237
+svdwn1 . 2237 i
+svdwn2 . 2263 2302 i
+csinext3 . 2302 i
+newtn . 2333 2376 i
+s62.3 . 2376 2440 i
+setupdsp . 2440 2451
+phschng2 . 2451
+below1 . 2474
+below4 . 2530 2553
+markend . 2553
+gomarkr . 2575
+markplay . 2624
+chkprio . 2654
+cleandsp . 2703
+priodspr . 2726
+setnorm . 2756
+oktoplay . 3021
+exdspret . 3041
+godsprs . 3061
+bothjobs . 3107
+savelocs . 3144
+gosleeps . 3176
+jobxchs . 3216
+initdsp . 3261
+normbnch . 3303
+blankchk . 3354
+isitn00 . 3377
+witchone . 3427
+cleanend . 3455
+flashsub . 3502
+timechek . 3543
+endit . 3575
+proceed . 3633
+normret . 3651 3717
+
+# Bank 11
+initvel 11 2000 i # Not matched in Comanche 55
+initvel2 . 2056 i
+initvel4 . 2133 i
+initvel6 . 2221 2256 i
+csinext1 . 2256 2331 i
+s52.2 . 2331 2363 i
+aloaded . 2363 2372 i
+kepprep . 2372 i
+fbr3 . 2472 i
+getrpsv . 2610 i
+gobaque . 2762 i
+oblate . 3010 i # Not matched in Comanche 55
+comterm . 3043 i # Not matched in Comanche 55
+nbranch . 3246 i
+matrix . 3263 i # Not matched in Comanche 55
+rectest . 3301 i
+chkswtch . 3353 i
+origchng . 3414 i
+rectify . 3454 i
+difeq+0 . 3501 i
+nextcol . 3575 i
+endstate . 3612 i
+difeqcom . 3661 i
+dow.. . 3720 3777 i # Not matched in Comanche 55
+
+# Bank 12
+P33/P73C 12 2000 2013 i
+csi/b2 . 2013 2042 i
+keplern . 2042 i
+periodch . 2131 i
+keploop . 2204 i
+posdelx . 2264 i
+timeovfl . 2326 i
+deltime . 2433 i
+iterator . 2550 i
+firstime . 2620 i # Not matched in Comanche 55
+newstate . 2665 2744 i
+timethet . 2744 3001 i
+getx . 3001 i
+polycoef . 3043 i
+invrseqn . 3134 i
+infinity . 3217 i
+maxcoga . 3315 i
+lambloop . 3343 i # Not matched in Comanche 55
+goiter . 3430 i # Not matched in Comanche 55
+360lamb . 3503 i
+targetv . 3561 i
+termnvec . 3647 i
+apsides . 3713 3764 i
+
+# Bank 13
+stateup 13 2000 2036 i
+e/bkcall . 2036 2071
+p76 . 2071 
+compmat . 2114 2220 i
+p76sub1 . 2222 2231 i
+s32/33.x . 2231 2244 i
+sr52.1 . 2244
+lem52 . 2262 i
+com52 . 2326 2364 i
+lat-long . 2370 i
+lalotorv . 2441 2521 i
+arctan . 2531 2571 i
+setgamma . 2571 2601 i
+setre . 2601 2625 i
+stateint . 2627 2654
+endint . 2656 i
+atopcsm . 2705 i
+movepcsm . 2747
+movealem . 2773
+usepios . 3025 3062 i
+setbank . 3064 i
+csmconic . 3114 i
+integrvs . 3135 i
+integrv . 3162 i
+rectout . 3226 i
+rvcon . 3271 i
+testloop . 3305 i # Not matched in Comanche 55
+p00hchk . 3377 3436 i
+intstall . 3442 3535
+midtoav2 . 3543 i # Not matched in Comanche 55
+timeinc . 3645 3706 i
+
+
+
+
+
+
+

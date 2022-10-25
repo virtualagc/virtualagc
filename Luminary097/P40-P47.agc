@@ -3,8 +3,10 @@
 ## Filename:    P40-P47.agc
 ## Purpose:     A section of Luminary revision 97.
 ##              It is part of the reconstructed source code for the
-##              original release of the flight software for the Lunar 
+##              second release of the flight software for the Lunar 
 ##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 11.
+##              It was created to fix two incorrect ephemeris constants in
+##              Luminary 96, as described by anomaly report LNY-59.
 ##              The code has been recreated from a copy of Luminary 99
 ##              revision 001, using asterisks indicating changed lines in
 ##              the listing and Luminary Memos #83 and #85, which list 
@@ -18,6 +20,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-28 MAS  Created from Luminary 99.
+##              2021-05-30 ABS  TGDCALC -> TGOCALC
 
 ## Page 752
 # PROGRAM DESCRIPTION  P40BOTH		DECEMBER 22, 1966
@@ -906,7 +909,7 @@ VGAIN*		STORE	VG		# VELOCITY TO BE GAINED SCALED AT (7) M/CS
 BDTOK		VLOAD	ABVAL
 			VG
 		STORE	VGDISP
-TGDCALC		SETPD	VLOAD
+TGOCALC		SETPD	VLOAD
 			0
 			VG
 		STOVL	VGPREV

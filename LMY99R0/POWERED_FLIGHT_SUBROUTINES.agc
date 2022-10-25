@@ -2,7 +2,7 @@
 ## Copyright:	Public domain.
 ## Filename:	POWERED_FLIGHT_SUBROUTINES.agc
 ## Purpose:	Part of the reconstructed source code for LMY99 Rev 0,
-##		otherwise known as Luminary Rev 99, the second release
+##		otherwise known as Luminary Rev 99, the third release
 ##		of the Apollo Guidance Computer (AGC) software for Apollo 11.
 ##		It differs from LMY99 Rev 1 (the flown version) only in the
 ##		placement of a single label. The corrections shown here have
@@ -28,6 +28,7 @@
 ##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
 ##				Luminary 99 vs Comanche 55.
 ##		2017-08-01 MAS	Created from LMY99 Rev 1.
+##		2021-05-30 ABS	SINSLOC -> SINESLOC
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -269,7 +270,7 @@ R*TL**P		CCS	DEXDEX		#       	+3 --> 0	-3 --> 2
 LOOP2		DXCH	BUF		# LOADING VECTOR COMPONENT, STORING INDEX
 ## Page 1264
 LOOP1		DXCH	MPAC
-		CA	SINSLOC
+		CA	SINESLOC
 		AD	DEX1
 		TS	ADDRWD
 
@@ -311,7 +312,7 @@ TSTPOINT	CCS	DEXDEX		# ONLY THE BRANCHING FUNCTION IS USED
 		TCF	R*TL**P
 		TC	RTNSAVER
 
-SINSLOC		ADRES	SINCDU		# FOR USE IN SETTING ADDRWD
+SINESLOC	ADRES	SINCDU		# FOR USE IN SETTING ADDRWD
 
 INDEXI		DEC	4		# **********   DON'T   **********
 		DEC	2		# **********   TOUCH   **********

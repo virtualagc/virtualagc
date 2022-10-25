@@ -3,8 +3,10 @@
 ## Filename:    P20-P25.agc
 ## Purpose:     A section of Luminary revision 97.
 ##              It is part of the reconstructed source code for the
-##              original release of the flight software for the Lunar 
+##              second release of the flight software for the Lunar 
 ##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 11.
+##              It was created to fix two incorrect ephemeris constants in
+##              Luminary 96, as described by anomaly report LNY-59.
 ##              The code has been recreated from a copy of Luminary 99
 ##              revision 001, using asterisks indicating changed lines in
 ##              the listing and Luminary Memos #83 and #85, which list 
@@ -18,6 +20,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-28 MAS  Created from Luminary 99.
+##              2021-05-30 ABS  R21LEMB -> R21LEM8
+##                              $$/r29 -> $$/R29
+##                              R29REM0J -> R29REMOJ
 
 ## Page 492
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -941,7 +946,7 @@ R21LEM12	RTB
 		TC	INTPRET
 		BOF
 			FSPASFLG	# FIRST PASS THRU REPOSITION
-			R21LEMB		# NO - GO TO CONTINUOUS DESIGNATE
+			R21LEM8		# NO - GO TO CONTINUOUS DESIGNATE
 		CLRGO
 			FSPASFLG	# YES - RESET FIRST PASS FLAG
 			R21LEM7 +1
@@ -953,7 +958,7 @@ R21LEM7		TS	REPOSCNT
 		DLOAD	GOTO
 			REPOSTM
 			R21LEM12 +2
-R21LEMB		DLOAD
+R21LEM8		DLOAD
 			REPOSTM
 		STCALL	TDEC1
 			UPPSV
@@ -4463,7 +4468,7 @@ VB56CADR	2CADR	TRMTRACK
 		SETLOC	R29/SERV
 		BANK
 		
-		COUNT*	$$/r29
+		COUNT*	$$/R29
 		
 NR29&RDR	EQUALS	EBANK5
 
@@ -4497,7 +4502,7 @@ R29		CS	RADMODES
 		CA	PRIO21		# MODE 1;  MUST REMODE.
 		TC	NOVAC
 		EBANK=	LOSCOUNT
-		2CADR	R29REM0J	# NEEDS OWN JOB TO RADSTALL IN.
+		2CADR	R29REMOJ	# NEEDS OWN JOB TO RADSTALL IN.
 		
 		CS	DESIGBIT
 		MASK	RADMODES	# CLEAR DESIGNATE FLAG IN RADMODES
@@ -4518,7 +4523,7 @@ SETPRPOS	CA	ONE
 ## Page 597
 # FORCE RENDEZVOUS RADAR INTO MODE 2.
 
-R29REM0J	CA	ONE
+R29REMOJ	CA	ONE
 		TC	WAITLIST
 		EBANK=	LOSCOUNT
 		2CADR	REMODE		# REMODE MUST RUN AS A TASK.

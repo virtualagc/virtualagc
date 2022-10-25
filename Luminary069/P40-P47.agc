@@ -26,6 +26,10 @@
 ##		2017-08-16 RSB	Fixed comment typo identified in AP11ROPE.
 ##		2017-08-26 MAS  Fixed an incorrect label found while transcribing
 ##                              Zerlina 56 (it was unreferenced so caused no errors).
+##              2021-05-30 ABS  Aligned TCF BURNBABY and TCF B*RNB*B* to field
+##                              boundaries and surrounding comments to match.
+##                              TGDCALC -> TGOCALC
+
 
 ## Page 759
 # PROGRAM DESCRIPTION  P40BOTH    DECEMBER 22, 1966
@@ -153,9 +157,9 @@ P40IN           DCOMP           SR1
                 TC              P40SXT4
 
 
-#               ***********************
-                    TCF    BURNBABY
-#               ***********************
+#           ***********************
+                TCF    BURNBABY
+#           ***********************
 
 
 P40SXT4         EXTEND
@@ -273,9 +277,9 @@ P41NORM         CALL
                 OCT             00076                   # GROUP 6 RESTARTS AT REDO6.7
                 OCT             04024                   # GROUP 4 RESTARTS HERE
 
-#               ***********************
-                    TCF    B*RNB*B*
-#               ***********************
+#           ***********************
+                TCF    B*RNB*B*
+#           ***********************
 
 
 BLNKWAIT        CAF             1SEC
@@ -285,7 +289,7 @@ BLNKWAIT        CAF             1SEC
 REDO6.7         CA              DISPDEX                 # ON A RESTART, DO NOT PUT UP DISPLAY IF
                 AD              TWO                     # BLANKING (BETWEEN TIG-35 AND TIG-30)
 
-#               ***********************
+#           ***********************
 
 ## Page 764
 
@@ -935,7 +939,7 @@ VGAIN*          STORE           VG                      # VELOCITY TO BE GAINED 
 BDTOK           VLOAD           ABVAL
                                 VG
                 STORE           VGDISP
-TGDCALC         SETPD           VLOAD
+TGOCALC         SETPD           VLOAD
                                 0
                                 VG
                 STOVL           VGPREV

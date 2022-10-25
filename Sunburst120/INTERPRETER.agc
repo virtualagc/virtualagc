@@ -17,6 +17,7 @@
 ##		2017-03-15 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
 ##		2017-06-23 RSB	Replaced an erroneous } with a correct ).
+##		2021-05-30 ABS	B5TOBB -> B5TOB8
 	
 ## Page 953
 # SECTION 1  DISPATCHER
@@ -2995,7 +2996,7 @@ BOV(B)          CCS             OVFIND                          # BRANCH ON OVER
                 TS              OVFIND                          
                 CCS             CYR                             
                 TCF             RTB                             # IF BASIC.
-B5TOBB          OCT             360                             
+B5TOB8          OCT             360                             
                 TCF             GOTO                            
 
 ## Page 1042

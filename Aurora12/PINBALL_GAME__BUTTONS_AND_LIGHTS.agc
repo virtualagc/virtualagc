@@ -16,6 +16,7 @@
 ##		2017-03-08 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
 ##				Luminary 99 vs Comanche 55.
+##		2021-05-30 ABS	Removed ENDSPF symbol not present in scans.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of
@@ -1976,7 +1977,7 @@ DSPFMEM         CAF             R1D1                    # IF F/F, DATACALL USES 
                 CA              NOUNCADR                # ORIGINAL FCADR LOADED STILL IN NOUNCADR.
                 TC              DATACALL
                 TC              DSPOCTWD
-ENDSPF          TC              ENDOFJOB
+                TC              ENDOFJOB
 
 ## Page 331
 #  DSPDECWD CONVERTS C(MPAC) AND C(MPAC+1) TO A SIGN AND 5 CHAR DECIMAL

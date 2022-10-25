@@ -19,8 +19,47 @@
 ##              2019-07-27 MAS  Backported R-2 lunar potential model code from
 ##                              Luminary 099, and positioned it such that the
 ##                              resulting banksums are correct.
+##		2020-12-14 RSB	Tweaked the annotation relevant to the
+##				change mentioned above to conform to the
+##				style and extent of similar justifying
+##				annotations previously added to 
+##				Comanche 44 and 51.  For explanatory purposes,
+##				however, I found it easier in this file to 
+##				dispense with Mike's approach of using Luminary 69
+##				as a baseline, and instead to use Luminary 99/1 as
+##				a baseline.  There is no difference in the 
+##				reconstructed code itself, of course, but the 
+##				##-style page-number comments all change over
+##				to Luminary 99/1 numbering rather than 
+##				Luminary 69 numbering.  Given that it is already
+##				known that the page numbers between Luminary 69
+##				and Luminary 69/2 shouldn't agree, that seems
+##				like a minor price to pay.
 
-## Page 1223
+## Page 1227
+
+## <b>Reconstruction:</b> As described by 
+## <a href="http://www.ibiblio.org/apollo/Documents/LUM75_text.pdf">
+## LUMINARY Memo #75"</a>, the entire purpose for creating Luminary 69/2
+## was to add the R-2 Lunar Potential Model to Luminary 69.  Manually
+## comparing Luminary 69 to Luminary 99/1 (which also incorporates the 
+## R-2 model) quickly makes it clear that most of the R-2 implementation
+## occurs in the ORBITAL INTEGRATION log section, and that the changes
+## within the ORBITAL INTEGRATION log section are extensive.
+## <br><br>
+## In point of fact, there is much less difference between ORBITAL INTEGRATION
+## in Luminary 69/2 and Luminary 99/1 than there is between Luminary 69/2 and
+## Luminary 69.  Therefore, to simplify our justifying annotations, in this 
+## single log section we use Luminary 99/1 as a baseline rather than Luminary 69.
+## We add explanatory annotations only at the differences between the Luminary 69/2
+## code and the Luminary 99/1 code.  Page numbers follow Luminary 99/1 rather than
+## Luminary 69.
+## <br><br>
+## Incidentally, that is <i>not</i> the approach originally taken when this log
+## section was reconstructed.  Then, Luminary 69 was still used as a baseline.
+## So reconstruction is possible using either baseline &mdash; but the Luminary 99/1
+## baseline is simply easier to explain on a change-by-change basis.
+
 # DELETE
 		BANK	13
 		SETLOC	ORBITAL
@@ -39,7 +78,7 @@ KEPPREP		LXA,2	SETPD
 			36D
 			X1
 		PDVL
-		DOT	PDDL		# F*SQRT(MU)(+7 OR +5)	 	4D	PL 6D
+		DOT	PDDL		# F*SQRT(MU) (+7 OR +5) 	4D	PL 6D
 			VCV
 			TAU.		# (+28)
 		DSU	NORM
@@ -48,7 +87,7 @@ KEPPREP		LXA,2	SETPD
 		SR1
 		DDV	PDDL
 			2D
-		DMP	PUSH		# FS(+6 +N1-N2) 		6D	PL 8D
+		DMP	PUSH		# FS (+6 +N1-N2) 		6D	PL 8D
 			4D
 		DSQ	PDDL		# (FS)SQ (+12 +2(N1-N2))	8D	PL 10D
 			4D
@@ -63,7 +102,7 @@ KEPPREP		LXA,2	SETPD
 			2D		# -(1/R-ALPHA) (+12 +3N1-2N2)
 		DMP	SL*
 			DP2/3
-			0 -3,1		# 10L(1/R-ALPHA) (+13 +2(N1-N2))
+			0 	-3,1	# 10L(1/R-ALPHA) (+13 +2(N1-N2))
 		XSU,1	DAD		# 2(FS)SQ - ETCETRA			PL 8D
 			S1		# X1 = N2-N1
 		SL*	DSU		# -FS+2(FS)SQ ETC (+6 +N1-N2)		PL 6D
@@ -72,7 +111,7 @@ KEPPREP		LXA,2	SETPD
 			0D
 			4D
 		SL*	SL*
-## Page 1224
+## Page 1228
 			8D,1
 			0,1		# S(-FS(1-2FS)-1/6...) (+17 OR +16)
 		DAD	PDDL		#					PL 6D
@@ -94,7 +133,7 @@ KEPPREP		LXA,2	SETPD
 		GOTO
 			KEPLERN
 
-## Page 1225
+## Page 1229
 FBR3		LXA,1	SSP
 			DIFEQCNT
 			S1
@@ -112,7 +151,7 @@ FBR3		LXA,1	SSP
 		STCALL	TET
 			KEPPREP
 
-## Page 1226
+## Page 1230
 # AGC ROUTINE TO COMPUTE ACCELERATION COMPONENTS.
 
 ACCOMP		LXA,1	LXA,2
@@ -123,7 +162,7 @@ ACCOMP		LXA,1	LXA,2
 		STOVL	FV
 			ALPHAV
 		VSL*	VAD
-			0 -7,2
+			0 	-7,2
 			RCV
 		STORE	BETAV
 		BOF	XCHX,2
@@ -162,7 +201,7 @@ ACCOMP		LXA,1	LXA,2
 			0
 		STORE	BETAV
 		STOVL	RPQV
-## Page 1227
+## Page 1231
 			2D
 		STORE	RPSV
 		SLOAD	DSU
@@ -180,7 +219,7 @@ ACCOMP		LXA,1	LXA,2
 			BETAV
 		XCHX,2
 			DIFEQCNT
-		STORE	VECTAB +6,2
+		STORE	VECTAB 	+6,2
 		STORE	RQVV
 		XCHX,2
 			DIFEQCNT
@@ -213,7 +252,7 @@ GAMCOMP		VLOAD	VSR1
 		NORM	ROUND
 			31D
 		PDDL	NORM		# NORMED B SQUARED TO PD LIST
-## Page 1228
+## Page 1232		
 			ALPHAM		# NORMALIZE (LESS ONE) LENGTH OF ALPHA
 			32D		# SAVING NORM SCALE FACTOR IN X1
 		SR1	PDVL
@@ -235,7 +274,7 @@ GAMCOMP		VLOAD	VSR1
 			33D
 			2D
 		SR*	XCHX,2
-			0 -1,2
+			0 	-1,2
 			S1
 		PUSH	SR1R		# RHO/4 TO 4D
 		PDVL	DOT
@@ -264,7 +303,7 @@ GAMCOMP		VLOAD	VSR1
 			6
 			BETAV		#		-
 		PDVL	VSR3		# (G/2)(C(PD+4))B/2 TO PD+16D
-## Page 1229
+## Page 1233
 			ALPHAV
 		VAD	PUSH		# A12 + C(PD+16D) TO PD+16D
 		DLOAD	DMP
@@ -285,14 +324,31 @@ GAMCOMP		VLOAD	VSR1
 		BOV			# CLEAR OVIND
 			+1
 		VSR*	XCHX,2
-			0 -1,2
+			0	-1,2
 			S1
 		VAD
 			FV
 		STORE	FV
 		BOV	RVQ		# RETURN IF NO OVERFLOW
 			+1
-GOBAQUE         DLOAD	SR
+## <b>Reconstruction:</b> At this point in Luminary 99/1, we would find the code sequence<br>
+## <pre>
+##    GOBAQUE         VLOAD     ABVAL
+##                              DELTAV
+##                    BZE
+##                              INT-ABRT
+##                    DLOAD     SR
+## </pre>
+## That's replaced in Luminary 69/2 by the single instruction following this annotation.
+## This particular change is due to a change in Luminary 99/1 that's unrelated to the 
+## R-2 model.  Instead, this change is due to
+## <a href="http://www.ibiblio.org/apollo/Documents/LUM67_text.pdf">LUMINARY Memo #67,
+## "LUMINARY Revisions 70-79"</a>, and in particular to a change incorporated in 
+## Luminary 79.  The memo describes this change as "PCR 720 was implemented. (Abort 
+## coasting integration when in infinite acceleration overflow loop). This change added 
+## the new POODOO code 430".  In particular, the code checks to see if |TDELTAV|=0, and
+## then jumps to INT-ABRT (see next annotation), and thus to POODOO if so.
+GOBAQUE		DLOAD	SR
 			H
 			9D
 		PUSH	BDSU
@@ -307,9 +363,19 @@ GOBAQUE         DLOAD	SR
 		SETGO
 			RPQFLAG
 			TESTLOOP
-## Page 1230
-# THE OBLATE ROUTINE COMPUTES THE ACCELERATION DUE TO OBLATENESS. IT USES THE UNIT OF THE VEHICLE
-# POSITION VECTOR FOUND IN ALPHAV AND THE DISTANCE TO THE CENTER IN ALPHAM. THIS IS ADDED TO THE SUM OF THE
+
+## <b>Reconstruction:</b> At this point in Luminary 99/1, we would find the code sequence<br>
+## <pre>
+##    INT-ABRT        EXIT
+##                    TC      POODOO
+##                    OCT     00430
+## </pre>
+## This code provides the end of the code sequence described in the preceding annotation above,
+## and as such is simply omitted in Luminary 69/2.
+
+## Page 1234
+# THE OBLATE ROUTINE COMPUTES THE ACCELERATION DUE TO OBLATENESS.  IT USES THE UNIT OF THE VEHICLE
+# POSITION VECTOR FOUND IN ALPHAV AND THE DISTANCE TO THE CENTER IN ALPHAM.  THIS IS ADDED TO THE SUM OF THE
 # DISTURBING ACCELERATIONS IN FV AND THE PROPER DIFEQ STAGE IS CALLED VIA X1.
 
 OBLATE		LXA,2	DLOAD
@@ -359,7 +425,7 @@ COMTERM		STORE	UZ
 		PDDL	DMPR
 			2
 			5/128
-## Page 1231
+## Page 1235
 		BDSU
 		DMP*
 			J4REQ/J3,2
@@ -461,7 +527,7 @@ QUALITY3	DSQ			# J22 TERM X R**4 IN 2D, SCALED B61
 		VAD	BOV		# OVERFLOW INDICATOR RESET IN "RP-TO-R"
 			FV
 			GOBAQUE
-
+## Page 1237			
 		STORE	FV
 NBRANCH		SLOAD	LXA,1
 			DIFEQCNT
@@ -474,7 +540,6 @@ COSPHIE		DLOAD
 			ALPHAV 	+4
 		STOVL	COSPHI/2
 			ZUNIT
-## Page 1233
 		GOTO
 			COMTERM
 DIFEQTAB	CADR	DIFEQ+0
@@ -513,8 +578,9 @@ RECTEST		VLOAD	ABVAL		# RECTIFY IF
 			3/4		#	   EXCEEDS 3/4 IN MAGNITUDE
 			CALLRECT	#
 		DAD	SL*		#			OR
+## Page 1238
 			3/4		#
-			0 -7,2		#	2) ABVAL(TDELTAV) EQUALS OR EXCEEDS
+			0 	-7,2	#	2) ABVAL(TDELTAV) EQUALS OR EXCEEDS
 		DDV	DSU		#	   .01(ABVAL(RCV))
 			10D
 			RECRATIO
@@ -525,7 +591,6 @@ RECTEST		VLOAD	ABVAL		# RECTIFY IF
 			3/4
 		BOV
 			CALLRECT
-## Page 1234
 		BMN
 			INTGRATE
 CALLRECT	CALL
@@ -564,6 +629,7 @@ LUNSPH		DLOAD	SR2
 			LUNPOS
 		VCOMP
 		STORE	RPQV
+## Page 1239		
 DOSWITCH	CALL
 			ORIGCHNG
 		GOTO
@@ -576,7 +642,6 @@ ORIGCHNG	STQ	CALL
 			0,2
 		VSU	VSL*
 			RPQV
-## Page 1235
 			2,2
 		STORE	RRECT
 		STODL	RCV
@@ -591,7 +656,7 @@ ORIGCHNG	STQ	CALL
 			0,2
 		VSU
 		VSL*
-			0 +2,2
+			0 	+2,2
 		STORE	VRECT
 		STORE	VCV
 		LXA,2	SXA,2
@@ -601,7 +666,7 @@ ORIGCHNG	STQ	CALL
 			MOONFLAG
 			CLRMOON
 			SETMOON
-## Page 1236
+## Page 1240
 # THE RECTIFY SUBROUTINE IS CALLED BY THE INTEGRATION PROGRAM AND OCCASIONALLY BY THE MEASUREMENT INCORPORATION
 # ROUTINES TO ESTABLISH A NEW CONIC.
 
@@ -609,13 +674,13 @@ RECTIFY		LXA,2	VLOAD
 			PBODY
 			TDELTAV
 		VSL*	VAD
-			0 -7,2
+			0 	-7,2
 			RCV
 		STORE	RRECT
 		STOVL	RCV
 			TNUV
 		VSL*	VAD
-			0 -4,2
+			0 	-4,2
 			VCV
 MINIRECT	STORE	VRECT
 		STOVL	VCV
@@ -627,8 +692,8 @@ MINIRECT	STORE	VRECT
 		STORE	XKEP
 		RVQ
 
-## Page 1237
-# THE THREE DIFEQ ROUTINES - DIFEQ+0, DIFEQ+12, AND DIFEQ+24 - ARE ENTEREDTO PROCESS THE CONTRIBUTIONS AT THE
+## Page 1241
+# THE THREE DIFEQ ROUTINES - DIFEQ+0, DIFEQ+12, AND DIFEQ+24 - ARE ENTERED TO PROCESS THE CONTRIBUTIONS AT THE
 # BEGINNING, MIDDLE, AND END OF THE TIMESTEP, RESPECTIVELY.  THE UPDATING IS DONE BY THE NYSTROM METHOD.
 
 DIFEQ+0		VLOAD	VSR3
@@ -670,7 +735,7 @@ DIFEQ+2		DLOAD	DMPR
 			COLREG
 			ZV
 		VSL3			# ADJUST W-POSITION FOR STORAGE
-		STORE	W +54D,2
+		STORE	W 	+54D,2
 		VLOAD
 			YV
 		VSL3	BOV
@@ -679,7 +744,7 @@ DIFEQ+2		DLOAD	DMPR
 
 		CALL
 			GRP2PC
-## Page 1238
+## Page 1242
 		LXA,2	SSP
 			COLREG
 			S2
@@ -702,7 +767,7 @@ NEXTCOL		CALL
 		VSR3			# ADJUST W-POSITION FOR INTEGRATION
 		STORE	YV
 		VLOAD*	AXT,1
-			W +54D,2
+			W 	+54D,2
 			0
 		VSR3			# ADJUST W-VELOCITY FOR INTEGRATION
 		STCALL	ZV
@@ -730,7 +795,7 @@ ENDSTATE	BOV	VLOAD
 			AMOVED
 		BON	GOTO
 			VINTFLAG
-## Page 1239
+## Page 1243
 			ATOPCSM
 			ATOPLEM
 AMOVED		SET	SSP
@@ -779,13 +844,13 @@ WMATEND		CLEAR	CLEAR
 		TC	ALARM
 		OCT	421
 		TC	INTPRET
-## Page 1240
+## Page 1244
 		GOTO
 			TESTLOOP	# FINISH INTEGRATING STATE VECTOR
 
-## Page 1241
-# ORBITAL ROUTINE FOR EXTRAPOLATION OF THE W MATRIX. IT COMPUTES THE SECOND DERIVATIVE OF EACH COLUMN POSITION
-# VECTOR OF THE MATRIX AND CALLS THE NYSTROM INTEGRATION ROUTINES TO SOLVE THE DIFFERENTIAL EQUATIONS. THE PROGRAM
+## Page 1245
+# ORBITAL ROUTINE FOR EXTRAPOLATION OF THE W MATRIX.  IT COMPUTES THE SECOND DERIVATIVE OF EACH COLUMN POSITION
+# VECTOR OF THE MATRIX AND CALLS THE NYSTROM INTEGRATION ROUTINES TO SOLVE THE DIFFERENTIAL EQUATIONS.  THE PROGRAM
 # USES A TABLE OF VEHICLE POSITION VECTORS COMPUTED DURING THE INTEGRATION OF THE VEHICLES POSITION AND VELOCITY.
 
 DOW..		LXA,2	DLOAD*
@@ -835,8 +900,39 @@ DOW..1		VLOAD	VSR4
 			S2
 			34D
 		VSL*	RVQ
-## Page 1242
-			0 -8D,2
+## Page 1246
+			0 	-8D,2	
+
+## <b>Reconstruction:</b> In Luminary 99/1 at this point, we would find the following code sequence:<br>
+## <pre>
+##    # ****************************************************************************************************************
+##    # ****************************************************************************************************************
+##    SETITCTR        SSP     BOFF        # SET ITERCTR FOR LAMBERT CALLS.  THIS
+##                            ITERCTR     # CODING BELONGS IN INITVEL AND IS HERE
+##                            20D         # FOR PURPOSES OF A ONE-MODULE
+##                            AVEGFLAG    # REMANUFACTURE ONLY.  CODING SHOULD
+##                            LAMBERT     # BE MOVED BACK TO INITVEL FOR LUMINARY 1B
+##                    SSP     GOTO
+##                            ITERCTR
+##                            5
+##                            LAMBERT
+##    # ****************************************************************************************************************
+##    # ****************************************************************************************************************
+## </pre>
+## Also, refer to
+## <a href="http://www.ibiblio.org/apollo/Documents/LUM83_text.pdf">LUMINARY Memo #83, "LUMINARY Revision 98"</a>.
+## As the function's own comments indicate, this should have been present for the very next memory-module manufacturing release.
+## The most-recent manufacturing release at that point was Luminary 97 (in April 1969), and the next one would be Luminary 
+## 99 (in May 1969).  (Those release dates are from
+## <a href="http://www.ibiblio.org/apollo/Documents/R-700.pdf#page=170">
+## <i>MIT's Role in Project Apollo, Final Report</i>, Table 4-II</a>.)  Naively, from the program comments, we'd conclude that
+## the code should have been removed by the time of the Luminary 99/1 release.  However, as it turned out, Luminary 99/1 differed 
+## from Luminary 99 in a single memory module, indeed in a single memory bank
+## &mdash; not the one containing this code &mdash; so by leaving the code in place it meant that a single new memory module needed
+## to be manufactured for Luminary 99/1; and the other 5 memory modules for Luminary 99/1 could be recycled from Luminary 99.
+## <br><br>
+## However interesting that may or may not be, the lesson we need to take away from it is that there would be no reason at
+## all for this code to be present in Luminary 69/2.  Hence it has been removed.
 
 		SETLOC	ORBITAL1
 		BANK
@@ -871,8 +967,13 @@ DP2/3		2DEC	.6666666667
 2/3		EQUALS	DP2/3
 OCT27		OCT	27
 
+## <b>Reconstruction:</b> Although otherwise using Luminary 99/1 as a baseline for the 
+## reconstruction of the ORBITAL INTEGRATION log section, we noticed the 
+## comment below which appears in Luminary 69 but not in Luminary 99/1.
+## It seems reasonable to retain this comment.
 # LM504 IS TEMPORARY
 
+## Page 1247
 		BANK	13
 		SETLOC	ORBITAL2
 		BANK
@@ -889,7 +990,6 @@ OCT27		OCT	27
 		DEC	-4
 ASCALE		DEC	-7
 		DEC	-6
-## Page 1243
 5/8		2DEC	5 B-3
 
 -1/12		2DEC	-.1
@@ -914,11 +1014,18 @@ COSPHI/2	EQUALS	URPV 	+4
 UZ		EQUALS	20D
 TVEC		EQUALS	26D
 
-## The following code for the R-2 lunar potential model was added to the end of bank 11
-## betwen Luminary 69 and LUM69 rev 2. The code was adapted from Luminary 099. Exact
-## comments and the "MODCHG1" label may differ from the original LUM69 rev 2.
-                SETLOC  MODCHG1
-                BANK
+## <b>Reconstruction:</b> The two lines of code following this annotation 
+## that switch to a different memory bank are found 
+## neither in Luminary 99/1 nor in Luminary 69.  However, if the QUALITY1 and QUALITY2
+## functions are not relocated to a different memory bank, you can expect memory-bank
+## overflows during assembly, memory-bank checksum errors, and so on.  It is reasonable
+## to expect that one or both of these functions may be relocated to other memory banks,
+## because some other AGC programs incorporating the R-2 memory model do so. Comanche
+## 55 (Apollo 11 CM) does so, for example; indeed, it not only switches memory banks, but
+## removes the functions to a different log section (though retaining a comment that they
+## are a part of the R-2 model).
+		SETLOC	MODCHG1
+		BANK
 QUALITY1	BOF	DLOAD
 			MOONFLAG
 			NBRANCH
@@ -930,6 +1037,7 @@ QUALITY2	PDDL	DSQ		# SQUARE INTO 2D, B2
 		DMP	VXSC		# 5(Y**2-X**2)UR
 			5/8		# CONSTANT, 5B3
 			URPV		# VECTOR.  RESULT MAXIMUM IS 5, SCALING
+## Page 1248
 					# HERE B6
 		VSL3	PDDL		# STORE SCALED B3 IN 2D, 4D, 6D FOR XYZ
 			URPV		# X COMPONENT, B1

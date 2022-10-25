@@ -14,6 +14,7 @@
 ##               2016-10-16 HG   FIX LABEL   SCALSAVE -> SCALSAV                   
 ##		 2016-12-07 RSB	 Proofed comments with octopus/ProoferComments
 ##				 and made a few changes.
+##		 2021-05-30 ABS  Fixed NEWLOC+1 line to be a remark.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of
@@ -159,7 +160,7 @@ ITEMP5          ERASE
 NEWLOC          EQUALS          ITEMP5
 
 ITEMP6          ERASE
-NEWLOC+1        EQUALS          ITEMP6				# DP ADDRESS.
+# NEWLOC+1      EQUALS          ITEMP6				DP ADDRESS.
 
 RUPTREG1        ERASE
 RUPTREG2        ERASE

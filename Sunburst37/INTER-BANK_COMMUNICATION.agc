@@ -22,6 +22,7 @@
 ##                              Add missing EXTEND
 ##		2017-06-23 RSB	Proofed comment text with
 ##				octopus/ProoferComments.
+##              2021-05-30 ABS  ISWCALLL -> ISWCALL
 
 ## Page 888
 #          THE FOLLOWING ROUTINE CAN BE USED TO CALL A SUBROUTINE IN ANOTHER BANK. IN THE BANKCALL VERSION, THE
@@ -111,7 +112,7 @@ IBNKCALL        DXCH            RUPTREG3                        # USES RUPTREG3,
                 CAF             0                               
                 INCR            Q                               
 
-ISWCALLL        TS              L                               
+ISWCALL         TS              L                               
                 LXCH            FBANK                           
                 MASK            LOW10                           
                 XCH             Q                               

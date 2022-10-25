@@ -25,6 +25,7 @@
 ##				side-by-side diff of Luminary 69/99/116/131/210.
 ##              2017-08-12 MAS  Fixed a comment text error found while transcribing
 ##                              Zerlina 56.
+##              2021-05-30 ABS  DEC -> DEC* for extended address fields.
 
 ## Page 39
 # DPS AND APS ENGINE PARAMETERS
@@ -543,10 +544,10 @@ KONMAT          2DEC            1.0             B-1     #       *************
                 2DEC            0                       #                   *
                 2DEC            0                       #                   *
                 2DEC            0                       #                   *
-                2DEC            .917456380      B-1*    # K1 = COS(OBL)
-                2DEC            -.035679339     B-1*    # K2 = SIN (OBL) SIN (IM) (-1)
+                2DEC*           .917456380      B-1*    # K1 = COS(OBL)
+                2DEC*           -.035679339     B-1*    # K2 = SIN (OBL) SIN (IM) (-1)
                 2DEC            0                       #                   *
-                2DEC            .397836387      B-1*    # K3 = SIN (OBL)
+                2DEC*           .397836387      B-1*    # K3 = SIN (OBL)
 
 ## Page 54
                 2DEC*           .082280652      B-1*    # K4 = COS (OBL) SIN (IM)

@@ -15,6 +15,7 @@
 ##				and fixed the errors found.
 ##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
 ##				vs Colossus 249.
+## 		2021-05-30 ABS	20/SXTMK -> 10/SXTMK
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -621,7 +622,7 @@ MARKIT		CCS	CDUCHKWD
 		SETLOC	SXTMARK1
 		BANK
 		
-		COUNT	20/SXTMK
+		COUNT	10/SXTMK
 		
 # PROGRAM NAME - MARKDIF			DATE- 19 SEPT 1967
 #

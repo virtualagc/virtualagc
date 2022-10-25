@@ -27,6 +27,7 @@
 ##		2016-12-05 RSB	Final few fixes with improved octopus/ProoferComments.  This
 ##				file is now completely proofed for textual content of comments.
 ##		2017-06-03 MAS	Replaced an instance of P00H with POOH.
+##		2021-05-30 ABS	Removed LOWSUPER workaround that is no longer needed.
 
 ## Page 12
 
@@ -1982,9 +1983,3 @@ TEMPNET		EQUALS	MPAC	+5	# NET ACCELERATION TEMP.  (SCALED AT PI/2)
 ABVLAOSQ	EQUALS	MPAC	+6	# -ABVAL(AOSQ) SCALED AT PI/2 RAD/SEC(2).
 ## Page 58
 ABVLAOSR	EQUALS	MPAC	+7	# -ABVAL(AOSR) SCALED AT PI/2 RAD/SEC(2).
-
-## The next two lines were not present in the original program listing, and provide a 
-## workaround for a discrepancy between the modern and original assembler programs.
-		BANK	30
-LOWSUPER	EQUALS
-		

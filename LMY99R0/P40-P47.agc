@@ -2,7 +2,7 @@
 ## Copyright:	Public domain.
 ## Filename:	P40-P47.agc
 ## Purpose:	Part of the reconstructed source code for LMY99 Rev 0,
-##		otherwise known as Luminary Rev 99, the second release
+##		otherwise known as Luminary Rev 99, the third release
 ##		of the Apollo Guidance Computer (AGC) software for Apollo 11.
 ##		It differs from LMY99 Rev 1 (the flown version) only in the
 ##		placement of a single label. The corrections shown here have
@@ -31,6 +31,7 @@
 ##		2017-08-16 RSB	Fixed comment typo identified in AP11ROPE.
 ##		2017-08-26 MAS  Fixed an incorrect label found while transcribing
 ##                              Zerlina 56 (it was unreferenced so caused no errors).
+##		2021-05-30 ABS	TGDCALC -> TGOCALC
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -939,7 +940,7 @@ VGAIN*		STORE	VG		# VELOCITY TO BE GAINED SCALED AT (7) M/CS
 BDTOK		VLOAD	ABVAL
 			VG
 		STORE	VGDISP
-TGDCALC		SETPD	VLOAD
+TGOCALC		SETPD	VLOAD
 			0
 			VG
 		STOVL	VGPREV

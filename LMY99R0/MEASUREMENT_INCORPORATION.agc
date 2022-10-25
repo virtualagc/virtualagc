@@ -2,7 +2,7 @@
 ## Copyright:	Public domain.
 ## Filename:	MEASUREMENT_INCORPORATION.agc
 ## Purpose:	Part of the reconstructed source code for LMY99 Rev 0,
-##		otherwise known as Luminary Rev 99, the second release
+##		otherwise known as Luminary Rev 99, the third release
 ##		of the Apollo Guidance Computer (AGC) software for Apollo 11.
 ##		It differs from LMY99 Rev 1 (the flown version) only in the
 ##		placement of a single label. The corrections shown here have
@@ -22,6 +22,7 @@
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-08-01 MAS	Created from LMY99 Rev 1.
+##		2021-05-30 ABS	ZEROD -> ZEROO
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -448,7 +449,7 @@ DOCSM1		RTB	CALL
 			SVDWN1		# STORE DOWNLINK STATE VECTOR
 		GOTO
 			FAZAB4
-ZEROD		=	ZEROVECS
+ZEROO		=	ZEROVECS
 54DD		DEC	54
 6DD		DEC	-6
 12DD		DEC	12

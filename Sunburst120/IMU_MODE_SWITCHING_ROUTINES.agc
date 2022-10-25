@@ -20,6 +20,7 @@
 ##		2017-03-15 RSB	Comment-text fixes identified in 6-way
 ##				side-by-side diff of Sunburst 120 and Luminary 
 ##				69/99/116/131/210.
+##		2021-05-30 ABS	Removed SPSCODE definition not present in scans.
 
 ## Page 137
 		BLOCK	02
@@ -35,8 +36,6 @@ ZEROICDU	CAF	ZERO		# ZERO ICDU COUNTERS.
 
 4SECS		DEC	400
 3SECS		DEC	300
-
-SPSCODE		=	BIT9
 
 ## Page 138
 # IMU ZEROING ROUTINE.

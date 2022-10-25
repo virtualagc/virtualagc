@@ -3,8 +3,10 @@
 ## Filename:    ALARM_AND_ABORT.agc
 ## Purpose:     A section of Luminary revision 97.
 ##              It is part of the reconstructed source code for the
-##              original release of the flight software for the Lunar 
+##              second release of the flight software for the Lunar 
 ##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 11.
+##              It was created to fix two incorrect ephemeris constants in
+##              Luminary 96, as described by anomaly report LNY-59.
 ##              The code has been recreated from a copy of Luminary 99
 ##              revision 001, using asterisks indicating changed lines in
 ##              the listing and Luminary Memos #83 and #85, which list 
@@ -18,6 +20,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-28 MAS  Created from Luminary 99.
+##              2021-05-30 ABS  OCT21103 -> OCT1103
 
 ## Page 1381
 # THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION.  IT MAY BE CALLED
@@ -169,7 +172,7 @@ STRTIDLE	CAF	BBSERVDL
 CCSHOLE		INHINT
 		CA	Q
 		TC	ABORT2
-OCT21103	OCT	1103
+OCT1103		OCT	1103
 CURTAINS	INHINT
 		CA	Q
 		TC	ALARM2

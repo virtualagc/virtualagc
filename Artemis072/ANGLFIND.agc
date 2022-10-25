@@ -15,6 +15,7 @@
 ##		2010-02-20 RSB	Un-##'d this header.
 ##		2017-01-21 RSB	Proofed comment text by diff'ing vs Comanche 55
 ##				and corrected errors found.
+##		2021-05-30 ABS	ENDOCM -> ENDDCM
 
 ## Page 403
 		SETLOC	KALCMON1
@@ -394,7 +395,7 @@ LOOPSIN		SLOAD*	RTB
 ## Page 411
 		STORE	16D,2		# C8=-SIN(THETA)SIN(PHI)SIN(PSI)
 		RVQ			#    +COS(THETA)COS(PHI)
-ENDOCM		EQUALS
+ENDDCM		EQUALS
 
 		SETLOC	KALCMON1
 		BANK

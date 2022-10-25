@@ -15,6 +15,7 @@
 ##		2016-12-18 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2021-05-30 ABS	GTSGO+DN -> GTSGO+ON
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -70,7 +71,7 @@ GTS		CAF	NEGONE		# MAKE THE NEXT PASS THROUGH THE DAP BE
 		AD	A		# FOR THE RIGHT SHIFT DUE TO EDITING.
 		TS	SAVESR
 
-GTSGO+DN	CAF	TWO		# SET INDEXER FOR R-AXIS CALCULATIONS.
+GTSGO+ON	CAF	TWO		# SET INDEXER FOR R-AXIS CALCULATIONS.
 		TCF	GOQTRIMG +1
 
 GOQTRIMG	CAF	ZERO		# SET INDEXER FOR Q-AXIS CALCULATIONS

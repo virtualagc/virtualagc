@@ -3,8 +3,10 @@
 ## Filename:    UPDATE_PROGRAM.agc
 ## Purpose:     A section of Luminary revision 97.
 ##              It is part of the reconstructed source code for the
-##              original release of the flight software for the Lunar 
+##              second release of the flight software for the Lunar 
 ##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 11.
+##              It was created to fix two incorrect ephemeris constants in
+##              Luminary 96, as described by anomaly report LNY-59.
 ##              The code has been recreated from a copy of Luminary 99
 ##              revision 001, using asterisks indicating changed lines in
 ##              the listing and Luminary Memos #83 and #85, which list 
@@ -18,6 +20,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-28 MAS  Created from Luminary 99.
+##              2021-05-30 ABS  DELTAOK -> DELTATOK
 
 ## Page 1386
 # PROGRAM NAME:		P27
@@ -370,7 +373,7 @@ TIMEDIDR	INHINT
 		DCA	UPBUFF +18D
 		DAS	MPAC		# FORM SUM IN MPAC
 		EXTEND
-		BZF	DELTAOK		# TEST FOR OVERFLOW
+		BZF	DELTATOK	# TEST FOR OVERFLOW
 		CAF	ZERO
 		DXCH	UPBUFF +18D	# OVERFLOW, RESTORE OLD VALUE OF CLOCK
 		DAS	TIME2		# AND TURN ON OPERATOR ERROR
@@ -380,7 +383,7 @@ TIMEDIDR	INHINT
 
 		TC	UPTEMP		# GO TO ERROR EXIT
 
-DELTAOK		TC	TPAGREE		# FORCE SIGN AGREEMENT
+DELTATOK	TC	TPAGREE		# FORCE SIGN AGREEMENT
 		DXCH	MPAC
 		DAS	TIME2		# INCREMENT TIME2,TIME1
 

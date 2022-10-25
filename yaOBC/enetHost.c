@@ -238,7 +238,7 @@ main(int argc, char **argv)
       case ENET_EVENT_TYPE_RECEIVE:
         fprintf (stderr, "\r");
         printf(
-            "%u 0x%08X:%u \"%s\"\n",
+            "%zu 0x%08X:%u \"%s\"\n",
             event.packet -> dataLength,
             event.peer -> address.host, event.peer -> address.port,
             event.packet -> data);

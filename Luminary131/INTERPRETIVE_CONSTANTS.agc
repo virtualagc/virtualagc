@@ -17,6 +17,7 @@
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
 ##		2017-02-27 RSB	Proofed comment text using octopus/ProoferComments.
+##		2021-05-30 ABS	DFC-6 -> DEC-6, DFC-12 -> DEC-12
 
 ## Page 1094
 		SETLOC	INTPRET1
@@ -50,8 +51,8 @@ ZEROVEC		2DEC	0
 		2DEC	0
 
 		OCT	77777		# -0, -6, -12 MUST REMAIN IN THIS ORDER
-DFC-6		DEC	-6
-DFC-12		DEC	-12
+DEC-6		DEC	-6
+DEC-12		DEC	-12
 LODPMAX		2OCT	3777737777	# THESE TWO CONSTANTS MUST REMAIN
 LODPMAX1	2OCT	3777737777	# ADJACENT AND THE SAME FOR INTEGRATION
 

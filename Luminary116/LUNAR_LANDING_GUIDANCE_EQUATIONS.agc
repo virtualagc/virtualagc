@@ -26,6 +26,7 @@
 ##                                          ENDLLJOB --> ENDOFJOB
 ##                                          REGODSPR --> REGDOSP
 ##                                          REFLASHR --> REFLASH
+##              2021-05-30 ABS  Fixed a page number to match scans.
 
 ## Page 791
                 EBANK=          E2DPS
@@ -323,7 +324,7 @@ TTFINCR         TC              INTPRET
                 DAS             TTF/8TMP                        # NOW HAVE INCREMENTED TTF/8 IN TTF/8TMP
 
                 TC              FASTCHNG
-## Page 804
+## Page 797
 
                 EXTEND
                 DCA             TTF/8TMP

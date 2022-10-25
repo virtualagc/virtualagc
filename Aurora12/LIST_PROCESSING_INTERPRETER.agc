@@ -20,6 +20,7 @@
 ##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##		2017-03-15 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2021-05-30 ABS	B5TOBB -> B5TOB8
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of
@@ -2945,7 +2946,7 @@ BOV(B)          CCS             OVFIND                  # BRANCH ON OVERFLOW TO 
                 TS              OVFIND
                 CCS             CYR
                 TCF             RTB                     # IF BASIC.
-B5TOBB          OCT             360
+B5TOB8          OCT             360
                 TCF             GOTO
 
 ## Page 119

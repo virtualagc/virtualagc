@@ -19,6 +19,6 @@ include ../Makefile.inc
 AP11ROPE.bin: Luminary099.bin AP11ROPE.binsource
 	../Tools/oct2bin $(OCT2BIN_ARGS) <AP11ROPE.binsource
 	mv oct2bin.bin $@
-	# Uncomment and add to $(EXTRA_TARGETS) when this when AP11ROPE 
+	# Uncomment and add to $(EXTRA_TARGETS) when this when AP11ROPE
 	# proofing is complete
 	# diff -s $@ $<

@@ -3,8 +3,10 @@
 ## Filename:    POWERED_FLIGHT_SUBROUTINES.agc
 ## Purpose:     A section of Luminary revision 97.
 ##              It is part of the reconstructed source code for the
-##              original release of the flight software for the Lunar 
+##              second release of the flight software for the Lunar 
 ##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 11.
+##              It was created to fix two incorrect ephemeris constants in
+##              Luminary 96, as described by anomaly report LNY-59.
 ##              The code has been recreated from a copy of Luminary 99
 ##              revision 001, using asterisks indicating changed lines in
 ##              the listing and Luminary Memos #83 and #85, which list 
@@ -18,6 +20,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-28 MAS  Created from Luminary 99.
+##              2021-05-30 ABS  SINSLOC -> SINESLOC
 
 ## Page 1259
 		BANK	14		# SAME FBANK AS THE FINDCDUD SUB-PROGRAM
@@ -239,7 +242,7 @@ R*TL**P		CCS	DEXDEX		#       	+3 --> 0	-3 --> 2
 LOOP2		DXCH	BUF		# LOADING VECTOR COMPONENT, STORING INDEX
 ## Page 1264
 LOOP1		DXCH	MPAC
-		CA	SINSLOC
+		CA	SINESLOC
 		AD	DEX1
 		TS	ADDRWD
 
@@ -281,7 +284,7 @@ TSTPOINT	CCS	DEXDEX		# ONLY THE BRANCHING FUNCTION IS USED
 		TCF	R*TL**P
 		TC	RTNSAVER
 
-SINSLOC		ADRES	SINCDU		# FOR USE IN SETTING ADDRWD
+SINESLOC	ADRES	SINCDU		# FOR USE IN SETTING ADDRWD
 
 INDEXI		DEC	4		# **********   DON'T   **********
 		DEC	2		# **********   TOUCH   **********

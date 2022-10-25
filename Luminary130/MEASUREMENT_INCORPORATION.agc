@@ -23,6 +23,7 @@
 ##		2017-02-27 RSB	Proofed comment text using octopus/ProoferComments.
 ##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##		2018-09-04 MAS	Copied from Luminary 131 for Luminary 130.
+##		2021-05-30 ABS	ZEROD -> ZEROO
 
 ## Page 1143
 #  INCORP1--PERFORMS THE SIX DIMENSIONAL STATE VECTOR DEVIATION FOR POSITI
@@ -429,7 +430,7 @@ DOCSM1		RTB	CALL
 			SVDWN1		# STORE DOWNLINK STATE VECTOR
 		GOTO
 			FAZAB4
-ZEROD		=	ZEROVECS
+ZEROO		=	ZEROVECS
 54DD		DEC	54
 6DD		DEC	-6
 12DD		DEC	12
