@@ -42,6 +42,8 @@ from engineering import endOfImplementation
 import parseCommandLine as cli
 if cli.block1:
     from auxiliaryBlockI import *
+elif cli.blk2:
+    from auxiliaryBLK2 import *
 else:
     from auxiliary import *
 

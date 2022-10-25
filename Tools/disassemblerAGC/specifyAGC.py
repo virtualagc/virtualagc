@@ -81,7 +81,7 @@ for param in sys.argv[1:]:
                     fictitious labels don't exist within the baseline source 
                     code, it's a little extra effort if you need to find it.
         --qrhack[=QPLACE,RETAA]  (Implemented here, but not in disassemblerAGC.py,
-                    so this option is harmless but still not useful at present.)  
+                    so this option is harmless but not useful at present.)  
                     In some places within some code versions we find instruction 
                     sequences like this,
                         TC MAKECADR / TS RETAA / stuff / XCH RETAA / TC BANKJUMP
@@ -109,7 +109,7 @@ elif blk2:
     #sys.exit(1)
     from disassembleInterpretiveBLK2 import interpreterOpcodes, parsers
     from registers import registersByName       # Same as Block II, I hope.
-    from auxiliary import *                     # Same as Block II, I hope.
+    from auxiliaryBLK2 import *                     # Same as Block II, I hope.
     from checkForReferencesBLK2 import checkForReferences
 else:
     from disassembleInterpretive import interpreterOpcodes, parsers
@@ -202,7 +202,13 @@ for line in sys.stdin:
     if dummy[-1:] == "D":
         dummy = dummy[:-1]
     if dummy.isdigit():
-        symbol = ""   
+        symbol = ""  
+    # Also, sometimes symbols are chosen to coincide with interpretive
+    # opcodes, such as "DLOAD*" in Aurora12.  This can bollix us, and
+    # rather than track down and fix every way it can bollix us, let's 
+    # just eliminate them entirely.
+    if symbol in interpreterOpcodes:
+        symbol = ""
     if not fixed:
         if symbol != "":
             erasable[offset][bank]["symbols"].append(symbol)

@@ -128,14 +128,15 @@ A rope dump will typically be in `--hardware` format rather than `--bin` or bins
 
     workflow.sh Solarium055 --block1 --hint=BMN1@UNAJUMP --skip=GOGETUNB
 
-### Baseline Retread 44 and DAP Aurora 12
+### Baseline Retread 44, Retread 50, and DAP Aurora 12
 
-DAP Aurora 12 is the BLK2 variant of Block II, and is not yet supported.  However it works pretty well if simply treated as normal Block II, with the biggest problem being that ~30 erasable variables in block E5 are mistakenly discovered in banks E3 or E7 instead.  In other words, it could be used in a pinch as-is, though it will obviously be better once BLK2 is correctly supported:
+    workflow.sh Aurora12        --blk2 --hint=UNAJUMP@MISCJUMP --hint=MISCJUMP@INDJUMP \
+                                --hint=PDVL@PDDL --hint=JACCESTR@JACCESTQ
 
-    workflow.sh Aurora12    --blk2 --hint=UNAJUMP@MISCJUMP --hint=MISCJUMP@INDJUMP \
-                            --hint=PDVL@PDDL --hint=JACCESTR@JACCESTQ
+Retread 44 can be processed using the same switches as for DAP Aurora 12.  So can Retread 50, except that we have no binsource file for it, but rather a bin file, so the command reads instead
 
-The same comments apply more-or-less to Retread 44, which can be processed using the same switches as for DAP Aurora 12.
+    workflow.sh Retread50 --bin --blk2 --hint=UNAJUMP@MISCJUMP --hint=MISCJUMP@INDJUMP \
+                                --hint=PDVL@PDDL --hint=JACCESTR@JACCESTQ
 
 ### Baseline Sunburst 37
 

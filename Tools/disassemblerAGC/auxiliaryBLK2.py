@@ -3,12 +3,18 @@
 """
 Copyright:      None - the author (Ron Burkey) declares this software to
                 be in the Public Domain, with no rights reserved.
-Filename:       auxiliary.py
+Filename:       auxiliaryBLK2.py
 Purpose:        Some auxiliary data and functions used throught the 
                 disassemblerAGC suite, such as the geometry of memory,
                 formatting functionality for addresses, and so forth. 
-                This particular file is Block II only. 
-History:        2022-10-14 RSB  Split off from disassemblerAGC.py.
+                This particular file is BLK2 only. 
+History:        2022-10-25 RSB  Forked from auxiliary.py (Block II).
+                                Began correcting references to erasables.
+                                Basically, the only thing corrected is
+                                that in interpretive arguments, erasables
+                                are only encoded as E0, E1, E2, E? rather
+                                than as E0, E1, ..., E7.
+
 """
 
 startingCoreBank = 0
@@ -56,7 +62,8 @@ def getAddress12(address12, minimal=False):
         else:
             bank = address12 // sizeErasableBank
             offset = address12 % sizeErasableBank
-            addressString = "%04o (E%o,%04o)" % (address12, bank, 0o1400 + offset)
+            addressString = "%04o (E%o,%04o)" % \
+                            (address12, bank, 0o1400 + offset)
     elif address12 < 0o2000:
         addressString = "E?,%04o" % address12
     elif address12 < 0o4000:
@@ -75,7 +82,8 @@ def getAddress12(address12, minimal=False):
 def getAddressInterpretive11(address11, referenceType, minimal=False):
     bank = address11 // sizeErasableBank
     address = (address11 % sizeErasableBank) + erasableOffset
-    if referenceType == "E" and address11 >= erasableOffset:
+    if referenceType in ["E", "A", "S", "H", "I"] and \
+            address11 >= erasableOffset:
         addressString = "E?,%04o" % address
     elif address11 < erasableOffset:
         if minimal:

@@ -16,7 +16,7 @@ of the subroutine.  After patterns are matched, those can then be
 used to converte to absolute addresses.
 """
 
-from auxiliary import *
+from auxiliaryBLK2 import *
 from disassembleInterpretiveBLK2 import interpreterOpcodes
 
 # Detects interpretive opcodes that don't decrement their stand-alone
