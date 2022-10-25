@@ -616,9 +616,10 @@ if cli.dtest or cli.dloopFilename != "":
                 label = labels[bank][offset]
                 referenceStack = [[label, 1]] + referenceStack[:-1]            
     
+    dof = sys.stdout
     def printDisassembly(core, erasable, iochannels,
                          occasion, bank, address, left, right):
-        global referenceStack
+        global referenceStack, dof
         offset = address % sizeCoreBank
         label = ""
         if bank in labels:
@@ -635,7 +636,6 @@ if cli.dtest or cli.dloopFilename != "":
                 continue
             referringLabel = referenceStack[i][0]
             if referringLabel in references:
-                #print(indexIntoReferringLabel, references[referringLabel], file=sys.stderr)
                 if indexIntoReferringLabel in references[referringLabel]:
                     r = references[referringLabel][indexIntoReferringLabel]
                     comment = ""
@@ -648,7 +648,8 @@ if cli.dtest or cli.dloopFilename != "":
                         right = r[0]
                         found = True
         print("%02o,%04o    %05o    %-16s%-16s%-16s%s" \
-              % (bank, address, core[bank][offset], label, left, right, comment))
+              % (bank, address, core[bank][offset], label, left, 
+                right, comment), file=dof)
         return False
     
     if cli.dtest:
@@ -661,23 +662,67 @@ if cli.dtest or cli.dloopFilename != "":
         print("At the prompt, enter the parameters for disassembling a range")
         print("of core.  There are two ways of doing this.  First, specify")
         print("octal values, in the form:")
-        print("       BB SSSS EEEE [I]")
+        print("       BB SSSS EEEE ['I']")
         print("where BB is the bank, SSSS is the starting address within")
         print("the bank, EEEE is the ending address, and I is an optional")
         print("literal 'I' if the instruction is interpretive.  A second")
         print("method is to enter the name of any known program label, along")
         print("with an octal count of the number of words to disassemble:")
-        print("       SYMBOL COUNT [I]")
-        print("Finally, you can also enter the word QUIT to quit.")
+        print("       SYMBOL COUNT ['I']")
+        print("You can also enter the word QUIT to quit.")
+        print("Finally, a command that's useful for debugging the")
+        print("disassembler itself, but not much else, is this:")
+        print("       '@SPECS' BASELINE.specs")
+        print("This command disassembles each (and only) those subroutines")
+        print("defined in the BASELINE.specs file, outputting the entire")
+        print("disassembly the file named disassemblerAGC.disassembly.")
         while True:
+            dof = sys.stdout
             line = input("> ")
             fields = line.split()
             if len(fields) == 1 and fields[0].upper() == "QUIT":
                 break
             if len(fields) not in [2, 3, 4]:
                 continue
-            if True:
+            try:
                 symbol = fields[0].upper()
+                if symbol == "@SPECS":
+                    specs = open(fields[1], "r")
+                    dof = open("disassemblerAGC.disassembly", "w")
+                    for line in specs:
+                        fields = line.strip().split("#")
+                        if len(fields) == 0:
+                            continue
+                        fields = fields[0].split()
+                        if len(fields) not in [4, 5] or fields[1] == "=" \
+                                or fields[0] in ["+", "-"]:
+                            continue
+                        try:
+                            bank = int(fields[1], 8)
+                            start = int(fields[2], 8)
+                            end = int(fields[3], 8)
+                            basic = True
+                            typeString = "basic"
+                            if len(fields) > 4 and fields[4].upper() == "I":
+                                basic = False
+                                typeString = "interpretive"
+                            print("=======================================" \
+                                  "=======================================", \
+                                    typeString, file=dof)
+                            initializeScope(core, bank, start)
+                            ret1, ret2 = disassembleRange(core, erasable, iochannels,
+                                             bank, start, end, printDisassembly, 
+                                             basic)
+                            print("Disassembly return values = %r, %r" \
+                                    % (ret1, ret2), file=dof)
+                        except:
+                            print("Disassembly failed.")
+                            break
+                    dof.close()
+                    specs.close()
+                    dof = sys.stdout
+                    print("Output written to disassemblerAGC.disassembly")
+                    continue
                 if symbol in programLabels:
                     bank = programLabels[symbol][0]
                     start = programLabels[symbol][1]
@@ -706,7 +751,7 @@ if cli.dtest or cli.dloopFilename != "":
                                  bank, start, end, printDisassembly, 
                                  basic)
                 print("Disassembly return values = %r, %r" % (ret1, ret2))
-            else:
+            except:
                 print("Cannot interpret this request.")
                 continue
     sys.exit(0)
