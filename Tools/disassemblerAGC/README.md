@@ -48,7 +48,7 @@ Notice particularly the following disassemblerAGC.py options which I don't belie
 
 * `--dump`, which dumps the entire core in octal form.  This lets you use disassemblerAGC.py as an viewer for bin files.
 * `--dtest`, which lets you disassemble a selectable range of memory.
-* `--dloop` is like `--dtest`, but with an input loop for manually inputting disassembly ranges repeatedly without having to rerun the program every time. 
+* `--dloop` is like `--dtest`, but with an input loop for manually inputting disassembly ranges repeatedly without having to rerun the program every time, as well as having a couple of additional convenience features, such as using symbolic names for the subroutines to be disassembled, and the ability to disassemble *all* of the subroutines identified via pattern matching.
 * `--symbols=SYMBOLFILE` allows `--dtest` or `--dloop` to try and replace numeric operands with symbolic ones.  Every time `disassemblerAGC.py --find=...` is run, it produces as a byproduct a SYMBOLFILE called disassemblerAGC.symbols which is suitable for use with `--symbols`.
 
 Note that with `--dloop`, the syntax used is
@@ -130,9 +130,9 @@ A rope dump will typically be in `--hardware` format rather than `--bin` or bins
 
 ### Baseline Retread 44 and DAP Aurora 12
 
-DAP Aurora 12 is the BLK2 variant of Block II, and is not yet supported.  However it works pretty well if simply treated as normal Block II, with the biggest problem being that ~30 erasable variables in block E5 are mistakenly discovered in banks E3 or E7 instead.  In other words, it could be used in a pinch as-is, though it will obviously be better once BLK2 is correctly supported, after which point the --blk2 switch would be added to the command line:
+DAP Aurora 12 is the BLK2 variant of Block II, and is not yet supported.  However it works pretty well if simply treated as normal Block II, with the biggest problem being that ~30 erasable variables in block E5 are mistakenly discovered in banks E3 or E7 instead.  In other words, it could be used in a pinch as-is, though it will obviously be better once BLK2 is correctly supported:
 
-    workflow.sh Aurora12    --hint=UNAJUMP@MISCJUMP --hint=MISCJUMP@INDJUMP \
+    workflow.sh Aurora12    --blk2 --hint=UNAJUMP@MISCJUMP --hint=MISCJUMP@INDJUMP \
                             --hint=PDVL@PDDL --hint=JACCESTR@JACCESTQ
 
 The same comments apply more-or-less to Retread 44, which can be processed using the same switches as for DAP Aurora 12.
@@ -644,14 +644,22 @@ What this command does is to prompt you with an input loop, in which you can rep
     At the prompt, enter the parameters for disassembling a range
     of core.  There are two ways of doing this.  First, specify
     octal values, in the form:
-            BB SSSS EEEE [I]
+           BB SSSS EEEE ['I']
     where BB is the bank, SSSS is the starting address within
     the bank, EEEE is the ending address, and I is an optional
     literal 'I' if the instruction is interpretive.  A second
     method is to enter the name of any known program label, along
     with an octal count of the number of words to disassemble:
-            SYMBOL COUNT [I]
-    Finally, you can also enter the word QUIT to quit.
+           SYMBOL COUNT ['I']
+    You can also enter the word QUIT to quit.
+    Finally, there's this command:
+           '@SPECS' BASELINE.specs
+    Note that this command requires the --dsymbols command-line
+    option to provide the symbol table for the loaded ROPE.
+    The command disassembles (in the loaded ROPE) each (and
+    only) those subroutines identified previously by pattern-
+    matching with --find, outputting the entire disassembly in
+    the file named disassemblerAGC.disassembly.
     > 1rev 20 i
     12,0112    55366    1REV            SQRT            BDDV            
     12,0113    11630                                    2PISC           # 11630 (fixed)

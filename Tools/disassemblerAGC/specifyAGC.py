@@ -105,8 +105,12 @@ if block1:
     from auxiliaryBlockI import *
     from checkForReferencesBlockI import checkForReferences
 elif blk2:
-    print("BLK2 not yet supported", file=sys.stderr)
-    sys.exit(1)
+    #print("BLK2 not yet supported", file=sys.stderr)
+    #sys.exit(1)
+    from disassembleInterpretiveBLK2 import interpreterOpcodes, parsers
+    from registers import registersByName       # Same as Block II, I hope.
+    from auxiliary import *                     # Same as Block II, I hope.
+    from checkForReferencesBLK2 import checkForReferences
 else:
     from disassembleInterpretive import interpreterOpcodes, parsers
     from registers import registersByName

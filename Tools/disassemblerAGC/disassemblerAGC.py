@@ -408,8 +408,11 @@ def disassembleRange(core, erasableOnEntry, iochannelsOnEntry, bank, start,
     return False, False
     
 #=============================================================================
-# Perform some options (based on command-line settings), which bypass
-# all of the normal disassembly workflow and then exit.
+# Perform some options (based on command-line settings).  Each of these
+# command-line options basically cause the program to perform some operation
+# and then to exit.  Thus the options implemented below are mutually exclusive.
+# all of the code *above* this point is essentially initialization of common
+# data for functions needed by the code below.
 
 # Command-line switch:  --dump
 if cli.dump:
@@ -670,12 +673,14 @@ if cli.dtest or cli.dloopFilename != "":
         print("with an octal count of the number of words to disassemble:")
         print("       SYMBOL COUNT ['I']")
         print("You can also enter the word QUIT to quit.")
-        print("Finally, a command that's useful for debugging the")
-        print("disassembler itself, but not much else, is this:")
+        print("Finally, there's this command:")
         print("       '@SPECS' BASELINE.specs")
-        print("This command disassembles each (and only) those subroutines")
-        print("defined in the BASELINE.specs file, outputting the entire")
-        print("disassembly the file named disassemblerAGC.disassembly.")
+        print("Note that this command requires the --dsymbols command-line")
+        print("option to provide the symbol table for the loaded ROPE.")
+        print("The command disassembles (in the loaded ROPE) each (and")
+        print("only) those subroutines identified previously by pattern-")
+        print("matching with --find, outputting the entire disassembly in")
+        print("the file named disassemblerAGC.disassembly.")
         while True:
             dof = sys.stdout
             line = input("> ")
@@ -687,6 +692,9 @@ if cli.dtest or cli.dloopFilename != "":
             try:
                 symbol = fields[0].upper()
                 if symbol == "@SPECS":
+                    if len(programLabels) == 0:
+                        print("No symbol table. Requires --dsymbols.")
+                        continue
                     specs = open(fields[1], "r")
                     dof = open("disassemblerAGC.disassembly", "w")
                     for line in specs:
@@ -697,10 +705,12 @@ if cli.dtest or cli.dloopFilename != "":
                         if len(fields) not in [4, 5] or fields[1] == "=" \
                                 or fields[0] in ["+", "-"]:
                             continue
+                        if fields[0] not in programLabels:
+                            continue
                         try:
-                            bank = int(fields[1], 8)
-                            start = int(fields[2], 8)
-                            end = int(fields[3], 8)
+                            bank = programLabels[fields[0]][0]
+                            start = programLabels[fields[0]][1] % sizeCoreBank + coreOffset
+                            end = start + int(fields[3], 8) - int(fields[2], 8)
                             basic = True
                             typeString = "basic"
                             if len(fields) > 4 and fields[4].upper() == "I":
