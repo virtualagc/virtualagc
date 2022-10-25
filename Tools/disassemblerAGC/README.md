@@ -63,7 +63,11 @@ As far as workflow.sh is concerned, it is presently invoked as
 
     workflow.sh BASELINE [OPTIONS]
 
-where the available options are those associated with disassemblerAGC.py's `--find` option (but not the `--find` option itself):  `--hint`, `--skip`, `--avoid`, `--ignore`, ....
+I mention this for the sake of completeness.  There are many examples given later, and it's better to adapt those rather than to invent your own OPTIONS from scratch.  Nevertheless, the following OPTIONs are presently supported:
+
+* General:  `--block1`, `--blk2`, `--bin`, `--hardware`.  (The latter two options additionally cause a ROPE.bin file to be used, in place of the default ROPE.binsource.)
+* For `specifyAGC.py` alone:  `--min`, `--invent`.
+* For `disassemblerAGC.py --find` alone:  All others. 
 
 # Envisaged Workflow<a name="Envisaged"></a>
 
