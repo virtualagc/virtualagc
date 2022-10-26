@@ -77,7 +77,7 @@ Idealized, the process of reconstructing source code from a dump of physical rop
 
 Not having performed such a reconstruction myself, the intermediate steps are something of a mystery to me ... and I'm sure they probably differ from one reconstruction to the next.  Which is why I've simply left them open in the final two steps above.  Hopefully, more detail can be filled in later.
 
-# Analysis
+# Preliminary Automated Analysis
 
 As described by [the disassembler's README](https://github.com/virtualagc/virtualagc/tree/master/Tools/disassemblerAGC#readme), the DAP Aurora 12 BASELINE is analyzed by the following command, assuming Linux, and assuming that the Tools/disassemblerAGC/ folder is in the PATH:
 
@@ -103,7 +103,7 @@ The subsequent ROPE-analysis step is this:
 The results (SundialE-Aurora12.matches) are encouraging.  Here's an initial summary:
 
   * "Special symbols":  This are symbols with patterns hardcoded into the disassembler, rather than being obtained by analysis of the BASELINE.  17 were found and 12 weren't, but the only really significant fact here is that the all-important subroutine `INTPRET` was in fact found.
-  * "Core":  These are subroutines sought by the patterns obtained from analyzing the BASELINE.  744 were found and 275 were not.  A pretty big haul, from which we may infer that we can simply paste nearly 75% of the source code directly from Aurora 12 in to Sundial E, with appriate relocation.
+  * "Core":  These are subroutines sought by the patterns obtained from analyzing the BASELINE.  744 were found and 275 were not.  A pretty big haul, from which we may infer that we can simply paste nearly 75% of the source code directly from Aurora 12 into Sundial E source-code files, with appriate relocation.
   * "Erasable":  These are references to erasable variables, found in the matched "Core" subroutines above.  Only ~200 were found out of ~550 attempted.  Well, better than nothing.
   * "Fixed references":  These are references to fixed-memory constants, found in the matched "Core" subroutines.  Only 345 were found out of ~1600 attempted.
   * "Discrepancies":  6 of these were found.  
@@ -114,4 +114,7 @@ Other discrepancies are harder to resolve. In our preliminary analysis, for exam
 
 Speaking of which, different subroutines often *are* identical to the point where they can accidentally be swapped by the matching process.  That's the point of the `--hint` command-line switches in the `workflow.sh` and `disassemblerAGC.py` invocations described earlier, and there's no guarantee that we can use the *same* hints in the ROPE-analysis step (`disassemblerAGC.py`) as in the BASELINE-analysis step (`workflow.sh`), so that's something we have to watch out for!
 
+# Manual Refinement of the Analysis
+
 TBD
+
