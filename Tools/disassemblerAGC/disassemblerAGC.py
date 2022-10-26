@@ -118,7 +118,8 @@ if cli.dloopFilename == "":
     readCoreRope(sys.stdin, core, cli, numCoreBanks, sizeCoreBank)
 else:
     f = open(cli.dloopFilename, "r")
-    readCoreRope(f, core, cli, numCoreBanks, sizeCoreBank)
+    readCoreRope(f, core, cli, numCoreBanks, 
+                 sizeCoreBank, cli.dumpModule)
     f.close()
 
 #=============================================================================
@@ -418,13 +419,21 @@ def disassembleRange(core, erasableOnEntry, iochannelsOnEntry, bank, start,
 
 # Command-line switch:  --dump
 if cli.dump:
+    bankOffset = 0
     if cli.block1:
-        bankList = range(startingCoreBank, numCoreBanks)
-    else:
-        bankList = [2, 3, 0, 1] + list(range(4, numCoreBanks))
-    for bank in bankList:
+        pass
+    else:   # BLK2 or Block II
+        if cli.hardwareFile:
+            bankList = [2, 3, 0, 1] + list(range(4, numCoreBanks))
+        else:
+            bankList = range(startingCoreBank, numCoreBanks)
+        if cli.dumpModule != 0:
+            bankOffset = (cli.dumpModule - 1) * 6
+            bankList = bankList[bankOffset : bankOffset + 6]
+    for rbank in bankList:
+        bank = rbank - bankOffset
         print()
-        print("BANK=%o" % bank)
+        print("BANK=%o" % rbank)
         for row in range(128):
             if row % 4 == 0:
                 print()
@@ -1080,8 +1089,6 @@ if cli.findFilename != "":
                         context &= 0o3777
                     referencedAddress = \
                         getAddressInterpretive11(context, referenceType, True)  
-                #print("\t%05o %s" % (context, referencedAddress), file=sys.stderr)               
-                #spec["referencedAddresses"].append(referencedAddress)
                 reference[3] = referencedAddress
             # Information about all code references to this erasable symbol
             # collected.  We now have to perform some statistics to decide

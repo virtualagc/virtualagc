@@ -7,16 +7,15 @@ Filename:       pieceworkAGC.py
 Purpose:        Combine bits and pieces of AGC .bin files, to produce a
                 single AGC .bin file in --hardware format.
 History:        2022-10-10 RSB  Created.
+                2022-10-26 RSB  Began adapting for --block1 and --blk2.
 """
 
 import sys
 
-# Create core with all "unused".
-core = []
-for bank in range(0o44):
-    core.append([0]*0o2000)
-
 additions = []
+block1 = False
+blk2 = False
+numCoreBlocks = 0o44 # Note: 0 through 0o43.
 for param in sys.argv[1:]:
     if param == "--help":
         print('''
@@ -25,8 +24,8 @@ for param in sys.argv[1:]:
             
         Without OPTIONS, a core dump (in disassemblerAGC.py --hardware
         --parity format) is produced on stdout, with all locations marked
-        as unused.  There's only one OPTION, which can be used as many
-        times as desired:
+        as unused.  The following options can be used as many times as 
+        desired:
         
             --add=F,P,H,S,B1[,B2[,B3[...]]]
             
@@ -43,14 +42,31 @@ for param in sys.argv[1:]:
                         smallest offset in F.
             B1,B2,...   A list of the banks (octal) which are to be
                         extracted from F and added to the output core.
+                        
+        The following options can be used to affect the size and format
+        of the output file:
+        
+            --block1
+            --blk2
         ''')
         sys.exit(0)
     elif param[:6] == "--add=":
         additions.append(param[6:])
+    elif param == "--block1":
+        block1 = True
+        numCoreBlocks = 0o35 # Note: 1 through 0o34; 0 not used.
+    elif param == "--blk2":
+        blk2 = True
+        numCoreBlocks = 0o30 # Note: 0 through 0o27.
     else:
         print("Unrecognized switch: ", param, file=sys.stderr)
         sys.exit(1)
         
+# Create core with all "unused".
+core = []
+for bank in range(numCoreBlocks):
+    core.append([0]*0o2000)
+
 for addition in additions:
     fields = addition.split(",")
     F = fields[0]
@@ -104,7 +120,7 @@ for addition in additions:
         
 # Output the result.
 data = []
-for bank in range(0o44):
+for bank in range(numCoreBlocks):
     for offset in range(0o2000):
         data.append((core[bank][offset] >> 8) & 0xFF)
         data.append(core[bank][offset] & 0xFF)

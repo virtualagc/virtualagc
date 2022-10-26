@@ -15,13 +15,16 @@ import sys
 # The cli structure contains the cli.binFile and cli.hardwareFile
 # command-line parameters.  The file parameter is an open file,
 # such as sys.stdin.
-def readCoreRope(file, core, cli, numCoreBanks, sizeCoreBank):
+def readCoreRope(file, core, cli, numCoreBanks, sizeCoreBank, module=""):
     if cli.hardwareFile or cli.binFile: # .bin file.
         data = file.buffer.read()
-        if cli.hardwareFile:
+        if cli.block1:
             bank = 0
-        else:
-            bank = 2
+        else:  # Block II or BLK2
+            if cli.hardwareFile:
+                bank = 0
+            else:
+                bank = 2
         offset = 0
         for i in range(0, len(data), 2):
             value = (data[i] << 8) | data[i + 1]
@@ -56,6 +59,10 @@ def readCoreRope(file, core, cli, numCoreBanks, sizeCoreBank):
                     bank = 0
                 else:
                     bank += 1
+                    # For BLK2 files, they are sometimes 0-padded
+                    # beyond the number of actual available banks.
+                    if bank >= numCoreBanks:
+                        break
     else: # .binsource file.
         bank = 2
         offset = 0

@@ -18,6 +18,7 @@ History:        2022-09-28 RSB  Split off from disassemblerAGC.py.
                 2022-10-18 RSB  Added --intpret.
                 2022-10-19 RSB  Added --dsymbols, --dloop
                 2022-10-20 RSB  Added --know.
+                2022-10-26 RSB  Added --module.
 """
 
 import sys
@@ -54,6 +55,7 @@ hardwareFile = False
 debug = False
 debugLevel = 0
 dump = False
+dumpModule = 0
 dtest = False
 dbasic = True
 dbank = -1
@@ -121,7 +123,17 @@ for param in sys.argv[1:]:
                 --dump      Output an octal dump of the ROPE. Don't forget
                             to add any appropriate AGC-architecture options
                             (see above), since those affect the selection of
-                            banks and the order in which they're output. 
+                            banks and the order in which they're output.
+                --module=B  In the case "--dump --hardware", one is generally
+                            dealing with data dumped from a single rope-memory
+                            module rather than a complete executable.  This
+                            option can be used to specify which module (B1,
+                            B2, B29, etc.) is being dumped.  This affects only
+                            the BANK labels appearing in the dump.  Partial
+                            rope files such as this should be avoided for
+                            any operations other than --dump.  Instead, a 
+                            full ROPE file should be prepared using tools 
+                            such as pieceworkAGC.py. 
                 --intpret=A Force the address of INTPRET to be at fixed-fixed
                             address A (a 4-digit octal).  This would be used
                             if (say) you don't have a dump of the 
@@ -287,6 +299,12 @@ for param in sys.argv[1:]:
         debugLevel = int(param[14:])
     elif param == "--dump":
         dump = True
+    elif param[:9] == "--module=":
+        dumpModule = param[9:]
+        if dumpModule[:1] != "B" or dumpModule[1:] == "" or not dumpModule[1:].isdigit():
+            print("Error: Parameter %s out of range." % param, file=sys.stderr)
+            sys.exit(1)
+        dumpModule = int(dumpModule[1:])
     elif param[:10] == "--pattern=":
         pattern = True
         symbol = param[10:]

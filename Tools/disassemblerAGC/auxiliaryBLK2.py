@@ -18,7 +18,7 @@ History:        2022-10-25 RSB  Forked from auxiliary.py (Block II).
 """
 
 startingCoreBank = 0
-numCoreBanks = 0o44 # 0 .. 43
+numCoreBanks = 0o30
 sizeCoreBank = 0o2000
 coreOffset = 0o2000
 numErasableBanks = 0o10
