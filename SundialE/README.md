@@ -26,7 +26,7 @@ But why SUNDIAL E, as opposed to SUNDIAL A through D?  I haven't found any expli
 
 Software for SUNDIAL in general, and SUNDIAL E in particular, used the "BLK2" target of the AGC assembler.  BLK2 is a kind of intermediate form of the language(s), poised between the Block I language and the final Block II language that was used on all manned missions.  It is thus similar to the final Block II language, but not precisely identical.
 
-The only other representative examples of BLK2 language we have as of this writing are the Retread and Aurora software.  Of these, Aurora is the closest for modeling Sundial.  For one thing, Sundial served a similar purpose as checkout software for the Command Module that Aurora did for the Lunar Module; Retread, meanwhile, was earlier software which lacked much of the essential functional for this purpose.  Besides which, consider document E-1142 (Rev. 48) of April 1966, which says:
+The only other representative examples of BLK2 language we have as of this writing are the Retread and Aurora software.  Of these, Aurora is the closest for modeling Sundial.  For one thing, Sundial served a similar purpose as checkout software for the Command Module that Aurora did for the Lunar Module; Retread, meanwhile, was earlier software which lacked much of the essential functionality for this purpose.  Besides which, consider document E-1142 (Rev. 48) of April 1966, which says:
 
     The programming of SUNDIAL has begun by carrying over many
     of the applicable sections from AURORA. Some of these sections have
@@ -67,8 +67,8 @@ Note also that the only version we presently have of Aurora is a fork called DAP
 Idealized, the process of reconstructing source code from a dump of physical rope-memory modules goes something like the following:
 
  1. Obtain an octal dump of the physical rope-memory modules.  I'll refer to this as the ROPE.  In this case, that's the file SundialE.bin.
- 2. Choose software version(s) to the ROPE, but for which we have actual source code.  I'll refer to these as the BASELINEs.  In this case, we have a single BASELINE, namely the files in the Aurora12/ folder of the source tree.
- 3. Analyze the BASELINE, using the programs found in the Tools/disassemblerAGC/ folder of the source tree.  This analysis results, among other things, in a BASELINE.patterns file, which provides a lot of information about the subroutines and other symbolic data in the BASELINE, but with absoluted addressing stripped away, and presented in a form in which a pattern-search based on it can be applied to the ROPE.
+ 2. Choose software version(s) similar to the ROPE, but for which we have actual source code.  I'll refer to these as the BASELINEs.  In this case, we have a single BASELINE, namely the files in the Aurora12/ folder of the source tree.
+ 3. Analyze the BASELINE, using the programs found in the Tools/disassemblerAGC/ folder of the source tree.  This analysis results, among other things, in a BASELINE.patterns file, which provides a lot of information about the subroutines and other symbolic data in the BASELINE, but with absolute addressing stripped away, and presented in a form in which a pattern-search based on it can be applied to the ROPE.
  4. Analysis of the ROPE with the BASELINE patterns typically finds a large number of subroutines which have remained essentially the same between the BASELINE and ROPE, but which may have moved to different addresses.  Since those subroutines have remained essentially the same, the analysis can also deduce the addresses in the ROPE of many erasable variables and fixed-memory constants which have also moved somewhat in the ROPE from their locations in the BASELINE.
  5. For items which have simply moved, their source code can essentially be pasted into the ROPE directly from the BASELINE.
  6. For those subroutines which have *not* been matched, they will often reside in expected locations in the gaps between the subroutines that *were* matched, but weren't found because instructions were added, changed, or deleted.
@@ -77,9 +77,9 @@ Idealized, the process of reconstructing source code from a dump of physical rop
 
 Not having performed such a reconstruction myself, the intermediate steps are something of a mystery to me ... and I'm sure they probably differ from one reconstruction to the next.  Which is why I've simply left them open in the final two steps above.  Hopefully, more detail can be filled in later.
 
-# BASELINE Analysis
+# Analysis
 
-As described by [the disassembler's README](https://github.com/virtualagc/virtualagc/tree/master/Tools/disassemblerAGC#readme), DAP Aurora 12 is analyzed by the following command, assuming Linux, and assuming that the Tools/disassemblerAGC/ folder is in the PATH:
+As described by [the disassembler's README](https://github.com/virtualagc/virtualagc/tree/master/Tools/disassemblerAGC#readme), the DAP Aurora 12 BASELINE is analyzed by the following command, assuming Linux, and assuming that the Tools/disassemblerAGC/ folder is in the PATH:
 
     cd Aurora12
     workflow.sh Aurora12 --blk2 --hint=UNAJUMP@MISCJUMP --hint=MISCJUMP@INDJUMP \
@@ -92,7 +92,7 @@ Resulting from this operation are several files in the Aurora12/ folder that wil
   * Aurora12-autogenerated.matches
   * disassemblerAGC.symbols
 
-The actual analysis step is this:
+The subsequent ROPE-analysis step is this:
 
     disassemblerAGC.py  --blk2 --hint=UNAJUMP@MISCJUMP --hint=MISCJUMP@INDJUMP \
                         --hint=PDVL@PDDL --hint=JACCESTR@JACCESTQ --bin \
@@ -100,9 +100,9 @@ The actual analysis step is this:
                         <SundialE.bin \
                         >SundialE-Aurora12.matches
 
-The results (SundialE-Aurora12.matches) is encouraging.  Here's an initial summary:
+The results (SundialE-Aurora12.matches) are encouraging.  Here's an initial summary:
 
-  * "Special symbols":  This are symbols with patterns hardcoded into the disassembler, rather than being obtained by analysis of the BASELINE.  17 were found and 12 weren't, but the only really fact here is that the all-important subroutine `INTPRET` was in fact found.
+  * "Special symbols":  This are symbols with patterns hardcoded into the disassembler, rather than being obtained by analysis of the BASELINE.  17 were found and 12 weren't, but the only really significant fact here is that the all-important subroutine `INTPRET` was in fact found.
   * "Core":  These are subroutines sought by the patterns obtained from analyzing the BASELINE.  744 were found and 275 were not.  A pretty big haul, from which we may infer that we can simply paste nearly 75% of the source code directly from Aurora 12 in to Sundial E, with appriate relocation.
   * "Erasable":  These are references to erasable variables, found in the matched "Core" subroutines above.  Only ~200 were found out of ~550 attempted.  Well, better than nothing.
   * "Fixed references":  These are references to fixed-memory constants, found in the matched "Core" subroutines.  Only 345 were found out of ~1600 attempted.
