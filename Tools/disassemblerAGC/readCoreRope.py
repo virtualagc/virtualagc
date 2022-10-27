@@ -11,20 +11,27 @@ History:        2022-09-25 RSB  Created.
 
 import sys
 
-# Read the input file (.bin or .binsource) into the core[] list.
-# The cli structure contains the cli.binFile and cli.hardwareFile
-# command-line parameters.  The file parameter is an open file,
-# such as sys.stdin.
-def readCoreRope(file, core, cli, numCoreBanks, sizeCoreBank, module=""):
+'''
+Read the input file (.bin or .binsource) into the core[] list.
+The cli structure contains the cli.binFile and cli.hardwareFile
+command-line parameters.  The file parameter is an open file,
+such as sys.stdin.
+
+For --bin or --hardware input files, we are also given a list 
+(bankList) of the order in which the memory banks appear in the 
+input file.
+
+For the cli input parameter, it is a structure with only 3 fields 
+used:
+    cli.hardwareFile        A boolean
+    cli.binFile             A boolean
+    cli.parity              A boolean
+'''
+def readCoreRope(file, core, cli, numCoreBanks, sizeCoreBank, bankList):
     if cli.hardwareFile or cli.binFile: # .bin file.
         data = file.buffer.read()
-        if cli.block1:
-            bank = 0
-        else:  # Block II or BLK2
-            if cli.hardwareFile:
-                bank = 0
-            else:
-                bank = 2
+        bankIndex = 0
+        bank = bankList[bankIndex]
         offset = 0
         for i in range(0, len(data), 2):
             value = (data[i] << 8) | data[i + 1]
@@ -53,17 +60,15 @@ def readCoreRope(file, core, cli, numCoreBanks, sizeCoreBank, module=""):
             offset += 1
             if offset >= sizeCoreBank:
                 offset = 0
-                if cli.binFile and bank == 1:
-                    bank = 4
-                elif cli.binFile and bank == 3:
-                    bank = 0
-                else:
-                    bank += 1
-                    # For BLK2 files, they are sometimes 0-padded
-                    # beyond the number of actual available banks.
-                    if bank >= numCoreBanks:
-                        break
-    else: # .binsource file.
+                bankIndex += 1
+                if bankIndex >= len(bankList):
+                    break
+                bank = bankList[bankIndex]
+    else:
+        # For binsource files, we simply use the markings BANK=N
+        # within the file to tell us what to read, so we needn't
+        # worry about any other factors like "--bin" or "--block1"
+        # etc.
         bank = 2
         offset = 0
         for line in file:

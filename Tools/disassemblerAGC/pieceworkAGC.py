@@ -15,36 +15,32 @@ import sys
 additions = []
 block1 = False
 blk2 = False
-numCoreBlocks = 0o44 # Note: 0 through 0o43.
 for param in sys.argv[1:]:
     if param == "--help":
         print('''
         Usage:
             pieceworkAGC.py [OPTIONS] >OUTPUT.bin
             
-        Without OPTIONS, a core dump (in disassemblerAGC.py --hardware
-        --parity format) is produced on stdout, with all locations marked
-        as unused.  The following options can be used as many times as 
-        desired:
+        A core dump (in disassemblerAGC.py --hardware --parity format) 
+        is produced on stdout. Without OPTIONS, with all locations will
+        be marked as unused.  The following option can be used as many 
+        times as desired:
         
             --add=F,P,H,S,B1[,B2[,B3[...]]]
             
         This option says to add data to the rope image from a file:
         
-            F           The filename.
-            P           0 if the file has no parity bits, 1 if it does.
-            H           0 if it's a --bin file, 1 for a --hardware file.
-            S           The lowest bank number (octal) in file F,
-                        which is expected to contain contiguous banks
-                        in the order appropriate to whether it's a
-                        --bin or a --hardware file.  Thus the lowest
-                        bank number in F is not necessarily at the 
-                        smallest offset in F.
-            B1,B2,...   A list of the banks (octal) which are to be
-                        extracted from F and added to the output core.
+            F           Filename of an input file.
+            P           0 if F has no parity bits, 1 if it does.
+            H           0 if F is a --bin file, 1 for a --hardware file.
+            M           0 if F is an entire rope, some other number
+                        of F contains a single rope-memory module.  For
+                        example, for module B29, M=29.
+            B1,B2,...   A list of the banks (octals) which are to be
+                        extracted from F and added to the output.
                         
-        The following options can be used to affect the size and format
-        of the output file:
+        The following options affect the size and ordering of banks in
+        the input and output files:
         
             --block1
             --blk2
@@ -54,17 +50,22 @@ for param in sys.argv[1:]:
         additions.append(param[6:])
     elif param == "--block1":
         block1 = True
-        numCoreBlocks = 0o35 # Note: 1 through 0o34; 0 not used.
     elif param == "--blk2":
         blk2 = True
-        numCoreBlocks = 0o30 # Note: 0 through 0o27.
     else:
         print("Unrecognized switch: ", param, file=sys.stderr)
         sys.exit(1)
+
+if block1:
+    from auxiliaryBlockI import *
+elif blk2:
+    from auxiliaryBLK2 import *
+else:
+    from auxiliary import *
         
 # Create core with all "unused".
 core = []
-for bank in range(numCoreBlocks):
+for bank in range(numCoreBanks):
     core.append([0]*0o2000)
 
 for addition in additions:
@@ -120,7 +121,7 @@ for addition in additions:
         
 # Output the result.
 data = []
-for bank in range(numCoreBlocks):
+for bank in range(numCoreBanks):
     for offset in range(0o2000):
         data.append((core[bank][offset] >> 8) & 0xFF)
         data.append(core[bank][offset] & 0xFF)

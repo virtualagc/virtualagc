@@ -23,6 +23,11 @@ numErasableBanks = 1 # 0 only; i.e., there really aren't any "banks"
 sizeErasableBank = 0o2000
 erasableOffset = 0o0000
 numIoChannels = 0
+bankListHardware = [0o10, 0o05, 0o30, 0o25, 0o06, 0o07, 0o26, 0o27,
+                    0o14, 0o11, 0o34, 0o31, 0o12, 0o13, 0o32, 0o33,
+                    0o04, 0o01, 0o24, 0o21, 0o02, 0o03, 0o22, 0o23]
+bankListBin = list(range(1, numCoreBanks))
+banksPerModule = 4
 
 # Convert bank,offset pair to an address string.  The parameters are integers,
 # and if either is unknown, it should be set to -1.  Returns a pair:

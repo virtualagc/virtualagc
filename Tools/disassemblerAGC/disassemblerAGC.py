@@ -114,12 +114,26 @@ if cli.flexFilename != "":
 #=============================================================================
 # Read the input file.
 
+if cli.hardwareFile:
+    bankList = bankListHardware
+    if cli.dumpModule != 0:
+        if cli.block1:
+            module = -1
+            if cli.dumpModule in [21, 22, 23, 24]:
+                module = cli.dumpModule - 21
+            elif cli.dumpModule in [28, 29]:
+                module = cli.dumpModule - 24
+        else:
+            module = cli.dumpModule - 1
+        bankList = bankList[banksPerModule * module : banksPerModule * (module + 1)]
+else: # --bin or binsource.
+    bankList = bankListBin
+    
 if cli.dloopFilename == "":
-    readCoreRope(sys.stdin, core, cli, numCoreBanks, sizeCoreBank)
+    readCoreRope(sys.stdin, core, cli, numCoreBanks, sizeCoreBank, bankList)
 else:
     f = open(cli.dloopFilename, "r")
-    readCoreRope(f, core, cli, numCoreBanks, 
-                 sizeCoreBank, cli.dumpModule)
+    readCoreRope(f, core, cli, numCoreBanks, sizeCoreBank, bankList)
     f.close()
 
 #=============================================================================
@@ -419,21 +433,9 @@ def disassembleRange(core, erasableOnEntry, iochannelsOnEntry, bank, start,
 
 # Command-line switch:  --dump
 if cli.dump:
-    bankOffset = 0
-    if cli.block1:
-        pass
-    else:   # BLK2 or Block II
-        if cli.hardwareFile:
-            bankList = [2, 3, 0, 1] + list(range(4, numCoreBanks))
-        else:
-            bankList = range(startingCoreBank, numCoreBanks)
-        if cli.dumpModule != 0:
-            bankOffset = (cli.dumpModule - 1) * 6
-            bankList = bankList[bankOffset : bankOffset + 6]
-    for rbank in bankList:
-        bank = rbank - bankOffset
+    for bank in bankList:
         print()
-        print("BANK=%o" % rbank)
+        print("BANK=%o" % bank)
         for row in range(128):
             if row % 4 == 0:
                 print()
