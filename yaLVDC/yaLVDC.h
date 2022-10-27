@@ -146,7 +146,7 @@ parseCommandLineArguments(int argc, char *argv[]);
 
 // See readAssemblies.c
 // Note that state_t contains just persistent values ... i.e., stuff in the CPU
-// that I expect to be stored in ferrite cores, and thus to survive a power
+// that I expect to be stored in core memory, and thus to survive a power
 // cycle, because the emulator will periodically write it out to a persistence
 // file that will be reread at startup.  So if there's non-persistent state
 // stuff, it needs to be handled using some other mechanism than state_t.
