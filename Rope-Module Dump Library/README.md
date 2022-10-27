@@ -167,19 +167,19 @@ Software:  Aurora 85
 
 Flaws:  None known.
 
-## 2003053-121-BLK2-SundialE-B1.bin
+## 2003053-121-BLK2-SundialB+-B1.bin
 
 Source:  MIT Museum
 
-Software:  Sundial E
+Software:  Sundial B, D, E
 
 Flaws:  None known.
 
-## 2003053-131-BLK2-SundialB+-B2.bin
+## 2003053-131-BLK2-SundialB-B2.bin
 
 Source:  Anonymous collector
 
-Software:  Sundial B, D, E
+Software:  Sundial B
 
 Flaws:  None known.
 
