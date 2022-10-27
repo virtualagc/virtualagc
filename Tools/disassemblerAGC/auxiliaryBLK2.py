@@ -14,11 +14,14 @@ History:        2022-10-25 RSB  Forked from auxiliary.py (Block II).
                                 that in interpretive arguments, erasables
                                 are only encoded as E0, E1, E2, E? rather
                                 than as E0, E1, ..., E7.
-
+                2022-10-27 RSB  Fixed per Mike's comments.  The only 
+                                difference from auxliary.py at this point
+                                is in the operation of the 
+                                getAddressInterpretive11() function.
 """
 
 startingCoreBank = 0
-numCoreBanks = 0o30
+numCoreBanks = 0o44 # 0 .. 43
 sizeCoreBank = 0o2000
 coreOffset = 0o2000
 numErasableBanks = 0o10
@@ -65,8 +68,7 @@ def getAddress12(address12, minimal=False):
         else:
             bank = address12 // sizeErasableBank
             offset = address12 % sizeErasableBank
-            addressString = "%04o (E%o,%04o)" % \
-                            (address12, bank, 0o1400 + offset)
+            addressString = "%04o (E%o,%04o)" % (address12, bank, 0o1400 + offset)
     elif address12 < 0o2000:
         addressString = "E?,%04o" % address12
     elif address12 < 0o4000:

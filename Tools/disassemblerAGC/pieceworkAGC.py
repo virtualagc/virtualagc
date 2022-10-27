@@ -8,6 +8,8 @@ Purpose:        Combine bits and pieces of AGC .bin files, to produce a
                 single AGC .bin file in --hardware format.
 History:        2022-10-10 RSB  Created.
                 2022-10-26 RSB  Began adapting for --block1 and --blk2.
+                2022-10-27 RSB  Fully corrected now to proper mapping of banks
+                                and modules.
 """
 
 import sys
@@ -26,22 +28,31 @@ for param in sys.argv[1:]:
         be marked as unused.  The following option can be used as many 
         times as desired:
         
-            --add=F,P,H,S,B1[,B2[,B3[...]]]
+            --add=F,P,H,M[,B1[,B2[,B3[...]]]]
             
         This option says to add data to the rope image from a file:
         
-            F           Filename of an input file.
+            F           Filename of an input .bin file.  These files 
+                        contain an entire rope if they're non-hardware
+                        .bin files.  If they're hardware .bin files,
+                        they may contain either an entire rope or else
+                        a single module.
             P           0 if F has no parity bits, 1 if it does.
-            H           0 if F is a --bin file, 1 for a --hardware file.
-            M           0 if F is an entire rope, some other number
-                        of F contains a single rope-memory module.  For
-                        example, for module B29, M=29.
+            H           1 if F is a hardware dump, 0 if a non-hardware
+                        .bin file.
+            M           Always should be 0 if F is a non-hardware .bin
+                        file.  If F is a hardware .bin file, then M=0
+                        if F contains an entire rope, or some other number
+                        if F contains a single rope-memory module.  For
+                        example, for module B29, then use M=29.  
             B1,B2,...   A list of the banks (octals) which are to be
-                        extracted from F and added to the output.
+                        extracted from F and added to the output.  If the
+                        list is empty, then all banks are extracted.
                         
-        The following options affect the size and ordering of banks in
-        the input and output files:
+        The following mutually-exclusive options affect the size and 
+        ordering of banks in the input and output files as well:
         
+            --agc       (the default)
             --block1
             --blk2
         ''')
@@ -50,8 +61,13 @@ for param in sys.argv[1:]:
         additions.append(param[6:])
     elif param == "--block1":
         block1 = True
+        blk2 = False
     elif param == "--blk2":
         blk2 = True
+        block1 = False
+    elif param == "--agc":
+        block1 = False
+        blk2 = False
     else:
         print("Unrecognized switch: ", param, file=sys.stderr)
         sys.exit(1)
@@ -73,32 +89,37 @@ for addition in additions:
     F = fields[0]
     P = (fields[1] != "0")
     H = (fields[2] != "0")
-    S = int(fields[3], 8)
+    M = int(fields[3])
     B = fields[4:]
-    print(F, P, H, S, B, file=sys.stderr)
-    for i in range(len(B)):
-        B[i] = int(B[i], 8)
+    print("Processing:", F, P, H, M, B, file=sys.stderr)
+    if H:
+        bankList = bankListHardware
+        if M != 0:
+            if block1:
+                module = -1
+                if M in [21, 22, 23, 24]:
+                    module = M - 19
+                elif M in [28, 29]:
+                    module = M - 28
+            else:
+                module = M - 1
+            bankList = bankList[banksPerModule * module : banksPerModule * (module + 1)]
+    else:
+        bankList = bankListBin
+    if len(B) == 0:
+        B = bankListHardware
+    else:
+        for i in range(len(B)):
+            B[i] = int(B[i], 8)
     f = open(F, "r")
     data = f.buffer.read()
     f.close()
     for destBank in B:
-        if destBank < S:
-            print("Desired bank %02o is before start of %s" % \
-                    (destBank, F), file=sys.stderr)
+        if destBank not in bankList:
             continue
-        # Translate the bank numbers for --bin vs --hardware,
-        # since bank 0, 1, 2, and 3 are in a different order.
-        tBank = destBank
-        if not H and destBank < 4:
-            if destBank < 2:
-                tBank += 2
-            else:
-                tBank -= 2
-        tBank -= S
+        tBank = bankList.index(destBank)
         offset = tBank * 0o4000
         if offset + 0o4000 > len(data):
-            print("Desired bank %02o is past end of %s" % \
-                    (destBank, F), file=sys.stderr)
             continue
         for address in range(0o2000):
             value = (data[2 * address + offset] << 8) \
@@ -121,7 +142,7 @@ for addition in additions:
         
 # Output the result.
 data = []
-for bank in range(numCoreBanks):
+for bank in bankListHardware:
     for offset in range(0o2000):
         data.append((core[bank][offset] >> 8) & 0xFF)
         data.append(core[bank][offset] & 0xFF)

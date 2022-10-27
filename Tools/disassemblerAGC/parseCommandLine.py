@@ -56,6 +56,7 @@ debug = False
 debugLevel = 0
 dump = False
 dumpModule = 0
+dumpSort = False
 dtest = False
 dbasic = True
 dbank = -1
@@ -134,6 +135,11 @@ for param in sys.argv[1:]:
                             any operations other than --dump.  Instead, a 
                             full ROPE file should be prepared using tools 
                             such as pieceworkAGC.py. 
+                --sort      Dumps for --hardware files are output using the 
+                            bank order specific to the target.  For --block1
+                            in particular, this may not be a very convenient
+                            order.  The --sort switch orders the banks in 
+                            increasing order in the --dump.
                 --intpret=A Force the address of INTPRET to be at fixed-fixed
                             address A (a 4-digit octal).  This would be used
                             if (say) you don't have a dump of the 
@@ -299,12 +305,16 @@ for param in sys.argv[1:]:
         debugLevel = int(param[14:])
     elif param == "--dump":
         dump = True
+    elif param == "--sort":
+        dumpSort = True
     elif param[:9] == "--module=":
         dumpModule = param[9:]
-        if dumpModule[:1] != "B" or dumpModule[1:] == "" or not dumpModule[1:].isdigit():
+        if dumpModule[:1].upper() == "B":
+            dumpModule = dumpModule[1:]
+        if not dumpModule.isdigit():
             print("Error: Parameter %s out of range." % param, file=sys.stderr)
             sys.exit(1)
-        dumpModule = int(dumpModule[1:])
+        dumpModule = int(dumpModule)
     elif param[:10] == "--pattern=":
         pattern = True
         symbol = param[10:]

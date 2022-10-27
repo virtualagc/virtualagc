@@ -120,9 +120,9 @@ if cli.hardwareFile:
         if cli.block1:
             module = -1
             if cli.dumpModule in [21, 22, 23, 24]:
-                module = cli.dumpModule - 21
+                module = cli.dumpModule - 19
             elif cli.dumpModule in [28, 29]:
-                module = cli.dumpModule - 24
+                module = cli.dumpModule - 28
         else:
             module = cli.dumpModule - 1
         bankList = bankList[banksPerModule * module : banksPerModule * (module + 1)]
@@ -433,7 +433,11 @@ def disassembleRange(core, erasableOnEntry, iochannelsOnEntry, bank, start,
 
 # Command-line switch:  --dump
 if cli.dump:
-    for bank in bankList:
+    if cli.dumpSort:
+        banks = sorted(bankList)
+    else:
+        banks = bankList
+    for bank in banks:
         print()
         print("BANK=%o" % bank)
         for row in range(128):
