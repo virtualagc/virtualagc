@@ -619,12 +619,12 @@ To summarize all of that, the Comanche 72 material we have to work with is:
 So our first step would seem to be to create a *full* `--bin --hardware` file, in which data from the memory banks just mentioned appear at the proper places, while the remainder of the space is filled with 00000 (plus parity=0), which would indicate unused positions in the rope.  This can be done with the pieceworkAGC.py program, an invocation of which might look like the following:
 
     pieceworkAGC.py --add=Comanche067.bin,0,0,0,0,2,3 \
-                    --add=Comanche072-B2.bin,1,1,6,6,7,10,11,12,13 \
+                    --add=Comanche072-B2.bin,1,1,2 \
                     >Comanche072-partial.bin
 
-The first `--add` switch says that from Comanche067.bin &mdash; which is specified to have no parity bits, to be in `--bin` format rather than `--hardware` format, and to contain a lowest bank number of 00 &mdash; we're supposed to extract banks 00, 02, and 03.
+The first `--add` switch says that from Comanche067.bin &mdash; which is specified to have no parity bits, to be in `--bin` format rather than `--hardware` format, and to contain a complete rope &mdash; from which we're supposed to extract banks 00, 02, and 03.
 
-The second `--add` switch says that from Comanche072-B2.bin &mdash; which has parity bits, is in `--hardware` format, and which has a lowest bank number of 06 &mdash; we're supposed to extract banks 06, 07, 10, 11, 12, and 13.
+The second `--add` switch says that from Comanche072-B2.bin &mdash; which has parity bits, is in `--hardware` format, and contains just module B2 &mdash; from which we're supposed to extract all of its banks.
 
 Altogether, Comanche072-partial.bin is produced, having just banks 00, 02, 03, 06, 07, 10, 11, 12, and 13 filled in with data, and the remainder filled with 00000 (plus 0 parity), which is what an unused memory location looks like.  This file then formes our ROPE file, against which we wish to match the patterns of the BASELINEs.
 
