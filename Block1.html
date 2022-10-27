@@ -135,7 +135,9 @@ document.write(headerTemplate.replace("@TITLE@","The Block I AGC").replace("@SUB
       people such as Eldon Hall, Albert Hopkins, and Ramón Alonso, whose
       names you will see mentioned elsewhere on this page and this site:</p>
     <center><iframe src="https://www.youtube.com/embed/YIBhPsyYCiM"
-        allowfullscreen="" frameborder="0" height="480" width="854">&amp;amp;amp;amp;amp;amp;lt;br&amp;amp;amp;amp;amp;amp;gt;
+        allowfullscreen="" width="854" height="480" frameborder="0">&amp;amp;amp;amp;amp;amp;amp;amp;lt;br&amp;amp;amp;amp;amp;amp;amp;amp;gt;
+
+
 
 
 
@@ -144,6 +146,8 @@ document.write(headerTemplate.replace("@TITLE@","The Block I AGC").replace("@SUB
     </p>
     <hr style="width: 100%; height: 2px;">
     <h2><a name="Available_Documentation" id="Available_Documentation"></a>Available
+
+
 
 
 
@@ -162,6 +166,8 @@ document.write(headerTemplate.replace("@TITLE@","The Block I AGC").replace("@SUB
 
 
 
+
+
           and lots of the official MIT/IL electrical-schematic and
           mechanical drawings</a>.&nbsp; I would be lying if I said our
         engineering-drawing collection is 100% complete, but we have a
@@ -177,6 +183,8 @@ document.write(headerTemplate.replace("@TITLE@","The Block I AGC").replace("@SUB
 
 
 
+
+
         This is essentially a theory-of-operation document for the Block
         I AGC and DSKY, and indeed even contains its own set of
         electrical schematics which often seem to be slightly later
@@ -186,6 +194,28 @@ document.write(headerTemplate.replace("@TITLE@","The Block I AGC").replace("@SUB
           view document" target="_blank">R-393:&nbsp; Logical
           Description for the Apollo Guidance Computer (AGC 4)</a>, by
         Albert Hopkins, Ramon Alonso, and Hugh Blair-Smith, July 1966.</li>
+      <li><a moz-do-not-send="true"
+href="http://www.ibiblio.org/apollo/Documents/agcis_2_machine_instructions.pdf">FR-2-102A,
+
+          "Apollo Guidance Computer Information Series, Issue 2: Machine
+          Instructions"</a>, 03/10/1963, by Raytheon.</li>
+      <li><a moz-do-not-send="true"
+          href="http://www.ibiblio.org/apollo/Documents/agcis_6_interpreter.pdf">FR-2-106A,
+
+          "Apollo Guidance Computer Information Series, Issue 6:
+          Interpreter and Interpretive Instructions"</a>, 09/25/1963, by
+        Raytheon.</li>
+      <li><a moz-do-not-send="true"
+          href="http://www.ibiblio.org/apollo/Documents/agcis_6b_interpreter.pdf">FR-2-106B,
+
+          "Apollo Guidance Computer Information Series, Issue 6B:
+          Interpreter and Interpretive Instructions"</a>, 05/29/1964, by
+        Raytheon.</li>
+      <li><a moz-do-not-send="true"
+          href="http://www.ibiblio.org/apollo/links2.html#ProgrammerManuals">...
+
+          and other of the Apollo Guidance Computer Information Series.</a><br>
+      </li>
       <li><a href="hrst/archive/1721.pdf" title="Click to view document"
           target="_blank">R-467:&nbsp; The Compleat Sunrise being a
           description of Program Sunrise (Sunrise 33 - NASA DWG#
@@ -231,6 +261,8 @@ While
 
 
 
+
+
       those are fine schematics, and worked well for John's purposes,
       they are not transcriptions of the original Block I schematics,
       but are rather schematics John designed from scratch, based on the
@@ -247,6 +279,8 @@ While
     </p>
     <hr size="2">
     <h2><a name="Block_1_Computer_System" id="Block_1_Computer_System"></a>Block
+
+
 
 
 
@@ -267,8 +301,8 @@ While
     <ul>
       <li>CM Block I AGC:</li>
       <ul>
-        <li><img alt="" src="block1-rope.jpg" align="right" height="100"
-            width="308">about 2 cubic feet</li>
+        <li><img alt="" src="block1-rope.jpg" width="308" height="100"
+            align="right">about 2 cubic feet</li>
         <li>about 110 pounds</li>
         <li>24,576 words of "fixed" memory (i.e., read-only memory).</li>
         <li>Controls two <a href="#DSKY">DSKY</a>s, one for the main
@@ -283,17 +317,18 @@ While
         <li>Controls one <a href="#DSKY">DSKY</a>.<br>
         </li>
       </ul>
-      <li><img alt="" src="block1-erasable.jpg" align="right"
-          height="150" width="243">Common:</li>
+      <li><img alt="" src="block1-erasable.jpg" width="243" height="150"
+          align="right">Common:</li>
       <ul>
         <li>Power:&nbsp; 180 watts active, 10 watts idle.<br>
         </li>
-        <li>Memory comprised 16-bit "words", each consisting of 15 bits
-          available for data, and 1 parity bit, all consisting of cores,
-          made of the ferromagnetic alloy called Permalloy, and sewn
+        <li>Fixed memory comprised 16-bit "words", each consisting of 15
+          bits available for data, and 1 parity bit, all consisting of
+          cores, made of the magnetic alloy called Permalloy, and sewn
           together into a "rope".<br>
         </li>
-        <li>1024 words of "erasable" memory (i.e., read-write memory).</li>
+        <li>1024 words of "erasable" memory (i.e., read-write memory),
+          based on ferrite cores.</li>
         <li>1's-complement arithmetic, plus overflow.</li>
         <li>Memory cycle time (MCT): 11.7 μs.</li>
       </ul>
@@ -327,21 +362,21 @@ While
       I LM software, so I can't comment on whether the LM Block I AGC
       requirements listed above are accurate.<br>
     </p>
-    <table summary="" cellpadding="24" cellspacing="2" align="center">
+    <table summary="" cellspacing="2" cellpadding="24" align="center">
       <tbody>
         <tr>
           <td valign="top"><a href="agc-block1-open.jpg"><img alt=""
-                src="small-agc-block1-open.jpg" border="2" height="300"
-                width="375"></a><br>
+                src="small-agc-block1-open.jpg" width="375" height="300"
+                border="2"></a><br>
           </td>
-          <td align="center" valign="top"><a
+          <td valign="top" align="center"><a
               href="agc-block1-closed.jpg"><img alt=""
-                src="small-agc-block1-closed.jpg" border="2"
-                height="300" width="375"></a><br>
+                src="small-agc-block1-closed.jpg" width="375"
+                height="300" border="2"></a><br>
           </td>
-          <td align="center" valign="top"><a href="AGC-block1-LM.jpg"><img
-                alt="" src="thm-AGC-block1-LM.jpg" border="2"
-                height="300" width="331"></a><br>
+          <td valign="top" align="center"><a href="AGC-block1-LM.jpg"><img
+                alt="" src="thm-AGC-block1-LM.jpg" width="331"
+                height="300" border="2"></a><br>
           </td>
         </tr>
       </tbody>
@@ -380,16 +415,16 @@ While
     <br>
     <div style="text-align: center;"> <a href="DSKY-BlockI-NASM.jpg"><img
           alt="Block 1 DSKY, nav bay" src="DSKY-BlockI-NASM-small.jpg"
-          border="2" height="400" width="141"></a>&nbsp;&nbsp;&nbsp; <a
+          width="141" height="400" border="2"></a>&nbsp;&nbsp;&nbsp; <a
         href="Block1ControlPanelDSKY.jpg"><img alt=""
-          src="small-Block1ControlPanelDSKY.jpg" border="2" height="400"
-          width="398"></a><br>
+          src="small-Block1ControlPanelDSKY.jpg" width="398"
+          height="400" border="2"></a><br>
     </div>
     <br>
-    <img alt="" src="EldonHallWithBlock1DSKY.jpg" align="right"
-      height="300" width="201">The left-hand picture above is a nav-bay
-    DSKY.&nbsp; On the right is a photo of a main control-panel DSKY<a
-      href="http://www.rrauction.com"></a>.<br>
+    <img alt="" src="EldonHallWithBlock1DSKY.jpg" width="201"
+      height="300" align="right">The left-hand picture above is a
+    nav-bay DSKY.&nbsp; On the right is a photo of a main control-panel
+    DSKY<a href="http://www.rrauction.com"></a>.<br>
     <br>
     And just how big were they?&nbsp; Well, in the picture to the right,
     you see Eldon Hall standing next to one of the control-panel DSKYs,
@@ -413,6 +448,8 @@ While
         <li><a href="1003563-051.html">Main DSKY</a></li>
         <li>Nav DSKY ... we don't actually have the specific top-level
           drawing for this one, but here's <a href="1003706-031.html">the
+
+
             closest match</a> in our drawing collection.<br>
         </li>
       </ul>
@@ -425,17 +462,17 @@ While
     get a larger view in which the text is actually legible.<br>
     <br>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="text-align: center;"><a
               href="Block1DSKY-drawing2.png"><img alt=""
                 src="Block1DSKY-drawing2-small.png" style="border: 2px
-                solid ; width: 237px; height: 839px;" border="0"
-                height="839" width="237"></a></td>
+                solid ; width: 237px; height: 839px;" width="237"
+                height="839" border="0"></a></td>
           <td style="text-align: center;"><img style="width: 587px;
               height: 572px;" alt="" src="Block1DSKY-drawing.png"
-              height="572" width="587"><br>
+              width="587" height="572"><br>
           </td>
         </tr>
       </tbody>
@@ -560,8 +597,8 @@ While
       other very-important "peripheral" components at all. <br>
     </p>
     <p>Nevertheless, if you want to know about them we do still have
-      quite a collection of <a href="links2.html#Block1">documents</a> and
-      engineering drawings covering the entire G&amp;N system.&nbsp;
+      quite a collection of <a href="links2.html#Block1">documents</a>
+      and engineering drawings covering the entire G&amp;N system.&nbsp;
       Here's a portal into electrical and mechanical engineering
       drawings for the flown versions of the Block I G&amp;N system:<br>
     </p>
@@ -574,6 +611,8 @@ While
     <hr style="width: 100%; height: 2px;">
     <h2><a name="Hardware_Architecture" id="Hardware_Architecture"></a>Computer
 Hardware
+
+
 
 
 
@@ -708,6 +747,8 @@ distinct
 
 
 
+
+
       positive numbers (1 through 16383), and 2<sup>14</sup>-1=16383
       distinct negative numbers (-1 through -16383).&nbsp; Zero actually
       has two distinct representations, +0 and -0, which act the same
@@ -765,6 +806,8 @@ distinct
     <p>The tricky aspect here is that when overflow exists, it is <tt>UC</tt>
       that is regarded as the "real" sign of the number, and not <tt>UC</tt>.&nbsp;
 When
+
+
 
 
 
@@ -857,6 +900,8 @@ When
 
 
 
+
+
           B14 B13 ... B1</tt>.&nbsp; Thus, the most-significant original
         bit <tt>B15</tt> is discarded, and then what's left over is
         shifted downward, wrapping the old least-significant bit into
@@ -923,6 +968,8 @@ When
         are <i>available</i> for storing the values of other registers
         during <a href="#Interrupt_Processing">interrupt processing</a>.&nbsp;
 However,
+
+
 
 
 
@@ -1155,9 +1202,13 @@ However,
 
 
 
+
+
         <i>PROGRAM</i><br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 [MD1]
+
+
 
 
 
@@ -1167,10 +1218,14 @@ However,
 
 
 
+
+
         <i>NOUN</i><br>
         [VD1]
         [VD2]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 [ND1]
+
+
 
 
 
@@ -1197,22 +1252,24 @@ However,
     fields.&nbsp; The specific mapping used is:<br>
     <br>
     <div align="center">
-      <table summary="" cellpadding="2" cellspacing="2" border="1">
+      <table summary="" cellspacing="2" cellpadding="2" border="1">
         <tbody>
           <tr>
-            <th align="center" valign="middle"> <tt>WWWW</tt><tt><br>
+            <th valign="middle" align="center"> <tt>WWWW</tt><tt><br>
               </tt></th>
-            <th align="center" valign="middle"> <tt>S</tt><tt><br>
+            <th valign="middle" align="center"> <tt>S</tt><tt><br>
               </tt></th>
-            <th align="center" valign="middle"> <tt>AAAAA</tt><tt><br>
+            <th valign="middle" align="center"> <tt>AAAAA</tt><tt><br>
               </tt></th>
-            <th align="center" valign="middle"> <tt>BBBBB</tt><tt><br>
+            <th valign="middle" align="center"> <tt>BBBBB</tt><tt><br>
               </tt></th>
           </tr>
           <tr>
             <td valign="top">017<br>
             </td>
-            <td colspan="3" rowspan="1" align="center" valign="top"> <i>(cannot
+            <td colspan="3" rowspan="1" valign="top" align="center"> <i>(cannot
+
+
 
 
 
@@ -1222,7 +1279,9 @@ However,
           <tr>
             <td valign="top">016<br>
             </td>
-            <td colspan="3" rowspan="1" align="center" valign="top"> <i>(see
+            <td colspan="3" rowspan="1" valign="top" align="center"> <i>(see
+
+
 
 
 
@@ -1231,16 +1290,20 @@ However,
           <tr>
             <td valign="top">015<br>
             </td>
-            <td colspan="3" rowspan="1" align="center" valign="top"> <i>(see
+            <td colspan="3" rowspan="1" valign="top" align="center"> <i>(see
+
+
 
 
 
                 below)</i></td>
           </tr>
           <tr>
-            <td align="center" valign="top">014<br>
+            <td valign="top" align="center">014<br>
             </td>
-            <td colspan="3" rowspan="1" align="center" valign="top"> <i>(see
+            <td colspan="3" rowspan="1" valign="top" align="center"> <i>(see
+
+
 
 
 
@@ -1248,113 +1311,113 @@ However,
             </td>
           </tr>
           <tr>
-            <td align="center" valign="middle">013<br>
+            <td valign="middle" align="center">013<br>
             </td>
-            <td align="center" valign="middle">n/a<br>
+            <td valign="middle" align="center">n/a<br>
             </td>
-            <td align="center" valign="middle">MD1<br>
+            <td valign="middle" align="center">MD1<br>
             </td>
-            <td align="center" valign="middle">MD2<br>
-            </td>
-          </tr>
-          <tr>
-            <td align="center" valign="middle">012<br>
-            </td>
-            <td align="center" valign="middle">FLASH<br>
-            </td>
-            <td align="center" valign="middle">VD1<br>
-            </td>
-            <td align="center" valign="middle">VD2<br>
+            <td valign="middle" align="center">MD2<br>
             </td>
           </tr>
           <tr>
-            <td align="center" valign="middle">011<br>
+            <td valign="middle" align="center">012<br>
             </td>
-            <td align="center" valign="middle">n/a<br>
+            <td valign="middle" align="center">FLASH<br>
             </td>
-            <td align="center" valign="middle">ND1<br>
+            <td valign="middle" align="center">VD1<br>
             </td>
-            <td align="center" valign="middle">ND2<br>
-            </td>
-          </tr>
-          <tr>
-            <td align="center" valign="middle">010<br>
-            </td>
-            <td align="center" valign="middle">UPACT<br>
-            </td>
-            <td align="center" valign="middle">n/a<br>
-            </td>
-            <td align="center" valign="middle">R1D1<br>
+            <td valign="middle" align="center">VD2<br>
             </td>
           </tr>
           <tr>
-            <td align="center" valign="middle">007<br>
+            <td valign="middle" align="center">011<br>
             </td>
-            <td align="center" valign="middle">R1S +<br>
+            <td valign="middle" align="center">n/a<br>
             </td>
-            <td align="center" valign="middle">R1D2<br>
+            <td valign="middle" align="center">ND1<br>
             </td>
-            <td align="center" valign="middle">R1D3<br>
-            </td>
-          </tr>
-          <tr>
-            <td align="center" valign="middle">006<br>
-            </td>
-            <td align="center" valign="middle">R1S -<br>
-            </td>
-            <td align="center" valign="middle">R1D4<br>
-            </td>
-            <td align="center" valign="middle">R1D5<br>
+            <td valign="middle" align="center">ND2<br>
             </td>
           </tr>
           <tr>
-            <td align="center" valign="middle">005<br>
+            <td valign="middle" align="center">010<br>
             </td>
-            <td align="center" valign="middle">R2S +<br>
+            <td valign="middle" align="center">UPACT<br>
             </td>
-            <td align="center" valign="middle">R2D1<br>
+            <td valign="middle" align="center">n/a<br>
             </td>
-            <td align="center" valign="middle">R2D2<br>
-            </td>
-          </tr>
-          <tr>
-            <td align="center" valign="middle">004<br>
-            </td>
-            <td align="center" valign="middle">R2S -<br>
-            </td>
-            <td align="center" valign="middle">R2D3<br>
-            </td>
-            <td align="center" valign="middle">R2D4<br>
+            <td valign="middle" align="center">R1D1<br>
             </td>
           </tr>
           <tr>
-            <td align="center" valign="middle">003<br>
+            <td valign="middle" align="center">007<br>
             </td>
-            <td align="center" valign="middle">n/a<br>
+            <td valign="middle" align="center">R1S +<br>
             </td>
-            <td align="center" valign="middle">R2D5<br>
+            <td valign="middle" align="center">R1D2<br>
             </td>
-            <td align="center" valign="middle">R3D1<br>
-            </td>
-          </tr>
-          <tr>
-            <td align="center" valign="middle">002<br>
-            </td>
-            <td align="center" valign="middle">R3S +<br>
-            </td>
-            <td align="center" valign="middle">R3D2<br>
-            </td>
-            <td align="center" valign="middle">R3D3<br>
+            <td valign="middle" align="center">R1D3<br>
             </td>
           </tr>
           <tr>
-            <td align="center" valign="middle">001<br>
+            <td valign="middle" align="center">006<br>
             </td>
-            <td align="center" valign="middle">R3S -<br>
+            <td valign="middle" align="center">R1S -<br>
             </td>
-            <td align="center" valign="middle">R3D4<br>
+            <td valign="middle" align="center">R1D4<br>
             </td>
-            <td align="center" valign="middle">R3D5<br>
+            <td valign="middle" align="center">R1D5<br>
+            </td>
+          </tr>
+          <tr>
+            <td valign="middle" align="center">005<br>
+            </td>
+            <td valign="middle" align="center">R2S +<br>
+            </td>
+            <td valign="middle" align="center">R2D1<br>
+            </td>
+            <td valign="middle" align="center">R2D2<br>
+            </td>
+          </tr>
+          <tr>
+            <td valign="middle" align="center">004<br>
+            </td>
+            <td valign="middle" align="center">R2S -<br>
+            </td>
+            <td valign="middle" align="center">R2D3<br>
+            </td>
+            <td valign="middle" align="center">R2D4<br>
+            </td>
+          </tr>
+          <tr>
+            <td valign="middle" align="center">003<br>
+            </td>
+            <td valign="middle" align="center">n/a<br>
+            </td>
+            <td valign="middle" align="center">R2D5<br>
+            </td>
+            <td valign="middle" align="center">R3D1<br>
+            </td>
+          </tr>
+          <tr>
+            <td valign="middle" align="center">002<br>
+            </td>
+            <td valign="middle" align="center">R3S +<br>
+            </td>
+            <td valign="middle" align="center">R3D2<br>
+            </td>
+            <td valign="middle" align="center">R3D3<br>
+            </td>
+          </tr>
+          <tr>
+            <td valign="middle" align="center">001<br>
+            </td>
+            <td valign="middle" align="center">R3S -<br>
+            </td>
+            <td valign="middle" align="center">R3D4<br>
+            </td>
+            <td valign="middle" align="center">R3D5<br>
             </td>
           </tr>
           <tr>
@@ -1389,7 +1452,7 @@ However,
     fashion of 0=0, 1=1, etc.&nbsp; Rather,<br>
     <br>
     <div align="center">
-      <table summary="" cellpadding="2" cellspacing="2" border="1">
+      <table summary="" cellspacing="2" cellpadding="2" border="1">
         <tbody>
           <tr>
             <th valign="middle"><tt>AAAAA</tt> <i>or</i> <tt>BBBBB</tt><br>
@@ -1398,69 +1461,69 @@ However,
             </th>
           </tr>
           <tr>
-            <td align="center" valign="middle">000<br>
+            <td valign="middle" align="center">000<br>
             </td>
-            <td align="center" valign="middle">blank<br>
-            </td>
-          </tr>
-          <tr>
-            <td align="center" valign="middle">025<br>
-            </td>
-            <td align="center" valign="middle">0<br>
+            <td valign="middle" align="center">blank<br>
             </td>
           </tr>
           <tr>
-            <td align="center" valign="middle">003<br>
+            <td valign="middle" align="center">025<br>
             </td>
-            <td align="center" valign="middle">1<br>
-            </td>
-          </tr>
-          <tr>
-            <td align="center" valign="middle">031<br>
-            </td>
-            <td align="center" valign="middle">2<br>
+            <td valign="middle" align="center">0<br>
             </td>
           </tr>
           <tr>
-            <td align="center" valign="middle">033<br>
+            <td valign="middle" align="center">003<br>
             </td>
-            <td align="center" valign="middle">3<br>
-            </td>
-          </tr>
-          <tr>
-            <td align="center" valign="middle">027<br>
-            </td>
-            <td align="center" valign="middle">4<br>
+            <td valign="middle" align="center">1<br>
             </td>
           </tr>
           <tr>
-            <td align="center" valign="middle">036<br>
+            <td valign="middle" align="center">031<br>
             </td>
-            <td align="center" valign="middle">5<br>
-            </td>
-          </tr>
-          <tr>
-            <td align="center" valign="middle">034<br>
-            </td>
-            <td align="center" valign="middle">6<br>
+            <td valign="middle" align="center">2<br>
             </td>
           </tr>
           <tr>
-            <td align="center" valign="middle">023<br>
+            <td valign="middle" align="center">033<br>
             </td>
-            <td align="center" valign="middle">7<br>
-            </td>
-          </tr>
-          <tr>
-            <td align="center" valign="middle">035<br>
-            </td>
-            <td align="center" valign="middle">8<br>
+            <td valign="middle" align="center">3<br>
             </td>
           </tr>
           <tr>
-            <td align="center" valign="middle">037<br>
+            <td valign="middle" align="center">027<br>
             </td>
-            <td align="center" valign="middle">9<br>
+            <td valign="middle" align="center">4<br>
+            </td>
+          </tr>
+          <tr>
+            <td valign="middle" align="center">036<br>
+            </td>
+            <td valign="middle" align="center">5<br>
+            </td>
+          </tr>
+          <tr>
+            <td valign="middle" align="center">034<br>
+            </td>
+            <td valign="middle" align="center">6<br>
+            </td>
+          </tr>
+          <tr>
+            <td valign="middle" align="center">023<br>
+            </td>
+            <td valign="middle" align="center">7<br>
+            </td>
+          </tr>
+          <tr>
+            <td valign="middle" align="center">035<br>
+            </td>
+            <td valign="middle" align="center">8<br>
+            </td>
+          </tr>
+          <tr>
+            <td valign="middle" align="center">037<br>
+            </td>
+            <td valign="middle" align="center">9<br>
             </td>
           </tr>
         </tbody>
@@ -1469,6 +1532,8 @@ However,
     </div>
     <br>
     So finally, as an example, suppose the value 027576 (<tt>WWWW</tt>=05,
+
+
 
 
 
@@ -1505,6 +1570,8 @@ and
 
 
 
+
+
       Timers</h3>
     <p>Counter/timer registers are registers in erasable memory which
       are automatically incremented or decremented by specific actions
@@ -1521,6 +1588,8 @@ and
         (i.e., <tt>AD</tt> or <tt>SU</tt>) creates <a
           href="#Overflow">positive overflow in the accumulator register</a>.&nbsp;
 Conversely,
+
+
 
 
 
@@ -1565,6 +1634,8 @@ data,
 
 
 
+
+
           as described earlier</a>.&nbsp; It is included in this section
         because it is implemented in hardware similar to a counter
         register, although the software simulation simply treats it as
@@ -1594,6 +1665,8 @@ data,
       </li>
     </ul>
     <h3><a name="Interrupt_Processing" id="Interrupt_Processing"></a>Interrupt
+
+
 
 
 
@@ -1698,6 +1771,8 @@ data,
     computer, <a
       href="assembly_language_manual.html#The_Interpreter_vs._the_CPU">as
 described
+
+
 
 
 
@@ -1911,6 +1986,8 @@ Instruction
 
 
 
+
+
       Set&nbsp;</h3>
     <p>In reading about the effects of the various "basic" instructions
       below, there are several notational conveniences that you should
@@ -1969,7 +2046,7 @@ Instruction
     </ul>
     <h4><a name="AD" id="AD"></a>AD</h4>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2038,7 +2115,7 @@ Instruction
     </table>
     <h4>CAF</h4>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2095,7 +2172,7 @@ Instruction
     </table>
     <h4>CCS</h4>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2155,7 +2232,7 @@ Instruction
             </blockquote>
             where DABS(<i>x</i>) is defined as<br>
             <blockquote>
-              <table summary="" cellpadding="2" cellspacing="2">
+              <table summary="" cellspacing="2" cellpadding="2">
                 <tbody>
                   <tr>
                     <td valign="middle">DABS(<i>x</i>) =<br>
@@ -2206,7 +2283,7 @@ Instruction
     <br>
     <h4>COM</h4>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2258,7 +2335,7 @@ Instruction
     </table>
     <h4><a name="CS" id="CS"></a>CS</h4>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2316,7 +2393,7 @@ Instruction
     </table>
     <h4>DOUBLE</h4>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2370,7 +2447,7 @@ Instruction
     </table>
     <h4>DV</h4>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2448,6 +2525,8 @@ Instruction
 
 
 
+
+
               sequences</a> defining the <tt>DV</tt> instruction, but
             R-393 does not define them, and it's impossible to know what
             they might be without following through the control-pulse
@@ -2462,6 +2541,8 @@ but
 
 
 
+
+
             does make some statements about what should happen in other
             cases<br>
             <ul>
@@ -2470,9 +2551,13 @@ but
 
 
 
+
+
                 037777 and C(<tt>Q</tt>) = -|C(<tt>K</tt>)|.</li>
               <li>If |b(<tt>A</tt>)| &gt; |C(<tt>K</tt>)|, then |C(<tt>A</tt>)|
 =
+
+
 
 
 
@@ -2490,7 +2575,7 @@ but
     </table>
     <h4>EXTEND</h4>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2557,6 +2642,8 @@ but
 
 
 
+
+
               47777</tt>", so that's what I'd suggest doing:<br>
             <br>
             <blockquote> <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -2564,9 +2651,13 @@ SETLOC&nbsp;&nbsp;
 
 
 
+
+
                 5777&nbsp; # STANDARD LOCATION FOR EXTENDING BITS</tt><tt><br>
               </tt> <tt>OPOVF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 XCADR&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -2579,9 +2670,13 @@ XCADR&nbsp;&nbsp;&nbsp;
 
 
 
+
+
                 EXTEND<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 SU
+
+
 
 
 
@@ -2599,6 +2694,8 @@ which
 
 
 
+
+
             tells the CPU that it's an <tt>SU</tt> instruction, but the
             operand is still 01234.&nbsp; All of which is, of course,
             rather convoluted, but it doesn't matter since all you have
@@ -2611,7 +2708,7 @@ which
     <br>
     <h4>INDEX</h4>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2686,7 +2783,7 @@ which
     <br>
     <h4>INHINT</h4>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2741,7 +2838,7 @@ which
     <br>
     <h4>MASK</h4>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2799,7 +2896,7 @@ which
     <br>
     <h4><a name="MP" id="MP"></a>MP</h4>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2887,7 +2984,7 @@ which
     </table>
     <h4>NOOP</h4>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2938,7 +3035,7 @@ which
     </table>
     <h4>OVIND</h4>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2996,7 +3093,7 @@ which
     <br>
     <h4>OVSK</h4>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3052,7 +3149,7 @@ which
     </table>
     <h4>RELINT</h4>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3106,7 +3203,7 @@ which
     </table>
     <h4>RESUME</h4>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3192,7 +3289,7 @@ which
     <br>
     <h4>RETURN</h4>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3241,7 +3338,7 @@ which
     <br>
     <h4>SQUARE</h4>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3303,7 +3400,7 @@ which
     </table>
     <h4>SU</h4>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3371,7 +3468,7 @@ which
     </table>
     <h4>TCAA</h4>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3419,6 +3516,8 @@ which
             <br>
             Suppose that the initial contents of the accumulator, b(<tt>A</tt>),
 is
+
+
 
 
 
@@ -3476,7 +3575,7 @@ is
     <h4><a name="TC" id="TC"></a>TC or TCR<br>
     </h4>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3558,7 +3657,7 @@ is
     <br>
     <h4><a name="TS" id="TS"></a>TS</h4>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3639,7 +3738,7 @@ is
     <br>
     <h4>XAQ</h4>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3707,7 +3806,7 @@ is
     <br>
     <h4>XCH</h4>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3821,11 +3920,15 @@ is
 
 
 
+
+
               OPERATOR<sub>1B<br>
               </sub></i></tt></i></tt> <tt><i>.<br>
           .<br>
           . &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;<br>
         </i></tt> <tt><i><tt><i><tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>MA</sub>&nbsp;
+
+
 
 
 
@@ -3843,6 +3946,8 @@ is
           </sub></i></tt> <tt><i><tt><i># Pattern 4:<br>
             </i></tt> OPERATOR</i></tt><tt><i><sub>0</sub> &nbsp; M<br>
         </i></tt> <tt><i><tt><i>OPERATOR</i></tt><tt><i><sub>1A</sub>&nbsp;
+
+
 
 
 
@@ -4006,8 +4111,8 @@ is
       sections dedicated to them that follow.&nbsp; However, a capsule
       comparison is given by the following table.&nbsp;<br>
     </p>
-    <table summary="" cellpadding="2" cellspacing="2" align="center"
-      border="1">
+    <table summary="" cellspacing="2" cellpadding="2" border="1"
+      align="center">
       <tbody>
         <tr>
           <th valign="top">Feature<br>
@@ -4033,6 +4138,8 @@ is
           <td valign="middle"><b>Design rationale</b><b><br>
             </b></td>
           <td valign="middle">Simulates <a href="#Pulse_Sequences">command-pulse
+
+
 
 
 
@@ -4109,6 +4216,8 @@ is
 
 
 
+
+
               055</a>.<br>
           </td>
         </tr>
@@ -4158,6 +4267,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/Pultorak-Simulator-1.
 
 
 
+
+
       GitHub repository</a>.<br>
     <br>
     Donna Polehn has also created <a
@@ -4184,6 +4295,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/Pultorak-Simulator-1.
     <br>
     Right now, you can find this ported code <a
 href="https://github.com/virtualagc/virtualagc/tree/master/yaAGC-Block1-Pultorak">in
+
+
 
 
 
@@ -4427,6 +4540,8 @@ our
 
 
 
+
+
         GitHub repository</a>.&nbsp; I have only worked with it in
       Linux, but I expect it should probably build in Mac OS X or
       Windows (with MinGW/Msys), as long as you have g++ and pthreads
@@ -4461,6 +4576,8 @@ our
         following it.</li>
       <li>e<i>N</i>=<i>V</i>&lt;Enter&gt; or e<i>B,O</i>=<i>V</i>&lt;Enter&gt;
 —
+
+
 
 
 
@@ -4613,6 +4730,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaUplinkBlock1">in
 
 
 
+
+
         our GitHub repository</a>. It is a simple command-line program,
       in which you can type (or feed in from a script) ASCII mnemonics
       for DSKY keys, which the program then converts to the proper
@@ -4722,13 +4841,13 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaUplinkBlock1">in
     But anyway, assuming you have started the simulation as indicated
     above, I do know enough to tell you how to do a few things with it:<br>
     <br>
-    <table summary="" cellpadding="2" cellspacing="2" border="1"
-      width="100%">
+    <table summary="" width="100%" cellspacing="2" cellpadding="2"
+      border="1">
       <tbody>
         <tr>
           <td valign="middle"><a href="block1-demo/startup.jpg"><img
                 alt="Click to enlarge" src="block1-demo/thm-startup.jpg"
-                border="2" height="200" width="198"></a><br>
+                width="198" height="200" border="2"></a><br>
           </td>
           <td valign="middle">Startup screen, immediately after starting
             simulation.<br>
@@ -4766,14 +4885,14 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaUplinkBlock1">in
             as a legitimate IMU mode.<br>
           </td>
           <td valign="middle"><a href="block1-demo/startup-nav.jpg"><img
-                alt="" src="block1-demo/thm-startup-nav.jpg" border="2"
-                height="300" width="90"></a><br>
+                alt="" src="block1-demo/thm-startup-nav.jpg" width="90"
+                height="300" border="2"></a><br>
           </td>
         </tr>
         <tr>
           <td valign="middle"><a href="block1-demo/V36E.jpg"><img
                 alt="Click to enlarge" src="block1-demo/thm-V36E.jpg"
-                border="2" height="200" width="198"></a><br>
+                width="198" height="200" border="2"></a><br>
           </td>
           <td valign="middle">V36E<br>
           </td>
@@ -4783,15 +4902,15 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaUplinkBlock1">in
             entitled, I expect.<br>
           </td>
           <td valign="middle"><a href="block1-demo/V36E-nav.jpg"><img
-                alt="" src="block1-demo/thm-V36E-nav.jpg" border="2"
-                height="300" width="90"></a><br>
+                alt="" src="block1-demo/thm-V36E-nav.jpg" width="90"
+                height="300" border="2"></a><br>
           </td>
         </tr>
         <tr>
           <td valign="middle"><a href="block1-demo/V32EV32EV32E.jpg"><img
                 alt="Click to enlarge"
-                src="block1-demo/thm-V32EV32EV32E.jpg" border="2"
-                height="200" width="198"></a><br>
+                src="block1-demo/thm-V32EV32EV32E.jpg" width="198"
+                height="200" border="2"></a><br>
           </td>
           <td valign="middle">V32EEE</td>
           <td valign="middle">I don't actually know how to get rid of
@@ -4803,13 +4922,13 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaUplinkBlock1">in
           </td>
           <td valign="middle"><a href="block1-demo/V32EV32EV32E-nav.jpg"><img
                 alt="" src="block1-demo/thm-V32EV32EV32E-nav.jpg"
-                border="2" height="300" width="90"></a><br>
+                width="90" height="300" border="2"></a><br>
           </td>
         </tr>
         <tr>
           <td valign="middle"><a href="block1-demo/thm-V31N02E.jpg"><img
                 alt="Click to enlarge" src="block1-demo/thm-V31N02E.jpg"
-                border="2" height="200" width="198"></a><br>
+                width="198" height="200" border="2"></a><br>
           </td>
           <td valign="middle">V31N02E<br>
           </td>
@@ -4844,14 +4963,14 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaUplinkBlock1">in
             </p>
           </td>
           <td valign="middle"><a href="block1-demo/V31N02E-nav.jpg"><img
-                alt="" src="block1-demo/thm-V31N02E-nav.jpg" border="2"
-                height="300" width="90"></a><br>
+                alt="" src="block1-demo/thm-V31N02E-nav.jpg" width="90"
+                height="300" border="2"></a><br>
           </td>
         </tr>
         <tr>
           <td valign="middle"><a href="block1-demo/V16N65E.jpg"><img
                 alt="Click to enlarge" src="block1-demo/thm-V16N65E.jpg"
-                border="2" height="200" width="199"></a><br>
+                width="199" height="200" border="2"></a><br>
           </td>
           <td valign="middle">V16N65E<br>
           </td>
@@ -4878,8 +4997,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaUplinkBlock1">in
             </ul>
           </td>
           <td valign="middle"><a href="block1-demo/V16N65E-nav.jpg"><img
-                alt="" src="block1-demo/thm-V16N65E-nav.jpg" border="2"
-                height="300" width="90"></a><br>
+                alt="" src="block1-demo/thm-V16N65E-nav.jpg" width="90"
+                height="300" border="2"></a><br>
           </td>
         </tr>
       </tbody>
@@ -4901,14 +5020,16 @@ Commons
 
 
 
+
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2021-09-21.<br>
+          2022-10-27.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
-              by ibiblio.org" src="hosted.png" height="100" width="300"></a><br>
+              by ibiblio.org" src="hosted.png" width="300" height="100"></a><br>
         </font></i> </center>
     <br>
   </body>
