@@ -132,9 +132,7 @@ and then once in interactive-disassembly mode, to use the command,
 
 The result of this is a new file, disassemblerAGC.disassembly, which contains a disassembly of Sundial E, but only of those portions (and using those symbols) which the disassembler has been able to deduce.  It is thus similar to Mike's disassembly, but *hopefully* complementary to it rather than entirely redundant.
 
-Alas, nothing much does come of this.  The only observation I have is this:
-
-  * At line 18584, there's a typo.  This line should have invented symbol U17,3410 (rather than U17,3430).
+I'll summarize what few results I find in a later section.
 
 One suggestion Mike had was to use Comanche 237 as a baseline rather than DAP Aurora 12.  So let's try that.  In fact, I never really thought of using a non-BLK2 baseline to analyze a BLK2 rope, so it should be a novelty!
 
@@ -228,9 +226,37 @@ Let's try it with other invented program labels for which the conclusion isn't s
     disassemblerAGC.py --pattern=U15,2016 --dbank=15 --dstart=2016 --dend=2031 --blk2 --bin <SundialE.bin >>DUMMY.flex
     disassemblerAGC.py --pattern=U15,2031 --dbank=15 --dstart=2031 --dend=2042 --blk2 --bin <SundialE.bin >>DUMMY.flex
 
-    disassemblerAGC.py --flex=DUMMY.flex --special --bin <SundialE.bin
-    disassemblerAGC.py --flex=DUMMY.flex --special <../Aurora12/Aurora12.binsource
+    disassemblerAGC.py --blk2 --flex=DUMMY.flex --special --bin <SundialE.bin
+    disassemblerAGC.py --blk2 --flex=DUMMY.flex --special <../Aurora12/Aurora12.binsource
     disassemblerAGC.py --flex=DUMMY.flex --special --bin <../Colossus237/Colossus237.bin
     disassemblerAGC.py --flex=DUMMY.flex --special --bin <../Sunburst37/Sunburst37.bin
 
 Alas, other than in Sundial E, none of these patterns are found in the other AGC versions tried.
+
+Okay, this business of writing separate `disassemblerAGC.py --pattern=...` commands like I've done above is for the birds, because there are several dozen invented labels.  I've written a one-off program, Tools/disassemblerAGC/unMike.py to convert Mike's entire manual disassembly, which I call sundiale.disagc.txt on my local computer, to a file which can be used with `disassemblerAGC.py --flex=...`.  Here's the usage:
+
+    unMike.py --blk2 <sundiale.disagc.txt >sundiale.disagc.flex
+
+Then,
+
+    disassemblerAGC.py --blk2 --flex=sundiale.disagc.flex --special --bin <SundialE.bin
+    disassemblerAGC.py --blk2 --flex=sundiale.disagc.flex --special <../Aurora12/Aurora12.binsource
+    disassemblerAGC.py --flex=sundiale.disagc.flex --special --bin <../Colossus237/Colossus237.bin
+    disassemblerAGC.py --flex=sundiale.disagc.flex --special --bin <../Sunburst37/Sunburst37.bin
+
+
+# Some Observations from the Stuff Above
+
+As of 2022-10-28:  
+
+  * At lines 17394 and 17395, I suspect that instead of `STODL UE5,1404` / `STORE UE5,1712` it should instead be:
+
+            STODL   UE5,1404
+                    UE5,1712
+
+  * At line 17432, I think, `BZMF` should be `BZF`.
+  * At line 17710, `TC` should be `TCF`.
+  * At line 18584, there's a typo.  This line should have been `U17,3410` (rather than `U17,3430`).
+  * `U15,2016` seems to be `1TO2SUB` from DAP Aurora 12, Sunburst37, and Colossus 237 with a slightly-modified calling sequence.
+  * `U15,2643` seems to be `STOREDATA` from Colossus 237.
+

@@ -68,6 +68,7 @@ symbol = "SYMBOL"
 specsFilename = ""
 findFilename = ""
 flexFilename = ""
+minFlex = 0o10
 checkFilename = ""
 skips = {}
 disjoint = True
@@ -279,6 +280,9 @@ for param in sys.argv[1:]:
                             such patterns.  Patterns can be created either
                             manually, or with the --pattern option (see
                             below).  
+                --min-flex=N  Ignore any patterns in a --flex file that are
+                            less than N (octal) words long.  The default is
+                            10 (octal, 8 decimal).
                 --pattern=S Outputs a sample pattern (which typically 
                             requiring manual tweaking) for program label S, 
                             suitable for pasting into searchSpecial.py or for
@@ -345,6 +349,8 @@ for param in sys.argv[1:]:
         findFilename = param[7:]
     elif param[:7] == "--flex=":
         flexFilename = param[7:]
+    elif param[:11] == "--min-flex=":
+        minFlex = int(param[11:], 8)
     elif param[:7] == "--prio=":
         pBanks = param[7:]
     elif param[:7] == "--skip=":

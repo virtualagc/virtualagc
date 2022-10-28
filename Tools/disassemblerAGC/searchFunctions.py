@@ -94,79 +94,38 @@ fixedFixedAddress, which is in the octal range 4000-7777 for banks 02 and 03,
 will also be -1 for banks other then 02 or 03.
 """
 
-def importFlexFile(flexFilename, searchPatterns):
+def importFlexFile(flexFilename, searchPatterns, minFlex=8):
     f = open(flexFilename, "r")
-    count = 0
-    inPatterns = False
+    exp = "{"
     for line in f:
-        line = line.strip().replace(" ", "")
-        if line[-1:] == ",":
-            line = line[:-1]
-        count += 1
-        if count == 1: # Key (symbol)
-            fields = line.split(":")
-            symbol = fields[0].replace('"', '')
-            flexDict = {
-                "dataWords": 0,
-                "noReturn": False,
-                "pattern": [],
-                "ranges": []
-                }
-        elif count == 2: # dataWords
-            fields = line.split(":")
-            dataWords = int(fields[1].replace(",", ""))
-            flexDict["dataWords"] = dataWords
-        elif count == 3: # noReturn
-            fields = line.split(":")
-            noReturn = (fields[1] == "True,")
-            flexDict["noReturn"] = noReturn
-        elif count == 4: # pattern
-            inPatterns = True
-        elif inPatterns: # lines of the pattern
-            if line == "]": # End of the pattern?
-                inPatterns = False
-                continue
-            if "True" in line:
-                required = True
-                line = line[6:]
-            else:
-                required = False
-                line = line[7:]
-            fields = line.split("],[")
-            fields[0] = fields[0].replace("[", "").replace("]", "")
-            fields[1] = fields[1].replace("[", "").replace("]", "")
-            opcodeFields = fields[0].split('","')
-            operandFields = fields[1].split('","')
-            for i in range(len(opcodeFields)):
-                opcodeFields[i] = \
-                    opcodeFields[i].replace('"', '').replace(",", "")
-            for i in range(len(operandFields)):
-                operandFields[i] = \
-                    operandFields[i].replace('"', '').replace(",", "")
-            if opcodeFields == ['']:
-                opcodeFields = []
-            if operandFields == ['']:
-                operandFields = []
-            flexDict["pattern"].append([required, opcodeFields, operandFields])
-        elif line == "}]":
-            searchPatterns[symbol] = [flexDict]
-            count = 0
-            inPatterns = False
-        else: # ranges
-            fields = line.split(":")
-            fields = fields[1].split("],[")
-            for field in fields:
-                field = field.replace("[", "").replace("]", "")
-                if field == "":
-                    continue
-                else:
-                    rangeFields = field.split(",")
-                    for i in range(len(rangeFields)):
-                        if "0o" == rangeFields[i][:2]:
-                            rangeFields[i] = rangeFields[i][2:]
-                        rangeFields[i] = int(rangeFields[i], 8)
-                    flexDict["ranges"].append(rangeFields)
+        exp += " " + line.strip()
     f.close()
+    exp += "}"
+    temp = eval(exp)
+    willDelete = []
+    for symbol in temp:
+        for entry in temp[symbol]:
+            #print(entry, file=sys.stderr)
+            if len(entry["pattern"]) < minFlex:
+                if symbol not in willDelete:
+                    willDelete.append(symbol)
+    for symbol in willDelete:
+        print("Flex pattern for %s is too short, removing it." % symbol, file=sys.stderr)
+        temp.pop(symbol)
+    searchPatterns.update(temp)
+    '''
+    for symbol in ["U16,3740"]: #searchPatterns:
+        print(symbol)
+        for pattern in searchPatterns[symbol]:
+            for key in pattern:
+                if key == "pattern":
+                    print("pattern = [")
+                    for i in pattern[key]:
+                        print("\t", i)
+                    print("]")
+                else:
+                    print(key, "=", pattern[key])
+    '''
 
 # Search for all of the special patterns, a la those in 
 # searchSpecial.py and searchSpecialBlockI.py.  The 
@@ -233,13 +192,13 @@ def searchSpecial(core, searchPatterns, disassembleBasic,
                     lastOffset = -1
                     if symbol == "no":
                         print("------------------")
+                    
+                    test = False
+                    if False and bank == 0o16 and testOffset == 0o3740 - 0o2000 and \
+                            symbol == "U%02o,%04o" % (bank, testOffset + 0o2000):
+                        test = True
+                            
                     while offset < endingOffset and iPat < len(pattern):
-                        test = False
-
-                        if False and bank == 0o15 and testOffset == 0o2330 - 0o2000 and \
-                                symbol == "U%02o,%04o" % (bank, testOffset + 0o2000):
-                            test = True
-                                
                         if basic:
                             # We need to disassemble the instruction at the current
                             # offset, but we don't need to do that if the offset
@@ -252,11 +211,8 @@ def searchSpecial(core, searchPatterns, disassembleBasic,
                                     disassembleBasic(core[bank][offset], extended)
                             if test:
                                 print("U%02o,%04o: basic=%r, opcode=%s, operand=%s" % \
-                                        (bank, offset, basic, opcode, operand), 
+                                        (bank, offset+0o2000, basic, opcode, operand), 
                                         file=sys.stderr)
-                            if symbol == "no":
-                                print("%02o %04o %04o %s %s %r" % (bank, testOffset, 
-                                    offset, opcode, operand, extended))
                             lastOffset = offset
                             required = pattern[iPat][0]
                             desiredOpcodes = pattern[iPat][1]
@@ -289,7 +245,7 @@ def searchSpecial(core, searchPatterns, disassembleBasic,
                                 right = d[1]
                                 if test:
                                     print("U%02o,%04o: basic=%r, left=%s, right=%s" % \
-                                            (bank, offset, basic, left, right), 
+                                            (bank, offset+0o2000, basic, left, right), 
                                             file=sys.stderr)
                                 if right == "":
                                     right = d[2]

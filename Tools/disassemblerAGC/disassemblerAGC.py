@@ -109,7 +109,7 @@ from searchFunctions import importFlexFile, searchSpecial, specialSubroutines
 # command-line switch, and append them to the searchPatterns dictionary
 # above prior to searching for the special subroutines.
 if cli.flexFilename != "":
-    importFlexFile(cli.flexFilename, searchPatterns)
+    importFlexFile(cli.flexFilename, searchPatterns, cli.minFlex)
 
 #=============================================================================
 # Read the input file.

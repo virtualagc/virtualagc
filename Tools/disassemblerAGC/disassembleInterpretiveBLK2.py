@@ -6,6 +6,7 @@ Copyright:      None - the author (Ron Burkey) declares this software to
 Filename:       disassemblerInterpretiveBLK2.py
 Purpose:        Disassemble a word from an interpretive location.
 History:        2022-10-18 RSB  Forked from disassemblerInterpretive.py.
+                2022-10-28 RSB  Fixed bug in STORE/STCALL/STODL/STOVL.
 """
 
 # Disassemble a word for an interpretive location. 
@@ -318,14 +319,14 @@ def disassembleInterpretive(core, bank, offset, state):
     if stadr or sword & 0o40000 == 0:
         stadr = False
         left = "??????"
-        storeType = 0o70000 & sword
-        if storeType == 0o30000:
+        storeType = 0o36000 & sword
+        if storeType == 0o36000:
             left = "STCALL"
-        elif storeType == 0o10000:
+        elif storeType in [0o06000, 0o12000, 0o16000]:
             left = "STODL"
-        elif storeType == 0o00000:
+        elif storeType in [0o00000, 0o04000]:
             left = "STORE"
-        elif storeType == 0o20000:
+        elif storeType in [0o20000, 0o22000]:
             left = "STOVL"
         if left == "??????":
             disassembly.append((left, "", ""))
