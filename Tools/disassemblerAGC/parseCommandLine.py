@@ -282,13 +282,14 @@ for param in sys.argv[1:]:
                 --pattern=S Outputs a sample pattern (which typically 
                             requiring manual tweaking) for program label S, 
                             suitable for pasting into searchSpecial.py or for
-                            use with the --flex option (see above). Only 
-                            patterns consisting entirely of basic
-                            instructions (rather than interpretive) are 
-                            currently supported.
+                            use with the --flex option (see above). Note that
+                            search flexibility for interpretive code is 
+                            somewhat reduced vs basic code.
                 --dbank=N   (For --pattern.) Bank number is N (octal).
                 --dstart=N  (For --pattern.) Starting offset is N (octal.
-                --dend==N   (For --pattern.) First address not assembled.    
+                --dend=N    (For --pattern.) First address not included. 
+                --dint      (For --pattern.) Starting offset is interpretive
+                            vs the default (basic). 
         ''')
         sys.exit(0)
     elif param == "--bin":

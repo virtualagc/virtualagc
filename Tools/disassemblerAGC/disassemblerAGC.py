@@ -184,7 +184,8 @@ if cli.checkFilename != "":
 # Search for special symbols like INTPRET, BANKCALL, ....  Their addresses
 # will be stored as specialSubroutines["INTPRET"] (and so on).
 
-searchSpecial(core, searchPatterns, disassembleBasic)
+searchSpecial(core, searchPatterns, disassembleBasic, 
+                disassembleInterpretive, interpretiveStart, bankListBin)
 
 if cli.intpret != -1:
     INTPRET = cli.intpret
@@ -546,7 +547,7 @@ if cli.pattern:
     def printPattern(core, erasable, iochannels,
                      occasion, bank, address, opcode, operand):
         operandString = '"' + operand + '"'
-        if len(operand) == 4 and operand.isdigit():
+        if len(operand) > 2 and operand.isdigit():
             operandString = ''
         print(indent + '        [True, ["%s"], [%s]],' % \
               (opcode, operandString))
@@ -555,13 +556,13 @@ if cli.pattern:
     print('    "%s": [{' % cli.symbol)
     print(indent + '    "dataWords": 0,')
     print(indent + '    "noReturn": False,')
+    print(indent + '    "basic": %r,' % cli.dbasic)
     print(indent + '    "pattern": [')
     disassembleRange(core, erasable, iochannels, 
                      cli.dbank, cli.dstart, cli.dend, printPattern, 
                      cli.dbasic)
     print(indent + '     ],')
-    print(indent + '    "ranges": [[0o%02o, 0o0000, 0o%04o]]' \
-                        % (cli.dbank, sizeCoreBank))
+    print(indent + '    "ranges": []')
     print(indent + '}],')
     sys.exit(0)
 

@@ -207,7 +207,7 @@ Though we actualy don't need to see it, since it's safely stored in the file DUM
                         [True, ["TS"], []],
                         [True, ["TCF"], []],
                      ],
-                    "ranges": [[0o04, 0o0000, 0o2000]]
+                    "ranges": []
                 }],
 
 Now let's try to actually find this file in the rope for some AGC software version.  To get our feet wet, start with somewhere we should be certain of finding it, namely in SundialE itself:

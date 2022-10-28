@@ -157,21 +157,27 @@ def importFlexFile(flexFilename, searchPatterns):
             fields = fields[1].split("],[")
             for field in fields:
                 field = field.replace("[", "").replace("]", "")
-                rangeFields = field.split(",")
-                for i in range(len(rangeFields)):
-                    if "0o" == rangeFields[i][:2]:
-                        rangeFields[i] = rangeFields[i][2:]
-                    rangeFields[i] = int(rangeFields[i], 8)
-                flexDict["ranges"].append(rangeFields)
+                if field == "":
+                    continue
+                else:
+                    rangeFields = field.split(",")
+                    for i in range(len(rangeFields)):
+                        if "0o" == rangeFields[i][:2]:
+                            rangeFields[i] = rangeFields[i][2:]
+                        rangeFields[i] = int(rangeFields[i], 8)
+                    flexDict["ranges"].append(rangeFields)
     f.close()
 
 # Search for all of the special patterns, a la those in 
 # searchSpecial.py and searchSpecialBlockI.py.  The 
 # disassembleBasic parameter is the name of the disassembler
 # function to be used.
+import sys
 specialSubroutines = {}
-def searchSpecial(core, searchPatterns, disassembleBasic):
+def searchSpecial(core, searchPatterns, disassembleBasic, 
+                    disassembleInterpretive, interpretiveStart, bankList):
     global specialSubroutines
+    INTPRET = "no"
     for symbol in searchPatterns:
         specialSubroutines[symbol] = (-1, -1, -1, {}, symbol, 0) # Mark as not found.
         found = False
@@ -179,7 +185,16 @@ def searchSpecial(core, searchPatterns, disassembleBasic):
             if found:
                 break
             pattern = searchPattern["pattern"]
-            for searchRange in searchPattern["ranges"]:
+            ranges = searchPattern["ranges"]
+            if "basic" not in searchPattern:
+                startBasic = True
+            else:
+                startBasic = searchPattern["basic"]
+            if len(ranges) == 0:
+                ranges = []
+                for bank in bankList:
+                    ranges.append([bank, 0o0000, 0o2000])
+            for searchRange in ranges:
                 if symbol == "no":
                     print(symbol)
                     print(pattern)
@@ -202,6 +217,9 @@ def searchSpecial(core, searchPatterns, disassembleBasic):
                 for testOffset in range(startingOffset, endingOffset):
                     if found:
                         break
+                    basic = startBasic
+                    if not basic:
+                        state = interpretiveStart()
                     iPat = 0 # Index into the pattern.
                     # Optional opcodes at the beginning of the pattern
                     # we can ignore for now, because they don't affect
@@ -216,31 +234,76 @@ def searchSpecial(core, searchPatterns, disassembleBasic):
                     if symbol == "no":
                         print("------------------")
                     while offset < endingOffset and iPat < len(pattern):
-                        # We need to disassemble the instruction at the current
-                        # offset, but we don't need to do that if the offset
-                        # hasn't changed since the last time we disassembled.  
-                        # More importantly, we must *not* do so, because the 
-                        # value of 'extended' may change if we do, and a 2nd
-                        # disassembly may therefore not be correct.
-                        if offset != lastOffset:
-                            opcode, operand, extended = \
-                                disassembleBasic(core[bank][offset], extended)
-                        if symbol == "no":
-                            print("%02o %04o %04o %s %s %r" % (bank, testOffset, 
-                                offset, opcode, operand, extended))
-                        lastOffset = offset
-                        required = pattern[iPat][0]
-                        desiredOpcodes = pattern[iPat][1]
-                        desiredOperands = pattern[iPat][2]
-                        if len(desiredOpcodes) == 0 or opcode in desiredOpcodes:
-                            if len(desiredOperands) == 0 \
-                                    or operand in desiredOperands:
-                                iPat += 1
-                                offset += 1
-                                continue
-                        if required:
-                            break
-                        iPat += 1 # Note: offset does not increment.
+                        test = False
+
+                        if False and bank == 0o15 and testOffset == 0o2330 - 0o2000 and \
+                                symbol == "U%02o,%04o" % (bank, testOffset + 0o2000):
+                            test = True
+                                
+                        if basic:
+                            # We need to disassemble the instruction at the current
+                            # offset, but we don't need to do that if the offset
+                            # hasn't changed since the last time we disassembled.  
+                            # More importantly, we must *not* do so, because the 
+                            # value of 'extended' may change if we do, and a 2nd
+                            # disassembly may therefore not be correct.
+                            if offset != lastOffset:
+                                opcode, operand, extended = \
+                                    disassembleBasic(core[bank][offset], extended)
+                            if test:
+                                print("U%02o,%04o: basic=%r, opcode=%s, operand=%s" % \
+                                        (bank, offset, basic, opcode, operand), 
+                                        file=sys.stderr)
+                            if symbol == "no":
+                                print("%02o %04o %04o %s %s %r" % (bank, testOffset, 
+                                    offset, opcode, operand, extended))
+                            lastOffset = offset
+                            required = pattern[iPat][0]
+                            desiredOpcodes = pattern[iPat][1]
+                            desiredOperands = pattern[iPat][2]
+                            if len(desiredOpcodes) == 0 or opcode in desiredOpcodes:
+                                if len(desiredOperands) == 0 \
+                                        or operand in desiredOperands:
+                                    iPat += 1
+                                    offset += 1
+                                    if operand == INTPRET:
+                                        operand = "INTPRET"
+                                    if opcode == "TC" and operand == "INTPRET":
+                                        basic = False
+                                        state = interpretiveStart()
+                                    continue
+                            if required:
+                                break
+                            iPat += 1 # Note: offset does not increment.
+                        else: # interpretive.
+                            # For interpretive code, we can't really handle 
+                            # too many alternatives because of the fact
+                            # that only complete "equations" (or "strings")
+                            # of lines can be meaningfully disassembled,
+                            # as opposed to individual words.
+                            disassembly, basic = \
+                                disassembleInterpretive(core, bank, offset, state)
+                            match = True
+                            for d in disassembly:
+                                left = d[0]
+                                right = d[1]
+                                if test:
+                                    print("U%02o,%04o: basic=%r, left=%s, right=%s" % \
+                                            (bank, offset, basic, left, right), 
+                                            file=sys.stderr)
+                                if right == "":
+                                    right = d[2]
+                                desiredLeft = pattern[iPat][1]
+                                desiredRight = pattern[iPat][2]
+                                if len(desiredLeft) == 0 or left in desiredLeft:
+                                    if len(desiredRight) == 0 or right in desiredRight:
+                                        iPat += 1
+                                        offset += 1
+                                        continue
+                                match = False
+                                break
+                            if not match:
+                                break
                     if iPat >= len(pattern):
                         # At this point, we know that the pattern has been
                         # found at bank,testOffset.  However, if there were
@@ -254,6 +317,8 @@ def searchSpecial(core, searchPatterns, disassembleBasic):
                                                       fixedFixed, searchPattern,
                                                       symbol, 
                                                       searchPattern["dataWords"])
+                        if symbol == "INTPRET":
+                            INTPRET = "%04o" % fixedFixed
                         iPat = 0
                         while not pattern[iPat][0]: 
                             iPat += 1
