@@ -158,6 +158,7 @@
  *                              know, but it shouldn't hurt anything.
  *              2022-08-07 RSB  Expanded the extra line to 'simulate' to include detection
  *                              of the .tcl program it might be running.
+ *              2022-10-28 RSB  Added LM131R1.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -280,9 +281,12 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
             { "LUMINARY 130 (LM)", "Luminary130/MAIN.agc.html",
                 "Click this to select Luminary 130, a preliminary revision of the Apollo 13 LM software.",
                 ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary130", "LM.ini" },
-            { "Apollo 13 Lunar Module", "Luminary131/MAIN.agc.html",
-                "Click this to select the LM for the Apollo 13 mission, running software LUMINARY 131.",
+            { "LUMINARY 131 (LM)", "Luminary131/MAIN.agc.html",
+                "Click this to select Luminary 131, a preliminary revision of the Apollo 13 LM software",
                 ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary131", "LM.ini" },
+            { "Apollo 13 Lunar Module", "LM131R1/MAIN.agc.html",
+                "Click this to select the LM for the Apollo 13 mission, running software LM131R1.",
+                ENABLED, LM, BLOCK2, PERIPHERALS, "LM131R1", "LM.ini" },
             { "Apollo 14 Command Module", "",
                 "Click this to select the CM for the Apollo 14 mission.",
                 DISABLED, CM, BLOCK2, PERIPHERALS, "", "CM.ini" },
@@ -771,6 +775,7 @@ EVT_RADIOBUTTON(ID_APOLLO12LMBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_APOLLO13CMBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_LUMINARY130BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_LUMINARY131BUTTON, VirtualAGC::ConsistencyEvent)
+EVT_RADIOBUTTON(ID_LM131R1BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_APOLLO14CMBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_LUMINARY163BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_LUMINARY173BUTTON, VirtualAGC::ConsistencyEvent)
@@ -2368,7 +2373,7 @@ VirtualAGC::EnableCpumon(bool YesNo)
 void
 VirtualAGC::SetDefaultConfiguration(void)
 {
-  missionRadioButtons[ID_LUMINARY131BUTTON - ID_FIRSTMISSION]->SetValue(true);
+  missionRadioButtons[ID_LUMINARY99BUTTON - ID_FIRSTMISSION]->SetValue(true);
   if (DropDown) // 2022-07-17.
     {
       DeviceAGCversionDropDownList->SetSelection(0);
@@ -2626,7 +2631,7 @@ VirtualAGC::FormLmsIni(void)
               L"RCS_Thrust_N                  445.0\n"
               L"RCS_Specific_Impulse_MS       2840.0\n"));
         }
-      else if (missionRadioButtons[ID_LUMINARY131BUTTON - ID_FIRSTMISSION]->GetValue())
+      else if (missionRadioButtons[ID_LM131R1BUTTON - ID_FIRSTMISSION]->GetValue())
         {
           // These are the numbers for LM 7 --- must correct or fix.
           Fout.Write(wxT("LM_Weight_Ascent_KG           4670.0\n"

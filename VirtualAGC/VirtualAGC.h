@@ -60,6 +60,7 @@
  *          	                window covering up all the other stuff at the
  *          	                center of the screen that I've moved it to
  *          	                the upper left.
+ *              2022-10-28 RSB  Added LM131R1.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and any ability to
@@ -156,6 +157,7 @@ enum
   ID_APOLLO13CMBUTTON,
   ID_LUMINARY130BUTTON,
   ID_LUMINARY131BUTTON,
+  ID_LM131R1BUTTON,
   ID_APOLLO14CMBUTTON,
   ID_LUMINARY163BUTTON,
   ID_LUMINARY173BUTTON,

@@ -239,7 +239,7 @@
 # 	"make FORCE_clang=yes FORCE_cc=/usr/bin/clang-3.9 FORCE_CC=/usr/bin/clang++-3.9".
 
 # NVER is the overall version code for the release.
-NVER:=\\\"2022-07-17\\\"
+NVER:=\\\"2022-10-29\\\"
 DATE:=`date +%Y%m%d`
 
 # DON'T CHANGE THE FOLLOWING SWITCH *********************************
@@ -470,7 +470,7 @@ MISSIONS += Retread50 SundialE LUM69R2 Luminary097 Luminary098
 MISSIONS += Comanche051 Artemis071 Luminary178 Luminary163 Luminary173
 MISSIONS += SundanceXXX Sundance306ish Comanche044 Comanche045 Manche45R2
 # MISSIONS += LUM99R2
-MISSIONS += Luminary096
+MISSIONS += Luminary096 LM131R1
 # ifndef MACOSX
 MISSIONS += Solarium055 TRIVIUM TRIVIUM-repaired
 # endif
