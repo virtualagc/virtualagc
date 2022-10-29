@@ -200,6 +200,7 @@
 #				with Ubuntu running under WSL on Windows.
 #				Also, adds a prominent warning if Tcl/Tk is not
 #				found.
+#		2022-10-29 RSB	Added LM131R1, Sunrise45, Sunrise69.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -470,7 +471,7 @@ MISSIONS += Retread50 SundialE LUM69R2 Luminary097 Luminary098
 MISSIONS += Comanche051 Artemis071 Luminary178 Luminary163 Luminary173
 MISSIONS += SundanceXXX Sundance306ish Comanche044 Comanche045 Manche45R2
 # MISSIONS += LUM99R2
-MISSIONS += Luminary096 LM131R1
+MISSIONS += Luminary096 LM131R1 Sunrise45 Sunrise69
 # ifndef MACOSX
 MISSIONS += Solarium055 TRIVIUM TRIVIUM-repaired
 # endif

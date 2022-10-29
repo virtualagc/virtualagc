@@ -60,7 +60,7 @@
  *          	                window covering up all the other stuff at the
  *          	                center of the screen that I've moved it to
  *          	                the upper left.
- *              2022-10-28 RSB  Added LM131R1.
+ *              2022-10-28 RSB  Added LM131R1, SUNRISE45, and SUNRISE69.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and any ability to
@@ -168,6 +168,8 @@ enum
   ID_SKYLABCMBUTTON,
   ID_SOYUZCMBUTTON,
   ID_VALIDATIONBUTTON,
+  ID_SUNRISE45BUTTON,
+  ID_SUNRISE69BUTTON,
   ID_RETREAD44BUTTON,
   ID_RETREAD50BUTTON,
   ID_AURORA12BUTTON,
