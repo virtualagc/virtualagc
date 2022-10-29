@@ -148,15 +148,15 @@ Software:  Sunrise 38, 45, 69
 
 Flaws:  None known.
 
-## 1003133-20-BlockI-Sunrise45+-B28-BadStrand7_BrokenCore167.bin
+## 1003133-20-BlockI-Sunrise45+-B28-BadStrand7_BrokenCore167.bin, 1003133-20-BlockI-Sunrise45+-B28-Repaired.bin
 
 Source:  An anonymous collector.
 
 Software:  Sunrise 45, 69
 
-Flaws:
+Flaws in the raw dump, due to a defective module:
 
-  * Bad Strand 7 (Stuck Bit 7, last quarter of banks 21 and 24):  As described earlier, stuck bits can be corrected with a parity-based fix.  The parity-based fix has not been applied in this raw dump, however.
+  * Bad Strand 7 (Stuck Bit 7, last quarter of banks 21 and 24):  As described earlier, stuck bits can be corrected with a parity-based fix.  
   * Broken Core 167:  The physical construction of a fixed-memory core rope involves the fact that whether or not data is read as a 0 or a 1 from a specific core depends on whether the wire for reading the data is threaded through the core (which is shaped like a tiny doughnut) or else passes around it.  64 wires are used for any given core &mdash; limited by the thickness of the wire and the size of the hole &mdash; so a broken core affects many locations at similar addresses but perhaps different memory banks.  In the case of core 167, data from the following addresses is lost and the indicated software sections are probably affected:
       * 04,6167: EXECUTIVE
       * 04,6567: PROGRESS CONTROL
@@ -166,6 +166,126 @@ Flaws:
       * 24,6567: PINBALL
       * 24,7167: PINBALL
       * 24,7567: PINBALL (this location is also affected by the bad bit 7).
+
+### Repairs to 1003133-20
+
+Since [the fix for stuck bits has already been described in some detail](#Stuck), I won't discuss that here.  As far as the 8 words affected by the defective core 167, there are tentative fixes which I'll describe here ... though I'm basically cut-and-pasting from Mike's description of his thinking.  I describe the fixes as "tentative" because the Sunrise software precedes the inclusion of memory-bank checksums ("banksums"), and hence we don't have any way to directly double-check these fixes.  In other words, perhaps the repaired dump for this module might need to be updated at some point in the future.
+
+By the way, heavy reliance is made on the hopefully-similar code from Solarium 55.  That's because Sunrise and Solarium are both software for the Block I AGC, and are the only samples of Block I code as of this writing.
+
+**Fix for 04,6167**: This one is very easy because it's in the middle of `CHANJOB` in EXECUTIVE, which is unchanged from Solarium.
+
+    04,6163  50122 0          TS     PUSHLOC
+    04,6164  74605 1          MASK   LOW10
+    04,6165  30122 0          XCH    PUSHLOC
+    04,6166  40000 0          COM
+    04,6167  00000 0          OCT    0000      ; Should be 60122 0 for AD PUSHLOC
+    04,6170  50060 1          TS     BANKSET
+    04,6171  40120 0          CS     ADRLOC
+
+**Fix for 04,6567**: This was by far the hardest one. It's in a section called PROGRESS CONTROL, which we have no other surviving examples of. Luckily the [AGC Information Series issue #16 (by Raytheon Corporation)](https://www.ibiblio.org/apollo/Documents/agcis_16_fresh_start.pdf#page=9) has a pretty detailed flowchart and even more detailed text descriptions. After trying to match code flow to the flowcharts, I eventually narrowed in on the bad word 04,6567 as the very first instruction of `PHASWT3`. Apparently this code path is never exercised in Sunrise, but nevertheless AGCIS #16 provides the following information about it:
+
+    At this location, program control is transferred to Routine `PHASWT3` which *immediately* passes control on to Routine `ONSKIP`. [emphasis ours]
+
+As luck would have it, `ONSKIP` is widely referenced in PROGRESS CONTROL and the AGCIS describes it in excruciating detail ("Initially, Routine `ONSKIP` places the complement of the octal quantity 00037 (77740) into the accumulator. Then the content of register `PHASE`, the old phase code, is added to the accumulator and the sum is tested"). And sure enough, our `PHASWT3` that starts with the bad word does not appear to call `ONSKIP` anywhere &mdash; certainly not immediately. So therefore, presumably, the missing word at the very beginning must be a call to `ONSKIP`.
+
+    04,6564  02516 1          TC     BANKCALL
+    04,6565  42001 0          CADR   DSPMM
+    04,6566  02276 0          TC     PHASEOUT
+    04,6567  00000 0 PHASWT3  OCT    0000      ; Should be 06701 1 for TC ONSKIP
+    04,6570  02272 1          TC     PHASOUT2
+    04,6571  35500 1          CAF    ZERO
+    04,6572  06651 0          TC     SETPHASE
+    04,6573  34516 1          CAF    ONE
+    04,6574  50034 0 PHASWT5  TS     OVCTR
+
+**Fix for 04,7167**: I was afraid of this one at first but it turned out to be easy. This is in `DSPOFF` in FRESH START, where a whole slew of erasables are initialized to 0. It turns out that [AGCS #16 also lists every erasable initialized here](http://www.ibiblio.org/apollo/Documents/agcis_16_fresh_start.pdf#page=41), in the order they're initialized. And [the AGCIS #15 errata has a listing at the end mapping erasable addresses to names](http://www.ibiblio.org/apollo/Documents/agcis_15_errata.pdf#page=49). So:
+
+![DSPLOCK](DSPLOCK.png)
+
+    04,7165  50624 1          TS     REQRET
+    04,7166  50646 0          TS     CLPASS
+    04,7167  00202 0          OCT    0202      ; Should be 50623 0 for TS DSPLOCK
+    04,7170  50636 1          TS     MONSAVE
+    04,7171  50637 0          TS     MONSAVE1
+    04,7172  50641 1          TS     GRABLOCK
+
+**Fix for 04,7567**: Freebie! This one is unwired anyways so it remains 00000 0.
+
+**Fix for 24,6167**: This is in or around `ENDECOM` in PINBALL. This code was pretty heavily refactored between Sunrise and Solarium, and the relevant AGCIS issue is incomplete, so we have to use context clues.
+
+Solarium has:
+
+    ENDECOM         XCH     MPAC +2
+                    INDEX   INREL
+                    TS      XREGLP -2
+                    XCH     MPAC +1
+                    INDEX   INREL
+                    TS      VERBREG
+                    TC      ENDALL
+    MORNUM          CCS     DSPCOUNT        # DECREMENT DSPCOUNT
+                    TS      DSPCOUNT
+                    TC      ENDOFJOB
+
+Note that `XREGLP -2` and `VERBREG` are both indexed by `INREL` here. Presumably the same must be true in Sunrise, despite code reordering. So:
+
+    24,6164  40115 0          CS     MPAC +1
+    24,6165  50115 1          TS     MPAC +1
+    24,6166  40114 1          CS     MPAC
+    24,6167  00000 0 ENDECOM  OCT    0000      ; Should be 20075 1 for INDEX INREL
+    24,6170  50612 1          TS     VERBREG
+    24,6171  30115 1          XCH    MPAC +1
+    24,6172  20075 1          INDEX  INREL
+    24,6173  50615 0          TS     XREGLP -2
+    24,6174  06152 1          TC     ENDALL
+    24,6175  10625 1 MORNUM   CCS    DSPCOUNT
+    24,6176  50625 0          TS     DSPCOUNT
+    24,6177  02115 0          TC     ENDOFJOB
+
+**Fix for 24,6567**: Very easy. This is the first element of table `SINBLANK`, which presumably did not change since the other elements all match.
+
+    24,6565  50625 0          TS     DSPCOUNT
+    24,6566  00105 0          TC     WDRET
+    24,6567  00000 0 SINBLANK OCT    0000      ; Should be 00016 0 for OCT 16.
+    24,6570  00005 1          OCT    5
+    24,6571  00004 0          OCT    4
+    24,6572  00015 0 DOUBLK   OCT    15
+    24,6573  00011 1          OCT    11
+    24,6574  00003 1          OCT    3
+
+**Fix for 24,7167**: This is in `TRACE1S` in PINBALL. This code is unchanged from Solarium, so:
+
+    24,7162  50103 0 TRACE1S  TS     COUNT
+    24,7163  10000 0          CCS    A
+    24,7164  50625 0          TS     DSPCOUNT
+    24,7165  07220 0          TC     DSPIN
+    24,7166  10075 1          CCS    WDCNT
+    24,7167  00000 0          OCT    0000      ; Should be 07146 0 for TC DSPDCWD1.
+    24,7170  42775 1          CS     VD1
+    24,7171  50625 0          TS     DSPCOUNT
+    24,7172  00105 0          TC     WDRET
+    24,7173  02476 0 DECROUND OCT    02476
+
+**Fix for 24,7567**: This is in `NVSUBSY1` in PINBALL, which again does not appear to have changed.
+
+    24,7557  50113 1 NVSUBSY1 TS     CADRTEM
+    24,7560  10623 1          CCS    DSPLOCK
+    24,7561  07564 1          TC     +3
+    24,7562  30113 1          XCH    CADRTEM
+    24,7563  02566 0          TC     BANKJUMP
+    24,7564  35502 0          CAF    TWO
+    24,7565  50641 1          TS     GRABLOCK
+    24,7566  30113 1          XCH    CADRTEM
+    24,7567  00000 0          OCT    0000      ; Should be 30651 0 for XCH DSPLIST +2.
+    24,7570  30650 1          XCH    DSPLIST +1
+    24,7571  30647 1          XCH    DSPLIST
+    24,7572  10000 0          CCS    A
+
+**Test of the repairs**:  As I mentioned above, we don't have any good way to cross-check these conclusions directly, though they seem pretty straightforward.  An *indirect* cross-check is to note that with these fixes in place, we in fact have a complete set of modules (B28, B29, B21, and B22) for Sunrise 69.  The complete executable can thus be formed by concatenating these four dumps.  Moreover, we have a Block I AGC emulator program (**yaAGCb1**) as well as a Block I DSKY emulator program (**yaDSKYb1**).  Combining all of these things, we can in fact run the repaired Sunrise 69 executable.  Here's an animated GIF showing the program in operation without apparent issues.  (Whether it shows up as animated or not in this README is another question.  It may be necessary to download it in order to see it do something.)
+
+![sunrise](sunrise.gif)
+
+But admittedly, this brief test probably does not exercise all of the repaired memory locations, so a more-intensive validation would be desired.
 
 ## 1003733-071-BlockI-Sunrise69-B22-BadBit2.bin, 1003733-071-BlockI-Sunrise69-B22-Repaired.bin
 
