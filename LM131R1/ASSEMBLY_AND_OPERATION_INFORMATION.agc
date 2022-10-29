@@ -16,7 +16,8 @@
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Mod history: 2022-10-28 MAS  Created from Luminary 131.
+## Mod history: 2022-10-28 MAS  Created from Luminary 131 and added a line
+##                              for alarm code 1466.
 
 ## Page 1
 
@@ -972,6 +973,8 @@
 #		VECTOR.)					S40.8
 # 01410		UNINTENTIONAL OVERFLOW IN GUIDANCE		DESCENT GUIDANCE EQS.
 # 01412		DESCENT IGNALG NOT CONVERGING			P63
+## The following alarm code was added in LM131 rev 1.
+# 01466		INSUF. THROTTLINGS BETWEEN SKIPPED THROTS	P66
 # 01520		V37 REQUEST NOT PERMITTED AT THIS TIME		V37
 # 01600		OVERFLOW IN DRIFT TEST				IMU 4
 # 01601		BAD IMU TORQUE					OPT PRE ALIGN CALIB
