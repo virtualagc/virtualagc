@@ -2,22 +2,21 @@
 ## Copyright:   Public domain.
 ## Filename:    FLAGWORD_ASSIGNMENTS.agc
 ## Purpose:     A section of LM131 revision 1.
-##              It is part of the reconstructed source code for the
-##              final release of the flight software for the Lunar 
-##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 13.
-##              The code has been recreated from a copy of Luminary 131.
-##              It has been adapted such that the resulting bugger words
-##              exactly match those specified for LM131 revision 1 in NASA
-##              drawing 2021152L, which gives relatively high confidence that
-##              the reconstruction is correct.
+##              It is part of the reconstructed source code for the final
+##              release of the flight software for the Lunar Module's (LM)
+##              Apollo Guidance Computer (AGC) for Apollo 13. The code has
+##              been reconstructed from a listing of Luminary 131 and a dump
+##              of a core rope memory module B5, part number 2010802-171,
+##              which is the only module different between LM131 revision 1
+##              and Luminary 131. The executable generated from this source
+##              has been verified against the module dump, so while the names,
+##              comments, and ordering may not be exactly correct, the
+##              resulting binary is.
 ## Reference:   pp. 61-88
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
-##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
-##              LM131 REVISION 1.
-## Mod history: 2019-08-04 MAS  Created from Luminary 130.
+## Mod history: 2022-10-28 MAS  Created from Luminary 131.
 
 ## Page 61
 # FLAGWORDS 0-11	ARE DOWNLINKED AND CAN BE SET AND CLEARED BY UP-FLAG AND DOWN-FLAG INSTRUCTIONS IN THE
@@ -909,7 +908,7 @@ FLPIBIT		=	BIT11			#	(ASCENT GUIDANCE)
 
 # BIT 10 FLAG 9	(L)
 FLRCS		=	140D			#	RCS INJECTION MODE	MAIN ENGINE MODE
-## Page 81	
+## Page 81
 FLRCSBIT	=	BIT10			#	(ASCENT GUIDANCE)
 
 # BIT 9 FLAG 9	(L)
@@ -994,7 +993,7 @@ REINTBIT	=	BIT7			#	TO BE RESTARTED		NOT TO BE RESTARTED
 
 # BIT 6 FLAG 10
 #		=	159D
-## Page 83	
+## Page 83
 
 # BIT 5 FLAG 10
 #		=	160D	
@@ -1233,4 +1232,6 @@ AUTRATE2	=	BIT2			# ASTRONAUT-CHOSEN KALCMANU MANEUVER RATES
 AUTR1FLG	=	209D			# (1,0)=		2.0 DEG/SEC
 AUTRATE1	=	BIT1			# (1,1)=	       10.0 DEG/SEC
 
+## Page 89
+## Nothing on this page.
 

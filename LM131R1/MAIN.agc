@@ -1,22 +1,21 @@
 ### FILE="Main.annotation"
-# Copyright:	Public domain.
-# Filename:	MAIN.agc
-# Purpose:	The main source file for the LM131 revision 1.
-#               It is part of the reconstructed source code for the
-#               final release of the flight software for the Lunar 
-#               Module's (LM) Apollo Guidance Computer (AGC) for Apollo 13.
-#               The code has been recreated from a copy of Luminary 131.
-#               It has been adapted such that the resulting bugger words
-#               exactly match those specified for LM131 revision 1 in NASA
-#               drawing 2021152L, which gives relatively high confidence that
-#               the reconstruction is correct.
-# Assembler:	yaYUL
-# Contact:	Ron Burkey <info@sandroid.org>.
-# Website: 	www.ibiblio.org/apollo/index.html
-# Warning:      THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
-#               AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
-#               LM131 REVISION 1.
-# Mod history:  2019-08-05 MAS  Created from Luminary 130.
+# Copyright:   Public domain.
+# Filename:    MAIN.agc
+# Purpose:     The main source file for LM131 revision 1.
+#              It is part of the reconstructed source code for the final
+#              release of the flight software for the Lunar Module's (LM)
+#              Apollo Guidance Computer (AGC) for Apollo 13. The code has
+#              been reconstructed from a listing of Luminary 131 and a dump
+#              of a core rope memory module B5, part number 2010802-171,
+#              which is the only module different between LM131 revision 1
+#              and Luminary 131. The executable generated from this source
+#              has been verified against the module dump, so while the names,
+#              comments, and ordering may not be exactly correct, the
+#              resulting binary is.
+# Assembler:   yaYUL
+# Contact:     Ron Burkey <info@sandroid.org>.
+# Website:     www.ibiblio.org/apollo/index.html
+# Mod history: 2022-10-28 MAS  Created from Luminary 131.
 
 $ASSEMBLY_AND_OPERATION_INFORMATION.agc		        # pp. 1-27
 $TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc	# pp. 28-37

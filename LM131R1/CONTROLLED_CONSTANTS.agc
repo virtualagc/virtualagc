@@ -2,22 +2,21 @@
 ## Copyright:   Public domain.
 ## Filename:    CONTROLLED_CONSTANTS.agc
 ## Purpose:     A section of LM131 revision 1.
-##              It is part of the reconstructed source code for the
-##              final release of the flight software for the Lunar 
-##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 13.
-##              The code has been recreated from a copy of Luminary 131.
-##              It has been adapted such that the resulting bugger words
-##              exactly match those specified for LM131 revision 1 in NASA
-##              drawing 2021152L, which gives relatively high confidence that
-##              the reconstruction is correct.
+##              It is part of the reconstructed source code for the final
+##              release of the flight software for the Lunar Module's (LM)
+##              Apollo Guidance Computer (AGC) for Apollo 13. The code has
+##              been reconstructed from a listing of Luminary 131 and a dump
+##              of a core rope memory module B5, part number 2010802-171,
+##              which is the only module different between LM131 revision 1
+##              and Luminary 131. The executable generated from this source
+##              has been verified against the module dump, so while the names,
+##              comments, and ordering may not be exactly correct, the
+##              resulting binary is.
 ## Reference:   pp. 38-53
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
-##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
-##              LM131 REVISION 1.
-## Mod history: 2019-08-04 MAS  Created from Luminary 130.
+## Mod history: 2022-10-28 MAS  Created from Luminary 131.
 
 ## Page 38
 # DPS AND APS ENGINE PARAMETERS
@@ -542,7 +541,7 @@ VAL67		2DEC*	.01726666666 B+1*	# AMOD
 
 		SETLOC	PLANTIN2
 		BANK
-		COUNT*	$$/LUROY
+		COUNT*	$$/LUROT
 		
 COSI		2DEC*	9.996417320 E-1 B-1*	# COS (5521.5 SEC.)
 SINI		2DEC*	2.676579050 E-2 B-1*	# SIN (5521.5 SEC.)

@@ -2,22 +2,21 @@
 ## Copyright:   Public domain.
 ## Filename:    FRESH_START_AND_RESTART.agc
 ## Purpose:     A section of LM131 revision 1.
-##              It is part of the reconstructed source code for the
-##              final release of the flight software for the Lunar 
-##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 13.
-##              The code has been recreated from a copy of Luminary 131.
-##              It has been adapted such that the resulting bugger words
-##              exactly match those specified for LM131 revision 1 in NASA
-##              drawing 2021152L, which gives relatively high confidence that
-##              the reconstruction is correct.
+##              It is part of the reconstructed source code for the final
+##              release of the flight software for the Lunar Module's (LM)
+##              Apollo Guidance Computer (AGC) for Apollo 13. The code has
+##              been reconstructed from a listing of Luminary 131 and a dump
+##              of a core rope memory module B5, part number 2010802-171,
+##              which is the only module different between LM131 revision 1
+##              and Luminary 131. The executable generated from this source
+##              has been verified against the module dump, so while the names,
+##              comments, and ordering may not be exactly correct, the
+##              resulting binary is.
 ## Reference:   pp. 213-238
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
-##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
-##              LM131 REVISION 1.
-## Mod history: 2019-08-04 MAS  Created from Luminary 130.
+## Mod history: 2022-10-28 MAS  Created from Luminary 131.
 
 ## Page 213
 		BANK	10
@@ -172,7 +171,7 @@ MR.KLEAN	INHINT
 		DXCH	-PHASE2
 		
 ## Page 216
-P00KLEAN	EXTEND
+POOKLEAN	EXTEND
 		DCA	NEG0
 		DXCH	-PHASE4
 V37KLEAN	EXTEND
@@ -750,7 +749,7 @@ V37		TS	MMNUMBER		# SAVE MAJOR MODE
 		CA	IMODES30		# IS IMU BEINB INITIALIZED
 		MASK	BIT6
 		CCS	A
-		TCF	CANTROD
+		TCF	CANTROO
 		
 		CS	MMNUMBER		# IS P70 REQUESTED?
 		AD	DEC70
@@ -768,7 +767,7 @@ V37		TS	MMNUMBER		# SAVE MAJOR MODE
 		MASK	NODOBIT
 		CCS	A
 		TCF	CHECKTAB		# NO
-CANTROD		TC	ALARM
+CANTROO		TC	ALARM
 		OCT	1520
 		
 V37BAD		TC	RELDSP			# RELEASES DISPLAY FROM ASTRONAUT
@@ -820,13 +819,13 @@ CANV37		CAF	ZERO
 		EXTEND
 		WRITE	SUPERBNK
 		
-		CAF	R00AD
+		CAF	ROOAD
 		TS	TEMPFLSH
 		
 		TC	PHASCHNG
 		OCT	14
 		
-ROC		TC	INTPRET
+ROO		TC	INTPRET
 
 		CALL				# WAIT FOR INTEGRATION TO FINISH
 ## Page 231
@@ -881,7 +880,7 @@ POOH		TC	RELDSP			# RELEASE DISPLAY SYSTEM
 		
 		CAF	DNLADP00
 ## Page 232
-SEUDOP00	TS	DNLSTCOD		# SET UP APPROPRIATE DOWNLIST CODE
+SEUDOPOO	TS	DNLSTCOD		# SET UP APPROPRIATE DOWNLIST CODE
 		TS	AGSWORD			#   (CURRENT LIST WILL BE COMPLETED BEFORE
 						#     NEW ONE IS STARTED)
 						
@@ -902,7 +901,7 @@ SEUDOP00	TS	DNLSTCOD		# SET UP APPROPRIATE DOWNLIST CODE
 		CCS	MMNUMBER		# IS IT POOH
 		TCF	RENDVOO			# NO
 GOMOD		TC	IBNKCALL		# REDUNDANT EXCEPT FOR GROUP 4
-		CADR	P00KLEAN
+		CADR	POOKLEAN
 		
 		CA	MMNUMBER
 		TS	MODREG
@@ -931,7 +930,7 @@ RENDVOO		CS	MODREG			# IS CURRENT PROGRAM 22
 		MASK	FLAGWRD0
 		CCS	A
 ## Page 233
-		TCF	P00FIZZ			# YES, LEAVE GROUP 2 TO PICK UP P20 OR P25
+		TCF	POOFIZZ			# YES, LEAVE GROUP 2 TO PICK UP P20 OR P25
 		
 RESET22		CS	OCT700			# CLEAR RENDEZVOUS, P25
 		MASK	FLAGWRD0		# AND IMU IN USE FLAGS
@@ -942,7 +941,7 @@ KILL2		EXTEND				# NO, KILL 2
 		DCA	NEG0
 		DXCH	-PHASE2
 		
-P00FIZZ		CAF	V37QCAD			# RESTART POINT FOR V37XEQ
+POOFIZZ		CAF	V37QCAD			# RESTART POINT FOR V37XEQ
 		TS	TEMPFLSH
 		
 		TCF	GOGOPROG
@@ -985,7 +984,7 @@ NOUVEAU		CAF	OCT500			# IS P20 OR P25 FLAG SET
 		CAF	DNLADMM1		# OBTAIN APPROPRIATE DOWNLIST ADDRESS
 
 		INHINT
-		TCF	SEUDOP00
+		TCF	SEUDOPOO
 		
 V37NONO		TC	FALTON			# COME HERE IF MM REQUESTED DOESNT EXIST
 
@@ -1039,7 +1038,7 @@ NEG7		EQUALS	OCT77770
 MMTEMP		EQUALS	PHSPRDT3
 BASETEMP	EQUALS	TBASE4
 V37QCAD		CADR	V37XEQ +3
-R00AD		CADR	DUMMYAD
+ROOAD		CADR	DUMMYAD
 OCT37667	OCT	37667
 OCT40072	OCT	40072
 OCT700		OCT	700

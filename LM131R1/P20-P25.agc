@@ -2,22 +2,21 @@
 ## Copyright:   Public domain.
 ## Filename:    P20-P25.agc
 ## Purpose:     A section of LM131 revision 1.
-##              It is part of the reconstructed source code for the
-##              final release of the flight software for the Lunar 
-##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 13.
-##              The code has been recreated from a copy of Luminary 131.
-##              It has been adapted such that the resulting bugger words
-##              exactly match those specified for LM131 revision 1 in NASA
-##              drawing 2021152L, which gives relatively high confidence that
-##              the reconstruction is correct.
+##              It is part of the reconstructed source code for the final
+##              release of the flight software for the Lunar Module's (LM)
+##              Apollo Guidance Computer (AGC) for Apollo 13. The code has
+##              been reconstructed from a listing of Luminary 131 and a dump
+##              of a core rope memory module B5, part number 2010802-171,
+##              which is the only module different between LM131 revision 1
+##              and Luminary 131. The executable generated from this source
+##              has been verified against the module dump, so while the names,
+##              comments, and ordering may not be exactly correct, the
+##              resulting binary is.
 ## Reference:   pp. 496-618
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
-##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
-##              LM131 REVISION 1.
-## Mod history: 2019-08-04 MAS  Created from Luminary 130.
+## Mod history: 2022-10-28 MAS  Created from Luminary 131.
 
 ## Page 496
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -948,7 +947,7 @@ R21LEM00	DAD
 		TC	INTPRET
 		BOF	CLRGO
 			FSPASFLG	# FIRST PASS THRU REPOSITION
-			R21LEMB		# NO - GO TO CONTINUOUS DESIGNATE
+			R21LEM8		# NO - GO TO CONTINUOUS DESIGNATE
 			FSPASFLG	# YES - RESET FIRST PASS FLAG
 			R21LEM50
 R21LEM13	CCS	REPOSCNT	# HAVE WE TRIED 60 TIMES?
@@ -959,7 +958,7 @@ R21LEM7		TS	REPOSCNT
 R21LEM50	DLOAD	GOTO
 			REPOSTM
 			R21LEM00
-R21LEMB		DLOAD
+R21LEM8		DLOAD
 			REPOSTM
 		STCALL	TDEC1
 			UPPSV
@@ -4549,7 +4548,7 @@ VB56CADR	2CADR	TRMTRACK
 		SETLOC	R29/SERV
 		BANK
 		
-		COUNT*	$$/r29
+		COUNT*	$$/R29
 		
 NR29&RDR	EQUALS	EBANK5
 
@@ -4583,7 +4582,7 @@ R29		CS	RADMODES
 		CA	PRIO21		# MODE 1;  MUST REMODE.
 		TC	NOVAC
 		EBANK=	LOSCOUNT
-		2CADR	R29REM0J	# NEEDS OWN JOB TO RADSTALL IN.
+		2CADR	R29REMOJ	# NEEDS OWN JOB TO RADSTALL IN.
 		
 		CS	DESIGBIT
 		MASK	RADMODES	# CLEAR DESIGNATE FLAG IN RADMODES
@@ -4604,7 +4603,7 @@ SETPRPOS	CA	ONE
 ## Page 602
 # FORCE RENDEZVOUS RADAR INTO MODE 2.
 
-R29REM0J	CA	ONE
+R29REMOJ	CA	ONE
 		TC	WAITLIST
 		EBANK=	LOSCOUNT
 		2CADR	REMODE		# REMODE MUST RUN AS A TASK.

@@ -2,22 +2,21 @@
 ## Copyright:   Public domain.
 ## Filename:    ERASABLE_ASSIGNMENTS.agc
 ## Purpose:     A section of LM131 revision 1.
-##              It is part of the reconstructed source code for the
-##              final release of the flight software for the Lunar 
-##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 13.
-##              The code has been recreated from a copy of Luminary 131.
-##              It has been adapted such that the resulting bugger words
-##              exactly match those specified for LM131 revision 1 in NASA
-##              drawing 2021152L, which gives relatively high confidence that
-##              the reconstruction is correct.
+##              It is part of the reconstructed source code for the final
+##              release of the flight software for the Lunar Module's (LM)
+##              Apollo Guidance Computer (AGC) for Apollo 13. The code has
+##              been reconstructed from a listing of Luminary 131 and a dump
+##              of a core rope memory module B5, part number 2010802-171,
+##              which is the only module different between LM131 revision 1
+##              and Luminary 131. The executable generated from this source
+##              has been verified against the module dump, so while the names,
+##              comments, and ordering may not be exactly correct, the
+##              resulting binary is.
 ## Reference:   pp. 90-154
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
-##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
-##              LM131 REVISION 1.
-## Mod history: 2019-08-04 MAS  Created from Luminary 130.
+## Mod history: 2022-10-28 MAS  Created from Luminary 131.
 
 ## Page 90
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -757,7 +756,7 @@ DNLRALT		EQUALS	DNLRVELZ +1	# B(1)TMP
 # INCORPORATION UNSWITCHED.			(2D)
 
 W.IND		EQUALS	PIPAGE		# B(1)
-W.INDI		EQUALS	W.IND +1	# I(1)
+W.IND1		EQUALS	W.IND +1	# I(1)
 
 # SUBROUTINE BALLANGS OF R60.			(1D)
 
@@ -1845,7 +1844,7 @@ JETRATER	EQUALS	JETRATE +2	# SCALED AT PI/4 RADIANS/SECOND
 
 DOWNTORK	ERASE	+5		# ACCUMULATED JET TORQUE COMMANDED ABOUT
 POSTORKP	EQUALS	DOWNTORK	# 	+,-P, +,-U, +,-V RESPECTIVELY.
-NETTOTKP	EQUALS	DOWNTORK +1	#	EMPLOYED EXCLUSIVELY FOR DOWNLIST.
+NEGTOTKP	EQUALS	DOWNTORK +1	#	EMPLOYED EXCLUSIVELY FOR DOWNLIST.
 POSTORKU	EQUALS	DOWNTORK +2	#	NOT INITIALIZED:  PERMITTED TO OVERFLOW
 ## Page 134
 NEGTORKU	EQUALS	DOWNTORK +3	#	SCALED AT 32 JET-SEC, OR ABOUT 2.0 JET-
@@ -2269,7 +2268,7 @@ QTEMP		ERASE			# I(1)TMP COMMON RETURN SAVE REGISTER.
 
 TCSI		ERASE	+1		# B(2)TMP CSI TIME IN CENTISECONDS
 TTPI		ERASE	+1		# B(2)TMP TPI TIME IN CENTISECONDS
-TTPIO		ERASE	+1		# B(2)TMP TTPI STORAGE FOR RECYCLE
+TTPI0		ERASE	+1		# B(2)TMP TTPI STORAGE FOR RECYCLE
 
 # P30,P40 INTERFACE.				(21D)
 

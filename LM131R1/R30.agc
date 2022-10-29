@@ -2,22 +2,21 @@
 ## Copyright:   Public domain.
 ## Filename:    R30.agc
 ## Purpose:     A section of LM131 revision 1.
-##              It is part of the reconstructed source code for the
-##              final release of the flight software for the Lunar 
-##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 13.
-##              The code has been recreated from a copy of Luminary 131.
-##              It has been adapted such that the resulting bugger words
-##              exactly match those specified for LM131 revision 1 in NASA
-##              drawing 2021152L, which gives relatively high confidence that
-##              the reconstruction is correct.
+##              It is part of the reconstructed source code for the final
+##              release of the flight software for the Lunar Module's (LM)
+##              Apollo Guidance Computer (AGC) for Apollo 13. The code has
+##              been reconstructed from a listing of Luminary 131 and a dump
+##              of a core rope memory module B5, part number 2010802-171,
+##              which is the only module different between LM131 revision 1
+##              and Luminary 131. The executable generated from this source
+##              has been verified against the module dump, so while the names,
+##              comments, and ordering may not be exactly correct, the
+##              resulting binary is.
 ## Reference:   pp. 714-724
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
-##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
-##              LM131 REVISION 1.
-## Mod history: 2019-08-04 MAS  Created from Luminary 130.
+## Mod history: 2022-10-28 MAS  Created from Luminary 131.
 
 ## Page 714
 # SUBROUTINE NAME:  V82CALL
@@ -197,7 +196,7 @@ BOTHPAD		STCALL	RPADTEM
 		STORE	TSTART82	#                SAVE IT
 		DLOAD	BZE		# SR30.1 SETS -TPER=0 IF HPER L/
 			-TPER		# HPERMIN (300 OR 35) KFT.
-			TICKTIFF	# (-TPER = 0)
+			TICKTFF		# (-TPER = 0)
 TICKTPER	DLOAD	DAD		# (-TPER NON ZERO) TFF WAS NOT COMPUTED,
 			-TPER		# BUT WAS SET TO 59M59S.  DONT TICK TFF, DO
 			TSTART82	# TICK -TPER.  DISPLAY BOTH.
@@ -207,7 +206,7 @@ TICKTPER	DLOAD	DAD		# (-TPER NON ZERO) TFF WAS NOT COMPUTED,
 		TS	V82FLAGS	# INFORMS TICKTEST TO INCREMENT ONLY -TPER
 		TC	ENDOFJOB
 
-TICKTIFF	DLOAD	DAD		# (-TPER=0) TFF WAS COMPUTED.  TICK TFF.
+TICKTFF		DLOAD	DAD		# (-TPER=0) TFF WAS COMPUTED.  TICK TFF.
 			TFF		# DO NOT TICK -TPER.  DISPLAY TFF, BUT NOT
 			TSTART82	# -TPER.
 		STORE	TFF		# TFF CORRECTED FOR TIME SINCE V82GOFF1
