@@ -16,7 +16,8 @@
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Mod history: 2022-10-28 MAS  Created from Luminary 131.
+## Mod history: 2022-10-28 MAS  Created from Luminary 131 and incoporated
+##                              changes from the LM131 module dump.
 
 ## Page 852
 		BANK	37
@@ -1087,8 +1088,12 @@ NOREASON	CS	FLGWRD11
 		CCS	A
 		TCF	VMEASCHK	# UPDATE INHIBITED - TEST VELOCITY ANYWAY
 
-		TC	INTPRET		# DO POSITION UPDATE
-		DLOAD	SR4
+## The following line was "TC INTPRET" in Luminary 131. It has been replaced with
+## a jump to the end of the bank in LM131 rev 1, where an altitude check is
+## performed to see if the landing radar should be disabled (PCR 942). Control
+## is returned to NOREASN1 if the radar was not disabled..
+		TCF	LROFF?
+NOREASN1	DLOAD	SR4
 			HCALC		# RESCALE H TO 2(28)M
 		EXIT
 		EXTEND
@@ -1650,3 +1655,97 @@ SETPOS		XCH	Q		# SAVE INDEX IN Q
 		TC	LRADRET
 
 OCT523		OCT	00523
+
+## This routine to disable the landing radar at a pad-loaded altitude (HLROFF)
+## was added in LM131 rev 1.
+LROFF?		TC	INTPRET
+		DLOAD	DSU
+			HCALC
+			HLROFF
+		BPL	CLEAR		# IF H < HLROFF, RESET LR PERMIT FLAG
+			NOREASN1
+			LRINH
+		EXIT
+		TCF	VMEASCHK
+
+# ****************************************************************************************************************
+# GUIDANCE FOR P66
+# ****************************************************************************************************************
+
+## The following P66 code was all added as part of PCR 988 (Auto P66) and PCR 1013 (Multiple Servicer
+## Avoidance) in LM131 rev 1.
+
+		SETLOC	P66LOC3
+		BANK
+
+P66HZ		VLOAD	VXSC
+			UNFC/2		# P63, P64, & P66 UNITS 2(-4)M/CS/CS
+			QHZ
+		PDVL	VSU
+			VHZC		# IN 2(7)M/CS
+			V		# IN 2(7)M/CS
+		V/SC	VSU		# YIELDS UNLIM HZ ACCEL CMD, 2(-4)M/CS/CS
+			TAUHZ		# IN 2(1))CS
+		EXIT
+
+		CA	PRIO21		# ASSURE THIS SERVICER JOB ENDS
+		TC	PRIOCHNG	# BEFORE NEXT SERVICER JOB BEGINS
+
+		CA	GHZ
+		TS	MPAC		# X COMPONENT = G
+
+		CA	EBANK5
+		TS	EBANK
+		EBANK=	END-E5
+
+		LXCH	MPAC +3
+		CA	AHZLIM
+		TC	BANKCALL
+		FCADR	LIMITSUB
+		TS	MPAC +3		# Y COMPONENT LIMITED TO AHZLIM
+
+		LXCH	MPAC +5
+		CA	AHZLIM
+		TC	BANKCALL
+		FCADR	LIMITSUB
+		TS	MPAC +5		# Z COMPONENT LIMITED TO AHZLIM
+
+		CA	EBANK7
+		TS	EBANK
+		EBANK=	END-E7
+
+		TC	POSTJUMP
+		FCADR	P66A
+
+GHZ		DEC	1.62292 E-4 B+4 # GRAVITY IN 2(-4)M/CS/CS
+
+		SETLOC	P66LOC
+		BANK
+
+P66A		CA	OVFIND		# OVERFLOW?
+		EXTEND
+		BZF	ENGARM?		# N: KEEP CHECKING
+		TC	BANKCALL	# Y: TAKE REMEDIAL ACTION
+		FCADR	OVFDESC		#    AND
+		TCF	P66VERT		#    SKIP ISSUANCE OF HZ CMDS
+
+ENGARM?		CA	BIT3		# IS ENGINE ARM SWITCH STILL ON?
+		EXTEND
+		RAND	CHAN30
+		EXTEND
+		BZF	CDUWHZ		# Y: ISSUE HZ CMDS
+
+		CCS	NGUIDSUB	# N: HAVE WE PROCEEDED AFTER TOUCHDOWN?
+		CA	IDLADR		# Y: PREVENT RCS JET FIRINGS
+		TS	T5ADR		#    AND
+		TCF	P66VERT		#    SKIP HZ CMDS, BUT CONTINUE DISPLAYS
+
+CDUWHZ		TC	INTPRET		# N: ISSUE HZ CMDS
+		STORE	UNFC/2		# MUST STORE FOR SUCCEEDING PASS
+		CALL
+			FINDCDUW
+		EXIT
+
+		TCF	P66VERT
+
+IDLADR		GENADR	DAPIDLER

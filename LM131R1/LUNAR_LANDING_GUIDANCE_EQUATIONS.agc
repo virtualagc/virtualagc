@@ -16,7 +16,8 @@
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Mod history: 2022-10-28 MAS  Created from Luminary 131.
+## Mod history: 2022-10-28 MAS  Created from Luminary 131 and incorporated
+##                              changes from the LM131 module dump.
 
 ## Page 793
 		EBANK=	E2DPS
@@ -39,7 +40,8 @@
 		TCF	TTFINCR		# IGNALG
 NEWPHASE	TCF	TTFINCR		# BRAKQUAD
 		TCF	STARTP64	# APPRQUAD
-		TCF	P65START	# VERTICAL
+## This was TCF P65START in Luminary 131.
+		TCF	STARTP66	# VERTICAL
 
 # PRE-GUIDANCE COMPUTATIONS:
 
@@ -53,7 +55,8 @@ PREGUIDE	TCF	RGVGCALC	# BRAKQUAD
 		TCF	TTF/8CL		# IGNALG
 WHATGUID	TCF	TTF/8CL		# BRAKQUAD
 		TCF	TTF/8CL		# APPRQUAD
-		TCF	VERTGUID	# VERTICAL
+## This was TCF VERTGUID in Luminary 131.
+		TCF	+1		# VERTICAL
 
 # POST GUIDANCE EQUATION COMPUTATIONS:
 
@@ -148,6 +151,10 @@ DEC66		DEC	66
 		EXTEND
 		DCA	HDOTDISP	# SET DESIRED ALTITUDE RATE = CURRENT
 		DXCH	VDGVERT		# 	ALTITUDE RATE.
+
+## Luminary 131 continues straight into STRTP66A here.
+		TCF	STRTP66B
+
 STRTP66A	TC	INTPRET
 		SLOAD	PUSH
 			PBIASZ
@@ -175,7 +182,7 @@ STRTP66A	TC	INTPRET
 		TS	FWEIGHT
 		TS	FWEIGHT +1
 		CAF	TWO		# WCHPHASE = 2 ---> VERTICAL: P65,P66,P67
-		TS	WCHVERT
+## Luminary 131 also initializes WCHVERT, a P65 erasable, here.
 		TS	WCHPHOLD
 		TS	WCHPHASE
 		TC	BANKCALL	# TEMPORARY, I HOPE HOPE HOPE
@@ -184,15 +191,17 @@ STRTP66A	TC	INTPRET
 		ADRES	XOVINFLG
 		TC	DOWNFLAG
 		ADRES	REDFLAG
-		TCF	VERTGUID
+## This jump goes to VERTGUID in Luminary 131.
+		TCF	P66
 
 RESTART?	CA	FLAGWRD1	# HAS THERE BEEN A RESTART?
 		MASK	RODFLBIT
 		EXTEND
-		BZF	STRTP66A	# YES.  REINITIALIZE BUT LEAVE VDGVERT AS
-					#	IS.
+		BZF	STRTP66A	# Y
+					# N
 
-		TCF	VERTGUID	# NO: CONTINUE WITH R.O.D.
+## This jump goes to VERTGUID in Luminary 131.
+		TCF	P66
 
 # ****************************************************************************************************************
 # INITIALIZATION FOR THIS PASS
@@ -793,30 +802,28 @@ UNWCLOOP	MASK	SIX
 		INCR	BBANK
 		EBANK=	PIF
 
-STEER?		CA	FLAGWRD2	# IF STEERSW DOWN NO OUTPUTS
+## These routines were largely rewritten between Luminary 131 and LM131 rev 1.
+STEER?		CA	OVFIND		# OVERFLOW?
+		EXTEND
+		BZF	STEERSW?	# N: CHECK STEERSW
+
+		TC	OVFDESC		# Y: REMEDIAL ACTION AND
+		TCF	DISPEXIT	#    SKIP ISSUANCE OF CMDS. NO STEERSW CHK
+
+STEERSW?	CS	FLAGWRD2	# IS STEERSW UP?
 		MASK	STEERBIT
+
 		EXTEND
-		BZF	RATESTOP
+		BZF	THRTCALL	# Y: ISSUE GUIDANCE CMDS
 
-EXVERT		CA	OVFIND		# IF OVERFLOW ANYWHERE IN GUIDANCE
-		EXTEND			#	DON'T CALL THROTTLE OR FINDCDUW
-		BZF	+13
-
-EXOVFLOW	TC	ALARM		# SOUND THE ALARM NON-ABORTIVELY.
-		OCT	01410
-
-RATESTOP	CAF	BIT13		# ARE WE IN ATTITUDE-HOLD?
-		EXTEND
-		RAND	CHAN31
-		EXTEND
-		BZF	DISPEXIT	# YES
-## Page 809
-		TC	BANKCALL	# NO:  DO A STOPRATE
-		CADR	STOPRATE
-
+RATESTOP	INHINT			# N: REMEDIAL ACTION
+		TC	IBNKCALL	#    AND
+		FCADR	STOPRATE	#    SKIP ISSUANCE OF CMDS
+		RELINT
 		TCF	DISPEXIT
 
-GDLMP1		TC	THROTTLE
+GDUMP1		=	THRTCALL
+THRTCALL	TC	THROTTLE
 		TC	INTPRET
 		CALL
 			FINDCDUW -2
@@ -834,6 +841,7 @@ DISPEXIT	EXTEND			# KILL GROUP 3:  DISPLAYS WILL BE
 
 ENDLLJOB	=	DISPEXIT +3
 
+DISPEX66	=	DISPEXIT +3
  +3		CS	FLAGWRD8	# IF FLUNDISP IS SET, NO DISPLAY THIS PASS
  		MASK	FLUNDBIT
 		EXTEND
@@ -884,73 +892,84 @@ VERTDISP	CAF	V06N60
 		TCF	STOPFIRE	# PROCEED
 		TCF	STOPFIRE	# V32E
 
-STOPFIRE	INHINT
-		TC	BANKCALL
-		CADR	ZATTEROR
+## Luminary 131 calls ZATTEROR under INHINT here, instead of setting WCHVERT to POSMAX.
+STOPFIRE	CAF	POSMAX
+		TS	WCHVERT
 		TCF	ENDOFJOB
 
-# ****************************************************************************************************************
-# GUIDANCE FOR P65
-# ****************************************************************************************************************
+## Luminary 131 had P65 code here.
+STRTP66B	CS	ZERO
+		TS	WCHVERT
 
-VERTGUID	CCS	WCHVERT
-		TCF	P66VERT		# +0
+		TC	RSTCTHRT
 
-#
-# 	THE P65 GUIDANCE EQUATION IS AS FOLLOWS:-
-#		      -      -
-#		      V2FG - VGU
-#		ACG = ----------
-#		        TAUVERT
+		TC	INTPRET
+		VLOAD	VXV		# COMPUTE HORIZONTAL VELOCITY COMMAND
+			WM		# MOON'S ANGULAR RATE IN 2(-17)RAD/CS
+			R		# LM POSITION IN 2(24)M
+		STORE	VHZC
+		EXIT
+		TCF	STRTP66A
 
-P65VERT		TC	INTPRET
-		GOTO
-			P65VERTA
+## One of the requirements in the creation of LM131 rev 1 was that it must only change module B5,
+## for both schedule and cost reasons (it takes more time and more money to remake all 6 rope modules
+## instead of just 1). Therefore one of the major challenges in adding Auto P66 was figuring out how to fit
+## all of the new code into the available space, *without* breaking references to module B5 from other
+## modules. FIXME
+## To aid with this challenge, engineers inserted at the end of new code a series of constants counting
+## down how many words they had left within that section before the next immovable reference from another
+## module. In this case, only a single word was left.
+		DEC	1
+
 ## Page 811
 
-# ****************************************************************************************************************
-# GUIDANCE FOR P66
-# ****************************************************************************************************************
-
-P66VERT		TC	POSTJUMP
-		CADR	P66VERTA
+# ***************************************************************************************************************
+# P66 VERTICAL CHANNEL
+# ***************************************************************************************************************
 
 		SETLOC	P66LOC
 		BANK
 		COUNT*	$$/F2DPS
 
-RODTASK		CAF	PRIO22
+RODTASK		CAF	PRIO22		# BUMPS ALL OF SERVICER JOB EXCEPT RODCOMP
 		TC	FINDVAC
 		EBANK=	DVCNTR
 		2CADR	RODCOMP
 
 		TCF	TASKOVER
 
-P65VERTA	VLOAD	VSU
-			V2FG
-			VGU
-		V/SC	GOTO
-			TAUVERT
-			AFCCALC1
-
-P66VERTA	TC	PHASCHNG	# TERMINATE GROUP 3.
-		OCT	00003
-
-		CAF	1SEC
+## The following P66 vertical channel code replaced the main implementation of P65 in LM131 rev 1.
+P66VERT		CA	1SEC
 		TC	TWIDDLE
 		ADRES	RODTASK
 
-RODCOMP		INHINT
+RODCOMP		CA	PRIO23		# LET ONLY ONE JOB THRU RODCOMP AT A TIME
+		TC	PRIOCHNG
+
+		INHINT
+
 		CAF	ZERO
 		XCH	RODCOUNT
 		EXTEND
 		MP	RODSCAL1
 		DAS	VDGVERT		# UPDATE DESIRED ALTITUDE RATE.
 
-		EXTEND			# SET OLDPIPAX,Y,Z = PIPAX,Y,Z
+		CAF	BIT5		# ARE WE IN AUTO THROTTLE?
+		EXTEND
+		RAND	CHAN30
+		EXTEND
+		BZF	RODCOMPA	# Y: CONTINUE ROD
+
+		EXTEND			# N: RESET VDGVERT TO CURRENT HDOT
+		DCA	HDOTDISP
+		DXCH	VDGVERT
+
+# READ THE PIPAS FOR P66
+
+RODCOMPA	EXTEND
 		DCA	PIPAX
-		DXCH	OLDPIPAX
-		DXCH	RUPTREG1	# SET RUPTREG1,2,3 = OLDPIPAX,Y,Z
+		DXCH	OLDPIPAX	# CURRENT PIPA READINGS INTO OLDPIPAX,Y,Z
+		DXCH	RUPTREG1	# SAVE PRIOR READINGS IN RUPTREG1,2,3
 		CA	PIPAZ
 		XCH	OLDPIPAZ
 		XCH	RUPTREG3
@@ -969,10 +988,12 @@ RODCOMP		INHINT
 		AD	PIPATMPZ
 		TS	MPAC +5		# MPAC(Z) = PIPAZ + PIPATMPZ
 
-		CS	OLDPIPAX
-		AD	TEMX
-		AD	RUPTREG1
-		TS	DELVROD
+# COMPUTE DELV SINCE THE LAST P66 PASS
+
+		CS	OLDPIPAX	# - CURRENT P66 PIPA
+		AD	TEMX		# - PIPA BY PIPASR IF INTERVENING, ELSE 0
+		AD	RUPTREG1	# + PIPA BY P66 ON THE LAST P66 PASS
+		TS	DELVROD		# = -DELV SINCE LAST P66 PASS, 2(14)CM/SEC
 		CS	OLDPIPAY
 		AD	TEMY
 		AD	RUPTREG2
@@ -1090,12 +1111,20 @@ ITRPNT2		EXIT
 		DXCH	MPAC		# MPAC = MEASURED ACCELERATION.
 		TC	BANKCALL
 		CADR	THROTTLE +3
+		INCR	CNTTHROT	# COUNT ONE THROTTLE COMPLETION
 		TC	BANKCALL	# PUT UP V06N60 DISPLAY BUT AVOID PHASCHNG
 		CADR	DISPEXIT +3
 
-BIT1H		OCT	00001
-SHFTFACT	2DEC	1 B-17
-BIASFACT	2DEC	655.36 B-26
+## One of the requirements in the creation of LM131 rev 1 was that it must only change module B5,
+## for both schedule and cost reasons (it takes more time and more money to remake all 6 rope modules
+## instead of just 1). Therefore one of the major challenges in adding Auto P66 was figuring out how to fit
+## all of the new code into the available space, *without* breaking references to module B5 from other
+## modules.
+## To aid with this challenge, engineers inserted at the end of new code a series of constants counting
+## down how many words they had left within that section before the next immovable reference from another
+## module. In this case, two words were left.
+		DEC	2
+		DEC	1
 
 # ****************************************************************************************************************
 # REDESIGNATOR TRAP
@@ -1447,5 +1476,92 @@ GSCALE		2DEC	100 B-11
 3/4DP		2DEC	.750
 DEPRCRIT	2DEC	-.02 B-1
 
+## The following P66 code was all added as part of PCR 988 (Auto P66) and PCR 1013 (Multiple Servicer
+## Avoidance) in LM131 rev 1.
+
 # ****************************************************************************************************************
+# GUIDANCE FOR P66
+# ****************************************************************************************************************
+
+#          THE P66 HORIZONTAL (HZ) EQUATION IS:
+
+#                 UNFC/2X = GHZ
+
+#                 UNFC/2Y = (LIMIT AHZLIM)(-QHZ UNFC/2Y   -(VY-VHZCY)/TAUHZ)
+#                                                      I-1
+
+#                 UNFC/2Z = (LIMIT AHZLIM)(-QHZ UNFC/2Z   -(VZ-VHZCZ)/TAUHZ)
+#                                                      I-1
+
+#          WHERE  GHZ IS LUNAR GRAVITY
+#                 QHZ AND 1/TAUHZ ARE GAIN CONSTANTS
+#                 VHZCY AND VHZCZ ARE THE Y AND Z COMPONENTS OF COMMANDED
+#                    VELOCITY, PLATFORM COORDINATES. THESE ARE INITIALIZED
+#                    TO MOONRATE
+#                 (LIMIT AHZLIM) INDICATES THE CONTENT OF THE SUBSEQUENT
+#                    PARENTHESES IS MAGNITUDE LIMITED TO AHZLIM
+
+		SETLOC	P66LOC2
+		BANK
+
+P66		TC	PHASCHNG	# TERMINATE GROUP 3
+		OCT	00003
+
+		TC	INTPRET
+		RTB	DSU		# IS THERE TIME FOR P66?
+			LOADTIME
+			PIPTIME
+		BDSU	BPL
+			2LATE466
+			P66HZ		# Y: DOIT
+		CLEAR	EXIT		# N: OMIT
+			RODFLAG
+
+		TC	RSTCTHRT
+		EXTEND			# TOO FEW THROTTLINGS SINCE LAST OMISSION?
+		BZMF	OMITWALM
+
+		TCF	DISPEX66	# N: PERMIT OMISSION SANS ALARM
+
+OMITWALM	TC	ALARM		# Y: PERMIT OMISSION WITH ALARM
+		OCT	01466
+
+		TCF	DISPEX66
+
+RSTCTHRT	CAF	EBANK5
+		TS	L
+		LXCH	EBANK
+		EBANK=	END-E5
+		CS	TOOFEW		# INITIALIZE CNTTHROT TO TOOFEW AND LOAD
+		LXCH	EBANK		# ACCUMULATOR WITH ITS PREVIOUS CONTENTS
+		EBANK=	END-E7
+		XCH	CNTTHROT
+		TC	Q
+
+## These constants were moved from bank 32 to make more room there for P66 code.
+# CONSTANTS FOR P66
+#
+BIT1H		OCT	00001
+SHFTFACT	2DEC	1 B-17
+BIASFACT	2DEC	655.36 B-26
+
+# DESCENT OVERFLOW SUBROUTINE
+OVFDESC		EXTEND
+		QXCH	OVFRET
+
+		TC	ALARM
+		OCT	01410
+
+		INHINT			# MUST USE INHINT, IBNKCALL, RELINT
+		TC	IBNKCALL	# BECAUSE DAP COULD INTERRUPT STOPRATE AND
+		FCADR	STOPRATE	# BECAUSE WE COME FROM P66HZ VIA BANKCALL
+		RELINT
+
+		CA	ZERO
+		TS	OVFIND
+
+		TC	OVFRET
+
+
+
 # ****************************************************************************************************************

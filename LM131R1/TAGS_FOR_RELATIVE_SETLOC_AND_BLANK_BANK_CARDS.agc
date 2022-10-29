@@ -16,7 +16,8 @@
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Mod history: 2022-10-28 MAS  Created from Luminary 131.
+## Mod history: 2022-10-28 MAS  Created from Luminary 131 and added tags
+##                              for the LM131 rev 1 P66 code.
 
 ## Page 28
 		COUNT	BANKSUM
@@ -235,6 +236,7 @@ ASENT5		EQUALS
 FTHROT		EQUALS
 F2DPS*31	EQUALS
 VB67		EQUALS
+P66LOC2		EQUALS
 		BNKSUM	31
 		
 		BANK	32
@@ -261,6 +263,7 @@ ASCFILT		EQUALS
 R12STUFF	EQUALS
 SERV4		EQUALS
 F2DPS*34	EQUALS
+P66LOC3		EQUALS
 ## Page 35
 		BNKSUM	34
 		
