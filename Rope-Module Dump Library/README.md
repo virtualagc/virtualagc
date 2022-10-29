@@ -185,7 +185,8 @@ By the way, heavy reliance is made on the hopefully-similar code from Solarium 5
 
 **Fix for 04,6567**: This was by far the hardest one. It's in a section called PROGRESS CONTROL, which we have no other surviving examples of. Luckily the [AGC Information Series issue #16 (by Raytheon Corporation)](https://www.ibiblio.org/apollo/Documents/agcis_16_fresh_start.pdf#page=9) has a pretty detailed flowchart and even more detailed text descriptions. After trying to match code flow to the flowcharts, I eventually narrowed in on the bad word 04,6567 as the very first instruction of `PHASWT3`. Apparently this code path is never exercised in Sunrise, but nevertheless AGCIS #16 provides the following information about it:
 
-    At this location, program control is transferred to Routine `PHASWT3` which *immediately* passes control on to Routine `ONSKIP`. [emphasis ours]
+    At this location, program control is transferred to Routine `PHASWT3` 
+    which *immediately* passes control on to Routine `ONSKIP`.
 
 As luck would have it, `ONSKIP` is widely referenced in PROGRESS CONTROL and the AGCIS describes it in excruciating detail ("Initially, Routine `ONSKIP` places the complement of the octal quantity 00037 (77740) into the accumulator. Then the content of register `PHASE`, the old phase code, is added to the accumulator and the sum is tested"). And sure enough, our `PHASWT3` that starts with the bad word does not appear to call `ONSKIP` anywhere &mdash; certainly not immediately. So therefore, presumably, the missing word at the very beginning must be a call to `ONSKIP`.
 
