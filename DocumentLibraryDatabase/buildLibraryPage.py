@@ -27,6 +27,8 @@
 #               2022-07-03 RSB  Tracked whether or not items are categorized
 #                               (as opposed to merely appearing in the 
 #                               Everything section).
+#		2022-10-29 RSB	Expanded "Software Listings" section to 
+#				"Software Listings and Dumps".
 #
 # Usage:
 #	./buildLibraryPage.py <DocumentLibraryDatabase.tsv >../links2.html
@@ -413,7 +415,8 @@ Arranged by mission.
 
 blurbAssemblyListing = """
 Here are listings of actual software for the various onboard guidance 
-computers covered by the Virtual AGC Project.  We don't have <i>all</i> of
+computers covered by the Virtual AGC Project, as well as dumps of 
+physical computer-memory modules.  We don't have <i>all</i> of
 it, by any means, but we have what we have!  While all of the software 
 revisions listed below are equipped with comments
 &mdash; too many and too much, some may say &mdash; there tend to be much
@@ -442,7 +445,7 @@ summary of what we presently have and don't have:<br><br>
 <tr align="center"><td>Apollo 10</td><td>yes</td><td>yes</td><td>no</td><td>no</td></tr>
 <tr align="center"><td>Apollo 11</td><td>yes</td><td>yes</td><td>yes</td><td>no</td></tr>
 <tr align="center"><td>Apollo 12</td><td>no</td><td>yes</td><td>yes</td><td>no</td></tr>
-<tr align="center"><td>Apollo 13</td><td>no</td><td>fine</td><td>no</td><td>no</td></tr>
+<tr align="center"><td>Apollo 13</td><td>no</td><td>yes</td><td>no</td><td>no</td></tr>
 <tr align="center"><td>Apollo 14</td><td>no</td><td>yes</td><td>no</td><td>no</td></tr>
 <tr align="center"><td>Apollo 15</td><td>yes</td><td>yes</td><td>yes</td><td>no</td></tr>
 <tr align="center"><td>Apollo 16</td><td>yes</td><td>yes</td><td>yes</td><td>no</td></tr>
@@ -1259,7 +1262,7 @@ tableOfContentsSpec = [
     { "anchor" : "ReferenceCards", "title" : "Quick-Reference Cards, Data Cards, Cue Cards", "keywords" : ["Reference cards"]},
     { "anchor" : "PadLoads", "title" : "AGC Pad Loads", "sortKey" : myMissionSortKey, "keywords" : [ "Pad load" ], "blurb" : blurbPadloads },
     { "anchor" : "EMPs", "title" : "Erasable Memory Programs (EMP)", "keywords" : ["Erasable memory programs", "EMP"]},
-    { "anchor" : "AssemblyListings", "title" : "Software Listings", "keywords" : ["Assembly listing", "release table"], "blurb" : blurbAssemblyListing },
+    { "anchor" : "AssemblyListings", "title" : "Software Listings and Dumps", "keywords" : ["Assembly listing", "release table", "module dump"], "blurb" : blurbAssemblyListing },
     { "anchor" : "MathFlow", "title" : "Math Flow", "keywords" : [ "Guidance equations" ], "blurb" : blurbMathFlow },
     { "anchor" : "SGAMemos", "title" : "Space Guidance Analysis Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Space Guidance Analysis Memo"], "blurb" : blurbSGA },
     { "anchor" : "ApolloProjectMemos", "title" : "Apollo Project Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Apollo Project Memo"] },
