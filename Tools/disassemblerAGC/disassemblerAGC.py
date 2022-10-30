@@ -163,12 +163,14 @@ def addCheckSymbols(line):
         else:
             checkErasable[symbol] = (bank, offset)
 
+symbolTableFound = False
 if cli.checkFilename != "":
     f = open(cli.checkFilename, "r")
     inSymbols = False
     for line in f:
         if line[:12] == "Symbol Table":
             inSymbols = True
+            symbolTableFound = True
             continue
         if "Unresolved symbols" == line[:18]:
             inSymbols = False
@@ -1372,7 +1374,13 @@ if cli.findFilename != "":
                     print(row, file=f)
             f.close()
     
-    if cli.checkFilename != "":
+    if cli.checkFilename != "" and not symbolTableFound:
+        print()
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print("Cross-check vs baseline assembly listing.")
+        print()
+        print("The baseline assembly listing had no symbol table.")
+    elif cli.checkFilename != "":
     
         print()
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
