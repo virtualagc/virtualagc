@@ -283,5 +283,5 @@ As of 2022-10-30:
   * `U15,2643` seems to be `STOREDTA` from Colossus 237.
   * At line 16007, `U15,2564` should be `U15,2654`. Also, it matches `LOADSTDT` in Colossus 237, but that would be obvious from `U15,2643`/`STOREDTA`.
 
-There are other matches, but now labels for the code in Aurora 12, Colossus 237, or Sunburst 37, so it doesn't really help.
+There are other matches, but no labels for the code in Aurora 12, Colossus 237, or Sunburst 37, so it doesn't really help.
 
