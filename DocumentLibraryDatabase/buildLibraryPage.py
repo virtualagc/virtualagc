@@ -392,9 +392,13 @@ if shuttle:
     <br><br>
     The entries are arranged from most-recently added to least-recently added.
     """
+    
     blurbEverything = """
-    This sections contains all of the documents, in order of publication
-    date.  
+    This section contains every document, in chronological order of publication,
+    regardless of whether or not already appearing above.
+    If an item appears only in this section, then perhaps we need to 
+    categorize it better.  Such documents are marked with the emoji """ \
+    + frowny + """.  Feel free to suggest better categorizations to us.
     """
 
 else:
