@@ -393,6 +393,13 @@ if shuttle:
     The entries are arranged from most-recently added to least-recently added.
     """
     
+    blurbFlowcharts = """
+    Note that while a number of revisions of various volumes of the Space
+    Shuttle Design Equations are available, I've been unable to locate 
+    the presumably all-important Volume V - Flow Diagrams, 
+    as well as Volume VI - Constants and Keyboard Accessible Parameters.
+    """
+    
     blurbEverything = """
     This section contains every document, in chronological order of publication,
     regardless of whether or not already appearing above.
@@ -1147,7 +1154,9 @@ orgAbbreviations = {
     "Douglas" : "McDonnell Douglas",
     "USA" : "United Space Alliance",
     "Intermetrics" : "Intermetrics Incorporated",
-    "Rockwell" : "Rockwell International"
+    "Rockwell" : "Rockwell International",
+    "DOD" : "United Stated Department of Defense",
+    "UT" : "University of Texas at Austin"
 }
 def makeOrgHover(dict):
     hover = ""
@@ -1324,12 +1333,18 @@ if shuttle:
     tableOfContentsSpec = [
         { "title" : "Debug", "sortKey" : myOriginalSortKey, "blurb" : blurbDebug },
         { "anchor" : "RecentAdditions", "title" : "Recently Added Documents as of %s" % currentDateString, "sortKey" : myRecentSortKey, "blurb" : blurbRecentlyAdded },
-        { "anchor" : "HAL/S", "title" : "HAL/S Programming Language", "keywords" : [ "HAL/S" ] },
+        { "anchor" : "flowcharts", "title" : "Design Equations and Flowcharts", "keywords" : [ "flowcharts", "flowchart", "design equations" ], "blurb" : blurbFlowcharts },
+        { "anchor" : "HAL/S", "title" : "HAL/S Programming", "keywords" : [ "HAL/S" ] },
         { "anchor" : "PASS", "title" : "Primary Avionics Software System (PASS)", "keywords" : [ "PASS" ] },
         { "anchor" : "BFS", "title" : "Backup Flight System (BFS)", "keywords" : [ "BFS" ] },
         { "anchor" : "FCOS", "title" : "Flight Control Operating System (FCOS)", "keywords" : [ "FCOS" ] },
+        { "anchor" : "DPS", "title" : "Data Processing Subsystem (DPS)", "keywords" : [ "DPS" ] },
         { "anchor" : "GPC", "title" : "General Purpose Computer (GPC), IBM AP-101S Avionics Computer", "keywords" : [ "AP-101S", "GPC" ] },
         { "anchor" : "FCS", "title" : "Flight Control System (FCS)", "keywords" : [ "FCS" ] },
+        { "anchor" : "GOAL", "title" : "Ground Operations Aerospace Language (GOAL)", "keywords" : [ "GOAL" ] },
+        { "anchor" : "FlightData", "title" : "Flight Data Files, Checklists, Handbooks, Procedures", "keywords" : [ "flight data" ] },
+        { "anchor" : "Training", "title" : "Crew Training Documents", "keywords" : [ "crew training" ] },
+        { "anchor" : "Missions", "title" : "Missions, Mission Types, Timelines", "keywords" : [ "Missions" ] },
         { "anchor" : "Everything", "title" : "Everything", "blurb" : blurbEverything, "all" : True, "lineNumbers" : True, "hr" : True }
     ]
 else:
