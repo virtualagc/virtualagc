@@ -353,7 +353,8 @@ cutoffMonths = 2
 if shuttle:
     blurbTop = """ 
     This is our library of Space Shuttle documents related in some way to the 
-    onboard computer systems.
+    onboard computer systems.  See also <a href="Shuttle.html">Space Shuttle
+    page</a>.
     <br><br>
     To avoid clutter on your screens, some details we have &mdash; download 
     size, archive from which the digitization was made, name of the person who scanned
@@ -1156,7 +1157,9 @@ orgAbbreviations = {
     "Intermetrics" : "Intermetrics Incorporated",
     "Rockwell" : "Rockwell International",
     "DOD" : "United Stated Department of Defense",
-    "UT" : "University of Texas at Austin"
+    "UT" : "University of Texas at Austin",
+    "UTC" : "United Technologies Corporation, Hamilton Standard Division",
+    "GE" : "General Electric"
 }
 def makeOrgHover(dict):
     hover = ""
@@ -1334,17 +1337,28 @@ if shuttle:
         { "title" : "Debug", "sortKey" : myOriginalSortKey, "blurb" : blurbDebug },
         { "anchor" : "RecentAdditions", "title" : "Recently Added Documents as of %s" % currentDateString, "sortKey" : myRecentSortKey, "blurb" : blurbRecentlyAdded },
         { "anchor" : "flowcharts", "title" : "Design Equations and Flowcharts", "keywords" : [ "flowcharts", "flowchart", "design equations" ], "blurb" : blurbFlowcharts },
+        { "anchor" : "Avionics", "title" : "Avionics", "keywords" : [ "avionics" ] },
         { "anchor" : "HAL/S", "title" : "HAL/S Programming", "keywords" : [ "HAL/S" ] },
         { "anchor" : "PASS", "title" : "Primary Avionics Software System (PASS)", "keywords" : [ "PASS" ] },
+        { "anchor" : "PFS", "title" : "Primary Flight Software (PFS)", "keywords" : [ "PFS" ] },
         { "anchor" : "BFS", "title" : "Backup Flight System (BFS)", "keywords" : [ "BFS" ] },
         { "anchor" : "FCOS", "title" : "Flight Control Operating System (FCOS)", "keywords" : [ "FCOS" ] },
         { "anchor" : "DPS", "title" : "Data Processing Subsystem (DPS)", "keywords" : [ "DPS" ] },
         { "anchor" : "GPC", "title" : "General Purpose Computer (GPC), IBM AP-101S Avionics Computer", "keywords" : [ "AP-101S", "GPC" ] },
         { "anchor" : "FCS", "title" : "Flight Control System (FCS)", "keywords" : [ "FCS" ] },
         { "anchor" : "GOAL", "title" : "Ground Operations Aerospace Language (GOAL)", "keywords" : [ "GOAL" ] },
+        { "anchor" : "papers", "title" : "Papers, Articles, Presentations, Books", "keywords" : [ "papers", "paper" ] },
+        { "anchor" : "studies", "title" : "Studies, Analyses", "keywords" : [ "studies" ] },
+        { "anchor" : "requirements", "title" : "Requirements", "keywords" : [ "requirements" ] },
+        { "anchor" : "DevTools", "title" : "Development Tools", "keywords" : [ "dev tools" ] },
         { "anchor" : "FlightData", "title" : "Flight Data Files, Checklists, Handbooks, Procedures", "keywords" : [ "flight data" ] },
-        { "anchor" : "Training", "title" : "Crew Training Documents", "keywords" : [ "crew training" ] },
-        { "anchor" : "Missions", "title" : "Missions, Mission Types, Timelines", "keywords" : [ "Missions" ] },
+        { "anchor" : "Training", "title" : "STS Training", "keywords" : [ "crew training", "training" ] },
+        { "anchor" : "FlightProcedures", "title" : "STS Flight Procedures", "keywords" : ["flight procedures" ] },
+        { "anchor" : "Support", "title" : "Support Documents" , "keywords" : ["support", "support documents"] },
+        { "anchor" : "Aerodynamics", "title" : "Aerodynamics", "keywords" : ["aerodynamics"] },
+        { "anchor" : "Structural", "title" : "Structural Design", "keywords" : ["structural"] },
+        { "anchor" : "LifeSupport", "title" : "Life Support, Environmental, Crew Station", "keywords" : ["life support"] },
+        { "anchor" : "Ground", "title" : "Ground Operations", "keywords" : ["ground"] },
         { "anchor" : "Everything", "title" : "Everything", "blurb" : blurbEverything, "all" : True, "lineNumbers" : True, "hr" : True }
     ]
 else:

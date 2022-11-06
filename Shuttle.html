@@ -1,0 +1,396 @@
+<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+  <head>
+    <title>Virtual AGC Document Library Page</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="Author" content="Ronald Burkey">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="author" content="Ronald S. Burkey">
+    <script type="text/javascript" src="Header.js"></script>
+  </head>
+  <body style="background-image: url(gray3.jpg);">
+    <script type="text/javascript">
+document.write(headerTemplate.replace("@TITLE@","Virtual AGC Project").replace("@SUBTITLE@","Space Shuttle Flight Software"))
+</script><br>
+    <div align="center"><i>(This page is preliminary and almost-entirely
+        speculative at this point, since we don't yet have the unique
+        materials which it hopes to provide.)</i><br>
+    </div>
+    <h1>Table of Contents </h1>
+    <ul>
+      <li> <a moz-do-not-send="true" href="#Introduction">Introduction</a></li>
+      <li><a moz-do-not-send="true" href="#References">References</a></li>
+      <li><a moz-do-not-send="true" href="#PASS">PASS and BFS Source
+          Code</a></li>
+      <li><a moz-do-not-send="true" href="#Emulation">Emulation</a><br>
+      </li>
+      <ul>
+        <li><a moz-do-not-send="true" href="#HAL">Phase 1</a></li>
+        <li><a moz-do-not-send="true" href="#Phase1.1">Phase 1.1</a><br>
+        </li>
+        <li><a moz-do-not-send="true" href="#Phase2">Phase 2</a><br>
+        </li>
+      </ul>
+    </ul>
+    <h1><a name="Introduction"></a>Introduction</h1>
+    <p>In so far as the Space Shuttle is concerned, my goals at present
+      are the following:<br>
+    </p>
+    <ul>
+      <li>To provide the complete source code for the software of its
+        onboard computer systems.</li>
+      <li>To provide all of the official documentation needed to
+        understand that software and to work with it.&nbsp; See the <a
+          moz-do-not-send="true" href="#References">References</a>.<br>
+      </li>
+      <li>To provide development tools suitable for working with the
+        source code, and in particular for compiling/assembling it into
+        executable form.</li>
+      <li>To provide an emulator suitable for running that executable
+        code.</li>
+      <li>For the emulator to be integrated into space-flight simulation
+        systems such as Orbiter+SSU or FlightGear.</li>
+    </ul>
+    <p>Now, there are various nuances to the statements above, such as
+      whether access to source code must be restricted in some ways,
+      rather than being freely available.&nbsp; And by "the" source
+      code, do I mean <i>all</i> revisions?&nbsp; Do I mean for <i>all</i>
+      components of the system?&nbsp; And by "the" development tools, do
+      I mean the original ones, or do I mean partial work-alikes?&nbsp;
+      And by emulation, do I mean emulation of the entire stack of code,
+      or just for some restricted portion of it?&nbsp; Answers to those
+      questions will become clear in the sections below, though there
+      aren't necessarily unique correct answers.&nbsp; One thing I can
+      say unequivocally is that integration into space-flight simulation
+      systems is my <i>hope</i> rather than anything that I'll actively
+      pursue; integration is the prerogative of the developers of those
+      space-flight simulators, rather than mine, if they feel it's
+      worthwhile for them.<br>
+    </p>
+    <p>My explanation of the Shuttle's computer system here will by
+      necessity be rather limited.&nbsp; The system is simply too
+      complex, and there are too many resources already available on the
+      web for me to suppose that a presentation by a johnny-come-lately
+      like me would be worthwhile or even interesting.&nbsp; Perhaps the
+      best place to get an introduction would be <a
+        moz-do-not-send="true"
+href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20Chapter%204.pdf">Chapter
+
+        4, "Computers in the Space Shuttle Avionics System", of James
+        Tomayko's <i>Computers in Spaceflight: The NASA Experience</i></a>.<br>
+    </p>
+    <p>With that said, here's a brief synopsis.<br>
+    </p>
+    <p>The portion of the Shuttle's full avionics system which concerns
+      us is the <i>Data Process System (DPS)</i>, which includes the <i>General
+
+        Purpose Computers (GPC)</i>, the crew interface
+      (cathode-ray-tube monitors and keyboards), the mass-memory units,
+      and the data-bus network interconnecting all of them.&nbsp; Here
+      is Figure 4-2, swiped from the afore-mentioned <i>Computers in
+        Spaceflight</i>, showing most of those components:<br>
+    </p>
+    <div align="center"><img moz-do-not-send="true"
+        src="DPS%20block%20diagram.png" alt="" width="805" height="445"><br>
+      <div align="left"><br>
+        As you can see, there are five separate GPCs.&nbsp; Each of the
+        GPCs is an AP-101S computer, designed and manufactured by IBM's
+        Federal Services Division (like the Apollo LVDC or Gemini OBC,
+        but not similar to them).<br>
+        <br>
+        Four of the GPCs run <i>identical</i> software, known as the <i>Primary
+
+          Flight Software (PFS)</i> atop the <i>Flight Control
+          Operating System (FCOS)</i>.&nbsp; PFS and FCOS together are
+        collectively referred to as the <i>Primary Avionics Software
+          Subsystem (PASS)</i>.&nbsp; The behaviors of these four copies
+        of FCOS are synchronized ... not on a CPU-cycle by CPU-cycle
+        basis, but to the extent that inputs to the GPCs from the
+        spacecraft, as well as commands output from the GPCs to the
+        spacecraft, occur at the same time.&nbsp; In particular, the
+        fact that outputs from the GPCs are synchronized allows
+        detection if one of the GPCs is behaving abnormally.<br>
+        <br>
+        The fifth GPC instead runs the <i>Backup Flight Software (BFS)</i>,
+        created entirely separately from PASS in a clean-room
+        fashion.&nbsp; This fifth GPC serves roughly the same purpose in
+        the Shuttle as the Abort Guidance System (AGS) in the Apollo
+        LM.&nbsp; BFS is specialized for abort functionality, i.e.,
+        reentry in the absence of a reliable set of GPCs running
+        PASS.&nbsp; <br>
+        <br>
+        The data bus, I'm told, is MIL-STD-1553.<br>
+        <br>
+        The crew-interface devices include:<br>
+        <ul>
+          <li>26 line by 51 character cathode ray tubes (CRTs).&nbsp;
+            The displays were capable of displaying some graphics as
+            well as text.&nbsp; The pilots had 3 MDUs, while the mission
+            specialist station had a 4th.&nbsp; Later on, 6 liquid
+            crystal displays (LCDs), similar in external appearance to
+            the CRTs, were added for the pilots.&nbsp; Together, the
+            CRTs and LCDs were referred to as Multifunction Display
+            Units (MCDUs). <br>
+          </li>
+          <li>Keyboards from Ebonex.&nbsp; The pilots had 2 of these,
+            and the mission specialist station had a 3rd.</li>
+        </ul>
+        <div align="center"><img moz-do-not-send="true"
+            src="DPS%20keyboard%20and%20CRT.png" alt="" width="952"
+            height="730"><br>
+          <br>
+        </div>
+      </div>
+      <div align="left">Here's a more-inclusive diagram (click to
+        enlarge<a moz-do-not-send="true"
+href="Shuttle/Architecture%20of%20the%20Space%20Shuttle%20Primary%20Avionics%20Software%20System%20Sept%201984.pdf"></a>)
+        of the entire avionics system, if you feel the need for one:<br>
+        <br>
+        <div align="center"><a href="shuttle_avionics_sm.jpg"><img
+              moz-do-not-send="true" src="shuttle_avionics_sm-small.jpg"
+              alt="" title="Click to enlarge" width="1200" height="333"
+              border="2"></a><br>
+        </div>
+        <br>
+        <br>
+        Like the AGC, AGS, and LVDC, which are programmed essentially in
+        the assembly language native to their CPU types, the Flight
+        Control Operating System (FCOS) is written in the assembly
+        language of the AP-101S CPU.&nbsp; The bulk of the software,
+        however, is the Primary Flight Software (PFS), and the PFS is
+        written in a higher-level language called HAL/S.&nbsp; <a
+          moz-do-not-send="true"
+          href="Shuttle/DPS%20Overview%20Workbook.pdf#page=22">The DPS
+          Overview Workbook</a> explains the overall structure of the
+        software better than I can:&nbsp; <br>
+        <blockquote>"PASS software consists of two types of software:
+          system software and application software. System software runs
+          the GPC. It is responsible for tasks such as GPC–to–GPC
+          communication, loading software from MMUs, and timekeeping
+          activities. Application software is software that runs the
+          orbiter. This includes software that calculates orbiter
+          trajectories and maneuvers, monitors various orbiter systems
+          (such as power, communications, and life support), and
+          supports mission–specific payload operations. The application
+          software is divided into broad functional areas called major
+          functions; in turn, each major function consists of
+          Operational Sequences (OPS), which are loaded into the GPCs
+          for each major phase of flight.<br>
+          <br>
+          "Finally, each OPS has one or more Major Modes (MMs) that
+          address individual events or subphases of the flight."<br>
+          <br>
+        </blockquote>
+        <div align="center"><img moz-do-not-send="true"
+            src="Shuttle%20flight%20computer%20software.png" alt=""
+            width="626" height="538"><br>
+        </div>
+      </div>
+    </div>
+    <ul>
+    </ul>
+    <h1><a name="References"></a>References</h1>
+    <p>All documents I can find that I feel are relevant to discussion
+      of the Space Shuttle's onboard computer systems and their software
+      have been collected on <a moz-do-not-send="true"
+        href="links-shuttle.html">our Space Shuttle Library page</a>.&nbsp;
+
+      However, here are some websites that have additional documents
+      that you may find interesting, and which may still contain
+      relevant materials that I've overlooked:<br>
+    </p>
+    <ul>
+      <li><a moz-do-not-send="true"
+href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.html">Johnson
+
+          Space Center's FOIA archive of flight data files</a>.</li>
+      <li><a moz-do-not-send="true"
+          href="https://sourceforge.net/projects/shuttleultra/files/References/">The
+
+          Space Shuttle Ultra site, particularly its reference section</a>.&nbsp;
+
+        Space Shuttle Ultra (SSU) is an add-on for the Orbiter
+        spaceflight simulation system.</li>
+      <li><a moz-do-not-send="true"
+          href="https://wiki.flightgear.org/Space_Shuttle_Avionics">The
+          FlightGear wiki entry on Space Shuttle avionics</a>.&nbsp;
+        FlightGear is a flight simulation system.</li>
+      <li><a moz-do-not-send="true"
+          href="https://gandalfddi.z19.web.core.windows.net/shuttle.html">Ken
+
+          Hollis's Space Shuttle page</a>.</li>
+      <li><a moz-do-not-send="true" href="https://ntrs.nasa.gov/">The
+          NASA Technical Reports Server (NTRS)</a>.</li>
+    </ul>
+    <h1><a name="PASS"></a>PASS and BFS Source Code</h1>
+    <p>I have become aware that multiple collectors have copies of what
+      I think may be the complete final revision of PASS and possibly
+      BFS, as well as others who may possess incomplete non-final
+      revisions.&nbsp; This is remarkable in contrast to my frustrations
+      in acquiring AGC/AGS/LVDC/OBS software as described elsewhere on
+      this site, particularly since a former developer of Shuttle
+      software has told me that: <br>
+    </p>
+    <blockquote>
+      <p>"When NASA shut down the Space Shuttle project, they erased all
+        of the backup storage media — since there WAS NO REQUIREMENT for
+        saving source code!&nbsp; Most of the HAL/S compiler and related
+        tools (like ... other support software were not saved), but all
+        of the HAL/S-based flight code was preserved."</p>
+    </blockquote>
+    <p>I will keep the editorial comments I'm tempted to make to myself.
+      <br>
+    </p>
+    <p>So ... the software still exists, which is good.&nbsp; But we
+      don't have any as of yet, and whether or not we can get any of it
+      remains to be seen.<br>
+    </p>
+    <p>TBD<br>
+    </p>
+    <h1><a name="Emulation"></a>Emulation</h1>
+    <p>To speak of emulation of the flight software is a bit ambiguous,
+      because there are many possibilities about how it might be done,
+      and there are engineering decisions associated with those
+      possibilities.<br>
+    </p>
+    <p>Here's the most-extreme possibility:<br>
+    </p>
+    <ul>
+      <li>Emulate the AP-101S computer itself, so that the emulation can
+        run that CPU's machine code.&nbsp; (Actually, the AP-101S is
+        microcoded, so you might step back even further and emulate the
+        microcode.)</li>
+      <li>Create an AP-101S assembler which can convert the AP-101S
+        assembly language of the FCOS into executable AP-101S machine
+        code.</li>
+      <li>Create a HAL/S compiler which can convert the HAL/S source
+        code of the PFS into AP-101S machine code.</li>
+      <li>... and similarly for BFS ...</li>
+      <li>Run 5 AP-101S emulations, running PASS and BFS, interconnected
+        by emulated data buses and simulations of the crew interface
+        devices.</li>
+    </ul>
+    <p>This is not only very complex, but also has the problem that even
+      with availability of PASS and BFS source code, we don't know
+      precisely what AP-101S machine code should be created, since there
+      are many, many ways of doing that.&nbsp; <br>
+    </p>
+    <p>And the least-extreme possibility we have is this:<br>
+    </p>
+    <ul>
+      <li>Create an emulation that runs HAL/S code directly; or at most,
+        compiles it to a p-code that can be executed by a virtual
+        machine, in much the same way that Java p-code runs on the Java
+        Virtual Machine (JVM).</li>
+    </ul>
+    <p>My intention is to at least begin with the latter approach, which
+      is discussed in the next section.&nbsp; If additional information
+      becomes available in the future, such as the original compilers,
+      then additional phases of more-complex emulations can be
+      contemplated.<br>
+    </p>
+    <h2><a name="HALS"></a>Phase 1<br>
+    </h2>
+    <p>The original HAL/S compiler was itself largely written in a
+      language called <a moz-do-not-send="true"
+        href="https://en.wikipedia.org/wiki/XPL">XPL</a>. There were two
+      versions of the compiler that I know of:<br>
+    </p>
+    <ul>
+      <li>HAL/S-360 compiled HAL/S source code into object code for the
+        IBM 360 mainframe computer.</li>
+      <li>HAL/S-FC compiled HAL/S source code into object code for the
+        IBM AP-101S avionics computer.</li>
+    </ul>
+    <p>Additionally, there was a runtime library of common mathematical
+      and other routines, as well as a program called HALLINK that
+      served as a linker for combining the object code and library into
+      executable code.<br>
+    </p>
+    <p><i>We</i>, on the other hand, will have the following programs:<br>
+    </p>
+    <ul>
+      <li>yaHAL-S.py is a Python program which compiles HAL/S source
+        code into a p-code format which I'll refer to as "p-HAL/S".</li>
+      <li>yaPASS.py is a Python program which executes p-HAL/S code and
+        has an integrated CRT+keyboard crew interface.</li>
+    </ul>
+    <h2><a name="Phase1.1"></a>Phase 1.1</h2>
+    <p>To the elements of Phase 1 above we add:<br>
+    </p>
+    <ul>
+      <li>yaGPC.c is a C subroutine which executes p-HAL/S code, and
+        provides configurable callbacks for any interactions with
+        databuses.<br>
+      </li>
+    </ul>
+    <p>The system is thus largely debugged in Phase 1, and in Phase 1.1
+      we simply add a higher-speed emulation of the GPC, stripped of my
+      specific interface between the GPC and the remainder of the
+      spacecraft.&nbsp; Phase 1.1 is intended for integration into
+      space-flight simulations, which in any case would prefer to plug
+      in their own emulation of the spacecraft (including the crew
+      interface) and would not care for mine.<br>
+    </p>
+    <blockquote>
+      <p><font size="+1"><b>→</b></font> <font size="-1">Note as an
+          aside, that the use of yaGPC in a freely-distributable
+          spaceflight-simulation system assumes that PASS and BFS are
+          freely distributable as well.&nbsp; Now at the present
+          writing, it isn't yet known known whether the International
+          Traffic in Arms Regulations (ITAR) restricts "export" of PASS
+          and BFS source code. <i>However</i>, all that is required for
+          Phase 1.1 is distribution of p-HAL/S code, rather than
+          distribution of the source code, and access to the source code
+          can be remain restricted.&nbsp; Since the Shuttle runs only
+          IBM AP-101S code, it <i>cannot run</i> p-HAL/S code, so <u>the
+            p-HAL/S code is not a component of the Shuttle, and is thus
+            unrestricted</u> whatever the status of the source
+          code.&nbsp; I apologize for introducing these annoying legal
+          technicalities into the discussion, but unfortunately it's
+          something that needs to be addressed as long as the law
+          burdens us with these regulations.&nbsp; The ideal situation
+          is certainly the free (and I believe, indisputably harmless)
+          distribution of the source code.&nbsp; I've received several
+          very-understandable complaints from my foreign colleagues on
+          this matter, pointing out their lack of enthusiasm for this
+          arrangement.&nbsp; They say, and I agree, that restriction of
+          the source code will delay integration of yaGPC.&nbsp;
+          Perhaps, even though I hope not, ultimately prevent it.&nbsp;
+          On the other hand, the penalty for violation of ITAR is a fine
+          of up to $1,000,000 and/or imprisonment for 10 years, per
+          violation.&nbsp; From that factoid, you may imagine <i>my</i>
+          lack of enthusiasm for the notion of violating ITAR
+          restrictions.&nbsp; In this case, my lack of enthusiasm must
+          take precedence over all the others.</font> </p>
+    </blockquote>
+    <p>TBD<br>
+    </p>
+    <h2><a name="Phase2"></a>Phase 2</h2>
+    <p>TBD<br>
+    </p>
+    <br>
+    <hr style="width: 100%; height: 2px;">
+    <center><br>
+      <span style="color: rgb(84, 89, 93); font-family: sans-serif;
+        font-size: 11.05px; font-style: normal; font-variant: normal;
+        font-weight: normal; letter-spacing: normal; line-height:
+        16.575px; orphans: auto; text-align: center; text-indent: 0px;
+        text-transform: none; white-space: normal; widows: 1;
+        word-spacing: 0px; -webkit-text-stroke-width: 0px; display:
+        inline !important; float: none; background-color: rgb(255, 255,
+        255);"> This page is available under the <a
+          href="https://creativecommons.org/publicdomain/zero/1.0/">
+          Creative Commons No Rights Reserved License</a> </span><br>
+      <i><font size="-1">Last modified by <a
+            href="mailto:info@sandroid.org">Ronald Burkey</a> on
+          2022-11-06 <br>
+          <br>
+          <a href="https://www.ibiblio.org"> <img style="border: 0px
+              solid ; width: 300px; height: 100px;" alt="Virtual AGC is
+              hosted by ibiblio.org" src="hosted.png" width="300"
+              height="100"></a><br>
+        </font></i></center>
+    <br>
+  </body>
+</html>
