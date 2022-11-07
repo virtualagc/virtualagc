@@ -76,6 +76,7 @@ document.write(headerTemplate.replace("@TITLE@","Virtual AGC Project").replace("
         moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20Chapter%204.pdf">Chapter
 
+
         4, "Computers in the Space Shuttle Avionics System", of James
         Tomayko's <i>Computers in Spaceflight: The NASA Experience</i></a>.<br>
     </p>
@@ -83,6 +84,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
     </p>
     <p>The portion of the Shuttle's full avionics system which concerns
       us is the <i>Data Process System (DPS)</i>, which includes the <i>General
+
 
         Purpose Computers (GPC)</i>, the crew interface
       (cathode-ray-tube monitors and keyboards), the mass-memory units,
@@ -99,6 +101,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
         but not similar to them).<br>
         <br>
         Four of the GPCs run <i>identical</i> software, known as the <i>Primary
+
 
           Flight Software (PFS)</i> atop the <i>Flight Control
           Operating System (FCOS)</i>.&nbsp; PFS and FCOS together are
@@ -195,6 +198,7 @@ href="Shuttle/Architecture%20of%20the%20Space%20Shuttle%20Primary%20Avionics%20S
       have been collected on <a moz-do-not-send="true"
         href="links-shuttle.html">our Space Shuttle Library page</a>.&nbsp;
 
+
       However, here are some websites that have additional documents
       that you may find interesting, and which may still contain
       relevant materials that I've overlooked:<br>
@@ -203,11 +207,14 @@ href="Shuttle/Architecture%20of%20the%20Space%20Shuttle%20Primary%20Avionics%20S
       <li><a moz-do-not-send="true"
 href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.html">Johnson
 
+
           Space Center's FOIA archive of flight data files</a>.</li>
       <li><a moz-do-not-send="true"
           href="https://sourceforge.net/projects/shuttleultra/files/References/">The
 
+
           Space Shuttle Ultra site, particularly its reference section</a>.&nbsp;
+
 
         Space Shuttle Ultra (SSU) is an add-on for the Orbiter
         spaceflight simulation system.</li>
@@ -217,6 +224,7 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
         FlightGear is a flight simulation system.</li>
       <li><a moz-do-not-send="true"
           href="https://gandalfddi.z19.web.core.windows.net/shuttle.html">Ken
+
 
           Hollis's Space Shuttle page</a>.</li>
       <li><a moz-do-not-send="true" href="https://ntrs.nasa.gov/">The
@@ -238,13 +246,109 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
         tools (like ... other support software were not saved), but all
         of the HAL/S-based flight code was preserved."</p>
     </blockquote>
-    <p>I will keep the editorial comments I'm tempted to make to myself.
-      <br>
+    <p>I will keep the editorial comments I'm tempted to make to
+      myself.&nbsp; As an aside, I'll also comment that fortunately the
+      source code of the original HAL/S compiler was saved after all,
+      but by individuals rather than by any of the organizational actors
+      involve.<br>
     </p>
     <p>So ... the software still exists, which is good.&nbsp; But we
       don't have any as of yet, and whether or not we can get any of it
       remains to be seen.<br>
     </p>
+    <p>But assuming that we can eventually get access to it, working
+      with the code requires knowledge of the HAL/S language.&nbsp;
+      Fortunately, we have a fair amount of documentation of that:<br>
+    </p>
+    <ol>
+      <li>The recommended starting point is "<a moz-do-not-send="true"
+          href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf">Programming
+          in HAL/S</a>", which was intended as an introduction to
+        programming in HAL/S and is organized as a tutorial.</li>
+      <li>The tutorial itself points out that it is not a definitive
+        exposition of the language, and recommends proceeding afterward
+        to the <a moz-do-not-send="true"
+          href="Shuttle/HAL_S%20Language%20Specification%20Nov%202005.pdf">"HAL/S
+          Language Specification"</a>, which contains a much-more-formal
+        specification of the language syntax ... fortunately in the form
+        of easy-to-understand graphs of the syntax, rather than the (in
+        my humble opinion) a less-comprehensible Backus-Naur format
+        (BNF).</li>
+      <li>Or to the <a moz-do-not-send="true"
+          href="Shuttle/HAL_S%20Programmers%20Guide%20Nov%202005.pdf">"HAL/S
+          Programmer's Guide"</a>.</li>
+      <li>And finally, the <a moz-do-not-send="true"
+          href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf">"HAL/S-FC
+          User's Guide"</a> explains how to compile and execute a HAL/S
+        program.&nbsp; That explanation is, of course, completely
+        irrelevant to our present situation, but you may find that the
+        document answers some questions left unanswered by the preceding
+        documents.&nbsp; (You many notice as well that our library
+        contains a "HAL/S-360 User's Guide"; that's simply a predecessor
+        of the "HAL/S-FC User's Guide".&nbsp; The former assumes that
+        the computer on which the compiler ran was an IBM-360, while the
+        latter assumed it was some arbitrary "mainframe" to which the
+        compiler had been ported.)<br>
+      </li>
+    </ol>
+    <p>We actually have quite a few revisions of each of the middle two
+      documents in our library, spanning the mid-1970's to the
+      mid-2000's, though I've only chosen to link the latest versions of
+      those documents above.&nbsp; Here are a few takeaways about the
+      HAL/S language that I imagine would commonly be asked by newcomers
+      to it:<br>
+    </p>
+    <ul>
+      <li>HAL/S is concerned with insuring correctness by design, in the
+        service of which it employs concepts from structured
+        programming. <br>
+      </li>
+      <li>HAL/S is a strongly-typed language, but those datatypes
+        include not just integers and floats (whose datatype is actually
+        "scalar"), but others such vectors, matrices, and arrays (which
+        is a distinct datatype from vectors and matrices).</li>
+      <li>By default, the vector datatype consists of 3-vectors, while
+        the matrix datatype consists of 3×3 matrices.&nbsp; Indices
+        (subscripts) of vectors and matrices begin at 1 rather than 0.<br>
+      </li>
+      <li>Arithmetical expressions such as A=B+C work not only with
+        float (scalar) and integer datatypes but with vectors and
+        matrices as well, wherever compatible.</li>
+      <li>There is no dynamic allocation of memory.&nbsp; Intended
+        side-effects of that are that there is no stack and no
+        recursion.&nbsp; The total memory usage is known at build-time.</li>
+      <li>All keywords are reserved.</li>
+      <li>HAL/S has no means of directly accessing specific addresses in
+        memory.</li>
+      <li>HAL/S statements:</li>
+      <ul>
+        <li>End with the semicolon (';') character.</li>
+        <li>Several may appear on the same line of source.</li>
+        <li>Statements may be broken across several lines of source.</li>
+        <li>An end-of-line is equivalent to a space character.<br>
+        </li>
+      </ul>
+      <li>Identifiers such as variable names:</li>
+      <ul>
+        <li>Upper-case only.</li>
+        <li>Maximum length of 32 characters.&nbsp; <br>
+        </li>
+        <li>Must begin with an alphabetic character.&nbsp; <br>
+        </li>
+        <li>Can contain alphanumerics and underscore characters, '_'.</li>
+        <li>Cannot end with an underscore.</li>
+        <li>Cannot be broken across lines.</li>
+        <li>HAL/S keywords cannot be used as identifiers.</li>
+      </ul>
+      <li>Two identifiers (variables or constants) separated by spaces
+        are multiplied ... in fact, there is no explicit multiplication
+        operator symbol such as '*'.&nbsp; ('*' is actually the vector
+        cross-product operator.)<br>
+      </li>
+      <li>Constant expressions such as "3 + 1/7" are evaluated at
+        compile-time rather than at runtime, to the extent possible.<br>
+      </li>
+    </ul>
     <p>TBD<br>
     </p>
     <h1><a name="Emulation"></a>Emulation</h1>
@@ -344,6 +448,7 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
           distribution of the source code, and access to the source code
           can be remain restricted.&nbsp; Since the Shuttle runs only
           IBM AP-101S code, it <i>cannot run</i> p-HAL/S code, so <u>the
+
             p-HAL/S code is not a component of the Shuttle, and is thus
             unrestricted</u> whatever the status of the source
           code.&nbsp; I apologize for introducing these annoying legal
@@ -384,7 +489,7 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2022-11-06 <br>
+          2022-11-07 <br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
