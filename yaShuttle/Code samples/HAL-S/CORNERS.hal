@@ -1,0 +1,20 @@
+# This sample came from PDF p. 39 of "Programming in HAL/S".
+# For a parallelogram, you input the length of the long side, the short side,
+# and the angle between them (in radians).  It then computes the positions
+# of the 4 corners on the assumption that a short side and long side meet
+# at the origin, that the long side proceeds in the + direction along the 
+# x-axis, and that the parallelogram is in the upper-right quadrant.
+
+  CORNERS: PROGRAM;
+     DECLARE SCALAR,
+                LONG, SHORT, ALPHA;
+     DECLARE VECTOR(2),
+     		AB, BC, CD, DA;
+     READ(5) LONG, SHORT, ALPHA;
+     AB = 0;
+     BC = VECTOR$2(LONG, 0);
+     DA = VECTOR$2(SHORT COS(ALPHA), SHORT SIN(ALPHA));
+     CD = BC + DA;
+     WRITE(6) AB, BC, CD, DA;
+   CLOSE CORNERS;
+   

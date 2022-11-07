@@ -1,0 +1,21 @@
+# This sample code was found on PDF p. 71 of "Progamming in HAL/S".
+# It's a silly little Monte Carlo computation of pi, by seeing if
+# randomly-chosen points are inside of a circle vs outside it but
+# within the enclosing square.
+
+  DARTBOARD_APPROXIMATION:
+  PROGRAM;
+     DECLARE SCALAR,
+     		X, Y;
+     DECLARE INTEGER,
+     		I, HIT, MISS;
+     DO FOR I = 1 TO 1000;
+     	X = RANDOM;
+     	Y = RANDOM;
+     	IF X**2 + Y**2 <= 1 THEN
+     	   HIT = HIT + 1;
+     	ELSE
+     	   MISS = MISS + 1;
+     END;
+     WRITE(6) 4 HIT / 1000;
+  CLOSE DARTBOARD_APPROXIMATION;

@@ -1,0 +1,26 @@
+# I found this sample on PDF pp. 47-48 of "Programming in HAL/S".
+# It illustrates slicing in vectors and matrices.
+
+  ROWS:
+  PROGRAM;
+     DECLARE 	M MATRIX,
+     		C SCALAR,
+     		I INTEGER,
+     		J INTEGER;
+     		
+C  MULTIPLY A ROW BY A (NONZERO) CONSTANT:
+   
+     M$(I, *) = C M$(I, *);
+     
+C  ADD A CONSTANT MULTIPLE OF ROW J TO ROW I:
+   
+     M$(I, *) = M$(I, *) + C M$(J, *);
+     
+C  EXCHANGE ROWS I AND J:
+   
+     TEMP = M$(I, *);
+     M$(I, *) = M$(J, *);
+     M$(J, *) = TEMP;
+     
+  CLOSE ROWS;
+  

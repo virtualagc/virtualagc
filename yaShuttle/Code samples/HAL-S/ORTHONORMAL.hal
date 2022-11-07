@@ -1,0 +1,27 @@
+# This sample is from PDF p. 44 of "Programming in HAL/S".  The code listed 
+# there is the output from the original assembler ... which is valid source
+# code, true, but not actually in the form somebody likely inputted it  
+# using punchcards.  (Recall that the assembler created a listing file that 
+# had essentially been pretty-printed, without any regard to the actual
+# format of the input.)  I've restored it to something probably closer to
+# what was on the original punchcards.
+
+  ORTHONORMAL: PROGRAM;
+  
+C  THIS PROGRAM CONSTRUCTS AN ORTHONORMAL 
+C  SET FROM X,Y AND Z AND THEN EXPRESSES
+C  V IN IT
+
+    DECLARE VECTOR, X, Y, Z, V, A1, A2, A3;
+    WRITE(6) DET(MATRIX(X, Y, Z));
+    
+C  IF RESULT IS ZERO, X, Y AND Z DO NOT FORM
+C  BASIS ... EXPECT ERROR BELOW.
+
+    A1 = UNIT(X);
+    A2 = UNIT(Y - (Y . A1) A1);
+    A3 = A1 * A2;
+    V = MATRIX(A1, A2, A3) V;
+           
+  CLOSE;
+      

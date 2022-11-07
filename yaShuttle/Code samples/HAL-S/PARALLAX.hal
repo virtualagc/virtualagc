@@ -1,0 +1,19 @@
+# This sample was found on PDF p. 53 of "Programming in HAL/S".
+# It illustrates the use of double precision.  It reads a 
+# pair of angles for spring and another pair of angles for fall,
+# both in radians, and outputs single number representing the
+# distance of the object in miles. While it doesn't exactly
+# say what the angles represent, I suppose they must be right 
+# ascension and declination.
+
+  PARALLAX:
+  PROGRAM;
+     DECLARE EARTH_ORBIT CONSTANT(92.9E6);
+     DECLARE VECTOR(2),
+     		SPRING_READING, FALL_READING;
+     DECLARE DEVIATION SCALAR DOUBLE;
+     READ(5) SPRING_READING, FALL_READING;
+     DEVIATION = ABVAL(SPRING_READING - FALL_READING) / 2;
+     WRITE(6) 'DISTANCE=', EARTH_ORBIT / TAN(DEVIATION), 'MILES';
+  CLOSE PARALLAX;
+  
