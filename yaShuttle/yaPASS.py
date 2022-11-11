@@ -25,6 +25,7 @@ scale = 0.66667
 windowName = "Space Shuttle Keyboard"
 numMonitors = 1
 scaleMDU = 1.0
+textHeight = 23
 windowNameMDU = "Space Shuttle Monitor"
 test = False
 for param in sys.argv[1:]:
@@ -42,6 +43,8 @@ for param in sys.argv[1:]:
         windoNameMDU = param[11:]
     elif param == "--test":
         test = True
+    elif param[:14] == "--text-height=":
+        textHeight = int(param[14:])
     elif param == "--help":
         print("""
         Phase 1 Emulator for Space Shuttle DPS.  Usage:
@@ -59,6 +62,13 @@ for param in sys.argv[1:]:
                             base name.
         --monitors=N, --scale-mdu=F, --name-mdu=S
                             Same, but for monitors rather than keyboards.
+        --text-height=N     N is a value that determines the vertical spacing
+                            of lines of text on the displays.  The usable
+                            range is about 12 (most tightly spaced) through 
+                            23 (most loosely spaced).  The font itself is not
+                            affected.  Typical settings might be
+                                23      For early hardware. (Default.)
+                                18      For late hardware.
         --test              Run crew-interface test, without CPU emulation.
         """)
         sys.exit(0)
@@ -80,20 +90,27 @@ monitorNames = []
 for i in range(numMonitors):
     monitorNames.append("%s %d" % (windowNameMDU, i+1))
 crewInterface.initializeKeyboards(keyboardDatabus, keyboardNames, scale)
-crewInterface.initializeMonitors(monitorDatabus, monitorNames, scaleMDU)
+crewInterface.initializeMonitors(monitorDatabus, monitorNames, scaleMDU, textHeight)
 crewInterfaces = threading.Thread(target=crewInterface.runCrewInterface, args=())
 crewInterfaces.start()
 
 # A simple test loop that just continually queries the databus for new input.
 if test:
+    # First, fill the screen with text.
+    testString = "123456789012345678901234567890123456789012345678901"
+    for i in range(26):
+        monitorDatabus.put("101\ttext\t%d\t1\t#FFA500\t'%s'" % (i + 1, testString))
+        testString = testString[1:] + testString[:1]
+    # Monitor inputs from the simulated buttons and echem them back
+    # to the monitors forever.
     while True:
         try:
             item = keyboardDatabus.get(block=False)
         except:
             continue
         fields = item.split('\t')
-        print("Received: ", fields)
-        monitorDatabus.put("101\ttext\t10\t10\t#FFA500\t'%s'" % item.replace("\t", " "))
+        #print("Received: ", fields)
+        monitorDatabus.put("101\ttext\t10\t10\t#FFA500\t'   %-30s   '" % item.replace("\t", " "))
         if item == "QUIT":
             break
 

@@ -1,0 +1,30 @@
+# This sample is modeled after PDF p. 80 in "Programming in HAL/S", 
+# but I've modified it quite a lot because the original didn't 
+# produce any output that could actually be checked.  What the 
+# sample does is to exercise the CASE construct.  It should output
+#	0 100
+#	1 200
+#	2 300
+#	3 400
+#	4 500
+#	5 100
+
+  EXAMPLE_4A:
+  PROGRAM;
+     DECLARE I INTEGER;
+     DECLARE SCALAR, VALUE;
+     
+     DO FOR I = 0 TO 5;
+        DO CASE I;
+	   ELSE
+	      VALUE = 100;
+	   VALUE = 200;
+	   VALUE = 300;
+	   VALUE = 400;
+	   DO;
+	      VALUE = 500;
+	   END;
+	END;
+	WRITE(6) I, VALUE;
+     END;
+  CLOSE EXAMPLE_4A;

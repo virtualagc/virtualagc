@@ -52,7 +52,7 @@ also emulated as a queue, the entries of which are one of the following:
 
     N\ttext\tROW\tCOLUMN\tCOLOR\tTEXT
     N\tflash\tROW\tCOLUMN\tCOLOR\tTEXT
-    ...
+    N\tbackground\tCOLOR
     
 N indicates the targeted monitor, using the numbering scheme mentioned for 
 keyboards:  101 is the first monitor, 102 is the second, and so on.
@@ -65,6 +65,7 @@ monitors are displayed at scale=1.0, each character can occupy a space of about
 12x23 pixels (if there's no spaces in between), with about a 10-pixel margin 
 between text and the edge of the display area.  (It's difficult to make exact 
 statements about the margins, because the display area has rounded corners.) 
+The "background" command affect the background color going forward.
 
 Using the cv2 module for display, flashing text may be rather expensive (CPU-wise)
 to accommodate, so I don't guarantee that there will actually be any difference
@@ -126,12 +127,16 @@ topViewport = 55
 leftViewport = 106 
 bottomViewport = 675
 rightViewport = 739
-topTextMargin = 10 # From edge of viewport to top of text.
-leftTextMargin = 10 # From edge of viewport ot left of text.
 xSpacingText = 12
 ySpacingText = 23
+yAdjustment = round(ySpacingText / 4)
+topTextMargin = 10 - yAdjustment # From edge of viewport to top of text.
+leftTextMargin = 10 # From edge of viewport ot left of text.
 numTextRows = 26
 numTextColumns = 51
+textScale = 0.5
+textBackgroundOffset = yAdjustment
+textBackgroundColors = []
 
 # Called on every mouse event in the crew interface GUI.
 # I.e., basically every time a button is pressed. 
@@ -157,6 +162,7 @@ def clickEvent(event, x, y, flags, interfaceNumber):
                      break
             if not found:
                 return
+            found = False
             for row in range(numRows - 1, -1, -1):
                 if y >= tops[row]:
                     if y > bottoms[row]:
@@ -198,6 +204,7 @@ def clickEvent(event, x, y, flags, interfaceNumber):
                      break
             if not found:
                 return
+            found = False
             if y >= topMDU:
                 if y > bottomMDU:
                     return
@@ -248,17 +255,19 @@ def initializeKeyboards(databus, names = ["Space Shuttle Keyboard"],
         bottoms.append(round(tops[-1] + size))
 
 def initializeMonitors(databus, names=["Space Shuttle Display"],
-                newscale=scaleMDU, file=imageFileMDU):
+                newscale=scaleMDU, textHeight=23, file=imageFileMDU):
     global  imageFileMDU, leftMDU, topMDU, sizeMDU, xSpacingMDU, \
             numColumnsMDU, buttonsMDU, leftsMDU, rightsMDU, bottomMDU, \
             windowCountMDU, monitorNames, scaleMDU, monitorDatabus, \
             topViewport, leftViewport, bottomViewport, rightViewport, \
-            topTextMargin, leftTextMargin, xSpacingText, ySpacingText
+            topTextMargin, leftTextMargin, xSpacingText, ySpacingText, \
+            textScale, textBackgroundOffset, yAdjustment
     monitorDatabus = databus
     windowCountMDU = len(names)
     monitorNames = names
     imageFileMDU = file
     scaleMDU = newscale
+    ySpacingText = textHeight
     if scaleMDU != 1.0:
         leftMDU *= scaleMDU
         topMDU *= scaleMDU
@@ -272,6 +281,9 @@ def initializeMonitors(databus, names=["Space Shuttle Display"],
         leftTextMargin *= scaleMDU
         xSpacingText *= scaleMDU
         ySpacingText *= scaleMDU
+        textScale *= scaleMDU
+        textBackgroundOffset *= scaleMDU
+        yAdjustment = round(ySpacingText / 4)
     leftsMDU = []
     rightsMDU = []
     for i in range(numColumnsMDU):
@@ -279,10 +291,13 @@ def initializeMonitors(databus, names=["Space Shuttle Display"],
         rightsMDU.append(round(leftsMDU[-1] + sizeMDU))
     bottomMDU = round(topMDU + sizeMDU)
     topMDU = round(topMDU)
+    for i in range(len(names)):
+        textBackgroundColors.append((0, 0, 0)) # BGR
 
 def runCrewInterface():  
     global transparent, imgs, keyboardDatabus, scale 
     global transparentMDU, imgsMDU, monitorDatabus, scaleMDU 
+    global textBackgroundColor
     img = cv2.imread(imageFile, 1)
     dim = (img.shape[1], img.shape[0])
     if scale != 1.0:
@@ -326,14 +341,27 @@ def runCrewInterface():
             while True:
                 item = monitorDatabus.get(block=False)
                 fields = item.split('\t')
+                if len(fields) == 3 and fields[1] == "background" and fields[2][:1] == "#":
+                    try:
+                        monitorNumber = int(fields[0]) - 101
+                        color = int(fields[2][1:], 16)
+                        R = 0xFF & (color >> 16)
+                        G = 0xFF & (color >> 8)
+                        B = 0xFF & color
+                        textBackgroundColors[monitorNumber] = (B, G, R)
+                    except:
+                        pass
+                    continue
                 if len(fields) == 6 and fields[1] in ['text', 'flash']:
                     try:
-                        monitorNumber = int(fields[0])
+                        monitorNumber = int(fields[0]) - 101
                         flash = fields[1] == 'flash'
                         row = int(fields[2])
                         column = int(fields[3])
                         color = fields[4]
                         text = fields[5]
+                        if text[:1] == "'" and text[-1:] == "'":
+                            text = text[1:-1]
                     except:
                         print("Corrupted command from GPC: ", item)
                         continue
@@ -347,12 +375,32 @@ def runCrewInterface():
                         continue
                     try:
                         color = int(color[1:], 16)
+                        R = 0xFF & (color >> 16)
+                        G = 0xFF & (color >> 8)
+                        B = 0xFF & color
                     except:
                         print("Illegal color string: ", item)
                         continue
                     # So if we've gotten to here, we have a perfectly legal
                     # command for drawing text on the monitor.
-                    print("Legal command: ", fields)
+                    #print("Legal command: ", monitorNumber, flash, row, column, color, text)
+                    monitor = imgsMDU[monitorNumber]
+                    for i in range(len(text)):
+                        char = text[i]
+                        x = round(leftViewport + leftTextMargin + xSpacingText * (column - 1 + i))
+                        y = round(topViewport + topTextMargin + ySpacingText * row)
+                        yt = round(y - ySpacingText + textBackgroundOffset)
+                        yb = round(y + textBackgroundOffset)
+                        try:
+                            cv2.rectangle(monitor, (x, yt), (x+xSpacingText, yb), 
+                                        textBackgroundColors[monitorNumber], -1)
+                            cv2.putText(monitor, char, (x, y), 
+                                        cv2.FONT_HERSHEY_SIMPLEX, textScale,
+                                        (B, G, R), 1)
+                        except Exception as e:
+                            print("Oops", e)
+                    cv2.imshow(monitorNames[monitorNumber], imgsMDU[monitorNumber])
+                    cv2.waitkey(1)
                     continue
                 else:
                     print("Unrecognized command from GPC: ", item)
