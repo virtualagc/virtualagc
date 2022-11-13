@@ -47,22 +47,64 @@ Aside from attempting to acquire Space Shuttle source code, original development
 
 This is an open area, as many additional developments are possible.  Here's a list of some of the possibilities:
 
-* The original compiler, HAL/S-360 (HAL/S-FC) ran on an IBM System/360 mainframe.  The [open source Hercules System/370 emulator](http://www.hercules-390.org/) is available, as is the [MVS operating system][http://www.ibiblio.org/jmaynard/], as is the [XPL compiler for MVS](https://www.jaymoseley.com/hercules/compilers/list_of.htm#XPL), so it's possible at least in principal to run the original HAL/S compiler.
+* The original compiler, HAL/S-360 (HAL/S-FC) ran on an IBM System/360 mainframe.  The [open source Hercules System/370 emulator](http://www.hercules-390.org/) is available, as is the [MVS operating system](http://www.ibiblio.org/jmaynard/), as is the [XPL compiler for MVS](https://www.jaymoseley.com/hercules/compilers/list_of.htm#XPL), so it's possible at least in principal to run the original HAL/S compiler.
 * Exploiting the original compiler to produce p-code.
 * Using a modern [XPL-to-C preprocessor](https://sourceforge.net/projects/xpl-compiler/) to run the original compiler on modern computers.
 * Writing an emulator for the IBM AP-101S avionics computer
 
 But I'm sure there are many other things that could be done as well.
 
-# The Modern Compiler: yaHAL/S
+# The Modern HAL/S Compiler: yaHAL/S
 
-TBD
+Here's my current plan, subject to change.
+
+A Backus-Naur Form (BNF) description of the HAL/S language appears in the contemporary documentation, in (AppendiX G of the HAL/S Language Specification](https://www.ibiblio.org/apollo/Shuttle/HAL_S%20Language%20Specification%20Nov%202005.pdf#page=209).  The link is to the latest version of the specification that's available, although as far as I can tell, the same description appears in the very earliest available version, as well as in the original source code, modulo typos.
+
+The documented BNF description is actually incomplete, in the sense that it is missing the following "nonterminals", most or all of which are elementary types:
+
+<pre>
+      &lt;EMPTY>
+      &lt;NO ARG ARITH FUNC>
+      &lt;ARITH FUNC>
+      &lt;NO ARG CHAR FUNC>
+      &lt;CHAR FUNC>
+      &lt;NO ARG BIT FUNC>
+      &lt;BIT FUNC>
+      &lt;NO ARG STRUCT FUNC>
+      &lt;STRUCT FUNC>
+      &lt;ARITH ID>
+      &lt;CHAR ID>
+      &lt;BIT ID>
+      &lt;STRUCTURE ID>
+      &lt;LABEL>
+      &lt;SIMPLE NUMBER>
+      &lt;COMPOUND NUMBER>
+      &lt;CHAR STRING>
+      &lt;TEXT>
+      &lt;EVENT>
+      &lt;IDENTIFIER>
+      &lt;LEVEL>
+      &lt;% MACRO NAME>
+      &lt;DCL LIST>
+      &lt;STRUCT TEMPLATE>
+</pre>
+
+At any rate, those missing nonterminals need to be reverse-engineered and their rules created, into order to get a complete BNF description of the language.  
+
+Having done that, I plan to use the [BNF Converter (BNFC)](https://bnfc.digitalgrammars.com/) compiler-compiler to produce a HAL/S compiler frontend.  Two additional major steps are needed:
+
+1. The BNF description cannot be used directly by BNFC, and instead needs first to be converted into an intermediate form known as [Labeled BNF (LBNF) grammar](https://bnfc.readthedocs.io/en/latest/lbnf.html)
+2. A compiler backend has to be created which can convert compiler frontend's output to the target form, which in this case is p-HAL/S p-code.
+
+More TBD.
 
 # The p-Code Format:  p-HAL/S
 
 TBD
 
 # The PHase 1 Emulator:  yaPASS.py
+
+I'm not sure there's any reason to go into much detail about this, but the program consists basically of two Python modules, namely shuttleCrewInterface.py (which emulates displays and keyboards) and gpc.py (which emulates the CPU and executes the p-code).  The two interact via Python thread-safe queues, which emulate the Shuttle's databuses.  Button presses in the crew interface are conveyed to the CPU by passing data in one direction, while commands for displaying data on the displays are passed from the CPU to the crew interface by messages in the opposite direction.
 
 TBD
 
