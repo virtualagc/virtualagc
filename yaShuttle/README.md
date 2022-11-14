@@ -56,45 +56,56 @@ But I'm sure there are many other things that could be done as well.
 
 # The Modern HAL/S Compiler: yaHAL/S
 
-Here's my current plan, subject to change.
+Here's my current progress and plan.
 
-A Backus-Naur Form (BNF) description of the HAL/S language appears in the contemporary documentation, in (AppendiX G of the HAL/S Language Specification](https://www.ibiblio.org/apollo/Shuttle/HAL_S%20Language%20Specification%20Nov%202005.pdf#page=209).  The link is to the latest version of the specification that's available, although as far as I can tell, the same description appears in the very earliest available version, as well as in the original source code, modulo typos.
+A Backus-Naur Form (BNF) description of the HAL/S language appears in the contemporary documentation, in (AppendiX G of the HAL/S Language Specification](https://www.ibiblio.org/apollo/Shuttle/HAL_S%20Language%20Specification%20Nov%202005.pdf#page=209).  The link is to the latest version of the specification that's available, although as far as I can tell, the same description appears in the very earliest available version, as well as in the original source code, modulo typos.  I have converted that into a machine-readable form, namely the file
 
-The documented BNF description is actually incomplete, in the sense that it is missing the following "nonterminals", most or all of which are elementary types:
+    HAL-S.bnf
 
-<pre>
-      &lt;EMPTY>
-      &lt;NO ARG ARITH FUNC>
-      &lt;ARITH FUNC>
-      &lt;NO ARG CHAR FUNC>
-      &lt;CHAR FUNC>
-      &lt;NO ARG BIT FUNC>
-      &lt;BIT FUNC>
-      &lt;NO ARG STRUCT FUNC>
-      &lt;STRUCT FUNC>
-      &lt;ARITH ID>
-      &lt;CHAR ID>
-      &lt;BIT ID>
-      &lt;STRUCTURE ID>
-      &lt;LABEL>
-      &lt;SIMPLE NUMBER>
-      &lt;COMPOUND NUMBER>
-      &lt;CHAR STRING>
-      &lt;TEXT>
-      &lt;EVENT>
-      &lt;IDENTIFIER>
-      &lt;LEVEL>
-      &lt;% MACRO NAME>
-      &lt;DCL LIST>
-      &lt;STRUCT TEMPLATE>
-</pre>
+with corrected typos and some reformatting.  Besides that, there were a couple of illegal constructions, 
 
-At any rate, those missing nonterminals need to be reverse-engineered and their rules created, into order to get a complete BNF description of the language.  
+    <OR> ::= | | OR
+    <CAT> ::= || | OR
 
-Having done that, I plan to use the [BNF Converter (BNFC)](https://bnfc.digitalgrammars.com/) compiler-compiler to produce a HAL/S compiler frontend.  Two additional major steps are needed:
+which I've changed to 
 
-1. The BNF description cannot be used directly by BNFC, and instead needs first to be converted into an intermediate form known as [Labeled BNF (LBNF) grammar](https://bnfc.readthedocs.io/en/latest/lbnf.html)
+    <OR> ::= <CHAR VERTICAL BAR> | OR
+    <CAT> ::= <CHAR VERTICAL BAR> <CHAR VERTICAL BAR> | CAT
+
+The type <CHAR VERTICAL BAR> naturally does not exist in the original BNF, nor in HAL-S.bnf, since there's no standard way in BNF I can discern to create a rule for it.  Besides which, the documented BNF description is actually incomplete, in the sense that it is missing rules for various other types it refers to, most or all of which are elementary types, such as <SIMPLE NUMBER>, <IDENTIFIER>, and so on.  Rules for all of these need to be created, into order to get a complete description of the language.  
+
+Having a complete formal description of HAL/S in hand, I use the [BNF Converter (BNFC)](https://bnfc.digitalgrammars.com/) compiler-compiler to produce a HAL/S compiler frontend. BNFC does not actually take a BNF description as input, but requires an alternate form known as [Labeled BNF (LBNF) grammar](https://bnfc.readthedocs.io/en/latest/lbnf.html).  I have therefore created a script,
+ 
+    bnf2lbnf.py
+
+that can convert my BNF to LBNF.  Although since the script is rather simple-minded in terms of its pattern matching, the original BNF description has been massaged somewhat in HAL-S.bnf in terms of its whitespace.
+ 
+I find it more-convenient to provide the rules for the missing types mentioned earlier in LBNF form rather than BNF, because LBNF has ready means of creating various of those rules (particularly <CHAR VERTICAL BAR>, but others as well) by means of regular expressions.  All of those additional definitions reside in a file called
+ 
+    extraHAL-S.lbnf
+
+In Linux or Mac OS X, the complete description of HAL/S in LBNF be created by the following command:
+ 
+    cat extraHAL-S.lbnf HAL-S.bnf | bnf2lbnf.py > HAL-S.cf
+
+In Windows, I've read (though I don't vouch for it!) that you'd replace `cat` by `type`.
+ 
+Assuming you've installed BNFC for your particular operating system (Linux, Windows, and Mac OS X are available, and maybe others for all I know), you're ready to build the compiler front-end.  I'd suggest you do this in a separate folder, because the process creates a lot of files.  In Linux, the process looks like this, assuming you're starting from the directory which contains HAL-S.cf:
+ 
+    md temp
+    cd temp
+    bnfc --c -m ../HAL-S.cf
+    make
+
+(If you've previously performed these same steps in the same directory, you'd also be advised to do a `make distclean` prior to the `bnfc ...`, or else you're likely to find that whatever changes have been made to HAL-S.cf in the meantime won't actually appear in the front-end you create.)
+ 
+As you may or may not be able to discern, what the `bnfc` command actually does is to create C-language source code for the HAL/S compiler front-end, and then compiles that C code.  In fact, BNFC can actually create the source code for the compiler front-end in a variety of languages, such as C++ or Java, and I've just chosen C as my personal preference.
+ 
+Some additional major steps are needed *after* creating the compiler front-end, in order to have a complete compiler:
+
+1. The BNF description cannot be used directly by BNFC, and instead needs first to be converted into an intermediate form known as 
 2. A compiler backend has to be created which can convert compiler frontend's output to the target form, which in this case is p-HAL/S p-code.
+3. A formatter for an output listing needs to be created.
 
 More TBD.
 
