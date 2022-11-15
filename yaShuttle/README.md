@@ -120,7 +120,7 @@ The compiler front-end produced in this manner is called `TestHAL_S`, and it is 
 
     TestHAL_S SOURCE.hal
 
-However ... there are certain features of HAL/S which are not captured by the BNF (or LBNF) description of it, and which we cannot work around.  Specifically, I refer to the fact that while HAL/S is essentially free-form in columns 2 and rightward &mdash; i.e., it does not respect column alignment or line breaks &mdash; it nevertheless treats column 1 specially.  Column 1 is normally blank, but can also contain the special characters
+However ... there are certain features of HAL/S which are not captured by the BNF (or LBNF) description of it, and which we cannot work around if we confine ourselves to BNF/LBNF.  Specifically, I refer to the fact that while HAL/S is essentially free-form in columns 2 and rightward &mdash; i.e., it does not respect column alignment or line breaks &mdash; it nevertheless treats column 1 specially.  Column 1 is normally blank, but can also contain the special characters
 
 * C &mdash; full-line comment.
 * D &mdash; compilation directive line.
