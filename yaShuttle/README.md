@@ -58,7 +58,7 @@ But I'm sure there are many other things that could be done as well.
 
 Here's my current progress and plan.
 
-A Backus-Naur Form (BNF) description of the HAL/S language appears in the contemporary documentation, in (AppendiX G of the HAL/S Language Specification](https://www.ibiblio.org/apollo/Shuttle/HAL_S%20Language%20Specification%20Nov%202005.pdf#page=209).  The link is to the latest version of the specification that's available, although as far as I can tell, the same description appears in the very earliest available version, as well as in the original source code, modulo typos.  I have converted that into a machine-readable form, namely the file
+A Backus-Naur Form (BNF) description of the HAL/S language appears in the contemporary documentation, in [AppendiX G of the HAL/S Language Specification](https://www.ibiblio.org/apollo/Shuttle/HAL_S%20Language%20Specification%20Nov%202005.pdf#page=209).  The link is to the latest version of the specification that's available, although as far as I can tell, the same description appears in the very earliest available version, as well as in the original source code, modulo typos.  I have converted that into a machine-readable form, namely the file
 
     HAL-S.bnf
 
