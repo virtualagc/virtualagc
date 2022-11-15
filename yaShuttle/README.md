@@ -72,7 +72,7 @@ which I've changed to
     <OR> ::= <CHAR VERTICAL BAR> | OR
     <CAT> ::= <CHAR VERTICAL BAR> <CHAR VERTICAL BAR> | CAT
 
-The type <CHAR VERTICAL BAR> naturally does not exist in the original BNF, nor in HAL-S.bnf, since there's no standard way in BNF I can discern to create a rule for it.  Besides which, the documented BNF description is actually incomplete, in the sense that it is missing rules for various other types it refers to, most or all of which are elementary types, such as <SIMPLE NUMBER>, <IDENTIFIER>, and so on.  Rules for all of these need to be created, into order to get a complete description of the language.  
+The type `<CHAR VERTICAL BAR>` naturally does not exist in the original BNF, nor in HAL-S.bnf, since there's no standard way in BNF I can discern to create a rule for it.  Besides which, the documented BNF description is actually incomplete, in the sense that it is missing rules for various other types it refers to, most or all of which are elementary types, such as `<SIMPLE NUMBER>`, `<IDENTIFIER>`, and so on.  Rules for all of these need to be created, into order to get a complete description of the language.  
 
 Having a complete formal description of HAL/S in hand, I use the [BNF Converter (BNFC)](https://bnfc.digitalgrammars.com/) compiler-compiler to produce a HAL/S compiler frontend. BNFC does not actually take a BNF description as input, but requires an alternate form known as [Labeled BNF (LBNF) grammar](https://bnfc.readthedocs.io/en/latest/lbnf.html).  I have therefore created a script,
  
