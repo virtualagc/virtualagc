@@ -100,14 +100,52 @@ Assuming you've installed BNFC for your particular operating system (Linux, Wind
 (If you've previously performed these same steps in the same directory, you'd also be advised to do a `make distclean` prior to the `bnfc ...`, or else you're likely to find that whatever changes have been made to HAL-S.cf in the meantime won't actually appear in the front-end you create.)
  
 As you may or may not be able to discern, what the `bnfc` command actually does is to create C-language source code for the HAL/S compiler front-end, and then compiles that C code.  In fact, BNFC can actually create the source code for the compiler front-end in a variety of languages, such as C++ or Java, and I've just chosen C as my personal preference.
- 
+
+The compiler front-end produced in this manner is called `TestHAL_S`, and it is used as follows:
+
+    TestHAL_S SOURCE.hal
+
+However ... there are certain features of HAL/S which are not captured by the BNF (or LBNF) description of it, and which we cannot work around.  Specifically, I refer to the fact that while HAL/S is essentially free-form in columns 2 and rightward &mdash; i.e., it does not respect column alignment or line breaks &mdash; it nevertheless treats column 1 specially.  Column 1 is normall blank, but can also contain the special characters
+
+* C &mdash; full-line comment.
+* D &mdash; compilation directive line.
+* E &mdash; exponent line.
+* M &mdash; main line (in conjunction with E and S lines).
+* S &mdash; subscript line.
+
+Neither BNF nor LBNF has any provision for a column-dependent feature of this kind.  Therefore, prior to compiling HAL/S source code, it is necessary to preprocess it,
+
+    HAL-preprocessor.py < TRUE_HAL_SOURCE.hal > TAME_HAL_SOURCE.hal
+
+to "tame" those column-dependent features.  It is the tamed HAL/S source which needs to be compiled.  Specifically, the multiline Exponent/Main/Subscript (E/M/S) constructs are converted to also-legal single-line form.  Moreover, full-line comments are converted to "//"-style comments.  I.e., in the tamed code, "//" anywhere in a line of code (not merely in column 1) indicates that the remainder of the line is a comment.
+
 Some additional major steps are needed *after* creating the compiler front-end, in order to have a complete compiler:
 
-1. The BNF description cannot be used directly by BNFC, and instead needs first to be converted into an intermediate form known as 
-2. A compiler backend has to be created which can convert compiler frontend's output to the target form, which in this case is p-HAL/S p-code.
-3. A formatter for an output listing needs to be created.
+1. A compiler backend has to be created which can convert compiler frontend's output to the target form, which in this case is p-HAL/S p-code.
+2. A formatter for an output listing needs to be created.
+3. Modifications must be made to produce sensible compilation error messages.
 
 More TBD.
+
+# Changes To the Language
+
+## Comments
+
+In true HAL/S, comments take one of the following two forms:
+
+* "C" in column 1 indicates a full-line comment.
+* Anything delimited by "/*" and "*/" is a comment.
+
+Additionally, though, we have the need for "modern" comments that weren't present originally, and we need to be able to distinguish those from the original comments.  Thus, we've added a third type:
+
+* "#" in column 1 indicates a full-line modern comment.
+
+As mentioned before, the modern compiler cannot recognize the special nature of column 1, so HAL/S is preprocessed prior to compilation in order to alter features dependent on column 1.  In the case of full-line comments, the preprocessor transforms them as follows:
+
+* "C" in column 1 &rarr; "//".
+* "#" in column 1 &rarr; "///".
+
+As a side effect, "//"-style comments and "///"-style comments can also be inserted into HAL/S source code *prior* to preprocessing ... though I would recommend against doing so.
 
 # The p-Code Format:  p-HAL/S
 
