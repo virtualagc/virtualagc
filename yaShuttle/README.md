@@ -99,7 +99,7 @@ I find it more-convenient to provide the rules for the missing types mentioned e
  
     extraHAL-S.lbnf
 
-In Linux or Mac OS X, the complete description of HAL/S in LBNF be created by the following command:
+In Linux or Mac OS X, the complete description of HAL/S in LBNF can be created by the following command:
  
     cat extraHAL-S.lbnf HAL-S.bnf | bnf2lbnf.py > HAL_S.cf
 
