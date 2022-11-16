@@ -22,42 +22,20 @@ import sys
 from tokenize import tokenize
 
 #Parse the command-line arguments.
-pcodeFilename = "yaHAL-S.phl"
-showSource = False
-showComments = True
-showSymbols = True
 tabSize = 8
 halsSource = []
 metadata = []
 for param in sys.argv[1:]:
     if param == "--help":
         print("""
-        This is a HAL/S compiler, producing p-HAL/S p-code.
+        This is a preprocessor for HAL/S code, intended to remove certain 
+        constructs (particularly multiline equations) prior to compilation.
         
         Usage:
-            yaHAL-S.py [OPTIONS] SOURCE1.hal[SOURCE2.hal [...]] >LISTING.lst
-        
-        The SOURCEx.hal files are supposed to comprise a complete image of the
-        application code loaded into a Shuttle GPC at any given time.  In flight,
-        different images are loaded into the GPC for different mission segments,
-        and each of those images would consist of a different set of SOURCEx.hal
-        files.
-        
-        The p-HAL/S output p-code is expected to be subsequently executed as part
-        of an emulated Shuttle (sub)system by either the yaPASS.py program or 
-        the yaGPC.c subroutine.
+            yaHAL-preprocessor.py [OPTIONS] SOURCE1.hal [SOURCE2.hal [...]] >SOURCE.hal
         
         The OPTIONS are: 
         
-        --pcode=F       Specifies the name of the output file of p-code, which
-                        by default is yaHAL-S.phl.
-        --source        If present, the original source-code lines are included
-                        in the output listing.  By default, they are not.
-        --no-comments   If present, program comments are omitted from the listing
-                        file.  By default, they are included.
-        --no-symbols    If present, numerical addresses and constant values are
-                        used in the listing file, in place of the (default) 
-                        symbolic names of variables and code.
         --tab=N         Tab size in source files; assumed to be 8.  No allowance
                         is made for different tab sizes in different source files,
                         so let's just hope that never happens!  Probably the 
@@ -65,14 +43,6 @@ for param in sys.argv[1:]:
                         punchcards, but it's certainly possible to accidentally
                         end up with tabs if source is edited in modern editors.
         """)
-    elif param[:8] == "--pcode=":
-        pcodeFilename = param[8:]
-    elif param == "--source":
-        showSource = True
-    elif param == "--no-comments":
-        showComments = False
-    elif param == "--no-symbols":
-        showSymbols = False
     elif param[:6] == "--tab=":
         tabSize = int(param[6:])
     else:
@@ -113,4 +83,9 @@ for i in range(len(halsSource)):
 tokenize(halsSource, metadata)
 
 for i in range(len(halsSource)):
-    print(halsSource[i], metadata[i])
+    if "comment" in metadata[i]:
+        print("//" + halsSource[i][1:])
+    elif "modern" in metadata[i]:
+        print("///" + halsSource[i][1:])
+    else:
+        print(halsSource[i])

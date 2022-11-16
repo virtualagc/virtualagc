@@ -1,0 +1,160 @@
+-- Copyright:   Public Domain
+-- Filename:    extraHAL-S.lbnf
+-- Purpose:     This is the LBNF description of various nonterminals missing from
+--              the BNF description of HAL/S found in Appendix G of the HAL/S 
+--              Language specification and transcribed into HAL-S.bnf in this
+--              source tree.  The concept is that HAL-S.bnf can be converted into
+--              LBNF using the script bnf2lbnf.py, and that when combined with 
+--              this file there will be a complete LBNF description of HAL/S
+--              that can be used as input to the so-called BNF Converter (BNFC)
+--              compiler-compiler.
+-- History:     2022-11-13 RSB  Created.
+--
+-- Note:  All labels have been left empty, because the bnf2lbnf.py script which
+-- will process this file before use can generate suitable labels automatically.
+--
+-- LBNF rules are needed for the following, which are missing from 
+-- HAL-S.bnf:
+--
+--      <EMPTY>
+--      <NO ARG ARITH FUNC>
+--      <ARITH FUNC>
+--      <NO ARG CHAR FUNC>
+--      <CHAR FUNC>
+--      <NO ARG BIT FUNC>
+--      <BIT FUNC>
+--      <NO ARG STRUCT FUNC>
+--      <STRUCT FUNC>
+--      <ARITH ID>
+--      <CHAR ID>
+--      <BIT ID>
+--      <STRUCTURE ID>
+--      <LABEL>
+--      <SIMPLE NUMBER>
+--      <COMPOUND NUMBER>
+--      <CHAR STRING>
+--      <EVENT>
+--      <IDENTIFIER>
+--      <TEXT>
+--      <LEVEL>
+--      <% MACRO NAME>
+--      <DCL LIST>
+--      <STRUCT TEMPLATE>
+--
+-- Additionally, <CHAR VERTICAL BAR> is defined to let us handle rules in
+-- which the character '|' itself is a terminal of HAL/S.
+
+entrypoints COMPILATION ;
+comment "//" ;
+comment "///" ;
+comment "/*" "*/" ;
+
+token IdentifierToken ["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"](["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_"]*["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"])? ;
+token StringToken ["'"]["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-]% $()[|*./&¬=<>#@,;:{}!?\""]+["'"] ;
+token NumberToken ["0123456789"]+ ;
+token CompoundToken ( ["0123456789"]+ ( ["."]["0123456789"]* )? | ["."]["0123456789"]+ ) ( ["EBH"]["-"]?["0123456789"]+ )? ;
+
+. CHAR_VERTICAL_BAR ::= "|" ;
+
+. EMPTY ::= ;
+
+-- Rules for <SIMPLE NUMBER> and <COMPOUND NUMBER>.
+. SIMPLE_NUMBER ::= NumberToken ;
+. COMPOUND_NUMBER ::= CompoundToken ;
+
+-- Rules for <NO ARG ARITH FUNC>.  See Appendix C of the language specification.
+. NO_ARG_ARITH_FUNC ::= "CLOCKTIME" ;
+. NO_ARG_ARITH_FUNC ::= "DATE" ;
+. NO_ARG_ARITH_FUNC ::= "ERRGRP" ;
+. NO_ARG_ARITH_FUNC ::= "PRIO" ;
+. NO_ARG_ARITH_FUNC ::= "RANDOM" ;
+. NO_ARG_ARITH_FUNC ::= "RUNTIME" ;
+
+-- Rules for <ARITH FUNC>.  See Appendix C of the language specification.
+. ARITH_FUNC ::= "NEXTTIME" ;
+. ARITH_FUNC ::= "ABS" ;
+. ARITH_FUNC ::= "CEILING" ;
+. ARITH_FUNC ::= "DIV" ;
+. ARITH_FUNC ::= "FLOOR" ;
+. ARITH_FUNC ::= "MIDVAL" ;
+. ARITH_FUNC ::= "MOD" ;
+. ARITH_FUNC ::= "ODD" ;
+. ARITH_FUNC ::= "REMAINDER" ;
+. ARITH_FUNC ::= "ROUND" ;
+. ARITH_FUNC ::= "SIGN" ;
+. ARITH_FUNC ::= "SIGNUM" ;
+. ARITH_FUNC ::= "TRUNCATE" ;
+. ARITH_FUNC ::= "ARCCOS" ;
+. ARITH_FUNC ::= "ARCCOSH" ;
+. ARITH_FUNC ::= "ARCSIN" ;
+. ARITH_FUNC ::= "ARCSINH" ;
+. ARITH_FUNC ::= "ARCTAN2" ;
+. ARITH_FUNC ::= "ARCTAN" ;
+. ARITH_FUNC ::= "ARCTANH" ;
+. ARITH_FUNC ::= "COS" ;
+. ARITH_FUNC ::= "COSH" ;
+. ARITH_FUNC ::= "EXP" ;
+. ARITH_FUNC ::= "LOG" ;
+. ARITH_FUNC ::= "SIN" ;
+. ARITH_FUNC ::= "SINH" ;
+. ARITH_FUNC ::= "SQRT" ;
+. ARITH_FUNC ::= "TAN" ;
+. ARITH_FUNC ::= "TANH" ;
+. ARITH_FUNC ::= "SHL" ;
+. ARITH_FUNC ::= "SHR" ;
+
+. NO_ARG_CHAR_FUNC ::= EMPTY ;
+
+. CHAR_FUNC ::= "INDEX" ;
+. CHAR_FUNC ::= "LENGTH" ;
+. CHAR_FUNC ::= "LJUST" ;
+. CHAR_FUNC ::= "RJUST" ;
+. CHAR_FUNC ::= "TRIM" ;
+
+. NO_ARG_BIT_FUNC ::= EMPTY ;
+
+. BIT_FUNC ::= "XOR" ;
+
+. NO_ARG_STRUCT_FUNC ::= EMPTY ;
+
+. STRUCT_FUNC ::= "ABVAL" ;
+. STRUCT_FUNC ::= "DET" ;
+. STRUCT_FUNC ::= "INVERSE" ;
+. STRUCT_FUNC ::= "TRACE" ;
+. STRUCT_FUNC ::= "TRANSPOSE" ;
+. STRUCT_FUNC ::= "UNIT" ;
+. STRUCT_FUNC ::= "MAX" ;
+. STRUCT_FUNC ::= "MIN" ;
+. STRUCT_FUNC ::= "PROD" ;
+. STRUCT_FUNC ::= "SUM" ;
+. STRUCT_FUNC ::= "SIZE" ;
+
+-- It would be nice if the rule for IDENTIFIER excluded all reserved
+-- words.  But I don't know how to do that, or even know if it's 
+-- possible.
+. IDENTIFIER ::= IdentifierToken ;
+. ARITH_ID ::= IDENTIFIER ;
+. CHAR_ID ::= IDENTIFIER ;
+. BIT_ID ::= IDENTIFIER ;
+. STRUCTURE_ID ::= IDENTIFIER ;
+. LABEL ::= IDENTIFIER ;
+. EVENT ::= IDENTIFIER ;
+. STRUCT_TEMPLATE ::= IDENTIFIER ;
+. PERCENT_MACRO_NAME ::= "%" IDENTIFIER ; 
+
+. CHAR_STRING ::= StringToken ;
+. TEXT ::= CHAR_STRING ;
+
+-- <LEVEL>.  These are just integers representing depth in a structure.
+-- I think.  I haven't been able to determine an upper limit on them.
+. LEVEL ::= "1" ;
+. LEVEL ::= "2" ;
+. LEVEL ::= "3" ;
+. LEVEL ::= "4" ;
+. LEVEL ::= "5" ;
+. LEVEL ::= "6" ;
+. LEVEL ::= "7" ;
+. LEVEL ::= "8" ;
+. LEVEL ::= "9" ;
+. LEVEL ::= "10" ;
+

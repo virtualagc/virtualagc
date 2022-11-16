@@ -11,6 +11,26 @@ Purpose:        Simulated crew interface for the shuttle.  Basically keyboards
 History:        2022-11-03 RSB  Created.
                 2022-11-04 RSB  Working!
 
+Here are two significant facts about the shuttle's crew interface as it pertains
+to this module:
+ 
+    1.  There was a makeover beginning in 1999, where the various elements of the
+        display system (namely the CRTs, the DEUs driving them, and so on) were 
+        replaced by the so-called Multifunction Electronic Display Subsystem
+        (MEDS, consisting of MFD in place of CRTs, IDPs in place of DEUs, etc.).
+        This very-significant upgrade was supposedly transparent to the GPCs'
+        software.  However, it resulted in *more* displays, capable of displaying
+        *more*, in formats which had been changed somewhat.
+    2.  What was displayed on the CRTs or MFDs was not solely controlled by
+        the PASS/BFS software.  Rather, it was a *combination* of display templates
+        stored within the DEU/IDP *plus* commands from the GPCs *plus* data
+        supplied directly by other shuttle systems.
+        
+Thus this emulation may be able to represent exactly the data supplied by the
+GPC, represent partially the built-in templates (since they are not entirely
+known from the documentation), and not represent at all any additional data 
+from the spacecraft.
+
 Example usage from calling program:
 
     import queue

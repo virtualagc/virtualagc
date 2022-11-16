@@ -1,0 +1,639 @@
+-- ****************************************************************
+-- * This file was created by the script bnf2lbnf.py, forming a   *
+-- * complete LBNF description from several BNF and LBNF partial  *
+-- * descriptions of the language.  Any embedded comments below   *
+-- * are from the partial-description files, and thus are not     *
+-- * necessarily 100% accurate for the complete LBNF description. *
+-- ****************************************************************
+
+-- Copyright:   Public Domain
+-- Filename:    extraHAL-S.lbnf
+-- Purpose:     This is the LBNF description of various nonterminals missing from
+--              the BNF description of HAL/S found in Appendix G of the HAL/S
+--              Language specification and transcribed into HAL-S.bnf in this
+--              source tree.  The concept is that HAL-S.bnf can be converted into
+--              LBNF using the script bnf2lbnf.py, and that when combined with
+--              this file there will be a complete LBNF description of HAL/S
+--              that can be used as input to the so-called BNF Converter (BNFC)
+--              compiler-compiler.
+-- History:     2022-11-13 RSB  Created.
+--
+-- Note:  All labels have been left empty, because the bnf2lbnf.py script which
+-- will process this file before use can generate suitable labels automatically.
+--
+-- LBNF rules are needed for the following, which are missing from
+-- HAL-S.bnf:
+--
+--      <EMPTY>
+--      <NO ARG ARITH FUNC>
+--      <ARITH FUNC>
+--      <NO ARG CHAR FUNC>
+--      <CHAR FUNC>
+--      <NO ARG BIT FUNC>
+--      <BIT FUNC>
+--      <NO ARG STRUCT FUNC>
+--      <STRUCT FUNC>
+--      <ARITH ID>
+--      <CHAR ID>
+--      <BIT ID>
+--      <STRUCTURE ID>
+--      <LABEL>
+--      <SIMPLE NUMBER>
+--      <COMPOUND NUMBER>
+--      <CHAR STRING>
+--      <EVENT>
+--      <IDENTIFIER>
+--      <TEXT>
+--      <LEVEL>
+--      <% MACRO NAME>
+--      <DCL LIST>
+--      <STRUCT TEMPLATE>
+--
+-- Additionally, <CHAR VERTICAL BAR> is defined to let us handle rules in
+-- which the character '|' itself is a terminal of HAL/S.
+
+entrypoints COMPILATION ;
+comment "//" ;
+comment "///" ;
+comment "/*" "*/" ;
+
+token IdentifierToken ["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"](["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_"]*["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"])? ;
+token StringToken ["'"]["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-]% $()[|*./&¬=<>#@,;:{}!?\""]+["'"] ;
+token NumberToken ["0123456789"]+ ;
+token CompoundToken ( ["0123456789"]+ ( ["."]["0123456789"]* )? | ["."]["0123456789"]+ ) ( ["EBH"]["-"]?["0123456789"]+ )? ;
+
+CEchar_vertical_bar . CHAR_VERTICAL_BAR ::= "|" ;
+
+CGempty . EMPTY ::= ;
+
+-- Rules for <SIMPLE NUMBER> and <COMPOUND NUMBER>.
+CJsimple_number . SIMPLE_NUMBER ::= NumberToken ;
+CKcompound_number . COMPOUND_NUMBER ::= CompoundToken ;
+
+-- Rules for <NO ARG ARITH FUNC>.  See Appendix C of the language specification.
+CNno_arg_arith_func . NO_ARG_ARITH_FUNC ::= "CLOCKTIME" ;
+COno_arg_arith_func . NO_ARG_ARITH_FUNC ::= "DATE" ;
+CPno_arg_arith_func . NO_ARG_ARITH_FUNC ::= "ERRGRP" ;
+CQno_arg_arith_func . NO_ARG_ARITH_FUNC ::= "PRIO" ;
+CRno_arg_arith_func . NO_ARG_ARITH_FUNC ::= "RANDOM" ;
+CSno_arg_arith_func . NO_ARG_ARITH_FUNC ::= "RUNTIME" ;
+
+-- Rules for <ARITH FUNC>.  See Appendix C of the language specification.
+CVarith_func . ARITH_FUNC ::= "NEXTTIME" ;
+CWarith_func . ARITH_FUNC ::= "ABS" ;
+CXarith_func . ARITH_FUNC ::= "CEILING" ;
+CYarith_func . ARITH_FUNC ::= "DIV" ;
+CZarith_func . ARITH_FUNC ::= "FLOOR" ;
+DAarith_func . ARITH_FUNC ::= "MIDVAL" ;
+DBarith_func . ARITH_FUNC ::= "MOD" ;
+DCarith_func . ARITH_FUNC ::= "ODD" ;
+DDarith_func . ARITH_FUNC ::= "REMAINDER" ;
+DEarith_func . ARITH_FUNC ::= "ROUND" ;
+DFarith_func . ARITH_FUNC ::= "SIGN" ;
+DGarith_func . ARITH_FUNC ::= "SIGNUM" ;
+DHarith_func . ARITH_FUNC ::= "TRUNCATE" ;
+DIarith_func . ARITH_FUNC ::= "ARCCOS" ;
+DJarith_func . ARITH_FUNC ::= "ARCCOSH" ;
+DKarith_func . ARITH_FUNC ::= "ARCSIN" ;
+DLarith_func . ARITH_FUNC ::= "ARCSINH" ;
+DMarith_func . ARITH_FUNC ::= "ARCTAN2" ;
+DNarith_func . ARITH_FUNC ::= "ARCTAN" ;
+DOarith_func . ARITH_FUNC ::= "ARCTANH" ;
+DParith_func . ARITH_FUNC ::= "COS" ;
+DQarith_func . ARITH_FUNC ::= "COSH" ;
+DRarith_func . ARITH_FUNC ::= "EXP" ;
+DSarith_func . ARITH_FUNC ::= "LOG" ;
+DTarith_func . ARITH_FUNC ::= "SIN" ;
+DUarith_func . ARITH_FUNC ::= "SINH" ;
+DVarith_func . ARITH_FUNC ::= "SQRT" ;
+DWarith_func . ARITH_FUNC ::= "TAN" ;
+DXarith_func . ARITH_FUNC ::= "TANH" ;
+DYarith_func . ARITH_FUNC ::= "SHL" ;
+DZarith_func . ARITH_FUNC ::= "SHR" ;
+
+EBno_arg_char_func . NO_ARG_CHAR_FUNC ::= EMPTY ;
+
+EDchar_func . CHAR_FUNC ::= "INDEX" ;
+EEchar_func . CHAR_FUNC ::= "LENGTH" ;
+EFchar_func . CHAR_FUNC ::= "LJUST" ;
+EGchar_func . CHAR_FUNC ::= "RJUST" ;
+EHchar_func . CHAR_FUNC ::= "TRIM" ;
+
+EJno_arg_bit_func . NO_ARG_BIT_FUNC ::= EMPTY ;
+
+ELbit_func . BIT_FUNC ::= "XOR" ;
+
+ENno_arg_struct_func . NO_ARG_STRUCT_FUNC ::= EMPTY ;
+
+EPstruct_func . STRUCT_FUNC ::= "ABVAL" ;
+EQstruct_func . STRUCT_FUNC ::= "DET" ;
+ERstruct_func . STRUCT_FUNC ::= "INVERSE" ;
+ESstruct_func . STRUCT_FUNC ::= "TRACE" ;
+ETstruct_func . STRUCT_FUNC ::= "TRANSPOSE" ;
+EUstruct_func . STRUCT_FUNC ::= "UNIT" ;
+EVstruct_func . STRUCT_FUNC ::= "MAX" ;
+EWstruct_func . STRUCT_FUNC ::= "MIN" ;
+EXstruct_func . STRUCT_FUNC ::= "PROD" ;
+EYstruct_func . STRUCT_FUNC ::= "SUM" ;
+EZstruct_func . STRUCT_FUNC ::= "SIZE" ;
+
+-- It would be nice if the rule for IDENTIFIER excluded all reserved
+-- words.  But I don't know how to do that, or even know if it's
+-- possible.
+FEidentifier . IDENTIFIER ::= IdentifierToken ;
+FFarith_id . ARITH_ID ::= IDENTIFIER ;
+FGchar_id . CHAR_ID ::= IDENTIFIER ;
+FHbit_id . BIT_ID ::= IDENTIFIER ;
+FIstructure_id . STRUCTURE_ID ::= IDENTIFIER ;
+FJlabel . LABEL ::= IDENTIFIER ;
+FKevent . EVENT ::= IDENTIFIER ;
+FLstruct_template . STRUCT_TEMPLATE ::= IDENTIFIER ;
+FMpercent_macro_name . PERCENT_MACRO_NAME ::= "%" IDENTIFIER ;
+
+FOchar_string . CHAR_STRING ::= StringToken ;
+FPtext . TEXT ::= CHAR_STRING ;
+
+-- <LEVEL>.  These are just integers representing depth in a structure.
+-- I think.  I haven't been able to determine an upper limit on them.
+FTlevel . LEVEL ::= "1" ;
+FUlevel . LEVEL ::= "2" ;
+FVlevel . LEVEL ::= "3" ;
+FWlevel . LEVEL ::= "4" ;
+FXlevel . LEVEL ::= "5" ;
+FYlevel . LEVEL ::= "6" ;
+FZlevel . LEVEL ::= "7" ;
+GAlevel . LEVEL ::= "8" ;
+GBlevel . LEVEL ::= "9" ;
+GClevel . LEVEL ::= "10" ;
+
+-- Copyright:   Public Domain
+-- Filename:    HAL-S.bnf
+-- Purpose:     This is the BNF description of the HAL/S programming language,
+--              taken from Appendix G of the HAL/S Language specification
+--              (https://www.ibiblio.org/apollo/Shuttle/HAL_S%20Language%20Specification%20Nov%202005.pdf#page=209).
+--              Some typos were corrected.  And terminal | (as opposed to BNF |)
+--              were replaced by <CHAR VERTICAL BAR>.
+-- History:     2022-11-08 RSB  Created.
+--              2022-11-14 RSB  Replaced special characters in type names, such as
+--                              <% MACRO NAME> -> <PERCENT MACRO NAME>, as these
+--                              aren't allowed in LBNF.
+--              2022-11-15 RSB  Various fixes, such as removal of _|_ from
+--                              COMPILATION.
+--
+-- Note also the separate HAL/S source file SYNTHESI.hal, a portion of the original
+-- HAL/S-FC compiler, which duplicates this BNF within its comments.
+
+AAcompilation . COMPILATION ::= COMPILE_LIST ;
+AAcompile_list . COMPILE_LIST ::= BLOCK_DEFINITION ;
+ABcompile_list . COMPILE_LIST ::= COMPILE_LIST BLOCK_DEFINITION ;
+AAplus . PLUS ::= "+" ;
+AAarith_exp . ARITH_EXP ::= TERM ;
+ABarith_exp . ARITH_EXP ::= PLUS TERM ;
+ACarith_exp . ARITH_EXP ::= "-1" TERM ;
+ADarith_exp . ARITH_EXP ::= ARITH_EXP PLUS TERM ;
+AEarith_exp . ARITH_EXP ::= ARITH_EXP "-1" TERM ;
+AAterm . TERM ::= PRODUCT ;
+ABterm . TERM ::= PRODUCT "/" TERM ;
+AAproduct . PRODUCT ::= FACTOR ;
+ABproduct . PRODUCT ::= FACTOR "*" PRODUCT ;
+ACproduct . PRODUCT ::= FACTOR "." PRODUCT ;
+ADproduct . PRODUCT ::= FACTOR PRODUCT ;
+AAstarstar . STARSTAR ::= "**" ;
+AAfactor . FACTOR ::= PRIMARY ;
+ABfactor . FACTOR ::= PRIMARY STARSTAR FACTOR ;
+AAarith_func_head . ARITH_FUNC_HEAD ::= ARITH_FUNC ;
+ABarith_func_head . ARITH_FUNC_HEAD ::= ARITH_CONV SUBSCRIPT ;
+AAarith_conv . ARITH_CONV ::= "INTEGER" ;
+ABarith_conv . ARITH_CONV ::= "SCALAR" ;
+ACarith_conv . ARITH_CONV ::= "VECTOR" ;
+ADarith_conv . ARITH_CONV ::= "MATRIX" ;
+AApre_primary . PRE_PRIMARY ::= "(" ARITH_EXP ")" ;
+ABpre_primary . PRE_PRIMARY ::= NUMBER ;
+ACpre_primary . PRE_PRIMARY ::= COMPOUND_NUMBER ;
+ADpre_primary . PRE_PRIMARY ::= ARITH_FUNC_HEAD "(" CALL_LIST ")" ;
+AAprimary . PRIMARY ::= ARITH_VAR ;
+ABprimary . PRIMARY ::= MODIFIED_ARITH_FUNC ;
+ACprimary . PRIMARY ::= ARITH_INLINE_DEF BLOCK_BODY CLOSING ";" ;
+ADprimary . PRIMARY ::= PRE_PRIMARY ;
+AEprimary . PRIMARY ::= PRE_PRIMARY QUALIFIER ;
+AAother_statement . OTHER_STATEMENT ::= ON_PHRASE STATEMENT ;
+ABother_statement . OTHER_STATEMENT ::= IF_STATEMENT ;
+ACother_statement . OTHER_STATEMENT ::= LABEL_DEFINITION OTHER_STATEMENT ;
+AAstatement . STATEMENT ::= BASIC_STATEMENT ;
+ABstatement . STATEMENT ::= OTHER_STATEMENT ;
+AAany_statement . ANY_STATEMENT ::= STATEMENT ;
+ABany_statement . ANY_STATEMENT ::= BLOCK_DEFINITION ;
+AAequals . EQUALS ::= "=" ;
+AAbasic_statement . BASIC_STATEMENT ::= LABEL_DEFINITION BASIC_STATEMENT ;
+ABbasic_statement . BASIC_STATEMENT ::= ASSIGNMENT ";" ;
+ACbasic_statement . BASIC_STATEMENT ::= "EXIT" ";" ;
+ADbasic_statement . BASIC_STATEMENT ::= "EXIT" LABEL ";" ;
+AEbasic_statement . BASIC_STATEMENT ::= "REPEAT" ";" ;
+AFbasic_statement . BASIC_STATEMENT ::= "REPEAT" LABEL ";" ;
+AGbasic_statement . BASIC_STATEMENT ::= "GO" "TO" LABEL ";" ;
+AHbasic_statement . BASIC_STATEMENT ::= ";" ;
+AIbasic_statement . BASIC_STATEMENT ::= CALL_KEY ";" ;
+AJbasic_statement . BASIC_STATEMENT ::= CALL_KEY "(" CALL_LIST ")" ";" ;
+AKbasic_statement . BASIC_STATEMENT ::= CALL_KEY ASSIGN "(" CALL_ASSIGN_LIST ")" ";" ;
+ALbasic_statement . BASIC_STATEMENT ::= CALL_KEY "(" CALL_LIST ")" ASSIGN "(" CALL_ASSIGN_LIST ")" ";" ;
+AMbasic_statement . BASIC_STATEMENT ::= "RETURN;" ;
+ANbasic_statement . BASIC_STATEMENT ::= "RETURN" EXPRESSION ";" ;
+AObasic_statement . BASIC_STATEMENT ::= DO_GROUP_HEAD ENDING ";" ;
+APbasic_statement . BASIC_STATEMENT ::= READ_KEY ";" ;
+AQbasic_statement . BASIC_STATEMENT ::= READ_PHRASE ";" ;
+ARbasic_statement . BASIC_STATEMENT ::= WRITE_KEY ";" ;
+ASbasic_statement . BASIC_STATEMENT ::= WRITE_PHRASE ";" ;
+ATbasic_statement . BASIC_STATEMENT ::= FILE_EXP EQUALS EXPRESSION ";" ;
+AUbasic_statement . BASIC_STATEMENT ::= VARIABLE EQUALS FILE_EXP ";" ;
+AVbasic_statement . BASIC_STATEMENT ::= WAIT_KEY "FOR" "DEPENDENT" ";" ;
+AWbasic_statement . BASIC_STATEMENT ::= WAIT_KEY ARITH_EXP ";" ;
+AXbasic_statement . BASIC_STATEMENT ::= WAIT_KEY "UNTIL" ARITH_EXP ";" ;
+AYbasic_statement . BASIC_STATEMENT ::= WAIT_KEY "FOR" BIT_EXP ";" ;
+AZbasic_statement . BASIC_STATEMENT ::= TERMINATOR ";" ;
+BAbasic_statement . BASIC_STATEMENT ::= TERMINATOR TERMINATE_LIST ";" ;
+BBbasic_statement . BASIC_STATEMENT ::= "UPDATE" "PRIORITY" "TO" ARITH_EXP ";" ;
+BCbasic_statement . BASIC_STATEMENT ::= "UPDATE" "PRIORITY" LABEL_VAR "TO" ARITH_EXP ";" ;
+BDbasic_statement . BASIC_STATEMENT ::= SCHEDULE_PHRASE ";" ;
+BEbasic_statement . BASIC_STATEMENT ::= SCHEDULE_PHRASE SCHEDULE_CONTROL ";" ;
+BFbasic_statement . BASIC_STATEMENT ::= SIGNAL_CLAUSE ";" ;
+BGbasic_statement . BASIC_STATEMENT ::= "SEND" "ERROR" SUBSCRIPT ";" ;
+BHbasic_statement . BASIC_STATEMENT ::= ON_CLAUSE ";" ;
+BIbasic_statement . BASIC_STATEMENT ::= ON_CLAUSE "AND" SIGNAL_CLAUSE ";" ;
+BJbasic_statement . BASIC_STATEMENT ::= "OFF" "ERROR" SUBSCRIPT ";" ;
+BKbasic_statement . BASIC_STATEMENT ::= PERCENT_MACRO_NAME ";" ;
+BLbasic_statement . BASIC_STATEMENT ::= PERCENT_MACRO_HEAD PERCENT_MACRO_ARG ")" ";" ;
+AApercent_macro_head . PERCENT_MACRO_HEAD ::= PERCENT_MACRO_NAME "(" ;
+ABpercent_macro_head . PERCENT_MACRO_HEAD ::= PERCENT_MACRO_HEAD PERCENT_MACRO_ARG "," ;
+AApercent_macro_arg . PERCENT_MACRO_ARG ::= NAME_VAR ;
+ABpercent_macro_arg . PERCENT_MACRO_ARG ::= CONSTANT ;
+AAbit_prim . BIT_PRIM ::= BIT_VAR ;
+ABbit_prim . BIT_PRIM ::= LABEL_VAR ;
+ACbit_prim . BIT_PRIM ::= EVENT_VAR ;
+ADbit_prim . BIT_PRIM ::= BIT_CONST ;
+AEbit_prim . BIT_PRIM ::= "(" BIT_EXP ")" ;
+AFbit_prim . BIT_PRIM ::= MODIFIED_BIT_FUNC ;
+AGbit_prim . BIT_PRIM ::= BIT_INLINE_DEF BLOCK_BODY CLOSING; ;
+AHbit_prim . BIT_PRIM ::= SUBBIT_HEAD EXPRESSION ")" ;
+AIbit_prim . BIT_PRIM ::= BIT_FUNC_HEAD "(" CALL_LIST ")" ;
+AAbit_func_head . BIT_FUNC_HEAD ::= BIT_FUNC ;
+ABbit_func_head . BIT_FUNC_HEAD ::= "BIT" SUB_OR_QUALIFIER ;
+AAbit_cat . BIT_CAT ::= BIT_PRIM ;
+ABbit_cat . BIT_CAT ::= BIT_CAT CAT BIT_PRIM ;
+ACbit_cat . BIT_CAT ::= NOT BIT_PRIM ;
+ADbit_cat . BIT_CAT ::= BIT_CAT CAT NOT BIT_PRIM ;
+AAbit_factor . BIT_FACTOR ::= BIT_CAT ;
+ABbit_factor . BIT_FACTOR ::= BIT_FACTOR AND BIT_CAT ;
+AAbit_exp . BIT_EXP ::= BIT_FACTOR ;
+ABbit_exp . BIT_EXP ::= BIT_EXP OR BIT_FACTOR ;
+AArelational_op . RELATIONAL_OP ::= EQUALS ;
+ABrelational_op . RELATIONAL_OP ::= NOT EQUALS ;
+ACrelational_op . RELATIONAL_OP ::= "<" ;
+ADrelational_op . RELATIONAL_OP ::= ">" ;
+AErelational_op . RELATIONAL_OP ::= "<=" ;
+AFrelational_op . RELATIONAL_OP ::= ">=" ;
+AGrelational_op . RELATIONAL_OP ::= NOT "<" ;
+AHrelational_op . RELATIONAL_OP ::= NOT ">" ;
+AAcomparison . COMPARISON ::= ARITH_EXP RELATIONAL_OP ARITH_EXP ;
+ABcomparison . COMPARISON ::= CHAR_EXP RELATIONAL_OP CHAR_EXP ;
+ACcomparison . COMPARISON ::= BIT_CAT RELATIONAL_OP BIT_CAT ;
+ADcomparison . COMPARISON ::= STRUCTURE_EXP RELATIONAL_OP STRUCTURE_EXP ;
+AEcomparison . COMPARISON ::= NAME_EXP RELATIONAL_OP NAME_EXP ;
+AArelational_factor . RELATIONAL_FACTOR ::= REL_PRIM ;
+ABrelational_factor . RELATIONAL_FACTOR ::= RELATIONAL_FACTOR AND REL_PRIM ;
+AArelational_exp . RELATIONAL_EXP ::= RELATIONAL_FACTOR ;
+ABrelational_exp . RELATIONAL_EXP ::= RELATIONAL_EXP OR RELATIONAL_FACTOR ;
+AArel_prim . REL_PRIM ::= "(" "1" RELATIONAL_EXP ")" ;
+ABrel_prim . REL_PRIM ::= NOT "(" "1" RELATIONAL_EXP ")" ;
+ACrel_prim . REL_PRIM ::= COMPARISON ;
+AAchar_prim . CHAR_PRIM ::= CHAR_VAR ;
+ABchar_prim . CHAR_PRIM ::= CHAR_CONST ;
+ACchar_prim . CHAR_PRIM ::= MODIFIED_CHAR_FUNC ;
+ADchar_prim . CHAR_PRIM ::= CHAR_INLINE_DEF BLOCK_BODY CLOSING; ;
+AEchar_prim . CHAR_PRIM ::= CHAR_FUNC_HEAD "(" CALL_LIST ")" ;
+AFchar_prim . CHAR_PRIM ::= "(" CHAR_EXP ")" ;
+AAchar_func_head . CHAR_FUNC_HEAD ::= CHAR_FUNC ;
+ABchar_func_head . CHAR_FUNC_HEAD ::= "CHARACTER" SUB_OR_QUALIFIER ;
+AAsub_or_qualifier . SUB_OR_QUALIFIER ::= SUBSCRIPT ;
+ABsub_or_qualifier . SUB_OR_QUALIFIER ::= BIT_QUALIFIER ;
+AAchar_exp . CHAR_EXP ::= CHAR_PRIM ;
+ABchar_exp . CHAR_EXP ::= CHAR_EXP CAT CHAR_PRIM ;
+ACchar_exp . CHAR_EXP ::= CHAR_EXP CAT ARITH_EXP ;
+ADchar_exp . CHAR_EXP ::= ARITH_EXP CAT ARITH_EXP ;
+AEchar_exp . CHAR_EXP ::= ARITH_EXP CAT CHAR_PRIM ;
+AAassignment . ASSIGNMENT ::= VARIABLE EQUALS EXPRESSION ;
+ABassignment . ASSIGNMENT ::= VARIABLE "," ASSIGNMENT ;
+AAif_statement . IF_STATEMENT ::= IF_CLAUSE STATEMENT ;
+ABif_statement . IF_STATEMENT ::= TRUE_PART STATEMENT ;
+AAtrue_part . TRUE_PART ::= IF_CLAUSE BASIC_STATEMENT "ELSE" ;
+AAif_clause . IF_CLAUSE ::= IF RELATIONAL_EXP "THEN" ;
+ABif_clause . IF_CLAUSE ::= IF BIT_EXP "THEN" ;
+AAif . IF ::= "IF" ;
+AAdo_group_head . DO_GROUP_HEAD ::= "DO" ";" ;
+ABdo_group_head . DO_GROUP_HEAD ::= "DO" FOR_LIST ";" ;
+ACdo_group_head . DO_GROUP_HEAD ::= "DO" FOR_LIST WHILE_CLAUSE ";" ;
+ADdo_group_head . DO_GROUP_HEAD ::= "DO" WHILE_CLAUSE ";" ;
+AEdo_group_head . DO_GROUP_HEAD ::= "DO" "CASE" ARITH_EXP ";" ;
+AFdo_group_head . DO_GROUP_HEAD ::= CASE_ELSE STATEMENT ;
+AGdo_group_head . DO_GROUP_HEAD ::= DO_GROUP_HEAD ANY_STATEMENT ;
+AHdo_group_head . DO_GROUP_HEAD ::= DO_GROUP_HEAD TEMPORARY_STMT ;
+AAcase_else . CASE_ELSE ::= "DO" "CASE" ARITH_EXP ";" "ELSE" ;
+AAwhile_key . WHILE_KEY ::= "WHILE" ;
+ABwhile_key . WHILE_KEY ::= "UNTIL" ;
+AAwhile_clause . WHILE_CLAUSE ::= WHILE_KEY BIT_EXP ;
+ABwhile_clause . WHILE_CLAUSE ::= WHILE_KEY RELATIONAL_EXP ;
+AAfor_list . FOR_LIST ::= FOR_KEY ARITH_EXP ITERATION_CONTROL ;
+ABfor_list . FOR_LIST ::= FOR_KEY ITERATION_BODY ;
+AAiteration_body . ITERATION_BODY ::= ARITH_EXP ;
+ABiteration_body . ITERATION_BODY ::= ITERATION_BODY "," ARITH_EXP ;
+AAiteration_control . ITERATION_CONTROL ::= "TO" ARITH_EXP ;
+ABiteration_control . ITERATION_CONTROL ::= "TO" ARITH_EXP "BY" ARITH_EXP ;
+AAfor_key . FOR_KEY ::= "FOR" ARITH_VAR EQUALS ;
+ABfor_key . FOR_KEY ::= "FOR" "TEMPORARY" IDENTIFIER "=" ;
+AAending . ENDING ::= "END" ;
+ABending . ENDING ::= "END" LABEL ;
+ACending . ENDING ::= LABEL_DEFINITION ENDING ;
+AAon_phrase . ON_PHRASE ::= "ON" "ERROR" SUBSCRIPT ;
+AAon_clause . ON_CLAUSE ::= "ON" "ERROR" SUBSCRIPT "SYSTEM" ;
+ABon_clause . ON_CLAUSE ::= "ON" "ERROR" SUBSCRIPT "IGNORE" ;
+AAsignal_clause . SIGNAL_CLAUSE ::= "SET" EVENT_VAR ;
+ABsignal_clause . SIGNAL_CLAUSE ::= "RESET" EVENT_VAR ;
+ACsignal_clause . SIGNAL_CLAUSE ::= "SIGNAL" EVENT_VAR ;
+AAfile_exp . FILE_EXP ::= FILE_HEAD "," ARITH_EXP ")" ;
+AAfile_head . FILE_HEAD ::= "FILE" "(" NUMBER ;
+AAcall_key . CALL_KEY ::= "CALL" LABEL_VAR ;
+AAcall_list . CALL_LIST ::= LIST_EXP ;
+ABcall_list . CALL_LIST ::= CALL_LIST "," LIST_EXP ;
+AAcall_assign_list . CALL_ASSIGN_LIST ::= VARIABLE ;
+ABcall_assign_list . CALL_ASSIGN_LIST ::= CALL_ASSIGN_LIST "," VARIABLE ;
+AAexpression . EXPRESSION ::= ARITH_EXP ;
+ABexpression . EXPRESSION ::= BIT_EXP ;
+ACexpression . EXPRESSION ::= CHAR_EXP ;
+ADexpression . EXPRESSION ::= STRUCTURE_EXP ;
+AEexpression . EXPRESSION ::= NAME_EXP ;
+AAstructure_exp . STRUCTURE_EXP ::= STRUCTURE_VAR ;
+ABstructure_exp . STRUCTURE_EXP ::= MODIFIED_STRUCT_FUNC ;
+ACstructure_exp . STRUCTURE_EXP ::= STRUC_INLINE_DEF BLOCK_BODY CLOSING ";" ;
+ADstructure_exp . STRUCTURE_EXP ::= STRUCT_FUNC_HEAD "(" CALL_LIST ")" ;
+AAstruct_func_head . STRUCT_FUNC_HEAD ::= STRUCT_FUNC ;
+AAlist_exp . LIST_EXP ::= EXPRESSION ;
+ABlist_exp . LIST_EXP ::= ARITH_EXP "#" EXPRESSION ;
+AAvariable . VARIABLE ::= ARITH_VAR ;
+ABvariable . VARIABLE ::= STRUCTURE_VAR ;
+ACvariable . VARIABLE ::= BIT_VAR ;
+ADvariable . VARIABLE ::= EVENT_VAR ;
+AEvariable . VARIABLE ::= SUBBIT_HEAD VARIABLE ")" ;
+AFvariable . VARIABLE ::= CHAR_VAR ;
+AGvariable . VARIABLE ::= NAME_KEY "(" NAME_VAR ")" ;
+AAname_var . NAME_VAR ::= VARIABLE ;
+ABname_var . NAME_VAR ::= LABEL_VAR ;
+ACname_var . NAME_VAR ::= MODIFIED_ARITH_FUNC ;
+ADname_var . NAME_VAR ::= MODIFIED_BIT_FUNC ;
+AEname_var . NAME_VAR ::= MODIFIED_CHAR_FUNC ;
+AFname_var . NAME_VAR ::= MODIFIED_STRUCT_FUNC ;
+AAname_exp . NAME_EXP ::= NAME_KEY "(" NAME_VAR ")" ;
+ABname_exp . NAME_EXP ::= "NULL" ;
+ACname_exp . NAME_EXP ::= NAME_KEY "(" "NULL" ")" ;
+AAname_key . NAME_KEY ::= "NAME" ;
+AAlabel_var . LABEL_VAR ::= PREFIX LABEL SUBSCRIPT ;
+AAmodified_arith_func . MODIFIED_ARITH_FUNC ::= PREFIX NO_ARG_ARITH_FUNC SUBSCRIPT ;
+AAmodified_bit_func . MODIFIED_BIT_FUNC ::= PREFIX NO_ARG_BIT_FUNC SUBSCRIPT ;
+AAmodified_char_func . MODIFIED_CHAR_FUNC ::= PREFIX NO_ARG_CHAR_FUNC SUBSCRIPT ;
+AAmodified_struct_func . MODIFIED_STRUCT_FUNC ::= PREFIX NO_ARG_STRUCT_FUNC SUBSCRIPT ;
+AAstructure_var . STRUCTURE_VAR ::= QUAL_STRUCT SUBSCRIPT ;
+AAarith_var . ARITH_VAR ::= ARITH_ID SUBSCRIPT ;
+ABarith_var . ARITH_VAR ::= PREFIX ARITH_ID SUBSCRIPT ;
+AAchar_var . CHAR_VAR ::= PREFIX CHAR_ID SUBSCRIPT ;
+AAbit_var . BIT_VAR ::= PREFIX BIT_ID SUBSCRIPT ;
+AAevent_var . EVENT_VAR ::= PREFIX EVENT SUBSCRIPT ;
+AAqual_struct . QUAL_STRUCT ::= STRUCTURE_ID ;
+ABqual_struct . QUAL_STRUCT ::= QUAL_STRUCT "." STRUCTURE_ID ;
+AAprefix . PREFIX ::= EMPTY ;
+ABprefix . PREFIX ::= QUAL_STRUCT "." ;
+AAsubbit_head . SUBBIT_HEAD ::= SUBBIT_KEY SUBSCRIPT "(" ;
+AAsubbit_key . SUBBIT_KEY ::= "SUBBIT" ;
+AAsubscript . SUBSCRIPT ::= SUB_HEAD ")" ;
+ABsubscript . SUBSCRIPT ::= QUALIFIER ;
+ACsubscript . SUBSCRIPT ::= "$" NUMBER ;
+ADsubscript . SUBSCRIPT ::= "$" ARITH_VAR ;
+AEsubscript . SUBSCRIPT ::= EMPTY ;
+AAsub_start . SUB_START ::= "$" "(" ;
+ABsub_start . SUB_START ::= "$" "(" "@" PREC_SPEC "," ;
+ACsub_start . SUB_START ::= SUB_HEAD ";" ;
+ADsub_start . SUB_START ::= SUB_HEAD ":" ;
+AEsub_start . SUB_START ::= SUB_HEAD "," ;
+AAsub_head . SUB_HEAD ::= SUB_START ;
+ABsub_head . SUB_HEAD ::= SUB_START SUB ;
+AAsub . SUB ::= SUB_EXP ;
+ABsub . SUB ::= "*" ;
+ACsub . SUB ::= SUB_RUN_HEAD SUB_EXP ;
+ADsub . SUB ::= ARITH_EXP "AT" SUB_EXP ;
+AAsub_run_head . SUB_RUN_HEAD ::= SUB_EXP "TO" ;
+AAsub_exp . SUB_EXP ::= ARITH_EXP ;
+ABsub_exp . SUB_EXP ::= POUND_EXPRESSION ;
+AApound_expression . POUND_EXPRESSION ::= "#" ;
+ABpound_expression . POUND_EXPRESSION ::= POUND_EXPRESSION PLUS TERM ;
+ACpound_expression . POUND_EXPRESSION ::= POUND_EXPRESSION "-1" TERM ;
+AAand . AND ::= "&" ;
+ABand . AND ::= "AND" ;
+AAor . OR ::= CHAR_VERTICAL_BAR ;
+ABor . OR ::= "OR" ;
+AAnot . NOT ::= "¬" ;
+ABnot . NOT ::= "NOT" ;
+AAcat . CAT ::= CHAR_VERTICAL_BAR CHAR_VERTICAL_BAR ;
+ABcat . CAT ::= "CAT" ;
+AAqualifier . QUALIFIER ::= "$" "(" "@" PREC_SPEC ")" ;
+ABqualifier . QUALIFIER ::= "$" "(" SCALE_HEAD ARITH_EXP ")" ;
+ACqualifier . QUALIFIER ::= "$" "(" "@" PREC_SPEC "," SCALE_HEAD ARITH_EXP ")" ;
+AAscale_head . SCALE_HEAD ::= "@" ;
+ABscale_head . SCALE_HEAD ::= "@" "@" ;
+AAbit_qualifier . BIT_QUALIFIER ::= "<" "$" "(" "@" RADIX ")" ;
+AAradix . RADIX ::= "HEX" ;
+ABradix . RADIX ::= "OCT" ;
+ACradix . RADIX ::= "BIN" ;
+ADradix . RADIX ::= "DEC" ;
+AAbit_const_head . BIT_CONST_HEAD ::= RADIX ;
+ABbit_const_head . BIT_CONST_HEAD ::= RADIX "(" NUMBER ")" ;
+AAbit_const . BIT_CONST ::= BIT_CONST_HEAD CHAR_STRING ;
+ABbit_const . BIT_CONST ::= "TRUE" ;
+ACbit_const . BIT_CONST ::= "FALSE" ;
+ADbit_const . BIT_CONST ::= "ON" ;
+AEbit_const . BIT_CONST ::= "OFF" ;
+AAchar_const . CHAR_CONST ::= CHAR_STRING ;
+ABchar_const . CHAR_CONST ::= "CHAR" "(" NUMBER ")" CHAR_STRING ;
+AAio_control . IO_CONTROL ::= "SKIP" "(" ARITH_EXP ")" ;
+ABio_control . IO_CONTROL ::= "TAB" "(" ARITH_EXP ")" ;
+ACio_control . IO_CONTROL ::= "COLUMN" "(" ARITH_EXP ")" ;
+ADio_control . IO_CONTROL ::= "LINE" "(" ARITH_EXP ")" ;
+AEio_control . IO_CONTROL ::= "PAGE" "(" ARITH_EXP ")" ;
+AAread_phrase . READ_PHRASE ::= READ_KEY READ_ARG ;
+ABread_phrase . READ_PHRASE ::= READ_PHRASE "," READ_ARG ;
+AAwrite_phrase . WRITE_PHRASE ::= WRITE_KEY WRITE_ARG ;
+ABwrite_phrase . WRITE_PHRASE ::= WRITE_PHRASE "," WRITE_ARG ;
+AAread_arg . READ_ARG ::= VARIABLE ;
+ABread_arg . READ_ARG ::= IO_CONTROL ;
+AAwrite_arg . WRITE_ARG ::= EXPRESSION ;
+ABwrite_arg . WRITE_ARG ::= IO_CONTROL ;
+AAread_key . READ_KEY ::= "READ" "(" NUMBER ")" ;
+ABread_key . READ_KEY ::= "READALL" "(" NUMBER ")" ;
+AAwrite_key . WRITE_KEY ::= "WRITE" "(" NUMBER ")" ;
+AAblock_definition . BLOCK_DEFINITION ::= BLOCK_STMT BLOCK_BODY CLOSING ";" ;
+AAblock_body . BLOCK_BODY ::= EMPTY ;
+ABblock_body . BLOCK_BODY ::= DECLARE_GROUP ;
+ACblock_body . BLOCK_BODY ::= BLOCK_BODY ANY_STATEMENT ;
+AAarith_inline_def . ARITH_INLINE_DEF ::= "FUNCTION" ARITH_SPEC ";" ;
+ABarith_inline_def . ARITH_INLINE_DEF ::= "FUNCTION" ";" ;
+AAbit_inline_def . BIT_INLINE_DEF ::= "FUNCTION" BIT_SPEC ";" ;
+AAchar_inline_def . CHAR_INLINE_DEF ::= "FUNCTION" CHAR_SPEC ";" ;
+AAstruc_inline_def . STRUC_INLINE_DEF ::= "FUNCTION" STRUCT_SPEC ";" ;
+AAblock_stmt . BLOCK_STMT ::= BLOCK_STMT_TOP ";" ;
+AAblock_stmt_top . BLOCK_STMT_TOP ::= BLOCK_STMT_TOP "ACCESS" ;
+ABblock_stmt_top . BLOCK_STMT_TOP ::= BLOCK_STMT_TOP "RIGID" ;
+ACblock_stmt_top . BLOCK_STMT_TOP ::= BLOCK_STMT_HEAD ;
+ADblock_stmt_top . BLOCK_STMT_TOP ::= BLOCK_STMT_HEAD "EXCLUSIVE" ;
+AEblock_stmt_top . BLOCK_STMT_TOP ::= BLOCK_STMT_HEAD "REENTRANT" ;
+AAlabel_definition . LABEL_DEFINITION ::= LABEL ":" ;
+AAlabel_external . LABEL_EXTERNAL ::= LABEL_DEFINITION ;
+ABlabel_external . LABEL_EXTERNAL ::= LABEL_DEFINITION "EXTERNAL" ;
+AAblock_stmt_head . BLOCK_STMT_HEAD ::= LABEL_EXTERNAL "PROGRAM" ;
+ABblock_stmt_head . BLOCK_STMT_HEAD ::= LABEL_EXTERNAL "COMPOOL" ;
+ACblock_stmt_head . BLOCK_STMT_HEAD ::= LABEL_DEFINITION "TASK" ;
+ADblock_stmt_head . BLOCK_STMT_HEAD ::= LABEL_DEFINITION "UPDATE" ;
+AEblock_stmt_head . BLOCK_STMT_HEAD ::= "UPDATE" ;
+AFblock_stmt_head . BLOCK_STMT_HEAD ::= FUNCTION_NAME ;
+AGblock_stmt_head . BLOCK_STMT_HEAD ::= FUNCTION_NAME FUNC_STMT_BODY ;
+AHblock_stmt_head . BLOCK_STMT_HEAD ::= PROCEDURE_NAME ;
+AIblock_stmt_head . BLOCK_STMT_HEAD ::= PROCEDURE_NAME PROC_STMT_BODY ;
+AAfunction_name . FUNCTION_NAME ::= LABEL_EXTERNAL "FUNCTION" ;
+AAprocedure_name . PROCEDURE_NAME ::= LABEL_EXTERNAL "PROCEDURE" ;
+AAfunc_stmt_body . FUNC_STMT_BODY ::= PARAMETER_LIST ;
+ABfunc_stmt_body . FUNC_STMT_BODY ::= TYPE_SPEC ;
+ACfunc_stmt_body . FUNC_STMT_BODY ::= PARAMETER_LIST TYPE_SPEC ;
+AAproc_stmt_body . PROC_STMT_BODY ::= PARAMETER_LIST ;
+ABproc_stmt_body . PROC_STMT_BODY ::= ASSIGN_LIST ;
+ACproc_stmt_body . PROC_STMT_BODY ::= PARAMETER_LIST ASSIGN_LIST ;
+AAparameter_list . PARAMETER_LIST ::= PARAMETER_HEAD IDENTIFIER ")" ;
+AAparameter_head . PARAMETER_HEAD ::= "(" ;
+ABparameter_head . PARAMETER_HEAD ::= PARAMETER_HEAD IDENTIFIER "," ;
+AAassign_list . ASSIGN_LIST ::= ASSIGN PARAMETER_LIST ;
+AAassign . ASSIGN ::= "ASSIGN" ;
+AAdeclare_element . DECLARE_ELEMENT ::= DECLARE_STATEMENT ;
+ABdeclare_element . DECLARE_ELEMENT ::= REPLACE_STMT ";" ;
+ACdeclare_element . DECLARE_ELEMENT ::= STRUCTURE_STMT ;
+ADdeclare_element . DECLARE_ELEMENT ::= "EQUATE" "EXTERNAL" IDENTIFIER "TO" VARIABLE ";" ;
+AAreplace_stmt . REPLACE_STMT ::= "REPLACE" REPLACE_HEAD "BY" TEXT ;
+AAreplace_head . REPLACE_HEAD ::= IDENTIFIER ;
+ABreplace_head . REPLACE_HEAD ::= IDENTIFIER "(" ARG_LIST ")" ;
+AAarg_list . ARG_LIST ::= IDENTIFIER ;
+ABarg_list . ARG_LIST ::= ARG_LIST "," IDENTIFIER ;
+AAtemporary_stmt . TEMPORARY_STMT ::= "TEMPORARY" DECLARE_BODY ";" ;
+AAdeclare_statement . DECLARE_STATEMENT ::= "DECLARE" DECLARE_BODY ";" ;
+AAdeclare_body . DECLARE_BODY ::= DECLARATION_LIST ;
+ABdeclare_body . DECLARE_BODY ::= ATTRIBUTES "," DECLARATION_LIST ;
+AAdeclaration_list . DECLARATION_LIST ::= DECLARATION ;
+ABdeclaration_list . DECLARATION_LIST ::= DCL_LIST_COMMA DECLARATION ;
+AAdcl_list_comma . DCL_LIST_COMMA ::= DECLARATION_LIST "," ;
+AAdeclare_group . DECLARE_GROUP ::= DECLARE_ELEMENT ;
+ABdeclare_group . DECLARE_GROUP ::= DECLARE_GROUP DECLARE_ELEMENT ;
+AAstructure_stmt . STRUCTURE_STMT ::= "STRUCTURE" STRUCT_STMT_HEAD STRUCT_STMT_TAIL ;
+AAstruct_stmt_head . STRUCT_STMT_HEAD ::= IDENTIFIER ":" LEVEL ;
+ABstruct_stmt_head . STRUCT_STMT_HEAD ::= IDENTIFIER MINOR_ATTR_LIST ":" LEVEL ;
+ACstruct_stmt_head . STRUCT_STMT_HEAD ::= STRUCT_STMT_HEAD DECLARATION "," LEVEL ;
+AAstruct_stmt_tail . STRUCT_STMT_TAIL ::= DECLARATION ";" ;
+AAstruct_spec . STRUCT_SPEC ::= STRUCT_TEMPLATE STRUCT_SPEC_BODY ;
+AAstruct_spec_body . STRUCT_SPEC_BODY ::= "-" "STRUCTURE" ;
+ABstruct_spec_body . STRUCT_SPEC_BODY ::= STRUCT_SPEC_HEAD LITERAL_EXP_OR_STAR ")" ;
+AAstruct_spec_head . STRUCT_SPEC_HEAD ::= "-" "STRUCTURE" "(" ;
+AAdeclaration . DECLARATION ::= NAME_ID ;
+ABdeclaration . DECLARATION ::= NAME_ID ATTRIBUTES ;
+AAname_id . NAME_ID ::= IDENTIFIER ;
+ABname_id . NAME_ID ::= IDENTIFIER "NAME" ;
+AAattributes . ATTRIBUTES ::= ARRAY_SPEC TYPE_AND_MINOR_ATTR ;
+ABattributes . ATTRIBUTES ::= ARRAY_SPEC ;
+ACattributes . ATTRIBUTES ::= TYPE_AND_MINOR_ATTR ;
+AAarray_spec . ARRAY_SPEC ::= ARRAY_HEAD LITERAL_EXP_OR_STAR ")" ;
+ABarray_spec . ARRAY_SPEC ::= "FUNCTION" ;
+ACarray_spec . ARRAY_SPEC ::= "PROCEDURE" ;
+ADarray_spec . ARRAY_SPEC ::= "PROGRAM" ;
+AEarray_spec . ARRAY_SPEC ::= "TASK" ;
+AAarray_head . ARRAY_HEAD ::= "ARRAY" "(" ;
+ABarray_head . ARRAY_HEAD ::= ARRAY_HEAD LITERAL_EXP_OR_STAR "," ;
+AAtype_and_minor_attr . TYPE_AND_MINOR_ATTR ::= TYPE_SPEC ;
+ABtype_and_minor_attr . TYPE_AND_MINOR_ATTR ::= TYPE_SPEC MINOR_ATTR_LIST ;
+ACtype_and_minor_attr . TYPE_AND_MINOR_ATTR ::= MINOR_ATTR_LIST ;
+AAtype_spec . TYPE_SPEC ::= STRUCT_SPEC ;
+ABtype_spec . TYPE_SPEC ::= BIT_SPEC ;
+ACtype_spec . TYPE_SPEC ::= CHAR_SPEC ;
+ADtype_spec . TYPE_SPEC ::= ARITH_SPEC ;
+AEtype_spec . TYPE_SPEC ::= "EVENT" ;
+AAbit_spec . BIT_SPEC ::= "BOOLEAN" ;
+ABbit_spec . BIT_SPEC ::= "BIT" "(" LITERAL_EXP_OR_STAR ")" ;
+AAchar_spec . CHAR_SPEC ::= "CHARACTER" "(" LITERAL_EXP_OR_STAR ")" ;
+AAarith_spec . ARITH_SPEC ::= PREC_SPEC ;
+ABarith_spec . ARITH_SPEC ::= SQ_DQ_NAME ;
+ACarith_spec . ARITH_SPEC ::= SQ_DQ_NAME PREC_SPEC ;
+AAsq_dq_name . SQ_DQ_NAME ::= DOUBLY_QUAL_NAME_HEAD LITERAL_EXP_OR_STAR ")" ;
+ABsq_dq_name . SQ_DQ_NAME ::= "INTEGER" ;
+ACsq_dq_name . SQ_DQ_NAME ::= "SCALAR" ;
+ADsq_dq_name . SQ_DQ_NAME ::= "VECTOR" ;
+AEsq_dq_name . SQ_DQ_NAME ::= "MATRIX" ;
+AAdoubly_qual_name_head . DOUBLY_QUAL_NAME_HEAD ::= "VECTOR" "(" ;
+ABdoubly_qual_name_head . DOUBLY_QUAL_NAME_HEAD ::= "MATRIX" "(" LITERAL_EXP_OR_STAR "," ;
+AAliteral_exp_or_star . LITERAL_EXP_OR_STAR ::= ARITH_EXP ;
+ABliteral_exp_or_star . LITERAL_EXP_OR_STAR ::= "*" ;
+AAprec_spec . PREC_SPEC ::= "SINGLE" ;
+ABprec_spec . PREC_SPEC ::= "DOUBLE" ;
+AAminor_attr_list . MINOR_ATTR_LIST ::= MINOR_ATTRIBUTE ;
+ABminor_attr_list . MINOR_ATTR_LIST ::= MINOR_ATTR_LIST MINOR_ATTRIBUTE ;
+AAminor_attribute . MINOR_ATTRIBUTE ::= "STATIC" ;
+ABminor_attribute . MINOR_ATTRIBUTE ::= "AUTOMATIC" ;
+ACminor_attribute . MINOR_ATTRIBUTE ::= "DENSE" ;
+ADminor_attribute . MINOR_ATTRIBUTE ::= "ALIGNED" ;
+AEminor_attribute . MINOR_ATTRIBUTE ::= "ACCESS" ;
+AFminor_attribute . MINOR_ATTRIBUTE ::= "LOCK" "(" LITERAL_EXP_OR_STAR ")" ;
+AGminor_attribute . MINOR_ATTRIBUTE ::= "REMOTE" ;
+AHminor_attribute . MINOR_ATTRIBUTE ::= "RIGID" ;
+AIminor_attribute . MINOR_ATTRIBUTE ::= INIT_OR_CONST_HEAD REPEATED_CONSTANT ")" ;
+AJminor_attribute . MINOR_ATTRIBUTE ::= INIT_OR_CONST_HEAD "*" ")" ;
+AKminor_attribute . MINOR_ATTRIBUTE ::= "LATCHED" ;
+ALminor_attribute . MINOR_ATTRIBUTE ::= "NONHAL" "(" LEVEL ")" ;
+AAinit_or_const_head . INIT_OR_CONST_HEAD ::= "INITIAL" "(" ;
+ABinit_or_const_head . INIT_OR_CONST_HEAD ::= "CONSTANT" "(" ;
+ACinit_or_const_head . INIT_OR_CONST_HEAD ::= INIT_OR_CONST_HEAD REPEATED_CONSTANT "," ;
+AArepeated_constant . REPEATED_CONSTANT ::= "EXPRESSION" ;
+ABrepeated_constant . REPEATED_CONSTANT ::= REPEAT_HEAD VARIABLE ;
+ACrepeated_constant . REPEATED_CONSTANT ::= REPEAT_HEAD CONSTANT ;
+ADrepeated_constant . REPEATED_CONSTANT ::= NESTED_REPEAT_HEAD REPEATED_CONSTANT ")" ;
+AErepeated_constant . REPEATED_CONSTANT ::= REPEAT_HEAD ;
+AArepeat_head . REPEAT_HEAD ::= ARITH_EXP "#" "SIMPLE" "NUMBER" ;
+AAnested_repeat_head . NESTED_REPEAT_HEAD ::= REPEAT_HEAD "(" ;
+ABnested_repeat_head . NESTED_REPEAT_HEAD ::= NESTED_REPEAT_HEAD REPEATED_CONSTANT "," ;
+AAconstant . CONSTANT ::= NUMBER ;
+ABconstant . CONSTANT ::= COMPOUND_NUMBER ;
+ACconstant . CONSTANT ::= BIT_CONST ;
+ADconstant . CONSTANT ::= CHAR_CONST ;
+AAnumber . NUMBER ::= SIMPLE_NUMBER ;
+ABnumber . NUMBER ::= LEVEL ;
+AAclosing . CLOSING ::= "CLOSE" ;
+ABclosing . CLOSING ::= "CLOSE" LABEL ;
+ACclosing . CLOSING ::= LABEL_DEFINITION CLOSING ;
+AAterminator . TERMINATOR ::= "TERMINATE" ;
+ABterminator . TERMINATOR ::= "CANCEL" ;
+AAterminate_list . TERMINATE_LIST ::= LABEL_VAR ;
+ABterminate_list . TERMINATE_LIST ::= TERMINATE_LIST "," LABEL_VAR ;
+AAwait_key . WAIT_KEY ::= "WAIT" ;
+AAschedule_head . SCHEDULE_HEAD ::= "SCHEDULE" LABEL_VAR ;
+ABschedule_head . SCHEDULE_HEAD ::= SCHEDULE_HEAD "AT" ARITH_EXP ;
+ACschedule_head . SCHEDULE_HEAD ::= SCHEDULE_HEAD "IN" ARITH_EXP ;
+ADschedule_head . SCHEDULE_HEAD ::= SCHEDULE_HEAD "ON" BIT_EXP ;
+AAschedule_phrase . SCHEDULE_PHRASE ::= SCHEDULE_HEAD ;
+ABschedule_phrase . SCHEDULE_PHRASE ::= SCHEDULE_HEAD "PRIORITY" "(" ARITH_EXP ")" ;
+ACschedule_phrase . SCHEDULE_PHRASE ::= SCHEDULE_PHRASE "DEPENDENT" ;
+AAschedule_control . SCHEDULE_CONTROL ::= STOPPING ;
+ABschedule_control . SCHEDULE_CONTROL ::= TIMING ;
+ACschedule_control . SCHEDULE_CONTROL ::= TIMING STOPPING ;
+AAtiming . TIMING ::= REPEAT "EVERY" ARITH_EXP ;
+ABtiming . TIMING ::= REPEAT "AFTER" ARITH_EXP ;
+ACtiming . TIMING ::= REPEAT ;
+AArepeat . REPEAT ::= "," "REPEAT" ;
+AAstopping . STOPPING ::= WHILE_KEY ARITH_EXP ;
+ABstopping . STOPPING ::= WHILE_KEY BIT_EXP ;

@@ -1,6 +1,17 @@
-# This sample code is from the HAL/S runtime library for the AP-101S,
-# and it concatenates two strings.
-
+# License:	None.  This file is in the Public Domain in the U.S.
+# Restrictions:	None suspected.
+# Filename:	CATV.asm
+# Language:	IBM AP-101S Assembly Language
+# Purpose:	This is believed to be a source-code file from the
+#		Space Shuttle PASS RTL (revision level unknown).
+#		As such, it is a library function for concatenating
+#		two strings.
+# Mod history:	2022-11-12 RSB	Added this header of modern comments.
+#
+# Lines beginning with '#', such as this line, are "modern" comments
+# added by the Virtual AGC Project.  All others lines are unchanged
+# from the form in which the Virtual AGC Project received them.
+#
          TITLE 'CATV - CONCATENATE'                                     00000100
 *
 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED

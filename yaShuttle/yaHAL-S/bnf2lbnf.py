@@ -9,8 +9,19 @@ Purpose:        Convert the HAL-S.bnf file to HAL-S.lbnf for use with
                 don't guarantee it, because it makes no attempt to 
                 correctly parse the BNF in all generality.
 History:        2022-11-09 RSB  Created. 
+                2022-11-13 RSB  Now allows for mixture of BNF and LBNF
+                                input lines.
 
-A variety of things need to be done.
+For the HAL/S BNF in particular, not all nonterminals have rules
+defined.  I've had to reverse engineer those, but instead of doing so
+in BNF, I've created LBNF for them in the file extraHAL-S.lbnf.  The
+syntax for creating the full LBNF for input into BNFC is:
+
+    cat extraHAL-S.lbnf HAL-s.bnf | bnf2lbnf.py >fullHAL-S.lbnf
+
+The LBNF input lines can simply be passed through (after noting which
+nonterminals are defined), but for the BNF input lines a variety of 
+things need to be done.
 
     1.  All nonterminals like <some string> need to be converted to 
         some_string ... i.e., no angular brackets and no spaces.
@@ -19,11 +30,11 @@ A variety of things need to be done.
         terminated by semi-colons at the ends of the lines.
     4.  Each line needs to be given a label.
     
-So for example,
+So for example, the BNF
 
     <all greetings> ::= hello | hola | aloha
     
-might turn into
+might turn into the LBNF
 
     all_greetings_1. all_greetings ::= "hello" ;
     all_greetings_2. all_greetings ::= "hola" ;
@@ -48,49 +59,59 @@ nonterminals = {}
 reverse = {}
 for i in range(len(lines)):
     line = lines[i].rstrip()
-    if line[:2] == "--" or "::=" not in line:
-        continue
-    n1 = line.index("::=")
-    nonterminal = line[:n1].strip()
-    if nonterminal[:1] != "<" or nonterminal[-1:] != ">":
-        print("Fatal: Illegal non-terminal")
-        print(line)
-        sys.exit(1)
-    replacement = nonterminal.replace(" ", "_")
-    replacement = replacement.replace("#", "pound")
-    replacement = replacement.replace(";", "semicolon")
-    replacement = replacement.replace("$", "dollar")
-    replacement = replacement.replace("*", "star")
-    replacement = replacement.replace("%", "percent")
-    replacement = replacement.replace("=", "equals")
-    replacement = replacement.replace(",", "comma")
-    replacement = replacement.replace("&", "amp")
-    nonterminals[nonterminal] = replacement
-    
+    if "token " == line[:6] or "entrypoints " == line[:12] \
+            or "comment " == line[:8]:
+        nonterminal = line.split()[1]
+        replacement = nonterminal
+    else:
+        if line[:2] == "--" or "::=" not in line:
+            continue
+        nonterminal = line[:line.index("::=")].strip()
+        if "." in nonterminal:  # Detect an LBNF line.
+            nonterminal = "<" + \
+                nonterminal[nonterminal.index(".") + 1:].replace("_", " ").strip() \
+                + ">"
+        if nonterminal[:1] != "<" or nonterminal[-1:] != ">":
+            print("Fatal: Illegal non-terminal")
+            print(line)
+            sys.exit(1)
+        replacement = nonterminal.replace(" ", "_")
+    if nonterminal not in nonterminals:
+        nonterminals[nonterminal] = replacement
+       
 for nonterminal in nonterminals:
     reverse[nonterminals[nonterminal]] = nonterminal
     
 # Second, final pass.
+print("-- ****************************************************************")
+print("-- * This file was created by the script bnf2lbnf.py, forming a   *")
+print("-- * complete LBNF description from several BNF and LBNF partial  *")
+print("-- * descriptions of the language.  Any embedded comments below   *")
+print("-- * are from the partial-description files, and thus are not     *")
+print("-- * necessarily 100% accurate for the complete LBNF description. *")
+print("-- ****************************************************************")
+print()
 for i in range(len(lines)):
     line = lines[i].rstrip()
-    if line[:2] == "--" or "::=" not in line:
-        #print(line)
+    if False:
+        if "token " == line[:6] or "entrypoints " == line[:12] \
+                or "comment " == line[:8] or line[:2] == "--":
+            print(line)
+            continue
+    elif "::=" not in line:
+        print(line)
+        continue
+    if "." in line[:line.index("::=")].strip():  # Detect an LBNF line.
+        line = line[line.index("."):]
+        nonterminal = line[1:line.index("::=")].strip().lower()
+        prefix = chr(0x41 + i // 26) + chr(0x41 + i % 26)
+        print(prefix + nonterminal + " " + line)
         continue
     for nonterminal in nonterminals:
         line = line.replace(nonterminal, nonterminals[nonterminal])
     n1 = line.index("::=")
     nonterminal = line[:n1].strip()[1:-1]
 
-    # Okay, here's some ad-hoc'ery based simply on knowledge of HAL-S.bnf:
-    if nonterminal == "OR":
-        print('OR_1. OR ::= "|" ;')
-        print('OR_2. OR ::= "OR" ;')
-        continue
-    if nonterminal == "CAT":
-        print('CAT_1. CAT ::= "||" ;')
-        print('CAT_2. CAT ::= "CAT" ;')
-        continue
-    
     rules = line[n1+3:].strip().split("|")
     for i in range(len(rules)):
         rule = rules[i]
@@ -108,8 +129,9 @@ for i in range(len(lines)):
                 if found:
                     fields[j] = field
                 else:
-                    fields[j] = '"' + field + '"' 
-        print("%s_%d. %s ::=" % (nonterminal, i+1, nonterminal), end="")
+                    fields[j] = '"' + field + '"'
+        labelPrefix = chr(0x41 + i // 26) + chr(0x41 + i % 26)
+        print("%s%s . %s ::=" % (labelPrefix, nonterminal.lower(), nonterminal), end="")
         for field in fields:    
             print(" " + field, end="")   
         print(" ;")
