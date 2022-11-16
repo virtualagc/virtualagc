@@ -1,4 +1,10 @@
-**Note:**  This file contains various notes (mostly to myself) about developing a "modern" HAL/S compiler that I call yaHAL-S.  It's likely not of interest to anybody else &mdash; RSB
+**Note:**  This file contains various notes (mostly to myself) in a blog-like form about developing a "modern" HAL/S compiler that I call yaHAL-S.  It's likely not of interest to anybody else &mdash; RSB
+
+# 2022-11-07
+
+Though I don't presently have any actual HAL/S code from PASS or BFS to work with, I've extracted various samples of short but complete (and presumably working) HAL/S programs from the book [Programming in HAL/S](https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf).  They've been stored [in the source tree](https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Code%20samples/Programming%20in%20HAL-S).
+
+# 2022-11-08
 
 A Backus-Naur Form (BNF) description of the HAL/S language appears in the contemporary documentation, in [AppendiX G of the HAL/S Language Specification](https://www.ibiblio.org/apollo/Shuttle/HAL_S%20Language%20Specification%20Nov%202005.pdf#page=209).  The link is to the latest version of the specification that's available, although as far as I can tell, the same description appears in the very earliest available version, as well as in the original source code, modulo typos.  I have converted that into a machine-readable form, namely the file
 
@@ -16,12 +22,16 @@ which I've changed to
 
 The type `<CHAR VERTICAL BAR>` naturally does not exist in the original BNF, nor in HAL-S.bnf, since there's no standard way in BNF I can discern to create a rule for it.  Besides which, the documented BNF description is actually incomplete, in the sense that it is missing rules for various other types it refers to, most or all of which are elementary types, such as `<SIMPLE NUMBER>`, `<IDENTIFIER>`, and so on.  Rules for all of these need to be created, into order to get a complete description of the language.  The contemporary BNF is also buggy, in the sense that while it served as documentation both prior to and after the original coding, it was not itself subject to automated processing.  *For example*, the very first rule was `<COMPILATION> ::= <COMPILE_LIST> _|_`, where the trailing `_|_` is just garbage; my guess is that it was shorthand for the original developers that `<COMPILATION>` was the top-level BNF rule.  For us, though, it's unprocessable nonsense and has to be removed.
 
+# 2022-11-09
+
 Having a complete formal description of HAL/S in hand, I use the [BNF Converter (BNFC)](https://bnfc.digitalgrammars.com/) compiler-compiler to produce a HAL/S compiler frontend. BNFC does not actually take a BNF description as input, but requires an alternate form known as [Labeled BNF (LBNF) grammar](https://bnfc.readthedocs.io/en/latest/lbnf.html).  I have therefore created a script,
  
     bnf2lbnf.py
 
 that can convert my BNF to LBNF.  Although since the script is rather simple-minded in terms of its pattern matching, the original BNF description has been massaged somewhat in HAL-S.bnf in terms of its whitespace.
- 
+
+# 2022-11-13
+
 I find it more-convenient to provide the rules for the missing types mentioned earlier in LBNF form rather than BNF, because LBNF has ready means of creating various of those rules (particularly <CHAR VERTICAL BAR>, but others as well) by means of regular expressions.  All of those additional definitions reside in a file called
  
     extraHAL-S.lbnf
@@ -66,6 +76,66 @@ Some additional major steps are needed *after* creating the compiler front-end, 
 1. A compiler backend has to be created which can convert the compiler frontend's output to the target form, which in this case is p-HAL/S p-code.
 2. A formatter for an output listing needs to be created.
 3. Modifications must be made to produce sensible compilation error messages.
+
+# 2022-11-15
+
+The compiler front-end is partially working, but breaks in unexpected ways.  In order to get more insight into what it's doing when it *does* work, I've a added a program which can reformat the "abstract syntax" output by the compiler into an easier-to understand hierarchical form:
+
+    syntaxHierarchy.py
+
+# 2022-11-16
+
+Well, it has been a bit of work in uncovering errors in both my own misconceived LBNF for missing rules and in fixing problems in the original BNF.  For example, using the hierarchical-reformatting tool from yesterday, I found that `<ARITH VAR>` was sometimes being misidentified as `<STRUCTURE VAR>`, due to `<EMPTY>` never being accepted in the rule `<PREFIX> ::= <EMPTY> | <QUAL STRUCT> .`.  I mention this merely to illustrate a) how hard these problems are to track down, and b) the traps inherent in the non-syntactically-debugged original BNF.
+
+But as of this morning the compiler front-end seems to at least be able to "compile" *one* of my sample HAL/S programs, specifically FACTORIAL.hal, which looks like the following:
+
+    /* Sample from PDF p. 85 of "Programming in HAL/S". */
+    
+    FACTORIAL:
+    PROGRAM;
+       DECLARE INTEGER,
+                  RESULT, N_MAX, I;
+       READ(5) N_MAX;
+       RESULT = 1;
+       DO FOR I = 2 TO N_MAX BY 1;
+          RESULT = I RESULT;
+       END;
+       WRITE(6) 'FACTORIAL=', RESULT;
+       WRITE(6) 'I=', I; /* I ADDED THIS! */
+    CLOSE FACTORIAL;
+
+The output of the compilation is a superficially-incomprehensible lisp-like mess, though understandable if you dig into it:
+
+    Parse Successful!
+    
+    [Abstract Syntax]
+    (AAcompilation (AAcompile_list (AAblock_definition (AAblock_stmt (ACblock_stmt_top (AAblock_stmt_head (AAlabel_external (AAlabel_definition (FJlabel (FEidentifier "FACTORIAL"))))))) (ACblock_body (ACblock_body (ACblock_body (ACblock_body (ACblock_body (ABblock_body (AAdeclare_group (AAdeclare_element (AAdeclare_statement (ABdeclare_body (ACattributes (AAtype_and_minor_attr (ADtype_spec (ABarith_spec ABsq_dq_name)))) (ABdeclaration_list (AAdcl_list_comma (ABdeclaration_list (AAdcl_list_comma (AAdeclaration_list (AAdeclaration (AAname_id (FEidentifier "RESULT"))))) (AAdeclaration (AAname_id (FEidentifier "N_MAX"))))) (AAdeclaration (AAname_id (FEidentifier "I"))))))))) (AAany_statement (AAstatement (AQbasic_statement (AAread_phrase (AAread_key (ABnumber FXlevel)) (AAread_arg (AAvariable (AAarith_var (FFarith_id (FEidentifier "N_MAX")) (AEsubscript CGempty))))))))) (AAany_statement (AAstatement (ABbasic_statement (AAassignment (AAvariable (AAarith_var (FFarith_id (FEidentifier "RESULT")) (AEsubscript CGempty))) AAequals (AAexpression (AAarith_exp (AAterm (AAproduct (AAfactor (ADprimary (ABpre_primary (ABnumber FTlevel))))))))))))) (AAany_statement (AAstatement (AObasic_statement (AGdo_group_head (ABdo_group_head (AAfor_list (AAfor_key (AAarith_var (FFarith_id (FEidentifier "I")) (AEsubscript CGempty)) AAequals) (AAarith_exp (AAterm (AAproduct (AAfactor (ADprimary (ABpre_primary (ABnumber FUlevel))))))) (ABiteration_control (AAarith_exp (AAterm (AAproduct (AAfactor (AAprimary (AAarith_var (FFarith_id (FEidentifier "N_MAX")) (AEsubscript CGempty))))))) (AAarith_exp (AAterm (AAproduct (AAfactor (ADprimary (ABpre_primary (ABnumber FTlevel)))))))))) (AAany_statement (AAstatement (ABbasic_statement (AAassignment (AAvariable (AAarith_var (FFarith_id (FEidentifier "RESULT")) (AEsubscript CGempty))) AAequals (AAexpression (AAarith_exp (AAterm (ADproduct (AAfactor (AAprimary (AAarith_var (FFarith_id (FEidentifier "I")) (AEsubscript CGempty)))) (AAproduct (AAfactor (AAprimary (AAarith_var (FFarith_id (FEidentifier "RESULT")) (AEsubscript CGempty)))))))))))))) AAending)))) (AAany_statement (AAstatement (ASbasic_statement (ABwrite_phrase (AAwrite_phrase (AAwrite_key (ABnumber FYlevel)) (AAwrite_arg (ACexpression (AAchar_exp (ABchar_prim (AAchar_const (FOchar_string "'FACTORIAL='"))))))) (AAwrite_arg (AAexpression (AAarith_exp (AAterm (AAproduct (AAfactor (AAprimary (AAarith_var (FFarith_id (FEidentifier "RESULT")) (AEsubscript CGempty)))))))))))))) (AAany_statement (AAstatement (ASbasic_statement (ABwrite_phrase (AAwrite_phrase (AAwrite_key (ABnumber FYlevel)) (AAwrite_arg (ACexpression (AAchar_exp (ABchar_prim (AAchar_const (FOchar_string "'I='"))))))) (AAwrite_arg (AAexpression (AAarith_exp (AAterm (AAproduct (AAfactor (AAprimary (AAarith_var (FFarith_id (FEidentifier "I")) (AEsubscript CGempty)))))))))))))) (ABclosing (FJlabel (FEidentifier "FACTORIAL"))))))
+    
+    [Linearized Tree]
+    FACTORIAL  : PROGRAM;
+    DECLARE INTEGER, RESULT, N_MAX, I;
+    READ ( 5)N_MAX;
+    RESULT  =  1;
+    DO FOR I  =  2 TO N_MAX BY  1;
+    RESULT  = I RESULT;
+    END;
+    WRITE ( 6)'FACTORIAL=', RESULT;
+    WRITE ( 6)'I=', I;
+    CLOSE FACTORIAL;
+
+I suspect there's still a lot of debugging of the BNF needed, but it's a nice little milestone anyway.
+
+Regarding completion of the compiler &mdash; some of the steps needed are listed at the end of the 2022-11-13 entry above &mdash; the way the command `bnfc --c -m ../HAL_S.cf` works &mdash; recall that it's one of the steps in building the test version (`TestHAL_S`) of the compiler &mdash; is to create a variety of C files:
+
+* Absyn.c, Absyn.h
+* Lexer.c
+* Parser.c, Parser.h
+* Printer.c, Printer.h
+* Skeleton.c, Skeleton.h
+* Test.c
+* Makefile
+
+Creating the full compiler is a matter of fleshing out Printer.c and Skeleton.c (I think), replacing Test.c (the top-level program), and fixing up the Makefile accordingly.  But I need to read more about this.
 
 More TBD.
 
