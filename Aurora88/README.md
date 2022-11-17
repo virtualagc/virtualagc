@@ -23,7 +23,7 @@ As we expected in advance, the B1 and B3 modules are identical to some modules a
 * 2003053-061-BLK2-Aurora85+-B1.bin
 * 2003053-181-BLK2-Aurora88-B3.bin
 
-The Aurora 88 rope image file in this folder, namely Aurora88.bin, is a processed form of the individual-module files in the Rope-Module Dump Library.  First, the individual module dumps have to be concatenated to form a single large file, and second, they have to be converted from "hardware" format to "Virtual AGC" format.  In Linux or Mac OS X, that looks like this:
+The Aurora 88 rope image file in *this* folder, namely Aurora88.bin, is a processed form of the individual-module files in the Rope-Module Dump Library.  First, the individual module dumps have to be concatenated to form a single large file, and second, they have to be converted from "hardware" format to "Virtual AGC" format.  In Linux or Mac OS X, that looks like this:
 
     cat ... the 3 module-dump files delimited by spaces ... > Aurora88-hardware.bin
     pieceworkAGC.py --bin --add=Aurora88-hardware.bin,1,1,0 >Aurora88.bin
@@ -35,7 +35,7 @@ In Windows, I *presume* &mdash; but don't vouch for it! &mdash; that the equival
     pieceworkAGC.py --bin --add=Aurora88-hardware.bin,1,1,0 >Aurora88.bin
     ren Aurora88-hardware_vagc.bin Aurora88.bin
 
-The **pieceworkAGC.py** program referenced here can be found in the Tools/disassemblerAGC/ folder of the source tree.  The final file mentioned above, Aurora.bin, is the rope image required by **yaAGC**.  The purpose of the **pieceworkAGC.py** program here is to convert the dumps from a format we call the "hardware" format to the format instead produced by our modern AGC assemblers and accepted by our modern AGC CPU emulators.  The Python 3 programming language is required.  (Actually, the **pieceworkAGC.py** program could have done the entire conversion, eliminating the need for `cat` or `copy` entirely, but the steps listed above are what I did before that fact occurred to me.)
+The **pieceworkAGC.py** program referenced here can be found in the Tools/disassemblerAGC/ folder of the source tree.  The final file mentioned above, Aurora88.bin, is the rope image required by **yaAGC**.  The purpose of the **pieceworkAGC.py** program here is to convert the dumps from a format we call the "hardware" format to the format instead produced by our modern AGC assemblers and accepted by our modern AGC CPU emulators.  The Python 3 programming language is required.  (Actually, the **pieceworkAGC.py** program could have done the entire conversion, eliminating the need for `cat` or `copy` entirely, but the steps listed above are what I did before that fact occurred to me.)
 
 Of course, you don't actually need to *do* this yourself, since the file Aurora88.bin is already present in this folder; but that's how it's done if you need to do it.
 
