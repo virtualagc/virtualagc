@@ -10,6 +10,7 @@ History:        2022-10-10 RSB  Created.
                 2022-10-26 RSB  Began adapting for --block1 and --blk2.
                 2022-10-27 RSB  Fully corrected now to proper mapping of banks
                                 and modules.
+                2022-11-17 RSB  Added --bin option.
 """
 
 import sys
@@ -17,16 +18,17 @@ import sys
 additions = []
 block1 = False
 blk2 = False
+binary = False
 for param in sys.argv[1:]:
     if param == "--help":
         print('''
         Usage:
             pieceworkAGC.py [OPTIONS] >OUTPUT.bin
             
-        A core dump (in disassemblerAGC.py --hardware --parity format) 
-        is produced on stdout. Without OPTIONS, with all locations will
-        be marked as unused.  The following option can be used as many 
-        times as desired:
+        A core dump (by default in disassemblerAGC.py --hardware --parity
+        format) is produced on stdout. Without OPTIONS, with all locations
+        will be marked as unused.  The following option can be used as 
+        many times as desired:
         
             --add=F,P,H,M[,B1[,B2[,B3[...]]]]
             
@@ -55,6 +57,11 @@ for param in sys.argv[1:]:
             --agc       (the default)
             --block1
             --blk2
+        
+        The option following option changes the output format to match 
+        that of disassemblerAGC.py --bin --parity:
+        
+            --bin
         ''')
         sys.exit(0)
     elif param[:6] == "--add=":
@@ -68,6 +75,8 @@ for param in sys.argv[1:]:
     elif param == "--agc":
         block1 = False
         blk2 = False
+    elif param == "--bin":
+        binary = True
     else:
         print("Unrecognized switch: ", param, file=sys.stderr)
         sys.exit(1)
@@ -142,9 +151,17 @@ for addition in additions:
         
 # Output the result.
 data = []
-for bank in bankListHardware:
+if binary:
+    bankListOutput = bankListBin
+else:
+    bankListOutput = bankListHardware
+for bank in bankListOutput:
     for offset in range(0o2000):
-        data.append((core[bank][offset] >> 8) & 0xFF)
-        data.append(core[bank][offset] & 0xFF)
+        value = core[bank][offset]
+        if binary: # Convert word from --hardware to --bin.
+            value = (value & 0o100000) | ((value << 1) & 0o77776) \
+                        | ((value & 0o40000) >> 14)
+        data.append((value >> 8) & 0xFF)
+        data.append(value & 0xFF)
 sys.stdout.buffer.write(bytes(data))
 

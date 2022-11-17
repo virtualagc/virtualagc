@@ -369,6 +369,30 @@ Software:  Aurora 88
 
 Flaws:  None known.
 
+## 2003972-011-BLK2-Aurora88-B1.bin
+
+Source:  Steve Jurvetson
+
+Software: Aurora 88
+
+Flaws:  None known.
+
+## 2003972-091-BLK2-Aurora88-B2.bin
+
+Source:  Steve Jurvetson
+
+Software: Aurora 88
+
+Flaws:  None known.
+
+## 2003972-111-BLK2-Aurora88-B3.bin
+
+Source:  Steve Jurvetson
+
+Software: Aurora 88
+
+Flaws:  None known.
+
 ## 2003972-211-BLK2-SundialE-B3.bin
 
 Source:  MIT Museum

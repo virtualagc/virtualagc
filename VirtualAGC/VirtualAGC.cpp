@@ -159,6 +159,7 @@
  *              2022-08-07 RSB  Expanded the extra line to 'simulate' to include detection
  *                              of the .tcl program it might be running.
  *              2022-10-28 RSB  Added LM131R1, SUNRISE45, and SUNRISE69.
+ *              2022-11-17 RSB  Added Aurora 88.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -329,8 +330,11 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
             { "RETREAD 50 (LM)", "Retread50/MAIN.agc.html",
                 "Click this to select the RETREAD 50 software.",
                 ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Retread50", "LM0.ini" },
-            { "AURORA 12 (LM)", "Aurora12/MAIN.agc.html",
-                "Click this to select the AURORA 12 (early non-mission LM) software.  This is the last AGC version with full testing capabilities.",
+            { "AURORA 88 (LM)", "Aurora88/MAIN.agc.html",
+                "Click this to select the AURORA 88 software.  This was the standard checkout software for the LM guidance system.",
+                ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Aurora88", "LM0.ini" },
+            { "DAP AURORA 12 (LM)", "Aurora12/MAIN.agc.html",
+                "Click this to select the DAP AURORA 12 (early non-mission LM) software.  This is the last AGC version with full testing capabilities.",
                 ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Aurora12", "LM0.ini" },
             { "BOREALIS (LM)", "Borealis/MAIN.agc.html",
                 "Click this to select the BOREALIS test-suite software.  BOREALIS is a modernized AGC self-test suite, based on AURORA.",
@@ -796,6 +800,7 @@ EVT_RADIOBUTTON(ID_SUNRISE45BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_SUNRISE69BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_RETREAD44BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_RETREAD50BUTTON, VirtualAGC::ConsistencyEvent)
+EVT_RADIOBUTTON(ID_AURORA88BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_AURORA12BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_SUNBURST37BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_ZERLINA56BUTTON, VirtualAGC::ConsistencyEvent)

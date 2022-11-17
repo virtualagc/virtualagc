@@ -24,7 +24,7 @@ In Windows, I *presume* &mdash; but don't vouch for it! &mdash; that the equival
     blk1_hard_to_vagc.py Sunrise45-hardware.bin
     ren Sunrise45-hardware_vagc.bin Sunrise45.bin
 
-The final file mentioned above, Sunrise45.bin, is the rope image required by **yaAGCb1**.  The purpose of the **blk1_hard_to_vagc.py** program is to convert the dumps from a format we call the "hardware" format to the format instead produced by our modern AGC assemblers and accepted by our modern AGC CPU emulators.  The Python programming language is required; specifically Python 3, but Python 2 could be used if the first line of the program is changed appropriately.
+By the way, you'll find the **blk1_hard_to_vagc.py** program in the Tools/disassemblerAGC/ folder of the source tree. The final file mentioned above, Sunrise45.bin, is the rope image required by **yaAGCb1**.  The purpose of the **blk1_hard_to_vagc.py** program is to convert the dumps from a format we call the "hardware" format to the format instead produced by our modern AGC assemblers and accepted by our modern AGC CPU emulators.  The Python programming language is required; specifically Python 3, but Python 2 could be used if the first line of the program is changed appropriately.
 
 Of course, you don't actually need to *do* this yourself, since the file Sunrise45.bin is already present; but that's how it's done if you need to do it.
 

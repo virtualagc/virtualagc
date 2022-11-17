@@ -61,6 +61,7 @@
  *          	                center of the screen that I've moved it to
  *          	                the upper left.
  *              2022-10-28 RSB  Added LM131R1, SUNRISE45, and SUNRISE69.
+ *              2022-11-17 RSB  Added Aurora 88.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and any ability to
@@ -172,6 +173,7 @@ enum
   ID_SUNRISE69BUTTON,
   ID_RETREAD44BUTTON,
   ID_RETREAD50BUTTON,
+  ID_AURORA88BUTTON,
   ID_AURORA12BUTTON,
   ID_BOREALISBUTTON,
   ID_SUNBURST37BUTTON,
