@@ -80,7 +80,7 @@ for i in range(len(halsSource)):
 # The original compiler's first step was to tokenize this stream of characters
 # into keywords vs identifiers vs operators vs literals, and we may as well do
 # the same.  
-tokenize(halsSource, metadata)
+warningCount, fatalCount = tokenize(halsSource, metadata)
 
 for i in range(len(halsSource)):
     if "comment" in metadata[i]:
@@ -88,4 +88,11 @@ for i in range(len(halsSource)):
     elif "modern" in metadata[i]:
         print("///" + halsSource[i][1:])
     else:
+        if "errors" in metadata[i]:
+            for error in metadata[i]["errors"]:
+                print(error, file=sys.stderr)
+            print(halsSource[i], file=sys.stderr)
         print(halsSource[i])
+        
+print(warningCount, "warnings", file=sys.stderr)
+print(fatalCount, "errors", file=sys.stderr)

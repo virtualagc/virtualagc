@@ -26,6 +26,8 @@ column 1 are "E" (exponent), "M" (main), "S" (subscript), "D" (???),
 and blank (which is just a normal line).
 """
 
+import sys
+
 INFO = 0
 WARNING = 1
 FATAL = 2
@@ -84,7 +86,7 @@ def unEMS(halsSource, metadata):
                 addError(FATAL, "Dangling exponent line", metadata, i)
                 i += 1
                 continue
-        elif main[0] == "M" and subscript[0] == "S": # M / S
+        elif main[0] == "M" and subscript[:1] == "S": # M / S
             combine = 2
             halsSource[i + 1] = ""
         elif main[0] == "S": # A dangling S.  How untidy!
@@ -118,7 +120,7 @@ def unEMS(halsSource, metadata):
                     addError(FATAL, "Colliding exponent and subscript", metadata, i)
                     break
                 replacement += "**("
-                while j < n and main[j] == " " and exponent[j] != " ":
+                while j < n and main[j] == " ":
                     replacement += exponent[j]
                     j += 1
                 replacement += ")"
@@ -127,7 +129,7 @@ def unEMS(halsSource, metadata):
                     addError(FATAL, "Unattached exponent", metadata, i)
                     break
                 replacement += "$("
-                while j < n and main[j] == " " and subscript[j] != " ":
+                while j < n and main[j] == " ":
                     replacement += subscript[j]
                     j += 1
                 replacement += ")"

@@ -51,8 +51,10 @@ comment "/*" "*/" ;
 
 token IdentifierToken ["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"](["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_"]*["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"])? ;
 token StringToken ["'"]["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-]% $()[|*./&¬=<>#@,;:{}!?\""]+["'"] ;
+token TextToken ["\""]["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-]% $()[|*./&¬=<>#@,;:{}!?'"]+["\""] ;
 token NumberToken ["0123456789"]+ ;
 token CompoundToken ( ["0123456789"]+ ( ["."]["0123456789"]* )? | ["."]["0123456789"]+ ) ( ["EBH"]["-"]?["0123456789"]+ )? ;
+token LevelToken ( ["123456789"] | ["12"]["0123456789"] ) ;
 
 . CHAR_VERTICAL_BAR ::= "|" ;
 
@@ -63,71 +65,71 @@ token CompoundToken ( ["0123456789"]+ ( ["."]["0123456789"]* )? | ["."]["0123456
 . COMPOUND_NUMBER ::= CompoundToken ;
 
 -- Rules for <NO ARG ARITH FUNC>.  See Appendix C of the language specification.
-. NO_ARG_ARITH_FUNC ::= "CLOCKTIME" ;
-. NO_ARG_ARITH_FUNC ::= "DATE" ;
-. NO_ARG_ARITH_FUNC ::= "ERRGRP" ;
-. NO_ARG_ARITH_FUNC ::= "PRIO" ;
-. NO_ARG_ARITH_FUNC ::= "RANDOM" ;
-. NO_ARG_ARITH_FUNC ::= "RUNTIME" ;
+ZZclocktime. NO_ARG_ARITH_FUNC ::= "CLOCKTIME" ;
+ZZdate. NO_ARG_ARITH_FUNC ::= "DATE" ;
+ZZerrgrp. NO_ARG_ARITH_FUNC ::= "ERRGRP" ;
+ZZprio. NO_ARG_ARITH_FUNC ::= "PRIO" ;
+ZZrandom. NO_ARG_ARITH_FUNC ::= "RANDOM" ;
+ZZruntime. NO_ARG_ARITH_FUNC ::= "RUNTIME" ;
 
 -- Rules for <ARITH FUNC>.  See Appendix C of the language specification.
-. ARITH_FUNC ::= "NEXTTIME" ;
-. ARITH_FUNC ::= "ABS" ;
-. ARITH_FUNC ::= "CEILING" ;
-. ARITH_FUNC ::= "DIV" ;
-. ARITH_FUNC ::= "FLOOR" ;
-. ARITH_FUNC ::= "MIDVAL" ;
-. ARITH_FUNC ::= "MOD" ;
-. ARITH_FUNC ::= "ODD" ;
-. ARITH_FUNC ::= "REMAINDER" ;
-. ARITH_FUNC ::= "ROUND" ;
-. ARITH_FUNC ::= "SIGN" ;
-. ARITH_FUNC ::= "SIGNUM" ;
-. ARITH_FUNC ::= "TRUNCATE" ;
-. ARITH_FUNC ::= "ARCCOS" ;
-. ARITH_FUNC ::= "ARCCOSH" ;
-. ARITH_FUNC ::= "ARCSIN" ;
-. ARITH_FUNC ::= "ARCSINH" ;
-. ARITH_FUNC ::= "ARCTAN2" ;
-. ARITH_FUNC ::= "ARCTAN" ;
-. ARITH_FUNC ::= "ARCTANH" ;
-. ARITH_FUNC ::= "COS" ;
-. ARITH_FUNC ::= "COSH" ;
-. ARITH_FUNC ::= "EXP" ;
-. ARITH_FUNC ::= "LOG" ;
-. ARITH_FUNC ::= "SIN" ;
-. ARITH_FUNC ::= "SINH" ;
-. ARITH_FUNC ::= "SQRT" ;
-. ARITH_FUNC ::= "TAN" ;
-. ARITH_FUNC ::= "TANH" ;
-. ARITH_FUNC ::= "SHL" ;
-. ARITH_FUNC ::= "SHR" ;
+ZZnexttime. ARITH_FUNC ::= "NEXTTIME" ;
+ZZabs. ARITH_FUNC ::= "ABS" ;
+ZZceiling. ARITH_FUNC ::= "CEILING" ;
+ZZdiv. ARITH_FUNC ::= "DIV" ;
+ZZfloor. ARITH_FUNC ::= "FLOOR" ;
+ZZmidval. ARITH_FUNC ::= "MIDVAL" ;
+ZZmod. ARITH_FUNC ::= "MOD" ;
+ZZodd. ARITH_FUNC ::= "ODD" ;
+ZZremainder. ARITH_FUNC ::= "REMAINDER" ;
+ZZround. ARITH_FUNC ::= "ROUND" ;
+ZZsign. ARITH_FUNC ::= "SIGN" ;
+ZZsignum. ARITH_FUNC ::= "SIGNUM" ;
+ZZtruncate. ARITH_FUNC ::= "TRUNCATE" ;
+ZZarccos. ARITH_FUNC ::= "ARCCOS" ;
+ZZarccosh. ARITH_FUNC ::= "ARCCOSH" ;
+ZZarcsin. ARITH_FUNC ::= "ARCSIN" ;
+ZZarcsinh. ARITH_FUNC ::= "ARCSINH" ;
+ZZarctan2. ARITH_FUNC ::= "ARCTAN2" ;
+ZZarctan. ARITH_FUNC ::= "ARCTAN" ;
+ZZarctanh. ARITH_FUNC ::= "ARCTANH" ;
+ZZcos. ARITH_FUNC ::= "COS" ;
+ZZcosh. ARITH_FUNC ::= "COSH" ;
+ZZexp. ARITH_FUNC ::= "EXP" ;
+ZZlog. ARITH_FUNC ::= "LOG" ;
+ZZsin. ARITH_FUNC ::= "SIN" ;
+ZZsinh. ARITH_FUNC ::= "SINH" ;
+ZZsqrt. ARITH_FUNC ::= "SQRT" ;
+ZZtan. ARITH_FUNC ::= "TAN" ;
+ZZtanh. ARITH_FUNC ::= "TANH" ;
+ZZshl. ARITH_FUNC ::= "SHL" ;
+ZZshr. ARITH_FUNC ::= "SHR" ;
+ZZabval. ARITH_FUNC ::= "ABVAL" ;
+ZZdet. ARITH_FUNC ::= "DET" ;
+ZZtrace. ARITH_FUNC ::= "TRACE" ;
 
-. NO_ARG_CHAR_FUNC ::= EMPTY ;
+ZZnoArgCharFunc. NO_ARG_CHAR_FUNC ::= EMPTY ;
 
-. CHAR_FUNC ::= "INDEX" ;
-. CHAR_FUNC ::= "LENGTH" ;
-. CHAR_FUNC ::= "LJUST" ;
-. CHAR_FUNC ::= "RJUST" ;
-. CHAR_FUNC ::= "TRIM" ;
+ZZindex. CHAR_FUNC ::= "INDEX" ;
+ZZlength. CHAR_FUNC ::= "LENGTH" ;
+ZZljust. CHAR_FUNC ::= "LJUST" ;
+ZZrjust. CHAR_FUNC ::= "RJUST" ;
+ZZtrim. CHAR_FUNC ::= "TRIM" ;
 
-. NO_ARG_BIT_FUNC ::= EMPTY ;
+ZZnoArgBitFunc. NO_ARG_BIT_FUNC ::= EMPTY ;
 
-. BIT_FUNC ::= "XOR" ;
+ZZxor. BIT_FUNC ::= "XOR" ;
 
-. NO_ARG_STRUCT_FUNC ::= EMPTY ;
+ZZnoArgStructFunc. NO_ARG_STRUCT_FUNC ::= EMPTY ;
 
-. STRUCT_FUNC ::= "ABVAL" ;
-. STRUCT_FUNC ::= "DET" ;
-. STRUCT_FUNC ::= "INVERSE" ;
-. STRUCT_FUNC ::= "TRACE" ;
-. STRUCT_FUNC ::= "TRANSPOSE" ;
-. STRUCT_FUNC ::= "UNIT" ;
-. STRUCT_FUNC ::= "MAX" ;
-. STRUCT_FUNC ::= "MIN" ;
-. STRUCT_FUNC ::= "PROD" ;
-. STRUCT_FUNC ::= "SUM" ;
-. STRUCT_FUNC ::= "SIZE" ;
+ZZinverse. STRUCT_FUNC ::= "INVERSE" ;
+ZZtranspose. STRUCT_FUNC ::= "TRANSPOSE" ;
+ZZunit. STRUCT_FUNC ::= "UNIT" ;
+ZZprod. STRUCT_FUNC ::= "PROD" ;
+ZZsum. STRUCT_FUNC ::= "SUM" ;
+ZZsize. STRUCT_FUNC ::= "SIZE" ;
+ZZmax. STRUCT_FUNC ::= "MAX" ;
+ZZmin. STRUCT_FUNC ::= "MIN" ;
 
 -- It would be nice if the rule for IDENTIFIER excluded all reserved
 -- words.  But I don't know how to do that, or even know if it's 
@@ -143,7 +145,7 @@ token CompoundToken ( ["0123456789"]+ ( ["."]["0123456789"]* )? | ["."]["0123456
 . PERCENT_MACRO_NAME ::= "%" IDENTIFIER ; 
 
 . CHAR_STRING ::= StringToken ;
-. TEXT ::= CHAR_STRING ;
+. TEXT ::= TextToken ;
 
 -- <LEVEL>.  These are just integers representing depth in a structure.
 -- I think.  I haven't been able to determine an upper limit on them.

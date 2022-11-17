@@ -59,112 +59,114 @@ comment "/*" "*/" ;
 
 token IdentifierToken ["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"](["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_"]*["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"])? ;
 token StringToken ["'"]["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-]% $()[|*./&¬=<>#@,;:{}!?\""]+["'"] ;
+token TextToken ["\""]["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-]% $()[|*./&¬=<>#@,;:{}!?'"]+["\""] ;
 token NumberToken ["0123456789"]+ ;
 token CompoundToken ( ["0123456789"]+ ( ["."]["0123456789"]* )? | ["."]["0123456789"]+ ) ( ["EBH"]["-"]?["0123456789"]+ )? ;
+token LevelToken ( ["123456789"] | ["12"]["0123456789"] ) ;
 
-CEchar_vertical_bar . CHAR_VERTICAL_BAR ::= "|" ;
+CGchar_vertical_bar . CHAR_VERTICAL_BAR ::= "|" ;
 
-CGempty . EMPTY ::= ;
+CIempty . EMPTY ::= ;
 
 -- Rules for <SIMPLE NUMBER> and <COMPOUND NUMBER>.
-CJsimple_number . SIMPLE_NUMBER ::= NumberToken ;
-CKcompound_number . COMPOUND_NUMBER ::= CompoundToken ;
+CLsimple_number . SIMPLE_NUMBER ::= NumberToken ;
+CMcompound_number . COMPOUND_NUMBER ::= CompoundToken ;
 
 -- Rules for <NO ARG ARITH FUNC>.  See Appendix C of the language specification.
-CNno_arg_arith_func . NO_ARG_ARITH_FUNC ::= "CLOCKTIME" ;
-COno_arg_arith_func . NO_ARG_ARITH_FUNC ::= "DATE" ;
-CPno_arg_arith_func . NO_ARG_ARITH_FUNC ::= "ERRGRP" ;
-CQno_arg_arith_func . NO_ARG_ARITH_FUNC ::= "PRIO" ;
-CRno_arg_arith_func . NO_ARG_ARITH_FUNC ::= "RANDOM" ;
-CSno_arg_arith_func . NO_ARG_ARITH_FUNC ::= "RUNTIME" ;
+ZZclocktime. NO_ARG_ARITH_FUNC ::= "CLOCKTIME" ;
+ZZdate. NO_ARG_ARITH_FUNC ::= "DATE" ;
+ZZerrgrp. NO_ARG_ARITH_FUNC ::= "ERRGRP" ;
+ZZprio. NO_ARG_ARITH_FUNC ::= "PRIO" ;
+ZZrandom. NO_ARG_ARITH_FUNC ::= "RANDOM" ;
+ZZruntime. NO_ARG_ARITH_FUNC ::= "RUNTIME" ;
 
 -- Rules for <ARITH FUNC>.  See Appendix C of the language specification.
-CVarith_func . ARITH_FUNC ::= "NEXTTIME" ;
-CWarith_func . ARITH_FUNC ::= "ABS" ;
-CXarith_func . ARITH_FUNC ::= "CEILING" ;
-CYarith_func . ARITH_FUNC ::= "DIV" ;
-CZarith_func . ARITH_FUNC ::= "FLOOR" ;
-DAarith_func . ARITH_FUNC ::= "MIDVAL" ;
-DBarith_func . ARITH_FUNC ::= "MOD" ;
-DCarith_func . ARITH_FUNC ::= "ODD" ;
-DDarith_func . ARITH_FUNC ::= "REMAINDER" ;
-DEarith_func . ARITH_FUNC ::= "ROUND" ;
-DFarith_func . ARITH_FUNC ::= "SIGN" ;
-DGarith_func . ARITH_FUNC ::= "SIGNUM" ;
-DHarith_func . ARITH_FUNC ::= "TRUNCATE" ;
-DIarith_func . ARITH_FUNC ::= "ARCCOS" ;
-DJarith_func . ARITH_FUNC ::= "ARCCOSH" ;
-DKarith_func . ARITH_FUNC ::= "ARCSIN" ;
-DLarith_func . ARITH_FUNC ::= "ARCSINH" ;
-DMarith_func . ARITH_FUNC ::= "ARCTAN2" ;
-DNarith_func . ARITH_FUNC ::= "ARCTAN" ;
-DOarith_func . ARITH_FUNC ::= "ARCTANH" ;
-DParith_func . ARITH_FUNC ::= "COS" ;
-DQarith_func . ARITH_FUNC ::= "COSH" ;
-DRarith_func . ARITH_FUNC ::= "EXP" ;
-DSarith_func . ARITH_FUNC ::= "LOG" ;
-DTarith_func . ARITH_FUNC ::= "SIN" ;
-DUarith_func . ARITH_FUNC ::= "SINH" ;
-DVarith_func . ARITH_FUNC ::= "SQRT" ;
-DWarith_func . ARITH_FUNC ::= "TAN" ;
-DXarith_func . ARITH_FUNC ::= "TANH" ;
-DYarith_func . ARITH_FUNC ::= "SHL" ;
-DZarith_func . ARITH_FUNC ::= "SHR" ;
+ZZnexttime. ARITH_FUNC ::= "NEXTTIME" ;
+ZZabs. ARITH_FUNC ::= "ABS" ;
+ZZceiling. ARITH_FUNC ::= "CEILING" ;
+ZZdiv. ARITH_FUNC ::= "DIV" ;
+ZZfloor. ARITH_FUNC ::= "FLOOR" ;
+ZZmidval. ARITH_FUNC ::= "MIDVAL" ;
+ZZmod. ARITH_FUNC ::= "MOD" ;
+ZZodd. ARITH_FUNC ::= "ODD" ;
+ZZremainder. ARITH_FUNC ::= "REMAINDER" ;
+ZZround. ARITH_FUNC ::= "ROUND" ;
+ZZsign. ARITH_FUNC ::= "SIGN" ;
+ZZsignum. ARITH_FUNC ::= "SIGNUM" ;
+ZZtruncate. ARITH_FUNC ::= "TRUNCATE" ;
+ZZarccos. ARITH_FUNC ::= "ARCCOS" ;
+ZZarccosh. ARITH_FUNC ::= "ARCCOSH" ;
+ZZarcsin. ARITH_FUNC ::= "ARCSIN" ;
+ZZarcsinh. ARITH_FUNC ::= "ARCSINH" ;
+ZZarctan2. ARITH_FUNC ::= "ARCTAN2" ;
+ZZarctan. ARITH_FUNC ::= "ARCTAN" ;
+ZZarctanh. ARITH_FUNC ::= "ARCTANH" ;
+ZZcos. ARITH_FUNC ::= "COS" ;
+ZZcosh. ARITH_FUNC ::= "COSH" ;
+ZZexp. ARITH_FUNC ::= "EXP" ;
+ZZlog. ARITH_FUNC ::= "LOG" ;
+ZZsin. ARITH_FUNC ::= "SIN" ;
+ZZsinh. ARITH_FUNC ::= "SINH" ;
+ZZsqrt. ARITH_FUNC ::= "SQRT" ;
+ZZtan. ARITH_FUNC ::= "TAN" ;
+ZZtanh. ARITH_FUNC ::= "TANH" ;
+ZZshl. ARITH_FUNC ::= "SHL" ;
+ZZshr. ARITH_FUNC ::= "SHR" ;
+ZZabval. ARITH_FUNC ::= "ABVAL" ;
+ZZdet. ARITH_FUNC ::= "DET" ;
+ZZtrace. ARITH_FUNC ::= "TRACE" ;
 
-EBno_arg_char_func . NO_ARG_CHAR_FUNC ::= EMPTY ;
+ZZnoArgCharFunc. NO_ARG_CHAR_FUNC ::= EMPTY ;
 
-EDchar_func . CHAR_FUNC ::= "INDEX" ;
-EEchar_func . CHAR_FUNC ::= "LENGTH" ;
-EFchar_func . CHAR_FUNC ::= "LJUST" ;
-EGchar_func . CHAR_FUNC ::= "RJUST" ;
-EHchar_func . CHAR_FUNC ::= "TRIM" ;
+ZZindex. CHAR_FUNC ::= "INDEX" ;
+ZZlength. CHAR_FUNC ::= "LENGTH" ;
+ZZljust. CHAR_FUNC ::= "LJUST" ;
+ZZrjust. CHAR_FUNC ::= "RJUST" ;
+ZZtrim. CHAR_FUNC ::= "TRIM" ;
 
-EJno_arg_bit_func . NO_ARG_BIT_FUNC ::= EMPTY ;
+ZZnoArgBitFunc. NO_ARG_BIT_FUNC ::= EMPTY ;
 
-ELbit_func . BIT_FUNC ::= "XOR" ;
+ZZxor. BIT_FUNC ::= "XOR" ;
 
-ENno_arg_struct_func . NO_ARG_STRUCT_FUNC ::= EMPTY ;
+ZZnoArgStructFunc. NO_ARG_STRUCT_FUNC ::= EMPTY ;
 
-EPstruct_func . STRUCT_FUNC ::= "ABVAL" ;
-EQstruct_func . STRUCT_FUNC ::= "DET" ;
-ERstruct_func . STRUCT_FUNC ::= "INVERSE" ;
-ESstruct_func . STRUCT_FUNC ::= "TRACE" ;
-ETstruct_func . STRUCT_FUNC ::= "TRANSPOSE" ;
-EUstruct_func . STRUCT_FUNC ::= "UNIT" ;
-EVstruct_func . STRUCT_FUNC ::= "MAX" ;
-EWstruct_func . STRUCT_FUNC ::= "MIN" ;
-EXstruct_func . STRUCT_FUNC ::= "PROD" ;
-EYstruct_func . STRUCT_FUNC ::= "SUM" ;
-EZstruct_func . STRUCT_FUNC ::= "SIZE" ;
+ZZinverse. STRUCT_FUNC ::= "INVERSE" ;
+ZZtranspose. STRUCT_FUNC ::= "TRANSPOSE" ;
+ZZunit. STRUCT_FUNC ::= "UNIT" ;
+ZZprod. STRUCT_FUNC ::= "PROD" ;
+ZZsum. STRUCT_FUNC ::= "SUM" ;
+ZZsize. STRUCT_FUNC ::= "SIZE" ;
+ZZmax. STRUCT_FUNC ::= "MAX" ;
+ZZmin. STRUCT_FUNC ::= "MIN" ;
 
 -- It would be nice if the rule for IDENTIFIER excluded all reserved
 -- words.  But I don't know how to do that, or even know if it's
 -- possible.
-FEidentifier . IDENTIFIER ::= IdentifierToken ;
-FFarith_id . ARITH_ID ::= IDENTIFIER ;
-FGchar_id . CHAR_ID ::= IDENTIFIER ;
-FHbit_id . BIT_ID ::= IDENTIFIER ;
-FIstructure_id . STRUCTURE_ID ::= IDENTIFIER ;
-FJlabel . LABEL ::= IDENTIFIER ;
-FKevent . EVENT ::= IDENTIFIER ;
-FLstruct_template . STRUCT_TEMPLATE ::= IDENTIFIER ;
-FMpercent_macro_name . PERCENT_MACRO_NAME ::= "%" IDENTIFIER ;
+FGidentifier . IDENTIFIER ::= IdentifierToken ;
+FHarith_id . ARITH_ID ::= IDENTIFIER ;
+FIchar_id . CHAR_ID ::= IDENTIFIER ;
+FJbit_id . BIT_ID ::= IDENTIFIER ;
+FKstructure_id . STRUCTURE_ID ::= IDENTIFIER ;
+FLlabel . LABEL ::= IDENTIFIER ;
+FMevent . EVENT ::= IDENTIFIER ;
+FNstruct_template . STRUCT_TEMPLATE ::= IDENTIFIER ;
+FOpercent_macro_name . PERCENT_MACRO_NAME ::= "%" IDENTIFIER ;
 
-FOchar_string . CHAR_STRING ::= StringToken ;
-FPtext . TEXT ::= CHAR_STRING ;
+FQchar_string . CHAR_STRING ::= StringToken ;
+FRtext . TEXT ::= TextToken ;
 
 -- <LEVEL>.  These are just integers representing depth in a structure.
 -- I think.  I haven't been able to determine an upper limit on them.
-FTlevel . LEVEL ::= "1" ;
-FUlevel . LEVEL ::= "2" ;
-FVlevel . LEVEL ::= "3" ;
-FWlevel . LEVEL ::= "4" ;
-FXlevel . LEVEL ::= "5" ;
-FYlevel . LEVEL ::= "6" ;
-FZlevel . LEVEL ::= "7" ;
-GAlevel . LEVEL ::= "8" ;
-GBlevel . LEVEL ::= "9" ;
-GClevel . LEVEL ::= "10" ;
+FVlevel . LEVEL ::= "1" ;
+FWlevel . LEVEL ::= "2" ;
+FXlevel . LEVEL ::= "3" ;
+FYlevel . LEVEL ::= "4" ;
+FZlevel . LEVEL ::= "5" ;
+GAlevel . LEVEL ::= "6" ;
+GBlevel . LEVEL ::= "7" ;
+GClevel . LEVEL ::= "8" ;
+GDlevel . LEVEL ::= "9" ;
+GElevel . LEVEL ::= "10" ;
 
 -- Copyright:   Public Domain
 -- Filename:    HAL-S.bnf
@@ -179,6 +181,9 @@ GClevel . LEVEL ::= "10" ;
 --                              aren't allowed in LBNF.
 --              2022-11-15 RSB  Various fixes, such as removal of _|_ from
 --                              COMPILATION.
+--              2022-11-16 RSB  Added ~~ to the syntax for suggesting LBNF labels,
+--                              and added various suggested labels.  Replaced the
+--                              absurd terminal "-1" by the rule "<MINUS> ::= -".
 --
 -- Note also the separate HAL/S source file SYNTHESI.hal, a portion of the original
 -- HAL/S-FC compiler, which duplicates this BNF within its comments.
@@ -187,20 +192,21 @@ AAcompilation . COMPILATION ::= COMPILE_LIST ;
 AAcompile_list . COMPILE_LIST ::= BLOCK_DEFINITION ;
 ABcompile_list . COMPILE_LIST ::= COMPILE_LIST BLOCK_DEFINITION ;
 AAplus . PLUS ::= "+" ;
+AAminus . MINUS ::= "-" ;
 AAarith_exp . ARITH_EXP ::= TERM ;
 ABarith_exp . ARITH_EXP ::= PLUS TERM ;
-ACarith_exp . ARITH_EXP ::= "-1" TERM ;
+ACarith_exp . ARITH_EXP ::= MINUS TERM ;
 ADarith_exp . ARITH_EXP ::= ARITH_EXP PLUS TERM ;
-AEarith_exp . ARITH_EXP ::= ARITH_EXP "-1" TERM ;
-AAterm . TERM ::= PRODUCT ;
-ABterm . TERM ::= PRODUCT "/" TERM ;
-AAproduct . PRODUCT ::= FACTOR ;
-ABproduct . PRODUCT ::= FACTOR "*" PRODUCT ;
-ACproduct . PRODUCT ::= FACTOR "." PRODUCT ;
-ADproduct . PRODUCT ::= FACTOR PRODUCT ;
-AAstarstar . STARSTAR ::= "**" ;
+AEarith_exp . ARITH_EXP ::= ARITH_EXP MINUS TERM ;
+AAtermNoDivide . TERM ::= PRODUCT ;
+ABtermDivide . TERM ::= PRODUCT "/" TERM ;
+AAproductSingle . PRODUCT ::= FACTOR ;
+ABproductCross . PRODUCT ::= FACTOR "*" PRODUCT ;
+ACproductDot . PRODUCT ::= FACTOR "." PRODUCT ;
+ADproductMultiplication . PRODUCT ::= FACTOR PRODUCT ;
+AAexponentiation . EXPONENTIATION ::= "**" ;
 AAfactor . FACTOR ::= PRIMARY ;
-ABfactor . FACTOR ::= PRIMARY STARSTAR FACTOR ;
+ABfactor . FACTOR ::= PRIMARY EXPONENTIATION FACTOR ;
 AAarith_func_head . ARITH_FUNC_HEAD ::= ARITH_FUNC ;
 ABarith_func_head . ARITH_FUNC_HEAD ::= ARITH_CONV SUBSCRIPT ;
 AAarith_conv . ARITH_CONV ::= "INTEGER" ;
@@ -345,8 +351,8 @@ AAfor_list . FOR_LIST ::= FOR_KEY ARITH_EXP ITERATION_CONTROL ;
 ABfor_list . FOR_LIST ::= FOR_KEY ITERATION_BODY ;
 AAiteration_body . ITERATION_BODY ::= ARITH_EXP ;
 ABiteration_body . ITERATION_BODY ::= ITERATION_BODY "," ARITH_EXP ;
-AAiteration_control . ITERATION_CONTROL ::= "TO" ARITH_EXP ;
-ABiteration_control . ITERATION_CONTROL ::= "TO" ARITH_EXP "BY" ARITH_EXP ;
+AAiteration_controlTo . ITERATION_CONTROL ::= "TO" ARITH_EXP ;
+ABiteration_controlToBy . ITERATION_CONTROL ::= "TO" ARITH_EXP "BY" ARITH_EXP ;
 AAfor_key . FOR_KEY ::= "FOR" ARITH_VAR EQUALS ;
 ABfor_key . FOR_KEY ::= "FOR" "TEMPORARY" IDENTIFIER "=" ;
 AAending . ENDING ::= "END" ;
@@ -395,16 +401,23 @@ ABname_exp . NAME_EXP ::= "NULL" ;
 ACname_exp . NAME_EXP ::= NAME_KEY "(" "NULL" ")" ;
 AAname_key . NAME_KEY ::= "NAME" ;
 AAlabel_var . LABEL_VAR ::= PREFIX LABEL SUBSCRIPT ;
-AAmodified_arith_func . MODIFIED_ARITH_FUNC ::= PREFIX NO_ARG_ARITH_FUNC SUBSCRIPT ;
-AAmodified_bit_func . MODIFIED_BIT_FUNC ::= PREFIX NO_ARG_BIT_FUNC SUBSCRIPT ;
-AAmodified_char_func . MODIFIED_CHAR_FUNC ::= PREFIX NO_ARG_CHAR_FUNC SUBSCRIPT ;
-AAmodified_struct_func . MODIFIED_STRUCT_FUNC ::= PREFIX NO_ARG_STRUCT_FUNC SUBSCRIPT ;
+AAmodified_arith_func . MODIFIED_ARITH_FUNC ::= NO_ARG_ARITH_FUNC SUBSCRIPT ;
+ABmodified_arith_func . MODIFIED_ARITH_FUNC ::= PREFIX NO_ARG_ARITH_FUNC SUBSCRIPT ;
+AAmodified_bit_func . MODIFIED_BIT_FUNC ::= NO_ARG_BIT_FUNC SUBSCRIPT ;
+ABmodified_bit_func . MODIFIED_BIT_FUNC ::= PREFIX NO_ARG_BIT_FUNC SUBSCRIPT ;
+AAmodified_char_func . MODIFIED_CHAR_FUNC ::= NO_ARG_CHAR_FUNC SUBSCRIPT ;
+ABmodified_char_func . MODIFIED_CHAR_FUNC ::= PREFIX NO_ARG_CHAR_FUNC SUBSCRIPT ;
+AAmodified_struct_func . MODIFIED_STRUCT_FUNC ::= NO_ARG_STRUCT_FUNC SUBSCRIPT ;
+ABmodified_struct_func . MODIFIED_STRUCT_FUNC ::= PREFIX NO_ARG_STRUCT_FUNC SUBSCRIPT ;
 AAstructure_var . STRUCTURE_VAR ::= QUAL_STRUCT SUBSCRIPT ;
 AAarith_var . ARITH_VAR ::= ARITH_ID SUBSCRIPT ;
 ABarith_var . ARITH_VAR ::= PREFIX ARITH_ID SUBSCRIPT ;
-AAchar_var . CHAR_VAR ::= PREFIX CHAR_ID SUBSCRIPT ;
-AAbit_var . BIT_VAR ::= PREFIX BIT_ID SUBSCRIPT ;
-AAevent_var . EVENT_VAR ::= PREFIX EVENT SUBSCRIPT ;
+AAchar_var . CHAR_VAR ::= CHAR_ID SUBSCRIPT ;
+ABchar_var . CHAR_VAR ::= PREFIX CHAR_ID SUBSCRIPT ;
+AAbit_var . BIT_VAR ::= BIT_ID SUBSCRIPT ;
+ABbit_var . BIT_VAR ::= PREFIX BIT_ID SUBSCRIPT ;
+AAevent_var . EVENT_VAR ::= EVENT SUBSCRIPT ;
+ABevent_var . EVENT_VAR ::= PREFIX EVENT SUBSCRIPT ;
 AAqual_struct . QUAL_STRUCT ::= STRUCTURE_ID ;
 ABqual_struct . QUAL_STRUCT ::= QUAL_STRUCT "." STRUCTURE_ID ;
 AAprefix . PREFIX ::= EMPTY ;
@@ -432,7 +445,7 @@ AAsub_exp . SUB_EXP ::= ARITH_EXP ;
 ABsub_exp . SUB_EXP ::= POUND_EXPRESSION ;
 AApound_expression . POUND_EXPRESSION ::= "#" ;
 ABpound_expression . POUND_EXPRESSION ::= POUND_EXPRESSION PLUS TERM ;
-ACpound_expression . POUND_EXPRESSION ::= POUND_EXPRESSION "-1" TERM ;
+ACpound_expression . POUND_EXPRESSION ::= POUND_EXPRESSION MINUS TERM ;
 AAand . AND ::= "&" ;
 ABand . AND ::= "AND" ;
 AAor . OR ::= CHAR_VERTICAL_BAR ;
@@ -596,15 +609,15 @@ AIminor_attribute . MINOR_ATTRIBUTE ::= INIT_OR_CONST_HEAD REPEATED_CONSTANT ")"
 AJminor_attribute . MINOR_ATTRIBUTE ::= INIT_OR_CONST_HEAD "*" ")" ;
 AKminor_attribute . MINOR_ATTRIBUTE ::= "LATCHED" ;
 ALminor_attribute . MINOR_ATTRIBUTE ::= "NONHAL" "(" LEVEL ")" ;
-AAinit_or_const_head . INIT_OR_CONST_HEAD ::= "INITIAL" "(" ;
-ABinit_or_const_head . INIT_OR_CONST_HEAD ::= "CONSTANT" "(" ;
-ACinit_or_const_head . INIT_OR_CONST_HEAD ::= INIT_OR_CONST_HEAD REPEATED_CONSTANT "," ;
-AArepeated_constant . REPEATED_CONSTANT ::= "EXPRESSION" ;
+AAinit_or_const_headInitial . INIT_OR_CONST_HEAD ::= "INITIAL" "(" ;
+ABinit_or_const_headConstant . INIT_OR_CONST_HEAD ::= "CONSTANT" "(" ;
+ACinit_or_const_headRepeatedConstant . INIT_OR_CONST_HEAD ::= INIT_OR_CONST_HEAD REPEATED_CONSTANT "," ;
+AArepeated_constant . REPEATED_CONSTANT ::= EXPRESSION ;
 ABrepeated_constant . REPEATED_CONSTANT ::= REPEAT_HEAD VARIABLE ;
 ACrepeated_constant . REPEATED_CONSTANT ::= REPEAT_HEAD CONSTANT ;
 ADrepeated_constant . REPEATED_CONSTANT ::= NESTED_REPEAT_HEAD REPEATED_CONSTANT ")" ;
 AErepeated_constant . REPEATED_CONSTANT ::= REPEAT_HEAD ;
-AArepeat_head . REPEAT_HEAD ::= ARITH_EXP "#" "SIMPLE" "NUMBER" ;
+AArepeat_head . REPEAT_HEAD ::= ARITH_EXP "#" SIMPLE_NUMBER ;
 AAnested_repeat_head . NESTED_REPEAT_HEAD ::= REPEAT_HEAD "(" ;
 ABnested_repeat_head . NESTED_REPEAT_HEAD ::= NESTED_REPEAT_HEAD REPEATED_CONSTANT "," ;
 AAconstant . CONSTANT ::= NUMBER ;

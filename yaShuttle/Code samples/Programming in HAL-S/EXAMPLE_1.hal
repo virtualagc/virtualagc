@@ -22,12 +22,8 @@ S	       J,K
 M	TIME  = RUNTIME;
 S	    I
 
-# I haven't figured out yet if the '*' annotations are necessary or valid
-# in the following line.  At any rate, yaHAL-S.py ignores them, so I 
-# guess that answer is good enough for now.
-
 E	*   *-1
-M	N = M
+M	N = M  ;
 M	TIME  = RUNTIME - TIME ;
 S	    I                 I
 
@@ -55,5 +51,5 @@ S	   	      I
 
      END;
      TMEAN = TMEAN / 100;
-     WRITE(6) 'TMEAN=', TMEAN, ', TMAX=', TMAX, ', TMIN=', TMIN
+     WRITE(6) 'TMEAN=', TMEAN, ', TMAX=', TMAX, ', TMIN=', TMIN;
   CLOSE EXAMPLE_1;

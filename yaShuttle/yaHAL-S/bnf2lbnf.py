@@ -11,6 +11,10 @@ Purpose:        Convert the HAL-S.bnf file to HAL-S.lbnf for use with
 History:        2022-11-09 RSB  Created. 
                 2022-11-13 RSB  Now allows for mixture of BNF and LBNF
                                 input lines.
+                2022-11-16 RSB  If input LBNF has a label, it's allowed
+                                to keep it; labels are generated only
+                                where they had been left empty.  Added
+                                ~~ for marking suggested labels in BNF.
 
 For the HAL/S BNF in particular, not all nonterminals have rules
 defined.  I've had to reverse engineer those, but instead of doing so
@@ -58,7 +62,12 @@ lines = sys.stdin.readlines()
 nonterminals = {}
 reverse = {}
 for i in range(len(lines)):
-    line = lines[i].rstrip()
+    if lines[i][:2] == "--":
+        continue
+    fields = lines[i].split("~~")
+    if len(fields) == 0:
+        continue
+    line = fields[0].rstrip()
     if "token " == line[:6] or "entrypoints " == line[:12] \
             or "comment " == line[:8]:
         nonterminal = line.split()[1]
@@ -92,17 +101,27 @@ print("-- * necessarily 100% accurate for the complete LBNF description. *")
 print("-- ****************************************************************")
 print()
 for i in range(len(lines)):
-    line = lines[i].rstrip()
-    if False:
-        if "token " == line[:6] or "entrypoints " == line[:12] \
-                or "comment " == line[:8] or line[:2] == "--":
-            print(line)
-            continue
-    elif "::=" not in line:
+    if lines[i][:2] == "--":
+        print(lines[i].rstrip())
+        continue
+    fields = lines[i].split("~~")
+    if len(fields) == 0:
+        print(line)
+        continue
+    line = fields[0].rstrip()
+    suggestions = []
+    if len(fields) > 1:
+        suggestions = fields[1:]
+    if "::=" not in line:
         print(line)
         continue
     if "." in line[:line.index("::=")].strip():  # Detect an LBNF line.
-        line = line[line.index("."):]
+        index = line.index(".")
+        if line[:index].strip() != "": # Does it have a label already?
+            print(line)
+            continue
+        # It's a label we left empty, so let's create one:
+        line = line[index:]
         nonterminal = line[1:line.index("::=")].strip().lower()
         prefix = chr(0x41 + i // 26) + chr(0x41 + i % 26)
         print(prefix + nonterminal + " " + line)
@@ -130,8 +149,12 @@ for i in range(len(lines)):
                     fields[j] = field
                 else:
                     fields[j] = '"' + field + '"'
+        if i < len(suggestions) and suggestions[i].strip() != "":
+            labelBody = suggestions[i].strip()
+        else:
+            labelBody = nonterminal.lower()
         labelPrefix = chr(0x41 + i // 26) + chr(0x41 + i % 26)
-        print("%s%s . %s ::=" % (labelPrefix, nonterminal.lower(), nonterminal), end="")
+        print("%s%s . %s ::=" % (labelPrefix, labelBody, nonterminal), end="")
         for field in fields:    
             print(" " + field, end="")   
         print(" ;")

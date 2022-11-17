@@ -57,6 +57,10 @@ The compiler front-end produced in this manner is called `TestHAL_S`, and it is 
 
     TestHAL_S SOURCE.hal
 
+or
+
+    TestHAL_S <SOURCE.hal
+
 However ... there are certain features of HAL/S which are not captured by the BNF (or LBNF) description of it, and which we cannot work around if we confine ourselves to BNF/LBNF.  Specifically, I refer to the fact that while HAL/S is essentially free-form in columns 2 and rightward &mdash; i.e., it does not respect column alignment or line breaks &mdash; it nevertheless treats column 1 specially.  Column 1 is normally blank, but can also contain the special characters
 
 * C &mdash; full-line comment.
@@ -67,11 +71,15 @@ However ... there are certain features of HAL/S which are not captured by the BN
 
 Neither BNF nor LBNF has any provision for a column-dependent feature of this kind.  Therefore, prior to compiling HAL/S source code, it is necessary to preprocess it,
 
-    HAL-preprocessor.py < TRUE_HAL_SOURCE.hal > TAME_HAL_SOURCE.hal
+    yaHAL-preprocessor.py TRUE_HAL_SOURCE.hal > TAME_HAL_SOURCE.hal
 
 to "tame" those column-dependent features.  It is the tamed HAL/S source which needs to be compiled.  Specifically, the multiline Exponent/Main/Subscript (E/M/S) constructs are converted to also-legal single-line form.  Moreover, full-line comments are converted to "//"-style comments.  I.e., in the tamed code, "//" anywhere in a line of code (not merely in column 1) indicates that the remainder of the line is a comment.
 
-Some additional major steps are needed *after* creating the compiler front-end, in order to have a complete compiler:
+Thus application of the complete preprocessor plus compiler front-end might look like:
+
+    yaHAL-preprocessor.py SOURCE.hal | TestHAL_S
+
+Some additional major steps will be needed *after* creating the compiler front-end, in order to have a complete compiler:
 
 1. A compiler backend has to be created which can convert the compiler frontend's output to the target form, which in this case is p-HAL/S p-code.
 2. A formatter for an output listing needs to be created.
@@ -124,6 +132,12 @@ The output of the compilation is a superficially-incomprehensible lisp-like mess
     CLOSE FACTORIAL;
 
 I suspect there's still a lot of debugging of the BNF needed, but it's a nice little milestone anyway.
+
+In fact, with the fixes I've made today, most of the HAL/S code samples I've provided so far will compile: CORNERS, DARTBOARD_APPROXIMATION, EXAMPLE_1, EXAMPLE_2, EXAMPLE_4A, FACTORIAL, NEWTON_SQRT, ORTHONORMAL, PARALLAX, ROOTS, ROWS, SIMPLE, XYZ_TO_POLAR.
+
+But there are 2 problematic ones left over: TABLE and TAN_SUMS.  These won't compile because they have `REPLACE ... BY "..."` macros.  And while the compiler can parse the macro definitions &mdash; though admittedly oddly &mdash; it cannot (as of yet) actually perform the preprocessor-style replacements that the macros implement.  Thus none of the lines having macro invocations in them compile.
+
+Amusingly, in the very last place it occurred to me to look in resolving my issues, I found a mistake in the XYZ_TO_POLAR example as it appears in *Programming in HAL/S*.  (The parentheses in the `WRITE(6)` command were not matched.)  What's amusing about that is that the document itself proudly proclaims that all of the code example are *correct*, and we don't need to worry about any errors, since the code was pasted directly from error-free compiler listings rather than manually typed into the document.  So ... I call BS on that one; errors in the sample-program listings are something that will indeed need to watched for.
 
 Regarding completion of the compiler &mdash; some of the steps needed are listed at the end of the 2022-11-13 entry above &mdash; the way the command `bnfc --c -m ../HAL_S.cf` works &mdash; recall that it's one of the steps in building the test version (`TestHAL_S`) of the compiler &mdash; is to create a variety of C files:
 
