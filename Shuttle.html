@@ -22,15 +22,7 @@ document.write(headerTemplate.replace("@TITLE@","Virtual AGC Project").replace("
       <li><a moz-do-not-send="true" href="#References">References</a></li>
       <li><a moz-do-not-send="true" href="#PASS">PASS and BFS Source
           Code</a></li>
-      <li><a moz-do-not-send="true" href="#Emulation">Emulation</a><br>
-      </li>
-      <ul>
-        <li><a moz-do-not-send="true" href="#HAL">Phase 1</a></li>
-        <li><a moz-do-not-send="true" href="#Phase1.1">Phase 1.1</a><br>
-        </li>
-        <li><a moz-do-not-send="true" href="#Phase2">Phase 2</a><br>
-        </li>
-      </ul>
+      <li><a moz-do-not-send="true" href="#Emulation">Emulation</a></li>
     </ul>
     <h1><a name="Introduction"></a>Introduction</h1>
     <p>In so far as the Space Shuttle is concerned, my goals at present
@@ -77,6 +69,7 @@ document.write(headerTemplate.replace("@TITLE@","Virtual AGC Project").replace("
 href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20Chapter%204.pdf">Chapter
 
 
+
         4, "Computers in the Space Shuttle Avionics System", of James
         Tomayko's <i>Computers in Spaceflight: The NASA Experience</i></a>.<br>
     </p>
@@ -84,6 +77,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
     </p>
     <p>The portion of the Shuttle's full avionics system which concerns
       us is the <i>Data Process System (DPS)</i>, which includes the <i>General
+
 
 
         Purpose Computers (GPC)</i>, the crew interface
@@ -101,6 +95,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
         but not similar to them).<br>
         <br>
         Four of the GPCs run <i>identical</i> software, known as the <i>Primary
+
 
 
           Flight Software (PFS)</i> atop the <i>Flight Control
@@ -199,6 +194,7 @@ href="Shuttle/Architecture%20of%20the%20Space%20Shuttle%20Primary%20Avionics%20S
         href="links-shuttle.html">our Space Shuttle Library page</a>.&nbsp;
 
 
+
       However, here are some websites that have additional documents
       that you may find interesting, and which may still contain
       relevant materials that I've overlooked:<br>
@@ -208,12 +204,15 @@ href="Shuttle/Architecture%20of%20the%20Space%20Shuttle%20Primary%20Avionics%20S
 href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.html">Johnson
 
 
+
           Space Center's FOIA archive of flight data files</a>.</li>
       <li><a moz-do-not-send="true"
           href="https://sourceforge.net/projects/shuttleultra/files/References/">The
 
 
+
           Space Shuttle Ultra site, particularly its reference section</a>.&nbsp;
+
 
 
         Space Shuttle Ultra (SSU) is an add-on for the Orbiter
@@ -224,6 +223,7 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
         FlightGear is a flight simulation system.</li>
       <li><a moz-do-not-send="true"
           href="https://gandalfddi.z19.web.core.windows.net/shuttle.html">Ken
+
 
 
           Hollis's Space Shuttle page</a>.</li>
@@ -263,12 +263,14 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
     <ol>
       <li>The recommended starting point is "<a moz-do-not-send="true"
           href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf">Programming
+
           in HAL/S</a>", which was intended as an introduction to
         programming in HAL/S and is organized as a tutorial.</li>
       <li>The tutorial itself points out that it is not a definitive
         exposition of the language, and recommends proceeding afterward
         to the <a moz-do-not-send="true"
           href="Shuttle/HAL_S%20Language%20Specification%20Nov%202005.pdf">"HAL/S
+
           Language Specification"</a>, which contains a much-more-formal
         specification of the language syntax ... fortunately in the form
         of easy-to-understand graphs of the syntax, rather than the (in
@@ -276,9 +278,11 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
         (BNF).</li>
       <li>Or to the <a moz-do-not-send="true"
           href="Shuttle/HAL_S%20Programmers%20Guide%20Nov%202005.pdf">"HAL/S
+
           Programmer's Guide"</a>.</li>
       <li>And finally, the <a moz-do-not-send="true"
           href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf">"HAL/S-FC
+
           User's Guide"</a> explains how to compile and execute a HAL/S
         program.&nbsp; That explanation is, of course, completely
         irrelevant to our present situation, but you may find that the
@@ -330,12 +334,15 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
       </ul>
       <li>Identifiers such as variable names:</li>
       <ul>
-        <li>Upper-case only.</li>
         <li>Maximum length of 32 characters.&nbsp; <br>
         </li>
         <li>Must begin with an alphabetic character.&nbsp; <br>
         </li>
-        <li>Can contain alphanumerics and underscore characters, '_'.</li>
+        <li>Can contain alphanumerics and underscore characters,
+          '_'.&nbsp; <b>Note:</b>&nbsp; Both upper and lower case are
+          allowed, though all code samples I've seen to date involve
+          only upper case.<br>
+        </li>
         <li>Cannot end with an underscore.</li>
         <li>Cannot be broken across lines.</li>
         <li>HAL/S keywords cannot be used as identifiers.</li>
@@ -351,129 +358,15 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
     </ul>
     <p>TBD<br>
     </p>
-    <h1><a name="Emulation"></a>Emulation</h1>
-    <p>To speak of emulation of the flight software is a bit ambiguous,
-      because there are many possibilities about how it might be done,
-      and there are engineering decisions associated with those
-      possibilities.<br>
-    </p>
-    <p>Here's the most-extreme possibility:<br>
-    </p>
-    <ul>
-      <li>Emulate the AP-101S computer itself, so that the emulation can
-        run that CPU's machine code.&nbsp; (Actually, the AP-101S is
-        microcoded, so you might step back even further and emulate the
-        microcode.)</li>
-      <li>Create an AP-101S assembler which can convert the AP-101S
-        assembly language of the FCOS into executable AP-101S machine
-        code.</li>
-      <li>Create a HAL/S compiler which can convert the HAL/S source
-        code of the PFS into AP-101S machine code.</li>
-      <li>... and similarly for BFS ...</li>
-      <li>Run 5 AP-101S emulations, running PASS and BFS, interconnected
-        by emulated data buses and simulations of the crew interface
-        devices.</li>
-    </ul>
-    <p>This is not only very complex, but also has the problem that even
-      with availability of PASS and BFS source code, we don't know
-      precisely what AP-101S machine code should be created, since there
-      are many, many ways of doing that.&nbsp; <br>
-    </p>
-    <p>And the least-extreme possibility we have is this:<br>
-    </p>
-    <ul>
-      <li>Create an emulation that runs HAL/S code directly; or at most,
-        compiles it to a p-code that can be executed by a virtual
-        machine, in much the same way that Java p-code runs on the Java
-        Virtual Machine (JVM).</li>
-    </ul>
-    <p>My intention is to at least begin with the latter approach, which
-      is discussed in the next section.&nbsp; If additional information
-      becomes available in the future, such as the original compilers,
-      then additional phases of more-complex emulations can be
-      contemplated.<br>
-    </p>
-    <h2><a name="HALS"></a>Phase 1<br>
-    </h2>
-    <p>The original HAL/S compiler was itself largely written in a
-      language called <a moz-do-not-send="true"
-        href="https://en.wikipedia.org/wiki/XPL">XPL</a>. There were two
-      versions of the compiler that I know of:<br>
-    </p>
-    <ul>
-      <li>HAL/S-360 compiled HAL/S source code into object code for the
-        IBM 360 mainframe computer.</li>
-      <li>HAL/S-FC compiled HAL/S source code into object code for the
-        IBM AP-101S avionics computer.</li>
-    </ul>
-    <p>Additionally, there was a runtime library of common mathematical
-      and other routines, as well as a program called HALLINK that
-      served as a linker for combining the object code and library into
-      executable code.<br>
-    </p>
-    <p><i>We</i>, on the other hand, will have the following programs:<br>
-    </p>
-    <ul>
-      <li>yaHAL-S.py is a Python program which compiles HAL/S source
-        code into a p-code format which I'll refer to as "p-HAL/S".</li>
-      <li>yaPASS.py is a Python program which executes p-HAL/S code and
-        has an integrated CRT+keyboard crew interface.</li>
-    </ul>
-    <h2><a name="Phase1.1"></a>Phase 1.1</h2>
-    <p>To the elements of Phase 1 above we add:<br>
-    </p>
-    <ul>
-      <li>yaGPC.c is a C subroutine which executes p-HAL/S code, and
-        provides configurable callbacks for any interactions with
-        databuses.<br>
-      </li>
-    </ul>
-    <p>The system is thus largely debugged in Phase 1, and in Phase 1.1
-      we simply add a higher-speed emulation of the GPC, stripped of my
-      specific interface between the GPC and the remainder of the
-      spacecraft.&nbsp; Phase 1.1 is intended for integration into
-      space-flight simulations, which in any case would prefer to plug
-      in their own emulation of the spacecraft (including the crew
-      interface) and would not care for mine.<br>
-    </p>
-    <blockquote>
-      <p><font size="+1"><b>→</b></font> <font size="-1">Note as an
-          aside, that the use of yaGPC in a freely-distributable
-          spaceflight-simulation system assumes that PASS and BFS are
-          freely distributable as well.&nbsp; Now at the present
-          writing, it isn't yet known known whether the International
-          Traffic in Arms Regulations (ITAR) restricts "export" of PASS
-          and BFS source code. <i>However</i>, all that is required for
-          Phase 1.1 is distribution of p-HAL/S code, rather than
-          distribution of the source code, and access to the source code
-          can be remain restricted.&nbsp; Since the Shuttle runs only
-          IBM AP-101S code, it <i>cannot run</i> p-HAL/S code, so <u>the
-
-            p-HAL/S code is not a component of the Shuttle, and is thus
-            unrestricted</u> whatever the status of the source
-          code.&nbsp; I apologize for introducing these annoying legal
-          technicalities into the discussion, but unfortunately it's
-          something that needs to be addressed as long as the law
-          burdens us with these regulations.&nbsp; The ideal situation
-          is certainly the free (and I believe, indisputably harmless)
-          distribution of the source code.&nbsp; I've received several
-          very-understandable complaints from my foreign colleagues on
-          this matter, pointing out their lack of enthusiasm for this
-          arrangement.&nbsp; They say, and I agree, that restriction of
-          the source code will delay integration of yaGPC.&nbsp;
-          Perhaps, even though I hope not, ultimately prevent it.&nbsp;
-          On the other hand, the penalty for violation of ITAR is a fine
-          of up to $1,000,000 and/or imprisonment for 10 years, per
-          violation.&nbsp; From that factoid, you may imagine <i>my</i>
-          lack of enthusiasm for the notion of violating ITAR
-          restrictions.&nbsp; In this case, my lack of enthusiasm must
-          take precedence over all the others.</font> </p>
-    </blockquote>
-    <p>TBD<br>
-    </p>
-    <h2><a name="Phase2"></a>Phase 2</h2>
-    <p>TBD<br>
-    </p>
+    <h1><a name="Emulation"></a>Compilation and Emulation</h1>
+    When a "modern" HAL/S compiler and a means of emulating the compiled
+    PASS/BFS executable code exists, I'll report on it in this section.<br>
+    <br>
+    Until then, I'll merely point out that <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/README.md">the
+      development roadmap and reports on progress along that roadmap
+      appear in the associated README</a> file in our software
+    repository.<br>
     <br>
     <hr style="width: 100%; height: 2px;">
     <center><br>
@@ -489,7 +382,7 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2022-11-07 <br>
+          2022-11-13 <br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is

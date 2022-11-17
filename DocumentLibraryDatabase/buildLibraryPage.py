@@ -393,6 +393,18 @@ if shuttle:
     <br><br>
     The entries are arranged from most-recently added to least-recently added.
     """
+
+    blurbXPL = """
+    Unfortunately, as far as I can tell, the primary reference on XPL is the
+    book <i>A Compiler Generator</i> by W. M. McKeeman, J. J. Horning, and 
+    D. B. Wortman (Prentice-Hall, 1970, "All rights reserved, ...").  Thus
+    while there are various online resources you can find that try to 
+    digest the information in that book and to spit the cud back at you one 
+    way or another, there are few authoritative online documents I can point to.
+    Less than one, actually.  I invite you to purchase the book &mdash; 
+    which, naturally, is out of print but can be found used &mdash; or to
+    google for the various online sources.
+    """
     
     blurbFlowcharts = """
     Note that while a number of revisions of various volumes of the Space
@@ -1338,10 +1350,12 @@ if shuttle:
         { "anchor" : "RecentAdditions", "title" : "Recently Added Documents as of %s" % currentDateString, "sortKey" : myRecentSortKey, "blurb" : blurbRecentlyAdded },
         { "anchor" : "flowcharts", "title" : "Design Equations and Flowcharts", "keywords" : [ "flowcharts", "flowchart", "design equations" ], "blurb" : blurbFlowcharts },
         { "anchor" : "Avionics", "title" : "Avionics", "keywords" : [ "avionics" ] },
-        { "anchor" : "HAL/S", "title" : "HAL/S Programming", "keywords" : [ "HAL/S" ] },
+        { "anchor" : "HAL/S", "title" : "HAL/S Language", "keywords" : [ "HAL/S" ] },
+        { "anchor" : "XPL", "title" : "XPL Language", "keywords" : ["XPL" ], "blurb" : blurbXPL },
         { "anchor" : "PASS", "title" : "Primary Avionics Software System (PASS)", "keywords" : [ "PASS" ] },
         { "anchor" : "PFS", "title" : "Primary Flight Software (PFS)", "keywords" : [ "PFS" ] },
         { "anchor" : "BFS", "title" : "Backup Flight System (BFS)", "keywords" : [ "BFS" ] },
+        { "anchor" : "RTL", "title" : "Run-Time Library (RTL)", "keywords" : [ "RTL" ] },
         { "anchor" : "FCOS", "title" : "Flight Control Operating System (FCOS)", "keywords" : [ "FCOS" ] },
         { "anchor" : "DPS", "title" : "Data Processing Subsystem (DPS)", "keywords" : [ "DPS" ] },
         { "anchor" : "GPC", "title" : "General Purpose Computer (GPC), IBM AP-101S Avionics Computer", "keywords" : [ "AP-101S", "GPC" ] },
