@@ -29,7 +29,7 @@ The Aurora 88 rope image file in *this* folder, namely Aurora88.bin, is a proces
     pieceworkAGC.py --bin --add=Aurora88-hardware.bin,1,1,0 >Aurora88.bin
     mv Aurora88-hardware_vagc.bin Aurora88.bin
 
-In Windows, I *presume* &mdash; but don't vouch for it! &mdash; that the equivalent steps would
+In Windows, I *presume* &mdash; but don't vouch for it! &mdash; that the equivalent steps would be
 
     copy /B ... the 3 files, separated by '+' signs ... Aurora88-hardware.bin
     pieceworkAGC.py --bin --add=Aurora88-hardware.bin,1,1,0 >Aurora88.bin

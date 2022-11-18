@@ -75,23 +75,25 @@ When there's something definitive, I'll describe it here.  For now, though, the 
 
 # <a name="Changes"></a>Changes To the Language
 
-## <a name="Comments"></a>Program Comments
+## <a name="Comments"></a>Program Comments and Compiler Directives
 
-In true HAL/S, comments take one of the following two forms:
+In true HAL/S, comments and compiler directives take one of the following forms:
 
 * `C` in column 1 indicates a full-line comment.
-* Anything delimited by `/*` and `*/` is a comment.
+* Anything in column 2 and beyond that's delimited by `/*` and `*/` is a comment.
+* `D` in column 1 indicates a compiler directive.
 
-Additionally, though, we have the need for "modern" comments that weren't present originally, and we need to be able to distinguish those from the original comments.  Thus, we've added a third type:
+Additionally, though, we have the need for "modern" comments that weren't present originally, and we need to be able to distinguish those from the original comments.  For example, we need additional comments to associate the code with the Virtual AGC Project, to indicate the provenance, to indicate the (modern) change history, to describe any licensing or distribution issues (copyright, ITAR), and so on, none of which is covered by the original program comments.  Thus, we've added a third type of comment:
 
-* `#` in column 1 indicates a full-line modern comment.
+* `#` in column 1 indicates a full-line *modern* comment.
 
-As mentioned before, the modern compiler cannot recognize the special nature of column 1, so HAL/S is preprocessed prior to compilation in order to alter features dependent on column 1.  In the case of full-line comments, the preprocessor transforms them as follows:
+But as mentioned before, the modern compiler cannot recognize the special nature of column 1, so we have to transform notations aligned to column 1 into something palatable to the compiler.  That's done by means of the preprocessor, **yaHAL-reprocessor.py** in the yaShuttle/yaHAL-S/ folder of the software repository.  In the case of full-line comments and compiler directives, the preprocessor transforms them as follows for consumption by the compiler:
 
 * `C` in column 1 &rarr; `//`.
 * `#` in column 1 &rarr; `///`.
+* `D` in column 1 &rarr; `//D`.
 
-As a side effect, `''`-style comments and `///`-style comments can also be inserted into HAL/S source code *prior* to preprocessing ... though I would recommend against doing so.
+While these new notations remain in column 1, to the compiler they are position-independent, and would be treated the same regardless of which column they appeared in:  i.e., the remainder of the line is not parsed as HAL/S code.
 
 # <a name="pCode"></a>The p-Code Format:  p-HAL/S
 

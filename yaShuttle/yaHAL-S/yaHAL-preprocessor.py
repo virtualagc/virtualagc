@@ -4,22 +4,45 @@
 Copyright:      None - the author (Ron Burkey) declares this software to
                 be in the Public Domain, with no rights reserved.
 Filename:       yaHAL-preprocessor.py
-Purpose:        I had originally intended this to be a compiler for the
-                HAL/S programming language, targeting a p-code form known 
-                as p-HAL/S. Now I think that using a more-modern
-                compiler-compiler approach is more appropriate ... but 
-                there are still things that I thing need to be handled by
-                preprocessing, such as converting the multiline E/M/S
-                construct to single lines of code.  That's what this
-                program does.
+Purpose:        This is a preprocessor for the "modern" HAL/S compiler
+                which takes care of things I don't think can be handled
+                by the compiler itself (given the BNFC framework for
+                developing the compiler).
 History:        2022-11-07 RSB  Created. 
                 2022-11-09 RSB  Change emphasis (and filename) from 
                                 compiler to preprocessor.
-         
+                2022-11-17 RSB  Began trying to account for 
+                                    REPLACE ... by "..." ;
+                                statements.
+                2022-11-18 RSB  Moved replaceBy into separate module
+                                for continued development.
+
+Here are the features of HAL/S I don't think the compiler can handle:
+
+    1.  Special characters in column 1.  Specifically:
+            a)  The original comments ('C' in column 1).
+            b)  "Modern" comments ('#' in column 1).
+            c)  Multiline E / M / S constructs (including tabulation).
+            d)  Compiler directives ('D' in column 1).
+    2.  The macro statements:
+            REPLACE identifier[(identifier)] by "string" ;
+        The compiler can parse these lines all right, but cannot 
+        perform the macro expansions themselves, as far as I can tell.
+       
+Of these matters:
+
+    *   I think that 1a through 1c can be handled perfectly well.  
+    *   I don't currently know how to address 1d, so I'm ignoring it for now.
+    *   I don't see any perfect way to handle issue 2, so I've hidden
+        in a separate module where it's "easily" replacable if the 
+        implementation is inadequate.
+        
 """
 
 import sys
-from tokenize import tokenize
+import re
+import unEMS
+import replaceBy
 
 #Parse the command-line arguments.
 tabSize = 8
@@ -62,6 +85,8 @@ for param in sys.argv[1:]:
                 m["comment"] = True
             elif halsSource[i][:1] == "#":
                 m["modern"] = True
+            elif halsSource[i][:1] == "D":
+                m["directive"] = True
             metadata.append(m)
 
 # Because whitespace is important in E/M/S constructs and (potentially) in the 
@@ -77,22 +102,35 @@ def untab(line):
 for i in range(len(halsSource)):
     halsSource[i] = untab(halsSource[i].rstrip())
     
-# The original compiler's first step was to tokenize this stream of characters
-# into keywords vs identifiers vs operators vs literals, and we may as well do
-# the same.  
-warningCount, fatalCount = tokenize(halsSource, metadata)
+# Remove E/M/S multiline constructs. 
+unEMS.unEMS(halsSource, metadata)
+warningCount = unEMS.warningCount
+fatalCount = unEMS.fatalCount
 
+# Take care of REPLACE ... BY "..." macros.
+replaceBy.replaceBy(halsSource, metadata)
+
+# Take care of original and modern full-line comments.
 for i in range(len(halsSource)):
     if "comment" in metadata[i]:
         print("//" + halsSource[i][1:])
     elif "modern" in metadata[i]:
         print("///" + halsSource[i][1:])
+    elif "directive" in metadata[i]:
+        print("//D" + halsSource[i][1:])
     else:
         if "errors" in metadata[i]:
             for error in metadata[i]["errors"]:
                 print(error, file=sys.stderr)
             print(halsSource[i], file=sys.stderr)
         print(halsSource[i])
-        
+
+# Print final summary.
+print("Preprocessor summary:", file=sys.stderr)
+for i in range(len(halsSource)):
+    if "errors" in metadata[i]:
+        print("Line %d:" % (i+1), halsSource[i], file=sys.stderr)
+        for error in metadata[i]["errors"]:
+            print("       ", error, file=sys.stderr)
 print(warningCount, "warnings", file=sys.stderr)
 print(fatalCount, "errors", file=sys.stderr)
