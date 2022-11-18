@@ -51,6 +51,13 @@ def addError(errorType, msg, metadata, lineNumber):
 # is processed, the topmost of the lines becomes a combination of the 
 # other(s), and then the others are turned into blank lines.  I do that to
 # preserve the original line numbering for error messages in the output.
+overmarks = { 
+    "-", # Vector
+    "*", # Matrix
+    ",", # Character
+    ".", # Bit and boolean
+    "+"  # Structure
+}
 def unEMS(halsSource, metadata):
     i = 0
     while i < len(halsSource) - 1:
@@ -102,6 +109,15 @@ def unEMS(halsSource, metadata):
         exponent = fmt % exponent
         main = fmt % main
         subscript = fmt % subscript
+        # Let's see if there are any illegal overmarks or undermarks.
+        for j in range(1, n):
+            if exponent[j] == " " and subscript[j] == " ":
+                continue
+            if main[j] == " ":
+                continue
+            if exponent[j] in overmarks:
+                continue
+            addError(WARNING, "Illegal overmark or undermark at %d" % j, metadata, i)            
         replacement = " "
         j = 1
         while j < n:
@@ -109,30 +125,25 @@ def unEMS(halsSource, metadata):
                 replacement += main[j]
                 j += 1
                 continue
-            if exponent[j] != " ":
-                if j < 1 or main[j - 1] == " ":
-                   addError(FATAL, "Unattached exponent", metadata, i)
-                   break
-                if subscript[j] != " ":
-                    addError(FATAL, "Colliding exponent and subscript", metadata, i)
-                    break
-                replacement += "**("
-                while j < n and main[j] == " ":
-                    replacement += exponent[j]
-                    j += 1
-                replacement += ")"
-            elif subscript[j] != " ":
-                if j < 1 or main[j - 1] == " ":
-                    addError(FATAL, "Unattached exponent", metadata, i)
-                    break
-                replacement += "$("
-                while j < n and main[j] == " ":
-                    replacement += subscript[j]
-                    j += 1
-                replacement += ")"
-            else:
-                replacement += " "
+            # We've reached a blank area in the main line; collect superscripts
+            # and subscripts.
+            sup = ""
+            sub = ""
+            while j < n and main[j] == " ":
+                sup += exponent[j]
+                sub += subscript[j]
                 j += 1
+            sup = sup.strip()
+            sub = sub.strip()
+            if len(sub) == 1:
+                replacement += "$" + sub
+            elif len(sub) > 1:
+                replacement += "$(" + sub + ")"
+            if len(sup) == 1:
+                replacement += "**" + sup
+            elif len(sup) > 1:
+                replacement += "**(" + sup + ")"
+            replacement += " "
         halsSource[i] = replacement  
         
         i += combine

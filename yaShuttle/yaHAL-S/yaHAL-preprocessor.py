@@ -107,6 +107,20 @@ unEMS.unEMS(halsSource, metadata)
 warningCount = unEMS.warningCount
 fatalCount = unEMS.fatalCount
 
+# To the best of my understanding when variables are shown in the compiler's
+# output listing as "[NAME]", the brackets are really just for annotation
+# purposes.  The BNF doesn't mention the brackets at all.  We need to 
+# replace [NAME] by NAME.
+for i in range(len(halsSource)):
+    line = halsSource[i]
+    while True:
+        match = re.search("\\[" + replaceBy.bareIdentifierPattern + "\\]", line)
+        if match == None:
+            break
+        line = line[:match.span()[0]] + match.group()[1:-1] + line[match.span()[1]:]
+    if line != halsSource[i]:
+        halsSource[i] = line
+
 # Take care of REPLACE ... BY "..." macros.
 replaceBy.replaceBy(halsSource, metadata)
 
@@ -119,10 +133,10 @@ for i in range(len(halsSource)):
     elif "directive" in metadata[i]:
         print("//D" + halsSource[i][1:])
     else:
-        if "errors" in metadata[i]:
-            for error in metadata[i]["errors"]:
-                print(error, file=sys.stderr)
-            print(halsSource[i], file=sys.stderr)
+        #if "errors" in metadata[i]:
+        #    for error in metadata[i]["errors"]:
+        #        print(error, file=sys.stderr)
+        #    print(halsSource[i], file=sys.stderr)
         print(halsSource[i])
 
 # Print final summary.
@@ -134,3 +148,6 @@ for i in range(len(halsSource)):
             print("       ", error, file=sys.stderr)
 print(warningCount, "warnings", file=sys.stderr)
 print(fatalCount, "errors", file=sys.stderr)
+if fatalCount > 0:
+    sys.exit(1)
+

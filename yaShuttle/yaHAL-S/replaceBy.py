@@ -38,6 +38,15 @@ import sys
 import re
 import copy
 
+bareIdentifierPattern = '[A-Za-z]([A-Za-z0-9_]*[A-Za-z0-9])?'
+identifierPattern = "\\b" + bareIdentifierPattern
+endblockPattern = '(\\bCLOSE\\s*;)|(\\bCLOSE\\s+' + identifierPattern + '\\s*;)'
+startblockPattern = '(\\bPROGRAM\\s*;)|(\\bFUNCTION\\b)|(\\bPROCEDURE\\b)'
+replacePattern = '\\bREPLACE\\s+' + identifierPattern
+argListPattern = '(\\s*\\([^)]+\\))?'
+byPattern = '\\s+BY\\s+"[^"]*"\\s*;'
+replaceByPattern = replacePattern + argListPattern + byPattern
+
 def oneReplacement(string, target, replacement):
     match = re.search("\\b" + target + "\\b", string)
     if match == None:
@@ -55,13 +64,6 @@ def replaceBy(halsSource, metadata):
 
     blockDepth = 0
     macros = [] # By depth.
-    identifierPattern = '\\b[A-Za-z]([A-Za-z0-9_]*[A-Za-z0-9])?'
-    endblockPattern = '(\\bCLOSE\\s*;)|(\\bCLOSE\\s+' + identifierPattern + '\\s*;)'
-    startblockPattern = '(\\bPROGRAM\\s*;)|(\\bFUNCTION\\b)|(\\bPROCEDURE\\b)'
-    replacePattern = '\\bREPLACE\\s+' + identifierPattern
-    argListPattern = '(\\s*\\([^)]+\\))?'
-    byPattern = '\\s+BY\\s+"[^"]*"\\s*;'
-    replaceByPattern = replacePattern + argListPattern + byPattern
     
     for i in range(len(halsSource)):
         # Ignore lines which shouldn't have macro expansions.
