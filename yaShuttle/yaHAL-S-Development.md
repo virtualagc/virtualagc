@@ -151,5 +151,49 @@ Regarding completion of the compiler &mdash; some of the steps needed are listed
 
 Creating the full compiler is a matter of fleshing out Printer.c and Skeleton.c (I think), replacing Test.c (the top-level program), and fixing up the Makefile accordingly.  But I need to read more about this.
 
+# 2022-11-19
+
+I now have 30 code samples from "Programming in HAL/S", and while I haven't checked the output from the proof-of-concept compiler front-end in detail, I'd cautiously say that they all work except for two, and that those fail in similar ways.  Consider the following sample, which I constructed myself:
+
+    TEST:
+    PROGRAM;
+        DECLARE MYBOOL BOOLEAN INITIAL(TRUE);
+        DECLARE MYVECTOR ARRAY(3) BOOLEAN INITIAL(TRUE);
+        DECLARE X INTEGER INITIAL(0);
+        
+        IF MYBOOL THEN
+        	X = 1;
+        IF TRUE = MYBOOL THEN
+        	X = 2;
+        IF TRUE = MYVECTOR$(1) THEN
+        	X = 3;
+        IF MYBOOL = TRUE THEN 
+        	X = 4;
+        IF MYVECTOR$(1) THEN
+        	X = 5;
+        IF MYVECTOR$(1) = TRUE THEN
+        	X = 6;
+    CLOSE TEST;
+
+The former 3 `IF ... THEN ... ;` parse, while the latter 3 fail either at `TRUE` or at `THEN`.  It *appears* to me that that's because the production rules in the BNF grammar require `MYBOOL` and `MYVECTOR$(1)` to be bit variables, but that the parser incorrectly determines them to be arithmetical identifiers in the latter 3 rules.  And why is that?
+
+Well, I've been more-or-less ignoring the warnings emitted by `bison` (the parser generator) when the compiler is built, mainly because I didn't understand them.  I notice now, though, that it complains about 673 "shift/reduce conflicts" and 420 "reduce/shift conflicts", which apparently indicate ambiguities in the grammar.  Besides which I have this:
+
+    HAL_S.y:725.11-50: warning: rule useless in parser due to conflicts [-Wother]
+      725 | CHAR_ID : IDENTIFIER { $$ = make_FIchar_id($1);  }
+          |           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Which is particularly curious to me, since why `<CHAR ID>`?  Why not the identically-defined `<BIT ID>` or `<STRUCT ID>`?  Dunno!
+
+It seems to me that one way around this is to use the preprocessor to alter the names of identifiers based on the `DECLARE` lines, for example prefixing them with 'a' for arithmeticals, 'b' for bits, etc.  In which case `<ARITH ID>` could be defined by tokens distinct from `<BIT ID>`, `<CHAR ID>`, and so on.  The extra characters on the symbol names could be removed after compilation.  I don't like that idea much, but it could be done.  I think.
+
+I think this is the basic problem, but there must be a better way to fix it.
+
+Thinking about how to debug this problem, it seems to me firstly that the method described earlier of creating HAL_S.cf &mdash; i.e., the LBNF input file to BNF Converter &mdash; namely,
+
+    cat extraHAL-S.lbnf HAL-S.bnf | bnf2lbnf.py > HAL_S.cf
+
+needs to be scrapped.  It was fine up to now, but it is cumbersome for debugging.  From now on, extraHAL-S.lbnf, HAL-S.bnf, and bnf2lbnf.py, though remaining in the repository, are frozen in their current states and are deprecated.  Instead, HAL_S.cf is the "official" language description, and it's the file that needs to be debugged on an ongoing basis.
+
 More TBD.
 

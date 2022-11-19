@@ -16,6 +16,12 @@ History:        2022-11-09 RSB  Created.
                                 where they had been left empty.  Added
                                 ~~ for marking suggested labels in BNF.
 
+                **********************************************************
+                * This file is now frozen and deprecated.  Work directly *
+                * the LBNF description in the file HAL_S.cf instead.     *
+                **********************************************************
+
+
 For the HAL/S BNF in particular, not all nonterminals have rules
 defined.  I've had to reverse engineer those, but instead of doing so
 in BNF, I've created LBNF for them in the file extraHAL-S.lbnf.  The
