@@ -54,7 +54,6 @@
 
 entrypoints COMPILATION ;
 comment "//" ;
-comment "///" ;
 comment "/*" "*/" ;
 
 token IdentifierToken ["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"](["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_"]*["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"])? ;
@@ -64,13 +63,13 @@ token NumberToken ["0123456789"]+ ;
 token CompoundToken ( ["0123456789"]+ ( ["."]["0123456789"]* )? | ["."]["0123456789"]+ ) ( ["EBH"]["-"]?["0123456789"]+ )? ;
 token LevelToken ( ["123456789"] | ["12"]["0123456789"] ) ;
 
-CGchar_vertical_bar . CHAR_VERTICAL_BAR ::= "|" ;
+CFchar_vertical_bar . CHAR_VERTICAL_BAR ::= "|" ;
 
-CIempty . EMPTY ::= ;
+CHempty . EMPTY ::= ;
 
 -- Rules for <SIMPLE NUMBER> and <COMPOUND NUMBER>.
-CLsimple_number . SIMPLE_NUMBER ::= NumberToken ;
-CMcompound_number . COMPOUND_NUMBER ::= CompoundToken ;
+CKsimple_number . SIMPLE_NUMBER ::= NumberToken ;
+CLcompound_number . COMPOUND_NUMBER ::= CompoundToken ;
 
 -- Rules for <NO ARG ARITH FUNC>.  See Appendix C of the language specification.
 ZZclocktime. NO_ARG_ARITH_FUNC ::= "CLOCKTIME" ;
@@ -115,6 +114,7 @@ ZZshr. ARITH_FUNC ::= "SHR" ;
 ZZabval. ARITH_FUNC ::= "ABVAL" ;
 ZZdet. ARITH_FUNC ::= "DET" ;
 ZZtrace. ARITH_FUNC ::= "TRACE" ;
+ZZunit. ARITH_FUNC ::= "UNIT" ;
 
 ZZnoArgCharFunc. NO_ARG_CHAR_FUNC ::= EMPTY ;
 
@@ -132,7 +132,6 @@ ZZnoArgStructFunc. NO_ARG_STRUCT_FUNC ::= EMPTY ;
 
 ZZinverse. STRUCT_FUNC ::= "INVERSE" ;
 ZZtranspose. STRUCT_FUNC ::= "TRANSPOSE" ;
-ZZunit. STRUCT_FUNC ::= "UNIT" ;
 ZZprod. STRUCT_FUNC ::= "PROD" ;
 ZZsum. STRUCT_FUNC ::= "SUM" ;
 ZZsize. STRUCT_FUNC ::= "SIZE" ;
@@ -142,31 +141,31 @@ ZZmin. STRUCT_FUNC ::= "MIN" ;
 -- It would be nice if the rule for IDENTIFIER excluded all reserved
 -- words.  But I don't know how to do that, or even know if it's
 -- possible.
-FGidentifier . IDENTIFIER ::= IdentifierToken ;
-FHarith_id . ARITH_ID ::= IDENTIFIER ;
-FIchar_id . CHAR_ID ::= IDENTIFIER ;
-FJbit_id . BIT_ID ::= IDENTIFIER ;
-FKstructure_id . STRUCTURE_ID ::= IDENTIFIER ;
-FLlabel . LABEL ::= IDENTIFIER ;
-FMevent . EVENT ::= IDENTIFIER ;
-FNstruct_template . STRUCT_TEMPLATE ::= IDENTIFIER ;
-FOpercent_macro_name . PERCENT_MACRO_NAME ::= "%" IDENTIFIER ;
+FFidentifier . IDENTIFIER ::= IdentifierToken ;
+FGarith_id . ARITH_ID ::= IDENTIFIER ;
+FHchar_id . CHAR_ID ::= IDENTIFIER ;
+FIbit_id . BIT_ID ::= IDENTIFIER ;
+FJstructure_id . STRUCTURE_ID ::= IDENTIFIER ;
+FKlabel . LABEL ::= IDENTIFIER ;
+FLevent . EVENT ::= IDENTIFIER ;
+FMstruct_template . STRUCT_TEMPLATE ::= IDENTIFIER ;
+FNpercent_macro_name . PERCENT_MACRO_NAME ::= "%" IDENTIFIER ;
 
-FQchar_string . CHAR_STRING ::= StringToken ;
-FRtext . TEXT ::= TextToken ;
+FPchar_string . CHAR_STRING ::= StringToken ;
+FQtext . TEXT ::= TextToken ;
 
 -- <LEVEL>.  These are just integers representing depth in a structure.
 -- I think.  I haven't been able to determine an upper limit on them.
-FVlevel . LEVEL ::= "1" ;
-FWlevel . LEVEL ::= "2" ;
-FXlevel . LEVEL ::= "3" ;
-FYlevel . LEVEL ::= "4" ;
-FZlevel . LEVEL ::= "5" ;
-GAlevel . LEVEL ::= "6" ;
-GBlevel . LEVEL ::= "7" ;
-GClevel . LEVEL ::= "8" ;
-GDlevel . LEVEL ::= "9" ;
-GElevel . LEVEL ::= "10" ;
+FUlevel . LEVEL ::= "1" ;
+FVlevel . LEVEL ::= "2" ;
+FWlevel . LEVEL ::= "3" ;
+FXlevel . LEVEL ::= "4" ;
+FYlevel . LEVEL ::= "5" ;
+FZlevel . LEVEL ::= "6" ;
+GAlevel . LEVEL ::= "7" ;
+GBlevel . LEVEL ::= "8" ;
+GClevel . LEVEL ::= "9" ;
+GDlevel . LEVEL ::= "10" ;
 
 -- Copyright:   Public Domain
 -- Filename:    HAL-S.bnf

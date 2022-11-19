@@ -1,0 +1,30 @@
+# From PDF p. 80 in "Programming in HAL/S".
+
+  EXAMPLE_4:
+  PROGRAM;
+     DECLARE SCALAR,
+     		A, B, C, D;
+     DECLARE NUM_GOOD INTEGER;
+     DECLARE SCALAR,
+     		VALUE, OLD_VALUE;
+     		
+C     . . .
+
+     DO CASE NUM_GOOD;
+        ELSE
+           DO;
+              VALUE = OLD_VALUE;
+              RETURN;
+           END;
+        VALUE = A;
+        VALUE = (A + B) / 2;
+        VALUE = MIDVAL(A, B, C);
+        DO;
+        
+C        . . .
+
+        END;
+     END;
+     OLD_VALUE = VALUE;
+  CLOSE EXAMPLE_4;
+  

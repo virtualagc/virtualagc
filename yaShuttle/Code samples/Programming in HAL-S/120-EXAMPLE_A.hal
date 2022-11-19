@@ -1,0 +1,55 @@
+# From PDF p. 120 of "Programming in HAL/S".
+
+# Syntax error at THEN in line37.  I think that the parser
+# identifies DATA_VALID$(I:) as arithmetical rather than
+# boolean.  I'll have to come back to this one.
+
+  EXAMPLE_A:
+  PROGRAM;
+     DECLARE ARRAY(4),
+     		ALT SCALAR,
+     		TIMETAG SCALAR,
+     		DATA_VALID BOOLEAN;
+     DECLARE SCALAR INITIAL(0),
+     		TOTAL, NUMBER_GOOD;
+     DECLARE AVERAGE SCALAR;
+     DO FOR TEMPORARY J = 1 TO 4;
+M       IF RUNTIME - TIMETAG  > .1 OR ALT  <=0 OR ALT  > 50000 THEN
+S			    J            J           J
+
+E           .
+M	DATA_VALID   = FALSE;
+S                 J:
+
+	ELSE
+	   DO;
+E                 .
+M	      DATA_VALID   = TRUE;
+S		 	J:
+
+	      NUMBER_GOOD = NUMBER_GOOD + 1;
+M	      TOTAL = TOTAL + ALT ;
+S	      			 J
+
+	   END;
+     END;
+     AVERAGE = TOTAL / NUMBER_GOOD;
+     DO FOR TEMPORARY I = 1 TO 4;
+E              .
+M	IF DATA_VALID   THEN
+S     		     I:
+
+M	   IF ABS(ALT  - AVERAGE) > .1 AVERAGE THEN
+S		     I
+
+E		  .
+M	      DATA_VALID   = FALSE;
+S			I:
+
+     END;
+     
+C  NOW WE HAVE SCREENED OUT DATA WHICH IS NEGATIVE OR ZERO,
+C  OR TOO LARGE OR TOO OLD OR TOO FAR FROM THE AVERAGE
+
+  CLOSE EXAMPLE_A;
+       
