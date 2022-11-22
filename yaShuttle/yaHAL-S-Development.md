@@ -32,11 +32,11 @@ that can convert my BNF to LBNF.  Although since the script is rather simple-min
 
 # 2022-11-13
 
-I find it more-convenient to provide the rules for the missing types mentioned earlier in LBNF form rather than BNF, because LBNF has ready means of creating various of those rules (particularly <CHAR VERTICAL BAR>, but others as well) by means of regular expressions.  All of those additional definitions reside in a file called
+I find it more-convenient to provide the rules for the missing types mentioned earlier in LBNF form rather than BNF, because LBNF has ready means of creating various of those rules (particularly `<CHAR VERTICAL BAR>`, but others as well) by means of regular expressions.  All of those additional definitions reside in a file called
  
     extraHAL-S.lbnf
 
-In Linux or Mac OS X, the complete description of HAL/S in LBNF can be created by the following command:
+(**Important later note:**  *Do not generate HAL_S.cf as indicated in this paragraph.  This method is now deprecated.  Do not overwrite HAL_S.cf.  Instead, the existing HAL_S.cf should be preserved and edited directly if necessary.*)  In Linux or Mac OS X, the complete description of HAL/S in LBNF can be created by the following command:
  
     cat extraHAL-S.lbnf HAL-S.bnf | bnf2lbnf.py > HAL_S.cf
 
@@ -195,5 +195,164 @@ Thinking about how to debug this problem, it seems to me firstly that the method
 
 needs to be scrapped.  It was fine up to now, but it is cumbersome for debugging.  From now on, extraHAL-S.lbnf, HAL-S.bnf, and bnf2lbnf.py, though remaining in the repository, are frozen in their current states and are deprecated.  Instead, HAL_S.cf is the "official" language description, and it's the file that needs to be debugged on an ongoing basis.
 
-More TBD.
+Taking this approach, I think I've verified that the problem is LBNF rules such as the following:
+
+    FGarith_id . ARITH_ID ::= IDENTIFIER ;
+    FHbit_id   . BIT_ID   ::= IDENTIFIER ;
+
+What I've done is to take HAL_S.hal and created a new file, Test.hal, which is the same except for the fact that I've removed all rules except those needed to parse the following function:
+
+    TEST:
+    PROGRAM;
+       IF MYBOOL = TRUE THEN
+     	  X = 2;
+    CLOSE TEST;
+
+(Yes, it's not legal without the `DECLARE` lines, but the parser doesn't know that.)  When I build the compiler using this truncated definition of the language, with both `ARITH_ID ::= IDENTIFIER` and `BIT_ID ::= IDENTIFIER`, Bison indicates 
+
+    bison -t -pTest Test.y -o Parser.c
+    Test.y: warning: 9 reduce/reduce conflicts [-Wconflicts-rr]
+
+Morever, the `TEST` program compiles with a syntax error at `TRUE` (as before), while if we instead use `TRUE = MYBOOL` then (as before) it compiles fine.
+
+However, if instead we change the rule for `BIT_ID` to instead be like an IDENTIFIER but prefixed by "b_", Bison reports no errors at all in building the compiler.  Moreover, if we change the `TEST` program to have `b_MYBOOL = TRUE`, then it compiles fine as well.  (And with `TRUE = b_MYBOOL` as well.)
+
+From googling the issue, it's unclear to me if there's any way to handle this in the compiler front-end.  If there is, it appears to me that it involves manually creating or editing the HAL_S.y input file for bison, rather than letting BNF Converter entirely handle its creation, and that seems to me like a recipe for disaster ... particularly since everything I'm reading about the how to work with bison directly seems to be little more than a pile of expert-speak gobbledygook.  And I'm not an expert in such stuff.
+
+The preprocessor approach I mentioned earlier seems as though it would definitely handle it.  We could have a naming convention for identifiers, such as
+
+    b_XXXXX         BIT_ID
+    c_XXXXX         CHAR_ID
+    s_XXXXX         STRUCT_ID
+    l_XXXXX         LABEL
+    e_XXXXX         EVENT
+    other           ARITH_ID
+
+The preprocessor would handle it something like macros:  For several of these, it would use `DECLARE` statements to create a separate macro for each affected declared identifier, and that macro's scope would be the present block (or inline blocks).  For example,
+
+    DECLARE MYBOOL BOOLEAN;
+    DECLARE MYCHAR CHARACTER;
+    DECLARE MYINT INTEGER;
+    DECLARE MYSCALAR SCALAR;
+
+would have the same preprocessing effect as
+
+    REPLACE MYBOOL BY "b_MYBOOL";
+    REPLACE MYCHAR BY "c_MYCHAR";
+    /* No REPLACE/BY needed for INTEGER or SCALAR. */
+
+Others (`LABEL`, `EVENT`) would have to be detected differently, since they have no `DECLARE`.
+
+I haven't implemented it in the preprocessor yet, but simply in terms of building the compiler (using the full HAL_S.cf) it has the effect of changing 
+
+    HAL_S.y: warning: 618 shift/reduce conflicts [-Wconflicts-sr]
+    HAL_S.y: warning: 410 reduce/reduce conflicts [-Wconflicts-rr]
+
+to
+
+    HAL_S.y: warning: 784 shift/reduce conflicts [-Wconflicts-sr]
+    HAL_S.y: warning: 129 reduce/reduce conflicts [-Wconflicts-rr]
+
+I.e., 1028 conflicts reduced to 913.  Well ... not wonderful, but at least a step in the right direction.
+
+# 2022-11-20
+
+My idea of debugging this problem is to divide and conquer:  Rearrange the rules in HAL_S.cf into major groups, and comment out all of the groups except the ones already debugged and the one currently being debugged.  Fortunately, bison has a multiline comment feature to accomplish this:
+
+    {-
+    ...
+    -}
+
+On my first attempt at this, I use as the top-level group of rules the "blocks" in general, but without any contents.  For example, this would include `XXXX: PROGRAM; ... CLOSE XXXX;` but without any internal statement like declarations, assignments, etc.  
+
+Unfortunately, even with the identifier-naming convention changes described in the preceding entry, just defining the blocks takes over half the rules, and leaves us with
+
+    HAL_S.y: warning: 297 shift/reduce conflicts [-Wconflicts-sr]
+    HAL_S.y: warning: 52 reduce/reduce conflicts [-Wconflicts-rr]
+
+It appears to me that that *may* be because the rule for `EXPRESSION` is needed, though it's hard to understand at the 50,000-foot level why that would be so.  Let's track it down:
+
+* `EXPRESSION`
+* Which is needed by `LIST_EXP`
+* Which is needed by `CALL_LIST`
+* Which is needed by the following:
+    * `CHAR_PRIM`, which is needed by `CHAR_EXP`.
+    * `BIT_PRIM`, which is needed by `BIT_CAT`, which is needed by `BIT_FACTOR`, which is needed by `BIT_EXP`.
+    * `STRUCTURE_EXP`
+    * `PRE_PRIMARY`, which is needed by `PRIMARY`, which is needed by `FACTOR`, which is needed by `PRODUCT`, which is needed by `TERM`, which is needed by `ARITH_EXP`.
+* `CHAR_EXP`, `BIT_EXP`, `STRUCTURE_EXP`, and `ARITH_EXP` are needed by `EXPRESSION`.
+
+So, any time any one of these `XXXX_EXP` types is needed, *all* of them are dragged in as well.
+
+Why is any one of the `XXXX_EXP` needed for empty blocks?  Well, it's tough to fully track down, but `ARITH_SPEC` is needed by `QUALIFIER`, which is needed by `SUBSCRIPT`, so `ARITH_SPEC` literally intrudes everywhere.
+
+Therefore, rather than starting with debugging the rules for empty blocks, it makes more sense starting with rules for `ARITH_SPEC`, then expanding to rules other objects.  
+
+So far I've done this for `ARITH_EXP` (without `SUBSCRIPT`) through `SUBSCRIPT`, through `BIT_EXP`, through `CHAR_EXP`, through `NAME_EXP`, through `STRUCTURE_EXP` (which completes all of `EXPRESSION`), through `ASSIGNMENT`, through `IF_STATEMENT`, and have eliminated all errors so far.  That's pretty good, since it accounts for roughly half of all the rules.
+
+I've encountered the following basic problems that had to be fixed along the way.  Firstly &mdash; my own error, but inherited from syntactic difficulties with BNF &mdash;
+
+    CAT ::= "CAT" ;
+    CAT ::= VERTICAL_BAR VERTICAL_BAR ;
+    VERTICAL_BAR ::= "|" ;
+
+really needed to be
+
+    CAT ::= "CAT" ;
+    CAT ::= "||" ;
+
+Second, lots of stuff like
+
+    X ::= PREFIX Y SUBSCRIPT ;
+    PREFIX ::= EMPTY ;
+    PREFIX ::= prefixstuff ;
+    SUBSCRIPT ::= EMPTY ;
+    SUBSCRIPT ::= suffixstuff ;
+    EMPTY ::= ;
+
+seemed to really confuse it.  I think the empty `PREFIX`'s may have been more confusing than the empty `SUBSCRIPT`'s.  Whatever!  I instead systematically introduced
+
+    X ::= Y ;
+    X ::= Y suffixstuff ;
+    X ::= prefixstuff Y ;
+    X ::= prefixstuff Y suffixstuff ;
+
+which it seemed to like a lot better.
+
+Thirdly, there were a number of instances like
+
+    MODIFIED_xxx_FUNC ::= PREFIX NO_ARG_xxx_FUNC SUBSCRIPT ;
+    NO_ARG_xxx_FUNC ::= EMPTY ;
+
+These represent (I believe) runtime-library functions with no arguments, of which there weren't any other than `NO_ARG_ARITH_FUNC`'s.  So the empty `MODIFIED_xxx_FUNC`'s were removed entirely.
+
+This divide-and-conquer debugging method is working, and thus will be continued ....
+
+# 2022-11-21
+
+I've worked through the remaining LBNF problems, I think, at least insofar as the code samples I have are concerned.  There are no errors or warnings when building the compiler front-end (vs the 1000+ experienced before), and all of the code samples I've collected then compile without syntax errors.  But since I've only put together samples from a little less than half of "Programming in HAL/S" so far, there may still be a ways to go.
+
+The LBNF changes I've made have mostly been straightforward and seemingly without the potential for causing problems.  One area of confusion, though, is the following BNF rule from p. G-3 of the Nov 2005 version of the "HAL/S Language Specification":
+
+    <REL PRIM> :: = (1<RELATIONAL EXP>)
+                    | <NOT> (1<RELATIONAL EXP>)
+                    | <COMPARISON>
+
+This rule makes no sense whatever to me, causes the parser problems (because it's ambiguous), and doesn't appear to be documented anywhere.  It does appear as-is in the program comments of SYNTHESI module of the original HAL/S compiler.  However, the 1's do *not* appear in the 1976 version of the "HAL/S Language Specification".  I think they're bogus, and have removed them.
+
+Something that seems more-problematic is syntax such as
+
+    DECLARE A MATRIX;
+    DECLARE B MATRIX;
+    ...
+    [A] = [B] ** (-1) ;
+
+This would mean to assign every element of the matrix `A` with the inverse of the corresponding element in matrix `B`.  Whereas the syntax
+
+    A = B ** (-1) ;
+
+would instead mean to take the matrix inverse of `B`.  However, the BNF simply omits this entirely:  There's not one reference to brackets in the entire language description. Nor are there any brackets used in SYNTHESI.  So for now at least, the LBNF and the consequent compiler front-end cannot use this bracket syntax.  In fact, the preprocessor currently removes it entirely, and simply converts `[A]` to `A`.  This needs to be fixed at some point.
+
+
+
 

@@ -1,18 +1,18 @@
-# License:	None.  This file is in the Public Domain in the U.S.
-# Restrictions:	None suspected.
-# Filename:	SYNTHESI.xpl
-# Language:	XPL
-# Purpose:	This is source-code file from the Space
-#		Shuttle HAL/S compiler (revision level unknown).  As such, 
-#		it is part of the HAL/S compiler's parser for the HAL/S
-#		language.  (The HAL/S compiler was written in XPL ...
-#		which superficially looks very much like HAL/S!)
-# Mod history:	2022-11-12 RSB	Added this header of modern comments.
-#
-# Lines beginning with '#', such as this line, are "modern" comments
-# added by the Virtual AGC Project.  All others lines are unchanged
-# from the form in which the Virtual AGC Project received them.
-#
+C/ License:	None.  This file is in the Public Domain in the U.S.
+C/ Restrictions:	None suspected.
+C/ Filename:	SYNTHESI.xpl
+C/ Language:	XPL
+C/ Purpose:	This is source-code file from the Space
+C/		Shuttle HAL/S compiler (revision level unknown).  As such, 
+C/		it is part of the HAL/S compiler's parser for the HAL/S
+C/		language.  (The HAL/S compiler was written in XPL ...
+C/		which superficially looks very much like HAL/S!)
+C/ Mod history:	2022-11-12 RSB	Added this header of modern comments.
+C/
+C/ Lines beginning with '#', such as this line, are "modern" comments
+C/ added by the Virtual AGC Project.  All others lines are unchanged
+C/ from the form in which the Virtual AGC Project received them.
+C/
  /***************************************************************************/
  /* PROCEDURE NAME:  SYNTHESIZE                                             */
  /* MEMBER NAME:     SYNTHESI                                               */

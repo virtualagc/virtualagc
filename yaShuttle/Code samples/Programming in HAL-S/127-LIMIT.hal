@@ -1,0 +1,13 @@
+C/ From PDF p. 127 of "Programming in HAL/S".
+
+  LIMIT:
+  FUNCTION(VALUE, BOUND) SCALAR;
+     DECLARE SCALAR,
+     		VALUE, BOUND;
+     IF VALUE > BOUND THEN
+        RETURN BOUND;
+     IF VALUE < -BOUND THEN
+        RETURN -BOUND;
+     RETURN VALUE;
+  CLOSE LIMIT;
+  

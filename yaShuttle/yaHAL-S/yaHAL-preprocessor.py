@@ -16,14 +16,15 @@ History:        2022-11-07 RSB  Created.
                                 statements.
                 2022-11-18 RSB  Moved replaceBy into separate module
                                 for continued development.
-
+                2022-11-21 RSB  Began adding identifier type prefixes.
+                                Removed #-comments.
+                                
 Here are the features of HAL/S I don't think the compiler can handle:
 
     1.  Special characters in column 1.  Specifically:
             a)  The original comments ('C' in column 1).
-            b)  "Modern" comments ('#' in column 1).
-            c)  Multiline E / M / S constructs (including tabulation).
-            d)  Compiler directives ('D' in column 1).
+            b)  Multiline E / M / S constructs (including tabulation).
+            v)  Compiler directives ('D' in column 1).
     2.  The macro statements:
             REPLACE identifier[(identifier)] by "string" ;
         The compiler can parse these lines all right, but cannot 
@@ -36,7 +37,11 @@ Of these matters:
     *   I don't see any perfect way to handle issue 2, so I've hidden
         in a separate module where it's "easily" replacable if the 
         implementation is inadequate.
-        
+
+Additionally, the preprocessor mangles IDENTIFIERs according to their
+datatype This is actually handled by appropriating the mechanism used for 
+REPLACE/BY macros, so the work is all handled by the replaceBy module
+transparently.
 """
 
 import sys
@@ -48,6 +53,7 @@ import replaceBy
 tabSize = 8
 halsSource = []
 metadata = []
+files = []
 for param in sys.argv[1:]:
     if param == "--help":
         print("""
@@ -69,6 +75,7 @@ for param in sys.argv[1:]:
     elif param[:6] == "--tab=":
         tabSize = int(param[6:])
     else:
+        files.append(param)
         start = len(halsSource)
         halsFile = open(param, "r")
         halsSource += halsFile.readlines()
@@ -83,8 +90,6 @@ for param in sys.argv[1:]:
                 first = False
             if halsSource[i][:1] == "C":
                 m["comment"] = True
-            elif halsSource[i][:1] == "#":
-                m["modern"] = True
             elif halsSource[i][:1] == "D":
                 m["directive"] = True
             metadata.append(m)
@@ -104,6 +109,7 @@ for i in range(len(halsSource)):
     
 # Remove E/M/S multiline constructs. 
 unEMS.unEMS(halsSource, metadata)
+
 warningCount = unEMS.warningCount
 fatalCount = unEMS.fatalCount
 
@@ -124,30 +130,28 @@ for i in range(len(halsSource)):
 # Take care of REPLACE ... BY "..." macros.
 replaceBy.replaceBy(halsSource, metadata)
 
-# Take care of original and modern full-line comments.
+# Take care of full-line comments.
 for i in range(len(halsSource)):
     if "comment" in metadata[i]:
         print("//" + halsSource[i][1:])
-    elif "modern" in metadata[i]:
-        print("///" + halsSource[i][1:])
     elif "directive" in metadata[i]:
         print("//D" + halsSource[i][1:])
     else:
-        #if "errors" in metadata[i]:
-        #    for error in metadata[i]["errors"]:
-        #        print(error, file=sys.stderr)
-        #    print(halsSource[i], file=sys.stderr)
         print(halsSource[i])
 
 # Print final summary.
-print("Preprocessor summary:", file=sys.stderr)
+print("//M -----------------------------------------------------------------")
+print("//M Files:")
+for file in files:
+    print("//M    ", file)
+print("//M Summary:")
 for i in range(len(halsSource)):
     if "errors" in metadata[i]:
-        print("Line %d:" % (i+1), halsSource[i], file=sys.stderr)
+        print("//M Line %d:" % (i+1), halsSource[i])
         for error in metadata[i]["errors"]:
-            print("       ", error, file=sys.stderr)
-print(warningCount, "warnings", file=sys.stderr)
-print(fatalCount, "errors", file=sys.stderr)
+            print("//M    ", error)
+print("//M    ", warningCount, "warnings")
+print("//M    ", fatalCount, "errors")
 if fatalCount > 0:
     sys.exit(1)
 
