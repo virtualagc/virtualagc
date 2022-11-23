@@ -27,11 +27,13 @@
 #               2022-07-03 RSB  Tracked whether or not items are categorized
 #                               (as opposed to merely appearing in the 
 #                               Everything section).
-#		2022-10-29 RSB	Expanded "Software Listings" section to 
-#				"Software Listings and Dumps".
-#		2022-11-01 RSB	Added --shuttle command-line switch to 
-#				process shuttle documents rather than
-#				main document library.
+#		        2022-10-29 RSB	Expanded "Software Listings" section to 
+#				                "Software Listings and Dumps".
+#		        2022-11-01 RSB	Added --shuttle command-line switch to 
+#				                process shuttle documents rather than
+#				                main document library.
+#               2022-11-23 RSB  Added the "Administrative" section to the 
+#                               Shuttle library.
 #
 # Usage:
 #	./buildLibraryPage.py <DocumentLibraryDatabase.tsv >../links2.html
@@ -1373,6 +1375,7 @@ if shuttle:
         { "anchor" : "Structural", "title" : "Structural Design", "keywords" : ["structural"] },
         { "anchor" : "LifeSupport", "title" : "Life Support, Environmental, Crew Station", "keywords" : ["life support"] },
         { "anchor" : "Ground", "title" : "Ground Operations", "keywords" : ["ground"] },
+        { "anchor" : "Administrative", "title" : "Administrative", "keywords" : ["administrative"] },
         { "anchor" : "Everything", "title" : "Everything", "blurb" : blurbEverything, "all" : True, "lineNumbers" : True, "hr" : True }
     ]
 else:
