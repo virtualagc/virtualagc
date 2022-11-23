@@ -50,14 +50,16 @@ appropriately according to type.  The naming scheme used in my current
 LBNF HAL/S language definition is that the following prefixes are added
 to identifiers of various types:
 
-    BOOLEAN     b_
-    CHARACTER   c_
-    STRUCT      s_
-    LABEL       l_
-    EVENT       e_
-    others      (none)      (Includes INTEGER and SCALAR.)
+    BOOLEAN             b_
+    BOOLEAN FUNCTION    bf_
+    CHARACTER           c_
+    CHARACTER FUNCTION  cf_
+    STRUCT              s_
+    LABEL               l_
+    EVENT               e_
+    others              (none)      (Includes INTEGER and SCALAR.)
 
-This name mangling is handle essentially the same way as REPLACE/BY
+This name mangling is handled essentially the same way as REPLACE/BY
 macros, except that the macros are created from DECLARE statements
 or the block head rather than REPLACE statement.  But the scopes 
 are the same.
@@ -71,7 +73,7 @@ bareIdentifierPattern = '[A-Za-z]([A-Za-z0-9_]*[A-Za-z0-9])?'
 identifierPattern = "\\b" + bareIdentifierPattern
 endblockPattern = '(\\b(END|CLOSE)\\s*;)|(\\b(END|CLOSE)\\s+' + \
                     bareIdentifierPattern + '\\s*;)'
-startSpecialBlockPattern = '\\bPROGRAM\\s*;|\\bFUNCTION\\b|\\bPROCEDURE\\b'
+startSpecialBlockPattern = ':\\s*PROGRAM\\s*;|:\\s*FUNCTION\\b|:\\s*PROCEDURE\\b'
 startblockPattern = startSpecialBlockPattern + '|\\bDO\\b'
 replacePattern = '\\bREPLACE\\s+' + identifierPattern
 argListPattern = '(\\s*\\([^)]+\\))?'
@@ -95,7 +97,8 @@ def allReplacement(string, target, replacement):
             return string
         string = newString
 
-def replaceBy(halsSource, metadata):
+debugIndentation = False
+def replaceBy(halsSource, metadata, full):
 
     def removeComments(string):
         while True:
@@ -132,8 +135,8 @@ def replaceBy(halsSource, metadata):
         if "child" not in metadata[i]:
             match = re.search(startblockPattern, fullLine)
             if match != None:
-                #print("->", fullLine, file=sys.stderr)
-                #print("->", blockDepth, blockDepth+1, file=sys.stderr)
+                if debugIndentation:
+                    print(blockDepth, "->", blockDepth+1, fullLine, file=sys.stderr)
                 blockDepth += 1
                 macros.append({})
             # A new macro definition via REPLACE ... BY "..."?  Notice that I'm
@@ -176,107 +179,109 @@ def replaceBy(halsSource, metadata):
                                             "pattern" : pattern }
                 # print('\t', macroName, macros[-1][macroName], file=sys.stderr)
                 continue
-            # A new macro via "name:" (avoiding subscripts)?
-            identifier = ""
-            match = re.search("^" + identifierPattern + "\\s*:", fullLine)
-            if match != None:
-                head = match.group()
-                identifier = re.search("^" + bareIdentifierPattern \
-                                        + "\\b", head).group()
-                '''
-                # For a program, function, or procedure definition, we have
-                # to go a little further.  What we've done above will make the
-                # program, function, or procedure definition itself the 
-                # scope, but we need to make the parent the scope.
-                match = re.search(startSpecialBlockPattern, fullLine)
-                if match != None and identifier[2:] != "l_":
-                    macros[-2][identifier]= { "arguments": [], 
-                                            "replacement": "l_" + identifier, 
-                                            "pattern": "\\b" + identifier + "\\b" }
-                '''
-            else:
-                match = re.search("(GO\\s+TO|REPEAT|EXIT)\\s+" + \
-                        bareIdentifierPattern + "\\s*;", fullLine);
+            # Type-distinguishing macros like "l_", "b_", ....
+            if full:
+                # A new macro via "name:" (avoiding subscripts)?
+                hasType = "l_"
+                identifier = ""
+                match = re.search("^" + identifierPattern + "\\s*:", fullLine)
                 if match != None:
-                    identifier = re.search("\\b" + bareIdentifierPattern + \
-                        "\\s*;", match.group()).group()[:-1].strip()
-            if identifier != "":
-                if identifier[:2] != "l_":
-                    macros[-1][identifier] = { "arguments": [], 
-                                            "replacement": "l_" + identifier, 
-                                            "pattern": "\\b" + identifier + "\\b" }
-            # A new macro via DECLARE?
-            match = re.search(declarePattern, fullLine)
-            if match != None:
-                declarations = fullLine[match.span()[0]:].strip()
-                declarations = re.search("DECLARE[^;]*", declarations).group()
-                declarations = declarations[7:].strip()
-                # At this point, the declarations string contains the entire 
-                # DECLARE statement, in which the leading "DECLARE" and 
-                # trailing ";" have been removed.  There are (say) N fields
-                # delimited by commas.  But we can't just split the statement
-                # at commas, because there could be MATRIX, ARRAY, or INITIAL
-                # qualifiers that also have comms in their parameter lists.
-                # So we have to engage in some heavy-fancy parsing.  :-(
-                # Either N identifiers are declared by the statement (for a 
-                # "simple declare" or "compound declare") or N-1 identifiers
-                # (for a "factored declare").  A macro is created for each
-                # declared identifier of BOOLEAN or CHARACTER type.
-                # Get rid of all matching (possibly nested) parentheses.
-                depth = 0
-                start = -1
-                end = -1
-                for n in range(len(declarations) - 1, -1, -1): 
-                    if declarations[n] == ")":
-                        if depth == 0:
-                            end = n
-                        depth += 1
-                    elif declarations[n] == "(":
-                        depth -= 1
-                        if depth == 0:
-                            start = n
-                    if depth == 0 and start != -1 and end != -1:
-                        declarations = declarations[:start] + declarations[end+1:]
-                        start = -1
-                        end = -1
-                # Get rid of a lot of other stuff that doesn't assist us in 
-                # parsing the datatypes for our particular needs (which are just 
-                # find identifiers that are BOOLEAN or CHARACTER).         
-                for pattern in ["\\bARRAY\\b", "\\bINITIAL\\b", 
-                                "\\bSINGLE\\b", "\\bDOUBLE\\b", "\\bSCALAR\\b",
-                                "\\bVECTOR\\b", "\\bMATRIX\\b", "\\bINTEGER\\b",
-                                "\\bCONSTANT\\b", "\\bFUNCTION\\b",
-                                "\\bPROCEDURE\\b"]:
-                    while True:
-                        match = re.search(pattern, declarations)
-                        if match == None:
-                            break
-                        declarations = declarations[:match.span()[0]] + \
-                                        declarations[match.span()[1] :]
-                declarations = declarations.split(",")
-                for n in range(len(declarations)):
-                    declarations[n] = declarations[n].split()
-                overallType = ""
-                start = 0
-                if len(declarations[0]) > 0:
-                    if declarations[0][0] in mangling:
-                        overallType = mangling[declarations[0][0]]
-                        start += 1
-                for n in range(start, len(declarations)):
-                    declaration = declarations[n]
-                    if len(declaration) == 1 and overallType != "":
-                        identifier = declaration[0]
-                        if identifier[:2] != overallType:
-                            macros[-1][identifier] = { "arguments": [], 
-                                            "replacement": overallType + identifier, 
-                                            "pattern": "\\b" + identifier + "\\b" }
-                    elif len(declaration) == 2 and declaration[1] in mangling:
-                        thisType = mangling[declaration[1]]
-                        identifier = declaration[0]
-                        if identifier[:2] != thisType:
-                            macros[-1][identifier] = { "arguments": [], 
-                                            "replacement": thisType + identifier, 
-                                            "pattern": "\\b" + identifier + "\\b" }
+                    head = match.group()
+                    identifier = re.search("^" + bareIdentifierPattern \
+                                            + "\\b", head).group()
+                    # For a function definition, need also to check out its
+                    # datatype.
+                    tail = fullLine[match.span()[1]+1:]
+                    for datatype in ["BOOLEAN", "CHARACTER"]:
+                        if re.search("\\b" + datatype + "\\b", tail) != None:
+                            if datatype == "BOOLEAN":
+                                hasType = "bf_"
+                            elif datatype == "CHARACTER":
+                                hasType = "cf_"
+                else:
+                    match = re.search("(GO\\s+TO|REPEAT|EXIT)\\s+" + \
+                            bareIdentifierPattern + "\\s*;", fullLine);
+                    if match != None:
+                        identifier = re.search("\\b" + bareIdentifierPattern + \
+                            "\\s*;", match.group()).group()[:-1].strip()
+                if identifier != "":
+                    if identifier[:2] != hasType:
+                        macros[-1][identifier] = { "arguments": [], 
+                                                "replacement": hasType + identifier, 
+                                                "pattern": "\\b" + identifier + "\\b" }
+                # A new macro via DECLARE?
+                match = re.search(declarePattern, fullLine)
+                if match != None:
+                    declarations = fullLine[match.span()[0]:].strip()
+                    declarations = re.search("DECLARE[^;]*", declarations).group()
+                    declarations = declarations[7:].strip()
+                    # At this point, the declarations string contains the entire 
+                    # DECLARE statement, in which the leading "DECLARE" and 
+                    # trailing ";" have been removed.  There are (say) N fields
+                    # delimited by commas.  But we can't just split the statement
+                    # at commas, because there could be MATRIX, ARRAY, or INITIAL
+                    # qualifiers that also have comms in their parameter lists.
+                    # So we have to engage in some heavy-fancy parsing.  :-(
+                    # Either N identifiers are declared by the statement (for a 
+                    # "simple declare" or "compound declare") or N-1 identifiers
+                    # (for a "factored declare").  A macro is created for each
+                    # declared identifier of BOOLEAN or CHARACTER type.
+                    # Get rid of all matching (possibly nested) parentheses.
+                    depth = 0
+                    start = -1
+                    end = -1
+                    for n in range(len(declarations) - 1, -1, -1): 
+                        if declarations[n] == ")":
+                            if depth == 0:
+                                end = n
+                            depth += 1
+                        elif declarations[n] == "(":
+                            depth -= 1
+                            if depth == 0:
+                                start = n
+                        if depth == 0 and start != -1 and end != -1:
+                            declarations = declarations[:start] + declarations[end+1:]
+                            start = -1
+                            end = -1
+                    # Get rid of a lot of other stuff that doesn't assist us in 
+                    # parsing the datatypes for our particular needs (which are just 
+                    # find identifiers that are BOOLEAN or CHARACTER).         
+                    for pattern in ["\\bARRAY\\b", "\\bINITIAL\\b", 
+                                    "\\bSINGLE\\b", "\\bDOUBLE\\b", "\\bSCALAR\\b",
+                                    "\\bVECTOR\\b", "\\bMATRIX\\b", "\\bINTEGER\\b",
+                                    "\\bCONSTANT\\b", "\\bPROCEDURE\\b"]:
+                        while True:
+                            match = re.search(pattern, declarations)
+                            if match == None:
+                                break
+                            declarations = declarations[:match.span()[0]] + \
+                                            declarations[match.span()[1] :]
+                    declarations = declarations.split(",")
+                    if debugIndentation:
+                        print("\t" + str(declarations), file=sys.stderr)
+                    for n in range(len(declarations)):
+                        declarations[n] = declarations[n].split()
+                    overallType = ""
+                    start = 0
+                    if len(declarations[0]) > 0:
+                        if declarations[0][0] in mangling:
+                            overallType = mangling[declarations[0][0]]
+                            start += 1
+                    for n in range(start, len(declarations)):
+                        declaration = declarations[n]
+                        if len(declaration) == 1 and overallType != "":
+                            identifier = declaration[0]
+                            if identifier[:2] != overallType:
+                                macros[-1][identifier] = { "arguments": [], 
+                                                "replacement": overallType + identifier, 
+                                                "pattern": "\\b" + identifier + "\\b" }
+                        elif len(declaration) == 2 and declaration[1] in mangling:
+                            thisType = mangling[declaration[1]]
+                            identifier = declaration[0]
+                            if identifier[:2] != thisType:
+                                macros[-1][identifier] = { "arguments": [], 
+                                                "replacement": thisType + identifier, 
+                                                "pattern": "\\b" + identifier + "\\b" }
                     
         # If we've gotten here, then we have a line which is eligible for macro
         # expansions.  The string called "line" is modified in place as macros
@@ -337,8 +342,8 @@ def replaceBy(halsSource, metadata):
             if match != None:
                 # At end of block, so discard all macro definitions specific
                 # to this block.
-                #print("<-", fullLine, file=sys.stderr)
-                #print("<-", blockDepth, blockDepth-1, macros[-1], file=sys.stderr)
+                if debugIndentation:
+                    print(blockDepth-1, "<-", blockDepth, fullLine, file=sys.stderr)
                 blockDepth -= 1
                 if blockDepth < 0:
                     print("Negative block depth implementation error.", \

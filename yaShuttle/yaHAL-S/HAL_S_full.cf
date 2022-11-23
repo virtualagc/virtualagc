@@ -1,6 +1,6 @@
 {-
 Copyright:  Public Domain
-Filename:   HAL_S.cf
+Filename:   HAL_S_full.cf
 Purpose:    LBNF description of the HAL/S language, in so far as compiler 
             generation via the BNF Converter compiler-compiler-compiler is 
             concerned.  This description requires the preprocessor's --full
@@ -34,13 +34,11 @@ entrypoints COMPILATION ;
 comment "//" ;
 comment "/*" "*/" ;
 
-token BitIdentifierToken {"b_"}["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"](["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_"]*["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"])? ;
-token BitFunctionIdentifierToken  {"bf_"}["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"](["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_"]*["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"])? ;
-token CharFunctionIdentifierToken {"cf_"}["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"](["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_"]*["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"])? ;
-token CharIdentifierToken {"c_"}["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"](["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_"]*["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"])? ;
-token StructIdentifierToken {"s_"}["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"](["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_"]*["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"])? ;
-token LabelToken {"l_"}["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"](["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_"]*["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"])? ;
-token EventToken {"e_"}["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"](["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_"]*["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"])? ;
+token BitIdentifierToken ["b"]["_"]["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"](["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_"]*["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"])? ;
+token CharIdentifierToken ["c"]["_"]["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"](["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_"]*["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"])? ;
+token StructIdentifierToken ["s"]["_"]["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"](["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_"]*["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"])? ;
+token LabelToken ["l"]["_"]["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"](["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_"]*["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"])? ;
+token EventToken ["e"]["_"]["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"](["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_"]*["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"])? ;
 token IdentifierToken ["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"](["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_"]*["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"])? ;
 token StringToken ["'"]["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-]% $()[|*./&¬=<>#@,;:{}!?\""]+["'"] ;
 token TextToken ["\""]["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-]% $()[|*./&¬=<>#@,;:{}!?'"]+["\""] ;
@@ -225,10 +223,7 @@ ABbit_func_head . BIT_FUNC_HEAD ::= "BIT" ;
 ACbit_func_head . BIT_FUNC_HEAD ::= "BIT" SUB_OR_QUALIFIER ;
 FHbit_id . BIT_ID ::= BitIdentifierToken ;
 FKlabel . LABEL ::= LabelToken ;
-FLlabel . LABEL ::= BitFunctionIdentifierToken ;
-FMlabel . LABEL ::= CharFunctionIdentifierToken ;
 ZZxor. BIT_FUNC ::= "XOR" ;
-ZZuserBitFunction. BIT_FUNC ::= BitFunctionIdentifierToken ;
 FLevent . EVENT ::= EventToken ;
 AAsub_or_qualifier . SUB_OR_QUALIFIER ::= SUBSCRIPT ;
 ABsub_or_qualifier . SUB_OR_QUALIFIER ::= BIT_QUALIFIER ;

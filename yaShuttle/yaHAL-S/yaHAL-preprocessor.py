@@ -18,6 +18,7 @@ History:        2022-11-07 RSB  Created.
                                 for continued development.
                 2022-11-21 RSB  Began adding identifier type prefixes.
                                 Removed #-comments.
+                2022-11-22 RSB  Added --full.
                                 
 Here are the features of HAL/S I don't think the compiler can handle:
 
@@ -54,6 +55,7 @@ tabSize = 8
 halsSource = []
 metadata = []
 files = []
+full = True
 for param in sys.argv[1:]:
     if param == "--help":
         print("""
@@ -71,9 +73,16 @@ for param in sys.argv[1:]:
                         Shuttle source has no tabs anyway since it was supplied on
                         punchcards, but it's certainly possible to accidentally
                         end up with tabs if source is edited in modern editors.
+        --full          If this is used, then identifiers are distinguished by
+                        type, prefixing "l_", "b_", "c_", ....  (The default.)
+        --indistinct    Opposite of --full.
         """)
     elif param[:6] == "--tab=":
         tabSize = int(param[6:])
+    elif param == "--full":
+        full = True
+    elif param == "--indistinct":
+        full = False
     else:
         files.append(param)
         start = len(halsSource)
@@ -128,7 +137,7 @@ for i in range(len(halsSource)):
         halsSource[i] = line
 
 # Take care of REPLACE ... BY "..." macros.
-replaceBy.replaceBy(halsSource, metadata)
+replaceBy.replaceBy(halsSource, metadata, full)
 
 # Take care of full-line comments.
 for i in range(len(halsSource)):
