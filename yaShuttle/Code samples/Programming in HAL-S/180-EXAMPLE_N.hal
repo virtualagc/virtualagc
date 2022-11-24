@@ -1,0 +1,76 @@
+C/ From PDF p. 180 of "Programming in HAL/S".
+
+  EXAMPLE_N:
+  PROGRAM;
+     STRUCTURE SUPER_VECTOR:
+        1 V VECTOR,
+        1 STATUS BOOLEAN,
+        1 TIMETAG SCALAR;
+     DECLARE VEL SUPER_VECTOR-STRUCTURE(3);
+     DECLARE BEST INTEGER;
+     DO FOR TEMPORARY I = 1 TO 3;
+E                                +
+M       CALL READ_IMU(I) ASSIGN(VEL  );
+S				   I;
+
+     END;
+E                      +
+M    CALL SELECT_BEST(VEL) ASSIGN(BEST);
+E                   +
+M    CALL GUIDANCE(VEL     );
+S		      BEST;
+
+E                   +
+M    CALL OTHER_SW(VEL     );
+S                     BEST;
+
+  SELECT_BEST:
+  PROCEDURE(V) ASSIGN(SELECTED);
+  
+     DECLARE V SUPER_VECTOR-STRUCTURE(3),
+     	     SELECTED INTEGER;
+     DECLARE N INTEGER;
+     DECLARE MOST_RECENT SCALAR INITIAL(0) AUTOMATIC;
+     DO FOR N = 1 TO 3;
+E              .
+M       IF V.STATUS   = OFF THEN
+S                  N;
+
+           REPEAT;
+M       IF V.TIMETAG   > MOST_RECENT THEN 
+S                   N;
+
+           DO;
+              SELECTED = N;
+M             MOST_RECENT = V.TIMETAG  ;
+S                                    N;
+
+           END;
+     END;
+     IF MOST_RECENT = 0 THEN
+        SELECTED = 1				/*ALL EQUALLY BAD*/
+  CLOSE SELECT_BEST;
+  GUIDANCE:
+  PROCEDURE(BEST_VEL);
+     DECLARE BEST_VEL SUPER_VECTOR-STRUCTURE;
+     
+C	...
+
+  CLOSE GUIDANCE;
+  OTHER_SW:
+  PROCEDURE(V);
+     DECLARE V SUPER_VECTOR-STRUCTURE;
+     
+C	...
+
+  CLOSE OTHER_SW;
+  READ_IMU:
+  PROCEDURE(UNIT_NUM) ASSIGN(STRUC);
+     DECLARE UNIT_NUM INTEGER,
+     	     STRUC SUPER_VECTOR-STRUCTURE;
+     	     
+C	...
+
+  CLOSE READ_IMU;
+  CLOSE EXAMPLE_N;
+  

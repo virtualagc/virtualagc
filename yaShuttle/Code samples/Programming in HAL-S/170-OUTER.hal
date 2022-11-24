@@ -1,0 +1,52 @@
+C/ From PDF p. 170 of "Programming in HAL/S".
+
+  OUTER:
+  PROGRAM;
+     DECLARE SCALAR,
+     		G1, G2;
+     STRUCTURE UTIL_PARM:
+        1 V VECTOR,
+        1 S1 SCALAR,
+        1 C INTEGER,
+        1 S2 SCALAR,
+        1 E BOOLEAN;
+  UTIL:
+  FUNCTION(X) VECTOR;
+     DECLARE X UTIL_PARM-STRUCTURE;
+     	     
+C	.
+C	.
+C	.
+
+E	      -
+M    RETURN X.V;
+  CLOSE UTIL;
+  NESTED:
+  PROCEDURE;
+     DECLARE RESULT VECTOR;
+     DECLARE LOCAL UTIL_PARM-STRUCTURE INITIAL(0, 1, 0, 0, 83, 0, OFF);
+     
+C  NOTE THAT THE TEMPLATE IS NOT REPEATED
+     	     
+     LOCAL.S1 = G1 / 3;
+     LOCAL.S2 = SIN(G1 + G2);
+     
+C	.
+C	.
+C	.
+     
+E      -             +
+M    RESULT = UTIL(LOCAL);
+
+C	.
+C	.
+C	.
+
+  CLOSE NESTED;
+  
+C	.
+C	.
+C	.
+
+  CLOSE OUTER;
+  
