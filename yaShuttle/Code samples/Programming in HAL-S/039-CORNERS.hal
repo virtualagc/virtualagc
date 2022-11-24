@@ -11,10 +11,19 @@ C/ x-axis, and that the parallelogram is in the upper-right quadrant.
      DECLARE VECTOR(2),
      		AB, BC, CD, DA;
      READ(5) LONG, SHORT, ALPHA;
-     AB = 0;
-     BC = VECTOR$2(LONG, 0);
-     DA = VECTOR$2(SHORT COS(ALPHA), SHORT SIN(ALPHA));
-     CD = BC + DA;
-     WRITE(6) AB, BC, CD, DA;
-   CLOSE CORNERS;
+E    -
+M    AB = 0;
+E    -
+M    BC = VECTOR (LONG, 0);
+S               2 
+
+E    -
+M    DA = VECTOR (SHORT COS(ALPHA), SHORT SIN(ALPHA));
+S               2
+
+E    -    -    -
+M    CD = BC + DA;
+E             -   -   -   -
+M    WRITE(6) AB, BC, CD, DA;
+  CLOSE CORNERS;
    
