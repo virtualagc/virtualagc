@@ -73,7 +73,8 @@ bareIdentifierPattern = '[A-Za-z]([A-Za-z0-9_]*[A-Za-z0-9])?'
 identifierPattern = "\\b" + bareIdentifierPattern
 endblockPattern = '(\\b(END|CLOSE)\\s*;)|(\\b(END|CLOSE)\\s+' + \
                     bareIdentifierPattern + '\\s*;)'
-startSpecialBlockPattern = ':\\s*PROGRAM\\s*;|:\\s*FUNCTION\\b|:\\s*PROCEDURE\\b'
+startSpecialBlockPattern = \
+        ':\\s*PROGRAM\\s*;|:\\s*FUNCTION\\b|:\\s*PROCEDURE\\b|\\bUPDATE\\s*;|:\\s*TASK\\s*;|\\bCOMPOOL\\s*;'
 startblockPattern = startSpecialBlockPattern + '|\\bDO\\b'
 replacePattern = '\\bREPLACE\\s+' + identifierPattern
 argListPattern = '(\\s*\\([^)]+\\))?'

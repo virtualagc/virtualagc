@@ -1,0 +1,77 @@
+C/ From PDF p. 265 of "Programming in HAL/S".
+
+  ENQUEUE:
+  PROCEDURE(WHEN, WHAT, PROCNAME);
+     DECLARE WHEN SCALAR,
+             WHAT INTEGER,
+             PROCNAME NAME PROCESS_CONTROL-STRUCTURE;
+     DECLARE NEW NAME TQE-STRUCTURE;
+     
+C  THE FOLLOWING NAME VARIABLE IS USED LIKE A LOOP
+C  VARIABLE IN A SEACH
+
+     DECLARE ENT NAME TQE-STRUCTURE;
+     
+C  IF NO FREE ENTRY THEN AN ERROR
+
+E              +
+M    IF NAME(FREE_Q) = NULL THEN
+        RETURN;
+        
+C    ELSE USE TOP FREE ENTRY FOR NEW ACTIVE Q ELEMENT
+
+E          +            +
+M    NAME(NEW) = NAME(FREE_Q);
+
+C    REMOVE NEW ENTRY FROM FREE_Q
+
+E           +                    +
+M    NAME(FREE_Q) = NAME(FREE_Q.NEXT);
+
+C  PUT INFO INTO NEW ENTRY
+
+     NEW.TIME = WHEN;
+     NEW.ACTION = WHAT;
+E                    +                    +
+M    NAME(NEW.AFFECTED_PROCESS) = NAME(PROCNAME);
+
+C     NOW INSERT NEW ENTRY IN APPROPRIATE POINT OF ACTV QUEUE
+C           EITHER BEFORE FIRST,
+C           BETWEEN ENT AND ENT.NEXT FOR SOME ENT
+C           OR AT END OF QUEUE
+
+     IF NEW.TIME < ACTV_Q.TIME THEN
+        DO;
+E                    +             +
+M          NAME(NEW.NEXT) = NAME(ACTV_Q);				/* PUT FIRST */
+E                 +             +
+M          NAME(ACTV_Q) = NAME(NEW);
+	   RETURN;
+	END;
+E          +            +
+M    NAME(ENT) = NAME(ACTV_Q);						/*START AT TOP*/
+E                       +
+M    DO UNTIL NAME(ENT.NEXT) = NAME(NULL);				/* SEARCH Q*/
+E	      +            +
+M       NAME(ENT) = NAME(ACTV_Q);					/*START AT TOP*/
+        IF ENT.NEXT.TIME > NEW.TIME THEN
+           DO;
+E                       +                +
+M             NAME(NEW.NEXT) = NAME(ENT.NEXT);
+E                       +            +
+M             NAME(ENT.NEXT) = NAME(NEW);
+              RETURN;							/*NEW ENTRY INSERTED*/
+	   END;
+E             +               +
+M	NAME(ENT) = NAME(ENT.NEXT);					/* TRY NEXT ENTRY*/     
+     END;
+     
+C  AT THIS POINT , THE WHOLE Q HAS BEEN SEARCHED UNSUCCESSFULLY,
+C    SO ADD NEW TO TH EEND
+
+E              +            +
+M    NAME(ENT.NEXT) = NAME(NEW);
+E              +
+M    NAME(NEW.NEXT) = NULL;
+  CLOSE ENQUEUE;
+  

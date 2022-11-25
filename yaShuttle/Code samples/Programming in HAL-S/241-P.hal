@@ -1,0 +1,21 @@
+C/ From PDF p. 241 in "Programming in HAL/S".
+
+  P:
+  PROGRAM;
+     DECLARE EVENT,
+     		ENGINE_OFF,
+     		ORBIT LATCHED;
+     SCHEDULE RE-IGNITE PRIORITY(999);
+  RE_IGNITE:
+  TASK;
+     DO WHILE TRUE;
+        WAIT FOR ENGINE_OFF & ¬ORBIT;
+        
+C		.
+C		.
+C		.
+
+     END;
+  CLOSE RE_IGNITE;
+  CLOSE P;
+  

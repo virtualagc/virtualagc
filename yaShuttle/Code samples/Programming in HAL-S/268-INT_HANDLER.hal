@@ -1,0 +1,47 @@
+C/ From PDF p. 268 of "Programming in HAL/S".
+C/ Note that without forward declarations for RECYCLE, 
+C/ CANCEL_PROC, READY, and SCHEDULE_AT, this fragment
+C/ is not compilable.  Note also that there's a 
+C/ pair of additional code fragments on pp. 269-270
+C/ that I haven't transcribed, because they're simply
+C/ too incomplete.
+
+  INT_HANDLER:
+  TASK;
+     DECLARE CLOCK_INTERRUPT EVENT;
+     DECLARE TEMP NAME TQE-STRUCTURE;
+     DO WHILE TRUE;
+        CALL SET_CLOCK(ACTV_Q.TIME) ASSIGN(CLOCK_INTERRUPT);
+        WAIT FOR CLOCK_INTERRUPT;
+        DO CASE ACTV_Q.ACTION;
+E			              +
+M          CALL RECYCLE(ACTV_Q.AFFECTED_PROCESS);
+E					  +
+M	   CALL CANCEL_PROC(ACTV_Q.AFFECTED_PROCESS);
+E				    +
+M	   CALL READY(ACTV_Q.AFFECTED_PROCESS);
+E					 
+M	   CALL SCHEDULE_AT(ACTV_Q.AFFECTED_PROCESS);
+	   ;								/* ETC */
+	END;
+	
+C  NOW REMOVE TQE FROM ACTIVE CHAIN
+
+E	      +		    +
+M       NAME(TEMP) = NAME(ACTV_Q);
+E	       +              +
+M	NAME(ACTV_Q) = NAME(ACTV_Q.NEXT);
+E		   +             +
+M	NAME(TEMP.NEXT) = NAME(FREE_Q);
+E	       +	     +
+M	NAME(FREE_Q) = NAME(TEMP);
+     END;
+  CLOSE;
+  RECYCLE:
+  PROCEDURE(X);
+     DECLARE X PROCESS_CONTROL-STRUCTURE;
+  CLOSE;
+  CANCEL_PROC:
+  PROCEDURE(X);
+     DECLARE X PROCESS_CONTROL-STRUCTURE;
+  CLOSE;   

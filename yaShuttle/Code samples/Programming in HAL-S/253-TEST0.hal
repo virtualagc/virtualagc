@@ -1,0 +1,24 @@
+C/ Adapted from PDF p. 253 of "Programming in HAL/S".
+C/ The original code could not be compiled, because
+C/ of the dangling initial DECLARE statement.  I've
+C/ simply wrapped the whole thing in a PROGRAM block
+C/ to make it compilable.
+
+  TEST1:
+  PROGRAM;
+  
+     DECLARE INFO ARRAY(1 + 1000 / 16) BIT(16);
+  TEST:
+  FUNCTION(I) BOOLEAN;
+     DECLARE I INTEGER;
+     DECLARE INTEGER,
+     		WORD, BITNUM;
+     WORD = DIV(I, 16);
+     BITNUM = I - 16 WORD;
+E            .
+M    RETURN INFO	       ;
+S               WORD+1:BITNUM+1
+
+  CLOSE TEST;
+  
+  CLOSE TESTO;
