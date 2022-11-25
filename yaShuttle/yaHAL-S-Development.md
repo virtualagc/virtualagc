@@ -353,6 +353,87 @@ This would mean to assign every element of the matrix `A` with the inverse of th
 
 would instead mean to take the matrix inverse of `B`.  However, the BNF simply omits this entirely:  There's not one reference to brackets in the entire language description. Nor are there any brackets used in SYNTHESI.  So for now at least, the LBNF and the consequent compiler front-end cannot use this bracket syntax.  In fact, the preprocessor currently removes it entirely, and simply converts `[A]` to `A`.  This needs to be fixed at some point.
 
+# 2022-11-25
 
+At this point, all of the code samples from "Programming in HAL/S" have been transcribed and are in the source tree, except for a couple that were just too fragmentary.  I know that there are problems with the preprocessor and compiler front-end, though, so now I want to work out the bugs in these areas by going through the samples one by one.  I guess I'll keep a record of that here.
 
+## 021-SIMPLE.hal
 
+The only things the preprocessor needs to do here are to correctly mangle the name of the program ("SIMPLE" &rarr; "l_SIMPLE") and to correctly convert full-line comments from `C` in column 1 to `//`.  Which it does.
+
+As far as the compiler front-end is concerned (i.e., the LBNF description of the language), I notice the following:
+
+* The `l_SIMPLE: PROGRAM;` is correctly parsed, but the LBNF labels associated with that don't allow us to easily tell what kind of block it is (i.e., program vs function vs procedure vs etc).  Changed labeling to account for that.
+* In `DECLARE R SCALAR;`, the LBNF labels again didn't allow us to easily distinguish `INTEGER` vs `SCALAR` vs. etc.  Fixed that.
+
+The front-end compilation seems fine after those fixes.
+
+## 029-DATATYPES.hal
+
+Preprocess output seems perfect.
+
+Compiler front-end output:  Declarations look fine.  `S = V . V;` looks fine.  `S = V * V;` looks fine.  `V = M V;` looks fine.  `M = V V;` looks fine.  `M = M M;` looks fine.  `V = V S;` looks fine. 
+
+I.e., all good.
+
+## 031-DECLARE3.hal
+
+Preprocessor fine.  Compiler front-end:  `DECLARE COUNTER INTEGER;` looks fine.  `DECLARE VECTOR, POSITION, VELOCITY, TORQUE;` looks fine.  `DECLARE NEW_CO_ORDS MATRIX, SPEED SCALAR, N INTEGER, WIND_FORCE VECTOR;` looks fine.
+
+All good.
+
+## 032-INITIAL_AND_CONSTANT.hal
+
+It's pointless continually listing the lines that compiled correctly.  From now on I'll just talk about stuff that did not compile correctly.
+
+All good.
+
+## 037-ROOTS.hal
+
+All good.
+
+## 039-CORNERS.hal
+
+All good.
+
+## 044-ORTHONORMAL.hal
+
+All good.
+
+## 046-XYZ_TO_POLAR.hal
+
+All good.
+
+## 047-ROWS.hal
+
+All good.
+
+## 052-TABLE.hal
+
+Preprocessor okay.
+
+Compiler front-end:  Okay, I think.
+
+## 053-PARALLAX.hal
+
+All good.
+
+## 071-DARTBOARD_APPROXIMATION.hal
+
+All good.
+
+## 072-EXAMPLE_2.hal
+
+All good.
+
+## 076-EXAMPLE_3.hal
+
+All good.
+
+## 080-EXAMPLE_4.hal and 080-EXAMPLE_4A.hal
+
+All good.
+
+## 085-FACTORIAL.hal
+
+Preprocessor:  Incorrectly, does macro replacements within strings; in this case, `'FACTORIAL=...'` &rarr; `'l_FACTORIAL=...'`.
