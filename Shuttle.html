@@ -22,15 +22,19 @@ document.write(headerTemplate.replace("@TITLE@","Virtual AGC Project").replace("
       <li><a moz-do-not-send="true" href="#References">References</a></li>
       <li><a moz-do-not-send="true" href="#PASS">PASS and BFS Source
           Code</a></li>
-      <li><a moz-do-not-send="true" href="#Emulation">Emulation</a></li>
+      <li><a moz-do-not-send="true" href="#Versioning">Software
+          Versioning</a><br>
+      </li>
+      <li><a moz-do-not-send="true" href="#Emulation">Compilation and
+          Emulation</a></li>
     </ul>
     <h1><a name="Introduction"></a>Introduction</h1>
     <p>In so far as the Space Shuttle is concerned, my goals at present
       are the following:<br>
     </p>
     <ul>
-      <li>To provide the complete source code for the software of its
-        onboard computer systems.</li>
+      <li>To provide the complete source code for the software for the
+        most-significant of its onboard computer systems.</li>
       <li>To provide all of the official documentation needed to
         understand that software and to work with it.&nbsp; See the <a
           moz-do-not-send="true" href="#References">References</a>.<br>
@@ -51,9 +55,10 @@ document.write(headerTemplate.replace("@TITLE@","Virtual AGC Project").replace("
       I mean the original ones, or do I mean partial work-alikes?&nbsp;
       And by emulation, do I mean emulation of the entire stack of code,
       or just for some restricted portion of it?&nbsp; Answers to those
-      questions will become clear in the sections below, though there
-      aren't necessarily unique correct answers.&nbsp; One thing I can
-      say unequivocally is that integration into space-flight simulation
+      questions will become clear in the sections below ... or at least,
+      clearer than they are now.&nbsp; But there aren't necessarily
+      unique, permanently-correct answers.&nbsp; One thing I can say
+      unequivocally is that integration into space-flight simulation
       systems is my <i>hope</i> rather than anything that I'll actively
       pursue; integration is the prerogative of the developers of those
       space-flight simulators, rather than mine, if they feel it's
@@ -70,6 +75,9 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
+
+
         4, "Computers in the Space Shuttle Avionics System", of James
         Tomayko's <i>Computers in Spaceflight: The NASA Experience</i></a>.<br>
     </p>
@@ -77,6 +85,9 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
     </p>
     <p>The portion of the Shuttle's full avionics system which concerns
       us is the <i>Data Process System (DPS)</i>, which includes the <i>General
+
+
+
 
 
 
@@ -89,53 +100,112 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
     <div align="center"><img moz-do-not-send="true"
         src="DPS%20block%20diagram.png" alt="" width="805" height="445"><br>
       <div align="left"><br>
-        As you can see, there are five separate GPCs.&nbsp; Each of the
-        GPCs is an AP-101S computer, designed and manufactured by IBM's
-        Federal Services Division (like the Apollo LVDC or Gemini OBC,
-        but not similar to them).<br>
+        As you can see, there were five separate GPCs.&nbsp; Each of the
+        GPCs was an AP-101S computer, designed and manufactured by IBM's
+        Federal Services Division (as were the Apollo LVDC or Gemini
+        OBC, though the GPC was not similar to them).<br>
         <br>
-        Four of the GPCs run <i>identical</i> software, known as the <i>Primary
+        Four of the GPCs nominally redundantly ran <i>identical</i>
+        software, known as the <i>Primary Flight Software (PFS)</i>
+        atop the <i>Flight Control Operating System (FCOS)</i>.&nbsp;
+        PFS and FCOS together are collectively referred to as the <i>Primary
 
-
-
-          Flight Software (PFS)</i> atop the <i>Flight Control
-          Operating System (FCOS)</i>.&nbsp; PFS and FCOS together are
-        collectively referred to as the <i>Primary Avionics Software
-          Subsystem (PASS)</i>.&nbsp; The behaviors of these four copies
-        of FCOS are synchronized ... not on a CPU-cycle by CPU-cycle
-        basis, but to the extent that inputs to the GPCs from the
-        spacecraft, as well as commands output from the GPCs to the
-        spacecraft, occur at the same time.&nbsp; In particular, the
-        fact that outputs from the GPCs are synchronized allows
-        detection if one of the GPCs is behaving abnormally.<br>
+          Avionics Software Subsystem (PASS)</i>.&nbsp; The behaviors of
+        these four copies of FCOS were synchronized ... not on a
+        CPU-cycle by CPU-cycle basis, but to the extent that inputs to
+        the GPCs from the spacecraft, as well as commands output from
+        the GPCs to the spacecraft, occurred at the same time.&nbsp; In
+        particular, the fact that outputs from the GPCs were
+        synchronized allowed detection if one of the GPCs was behaving
+        abnormally.&nbsp; I say they did this "nominally", because this
+        extreme level of redundancy was warranted only during critical
+        flight phases ... in particular, during ascent and
+        reentry.&nbsp; During the more-leisurely phases of the mission,
+        if additional computing power was needded, the four principal
+        GPCs did not necessarily need to run identical, redundant
+        software.<br>
         <br>
-        The fifth GPC instead runs the <i>Backup Flight Software (BFS)</i>,
+        The fifth GPC instead ran the <i>Backup Flight Software (BFS)</i>,
         created entirely separately from PASS in a clean-room
-        fashion.&nbsp; This fifth GPC serves roughly the same purpose in
+        fashion.&nbsp; This fifth GPC served roughly the same purpose in
         the Shuttle as the Abort Guidance System (AGS) in the Apollo
-        LM.&nbsp; BFS is specialized for abort functionality, i.e.,
+        LM.&nbsp; BFS was specialized for abort functionality, i.e.,
         reentry in the absence of a reliable set of GPCs running
-        PASS.&nbsp; <br>
+        PASS.&nbsp; And as I said above, this capability was really
+        needed only during ascent or reentry.<br>
         <br>
-        The data bus, I'm told, is MIL-STD-1553.<br>
+        Besides these, there was a <i>Run Time Library (RTL)</i> that
+        provided various common functions needed by PASS/BFS, such as
+        square roots, trigonometric functions, and so forth.<br>
         <br>
-        The crew-interface devices include:<br>
+        The data buses interconnecting the GPCs and peripheral devices
+        were MIL-STD-1553 buses.<br>
+        <br>
+        The crew-interface devices included:<br>
         <ul>
-          <li>26 line by 51 character cathode ray tubes (CRTs).&nbsp;
-            The displays were capable of displaying some graphics as
-            well as text.&nbsp; The pilots had 3 MDUs, while the mission
-            specialist station had a 4th.&nbsp; Later on, 6 liquid
-            crystal displays (LCDs), similar in external appearance to
-            the CRTs, were added for the pilots.&nbsp; Together, the
-            CRTs and LCDs were referred to as Multifunction Display
-            Units (MCDUs). <br>
+          <li>26 line by 51 character displays, capable also of
+            displaying some graphics.&nbsp; Prior to about the year
+            2000, the pilots had 3 of these displays and the crew
+            specialist had 1; they were monochrome (green text on black
+            background) cathode-ray tubes (CRTs).&nbsp; After 2000, the
+            pilots' CRTs were replaced by 9 multi-color liquid crystal
+            displays (LCDs).&nbsp; Collectively, the CRTs and LCDs were
+            referred to as Multifunction Display Units (MDUs).&nbsp; <br>
           </li>
           <li>Keyboards from Ebonex.&nbsp; The pilots had 2 of these,
             and the mission specialist station had a 3rd.</li>
         </ul>
-        <div align="center"><img moz-do-not-send="true"
-            src="DPS%20keyboard%20and%20CRT.png" alt="" width="952"
-            height="730"><br>
+        <p>In the diagrams below, the pre-2000 configuration is shown on
+          the left, while the post-2000 configuration is shown on the
+          right.&nbsp; Notice that the LCD-based displays (on the right)
+          have 6 buttons along the bottom edge that the CRTs (on the
+          left) lack, as well as being taller relative to their
+          width.&nbsp; The LCDs continued to display 51×26 textual
+          characters, just as the CRTs had, but the text was scrunched
+          into the upper part of the screen, while a strip along the
+          bottom of the LCD could display additional stuff that the CRTs
+          hadn't been able to, such as menu options selectable by the
+          edge buttons.&nbsp; These differences were transparent to the
+          PASS/BFS flight software, because the additional stuff
+          displayed along the bottom was not controlled by the PASS/BFS
+          software.&nbsp; In contrast, keyboards were the same
+          throughout the duration of the Shuttle program.<br>
+        </p>
+        <div align="center">
+          <table width="100%" cellspacing="2" cellpadding="2"
+            height="739">
+            <tbody>
+              <tr>
+                <td valign="top" align="center">
+                  <div><img moz-do-not-send="true"
+                      src="ShuttleCRThorizSitPhoto.jpg" alt=""
+                      width="429" height="364"><img
+                      moz-do-not-send="true"
+                      src="DPS%20keyboard%20and%20CRT.png" alt=""
+                      width="952" height="730"><br>
+                  </div>
+                  <br>
+                  <div><i>Older configuration:&nbsp; keyboard and 4
+                      displays</i><br>
+                  </div>
+                </td>
+                <td valign="top" align="center"><img
+                    moz-do-not-send="true"
+                    src="ShuttleLCDhorizSitPhoto.jpg" alt="" width="377"
+                    height="363"><br>
+                  <img moz-do-not-send="true" src="ShuttleMFD.png"
+                    alt="" width="485" height="421"><br>
+                  <br>
+                  <img moz-do-not-send="true"
+                    src="ShuttleForwardCockpitDisplays.png" alt=""
+                    width="886" height="290"><br>
+                  <br>
+                  <i>Newer configuration:&nbsp; 9 displays</i><br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <br>
           <br>
         </div>
       </div>
@@ -153,10 +223,11 @@ href="Shuttle/Architecture%20of%20the%20Space%20Shuttle%20Primary%20Avionics%20S
         <br>
         Like the AGC, AGS, and LVDC, which are programmed essentially in
         the assembly language native to their CPU types, the Flight
-        Control Operating System (FCOS) is written in the assembly
-        language of the AP-101S CPU.&nbsp; The bulk of the software,
-        however, is the Primary Flight Software (PFS), and the PFS is
-        written in a higher-level language called HAL/S.&nbsp; <a
+        Control Operating System (FCOS) and the Run Time Library (RTL)
+        are written in the assembly language of the AP-101S CPU.&nbsp;
+        But once you get past those infrastructural items, you have the
+        Primary Flight Software (PFS), and the PFS is written in a
+        higher-level language called HAL/S.&nbsp; <a
           moz-do-not-send="true"
           href="Shuttle/DPS%20Overview%20Workbook.pdf#page=22">The DPS
           Overview Workbook</a> explains the overall structure of the
@@ -195,6 +266,9 @@ href="Shuttle/Architecture%20of%20the%20Space%20Shuttle%20Primary%20Avionics%20S
 
 
 
+
+
+
       However, here are some websites that have additional documents
       that you may find interesting, and which may still contain
       relevant materials that I've overlooked:<br>
@@ -205,13 +279,22 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
 
 
 
+
+
+
           Space Center's FOIA archive of flight data files</a>.</li>
       <li><a moz-do-not-send="true"
           href="https://sourceforge.net/projects/shuttleultra/files/References/">The
 
 
 
+
+
+
           Space Shuttle Ultra site, particularly its reference section</a>.&nbsp;
+
+
+
 
 
 
@@ -223,6 +306,9 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
         FlightGear is a flight simulation system.</li>
       <li><a moz-do-not-send="true"
           href="https://gandalfddi.z19.web.core.windows.net/shuttle.html">Ken
+
+
+
 
 
 
@@ -264,12 +350,18 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
       <li>The recommended starting point is "<a moz-do-not-send="true"
           href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf">Programming
 
+
+
+
           in HAL/S</a>", which was intended as an introduction to
         programming in HAL/S and is organized as a tutorial.</li>
       <li>The tutorial itself points out that it is not a definitive
         exposition of the language, and recommends proceeding afterward
         to the <a moz-do-not-send="true"
           href="Shuttle/HAL_S%20Language%20Specification%20Nov%202005.pdf">"HAL/S
+
+
+
 
           Language Specification"</a>, which contains a much-more-formal
         specification of the language syntax ... fortunately in the form
@@ -279,9 +371,15 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
       <li>Or to the <a moz-do-not-send="true"
           href="Shuttle/HAL_S%20Programmers%20Guide%20Nov%202005.pdf">"HAL/S
 
+
+
+
           Programmer's Guide"</a>.</li>
-      <li>And finally, the <a moz-do-not-send="true"
+      <li>And then there's the <a moz-do-not-send="true"
           href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf">"HAL/S-FC
+
+
+
 
           User's Guide"</a> explains how to compile and execute a HAL/S
         program.&nbsp; That explanation is, of course, completely
@@ -358,12 +456,277 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
     </ul>
     <p>TBD<br>
     </p>
+    <h1><a name="Versioning"></a>Software Versioning</h1>
+    <p>As I've described above, any given shuttle had a number of
+      computers, running a lot of different software components — more
+      than just the GPCs running PASS/BFS/FCOS/RTL we're discussing
+      here.&nbsp; Each of these software components had their own unique
+      versioning.&nbsp; I couldn't begin to tell you what those all are;
+      I don't even have a list of all the different computers or their
+      software components, let alone details about their versions. <br>
+    </p>
+    <p>However, in all but the very earliest missions, the <i>collection</i>
+      of all of the software components at their various revision levels
+      was itself identified by what's called the <i>Operational
+        Increment (OI)</i>.&nbsp; You thus see various Shuttle documents
+      specifying "OI-24" or "OI-33", and what this means is that those
+      documents are specialized to those particular overall software
+      versions.&nbsp; The versioning of individual software components
+      of the overall software version was apparently by <i>Version
+        Increments (VI)</i>, such as "VI 1.23".<br>
+    </p>
+    <p>At this point, I have no authoritative references which link
+      software versions to specific Shuttle missions.&nbsp; For what
+      information I do have, I'd refer you to the mission summaries, <a
+        moz-do-not-send="true"
+        href="Shuttle/SpaceShuttleMissionsSummaryVol1.pdf">Volume 1</a>
+      and <a moz-do-not-send="true"
+        href="Shuttle/SpaceShuttleMissionsSummaryVol2.pdf">Volume 2</a>.&nbsp;
+
+      (Some data past the end of Volume 2 can be gotten from NASA Press
+      Kits for STS-132 through 135.)&nbsp; In the following tabulation,
+      sorted by software version, notice that a higher STS mission
+      number sometimes has a lower software version number, presumably
+      partially because the mission numbering doesn't perfectly agree
+      with the chronological order in which the missions were flown.<br>
+    </p>
+    <table cellspacing="2" cellpadding="2" border="1" align="center">
+      <tbody>
+        <tr>
+          <th valign="middle" align="center">Mission<br>
+          </th>
+          <th valign="middle" align="center">Software Version<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top" align="center">STS-1 <br>
+          </td>
+          <td valign="top" align="center">R16/T9<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">STS-2, 3, 4<br>
+          </td>
+          <td valign="top" align="center">R18/T11<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top" align="center">STS-5, 6, 7, 8<br>
+          </td>
+          <td valign="top" align="center">R19/T12<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-9 (41A), 11 (41B), 13
+            (41C)<br>
+          </td>
+          <td valign="middle" align="center">OI-2<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-14 (41DR), 17 (41G), 19
+            (51A), 20 (51C), 24 (51B)<br>
+          </td>
+          <td valign="middle" align="center">OI-4<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-22 (51E), 23 (51D)<br>
+          </td>
+          <td valign="middle" align="center">OI-5<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-26 (51F)<br>
+          </td>
+          <td valign="middle" align="center">OI5-24<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-25 (51G)<br>
+          </td>
+          <td valign="middle" align="center">OI-6<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-27 (51I)<br>
+          </td>
+          <td valign="middle" align="center">OI6-27<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-28 (51J)<br>
+          </td>
+          <td valign="middle" align="center">OI6-28<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-30 (61A)<br>
+          </td>
+          <td valign="middle" align="center">OI6-29<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-31 (61B)<br>
+          </td>
+          <td valign="middle" align="center">OI6-30<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-33 (51L)<br>
+          </td>
+          <td valign="middle" align="center">OI17-26<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-32 (61C)<br>
+          </td>
+          <td valign="middle" align="center">OI17-32<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-26 (26R), 27 (27R), 28
+            (28R), 29 (29R), 30 (30R), 33 (33R)<br>
+          </td>
+          <td valign="middle" align="center">OI-8B<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-31 (31R), 32 (32R), 34
+            (34R), 36 (36R)<br>
+          </td>
+          <td valign="middle" align="center">OI-8C<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-35 (61E), 38, 40, 41<br>
+          </td>
+          <td valign="middle" align="center">OI-8D<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-37, 39<br>
+          </td>
+          <td valign="middle" align="center">OI-8F<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-42, 43, 44, 45, 48<br>
+          </td>
+          <td valign="middle" align="center">OI-20<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-46, 47, 49, 50, 52, 53,
+            54, 55, 56<br>
+          </td>
+          <td valign="middle" align="center">OI-21<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-51, 57, 58, 59, 60, 61,
+            62, 68<br>
+          </td>
+          <td valign="middle" align="center">OI-22<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-63, 64, 65, 66, 67<br>
+          </td>
+          <td valign="middle" align="center">OI-23<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-69, 70, 71, 72, 73, 74,
+            75, 76, 77, 78<br>
+          </td>
+          <td valign="middle" align="center">OI-24<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-79, 80, 81, 82, 83, 84,
+            94<br>
+          </td>
+          <td valign="middle" align="center">OI-25<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-85, 86, 87, 89<br>
+          </td>
+          <td valign="middle" align="center">OI-26A<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-88, 90, 91, 93, 95, 103<br>
+          </td>
+          <td valign="middle" align="center">OI-26B<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-92, 96, 97, 99, 101,
+            106<br>
+          </td>
+          <td valign="middle" align="center">OI-27<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-98, 100, 102, 104, 105,
+            108, 109<br>
+          </td>
+          <td valign="middle" align="center">OI-28<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-107, 110, 111, 112, 113<br>
+          </td>
+          <td valign="middle" align="center">OI-29<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-114, 115, 116, 117,
+            118, 121<br>
+          </td>
+          <td valign="middle" align="center">OI-30<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-120, 122, 123, 124, 125<br>
+          </td>
+          <td valign="middle" align="center">OI-32<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-119, 126, 127<br>
+          </td>
+          <td valign="middle" align="center">OI-33<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">STS-128, 129, 130, 131,
+            132, 133, 134, 135<br>
+          </td>
+          <td valign="middle" align="center">OI-34<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>For example, the presentation for <a moz-do-not-send="true"
+        href="Shuttle/STS-121%20FRR%20SE&amp;I.pdf#page=22">the STS-121
+        Flight Readiness Review (FRR)</a> tells us that the software
+      version was OI-30, in agreement with the table above, while just
+      the Integrated Display Processor (IDP) software component was
+      version VI 4.01 and the Multifunction Display Unit Function (MDUF)
+      was version VI 5.00.<br>
+    </p>
     <h1><a name="Emulation"></a>Compilation and Emulation</h1>
     When a "modern" HAL/S compiler and a means of emulating the compiled
     PASS/BFS executable code exists, I'll report on it in this section.<br>
     <br>
     Until then, I'll merely point out that <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/README.md">the
+
+
+
       development roadmap and reports on progress along that roadmap
       appear in the associated README</a> file in our software
     repository.<br>
@@ -382,7 +745,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/README.md">
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2022-11-13 <br>
+          2022-11-26<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
