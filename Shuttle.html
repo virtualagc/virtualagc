@@ -23,14 +23,19 @@ document.write(headerTemplate.replace("@TITLE@","Virtual AGC Project").replace("
       <li><a moz-do-not-send="true" href="#PASS">PASS and BFS Source
           Code</a></li>
       <li><a moz-do-not-send="true" href="#Versioning">Software
-          Versioning</a><br>
+          Versioning</a></li>
+      <li><a moz-do-not-send="true" href="#Display">Multi-Function
+          Display Formatting and Versioning</a></li>
+      <li><a moz-do-not-send="true" href="#Messaging">GPC - DEU/IDP
+          Messaging</a><br>
       </li>
       <li><a moz-do-not-send="true" href="#Emulation">Compilation and
           Emulation</a></li>
     </ul>
     <h1><a name="Introduction"></a>Introduction</h1>
-    <p>In so far as the Space Shuttle is concerned, my goals at present
-      are the following:<br>
+    <p>Insofar as the Space Shuttle is concerned, the Virtual AGC
+      Project's present goals — or if you'd prefer, my goals — at
+      present are the following:<br>
     </p>
     <ul>
       <li>To provide the complete source code for the software for the
@@ -47,6 +52,9 @@ document.write(headerTemplate.replace("@TITLE@","Virtual AGC Project").replace("
       <li>For the emulator to be integrated into space-flight simulation
         systems such as Orbiter+SSU or FlightGear.</li>
     </ul>
+    <p>In particular, we don't pretend to be putting together an
+      "everything about the Space Shuttle" site.<br>
+    </p>
     <p>Now, there are various nuances to the statements above, such as
       whether access to source code must be restricted in some ways,
       rather than being freely available.&nbsp; And by "the" source
@@ -56,8 +64,9 @@ document.write(headerTemplate.replace("@TITLE@","Virtual AGC Project").replace("
       And by emulation, do I mean emulation of the entire stack of code,
       or just for some restricted portion of it?&nbsp; Answers to those
       questions will become clear in the sections below ... or at least,
-      clearer than they are now.&nbsp; But there aren't necessarily
-      unique, permanently-correct answers.&nbsp; One thing I can say
+      clearer than they are now.&nbsp; And I don't pretend to know all
+      of the answers yet.&nbsp; But there aren't necessarily unique,
+      permanently-correct answers.&nbsp; One thing I can say
       unequivocally is that integration into space-flight simulation
       systems is my <i>hope</i> rather than anything that I'll actively
       pursue; integration is the prerogative of the developers of those
@@ -68,10 +77,13 @@ document.write(headerTemplate.replace("@TITLE@","Virtual AGC Project").replace("
       necessity be rather limited.&nbsp; The system is simply too
       complex, and there are too many resources already available on the
       web for me to suppose that a presentation by a johnny-come-lately
-      like me would be worthwhile or even interesting.&nbsp; Perhaps the
-      best place to get an introduction would be <a
-        moz-do-not-send="true"
+      like me would be worthwhile or even interesting about a topic this
+      big.&nbsp; Perhaps the best place to get an introduction would be
+      <a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20Chapter%204.pdf">Chapter
+
+
+
 
 
 
@@ -85,6 +97,9 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
     </p>
     <p>The portion of the Shuttle's full avionics system which concerns
       us is the <i>Data Process System (DPS)</i>, which includes the <i>General
+
+
+
 
 
 
@@ -109,6 +124,9 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
         software, known as the <i>Primary Flight Software (PFS)</i>
         atop the <i>Flight Control Operating System (FCOS)</i>.&nbsp;
         PFS and FCOS together are collectively referred to as the <i>Primary
+
+
+
 
           Avionics Software Subsystem (PASS)</i>.&nbsp; The behaviors of
         these four copies of FCOS were synchronized ... not on a
@@ -148,9 +166,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
             2000, the pilots had 3 of these displays and the crew
             specialist had 1; they were monochrome (green text on black
             background) cathode-ray tubes (CRTs).&nbsp; After 2000, the
-            pilots' CRTs were replaced by 9 multi-color liquid crystal
-            displays (LCDs).&nbsp; Collectively, the CRTs and LCDs were
-            referred to as Multifunction Display Units (MDUs).&nbsp; <br>
+            CRTs were replaced by multi-color liquid crystal displays
+            (LCDs), 9 for the pilots and 2 elsewhere.&nbsp;
+            Collectively, the CRTs and LCDs were referred to as
+            Multifunction Display Units (MDUs).&nbsp; <br>
           </li>
           <li>Keyboards from Ebonex.&nbsp; The pilots had 2 of these,
             and the mission specialist station had a 3rd.</li>
@@ -185,9 +204,9 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
                       width="952" height="730"><br>
                   </div>
                   <br>
-                  <div><i>Older configuration:&nbsp; keyboard and 4
-                      displays</i><br>
-                  </div>
+                  <div><i>Older configuration:&nbsp; 4 CRT displays<br>
+                      (Multifunction CRT Display System, or MCDS)<br>
+                    </i> </div>
                 </td>
                 <td valign="top" align="center"><img
                     moz-do-not-send="true"
@@ -200,8 +219,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
                     src="ShuttleForwardCockpitDisplays.png" alt=""
                     width="886" height="290"><br>
                   <br>
-                  <i>Newer configuration:&nbsp; 9 displays</i><br>
-                </td>
+                  <i>Newer configuration:&nbsp; 11 LCD displays<br>
+                    (Multifunction Electronic Display Subsystem, or
+                    MEDS)<br>
+                  </i> </td>
               </tr>
             </tbody>
           </table>
@@ -210,9 +231,15 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
         </div>
       </div>
       <div align="left">Here's a more-inclusive diagram (click to
-        enlarge<a moz-do-not-send="true"
-href="Shuttle/Architecture%20of%20the%20Space%20Shuttle%20Primary%20Avionics%20Software%20System%20Sept%201984.pdf"></a>)
-        of the entire avionics system, if you feel the need for one:<br>
+        enlarge) of the entire <i>older</i> configuration of the
+        avionics system, if you feel the need for one.&nbsp; Personally,
+        I'm just including it because it's colorful, and you'll need to
+        dig into the actual documentation if you want real detail.&nbsp;
+        By the way, you can tell it's the older configuration rather
+        than the newer one, because if you look in the upper-left area,
+        you'll see "CRT 1", "CRT 2", "CRT 3", and (somewhat below the
+        others) "CRT 4", rather than the 11 MFDs you'd see in the newer
+        configuration:<br>
         <br>
         <div align="center"><a href="shuttle_avionics_sm.jpg"><img
               moz-do-not-send="true" src="shuttle_avionics_sm-small.jpg"
@@ -269,6 +296,9 @@ href="Shuttle/Architecture%20of%20the%20Space%20Shuttle%20Primary%20Avionics%20S
 
 
 
+
+
+
       However, here are some websites that have additional documents
       that you may find interesting, and which may still contain
       relevant materials that I've overlooked:<br>
@@ -276,6 +306,9 @@ href="Shuttle/Architecture%20of%20the%20Space%20Shuttle%20Primary%20Avionics%20S
     <ul>
       <li><a moz-do-not-send="true"
 href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.html">Johnson
+
+
+
 
 
 
@@ -291,7 +324,13 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
 
 
 
+
+
+
           Space Shuttle Ultra site, particularly its reference section</a>.&nbsp;
+
+
+
 
 
 
@@ -306,6 +345,9 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
         FlightGear is a flight simulation system.</li>
       <li><a moz-do-not-send="true"
           href="https://gandalfddi.z19.web.core.windows.net/shuttle.html">Ken
+
+
+
 
 
 
@@ -353,12 +395,18 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
 
 
 
+
+
+
           in HAL/S</a>", which was intended as an introduction to
         programming in HAL/S and is organized as a tutorial.</li>
       <li>The tutorial itself points out that it is not a definitive
         exposition of the language, and recommends proceeding afterward
         to the <a moz-do-not-send="true"
           href="Shuttle/HAL_S%20Language%20Specification%20Nov%202005.pdf">"HAL/S
+
+
+
 
 
 
@@ -374,9 +422,15 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
 
 
 
+
+
+
           Programmer's Guide"</a>.</li>
       <li>And then there's the <a moz-do-not-send="true"
           href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf">"HAL/S-FC
+
+
+
 
 
 
@@ -482,6 +536,9 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
         href="Shuttle/SpaceShuttleMissionsSummaryVol1.pdf">Volume 1</a>
       and <a moz-do-not-send="true"
         href="Shuttle/SpaceShuttleMissionsSummaryVol2.pdf">Volume 2</a>.&nbsp;
+
+
+
 
       (Some data past the end of Volume 2 can be gotten from NASA Press
       Kits for STS-132 through 135.)&nbsp; In the following tabulation,
@@ -718,12 +775,134 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
       version VI 4.01 and the Multifunction Display Unit Function (MDUF)
       was version VI 5.00.<br>
     </p>
+    <h1><a name="Display"></a>Multi-Function Display Formatting and
+      Versioning</h1>
+    <p>As was mentioned earlier in the <a moz-do-not-send="true"
+        href="#Introduction">Introduction</a>, the principal method by
+      which the General Purpose Computers (GPC) running the primary
+      flight software (PFS/PASS) and backup flight software (BFS)
+      interact with the crew includes keyboards and display
+      screens.&nbsp; What's unusual about these display screens is that
+      what appears on them is only <i>partially</i> controlled by the
+      PASS/BFS software.&nbsp; Instead, there was another processor
+      sitting between each of the displays and the GPCs, and it was this
+      extra processor that directly controlled what was displayed and
+      how the display was formatted.&nbsp; (For that matter, the
+      keyboards also were attached to one of these extra processors
+      rather than to the GPCs, so whatever keystrokes were seen by the
+      PASS/BFS software had already been pre-digested.)<br>
+    </p>
+    <p><img moz-do-not-send="true" src="MCDS.png" alt="" width="455"
+        height="278" align="right">In the case of the older, pre-2000
+      cockpit configuration (MCDS, 4 CRTs), this extra processor was
+      known as the <i>Display Electronics Unit (DEU)</i>, and it
+      consisted of an IBM SP-0 CPU with 8K×16 bits of RAM.&nbsp; In the
+      case of the newer, post-2000 cockpit configuration (MEDS, 11
+      LCDs), the extra processor was known as the Integrated Display
+      Processor (IDP), a 368DX microprocessor.&nbsp; The basic schema is
+      seen in the diagram to the right.&nbsp; While the diagram is
+      specific to the older (MCDS) configuration, the newer (MEDS)
+      configuration is conceptually quite similar.<br>
+    </p>
+    <p>In the case of the MEDS configuration, the software that was
+      specifically tasked with formatting the display was called the <i>Display
+
+        Application Software (DAS)</i>.&nbsp; But these details are of
+      little interest to us in the absence of the DAS or other software
+      that ran on the DEU/IDPs.&nbsp; So the only use of these factoids
+      I'll use in the context of the present discussion is to refer to
+      what I've been calling the "extra processor" so far instead as the
+      "DEU/IDP".<br>
+    </p>
+    <p>What <i>is</i> of importance to us, however, is that in addition
+      to inputs from the GPCs via the MIL-STD-1553 databuses, the
+      DEU/IDP's RAM was used to store a set of templates that controlled
+      the formatting of the display screen.&nbsp; These templates were
+      loaded from mass memory into RAM at power-up.&nbsp; In other
+      words, the screen templates are independent of the PASS/BFS source
+      code.<br>
+    </p>
+    For illustrative purposes, here's an example of the screen template
+    for "GNC SYS SUMM 1":<br>
+    <br>
+    <div align="center"><img moz-do-not-send="true"
+        src="GNC-SYS-SUMM-1-OP-26.png" alt="" width="534" height="385"></div>
+    <p>The screen templates don't quite fall under the Operational
+      Increment (OI) top-level software-versioning scheme we've already
+      discussed.&nbsp; They do, but they are also controlled by <i>Program
+
+
+        Change Notices (PCN)</i>.&nbsp; In a practical sense, what this
+      means is that to know the screen templates and consequent
+      display-screen formats for any given Shuttle mission, we must have
+      not merely the screen templates for that generic OI, but also the
+      differences to those templates that were made due to specific
+      PCNs.&nbsp; <br>
+    </p>
+    <p>The controlling document for the screen templates is
+      unclear.&nbsp; The most-accessible seems to be JSC-48017,&nbsp;
+      the "Data Processing System Dictionary".&nbsp; <a
+        moz-do-not-send="true" href="links-shuttle.html#DPS">We have
+        several revisions of JSC-48017 in our Shuttle Library</a>, and
+      in principle, if we could collect <i>all</i> of the different
+      revisions, then we'd have all of the screen templates.&nbsp; On
+      the other hand, <i>the <a moz-do-not-send="true"
+          href="links-shuttle.html#DPS">Functional Subsystem Software
+          Requirements (FSSR)</a></i> also contain these templates, and
+      seem a lot more authoritative, as well as providing a lot more
+      information. As a practical matter, they're also a lot harder to
+      find than DPS Dictionaries are.&nbsp; There are also
+      reference-card-like summaries that are very helpful, such as <a
+        moz-do-not-send="true"
+        href="Shuttle/Orbiter%20Displays%20Reference%20Guide%20OI-34.pdf">this
+
+
+        one for OI-34</a>.<br>
+    </p>
+    <p>https://www.ibiblio.org/apollo/Shuttle/sts83-0020v1-34%20-%20Displays%20and%20Controls%20-%20GNC.pdf<br>
+    </p>
+    <p>That turns out to be even more problematic than it sounds.&nbsp;
+      Take the sample template for GNC SYS SUMM 1 seen above.&nbsp; I
+      got this from <a moz-do-not-send="true"
+        href="Shuttle/Space%20Shuttle%20DPS%20Dictionary%20OI-26.pdf">the
+
+
+        DPS Dictionary for OI-26 and subsequent as modified by PCN-4</a>.&nbsp;
+
+
+      The document itself notes that with PCN-4 it's applicable to
+      STS-96 and subsequent ... which actually flew OI-27.&nbsp; So to
+      find the templates for OI-26, we'd actually need the DPS
+      Dictionary <i>without</i> PCN-4, and that's something that as of
+      this writing we don't actually have.<br>
+    </p>
+    <h1><a name="Messaging"></a>GPC - DEU/IDP Messaging</h1>
+    <p>Keyboard data was supplied to the General Purpose Computers
+      (GPC), and hence to the PASS/BFS software, by means of messages on
+      the MIL-STD-1553 databuses interconnecting the GPCs and
+      DEU/IDPs.&nbsp; Similarly, data was output by the GPCs for display
+      by passing messages on the databuses as well.&nbsp; Technical
+      details about this messaging can be found in the <a
+        moz-do-not-send="true"
+href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2019970615.pdf#page=169">Data
+        Processing System Brief</a>.&nbsp; I won't bother to summarize
+      that information here, since the document's presentation is at
+      least as readable as anything I might write up to supplement
+      it.&nbsp; While our only available revision of this document so
+      far is for the MCDS, recall that the change from the MCDS to MEDS
+      cockpit configurations was done in a way that was transparent to
+      the existing software.&nbsp; That implies, I hope, that the
+      messaging format would have been the same in either configuration.<br>
+    </p>
     <h1><a name="Emulation"></a>Compilation and Emulation</h1>
     When a "modern" HAL/S compiler and a means of emulating the compiled
     PASS/BFS executable code exists, I'll report on it in this section.<br>
     <br>
     Until then, I'll merely point out that <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/README.md">the
+
+
+
 
 
 

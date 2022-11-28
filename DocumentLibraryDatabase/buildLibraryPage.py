@@ -34,6 +34,8 @@
 #				                main document library.
 #               2022-11-23 RSB  Added the "Administrative" section to the 
 #                               Shuttle library.
+#               2022-11-28 RSB  Added OI-specific sections to the Shuttle
+#                               library.
 #
 # Usage:
 #	./buildLibraryPage.py <DocumentLibraryDatabase.tsv >../links2.html
@@ -1362,6 +1364,26 @@ if shuttle:
         { "anchor" : "DPS", "title" : "Data Processing Subsystem (DPS)", "keywords" : [ "DPS" ] },
         { "anchor" : "GPC", "title" : "General Purpose Computer (GPC), IBM AP-101S Avionics Computer", "keywords" : [ "AP-101S", "GPC" ] },
         { "anchor" : "FCS", "title" : "Flight Control System (FCS)", "keywords" : [ "FCS" ] },
+        { "anchor" : "OI2", "title" : "Software Version OI-2", "keywords" : [ "OI-2" ] },
+        { "anchor" : "OI4", "title" : "Software Version OI-4", "keywords" : [ "OI-4" ] },
+        { "anchor" : "OI5", "title" : "Software Version OI-5", "keywords" : [ "OI-5" ] },
+        { "anchor" : "OI6", "title" : "Software Version OI-6", "keywords" : [ "OI-6" ] },
+        { "anchor" : "OI7", "title" : "Software Version OI-7", "keywords" : [ "OI-7" ] },
+        { "anchor" : "OI8", "title" : "Software Version OI-8", "keywords" : [ "OI-8", "OI-8B", "OI-8C", "OI-8D", "OI-8F" ] },
+        { "anchor" : "OI20", "title" : "Software Version OI-20", "keywords" : [ "OI-20" ] },
+        { "anchor" : "OI21", "title" : "Software Version OI-21", "keywords" : [ "OI-21" ] },
+        { "anchor" : "OI22", "title" : "Software Version OI-22", "keywords" : [ "OI-22" ] },
+        { "anchor" : "OI23", "title" : "Software Version OI-23", "keywords" : [ "OI-23" ] },
+        { "anchor" : "OI24", "title" : "Software Version OI-24", "keywords" : [ "OI-24" ] },
+        { "anchor" : "OI25", "title" : "Software Version OI-25", "keywords" : [ "OI-25" ] },
+        { "anchor" : "OI26", "title" : "Software Version OI-26", "keywords" : [ "OI-26", "OI-26A", "OI-26B" ] },
+        { "anchor" : "OI27", "title" : "Software Version OI-27", "keywords" : [ "OI-27" ] },
+        { "anchor" : "OI28", "title" : "Software Version OI-28", "keywords" : [ "OI-28" ] },
+        { "anchor" : "OI29", "title" : "Software Version OI-29", "keywords" : [ "OI-29" ] },
+        { "anchor" : "OI30", "title" : "Software Version OI-30", "keywords" : [ "OI-30" ] },
+        { "anchor" : "OI32", "title" : "Software Version OI-32", "keywords" : [ "OI-32" ] },
+        { "anchor" : "OI33", "title" : "Software Version OI-33", "keywords" : [ "OI-33" ] },
+        { "anchor" : "OI34", "title" : "Software Version OI-34", "keywords" : [ "OI-34" ] },
         { "anchor" : "GOAL", "title" : "Ground Operations Aerospace Language (GOAL)", "keywords" : [ "GOAL" ] },
         { "anchor" : "papers", "title" : "Papers, Articles, Presentations, Books", "keywords" : [ "papers", "paper" ] },
         { "anchor" : "studies", "title" : "Studies, Analyses", "keywords" : [ "studies" ] },
