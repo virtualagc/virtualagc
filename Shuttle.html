@@ -90,6 +90,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
         4, "Computers in the Space Shuttle Avionics System", of James
         Tomayko's <i>Computers in Spaceflight: The NASA Experience</i></a>.<br>
     </p>
@@ -97,6 +98,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
     </p>
     <p>The portion of the Shuttle's full avionics system which concerns
       us is the <i>Data Process System (DPS)</i>, which includes the <i>General
+
 
 
 
@@ -124,6 +126,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
         software, known as the <i>Primary Flight Software (PFS)</i>
         atop the <i>Flight Control Operating System (FCOS)</i>.&nbsp;
         PFS and FCOS together are collectively referred to as the <i>Primary
+
 
 
 
@@ -299,6 +302,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
       However, here are some websites that have additional documents
       that you may find interesting, and which may still contain
       relevant materials that I've overlooked:<br>
@@ -306,6 +310,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
     <ul>
       <li><a moz-do-not-send="true"
 href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.html">Johnson
+
 
 
 
@@ -327,7 +332,9 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
 
 
 
+
           Space Shuttle Ultra site, particularly its reference section</a>.&nbsp;
+
 
 
 
@@ -345,6 +352,7 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
         FlightGear is a flight simulation system.</li>
       <li><a moz-do-not-send="true"
           href="https://gandalfddi.z19.web.core.windows.net/shuttle.html">Ken
+
 
 
 
@@ -398,12 +406,14 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
 
 
 
+
           in HAL/S</a>", which was intended as an introduction to
         programming in HAL/S and is organized as a tutorial.</li>
       <li>The tutorial itself points out that it is not a definitive
         exposition of the language, and recommends proceeding afterward
         to the <a moz-do-not-send="true"
           href="Shuttle/HAL_S%20Language%20Specification%20Nov%202005.pdf">"HAL/S
+
 
 
 
@@ -425,9 +435,11 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
 
 
 
+
           Programmer's Guide"</a>.</li>
       <li>And then there's the <a moz-do-not-send="true"
           href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf">"HAL/S-FC
+
 
 
 
@@ -536,6 +548,7 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
         href="Shuttle/SpaceShuttleMissionsSummaryVol1.pdf">Volume 1</a>
       and <a moz-do-not-send="true"
         href="Shuttle/SpaceShuttleMissionsSummaryVol2.pdf">Volume 2</a>.&nbsp;
+
 
 
 
@@ -780,17 +793,17 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
     <p>As was mentioned earlier in the <a moz-do-not-send="true"
         href="#Introduction">Introduction</a>, the principal method by
       which the General Purpose Computers (GPC) running the primary
-      flight software (PFS/PASS) and backup flight software (BFS)
-      interact with the crew includes keyboards and display
-      screens.&nbsp; What's unusual about these display screens is that
-      what appears on them is only <i>partially</i> controlled by the
-      PASS/BFS software.&nbsp; Instead, there was another processor
-      sitting between each of the displays and the GPCs, and it was this
-      extra processor that directly controlled what was displayed and
-      how the display was formatted.&nbsp; (For that matter, the
-      keyboards also were attached to one of these extra processors
-      rather than to the GPCs, so whatever keystrokes were seen by the
-      PASS/BFS software had already been pre-digested.)<br>
+      flight software (PFS) and backup flight software (BFS) interact
+      with the crew includes keyboards and display screens.&nbsp; What's
+      unusual about the display screens is that what appears on them is
+      only <i>partially</i> controlled by the PFS or BFS
+      software.&nbsp; Instead, there was another processor sitting
+      between each of the displays and the GPCs, and it was this extra
+      processor that directly controlled what was displayed and how the
+      display was formatted.&nbsp; (For that matter, the keyboards also
+      were attached to one of these extra processors rather than to the
+      GPCs, so whatever keystrokes were seen by the PFS/BFS software had
+      already been pre-digested by these extra processors.)<br>
     </p>
     <p><img moz-do-not-send="true" src="MCDS.png" alt="" width="455"
         height="278" align="right">In the case of the older, pre-2000
@@ -799,83 +812,136 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
       consisted of an IBM SP-0 CPU with 8K×16 bits of RAM.&nbsp; In the
       case of the newer, post-2000 cockpit configuration (MEDS, 11
       LCDs), the extra processor was known as the Integrated Display
-      Processor (IDP), a 368DX microprocessor.&nbsp; The basic schema is
-      seen in the diagram to the right.&nbsp; While the diagram is
-      specific to the older (MCDS) configuration, the newer (MEDS)
-      configuration is conceptually quite similar.<br>
-    </p>
-    <p>In the case of the MEDS configuration, the software that was
+      Processor (IDP), an Intel 368DX microprocessor.&nbsp; The basic
+      schema is seen in the diagram to the right.&nbsp; While the
+      diagram is specific to the older (MCDS) configuration, the newer
+      (MEDS) configuration is conceptually quite similar.&nbsp; In the
+      case of the MEDS configuration, the software for the IDP that was
       specifically tasked with formatting the display was called the <i>Display
 
-        Application Software (DAS)</i>.&nbsp; But these details are of
-      little interest to us in the absence of the DAS or other software
-      that ran on the DEU/IDPs.&nbsp; So the only use of these factoids
-      I'll use in the context of the present discussion is to refer to
-      what I've been calling the "extra processor" so far instead as the
-      "DEU/IDP".<br>
+
+        Application Software (DAS)</i>.&nbsp; But these kinds of details
+      are of little interest to us in the absence of the DAS or other
+      software that actually ran on the DEU/IDPs.&nbsp; So the only use
+      of these factoids I'll use in the context of the present
+      discussion is to refer from now on to what I've been calling the
+      "extra processor" so far instead as the "DEU/IDP".<br>
     </p>
     <p>What <i>is</i> of importance to us, however, is that in addition
       to inputs from the GPCs via the MIL-STD-1553 databuses, the
       DEU/IDP's RAM was used to store a set of templates that controlled
       the formatting of the display screen.&nbsp; These templates were
       loaded from mass memory into RAM at power-up.&nbsp; In other
-      words, the screen templates are independent of the PASS/BFS source
+      words, the screen templates are independent of the PFS/BFS source
       code.<br>
     </p>
-    For illustrative purposes, here's an example of the screen template
-    for "GNC SYS SUMM 1":<br>
+    For illustrative purposes, there's an example below of the template
+    for screen "GNC SYS SUMM 1" for mission STS-96.&nbsp; It comes in
+    two varieties, one for the primary flight software, and one for the
+    backup flight software: <br>
     <br>
-    <div align="center"><img moz-do-not-send="true"
-        src="GNC-SYS-SUMM-1-OP-26.png" alt="" width="534" height="385"></div>
-    <p>The screen templates don't quite fall under the Operational
-      Increment (OI) top-level software-versioning scheme we've already
-      discussed.&nbsp; They do, but they are also controlled by <i>Program
-
-
-        Change Notices (PCN)</i>.&nbsp; In a practical sense, what this
-      means is that to know the screen templates and consequent
+    <table cellspacing="2" cellpadding="2" border="0" align="center">
+      <tbody>
+        <tr>
+          <td valign="top"><img moz-do-not-send="true"
+              src="GNC-SYS-SUMM-1-PASS-STS96.png" alt="" width="534"
+              height="385"><br>
+            <div align="center"><i>PFS GNC SYS SUMM 1 screen, STS-96</i><br>
+            </div>
+          </td>
+          <td valign="top"><img moz-do-not-send="true"
+              src="GNC-SYS-SUMM-1-BFS-STS96.png" alt="" width="532"
+              height="385"><br>
+            <div align="center"><i>BFS GNC SYS SUMM 1 screen, STS-96</i></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    <p>As you can probably deduce from these images, some of the areas
+      are supposed to be updated with data from the GPC (or elsewhere in
+      the spacecraft), such as the HH, MM, and SS in the upper-right
+      corner or the X's and S's that are all over the place.&nbsp; Other
+      markings, like the "SURF", "POS", "MOM", and "DPS" are simply
+      features of the template, and don't change at the whim of the GPC
+      or its software.<br>
+    </p>
+    <p>The screen templates don't <i>quite</i> fall under the
+      Operational Increment (OI) top-level software-versioning scheme
+      we've already discussed.&nbsp; They do, but they are also
+      controlled by <i>Program Change Notices (PCN)</i>.&nbsp; The
+      examples above are for STS-96 which flew software version OI-27,
+      but that doesn't mean that all missions using OI-27 necessarily
+      had identical screen templates.&nbsp; In a practical sense, what
+      this means is that to know the screen templates and consequent
       display-screen formats for any given Shuttle mission, we must have
       not merely the screen templates for that generic OI, but also the
-      differences to those templates that were made due to specific
-      PCNs.&nbsp; <br>
+      differences to those templates that were made due to specific PCNs
+      ... and of course, actually have the associated documentation so
+      that we can consult it.&nbsp; <br>
     </p>
-    <p>The controlling document for the screen templates is
-      unclear.&nbsp; The most-accessible seems to be JSC-48017,&nbsp;
-      the "Data Processing System Dictionary".&nbsp; <a
-        moz-do-not-send="true" href="links-shuttle.html#DPS">We have
-        several revisions of JSC-48017 in our Shuttle Library</a>, and
-      in principle, if we could collect <i>all</i> of the different
-      revisions, then we'd have all of the screen templates.&nbsp; On
-      the other hand, <i>the <a moz-do-not-send="true"
-          href="links-shuttle.html#DPS">Functional Subsystem Software
-          Requirements (FSSR)</a></i> also contain these templates, and
-      seem a lot more authoritative, as well as providing a lot more
-      information. As a practical matter, they're also a lot harder to
-      find than DPS Dictionaries are.&nbsp; There are also
-      reference-card-like summaries that are very helpful, such as <a
+    <p>Several documents provide screen templates that can be related to
+      one or more missions or software versions.&nbsp; The
+      most-available seems to be JSC-48017,&nbsp; the "Data Processing
+      System Dictionary".&nbsp; <a moz-do-not-send="true"
+        href="links-shuttle.html#DPS">We have several revisions of
+        JSC-48017 in our Shuttle Library</a>, and in principle, if we
+      could collect <i>all</i> of the different revisions, then we'd
+      have all of the screen templates for all of the missions.&nbsp; <a
+        moz-do-not-send="true"
+        href="Shuttle/Space%20Shuttle%20DPS%20Dictionary%20OI-26.pdf">The
+        GNC SYS SUMM 1 sample templates above came from one such DPS
+        Dictionary</a>.&nbsp; There are also reference-card-like
+      summaries that are very helpful, such as <a
         moz-do-not-send="true"
         href="Shuttle/Orbiter%20Displays%20Reference%20Guide%20OI-34.pdf">this
 
 
+
         one for OI-34</a>.<br>
     </p>
-    <p>https://www.ibiblio.org/apollo/Shuttle/sts83-0020v1-34%20-%20Displays%20and%20Controls%20-%20GNC.pdf<br>
+    <p>On the other hand, <i>the <a moz-do-not-send="true"
+          href="links-shuttle.html#DPS">Functional Subsystem Software
+          Requirements (FSSR)</a></i> documents also contain these
+      templates, and seem a lot more authoritative, as well as providing
+      a lot more information. In fact, the FSSR goes so far as to give
+      screen coordinates for each field, and to explain how every datum
+      received by the DEU/IDP via the databus relates specifically to
+      each X and S on the display screen!&nbsp; Unfortunately, the FSSRs
+      are also a lot more numerous and a lot harder to find than DPS
+      Dictionaries are, so the dream of obtaining a complete set of them
+      seems more whimsical than obtaining a complete set of DPS
+      Dictionaries.&nbsp; Nevertheless, on balance, it seems as though
+      the FSSRs should be regarded as the controlling documents for the
+      screen templates.&nbsp; We just need to collect all of them, or
+      failing that, fall back on DPS Dictionaries.&nbsp; For example,
+      here are the same GNC SYS SUMM 1 templates, but for software
+      version OI-34 (say, mission STS-128), taken from the FSSR.&nbsp;
+      They're different than the ones shown above for STS-96, though
+      only barely so.&nbsp; Personally, I see only 4 differences, some
+      sensible, some nonsensical, and some (I suspect) misprints;
+      perhaps you can find more.&nbsp; Incidentally, STS-96 had the MCDS
+      (pre-2000) cockpit configuration, while STS-128 had the MEDS
+      (post-2000) cockpit configuration, so perhaps that has something
+      to do with the differences.<br>
     </p>
-    <p>That turns out to be even more problematic than it sounds.&nbsp;
-      Take the sample template for GNC SYS SUMM 1 seen above.&nbsp; I
-      got this from <a moz-do-not-send="true"
-        href="Shuttle/Space%20Shuttle%20DPS%20Dictionary%20OI-26.pdf">the
-
-
-        DPS Dictionary for OI-26 and subsequent as modified by PCN-4</a>.&nbsp;
-
-
-      The document itself notes that with PCN-4 it's applicable to
-      STS-96 and subsequent ... which actually flew OI-27.&nbsp; So to
-      find the templates for OI-26, we'd actually need the DPS
-      Dictionary <i>without</i> PCN-4, and that's something that as of
-      this writing we don't actually have.<br>
-    </p>
+    <table cellspacing="2" cellpadding="2" border="0" align="center">
+      <tbody>
+        <tr>
+          <td valign="top"><img moz-do-not-send="true"
+              src="GNC-SYS-SUMM-1-PASS-OP34.png" alt="" width="541"
+              height="371"><br>
+            <div align="center"><i>PFS GNC SYS SUMM 1 screen, STS-128</i><br>
+            </div>
+          </td>
+          <td valign="top"><img moz-do-not-send="true"
+              src="GNC-SYS-SUMM-1-BFS-OP34.png" alt="" width="541"
+              height="371"><br>
+            <div align="center"><i>BFS GNC SYS SUMM 1 screen, STS-128</i></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <h1><a name="Messaging"></a>GPC - DEU/IDP Messaging</h1>
     <p>Keyboard data was supplied to the General Purpose Computers
       (GPC), and hence to the PASS/BFS software, by means of messages on
@@ -885,6 +951,7 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
       details about this messaging can be found in the <a
         moz-do-not-send="true"
 href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2019970615.pdf#page=169">Data
+
         Processing System Brief</a>.&nbsp; I won't bother to summarize
       that information here, since the document's presentation is at
       least as readable as anything I might write up to supplement
@@ -900,6 +967,7 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
     <br>
     Until then, I'll merely point out that <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/README.md">the
+
 
 
 
@@ -924,7 +992,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/README.md">
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2022-11-26<br>
+          2022-11-28<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
