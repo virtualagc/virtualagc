@@ -82,6 +82,10 @@ for line in sys.stdin:
                     if skip > 0:
                         skip -= 1
                         continue
+                    if line[i-1:i+12] == "any_statement" or \
+                            line[i-1:14] == "basic_statement" or \
+                            line[i-1:14] == "other_statement":
+                        print()
                     for j in range(indent):
                         print(" ", end="")
                     print("%d:" % indent, end="")

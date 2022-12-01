@@ -527,5 +527,34 @@ All okay now.
 
 All okay.
 
+# 2022-12-01
 
+## 119-EXAMPLE_9.hal
 
+All okay.
+
+## 120-EXAMPLE_A.hal
+
+I can't distinguish things like `DATA_VALID$(I:) = FALSE;` from `DATA_VALID$(I) = FALSE;` in the abstract syntax tree.  I see now that 119-EXAMPLE_9.hal had this problem as well, but I just didn't notice it before.
+
+All okay now.
+
+## 127-LIMIT.hal
+
+All okay.
+
+## 128-MASS.hal
+
+When a function name or procedure name is mangled via a definition of the function or procedure or a forward declaration of it, the scope of the mangled name could be the parent context, not just the interior of the function or procedure.  That fails in this example, where the function `TAU()` isn't accessible to the parent (`MASS()`).
+
+Fixed for function/procedure definitions but not yet for forward declarations, since this example doesn't have any to test.
+
+All okay now.
+
+## 129-ALMOST_EQUAL.hal
+
+All okay.
+
+## 130-EXAMPLE_N.hal
+
+This example has a forward definition of a function, for which the mangling of the function name as mentioned above remains to be fixed in the preprocessor.

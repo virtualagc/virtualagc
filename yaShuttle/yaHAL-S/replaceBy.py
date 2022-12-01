@@ -183,6 +183,7 @@ def replaceBy(halsSource, metadata, full):
                 # A new macro via "name:" (avoiding subscripts)?
                 hasType = "l_"
                 identifier = ""
+                isProcedureOrFunction = False
                 match = re.search("^" + identifierPattern + "\\s*:", fullLine)
                 if match != None:
                     head = match.group()
@@ -197,6 +198,8 @@ def replaceBy(halsSource, metadata, full):
                                 hasType = "bf_"
                             elif datatype == "CHARACTER":
                                 hasType = "cf_"
+                    if re.search("\\b(FUNCTION|PROCEDURE)\\b", tail) != None:
+                        isProcedureOrFunction = True
                 else:
                     match = re.search("(GO\\s+TO|REPEAT|EXIT)\\s+" + \
                             bareIdentifierPattern + "\\s*;", fullLine);
@@ -208,6 +211,10 @@ def replaceBy(halsSource, metadata, full):
                         macros[-1][identifier] = { "arguments": [], 
                                                 "replacement": hasType + identifier, 
                                                 "pattern": "\\b" + identifier + "\\b" }
+                        if isProcedureOrFunction:
+                            macros[-2][identifier] = { "arguments": [], 
+                                "replacement": hasType + identifier, 
+                                "pattern": "\\b" + identifier + "\\b" }
                 # A new macro via DECLARE?
                 match = re.search(declarePattern, fullLine)
                 if match != None:
