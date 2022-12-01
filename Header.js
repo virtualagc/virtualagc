@@ -90,7 +90,7 @@ headerTemplate = '<table summary="" nosave="" width="100%" border="1" cellpaddin
   + '<div align="center"> </div>' 
   + '</td>' 
   + '<td nosave="" align="center" valign="top">' 
-  + '<center><b><font color="#999900"><font size="+3">AGC &mdash; AGS &mdash; LVDC &mdash; Gemini &mdash; Shuttle</font></font></b></center>' 
+  + '<center><b><font color="#999900"><font size="+3">The Virtual AGC Project<br>Gemini &mdash; Apollo &mdash; Shuttle</font></font></b></center>' 
   + '<br>' 
   + '<b><font color="#000000"><font size="+3">@TITLE@<br>' 
   + '<small>@SUBTITLE@</small><br>' 

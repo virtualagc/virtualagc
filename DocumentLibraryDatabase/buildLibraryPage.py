@@ -296,9 +296,9 @@ fancyHeaderAndFooter = True
 #frowny = "&#128533;" # 😕
 frowny = "&#128558;" # 😮
 
-title = "Document Library Page Redux"
+title = "Apollo and Gemini"
 if shuttle:
-    title = "Space Shuttle Libary Page"
+    title = "Space Shuttle"
 fileHeader = """<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
 <head>
@@ -311,7 +311,7 @@ fileHeader = """<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
 </head>
 <body style="background-image: url(gray3.jpg);">
 <script type="text/javascript">
-document.write(headerTemplate.replace("@TITLE@","Virtual AGC Project").replace("@SUBTITLE@","%s"))
+document.write(headerTemplate.replace("@TITLE@","Document Library").replace("@SUBTITLE@","%s"))
 </script>
 <br><br>
 """ % title
