@@ -12,49 +12,58 @@
     <script type="text/javascript">
 document.write(headerTemplate.replace("@TITLE@","Virtual AGC Project").replace("@SUBTITLE@","Space Shuttle Flight Software"))
 </script><br>
-    <div align="center"><i>(This page is preliminary and almost-entirely
-        speculative at this point, since we don't yet have the unique
-        materials which it hopes to provide.)</i><br>
+    <div align="center"><i>(This page is under construction.)</i><br>
     </div>
     <h1>Table of Contents </h1>
     <ul>
       <li> <a moz-do-not-send="true" href="#Introduction">Introduction</a></li>
       <li><a moz-do-not-send="true" href="#References">References</a></li>
-      <li><a moz-do-not-send="true" href="#PASS">PASS and BFS Source
-          Code</a></li>
+      <li><a moz-do-not-send="true" href="#PASS">PASS, BFS, and Other
+          Shuttle Source Code</a></li>
+      <li><a moz-do-not-send="true" href="#HALS">HAL/S</a><br>
+      </li>
       <li><a moz-do-not-send="true" href="#Versioning">Software
           Versioning</a></li>
       <li><a moz-do-not-send="true" href="#Display">Multi-Function
           Display Formatting and Versioning</a></li>
-      <li><a moz-do-not-send="true" href="#Messaging">GPC - DEU/IDP
-          Messaging</a><br>
+      <li><a moz-do-not-send="true" href="#Messaging">Computer-to-Peripheral
+          Interface</a><br>
       </li>
       <li><a moz-do-not-send="true" href="#Emulation">Compilation and
           Emulation</a></li>
     </ul>
     <h1><a name="Introduction"></a>Introduction</h1>
     <p>Insofar as the Space Shuttle is concerned, the Virtual AGC
-      Project's present goals — or if you'd prefer, my goals — at
-      present are the following:<br>
+      Project's present goals — or if you'd prefer, <i>my</i> goals —
+      at present are the following:<br>
     </p>
     <ul>
       <li>To provide the complete source code for the software for the
-        most-significant of its onboard computer systems.</li>
+        most-significant of its onboard computer systems, to the extent
+        allowed by U.S. law.</li>
       <li>To provide all of the official documentation needed to
         understand that software and to work with it.&nbsp; See the <a
           moz-do-not-send="true" href="#References">References</a>.<br>
       </li>
       <li>To provide development tools suitable for working with the
-        source code, and in particular for compiling/assembling it into
-        executable form.</li>
+        software source code, and in particular for compiling/assembling
+        it into executable form.</li>
       <li>To provide an emulator suitable for running that executable
         code.</li>
       <li>For the emulator to be integrated into space-flight simulation
         systems such as Orbiter+SSU or FlightGear.</li>
     </ul>
-    <p>In particular, we don't pretend to be putting together an
-      "everything about the Space Shuttle" site.<br>
+    <p>In essence, we'd like to do the same kinds of things for the
+      Space Shuttle's onboard computers, as particularly the computers'
+      software, as we have done for Apollo's onboard computer systems
+      and software.<br>
     </p>
+    <p>In particular, we <i>don't</i> pretend to be putting together an
+      "everything about the Space Shuttle" site.&nbsp; If you want to
+      know about the Space Shuttle's Main Engines (SSME) or Reaction
+      Control System (RCS), or hear marvelous facts such as the maximum
+      payload size being a 15×60 foot cylinder weighing 65,000 pounds,
+      then this is <i>not</i> the place to look. </p>
     <p>Now, there are various nuances to the statements above, such as
       whether access to source code must be restricted in some ways,
       rather than being freely available.&nbsp; And by "the" source
@@ -62,12 +71,25 @@ document.write(headerTemplate.replace("@TITLE@","Virtual AGC Project").replace("
       components of the system?&nbsp; And by "the" development tools, do
       I mean the original ones, or do I mean partial work-alikes?&nbsp;
       And by emulation, do I mean emulation of the entire stack of code,
-      or just for some restricted portion of it?&nbsp; Answers to those
-      questions will become clear in the sections below ... or at least,
-      clearer than they are now.&nbsp; And I don't pretend to know all
-      of the answers yet.&nbsp; But there aren't necessarily unique,
-      permanently-correct answers.&nbsp; One thing I can say
-      unequivocally is that integration into space-flight simulation
+      or just for some restricted portion of it?&nbsp; And besides
+      which, how do I really know which documents may be relevant to
+      these matters and which may be completely irrelevant?<br>
+    </p>
+    <p>For example, although I explicitly said above that this <i>isn't</i>
+      the site to come to if you want to learn about engines (SSME), the
+      engines were in fact controlled by a dedicated controller
+      containing <a moz-do-not-send="true"
+        href="Shuttle/1985008580.pdf#page=60">two redundant Honeywell
+        HDC-601 digital computers</a> ... so shouldn't those computers
+      and their software be covered here?<br>
+    </p>
+    <p>Answers to those questions will become clear in the sections
+      below ... or at least, clearer than they are now.&nbsp; There are
+      a lot of gray areas.&nbsp; And I don't pretend to know all of the
+      answers <i>yet</i>, so we may need to await future events to have
+      a more-complete picture.&nbsp; But there aren't necessarily
+      unique, permanently-correct answers anyway.&nbsp; One thing I can
+      say unequivocally is that integration into space-flight simulation
       systems is my <i>hope</i> rather than anything that I'll actively
       pursue; integration is the prerogative of the developers of those
       space-flight simulators, rather than mine, if they feel it's
@@ -78,8 +100,8 @@ document.write(headerTemplate.replace("@TITLE@","Virtual AGC Project").replace("
       complex, and there are too many resources already available on the
       web for me to suppose that a presentation by a johnny-come-lately
       like me would be worthwhile or even interesting about a topic this
-      big.&nbsp; Perhaps the best place to get an introduction would be
-      <a moz-do-not-send="true"
+      big.&nbsp; Perhaps the best place to get a general introduction
+      would be <a moz-do-not-send="true"
 href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20Chapter%204.pdf">Chapter
 
 
@@ -91,28 +113,26 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
+
         4, "Computers in the Space Shuttle Avionics System", of James
-        Tomayko's <i>Computers in Spaceflight: The NASA Experience</i></a>.<br>
+        Tomayko's <i>Computers in Spaceflight: The NASA Experience</i></a>,
+      but there are numerous other documents in <a
+        moz-do-not-send="true" href="links-shuttle.html">our Shuttle
+        Library</a> to provide more detail.<br>
     </p>
-    <p>With that said, here's a brief synopsis.<br>
+    <p>With that said, here's a brief synopsis.&nbsp; As with any
+      engineering system of substantial complexity, prepare to descend
+      into acronym hell!<br>
     </p>
-    <p>The portion of the Shuttle's full avionics system which concerns
-      us is the <i>Data Process System (DPS)</i>, which includes the <i>General
-
-
-
-
-
-
-
-
-
-
-        Purpose Computers (GPC)</i>, the crew interface
-      (cathode-ray-tube monitors and keyboards), the mass-memory units,
-      and the data-bus network interconnecting all of them.&nbsp; Here
-      is Figure 4-2, swiped from the afore-mentioned <i>Computers in
-        Spaceflight</i>, showing most of those components:<br>
+    <p>The portion of the Shuttle's full avionics system which primarily
+      concerns us is the <i>Data Process System (DPS)</i>, which
+      includes the <i>General Purpose Computers (GPC)</i>, the crew
+      interface (display and keyboards), the mass-memory units, and the
+      data-bus network interconnecting all of them.&nbsp; Here's a
+      diagram, swiped from the afore-mentioned <i>Computers in
+        Spaceflight</i>, that gives a very high-level view of the system
+      architecture:<br>
     </p>
     <div align="center"><img moz-do-not-send="true"
         src="DPS%20block%20diagram.png" alt="" width="805" height="445"><br>
@@ -120,12 +140,17 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
         As you can see, there were five separate GPCs.&nbsp; Each of the
         GPCs was an AP-101S computer, designed and manufactured by IBM's
         Federal Services Division (as were the Apollo LVDC or Gemini
-        OBC, though the GPC was not similar to them).<br>
+        OBC, though the GPC was not similar to them).&nbsp; Although I
+        may not talk about the AP-101S much, it's worth mentioning that
+        it was a kind of embedded version of the IBM System/360
+        mainframe, in that it shared roughly the same assembly language.<br>
         <br>
         Four of the GPCs nominally redundantly ran <i>identical</i>
         software, known as the <i>Primary Flight Software (PFS)</i>
         atop the <i>Flight Control Operating System (FCOS)</i>.&nbsp;
         PFS and FCOS together are collectively referred to as the <i>Primary
+
+
 
 
 
@@ -142,21 +167,21 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
         extreme level of redundancy was warranted only during critical
         flight phases ... in particular, during ascent and
         reentry.&nbsp; During the more-leisurely phases of the mission,
-        if additional computing power was needded, the four principal
+        if additional computing power was needed, the four principal
         GPCs did not necessarily need to run identical, redundant
         software.<br>
         <br>
         The fifth GPC instead ran the <i>Backup Flight Software (BFS)</i>,
         created entirely separately from PASS in a clean-room
         fashion.&nbsp; This fifth GPC served roughly the same purpose in
-        the Shuttle as the Abort Guidance System (AGS) in the Apollo
+        the Shuttle as the Abort Guidance System (AGS) did in the Apollo
         LM.&nbsp; BFS was specialized for abort functionality, i.e.,
         reentry in the absence of a reliable set of GPCs running
         PASS.&nbsp; And as I said above, this capability was really
         needed only during ascent or reentry.<br>
         <br>
         Besides these, there was a <i>Run Time Library (RTL)</i> that
-        provided various common functions needed by PASS/BFS, such as
+        provided various common functions needed by PASS / BFS, such as
         square roots, trigonometric functions, and so forth.<br>
         <br>
         The data buses interconnecting the GPCs and peripheral devices
@@ -171,12 +196,19 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
             background) cathode-ray tubes (CRTs).&nbsp; After 2000, the
             CRTs were replaced by multi-color liquid crystal displays
             (LCDs), 9 for the pilots and 2 elsewhere.&nbsp;
-            Collectively, the CRTs and LCDs were referred to as
-            Multifunction Display Units (MDUs).&nbsp; <br>
+            Collectively, the CRTs and LCDs were referred to as <i>Multifunction
+
+              Display Units (MDUs)</i>.&nbsp; <br>
           </li>
-          <li>Keyboards from Ebonex.&nbsp; The pilots had 2 of these,
-            and the mission specialist station had a 3rd.</li>
+          <li>Keyboards.&nbsp; The pilots had 2 of these, and the
+            mission specialist station had a 3rd.</li>
         </ul>
+        <p>The pre-2000 configuration was known collectively as the <i>Multifunction
+
+            CRT Display System (MCDS)</i>, while the post-2000
+          configuration was known as the <i>Multifunction Electronic
+            Display Subsystem (MEDS)</i>.<br>
+        </p>
         <p>In the diagrams below, the pre-2000 configuration is shown on
           the left, while the post-2000 configuration is shown on the
           right.&nbsp; Notice that the LCD-based displays (on the right)
@@ -188,10 +220,11 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
           bottom of the LCD could display additional stuff that the CRTs
           hadn't been able to, such as menu options selectable by the
           edge buttons.&nbsp; These differences were transparent to the
-          PASS/BFS flight software, because the additional stuff
-          displayed along the bottom was not controlled by the PASS/BFS
-          software.&nbsp; In contrast, keyboards were the same
-          throughout the duration of the Shuttle program.<br>
+          PASS / BFS flight software, because the additional stuff
+          displayed along the bottom was not controlled by the PASS /
+          BFS software.&nbsp; In contrast, keyboards were the same in
+          type and number throughout the duration of the Shuttle
+          program.<br>
         </p>
         <div align="center">
           <table width="100%" cellspacing="2" cellpadding="2"
@@ -233,16 +266,16 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
           <br>
         </div>
       </div>
-      <div align="left">Here's a more-inclusive diagram (click to
+      <div align="left">There's a more-inclusive diagram below (click to
         enlarge) of the entire <i>older</i> configuration of the
         avionics system, if you feel the need for one.&nbsp; Personally,
         I'm just including it because it's colorful, and you'll need to
         dig into the actual documentation if you want real detail.&nbsp;
-        By the way, you can tell it's the older configuration rather
-        than the newer one, because if you look in the upper-left area,
-        you'll see "CRT 1", "CRT 2", "CRT 3", and (somewhat below the
-        others) "CRT 4", rather than the 11 MFDs you'd see in the newer
-        configuration:<br>
+        By the way, you can tell it's the older configuration (MCDS)
+        rather than the newer one (MEDS), because if you look in the
+        upper-left area, you'll see "CRT 1", "CRT 2", "CRT 3", and
+        (somewhat below the others) "CRT 4", rather than the 11 MFDs
+        you'd see in the newer configuration:<br>
         <br>
         <div align="center"><a href="shuttle_avionics_sm.jpg"><img
               moz-do-not-send="true" src="shuttle_avionics_sm-small.jpg"
@@ -255,13 +288,13 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
         the assembly language native to their CPU types, the Flight
         Control Operating System (FCOS) and the Run Time Library (RTL)
         are written in the assembly language of the AP-101S CPU.&nbsp;
-        But once you get past those infrastructural items, you have the
-        Primary Flight Software (PFS), and the PFS is written in a
-        higher-level language called HAL/S.&nbsp; <a
-          moz-do-not-send="true"
+        But once you get past those infrastructural software components,
+        you have the Primary Flight Software (PFS), and the PFS is
+        written in a higher-level language called HAL/S, as is the
+        BFS.&nbsp; <a moz-do-not-send="true"
           href="Shuttle/DPS%20Overview%20Workbook.pdf#page=22">The DPS
           Overview Workbook</a> explains the overall structure of the
-        software better than I can:&nbsp; <br>
+        PFS better than I can:&nbsp; <br>
         <blockquote>"PASS software consists of two types of software:
           system software and application software. System software runs
           the GPC. It is responsible for tasks such as GPC–to–GPC
@@ -291,8 +324,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
     <h1><a name="References"></a>References</h1>
     <p>All documents I can find that I feel are relevant to discussion
       of the Space Shuttle's onboard computer systems and their software
-      have been collected on <a moz-do-not-send="true"
-        href="links-shuttle.html">our Space Shuttle Library page</a>.&nbsp;
+      have been collected on <b><a moz-do-not-send="true"
+          href="links-shuttle.html">our Space Shuttle Library page</a></b>.&nbsp;
 
 
 
@@ -303,13 +336,18 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
-      However, here are some websites that have additional documents
-      that you may find interesting, and which may still contain
-      relevant materials that I've overlooked:<br>
+
+
+      That should be your first stop in a documentation
+      pilgrimage!&nbsp; However, here are some websites that have
+      additional documents that you may find interesting, and which may
+      still contain relevant materials that I've overlooked:<br>
     </p>
     <ul>
       <li><a moz-do-not-send="true"
 href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.html">Johnson
+
+
 
 
 
@@ -333,7 +371,11 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
 
 
 
+
+
           Space Shuttle Ultra site, particularly its reference section</a>.&nbsp;
+
+
 
 
 
@@ -362,17 +404,18 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
 
 
 
+
+
           Hollis's Space Shuttle page</a>.</li>
       <li><a moz-do-not-send="true" href="https://ntrs.nasa.gov/">The
           NASA Technical Reports Server (NTRS)</a>.</li>
     </ul>
-    <h1><a name="PASS"></a>PASS and BFS Source Code</h1>
+    <h1><a name="PASS"></a>PASS, BFS, and Other Shuttle Source Code</h1>
     <p>I have become aware that multiple collectors have copies of what
       I think may be the complete final revision of PASS and possibly
-      BFS, as well as others who may possess incomplete non-final
-      revisions.&nbsp; This is remarkable in contrast to my frustrations
-      in acquiring AGC/AGS/LVDC/OBS software as described elsewhere on
-      this site, particularly since a former developer of Shuttle
+      BFS.&nbsp; This is remarkable in contrast to the frustrations one
+      encounters in trying to find existent copies of Apollo flight
+      software, particularly since a former developer of Shuttle
       software has told me that: <br>
     </p>
     <blockquote>
@@ -384,21 +427,70 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
     </blockquote>
     <p>I will keep the editorial comments I'm tempted to make to
       myself.&nbsp; As an aside, I'll also comment that fortunately the
-      source code of the original HAL/S compiler was saved after all,
-      but by individuals rather than by any of the organizational actors
-      involve.<br>
+      source code of the original HAL/S compiler <i>was</i> saved after
+      all, but by individuals rather than by any of the organizational
+      actors involved.&nbsp; Shame on you, organizational actors!<br>
     </p>
-    <p>So ... the software still exists, which is good.&nbsp; But we
-      don't have any as of yet, and whether or not we can get any of it
-      remains to be seen.<br>
+    <p>TBD<br>
     </p>
-    <p>But assuming that we can eventually get access to it, working
-      with the code requires knowledge of the HAL/S language.&nbsp;
-      Fortunately, we have a fair amount of documentation of that:<br>
+    <h1><a name="HALS"></a>HAL/S<br>
+    </h1>
+    <p>HAL/S?&nbsp; HAL/S was a high-level programming language in which
+      the PFS and BFS application software was written.&nbsp; Whereas
+      infrastructural software (like operating systems and run-time
+      libraries) was written in whatever assembly-languages were native
+      to the particular CPUs running that code.&nbsp; <br>
+    </p>
+    <p>HAL/S was a compiled language, and the HAL/S flight-software
+      source code was compiled down to a machine-code executable before
+      it could be run.&nbsp; Compilers existed for it that could be used
+      on several different types of computers.&nbsp; Some of the
+      compilers produced code that could be run on an IBM System/360
+      mainframe; others could produce executable code for the Shuttle's
+      IBM AP-101S onboard computers; for all I know, others produced
+      executable code for other computers. <br>
+    </p>
+    <p>I'm sure you can't help but notice that "HAL" was the name of the
+      computer in the movie <i>2001: A Space Odyssey</i>, which came
+      out in 1968, not too many years before the HAL/S language was
+      invented.&nbsp; In the movie, H.A.L. stood for "Heuristic
+      Algorithmic Logic", and many people have observed that H.A.L. was
+      just one letter away from I.B.M.&nbsp; (I.e., "H" is one letter
+      before "I" in the alphabet, "A" is one letter before "B", and "L"
+      is one letter before "M".)&nbsp; The writer of the movie, Arthur
+      C. Clarke, maintained that that was simply a coincidence.&nbsp;
+      Where the "HAL" in HAL/S comes from has likewise been explained in
+      several ways, none of them relating to <i>2001: A Space Odyssey</i>.&nbsp;
+      The HAL/S language was invented (and the flight software was
+      written) by a company called Intermetrics, many of whose employees
+      were refugees from the same Draper Laboratories (MIT
+      Instrumentation Laboratory) at which the Apollo flight software
+      had been written.&nbsp; One of those refugees was Ed Copps, one of
+      Intermetrics's founders, who is said to have named the HAL/S
+      language in honor of Hal Laning, perhaps the most-prominent among
+      the designers of the Apollo Guidance Computer's hardware.&nbsp;
+      Others offer the explanation that HAL/S is an acronym for
+      "High-order Assembly Language / Shuttle".&nbsp; Well, who
+      knows?&nbsp; It's fun to believe it was all three.&nbsp; All I can
+      really say for sure is that there's nothing "heuristic" about
+      HAL/S, even if <i>2001</i> may have been somewhere in the back of
+      somebody's mind.<br>
+    </p>
+    <p>But I digress.&nbsp; As I was saying, the HAL/S software still
+      exists, which is good.&nbsp; But the Virtual AGC Project doesn't
+      have any as of yet, and like all future events, whether or not we
+      can get any of it remains to be seen.<br>
+    </p>
+    <p>Assuming that we can eventually get access to it, working with
+      the application software's source code requires knowledge of the
+      HAL/S language.&nbsp; Fortunately, we have a fair amount of
+      documentation of that:<br>
     </p>
     <ol>
       <li>The recommended starting point is "<a moz-do-not-send="true"
           href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf">Programming
+
+
 
 
 
@@ -421,13 +513,15 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
 
 
 
+
+
           Language Specification"</a>, which contains a much-more-formal
-        specification of the language syntax ... fortunately in the form
-        of easy-to-understand graphs of the syntax, rather than the (in
-        my humble opinion) a less-comprehensible Backus-Naur format
-        (BNF).</li>
+        specification of the language syntax, both in the form of graphs
+        of the syntax and in Backus-Naur form (BNF).</li>
       <li>Or to the <a moz-do-not-send="true"
           href="Shuttle/HAL_S%20Programmers%20Guide%20Nov%202005.pdf">"HAL/S
+
+
 
 
 
@@ -439,6 +533,8 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
           Programmer's Guide"</a>.</li>
       <li>And then there's the <a moz-do-not-send="true"
           href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf">"HAL/S-FC
+
+
 
 
 
@@ -462,70 +558,240 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
     <p>We actually have quite a few revisions of each of the middle two
       documents in our library, spanning the mid-1970's to the
       mid-2000's, though I've only chosen to link the latest versions of
-      those documents above.&nbsp; Here are a few takeaways about the
-      HAL/S language that I imagine would commonly be asked by newcomers
-      to it:<br>
+      those documents above.&nbsp; <br>
     </p>
+    <p>Here's a brief sample of HAL/S code from "Programming in HAL/S",
+      just to give you its flavor:<br>
+    </p>
+    <blockquote>
+      <p><tt>&nbsp; FACTORIAL:</tt><tt><br>
+        </tt><tt>&nbsp; PROGRAM;</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; DECLARE INTEGER,</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          &nbsp;&nbsp;&nbsp; RESULT, N_MAX, I;</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; READ(5) N_MAX;</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; RESULT = 1;</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; DO FOR I = 2 TO N_MAX BY 1;</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; RESULT = I
+          RESULT;</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; END;</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; WRITE(6) 'FACTORIAL=', RESULT;</tt><tt><br>
+        </tt><tt>&nbsp; CLOSE FACTORIAL;</tt><br>
+      </p>
+    </blockquote>
+    <p>What this program does is to read a number (<tt>N_MAX</tt>),
+      compute its mathematical factorial, then output the result.&nbsp;
+      While I won't dissect this short program in detail, I can make a
+      couple of observations.&nbsp; For one, the language is <i>strongly
+
+        typed</i>, meaning that every variable has a type that's
+      declared at compile time, and that storage for it is fixed and
+      unalterable at run-time.&nbsp; Nor is there any dynamic memory
+      allocation (as well as no stack and no recursion), so RAM usage is
+      completely known at compile time.&nbsp; HAL/S programs <i>never</i>
+      unexpectedly abort because memory has filled up.&nbsp; The other
+      observation is that the <tt>READ(5)</tt> and <tt>WRITE(6)</tt>
+      statements are very familiar to FORTRAN users ... or at least to
+      FORTRAN users of (say we say?) a certain vintage.&nbsp; In
+      FORTRAN-speak, the 5 and 6 are "logical unit numbers" (LUN) whose
+      specific interpretation as keyboard and printer (or keyboard and
+      display, or even as files) are perhaps assigned externally by the
+      Job Control Language (JCL) used to run the job.&nbsp; This
+      reflects the fact that the first HAL compilers targeted IBM 360
+      computers rather than the Shuttle's computers.&nbsp; In the
+      Shuttle software, these <tt>READ</tt> and <tt>WRITE</tt>
+      constructs wouldn't have been used, and keyboard input or display
+      output would instead have been handled by calls to the run-time
+      library.<br>
+    </p>
+    HAL/S actually has many novel features not visible in the <tt>FACTORIAL</tt>
+    example, such as those devoted to real-time response and scheduling
+    of execution.&nbsp; Again, I won't get into those here.&nbsp;
+    Perhaps the most-novel feature is a superficial one, namely the
+    ability to express mathematical formulae in a multi-line format that
+    the language's designers felt was more self-documenting than the
+    usual single-line manner of expressing mathematical formulae in
+    programming languages.&nbsp; One comment made several times in the
+    documentation is that it's worthwhile for the programmer to spend
+    more time than one is usually inclined to do to make the source code
+    easy to read ... because more time will eventually be spend reading
+    the code than writing it.&nbsp; I.e., the time lost in creating
+    readable code is more than made up for by the saving in maintaining
+    the code later.&nbsp; This is sound engineering doctrine, according
+    to the software-design literature of the time ... but very far from
+    <i>today's</i> actual practice and attitudes (2022), in which the
+    initial design schedule is everything, and downstream maintenance an
+    afterthought performed by somebody management doesn't have to budget
+    time or money for <i>today</i>.&nbsp; So were the HAL/S designers
+    on the wrong side of history in this respect?&nbsp; (That's an
+    exercise for the reader.)<br>
+    <br>
+    Here's a HAL/S sample that illustrates the multi-line
+    pseudo-mathematical format I just mentioned:<br>
+    <blockquote><tt>C Compute corners of a parallelogram.<br>
+        <br>
+        &nbsp; CORNERS: PROGRAM;</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; DECLARE SCALAR,</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+        LONG, SHORT, ALPHA;</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; DECLARE VECTOR(2),</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; AB, BC, CD, DA;</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; READ(5) LONG, SHORT, ALPHA;</tt><tt><br>
+        <br>
+      </tt><tt>E&nbsp;&nbsp;&nbsp; -</tt><tt><br>
+      </tt><tt>M&nbsp;&nbsp;&nbsp; AB = 0;</tt><tt><br>
+        <br>
+      </tt><tt>E&nbsp;&nbsp;&nbsp; -</tt><tt><br>
+      </tt><tt>M&nbsp;&nbsp;&nbsp; BC = VECTOR (LONG, 0);</tt><tt><br>
+      </tt><tt>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+        2 </tt><tt><br>
+      </tt><tt><br>
+      </tt><tt>E&nbsp;&nbsp;&nbsp; -</tt><tt><br>
+      </tt><tt>M&nbsp;&nbsp;&nbsp; DA = VECTOR (SHORT COS(ALPHA), SHORT
+        SIN(ALPHA));</tt><tt><br>
+      </tt><tt>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+        2</tt><tt><br>
+      </tt><tt><br>
+      </tt><tt>E&nbsp;&nbsp;&nbsp; -&nbsp;&nbsp;&nbsp;
+        -&nbsp;&nbsp;&nbsp; -</tt><tt><br>
+      </tt><tt>M&nbsp;&nbsp;&nbsp; CD = BC + DA;</tt><tt><br>
+        <br>
+      </tt><tt>E&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+        -&nbsp;&nbsp; -&nbsp;&nbsp; -&nbsp;&nbsp; -</tt><tt><br>
+      </tt><tt>M&nbsp;&nbsp;&nbsp; WRITE(6) AB, BC, CD, DA;</tt><tt><br>
+      </tt><tt>&nbsp; CLOSE CORNERS;</tt><br>
+    </blockquote>
+    What this example program does is to allow input of parameters
+    describing a parallelogram — namely, the lengths of a "short" side
+    and a "long" side (which is assumed to be along the <i>x</i>-axis),
+    and the angle between them in radians — and then to output the (<i>x</i>,<i>y</i>)
+    coordinates of the four corners.&nbsp; The code also illustrates
+    another of HAL/S's novel features, in that it can do arithmetic not
+    just on scalar variables like integers or floats, but also do vector
+    arithmetic or even matrix arithmetic. For example, vector/matrix
+    addition or subtraction, vector dot products or cross products,
+    matrix multiplication or inversion, etc.&nbsp; Functions like <tt>COS</tt>
+    or <tt>SIN</tt> or <tt>VECTOR<sub>2</sub></tt> (which forms a
+    2-vector from two scalar inputs) were available in the run-time
+    library.<br>
+    <br>
+    It's important to realize that the lines with the leading characters
+    <tt>E</tt>, <tt>M</tt>, and <tt>S</tt> are active code rather than
+    merely program comments.&nbsp; In HAL/S, column 1 has a special
+    purpose.&nbsp; Normally that column is blank.&nbsp; True, if a <tt>C</tt>
+    appears there, it actually is a full-line comment.&nbsp; But for a
+    multi-line mathematical form, <tt>M</tt> in column 1 indicates the
+    formula's "main" line, whereas <tt>E</tt> indicates an "exponent"
+    line and <tt>S</tt> indicates a "subscript" line.&nbsp; You can see
+    that several places above.&nbsp; If a variable (like <tt>AB</tt>)
+    has a '-' above it, that means that <tt>AB</tt> is really a
+    vector.&nbsp; Actually, a 2-vector.&nbsp; That's reflected in the
+    declaration "<tt>DECLARE VECTOR(2), AB, ...</tt>".&nbsp; Besides
+    which, there are also subscripts, as in <tt>VECTOR<sub>2</sub></tt>.<br>
+    <br>
+    And '<tt>-</tt>' isn't the only datatype-related character that can
+    appear in the <tt>E</tt> line above a variable in the <tt>M</tt>
+    line:<br>
     <ul>
-      <li>HAL/S is concerned with insuring correctness by design, in the
-        service of which it employs concepts from structured
-        programming. <br>
-      </li>
-      <li>HAL/S is a strongly-typed language, but those datatypes
-        include not just integers and floats (whose datatype is actually
-        "scalar"), but others such vectors, matrices, and arrays (which
-        is a distinct datatype from vectors and matrices).</li>
-      <li>By default, the vector datatype consists of 3-vectors, while
-        the matrix datatype consists of 3×3 matrices.&nbsp; Indices
-        (subscripts) of vectors and matrices begin at 1 rather than 0.<br>
-      </li>
-      <li>Arithmetical expressions such as A=B+C work not only with
-        float (scalar) and integer datatypes but with vectors and
-        matrices as well, wherever compatible.</li>
-      <li>There is no dynamic allocation of memory.&nbsp; Intended
-        side-effects of that are that there is no stack and no
-        recursion.&nbsp; The total memory usage is known at build-time.</li>
-      <li>All keywords are reserved.</li>
-      <li>HAL/S has no means of directly accessing specific addresses in
-        memory.</li>
-      <li>HAL/S statements:</li>
-      <ul>
-        <li>End with the semicolon (';') character.</li>
-        <li>Several may appear on the same line of source.</li>
-        <li>Statements may be broken across several lines of source.</li>
-        <li>An end-of-line is equivalent to a space character.<br>
-        </li>
-      </ul>
-      <li>Identifiers such as variable names:</li>
-      <ul>
-        <li>Maximum length of 32 characters.&nbsp; <br>
-        </li>
-        <li>Must begin with an alphabetic character.&nbsp; <br>
-        </li>
-        <li>Can contain alphanumerics and underscore characters,
-          '_'.&nbsp; <b>Note:</b>&nbsp; Both upper and lower case are
-          allowed, though all code samples I've seen to date involve
-          only upper case.<br>
-        </li>
-        <li>Cannot end with an underscore.</li>
-        <li>Cannot be broken across lines.</li>
-        <li>HAL/S keywords cannot be used as identifiers.</li>
-      </ul>
-      <li>Two identifiers (variables or constants) separated by spaces
-        are multiplied ... in fact, there is no explicit multiplication
-        operator symbol such as '*'.&nbsp; ('*' is actually the vector
-        cross-product operator.)<br>
-      </li>
-      <li>Constant expressions such as "3 + 1/7" are evaluated at
-        compile-time rather than at runtime, to the extent possible.<br>
+      <li>'<tt>-</tt>' for vectors.</li>
+      <li>'<tt>*</tt>' for matrices.</li>
+      <li>'<tt>,</tt>' for strings.</li>
+      <li>'<tt>.</tt>' for booleans.</li>
+      <li>'<tt>+</tt>' for structures.<br>
       </li>
     </ul>
-    <p>TBD<br>
+    My impression is that creating source code in this multi-line format
+    is a pain in the neck, since aligning the columns cards isn't that
+    easy.&nbsp; Fortunately, HAL/S doesn't actually <i>require</i> the
+    use of this <tt>E/M/S</tt> multi-line format for (input of)
+    mathematical formulas.&nbsp; A single-line format is perfectly valid
+    as well, and would look like this:<br>
+    <blockquote><tt>&nbsp; CORNERS: PROGRAM;</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; DECLARE SCALAR,</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+        LONG, SHORT, ALPHA;</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; DECLARE VECTOR(2),</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; AB, BC, CD, DA;</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; READ(5) LONG, SHORT, ALPHA;</tt><tt><br>
+        &nbsp;&nbsp;&nbsp;&nbsp; AB = 0;<br>
+        &nbsp;&nbsp;&nbsp;&nbsp; BC = VECTOR$2(LONG, 0);<br>
+        &nbsp;&nbsp;&nbsp;&nbsp; DA = VECTOR$2(SHORT COS(ALPHA), SHORT
+        SIN(ALPHA));<br>
+        &nbsp;&nbsp;&nbsp;&nbsp; CD = BC + DA;<br>
+        &nbsp;&nbsp;&nbsp;&nbsp; WRITE(6) AB, BC, CD, DA;<br>
+      </tt><tt>&nbsp; CLOSE CORNERS;</tt><br>
+    </blockquote>
+    In the single-line format, The beginning of a subscript is indicated
+    by the '<tt>$</tt>' character. <br>
+    <br>
+    One thing you may take away from this is that the '<tt>-</tt>' (or '<tt>*</tt>',
+    '<tt>+</tt>', ...) annotations which appear on the <tt>E</tt> lines
+    to indicate vector vs scalar variables weren't really needed, since
+    they don't show up in the single-line notation at all; in fact,
+    they're just eye-candy that are nice for readability, and are
+    actually discarded by the compiler.&nbsp; Whereas the subscript '<tt>2</tt>'
+    which appears on the <tt>S</tt> line is in fact quite necessary,
+    since <tt>VECTOR</tt> isn't the same thing as <tt>VECTOR<sub>2</sub></tt>,
+    which isn't the same thing as <tt>VECTOR<sub>3</sub></tt>.<br>
+    <br>
+    My guess is that almost all source code was written in the
+    single-line format.&nbsp; However, realize that yet another novelty
+    of HAL/S is that the
+    original compiler allowed the programmer <i>no control whatsoever</i>
+    over the format of the output compiler listings.&nbsp; Those were <i>always</i>
+    pretty-printed according to the standards decided upon by the
+    designers of the compiler.&nbsp; Thus, the program might input code
+    in the single-line format, but the assembly listing would always be
+    output in the multi-line format. <br>
+    <br>
+    The same is true of any other formatting decisions.&nbsp; I
+    mentioned above that column 1 of the source code has a special
+    purpose, and thus it matters what characters appear in column 1 vs
+    other columns.&nbsp; But for all lines which have blanks in column
+    1, the input source code is completely free-form:&nbsp; Multiple
+    statements can appear on a single line.&nbsp; Individual statements
+    can be broken across multiple lines.&nbsp; Empty lines and
+    whitespaces within lines are ignored, except where at least one
+    space is needed between two adjacent identifiers.&nbsp; (And except
+    in comments or literal quoted strings.)<br>
+    <br>
+    The latter point is interesting in connection with the operation of
+    multiplication.&nbsp; While HAL/S has the usual operators for a lot
+    of mathematical or logical operations, such as "<tt>-</tt>" for
+    subtraction, "<tt>/</tt>" for division, "<tt>**</tt>" for
+    exponentiation, and so on, <i>it has no operator for multiplication</i>.&nbsp;
+    Multiplication is indicated simply by placing variable names,
+    constant names, or literal numbers adjacent to each other (separated
+    by whitespace).&nbsp; For example, <br>
+    <blockquote><tt>DECLARE SCALAR, X, Y, Z;<br>
+        DECLARE INTEGER, I, J, K;<br>
+        X = Y Z ;<br>
+        I = 2 J K ;<br>
+      </tt></blockquote>
+    <p>By the way, <tt>SCALAR</tt> is what HAL/S calls its
+      floating-point type; thus <tt>SCALAR</tt> contrasts with <tt>INTEGER</tt>
+      or <tt>BOOLEAN</tt> datatypes, but not with <tt>VECTOR</tt> or <tt>MATRIX</tt>.&nbsp;
+      In fact, contrary to normal mathematical usage of the terms, all <tt>VECTOR</tt>
+      and <tt>MATRIX</tt> objects consist entirely of <tt>SCALAR</tt>
+      values.&nbsp; You can't have (say) a <tt>VECTOR</tt> of <tt>INTEGER</tt>
+      values.&nbsp; Though there is an <tt>ARRAY</tt> type, of
+      arbitrary dimensionality, which can hold values of any datatype
+      you like.&nbsp; And as it turns out, there actually is an operator
+      '<tt>*</tt>', but it is the vector cross-product operation, not a
+      multiplication of two numbers.&nbsp; Similarly, the '<tt>.</tt>'
+      operator is a vector dot product.<br>
     </p>
     <h1><a name="Versioning"></a>Software Versioning</h1>
     <p>As I've described above, any given shuttle had a number of
       computers, running a lot of different software components — more
-      than just the GPCs running PASS/BFS/FCOS/RTL we're discussing
+      than just the GPCs running PFS / BFS / FCOS / RTL we're discussing
       here.&nbsp; Each of these software components had their own unique
       versioning.&nbsp; I couldn't begin to tell you what those all are;
       I don't even have a list of all the different computers or their
@@ -548,6 +814,8 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
         href="Shuttle/SpaceShuttleMissionsSummaryVol1.pdf">Volume 1</a>
       and <a moz-do-not-send="true"
         href="Shuttle/SpaceShuttleMissionsSummaryVol2.pdf">Volume 2</a>.&nbsp;
+
+
 
 
 
@@ -802,8 +1070,8 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
       processor that directly controlled what was displayed and how the
       display was formatted.&nbsp; (For that matter, the keyboards also
       were attached to one of these extra processors rather than to the
-      GPCs, so whatever keystrokes were seen by the PFS/BFS software had
-      already been pre-digested by these extra processors.)<br>
+      GPCs, so whatever keystrokes were seen by the PFS / BFS software
+      had already been pre-digested by these extra processors.)<br>
     </p>
     <p><img moz-do-not-send="true" src="MCDS.png" alt="" width="455"
         height="278" align="right">In the case of the older, pre-2000
@@ -820,20 +1088,22 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
       specifically tasked with formatting the display was called the <i>Display
 
 
+
+
         Application Software (DAS)</i>.&nbsp; But these kinds of details
       are of little interest to us in the absence of the DAS or other
       software that actually ran on the DEU/IDPs.&nbsp; So the only use
       of these factoids I'll use in the context of the present
       discussion is to refer from now on to what I've been calling the
-      "extra processor" so far instead as the "DEU/IDP".<br>
+      "extra processor" instead as the "DEU/IDP".<br>
     </p>
     <p>What <i>is</i> of importance to us, however, is that in addition
       to inputs from the GPCs via the MIL-STD-1553 databuses, the
       DEU/IDP's RAM was used to store a set of templates that controlled
       the formatting of the display screen.&nbsp; These templates were
       loaded from mass memory into RAM at power-up.&nbsp; In other
-      words, the screen templates are independent of the PFS/BFS source
-      code.<br>
+      words, the screen templates are <i>independent</i> of the PFS /
+      BFS source code.<br>
     </p>
     For illustrative purposes, there's an example below of the template
     for screen "GNC SYS SUMM 1" for mission STS-96.&nbsp; It comes in
@@ -864,7 +1134,7 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
       corner or the X's and S's that are all over the place.&nbsp; Other
       markings, like the "SURF", "POS", "MOM", and "DPS" are simply
       features of the template, and don't change at the whim of the GPC
-      or its software.<br>
+      or more specifically, of PFS or BFS.<br>
     </p>
     <p>The screen templates don't <i>quite</i> fall under the
       Operational Increment (OI) top-level software-versioning scheme
@@ -890,11 +1160,15 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
       have all of the screen templates for all of the missions.&nbsp; <a
         moz-do-not-send="true"
         href="Shuttle/Space%20Shuttle%20DPS%20Dictionary%20OI-26.pdf">The
+
+
         GNC SYS SUMM 1 sample templates above came from one such DPS
         Dictionary</a>.&nbsp; There are also reference-card-like
       summaries that are very helpful, such as <a
         moz-do-not-send="true"
         href="Shuttle/Orbiter%20Displays%20Reference%20Guide%20OI-34.pdf">this
+
+
 
 
 
@@ -914,16 +1188,17 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
       Dictionaries.&nbsp; Nevertheless, on balance, it seems as though
       the FSSRs should be regarded as the controlling documents for the
       screen templates.&nbsp; We just need to collect all of them, or
-      failing that, fall back on DPS Dictionaries.&nbsp; For example,
-      here are the same GNC SYS SUMM 1 templates, but for software
-      version OI-34 (say, mission STS-128), taken from the FSSR.&nbsp;
-      They're different than the ones shown above for STS-96, though
-      only barely so.&nbsp; Personally, I see only 4 differences, some
-      sensible, some nonsensical, and some (I suspect) misprints;
-      perhaps you can find more.&nbsp; Incidentally, STS-96 had the MCDS
-      (pre-2000) cockpit configuration, while STS-128 had the MEDS
-      (post-2000) cockpit configuration, so perhaps that has something
-      to do with the differences.<br>
+      failing that, fall back on DPS Dictionaries when available.&nbsp;
+      For example, here are the same GNC SYS SUMM 1 templates, but for
+      software version OI-34 (say, mission STS-128), taken from the
+      FSSR.&nbsp; They're different than the ones shown above for
+      STS-96, though only barely so.&nbsp; Personally, I see only 4
+      differences, some sensible, some nonsensical, and some (I suspect)
+      misprints; perhaps you can find more.&nbsp; Incidentally, STS-96
+      had the MCDS (pre-2000) cockpit configuration, while STS-128 had
+      the MEDS (post-2000) cockpit configuration, so perhaps that has
+      something to do with the differences.<br>
+      <br>
     </p>
     <table cellspacing="2" cellpadding="2" border="0" align="center">
       <tbody>
@@ -942,7 +1217,8 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
         </tr>
       </tbody>
     </table>
-    <h1><a name="Messaging"></a>GPC - DEU/IDP Messaging</h1>
+    <h1><a name="Messaging"></a>Computer-to-Peripheral Interface<br>
+    </h1>
     <p>Keyboard data was supplied to the General Purpose Computers
       (GPC), and hence to the PASS/BFS software, by means of messages on
       the MIL-STD-1553 databuses interconnecting the GPCs and
@@ -951,6 +1227,8 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
       details about this messaging can be found in the <a
         moz-do-not-send="true"
 href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2019970615.pdf#page=169">Data
+
+
 
         Processing System Brief</a>.&nbsp; I won't bother to summarize
       that information here, since the document's presentation is at
@@ -961,12 +1239,16 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
       the existing software.&nbsp; That implies, I hope, that the
       messaging format would have been the same in either configuration.<br>
     </p>
+    <p>TBD<br>
+    </p>
     <h1><a name="Emulation"></a>Compilation and Emulation</h1>
-    When a "modern" HAL/S compiler and a means of emulating the compiled
-    PASS/BFS executable code exists, I'll report on it in this section.<br>
+    When a "modern" HAL/S compiler and means of emulating the compiled
+    PASS/BFS executable code exist, I'll report on them in this section.<br>
     <br>
-    Until then, I'll merely point out that <a moz-do-not-send="true"
+    Until then, I'll point out that <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/README.md">the
+
+
 
 
 
@@ -977,6 +1259,44 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/README.md">
       development roadmap and reports on progress along that roadmap
       appear in the associated README</a> file in our software
     repository.<br>
+    <blockquote><b>Aside:</b>&nbsp; To anyone likewise contemplating
+      creation of a HAL/S compiler.&nbsp; A couple of points of
+      immediate interest stand out.&nbsp; One is that the <a
+        moz-do-not-send="true"
+href="Shuttle/HAL_S%20Language%20Specification%20Nov%202005.pdf#page=209">"HAL/S
+
+
+
+
+
+
+
+
+
+
+        Language Specification", Appendix G</a>, contains a Backus-Naur
+      form (BNF) description of the HAL/S grammar.&nbsp; Moreover,
+      modern compiler-generator tools can (in essence) create the parser
+      for a compiler from a BNF or BNF-like description of the
+      grammar.&nbsp; These factoids might give one the impression that a
+      HAL/S compiler can be thrown together in reasonably short
+      order.&nbsp; Perhaps as a project in a class on compiler
+      theory!&nbsp; Unfortunately, the situation is far from being as
+      rosy as those observations make it sound.&nbsp; For one thing, the
+      documented BNF grammar is incomplete, not to mention having a few
+      errors in it.&nbsp; Perhaps more-importantly, BNF is used to
+      describe so-called <i>context-free grammars</i>.&nbsp; A
+      compiler-generation tool would likely require that the grammar
+      indeed be context-free.&nbsp; But HAL/S grammar is <i>not</i>
+      context-free.&nbsp; Thus while the BNF description may have been a
+      useful documentation tool back in the day, particularly for
+      specifying the individual structures of HAL/S statements, serious
+      workarounds are needed if you hope to actually use the original
+      BNF description <i>in toto</i> as part of an effort to generate a
+      HAL/S compiler. <br>
+    </blockquote>
+    <br>
+    TBD<br>
     <br>
     <hr style="width: 100%; height: 2px;">
     <center><br>
@@ -992,7 +1312,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/README.md">
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2022-11-28<br>
+          2022-12-01<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
