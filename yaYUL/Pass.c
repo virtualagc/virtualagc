@@ -122,6 +122,8 @@
  *             			accident, and similarly was failing by accident in Mac OS X.
  *            	2018-10-12 RSB	Added --simulation stuff.
  *            	2021-01-24 RSB  Added a "Reconstruction" marker in .lst files.
+ *            	2022-11-27 MAS  Added the "LOC" pseudo-op to Block I, and removed an old
+ *            	                workaround for the symbol "DECON" in Solarium 55.
  *
  * I don't really try to duplicate the formatting used by the original
  * assembly-language code, since that format was appropriate for
@@ -491,6 +493,7 @@ static ParserMatch_t ParsersBlock1[] =
     { "EXTEND", OP_BASIC, NULL, "INDEX", "$5777" },
     { "INDEX", OP_BASIC, ParseINDEX },
     { "INHINT", OP_BASIC, NULL, "INDEX", "$17" },
+    { "LOC", OP_PSEUDO, ParseSETLOC },
     { "MASK", OP_BASIC, ParseMASK },
     { "MP", OP_BASIC, ParseMP },
     { "NDX", OP_BASIC, ParseINDEX },
@@ -1871,11 +1874,6 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
             }
           else if (whichColumn < 8)
             i++;
-
-          if (!strcmp(ParseInputRecord.Label, "DECON"))
-            {
-              j++;
-            }
 
           for (k = 9; k > 0; k--)
             strcpy(lastLines[k], lastLines[k - 1]);
