@@ -19,6 +19,8 @@ History:        2022-11-07 RSB  Created.
                 2022-11-21 RSB  Began adding identifier type prefixes.
                                 Removed #-comments.
                 2022-11-22 RSB  Added --full.
+                2022-11-30 RSB  Eliminated the bracket-removal code, expecting
+                                the LBNF to handle it.
                                 
 Here are the features of HAL/S I don't think the compiler can handle:
 
@@ -49,6 +51,7 @@ import sys
 import re
 import unEMS
 import replaceBy
+import reorganizer
 
 #Parse the command-line arguments.
 tabSize = 8
@@ -122,45 +125,61 @@ unEMS.unEMS(halsSource, metadata)
 warningCount = unEMS.warningCount
 fatalCount = unEMS.fatalCount
 
-# To the best of my understanding when variables are shown in the compiler's
-# output listing as "[NAME]", the brackets are really just for annotation
-# purposes.  The BNF doesn't mention the brackets at all.  We need to 
-# replace [NAME] by NAME.
+# Reorganize input lines.
+'''
+print("---------------------------------------------------------------------")
+for i in range(len(halsSource)):
+    print(halsSource[i], metadata[i])
+'''
+halsSource, metadata = reorganizer.reorganizer(halsSource, metadata)
+'''
+print("---------------------------------------------------------------------")
+for i in range(len(halsSource)):
+    print(halsSource[i], metadata[i])
+sys.exit(1)
+'''
+
+'''
+# This code was intended to convert constructs like [X] to just X.  It's 
+# misguided and needs to be removed ... which I'll do as soon as the LBNF
+# for the compiler front-end has been fixed up to account for the brackets.
 for i in range(len(halsSource)):
     line = halsSource[i]
     while True:
         match = re.search("\\[" + replaceBy.bareIdentifierPattern + "\\]", line)
         if match == None:
             break
-        line = line[:match.span()[0]] + match.group()[1:-1] + line[match.span()[1]:]
+        line = line[:match.span()[0]] + match.group()[1:-1] \
+                    + line[match.span()[1]:]
     if line != halsSource[i]:
         halsSource[i] = line
+'''
 
 # Take care of REPLACE ... BY "..." macros.
 replaceBy.replaceBy(halsSource, metadata, full)
 
-# Take care of full-line comments.
+# Output the modified source.
 for i in range(len(halsSource)):
-    if "comment" in metadata[i]:
-        print("//" + halsSource[i][1:])
-    elif "directive" in metadata[i]:
-        print("//D" + halsSource[i][1:])
+    if len(halsSource[i]) > 0 and halsSource[i][:1] != " ":
+        print(" /*" + halsSource[i] + "*/" )
     else:
-        print(halsSource[i])
+        #print(halsSource[i])
+        print(reorganizer.untranslate(halsSource[i]))
 
 # Print final summary.
-print("//M -----------------------------------------------------------------")
-print("//M Files:")
+print(" /*")
+print(" Files:")
 for file in files:
-    print("//M    ", file)
-print("//M Summary:")
+    print("     ", file)
+print(" Summary:")
 for i in range(len(halsSource)):
     if "errors" in metadata[i]:
-        print("//M Line %d:" % (i+1), halsSource[i])
+        print(" Line %d:" % (i+1), halsSource[i])
         for error in metadata[i]["errors"]:
-            print("//M    ", error)
-print("//M    ", warningCount, "warnings")
-print("//M    ", fatalCount, "errors")
+            print("     ", error)
+print("     ", warningCount, "warnings")
+print("     ", fatalCount, "errors")
+print (" */")
 if fatalCount > 0:
     sys.exit(1)
 

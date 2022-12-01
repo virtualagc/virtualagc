@@ -357,6 +357,13 @@ would instead mean to take the matrix inverse of `B`.  However, the BNF simply o
 
 At this point, all of the code samples from "Programming in HAL/S" have been transcribed and are in the source tree, except for a couple that were just too fragmentary.  I know that there are problems with the preprocessor and compiler front-end, though, so now I want to work out the bugs in these areas by going through the samples one by one.  I guess I'll keep a record of that here.
 
+Basically, two detailed inspections are made, of the commands
+
+    yaHAL-preprocessor.py FILENAME.hal
+    yaHAL-preprocessor.py FILENAME.hal | TestHAL_S | syntaxHierarchy.py --collapse
+
+and any discrepancies from expectations are noted and fixed.  I don't recall if I mentioned `syntaxHierarchy.py` before, but it formats the abstract syntax tree output by the compiler front-end `TestHAL_S` in a slightly more-readable form.
+
 ## 021-SIMPLE.hal
 
 The only things the preprocessor needs to do here are to correctly mangle the name of the program ("SIMPLE" &rarr; "l_SIMPLE") and to correctly convert full-line comments from `C` in column 1 to `//`.  Which it does.
@@ -436,4 +443,89 @@ All good.
 
 ## 085-FACTORIAL.hal
 
-Preprocessor:  Incorrectly, does macro replacements within strings; in this case, `'FACTORIAL=...'` &rarr; `'l_FACTORIAL=...'`.
+Preprocessor:  Incorrectly, does macro replacements within strings and probably comments; in this case, `'FACTORIAL=...'` &rarr; `'l_FACTORIAL=...'`.
+
+# 2022-11-27
+
+## 085-FACTORIAL.hal (continued)
+
+Implementation of this is very confusing.  The problem is that as of right now, the preprocessor works on a line at a time.  There are certain exceptions, in that in processing declarations, for example, it joins together separate lines for the purpose of analysis without the hassle of line-breaks in the middle of search patterns.  But in this case, actual replacements of text are needed.  It's best to do this without worrying about line breaks ... but on the other hand, we need to keep track of those line breaks to a certain extent for printing output, positioning of error messages, and so forth, and that's really tough to do if we eliminate the line breaks and start replacing text.
+
+Or do we?  The documentation makes a big deal about how the coder has no control whatever over the formatting of the output listing, and that the compiler formats it all automatically in a presumably better way.  I wonder if this extends to line breaks as well, and to positioning of comments?  Because if it does, then my concern over tracking the positions of the line breaks is silly:  I ought to simply reformat all of the source code right from the get-go into lines that each contain a single, complete statement ... even if they're very long lines. (After rejoining of E/M/S constructs, of course.)  And then inline comments should all be moved to the ends of those unified lines.  (And if there's a full-line comment in the midst of a statement that has been broken into multiple lines and is being rejoined?  Perhaps such full-line comments should be moved, as separate lines, to the front of the multi-line statement.)
+
+Requires thought ....
+
+# 2022-11-29
+
+## 085-FACTORIAL.hal (continued)
+
+Here's a digression from what I had been doing.  It seems as though trying to work with the source-code in free-form is just too problematic.  So after the preprocessor removes the E/M/S constructs in favor of single-line assignments, but before it does anything else, I've added code to the preprocessor that reorganizes all of the source code so that each line is everything leading up to the final semi-colon (or else is a full-line comment or a compiler directive).  Inline comments are all moved after the semicolon, and delimited from it by a tab rather than a space.
+
+One thing I had not counted on here, and indeed had forgotten about if I ever even knew it, is the possibility of semicolons appearing in subscripts as "copy numbers" of structures.  My initial implementation of the line reorganizer just mentioned doesn't support that and needs to be fixed.
+
+Another thing ... it appears from p. 46 of "Programming in HAL/S" that E/M/S constructs are not limited to just three lines.  It shows an example of E/M/S/S, but presumably you can have any number of E's, followed by an M, followed by any number of S's.  My preprocessor code doesn't do that at the moment, and so perhaps will need to be fixed.  Or perhaps not, since I can't imagine any sane coder actually inputting source code using such an unwieldy convention.  Perhaps that only needs to be worried about in the pretty-printing, which I'm nowhere close to considering yet anyway.
+
+# 2022-11-30
+
+## 085-FACTORIAL.hal (continued)
+
+Okay, semicolons appearing in subscripts, to any depth, has now been taken care of in the line reorganization.  That required also matching of parentheses.
+
+Finally, the new line-reorganizer code, having knowledge as it does about which portions of each line are single-quoted strings and inline comments, is able to protect those agains REPLACE macros and identifier mangling by temporarily translating them to characters not in the HAL/S character set, and then restoring them afterward.
+
+This finally fixes the `FACTORIAL` code.
+
+## 091-NEWTON_SQRT.hal
+
+The preprocessor does an infinite loop on this one ... but that's just a bug in the comment-detection line reorganizer code I added yesterday; easily fixed.
+
+All okay.
+
+## 095-TAN_SUMS.hal
+
+The preprocessor's new line-reorganizer code appends the multiline comment following the opening full-line comment to the full-line comment.  Fixed that.
+
+`DO UNTIL TOTAL > 5 PI;` is misparsed as `WHILE` ... not it wasn't, but the LBNF label didn't distinguish between `WHILE` and `UNTIL`, so it was hard to read.  Fixed that.
+
+All okay.
+
+## 097-SAMPLE_FLOW.hal
+
+All okay.
+
+## 104-EXAMPLE_1.hal
+
+All okay.
+
+## 106-EXAMPLE_2.hal
+
+I don't see that `TEMPORARY` is indicated in the abstract syntax tree, for `DO TEMPORARY I = 1 TO 4;` or `DO FOR TEMPORARY J = 1 TO 3;` ... but it was; the LBNF labeling in the compiler front-end just wasn't adequate to make that obvious.  Fixed now.
+
+All okay.
+
+## 107-EXAMPLE_3.hal and 107-EXAMPLE_4.hal
+
+All okay.
+
+## 108-EXAMPLE_5.hal
+
+All okay.
+
+## 112-EXAMPLE_6.hal
+
+This example contains identifiers like `[ATT_RATE]`, `[GYRO_INPUT]`, and `[SCALE]`, which I had previously had the preprocessor eliminate in favor of `ATT_RATE`, `GYRO_INPUT`, and `SCALE`.  I'm convinced now that that was the wrong behavior.  So I've removed that behavior from the preprocessor and have made adjustments to the compiler front-end's LBNF to accommodate new `<ARITH VAR>` types `[ <ARITH ID> ]` and `[ <ARITH ID> ] <SUBSCRIPT>`.  It may take a while to see if those are the appropriate changes.
+
+All okay now.
+
+## 113-EXAMPLE_7.hal
+
+The preprocessor code for line reorganization that protected inline comments and single-quoted strings did not properly handle occurrences of "¬" occurring outside of those contexts, incorrectly converting them them to ",".  Fixed that.
+
+All okay now.
+
+## 117-EXAMPLE_8.hal
+
+All okay.
+
+
+

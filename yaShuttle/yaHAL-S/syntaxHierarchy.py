@@ -34,6 +34,7 @@ for param in sys.argv[1:]:
         --no-strip  Do not remove 2-letter prefixes from LBNF labels.
         --collapse  Make the hierarchy easier to read ... I hope.
         """)
+        sys.exit(0)
     else:
         print("Unknown parameter:", param)
         sys.exit(1)

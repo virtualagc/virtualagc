@@ -74,7 +74,7 @@ identifierPattern = "\\b" + bareIdentifierPattern
 endblockPattern = '(\\b(END|CLOSE)\\s*;)|(\\b(END|CLOSE)\\s+' + \
                     bareIdentifierPattern + '\\s*;)'
 startSpecialBlockPattern = \
-        ':\\s*PROGRAM\\s*;|:\\s*FUNCTION\\b|:\\s*PROCEDURE\\b|\\bUPDATE\\s*;|:\\s*TASK\\s*;|\\bCOMPOOL\\s*;'
+    ':\\s*PROGRAM\\s*;|:\\s*FUNCTION\\b|:\\s*PROCEDURE\\b|\\bUPDATE\\s*;|:\\s*TASK\\s*;|\\bCOMPOOL\\s*;'
 startblockPattern = startSpecialBlockPattern + '|\\bDO\\b'
 replacePattern = '\\bREPLACE\\s+' + identifierPattern
 argListPattern = '(\\s*\\([^)]+\\))?'
@@ -123,14 +123,14 @@ def replaceBy(halsSource, metadata, full):
         line = halsSource[i]
         if line.strip() == "":
             continue
-        # Allow for the possibility that this statement
-        # is split across lines.
         fullLine = removeComments(line).strip()
+        '''
         j = i + 1
         while fullLine[-1:] != ";" and j < len(halsSource):
             fullLine += " " + removeComments(halsSource[j]).strip()
             metadata[j]["child"] = True
             j += 1
+        '''
         #print("->", fullLine, file=sys.stderr)
         # At beginning of a block?
         if "child" not in metadata[i]:
@@ -140,9 +140,7 @@ def replaceBy(halsSource, metadata, full):
                     print(blockDepth, "->", blockDepth+1, fullLine, file=sys.stderr)
                 blockDepth += 1
                 macros.append({})
-            # A new macro definition via REPLACE ... BY "..."?  Notice that I'm
-            # assuming the definition is confined to a single input line.  
-            # There's no guarantee of that, and we may need to fix it later.
+            # A new macro definition via REPLACE ... BY "..."?  
             match = re.search(replaceByPattern, fullLine)
             if match != None:
                 # A new macro is defined here.  We need to parse it enough so 
@@ -351,7 +349,7 @@ def replaceBy(halsSource, metadata, full):
                             file=sys.stderr)
                 macros = macros[:-1]
         if changed:
-            halsSource[i] = line + " //M Changed"
+            halsSource[i] = line # + " //M Changed"
 
     if blockDepth != 0:
         print("Block depth implementation error.", blockDepth, file=sys.stderr)
