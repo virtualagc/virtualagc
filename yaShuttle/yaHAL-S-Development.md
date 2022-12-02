@@ -558,3 +558,81 @@ All okay.
 ## 130-EXAMPLE_N.hal
 
 This example has a forward definition of a function, for which the mangling of the function name as mentioned above remains to be fixed in the preprocessor.
+
+# 2022-12-02
+
+## 130-EXAMPLE_N.hal (continued)
+
+Fixed the forward-declaration stuff mentioned yesterday, and a typo in the code sample itself.
+
+All okay now.
+
+## 134-DOTS.hal and 134-ROLL.hal
+
+All okay.
+
+## 136-DOTS.hal
+
+All okay.
+
+## 137-STATISTICS.hal
+
+In the LBNF grammar, some RTL functions that I now think should be `<ARITH FUNC>` type had been set (by me, as they were opmitted from the original BNF grammar) as `<STRUCT FUNC>`, causing the compilation to fail.  (In particular, `SUM()`.)  I've changed that.
+
+All okay.
+
+## 138-FILTER.hal
+
+All okay.
+
+## 140-STATISTICS.hal
+
+All okay.
+
+## 141-VSUM.hal
+
+All okay.
+
+## 154-ADD.hal
+
+Couldn't tell from abstract syntax tree which minor attribute (`AUTOMATIC`) was in the declaration `DECLARE TOTAL SCALAR INITIAL(0) AUTOMATIC;`.  Fixed the labeling in the LBNF grammar to allow it.
+
+All okay now.
+
+## 158-STATE.hal
+
+Fixed a typo in the sample code, but otherwise okay.
+
+## 159-AGE.hal
+
+Preprocessor problem with the scope for name mangling: It doesn't allow for redeclaration of an identifier that the parent scope is mangling.  In this example, the problem is that it's for a program called `AGE`, which at the top-level scope is being mangled as `l_AGE`.  However, within the `AGE` program itself, there's also a declaration for `AGE` as a local variable.  *Within* the scope of the `l_AGE` program itself, `AGE` should not be mangled.
+
+Besides which the `INTEGER()` RTL function (if that's what it actually is) was not recognised as such.
+
+Having fixed those things in the preprocessor and LBNF grammer, all is okay.
+
+## 160-REFORMAT.hal
+
+Same situation as in section above:  `CHARACTER()` not recognized as an RTL function in the LBNF grammar.
+
+Plus it appears as though the RTL functions `LENGTH()` and (perhaps) `INDEX()` are miscategorized in the LBNF grammar as `<CHAR FUNC>` rather than `<ARITH FUNC>`.  (Again, these were absent from the documented BNF grammar, so I had invented them myself.)
+
+Even with that fix, `INTEGER$(@DOUBLE)()` is not parsed correctly ... or wait, maybe it is parsed okay after all.  Well, it's hard to tell from the abstract syntax tree.   Yes, it's okay, because it does have an `<ARITH FUNC HEAD>` that I was too daft to see.
+
+Looks good to me.
+
+## 164-OUTER.hal
+
+"Programming in HAL/S" has a misprint here, which I faithfully transcribed into the source file and have now needed to correct.  Specifically, in place of `DECLARE VNAME CHARACTER(8);`, the document instead had `DECLARE V NAME CHARACTER(8);`.  As it happens, the latter is indeed something that can be parsed, so that added to the confusion.  Nevertheless, parsable or not, it doesn't seem to match what's happening in the remainder of the code.
+
+The labeling in the LBNF grammar didn't let me easily distinguish the differen i/o controls in `READ` (i.e., `SKIP`, `COLUMN`, and so on).  Now fixed.
+
+All okay now.
+
+## 167-ASSORTEDIO.hal
+
+Syntax error at `IOPARM` in `STRUCT IOPARM: ...;` ... oh, that's a typo in the sample code:  `STRUCT` should have been `STRUCTURE`.
+
+Well, the syntax error remains after fixing that.  It may be because while I mangle several types of identifiers (labels, booleans, boolean functions, ...), I never go around to mangling structure identifiers.
+
+TBD

@@ -8,6 +8,8 @@ Purpose:        This is a module for the yaHAL-preprocessor.py program
                 that handles REPLACE ... BY "...".
 History:        2022-11-18 RSB  Created. 
                 2022-11-21 RSB  Added identifier mangling based on DECLARE.
+                                Account for non-mangled declarations in 
+                                child-scope vs parent-scope.
 
 I've implemented a very imperfect, heuristic method.  If it
 turns out to be inadequate, it can be replaced.  It probably should be almost
@@ -82,8 +84,12 @@ byPattern = '\\s+BY\\s+"[^"]*"\\s*;'
 replaceByPattern = replacePattern + argListPattern + byPattern
 declarePattern = '\\bDECLARE\\s'
 
+# Note that the mangling prefix for FUNCTION is actually "l_" only for 
+# arithmetical functions; for boolean functions it's "bf_" and for character
+# functions it's "cf_".
 mangling = { "BOOLEAN" : "b_", "CHARACTER" : "c_", "INTEGER" : "", 
-            "SCALAR" : "", "VECTOR" : "", "MATRIX" : "" }
+            "SCALAR" : "", "VECTOR" : "", "MATRIX" : "",
+            "PROCEDURE" : "l_", "FUNCTION": "l_", "STRUCTURE": "s_" }
 
 def oneReplacement(string, target, replacement):
     match = re.search("\\b" + target + "\\b", string)
@@ -137,7 +143,8 @@ def replaceBy(halsSource, metadata, full):
             match = re.search(startblockPattern, fullLine)
             if match != None:
                 if debugIndentation:
-                    print(blockDepth, "->", blockDepth+1, fullLine, file=sys.stderr)
+                    print(blockDepth, "->", blockDepth+1, \
+                            fullLine, file=sys.stderr)
                 blockDepth += 1
                 macros.append({})
             # A new macro definition via REPLACE ... BY "..."?  
@@ -150,7 +157,8 @@ def replaceBy(halsSource, metadata, full):
                 match = re.search(replacePattern, macroDefinition) 
                 match = re.search(identifierPattern, match.group()[8:])
                 macroName = match.group().strip()
-                match = re.search(replacePattern + argListPattern, macroDefinition)
+                match = re.search(replacePattern + argListPattern, \
+                                macroDefinition)
                 fields = match.group().split("(")
                 argumentString = ""
                 if len(fields) > 1:
@@ -159,8 +167,8 @@ def replaceBy(halsSource, metadata, full):
                     argumentList = []
                 else:
                     argumentList = argumentString.replace(" ", "").split(",")
-                # Create a pattern for which to look for locations in a target line
-                # at which to expand this macro.
+                # Create a pattern for which to look for locations in a target
+                # line at which to expand this macro.
                 pattern = "\\b" + macroName
                 if len(argumentList) == 0:
                     pattern += "\\b"
@@ -198,7 +206,7 @@ def replaceBy(halsSource, metadata, full):
                                 hasType = "bf_"
                             elif datatype == "CHARACTER":
                                 hasType = "cf_"
-                    if re.search("\\b(FUNCTION|PROCEDURE)\\b", tail) != None:
+                    if re.search("\\b(FUNCTION|PROCEDURE|PROGRAM)\\b", tail) != None:
                         isProcedureOrFunction = True
                 else:
                     match = re.search("(GO\\s+TO|REPEAT|EXIT)\\s+" + \
@@ -209,18 +217,23 @@ def replaceBy(halsSource, metadata, full):
                 if identifier != "":
                     if identifier[:2] != hasType:
                         macros[-1][identifier] = { "arguments": [], 
-                                                "replacement": hasType + identifier, 
-                                                "pattern": "\\b" + identifier + "\\b" }
+                                        "replacement": hasType + identifier, 
+                                        "pattern": "\\b" + identifier + "\\b" }
                         if isProcedureOrFunction:
                             macros[-2][identifier] = { "arguments": [], 
                                 "replacement": hasType + identifier, 
                                 "pattern": "\\b" + identifier + "\\b" }
                 # A new macro via DECLARE?
+                '''
                 match = re.search(declarePattern, fullLine)
                 if match != None:
                     declarations = fullLine[match.span()[0]:].strip()
                     declarations = re.search("DECLARE[^;]*", declarations).group()
                     declarations = declarations[7:].strip()
+                '''
+                if fullLine[:8] == "DECLARE ":
+                    declarations = fullLine[8:-1].strip()
+                    #print("*", "'" + declarations + "'")
                     # At this point, the declarations string contains the entire 
                     # DECLARE statement, in which the leading "DECLARE" and 
                     # trailing ";" have been removed.  There are (say) N fields
@@ -246,16 +259,18 @@ def replaceBy(halsSource, metadata, full):
                             if depth == 0:
                                 start = n
                         if depth == 0 and start != -1 and end != -1:
-                            declarations = declarations[:start] + declarations[end+1:]
+                            declarations = declarations[:start] + \
+                                            declarations[end+1:]
                             start = -1
                             end = -1
                     # Get rid of a lot of other stuff that doesn't assist us in 
-                    # parsing the datatypes for our particular needs (which are just 
-                    # find identifiers that are BOOLEAN or CHARACTER).         
+                    # parsing the datatypes for our particular needs (which are
+                    # just find identifiers that are BOOLEAN, CHARACTER, 
+                    # STRUCTURE, PROCEDURE, and FUNCTION, I think).         
                     for pattern in ["\\bARRAY\\b", "\\bINITIAL\\b", 
-                                    "\\bSINGLE\\b", "\\bDOUBLE\\b", "\\bSCALAR\\b",
-                                    "\\bVECTOR\\b", "\\bMATRIX\\b", "\\bINTEGER\\b",
-                                    "\\bCONSTANT\\b", "\\bPROCEDURE\\b"]:
+                                "\\bSINGLE\\b", "\\bDOUBLE\\b", "\\bSCALAR\\b",
+                                "\\bVECTOR\\b", "\\bMATRIX\\b", "\\bINTEGER\\b",
+                                "\\bCONSTANT\\b"]:
                         while True:
                             match = re.search(pattern, declarations)
                             if match == None:
@@ -268,10 +283,19 @@ def replaceBy(halsSource, metadata, full):
                     for n in range(len(declarations)):
                         declarations[n] = declarations[n].split()
                     overallType = ""
+                    overallFunction = False
                     start = 0
                     if len(declarations[0]) > 0:
                         if declarations[0][0] in mangling:
                             overallType = mangling[declarations[0][0]]
+                            if declarations[0][0] == "FUNCTION":
+                                overallFunction = True
+                                if "BOOLEAN" in declarations[0]:
+                                    overallType = "bf_"
+                                elif "CHARACTER" in declarations[0]:
+                                    overallType = "cf_"
+                                else:
+                                    overallType = "l_"
                             start += 1
                     for n in range(start, len(declarations)):
                         declaration = declarations[n]
@@ -279,16 +303,59 @@ def replaceBy(halsSource, metadata, full):
                             identifier = declaration[0]
                             if identifier[:2] != overallType:
                                 macros[-1][identifier] = { "arguments": [], 
-                                                "replacement": overallType + identifier, 
-                                                "pattern": "\\b" + identifier + "\\b" }
-                        elif len(declaration) == 2 and declaration[1] in mangling:
+                                        "replacement": overallType + identifier, 
+                                        "pattern": "\\b" + identifier + "\\b" }
+                        elif len(declaration) >= 2 and \
+                                declaration[1] in mangling:
                             thisType = mangling[declaration[1]]
+                            if overallFunction and thisType == "b_":
+                                thisType = "bf_"
+                            elif overallFunction and thisType == "c_":
+                                thisType = "cf_"
+                            elif overallFunction:
+                                thisType = "l_"
+                            elif declaration[1] == "FUNCTION":
+                                if "BOOLEAN" in declaration[1:]:
+                                    thisType = "bf_"
+                                elif "CHARACTER" in declaration[1:]:
+                                    thisType = "cf_"
+                                else:
+                                    thisType = "l_"
                             identifier = declaration[0]
                             if identifier[:2] != thisType:
                                 macros[-1][identifier] = { "arguments": [], 
-                                                "replacement": thisType + identifier, 
-                                                "pattern": "\\b" + identifier + "\\b" }
+                                        "replacement": thisType + identifier, 
+                                        "pattern": "\\b" + identifier + "\\b" }
+                        elif len(declaration) > 0:
+                            # If we've gotten here, the identifier isn't 
+                            # supposed to be mangled.  However, we still have
+                            # to account for it in case it's a redeclaration
+                            # of an identifier that a parent context wants to
+                            # be mangled.
+                            identifier = declaration[0]
+                            macros[-1][identifier] = { "ignore" : True }
                     
+        # At end of a block?  I used to have this *after* the macro expansions
+        # below, but it needs to be before so that the label (if any) for
+        # statements like "CLOSE LABEL;" or "END LABEL;" is at the correct
+        # level.
+        if "child" not in metadata[i]:
+            match = re.search(endblockPattern, fullLine)
+            if match != None:
+                # At end of block, so discard all macro definitions specific
+                # to this block.
+                if debugIndentation:
+                    print(blockDepth-1, "<-", blockDepth, \
+                            fullLine, file=sys.stderr)
+                blockDepth -= 1
+                if blockDepth < 0:
+                    print("Negative block depth implementation error.", \
+                            file=sys.stderr)
+                #print("*1", halsSource[i])
+                #print("*2", macros)
+                macros = macros[:-1]
+                #print("*3", macros)
+                
         # If we've gotten here, then we have a line which is eligible for macro
         # expansions.  The string called "line" is modified in place as macros
         # are expanded.
@@ -307,6 +374,8 @@ def replaceBy(halsSource, metadata, full):
                         # one in an outer block, ignore the outer block.
                         continue
                     macroNamesChecked.append(macroName)
+                    if "ignore" in macro:
+                        continue
                     # Find all occurrences of the macro name in the line.
                     # Notice that the occurrence *could* be within a string
                     # (i.e., '...'), and I don't check for that.  May fix it
@@ -342,19 +411,7 @@ def replaceBy(halsSource, metadata, full):
                                         macro["arguments"][j], newArgs[j])
                         line = line[:match.span()[0]] + replacement \
                                         + line[match.span()[1]:]
-        # At end of a block?
-        if "child" not in metadata[i]:
-            match = re.search(endblockPattern, fullLine)
-            if match != None:
-                # At end of block, so discard all macro definitions specific
-                # to this block.
-                if debugIndentation:
-                    print(blockDepth-1, "<-", blockDepth, fullLine, file=sys.stderr)
-                blockDepth -= 1
-                if blockDepth < 0:
-                    print("Negative block depth implementation error.", \
-                            file=sys.stderr)
-                macros = macros[:-1]
+
         if changed:
             halsSource[i] = line # + " //M Changed"
 

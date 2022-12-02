@@ -15,7 +15,8 @@ C	.
 
   INITIALIZE:
   PROCEDURE;
-     DECLARE V NAME CHARACTER(8);
+C/ The following line was given as V NAME rather than VNAME, which seems wrong.
+     DECLARE VNAME CHARACTER(8);
      REPLACE INFILE BY "5";
      DO WHILE TRUE;
         READALL(INFILE) VNAME;

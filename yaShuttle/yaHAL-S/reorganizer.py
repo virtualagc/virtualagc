@@ -32,12 +32,24 @@ Not = chr(0xAC)
 translatedNot = chr(0x80)
 def translate(string):
     translatedString = ""
+    isInlineComment = string[:2] == "/*" and string[-2:] == "*/"
+    isQuotedString = string[:1] == "'" and string[-1:] == "'"
+    if isInlineComment:
+        translatedString = "/*"
+        string = string[2:-2]
+    elif isQuotedString:
+        translatedString = "'"
+        string = string[1:-1]
     for c in string:
         if c == Not:
             c = translatedNot
         else:
             c = chr(ord(c) | 0x80)
         translatedString += c
+    if isInlineComment:
+        translatedString += "*/"
+    elif isQuotedString:
+        translatedString += "'"
     return translatedString
     
 # Undo translate().
@@ -97,7 +109,8 @@ def reorganizer(halsSource, metadata):
             elif key == "errors":
                 outputMeta[key] += meta[key]
         if status == inNormal and outputLine.strip() != "":
-            outputLine += " "
+            if outputLine[-1:] != " ":
+                outputLine += " "
         elif status == inComment and comment.strip() != "":
             comment += " "
         for c in line:
@@ -106,7 +119,10 @@ def reorganizer(halsSource, metadata):
                 # print(c, parenthesisDepths)
                 backtrack = False
                 if status == inNormal:
-                    if c == "'":
+                    if c == " ":
+                        if outputLine[-1:] != " ":
+                            outputLine += " "
+                    elif c == "'":
                         status = inSingleQuote
                         outputLine += c
                     elif c == '"':
@@ -137,7 +153,7 @@ def reorganizer(halsSource, metadata):
                                 parenthesisDepths[0] == 0:
                             if comment != "":
                                 outputLine += "\t" + translate(comment)
-                            newHalsSource.append(" " + outputLine)
+                            newHalsSource.append(" " + outputLine.strip())
                             newMetadata.append(outputMeta)
                             outputLine = ""
                             outputMeta = {}
