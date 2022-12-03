@@ -473,8 +473,10 @@ PUTPOS2		TC	INTPRET
 
 		TC	QPLACE
 
-		OCT	12102		# FIXME
-		OCT	01207
+## The following two words are unreachable, but their values
+## suggest they may be dead code.
+		CADR	MKRELEAS
+		TC	QPLACE
 
 CATCHAPP	XCH	Q
 		XCH	QPLACE
@@ -763,17 +765,14 @@ MTRXLD		DEC	17
 300SEC		DEC	30		# FIXME
 0.5SEC		DEC	.5 E2
 10SEC		DEC	10 E2
+20SEC		DEC	20 E2
+GYPRIO		OCT	23000
 
-		OCT	03720		# FIXME
-		OCT	23000
-		OCT	04572
-		OCT	17033
-		OCT	22004
-		OCT	35223
-		OCT	33205
-		OCT	20745
-		OCT	22004
-		OCT	35223
+## The following words are unreferenced constants.
+		2DEC	0.1481
+		2DEC	0.5628
+		2DEC	0.8519
+		2DEC	0.5628
 
 SYNSTAR1	2DEC	0.0
 		2DEC	0.5
