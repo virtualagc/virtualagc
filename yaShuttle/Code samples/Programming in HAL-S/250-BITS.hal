@@ -1,0 +1,57 @@
+C/ Adapted from PDF p. 250 in "Programming in HAL/S".
+C/ The original is just some declarations and a DO WHILE
+C/ block (not a part of a PROGRAM, FUNCTION, or PROCEDURE)
+C/ and hence uncompilable as-is.  I've simply wrapped it in
+C/ "BITS: PROGRAM; ... CLOSE BITS;" to make it compilable.
+
+  BITS:
+  PROGRAM;
+  
+     DECLARE I INTEGER;
+     DECLARE B BIT(8);
+     DECLARE BOOLEAN,
+     		C1, C2, C3, C4, C5, C6, C7, C8;
+     		
+C
+
+     DO WHILE ON;
+        DO FOR I = 1 TO 100;
+E             .
+M          IF B = HEX'00' THEN
+	      DO;
+	     
+C		...
+
+              END;
+           ELSE
+              DO;
+              
+C		...
+
+              END;
+        END;
+E          .
+M       IF C1 THEN
+E          .
+M          B  = ON;
+S           1
+
+E          .
+M       IF C2 THEN
+E          .
+M          B  = ON;
+S           2
+
+C	   .
+C          .
+C          .
+
+E          .
+M       IF C8 THEN
+E          .
+M          B  = ON;
+S           8
+
+     END;
+     
+  CLOSE BITS;

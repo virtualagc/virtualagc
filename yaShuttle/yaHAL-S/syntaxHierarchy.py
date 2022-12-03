@@ -7,17 +7,22 @@ Filename:       syntaxHierarchy.py
 Purpose:        This is a little one-off utility that lets me visualize the
                 "abstract syntax" output by test BNFC programs.
 History:        2022-11-15 RSB  Created. 
-                2022-11-16 RSB  Added --strip, --no-strip.      
+                2022-11-16 RSB  Added --strip, --no-strip.  
+                2022-11-25 RSB  Added --collapse.  Fixed parentheses inside
+                                the replacement string of REPLACE statements.  
 """
 
 import sys
 
 strip = True
+collapse = False
 for param in sys.argv[1:]:
     if param == "--strip":
         strip = True
     elif param == "--no-strip":
         strip = False
+    elif param == "--collapse":
+        collapse = True
     elif param == "--help":
         print("""
         Helps examine output from the TestHAL_S compiler front-end.
@@ -27,7 +32,9 @@ for param in sys.argv[1:]:
         --strip     Remove 2-letter prefixes from LBNF labels.
                     (This is the default.)
         --no-strip  Do not remove 2-letter prefixes from LBNF labels.
+        --collapse  Make the hierarchy easier to read ... I hope.
         """)
+        sys.exit(0)
     else:
         print("Unknown parameter:", param)
         sys.exit(1)
@@ -36,7 +43,7 @@ if strip:
     skipSize = 2
 else:
     skipSize = 0
-step = 2
+step = 1
 itsTime = False
 for line in sys.stdin:
     if "[Abstract Syntax]" in line:
@@ -47,14 +54,22 @@ for line in sys.stdin:
         isEmpty = True
         skip = 0
         inQuote = False
-        for c in line.strip():
-            if c == "(":
-                if not isEmpty:
+        line = line.strip()
+        i = 0
+        while i < len(line):
+            c = line[i]
+            i += 1
+            if c == '"' and i < len(line) and line[i] == '"':
+                i += 1
+            if not inQuote and c == "(":
+                if not collapse and not isEmpty:
                     print()
                     isEmpty = True
+                elif collapse and not isEmpty:
+                    print("%d:" % (indent+1), end="")
                 indent += step
                 skip = skipSize
-            elif c == ")":
+            elif not inQuote and c == ")":
                 indent -= step
                 if not isEmpty:
                     print()
@@ -67,8 +82,13 @@ for line in sys.stdin:
                     if skip > 0:
                         skip -= 1
                         continue
-                    for i in range(indent):
+                    if line[i-1:i+12] == "any_statement" or \
+                            line[i-1:14] == "basic_statement" or \
+                            line[i-1:14] == "other_statement":
+                        print()
+                    for j in range(indent):
                         print(" ", end="")
+                    print("%d:" % indent, end="")
                 if c == '"':
                     inQuote = not inQuote
                     skip = 0

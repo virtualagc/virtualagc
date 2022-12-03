@@ -1,0 +1,29 @@
+C/ From PDF p. 199 in "Programming in HAL/S".
+
+  P:
+  PROGRAM;
+     DECLARE SCALAR,
+     		A, B, C;
+     DECLARE INTEGER,
+     		X, Y, Z;
+     ON ERROR
+        DO;
+           WRITE(6) A, B, C, X, Y, Z;
+           RETURN;
+        END;
+M    ON ERROR
+S	     10:5
+
+        RETURN;
+M    ON ERROR    IGNORE;
+S	     10:
+
+M    ON ERROR    SYSTEM;
+S	     4:2
+
+C	.
+C	.
+C	.
+
+  LAST_CARD:
+  CLOSE P;

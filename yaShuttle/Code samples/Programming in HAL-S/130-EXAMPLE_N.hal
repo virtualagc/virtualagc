@@ -1,0 +1,41 @@
+C/ From PDF p. 130 of "Programming in HAL/S".
+
+  EXAMPLE_N:
+  PROGRAM;
+     DECLARE V SCALAR;
+     DECLARE ALMOST_EQUAL FUNCTION BOOLEAN;			/*<---*/
+  MASS:
+  FUNCTION(REST_MASS, SPEED) SCALAR;
+     DECLARE SCALAR,
+     		REST_MASS, SPEED;
+  TAU:
+  FUNCTION(V) SCALAR;
+     DECLARE V SCALAR;
+     
+C		.
+C		.
+C		.
+
+  CLOSE TAU;
+  
+C		.
+C		.
+C		.
+
+  CLOSE MASS;
+E					       .
+M    DO FOR V = 250000 TO 0 BY -100 UNTIL ALMOST_EQUAL(1, MASS(1, V));
+     END;
+     WRITE(6) 'THE ANSWER IS', V;
+  ALMOST_EQUAL:
+  FUNCTION(A,B) BOOLEAN;
+     DECLARE SCALAR,
+     		A, B;
+     		
+C	.
+C	.
+C	.
+
+  CLOSE ALMOST_EQUAL;
+  CLOSE EXAMPLE_N;
+  

@@ -1,22 +1,25 @@
-# This sample code is from PDF p. 72 of "Programming in HAL/S".
-# It illustrates the use of TEMPORARY variables, which are variables
-# defined within a DO ... END block rather than in the main 
-# declaration group.  Since this sample doesn't output anything,
-# there's not actually much point in running it.  It's mainly for
-# testing the compiler.
+C/ This sample code is from PDF p. 72 of "Programming in HAL/S".
+C/ It illustrates the use of TEMPORARY variables, which are variables
+C/ defined within a DO ... END block rather than in the main 
+C/ declaration group.  
 
   EXAMPLE_2:
   PROGRAM;
-     DECLARE 	VEL VECTOR,
-     		MY_FRAME MATRIX;
+     DECLARE VEL VECTOR,
+     	     MY_FRAME MATRIX;
      DECLARE VECTOR,
-     		RESULT1, RESULT2, E;
+     	     RESULT1, RESULT2, E;
+     	     
 C     ...
+
      DO;
      	TEMPORARY V_PRIME VECTOR;
-     	V_PRIME = MY_FRAME VEL;
-     	RESULT1 = UNIT(V_PRIME);
-     	RESULT2 = V_PRIME * E;
+E          -         *      -
+M    	V_PRIME = MY_FRAME VEL;
+E          -              -
+M    	RESULT1 = UNIT(V_PRIME);
+E          -         -      -
+M    	RESULT2 = V_PRIME * E;
      END;
   CLOSE EXAMPLE_2;
   

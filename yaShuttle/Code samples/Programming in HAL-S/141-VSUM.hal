@@ -1,0 +1,17 @@
+C/ From PDF p. 141 of "Programming in HAL/S".
+
+  VSUM:
+  FUNCTION(V) VECTOR;
+     DECLARE V ARRAY(*) VECTOR;
+     DECLARE TOTAL VECTOR INITIAL(0);
+E				     -
+M    DO FOR TEMPORARY N = 1 TO SIZE([V]);
+E         -       -     -
+M       TOTAL = TOTAL + V  ;
+S  			 N:
+
+     END;
+E             -
+M    RETURN TOTAL;
+  CLOSE VSUM;
+  

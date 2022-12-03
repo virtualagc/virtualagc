@@ -1,4 +1,4 @@
-# From PDF p. 117 of "Programming in HAL/S".
+C/ From PDF p. 117 of "Programming in HAL/S".
 
   EXAMPLE_8:
   PROGRAM;
@@ -15,10 +15,9 @@ C    OBTAIN POSTIONS FROM OUTSIDE
 
 E        -              -            -
 M    [VELOCITY] = ([POSITIONS] - [OLD_POSN]) / DELTA_T;
-# Why are [DISTANCE] and [APPROACH_RATE] in brackets below?  They're scalars.
 E                            -           -
 M    [DISTANCE] = ABVAL([POSITIONS] - MY_POSN);
-E                          -                              -
+E                          -                  -           -
 M    [APPROACH_RATE] = [VELOCITY] . UNIT([POSITIONS] - MY_POSN);
 E        -             -
 M    [OLD_POSN] = [POSITIONS];

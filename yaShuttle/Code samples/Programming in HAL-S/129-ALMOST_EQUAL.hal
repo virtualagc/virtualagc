@@ -1,0 +1,17 @@
+C/ From PDF p. 129 of "Progamming in HAL/S".
+
+  ALMOST_EQUAL:
+  FUNCTION(A, B) BOOLEAN;
+     DECLARE SCALAR,
+     		A, B;
+     DECLARE TOLERANCE SCALAR;
+     IF B ¬= 0 THEN
+        TOLERANCE = .000001 ABS(B);
+     ELSE
+        TOLERANCE = .000001;
+     IF ABS(A - B) > TOLERANCE THEN
+        RETURN FALSE;
+     ELSE
+        RETURN TRUE;
+  CLOSE ALMOST_EQUAL;
+  

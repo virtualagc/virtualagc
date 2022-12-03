@@ -32,11 +32,11 @@ that can convert my BNF to LBNF.  Although since the script is rather simple-min
 
 # 2022-11-13
 
-I find it more-convenient to provide the rules for the missing types mentioned earlier in LBNF form rather than BNF, because LBNF has ready means of creating various of those rules (particularly <CHAR VERTICAL BAR>, but others as well) by means of regular expressions.  All of those additional definitions reside in a file called
+I find it more-convenient to provide the rules for the missing types mentioned earlier in LBNF form rather than BNF, because LBNF has ready means of creating various of those rules (particularly `<CHAR VERTICAL BAR>`, but others as well) by means of regular expressions.  All of those additional definitions reside in a file called
  
     extraHAL-S.lbnf
 
-In Linux or Mac OS X, the complete description of HAL/S in LBNF can be created by the following command:
+(**Important later note:**  *Do not generate HAL_S.cf as indicated in this paragraph.  This method is now deprecated.  Do not overwrite HAL_S.cf.  Instead, the existing HAL_S.cf should be preserved and edited directly if necessary.*)  In Linux or Mac OS X, the complete description of HAL/S in LBNF can be created by the following command:
  
     cat extraHAL-S.lbnf HAL-S.bnf | bnf2lbnf.py > HAL_S.cf
 
@@ -195,5 +195,444 @@ Thinking about how to debug this problem, it seems to me firstly that the method
 
 needs to be scrapped.  It was fine up to now, but it is cumbersome for debugging.  From now on, extraHAL-S.lbnf, HAL-S.bnf, and bnf2lbnf.py, though remaining in the repository, are frozen in their current states and are deprecated.  Instead, HAL_S.cf is the "official" language description, and it's the file that needs to be debugged on an ongoing basis.
 
-More TBD.
+Taking this approach, I think I've verified that the problem is LBNF rules such as the following:
 
+    FGarith_id . ARITH_ID ::= IDENTIFIER ;
+    FHbit_id   . BIT_ID   ::= IDENTIFIER ;
+
+What I've done is to take HAL_S.hal and created a new file, Test.hal, which is the same except for the fact that I've removed all rules except those needed to parse the following function:
+
+    TEST:
+    PROGRAM;
+       IF MYBOOL = TRUE THEN
+     	  X = 2;
+    CLOSE TEST;
+
+(Yes, it's not legal without the `DECLARE` lines, but the parser doesn't know that.)  When I build the compiler using this truncated definition of the language, with both `ARITH_ID ::= IDENTIFIER` and `BIT_ID ::= IDENTIFIER`, Bison indicates 
+
+    bison -t -pTest Test.y -o Parser.c
+    Test.y: warning: 9 reduce/reduce conflicts [-Wconflicts-rr]
+
+Morever, the `TEST` program compiles with a syntax error at `TRUE` (as before), while if we instead use `TRUE = MYBOOL` then (as before) it compiles fine.
+
+However, if instead we change the rule for `BIT_ID` to instead be like an IDENTIFIER but prefixed by "b_", Bison reports no errors at all in building the compiler.  Moreover, if we change the `TEST` program to have `b_MYBOOL = TRUE`, then it compiles fine as well.  (And with `TRUE = b_MYBOOL` as well.)
+
+From googling the issue, it's unclear to me if there's any way to handle this in the compiler front-end.  If there is, it appears to me that it involves manually creating or editing the HAL_S.y input file for bison, rather than letting BNF Converter entirely handle its creation, and that seems to me like a recipe for disaster ... particularly since everything I'm reading about the how to work with bison directly seems to be little more than a pile of expert-speak gobbledygook.  And I'm not an expert in such stuff.
+
+The preprocessor approach I mentioned earlier seems as though it would definitely handle it.  We could have a naming convention for identifiers, such as
+
+    b_XXXXX         BIT_ID
+    c_XXXXX         CHAR_ID
+    s_XXXXX         STRUCT_ID
+    l_XXXXX         LABEL
+    e_XXXXX         EVENT
+    other           ARITH_ID
+
+The preprocessor would handle it something like macros:  For several of these, it would use `DECLARE` statements to create a separate macro for each affected declared identifier, and that macro's scope would be the present block (or inline blocks).  For example,
+
+    DECLARE MYBOOL BOOLEAN;
+    DECLARE MYCHAR CHARACTER;
+    DECLARE MYINT INTEGER;
+    DECLARE MYSCALAR SCALAR;
+
+would have the same preprocessing effect as
+
+    REPLACE MYBOOL BY "b_MYBOOL";
+    REPLACE MYCHAR BY "c_MYCHAR";
+    /* No REPLACE/BY needed for INTEGER or SCALAR. */
+
+Others (`LABEL`, `EVENT`) would have to be detected differently, since they have no `DECLARE`.
+
+I haven't implemented it in the preprocessor yet, but simply in terms of building the compiler (using the full HAL_S.cf) it has the effect of changing 
+
+    HAL_S.y: warning: 618 shift/reduce conflicts [-Wconflicts-sr]
+    HAL_S.y: warning: 410 reduce/reduce conflicts [-Wconflicts-rr]
+
+to
+
+    HAL_S.y: warning: 784 shift/reduce conflicts [-Wconflicts-sr]
+    HAL_S.y: warning: 129 reduce/reduce conflicts [-Wconflicts-rr]
+
+I.e., 1028 conflicts reduced to 913.  Well ... not wonderful, but at least a step in the right direction.
+
+# 2022-11-20
+
+My idea of debugging this problem is to divide and conquer:  Rearrange the rules in HAL_S.cf into major groups, and comment out all of the groups except the ones already debugged and the one currently being debugged.  Fortunately, bison has a multiline comment feature to accomplish this:
+
+    {-
+    ...
+    -}
+
+On my first attempt at this, I use as the top-level group of rules the "blocks" in general, but without any contents.  For example, this would include `XXXX: PROGRAM; ... CLOSE XXXX;` but without any internal statement like declarations, assignments, etc.  
+
+Unfortunately, even with the identifier-naming convention changes described in the preceding entry, just defining the blocks takes over half the rules, and leaves us with
+
+    HAL_S.y: warning: 297 shift/reduce conflicts [-Wconflicts-sr]
+    HAL_S.y: warning: 52 reduce/reduce conflicts [-Wconflicts-rr]
+
+It appears to me that that *may* be because the rule for `EXPRESSION` is needed, though it's hard to understand at the 50,000-foot level why that would be so.  Let's track it down:
+
+* `EXPRESSION`
+* Which is needed by `LIST_EXP`
+* Which is needed by `CALL_LIST`
+* Which is needed by the following:
+    * `CHAR_PRIM`, which is needed by `CHAR_EXP`.
+    * `BIT_PRIM`, which is needed by `BIT_CAT`, which is needed by `BIT_FACTOR`, which is needed by `BIT_EXP`.
+    * `STRUCTURE_EXP`
+    * `PRE_PRIMARY`, which is needed by `PRIMARY`, which is needed by `FACTOR`, which is needed by `PRODUCT`, which is needed by `TERM`, which is needed by `ARITH_EXP`.
+* `CHAR_EXP`, `BIT_EXP`, `STRUCTURE_EXP`, and `ARITH_EXP` are needed by `EXPRESSION`.
+
+So, any time any one of these `XXXX_EXP` types is needed, *all* of them are dragged in as well.
+
+Why is any one of the `XXXX_EXP` needed for empty blocks?  Well, it's tough to fully track down, but `ARITH_SPEC` is needed by `QUALIFIER`, which is needed by `SUBSCRIPT`, so `ARITH_SPEC` literally intrudes everywhere.
+
+Therefore, rather than starting with debugging the rules for empty blocks, it makes more sense starting with rules for `ARITH_SPEC`, then expanding to rules other objects.  
+
+So far I've done this for `ARITH_EXP` (without `SUBSCRIPT`) through `SUBSCRIPT`, through `BIT_EXP`, through `CHAR_EXP`, through `NAME_EXP`, through `STRUCTURE_EXP` (which completes all of `EXPRESSION`), through `ASSIGNMENT`, through `IF_STATEMENT`, and have eliminated all errors so far.  That's pretty good, since it accounts for roughly half of all the rules.
+
+I've encountered the following basic problems that had to be fixed along the way.  Firstly &mdash; my own error, but inherited from syntactic difficulties with BNF &mdash;
+
+    CAT ::= "CAT" ;
+    CAT ::= VERTICAL_BAR VERTICAL_BAR ;
+    VERTICAL_BAR ::= "|" ;
+
+really needed to be
+
+    CAT ::= "CAT" ;
+    CAT ::= "||" ;
+
+Second, lots of stuff like
+
+    X ::= PREFIX Y SUBSCRIPT ;
+    PREFIX ::= EMPTY ;
+    PREFIX ::= prefixstuff ;
+    SUBSCRIPT ::= EMPTY ;
+    SUBSCRIPT ::= suffixstuff ;
+    EMPTY ::= ;
+
+seemed to really confuse it.  I think the empty `PREFIX`'s may have been more confusing than the empty `SUBSCRIPT`'s.  Whatever!  I instead systematically introduced
+
+    X ::= Y ;
+    X ::= Y suffixstuff ;
+    X ::= prefixstuff Y ;
+    X ::= prefixstuff Y suffixstuff ;
+
+which it seemed to like a lot better.
+
+Thirdly, there were a number of instances like
+
+    MODIFIED_xxx_FUNC ::= PREFIX NO_ARG_xxx_FUNC SUBSCRIPT ;
+    NO_ARG_xxx_FUNC ::= EMPTY ;
+
+These represent (I believe) runtime-library functions with no arguments, of which there weren't any other than `NO_ARG_ARITH_FUNC`'s.  So the empty `MODIFIED_xxx_FUNC`'s were removed entirely.
+
+This divide-and-conquer debugging method is working, and thus will be continued ....
+
+# 2022-11-21
+
+I've worked through the remaining LBNF problems, I think, at least insofar as the code samples I have are concerned.  There are no errors or warnings when building the compiler front-end (vs the 1000+ experienced before), and all of the code samples I've collected then compile without syntax errors.  But since I've only put together samples from a little less than half of "Programming in HAL/S" so far, there may still be a ways to go.
+
+The LBNF changes I've made have mostly been straightforward and seemingly without the potential for causing problems.  One area of confusion, though, is the following BNF rule from p. G-3 of the Nov 2005 version of the "HAL/S Language Specification":
+
+    <REL PRIM> :: = (1<RELATIONAL EXP>)
+                    | <NOT> (1<RELATIONAL EXP>)
+                    | <COMPARISON>
+
+This rule makes no sense whatever to me, causes the parser problems (because it's ambiguous), and doesn't appear to be documented anywhere.  It does appear as-is in the program comments of SYNTHESI module of the original HAL/S compiler.  However, the 1's do *not* appear in the 1976 version of the "HAL/S Language Specification".  I think they're bogus, and have removed them.
+
+Something that seems more-problematic is syntax such as
+
+    DECLARE A MATRIX;
+    DECLARE B MATRIX;
+    ...
+    [A] = [B] ** (-1) ;
+
+This would mean to assign every element of the matrix `A` with the inverse of the corresponding element in matrix `B`.  Whereas the syntax
+
+    A = B ** (-1) ;
+
+would instead mean to take the matrix inverse of `B`.  However, the BNF simply omits this entirely:  There's not one reference to brackets in the entire language description. Nor are there any brackets used in SYNTHESI.  So for now at least, the LBNF and the consequent compiler front-end cannot use this bracket syntax.  In fact, the preprocessor currently removes it entirely, and simply converts `[A]` to `A`.  This needs to be fixed at some point.
+
+# 2022-11-25
+
+At this point, all of the code samples from "Programming in HAL/S" have been transcribed and are in the source tree, except for a couple that were just too fragmentary.  I know that there are problems with the preprocessor and compiler front-end, though, so now I want to work out the bugs in these areas by going through the samples one by one.  I guess I'll keep a record of that here.
+
+Basically, two detailed inspections are made, of the commands
+
+    yaHAL-preprocessor.py FILENAME.hal
+    yaHAL-preprocessor.py FILENAME.hal | TestHAL_S | syntaxHierarchy.py --collapse
+
+and any discrepancies from expectations are noted and fixed.  I don't recall if I mentioned `syntaxHierarchy.py` before, but it formats the abstract syntax tree output by the compiler front-end `TestHAL_S` in a slightly more-readable form.
+
+## 021-SIMPLE.hal
+
+The only things the preprocessor needs to do here are to correctly mangle the name of the program ("SIMPLE" &rarr; "l_SIMPLE") and to correctly convert full-line comments from `C` in column 1 to `//`.  Which it does.
+
+As far as the compiler front-end is concerned (i.e., the LBNF description of the language), I notice the following:
+
+* The `l_SIMPLE: PROGRAM;` is correctly parsed, but the LBNF labels associated with that don't allow us to easily tell what kind of block it is (i.e., program vs function vs procedure vs etc).  Changed labeling to account for that.
+* In `DECLARE R SCALAR;`, the LBNF labels again didn't allow us to easily distinguish `INTEGER` vs `SCALAR` vs. etc.  Fixed that.
+
+The front-end compilation seems fine after those fixes.
+
+## 029-DATATYPES.hal
+
+Preprocess output seems perfect.
+
+Compiler front-end output:  Declarations look fine.  `S = V . V;` looks fine.  `S = V * V;` looks fine.  `V = M V;` looks fine.  `M = V V;` looks fine.  `M = M M;` looks fine.  `V = V S;` looks fine. 
+
+I.e., all good.
+
+## 031-DECLARE3.hal
+
+Preprocessor fine.  Compiler front-end:  `DECLARE COUNTER INTEGER;` looks fine.  `DECLARE VECTOR, POSITION, VELOCITY, TORQUE;` looks fine.  `DECLARE NEW_CO_ORDS MATRIX, SPEED SCALAR, N INTEGER, WIND_FORCE VECTOR;` looks fine.
+
+All good.
+
+## 032-INITIAL_AND_CONSTANT.hal
+
+It's pointless continually listing the lines that compiled correctly.  From now on I'll just talk about stuff that did not compile correctly.
+
+All good.
+
+## 037-ROOTS.hal
+
+All good.
+
+## 039-CORNERS.hal
+
+All good.
+
+## 044-ORTHONORMAL.hal
+
+All good.
+
+## 046-XYZ_TO_POLAR.hal
+
+All good.
+
+## 047-ROWS.hal
+
+All good.
+
+## 052-TABLE.hal
+
+Preprocessor okay.
+
+Compiler front-end:  Okay, I think.
+
+## 053-PARALLAX.hal
+
+All good.
+
+## 071-DARTBOARD_APPROXIMATION.hal
+
+All good.
+
+## 072-EXAMPLE_2.hal
+
+All good.
+
+## 076-EXAMPLE_3.hal
+
+All good.
+
+## 080-EXAMPLE_4.hal and 080-EXAMPLE_4A.hal
+
+All good.
+
+## 085-FACTORIAL.hal
+
+Preprocessor:  Incorrectly, does macro replacements within strings and probably comments; in this case, `'FACTORIAL=...'` &rarr; `'l_FACTORIAL=...'`.
+
+# 2022-11-27
+
+## 085-FACTORIAL.hal (continued)
+
+Implementation of this is very confusing.  The problem is that as of right now, the preprocessor works on a line at a time.  There are certain exceptions, in that in processing declarations, for example, it joins together separate lines for the purpose of analysis without the hassle of line-breaks in the middle of search patterns.  But in this case, actual replacements of text are needed.  It's best to do this without worrying about line breaks ... but on the other hand, we need to keep track of those line breaks to a certain extent for printing output, positioning of error messages, and so forth, and that's really tough to do if we eliminate the line breaks and start replacing text.
+
+Or do we?  The documentation makes a big deal about how the coder has no control whatever over the formatting of the output listing, and that the compiler formats it all automatically in a presumably better way.  I wonder if this extends to line breaks as well, and to positioning of comments?  Because if it does, then my concern over tracking the positions of the line breaks is silly:  I ought to simply reformat all of the source code right from the get-go into lines that each contain a single, complete statement ... even if they're very long lines. (After rejoining of E/M/S constructs, of course.)  And then inline comments should all be moved to the ends of those unified lines.  (And if there's a full-line comment in the midst of a statement that has been broken into multiple lines and is being rejoined?  Perhaps such full-line comments should be moved, as separate lines, to the front of the multi-line statement.)
+
+Requires thought ....
+
+# 2022-11-29
+
+## 085-FACTORIAL.hal (continued)
+
+Here's a digression from what I had been doing.  It seems as though trying to work with the source-code in free-form is just too problematic.  So after the preprocessor removes the E/M/S constructs in favor of single-line assignments, but before it does anything else, I've added code to the preprocessor that reorganizes all of the source code so that each line is everything leading up to the final semi-colon (or else is a full-line comment or a compiler directive).  Inline comments are all moved after the semicolon, and delimited from it by a tab rather than a space.
+
+One thing I had not counted on here, and indeed had forgotten about if I ever even knew it, is the possibility of semicolons appearing in subscripts as "copy numbers" of structures.  My initial implementation of the line reorganizer just mentioned doesn't support that and needs to be fixed.
+
+Another thing ... it appears from p. 46 of "Programming in HAL/S" that E/M/S constructs are not limited to just three lines.  It shows an example of E/M/S/S, but presumably you can have any number of E's, followed by an M, followed by any number of S's.  My preprocessor code doesn't do that at the moment, and so perhaps will need to be fixed.  Or perhaps not, since I can't imagine any sane coder actually inputting source code using such an unwieldy convention.  Perhaps that only needs to be worried about in the pretty-printing, which I'm nowhere close to considering yet anyway.
+
+# 2022-11-30
+
+## 085-FACTORIAL.hal (continued)
+
+Okay, semicolons appearing in subscripts, to any depth, has now been taken care of in the line reorganization.  That required also matching of parentheses.
+
+Finally, the new line-reorganizer code, having knowledge as it does about which portions of each line are single-quoted strings and inline comments, is able to protect those agains REPLACE macros and identifier mangling by temporarily translating them to characters not in the HAL/S character set, and then restoring them afterward.
+
+This finally fixes the `FACTORIAL` code.
+
+## 091-NEWTON_SQRT.hal
+
+The preprocessor does an infinite loop on this one ... but that's just a bug in the comment-detection line reorganizer code I added yesterday; easily fixed.
+
+All okay.
+
+## 095-TAN_SUMS.hal
+
+The preprocessor's new line-reorganizer code appends the multiline comment following the opening full-line comment to the full-line comment.  Fixed that.
+
+`DO UNTIL TOTAL > 5 PI;` is misparsed as `WHILE` ... not it wasn't, but the LBNF label didn't distinguish between `WHILE` and `UNTIL`, so it was hard to read.  Fixed that.
+
+All okay.
+
+## 097-SAMPLE_FLOW.hal
+
+All okay.
+
+## 104-EXAMPLE_1.hal
+
+All okay.
+
+## 106-EXAMPLE_2.hal
+
+I don't see that `TEMPORARY` is indicated in the abstract syntax tree, for `DO TEMPORARY I = 1 TO 4;` or `DO FOR TEMPORARY J = 1 TO 3;` ... but it was; the LBNF labeling in the compiler front-end just wasn't adequate to make that obvious.  Fixed now.
+
+All okay.
+
+## 107-EXAMPLE_3.hal and 107-EXAMPLE_4.hal
+
+All okay.
+
+## 108-EXAMPLE_5.hal
+
+All okay.
+
+## 112-EXAMPLE_6.hal
+
+This example contains identifiers like `[ATT_RATE]`, `[GYRO_INPUT]`, and `[SCALE]`, which I had previously had the preprocessor eliminate in favor of `ATT_RATE`, `GYRO_INPUT`, and `SCALE`.  I'm convinced now that that was the wrong behavior.  So I've removed that behavior from the preprocessor and have made adjustments to the compiler front-end's LBNF to accommodate new `<ARITH VAR>` types `[ <ARITH ID> ]` and `[ <ARITH ID> ] <SUBSCRIPT>`.  It may take a while to see if those are the appropriate changes.
+
+All okay now.
+
+## 113-EXAMPLE_7.hal
+
+The preprocessor code for line reorganization that protected inline comments and single-quoted strings did not properly handle occurrences of "¬" occurring outside of those contexts, incorrectly converting them them to ",".  Fixed that.
+
+All okay now.
+
+## 117-EXAMPLE_8.hal
+
+All okay.
+
+# 2022-12-01
+
+## 119-EXAMPLE_9.hal
+
+All okay.
+
+## 120-EXAMPLE_A.hal
+
+I can't distinguish things like `DATA_VALID$(I:) = FALSE;` from `DATA_VALID$(I) = FALSE;` in the abstract syntax tree.  I see now that 119-EXAMPLE_9.hal had this problem as well, but I just didn't notice it before.
+
+All okay now.
+
+## 127-LIMIT.hal
+
+All okay.
+
+## 128-MASS.hal
+
+When a function name or procedure name is mangled via a definition of the function or procedure or a forward declaration of it, the scope of the mangled name could be the parent context, not just the interior of the function or procedure.  That fails in this example, where the function `TAU()` isn't accessible to the parent (`MASS()`).
+
+Fixed for function/procedure definitions but not yet for forward declarations, since this example doesn't have any to test.
+
+All okay now.
+
+## 129-ALMOST_EQUAL.hal
+
+All okay.
+
+## 130-EXAMPLE_N.hal
+
+This example has a forward definition of a function, for which the mangling of the function name as mentioned above remains to be fixed in the preprocessor.
+
+# 2022-12-02
+
+## 130-EXAMPLE_N.hal (continued)
+
+Fixed the forward-declaration stuff mentioned yesterday, and a typo in the code sample itself.
+
+All okay now.
+
+## 134-DOTS.hal and 134-ROLL.hal
+
+All okay.
+
+## 136-DOTS.hal
+
+All okay.
+
+## 137-STATISTICS.hal
+
+In the LBNF grammar, some RTL functions that I now think should be `<ARITH FUNC>` type had been set (by me, as they were opmitted from the original BNF grammar) as `<STRUCT FUNC>`, causing the compilation to fail.  (In particular, `SUM()`.)  I've changed that.
+
+All okay.
+
+## 138-FILTER.hal
+
+All okay.
+
+## 140-STATISTICS.hal
+
+All okay.
+
+## 141-VSUM.hal
+
+All okay.
+
+## 154-ADD.hal
+
+Couldn't tell from abstract syntax tree which minor attribute (`AUTOMATIC`) was in the declaration `DECLARE TOTAL SCALAR INITIAL(0) AUTOMATIC;`.  Fixed the labeling in the LBNF grammar to allow it.
+
+All okay now.
+
+## 158-STATE.hal
+
+Fixed a typo in the sample code, but otherwise okay.
+
+## 159-AGE.hal
+
+Preprocessor problem with the scope for name mangling: It doesn't allow for redeclaration of an identifier that the parent scope is mangling.  In this example, the problem is that it's for a program called `AGE`, which at the top-level scope is being mangled as `l_AGE`.  However, within the `AGE` program itself, there's also a declaration for `AGE` as a local variable.  *Within* the scope of the `l_AGE` program itself, `AGE` should not be mangled.
+
+Besides which the `INTEGER()` RTL function (if that's what it actually is) was not recognised as such.
+
+Having fixed those things in the preprocessor and LBNF grammer, all is okay.
+
+## 160-REFORMAT.hal
+
+Same situation as in section above:  `CHARACTER()` not recognized as an RTL function in the LBNF grammar.
+
+Plus it appears as though the RTL functions `LENGTH()` and (perhaps) `INDEX()` are miscategorized in the LBNF grammar as `<CHAR FUNC>` rather than `<ARITH FUNC>`.  (Again, these were absent from the documented BNF grammar, so I had invented them myself.)
+
+Even with that fix, `INTEGER$(@DOUBLE)()` is not parsed correctly ... or wait, maybe it is parsed okay after all.  Well, it's hard to tell from the abstract syntax tree.   Yes, it's okay, because it does have an `<ARITH FUNC HEAD>` that I was too daft to see.
+
+Looks good to me.
+
+## 164-OUTER.hal
+
+"Programming in HAL/S" has a misprint here, which I faithfully transcribed into the source file and have now needed to correct.  Specifically, in place of `DECLARE VNAME CHARACTER(8);`, the document instead had `DECLARE V NAME CHARACTER(8);`.  As it happens, the latter is indeed something that can be parsed, so that added to the confusion.  Nevertheless, parsable or not, it doesn't seem to match what's happening in the remainder of the code.
+
+The labeling in the LBNF grammar didn't let me easily distinguish the differen i/o controls in `READ` (i.e., `SKIP`, `COLUMN`, and so on).  Now fixed.
+
+All okay now.
+
+## 167-ASSORTEDIO.hal
+
+Syntax error at `IOPARM` in `STRUCT IOPARM: ...;` ... oh, that's a typo in the sample code:  `STRUCT` should have been `STRUCTURE`.
+
+Well, the syntax error remains after fixing that.  It may be because while I mangle several types of identifiers (labels, booleans, boolean functions, ...), I never go around to mangling structure identifiers.
+
+TBD

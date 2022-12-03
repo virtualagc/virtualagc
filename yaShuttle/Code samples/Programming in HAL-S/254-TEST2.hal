@@ -1,0 +1,27 @@
+C/ Adapted from PDF p. 254 of "Programming in HAL/S".
+C/ The original code could not be compiled, because
+C/ it didn't consist of top-level blocks like PROGRAM,
+C/ FUNCTION, or PROCEDURE.  I've simply wrapped the 
+C/ whole thing in a PROGRAM block to make it compilable.
+
+  TEST2:
+  PROGRAM;
+
+     DECLARE I INTEGER,
+             B BIT(16);
+     READ(5) I;
+E    .
+M    B = BIT(I);
+E       .
+M    IF B  THEN   
+S	 1
+
+        WRITE(6) 'VALUE OF I WAS NEGATIVE';
+E       .
+M    IF B  THEN
+S        #
+
+        WRITE(6) 'VALUE OF I WAS ODD';
+      
+  CLOSE TEST2;
+  

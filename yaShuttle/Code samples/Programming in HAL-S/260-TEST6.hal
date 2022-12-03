@@ -1,0 +1,46 @@
+C/ Adapted from PDF p. 260 of "Programming in HAL/S".
+C/ The original code could not be compiled, because
+C/ it didn't consist of top-level blocks like PROGRAM,
+C/ FUNCTION, or PROCEDURE.  I've simply wrapped the 
+C/ whole thing in a PROGRAM block to make it compilable.
+
+  TEST6:
+  PROGRAM;
+
+     STRUCTURE IMU_DATA:
+        1 DELTA_V ARRAY(3) INTEGER DOUBLE,
+        1 ATTITUDE ARRAY(3) INTEGER,
+        1 STATUS BIT(16);
+        
+     DECLARE IMU_INPT IMU_DATA-STRUCTURE(3);
+     DECLARE BEST_INTEGER;
+     DECLARE PITCH_ANGLE SCALAR;
+     
+     DECLARE BEST_IMU NAME IMU_DATA-STRUCTURE;
+     
+  LOW_RATE:
+  TASK;
+     DECLARE BEST INTEGER;
+     CALL TBD ASSIGN(BEST);
+E            +                +
+M    NAME(BEST_IMU) = NAME(IMU_INPT     );
+S     				   BEST;
+
+  CLOSE LOW_RATE;
+  
+C
+
+  HI_RATE:
+  TASK;
+  
+C	...
+
+M    PITCH_ANGLE = SCALAR(BEST_IMU.ATTITUDE );
+S                                          1
+
+C	...
+
+  CLOSE HI_RATE;
+  
+  CLOSE TEST6;
+  

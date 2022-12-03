@@ -1,0 +1,33 @@
+C/ From PDF p. 172 of "Programming in HAL/S".
+
+  OUTER:
+  PROGRAM;
+     DECLARE SCALAR,
+     		G1, G2;
+     STRUCTURE UTIL_PARM:
+        1 V VECTOR,
+        1 S1 SCALAR,
+        1 C INTEGER,
+        1 S2 SCALAR,
+        1 E BOOLEAN;
+     DECLARE ARG UTIL_PARM-STRUCTURE;
+  UTIL:
+  FUNCTION(X) VECTOR;
+     DECLARE X UTIL_PARM-STRUCTURE;
+     	     
+C	.
+C	.
+C	.
+
+E	      -
+M    RETURN X.V;
+  CLOSE UTIL;
+     DO FOR TEMPORARY I = 1 TO 10;
+E		 +
+M       READ(5) ARG;
+E			     +              +
+M       WRITE(6) 'UTIL OF', ARG, '=', UTIL(ARG);
+
+     END;
+  CLOSE OUTER;
+  

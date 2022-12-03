@@ -1,0 +1,22 @@
+C/ From PDF p. 177 of "Programming in HAL/S".
+
+  P:
+  PROGRAM;
+     STRUCTURE SUPER_VECTOR:
+        1 V VECTOR,
+        1 STATUS BOOLEAN,
+        1 TIMETAG SCALAR;
+     STRUCTURE S2:
+     	1 STATE,
+     	   2 POSITION,
+     	      3 V VECTOR,
+     	      3 STATUS BOOLEAN,
+     	      3 TIMETAG SCALAR,
+     	   2 VELOCITY,
+     	      3 V VECTOR,
+     	      3 STATUS BOOLEAN,
+     	      3 TIMETAG SCALAR,
+     	   2 ACCEL SUPER_VECTOR-STRUCTURE,
+     	1 ATTITUDE_INFO ARRAY(3) VECTOR DOUBLE;
+  CLOSE P;
+  

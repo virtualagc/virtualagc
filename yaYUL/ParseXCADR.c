@@ -22,9 +22,8 @@
   		unique to Block 1.
   Mode:		2009-07-25 RSB	Copied from ParseCADR.c.
                 2016-08-24 RSB  Fixed for Block 1.
-  
-  At the moment I don't know how or if XCADR differs from CADR, so I've
-  just copied ParseCADR().
+                2022-11-27 MAS  Corrected operation to match the original
+                                Yul (needed for Sunrise 45).
 */
 
 #include "yaYUL.h"
@@ -38,10 +37,6 @@ int ParseXCADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   Address_t Address;
   int Value, i;
-
-  if (!strcmp(InRecord->Operand, "DECON")) {
-      i = 0;
-  }
 
   IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
   if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow)
@@ -88,53 +83,36 @@ int ParseXCADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 	  return (0);
 	}
 
-      if (Block1)
+      if (InRecord->ProgramCounter.Fixed && Address.Fixed && Address.Banked &&
+          (InRecord->ProgramCounter.FB != Address.FB ))
         {
-          int isLiteralNumber = 0;
-          char *s;
-          unsigned offset;
-          if (1 == sscanf(InRecord->Mod1, "+%o", &offset))
-            OpcodeOffset = offset;
-          isLiteralNumber = 1;
-          for (s = InRecord->Operand; *s; s++)
-            if (*s > '9' || *s < '0')
-              {
-                isLiteralNumber = 0;
-                break;
-              }
-          if (isLiteralNumber)
-            OutRecord->Words[0] = 050000 + atoi(InRecord->Operand) - 1;
-          else if (Address.Erasable)
-            OutRecord->Words[0] = 050000 + Address.Value - 1;
-          else if (Address.Fixed)
-            OutRecord->Words[0] = 050000 + (Address.FB << 9) + (Address.Value & 01777) - 1;
-          else
-            OutRecord->Words[0] = 050000 + Address.Value;
+          strcpy(OutRecord->ErrorMessage, "Destination must be in current fixed bank.");
+          OutRecord->Fatal = 1;
         }
+
+      if (!Block1)
+        {
+	  strcpy(OutRecord->ErrorMessage, "XCADR is only supported for Block I");
+	  OutRecord->Fatal = 1;
+	  return (0);
+        }
+
+      int isLiteralNumber = 0;
+      char *s;
+      unsigned offset;
+      if (1 == sscanf(InRecord->Mod1, "+%o", &offset))
+        OpcodeOffset = offset;
+      isLiteralNumber = 1;
+      for (s = InRecord->Operand; *s; s++)
+        if (*s > '9' || *s < '0')
+          {
+            isLiteralNumber = 0;
+            break;
+          }
+      if (isLiteralNumber)
+        OutRecord->Words[0] = 047777 + atoi(InRecord->Operand);
       else
-        {
-          if (!Address.Fixed || !Address.Banked)
-            {
-              strcpy(OutRecord->ErrorMessage, "Destination not in an F-bank.");
-              OutRecord->Fatal = 1;
-              return (0);
-            }
-
-          // If this is a superbank, we massage a little more to get into the 15-bit
-          // address range.
-          if (Address.Super && Address.FB >= 030)
-            Address.Value -= 010 * 02000;
-
-          if (Address.Value < 010000 || Address.Value > 0107777)
-            {
-              strcpy(OutRecord->ErrorMessage, "Destination address out of range.");
-              OutRecord->Fatal = 1;
-              return (0);
-            }
-
-          OutRecord->Words[0] = Address.Value - 010000;
-        }
-
+        OutRecord->Words[0] = 047777 + Address.SReg;
     }
   else
     {

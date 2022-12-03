@@ -1,0 +1,17 @@
+C/ From PDF p. 154 of "Programming in HAL/S".
+
+  ADD:
+  PROGRAM;
+     DECLARE TOTAL SCALAR INITIAL(0) AUTOMATIC;
+     DECLARE A ARRAY(100) SCALAR INITIAL(0);
+     READ(5) [A];
+M    DO FOR TEMPORARY I = 1 TO 100 UNTIL A  = 0;
+S                                         I
+
+M       TOTAL = TOTAL + A ;
+S			 I
+
+     END;
+     WRITE(6) 'TOTAL IS ', TOTAL;
+  CLOSE ADD;
+  

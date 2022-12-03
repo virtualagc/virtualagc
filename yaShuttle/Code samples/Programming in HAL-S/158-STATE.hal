@@ -1,0 +1,21 @@
+C/ From PDF p. 158 of "Programming in HAL/S".
+
+  STATE:
+  FUNCTION(B, TYPE) CHARACTER(5);
+     DECLARE B BOOLEAN,
+     		TYPE INTEGER;
+     DECLARE YES ARRAY(4) CHARACTER(5) INITIAL('TRUE', 'ON', 'OPEN', 'VALID');
+     DECLARE NO ARRAY(4) CHARACTER(5) INITIAL('FALSE', 'OFF', 'SHUT', 'ERROR');
+E       .
+M    IF B THEN
+E               ,
+M       RETURN YES     ;
+S		  TYPE:
+
+     ELSE
+E              ,
+M       RETURN NO     ;
+S                TYPE:
+
+  CLOSE STATE;
+  

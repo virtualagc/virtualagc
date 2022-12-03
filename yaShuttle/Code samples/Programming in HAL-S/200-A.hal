@@ -1,0 +1,24 @@
+C/ From PDF p. 200 in "Programming in HAL/S".
+
+  A:
+  PROGRAM;
+M    ON ERROR    IGNORE;
+S            1:2
+
+     CALL B;
+     CALL C;
+  B:
+  PROCEDURE:
+  
+M    ON ERROR
+S            1:2
+
+       GO TO X;
+    CALL C;
+ X: WRITE(6) 'GOT AN ERROR';
+ CLOSE B;
+ C:
+ PROCEDURE;
+ CLOSE C;
+ CLOSE A;
+ 

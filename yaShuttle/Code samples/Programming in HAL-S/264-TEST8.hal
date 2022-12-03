@@ -1,0 +1,36 @@
+C/ Adapted from PDF p. 264 of "Programming in HAL/S".
+C/ The original code could not be compiled, because
+C/ it didn't consist of top-level blocks like PROGRAM,
+C/ FUNCTION, or PROCEDURE.  I've simply wrapped the 
+C/ whole thing in a PROGRAM block to make it compilable.
+
+  TEST8:
+  PROGRAM;
+
+     STRUCTURE TQE:
+     
+C    TIMER QUEUE ELEMENT
+
+        1 TIME SCALAR,
+        1 ACTION INTEGER,
+        1 AFFECTED_PROCESS NAME PROCESS_CONTROL-STRUCTURE,
+        1 NEXT NAME TQE-STRUCTURE;
+     DECLARE TQ TQE-STRUCTURE(100);
+     
+     DECLARE FREE_Q NAME TQE-STRUCTURE;
+     DECLARE ACTV_Q NAME TQE-STRUCTURE;
+     
+  INITIALIZE:
+E           +            +
+M    NAME(FREE_Q) = NAME(TQ  );
+S			   1;
+
+     DO FOR TEMPORARY N = 1 TO 99;
+E                +             +
+M       NAME(TQ.NEXT  ) = NAME(TQ    );
+S		    N;           N+1;
+
+     END;
+     
+  CLOSE TEST8;
+  

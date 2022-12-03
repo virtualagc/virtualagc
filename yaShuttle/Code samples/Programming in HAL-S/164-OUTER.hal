@@ -1,0 +1,42 @@
+C/ From PDF p. 164 of "Programming in HAL/S".
+
+  OUTER:
+  PROGRAM;
+  
+     DECLARE SCALAR,
+     		PHI, ALPHA;
+     DECLARE INITIAL_POSN VECTOR DOUBLE;
+     DECLARE MODE INTEGER,
+     		PRINT BOOLEAN;
+     		
+C	.
+C	.
+C	.
+
+  INITIALIZE:
+  PROCEDURE;
+C/ The following line was given as V NAME rather than VNAME, which seems wrong.
+     DECLARE VNAME CHARACTER(8);
+     REPLACE INFILE BY "5";
+     DO WHILE TRUE;
+        READALL(INFILE) VNAME;
+        VNAME = TRIM(VNAME);
+        IF VNAME = 'PHI' THEN READ(INFILE) SKIP(0), COLUMN(9), PHI;
+        IF VNAME = 'ALPHA' THEN READ(INFILE) SKIP(0), COLUMN(9), ALPHA;
+        IF VNAME = 'I_POSN' THEN READ(INFILE) SKIP(0), COLUMN(9), INITIAL_POSN;
+        IF VNAME = 'MODE' THEN READ(INFILE) SKIP(0), COLUMN(9), MODE;
+        IF VNAME = 'PRINT' THEN READ(INFILE) SKIP(0), COLUMN(9), PRINT;
+        IF VNAME = 'END' THEN EXIT;
+     END;
+E	  .
+M    IF PRINT THEN
+E                                 -
+M       WRITE(6) PHI, ALPHA, INITIAL_POSN, MODE;
+  CLOSE INITIALIZE;
+  
+C	.
+C	.
+C	.
+
+  CLOSE OUTER;
+  

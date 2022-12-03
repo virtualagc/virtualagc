@@ -1,0 +1,28 @@
+C/ Adapted from PDF p. 260 of "Programming in HAL/S".
+C/ The original code could not be compiled, because
+C/ it didn't consist of top-level blocks like PROGRAM,
+C/ FUNCTION, or PROCEDURE.  I've simply wrapped the 
+C/ whole thing in a PROGRAM block to make it compilable.
+
+  TEST5:
+  PROGRAM;
+
+E                        +
+M    CALL XTRA ASSIGN(IMU_INPT     );
+S			      BEST;
+
+  XTRA:
+  PROCEDURE ASSIGN(BEST_IMU);
+     DECLARE BEST_IMU IMU_DATA-STRUCTURE;
+     
+C		...
+
+M    PITCH_ANGLE = SCALAR(BEST_IMU.ATTITUDE  );
+S					   1
+
+C		...
+
+  CLOSE XTRA;
+  
+  CLOSE TEST5;
+       

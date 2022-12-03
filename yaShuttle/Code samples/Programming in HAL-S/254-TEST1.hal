@@ -1,0 +1,19 @@
+C/ Adapted from PDF p. 254 of "Programming in HAL/S".
+C/ The original code could not be compiled, because
+C/ it didn't consist of top-level blocks like PROGRAM,
+C/ FUNCTION, or PROCEDURE.  I've simply wrapped the 
+C/ whole thing in a PROGRAM block to make it compilable.
+
+  TEST1:
+  PROGRAM;
+
+     DECLARE INPUT BIT(24);
+     DECLARE OUTPUT INTEGER INITIAL(0);
+     DO FOR I = 1 TO 21 BY 4;
+E                                     .
+M       OUTPUT = 10 OUTPUT + INTEGER(INPUT      );
+S					  4 AT I
+
+     END;
+  CLOSE TEST1;
+  

@@ -16,14 +16,18 @@ History:        2022-11-07 RSB  Created.
                                 statements.
                 2022-11-18 RSB  Moved replaceBy into separate module
                                 for continued development.
-
+                2022-11-21 RSB  Began adding identifier type prefixes.
+                                Removed #-comments.
+                2022-11-22 RSB  Added --full.
+                2022-11-30 RSB  Eliminated the bracket-removal code, expecting
+                                the LBNF to handle it.
+                                
 Here are the features of HAL/S I don't think the compiler can handle:
 
     1.  Special characters in column 1.  Specifically:
             a)  The original comments ('C' in column 1).
-            b)  "Modern" comments ('#' in column 1).
-            c)  Multiline E / M / S constructs (including tabulation).
-            d)  Compiler directives ('D' in column 1).
+            b)  Multiline E / M / S constructs (including tabulation).
+            v)  Compiler directives ('D' in column 1).
     2.  The macro statements:
             REPLACE identifier[(identifier)] by "string" ;
         The compiler can parse these lines all right, but cannot 
@@ -36,18 +40,25 @@ Of these matters:
     *   I don't see any perfect way to handle issue 2, so I've hidden
         in a separate module where it's "easily" replacable if the 
         implementation is inadequate.
-        
+
+Additionally, the preprocessor mangles IDENTIFIERs according to their
+datatype This is actually handled by appropriating the mechanism used for 
+REPLACE/BY macros, so the work is all handled by the replaceBy module
+transparently.
 """
 
 import sys
 import re
 import unEMS
 import replaceBy
+import reorganizer
 
 #Parse the command-line arguments.
 tabSize = 8
 halsSource = []
 metadata = []
+files = []
+full = True
 for param in sys.argv[1:]:
     if param == "--help":
         print("""
@@ -65,10 +76,18 @@ for param in sys.argv[1:]:
                         Shuttle source has no tabs anyway since it was supplied on
                         punchcards, but it's certainly possible to accidentally
                         end up with tabs if source is edited in modern editors.
+        --full          If this is used, then identifiers are distinguished by
+                        type, prefixing "l_", "b_", "c_", ....  (The default.)
+        --indistinct    Opposite of --full.
         """)
     elif param[:6] == "--tab=":
         tabSize = int(param[6:])
+    elif param == "--full":
+        full = True
+    elif param == "--indistinct":
+        full = False
     else:
+        files.append(param)
         start = len(halsSource)
         halsFile = open(param, "r")
         halsSource += halsFile.readlines()
@@ -83,8 +102,6 @@ for param in sys.argv[1:]:
                 first = False
             if halsSource[i][:1] == "C":
                 m["comment"] = True
-            elif halsSource[i][:1] == "#":
-                m["modern"] = True
             elif halsSource[i][:1] == "D":
                 m["directive"] = True
             metadata.append(m)
@@ -104,50 +121,65 @@ for i in range(len(halsSource)):
     
 # Remove E/M/S multiline constructs. 
 unEMS.unEMS(halsSource, metadata)
+
 warningCount = unEMS.warningCount
 fatalCount = unEMS.fatalCount
 
-# To the best of my understanding when variables are shown in the compiler's
-# output listing as "[NAME]", the brackets are really just for annotation
-# purposes.  The BNF doesn't mention the brackets at all.  We need to 
-# replace [NAME] by NAME.
+# Reorganize input lines.
+'''
+print("---------------------------------------------------------------------")
+for i in range(len(halsSource)):
+    print(halsSource[i], metadata[i])
+'''
+halsSource, metadata = reorganizer.reorganizer(halsSource, metadata)
+'''
+print("---------------------------------------------------------------------")
+for i in range(len(halsSource)):
+    print(halsSource[i], metadata[i])
+sys.exit(1)
+'''
+
+'''
+# This code was intended to convert constructs like [X] to just X.  It's 
+# misguided and needs to be removed ... which I'll do as soon as the LBNF
+# for the compiler front-end has been fixed up to account for the brackets.
 for i in range(len(halsSource)):
     line = halsSource[i]
     while True:
         match = re.search("\\[" + replaceBy.bareIdentifierPattern + "\\]", line)
         if match == None:
             break
-        line = line[:match.span()[0]] + match.group()[1:-1] + line[match.span()[1]:]
+        line = line[:match.span()[0]] + match.group()[1:-1] \
+                    + line[match.span()[1]:]
     if line != halsSource[i]:
         halsSource[i] = line
+'''
 
 # Take care of REPLACE ... BY "..." macros.
-replaceBy.replaceBy(halsSource, metadata)
+replaceBy.replaceBy(halsSource, metadata, full)
 
-# Take care of original and modern full-line comments.
+# Output the modified source.
 for i in range(len(halsSource)):
-    if "comment" in metadata[i]:
-        print("//" + halsSource[i][1:])
-    elif "modern" in metadata[i]:
-        print("///" + halsSource[i][1:])
-    elif "directive" in metadata[i]:
-        print("//D" + halsSource[i][1:])
+    if len(halsSource[i]) > 0 and halsSource[i][:1] != " ":
+        print(" /*" + halsSource[i] + "*/" )
     else:
-        #if "errors" in metadata[i]:
-        #    for error in metadata[i]["errors"]:
-        #        print(error, file=sys.stderr)
-        #    print(halsSource[i], file=sys.stderr)
-        print(halsSource[i])
+        #print(halsSource[i])
+        print(reorganizer.untranslate(halsSource[i]))
 
 # Print final summary.
-print("Preprocessor summary:", file=sys.stderr)
+print(" /*")
+print(" Files:")
+for file in files:
+    print("     ", file)
+print(" Summary:")
 for i in range(len(halsSource)):
     if "errors" in metadata[i]:
-        print("Line %d:" % (i+1), halsSource[i], file=sys.stderr)
+        print(" Line %d:" % (i+1), halsSource[i])
         for error in metadata[i]["errors"]:
-            print("       ", error, file=sys.stderr)
-print(warningCount, "warnings", file=sys.stderr)
-print(fatalCount, "errors", file=sys.stderr)
+            print("     ", error)
+print("     ", warningCount, "warnings")
+print("     ", fatalCount, "errors")
+print (" */")
 if fatalCount > 0:
     sys.exit(1)
 

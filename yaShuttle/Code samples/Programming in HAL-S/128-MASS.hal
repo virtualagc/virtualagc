@@ -1,0 +1,16 @@
+C/ From PDF p. 128 of "Programming in HAL/S".
+
+  MASS:
+  FUNCTION(REST_MASS, SPEED) SCALAR;
+     DECLARE SCALAR, 
+     		REST_MASS, SPEED;
+  TAU:
+  FUNCTION(V) SCALAR;
+     DECLARE V SCALAR;
+     DECLARE C CONSTANT(2980000);
+E                     2    2
+M    RETURN SQRT(1 - V  / C  );
+  CLOSE TAU;
+     RETURN REST_MASS / TAU(SPEED);
+  CLOSE MASS;
+  
