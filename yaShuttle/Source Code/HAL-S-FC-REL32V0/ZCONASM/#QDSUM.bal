@@ -1,0 +1,4 @@
+#QDSUM   CSECT
+ DC Z(DSUM,,X'E')
+ EXTRN DSUM
+ END

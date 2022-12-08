@@ -1,0 +1,4 @@
+#QDTOH   CSECT
+ DC Z(DTOH,,X'E')
+ EXTRN DTOH
+ END

@@ -1,0 +1,4 @@
+#QSIN    CSECT
+ DC Z(SIN,,X'E')
+ EXTRN SIN
+ END

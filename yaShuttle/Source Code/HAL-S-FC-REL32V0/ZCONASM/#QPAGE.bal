@@ -1,0 +1,4 @@
+#QPAGE   CSECT
+ DC Z(PAGE,,X'E')
+ EXTRN PAGE
+ END

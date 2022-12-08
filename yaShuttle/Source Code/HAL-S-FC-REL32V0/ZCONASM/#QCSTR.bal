@@ -1,0 +1,4 @@
+#QCSTR   CSECT
+ DC Z(CSTR,,X'E')
+ EXTRN CSTR
+ END

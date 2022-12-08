@@ -1,0 +1,4 @@
+#QEIN    CSECT
+ DC Z(EIN,,X'E')
+ EXTRN EIN
+ END

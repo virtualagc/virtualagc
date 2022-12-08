@@ -1,0 +1,4 @@
+#QETOH   CSECT
+ DC Z(ETOH,,X'E')
+ EXTRN ETOH
+ END

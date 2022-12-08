@@ -1,0 +1,4 @@
+#QBTOC   CSECT
+ DC Z(BTOC,,X'E')
+ EXTRN BTOC
+ END

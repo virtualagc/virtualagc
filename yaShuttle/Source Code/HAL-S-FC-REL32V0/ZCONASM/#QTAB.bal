@@ -1,0 +1,4 @@
+#QTAB    CSECT
+ DC Z(TAB,,X'E')
+ EXTRN TAB
+ END

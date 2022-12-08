@@ -1,0 +1,4 @@
+#QIMAX   CSECT
+ DC Z(IMAX,,X'E')
+ EXTRN IMAX
+ END

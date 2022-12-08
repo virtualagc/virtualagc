@@ -1,0 +1,4 @@
+#QDEXP   CSECT
+ DC Z(DEXP,,X'E')
+ EXTRN DEXP
+ END

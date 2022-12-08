@@ -1,4 +1,4 @@
-*This folder is work in progress and is not presently useful for anything ... beginning with the fact that Space Shuttle software is not presently available.  The same comment applies to the Space Shuttle web-pages mentioned below.*
+*This folder is work in progress and is not presently useful for much ... beginning with the fact that Space Shuttle software is not presently available.*
 
 # Table of Contents
 
@@ -6,14 +6,10 @@
 * [Some Background](#Background)
 * [Roadmap](#Roadmap)
     * [Phase 1](#Phase1)
-    * [Phase 1.1](#Phase11)
     * [Phase 2 and Beyond](#Phase2)
-* [The Modern HAL/S Compiler: yaHAL-S](#Compiler)
-* [Changes To the Language](#Changes)
-    * [Program Comments](#Comments)
-* [The p-Code Format:  p-HAL/S](#pCode)
-* [The PHase 1 Emulator:  yaPASS.py](#Emulator1)
-* [The Phase 1.1 Emulator:  yaGPC.c](#Emulator11)
+* [The Modern HAL/S Compiler and Preprocessor: yaHAL_S and yaHAL-preprocessor.py](#Compiler)
+* [Conventions and Restrictions](#Changes)
+    * [Column 1 and Comments](#Comments)
 
 # <a name="WhatIs"></a>What's This?
 
@@ -51,12 +47,10 @@ Aside from attempting to acquire Space Shuttle source code, original development
 ## <a name="Phase1"></a>Phase 1
 
 1. Creation of a p-code format (p-HAL/S), suitable for distributing emulation-ready but unmodifiable Shuttle Software, from which source code is not recoverable.  This is seen as an ITAR-compatible method of open distribution, since the distributed p-code contains neither targeting capabilities, nor the means to add such capabilities.
-2. Creation of a "modern" compiler (yaHAL-S) for the HAL/S language, producing p-HAL/S p-code.
-3. Creation of an emulator (yaPASS.py) for executing p-HAL/S p-code and emulating certain Shuttle crew-interface peripherals, specifically the multifunction displays and keyboards.  This emulation is not required to be time-efficient or suitable for integration into a spaceflight-simulation system.
+2. Creation of a "modern" compiler (yaHAL-S) for the HAL/S language, producing an executable form of the code.
+3. Creation of an emulation (yaPASS.py) for certain peripherals (displays, keyboards), and possibly for the CPU running the executable just mentioned.
 
-## <a name="Phase11"></a>Phase 1.1
-
-1. Creation of a fast emulation subroutine (yaGPC.c) for executing p-HAL/S p-code, but with no direct means of emulating peripherals.  Instead, there will be some method for developers to interface to their own peripheral devices and/or databuses.  This is intended to be an efficient means of integration for spaceflight-simulation systems.
+What it means to produce "executable" code is TBD.  If, for example, the compiler simply produced an executable for its target platform (e.g., Linux, Mac, Windows), then no CPU emulation is required.  Another possibility is to produce a kind of p-code (say, "p-HAL/S"), in which case some kind of virtual p-code machine is required to execute that p-code.
 
 ## <a name="Phase2"></a>Phase 2 and Beyond
 
@@ -69,42 +63,82 @@ This is an open area, as many additional developments are possible.  Here's a li
 
 But I'm sure there are many other things that could be done as well.
 
-# <a name="Compiler"></a>The Modern HAL/S Compiler: yaHAL-S
+# <a name="Compiler"></a>The Modern HAL/S Compiler and Preprocessor: yaHAL_S and yaHAL-preprocessor.py
 
-When there's something definitive, I'll describe it here.  For now, though, the compiler is under development.  You can read about the progress and status in the separate file yaHAL-S-Development.md.
+When there's something definitive, I'll describe it here.  In general, though, the HAL/S compiler is under development.  You can read about the progress and status in the separate file yaHAL-S-Development.md.
 
-# <a name="Changes"></a>Changes To the Language
+In the "modern" system, compilation of HAL/S source-code is a two-part process:  The source code is first preprocessed and then the preprocessed code is compiled.  The preprocessing step is not optional, as it works around certain issues with HAL/S source code that the compiler is unable to handle, for technical reasons probably not of general interest.  (For the record, some of those issues are:  Special interpretation of column 1 of source lines, including full-line comments and multi-line math format; free format of source lines past column 1; expansion of macros; some compiler directives, including structure templates and inclusion of source files; non-context-free grammar.)
 
-## <a name="Comments"></a>Program Comments and Compiler Directives
+The preprocessor is invoked simply as
 
-In true HAL/S, comments and compiler directives take one of the following forms:
+    yaHAL-preprocessor.py FILE1.hal [FILE2.hal [...] ] > PREPROCESSED.hal
 
-* `C` in column 1 indicates a full-line comment.
-* Anything in column 2 and beyond that's delimited by `/*` and `*/` is a comment.
-* `D` in column 1 indicates a compiler directive.
+As you may gather from this, the file output by the the preprocessor would in fact be a legal HAL/S source code file if the original HAL/S compiler from the Shuttle era were available to compile it ... although in a pragmatic sense it may exceed line-length limits and lack line-sequencing numbers required by some versions of the original compiler.  Since the preprocessor is simply a standard Python 3 program it can be run without change on any platform supporting Python 3.
 
-Additionally, though, we have the need for "modern" comments that weren't present originally, and we need to be able to distinguish those from the original comments.  For example, we need additional comments to associate the code with the Virtual AGC Project, to indicate the provenance, to indicate the (modern) change history, to describe any licensing or distribution issues (copyright, ITAR), and so on, none of which is covered by the original program comments.  Thus, we've added a third type of comment:
+As I'm writing this, the compiler is much earlier in its development than is the preprocessor, so details of its operation are less clear.  In general, I'd expect it to be invoked as
 
-* `#` in column 1 indicates a full-line *modern* comment.
+    yaHAL_S [OPTIONS] < PREPROCESSED.hal > PREPROCESSED.lst
 
-But as mentioned before, the modern compiler cannot recognize the special nature of column 1, so we have to transform notations aligned to column 1 into something palatable to the compiler.  That's done by means of the preprocessor, **yaHAL-reprocessor.py** in the yaShuttle/yaHAL-S/ folder of the software repository.  In the case of full-line comments and compiler directives, the preprocessor transforms them as follows for consumption by the compiler:
+where by `PREPROCESSED.lst`, I mean a listing file.  I'd expect the compiled executable to appear as a file called "yaHAL_S.*ext*", where the file-extension *ext* is yet to be determined, and would depend on the machine architecture on which the executable is expected to run.
 
-* `C` in column 1 &rarr; `//`.
-* `#` in column 1 &rarr; `///`.
-* `D` in column 1 &rarr; `//D`.
+# <a name="Changes"></a>Conventions and Restrictions
 
-While these new notations remain in column 1, to the compiler they are position-independent, and would be treated the same regardless of which column they appeared in:  i.e., the remainder of the line is not parsed as HAL/S code.
+## <a name="Comments"></a>Column 1 and Comments
 
-# <a name="pCode"></a>The p-Code Format:  p-HAL/S
+In true HAL/S, column 1 of each source-code line has a special interpretation, while columns 2 and beyond are completely free-form.
 
-TBD
+The special interpretations for column 1 are:
 
-# <a name="Emulator1"></a>The Phase 1 Emulator:  yaPASS.py
+* `C` indicates a full-line comment.
+* `D` indicates a compiler directive.
+* `E` indicates an "exponent" line.
+* Blank or `M` indicates a "main" line.
+* `S` indicates a "subscript" line.
 
-I'm not sure there's any reason to go into much detail about this, but the program consists basically of two Python modules, namely shuttleCrewInterface.py (which emulates displays and keyboards) and gpc.py (which emulates the CPU and executes the p-code).  The two interact via Python thread-safe queues, which emulate the Shuttle's databuses.  Button presses in the crew interface are conveyed to the CPU by passing data in one direction, while commands for displaying data on the displays are passed from the CPU to the crew interface by messages in the opposite direction.
+Besides full-line comments, there are also inline comments, which can be contained to a single line or can span multiple lines.  These have column 1 blank, but are delimited by `/*` and `*/`.
 
-TBD
+Conventionally, in the "modern" environment, we have a need for program comments which can be distinguished from the source-code's shuttle-era program comments.  *By convention*, a modern comment is one whose first comment character is '/'.  This remains a legal HAL/S full-line or inline comment, while still being distinguishable from the original comments.  For example:
 
-# <a name="Emulator11"></a>The Phase 1.1 Emulator:  yaGPC.c
+    C THIS IS A SHUTTLE-ERA FULL-LINE COMMENT
+    C/ This is a modern full-line comment
+     ... /* THIS IS A SHUTTLE-ERA INLINE COMMENT */ ...
+     ... /*/ This is a modern inline comment */ ...
 
-TBD
+You may suppose from this that the capitalization plays some role.  It doesn't.  In fact, the legal HAL/S character set includes lower-case alphabetic characters, so all of these comments are legal HAL/S in any era.  However, for whatever reason, none of the original source-code files I've seen employ any lower-case.  I'd venture that that's because software development began at a time when source-code was provided on punch cards, and punch cards could encode upper-case alphabetics but not lower-case alphabetics.  And then once this upper-case habit had been formed, it evolved into standard practice that continued long after punch-cards had fallen by the wayside.  But lower-case has always been legal, even in [the very first (1971) version of the HAL/S language specification](https://www.ibiblio.org/apollo/Shuttle/19730003464.pdf#page=26).
+
+As far as preprocessor actions are concerned, the preprocessor simply converts all full-line comments to inline comments beginning in column 2.  For example,
+
+    C FIRST COMMENT
+    C/ Second comment
+
+would be turned into
+
+     /* FIRST COMMENT */
+     /*/ Second comment */
+
+Of course, if the original shuttle-era source code contains any full-line comments beginning *immediately* in column 2 after the `C` in column 1, with no intervening whitespace, it will defeat this simple-minded convention of mine!
+
+Regarding the other special characters in column 1, the characters `E`, `M`, and `S` are associated a multi-line mathematical format for writing formulas.  For example, <i>z</i><sub>2</sub>=<i>x</i><sup>2</sup>+<i>y</i><sup>2</sup> in multiline format would look like
+
+    E     2  2
+    M z =x +y ;
+    S  2
+
+However, each multi-line mathematical expression like this has a corresponding single-line form, in the case of this example
+
+     z$2 = x**2 + y**2 ;
+
+and the preprocessor simply replaces the multi-line expressions by their single-line equivalents.
+
+**Note:**  In principle, there can be any number of `E` lines and any number of `S` lines for a given `M` line in multi-line math format.  The preprocessor only deals with 0 or 1 of each.  This is probably not a problem, since in practice the single-line format was used for writing source code, while the multi-line format was used for reading it.
+
+The final special character it's possible to find in column 1 is `D`, indicating a compiler directive.  Some compiler directives can be handled immediately by the preprocessor, such as source-file inclusions.  In general, however, the preprocessor simply converts these lines to inline comments, and hopes that the compiler will know what to do with them.  For example, consider the compiler directives
+
+    D INCLUDE TEMPLATE LIMIT
+    D DEVICE CHANNEL=6 UNPAGED
+
+The former can be immediately acted on by the preprocessor &mdash; think of this example as fetching a single declaration of a structure or an external variable or function called `LIMIT` from a C/C++ header file or a Python module, except that you know only the name of the object whose template you are fetching rather than knowing the filename containing it.  The latter can't be acted on by the preprocessor; it relates to the behavior of output devices.  But in any case, whatever overt action the preprocessor takes, it also turns the directives into inline comments:
+
+     /*D INCLUDE TEMPLATE LIMIT */
+     /*D DEVICE CHANNEL=6 UNPAGED */
+

@@ -1,0 +1,4 @@
+#QHSUM   CSECT
+ DC Z(HSUM,,X'E')
+ EXTRN HSUM
+ END

@@ -1,0 +1,4 @@
+#QCTOO   CSECT
+ DC Z(CTOO,,X'E')
+ EXTRN CTOO
+ END

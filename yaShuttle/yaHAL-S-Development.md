@@ -633,6 +633,226 @@ All okay now.
 
 Syntax error at `IOPARM` in `STRUCT IOPARM: ...;` ... oh, that's a typo in the sample code:  `STRUCT` should have been `STRUCTURE`.
 
-Well, the syntax error remains after fixing that.  It may be because while I mangle several types of identifiers (labels, booleans, boolean functions, ...), I never go around to mangling structure identifiers.
+# 2022-12-03
+
+## 167-ASSORTEDIO.hal (continued)
+
+Well, the syntax error remains after fixing that.  It may be because while I mangle several types of identifiers (labels, booleans, boolean functions, ...), I never go around to mangling structure identifiers.  It looks like there are three places where the preprocessor has to deal with mangling of structure IDs (not to mention structure functions, which I haven't gotten to):
+
+    STRUCT ID1: ...;
+    DECLARE ID2 ID1-STRUCTURE ...;
+
+This needs to become:
+
+    STRUCT s_ID1: ...;
+    DECLARE s_ID2 s_ID1-STRUCTURE ...;
+
+Even having done this in the preprocessor, the line `DECLARE IO PROCEDURE NONHAL(1);` fails; and it's not the `NONHAL` part that's failing.  Apparently, the reason is that the preprocessor mangles `IO` &rarr; `l_IO` (as I intendeded), but the LBNF grammar expects the procedure name in a forward declaration to be just any old identifier, and not the mangled form, whereas in the actual `CALL` to the procedure we need the mangled name.  That requires a replacement rule in the LBNF grammar for forward procedure declarations.
+
+With that, there's a failure at "`)`" in line `CALL l_IO(s_FWDSENSORS);`.  In these cases, we'd usually suspect that the parser thinks `l_IO` is a variable rather than a procedure or function, but we know that's not happening because if we replace `l_IO` by just `IO`, the error occurs at `IO` rather than at "`)`".  I think this must be a failure in the `CALL` parsing rules, since I notice that while preceding code samples do have procedure definitions, they actually have no `CALL`s to the procedures they define ... so this sample actually has the very first usage of `CALL`.  The answer appears to be that structure IDs are not accepted in the procedure's parameter list.  I've added that to the LBNF grammar (at `<LIST EXP>`), though it's unclear if that's the best place to do so.
+
+With that, there's now a failure at `DO_NAV_READ` in the line `SIGNAL DO_NAV_READ;`.  That would appear to be because I haven't yet added mangling of event names to the preprocessor.  Having added that, the declaration `DECLARE e_DO_NAV_READ EVENT;` fails because the LBNF grammar doesn't expect a mangled event name here. Fixed that.  I'm not sure that all possible declarations of events are covered, though, so problems may recur with more-complicated declarations.
+
+Now compiles without error, but it's difficult to understand the parsing of `INITIAL(NAME(NULL))` from the abstract syntax tree.  Changed some LBNF labels to handle that.
+
+After all of that stuff, seems okay, though admittedly the example contains so much stuff I've never seen before (in almost every line) that it's tough to be sure.  At least I'll say it's okay for now.
+
+## 169-OUTER.hal
+
+Looks good.
+
+## 170-OUTER.hal
+
+In
+
+    STRUCTURE UTIL_PARM:
+        1 V VECTOR,
+        1 S1 SCALAR,
+        1 C INTEGER,
+        1 S2 SCALAR,
+        1 E BOOLEAN;
+
+it seems to me that it should be `1 s_E BOOLEAN`.  It doesn't cause any problem in *this* example, so for the moment I'm going to ignore it.
+
+Another thing which doesn't cause me any problem in this example but which is wrong is that 
+
+      UTIL:
+      FUNCTION(X) VECTOR;
+         DECLARE X UTIL_PARM-STRUCTURE;
+         RETURN X.V;
+      CLOSE UTIL;
+
+preprocesses to
+
+      l_UTIL:
+      FUNCTION(X) VECTOR;
+         DECLARE s_X UTIL_PARM-STRUCTURE;
+         RETURN s_X.V;
+      CLOSE l_UTIL;
+
+I.e., the mangling of `X` to `s_X` has no way to work backwards into the parameter list as `FUNCTION(s_X)`.  This definitely needs to be fixed.
+
+# 2022-12-04
+
+## 170-OUTER.hal (continued)
+
+Changed the preprocessor to apply name-manglings associated with `DECLARE` statements to the immediately enclosing `FUNCTION` or `PROCEDURE` definition parameter lists.
+
+However, it nows gives an error at the now-properly-mangled line `l_UTIL: FUNCTION(s_X) VECTOR;`.  The problem is that only `<IDENTIFIER>` (i.e., unmangled) tokens can appear in parameter lists of `FUNCTION` or `PROCEDURE` definitions.  I've fixed this in the LBNF grammer to allowed mangled tokens as well. I don't know for sure if function/procedure names can be passed as parameters or not, but I think not, so I haven't allowed mangled tokens for those to be used.
+
+After those changes, the abstract syntax tree looks good to me.
+
+## 172-OUTER.hal
+
+There's a syntax error at "`;`" in `READ(5) s_ARG;`.  That's because the `<READ ARG>` type can be a `<VARIABLE>`, but I haven't allowed `<VARIABLE>` to be a mangled structure-ID token.  I've added it to the LBNF grammar; I'm not sure that's the best place for it, as opposed to in `<READ ARG>` directly, but that's what I've done.
+
+Next, there's a syntax error at the 2nd "`,`" in `WRITE(6) 'UTIL OF', s_ARG, '=', l_UTIL(s_ARG);` for obviously similar but not identical reasons.  This is hard to fix in the LBNF grammar, because several places I added mangled struct-ID names caused conflicts in building parser.  I've at least temporarily added it as a special type of `<WRITE ARG>`.  Perhaps it's adequate.
+
+With those changes, looks good to me.
+
+## 176-P.hal
+
+There's a syntax error at `INTEGRATE` in line `CALL INTEGRATE(s_STATE2.s_STATE.ACCEL) ASSIGN(s_STATE2,s_STATE.VELOCITY);`.  It seems to me that there *ought* to be an error there, since there's no forward declation of `INTEGRATE`, so the name of the procedure isn't properly mangled to `l_INTEGRATE`.  In other words, this appears to me to be an error in the code sample, though in reviewing the original (p. 176 of "Programming in HAL/S"), I seem to have transcribed it correctly.  
+
+I've "fixed" this by adding the forward declaration `DECLARE INTEGRATE PROCEDURE;`.  However, this statement itself causes a syntax error, because the LBNF grammar apparently expects this forward declaration to have a non-empty `<MINOR ATTR LIST>` at the end.  (Or perhaps `<MINOR ATTR LIST>`s used to have an `EMPTY` option that I've long since had to get rid of.  Whatever.)  I've fixed this in the LBNF grammar.
+
+There's a syntax error at "`;`" in the line `FILE(1, CYCLE) = s_STATE2.s_STATE;`.  This appears to be because `s_STATE` is mangled.
+
+TBD1
+
+Moreover, I've seen that structure fields of structure templates are not mangled by the preprocessor.  TBD2
+
+And here's a really big problem!  What a field name of a structure coincides with another identifier that isn't supposed to be mangled; or vice-versa?  The stupid preprocessor depends only on pattern matching, so it doesn't know the difference.  Mangle one, mangle all!  This appears to me to be an almost unvolvable problem without the preprocessor being able to fully parse the source rather than relying on pattern matching.  Or at least having some metadata that latches onto the identfiers somehow in determining if they should be mangled.  Yikes!  TBD3
+
+# 2022-12-05
+
+## 176-P.hal (continued)
+
+Regarding TBD1 from yesterday, it's still pretty mysterious to my why that file expression wasn't working, but I did eventually find a way to finagle it into the LBNF rules, and it did compile without conflicts, and that did eliminate the syntax error.
+
+Regarding TBD3, the truth is that I don't even know if this problem occurs.  I'm inclined to simply say that the modern compiler doesn't support that kind of name duplication, and perhaps add code to detect it and emit a fatal error.  At any rate, **I don't intend to solve it *right now*, so it's deferred.**
+
+That leaves TBD2, which is something that affects this very code sample. 
+
+With TBD2 fixed in the preprocessor, we now have a syntax error at "`=`" in line `s_STATE2.s_STATE.s_ACCEL = READ_ACC(17);`.  This would seem to be because there is no declaration of the function `READ_ACC`, so the preprocessor cannot mangle the name.  I'd call this a bug in the code sample.  Unfortunately, I don't actually understand how to make either a forward declaration or an actual function that fits the bill.  Nor do I think the LBNF grammer has "structure functions" built into it correctly yet; and `READ_ACC` *must* be a structure function, because the multiline annotation for it (in the exponent line) is "`+`" (just as it is for `s_ACCEL`).  So this needs a lot more thought.
+
+# 2022-12-06
+
+## Issue "TBD3"
+
+Regarding issue TBD3, first mentioned 2 days ago, and disposed of yesterday as being "deferred" due to the wishful thinking that perhaps it's something that never arises in practice, I have additional thoughts.
+
+Firstly, it *nearly* happens even in code sample 176-P.hal, since in the declarations
+
+    DECLARE STATE STATEVEC-STRUCTURE;
+    STRUCTURE S2:
+        1 STATE STATEVEC-STRUCTURE,
+        1 ATTITUDE_INFO ARRAY(3) VECTOR DOUBLE;
+    DECLARE STATE2 S2-STRUCTURE;
+
+we see `STATE` is declared both as a top-level variable and as the structer-field `STATE2.STATE`.  The fact that both declarations of `STATE` just happen to be of the same type, `STATEVEC-STRUCTURE`, and therefore just happen to be mangled correctly in the same way, is luck.  They could just as easily have had different types.  So this problem *will* occur in practice, and there's no point pretending that it mightn't.  I'm afraid the pretense that it might turn out not to be a problem was based more on my inability to think of any way to work around it in the current framework than anything else.
+
+Secondly, I think there *is* a way to work around it in within the existing preprocessor framework after all, and it goes something like the following.  In the first place, all mangling of top-level variables (i.e., not structure fields) remains identical to before:
+
+  * Top-level variable:
+    * Arithmetical (`INTEGER`, `SCALAR`, `VECTOR`, `MATRIX`) &mdash; no mangling
+    * Boolean &mdash; prefix "b_" added.
+    * Character &mdash; prefix "c_" added.
+    * Structure &mdash; prefix "s_" added.
+
+For structure fields, however, an additional step is needed.  Every structure field is declared as part of a structure template, and is therefore associated with the following metadata:  The name of the structure template, and the tree-position within the structure template.  As an example, consider the following arbitrarily-chosen structure template:
+
+    STRUCTURE A:
+        1 B ...,
+        1 C ...,
+            2 D ...,
+                3 E ...,
+            2 F ...,
+        1 G ...;
+
+By the tree-position within the structure template, speaking loosely, I mean that `B` is at the 0 position, `C` is at the 1 position, `G` is at the 2 position, while D is at the 1.0 position, F is at the 1.1 position, and E is at the 1.0.0 position.
+
+Though I've shown all of the identifiers here as if they were different, realize that many of them could actually be duplicates.  Thus while we cannot have B==C, C==G, B==G, or D==F, we could have A==B, A==C, A==D, B==D, D==E, etc.  The mangling scheme has to account for all of those possibilities.  It does that by including the path within the mangling scheme.
+
+Specifically, imagine this.  From the metadata for each field (structure-template name and path into the structure template), construct some kind of unique numerical hashcode, or at least a hashcode that's extremely unlikely to repeat.  For example, for field E, we might first form the string
+
+    path + "_" + structureTemplateName = "1.0.0_A"
+
+and then take a 32-bit CRC of "1.0.0._A", say *NNNN* (in decimal form, not hexadecimal).  If, say, `E` were of type `BOOLEAN`, the fully mangled name for field `E` would be
+
+    b_*NNNN*_E
+
+(By the way, this is written in advance of implementation, so I'm merely presenting a concept here.  I don't claim that the actual implementation will faithfully follow the exact details of what I just showed you.)
+
+This scheme works even for separately-compiled units, since the hashing depends on the name of the structure *template* and not on the declared name of the structure using that template.  Recall too that when the output listing is created, the compiler must reverse all mangling that the preprocessor had previously added.  Suffixes of the type
+
+    *lowerCase*_*NNNN*_
+
+are always removable, since the PFS/BFS source code never uses lower-case and never allows digits as the leading character of identifier names. 
+
+By the way, reversability of the mangling (as well as the desire to keep mangled identfiers from becoming very, very long) is the reason for choosing a decimal-numerical hashcode rather than simply using an unhashed string like "1.0.0_A" as the "hashcode" or a hexadecimal hashcode.
+
+So finally, here is the full mangling scheme:
+
+  * Top-level variables and structure-template names:
+    * Arithmetical (`INTEGER`, `SCALAR`, `VECTOR`, `MATRIX`) &mdash; no mangling.
+    * Boolean &mdash; prefix "b_" added.
+    * Character &mdash; prefix "c_" added.
+    * Structure &mdash; prefix "s_" added.
+  * Structure fields:
+    * Arithmetical (`INTEGER`, `SCALAR`, `VECTOR`, `MATRIX`) &mdash; "a_*HASHCODE*_" added.
+    * Boolean &mdash; prefix "b_*HASHCODE*_" added.
+    * Character &mdash; prefix "c_*HASHCODE*_" added.
+    * Structure &mdash; prefix "s_*HASHCODE*_" added.
+
+Note that except for arithmetical fields, the structure-field mangled names are legal top-level mangled names as well, so they do not require any changes to the LBNF grammer over those previously made for the weaker mangling scheme.  Whereas the arithmetical structure fields require merely a minor addition to the LBNF grammer.  I think.
+
+## Issue "TBD3" Revisited
+
+The scheme presented in the preceding section for working around issue TBD3 is too clever ... which is a polite way of saying that in this case means "not very good".  It overlooks a couple of important points.  One it overlooks is a possibility like:
+
+    STRUCTURE A: 1 B type, ...;
+    STRUCTURE C: 1 C A-STRUCTURE, ...;
+    DECLARE E C-STRUCTURE;
+
+since in actual use you could then find references like
+
+    X = E.C.B;
+
+where field `B` doesn't have any readily accessible tree-position in `E`; rather you have to navigate through both `E`'s and `C`'s tree structure to find field B.  The other thing is that the scheme isn't easy to apply to structure references you find, *regardless* of whether or not there are these multiple redirections to different structure templates.
+
+The truth, it appears to me, is that there isn't going to be any adequate scheme based on pattern searches for the field names alone, *regardless* of how they're mangled.
+
+So here's a very different idea:
+
+1. Only *top-level* identifiers (i.e., not fields in structures) get added to the macro list.
+2. Every `STRUCTURE` statement encountered to define a structure template results in construction of a tree describing that structure template, and all of these trees are stored in a dictionary of structure templates.
+3. Keep track of all the datatypes of top-level variables, specifically of those declared as structures.
+4. For the macro replacements, the input lines are no longer regex-scanned for identifiers.  Rather, they are scanned for regular expressions that (loosely speaking) are of the form "IDENTIFIER(\s&#42;\\.\s&#42;IDENTIFIER)*".  In other words, complete paths to structure fields.  If the match contains no periods, then it's just a plain identifier and a regular macro-style replacement can be done on it.
+5. If the matches contain periods, then they have to be analyzed vs the existing structure templates to determine how each field must be mangled.  The mangling, in all cases, is just the old-style mangling with "b_", "c_", and "s_" prefixes; no "hashcodes" or any other additions are needed.
+
+Two points.  First, you might suppose that some structure-template fields might have a type that's an array of structures, in which case you'd have to worry about awful cases like A.B.C$(1,2).D.  However, if you look at the BNF grammar, I don't think there's any allowance for subscripts in the middle like this ... only at the end.  Which is queer, since `STRUCTURE` statements seem to allow fields to be arrays of structures, and since it seems like it would be very useful.  At any rate, it would make the parsing the preprocessor would have to do extremely problematic; you couldn't do it with regular expressions.  So for my purposes, good riddance!
+
+Regardless of what I think I'm reading in the BNF grammar, "Programming in HAL/S" has some clarifications and confusions:
+
+* PDF p. 101: "HAL/S allows arrays of any data type;" however, it makes this claim 3 chapters prior to introducing structures, so it's unclear to me that "any data type" includes structures (or `NAME`, or `EVENT`, or anything other than `INTEGER`, `SCALAR`, `CHARACTER`, `BOOLEAN`, `VECTOR`, and `MATRIX`).  For that matter, does HAL/S consider structures to be a "datatype" at all? (The BNF grammar *does*.)
+* PDF p. 180:  A whole subsection (9.3) introduces the concept of "multi-copied structures" ... which have very little difference from one-dimensional arrays of structures, except for a few restrictions.  They're used the same way.  What's the point of having this entirely new concept of multi-copied structures if you can already have arrays of structures, and arrays of structures have less restrictions on them?
+* PDF p. 185: "Arrays may be used as structure components, but multi-copied structures may not."
+
+Well, this is hard to resolve at this remove.  It appears to me that arrays of structures aren't allowed, but that multi-copied structures exist in their place, and that they can't be used as structure components even though arrays of simpler datatypes can be.  I'm going to go with that until I encounter counter-examples.
+
+Secondly, if you look at it superficially, it would seem that if you had a structure path of a form like A.B.C.D.E, then all of the leading identifiers would have to mangle with "s_", since they must all be structures, and thus the only questionable mangling is for the final field.  Alas, this is not so.  The reason is that "." can be a dot-product operator too, so if you have an expression like this it could also represent dot products in a variety of ways:
+
+    (A) . (B.C.D.E)
+    (A.B) . (C.D.E)
+    ...
+    (A.B.C.D) . (E)
+
+So unfortunately, there's no choice to to analyze these expressions enough using the trees for the structure templates to determine if any of the dot-product cases applies.  Nevertheless, once you've done that, the remaining structure expressions do have the property that only the final field can have a mangling other than "s_".
+
+In spite of this little quirk, this scheme does seem to me to be very workable.  I'll think on it a bit more before trying to act on it, though.
+
+## 176-P.hal (continued)
 
 TBD
+

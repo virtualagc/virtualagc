@@ -1,0 +1,4 @@
+#QDLOG   CSECT
+ DC Z(DLOG,,X'E')
+ EXTRN DLOG
+ END

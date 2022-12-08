@@ -1,0 +1,4 @@
+#QEMOD   CSECT
+ DC Z(EMOD,,X'E')
+ EXTRN EMOD
+ END

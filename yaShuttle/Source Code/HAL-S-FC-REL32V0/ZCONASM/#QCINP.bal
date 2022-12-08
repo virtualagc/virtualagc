@@ -1,0 +1,4 @@
+#QCINP   CSECT
+ DC Z(CINP,,X'E')
+ EXTRN CINP
+ END

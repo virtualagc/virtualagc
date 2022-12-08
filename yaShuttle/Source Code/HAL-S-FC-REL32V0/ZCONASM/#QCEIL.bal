@@ -1,0 +1,4 @@
+#QCEIL   CSECT
+ DC Z(CEIL,,X'E')
+ EXTRN CEIL
+ END

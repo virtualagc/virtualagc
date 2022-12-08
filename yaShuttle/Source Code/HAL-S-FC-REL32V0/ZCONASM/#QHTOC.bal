@@ -1,0 +1,4 @@
+#QHTOC   CSECT
+ DC Z(HTOC,,X'E')
+ EXTRN HTOC
+ END

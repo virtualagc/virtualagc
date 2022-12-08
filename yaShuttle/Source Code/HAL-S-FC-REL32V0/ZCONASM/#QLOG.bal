@@ -1,0 +1,4 @@
+#QLOG    CSECT
+ DC Z(LOG,,X'E')
+ EXTRN LOG
+ END

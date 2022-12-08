@@ -1,0 +1,4 @@
+#QCPRC   CSECT
+ DC Z(CPRC,,X'E')
+ EXTRN CPRC
+ END

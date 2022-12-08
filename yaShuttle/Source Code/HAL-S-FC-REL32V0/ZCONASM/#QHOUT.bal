@@ -1,0 +1,4 @@
+#QHOUT   CSECT
+ DC Z(HOUT,,X'E')
+ EXTRN HOUT
+ END

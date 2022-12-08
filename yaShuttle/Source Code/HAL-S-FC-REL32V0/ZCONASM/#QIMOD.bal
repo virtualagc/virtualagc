@@ -1,0 +1,4 @@
+#QIMOD   CSECT
+ DC Z(IMOD,,X'E')
+ EXTRN IMOD
+ END

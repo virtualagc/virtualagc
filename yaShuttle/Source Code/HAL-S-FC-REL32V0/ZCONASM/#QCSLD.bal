@@ -1,0 +1,4 @@
+#QCSLD   CSECT
+ DC Z(CSLD,,X'E')
+ EXTRN CSLD
+ END

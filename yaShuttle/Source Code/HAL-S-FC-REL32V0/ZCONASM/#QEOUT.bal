@@ -1,0 +1,4 @@
+#QEOUT   CSECT
+ DC Z(EOUT,,X'E')
+ EXTRN EOUT
+ END

@@ -1,0 +1,4 @@
+#QCOUT   CSECT
+ DC Z(COUT,,X'E')
+ EXTRN COUT
+ END
