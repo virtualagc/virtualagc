@@ -20,6 +20,9 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle").replace("@SUBTI
       <li><a moz-do-not-send="true" href="#References">References</a></li>
       <li><a moz-do-not-send="true" href="#PASS">PASS, BFS, and Other
           Shuttle Source Code</a></li>
+      <li><a moz-do-not-send="true" href="#EBCDIC">Encoding of the
+          Original Source Code</a><br>
+      </li>
       <li><a moz-do-not-send="true" href="#HALS">HAL/S</a><br>
       </li>
       <li><a moz-do-not-send="true" href="#Versioning">Software
@@ -27,6 +30,10 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle").replace("@SUBTI
       <li><a moz-do-not-send="true" href="#Display">Multi-Function
           Display Formatting and Versioning</a></li>
       <li><a moz-do-not-send="true" href="#Messaging">Computer-to-Peripheral
+
+
+
+
           Interface</a><br>
       </li>
       <li><a moz-do-not-send="true" href="#Emulation">Compilation and
@@ -115,6 +122,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
+
+
+
         4, "Computers in the Space Shuttle Avionics System", of James
         Tomayko's <i>Computers in Spaceflight: The NASA Experience</i></a>,
       but there are numerous other documents in <a
@@ -149,6 +160,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
         software, known as the <i>Primary Flight Software (PFS)</i>
         atop the <i>Flight Control Operating System (FCOS)</i>.&nbsp;
         PFS and FCOS together are collectively referred to as the <i>Primary
+
+
+
+
 
 
 
@@ -198,12 +213,20 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
             (LCDs), 9 for the pilots and 2 elsewhere.&nbsp;
             Collectively, the CRTs and LCDs were referred to as <i>Multifunction
 
+
+
+
+
               Display Units (MDUs)</i>.&nbsp; <br>
           </li>
           <li>Keyboards.&nbsp; The pilots had 2 of these, and the
             mission specialist station had a 3rd.</li>
         </ul>
         <p>The pre-2000 configuration was known collectively as the <i>Multifunction
+
+
+
+
 
             CRT Display System (MCDS)</i>, while the post-2000
           configuration was known as the <i>Multifunction Electronic
@@ -338,6 +361,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
+
+
+
       That should be your first stop in a documentation
       pilgrimage!&nbsp; However, here are some websites that have
       additional documents that you may find interesting, and which may
@@ -346,6 +373,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
     <ul>
       <li><a moz-do-not-send="true"
 href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.html">Johnson
+
+
+
+
 
 
 
@@ -373,7 +404,15 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
 
 
 
+
+
+
+
           Space Shuttle Ultra site, particularly its reference section</a>.&nbsp;
+
+
+
+
 
 
 
@@ -406,17 +445,19 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
 
 
 
+
+
+
+
           Hollis's Space Shuttle page</a>.</li>
       <li><a moz-do-not-send="true" href="https://ntrs.nasa.gov/">The
           NASA Technical Reports Server (NTRS)</a>.</li>
     </ul>
     <h1><a name="PASS"></a>PASS, BFS, and Other Shuttle Source Code</h1>
-    <p>I have become aware that multiple collectors have copies of what
-      I think may be the complete final revision of PASS and possibly
-      BFS.&nbsp; This is remarkable in contrast to the frustrations one
-      encounters in trying to find existent copies of Apollo flight
-      software, particularly since a former developer of Shuttle
-      software has told me that: <br>
+    <p>I have become aware of private individuals with copies of what I
+      think may be the complete final revision of PASS and possibly
+      BFS.&nbsp; This is remarkable, given that a former developer of
+      Shuttle software has told me that: <br>
     </p>
     <blockquote>
       <p>"When NASA shut down the Space Shuttle project, they erased all
@@ -428,10 +469,175 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
     <p>I will keep the editorial comments I'm tempted to make to
       myself.&nbsp; As an aside, I'll also comment that fortunately the
       source code of the original HAL/S compiler <i>was</i> saved after
-      all, but by individuals rather than by any of the organizational
-      actors involved.&nbsp; Shame on you, organizational actors!<br>
+      all, though by individuals rather than by any of the
+      organizational actors involved.&nbsp; Shame on you, organizational
+      actors!<br>
     </p>
+    <p>At any rate, here is a list Shuttle-era software source code
+      currently available to us, or that we hope to make available
+      (subject to potential ITAR restrictions) at some point in the
+      future:<br>
+    </p>
+    <ul>
+      <li>HAL/S-FC — the original HAL/S compiler.&nbsp; Our software
+        repository currently has <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/HAL-S-FC-REL32V0">only
+          <i>partial</i> source code for release 32V0"</a>.&nbsp; Here
+        are some admittedly-poor hints for dissecting that source code:</li>
+      <ul>
+        <li>The top-level program for any given phase of the compiler is
+          generally the one called "##DRIVER.xpl".<br>
+        </li>
+        <li>The structure of the compiler program to one or another
+          level of detail is documented in:</li>
+        <ul>
+          <li><a moz-do-not-send="true"
+              href="Shuttle/19740021426.pdf#page=10">Chapter 2
+              ("Compiler Organization") of the "HAL/S-FC Compiler System
+              Functional Specification"</a>.</li>
+          <li><a moz-do-not-send="true"
+              href="Shuttle/hal-s_compiler_system_specification.pdf">"HAL/S
+              Compiler System Specification"</a>.</li>
+          <li><a moz-do-not-send="true" href="Shuttle/19760020796.pdf">"HAL/S-FC
+              &amp; HAL/S-360 Compiler System Program Description"</a>.<br>
+          </li>
+        </ul>
+        <li>The HAL/S compiler was based on the "Translator Writing
+          System" (TWS), which is basically a compiler (XCOM) and other
+          utilities for the XPL language, described in great detail in
+          the book <i>A Compiler Generator</i> by McKeeman, Horning,
+          and Wortman.&nbsp; Moreover, the HAL/S language is itself very
+          much like the XPL language.&nbsp; Therefore, you may get some
+          insights about HAL/S-FC&nbsp; by reading about XCOM that you
+          mightn't get by in looking at the documentation that survives
+          from the Shuttle project.</li>
+      </ul>
+      <li>Translator Writing System (TWS) —<a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/XPL-TWS-1969-03">The
+          source code from the Appendices of the book <i>A Compiler
+            Generator</i></a> mentioned above, including XCOM and other
+        XPL software.&nbsp; It is not necessarily the same version of
+        TWS on which HAL/S-FC is based.<br>
+      </li>
+      <li>PFS — wish list.</li>
+      <li>BFS — wish list.</li>
+      <li>FCOS — wish list.<br>
+      </li>
+    </ul>
     <p>TBD<br>
+    </p>
+    <h1><a name="EBCDIC"></a>Encoding of the Original Source Code</h1>
+    <p>For the impatient, I'd summarize this section by telling you to
+      a) preferentially use ISO 8859-15 or ISO 8859-1 encoding for
+      viewing Shuttle source-code files; and b) don't be surprised to
+      find the characters "~" or "^" where the documentation would tell
+      you that there should be a "¬" character.<br>
+    </p>
+    <p>The Apollo source code presented on other pages of this website
+      was all obtained by the process of manually transcribing it from
+      actual physical printouts (or scans) of the Apollo-era program
+      listings.&nbsp; In contrast, all Shuttle-era software source code
+      available so far has all been obtained from machine-readable
+      copies retrieved from magnetic tapes or compact discs.<br>
+    </p>
+    <p>The reason this distinction between the Apollo source code and
+      Shuttle source code is important is that in the case of Apollo, we
+      seldom needed to think about how the source code may have been
+      encoded in the Apollo-era computers that processed it.&nbsp;
+      Whereas with the Shuttle software, the encoding of the source code
+      is pretty important because incorrect encoding results in some of
+      the source code appearing quite differently than associated
+      documentation indicates that it should.<br>
+    </p>
+    <p>In what I presume to call the "modern era", software source-code
+      files are invariably encoded in what it known as "plain vanilla"
+      or "7-bit" ASCII format, except possibly within quoted strings of
+      text or in program comments.&nbsp; However ... Shuttle onboard
+      software and its support software was instead maintained on
+      computers similar to IBM System/360 mainframes, which means that
+      the source code was instead encoded in an 8-bit format known as
+      EBCDIC.<br>
+    </p>
+    <p>What's significant about this is that all of the Shuttle-related
+      source code we present at this website and in our software
+      repository is in 7-bit ASCII, and thus has been <i>converted</i>
+      at some point&nbsp; — usually perfectly but not <i>always</i> —
+      and usually but not always, <i>before</i> we acquired it — from
+      EBCDIC to ASCII.&nbsp; Even if the original EBCDIC source code had
+      survived, it would now appear to be gobbledygook on any computer
+      available to the general public.&nbsp; Thus the accuracy of the
+      conversion from EBCDIC to ASCII becomes a question.&nbsp; In <i>most</i>
+      cases, EBCDIC and ASCII overlap, in the sense that they encode the
+      same character sets, but using different numerical codes, and thus
+      the conversion from one to the other is straightforward. <br>
+    </p>
+    <p>But in a few cases EBCDIC includes characters not available at
+      all in 7-bit ASCII, or the conversion goes awry for unknown
+      reasons.&nbsp; Those cases have required some compromises and
+      workarounds in our presentation of the Shuttle source code.&nbsp;
+      The following EBCDIC characters are the problematic ones:<br>
+    </p>
+    <ul>
+      <li>'¬' (EBCDIC 0x5F).&nbsp; This character does not exist at all
+        in 7-bit ASCII, but it is quite important in HAL/S (and in
+        XPL).&nbsp; It is the logical NOT symbol.&nbsp; Among other
+        things, every bit of Shuttle-era documentation tells you that
+        "¬=" is how you express "not equal to".&nbsp; For example, "<tt>IF
+
+
+          A </tt><tt>¬= B then C=1;</tt>".&nbsp; And yet, not a single
+        ¬ is found in any of the available ASCII conversions of
+        Shuttle-era source code.&nbsp; In its place, you find either ^
+        or ~, as in "<tt>IF A </tt><tt>^= B then C=1;</tt>" or "<tt>IF
+          A ~</tt><tt>= B then C=1;</tt>".</li>
+      <li>'¢' (EBCDIC 0xB0).&nbsp; This character also does not exist in
+        7-bit ASCII.&nbsp; It is an escape character used in literal
+        HAL/S string constants to indicate that the next character in
+        the string is from outside of the HAL/S character set. </li>
+      <li>Form feed (EBCDIC 0x0C).&nbsp; This control character exists
+        in 7-bit ASCII, and indeed has the same numerical encoding as in
+        EBCDIC ... but the EBCDIC-to-ASCII conversion process for some
+        reason may replace it with a different character entirely.&nbsp;
+        Fortunately, this character seems to appear only in reports
+        printed by the original HAL/S-FC compiler, such as symbol
+        cross-reference tables, so it's not really a big deal if it's
+        incorrect.&nbsp; However, don't be surprised if you find a euro
+        character ("€") in a report where you might have expected to
+        find a form feed.&nbsp; Incidentally, such reports tend to
+        contain confusing and possibly incorrect conversions of other
+        control characters, possibly including VT (vertical tab), HT
+        (horizontal tab), and CR (carriage return), thus resulting in a
+        peppering of control characters of uncertain functionality.<br>
+      </li>
+      <li>Unprintable (EBCDIC 0xFE).&nbsp; This character doesn't exist
+        in 7-bit ASCII, but is used by HAL/S for padding lines of fixed
+        length past the logical end of a file.&nbsp; This doesn't seem
+        like a serious problem, but if you encounter such padding at the
+        end of a file, you may find extraneous section signs ("§")
+        appearing in the padded area.<br>
+      </li>
+    </ul>
+    <p>My workaround for these problematic characters is:<br>
+    </p>
+    <ol>
+      <li>The "modern" replacement for the original HAL/S-FC compiler
+        accepts ¬, ^, and ~ interchangeably, so no corrections are
+        needed to the ASCII versions of the Shuttle-era source-code
+        files with regard to logical-NOT.</li>
+      <li>In those (few) Shuttle-era source-code files using the ¢
+        character, the source-code files are modified so that the
+        incorrect ASCII translation of the symbol (unprintable 0x9B) is
+        replaced by the ¢ character in an ISO 8859-15 (or ISO 8859-1)
+        encoding.</li>
+    </ol>
+    <p>These compromises should allow Shuttle source code to be viewed,
+      edited, and compiled (with a "modern" compiler) acceptably, if the
+      the following advice is obeyed.<br>
+    </p>
+    <p><b>Summary:</b>&nbsp; For best viewing (or editing) of
+      Shuttle-era source-code files, use ISO 8859-15 (or ISO 8859-1)
+      encoding. Other encodings (particularly UTF-8) will work properly
+      for many source files but not for all of them.<br>
     </p>
     <h1><a name="HALS"></a>HAL/S<br>
     </h1>
@@ -461,6 +667,10 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
       C. Clarke, maintained that that was simply a coincidence.&nbsp;
       Where the "HAL" in HAL/S comes from has likewise been explained in
       several ways, none of them relating to <i>2001: A Space Odyssey</i>.&nbsp;
+
+
+
+
       The HAL/S language was invented (and the flight software was
       written) by a company called Intermetrics, many of whose employees
       were refugees from the same Draper Laboratories (MIT
@@ -470,16 +680,20 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
       language in honor of Hal Laning, perhaps the most-prominent among
       the designers of the Apollo Guidance Computer's hardware.&nbsp;
       Others offer the explanation that HAL/S is an acronym for
-      "High-order Assembly Language / Shuttle".&nbsp; Well, who
-      knows?&nbsp; It's fun to believe it was all three.&nbsp; All I can
-      really say for sure is that there's nothing "heuristic" about
-      HAL/S, even if <i>2001</i> may have been somewhere in the back of
-      somebody's mind.<br>
+      "High-order Assembly Language / Shuttle".&nbsp; <a
+        moz-do-not-send="true" href="Shuttle/20120013307.pdf">Still
+        others</a> state that "the acronym 'HAL' was never formally
+      defined".&nbsp; Well, who knows?&nbsp; It's fun to make up your
+      own mind about which constellation of facts matches your own
+      preferences.&nbsp; All I can really say for sure is that there's
+      nothing "heuristic" about HAL/S, even if <i>2001</i> may secretly
+      have been somewhere in the back of somebody's mind.<br>
     </p>
-    <p>But I digress.&nbsp; As I was saying, the HAL/S software still
-      exists, which is good.&nbsp; But the Virtual AGC Project doesn't
-      have any as of yet, and like all future events, whether or not we
-      can get any of it remains to be seen.<br>
+    <p>But I digress.&nbsp; As I was saying, the HAL/S software for the
+      Shuttle's PFS and BFS still survives in private stashes, which is
+      much better than the alternative.&nbsp; But the Virtual AGC
+      Project doesn't have any as of yet, and whether or not we can get
+      any of it depends very much on the kindness of strangers.<br>
     </p>
     <p>Assuming that we can eventually get access to it, working with
       the application software's source code requires knowledge of the
@@ -489,6 +703,10 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
     <ol>
       <li>The recommended starting point is "<a moz-do-not-send="true"
           href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf">Programming
+
+
+
+
 
 
 
@@ -515,6 +733,10 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
 
 
 
+
+
+
+
           Language Specification"</a>, which contains a much-more-formal
         specification of the language syntax, both in the form of graphs
         of the syntax and in Backus-Naur form (BNF).</li>
@@ -530,9 +752,17 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
 
 
 
+
+
+
+
           Programmer's Guide"</a>.</li>
       <li>And then there's the <a moz-do-not-send="true"
           href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf">"HAL/S-FC
+
+
+
+
 
 
 
@@ -584,6 +814,10 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
       While I won't dissect this short program in detail, I can make a
       couple of observations.&nbsp; For one, the language is <i>strongly
 
+
+
+
+
         typed</i>, meaning that every variable has a type that's
       declared at compile time, and that storage for it is fixed and
       unalterable at run-time.&nbsp; Nor is there any dynamic memory
@@ -620,19 +854,24 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
     the code later.&nbsp; This is sound engineering doctrine, according
     to the software-design literature of the time ... but very far from
     <i>today's</i> actual practice and attitudes (2022), in which the
-    initial design schedule is everything, and downstream maintenance an
-    afterthought performed by somebody management doesn't have to budget
-    time or money for <i>today</i>.&nbsp; So were the HAL/S designers
-    on the wrong side of history in this respect?&nbsp; (That's an
-    exercise for the reader.)<br>
+    initial design schedule is everything, and downstream maintenance is
+    an afterthought performed by somebody management doesn't have to
+    budget time or money for <i>today</i>.&nbsp; So were the HAL/S
+    designers on the wrong side of history in this respect?&nbsp;
+    (That's an exercise for the reader.) <br>
     <br>
-    Here's a HAL/S sample that illustrates the multi-line
-    pseudo-mathematical format I just mentioned:<br>
+    What the multi-line format mainly does is to allow a more-natural
+    representations of superscripts and subscripts.&nbsp; Here's a HAL/S
+    sample that illustrates the multi-line pseudo-mathematical format:<br>
     <blockquote><tt>C Compute corners of a parallelogram.<br>
         <br>
         &nbsp; CORNERS: PROGRAM;</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; DECLARE SCALAR,</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
 
         LONG, SHORT, ALPHA;</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; DECLARE VECTOR(2),</tt><tt><br>
@@ -647,12 +886,20 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
       </tt><tt>M&nbsp;&nbsp;&nbsp; BC = VECTOR (LONG, 0);</tt><tt><br>
       </tt><tt>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
+
+
+
         2 </tt><tt><br>
       </tt><tt><br>
       </tt><tt>E&nbsp;&nbsp;&nbsp; -</tt><tt><br>
       </tt><tt>M&nbsp;&nbsp;&nbsp; DA = VECTOR (SHORT COS(ALPHA), SHORT
         SIN(ALPHA));</tt><tt><br>
       </tt><tt>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
 
         2</tt><tt><br>
       </tt><tt><br>
@@ -661,6 +908,10 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
       </tt><tt>M&nbsp;&nbsp;&nbsp; CD = BC + DA;</tt><tt><br>
         <br>
       </tt><tt>E&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
 
         -&nbsp;&nbsp; -&nbsp;&nbsp; -&nbsp;&nbsp; -</tt><tt><br>
       </tt><tt>M&nbsp;&nbsp;&nbsp; WRITE(6) AB, BC, CD, DA;</tt><tt><br>
@@ -678,21 +929,85 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
     matrix multiplication or inversion, etc.&nbsp; Functions like <tt>COS</tt>
     or <tt>SIN</tt> or <tt>VECTOR<sub>2</sub></tt> (which forms a
     2-vector from two scalar inputs) were available in the run-time
-    library.<br>
+    library or as compile-time arithmetic when appropriate.<br>
     <br>
     It's important to realize that the lines with the leading characters
-    <tt>E</tt>, <tt>M</tt>, and <tt>S</tt> are active code rather than
-    merely program comments.&nbsp; In HAL/S, column 1 has a special
-    purpose.&nbsp; Normally that column is blank.&nbsp; True, if a <tt>C</tt>
-    appears there, it actually is a full-line comment.&nbsp; But for a
-    multi-line mathematical form, <tt>M</tt> in column 1 indicates the
-    formula's "main" line, whereas <tt>E</tt> indicates an "exponent"
-    line and <tt>S</tt> indicates a "subscript" line.&nbsp; You can see
-    that several places above.&nbsp; If a variable (like <tt>AB</tt>)
-    has a '-' above it, that means that <tt>AB</tt> is really a
-    vector.&nbsp; Actually, a 2-vector.&nbsp; That's reflected in the
-    declaration "<tt>DECLARE VECTOR(2), AB, ...</tt>".&nbsp; Besides
-    which, there are also subscripts, as in <tt>VECTOR<sub>2</sub></tt>.<br>
+    <tt>E</tt>, <tt>M</tt>, and <tt>S</tt> in the example above are
+    active code rather than merely program comments.&nbsp; In HAL/S,
+    column 1 has a special purpose.&nbsp; Normally that column is
+    blank.&nbsp; True, if a <tt>C</tt> appears there, it actually is a
+    full-line comment.&nbsp; If a <tt>D</tt> appears there, then the
+    line is a compiler directive.&nbsp; But for a multi-line
+    mathematical form, <tt>M</tt> in column 1 indicates the formula's
+    "main" line, whereas <tt>E</tt> indicates an "exponent" line and <tt>S</tt>
+    indicates a "subscript" line.&nbsp; You can see that several places
+    above.&nbsp; When this multi-line math format is discussed, it's
+    generally described as a "3-line" format.&nbsp; But in fact, there
+    was no limit to the number of <tt>E</tt> or <tt>S</tt> lines
+    associated with a given <tt>M</tt> line.&nbsp; For example, here's
+    some valid code:<br>
+    <blockquote>
+      <div class="moz-cite-prefix">
+        <meta http-equiv="content-type" content="text/html;
+          charset=UTF-8">
+        <div class="moz-cite-prefix"><tt>E&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+            DEX$J<br>
+          </tt></div>
+        <tt> </tt>
+        <div class="moz-cite-prefix"><tt>E&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+            I&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+            I<br>
+          </tt></div>
+        <tt> </tt>
+        <div class="moz-cite-prefix"><tt>M&nbsp;&nbsp;
+            COEF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            ALPHA<br>
+          </tt></div>
+        <tt> </tt>
+        <div class="moz-cite-prefix"><tt>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+            L<br>
+          </tt></div>
+        <tt> </tt>
+        <div class="moz-cite-prefix"><tt>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+            M**2</tt></div>
+      </div>
+    </blockquote>
+    But you'll notice that if you have a subscript in an <tt>E</tt>
+    line or an exponent in an <tt>S</tt> line (as in <tt>DEX$J</tt> or
+    <tt>M**2</tt> above), you just have to live with <i>those</i>
+    little bits remaining in single-line notation.&nbsp; (In fact,
+    there's not even <i>any</i> real need to put an <tt>M</tt> in
+    column 1 for a main line, since the <tt>M</tt> meant exactly the
+    same thing to the original compilers as a blank in column 1.&nbsp;
+    I'm told — thank heaven! — that nobody ever actually did omit the <tt>M</tt>'s.)<br>
+    <br>
+    In the multi-line math format, if a variable (like <tt>AB</tt>) has
+    a '-' above it, that means that <tt>AB</tt> is really a
+    vector.&nbsp; Actually, a 2-vector, in the example code above.&nbsp;
+    That's reflected in the declaration "<tt>DECLARE VECTOR(2), AB, ...</tt>".
+
+
+
+    <br>
     <br>
     And '<tt>-</tt>' isn't the only datatype-related character that can
     appear in the <tt>E</tt> line above a variable in the <tt>M</tt>
@@ -710,10 +1025,14 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
     easy.&nbsp; Fortunately, HAL/S doesn't actually <i>require</i> the
     use of this <tt>E/M/S</tt> multi-line format for (input of)
     mathematical formulas.&nbsp; A single-line format is perfectly valid
-    as well, and would look like this:<br>
+    as well, and for the <tt>CORNERS</tt> program would look like this:<br>
     <blockquote><tt>&nbsp; CORNERS: PROGRAM;</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; DECLARE SCALAR,</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
 
         LONG, SHORT, ALPHA;</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; DECLARE VECTOR(2),</tt><tt><br>
@@ -732,24 +1051,31 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
     by the '<tt>$</tt>' character. <br>
     <br>
     One thing you may take away from this is that the '<tt>-</tt>' (or '<tt>*</tt>',
+
+
+
+
     '<tt>+</tt>', ...) annotations which appear on the <tt>E</tt> lines
     to indicate vector vs scalar variables weren't really needed, since
     they don't show up in the single-line notation at all; in fact,
-    they're just eye-candy that are nice for readability, and are
-    actually discarded by the compiler.&nbsp; Whereas the subscript '<tt>2</tt>'
+    they're just eye-candy nice for readability, and are actually
+    discarded by the compiler.&nbsp; Whereas the subscript '<tt>2</tt>'
     which appears on the <tt>S</tt> line is in fact quite necessary,
-    since <tt>VECTOR</tt> isn't the same thing as <tt>VECTOR<sub>2</sub></tt>,
-    which isn't the same thing as <tt>VECTOR<sub>3</sub></tt>.<br>
+    since <tt>VECTOR</tt>() isn't the same thing as <tt>VECTOR<sub>2</sub>()</tt>,
+    which isn't the same thing as <tt>VECTOR<sub>3</sub>()</tt>.<br>
     <br>
     My guess is that almost all source code was written in the
-    single-line format.&nbsp; However, realize that yet another novelty
-    of HAL/S is that the
-    original compiler allowed the programmer <i>no control whatsoever</i>
-    over the format of the output compiler listings.&nbsp; Those were <i>always</i>
+    single-line format ... and indeed, I've been told by one of the
+    original developers that this is so.&nbsp; However, realize that yet
+    another novelty of HAL/S is that the original compiler allowed the
+    programmer <i>no control whatsoever</i> over the format of the
+    output compiler listings.&nbsp; Those were <i>always</i>
     pretty-printed according to the standards decided upon by the
-    designers of the compiler.&nbsp; Thus, the program might input code
-    in the single-line format, but the assembly listing would always be
-    output in the multi-line format. <br>
+    designers of the compiler.&nbsp; (Well, I think that maybe
+    pretty-printing could be turned off, but that doesn't mean the
+    person writing the code controlled the format.)&nbsp; Thus, the
+    program might input code in the single-line format, but the assembly
+    listing would always be output in the multi-line format. <br>
     <br>
     The same is true of any other formatting decisions.&nbsp; I
     mentioned above that column 1 of the source code has a special
@@ -767,6 +1093,10 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
     of mathematical or logical operations, such as "<tt>-</tt>" for
     subtraction, "<tt>/</tt>" for division, "<tt>**</tt>" for
     exponentiation, and so on, <i>it has no operator for multiplication</i>.&nbsp;
+
+
+
+
     Multiplication is indicated simply by placing variable names,
     constant names, or literal numbers adjacent to each other (separated
     by whitespace).&nbsp; For example, <br>
@@ -778,6 +1108,10 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
     <p>By the way, <tt>SCALAR</tt> is what HAL/S calls its
       floating-point type; thus <tt>SCALAR</tt> contrasts with <tt>INTEGER</tt>
       or <tt>BOOLEAN</tt> datatypes, but not with <tt>VECTOR</tt> or <tt>MATRIX</tt>.&nbsp;
+
+
+
+
       In fact, contrary to normal mathematical usage of the terms, all <tt>VECTOR</tt>
       and <tt>MATRIX</tt> objects consist entirely of <tt>SCALAR</tt>
       values.&nbsp; You can't have (say) a <tt>VECTOR</tt> of <tt>INTEGER</tt>
@@ -814,6 +1148,10 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
         href="Shuttle/SpaceShuttleMissionsSummaryVol1.pdf">Volume 1</a>
       and <a moz-do-not-send="true"
         href="Shuttle/SpaceShuttleMissionsSummaryVol2.pdf">Volume 2</a>.&nbsp;
+
+
+
+
 
 
 
@@ -1090,6 +1428,10 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
 
 
 
+
+
+
+
         Application Software (DAS)</i>.&nbsp; But these kinds of details
       are of little interest to us in the absence of the DAS or other
       software that actually ran on the DEU/IDPs.&nbsp; So the only use
@@ -1162,11 +1504,19 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
         href="Shuttle/Space%20Shuttle%20DPS%20Dictionary%20OI-26.pdf">The
 
 
+
+
+
+
         GNC SYS SUMM 1 sample templates above came from one such DPS
         Dictionary</a>.&nbsp; There are also reference-card-like
       summaries that are very helpful, such as <a
         moz-do-not-send="true"
         href="Shuttle/Orbiter%20Displays%20Reference%20Guide%20OI-34.pdf">this
+
+
+
+
 
 
 
@@ -1230,6 +1580,10 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
 
 
 
+
+
+
+
         Processing System Brief</a>.&nbsp; I won't bother to summarize
       that information here, since the document's presentation is at
       least as readable as anything I might write up to supplement
@@ -1242,7 +1596,32 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
     <p>TBD<br>
     </p>
     <h1><a name="Emulation"></a>Compilation and Emulation</h1>
-    When a "modern" HAL/S compiler and means of emulating the compiled
+    In contrast to the HAL/S source code for PFS (PASS) and BFS, of
+    which I have none so far, I have in fact received quite a lot of the
+    source code (but not all) for the original HAL/S compiler.&nbsp; (I
+    have also received quite a lot of assembly-language code for the
+    PASS runtime library ... I think.)&nbsp; I foresee no legal (or CYA
+    legalistic) impediments to making this source code available, and
+    will do so as soon as I have been able to sufficiently clarify what
+    I'm looking at and how it should be presented.&nbsp; The compiler
+    itself was writing in a language called <a moz-do-not-send="true"
+      href="https://www.cs.toronto.edu/XPL/">XPL</a>, and could
+    theoretically be compiled (and run) using <a moz-do-not-send="true"
+      href="https://sourceforge.net/projects/xpl-compiler/">Daniel
+      Weaver's XPL-to-C cross-compiler</a>.&nbsp; I say "theoretically",
+    because I have no idea yet as to whether it would work in practice
+    or not.<br>
+    <br>
+    Separately, I have been working on my own "modern" HAL/S
+    compiler.&nbsp; I am doing so not because I feel that the original
+    compiler is inadequate in some way, but because when I began it
+    there was no prospect of acquiring the original source code, which
+    was believed not to have survived.&nbsp; In fact, I expect the
+    "modern" compiler to be inferior to the original, since not all of
+    the notions embodied in the original compiler are easily duplicated
+    well using compiler-generator tools catering to later notions.<br>
+    <br>
+    At any rate, when such compilers and means of emulating the compiled
     PASS/BFS executable code exist, I'll report on them in this section.<br>
     <br>
     Until then, I'll point out that <a moz-do-not-send="true"
@@ -1256,13 +1635,17 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/README.md">
 
 
 
+
+
+
+
       development roadmap and reports on progress along that roadmap
       appear in the associated README</a> file in our software
     repository.<br>
-    <blockquote><b>Aside:</b>&nbsp; To anyone likewise contemplating
-      creation of a HAL/S compiler.&nbsp; A couple of points of
-      immediate interest stand out.&nbsp; One is that the <a
-        moz-do-not-send="true"
+    <blockquote><font size="-1"><b>Aside:</b>&nbsp; To anyone likewise
+        tempted into contemplating creation of a HAL/S compiler, some
+        observations and a warning are in order.&nbsp; One observation
+        is that the <a moz-do-not-send="true"
 href="Shuttle/HAL_S%20Language%20Specification%20Nov%202005.pdf#page=209">"HAL/S
 
 
@@ -1274,26 +1657,93 @@ href="Shuttle/HAL_S%20Language%20Specification%20Nov%202005.pdf#page=209">"HAL/S
 
 
 
-        Language Specification", Appendix G</a>, contains a Backus-Naur
-      form (BNF) description of the HAL/S grammar.&nbsp; Moreover,
-      modern compiler-generator tools can (in essence) create the parser
-      for a compiler from a BNF or BNF-like description of the
-      grammar.&nbsp; These factoids might give one the impression that a
-      HAL/S compiler can be thrown together in reasonably short
-      order.&nbsp; Perhaps as a project in a class on compiler
-      theory!&nbsp; Unfortunately, the situation is far from being as
-      rosy as those observations make it sound.&nbsp; For one thing, the
-      documented BNF grammar is incomplete, not to mention having a few
-      errors in it.&nbsp; Perhaps more-importantly, BNF is used to
-      describe so-called <i>context-free grammars</i>.&nbsp; A
-      compiler-generation tool would likely require that the grammar
-      indeed be context-free.&nbsp; But HAL/S grammar is <i>not</i>
-      context-free.&nbsp; Thus while the BNF description may have been a
-      useful documentation tool back in the day, particularly for
-      specifying the individual structures of HAL/S statements, serious
-      workarounds are needed if you hope to actually use the original
-      BNF description <i>in toto</i> as part of an effort to generate a
-      HAL/S compiler. <br>
+
+
+
+
+          Language Specification", Appendix G</a>, contains a
+        Backus-Naur form (BNF) description of the HAL/S grammar.&nbsp;
+        Moreover, modern compiler-generator tools can (in essence)
+        create the parser for a compiler from a BNF or BNF-like
+        description of the grammar.&nbsp; These factoids might give one
+        the impression that a HAL/S compiler can be thrown together in
+        reasonably short order.&nbsp; Perhaps as a project in a class on
+        compiler theory!&nbsp; <br>
+        <br>
+        Unfortunately, the situation is far from being as rosy as those
+        observations make it sound.&nbsp; For one thing, the documented
+        BNF grammar is incomplete, not to mention having a few errors in
+        it.&nbsp; Perhaps more-importantly, BNF is used to describe
+        so-called <i>context-free grammars</i>.&nbsp; A
+        compiler-generation tool would likely require that the grammar
+        indeed be context-free.&nbsp; But HAL/S grammar is <i>not</i>
+        context-free.&nbsp; Thus while the BNF description may have been
+        a useful documentation tool back in the day, particularly for
+        specifying the individual structures of HAL/S statements,
+        serious workarounds are needed if you hope to actually use the
+        original BNF description <i>in toto</i> as part of an effort to
+        generate a HAL/S compiler. <br>
+        <br>
+        Since I have no more compiler-theoretical chops than any other
+        schmoe off the street, anyone with actual knowledge in this area
+        might want some evidence that I'm correct.&nbsp; I'll confine
+        myself to just a couple of examples.&nbsp; Consider the
+        following lines of HAL/S code, which also happen to be valid
+        code in lots of other languages, such a C:<br>
+      </font>
+      <blockquote><font size="-1">a = b(c);<br>
+          d = e.f;<br>
+        </font></blockquote>
+      <font size="-1">In C, the first of these would be a call to
+        function <tt>b()</tt> with an argument of <tt>c</tt>,
+        assigning the result to the variable <tt>a</tt>.&nbsp; The
+        second line would be an assignment to variable <tt>d</tt> of
+        the value of the <tt>f</tt> field of structure <tt>e</tt>.
+        There is no other possible interpretation of these lines in
+        C.&nbsp; Specifically, they can be parsed without any knowledge
+        at all of the nature of quantities </font><font size="-1"><tt>a</tt></font><font
+        size="-1"> through </font><font size="-1"><tt>f</tt></font><font
+        size="-1">.&nbsp; And indeed, these are appropriate
+        interpretations in HAL/S as well.&nbsp; But in HAL/S they're not
+        the <i>only</i> interpretations!&nbsp; In HAL/S, the first line
+        could instead be parsed as what would be expressed in C as "<tt>a
+          = b * c;</tt>".&nbsp; Why?&nbsp; Because in HAL/S there is no
+        multiplication operator!&nbsp; Multiplication is indicated
+        simply by putting two expressions (in this case, "<tt>b</tt>"
+        and "<tt>(c)</tt>") side-by-side.&nbsp; Meanwhile, in HAL/S the
+        second line could be parsed as the dot-product of two
+        vectors.&nbsp; Why?&nbsp; Because in addition to being the
+        separator for structures, "." is also the vector dot-product
+        operator.&nbsp; The HAL/S compiler can parse these lines
+        perfectly well, but <i>only</i> because it has the additional
+        context of the type declarations (not shown) for </font><font
+        size="-1"><tt>a</tt></font><font size="-1"> through </font><font
+        size="-1"><tt>f</tt></font><font size="-1"> which will have
+        preceded these lines.&nbsp; Without that additional context, a
+        HAL/S compiler cannot parse these lines at all.&nbsp; Thus the
+        HAL/S grammar is not context-free. QED<br>
+        <br>
+        On the other hand, the situation isn't necessarily completely
+        dire for the context-free approach either.&nbsp; My workaround
+        is to have a preprocessor which turns HAL/S source-code into a
+        very similar but context-free grammar by (among other things)
+        mangling identifiers to indicate their declared datatypes.&nbsp;
+        For example, the sample lines above would be mangled by the
+        preprocessor to<br>
+      </font>
+      <blockquote><font size="-1">a = l_b(c);<br>
+          d = s_e.f;<br>
+        </font></blockquote>
+      <font size="-1">In this mangled form of HAL/S, the token "</font><font
+        size="-1"><tt>l_b</tt></font><font size="-1">" is characteristic
+        of various types of labels, such as function names, so that the
+        only possible interpretation of the first line is that it's a
+        function call.&nbsp; Similarly, "</font><font size="-1"><tt>s_e</tt></font><font
+        size="-1">" is characteristic of names of structures, so the
+        second line cannot possibly be a vector dot product, and must be
+        referencing a field of a structure.&nbsp; So far, at least, this
+        workaround seems to work.&nbsp; Only time will tell if can go
+        the distance.</font><br>
     </blockquote>
     <br>
     TBD<br>
@@ -1312,7 +1762,7 @@ href="Shuttle/HAL_S%20Language%20Specification%20Nov%202005.pdf#page=209">"HAL/S
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2022-12-01<br>
+          2022-12-08<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is

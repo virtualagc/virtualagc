@@ -401,13 +401,13 @@ if shuttle:
     blurbXPL = """
     Unfortunately, as far as I can tell, the primary reference on XPL is the
     book <i>A Compiler Generator</i> by W. M. McKeeman, J. J. Horning, and 
-    D. B. Wortman (Prentice-Hall, 1970, "All rights reserved, ...").  Thus
+    D. B. Wortman (1970).  Thus
     while there are various online resources you can find that try to 
     digest the information in that book and to spit the cud back at you one 
     way or another, there are few authoritative online documents I can point to.
     Less than one, actually.  I invite you to purchase the book &mdash; 
     which, naturally, is out of print but can be found used &mdash; or to
-    google for the various online sources.
+    google for resources online.
     """
     
     blurbFlowcharts = """
