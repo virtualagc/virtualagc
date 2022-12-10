@@ -20,4 +20,4 @@ include ../Makefile.inc
 
 .PHONY: diffSunrise45
 diffSunrise45:
-	diff -s Sunrise45.bin Sunrise45_dump.bin
+	diff -s Sunrise45.bin Sunrise45-dump.bin
