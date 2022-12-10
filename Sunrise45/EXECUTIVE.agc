@@ -1,7 +1,7 @@
 ### FILE="Main.annotation"
 ## Copyright:	Public domain.
 ## Filename:	EXECUTIVE.agc
-## Purpose:	A section of Sunrise 45. 
+## Purpose:	A section of Sunrise 45.
 ##		It is part of the reconstructed source code for the penultimate
 ##		release of the Block I Command Module system test software. No
 ##		original listings of this program are available; instead, this

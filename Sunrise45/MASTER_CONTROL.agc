@@ -1,17 +1,24 @@
 ### FILE="Main.annotation"
 ## Copyright:	Public domain.
-## Filename:	RESTART_CONTROL.agc
-## Purpose:	Part of the source code for Solarium build 55. This
-##		is for the Command Module's (CM) Apollo Guidance
-##		Computer (AGC), for Apollo 6.
+## Filename:	MASTER_CONTROL.agc
+## Purpose:	A section of Sunrise 45.
+##		It is part of the reconstructed source code for the penultimate
+##		release of the Block I Command Module system test software. No
+##		original listings of this program are available; instead, this
+##		file was created via disassembly of dumps of Sunrise core rope
+##		memory modules and comparison with the later Block I program
+##		Solarium 55.
 ## Assembler:	yaYUL --block1
-## Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
-## WEBSITE:	WWW.IBIBLIO.ORG/APOLLO/INDEX.HTML
-## MOD HISTORY:	2009-09-21 JL	CREATED.
-##		2016-08-22 RSB	TYPOS.
-## 		2016-12-28 RSB	PROOFED COMMENT TEXT USING OCTOPUS/PROOFERCOMMENTS,
-##				AND FIXED ERRORS FOUND.
+## Contact:	Ron Burkey <info@sandroid.org>.
+## Website:	www.ibiblio.org/apollo/index.html
+## Mod history:	2022-12-09 MAS	Initial reconstructed source.
 
+## This log section is not present in any currently-known surviving program listings, so
+## it has been written from scratch to match the module disassembly. Label names were
+## taken from AGC Information Series Issue 16: Progress Control and Fresh Start, and
+## should be mostly correct. The name of the section itself could have originally been
+## PROGRESS CONTROL; the original sources are evenly split between calling it PROGRESS
+## CONTROL and MASTER CONTROL, and it is unclear which was actually in the listing.
 
 		BANK	1
 GETPHASE	XCH	Q

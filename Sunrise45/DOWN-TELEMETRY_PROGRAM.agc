@@ -1,17 +1,19 @@
 ### FILE="Main.annotation"
 ## Copyright:	Public domain.
 ## Filename:	DOWN-TELEMETRY_PROGRAM.agc
-## Purpose:	Part of the source code for Solarium build 55. This
-##		is for the Command Module's (CM) Apollo Guidance
-##		Computer (AGC), for Apollo 6.
+## Purpose:	A section of Sunrise 45.
+##		It is part of the reconstructed source code for the penultimate
+##		release of the Block I Command Module system test software. No
+##		original listings of this program are available; instead, this
+##		file was created via disassembly of dumps of Sunrise core rope
+##		memory modules and comparison with the later Block I program
+##		Solarium 55.
 ## Assembler:	yaYUL --block1
-## Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
-## Mod history:	2009-09-29 JL	Created.
-##		2016-08-19 RSB	Typo.
-## 		2016-12-28 RSB	Proofed comment text using octopus/ProoferComments,
-##				and fixed errors found.
+## Mod history:	2022-12-09 MAS	Initial reconstructed source.
 
+## Label names in this section were taken from the errata for AGC Information Series Issue 15.
 
 # TELEMETRY PROCESSOR
 # --------- ---------
