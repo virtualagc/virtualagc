@@ -15,6 +15,7 @@ History:        2022-11-18 RSB  Created.
                                 changes, of which there were a lot.  Oops!)
                                 Began adding hashing for mangling of structure
                                 field names.
+                2022-12-09 RSB  Added structure-template library.
 
 I've implemented a very imperfect, heuristic method.  If it
 turns out to be inadequate, it can be replaced.  It probably should be almost
@@ -89,10 +90,7 @@ are the same.
 import sys
 import re
 import copy
-
-# For structure field-name hashing.
-from crc import Calculator, Crc64
-crcCalculator = Calculator(Crc64.CRC64)
+import unEMS
 
 bareIdentifierPattern = '[A-Za-z]([A-Za-z0-9_]*[A-Za-z0-9])?'
 identifierPattern = "\\b" + bareIdentifierPattern
@@ -197,7 +195,7 @@ def expandMacros(rawline, macros, maxScopes=1000000):
     return line, changed
 
 debugIndentation = False
-def replaceBy(halsSource, metadata, full):
+def replaceBy(halsSource, metadata, full, libraryFilename, templateLibrary):
 
     def removeComments(string):
         while True:
@@ -322,6 +320,34 @@ def replaceBy(halsSource, metadata, full):
                                             bareIdentifierPattern + "\\s*:", \
                                             fullLine)
                         if match != None:
+                            # Update structure library.  Note that we normalize
+                            # the STRUCTURE statement to facilitate comparisons
+                            # once the template is in the library.  Just for
+                            # now, the method is to replace all whitespace by
+                            # single spaces, to eliminate inline comments, etc.
+                            # However, since this is done by simple-minded
+                            # pattern-matching, it can goof up for some things,
+                            # particularly CHARACTER() INITIAL('...').
+                            # So in the long run, a better method may be needed.
+                            normalized = re.sub("\s*/[*].*[*]/\s*", \
+                                                "", fullLine)
+                            normalized = normalized.strip()
+                            normalized = re.sub("\s+:", ":", normalized)
+                            normalized = re.sub("\s+;", ";", normalized)
+                            fields = normalized.split()
+                            identifier = fields[1][:-1]
+                            if identifier not in templateLibrary:
+                                templateLibrary[identifier] = normalized
+                                f = open(libraryFilename, "a")
+                                print(normalized, file=f)
+                                f.close()
+                            elif normalized != templateLibrary[identifier]:
+                                unEMS.addError(unEMS.WARNING, \
+                                    "Template mismatch between source (" + \
+                                    normalized + ") and library (" + \
+                                    templateLibrary[identifier] + ")", \
+                                    metadata, i)
+                                    
                             hasType = "s_"
                             identifier = re.search(
                                 "\\b" + bareIdentifierPattern + "\\b", 

@@ -9,13 +9,16 @@ Purpose:        This is a little one-off utility that lets me visualize the
 History:        2022-11-15 RSB  Created. 
                 2022-11-16 RSB  Added --strip, --no-strip.  
                 2022-11-25 RSB  Added --collapse.  Fixed parentheses inside
-                                the replacement string of REPLACE statements.  
+                                the replacement string of REPLACE statements.
+                2022-12-11 RSB  Added --bare.  
 """
 
 import sys
 
 strip = True
 collapse = False
+bare = False
+stringDelimiter = '"'
 for param in sys.argv[1:]:
     if param == "--strip":
         strip = True
@@ -23,6 +26,10 @@ for param in sys.argv[1:]:
         strip = False
     elif param == "--collapse":
         collapse = True
+    elif param == "--bare":
+        bare = True
+    elif param == "--carat":
+        stringDelimiter = "^"
     elif param == "--help":
         print("""
         Helps examine output from the TestHAL_S compiler front-end.
@@ -33,6 +40,8 @@ for param in sys.argv[1:]:
                     (This is the default.)
         --no-strip  Do not remove 2-letter prefixes from LBNF labels.
         --collapse  Make the hierarchy easier to read ... I hope.
+        --bare      Assumes input contains just the abstract syntax.
+        --carat     Assumes string delimiter is ^ rather than double quote.
         """)
         sys.exit(0)
     else:
@@ -46,6 +55,8 @@ else:
 step = 1
 itsTime = False
 for line in sys.stdin:
+    if bare and "(" == line[:1]:
+        itsTime = True
     if "[Abstract Syntax]" in line:
         itsTime = True
     elif itsTime:
@@ -89,7 +100,7 @@ for line in sys.stdin:
                     for j in range(indent):
                         print(" ", end="")
                     print("%d:" % indent, end="")
-                if c == '"':
+                if c == stringDelimiter:
                     inQuote = not inQuote
                     skip = 0
                 if skip > 0:

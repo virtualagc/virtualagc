@@ -1,19 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-
-*****************************************************************************
-*   This program has been superseded by yaHAL-S-FC.py.  I'll delete it      *
-*   in the not-too-distant future.                                          *
-*****************************************************************************
-
 Copyright:      None - the author (Ron Burkey) declares this software to
                 be in the Public Domain, with no rights reserved.
-Filename:       yaHAL-preprocessor.py
+Filename:       yaHAL-S-FC.py
 Purpose:        This is a preprocessor for the "modern" HAL/S compiler
                 which takes care of things I don't think can be handled
                 by the compiler itself (given the BNFC framework for
-                developing the compiler).
+                developing the compiler).  It invokes the compiler 
+                automatically when appropriate, so it's also appropriate to
+                call this the compiler.
 History:        2022-11-07 RSB  Created. 
                 2022-11-09 RSB  Change emphasis (and filename) from 
                                 compiler to preprocessor.
@@ -29,6 +25,7 @@ History:        2022-11-07 RSB  Created.
                                 the LBNF to handle it.
                 2022-12-09 RSB  Added --library option.
                 2022-12-10 RSB  Added --no-compile.
+                2022-12-11 RSB  The next evolution of yaHAL-preprocessor.py.
                                 
 Here are some features of HAL/S I don't think the compiler (if based on a
 context-free grammar with free formatting) could handle without preprocessing:
@@ -57,9 +54,11 @@ and updates if it discovers new STRUCTURE statements not already in the library.
 
 import sys
 import re
+
 import unEMS
 import replaceBy
 import reorganizer
+from pass1 import tokenizeAndParse, tmpFile, compiler
 
 #Parse the command-line arguments.
 tabSize = 8
@@ -69,22 +68,28 @@ files = []
 full = True
 libraryFilename = "yaHAL-default.templates"
 structureTemplates = {}
-noCompile = True
+noCompile = False
 for param in ["--library="+libraryFilename] + sys.argv[1:]:
     if param == "--help":
         print("""
-        This is a preprocessor for HAL/S code, intended to remove certain 
-        constructs (particularly multiline equations) prior to compilation.
+        This is a preprocessor+compiler for HAL/S code. The principal 
+        functionality is preprocessing, and the compiler is simply invoked as
+        an external program. The preprocessing is necessary because the external
+        compiler is valid only for a context-free grammar, and the official
+        HAL/S grammar is not context-free.  The preprocessor produces valid 
+        HAL/S code but mangled in such a way that it can be parsed by a 
+        context-free grammar.
         
         Usage:
-            yaHAL-preprocessor.py [OPTIONS] SOURCE1.hal [SOURCE2.hal [...]] >SOURCE.hal
+            yaHAL-S-FC.py [OPTIONS] SOURCE1.hal [SOURCE2.hal [...]] >SOURCE.hal
         
         The OPTIONS are: 
         
         --tab=N         Tab size in source files; assumed to be 8.  No allowance
-                        is made for different tab sizes in different source files,
-                        so let's just hope that never happens!  Probably the 
-                        Shuttle source has no tabs anyway since it was supplied on
+                        is made for different tab sizes in different source 
+                        files, so let's just hope that never happens!  Probably 
+                        the Shuttle source has no tabs anyway since it was 
+                        supplied on
                         punchcards, but it's certainly possible to accidentally
                         end up with tabs if source is edited in modern editors.
         --full          If this is used, then identifiers are distinguished by
@@ -97,9 +102,10 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
                         will only be added to the final library file specified.
                         This option must precede the HAL/S source filenames.
         --no-compile    Merely output preprocessed source, and do not attempt
-                        to invoke the compiler.  (This is currently the default
-                        anyway.)
-        """)
+                        to invoke the compiler.
+        --compiler=F    Name of compiler's phase 1 (default %s).
+        """ % compiler)
+        sys.exit(0)
     elif param[:6] == "--tab=":
         tabSize = int(param[6:])
     elif param == "--full":
@@ -108,6 +114,8 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
         full = False
     elif param == "--no-compile":
         noCompile = True
+    elif param[:11] == "--compiler=":
+        compiler = param[11:]
     elif param[:10] == "--library=":
         libraryFilename = param[10:].strip()
         #print("Here", libraryFilename)
@@ -182,49 +190,29 @@ warningCount = unEMS.warningCount
 fatalCount = unEMS.fatalCount
 
 # Reorganize input lines.
-'''
-print("---------------------------------------------------------------------")
-for i in range(len(halsSource)):
-    print(halsSource[i], metadata[i])
-'''
 halsSource, metadata = reorganizer.reorganizer(halsSource, metadata)
-'''
-print("---------------------------------------------------------------------")
-for i in range(len(halsSource)):
-    print(halsSource[i], metadata[i])
-sys.exit(1)
-'''
-
-'''
-# This code was intended to convert constructs like [X] to just X.  It's 
-# misguided and needs to be removed ... which I'll do as soon as the LBNF
-# for the compiler front-end has been fixed up to account for the brackets.
-for i in range(len(halsSource)):
-    line = halsSource[i]
-    while True:
-        match = re.search("\\[" + replaceBy.bareIdentifierPattern + "\\]", line)
-        if match == None:
-            break
-        line = line[:match.span()[0]] + match.group()[1:-1] \
-                    + line[match.span()[1]:]
-    if line != halsSource[i]:
-        halsSource[i] = line
-'''
 
 # Take care of REPLACE ... BY "..." macros.
 replaceBy.replaceBy(halsSource, metadata, full, \
                     libraryFilename, structureTemplates)
 
-# Output the modified source.
+# Output the modified source.  If --no-compile, then simply output to stdout.
+# If not --no-compile, then output to a file called yaHAL_S.tmp.
+if noCompile:
+    f = sys.stdout
+else:
+    f = open(tmpFile, "w")
 for i in range(len(halsSource)):
     if len(halsSource[i]) > 0 and halsSource[i][:1] != " ":
-        print(" /*" + halsSource[i] + "*/" )
+        print(" /*" + halsSource[i] + "*/", file=f)
     else:
-        #print(halsSource[i])
-        print(reorganizer.untranslate(halsSource[i]))
+        print(reorganizer.untranslate(halsSource[i]), file=f)
+if not noCompile:
+    f.close()
 
-# Print final summary.
+# Print final summary of preprocessing.
 print(" /*")
+print(" Preprocessor Report ------------------------------------------------")
 print(" Files:")
 for file in files:
     print("     ", file)
@@ -236,7 +224,17 @@ for i in range(len(halsSource)):
             print("     ", error)
 print("     ", warningCount, "warnings")
 print("     ", fatalCount, "errors")
-print (" */")
+print(" --------------------------------------------------------------------")
+print(" */")
 if fatalCount > 0:
     sys.exit(1)
 
+if not noCompile:
+    success, ast = tokenizeAndParse([])
+    if success:
+        print(" Pass 1 successful!")
+        print(ast)
+    else:
+        print(" Pass 1 failure!")
+        sys.exit(1)
+        
