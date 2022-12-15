@@ -36,6 +36,7 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle").replace("@SUBTI
 
 
 
+
           Interface</a><br>
       </li>
       <li><a moz-do-not-send="true" href="#Emulation">Compilation and
@@ -132,6 +133,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
         4, "Computers in the Space Shuttle Avionics System", of James
         Tomayko's <i>Computers in Spaceflight: The NASA Experience</i></a>,
       but there are numerous other documents in <a
@@ -167,6 +169,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
         software, known as the <i>Primary Flight Software (PFS)</i>
         atop the <i>Flight Control Operating System (FCOS)</i>.&nbsp;
         PFS and FCOS together are collectively referred to as the <i>Primary
+
 
 
 
@@ -230,12 +233,14 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
               Display Units (MDUs)</i>.&nbsp; <br>
           </li>
           <li>Keyboards.&nbsp; The pilots had 2 of these, and the
             mission specialist station had a 3rd.</li>
         </ul>
         <p>The pre-2000 configuration was known collectively as the <i>Multifunction
+
 
 
 
@@ -393,6 +398,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
       That should be your first stop in a documentation
       pilgrimage!&nbsp; However, here are some websites that have
       additional documents that you may find interesting, and which may
@@ -401,6 +407,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
     <ul>
       <li><a moz-do-not-send="true"
 href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.html">Johnson
+
 
 
 
@@ -440,7 +447,9 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
 
 
 
+
           Space Shuttle Ultra site, particularly its reference section</a>.&nbsp;
+
 
 
 
@@ -467,6 +476,7 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
         FlightGear is a flight simulation system.</li>
       <li><a moz-do-not-send="true"
           href="https://gandalfddi.z19.web.core.windows.net/shuttle.html">Ken
+
 
 
 
@@ -520,6 +530,7 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/HAL-S-FC-REL32V0">only
 
 
+
           <i>partial</i> source code for release 32V0"</a>.&nbsp; Here
         are some admittedly-poor hints for dissecting that source code:</li>
       <ul>
@@ -537,8 +548,10 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
               href="Shuttle/hal-s_compiler_system_specification.pdf">"HAL/S
 
 
+
               Compiler System Specification"</a>.</li>
           <li><a moz-do-not-send="true" href="Shuttle/19760020796.pdf">"HAL/S-FC
+
 
 
               &amp; HAL/S-360 Compiler System Program Description"</a>.<br>
@@ -558,6 +571,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/XPL-TWS-1969-03">The
 
 
+
           source code from the Appendices of the book <i>A Compiler
             Generator</i></a> mentioned above, including XCOM and other
         XPL software.&nbsp; This is reference code, and is guaranteed
@@ -571,23 +585,46 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       </li>
     </ul>
     <h1><a name="EBCDIC"></a>Encoding of the Shuttle Source Code</h1>
-    <p><b>Executive summary</b>:&nbsp; As presented by the Virtual AGC
-      Project, the vast majority of Shuttle source code is compatible
-      with whatever character-encoding environment is used on your
-      particular computer system, and in particular with UTF-8.&nbsp;
-      But there's a handful of Shuttle source-code files that
-      specifically need to be viewed using an ISO 8859-15 (or -1)
-      encoding.&nbsp; And one more thing: The characters "^" and "~" are
-      used, undocumented, as aliases for the "¬" operator in HAL/S and
-      XPL.&nbsp; If this explanation satisfies you, I wouldn't bother to
-      read the remainder of this section.&nbsp; If not, then read on!<br>
+    <p>You should use a <b>UTF-8</b> character-encoding environment
+      when you view or compile the Shuttle's HAL/S source code as
+      presented here at Virtual AGC.</p>
+    <p>The vast majority of the presented Shuttle source code is
+      actually compatible with <i>whatever</i> 8-bit character-encoding
+      environment is used:&nbsp; ASCII, ISO 8859, or UTF-8.&nbsp; (If
+      you're using UTF-16, it's not compatible with <i>that</i>.&nbsp;
+      But then you're probably used to incompatibility anyway and know
+      how to work around it.&nbsp; I don't.)&nbsp; All of the character
+      sets just mentioned share a common core of 128 characters,
+      including almost all of the characters used in the majority of
+      computer software source code, and encode them identically.&nbsp;
+      However, HAL/S (and XPL) source code source code can contain a
+      couple of additional characters <i>not</i> in the 128-character
+      core of compatibility.&nbsp; Those characters are "¬" and
+      "¢".&nbsp; If you were to view files containing them in a
+      non-UTF-8 environment, those characters would not look right; if
+      you edit such source files a non-UTF-8 encoding environment, they
+      may become corrupted and uncompilable.&nbsp; And I suppose (but
+      don't know) that compiling in a non-UTF-8 environment may fail
+      anyway.&nbsp; <br>
     </p>
-    <p>These days, we tend not to think about how textual information is
-      encoded numerically for storage in our computers, because almost
-      everybody now does it the same way.&nbsp; Simple Latin-alphabet
-      text, such as that found in almost-all computer software source
-      code, is nowadays invariably encoded in what's known as 7-bit
-      ASCII or "plain vanilla" ASCII:<br>
+    <p>Since it's hard to mix-and-match character encoding environments
+      on your computer, I'd suggest just using UTF-8 for everything, if
+      it's possible for you and working with Shuttle code is important
+      enough for you.&nbsp; I think UTF-8 may be the most common
+      approach these days and the most future-proofed approach anyway,
+      but if your specific case is different, the generality that it
+      works for everyone <i>else</i> won't be too comforting to you.<br>
+    </p>
+    <p>This problem arises partly because the Shuttle's software source
+      code originally wasn't compatible with <i>any</i> of the
+      character encoding schemes we use today.&nbsp; These days, we tend
+      not to think too much about how simple Latin-alphabet text or
+      numerics are encoded numerically for storage in our computers,
+      because almost everybody now does it in similar ways.&nbsp;
+      Indeed, your eyes may have glazed over while reading the
+      paragraphs above, and you may have wondered why I was even
+      bothering to discuss it. The usual encoding is known as 7-bit
+      ASCII or "plain vanilla" ASCII or just "ASCII":<br>
     </p>
     <blockquote>
       <p><tt>Dec Hex&nbsp;&nbsp;&nbsp; Dec Hex&nbsp;&nbsp;&nbsp; Dec
@@ -640,90 +677,56 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
           o&nbsp; 127 7F DEL</tt><br>
       </p>
     </blockquote>
-    <p>Whereas if you have need for more than just the 95 printable
-      characters (plus 33 control codes) provided by that scheme, the
-      vastly-more-inclusive UTF-8 encoding scheme is used instead.&nbsp;
-      In UTF-8, characters are encoded using from 1 to 6 bytes each, <i>but</i>
-      the first 128 characters use 1 byte each and are identical to
-      7-bit ASCII codes.<br>
+    Whereas instead, in UTF-8, the funky characters "¬" and "¢" are
+    represented by the <i>2-byte </i>sequences 0xC2 0xAC and 0xC2
+    0xA2, respectively.&nbsp; Of course, you don't have to worry about
+    that because it's all transparent to you, if you are within the
+    suggested UTF-8 environment.<br>
+    <br>
+    But it wasn't always like that, particularly when IBM was king of
+    the mainframe hill, as it was back in the time that Shuttle (and
+    Apollo) software development was first in full-swing.&nbsp; IBM
+    mainframes like System/360 used an 8-bit character-encoding scheme
+    called EBCDIC, which was <i>completely unlike</i> ASCII in almost
+    every respect. I'll ask you to take my word for that rather than
+    showing you a handy-dandy character table for EBCDIC like the one
+    for ASCII above, because every EBCDIC table I can find differs (in
+    some respects) from the others, and so in the end it's more
+    confusing to show you a table than to leave it out entirely.&nbsp; <br>
+    <br>
+    How is this relevant to us?&nbsp; Well, since the entire Shuttle
+    software-development system basically ran on those old IBM
+    System/360 style computers, all of the Shuttle software source code
+    was
+    originally encoded in EBCDIC.&nbsp; To be absolutely authentic,
+    perhaps Virtual AGC should be presenting Shuttle code to you in
+    EBCDIC form.&nbsp; But if I did, then it would be impossible for you
+    to view it or work with it, since no generally-available modern
+    computer systems use EBCDIC any longer.&nbsp; Thus for your
+    convenience, all of the EBCDIC source code has been converted to
+    UTF-8 for storage in our software repository.<br>
+    <br>
+    Conversely, if we ever get the original HAL/S-FC compiler to run on
+    our modern computer systems, we have to convert the Shuttle source
+    code back to EBCDIC to get it to compile!&nbsp; I don't really know.<br>
+    <p>Interestingly, the original Shuttle software development teams
+      may have had problems with the funky "¬" character themselves,
+      because when you view the Shuttle source code, you may not
+      actually find "¬" characters in the source.&nbsp; You may see "~"
+      or "^" in place of "¬".&nbsp; But that's not something we at
+      Virtual AGC have done.&nbsp; If those kinds of character
+      substitutions were made, they were done long before we at Virtual
+      AGC ever saw the code.&nbsp; The documentation for the HAL/S
+      language is clear and unambiguous that "¬" is the "logical not"
+      operator, and that it is used in expressions like <tt>A</tt><tt>¬=
+        B</tt> ("<tt>A</tt> is not equal to <tt>B</tt>").&nbsp; But the
+      EBCDIC character set is not entirely consistent.&nbsp; In some
+      EBCDIC tables you find that&nbsp; "¬" is encoded numerically in
+      EBCDIC as 0x5F, while other EBCDIC tables say that "^" is encoded
+      as 0x5F, and still other tables show nothing or still other
+      characters (in particular, a horizontal bar that may or may not be
+      "~") occupying the 0x5F slot.<br>
     </p>
-    <p>But it wasn't always like that, particularly when IBM was king of
-      the mainframe hill, as it was back in the time that Shuttle (and
-      Apollo) software development was first in full-swing.&nbsp; IBM
-      mainframes like System/360 used an 8-bit character-encoding scheme
-      called EBCDIC, which was completely unlike ASCII in almost every
-      respect. I'll ask you to take my word for that rather than showing
-      you a handy-dandy character table for EBCDIC like the one for
-      ASCII above, because every EBCDIC table I can find differs (in
-      some respects) from the others, and so in the end it's more
-      confusing to show you a table than to leave it out entirely.&nbsp;
-      How is this relevant to us?&nbsp; Well, since the entire Shuttle
-      software-development system basically ran on those IBM System/360
-      style computers, all of the Shuttle software source code was
-      encoded in EBCDIC.&nbsp; And no modern computer systems use EBCDIC
-      any longer.&nbsp; Without being converted in some way, the
-      original source code simply looks like gobbledygook!&nbsp; So to
-      store any Shuttle-related software in our software repository, or
-      to display it here on these web-pages, that source code must first
-      be converted from EBCDIC encoding to a modern encoding ... which
-      to the extent possible is 7-bit ASCII.<br>
-    </p>
-    <p>As you may have guessed form the comments I've just made, that
-      conversion process is not perfect.&nbsp; Simple alphanumerics and
-      common punctuation don't cause any problems, but there are two
-      more-unusual characters that cause us some difficulty.&nbsp; <br>
-    </p>
-    <p>The most irritating is the "¬" character, which as all of the
-      HAL/S <i>and</i> XPL documentation tells us is the logical-NOT
-      operator.&nbsp; Thus, a HAL/S (or XPL) expression that <tt>A</tt>
-      is not equal to <tt>B</tt> would be <tt>A</tt><tt>¬=B</tt>.&nbsp;
-
-      But it's questionable as to whether "¬" is even in EBCDIC or
-      not.&nbsp; In some EBCDIC tables you find it encoded as
-      hexadecimal 0x5F; in others, as 0xBA; in still other tables, it
-      doesn't appear at all.&nbsp; Regardless of that, there is
-      certainly no "¬" character in 7-bit ASCII, so no conversion is
-      possible.<br>
-    </p>
-    <p>The workaround employed by HAL/S and XPL developers at the time
-      seems to have been to use "^" or "~" instead of "¬", without
-      choosing to make any mention of it in the documentation.&nbsp;
-      Fortunately, both "^" and "~" do appear in ASCII. And in <i>some</i>
-      versions of EBCDIC.&nbsp; <i>Our</i> workaround is simply to
-      accept "^" or "~", which have no other uses in HAL/S or XPL, as
-      being interchangeable with "¬".&nbsp; For example, <i>any</i> of
-      the expressions <tt>A</tt><tt>¬=B</tt>, <tt>A^</tt><tt>=B</tt>,
-      or <tt>A~</tt><tt>=B</tt> may be used to express "<tt>A</tt> is
-      not equal to <tt>B</tt>" in our source-code presentation. </p>
-    <p>The "¢" character is the other problematic case.&nbsp; It is an
-      escape code that appears sometimes in string literals.&nbsp; Once
-      again, it is usually available in EBCDIC (though not always with
-      the same numerical encoding) but is not available in 7-bit ASCII
-      at all.&nbsp; In this case, though, the original Shuttle
-      developers used no alternate symbol, as far as I know right now
-      ... so there is no workaround.&nbsp; We simply have to have "¢"
-      characters in our HAL/S source code somehow, regardless of the
-      fact that there's no 7-bit ASCII code for it.<br>
-    </p>
-    <p>Well, and there's also the "§" character that may or may not
-      appear in certain messages printed by the original HAL/S compiler;
-      I'm less certain about this one than the others, because I'm not
-      sure exactly what the character is supposed to be, but it would be
-      good to account for it.<br>
-    </p>
-    <p>So ... how are "¬" and "¢" then reasonably represented in an
-      ASCII-like conversion of the original EBCDIC code?&nbsp; As I
-      mentioned earlier, the most-standard way of doing that these days
-      would probably be to encode them using UTF-8.&nbsp; Personally, I
-      find that distasteful, since I hate to introduce multi-byte
-      encodings for just a couple of characters appearing in a tiny
-      minority of the source-code files.&nbsp; As an alternative to
-      UTF-8, there's still a variety of 8-bit encoding schemes in common
-      use today.&nbsp; One of these, ISO 8859-15 (or -1) is identical to
-      7-bit ASCII for the lowest 128 characters, while encoding our
-      problematic characters in the numerical range 128 through
-      255.&nbsp; I've chosen to use this scheme for the presentation of
-      HAL/S and XPL source code.</p>
     <h1><a name="HALS"></a>HAL/S<br>
     </h1>
     <p>HAL/S?&nbsp; HAL/S was a high-level programming language in which
@@ -752,6 +755,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       C. Clarke, maintained that that was simply a coincidence.&nbsp;
       Where the "HAL" in HAL/S comes from has likewise been explained in
       several ways, none of them relating to <i>2001: A Space Odyssey</i>.&nbsp;
+
 
 
 
@@ -806,12 +810,14 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
           in HAL/S</a>", which was intended as an introduction to
         programming in HAL/S and is organized as a tutorial.</li>
       <li>The tutorial itself points out that it is not a definitive
         exposition of the language, and recommends proceeding afterward
         to the <a moz-do-not-send="true"
           href="Shuttle/HAL_S%20Language%20Specification%20Nov%202005.pdf">"HAL/S
+
 
 
 
@@ -849,9 +855,11 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
           Programmer's Guide"</a>.</li>
       <li>And then there's the <a moz-do-not-send="true"
           href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf">"HAL/S-FC
+
 
 
 
@@ -908,6 +916,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       compute its mathematical factorial, then output the result.&nbsp;
       While I won't dissect this short program in detail, I can make a
       couple of observations.&nbsp; For one, the language is <i>strongly
+
 
 
 
@@ -972,6 +981,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
         LONG, SHORT, ALPHA;</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; DECLARE VECTOR(2),</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
@@ -984,6 +994,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       </tt><tt>E&nbsp;&nbsp;&nbsp; -</tt><tt><br>
       </tt><tt>M&nbsp;&nbsp;&nbsp; BC = VECTOR (LONG, 0);</tt><tt><br>
       </tt><tt>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -1004,6 +1015,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
         2</tt><tt><br>
       </tt><tt><br>
       </tt><tt>E&nbsp;&nbsp;&nbsp; -&nbsp;&nbsp;&nbsp;
@@ -1011,6 +1023,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       </tt><tt>M&nbsp;&nbsp;&nbsp; CD = BC + DA;</tt><tt><br>
         <br>
       </tt><tt>E&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -1062,6 +1075,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
             DEX$J<br>
           </tt></div>
         <tt> </tt>
@@ -1072,7 +1086,9 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
             I&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -1093,10 +1109,12 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
             L<br>
           </tt></div>
         <tt> </tt>
         <div class="moz-cite-prefix"><tt>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -1119,6 +1137,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     a '-' above it, that means that <tt>AB</tt> is really a
     vector.&nbsp; Actually, a 2-vector, in the example code above.&nbsp;
     That's reflected in the declaration "<tt>DECLARE VECTOR(2), AB, ...</tt>".
+
 
 
 
@@ -1153,6 +1172,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
         LONG, SHORT, ALPHA;</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; DECLARE VECTOR(2),</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
@@ -1170,6 +1190,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     by the '<tt>$</tt>' character. <br>
     <br>
     One thing you may take away from this is that the '<tt>-</tt>' (or '<tt>*</tt>',
+
 
 
 
@@ -1220,6 +1241,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
     Multiplication is indicated simply by placing variable names,
     constant names, or literal numbers adjacent to each other (separated
     by whitespace).&nbsp; For example, <br>
@@ -1231,6 +1253,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     <p>By the way, <tt>SCALAR</tt> is what HAL/S calls its
       floating-point type; thus <tt>SCALAR</tt> contrasts with <tt>INTEGER</tt>
       or <tt>BOOLEAN</tt> datatypes, but not with <tt>VECTOR</tt> or <tt>MATRIX</tt>.&nbsp;
+
 
 
 
@@ -1273,6 +1296,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
         href="Shuttle/SpaceShuttleMissionsSummaryVol1.pdf">Volume 1</a>
       and <a moz-do-not-send="true"
         href="Shuttle/SpaceShuttleMissionsSummaryVol2.pdf">Volume 2</a>.&nbsp;
+
 
 
 
@@ -1561,6 +1585,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
         Application Software (DAS)</i>.&nbsp; But these kinds of details
       are of little interest to us in the absence of the DAS or other
       software that actually ran on the DEU/IDPs.&nbsp; So the only use
@@ -1639,11 +1664,13 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
         GNC SYS SUMM 1 sample templates above came from one such DPS
         Dictionary</a>.&nbsp; There are also reference-card-like
       summaries that are very helpful, such as <a
         moz-do-not-send="true"
         href="Shuttle/Orbiter%20Displays%20Reference%20Guide%20OI-34.pdf">this
+
 
 
 
@@ -1719,6 +1746,7 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
 
 
 
+
         Processing System Brief</a>.&nbsp; I won't bother to summarize
       that information here, since the document's presentation is at
       least as readable as anything I might write up to supplement
@@ -1754,6 +1782,7 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
     executable code exist, I'll report on them in this section. Until
     then, I'll point out that <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/README.md">the
+
 
 
 
