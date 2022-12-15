@@ -852,7 +852,109 @@ So unfortunately, there's no choice to to analyze these expressions enough using
 
 In spite of this little quirk, this scheme does seem to me to be very workable.  I'll think on it a bit more before trying to act on it, though.
 
-## 176-P.hal (continued)
+# 2022-12-13
+
+I've spent the last few days reworking the fundamental structure of this software.  Here are the main differences:
+
+ 1. The compiler front-end has been fixed up, so that there are now two executables built:  TestHAL_S, which is exactly the same as the BNF Converter demo I've been using up to now, and modernHAL-S-FC.  The two are almost the same, but the latter one quotes strings in its abstract syntax output using carats rather than double-quotes ... which makes those strings parsable easily rather than messes that aren't guaranteed consistent.  The latter program also omits some outputs that we don't care about.  Finally, it would not normally be called independently, but rather would be invoked normally by the preprocessor.
+ 2. The preprocessor program (yaHAL-preprocessor.py) has been replaced by yaHAL-S-FC.py, which is calls the compiler front-end directly rather than via some explicit pipe in the shell.  It also parses the "abstract syntax" output by the compiler front-end, both for subsequent processing and for human inspection.  The latter point obsoletes syntaxHierarchy.py.
+ 3. Changes to the LBNF grammar have been made to allow the new preprocessor yaHAL-S-FC.py to call the compiler front-end modernHAL-S-FC not only for the compilation of the full source file, but also to compile several types of individual source lines, in particular:  `STRUCTURE`, `DECLARE`, and `REPLACE` lines.  This will allow various types of *ad hoc* but not-fully-correct parsing that the preprocessor does now to be pulled out in favor of simply allowing modernHAL-S-FC to parse those lines correctly according to the grammar.  I've not yet taken advantage of that in the preprocessor, but it opens the door to much-better maintainability and syntactical correctness and completeness in the preprocessor.
+ 4. A top-level Makefile handles building all this weird stuff automatically (specifically, the hacked version of TestHAL_S that is modernHAL-S-FC).
+
+On the downside, modernHAL-S-FC *is* a hack of TestHAL_S, and relies on the (undocumented) internal structure of the Printer.c files generated automatically by BNF Converter remaining similar to the way it is now.  I think that's actually a fair seems to be a very primitive function unlikely to change.  Plus, the hack is only necessary until I've completely finalized the LBNF grammer, after which point there's no longer a need to regenerated any of the C source files.  But still ....
+
+There are certain drawbacks to the way the preprocessor invokes the compiler front end, in that in the C version of the code, source code can only be passed to the compiler via a file.  Thus to compile a single `STRUCTURE` statement (for example), the preprocessor needs to create a file containing it, run the modernHAL-S-FC program while capturing the textual output, and then finally parse the textual output of the front-end to get a Python structure for the AST.  That's pretty inefficient.  It would be lots better if the compiler front-end could simply be invoked as a library function and the source line passed as a memory buffer.  But the structure of the C code simply doesn't allow it.  I *think* that using Java or Haskell framework for the compiler front-end, rather than C, might let me get around this.  But it's a huge learning curve, particularly for Haskell, since I'd likely want to convert the preprocessor to those languages as well.  Given the hassle, that's something I'm going to put off considering indefinitely.  At least until the Python/C compiler is fully working!
+
+On the other hand, perhaps there's a way to partially do what I was talking about in the preceding paragraph.  At any rate, there's a function `fmemopen()` which associates a file descriptor with a block of memory, and then file operations occur to that block of memory rather than to a file, so the function that would have to be fooled into doing this (`pCOMPILATION(FILE *fp)`) probably would work with it.  It still looks like a lot of work to somehow get Python and C working together.  I suppose that what might be easier, once the proprocessor is perfected, is to rewrite the preprocessor in C.
+
+# 2022-12-14
+
+## 176-P.hal (concluded)
+
+Even after all of the above, there were a number of problems.  For one thing, in `STATE2.STATE.ACCEL = READ_ACC(17);`, there had been no forward declation of `READ_ACC()`, which as far as I know is not a built-in function, so it couldn't be mangled properly.  I've added in the forward declaration.
+
+Next, `<QUAL STRUCT> <EQUALS> <EXPRESSION> ;` was not allowed in the grammar, yet if I added it, it conflicted with `<VARIABLE> <EQUALS> <EXPRESSION> ;`, even though `<QUAL STRUCT>` is not an allowed type of `<VARIABLE>`.  The problem was that the grammar has been allowing assignments with the left-hand side of `<VARIABLE> . <STRUCT_ID>` for some reason, that that caused the conflight.  I've resolved that in the grammar.
+
+Next, `<QUAL STRUCT>` wasn't allowed in a `<CALL ASSIGN LIST>`, which I've I've fixed.
+
+Well ... and probably more stuff of a similar nature that I've forgotten.  At any rate, 176-P.hal now parses without error and the abstract syntax produced looks good to me.
+
+## 177-P.hal
+
+Looks good!
+
+## 180-EXAMPLE_N.hal
+
+The `READ_IMU` procedure has no forward declaration, so I'm adding that.  Similarly for procedures `SELECT_BEST`, `GUIDANCE`, and `OTHER_SW`.
+
+Incidentally, I notice that there may be a grammar bug, because while the parser accepts declarations like
+
+    DECLARE A PROCEDURE, B PROCEDURE;
+
+it nevertheless rejects declarations like
+
+    DECLARE PROCEDURE, A, B;
+
+even though the preprocessor properly mangles both.  And indeed, I find nothing in the grammar that would allow the latter, neither as shown nor with `FUNCTION` in place of `PROCEDURE`.  In contrast, simple datatypes like `SCALAR` or `INTEGER` are allowed, with or without minor attributes.  Logically it would seem to be perfectly proper to allow `FUNCTION` or `PROCEDURE`, but perhaps there's a good reason not to.  At any rate, until I find supposedly-correct code samples that require it, I'm going to assume that the BNF is correct and that they're not allowed.
+
+Also fixed a missing semicolon in my transcription of the code sample.  
+
+After all that, parsing looks good!
+
+## 184-EXAMPLE_N.hal
+
+Lacks necessary forward declarations of `READ_IMU`, `SELECT_BEST`, `GUIDANCE`, and `OTHER_SW`, which I've added.
+
+Additions I had speculatively added to the grammar previously to handle cases like `{ ... }` in analogy to `[ ... ]` had been done incorrectly.  Hopefully fixed now.
+
+Found a spurious `END;` in my transcription of the code sample, which I've removed.
+
+After all that, it compiles.  
+
+I'm going to change my strategy here a little bit, because I'm just going to check now that code samples compiler rather than check the abstract syntax trees in detail.  That's because it has been quite a long time now since I found any that compiled *wrong*, while at the same time, the code samples have become longer and checking the abstract syntax trees in detail takes so much longer.  I'm afraid that this may be slowing down the process of completing/tweaking the preprocessor and grammar so much that I can't complete it, without (at the same time) it being very helpful.  It's certainly draining my enthusiasm, anyway!
+
+## 186-P.hal
+
+This fails at `FLAGS` of `STRUCTURE FLAGS DENSE: ...`.  The preprocessor hasn't mangled `FLAGS` or any of the names of the structure's fields.  That's because my regex for recognizing `STRUCTURE` statements was too restrictive, and was thrown off by the `DENSE` attribute (or any other attribute that could appear there).  Fixed that.
+
+While this compiles as-is, I notice that the preprocessor doesn't mangle the `C` field in `STRUCTURE ..., 1 C CHARACTER(5);`.  The `(5)` is throwing it off.  Fixed that.
+
+Now, though, I see that this is overwriting the `FLAGS` structure template in the library file on every run, with identical definitions.  Whereas it never did that with the other structure templates in the file.  That's once again because of the `DENSE` (or other) minor attribute.  Fixed that.
+
+Compiles now.
+
+## 193-TEST_X.hal
+
+The code sample has no forward declaration for the procedure `X`.  Fixed that.
+
+Fails on the 2nd `WRITE(6) ...`.  Another problem with it is that when I print out the error message, it shows the string literals as encoded for some reason, even though they're not encoded in the mangled source file passed to the compiler front end.  Ah!  The error message is encoded, because the source line comes from the source code buffered in the preprocessor (as it should) ratehr than from the compiler front-end, and I forgot to unencode it.  That's fixed now.
+
+As for why it fails, though, I think that's because the string includes the '¬' characters.  I think there must be some mixup between the encoding of that character (i.e., UTF-8 vs ISO 8859-15) in the code sample file vs the tokens recognized by the LBNF grammar, in which case it ends up not being in the HAL/S character set.
+
+In the discussion earlier (or perhaps it was elsewhere), I went to great lengths to come to the conclusion that encoding ¬ as ISO 8859-15 (or -1) was the correct decision, vs UTF-8.  What I failed to recognize is that when BNFC reads the LBNF grammar for HAL/S, it's not going to play nice with an ISO 8859-15 encoding, and in fact simply bails.  So the notion of using an ISO 8859-15 encoding for ¬ (and for the cent symbol) is increasingly cumbersome.  So that is all being reversed. 
+
+Plus, the string literal doesn't *really* use the ¬ character anyway.  There's something wrong with my encoding/decoding routines in reorganizer.py, in which translating and then untranslating a comma turns it into a ¬.  Fixed them.
+
+With everything consistently UTF-8 now, and all instances of ¬ and ¢ fixed (including in the original HAL/S-FC source.  I hope!), compiles okay.
+
+## 194-TEST_X.hal
+
+Compiles.
+
+## 197-P.hal
+
+Compiles.
+
+## 198-P.hal
+
+Fixed a bad semicolon (should have been a comma) in the transcribed code sample.  Compiles okay now.
+
+## 199-P.hal
+
+Fails at `ERROR` in `ON ERROR DO;`.  This appears to be because `ERROR` has no subscript.  This is a grammar error I caused a while back when I couldn't make empty subscripts work generically in the grammar, and so began handling the empty-subscript case separately.  It affects `ON ERROR`, `OFF ERROR`, and `SEND ERROR`, now all fixed.
+
+Now fails at the colon in `LAST_CARD: CLOSE l_P;`.  The preprocessor wasn't mangling `LAST_CARD` because I had failed to consider that `CLOSE` might have a label preceding it as well as following it.  Fixed.
+
+Now compiles.
 
 TBD
-

@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+        **************************************************************
+        *   This program has essentially been superseded by the      *
+        *   --ast-only switch in yaHAL-S-FC.py.                      *
+        **************************************************************
+
 Copyright:      None - the author (Ron Burkey) declares this software to
                 be in the Public Domain, with no rights reserved.
 Filename:       syntaxHierarchy.py

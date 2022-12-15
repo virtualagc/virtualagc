@@ -58,7 +58,7 @@ import re
 import unEMS
 import replaceBy
 import reorganizer
-from pass1 import tokenizeAndParse, tmpFile, compiler
+from pass1 import tokenizeAndParse, tmpFile, compiler, astPrint, captured
 
 #Parse the command-line arguments.
 tabSize = 8
@@ -69,6 +69,8 @@ full = True
 libraryFilename = "yaHAL-default.templates"
 structureTemplates = {}
 noCompile = False
+astOnly = False
+trace = False
 for param in ["--library="+libraryFilename] + sys.argv[1:]:
     if param == "--help":
         print("""
@@ -104,6 +106,9 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
         --no-compile    Merely output preprocessed source, and do not attempt
                         to invoke the compiler.
         --compiler=F    Name of compiler's phase 1 (default %s).
+        --ast-only      Simply display the abstract syntax tree (AST) without
+                        trying to produced object code.
+        --trace         Enable tracing for compiler front-end parser.
         """ % compiler)
         sys.exit(0)
     elif param[:6] == "--tab=":
@@ -114,8 +119,12 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
         full = False
     elif param == "--no-compile":
         noCompile = True
+    elif param == "--ast-only":
+        astOnly = True
     elif param[:11] == "--compiler=":
         compiler = param[11:]
+    elif param == "--trace":
+        trace = True
     elif param[:10] == "--library=":
         libraryFilename = param[10:].strip()
         #print("Here", libraryFilename)
@@ -211,30 +220,42 @@ if not noCompile:
     f.close()
 
 # Print final summary of preprocessing.
-print(" /*")
-print(" Preprocessor Report ------------------------------------------------")
-print(" Files:")
-for file in files:
-    print("     ", file)
-print(" Summary:")
+#print("Files:")
+#for file in files:
+#    print("    ", file)
 for i in range(len(halsSource)):
     if "errors" in metadata[i]:
-        print(" Line %d:" % (i+1), halsSource[i])
+        print("Line %d:" % (i+1), halsSource[i])
         for error in metadata[i]["errors"]:
-            print("     ", error)
-print("     ", warningCount, "warnings")
-print("     ", fatalCount, "errors")
-print(" --------------------------------------------------------------------")
-print(" */")
+            print("    ", error)
+print(warningCount, "preprocessor warnings")
+print(fatalCount, "preprocessor errors")
 if fatalCount > 0:
     sys.exit(1)
 
 if not noCompile:
-    success, ast = tokenizeAndParse([])
+    success, ast = tokenizeAndParse([], trace)
+    for error in captured["stderr"]:
+        fields = error.split(":", 2)
+        if len(fields) > 2 and fields[0].strip() == "error":
+            print("Error:" + error[6:])
+            fields = fields[1].strip().split(",")
+            i = int(fields[0]) - 1
+            j = int(fields[1])
+            print(reorganizer.untranslate(halsSource[i]))
+            print("%*s^" % (j, "")) 
+        else:
+            print(error)
     if success:
-        print(" Pass 1 successful!")
-        print(ast)
+        print("Compiler pass 1 successful.")
+        if astOnly:
+            print()
+            print("Abstract Syntax Tree (AST)")
+            print("--------------------------")
+            astPrint(ast)
+            sys.exit(0)
     else:
-        print(" Pass 1 failure!")
+        print("Compiler pass 1 failure.")
         sys.exit(1)
-        
+    # Additional passes ...
+    # TBD

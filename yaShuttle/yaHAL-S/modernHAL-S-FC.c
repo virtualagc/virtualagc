@@ -20,11 +20,11 @@
 #include "temp/Absyn.h"
 
 void usage(void) {
-  printf("usage: Call with one of the following argument combinations:\n");
-  printf("\t--help\t\tDisplay this help message.\n");
-  printf("\t(no arguments)	Parse stdin verbosely.\n");
-  printf("\t(files)\t\tParse content of files verbosely.\n");
-  printf("\t-s (files)\tSilent mode. Parse content of files silently.\n");
+  printf("Usage:\n");
+  printf("\tmodernHAL-S-FC [OPTIONS] SOURCEFILE | <SOURCEFILE\n");
+  printf("The available OPTIONS are:\n");
+  printf("\t--help            Print this message and quit.\n");
+  printf("\t--trace           Enable parser tracing.\n");
 }
 
 int main(int argc, char ** argv)
@@ -33,28 +33,46 @@ int main(int argc, char ** argv)
   COMPILATION parse_tree;
   int quiet = 0;
   char *filename = NULL;
+  int i;
 
-  if (argc > 1) {
-    if (strcmp(argv[1], "-s") == 0) {
-      quiet = 1;
-      if (argc > 2) {
-        filename = argv[2];
-      } else {
-        input = stdin;
-      }
-    } else {
-      filename = argv[1];
+  input = stdin;
+  for (i = 1; i < argc; i++)
+    {
+      if (!strcmp(argv[i], "--help"))
+        {
+          usage();
+          exit(0);
+        }
+      else if (!strcmp(argv[i], "--trace"))
+        {
+          extern int HAL_Sdebug;
+          HAL_Sdebug = 1;
+        }
+      else if (argv[i][0] == '-')
+        {
+          printf("Unrecognized option %s.\n\n", argv[i]);
+          usage();
+          exit(1);
+        }
+      else if (filename != NULL)
+        {
+          printf("Multiple filenames given (%s, %s)\n\n", filename, argv[i]);
+          usage();
+          exit(1);
+        }
+      else
+        {
+          filename = argv[i];
+          input = fopen(filename, "r");
+          if (input == NULL)
+            {
+              printf("Source file not found (%s)\n\n", filename);
+              usage();
+              exit(1);
+            }
+        }
     }
-  }
 
-  if (filename) {
-    input = fopen(filename, "r");
-    if (!input) {
-      usage();
-      exit(1);
-    }
-  }
-  else input = stdin;
   /* The default entry point is used. For other options see Parser.h */
   parse_tree = pCOMPILATION(input);
   if (parse_tree)

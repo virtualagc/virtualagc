@@ -1,6 +1,6 @@
  /*/
-    Encoding:   Access this file using an ISO 8859-15 or ISO 8859-1 character 
-                encoding.  The following should be a U.S. cent symbol: '¢'.
+    Encoding:   Access this file using a UTF-8 character encoding.  
+    		The following should appear to be a U.S. cent symbol: 'Â¢'.
     Access:     Public Domain, no restrictions believed to exist.
     Filename:   SCAN.xpl
     Purpose:    This is a part of "Phase 1" (syntax analysis) of the HAL/S-FC 
@@ -11,8 +11,10 @@
     History:    2022-12-07 RSB  Suffixed the filename with ".xpl".  Before this
                                 file had been received, it appears as though
                                 an EBCDIC-to-ASCII conversion had incorrectly
-                                encoded the character '¢' (U.S. cent) as 0x9B.  
+                                encoded the character 'Â¢' (U.S. cent) as 0x9B.  
                                 This has been repaired.
+                2022-12-14 RSB	Changed encoding from ISO 8859-15 (or -1) 
+                		to UTF-8.
     Note:       Inline comments beginning with "/*/" were created by the 
                 Virtual AGC Project. Inline comments beginning merely with 
                 "/*" are from the original Space Shuttle development.
@@ -454,7 +456,7 @@ PARAMETER_PROCESSING:                                                           
                         END;                                                    00684500
                      END;                                                       00684600
                     ELSE IF NEXT_CHAR=BYTE('"') THEN D_QUOTE_FLAG=^D_QUOTE_FLAG;00684700
-                     ELSE IF NEXT_CHAR=BYTE('¢') THEN CENT_FLAG=^CENT_FLAG;     00684800
+                     ELSE IF NEXT_CHAR=BYTE('Â¢') THEN CENT_FLAG=^CENT_FLAG;     00684800
                      ELSE IF NEXT_CHAR = BYTE(',') THEN DO;                     00684900
                         IF NUM_OF_PAREN=0 & D_QUOTE_FLAG =FALSE THEN            00685000
                            IF CENT_FLAG=FALSE THEN                              00685100
@@ -497,7 +499,7 @@ CHECK_ARG_NUM:                                                                  
             THEN DO;  CALL ERROR(CLASS_IR,8);                                   00688700
                RETURN;                                                          00688750
          END;                                                                   00688800
-         IF NEXT_CHAR=BYTE('¢') THEN                                            00688900
+         IF NEXT_CHAR=BYTE('Â¢') THEN                                            00688900
             IF FOUND_CENT THEN IF MACRO_EXPAN_LEVEL>0 THEN GO TO NO_BACKUP;     00689000
          ELSE CALL STREAM;                                                      00689100
          IF PARM_EXPAN_LEVEL>BASE_PARM_LEVEL(MACRO_EXPAN_LEVEL) THEN DO;        00689200
@@ -735,13 +737,13 @@ NEW_CHAR:                                                                       
                   END; /* OF DO...VALID CHARACTER */                            00710200
                   ELSE DO;                                                      00710300
                      IF S1 THEN                                                 00710400
-                        IF NEXT_CHAR ^= BYTE('¢') THEN                          00710500
+                        IF NEXT_CHAR ^= BYTE('Â¢') THEN                          00710500
                         CALL ERROR(CLASS_IL, 1);                                00710600
                      GO TO FOUND_TOKEN;                                         00710700
                   END;                                                          00710800
                END; /* OF DO FOREVER */                                         00710900
 FOUND_TOKEN:                                                                    00711000
-               IF NEXT_CHAR=BYTE('¢') THEN DO;                                  00711100
+               IF NEXT_CHAR=BYTE('Â¢') THEN DO;                                  00711100
                   GO TO CASE13;                                                 00711200
                END;                                                             00711300
                ELSE DO;                                                         00711400
@@ -835,7 +837,7 @@ PARM_FOUND:       PROCEDURE BIT(8);                                             
                               ELSE DO;                                          00718500
                                  IF FIRST_TIME_PARM(PARM_EXPAN_LEVEL-1) THEN DO;00718600
  /*  CHECK FOR CENT SIGN  */                                                    00718610
-                                    IF NEXT_CHAR^=BYTE('¢') THEN                00718620
+                                    IF NEXT_CHAR^=BYTE('Â¢') THEN                00718620
                                        PARM_REPLACE_PTR(PARM_EXPAN_LEVEL-1)=    00718700
                                        PARM_REPLACE_PTR(PARM_EXPAN_LEVEL-1)-1;  00718800
                                  END;                                           00718810
@@ -1169,7 +1171,7 @@ CONCAT:           NEXT_ELEMENT(MACRO_TEXTS);                                    
                   END;                                                          00750900
                END;                                                             00751000
             END;   /*  END OF CASE 12  */                                       00751100
-            DO;    /*  CASE 13 - ¢ FOR ¢MACROS  */                              00751200
+            DO;    /*  CASE 13 - Â¢ FOR Â¢MACROS  */                              00751200
 CASE13:                                                                         00751300
                SOME_BCD=BCD;                                                    00751400
                BCD='';                                                          00751500
@@ -1180,7 +1182,7 @@ CASE13:                                                                         
                END;                                                             00752000
 END_OF_CENT:                                                                    00752100
                FOUND_CENT=TRUE;                                                 00752200
-               IF NEXT_CHAR=BYTE('¢') THEN DO;                                  00752300
+               IF NEXT_CHAR=BYTE('Â¢') THEN DO;                                  00752300
                   IF PARM_FOUND THEN DO;                                        00752400
                      IF SOME_BCD='' THEN GO TO SCAN_START;                      00752500
                      BCD=SOME_BCD;                                              00752600

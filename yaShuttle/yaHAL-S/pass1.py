@@ -36,15 +36,48 @@ tmpFile = "yaHAL-S-FC.tmp"
 compiler = "modernHAL-S-FC" # Must be in the PATH.
 
 """
- Make the abstract syntax tree given to us as a list of strings into an actual 
- tree structure.  This is actually a recursive function.  It assumes that the
+ Make the "abstract syntax" obtained as a big string from the compiler 
+ front-end into an actual abstract syntax tree (AST) structure.  This is 
+ actually a recursive function.  It assumes that the abstract-syntax
  string passed to it always starts with "(", and it processes until the 
- matching closing parenthesis is reached.  It returns
+ matching closing parenthesis is reached, which is not necessarily the end
+ of the string itself.  It returns
         success, tree, index
  where success is a boolean for success vs failure, tree is the tree structure
  created, and index is an index to the first unprocessed character in the 
  input string.
+ 
+ The abstract syntax tree itself is in the form of a linked nodes that are 
+ dictionaries generally having the form
+    {
+        "lbnfLabel" : string,
+        "components" : [ ... strings or nodes ... ]
+    }
+ Since by convention the LBNF labels in my HAL/S grammar always begin with
+ two arbitrary capital letters present solely to make the labels unique, and 
+ I may or may not remove those two prefixed capitals.  The number of prefixed
+ characters to remove from LBNF labels is determined by removePrefixedCapitals.
+ In the "components", the "strings mentioned are themselves lbnfLabels or
+ else string literals, the latter of which are distinguished by the fact that
+ they begin and end with carats.  For example, for the HAL/S LBNF grammar,
+ the root node will always be
+    {
+        "lbnfLabel" : "compilaton",
+        "components" : [ a single compile_list node ]
+    }
+ In general, the number of components is exactly the number of components
+ in the LBNF rule associated with the (full LBNF label), except that string
+ literals won't have been passed along.  If that sound confusing, consider
+ the rule:
+    AAreplace_stmt . REPLACE_STMT ::= "REPLACE" REPLACE_HEAD "BY" TEXT ;
+ The string literals "REPLACE" and "BY" won't appear among the components,
+ so the node associated with this rule would look like this:
+    {
+        "lbnfLabel" : "AAreplace_stmt",
+        "components" : [ a REPLACE_HEAD node, a TEXT node ]
+    }
 """
+removePrefixedCapitals = 2 # Number of chars to remove from front of LBNF labels
 def makeTree(abstractSyntax, index=0):
     ast = None
     if abstractSyntax[0] != "(":
@@ -54,7 +87,7 @@ def makeTree(abstractSyntax, index=0):
     index += 1
     while abstractSyntax[index] not in [" ", ")"]:
         index += 1
-    label = abstractSyntax[startIndex+3:index]
+    label = abstractSyntax[startIndex+1+removePrefixedCapitals:index]
     ast = { "lbnfLabel" : label, "components" : [] }
     index += 1
     if abstractSyntax[index] == ")":
@@ -95,40 +128,6 @@ def makeTree(abstractSyntax, index=0):
                     file=sys.stderr)
             sys.exit(1)
         index += 1
-    '''
-    ast = []
-    for line in astList:
-        line = line.strip()
-        if line == "":
-            continue
-        # Replace all of spaces in any string by carats.
-        while True:
-            match = re.search("\\^[^^]*\\s[^^]*\\^", line)
-            if match == None:
-                break
-            line = line[:match.span()[0]+1] + \
-                    match.group()[1:-1].replace(" ", "^") + \
-                    line[match.span()[1]-1:]
-        fields = line.split()
-        depth = int(fields[0])
-        label = fields[1]
-        for i in range(1, len(fields)):
-            if fields[i][:1] == "^":
-                fields[i] = "^" + fields[i][1:-1].replace("^", " ")
-        node = { "parent": -1, "depth": depth, "label" : label,
-                 "fields" : fields[2:], "children" : [] }
-        ast.append(node)
-    for i in range(1, len(ast)):
-        depth = ast[i]["depth"] - 1
-        for j in range(i - 1, -1, -1):
-            if ast[j]["depth"] == depth:
-                ast[i]["parent"] = j
-                break
-    for i in range(1, len(ast)):
-        parent = ast[i]["parent"]
-        ast[parent]["children"].append(i)
-    return success, ast
-    '''
 
 # Invoke compiler front end.  The source code to be compiled is a list of 
 # strings that will be written to the temporary file (tmpFile), but if the list 
@@ -139,20 +138,59 @@ def makeTree(abstractSyntax, index=0):
 # dictionary is an actionable form of the abstract syntax tree.  Yes this is
 # cumbersome, but I see no way to use the BNF Converter framework otherwise, 
 # at least not in C.
-def tokenizeAndParse(sourceList=[]):
+captured = { "stderr" : [] }
+def tokenizeAndParse(sourceList=[], trace=False):
+    global captured
+    captured["stderr"] = []
     try:
         if len(sourceList) > 0:
             f = open(tmpFile, "w")
             f.writelines(sourceList)
             f.close()
-        output = subprocess.check_output([compiler, tmpFile], 
-                                        stderr=subprocess.STDOUT)
-        output = output.decode("utf-8").split("\n")
-        for line in output:
-            if "(" != line[:1]:
-                continue
-            return makeTree(line)[:2]
+        #output = subprocess.check_output([compiler, tmpFile])
+        compilerAndParameters = [compiler]
+        if trace:
+            compilerAndParameters.append("--trace")
+        compilerAndParameters.append(tmpFile)
+        #print(compilerAndParameters)
+        run =subprocess.run(compilerAndParameters, capture_output=True)
+        if len(run.stderr) > 0:
+            captured["stderr"] = run.stderr.decode("utf-8").strip().split("\n")
+        if len(run.stdout) > 0:
+            output = run.stdout.decode("utf-8").strip().split("\n")
+            for line in output:
+                if "(" != line[:1]:
+                    #print(line, file=sys.stderr)
+                    continue
+                else:
+                    return makeTree(line)[:2]
     except:
-        return False, []
+        pass
+    return False, []
 
-
+# A function that prints an abstract syntax tree.
+#indenter = "    |    |    |    |    |    |    |    |    |    |    |    |    |"
+#indenter = "   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |"
+indenter = "░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ "
+indenter += indenter
+def astPrint(ast, indent=0):
+    print("%s" % (indenter[:indent]), end="")
+    print(ast["lbnfLabel"], ":", end="")
+    interrupted = False
+    needNewline = True
+    for component in ast["components"]:
+        if isinstance(component, str):
+            if interrupted:
+                print("%s" % (indenter[:indent]), end="")
+                interrupted = False
+            print(" %s" % component, end="")
+            needNewline = True
+        else:
+            if needNewline:
+                print()
+                needNewline = False
+            astPrint(component, indent + 1)
+            needNewline = False
+            interrupted = True
+    if needNewline:        
+        print()

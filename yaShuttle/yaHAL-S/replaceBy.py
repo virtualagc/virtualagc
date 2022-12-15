@@ -63,6 +63,7 @@ to identifiers of various types:
     CHARACTER           c_
     CHARACTER FUNCTION  cf_
     STRUCT              s_
+    STRUCTURE FUNCTION  sf_
     LABEL               l_
     EVENT               e_
     others              (none)  (Including INTEGER, SCALAR, VECTOR, MATRIX.)
@@ -107,8 +108,8 @@ replaceByPattern = replacePattern + argListPattern + byPattern
 declarePattern = '\\bDECLARE\\s'
 
 # Note that the mangling prefix for FUNCTION is actually "l_" only for 
-# arithmetical functions; for boolean functions it's "bf_" and for character
-# functions it's "cf_".
+# arithmetical functions; for boolean functions it's "bf_", for character
+# functions it's "cf_", and for structure functions "sf_".
 mangling = { "BOOLEAN" : "b_", "CHARACTER" : "c_", "INTEGER" : "", 
             "SCALAR" : "", "VECTOR" : "", "MATRIX" : "",
             "PROCEDURE" : "l_", "FUNCTION": "l_", "STRUCTURE": "s_",
@@ -297,13 +298,15 @@ def replaceBy(halsSource, metadata, full, libraryFilename, templateLibrary):
                     # For a function definition, need also to check out its
                     # datatype.
                     tail = fullLine[match.span()[1]+1:]
-                    for datatype in ["BOOLEAN", "CHARACTER"]:
+                    for datatype in ["BOOLEAN", "CHARACTER", "STRUCTURE"]:
                         if re.search("\\b" + datatype + "\\b", tail) != None:
                             if datatype == "BOOLEAN":
                                 hasType = "bf_"
                             elif datatype == "CHARACTER":
                                 hasType = "cf_"
-                    if re.search("\\b(FUNCTION|PROCEDURE|PROGRAM)\\b", tail) \
+                            elif datatype == "STRUCTURE":
+                                hasType = "sf_"
+                    if re.search("\\b(FUNCTION|PROCEDURE|PROGRAM|CLOSE)\\b", tail) \
                             != None:
                         isProcedureOrFunction = True
                         if None != re.search("\\b(FUNCTION|PROCEDURE)\\b", tail):
@@ -317,7 +320,7 @@ def replaceBy(halsSource, metadata, full, libraryFilename, templateLibrary):
                     else:
                         # Structure template?
                         match = re.search("^\\s*STRUCTURE\\s+" + \
-                                            bareIdentifierPattern + "\\s*:", \
+                                            bareIdentifierPattern + "[^:]*:", \
                                             fullLine)
                         if match != None:
                             # Update structure library.  Note that we normalize
@@ -335,7 +338,10 @@ def replaceBy(halsSource, metadata, full, libraryFilename, templateLibrary):
                             normalized = re.sub("\s+:", ":", normalized)
                             normalized = re.sub("\s+;", ";", normalized)
                             fields = normalized.split()
-                            identifier = fields[1][:-1]
+                            if fields[1][-1:] == ":":
+                                identifier = fields[1][:-1]
+                            else:
+                                identifier = fields[1]
                             if identifier not in templateLibrary:
                                 templateLibrary[identifier] = normalized
                                 f = open(libraryFilename, "a")
@@ -374,6 +380,8 @@ def replaceBy(halsSource, metadata, full, libraryFilename, templateLibrary):
                                 thisType = ""
                                 if "STRUCTURE" == subfields[2][-9:]:
                                     thisType = "s_"
+                                elif "CHARACTER" == subfields[2][:9]:
+                                    thisType = "c_"
                                 else:
                                     if subfields[2] not in mangling:
                                         continue
@@ -468,6 +476,9 @@ def replaceBy(halsSource, metadata, full, libraryFilename, templateLibrary):
                                     overallType = "bf_"
                                 elif "CHARACTER" in declarations[0]:
                                     overallType = "cf_"
+                                elif len(declarations[0]) > 2 and \
+                                        "STRUCTURE" in declarations[0][2]:
+                                    overallType = "sf_"
                                 else:
                                     overallType = "l_"
                             start += 1
@@ -489,6 +500,8 @@ def replaceBy(halsSource, metadata, full, libraryFilename, templateLibrary):
                                 thisType = "bf_"
                             elif overallFunction and thisType == "c_":
                                 thisType = "cf_"
+                            elif overallFunction and thisType == "s_":
+                                thisType = "sf_"
                             elif overallFunction:
                                 thisType = "l_"
                             elif declaration[1] == "FUNCTION":
@@ -496,6 +509,8 @@ def replaceBy(halsSource, metadata, full, libraryFilename, templateLibrary):
                                     thisType = "bf_"
                                 elif "CHARACTER" in declaration[1:]:
                                     thisType = "cf_"
+                                elif "STRUCTURE" in declaration[2]:
+                                    thisType = "sf_"
                                 else:
                                     thisType = "l_"
                             identifier = declaration[0]

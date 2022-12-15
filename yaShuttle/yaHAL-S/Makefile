@@ -9,7 +9,8 @@
 APP = modernHAL-S-FC
 
 CC = gcc
-CCFLAGS = -O3 -W -Wall
+CCFLAGS = -O3
+BISON_OPTS = -t -pHAL_S
 
 OBJS = temp/Absyn.o temp/Lexer.o temp/Parser.o
 
@@ -46,6 +47,6 @@ Printer.c Printer.h Absyn.h : temp/Printer.c temp/Printer.h temp/Absyn.h fixPrin
 DemoHAL_S ${OBJS} temp/Printer.c : HAL_S.cf
 	if [ ! -d temp] ; then mkdir temp ; fi
 	cd temp && bnfc --c -l -m ../$^
-	make -C temp
+	make -C temp CCFLAGS="${CCFLAGS}" BISON_OPTS="${BISON_OPTS}"
 	mv temp/TestHAL_S DemoHAL_S
 	

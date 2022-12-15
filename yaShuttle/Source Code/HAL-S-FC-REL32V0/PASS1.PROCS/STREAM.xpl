@@ -1,6 +1,6 @@
  /*/
-    Encoding:   Access this file using an ISO 8859-15 or ISO 8859-1 character 
-                encoding.  The following should be a U.S. cent symbol: '¢'.
+    Encoding:   Access this file using a UTF-8 character encoding.  
+    		The following should appear to be a U.S. cent symbol: 'Â¢'.
     Access:     Public Domain, no restrictions believed to exist.
     Filename:   STREAM.xpl
     Purpose:    This is a part of "Phase 1" (syntax analysis) of the HAL/S-FC 
@@ -11,8 +11,10 @@
     History:    2022-12-07 RSB  Suffixed the filename with ".xpl".  Before this
                                 file had been received, it appears as though
                                 an EBCDIC-to-ASCII conversion had incorrectly
-                                encoded the character '¢' (U.S. cent) as 0x9B.  
+                                encoded the character 'Â¢' (U.S. cent) as 0x9B.  
                                 This has been repaired.
+                2022-12-14 RSB	Changed the character encoding from ISO 8859-15
+                		to UTF-8.
     Note:       Inline comments beginning with "/*/" were created by the 
                 Virtual AGC Project. Inline comments beginning merely with 
                 "/*" are from the original Space Shuttle development.
@@ -363,7 +365,7 @@ STREAM:                                                                         
          THE FORMAT OF INPUT_PAD IS:                                            00442900
                    'M XY YX Z Z '' Z Z " Z Z'                                   00443000
          WHERE X IS A "/", Y IS A "*", AND Z IS THE EOF SYMBOL */               00443100
-         INPUT_PAD CHARACTER INITIAL('M /**/ § § '' § § " § §');                00443200
+         INPUT_PAD CHARACTER INITIAL('M /**/ Â¢ Â¢ '' Â¢ Â¢ " Â¢ Â¢');                00443200
       DECLARE (LAST_E_IND, LAST_S_IND, E_BLANKS, S_BLANKS, EP, SP) BIT(16),     00443300
          M_BLANKS BIT(16) INITIAL(-1),                                          00443400
          IND_LIM LITERALLY '127', IND_SHIFT LITERALLY '7',                      00443500
@@ -469,7 +471,7 @@ CHAR_VALUE:    PROCEDURE(STR);                                                  
                   C = D_TOKEN;                                                  00461900
                END;                                                             00462000
                DO I = 1 TO TEXT_LIMIT - 1;                                      00462005
-                  IF BYTE(CURRENT_CARD, I) = BYTE('¢') THEN                     00462010
+                  IF BYTE(CURRENT_CARD, I) = BYTE('Â¢') THEN                     00462010
                      DO;                                                        00462015
                      J = CHAR_INDEX(TOGGLES, SUBSTR(CURRENT_CARD, I + 1, 1));   00462020
                      IF J > -1 THEN                                             00462025
