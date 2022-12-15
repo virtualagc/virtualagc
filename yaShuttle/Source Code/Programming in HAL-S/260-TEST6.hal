@@ -1,11 +1,4 @@
 C/ Adapted from PDF p. 260 of "Programming in HAL/S".
-C/ The original code could not be compiled, because
-C/ it didn't consist of top-level blocks like PROGRAM,
-C/ FUNCTION, or PROCEDURE.  I've simply wrapped the 
-C/ whole thing in a PROGRAM block to make it compilable.
-
-  TEST6:
-  PROGRAM;
 
      STRUCTURE IMU_DATA:
         1 DELTA_V ARRAY(3) INTEGER DOUBLE,
@@ -21,6 +14,7 @@ C/ whole thing in a PROGRAM block to make it compilable.
   LOW_RATE:
   TASK;
      DECLARE BEST INTEGER;
+     DECLARE TBD PROCEDURE;
      CALL TBD ASSIGN(BEST);
 E            +                +
 M    NAME(BEST_IMU) = NAME(IMU_INPT     );
@@ -42,5 +36,4 @@ C	...
 
   CLOSE HI_RATE;
   
-  CLOSE TEST6;
   

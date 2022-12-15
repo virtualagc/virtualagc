@@ -1,0 +1,15 @@
+C/ From PDF p. 276 of "Programming in HAL/S".
+
+  DECLARE INTEGER,
+     PS CONSTANT(2),
+     RS CONSTANT(5);
+C       PI SCALE AND R SCALE
+  DECLARE PI FIXED @PS CONSTANT(3,14159$(@PS));
+  DECLARE FIXED,
+     R	     @RS,
+     AREA    @(PS + 2 RS),
+     CIRCUM  @(PS + RS);
+C  ...
+   AREA = PI R**2;
+   CIRCUM = 2 PI R;
+   

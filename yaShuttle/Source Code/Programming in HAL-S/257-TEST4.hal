@@ -1,22 +1,17 @@
 C/ Adapted from PDF p. 257 of "Programming in HAL/S".
-C/ The original code could not be compiled, because
-C/ it didn't consist of top-level blocks like PROGRAM,
-C/ FUNCTION, or PROCEDURE.  I've simply wrapped the 
-C/ whole thing in a PROGRAM block to make it compilable.
-
-  TEST4:
-  PROGRAM;
+C/ The 6 at that's supposed to be at the beginning of the 2nd S line
+C/ has instead been moved to the end of the first S line, due to a
+C/ limitation in the modern preprocessor that I'm not inclined to fix.
 
      DECLARE DATA ARRAY(3) BIT(16);
      DECLARE AVERAGE BIT(16);
      
 E       .                                .                                               .
-M    AVERAGE = BIT        (SUM(INTEGER([DATA]        )) / 3 || BIT        (SUM(INTEGER([DATA]
-S                 5 AT #-4                   *:1 TO 5             5 AT #-4                   *:5 AT
+M    AVERAGE = BIT        (SUM(INTEGER([DATA]        )) / 3) || BIT        (SUM(INTEGER([DATA]
+S                 5 AT #-4                   *:1 TO 5              5 AT #-4                   *:5 AT 6
 
 E                                          .                       .            .          .
-M     )) / 3) || BIT        (SUM(INTEGER([DATA]         )) / 3 || DATA     AND DATA     & DATA     '
-S    6              5 AT #-4                   *:5 AT 11              1:16         2:16       3:16
+M     )) / 3) || BIT        (SUM(INTEGER([DATA]         )) / 3) || DATA     AND DATA     & DATA     ;
+S                   5 AT #-4                   *:5 AT 11               1:16         2:16       3:16
 
-  CLOSE TEST4;
   

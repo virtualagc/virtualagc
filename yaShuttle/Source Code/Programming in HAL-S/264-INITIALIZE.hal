@@ -1,0 +1,21 @@
+C/ From PDF p. 264 of "Programming in HAL/S".
+
+D INCLUDE TEMPLATE PROCESS_CONTROL
+D INCLUDE TEMPLATE TQE
+     DECLARE TQ TQE-STRUCTURE(100);
+
+     DECLARE FREE_Q NAME TQE-STRUCTURE;
+     DECLARE ACTV_Q NAME TQE-STRUCTURE;
+  
+  INITIALIZE:
+  
+E           +            +
+M    NAME(FREE_Q) = NAME(TQ  );
+S	                   1;
+
+     DO FOR TEMPORARY N = 1 TO 99;
+E		 +	       +
+M       NAME(TQ.NEXT  ) = NAME(TQ    );     
+S		    N;           N+1;
+
+     END;

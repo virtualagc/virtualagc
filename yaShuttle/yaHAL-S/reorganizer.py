@@ -26,8 +26,11 @@ themselves subject to macro replacements or mangling.
 
 import sys
 
-# Translate a 7-bit ASCII string to 8-bit (with exception for ¬, which is 
-# already 8-bit == 0xAC).
+# Translate a 7-bit ASCII string to 8-bit (with an exception for ¬, has to 
+# be treated differently for the untranslate() function to work properly
+# outside of string literals and comments).
+Not = "¬"
+translatedNot = 0xff
 def translate(string):
     translatedString = ""
     isInlineComment = string[:2] == "/*" and string[-2:] == "*/"
@@ -39,13 +42,10 @@ def translate(string):
         translatedString = "'"
         string = string[1:-1]
     for c in string:
-        '''
         if c == Not:
             c = translatedNot
         else:
-            c = chr(ord(c) | 0x80)
-        '''
-        c = chr(ord(c) + 0x80)
+            c = chr(ord(c) + 0x80)
         translatedString += c
     if isInlineComment:
         translatedString += "*/"
@@ -57,17 +57,14 @@ def translate(string):
 def untranslate(string):
     translatedString = ""
     for c in string:
-        '''
         if c == Not:
             pass
         elif c == translatedNot:
             c = Not
         else:
-            c = chr(ord(c) & 0x7F)
-        '''
-        o = ord(c)
-        if o >= 0x80:
-            c = chr(ord(c) - 0x80)
+            o = ord(c)
+            if o >= 0x80:
+                c = chr(ord(c) - 0x80)
         translatedString += c
     return translatedString
 

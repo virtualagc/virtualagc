@@ -1,11 +1,9 @@
 C/ Adapted from PDF p. 264 of "Programming in HAL/S".
-C/ The original code could not be compiled, because
-C/ it didn't consist of top-level blocks like PROGRAM,
-C/ FUNCTION, or PROCEDURE.  I've simply wrapped the 
-C/ whole thing in a PROGRAM block to make it compilable.
+C/ Note that code sample 269-PROCESS_CONTROL.hal needs to be
+C/ compiled before this code sample in order to get the 
+C/ definition of PROCESS_CONTROL into the template library.
 
-  TEST8:
-  PROGRAM;
+D INCLUDE TEMPLATE PROCESS_CONTROL
 
      STRUCTURE TQE:
      
@@ -32,5 +30,3 @@ S		    N;           N+1;
 
      END;
      
-  CLOSE TEST8;
-  

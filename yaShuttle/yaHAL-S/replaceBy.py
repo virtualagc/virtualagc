@@ -68,20 +68,6 @@ to identifiers of various types:
     EVENT               e_
     others              (none)  (Including INTEGER, SCALAR, VECTOR, MATRIX.)
 
-The list above reflects mangling for top-level objects, rather than structure
-fields.  For fields of a structure, the mangling scheme differs somewhat
-
-    INTEGER, SCALAR, VECTOR, MATRIX a_NNNN_
-    BOOLEAN                         b_NNNN_
-    CHARACTER                       c_NNNN_
-    STRUCTURE                       s_NNNN_
-
-Here, NNNN is a decimal number, not necessarily exactly 4 digits, representing
-a hashcode of a string made up from the name of the structure template plus the
-tree-position of the field within the structure.  I'll cover the details of that
-at the point the calculation is done, rather than here.  The exact hashing
-algorithm is of no consequence other than that it must be very sparse.
-
 This name mangling is handled essentially the same way as REPLACE/BY
 macros, except that the macros are created from DECLARE statements
 or the block head rather than REPLACE statement.  But the scopes 
@@ -113,7 +99,7 @@ declarePattern = '\\bDECLARE\\s'
 mangling = { "BOOLEAN" : "b_", "CHARACTER" : "c_", "INTEGER" : "", 
             "SCALAR" : "", "VECTOR" : "", "MATRIX" : "",
             "PROCEDURE" : "l_", "FUNCTION": "l_", "STRUCTURE": "s_",
-            "EVENT" : "e_" }
+            "EVENT" : "e_", "BIT" : "b_" }
 
 def oneReplacement(string, target, replacement):
     match = re.search("\\b" + target + "\\b", string)
@@ -217,12 +203,13 @@ def replaceBy(halsSource, metadata, full, libraryFilename, templateLibrary):
     for i in range(len(halsSource)):
         # Ignore lines which shouldn't have macro expansions.
         meta = metadata[i]
-        if "comment" in meta:
-            continue
-        if "modern" in meta:
-            continue
-        if "directive" in meta:
-            continue
+        if halsSource[i][:1] != " ":
+            if "comment" in meta:
+                continue
+            if "modern" in meta:
+                continue
+            if "directive" in meta:
+                continue
         line = halsSource[i]
         if line.strip() == "":
             continue
@@ -306,7 +293,7 @@ def replaceBy(halsSource, metadata, full, libraryFilename, templateLibrary):
                                 hasType = "cf_"
                             elif datatype == "STRUCTURE":
                                 hasType = "sf_"
-                    if re.search("\\b(FUNCTION|PROCEDURE|PROGRAM|CLOSE)\\b", tail) \
+                    if re.search("\\b(FUNCTION|PROCEDURE|PROGRAM|CLOSE|COMPOOL|TASK|UPDATE)\\b", tail) \
                             != None:
                         isProcedureOrFunction = True
                         if None != re.search("\\b(FUNCTION|PROCEDURE)\\b", tail):
@@ -377,11 +364,15 @@ def replaceBy(halsSource, metadata, full, libraryFilename, templateLibrary):
                                                     bareIdentifierPattern + \
                                                     "$", identifier):
                                     continue
+                                #print("*", fullLine)
+                                #print("*", subfields)
                                 thisType = ""
                                 if "STRUCTURE" == subfields[2][-9:]:
                                     thisType = "s_"
                                 elif "CHARACTER" == subfields[2][:9]:
                                     thisType = "c_"
+                                elif "BIT" == subfields[2][:3]:
+                                    thisType = "b_"
                                 else:
                                     if subfields[2] not in mangling:
                                         continue
@@ -396,6 +387,17 @@ def replaceBy(halsSource, metadata, full, libraryFilename, templateLibrary):
                                                 "pattern": "\\b" + identifier \
                                                             + "\\b" }
                             identifier = ""
+                        else:
+                            # SCHEDULE statement?
+                            match = re.search("^\\s*SCHEDULE\\s+" + \
+                                                bareIdentifierPattern + "\\b", \
+                                                fullLine)
+                            if match != None:
+                                fields = match.group().strip().split()
+                                identifier = fields[1]
+                                macros[-1][identifier] = { "arguments": [], 
+                                            "replacement": "l_" + identifier, 
+                                            "pattern": "\\b" + identifier + "\\b" }
                 if identifier != "":
                     if identifier[:2] != hasType:
                         macros[-1][identifier] = { "arguments": [], 
@@ -406,13 +408,6 @@ def replaceBy(halsSource, metadata, full, libraryFilename, templateLibrary):
                                 "replacement": hasType + identifier, 
                                 "pattern": "\\b" + identifier + "\\b" }
                 # A new macro via DECLARE?
-                '''
-                match = re.search(declarePattern, fullLine)
-                if match != None:
-                    declarations = fullLine[match.span()[0]:].strip()
-                    declarations = re.search("DECLARE[^;]*", declarations).group()
-                    declarations = declarations[7:].strip()
-                '''
                 if fullLine[:8] == "DECLARE ":
                     declarations = fullLine[8:-1].strip()
                     #print("*", "'" + declarations + "'")
@@ -452,7 +447,8 @@ def replaceBy(halsSource, metadata, full, libraryFilename, templateLibrary):
                     for pattern in ["\\bARRAY\\b", "\\bINITIAL\\b", 
                                 "\\bSINGLE\\b", "\\bDOUBLE\\b", "\\bSCALAR\\b",
                                 "\\bVECTOR\\b", "\\bMATRIX\\b", "\\bINTEGER\\b",
-                                "\\bCONSTANT\\b", "\\bNONHAL\\b"]:
+                                "\\bCONSTANT\\b", "\\bNONHAL\\b", 
+                                "\\bLATCHED\\b"]:
                         while True:
                             match = re.search(pattern, declarations)
                             if match == None:

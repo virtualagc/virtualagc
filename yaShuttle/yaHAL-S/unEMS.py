@@ -135,9 +135,9 @@ def unEMS(halsSource, metadata):
                 j += 1
             sup = sup.strip()
             sub = sub.strip()
-            if len(sub) == 1:
+            if len(sub) == 1 and sub != "#":
                 replacement += "$" + sub
-            elif len(sub) > 1:
+            elif len(sub) > 1 or sub == "#":
                 replacement += "$(" + sub + ")"
             if len(sup) == 1:
                 replacement += "**" + sup

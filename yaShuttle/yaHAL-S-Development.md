@@ -957,4 +957,231 @@ Now fails at the colon in `LAST_CARD: CLOSE l_P;`.  The preprocessor wasn't mang
 
 Now compiles.
 
+# 2022-12-15
+
+## 200-A.hal
+
+The code sample lacked forward declarations for procedures `B` and `C`, as well as having a transcriptions typo (":" in place of ";").  Fixed.
+
+Compiles now.
+
+## 203-A.hal
+
+The code sample lacked forward declaration for procedure `B`. 
+
+Compiles now.
+
+## 205-LOG10.hal
+
+Fixed a transcription typo.  Compiles now.
+
+## 213-GNC_POOL.hal
+
+The proprocessor wasn't mangling names of `COMPOOL`s.  Fixed.
+
+Compiles now.
+
+## 219-P.hal
+
+Fixed a transcription typo.  Also, the proprocessor wasn't mangling names of `TASK`s.  Fixed.
+
+Compiles now.
+
+## 222-P.hal and 222-MULTI.hal
+
+Both compile.
+
+## 224-GNC_POOL.hal
+
+The preprocessor wasn't mangling names of `UPDATE`s.  Fixed.
+
+Compiles now.
+
+## 225-MEAN.hal
+
+Compiles.
+
+## 230-STARTUP.hal
+
+Fixed transcription typo.  Compiles now.
+
+## 234-X.hal
+
+Compiles.
+
+## 237-STARTUP.hal
+
+Fixed a couple of transcription typos.  Compiles now.
+
+## 238-P.hal
+
+Fixed a transcription typo.
+
+Now fails at `LATCHED` in `DECLARE ORBIT EVENT LATCHED INITIAL(FALSE);`.  That's because the grammar's rule for `<DECLARATION>`, there was no choice like `EVENT <MINOR ATTR LIST>`, so the presence of the `LATCHED` (or the `INITIAL(FALSE)`) causes the failure.  Fixed in the grammar.
+
+Compiles now.
+
+## 239-STARTUP.hal
+
+Fixed a pair of transcription typos.  Compiles now.
+
+## 241-P.hal
+
+Fails at the 2nd comma in `DECLARE EVENT, ENGINE_OFF, ORBIT LATCHED;`.  There are two issues:
+
+ 1. The preprocessor does not mangle `ORBIT`, even though it mangles `ENGINE_OFF`.  Fixed that.
+ 2. The compiler front-end doesn't like it whether or not `ORBIT` is mangled.  Made a couple of additions to the grammar to fix that.
+
+Fixed a transcription typo (`RE_IGNITE` vs `RE-IGNITE`).  Fails now at `RE_IGNITE` in `SCHEDULE RE_IGNITE PRIORITY(999);`.  This is because the preprocessor wasn't mangling the identifiers found in `SCHEDULE` statements.  Fixed that.
+
+I notice too that in `WAIT FOR ENGINE_OFF & ¬ORBIT;`, the preprocessor was converting "`¬`" to "`,`".  That's because when the proprocessor encodes inline comments and string literals to prevent them from participating in matches it encodes only the content of the comments and strings, but when it unencodes it does so on the entire line (not just inline comments and string literals).  That's going to have the side effect in Python 3 that "¬"=chr(172) &rarr; chr(172-128)=",".  (It will also convert the cent sign, the only other funky character, to a double-quote if found outside of comments or string literals. However, the cent symbol appears *only* in string literals in HAL/S, so that's not a problem.)  Fixed this by treating ¬ specially in the translation and untranslation functions in reorganizer.py.
+
+I notice that the grammar has a problem in that the declaration lists it uses in the two forms of the `DECLARE` statement, i.e. the 
+simple and compound declarations vs the factored declaration (see "Programming in HAL/S" section 2.3), are the same.  Because of this, abominations like the following are syntactically allowed by the parser:
+
+    DECLARE INTEGER, X SCALAR;
+    DECLARE e_MYEVENT;
+
+The first of these allows `X` to be declared as an `INTEGER SCALAR`, whereas the second allows an event to be declared as a `SCALAR`.  Of course, this isn't a disaster, since the next compiler phase catches these errors and rejects them.  It may not be fixable in the grammar anyway, and may just be a side-effect of using a BNF description for a non-context-free grammar that has to be tolerated.
+
+Anyway, compiles now.
+
+## 242-P.hal
+
+Compiles.
+
+## 245-P.hal
+
+Compiles.
+
+## 250-BITS.hal
+
+Fails at `HEX` in `IF B = HEX'00' THEN DO;`. That's because the proprocessor didn't mangle type `BIT(...)` as a boolean, which I've now fixed it to do.
+
+Compiles now.
+
+## 253-TEST0.hal
+
+Compiles now.
+
+## 254-TEST1.hal and 254-TEST2.hal
+
+Fails on
+
+    E       .
+    M    IF B  THEN
+    S        #
+
+This appears to be because the proprocess flattens this as `IF b_B$# THEN ...` rather than as `IF b_B$(#) THEN ...`.  Fixed that.
+
+Compiles now.
+
+## 255-TEST3.hal
+
+    Error: 9,22: syntax error at HEX
+     WRITE(6) CHARACTER$(@HEX) (b_B);
+                          ^
+The grammar lacked a rule like `<QUALIFIER> ::= $ ( @ <RADIX> ) ;` that would have allowed the syntax above.  Fixed it.
+
+Compiles now.
+
+## 257-TEST4.hal
+
+Fixed three transcription typos.
+
+    Error: 4,42: syntax error at b_DATA
+     b_AVERAGE = BIT$(5 AT #-4) (SUM(INTEGER([b_DATA]$(*:1 TO 5) )) / 3) || ... ;
+                                              ^
+This is because while I added constructs like `[ <ARITH VAR> ]` to the grammar, I didn't do so for `<BIT VAR>`.  Fixed that.
+
+The error then becomes:
+
+    Error: 4,116: syntax error at )
+     b_AVERAGE = BIT$(5 AT #-4) (SUM(INTEGER([b_DATA]$(*:1 TO 5) )) / 3) || BIT$(5 AT #-4) (SUM(INTEGER([b_DATA]$(*:5 AT) $6 )) ... ;
+                                                                                                                        ^
+This is because the preprocessor hasn't flattened the multiline E/M/S correctly.  Here's the original:
+
+    E       .                                .                                               .
+    M    AVERAGE = BIT        (SUM(INTEGER([DATA]        )) / 3) || BIT        (SUM(INTEGER([DATA]
+    S                 5 AT #-4                   *:1 TO 5              5 AT #-4                   *:5 AT
+    
+    E                                          .                       .            .          .
+    M     )) / 3) || BIT        (SUM(INTEGER([DATA]         )) / 3) || DATA     AND DATA     & DATA     ;
+    S    6              5 AT #-4                   *:5 AT 11               1:16         2:16       3:16
+
+What should have been `$(*:5 AT 6)` instead became the bogus `$(*:5 at) $6`.  Presumably the problem is that the preprocessor first flattens each group of E/M/S lines separately and then concatenates them, whereas what should be done is to concatenate the E lines, concatenate the M lines, concatenate the S lines, and *then* flatten.
+
+This is really difficult to fix, since it's completely against the way the preprocessor is structured.  And is it even worth it, considering that the code is supposedly rarely input in E/M/S form? E/M/S is good for outputting a listing, not for code entry.  
+
+I think I'm just going to let this one slide, and move the 6 at the beginning of the 2nd S line to the end of the first S line.  It's not as if the code sample is trying to demonstrate that this is a good way of entering code!  It's for demonstrating the value of operations on bit arrays.
+
+With that understanding, it compiles now.
+
+## 260-TEST5.hal and 260-TEST6.hal
+
+The 260-TEST5.hal code sample lacks a forward declaration of the procedure `XTRA`, as well as any `STRUCTURE` statement for `IMU_DATA`.  I've added the former, and for that latter have added a compiler directive
+
+    D INCLUDE TEMPLATE IMU_DATA
+
+since the template is already in the template library from earlier compilation runs on code sample 260-TEST6.hal, in which it is defined.
+
+However, the template included from this compiler directive is not mangled by the preprocessor, because it is mistaken for a compiler directive.  Fixed that, so it's mangled properly.  But now the compiler fails there:
+
+    Error: 2,1: syntax error at STRUCTURE
+     STRUCTURE s_IMU_DATA: 1 DELTA_V ARRAY(3) INTEGER DOUBLE, 1 ATTITUDE ARRAY(3) INTEGER, 1 b_STATUS BIT(16);
+     ^
+Apparently that's because the fixup to the `<COMPILATION>` rules I made earlier accidentally excluded `<STRUCTURE STMT>`, which had previously been allowed.  Fixed that.
+
+The error now moves to:
+
+    Error: 8,21: syntax error at (
+     PITCH_ANGLE = SCALAR(s_BEST_IMU.ATTITUDE$1 );
+                         ^
+That's because I hadn't included `SCALAR` among the `<ARITH FUNC>` rules of the grammar in the way I had done with `INTEGER` and `CHARACTER`.  Fixed that.
+
+The error now moves to:
+
+    Error: 19,6: syntax error at TBD
+     CALL TBD ASSIGN(BEST);
+          ^
+That's because there's no forward declaration of the procedure `TBD` in the code sample.  I've added it.
+
+Compiles now.
+
+## 262-TEST7.hal
+
+Compiles.
+
+## 264-TEST8.hal and 269-PROCESS_CONTROL.hal
+
+Failure in 264-TEST8.hal:
+
+    Error: 3,75: syntax error at PROCESS_CONTROL
+     STRUCTURE s_TQE: 1 TIME SCALAR, 1 ACTION INTEGER, 1 AFFECTED_PROCESS NAME PROCESS_CONTROL-STRUCTURE, 1 NEXT NAME s_TQE-STRUCTURE;
+                                                                               ^
+I think the problem here is mangling.  Should there be special name mangling for `AFFECTED_PROCESS`?  Or should it be mangled as a structure?  Whatever ... the preprocessor does neither of those things; there's no mangling.
+
+No!  The problem is that `PROCESS_CONTROL` isn't mangled to `s_PROCESS_CONTROL` for some reason, whereas `TQE` (the next field after that) *is* properly mangled as `s_TQE`.  Ah! `TQE` is mangled properly because that happens to be the name of the structure template as well:  `STRUCTURE TQE: ...`.  I wonder if that could be a problem too (but not *this* problem)?  Probably not, in any rational world, since it would require some nut to define a field of a structure template with the same name as the template, but *not* of a structure type; that would be pretty weird.  
+
+Anyway, the presence of `NAME` is clearly confusing the preprocess enough that it doesn't notice the `-STRUCTURE` that's there also.
+
+But no!  That's not it.  The problem is simply that the structure template `PROCESS_CONTROL` is undefined, so naturally it's not mangled.  It's actually defined in the code sample on page 269 ... which I hadn't bothered to transcribe because I thought it was pointless.  And similarly for the code samples on subsequent pages.  Sigh!  Anyway, I'm transcribing them now.
+
+269-PROCESS_CONTROL.hal compiles fine, and I've added a compiler directive 
+
+    D INCLUDE TEMPLATE PROCESS_CONTROL
+
+in 264-TEST8.hal.  And 264-TEST8.hal now compiles.
+
+## 265-ENQUEUE.hal
+
+Requires missing compiler directives
+
+    D INCLUDE TEMPLATE PROCESS_CONTROL
+    D INCLUDE TEMPLATE TQE
+
+However, requires several additional undefined structure templates: `FREE_Q`, `ENT`, maybe others.
+
+
+
 TBD
