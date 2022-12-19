@@ -1,4 +1,7 @@
 {-
+Note:  Only position the comment and end-comment markers in column 1, or else
+the HAL/S interpreter's BNF displays will be inaccurate.
+
 Copyright:  	Public Domain
 Filename:   	HAL_S.cf
 Purpose:    	LBNF description of the HAL/S language, in so far as compiler 
@@ -695,6 +698,8 @@ ACcompilation . COMPILATION ::= DECLARE_STATEMENT ;
 ADcompilation . COMPILATION ::= COMPILATION DECLARE_STATEMENT ;
 AEcompilation . COMPILATION ::= STRUCTURE_STMT ;
 AFcompilation . COMPILATION ::= COMPILATION STRUCTURE_STMT ;
+AGcompilation . COMPILATION ::= REPLACE_STMT ";" ;
+AHcompilation . COMPILATION ::= COMPILATION REPLACE_STMT ";" ;
 AAblock_definition . BLOCK_DEFINITION ::= BLOCK_STMT CLOSING ";" ;
 ABblock_definition . BLOCK_DEFINITION ::= BLOCK_STMT BLOCK_BODY CLOSING ";" ;
 AAblock_stmt . BLOCK_STMT ::= BLOCK_STMT_TOP ";" ;

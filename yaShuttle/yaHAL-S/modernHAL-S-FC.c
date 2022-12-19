@@ -21,7 +21,7 @@
 
 void usage(void) {
   printf("Usage:\n");
-  printf("\tmodernHAL-S-FC [OPTIONS] SOURCEFILE | <SOURCEFILE\n");
+  printf("\tmodernHAL-S-FC [OPTIONS] SOURCEFILE | <SOURCEFILE\n\n");
   printf("The available OPTIONS are:\n");
   printf("\t--help            Print this message and quit.\n");
   printf("\t--trace           Enable parser tracing.\n");

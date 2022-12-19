@@ -31,9 +31,13 @@ compiler front end to have strings delimited by carats rather than quotes.
 import sys
 import subprocess
 import re
-                
+import platform
+               
 tmpFile = "yaHAL-S-FC.tmp"
-compiler = "modernHAL-S-FC" # Must be in the PATH.
+# The compiler must be in the PATH.
+compiler = "modernHAL-S-FC" 
+if platform.system() == "Windows":
+    compiler += ".exe"
 
 """
  Make the "abstract syntax" obtained as a big string from the compiler 
@@ -77,7 +81,7 @@ compiler = "modernHAL-S-FC" # Must be in the PATH.
         "components" : [ a REPLACE_HEAD node, a TEXT node ]
     }
 """
-removePrefixedCapitals = 2 # Number of chars to remove from front of LBNF labels
+removePrefixedCapitals = 0 # Number of chars to remove from front of LBNF labels
 def makeTree(abstractSyntax, index=0):
     ast = None
     if abstractSyntax[0] != "(":
@@ -139,7 +143,7 @@ def makeTree(abstractSyntax, index=0):
 # cumbersome, but I see no way to use the BNF Converter framework otherwise, 
 # at least not in C.
 captured = { "stderr" : [] }
-def tokenizeAndParse(sourceList=[], trace=False):
+def tokenizeAndParse(sourceList=[], trace=False, wine=False):
     global captured
     captured["stderr"] = []
     try:
@@ -147,8 +151,10 @@ def tokenizeAndParse(sourceList=[], trace=False):
             f = open(tmpFile, "w")
             f.writelines(sourceList)
             f.close()
-        #output = subprocess.check_output([compiler, tmpFile])
-        compilerAndParameters = [compiler]
+        if wine:
+            compilerAndParameters = ["wine", compiler+".exe"]
+        else:
+            compilerAndParameters = [compiler]
         if trace:
             compilerAndParameters.append("--trace")
         compilerAndParameters.append(tmpFile)
@@ -173,23 +179,67 @@ def tokenizeAndParse(sourceList=[], trace=False):
 #indenter = "   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |"
 indenter = "░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ "
 indenter += indenter
-def astPrint(ast, indent=0):
+lbnf2bnf = {}
+def astPrint(ast, lbnf=True, bnf=False, indent=0):
+    global lbnf2bnf
+    if not (lbnf or bnf):
+        return
+    if bnf and lbnf2bnf == {}:
+        # Read the LBNF grammar.
+        try:
+            f = open("HAL_S.cf")
+            inComment = False
+            for line in f:
+                line = line.strip()
+                if line == "":
+                    continue
+                if inComment:
+                    if line[:2] == "-}":
+                        inComment = False
+                    continue
+                if line[:2] == "{-":
+                    inComment = True
+                    continue
+                if line[:2] == "--":
+                    continue
+                fields = line.split("::=")
+                if len(fields) != 2:
+                    continue
+                subfields = fields[0].split(".")
+                if len(subfields) != 2:
+                    continue
+                idLbnf = subfields[0].strip()
+                idBnf = "<" + subfields[1].strip().replace("_", " ") + ">"
+                lbnf2bnf[idLbnf] = idBnf
+            f.close()
+        except:
+            print("Cannot read grammar file HAL_S.cf. Displaying LBNF.")
+            lbnf = True
+            bnf = False
+    
     print("%s" % (indenter[:indent]), end="")
-    print(ast["lbnfLabel"], ":", end="")
+    label = ast["lbnfLabel"]
+    if bnf and label in lbnf2bnf:
+        label = lbnf2bnf[label]
+    print(label, ":", end="")
     interrupted = False
     needNewline = True
     for component in ast["components"]:
         if isinstance(component, str):
+            if bnf and component in lbnf2bnf:
+                component = lbnf2bnf[component]
+            spacer = " "
             if interrupted:
                 print("%s" % (indenter[:indent]), end="")
                 interrupted = False
-            print(" %s" % component, end="")
+                spacer = indenter[indent]
+            print("%s%s" % (spacer, component), end="")
             needNewline = True
         else:
             if needNewline:
                 print()
                 needNewline = False
-            astPrint(component, indent + 1)
+            astPrint(component, lbnf, bnf, indent + 1)
             needNewline = False
             interrupted = True
     if needNewline:        

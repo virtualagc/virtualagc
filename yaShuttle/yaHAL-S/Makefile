@@ -8,45 +8,59 @@
 
 APP = modernHAL-S-FC
 
+# See if we can build a .exe.
+# For Windows 32:
+#CC2 = i686-w64-mingw32-gcc
+# For Windows 64:
+CC2 = x86_64-w64-mingw32-gcc
+ifeq "" "$(shell which $(CC2))"
+  APP2 = ""
+else
+  APP2 = ${APP}.exe
+endif
+
 CC = gcc
 CCFLAGS = -O3
 BISON_OPTS = -t -pHAL_S
 
-OBJS = temp/Absyn.o temp/Lexer.o temp/Parser.o
+CFILES = Absyn.c Parser.c Lexer.c Printer.c
+HFILES = Absyn.h Parser.h Printer.h
 
 .PHONY : clean distclean
 
-all : DemoHAL_S ${APP}
+all : DemoHAL_S ${APP} ${APP2}
 
 clean :
-	rm -f ${APP} ${APP}.o
+	rm -f ${APP} ${APP}.o ${APP2}
 	if [ -d temp ] ; then rm temp/* -rf; fi
 	-make -C temp clean
 
 distclean : clean
 	-make -C temp distclean
 
-${APP}.o : modernHAL-S-FC.c
-	${CC} ${CCFLAGS} -c -o $@ $^
-	
-${APP} : ${OBJS} ${APP}.o Printer.o
-	${CC} ${CCFLAGS} $^ -o $@
-
-Printer.o : Printer.c Printer.h Absyn.h
-	${CC} ${CCFLAGS} -c -o $@ $<
-
-Printer.c Printer.h Absyn.h : temp/Printer.c temp/Printer.h temp/Absyn.h fixPrinter.c
+DemoHAL_S ${CFILES} ${HFILES} : HAL_S.cf fixPrinter.c
+	if [ ! -d temp] ; then mkdir temp ; fi
+	cd temp && bnfc --c -l -m ../HAL_S.cf
+	make -C temp CCFLAGS="${CCFLAGS}" BISON_OPTS="${BISON_OPTS}"
+	mv temp/TestHAL_S DemoHAL_S
 	cp temp/Printer.h .
 	cp temp/Absyn.h .
+	cp temp/Parser.h .
+	cp temp/Absyn.c .
+	cp temp/Lexer.c .
+	cp temp/Parser.c .
 	sed -e '1h;2,$$H;$$!d;g' -re \
 		's/void\s+bufAppendC\s*\([^)]*\)\s*\{/void bufAppendC(const char c)\n{\n\#include "fixPrinter.c"\n/' \
 		temp/Printer.c >Printer.c
 
-# Run BNF Converter to create the lexer, parser, etc., 
-# as well as the demo front-end.
-DemoHAL_S ${OBJS} temp/Printer.c : HAL_S.cf
-	if [ ! -d temp] ; then mkdir temp ; fi
-	cd temp && bnfc --c -l -m ../$^
-	make -C temp CCFLAGS="${CCFLAGS}" BISON_OPTS="${BISON_OPTS}"
-	mv temp/TestHAL_S DemoHAL_S
-	
+${APP} : modernHAL-S-FC.c ${CFILES} ${HFILES}
+	${CC} ${CCFLAGS} -o $@ modernHAL-S-FC.c ${CFILES}
+
+${APP}.exe: modernHAL-S-FC.c ${CFILES} ${HFILES}
+	${CC2} ${CCFLAGS} -o $@ modernHAL-S-FC.c ${CFILES}
+
+# Here's a target for Mac.  Beware!  It produces an executable if you have
+# clang installed, but the executable it produces is only going to work on
+# a Mac if you've compiled on a Mac.
+modernHAL-S-FC-macosx: modernHAL-S-FC.c ${CFILES} ${HFILES}
+	clang ${CCFLAGS} -o $@ modernHAL-S-FC.c ${CFILES}

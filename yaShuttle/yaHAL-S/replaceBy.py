@@ -182,8 +182,11 @@ def expandMacros(rawline, macros, maxScopes=1000000):
     return line, changed
 
 debugIndentation = False
-def replaceBy(halsSource, metadata, full, libraryFilename, templateLibrary):
-
+blockDepth = 0
+macros = [{}] # By depth.
+def replaceBy(halsSource, metadata, libraryFilename, templateLibrary):
+    global blockDepth, macros
+    
     def removeComments(string):
         while True:
             match = re.search("/[*].*[*]/", string)
@@ -191,8 +194,6 @@ def replaceBy(halsSource, metadata, full, libraryFilename, templateLibrary):
                 return string
             string = string[:match.span()[0]] + string[match.span()[1]+1:]
 
-    blockDepth = 0
-    macros = [{}] # By depth.
     lastFunctionProcedure = -1
     # The structureTemplates dictionary is used to track fields of structure
     # templates, for mangling purposes.  The keys are the names of the
@@ -272,132 +273,131 @@ def replaceBy(halsSource, metadata, full, libraryFilename, templateLibrary):
                 # print('\t', macroName, macros[-1][macroName], file=sys.stderr)
                 continue
             # Type-distinguishing macros like "l_", "b_", ....
-            if full:
-                # A new macro via "name:" (avoiding subscripts)?
-                hasType = "l_"
-                identifier = ""
-                isProcedureOrFunction = False
-                match = re.search("^" + identifierPattern + "\\s*:", fullLine)
+            # A new macro via "name:" (avoiding subscripts)?
+            hasType = "l_"
+            identifier = ""
+            isProcedureOrFunction = False
+            match = re.search("^" + identifierPattern + "\\s*:", fullLine)
+            if match != None:
+                head = match.group()
+                identifier = re.search("^" + bareIdentifierPattern \
+                                        + "\\b", head).group()
+                # For a function definition, need also to check out its
+                # datatype.
+                tail = fullLine[match.span()[1]+1:]
+                for datatype in ["BOOLEAN", "CHARACTER", "STRUCTURE"]:
+                    if re.search("\\b" + datatype + "\\b", tail) != None:
+                        if datatype == "BOOLEAN":
+                            hasType = "bf_"
+                        elif datatype == "CHARACTER":
+                            hasType = "cf_"
+                        elif datatype == "STRUCTURE":
+                            hasType = "sf_"
+                if re.search("\\b(FUNCTION|PROCEDURE|PROGRAM|CLOSE|COMPOOL|TASK|UPDATE)\\b", tail) \
+                        != None:
+                    isProcedureOrFunction = True
+                    if None != re.search("\\b(FUNCTION|PROCEDURE)\\b", tail):
+                        lastFunctionProcedure = i
+            else:
+                match = re.search("(GO\\s+TO|REPEAT|EXIT)\\s+" + \
+                        bareIdentifierPattern + "\\s*;", fullLine);
                 if match != None:
-                    head = match.group()
-                    identifier = re.search("^" + bareIdentifierPattern \
-                                            + "\\b", head).group()
-                    # For a function definition, need also to check out its
-                    # datatype.
-                    tail = fullLine[match.span()[1]+1:]
-                    for datatype in ["BOOLEAN", "CHARACTER", "STRUCTURE"]:
-                        if re.search("\\b" + datatype + "\\b", tail) != None:
-                            if datatype == "BOOLEAN":
-                                hasType = "bf_"
-                            elif datatype == "CHARACTER":
-                                hasType = "cf_"
-                            elif datatype == "STRUCTURE":
-                                hasType = "sf_"
-                    if re.search("\\b(FUNCTION|PROCEDURE|PROGRAM|CLOSE|COMPOOL|TASK|UPDATE)\\b", tail) \
-                            != None:
-                        isProcedureOrFunction = True
-                        if None != re.search("\\b(FUNCTION|PROCEDURE)\\b", tail):
-                            lastFunctionProcedure = i
+                    identifier = re.search("\\b" + bareIdentifierPattern + \
+                        "\\s*;", match.group()).group()[:-1].strip()
                 else:
-                    match = re.search("(GO\\s+TO|REPEAT|EXIT)\\s+" + \
-                            bareIdentifierPattern + "\\s*;", fullLine);
+                    # Structure template?
+                    match = re.search("^\\s*STRUCTURE\\s+" + \
+                                        bareIdentifierPattern + "[^:]*:", \
+                                        fullLine)
                     if match != None:
-                        identifier = re.search("\\b" + bareIdentifierPattern + \
-                            "\\s*;", match.group()).group()[:-1].strip()
+                        # Update structure library.  Note that we normalize
+                        # the STRUCTURE statement to facilitate comparisons
+                        # once the template is in the library.  Just for
+                        # now, the method is to replace all whitespace by
+                        # single spaces, to eliminate inline comments, etc.
+                        # However, since this is done by simple-minded
+                        # pattern-matching, it can goof up for some things,
+                        # particularly CHARACTER() INITIAL('...').
+                        # So in the long run, a better method may be needed.
+                        normalized = re.sub("\s*/[*].*[*]/\s*", \
+                                            "", fullLine)
+                        normalized = normalized.strip()
+                        normalized = re.sub("\s+:", ":", normalized)
+                        normalized = re.sub("\s+;", ";", normalized)
+                        fields = normalized.split()
+                        if fields[1][-1:] == ":":
+                            identifier = fields[1][:-1]
+                        else:
+                            identifier = fields[1]
+                        if identifier not in templateLibrary:
+                            templateLibrary[identifier] = normalized
+                            f = open(libraryFilename, "a")
+                            print(normalized, file=f)
+                            f.close()
+                        elif normalized != templateLibrary[identifier]:
+                            unEMS.addError(unEMS.WARNING, \
+                                "Template mismatch between source (" + \
+                                normalized + ") and library (" + \
+                                templateLibrary[identifier] + ")", \
+                                metadata, i)
+                                
+                        hasType = "s_"
+                        identifier = re.search(
+                            "\\b" + bareIdentifierPattern + "\\b", 
+                            match.group().replace("STRUCTURE","")).group()
+                        macros[-1][identifier] = { "arguments": [], 
+                                    "replacement": "s_" + identifier, 
+                                    "pattern": "\\b" + identifier + "\\b" }
+                        # That takes care of the name of this structure
+                        # template, but not of the structure fieldnames;
+                        # they may need mangling as well.
+                        endLine = fullLine[match.span()[1]+1:].strip()
+                        for field in endLine.replace(";", "").split(","):
+                            subfields = field.split()
+                            
+                            if len(subfields) < 3:
+                                continue
+                            if not subfields[0].isdigit():
+                                continue
+                            identifier = subfields[1]
+                            if None == re.search("^" + \
+                                                bareIdentifierPattern + \
+                                                "$", identifier):
+                                continue
+                            #print("*", fullLine)
+                            #print("*", subfields)
+                            thisType = ""
+                            if "STRUCTURE" == subfields[2][-9:]:
+                                thisType = "s_"
+                            elif "CHARACTER" == subfields[2][:9]:
+                                thisType = "c_"
+                            elif "BIT" == subfields[2][:3]:
+                                thisType = "b_"
+                            else:
+                                if subfields[2] not in mangling:
+                                    continue
+                                thisType = mangling[subfields[2]]
+                                if thisType == "":
+                                    continue
+                            if thisType in identifier:
+                                continue
+                            macros[-1][identifier] = { "arguments": [], 
+                                            "replacement": thisType + \
+                                                            identifier, 
+                                            "pattern": "\\b" + identifier \
+                                                        + "\\b" }
+                        identifier = ""
                     else:
-                        # Structure template?
-                        match = re.search("^\\s*STRUCTURE\\s+" + \
-                                            bareIdentifierPattern + "[^:]*:", \
+                        # SCHEDULE statement?
+                        match = re.search("^\\s*SCHEDULE\\s+" + \
+                                            bareIdentifierPattern + "\\b", \
                                             fullLine)
                         if match != None:
-                            # Update structure library.  Note that we normalize
-                            # the STRUCTURE statement to facilitate comparisons
-                            # once the template is in the library.  Just for
-                            # now, the method is to replace all whitespace by
-                            # single spaces, to eliminate inline comments, etc.
-                            # However, since this is done by simple-minded
-                            # pattern-matching, it can goof up for some things,
-                            # particularly CHARACTER() INITIAL('...').
-                            # So in the long run, a better method may be needed.
-                            normalized = re.sub("\s*/[*].*[*]/\s*", \
-                                                "", fullLine)
-                            normalized = normalized.strip()
-                            normalized = re.sub("\s+:", ":", normalized)
-                            normalized = re.sub("\s+;", ";", normalized)
-                            fields = normalized.split()
-                            if fields[1][-1:] == ":":
-                                identifier = fields[1][:-1]
-                            else:
-                                identifier = fields[1]
-                            if identifier not in templateLibrary:
-                                templateLibrary[identifier] = normalized
-                                f = open(libraryFilename, "a")
-                                print(normalized, file=f)
-                                f.close()
-                            elif normalized != templateLibrary[identifier]:
-                                unEMS.addError(unEMS.WARNING, \
-                                    "Template mismatch between source (" + \
-                                    normalized + ") and library (" + \
-                                    templateLibrary[identifier] + ")", \
-                                    metadata, i)
-                                    
-                            hasType = "s_"
-                            identifier = re.search(
-                                "\\b" + bareIdentifierPattern + "\\b", 
-                                match.group().replace("STRUCTURE","")).group()
+                            fields = match.group().strip().split()
+                            identifier = fields[1]
                             macros[-1][identifier] = { "arguments": [], 
-                                        "replacement": "s_" + identifier, 
+                                        "replacement": "l_" + identifier, 
                                         "pattern": "\\b" + identifier + "\\b" }
-                            # That takes care of the name of this structure
-                            # template, but not of the structure fieldnames;
-                            # they may need mangling as well.
-                            endLine = fullLine[match.span()[1]+1:].strip()
-                            for field in endLine.replace(";", "").split(","):
-                                subfields = field.split()
-                                
-                                if len(subfields) < 3:
-                                    continue
-                                if not subfields[0].isdigit():
-                                    continue
-                                identifier = subfields[1]
-                                if None == re.search("^" + \
-                                                    bareIdentifierPattern + \
-                                                    "$", identifier):
-                                    continue
-                                #print("*", fullLine)
-                                #print("*", subfields)
-                                thisType = ""
-                                if "STRUCTURE" == subfields[2][-9:]:
-                                    thisType = "s_"
-                                elif "CHARACTER" == subfields[2][:9]:
-                                    thisType = "c_"
-                                elif "BIT" == subfields[2][:3]:
-                                    thisType = "b_"
-                                else:
-                                    if subfields[2] not in mangling:
-                                        continue
-                                    thisType = mangling[subfields[2]]
-                                    if thisType == "":
-                                        continue
-                                if thisType in identifier:
-                                    continue
-                                macros[-1][identifier] = { "arguments": [], 
-                                                "replacement": thisType + \
-                                                                identifier, 
-                                                "pattern": "\\b" + identifier \
-                                                            + "\\b" }
-                            identifier = ""
-                        else:
-                            # SCHEDULE statement?
-                            match = re.search("^\\s*SCHEDULE\\s+" + \
-                                                bareIdentifierPattern + "\\b", \
-                                                fullLine)
-                            if match != None:
-                                fields = match.group().strip().split()
-                                identifier = fields[1]
-                                macros[-1][identifier] = { "arguments": [], 
-                                            "replacement": "l_" + identifier, 
-                                            "pattern": "\\b" + identifier + "\\b" }
                 if identifier != "":
                     if identifier[:2] != hasType:
                         macros[-1][identifier] = { "arguments": [], 

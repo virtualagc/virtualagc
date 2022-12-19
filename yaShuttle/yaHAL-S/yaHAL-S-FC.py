@@ -26,6 +26,7 @@ History:        2022-11-07 RSB  Created.
                 2022-12-09 RSB  Added --library option.
                 2022-12-10 RSB  Added --no-compile.
                 2022-12-11 RSB  The next evolution of yaHAL-preprocessor.py.
+                2022-12-16 RSB  Began implementing interpreter.
                                 
 Here are some features of HAL/S I don't think the compiler (if based on a
 context-free grammar with free formatting) could handle without preprocessing:
@@ -53,24 +54,26 @@ and updates if it discovers new STRUCTURE statements not already in the library.
 """
 
 import sys
-import re
 
-import unEMS
-import replaceBy
-import reorganizer
-from pass1 import tokenizeAndParse, tmpFile, compiler, astPrint, captured
+#import unEMS
+#import replaceBy
+#import reorganizer
+#from pass1 import tokenizeAndParse, tmpFile, compiler, astPrint, captured
+from processSource import processSource
+from interpreterLoop import interpreterLoop
 
 #Parse the command-line arguments.
 tabSize = 8
 halsSource = []
 metadata = []
 files = []
-full = True
 libraryFilename = "yaHAL-default.templates"
 structureTemplates = {}
 noCompile = False
-astOnly = False
+lbnf = False
+bnf = False
 trace = False
+interactive = False
 for param in ["--library="+libraryFilename] + sys.argv[1:]:
     if param == "--help":
         print("""
@@ -83,10 +86,15 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
         context-free grammar.
         
         Usage:
-            yaHAL-S-FC.py [OPTIONS] SOURCE1.hal [SOURCE2.hal [...]] >SOURCE.hal
+            yaHAL-S-FC.py [OPTIONS] [SOURCE1.hal [SOURCE2.hal [...]]] >SOURCE.hal
         
         The OPTIONS are: 
         
+        --interactive   Normally, the HAL/S source-code comes from a file or
+                        files specified on the command line.  However, in 
+                        interactive mode, HAL/S statements are entered from
+                        the keyboard and executed one at a time as they are
+                        entered.
         --tab=N         Tab size in source files; assumed to be 8.  No allowance
                         is made for different tab sizes in different source 
                         files, so let's just hope that never happens!  Probably 
@@ -94,9 +102,6 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
                         supplied on
                         punchcards, but it's certainly possible to accidentally
                         end up with tabs if source is edited in modern editors.
-        --full          If this is used, then identifiers are distinguished by
-                        type, prefixing "l_", "b_", "c_", ....  (The default.)
-        --indistinct    Opposite of --full.
         --library=F     Specifies the filename of the library of structure
                         templates.  By default, "yaHAL-default.templates".
                         This option can be used multiple times, but any new
@@ -106,21 +111,23 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
         --no-compile    Merely output preprocessed source, and do not attempt
                         to invoke the compiler.
         --compiler=F    Name of compiler's phase 1 (default %s).
-        --ast-only      Simply display the abstract syntax tree (AST) without
-                        trying to produced object code.
+        --lbnf, --bnf   Display the abstract syntax trees (AST) in LBNF or
+                        in BNF.  Default is not to display the ASTs.
         --trace         Enable tracing for compiler front-end parser.
         """ % compiler)
         sys.exit(0)
+    elif param == "--interactive":
+        interactive = True
     elif param[:6] == "--tab=":
         tabSize = int(param[6:])
-    elif param == "--full":
-        full = True
-    elif param == "--indistinct":
-        full = False
     elif param == "--no-compile":
         noCompile = True
-    elif param == "--ast-only":
-        astOnly = True
+    elif param == "--lbnf":
+        lbnf = True
+        bnf = False
+    elif param == "--bnf":
+        bnf = True
+        lbnf = False
     elif param[:11] == "--compiler=":
         compiler = param[11:]
     elif param == "--trace":
@@ -146,6 +153,9 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
         except:
             print("FYI: Structure-template library file", libraryFilename, \
                   "doesn't exist yet.", file=sys.stderr)
+    elif param[:1] == "-":
+        print("Unknown parameter:", param)
+        sys.exit(1)
     else:
         files.append(param)
         start = len(halsSource)
@@ -179,83 +189,10 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
                             " requested by compiler directive not in libary."]
             metadata.append(m)
 
-# Because whitespace is important in E/M/S constructs and (potentially) in the 
-# positioning our compiler output is going to use for error markers, let's
-# expand all tabs to spaces.
-def untab(line):
-    while "\t" in line:
-        tabAt = line.index('\t')
-        alignTo = tabSize * ((tabAt + tabSize) // tabSize)
-        fmt = "%-" + ("%d" % alignTo) + "s"
-        line = fmt % line[:tabAt] + line[tabAt + 1:]
-    return line
-for i in range(len(halsSource)):
-    halsSource[i] = untab(halsSource[i].rstrip())
-
-# Remove E/M/S multiline constructs. 
-unEMS.unEMS(halsSource, metadata)
-
-warningCount = unEMS.warningCount
-fatalCount = unEMS.fatalCount
-
-# Reorganize input lines.
-halsSource, metadata = reorganizer.reorganizer(halsSource, metadata)
-
-# Take care of REPLACE ... BY "..." macros.
-replaceBy.replaceBy(halsSource, metadata, full, \
-                    libraryFilename, structureTemplates)
-
-# Output the modified source.  If --no-compile, then simply output to stdout.
-# If not --no-compile, then output to a file called yaHAL_S.tmp.
-if noCompile:
-    f = sys.stdout
+# Interpret or compile.
+if not interactive:
+    processSource(halsSource, metadata, libraryFilename, structureTemplates,
+                    noCompile, lbnf, bnf, trace)
 else:
-    f = open(tmpFile, "w")
-for i in range(len(halsSource)):
-    if len(halsSource[i]) > 0 and halsSource[i][:1] != " ":
-        print(" /*" + halsSource[i] + "*/", file=f)
-    else:
-        print(reorganizer.untranslate(halsSource[i]), file=f)
-if not noCompile:
-    f.close()
+    interpreterLoop(libraryFilename, structureTemplates)
 
-# Print final summary of preprocessing.
-#print("Files:")
-#for file in files:
-#    print("    ", file)
-for i in range(len(halsSource)):
-    if "errors" in metadata[i]:
-        print("Line %d:" % (i+1), halsSource[i])
-        for error in metadata[i]["errors"]:
-            print("    ", error)
-print(warningCount, "preprocessor warnings")
-print(fatalCount, "preprocessor errors")
-if fatalCount > 0:
-    sys.exit(1)
-
-if not noCompile:
-    success, ast = tokenizeAndParse([], trace)
-    for error in captured["stderr"]:
-        fields = error.split(":", 2)
-        if len(fields) > 2 and fields[0].strip() == "error":
-            print("Error:" + error[6:])
-            fields = fields[1].strip().split(",")
-            i = int(fields[0]) - 1
-            j = int(fields[1])
-            print(reorganizer.untranslate(halsSource[i]))
-            print("%*s^" % (j, "")) 
-        else:
-            print(error)
-    if success:
-        print("Compiler pass 1 successful.")
-        if astOnly:
-            print()
-            print("Abstract Syntax Tree (AST)")
-            print("--------------------------")
-            astPrint(ast)
-            sys.exit(0)
-    else:
-        print("Compiler pass 1 failure.")
-        sys.exit(1)
-    # Additional passes ...
-    # TBD

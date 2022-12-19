@@ -1173,6 +1173,10 @@ But no!  That's not it.  The problem is simply that the structure template `PROC
 
 in 264-TEST8.hal.  And 264-TEST8.hal now compiles.
 
+## 264-INITIALIZE.hal
+
+Various compiler directives and `DECLARE`s missing, I assume because the assumption is that this file is really part of 264-TEST8.hal.  At any rate, once those things are include, compiles okay.
+
 ## 265-ENQUEUE.hal
 
 Requires missing compiler directives
@@ -1182,6 +1186,10 @@ Requires missing compiler directives
 
 However, requires several additional undefined structure templates: `FREE_Q`, `ENT`, maybe others.
 
+(To be continued.)
 
+# 2022-12-16
 
-TBD
+While I haven't 100% completed pass 1 of the compiler, it's clear now that the preprocessor+compiler is working mostly, and that there aren't likely to be any unstoppable barriers to completing it.  But I'm bored with it, so I'm going to shift focus for a while.
+
+What I'm going to do is to turn the preprocessor+compiler into an interpreter.  I'll create two Python modules for the preprocessor.  One of those modules will generate p-code from the AST.  The other will execute sequences of p-code.  The preprocessor itself will have the 
