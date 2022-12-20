@@ -15,9 +15,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "temp/Parser.h"
-#include "temp/Printer.h"
-#include "temp/Absyn.h"
+#include "Parser.h"
+#include "Printer.h"
+#include "Absyn.h"
 
 void usage(void) {
   printf("Usage:\n");

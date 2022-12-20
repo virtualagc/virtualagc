@@ -34,10 +34,16 @@ import re
 import platform
                
 tmpFile = "yaHAL-S-FC.tmp"
-# The compiler must be in the PATH.
+
+# Try to determine the operating system, and hence which compiler executable
+# to run.  The test is crude, to say the least, and none of the compilers are
+# really tested much except the one I run on my own computer.  The compiler 
+# executables must be in the PATH.
 compiler = "modernHAL-S-FC" 
 if platform.system() == "Windows":
     compiler += ".exe"
+elif platform.system() == "Darwin":
+    compiler += "-macosx"
 
 """
  Make the "abstract syntax" obtained as a big string from the compiler 

@@ -7,7 +7,7 @@
 * [Roadmap](#Roadmap)
     * [Phase 1](#Phase1)
     * [Phase 2 and Beyond](#Phase2)
-* [The Modern HAL/S Compiler and Preprocessor: yaHAL_S and yaHAL-preprocessor.py](#Compiler)
+* [The Modern HAL/S Compiler and Preprocessor: modernHAL-S-FC and yaHAL-S-FC.py](#Compiler)
 * [Conventions and Restrictions](#Changes)
     * [Column 1 and Comments](#Comments)
 
@@ -46,11 +46,10 @@ Aside from attempting to acquire Space Shuttle source code, original development
 
 ## <a name="Phase1"></a>Phase 1
 
-1. Creation of a p-code format (p-HAL/S), suitable for distributing emulation-ready but unmodifiable Shuttle Software, from which source code is not recoverable.  This is seen as an ITAR-compatible method of open distribution, since the distributed p-code contains neither targeting capabilities, nor the means to add such capabilities.
-2. Creation of a "modern" compiler (yaHAL-S) for the HAL/S language, producing an executable form of the code.
-3. Creation of an emulation (yaPASS.py) for certain peripherals (displays, keyboards), and possibly for the CPU running the executable just mentioned.
-
-What it means to produce "executable" code is TBD.  If, for example, the compiler simply produced an executable for its target platform (e.g., Linux, Mac, Windows), then no CPU emulation is required.  Another possibility is to produce a kind of p-code (say, "p-HAL/S"), in which case some kind of virtual p-code machine is required to execute that p-code.
+1. Creation of an intermediate language ("PALMAT"), i.e., neither source code nor code which is executable on an actual Shuttle computer system, suitable for distributing emulation-ready but unmodifiable Shuttle Software, from which source code is not recoverable.  This is seen as an ITAR-compatible method of open distribution, since the distributed PALMAT contains neither targeting capabilities, nor the means to add such capabilities.
+2. Creation of a "modern" compiler for the HAL/S language, generating PALMAT.
+3. Creation of an emulation (yaPASS.py) for certain peripherals (displays, keyboards), and low-speed emulation for PALMAT code.
+4. Creation of a high-speed emulator for PALMAT code, suitable for integration into existing spaceflight simulation systems.
 
 ## <a name="Phase2"></a>Phase 2 and Beyond
 
@@ -69,17 +68,17 @@ When there's something definitive, I'll describe it here.  In general, though, t
 
 In the "modern" system, compilation of HAL/S source-code is a two-part process:  The source code is first preprocessed and then the preprocessed code is compiled.  The preprocessing step is not optional, as it works around certain issues with HAL/S source code that the compiler is unable to handle, for technical reasons probably not of general interest.  (For the record, some of those issues are:  Special interpretation of column 1 of source lines, including full-line comments and multi-line math format; free format of source lines past column 1; expansion of macros; some compiler directives, including structure templates and inclusion of source files; non-context-free grammar.)
 
-The preprocessor is invoked simply as
+The preprocessor a Python 3 program called yaHAL-S-FC.py, while the compiler is a C program called modernHAL-S-FC (on Linux, or else modernHAL-S-FC.exe on Windows or modernHAL-S-FC-macosx on Mac).  The proprocessor automatically invokes the compiler as needed, so it's really only necessary to understand how to invoke the proprocessor:
 
-    yaHAL-preprocessor.py FILE1.hal [FILE2.hal [...] ] > PREPROCESSED.hal
+    yaHAL-S-FC.py [OPTIONS] FILE1.hal [FILE2.hal [...] ]
 
-As you may gather from this, the file output by the the preprocessor would in fact be a legal HAL/S source code file if the original HAL/S compiler from the Shuttle era were available to compile it ... although in a pragmatic sense it may exceed line-length limits and lack line-sequencing numbers required by some versions of the original compiler.  Since the preprocessor is simply a standard Python 3 program it can be run without change on any platform supporting Python 3.
+This produces various files, of which the file yaHAL-S-FC.palmat contains the compiled form of the HAL/S source code, in the PALMAT intermediate language mentioned earlier.  Or more accurately, the output file is a JSON representation of the PALMAT code, and is thus not only human readable (if we wish to be charitable), but also readily importable into alternate types of emulators, or to potential compiler passes capable of producing higher-speed versions of the executable.
 
-As I'm writing this, the compiler is much earlier in its development than is the preprocessor, so details of its operation are less clear.  In general, I'd expect it to be invoked as
+Alternatively, the command
 
-    yaHAL_S [OPTIONS] < PREPROCESSED.hal > PREPROCESSED.lst
+    yaHAL-S-FC.py --interactive
 
-where by `PREPROCESSED.lst`, I mean a listing file.  I'd expect the compiled executable to appear as a file called "yaHAL_S.*ext*", where the file-extension *ext* is yet to be determined, and would depend on the machine architecture on which the executable is expected to run.
+invokes the preprocessor/compiler in a way that allows the user to repeatedly input lines of HAL/S code from the keyboard and to compile/execute it immediately on a line-by-line basis, or to analyze it in various ways not available in the batch compilation mode described earlier.
 
 # <a name="Changes"></a>Conventions and Restrictions
 

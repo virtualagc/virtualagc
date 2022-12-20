@@ -152,5 +152,4 @@ def interpreterLoop(libraryFilename, structureTemplates):
                          structureTemplates, noCompile, xeq, lbnf, bnf, \
                          trace, wine)
 
-        print(ast)
         
