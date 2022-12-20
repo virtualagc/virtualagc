@@ -91,6 +91,7 @@ typedef union
   IF_CLAUSE if_clause_;
   TRUE_PART true_part_;
   IF if_;
+  THEN then_;
   RELATIONAL_EXP relational_exp_;
   RELATIONAL_FACTOR relational_factor_;
   REL_PRIM rel_prim_;

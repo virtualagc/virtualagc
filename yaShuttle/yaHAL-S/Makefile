@@ -28,7 +28,7 @@ HFILES = Absyn.h Parser.h Printer.h
 
 .PHONY : clean distclean
 
-all : DemoHAL_S ${APP} ${APP2}
+all : DemoHAL_S ${APP} ${APP2} yaHAL-S-FC.zip
 
 clean :
 	rm -f ${APP} ${APP}.o ${APP2}
@@ -36,6 +36,7 @@ clean :
 	-make -C temp clean
 
 distclean : clean
+	-rm DemoHAL_S
 	-make -C temp distclean
 
 DemoHAL_S ${CFILES} ${HFILES} : HAL_S.cf fixPrinter.c
@@ -49,6 +50,7 @@ DemoHAL_S ${CFILES} ${HFILES} : HAL_S.cf fixPrinter.c
 	cp temp/Absyn.c .
 	cp temp/Lexer.c .
 	cp temp/Parser.c .
+	cp temp/HAL_S.y .
 	sed -e '1h;2,$$H;$$!d;g' -re \
 		's/void\s+bufAppendC\s*\([^)]*\)\s*\{/void bufAppendC(const char c)\n{\n\#include "fixPrinter.c"\n/' \
 		temp/Printer.c >Printer.c
@@ -64,3 +66,7 @@ ${APP}.exe: modernHAL-S-FC.c ${CFILES} ${HFILES}
 # a Mac if you've compiled on a Mac.
 modernHAL-S-FC-macosx: modernHAL-S-FC.c ${CFILES} ${HFILES}
 	clang ${CCFLAGS} -o $@ modernHAL-S-FC.c ${CFILES}
+	
+# Make a zipfile for distributing just the preprocess+compiler executables and source.
+yaHAL-S-FC.zip:
+	zip $@ *.c *.h *.py modernHAL* *.cf *.y *.pdf README.txt

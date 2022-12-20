@@ -3,7 +3,7 @@
 """
 Copyright:      None - the author (Ron Burkey) declares this software to
                 be in the Public Domain, with no rights reserved.
-Filename:       tokenize.py
+Filename:       unEMS.py
 Purpose:        Gets rid of E/M/S multilines by combining them into
                 single-line statements.
 History:        2022-11-08 RSB  Created.       

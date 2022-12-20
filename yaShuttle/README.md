@@ -66,9 +66,9 @@ But I'm sure there are many other things that could be done as well.
 
 When there's something definitive, I'll describe it here.  In general, though, the HAL/S compiler is under development.  You can read about the progress and status in the separate file yaHAL-S-Development.md.
 
-In the "modern" system, compilation of HAL/S source-code is a two-part process:  The source code is first preprocessed and then the preprocessed code is compiled.  The preprocessing step is not optional, as it works around certain issues with HAL/S source code that the compiler is unable to handle, for technical reasons probably not of general interest.  (For the record, some of those issues are:  Special interpretation of column 1 of source lines, including full-line comments and multi-line math format; free format of source lines past column 1; expansion of macros; some compiler directives, including structure templates and inclusion of source files; non-context-free grammar.)
+In the "modern" system, compilation of HAL/S source-code is a two-part process:  The source code is first preprocessed and then the preprocessed code is compiled.  The preprocessing step is not optional, as it works around certain issues with HAL/S source code that the compiler proper is unable to handle, for technical reasons probably not of general interest.  (For the record, some of those issues are:  Special interpretation of column 1 of source lines, including full-line comments and multi-line math format; expansion of macros; some compiler directives, including structure templates and inclusion of source files; non-context-free grammar.)
 
-The preprocessor a Python 3 program called yaHAL-S-FC.py, while the compiler is a C program called modernHAL-S-FC (on Linux, or else modernHAL-S-FC.exe on Windows or modernHAL-S-FC-macosx on Mac).  The proprocessor automatically invokes the compiler as needed, so it's really only necessary to understand how to invoke the proprocessor:
+The preprocessor is a Python 3 program called yaHAL-S-FC.py, while the compiler is a C program called modernHAL-S-FC (on Linux, or else modernHAL-S-FC.exe on Windows or modernHAL-S-FC-macosx on Mac).  The proprocessor automatically invokes the compiler as needed, so it's really only necessary to understand how to invoke the proprocessor:
 
     yaHAL-S-FC.py [OPTIONS] FILE1.hal [FILE2.hal [...] ]
 

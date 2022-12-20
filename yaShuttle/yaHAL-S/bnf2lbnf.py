@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+
+                **********************************************************
+                * This file is now frozen and deprecated.  Work directly *
+                * with the LBNF description in the file HAL_S.cf instead.*
+                **********************************************************
+
 Copyright:      None - the author (Ron Burkey) declares this software to
                 be in the Public Domain, with no rights reserved.
 Filename:       bnf2lbnf.py
@@ -15,12 +21,6 @@ History:        2022-11-09 RSB  Created.
                                 to keep it; labels are generated only
                                 where they had been left empty.  Added
                                 ~~ for marking suggested labels in BNF.
-
-                **********************************************************
-                * This file is now frozen and deprecated.  Work directly *
-                * the LBNF description in the file HAL_S.cf instead.     *
-                **********************************************************
-
 
 For the HAL/S BNF in particular, not all nonterminals have rules
 defined.  I've had to reverse engineer those, but instead of doing so

@@ -412,10 +412,11 @@ AAequals . EQUALS ::= "=" ;
 -- Here are the additional rules needed for IF_STATEMENT. 
 AAifStatement . IF_STATEMENT ::= IF_CLAUSE STATEMENT ;
 ABifThenElseStatement . IF_STATEMENT ::= TRUE_PART STATEMENT ;
-AAif_clause . IF_CLAUSE ::= IF RELATIONAL_EXP "THEN" ;
-ABif_clause . IF_CLAUSE ::= IF BIT_EXP "THEN" ;
+AAif_clause . IF_CLAUSE ::= IF RELATIONAL_EXP THEN ;
+ABif_clause . IF_CLAUSE ::= IF BIT_EXP THEN ;
 AAtrue_part . TRUE_PART ::= IF_CLAUSE BASIC_STATEMENT "ELSE" ;
 AAif . IF ::= "IF" ;
+AAthen . THEN ::= "THEN" ;
 AArelational_exp . RELATIONAL_EXP ::= RELATIONAL_FACTOR ;
 ABrelational_exp . RELATIONAL_EXP ::= RELATIONAL_EXP OR RELATIONAL_FACTOR ;
 AArelational_factor . RELATIONAL_FACTOR ::= REL_PRIM ;

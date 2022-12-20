@@ -3,7 +3,7 @@
 """
         **************************************************************
         *   This program has essentially been superseded by the      *
-        *   --ast-only switch in yaHAL-S-FC.py.                      *
+        *   --ast-only or --interactive switch in yaHAL-S-FC.py.     *
         **************************************************************
 
 Copyright:      None - the author (Ron Burkey) declares this software to
