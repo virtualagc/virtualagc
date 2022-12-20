@@ -3060,7 +3060,7 @@ void ppIF_CLAUSE(IF_CLAUSE p, int _i_)
     if (_i_ > 0) renderC(_L_PAREN);
     ppIF(p->u.aaif_clause_.if_, 0);
     ppRELATIONAL_EXP(p->u.aaif_clause_.relational_exp_, 0);
-    renderS("THEN");
+    ppTHEN(p->u.aaif_clause_.then_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
@@ -3069,7 +3069,7 @@ void ppIF_CLAUSE(IF_CLAUSE p, int _i_)
     if (_i_ > 0) renderC(_L_PAREN);
     ppIF(p->u.abif_clause_.if_, 0);
     ppBIT_EXP(p->u.abif_clause_.bit_exp_, 0);
-    renderS("THEN");
+    ppTHEN(p->u.abif_clause_.then_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
@@ -3115,6 +3115,24 @@ void ppIF(IF p, int _i_)
 
   default:
     fprintf(stderr, "Error: bad kind field when printing IF!\n");
+    exit(1);
+  }
+}
+
+void ppTHEN(THEN p, int _i_)
+{
+  switch(p->kind)
+  {
+  case is_AAthen:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderS("THEN");
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+
+  default:
+    fprintf(stderr, "Error: bad kind field when printing THEN!\n");
     exit(1);
   }
 }
@@ -10996,6 +11014,8 @@ void shIF_CLAUSE(IF_CLAUSE p)
     shIF(p->u.aaif_clause_.if_);
   bufAppendC(' ');
     shRELATIONAL_EXP(p->u.aaif_clause_.relational_exp_);
+  bufAppendC(' ');
+    shTHEN(p->u.aaif_clause_.then_);
 
     bufAppendC(')');
 
@@ -11010,6 +11030,8 @@ void shIF_CLAUSE(IF_CLAUSE p)
     shIF(p->u.abif_clause_.if_);
   bufAppendC(' ');
     shBIT_EXP(p->u.abif_clause_.bit_exp_);
+  bufAppendC(' ');
+    shTHEN(p->u.abif_clause_.then_);
 
     bufAppendC(')');
 
@@ -11061,6 +11083,25 @@ void shIF(IF p)
 
   default:
     fprintf(stderr, "Error: bad kind field when showing IF!\n");
+    exit(1);
+  }
+}
+
+void shTHEN(THEN p)
+{
+  switch(p->kind)
+  {
+  case is_AAthen:
+
+    bufAppendS("AAthen");
+
+
+
+
+    break;
+
+  default:
+    fprintf(stderr, "Error: bad kind field when showing THEN!\n");
     exit(1);
   }
 }

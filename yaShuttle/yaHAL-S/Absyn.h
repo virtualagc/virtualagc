@@ -192,6 +192,8 @@ struct TRUE_PART_;
 typedef struct TRUE_PART_ *TRUE_PART;
 struct IF_;
 typedef struct IF_ *IF;
+struct THEN_;
+typedef struct THEN_ *THEN;
 struct RELATIONAL_EXP_;
 typedef struct RELATIONAL_EXP_ *RELATIONAL_EXP;
 struct RELATIONAL_FACTOR_;
@@ -1649,13 +1651,13 @@ struct IF_CLAUSE_
   enum { is_AAif_clause, is_ABif_clause } kind;
   union
   {
-    struct { IF if_; RELATIONAL_EXP relational_exp_; } aaif_clause_;
-    struct { BIT_EXP bit_exp_; IF if_; } abif_clause_;
+    struct { IF if_; RELATIONAL_EXP relational_exp_; THEN then_; } aaif_clause_;
+    struct { BIT_EXP bit_exp_; IF if_; THEN then_; } abif_clause_;
   } u;
 };
 
-IF_CLAUSE make_AAif_clause(IF p0, RELATIONAL_EXP p1);
-IF_CLAUSE make_ABif_clause(IF p0, BIT_EXP p1);
+IF_CLAUSE make_AAif_clause(IF p0, RELATIONAL_EXP p1, THEN p2);
+IF_CLAUSE make_ABif_clause(IF p0, BIT_EXP p1, THEN p2);
 
 struct TRUE_PART_
 {
@@ -1679,6 +1681,17 @@ struct IF_
 };
 
 IF make_AAif(void);
+
+struct THEN_
+{
+  int line_number, char_number;
+  enum { is_AAthen } kind;
+  union
+  {
+  } u;
+};
+
+THEN make_AAthen(void);
 
 struct RELATIONAL_EXP_
 {

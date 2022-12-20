@@ -32,7 +32,8 @@ import sys
 import subprocess
 import re
 import platform
-               
+import os
+
 tmpFile = "yaHAL-S-FC.tmp"
 
 # Try to determine the operating system, and hence which compiler executable
@@ -193,7 +194,9 @@ def astPrint(ast, lbnf=True, bnf=False, indent=0):
     if bnf and lbnf2bnf == {}:
         # Read the LBNF grammar.
         try:
-            f = open("HAL_S.cf")
+            # HAL_S.cf must be in same folder as the preprocessor.
+            path = re.sub("[^/]*$", "", os.path.realpath(sys.argv[0]))
+            f = open(path + "HAL_S.cf")
             inComment = False
             for line in f:
                 line = line.strip()

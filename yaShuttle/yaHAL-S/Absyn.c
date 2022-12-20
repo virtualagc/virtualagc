@@ -3414,7 +3414,7 @@ IF_STATEMENT make_ABifThenElseStatement(TRUE_PART p1, STATEMENT p2)
     tmp->u.abifthenelsestatement_.statement_ = p2;
     return tmp;
 }/********************   AAif_clause    ********************/
-IF_CLAUSE make_AAif_clause(IF p1, RELATIONAL_EXP p2)
+IF_CLAUSE make_AAif_clause(IF p1, RELATIONAL_EXP p2, THEN p3)
 {
     IF_CLAUSE tmp = (IF_CLAUSE) malloc(sizeof(*tmp));
     if (!tmp)
@@ -3425,10 +3425,11 @@ IF_CLAUSE make_AAif_clause(IF p1, RELATIONAL_EXP p2)
     tmp->kind = is_AAif_clause;
     tmp->u.aaif_clause_.if_ = p1;
     tmp->u.aaif_clause_.relational_exp_ = p2;
+    tmp->u.aaif_clause_.then_ = p3;
     return tmp;
 }
 /********************   ABif_clause    ********************/
-IF_CLAUSE make_ABif_clause(IF p1, BIT_EXP p2)
+IF_CLAUSE make_ABif_clause(IF p1, BIT_EXP p2, THEN p3)
 {
     IF_CLAUSE tmp = (IF_CLAUSE) malloc(sizeof(*tmp));
     if (!tmp)
@@ -3439,6 +3440,7 @@ IF_CLAUSE make_ABif_clause(IF p1, BIT_EXP p2)
     tmp->kind = is_ABif_clause;
     tmp->u.abif_clause_.if_ = p1;
     tmp->u.abif_clause_.bit_exp_ = p2;
+    tmp->u.abif_clause_.then_ = p3;
     return tmp;
 }/********************   AAtrue_part    ********************/
 TRUE_PART make_AAtrue_part(IF_CLAUSE p1, BASIC_STATEMENT p2)
@@ -3463,6 +3465,17 @@ IF make_AAif()
         exit(1);
     }
     tmp->kind = is_AAif;
+    return tmp;
+}/********************   AAthen    ********************/
+THEN make_AAthen()
+{
+    THEN tmp = (THEN) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AAthen!\n");
+        exit(1);
+    }
+    tmp->kind = is_AAthen;
     return tmp;
 }/********************   AArelational_exp    ********************/
 RELATIONAL_EXP make_AArelational_exp(RELATIONAL_FACTOR p1)
