@@ -14,7 +14,7 @@ from processSource import processSource
 maxRecent = 25
 def interpreterLoop(libraryFilename, structureTemplates):
     xeq = False
-    lbnf = True
+    lbnf = False
     bnf = False
     trace = False
     recentHal = []

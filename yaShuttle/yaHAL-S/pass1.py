@@ -35,6 +35,9 @@ import platform
 import os
 
 tmpFile = "yaHAL-S-FC.tmp"
+# Determine the path to the preprocessor script, since that's where auxiliary
+# files like HAL_S.cf have been placed as well.
+path = re.sub("[^/\\\\]*$", "", os.path.realpath(sys.argv[0]))
 
 # Try to determine the operating system, and hence which compiler executable
 # to run.  The test is crude, to say the least, and none of the compilers are
@@ -150,8 +153,22 @@ def makeTree(abstractSyntax, index=0):
 # cumbersome, but I see no way to use the BNF Converter framework otherwise, 
 # at least not in C.
 captured = { "stderr" : [] }
+tokens = {}
 def tokenizeAndParse(sourceList=[], trace=False, wine=False):
-    global captured
+    global captured, tokens
+    if trace and tokens == {}:
+        try:
+            f = open(path + "HAL_S.y")
+            for line in f:
+                if "%token" == line[:6]:
+                    fields = line.split()
+                    if len(fields) >= 4 and "_SYMB_" == fields[1][:6] \
+                            and "/*" == fields[2] and fields[1][6:].isdigit():
+                        tokens[fields[1]] = fields[3]   
+            f.close()
+        except:
+            print("Could not read HAL_S.y; _SYMB_n may not be translated.")
+        #print("*", tokens)
     captured["stderr"] = []
     try:
         if len(sourceList) > 0:
@@ -168,7 +185,18 @@ def tokenizeAndParse(sourceList=[], trace=False, wine=False):
         #print(compilerAndParameters)
         run =subprocess.run(compilerAndParameters, capture_output=True)
         if len(run.stderr) > 0:
-            captured["stderr"] = run.stderr.decode("utf-8").strip().split("\n")
+            stderr = run.stderr.decode("utf-8").strip()
+            while True:
+                match = re.search("\\b_SYMB_[0-9]+\\b", stderr)
+                if match == None:
+                    break
+                key = match.group()
+                if key not in tokens:
+                    break
+                stderr = stderr[:match.span()[0]] + tokens[key] + " " + \
+                            stderr[match.span()[1]+1:]
+            captured["stderr"] = stderr.split("\n")
+            
         if len(run.stdout) > 0:
             output = run.stdout.decode("utf-8").strip().split("\n")
             for line in output:
@@ -194,8 +222,6 @@ def astPrint(ast, lbnf=True, bnf=False, indent=0):
     if bnf and lbnf2bnf == {}:
         # Read the LBNF grammar.
         try:
-            # HAL_S.cf must be in same folder as the preprocessor.
-            path = re.sub("[^/]*$", "", os.path.realpath(sys.argv[0]))
             f = open(path + "HAL_S.cf")
             inComment = False
             for line in f:

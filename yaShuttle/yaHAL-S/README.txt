@@ -321,15 +321,16 @@ It fails, but why did it fail?
 	0 preprocessor warnings
 	0 preprocessor errors
 	Starting parse
-	... snip ...
+	Entering state 0
+	...
 	Entering state 293
 	Stack now 0 67 293
-	Reducing stack by rule 1 (line 643):
+	Reducing stack by rule 1 (line 645):
 	   $1 = nterm TERM (1.5: )
 	-> $$ = nterm ARITH_EXP (1.5: )
 	Entering state 375
 	Stack now 0 67 375
-	Next token is token _SYMB_166 (1.7-10: )
+	Next token is token THEN (1.7-10: )
 	Error: 1,7: syntax error at THEN
 	 IF I THEN A=1;
 	       ^
@@ -337,18 +338,17 @@ It fails, but why did it fail?
 	Stack now 0 67
 	Error: popping nterm IF (1.2-3: )
 	Stack now 0
-	Cleanup: discarding lookahead token _SYMB_166 (1.7-10: )
+	Cleanup: discarding lookahead token THEN (1.7-10: )
 	Stack now 0
 	Compiler pass 1 failure.
 	[HELP] > 
 
 As you can see, the trace is very long, so I've had to cut out a bunch of 
-it in the middle.  However, you can see that the parser got as far as 
+it in the middle.  Even so, the trace isn't exactly easy to read.
+However, I think that you can see that the parser got as far as 
 determining that we have an "IF", followed by an "ARITH_EXP" (which is
-its way of referring to the BNF type <ARITH-EXP>), followed by "_SYMB_166",
-before bailing.  To see what the cryptic _SYMB_166 refers to, I'm afraid
-you have to look in the file HAL_S.y (included in this zipfile) to find 
-that it means (as you might expect) the token "THEN".
+its way of referring to the BNF type <ARITH-EXP>), followed by the token
+"THEN, before bailing out. 
 
 So why did it fail?  Because if you look in the BNF grammar, you find
 that there's no rule for a token "IF" followed by an <ARITH-EXP> 
