@@ -95,15 +95,16 @@ def processSource(halsSource, metadata, libraryFilename, structureTemplates, \
     #print("Files:")
     #for file in files:
     #    print("    ", file)
-    for i in range(len(halsSource)):
-        if "errors" in metadata[i]:
-            print("Line %d:" % (i+1), halsSource[i])
-            for error in metadata[i]["errors"]:
-                print("    ", error)
-    print(warningCount, "preprocessor warnings")
-    print(fatalCount, "preprocessor errors")
-    if fatalCount > 0:
-        return False, {}
+    if warningCount != 0 or fatalCount != 0:
+        for i in range(len(halsSource)):
+            if "errors" in metadata[i]:
+                print("Line %d:" % (i+1), halsSource[i])
+                for error in metadata[i]["errors"]:
+                    print("    ", error)
+        print(warningCount, "preprocessor warnings")
+        print(fatalCount, "preprocessor errors")
+        if fatalCount > 0:
+            return False, {}
 
     if noCompile:
         return True, {}
@@ -117,11 +118,11 @@ def processSource(halsSource, metadata, libraryFilename, structureTemplates, \
             i = int(fields[0]) - 1
             j = int(fields[1])
             print(reorganizer.untranslate(halsSource[i]))
-            print("%*s^" % (j, "")) 
+            print("%*s^" % (j-1, "")) 
         else:
             print(error)
     if success:
-        print("Compiler pass 1 successful.")
+        #print("Compiler pass 1 successful.")
         if lbnf or bnf:
             flavor = "LBNF"
             if bnf:

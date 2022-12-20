@@ -23,20 +23,29 @@ Setup
 Expand the zipfile, creating a single folder.  Add this folder to your
 PATH.   
 
-The Python 3 language must also be installed.
+The Python 3 language must also be installed, and presumably in your
+PATH as well.
 
-The compiler consists of a completely-portable portion written in 
+Our compiler consists of a completely-portable portion written in 
 Python 3, plus a portion written in C that must itself be compiled
-before being usable.
+before being runnable on your system.
 
 As I said earlier, the C-language component of the compiler has been
 pre-built and will hopefully work on Windows, Mac, and some Ubuntu-based
-versions of Linux.  If you have another type of system, or else if the
-pre-built executable *doesn't* work for you, then you'll have to rebuild
-it from source ... which, fortunately, is quite easy.
+versions of Linux.  I've verified operation on Windows 7 and Mac OS X
+10.7 (which are the "newest" versions to which I have access) and on
+Linux Mint 21. I have no intention of paying Microsoft or Apple solely 
+for the dubious privilege of testing this free software on their systems, 
+so the rest is in the hands of whatever spirits there be.
 
-Here's how to test if the executable for the C-language component works
-as-is or not.  From a command-line, use one of the following commands:
+If you have another type of system, or else if the pre-built executable 
+*doesn't* work for you, then you'll have to rebuild executables
+from source ... which fortunately, is quite easy since the C source
+code seems to be quite generic and is therefore likely to compile
+smoothly without error.  I hope.
+
+Here's how to test if the pre-built executable for the C-language component
+works as-is or not.  From a command-line, use one of the following commands:
 
 	modernHAL-S-FC --help				(in Linux)
 		or
@@ -64,9 +73,9 @@ names or operator-system aliases:
 	clang
 	cl
 
-(Disclaimer: I'm only confident of gcc, or in clang insofar as it is
-a drop-in replacement for gcc.  And since they're available for free
-on most systems, or else come with them, I'm not inclined to explore
+(Disclaimer: I'm only confident of gcc, or clang insofar as it is
+a drop-in replacement for gcc.  And since those are available for free
+on most systems, or else comes with them, I'm not inclined to explore
 or vouch for the use of compilers like cl.  Take anything I say about
 compilers other than gcc or clang with a grain of salt.)
 
@@ -140,14 +149,16 @@ always be forgetting to start each line with a space, so the treatment
 of column 1 is somewhat different.  If a line begins with "C " or "D "
 it is still treated as a comment or a compiler directive, just as in
 pure HAL/S.  However, E/M/S (exponent/main/subscript) lines are not
-allowed at all. 
+allowed at all; which frankly is no loss, since they're more useful
+as an output format than as an input format.
 
 Thus in general, the interpreter will accept any lines other that
 full-line comments or compiler directives as regular HAL/S source
 code, and will automatically prepend a single space to them before
-compilation.  If you want to enter code like "C = 1;" or "D = C + 5",
-I'm afraid you still have to be careful to put a space in front of 
-yourself, rather than beginning them in column 1.
+compiling them.  If you want to enter code like "C = 1;" or "D = C + 5",
+which the interpreter will confuse with full-line comments or 
+compiler directives, I'm afraid you'll have to be careful to put a 
+space in front of them yourself, rather than beginning them in column 1.
 
 Moreover, in addition to HAL/S code, you can also input commands for
 the interpreter itself, such as "HELP" to get a list of the commands
@@ -175,26 +186,26 @@ see something like this:
 	[HELP] > 
 
 Many of these are things more helpful to me (for debugging the 
-compiler) than to you, I expect.  
+compiler) than to you, I expect. 
 
 Debugging
 ---------
 
-I would, however, like to make some special note of the interpreter
+I would like to make some special note of the interpreter
 commands TRACE/NOTRACE and LBNF/BNF/NOAST.  
 
 The compiler processes the HAL/S language in terms of what's known 
-as the "grammar" of the language, which is something typically 
+as the "grammar" of HAL/S, which is something typically 
 expressed in a language called BNF (Backus Naur Form).  Unfortunately, 
-BNF, if intendend as a *full* description, applies only what are called 
-"context-free" grammars.  And as originally defined by the team 
+BNF, if intendend as a *full* description, applies only to what are 
+called "context-free" grammars.  And as originally defined by the team 
 that designed HAL/S back in the 1970's, HAL/S is *not* context-free.
 
 Our modern compiler works around this difficulty by having a 
 preprocessor that "mangles" HAL/S into a slightly-different language
-called "Preprocessed HAL/S" that is context-free.  This mangling
+I call "Preprocessed HAL/S" that *is* context-free.  This mangling
 does several things, but where it will probably be most obvious 
-is that identifiers (i.e., the symbolic names of variables, function,
+is that identifiers (i.e., the symbolic names of variables, functions,
 procedures, etc.) are modified to indicate just what type of objects
 the identifiers refer to.  You won't see this in numerical variables,
 so for example, the variable I in "DECLARE I INTEGER;" remains as-is,
@@ -210,13 +221,13 @@ if you input
 
 	[HELP] > DECLARE X BOOLEAN;
 
-the preprocessor will turn this into "DECLARE b_X BOOLEAN;" and 
-statments like "IF X THEN A=1;" will turn into "IF b_X THEN A=1;",
+the preprocessor internally treats it as "DECLARE b_X BOOLEAN;" and 
+statments like "IF X THEN A=1;" are treated as "IF b_X THEN A=1;",
 none of which you normally have to think about.
 
 Besides the BNF grammar of Preprocessed HAL/S, there also exists a 
 description of the grammer in the LBNF language.  LBNF stands for
-"labelled" BNF.  In fact, we use LBNF throughout, but also provided
+"labelled" BNF.  In fact, we use LBNF throughout, but also provide
 some documentation in BNF, just because it's more familiar to most
 programmers.  If you're so-inclined, you can compare these
 various grammars at the following links:
@@ -242,9 +253,6 @@ BNF analysis for each statement.  For example:
 	[HELP] > BNF
 	Display abstract syntax trees (AST) in BNF.
 	[HELP] > DECLARE I INTEGER;
-	0 preprocessor warnings
-	0 preprocessor errors
-	Compiler pass 1 successful.
 	
 	Abstract Syntax Tree (AST) in BNF
 	----------------------------------
@@ -267,9 +275,6 @@ Or if you use the interpreter's LBNF command:
 	[HELP] > lbnf
 	Display abstract syntax trees (AST) in LBNF.
 	[HELP] > DECLARE I INTEGER;
-	0 preprocessor warnings
-	0 preprocessor errors
-	Compiler pass 1 successful.
 	
 	Abstract Syntax Tree (AST) in LBNF
 	----------------------------------
@@ -295,7 +300,7 @@ SCALAR? VECTOR? MATRIX?  Whereas the LBNF grammar is specific that
 I has been declared as AAarithConvInteger; i.e., INTEGER.  But 
 I digress!
 
-Or you can just use the NOAST interpreter command to turn of the printouts
+You can just use the NOAST interpreter command to turn off the printouts
 for these BNF/LBNF analyses.
 
 What's particularly useful if a statement *won't* parse, due to some
@@ -305,21 +310,17 @@ parsing up to the very point of failure, so you can see why the parser
 failed.  For example, suppose we were to try the following:
 
 	[HELP] > IF I THEN A=1;
-	0 preprocessor warnings
-	0 preprocessor errors
 	Error: 1,7: syntax error at THEN
 	 IF I THEN A=1;
-	       ^
+	      ^
 	Compiler pass 1 failure.
 	[HELP] > 
 
-It fails, but why did it fail?  
+It fails, but why did it fail?  Let's try TRACE'ing it:
 
 	[HELP] > TRACE
 	TRACE on.
 	[HELP] > IF I THEN A=1;
-	0 preprocessor warnings
-	0 preprocessor errors
 	Starting parse
 	Entering state 0
 	...
@@ -333,7 +334,7 @@ It fails, but why did it fail?
 	Next token is token THEN (1.7-10: )
 	Error: 1,7: syntax error at THEN
 	 IF I THEN A=1;
-	       ^
+	      ^
 	Error: popping nterm ARITH_EXP (1.5: )
 	Stack now 0 67
 	Error: popping nterm IF (1.2-3: )
@@ -366,15 +367,9 @@ If we instead did the following:
 	[HELP] > NOTRACE
 	TRACE off.
 	[HELP] > DECLARE I BOOLEAN;
-	0 preprocessor warnings
-	0 preprocessor errors
-	Compiler pass 1 successful.
 	[HELP] > BNF
 	Display abstract syntax trees (AST) in BNF.
 	[HELP] > IF I THEN A=1;
-	0 preprocessor warnings
-	0 preprocessor errors
-	Compiler pass 1 successful.
 	
 	Abstract Syntax Tree (AST) in BNF
 	----------------------------------
@@ -409,9 +404,10 @@ If we instead did the following:
 	░ ░ ░ ░ ░ ░ ░ ░ <LEVEL> : ^1^
 	[HELP] > 
 
-Now it works, because I is declared as a BOOLEAN rather than an INTEGER.  
+Now it works, because I is declared as a BOOLEAN rather than an INTEGER,
+so the "IF" is followed by a <BIT EXP> rather than an <ARITH EXP>.  
 And as a side note, if you glance through the BNF that was printed out, 
-you'll notice that even though we referred to "I" in the HAL/S source
+you'll notice that even though we used the variable "I" in the HAL/S source
 code we typed in, internally the preprocessor has mangled "I" to "b_I"
 to indicate that it is a BOOLEAN.
 

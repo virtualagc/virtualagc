@@ -13,6 +13,7 @@ APP = modernHAL-S-FC
 #CC2 = i686-w64-mingw32-gcc
 # For Windows 64:
 CC2 = x86_64-w64-mingw32-gcc
+STRIP2 = x86_64-w64-mingw32-strip
 ifeq "" "$(shell which $(CC2))"
   APP2 = ""
 else
@@ -20,6 +21,7 @@ else
 endif
 
 CC = gcc
+STRIP = strip
 CCFLAGS = -O3
 BISON_OPTS = -t -pHAL_S
 
@@ -57,15 +59,18 @@ DemoHAL_S ${CFILES} ${HFILES} : HAL_S.cf fixPrinter.c
 
 ${APP} : modernHAL-S-FC.c ${CFILES} ${HFILES}
 	${CC} ${CCFLAGS} -o $@ modernHAL-S-FC.c ${CFILES}
+	-${STRIP} $@
 
 ${APP}.exe: modernHAL-S-FC.c ${CFILES} ${HFILES}
 	${CC2} ${CCFLAGS} -o $@ modernHAL-S-FC.c ${CFILES}
+	-${STRIP2} $@
 
 # Here's a target for Mac.  Beware!  It produces an executable if you have
 # clang installed, but the executable it produces is only going to work on
 # a Mac if you've compiled on a Mac.
 modernHAL-S-FC-macosx: modernHAL-S-FC.c ${CFILES} ${HFILES}
 	clang ${CCFLAGS} -o $@ modernHAL-S-FC.c ${CFILES}
+	strip $@
 	
 # Make a zipfile for distributing just the preprocess+compiler executables and source.
 yaHAL-S-FC.zip:
