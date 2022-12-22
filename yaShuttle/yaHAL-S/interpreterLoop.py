@@ -11,7 +11,7 @@ History:        2022-12-16 RSB  Split off the nascent form from
 
 from processSource import processSource
 from PALMAT import constructPALMAT
-from p_Functions import removeIdentifier, removeAllIdentifiers
+from p_Functions import removeIdentifier, removeAllIdentifiers, commonAttributes
 
 maxRecent = 25
 def interpreterLoop(libraryFilename, structureTemplates):
@@ -121,6 +121,7 @@ def interpreterLoop(libraryFilename, structureTemplates):
                             for identifier in sorted(identifiers):
                                 print("\t%s:" % identifier[1:-1], \
                                         identifiers[identifier])
+                    #print("commonAttributes =", commonAttributes)
                     continue
                 elif firstWord == "RESET":
                     PALMAT = constructPALMAT()

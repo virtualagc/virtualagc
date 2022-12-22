@@ -152,9 +152,24 @@ the whole thing looks like:
     ret = func()
 (The arguments and return value of func mightn't be what's shown; I'm just 
 talking about the principle of how to look up the function and call it.)  
+
+The generatePALMAT() function is basically a (pretty-complex) state machine,
+and therefore must track the state in order to figure out how to interpret some
+of the stuff it finds in the AST.  That's tricky, because the state generally
+depends not just on the current LBNF label being processed, but on some 
+(abridged) sequence of LBNF labels.  For example, in processing
+    DECLARE A INTEGER DOUBLE;
+            vs
+    DECLARE INTEGER, A DOUBLE;
+the INTEGER keyword has to be handle somewhat differently.  The solution I use
+to track the states is that the "state" is a list of the form
+    [LBNFlabel1, ..., LBNFlabelN]
+where (as I said) these LBNF labels are some abridged sequence of the LBNF
+labels encountered.  The entry state in which no statement is yet being 
+processed is state=[].
 '''
 
-def generatePALMAT(ast, PALMAT, state="top"):
+def generatePALMAT(ast, PALMAT, state=[]):
     newState = state
     lbnfLabelFull = ast["lbnfLabel"]
     lbnfLabel = lbnfLabelFull[2:]
@@ -164,7 +179,7 @@ def generatePALMAT(ast, PALMAT, state="top"):
         success, newState = func(PALMAT, state)
         if not success:
             return False, PALMAT
-            
+        #print(newState)    
     for component in ast["components"]:
         if isinstance(component, str):
             if component[:1] == "^":
