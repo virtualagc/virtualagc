@@ -209,20 +209,15 @@ def tokenizeAndParse(sourceList=[], trace=False, wine=False):
         pass
     return False, []
 
-# A function that prints an abstract syntax tree.
-#indenter = "    |    |    |    |    |    |    |    |    |    |    |    |    |"
-#indenter = "   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |"
-indenter = "░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ "
-indenter += indenter
-lbnf2bnf = {}
-def astPrint(ast, lbnf=True, bnf=False, indent=0):
-    global lbnf2bnf
-    if not (lbnf or bnf):
-        return
-    if bnf and lbnf2bnf == {}:
-        # Read the LBNF grammar.
+# A function to read the LBNF grammar.  Returns True on success, False on
+# failure.
+grammar = {}
+def readGrammar(filename):
+    global grammar
+    if grammar == {}:
         try:
-            f = open(path + "HAL_S.cf")
+            lbnf2bnf = {}
+            f = open(path + filename)
             inComment = False
             for line in f:
                 line = line.strip()
@@ -247,10 +242,27 @@ def astPrint(ast, lbnf=True, bnf=False, indent=0):
                 idBnf = "<" + subfields[1].strip().replace("_", " ") + ">"
                 lbnf2bnf[idLbnf] = idBnf
             f.close()
+            grammar["lbnf2bnf"] = lbnf2bnf
         except:
-            print("Cannot read grammar file HAL_S.cf. Displaying LBNF.")
-            lbnf = True
-            bnf = False
+            # Failed!
+            return False
+    return True
+
+# A function that prints an abstract syntax tree.
+#indenter = "    |    |    |    |    |    |    |    |    |    |    |    |    |"
+#indenter = "   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |"
+indenter = "░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ "
+indenter += indenter
+def astPrint(ast, lbnf=True, bnf=False, indent=0):
+    if not (lbnf or bnf):
+        return
+    if bnf:
+        if readGrammar("HAL_S.cf"):
+            lbnf2bnf = grammar["lbnf2bnf"]
+        else:
+            print("Cannot read grammar file HAL_S.cf.")
+            print("Cannot display BNF.")
+            return
     
     print("%s" % (indenter[:indent]), end="")
     label = ast["lbnfLabel"]

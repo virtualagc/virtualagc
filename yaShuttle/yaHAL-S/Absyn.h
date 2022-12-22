@@ -28,6 +28,28 @@ typedef char* CompoundToken;
 
 /********************   Forward Declarations    ********************/
 
+struct DECLARE_BODY_;
+typedef struct DECLARE_BODY_ *DECLARE_BODY;
+struct ATTRIBUTES_;
+typedef struct ATTRIBUTES_ *ATTRIBUTES;
+struct DECLARATION_;
+typedef struct DECLARATION_ *DECLARATION;
+struct ARRAY_SPEC_;
+typedef struct ARRAY_SPEC_ *ARRAY_SPEC;
+struct TYPE_AND_MINOR_ATTR_;
+typedef struct TYPE_AND_MINOR_ATTR_ *TYPE_AND_MINOR_ATTR;
+struct IDENTIFIER_;
+typedef struct IDENTIFIER_ *IDENTIFIER;
+struct SQ_DQ_NAME_;
+typedef struct SQ_DQ_NAME_ *SQ_DQ_NAME;
+struct DOUBLY_QUAL_NAME_HEAD_;
+typedef struct DOUBLY_QUAL_NAME_HEAD_ *DOUBLY_QUAL_NAME_HEAD;
+struct ARITH_CONV_;
+typedef struct ARITH_CONV_ *ARITH_CONV;
+struct DECLARATION_LIST_;
+typedef struct DECLARATION_LIST_ *DECLARATION_LIST;
+struct NAME_ID_;
+typedef struct NAME_ID_ *NAME_ID;
 struct ARITH_EXP_;
 typedef struct ARITH_EXP_ *ARITH_EXP;
 struct TERM_;
@@ -68,8 +90,6 @@ struct EXPRESSION_;
 typedef struct EXPRESSION_ *EXPRESSION;
 struct ARITH_ID_;
 typedef struct ARITH_ID_ *ARITH_ID;
-struct IDENTIFIER_;
-typedef struct IDENTIFIER_ *IDENTIFIER;
 struct NO_ARG_ARITH_FUNC_;
 typedef struct NO_ARG_ARITH_FUNC_ *NO_ARG_ARITH_FUNC;
 struct ARITH_FUNC_;
@@ -94,8 +114,6 @@ struct SUB_EXP_;
 typedef struct SUB_EXP_ *SUB_EXP;
 struct POUND_EXPRESSION_;
 typedef struct POUND_EXPRESSION_ *POUND_EXPRESSION;
-struct ARITH_CONV_;
-typedef struct ARITH_CONV_ *ARITH_CONV;
 struct BIT_EXP_;
 typedef struct BIT_EXP_ *BIT_EXP;
 struct BIT_FACTOR_;
@@ -288,20 +306,10 @@ struct FOR_KEY_;
 typedef struct FOR_KEY_ *FOR_KEY;
 struct TEMPORARY_STMT_;
 typedef struct TEMPORARY_STMT_ *TEMPORARY_STMT;
-struct DECLARE_BODY_;
-typedef struct DECLARE_BODY_ *DECLARE_BODY;
-struct DECLARATION_LIST_;
-typedef struct DECLARATION_LIST_ *DECLARATION_LIST;
 struct CONSTANT_;
 typedef struct CONSTANT_ *CONSTANT;
-struct ATTRIBUTES_;
-typedef struct ATTRIBUTES_ *ATTRIBUTES;
-struct ARRAY_SPEC_;
-typedef struct ARRAY_SPEC_ *ARRAY_SPEC;
 struct ARRAY_HEAD_;
 typedef struct ARRAY_HEAD_ *ARRAY_HEAD;
-struct TYPE_AND_MINOR_ATTR_;
-typedef struct TYPE_AND_MINOR_ATTR_ *TYPE_AND_MINOR_ATTR;
 struct MINOR_ATTR_LIST_;
 typedef struct MINOR_ATTR_LIST_ *MINOR_ATTR_LIST;
 struct MINOR_ATTRIBUTE_;
@@ -314,10 +322,6 @@ struct REPEAT_HEAD_;
 typedef struct REPEAT_HEAD_ *REPEAT_HEAD;
 struct NESTED_REPEAT_HEAD_;
 typedef struct NESTED_REPEAT_HEAD_ *NESTED_REPEAT_HEAD;
-struct DECLARATION_;
-typedef struct DECLARATION_ *DECLARATION;
-struct NAME_ID_;
-typedef struct NAME_ID_ *NAME_ID;
 struct DCL_LIST_COMMA_;
 typedef struct DCL_LIST_COMMA_ *DCL_LIST_COMMA;
 struct LITERAL_EXP_OR_STAR_;
@@ -338,10 +342,6 @@ struct STRUCT_SPEC_HEAD_;
 typedef struct STRUCT_SPEC_HEAD_ *STRUCT_SPEC_HEAD;
 struct ARITH_SPEC_;
 typedef struct ARITH_SPEC_ *ARITH_SPEC;
-struct SQ_DQ_NAME_;
-typedef struct SQ_DQ_NAME_ *SQ_DQ_NAME;
-struct DOUBLY_QUAL_NAME_HEAD_;
-typedef struct DOUBLY_QUAL_NAME_HEAD_ *DOUBLY_QUAL_NAME_HEAD;
 struct COMPILATION_;
 typedef struct COMPILATION_ *COMPILATION;
 struct BLOCK_DEFINITION_;
@@ -413,6 +413,187 @@ typedef struct STRUC_INLINE_DEF_ *STRUC_INLINE_DEF;
 
 
 /********************   Abstract Syntax Classes    ********************/
+
+struct DECLARE_BODY_
+{
+  int line_number, char_number;
+  enum { is_AAdeclareBody_declarationList, is_ABdeclareBody_attributes_declarationList } kind;
+  union
+  {
+    struct { DECLARATION_LIST declaration_list_; } aadeclarebody_declarationlist_;
+    struct { ATTRIBUTES attributes_; DECLARATION_LIST declaration_list_; } abdeclarebody_attributes_declarationlist_;
+  } u;
+};
+
+DECLARE_BODY make_AAdeclareBody_declarationList(DECLARATION_LIST p0);
+DECLARE_BODY make_ABdeclareBody_attributes_declarationList(ATTRIBUTES p0, DECLARATION_LIST p1);
+
+struct ATTRIBUTES_
+{
+  int line_number, char_number;
+  enum { is_AAattributes_arraySpec_typeAndMinorAttr, is_ABattributes_arraySpec, is_ACattributes_typeAndMinorAttr } kind;
+  union
+  {
+    struct { ARRAY_SPEC array_spec_; TYPE_AND_MINOR_ATTR type_and_minor_attr_; } aaattributes_arrayspec_typeandminorattr_;
+    struct { ARRAY_SPEC array_spec_; } abattributes_arrayspec_;
+    struct { TYPE_AND_MINOR_ATTR type_and_minor_attr_; } acattributes_typeandminorattr_;
+  } u;
+};
+
+ATTRIBUTES make_AAattributes_arraySpec_typeAndMinorAttr(ARRAY_SPEC p0, TYPE_AND_MINOR_ATTR p1);
+ATTRIBUTES make_ABattributes_arraySpec(ARRAY_SPEC p0);
+ATTRIBUTES make_ACattributes_typeAndMinorAttr(TYPE_AND_MINOR_ATTR p0);
+
+struct DECLARATION_
+{
+  int line_number, char_number;
+  enum { is_AAdeclaration_nameId, is_ABdeclaration_nameId_attributes, is_ACdeclaration_labelToken_procedure_minorAttrList, is_ADdeclaration_labelToken_procedure, is_AEdeclaration_eventToken_event, is_AFdeclaration_eventToken_event_minorAttrList, is_AGdeclaration_eventToken, is_AHdeclaration_eventToken_minorAttrList } kind;
+  union
+  {
+    struct { NAME_ID name_id_; } aadeclaration_nameid_;
+    struct { ATTRIBUTES attributes_; NAME_ID name_id_; } abdeclaration_nameid_attributes_;
+    struct { LabelToken labeltoken_; MINOR_ATTR_LIST minor_attr_list_; } acdeclaration_labeltoken_procedure_minorattrlist_;
+    struct { LabelToken labeltoken_; } addeclaration_labeltoken_procedure_;
+    struct { EventToken eventtoken_; } aedeclaration_eventtoken_event_;
+    struct { EventToken eventtoken_; MINOR_ATTR_LIST minor_attr_list_; } afdeclaration_eventtoken_event_minorattrlist_;
+    struct { EventToken eventtoken_; } agdeclaration_eventtoken_;
+    struct { EventToken eventtoken_; MINOR_ATTR_LIST minor_attr_list_; } ahdeclaration_eventtoken_minorattrlist_;
+  } u;
+};
+
+DECLARATION make_AAdeclaration_nameId(NAME_ID p0);
+DECLARATION make_ABdeclaration_nameId_attributes(NAME_ID p0, ATTRIBUTES p1);
+DECLARATION make_ACdeclaration_labelToken_procedure_minorAttrList(LabelToken p0, MINOR_ATTR_LIST p1);
+DECLARATION make_ADdeclaration_labelToken_procedure(LabelToken p0);
+DECLARATION make_AEdeclaration_eventToken_event(EventToken p0);
+DECLARATION make_AFdeclaration_eventToken_event_minorAttrList(EventToken p0, MINOR_ATTR_LIST p1);
+DECLARATION make_AGdeclaration_eventToken(EventToken p0);
+DECLARATION make_AHdeclaration_eventToken_minorAttrList(EventToken p0, MINOR_ATTR_LIST p1);
+
+struct ARRAY_SPEC_
+{
+  int line_number, char_number;
+  enum { is_AAarraySpec_arrayHead_literalExpOrStar, is_ABarraySpec_function, is_ACarraySpec_procedure, is_ADarraySpec_program, is_AEarraySpec_task } kind;
+  union
+  {
+    struct { ARRAY_HEAD array_head_; LITERAL_EXP_OR_STAR literal_exp_or_star_; } aaarrayspec_arrayhead_literalexporstar_;
+  } u;
+};
+
+ARRAY_SPEC make_AAarraySpec_arrayHead_literalExpOrStar(ARRAY_HEAD p0, LITERAL_EXP_OR_STAR p1);
+ARRAY_SPEC make_ABarraySpec_function(void);
+ARRAY_SPEC make_ACarraySpec_procedure(void);
+ARRAY_SPEC make_ADarraySpec_program(void);
+ARRAY_SPEC make_AEarraySpec_task(void);
+
+struct TYPE_AND_MINOR_ATTR_
+{
+  int line_number, char_number;
+  enum { is_AAtypeAndMinorAttr_typeSpec, is_ABtypeAndMinorAttr_typeSpec_minorAttrList, is_ACtypeAndMinorAttr_minorAttrList } kind;
+  union
+  {
+    struct { TYPE_SPEC type_spec_; } aatypeandminorattr_typespec_;
+    struct { MINOR_ATTR_LIST minor_attr_list_; TYPE_SPEC type_spec_; } abtypeandminorattr_typespec_minorattrlist_;
+    struct { MINOR_ATTR_LIST minor_attr_list_; } actypeandminorattr_minorattrlist_;
+  } u;
+};
+
+TYPE_AND_MINOR_ATTR make_AAtypeAndMinorAttr_typeSpec(TYPE_SPEC p0);
+TYPE_AND_MINOR_ATTR make_ABtypeAndMinorAttr_typeSpec_minorAttrList(TYPE_SPEC p0, MINOR_ATTR_LIST p1);
+TYPE_AND_MINOR_ATTR make_ACtypeAndMinorAttr_minorAttrList(MINOR_ATTR_LIST p0);
+
+struct IDENTIFIER_
+{
+  int line_number, char_number;
+  enum { is_AAidentifier } kind;
+  union
+  {
+    struct { IdentifierToken identifiertoken_; } aaidentifier_;
+  } u;
+};
+
+IDENTIFIER make_AAidentifier(IdentifierToken p0);
+
+struct SQ_DQ_NAME_
+{
+  int line_number, char_number;
+  enum { is_AAsQdQName_doublyQualNameHead_literalExpOrStar, is_ABsQdQName_arithConv } kind;
+  union
+  {
+    struct { DOUBLY_QUAL_NAME_HEAD doubly_qual_name_head_; LITERAL_EXP_OR_STAR literal_exp_or_star_; } aasqdqname_doublyqualnamehead_literalexporstar_;
+    struct { ARITH_CONV arith_conv_; } absqdqname_arithconv_;
+  } u;
+};
+
+SQ_DQ_NAME make_AAsQdQName_doublyQualNameHead_literalExpOrStar(DOUBLY_QUAL_NAME_HEAD p0, LITERAL_EXP_OR_STAR p1);
+SQ_DQ_NAME make_ABsQdQName_arithConv(ARITH_CONV p0);
+
+struct DOUBLY_QUAL_NAME_HEAD_
+{
+  int line_number, char_number;
+  enum { is_AAdoublyQualNameHead_vector, is_ABdoublyQualNameHead_matrix_literalExpOrStar } kind;
+  union
+  {
+    struct { LITERAL_EXP_OR_STAR literal_exp_or_star_; } abdoublyqualnamehead_matrix_literalexporstar_;
+  } u;
+};
+
+DOUBLY_QUAL_NAME_HEAD make_AAdoublyQualNameHead_vector(void);
+DOUBLY_QUAL_NAME_HEAD make_ABdoublyQualNameHead_matrix_literalExpOrStar(LITERAL_EXP_OR_STAR p0);
+
+struct ARITH_CONV_
+{
+  int line_number, char_number;
+  enum { is_AAarithConv_integer, is_ABarithConv_scalar, is_ACarithConv_vector, is_ADarithConv_matrix } kind;
+  union
+  {
+  } u;
+};
+
+ARITH_CONV make_AAarithConv_integer(void);
+ARITH_CONV make_ABarithConv_scalar(void);
+ARITH_CONV make_ACarithConv_vector(void);
+ARITH_CONV make_ADarithConv_matrix(void);
+
+struct DECLARATION_LIST_
+{
+  int line_number, char_number;
+  enum { is_AAdeclaration_list, is_ABdeclaration_list } kind;
+  union
+  {
+    struct { DECLARATION declaration_; } aadeclaration_list_;
+    struct { DCL_LIST_COMMA dcl_list_comma_; DECLARATION declaration_; } abdeclaration_list_;
+  } u;
+};
+
+DECLARATION_LIST make_AAdeclaration_list(DECLARATION p0);
+DECLARATION_LIST make_ABdeclaration_list(DCL_LIST_COMMA p0, DECLARATION p1);
+
+struct NAME_ID_
+{
+  int line_number, char_number;
+  enum { is_AAnameId_identifier, is_ABnameId_identifier_name, is_ACnameId_bitId, is_ADnameId_charId, is_AEnameId_bitFunctionIdentifierToken, is_AFnameId_charFunctionIdentifierToken, is_AGnameId_structIdentifierToken, is_AHnameId_structFunctionIdentifierToken } kind;
+  union
+  {
+    struct { IDENTIFIER identifier_; } aanameid_identifier_;
+    struct { IDENTIFIER identifier_; } abnameid_identifier_name_;
+    struct { BIT_ID bit_id_; } acnameid_bitid_;
+    struct { CHAR_ID char_id_; } adnameid_charid_;
+    struct { BitFunctionIdentifierToken bitfunctionidentifiertoken_; } aenameid_bitfunctionidentifiertoken_;
+    struct { CharFunctionIdentifierToken charfunctionidentifiertoken_; } afnameid_charfunctionidentifiertoken_;
+    struct { StructIdentifierToken structidentifiertoken_; } agnameid_structidentifiertoken_;
+    struct { StructFunctionIdentifierToken structfunctionidentifiertoken_; } ahnameid_structfunctionidentifiertoken_;
+  } u;
+};
+
+NAME_ID make_AAnameId_identifier(IDENTIFIER p0);
+NAME_ID make_ABnameId_identifier_name(IDENTIFIER p0);
+NAME_ID make_ACnameId_bitId(BIT_ID p0);
+NAME_ID make_ADnameId_charId(CHAR_ID p0);
+NAME_ID make_AEnameId_bitFunctionIdentifierToken(BitFunctionIdentifierToken p0);
+NAME_ID make_AFnameId_charFunctionIdentifierToken(CharFunctionIdentifierToken p0);
+NAME_ID make_AGnameId_structIdentifierToken(StructIdentifierToken p0);
+NAME_ID make_AHnameId_structFunctionIdentifierToken(StructFunctionIdentifierToken p0);
 
 struct ARITH_EXP_
 {
@@ -723,18 +904,6 @@ struct ARITH_ID_
 ARITH_ID make_FGarith_id(IDENTIFIER p0);
 ARITH_ID make_FHarith_id(ArithFieldToken p0);
 
-struct IDENTIFIER_
-{
-  int line_number, char_number;
-  enum { is_FFidentifier } kind;
-  union
-  {
-    struct { IdentifierToken identifiertoken_; } ffidentifier_;
-  } u;
-};
-
-IDENTIFIER make_FFidentifier(IdentifierToken p0);
-
 struct NO_ARG_ARITH_FUNC_
 {
   int line_number, char_number;
@@ -958,20 +1127,6 @@ struct POUND_EXPRESSION_
 POUND_EXPRESSION make_AApound_expression(void);
 POUND_EXPRESSION make_ABpound_expression(POUND_EXPRESSION p0, PLUS p1, TERM p2);
 POUND_EXPRESSION make_ACpound_expression(POUND_EXPRESSION p0, MINUS p1, TERM p2);
-
-struct ARITH_CONV_
-{
-  int line_number, char_number;
-  enum { is_AAarithConvInteger, is_ABarithConvScalar, is_ACarithConvVector, is_ADarithConvMatrix } kind;
-  union
-  {
-  } u;
-};
-
-ARITH_CONV make_AAarithConvInteger(void);
-ARITH_CONV make_ABarithConvScalar(void);
-ARITH_CONV make_ACarithConvVector(void);
-ARITH_CONV make_ADarithConvMatrix(void);
 
 struct BIT_EXP_
 {
@@ -2451,34 +2606,6 @@ struct TEMPORARY_STMT_
 
 TEMPORARY_STMT make_AAtemporary_stmt(DECLARE_BODY p0);
 
-struct DECLARE_BODY_
-{
-  int line_number, char_number;
-  enum { is_AAdeclare_body, is_ABdeclare_body } kind;
-  union
-  {
-    struct { DECLARATION_LIST declaration_list_; } aadeclare_body_;
-    struct { ATTRIBUTES attributes_; DECLARATION_LIST declaration_list_; } abdeclare_body_;
-  } u;
-};
-
-DECLARE_BODY make_AAdeclare_body(DECLARATION_LIST p0);
-DECLARE_BODY make_ABdeclare_body(ATTRIBUTES p0, DECLARATION_LIST p1);
-
-struct DECLARATION_LIST_
-{
-  int line_number, char_number;
-  enum { is_AAdeclaration_list, is_ABdeclaration_list } kind;
-  union
-  {
-    struct { DECLARATION declaration_; } aadeclaration_list_;
-    struct { DCL_LIST_COMMA dcl_list_comma_; DECLARATION declaration_; } abdeclaration_list_;
-  } u;
-};
-
-DECLARATION_LIST make_AAdeclaration_list(DECLARATION p0);
-DECLARATION_LIST make_ABdeclaration_list(DCL_LIST_COMMA p0, DECLARATION p1);
-
 struct CONSTANT_
 {
   int line_number, char_number;
@@ -2497,38 +2624,6 @@ CONSTANT make_ABconstant(COMPOUND_NUMBER p0);
 CONSTANT make_ACconstant(BIT_CONST p0);
 CONSTANT make_ADconstant(CHAR_CONST p0);
 
-struct ATTRIBUTES_
-{
-  int line_number, char_number;
-  enum { is_AAattributes, is_ABattributes, is_ACattributes } kind;
-  union
-  {
-    struct { ARRAY_SPEC array_spec_; TYPE_AND_MINOR_ATTR type_and_minor_attr_; } aaattributes_;
-    struct { ARRAY_SPEC array_spec_; } abattributes_;
-    struct { TYPE_AND_MINOR_ATTR type_and_minor_attr_; } acattributes_;
-  } u;
-};
-
-ATTRIBUTES make_AAattributes(ARRAY_SPEC p0, TYPE_AND_MINOR_ATTR p1);
-ATTRIBUTES make_ABattributes(ARRAY_SPEC p0);
-ATTRIBUTES make_ACattributes(TYPE_AND_MINOR_ATTR p0);
-
-struct ARRAY_SPEC_
-{
-  int line_number, char_number;
-  enum { is_AAarray_spec, is_ABarraySpecFunction, is_ACarraySpecProcedure, is_ADarraySpecProgram, is_AEarraySpecTask } kind;
-  union
-  {
-    struct { ARRAY_HEAD array_head_; LITERAL_EXP_OR_STAR literal_exp_or_star_; } aaarray_spec_;
-  } u;
-};
-
-ARRAY_SPEC make_AAarray_spec(ARRAY_HEAD p0, LITERAL_EXP_OR_STAR p1);
-ARRAY_SPEC make_ABarraySpecFunction(void);
-ARRAY_SPEC make_ACarraySpecProcedure(void);
-ARRAY_SPEC make_ADarraySpecProgram(void);
-ARRAY_SPEC make_AEarraySpecTask(void);
-
 struct ARRAY_HEAD_
 {
   int line_number, char_number;
@@ -2541,22 +2636,6 @@ struct ARRAY_HEAD_
 
 ARRAY_HEAD make_AAarray_head(void);
 ARRAY_HEAD make_ABarray_head(ARRAY_HEAD p0, LITERAL_EXP_OR_STAR p1);
-
-struct TYPE_AND_MINOR_ATTR_
-{
-  int line_number, char_number;
-  enum { is_AAtype_and_minor_attr, is_ABtype_and_minor_attr, is_ACtype_and_minor_attr } kind;
-  union
-  {
-    struct { TYPE_SPEC type_spec_; } aatype_and_minor_attr_;
-    struct { MINOR_ATTR_LIST minor_attr_list_; TYPE_SPEC type_spec_; } abtype_and_minor_attr_;
-    struct { MINOR_ATTR_LIST minor_attr_list_; } actype_and_minor_attr_;
-  } u;
-};
-
-TYPE_AND_MINOR_ATTR make_AAtype_and_minor_attr(TYPE_SPEC p0);
-TYPE_AND_MINOR_ATTR make_ABtype_and_minor_attr(TYPE_SPEC p0, MINOR_ATTR_LIST p1);
-TYPE_AND_MINOR_ATTR make_ACtype_and_minor_attr(MINOR_ATTR_LIST p0);
 
 struct MINOR_ATTR_LIST_
 {
@@ -2657,58 +2736,6 @@ struct NESTED_REPEAT_HEAD_
 
 NESTED_REPEAT_HEAD make_AAnested_repeat_head(REPEAT_HEAD p0);
 NESTED_REPEAT_HEAD make_ABnested_repeat_head(NESTED_REPEAT_HEAD p0, REPEATED_CONSTANT p1);
-
-struct DECLARATION_
-{
-  int line_number, char_number;
-  enum { is_AAdeclarationName, is_ABdeclarationNameWithAttributes, is_ACdeclarationProcedure, is_ADdeclarationProcedure, is_AEdeclarationEvent, is_AFdeclarationEvent, is_AGdeclarationEvent, is_AHdeclarationEvent } kind;
-  union
-  {
-    struct { NAME_ID name_id_; } aadeclarationname_;
-    struct { ATTRIBUTES attributes_; NAME_ID name_id_; } abdeclarationnamewithattributes_;
-    struct { LabelToken labeltoken_; MINOR_ATTR_LIST minor_attr_list_; } acdeclarationprocedure_;
-    struct { LabelToken labeltoken_; } addeclarationprocedure_;
-    struct { EventToken eventtoken_; } aedeclarationevent_;
-    struct { EventToken eventtoken_; MINOR_ATTR_LIST minor_attr_list_; } afdeclarationevent_;
-    struct { EventToken eventtoken_; } agdeclarationevent_;
-    struct { EventToken eventtoken_; MINOR_ATTR_LIST minor_attr_list_; } ahdeclarationevent_;
-  } u;
-};
-
-DECLARATION make_AAdeclarationName(NAME_ID p0);
-DECLARATION make_ABdeclarationNameWithAttributes(NAME_ID p0, ATTRIBUTES p1);
-DECLARATION make_ACdeclarationProcedure(LabelToken p0, MINOR_ATTR_LIST p1);
-DECLARATION make_ADdeclarationProcedure(LabelToken p0);
-DECLARATION make_AEdeclarationEvent(EventToken p0);
-DECLARATION make_AFdeclarationEvent(EventToken p0, MINOR_ATTR_LIST p1);
-DECLARATION make_AGdeclarationEvent(EventToken p0);
-DECLARATION make_AHdeclarationEvent(EventToken p0, MINOR_ATTR_LIST p1);
-
-struct NAME_ID_
-{
-  int line_number, char_number;
-  enum { is_AAname_id, is_ABnameIdName, is_ACnameIdBit, is_ADnameIdChar, is_AEnameIdBitFunc, is_AFnameIdCharFunc, is_AGnameIdStruct, is_AHnameIdStructFunc } kind;
-  union
-  {
-    struct { IDENTIFIER identifier_; } aaname_id_;
-    struct { IDENTIFIER identifier_; } abnameidname_;
-    struct { BIT_ID bit_id_; } acnameidbit_;
-    struct { CHAR_ID char_id_; } adnameidchar_;
-    struct { BitFunctionIdentifierToken bitfunctionidentifiertoken_; } aenameidbitfunc_;
-    struct { CharFunctionIdentifierToken charfunctionidentifiertoken_; } afnameidcharfunc_;
-    struct { StructIdentifierToken structidentifiertoken_; } agnameidstruct_;
-    struct { StructFunctionIdentifierToken structfunctionidentifiertoken_; } ahnameidstructfunc_;
-  } u;
-};
-
-NAME_ID make_AAname_id(IDENTIFIER p0);
-NAME_ID make_ABnameIdName(IDENTIFIER p0);
-NAME_ID make_ACnameIdBit(BIT_ID p0);
-NAME_ID make_ADnameIdChar(CHAR_ID p0);
-NAME_ID make_AEnameIdBitFunc(BitFunctionIdentifierToken p0);
-NAME_ID make_AFnameIdCharFunc(CharFunctionIdentifierToken p0);
-NAME_ID make_AGnameIdStruct(StructIdentifierToken p0);
-NAME_ID make_AHnameIdStructFunc(StructFunctionIdentifierToken p0);
 
 struct DCL_LIST_COMMA_
 {
@@ -2842,33 +2869,6 @@ struct ARITH_SPEC_
 ARITH_SPEC make_AAarith_spec(PREC_SPEC p0);
 ARITH_SPEC make_ABarith_spec(SQ_DQ_NAME p0);
 ARITH_SPEC make_ACarith_spec(SQ_DQ_NAME p0, PREC_SPEC p1);
-
-struct SQ_DQ_NAME_
-{
-  int line_number, char_number;
-  enum { is_AAsq_dq_name, is_ABsq_dq_name } kind;
-  union
-  {
-    struct { DOUBLY_QUAL_NAME_HEAD doubly_qual_name_head_; LITERAL_EXP_OR_STAR literal_exp_or_star_; } aasq_dq_name_;
-    struct { ARITH_CONV arith_conv_; } absq_dq_name_;
-  } u;
-};
-
-SQ_DQ_NAME make_AAsq_dq_name(DOUBLY_QUAL_NAME_HEAD p0, LITERAL_EXP_OR_STAR p1);
-SQ_DQ_NAME make_ABsq_dq_name(ARITH_CONV p0);
-
-struct DOUBLY_QUAL_NAME_HEAD_
-{
-  int line_number, char_number;
-  enum { is_AAdoublyQualNameHeadVector, is_ABdoublyQualNameHeadMatrix } kind;
-  union
-  {
-    struct { LITERAL_EXP_OR_STAR literal_exp_or_star_; } abdoublyqualnameheadmatrix_;
-  } u;
-};
-
-DOUBLY_QUAL_NAME_HEAD make_AAdoublyQualNameHeadVector(void);
-DOUBLY_QUAL_NAME_HEAD make_ABdoublyQualNameHeadMatrix(LITERAL_EXP_OR_STAR p0);
 
 struct COMPILATION_
 {

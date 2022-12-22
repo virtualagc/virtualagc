@@ -43,10 +43,12 @@ import unEMS
 import replaceBy
 import reorganizer
 from pass1 import tokenizeAndParse, tmpFile, compiler, astPrint, captured
+from PALMAT import generatePALMAT, constructPALMAT
 
 # Preprocess and compile a set of source lines, according to the global 
-# settings. Return True on success, False on failure.
-def processSource(halsSource, metadata, libraryFilename, structureTemplates, \
+# settings. Return True,ast on success, False,{} on failure.
+def processSource(PALMAT, halsSource, metadata, libraryFilename, 
+                    structureTemplates, \
                     noCompile=False, xeq=True, lbnf=False, bnf=False, \
                     trace=False, wine=False):
 
@@ -131,8 +133,6 @@ def processSource(halsSource, metadata, libraryFilename, structureTemplates, \
             print("Abstract Syntax Tree (AST) in", flavor)
             print("----------------------------------")
             astPrint(ast, lbnf, bnf)
-        if not xeq:
-            return True, ast
     else:
         print("Compiler pass 1 failure.")
         return False, ast
@@ -140,5 +140,7 @@ def processSource(halsSource, metadata, libraryFilename, structureTemplates, \
     # Additional passes ...
     # TBD
 
-    return False, ast
+    success = generatePALMAT(ast, PALMAT)
+
+    return success, ast
     

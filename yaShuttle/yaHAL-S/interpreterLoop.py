@@ -10,6 +10,8 @@ History:        2022-12-16 RSB  Split off the nascent form from
 """
 
 from processSource import processSource
+from PALMAT import constructPALMAT
+from p_Functions import removeIdentifier, removeAllIdentifiers
 
 maxRecent = 25
 def interpreterLoop(libraryFilename, structureTemplates):
@@ -25,6 +27,7 @@ def interpreterLoop(libraryFilename, structureTemplates):
     metadata = []
     noCompile = False
     wine = False
+    PALMAT = constructPALMAT()
     while not quitting:
         if halCode:
             recentHal.append(halsSource)
@@ -61,7 +64,14 @@ def interpreterLoop(libraryFilename, structureTemplates):
                         continue
                     halsSource = recentHal[-N]
                     metadata = recentMeta[-N]
-                    break
+                    continue
+            elif firstWord == "REMOVE" and len(fields) > 1:
+                identifier = fields[1]
+                if identifier == "*":
+                    removeAllIdentifiers(PALMAT)
+                else: 
+                    removeIdentifier(PALMAT, "^" + identifier + "^")
+                continue
             elif numWords == 1:
                 # Handle interpreter commands vs HAL/S source code.
                 if firstWord == "QUIT":
@@ -100,7 +110,20 @@ def interpreterLoop(libraryFilename, structureTemplates):
                     xeq = False
                     continue
                 elif firstWord == "STATUS":
-                    print("Not implemented yet.")
+                    scopes = PALMAT["scopes"]
+                    for i in range(len(scopes)):
+                        scope = scopes[i]
+                        print("Scope %d:" % (i+1))
+                        identifiers = scope["identifiers"]
+                        if len(identifiers) == 0:
+                            print("\t(Empty)")
+                        else:
+                            for identifier in sorted(identifiers):
+                                print("\t%s:" % identifier[1:-1], \
+                                        identifiers[identifier])
+                    continue
+                elif firstWord == "RESET":
+                    PALMAT = constructPALMAT()
                     continue
                 elif firstWord == "RECENT":
                     for i in range(len(recentHal)):
@@ -128,6 +151,9 @@ def interpreterLoop(libraryFilename, structureTemplates):
                     print("    EXEC     Execute the HAL/S code.")
                     print("    NOEXEC   Don't execute the HAL/S code.")
                     print("    STATUS   Show the current VM state.")
+                    print("    REMOVE D Remove identifier D (current scope).")
+                    print("    REMOVE * Remove all identifiers (current scope).")
+                    print("    RESET    Reset entire STATUS.")
                     print("    RECENT   Show recent lines of code, numbered.")
                     print("    RERUN    Re-run last line of code.")
                     print("    RERUN D  Re-run numbered line D (from RECENT).")
@@ -148,8 +174,8 @@ def interpreterLoop(libraryFilename, structureTemplates):
                 metadata.append( {} )
         if quitting:
             break 
-        success, ast = processSource(halsSource, metadata, libraryFilename, \
-                         structureTemplates, noCompile, xeq, lbnf, bnf, \
-                         trace, wine)
-
+        PALMAT["scopes"][-1]["instructions"] = []
+        success, ast = processSource(PALMAT, halsSource, metadata, \
+                         libraryFilename, structureTemplates, noCompile, xeq, \
+                         lbnf, bnf, trace, wine)
         

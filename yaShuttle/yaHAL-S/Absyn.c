@@ -5,7 +5,517 @@
 #include "Absyn.h"
 
 
-/********************   AAarithExpTerm    ********************/
+/********************   AAdeclareBody_declarationList    ********************/
+DECLARE_BODY make_AAdeclareBody_declarationList(DECLARATION_LIST p1)
+{
+    DECLARE_BODY tmp = (DECLARE_BODY) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AAdeclareBody_declarationList!\n");
+        exit(1);
+    }
+    tmp->kind = is_AAdeclareBody_declarationList;
+    tmp->u.aadeclarebody_declarationlist_.declaration_list_ = p1;
+    return tmp;
+}
+/********************   ABdeclareBody_attributes_declarationList    ********************/
+DECLARE_BODY make_ABdeclareBody_attributes_declarationList(ATTRIBUTES p1, DECLARATION_LIST p2)
+{
+    DECLARE_BODY tmp = (DECLARE_BODY) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ABdeclareBody_attributes_declarationList!\n");
+        exit(1);
+    }
+    tmp->kind = is_ABdeclareBody_attributes_declarationList;
+    tmp->u.abdeclarebody_attributes_declarationlist_.attributes_ = p1;
+    tmp->u.abdeclarebody_attributes_declarationlist_.declaration_list_ = p2;
+    return tmp;
+}/********************   AAattributes_arraySpec_typeAndMinorAttr    ********************/
+ATTRIBUTES make_AAattributes_arraySpec_typeAndMinorAttr(ARRAY_SPEC p1, TYPE_AND_MINOR_ATTR p2)
+{
+    ATTRIBUTES tmp = (ATTRIBUTES) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AAattributes_arraySpec_typeAndMinorAttr!\n");
+        exit(1);
+    }
+    tmp->kind = is_AAattributes_arraySpec_typeAndMinorAttr;
+    tmp->u.aaattributes_arrayspec_typeandminorattr_.array_spec_ = p1;
+    tmp->u.aaattributes_arrayspec_typeandminorattr_.type_and_minor_attr_ = p2;
+    return tmp;
+}
+/********************   ABattributes_arraySpec    ********************/
+ATTRIBUTES make_ABattributes_arraySpec(ARRAY_SPEC p1)
+{
+    ATTRIBUTES tmp = (ATTRIBUTES) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ABattributes_arraySpec!\n");
+        exit(1);
+    }
+    tmp->kind = is_ABattributes_arraySpec;
+    tmp->u.abattributes_arrayspec_.array_spec_ = p1;
+    return tmp;
+}
+/********************   ACattributes_typeAndMinorAttr    ********************/
+ATTRIBUTES make_ACattributes_typeAndMinorAttr(TYPE_AND_MINOR_ATTR p1)
+{
+    ATTRIBUTES tmp = (ATTRIBUTES) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ACattributes_typeAndMinorAttr!\n");
+        exit(1);
+    }
+    tmp->kind = is_ACattributes_typeAndMinorAttr;
+    tmp->u.acattributes_typeandminorattr_.type_and_minor_attr_ = p1;
+    return tmp;
+}/********************   AAdeclaration_nameId    ********************/
+DECLARATION make_AAdeclaration_nameId(NAME_ID p1)
+{
+    DECLARATION tmp = (DECLARATION) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AAdeclaration_nameId!\n");
+        exit(1);
+    }
+    tmp->kind = is_AAdeclaration_nameId;
+    tmp->u.aadeclaration_nameid_.name_id_ = p1;
+    return tmp;
+}
+/********************   ABdeclaration_nameId_attributes    ********************/
+DECLARATION make_ABdeclaration_nameId_attributes(NAME_ID p1, ATTRIBUTES p2)
+{
+    DECLARATION tmp = (DECLARATION) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ABdeclaration_nameId_attributes!\n");
+        exit(1);
+    }
+    tmp->kind = is_ABdeclaration_nameId_attributes;
+    tmp->u.abdeclaration_nameid_attributes_.name_id_ = p1;
+    tmp->u.abdeclaration_nameid_attributes_.attributes_ = p2;
+    return tmp;
+}
+/********************   ACdeclaration_labelToken_procedure_minorAttrList    ********************/
+DECLARATION make_ACdeclaration_labelToken_procedure_minorAttrList(LabelToken p1, MINOR_ATTR_LIST p2)
+{
+    DECLARATION tmp = (DECLARATION) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ACdeclaration_labelToken_procedure_minorAttrList!\n");
+        exit(1);
+    }
+    tmp->kind = is_ACdeclaration_labelToken_procedure_minorAttrList;
+    tmp->u.acdeclaration_labeltoken_procedure_minorattrlist_.labeltoken_ = p1;
+    tmp->u.acdeclaration_labeltoken_procedure_minorattrlist_.minor_attr_list_ = p2;
+    return tmp;
+}
+/********************   ADdeclaration_labelToken_procedure    ********************/
+DECLARATION make_ADdeclaration_labelToken_procedure(LabelToken p1)
+{
+    DECLARATION tmp = (DECLARATION) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ADdeclaration_labelToken_procedure!\n");
+        exit(1);
+    }
+    tmp->kind = is_ADdeclaration_labelToken_procedure;
+    tmp->u.addeclaration_labeltoken_procedure_.labeltoken_ = p1;
+    return tmp;
+}
+/********************   AEdeclaration_eventToken_event    ********************/
+DECLARATION make_AEdeclaration_eventToken_event(EventToken p1)
+{
+    DECLARATION tmp = (DECLARATION) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AEdeclaration_eventToken_event!\n");
+        exit(1);
+    }
+    tmp->kind = is_AEdeclaration_eventToken_event;
+    tmp->u.aedeclaration_eventtoken_event_.eventtoken_ = p1;
+    return tmp;
+}
+/********************   AFdeclaration_eventToken_event_minorAttrList    ********************/
+DECLARATION make_AFdeclaration_eventToken_event_minorAttrList(EventToken p1, MINOR_ATTR_LIST p2)
+{
+    DECLARATION tmp = (DECLARATION) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AFdeclaration_eventToken_event_minorAttrList!\n");
+        exit(1);
+    }
+    tmp->kind = is_AFdeclaration_eventToken_event_minorAttrList;
+    tmp->u.afdeclaration_eventtoken_event_minorattrlist_.eventtoken_ = p1;
+    tmp->u.afdeclaration_eventtoken_event_minorattrlist_.minor_attr_list_ = p2;
+    return tmp;
+}
+/********************   AGdeclaration_eventToken    ********************/
+DECLARATION make_AGdeclaration_eventToken(EventToken p1)
+{
+    DECLARATION tmp = (DECLARATION) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AGdeclaration_eventToken!\n");
+        exit(1);
+    }
+    tmp->kind = is_AGdeclaration_eventToken;
+    tmp->u.agdeclaration_eventtoken_.eventtoken_ = p1;
+    return tmp;
+}
+/********************   AHdeclaration_eventToken_minorAttrList    ********************/
+DECLARATION make_AHdeclaration_eventToken_minorAttrList(EventToken p1, MINOR_ATTR_LIST p2)
+{
+    DECLARATION tmp = (DECLARATION) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AHdeclaration_eventToken_minorAttrList!\n");
+        exit(1);
+    }
+    tmp->kind = is_AHdeclaration_eventToken_minorAttrList;
+    tmp->u.ahdeclaration_eventtoken_minorattrlist_.eventtoken_ = p1;
+    tmp->u.ahdeclaration_eventtoken_minorattrlist_.minor_attr_list_ = p2;
+    return tmp;
+}/********************   AAarraySpec_arrayHead_literalExpOrStar    ********************/
+ARRAY_SPEC make_AAarraySpec_arrayHead_literalExpOrStar(ARRAY_HEAD p1, LITERAL_EXP_OR_STAR p2)
+{
+    ARRAY_SPEC tmp = (ARRAY_SPEC) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AAarraySpec_arrayHead_literalExpOrStar!\n");
+        exit(1);
+    }
+    tmp->kind = is_AAarraySpec_arrayHead_literalExpOrStar;
+    tmp->u.aaarrayspec_arrayhead_literalexporstar_.array_head_ = p1;
+    tmp->u.aaarrayspec_arrayhead_literalexporstar_.literal_exp_or_star_ = p2;
+    return tmp;
+}
+/********************   ABarraySpec_function    ********************/
+ARRAY_SPEC make_ABarraySpec_function()
+{
+    ARRAY_SPEC tmp = (ARRAY_SPEC) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ABarraySpec_function!\n");
+        exit(1);
+    }
+    tmp->kind = is_ABarraySpec_function;
+    return tmp;
+}
+/********************   ACarraySpec_procedure    ********************/
+ARRAY_SPEC make_ACarraySpec_procedure()
+{
+    ARRAY_SPEC tmp = (ARRAY_SPEC) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ACarraySpec_procedure!\n");
+        exit(1);
+    }
+    tmp->kind = is_ACarraySpec_procedure;
+    return tmp;
+}
+/********************   ADarraySpec_program    ********************/
+ARRAY_SPEC make_ADarraySpec_program()
+{
+    ARRAY_SPEC tmp = (ARRAY_SPEC) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ADarraySpec_program!\n");
+        exit(1);
+    }
+    tmp->kind = is_ADarraySpec_program;
+    return tmp;
+}
+/********************   AEarraySpec_task    ********************/
+ARRAY_SPEC make_AEarraySpec_task()
+{
+    ARRAY_SPEC tmp = (ARRAY_SPEC) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AEarraySpec_task!\n");
+        exit(1);
+    }
+    tmp->kind = is_AEarraySpec_task;
+    return tmp;
+}/********************   AAtypeAndMinorAttr_typeSpec    ********************/
+TYPE_AND_MINOR_ATTR make_AAtypeAndMinorAttr_typeSpec(TYPE_SPEC p1)
+{
+    TYPE_AND_MINOR_ATTR tmp = (TYPE_AND_MINOR_ATTR) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AAtypeAndMinorAttr_typeSpec!\n");
+        exit(1);
+    }
+    tmp->kind = is_AAtypeAndMinorAttr_typeSpec;
+    tmp->u.aatypeandminorattr_typespec_.type_spec_ = p1;
+    return tmp;
+}
+/********************   ABtypeAndMinorAttr_typeSpec_minorAttrList    ********************/
+TYPE_AND_MINOR_ATTR make_ABtypeAndMinorAttr_typeSpec_minorAttrList(TYPE_SPEC p1, MINOR_ATTR_LIST p2)
+{
+    TYPE_AND_MINOR_ATTR tmp = (TYPE_AND_MINOR_ATTR) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ABtypeAndMinorAttr_typeSpec_minorAttrList!\n");
+        exit(1);
+    }
+    tmp->kind = is_ABtypeAndMinorAttr_typeSpec_minorAttrList;
+    tmp->u.abtypeandminorattr_typespec_minorattrlist_.type_spec_ = p1;
+    tmp->u.abtypeandminorattr_typespec_minorattrlist_.minor_attr_list_ = p2;
+    return tmp;
+}
+/********************   ACtypeAndMinorAttr_minorAttrList    ********************/
+TYPE_AND_MINOR_ATTR make_ACtypeAndMinorAttr_minorAttrList(MINOR_ATTR_LIST p1)
+{
+    TYPE_AND_MINOR_ATTR tmp = (TYPE_AND_MINOR_ATTR) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ACtypeAndMinorAttr_minorAttrList!\n");
+        exit(1);
+    }
+    tmp->kind = is_ACtypeAndMinorAttr_minorAttrList;
+    tmp->u.actypeandminorattr_minorattrlist_.minor_attr_list_ = p1;
+    return tmp;
+}/********************   AAidentifier    ********************/
+IDENTIFIER make_AAidentifier(IdentifierToken p1)
+{
+    IDENTIFIER tmp = (IDENTIFIER) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AAidentifier!\n");
+        exit(1);
+    }
+    tmp->kind = is_AAidentifier;
+    tmp->u.aaidentifier_.identifiertoken_ = p1;
+    return tmp;
+}/********************   AAsQdQName_doublyQualNameHead_literalExpOrStar    ********************/
+SQ_DQ_NAME make_AAsQdQName_doublyQualNameHead_literalExpOrStar(DOUBLY_QUAL_NAME_HEAD p1, LITERAL_EXP_OR_STAR p2)
+{
+    SQ_DQ_NAME tmp = (SQ_DQ_NAME) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AAsQdQName_doublyQualNameHead_literalExpOrStar!\n");
+        exit(1);
+    }
+    tmp->kind = is_AAsQdQName_doublyQualNameHead_literalExpOrStar;
+    tmp->u.aasqdqname_doublyqualnamehead_literalexporstar_.doubly_qual_name_head_ = p1;
+    tmp->u.aasqdqname_doublyqualnamehead_literalexporstar_.literal_exp_or_star_ = p2;
+    return tmp;
+}
+/********************   ABsQdQName_arithConv    ********************/
+SQ_DQ_NAME make_ABsQdQName_arithConv(ARITH_CONV p1)
+{
+    SQ_DQ_NAME tmp = (SQ_DQ_NAME) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ABsQdQName_arithConv!\n");
+        exit(1);
+    }
+    tmp->kind = is_ABsQdQName_arithConv;
+    tmp->u.absqdqname_arithconv_.arith_conv_ = p1;
+    return tmp;
+}/********************   AAdoublyQualNameHead_vector    ********************/
+DOUBLY_QUAL_NAME_HEAD make_AAdoublyQualNameHead_vector()
+{
+    DOUBLY_QUAL_NAME_HEAD tmp = (DOUBLY_QUAL_NAME_HEAD) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AAdoublyQualNameHead_vector!\n");
+        exit(1);
+    }
+    tmp->kind = is_AAdoublyQualNameHead_vector;
+    return tmp;
+}
+/********************   ABdoublyQualNameHead_matrix_literalExpOrStar    ********************/
+DOUBLY_QUAL_NAME_HEAD make_ABdoublyQualNameHead_matrix_literalExpOrStar(LITERAL_EXP_OR_STAR p1)
+{
+    DOUBLY_QUAL_NAME_HEAD tmp = (DOUBLY_QUAL_NAME_HEAD) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ABdoublyQualNameHead_matrix_literalExpOrStar!\n");
+        exit(1);
+    }
+    tmp->kind = is_ABdoublyQualNameHead_matrix_literalExpOrStar;
+    tmp->u.abdoublyqualnamehead_matrix_literalexporstar_.literal_exp_or_star_ = p1;
+    return tmp;
+}/********************   AAarithConv_integer    ********************/
+ARITH_CONV make_AAarithConv_integer()
+{
+    ARITH_CONV tmp = (ARITH_CONV) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AAarithConv_integer!\n");
+        exit(1);
+    }
+    tmp->kind = is_AAarithConv_integer;
+    return tmp;
+}
+/********************   ABarithConv_scalar    ********************/
+ARITH_CONV make_ABarithConv_scalar()
+{
+    ARITH_CONV tmp = (ARITH_CONV) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ABarithConv_scalar!\n");
+        exit(1);
+    }
+    tmp->kind = is_ABarithConv_scalar;
+    return tmp;
+}
+/********************   ACarithConv_vector    ********************/
+ARITH_CONV make_ACarithConv_vector()
+{
+    ARITH_CONV tmp = (ARITH_CONV) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ACarithConv_vector!\n");
+        exit(1);
+    }
+    tmp->kind = is_ACarithConv_vector;
+    return tmp;
+}
+/********************   ADarithConv_matrix    ********************/
+ARITH_CONV make_ADarithConv_matrix()
+{
+    ARITH_CONV tmp = (ARITH_CONV) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ADarithConv_matrix!\n");
+        exit(1);
+    }
+    tmp->kind = is_ADarithConv_matrix;
+    return tmp;
+}/********************   AAdeclaration_list    ********************/
+DECLARATION_LIST make_AAdeclaration_list(DECLARATION p1)
+{
+    DECLARATION_LIST tmp = (DECLARATION_LIST) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AAdeclaration_list!\n");
+        exit(1);
+    }
+    tmp->kind = is_AAdeclaration_list;
+    tmp->u.aadeclaration_list_.declaration_ = p1;
+    return tmp;
+}
+/********************   ABdeclaration_list    ********************/
+DECLARATION_LIST make_ABdeclaration_list(DCL_LIST_COMMA p1, DECLARATION p2)
+{
+    DECLARATION_LIST tmp = (DECLARATION_LIST) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ABdeclaration_list!\n");
+        exit(1);
+    }
+    tmp->kind = is_ABdeclaration_list;
+    tmp->u.abdeclaration_list_.dcl_list_comma_ = p1;
+    tmp->u.abdeclaration_list_.declaration_ = p2;
+    return tmp;
+}/********************   AAnameId_identifier    ********************/
+NAME_ID make_AAnameId_identifier(IDENTIFIER p1)
+{
+    NAME_ID tmp = (NAME_ID) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AAnameId_identifier!\n");
+        exit(1);
+    }
+    tmp->kind = is_AAnameId_identifier;
+    tmp->u.aanameid_identifier_.identifier_ = p1;
+    return tmp;
+}
+/********************   ABnameId_identifier_name    ********************/
+NAME_ID make_ABnameId_identifier_name(IDENTIFIER p1)
+{
+    NAME_ID tmp = (NAME_ID) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ABnameId_identifier_name!\n");
+        exit(1);
+    }
+    tmp->kind = is_ABnameId_identifier_name;
+    tmp->u.abnameid_identifier_name_.identifier_ = p1;
+    return tmp;
+}
+/********************   ACnameId_bitId    ********************/
+NAME_ID make_ACnameId_bitId(BIT_ID p1)
+{
+    NAME_ID tmp = (NAME_ID) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ACnameId_bitId!\n");
+        exit(1);
+    }
+    tmp->kind = is_ACnameId_bitId;
+    tmp->u.acnameid_bitid_.bit_id_ = p1;
+    return tmp;
+}
+/********************   ADnameId_charId    ********************/
+NAME_ID make_ADnameId_charId(CHAR_ID p1)
+{
+    NAME_ID tmp = (NAME_ID) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ADnameId_charId!\n");
+        exit(1);
+    }
+    tmp->kind = is_ADnameId_charId;
+    tmp->u.adnameid_charid_.char_id_ = p1;
+    return tmp;
+}
+/********************   AEnameId_bitFunctionIdentifierToken    ********************/
+NAME_ID make_AEnameId_bitFunctionIdentifierToken(BitFunctionIdentifierToken p1)
+{
+    NAME_ID tmp = (NAME_ID) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AEnameId_bitFunctionIdentifierToken!\n");
+        exit(1);
+    }
+    tmp->kind = is_AEnameId_bitFunctionIdentifierToken;
+    tmp->u.aenameid_bitfunctionidentifiertoken_.bitfunctionidentifiertoken_ = p1;
+    return tmp;
+}
+/********************   AFnameId_charFunctionIdentifierToken    ********************/
+NAME_ID make_AFnameId_charFunctionIdentifierToken(CharFunctionIdentifierToken p1)
+{
+    NAME_ID tmp = (NAME_ID) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AFnameId_charFunctionIdentifierToken!\n");
+        exit(1);
+    }
+    tmp->kind = is_AFnameId_charFunctionIdentifierToken;
+    tmp->u.afnameid_charfunctionidentifiertoken_.charfunctionidentifiertoken_ = p1;
+    return tmp;
+}
+/********************   AGnameId_structIdentifierToken    ********************/
+NAME_ID make_AGnameId_structIdentifierToken(StructIdentifierToken p1)
+{
+    NAME_ID tmp = (NAME_ID) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AGnameId_structIdentifierToken!\n");
+        exit(1);
+    }
+    tmp->kind = is_AGnameId_structIdentifierToken;
+    tmp->u.agnameid_structidentifiertoken_.structidentifiertoken_ = p1;
+    return tmp;
+}
+/********************   AHnameId_structFunctionIdentifierToken    ********************/
+NAME_ID make_AHnameId_structFunctionIdentifierToken(StructFunctionIdentifierToken p1)
+{
+    NAME_ID tmp = (NAME_ID) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AHnameId_structFunctionIdentifierToken!\n");
+        exit(1);
+    }
+    tmp->kind = is_AHnameId_structFunctionIdentifierToken;
+    tmp->u.ahnameid_structfunctionidentifiertoken_.structfunctionidentifiertoken_ = p1;
+    return tmp;
+}/********************   AAarithExpTerm    ********************/
 ARITH_EXP make_AAarithExpTerm(TERM p1)
 {
     ARITH_EXP tmp = (ARITH_EXP) malloc(sizeof(*tmp));
@@ -737,18 +1247,6 @@ ARITH_ID make_FHarith_id(ArithFieldToken p1)
     }
     tmp->kind = is_FHarith_id;
     tmp->u.fharith_id_.arithfieldtoken_ = p1;
-    return tmp;
-}/********************   FFidentifier    ********************/
-IDENTIFIER make_FFidentifier(IdentifierToken p1)
-{
-    IDENTIFIER tmp = (IDENTIFIER) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating FFidentifier!\n");
-        exit(1);
-    }
-    tmp->kind = is_FFidentifier;
-    tmp->u.ffidentifier_.identifiertoken_ = p1;
     return tmp;
 }/********************   ZZclocktime    ********************/
 NO_ARG_ARITH_FUNC make_ZZclocktime()
@@ -1753,53 +2251,6 @@ POUND_EXPRESSION make_ACpound_expression(POUND_EXPRESSION p1, MINUS p2, TERM p3)
     tmp->u.acpound_expression_.pound_expression_ = p1;
     tmp->u.acpound_expression_.minus_ = p2;
     tmp->u.acpound_expression_.term_ = p3;
-    return tmp;
-}/********************   AAarithConvInteger    ********************/
-ARITH_CONV make_AAarithConvInteger()
-{
-    ARITH_CONV tmp = (ARITH_CONV) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AAarithConvInteger!\n");
-        exit(1);
-    }
-    tmp->kind = is_AAarithConvInteger;
-    return tmp;
-}
-/********************   ABarithConvScalar    ********************/
-ARITH_CONV make_ABarithConvScalar()
-{
-    ARITH_CONV tmp = (ARITH_CONV) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ABarithConvScalar!\n");
-        exit(1);
-    }
-    tmp->kind = is_ABarithConvScalar;
-    return tmp;
-}
-/********************   ACarithConvVector    ********************/
-ARITH_CONV make_ACarithConvVector()
-{
-    ARITH_CONV tmp = (ARITH_CONV) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ACarithConvVector!\n");
-        exit(1);
-    }
-    tmp->kind = is_ACarithConvVector;
-    return tmp;
-}
-/********************   ADarithConvMatrix    ********************/
-ARITH_CONV make_ADarithConvMatrix()
-{
-    ARITH_CONV tmp = (ARITH_CONV) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ADarithConvMatrix!\n");
-        exit(1);
-    }
-    tmp->kind = is_ADarithConvMatrix;
     return tmp;
 }/********************   AAbit_exp    ********************/
 BIT_EXP make_AAbit_exp(BIT_FACTOR p1)
@@ -5494,58 +5945,6 @@ TEMPORARY_STMT make_AAtemporary_stmt(DECLARE_BODY p1)
     tmp->kind = is_AAtemporary_stmt;
     tmp->u.aatemporary_stmt_.declare_body_ = p1;
     return tmp;
-}/********************   AAdeclare_body    ********************/
-DECLARE_BODY make_AAdeclare_body(DECLARATION_LIST p1)
-{
-    DECLARE_BODY tmp = (DECLARE_BODY) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AAdeclare_body!\n");
-        exit(1);
-    }
-    tmp->kind = is_AAdeclare_body;
-    tmp->u.aadeclare_body_.declaration_list_ = p1;
-    return tmp;
-}
-/********************   ABdeclare_body    ********************/
-DECLARE_BODY make_ABdeclare_body(ATTRIBUTES p1, DECLARATION_LIST p2)
-{
-    DECLARE_BODY tmp = (DECLARE_BODY) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ABdeclare_body!\n");
-        exit(1);
-    }
-    tmp->kind = is_ABdeclare_body;
-    tmp->u.abdeclare_body_.attributes_ = p1;
-    tmp->u.abdeclare_body_.declaration_list_ = p2;
-    return tmp;
-}/********************   AAdeclaration_list    ********************/
-DECLARATION_LIST make_AAdeclaration_list(DECLARATION p1)
-{
-    DECLARATION_LIST tmp = (DECLARATION_LIST) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AAdeclaration_list!\n");
-        exit(1);
-    }
-    tmp->kind = is_AAdeclaration_list;
-    tmp->u.aadeclaration_list_.declaration_ = p1;
-    return tmp;
-}
-/********************   ABdeclaration_list    ********************/
-DECLARATION_LIST make_ABdeclaration_list(DCL_LIST_COMMA p1, DECLARATION p2)
-{
-    DECLARATION_LIST tmp = (DECLARATION_LIST) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ABdeclaration_list!\n");
-        exit(1);
-    }
-    tmp->kind = is_ABdeclaration_list;
-    tmp->u.abdeclaration_list_.dcl_list_comma_ = p1;
-    tmp->u.abdeclaration_list_.declaration_ = p2;
-    return tmp;
 }/********************   AAconstant    ********************/
 CONSTANT make_AAconstant(NUMBER p1)
 {
@@ -5597,106 +5996,6 @@ CONSTANT make_ADconstant(CHAR_CONST p1)
     tmp->kind = is_ADconstant;
     tmp->u.adconstant_.char_const_ = p1;
     return tmp;
-}/********************   AAattributes    ********************/
-ATTRIBUTES make_AAattributes(ARRAY_SPEC p1, TYPE_AND_MINOR_ATTR p2)
-{
-    ATTRIBUTES tmp = (ATTRIBUTES) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AAattributes!\n");
-        exit(1);
-    }
-    tmp->kind = is_AAattributes;
-    tmp->u.aaattributes_.array_spec_ = p1;
-    tmp->u.aaattributes_.type_and_minor_attr_ = p2;
-    return tmp;
-}
-/********************   ABattributes    ********************/
-ATTRIBUTES make_ABattributes(ARRAY_SPEC p1)
-{
-    ATTRIBUTES tmp = (ATTRIBUTES) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ABattributes!\n");
-        exit(1);
-    }
-    tmp->kind = is_ABattributes;
-    tmp->u.abattributes_.array_spec_ = p1;
-    return tmp;
-}
-/********************   ACattributes    ********************/
-ATTRIBUTES make_ACattributes(TYPE_AND_MINOR_ATTR p1)
-{
-    ATTRIBUTES tmp = (ATTRIBUTES) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ACattributes!\n");
-        exit(1);
-    }
-    tmp->kind = is_ACattributes;
-    tmp->u.acattributes_.type_and_minor_attr_ = p1;
-    return tmp;
-}/********************   AAarray_spec    ********************/
-ARRAY_SPEC make_AAarray_spec(ARRAY_HEAD p1, LITERAL_EXP_OR_STAR p2)
-{
-    ARRAY_SPEC tmp = (ARRAY_SPEC) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AAarray_spec!\n");
-        exit(1);
-    }
-    tmp->kind = is_AAarray_spec;
-    tmp->u.aaarray_spec_.array_head_ = p1;
-    tmp->u.aaarray_spec_.literal_exp_or_star_ = p2;
-    return tmp;
-}
-/********************   ABarraySpecFunction    ********************/
-ARRAY_SPEC make_ABarraySpecFunction()
-{
-    ARRAY_SPEC tmp = (ARRAY_SPEC) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ABarraySpecFunction!\n");
-        exit(1);
-    }
-    tmp->kind = is_ABarraySpecFunction;
-    return tmp;
-}
-/********************   ACarraySpecProcedure    ********************/
-ARRAY_SPEC make_ACarraySpecProcedure()
-{
-    ARRAY_SPEC tmp = (ARRAY_SPEC) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ACarraySpecProcedure!\n");
-        exit(1);
-    }
-    tmp->kind = is_ACarraySpecProcedure;
-    return tmp;
-}
-/********************   ADarraySpecProgram    ********************/
-ARRAY_SPEC make_ADarraySpecProgram()
-{
-    ARRAY_SPEC tmp = (ARRAY_SPEC) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ADarraySpecProgram!\n");
-        exit(1);
-    }
-    tmp->kind = is_ADarraySpecProgram;
-    return tmp;
-}
-/********************   AEarraySpecTask    ********************/
-ARRAY_SPEC make_AEarraySpecTask()
-{
-    ARRAY_SPEC tmp = (ARRAY_SPEC) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AEarraySpecTask!\n");
-        exit(1);
-    }
-    tmp->kind = is_AEarraySpecTask;
-    return tmp;
 }/********************   AAarray_head    ********************/
 ARRAY_HEAD make_AAarray_head()
 {
@@ -5721,45 +6020,6 @@ ARRAY_HEAD make_ABarray_head(ARRAY_HEAD p1, LITERAL_EXP_OR_STAR p2)
     tmp->kind = is_ABarray_head;
     tmp->u.abarray_head_.array_head_ = p1;
     tmp->u.abarray_head_.literal_exp_or_star_ = p2;
-    return tmp;
-}/********************   AAtype_and_minor_attr    ********************/
-TYPE_AND_MINOR_ATTR make_AAtype_and_minor_attr(TYPE_SPEC p1)
-{
-    TYPE_AND_MINOR_ATTR tmp = (TYPE_AND_MINOR_ATTR) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AAtype_and_minor_attr!\n");
-        exit(1);
-    }
-    tmp->kind = is_AAtype_and_minor_attr;
-    tmp->u.aatype_and_minor_attr_.type_spec_ = p1;
-    return tmp;
-}
-/********************   ABtype_and_minor_attr    ********************/
-TYPE_AND_MINOR_ATTR make_ABtype_and_minor_attr(TYPE_SPEC p1, MINOR_ATTR_LIST p2)
-{
-    TYPE_AND_MINOR_ATTR tmp = (TYPE_AND_MINOR_ATTR) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ABtype_and_minor_attr!\n");
-        exit(1);
-    }
-    tmp->kind = is_ABtype_and_minor_attr;
-    tmp->u.abtype_and_minor_attr_.type_spec_ = p1;
-    tmp->u.abtype_and_minor_attr_.minor_attr_list_ = p2;
-    return tmp;
-}
-/********************   ACtype_and_minor_attr    ********************/
-TYPE_AND_MINOR_ATTR make_ACtype_and_minor_attr(MINOR_ATTR_LIST p1)
-{
-    TYPE_AND_MINOR_ATTR tmp = (TYPE_AND_MINOR_ATTR) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ACtype_and_minor_attr!\n");
-        exit(1);
-    }
-    tmp->kind = is_ACtype_and_minor_attr;
-    tmp->u.actype_and_minor_attr_.minor_attr_list_ = p1;
     return tmp;
 }/********************   AAminor_attr_list    ********************/
 MINOR_ATTR_LIST make_AAminor_attr_list(MINOR_ATTRIBUTE p1)
@@ -6078,216 +6338,6 @@ NESTED_REPEAT_HEAD make_ABnested_repeat_head(NESTED_REPEAT_HEAD p1, REPEATED_CON
     tmp->u.abnested_repeat_head_.nested_repeat_head_ = p1;
     tmp->u.abnested_repeat_head_.repeated_constant_ = p2;
     return tmp;
-}/********************   AAdeclarationName    ********************/
-DECLARATION make_AAdeclarationName(NAME_ID p1)
-{
-    DECLARATION tmp = (DECLARATION) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AAdeclarationName!\n");
-        exit(1);
-    }
-    tmp->kind = is_AAdeclarationName;
-    tmp->u.aadeclarationname_.name_id_ = p1;
-    return tmp;
-}
-/********************   ABdeclarationNameWithAttributes    ********************/
-DECLARATION make_ABdeclarationNameWithAttributes(NAME_ID p1, ATTRIBUTES p2)
-{
-    DECLARATION tmp = (DECLARATION) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ABdeclarationNameWithAttributes!\n");
-        exit(1);
-    }
-    tmp->kind = is_ABdeclarationNameWithAttributes;
-    tmp->u.abdeclarationnamewithattributes_.name_id_ = p1;
-    tmp->u.abdeclarationnamewithattributes_.attributes_ = p2;
-    return tmp;
-}
-/********************   ACdeclarationProcedure    ********************/
-DECLARATION make_ACdeclarationProcedure(LabelToken p1, MINOR_ATTR_LIST p2)
-{
-    DECLARATION tmp = (DECLARATION) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ACdeclarationProcedure!\n");
-        exit(1);
-    }
-    tmp->kind = is_ACdeclarationProcedure;
-    tmp->u.acdeclarationprocedure_.labeltoken_ = p1;
-    tmp->u.acdeclarationprocedure_.minor_attr_list_ = p2;
-    return tmp;
-}
-/********************   ADdeclarationProcedure    ********************/
-DECLARATION make_ADdeclarationProcedure(LabelToken p1)
-{
-    DECLARATION tmp = (DECLARATION) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ADdeclarationProcedure!\n");
-        exit(1);
-    }
-    tmp->kind = is_ADdeclarationProcedure;
-    tmp->u.addeclarationprocedure_.labeltoken_ = p1;
-    return tmp;
-}
-/********************   AEdeclarationEvent    ********************/
-DECLARATION make_AEdeclarationEvent(EventToken p1)
-{
-    DECLARATION tmp = (DECLARATION) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AEdeclarationEvent!\n");
-        exit(1);
-    }
-    tmp->kind = is_AEdeclarationEvent;
-    tmp->u.aedeclarationevent_.eventtoken_ = p1;
-    return tmp;
-}
-/********************   AFdeclarationEvent    ********************/
-DECLARATION make_AFdeclarationEvent(EventToken p1, MINOR_ATTR_LIST p2)
-{
-    DECLARATION tmp = (DECLARATION) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AFdeclarationEvent!\n");
-        exit(1);
-    }
-    tmp->kind = is_AFdeclarationEvent;
-    tmp->u.afdeclarationevent_.eventtoken_ = p1;
-    tmp->u.afdeclarationevent_.minor_attr_list_ = p2;
-    return tmp;
-}
-/********************   AGdeclarationEvent    ********************/
-DECLARATION make_AGdeclarationEvent(EventToken p1)
-{
-    DECLARATION tmp = (DECLARATION) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AGdeclarationEvent!\n");
-        exit(1);
-    }
-    tmp->kind = is_AGdeclarationEvent;
-    tmp->u.agdeclarationevent_.eventtoken_ = p1;
-    return tmp;
-}
-/********************   AHdeclarationEvent    ********************/
-DECLARATION make_AHdeclarationEvent(EventToken p1, MINOR_ATTR_LIST p2)
-{
-    DECLARATION tmp = (DECLARATION) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AHdeclarationEvent!\n");
-        exit(1);
-    }
-    tmp->kind = is_AHdeclarationEvent;
-    tmp->u.ahdeclarationevent_.eventtoken_ = p1;
-    tmp->u.ahdeclarationevent_.minor_attr_list_ = p2;
-    return tmp;
-}/********************   AAname_id    ********************/
-NAME_ID make_AAname_id(IDENTIFIER p1)
-{
-    NAME_ID tmp = (NAME_ID) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AAname_id!\n");
-        exit(1);
-    }
-    tmp->kind = is_AAname_id;
-    tmp->u.aaname_id_.identifier_ = p1;
-    return tmp;
-}
-/********************   ABnameIdName    ********************/
-NAME_ID make_ABnameIdName(IDENTIFIER p1)
-{
-    NAME_ID tmp = (NAME_ID) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ABnameIdName!\n");
-        exit(1);
-    }
-    tmp->kind = is_ABnameIdName;
-    tmp->u.abnameidname_.identifier_ = p1;
-    return tmp;
-}
-/********************   ACnameIdBit    ********************/
-NAME_ID make_ACnameIdBit(BIT_ID p1)
-{
-    NAME_ID tmp = (NAME_ID) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ACnameIdBit!\n");
-        exit(1);
-    }
-    tmp->kind = is_ACnameIdBit;
-    tmp->u.acnameidbit_.bit_id_ = p1;
-    return tmp;
-}
-/********************   ADnameIdChar    ********************/
-NAME_ID make_ADnameIdChar(CHAR_ID p1)
-{
-    NAME_ID tmp = (NAME_ID) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ADnameIdChar!\n");
-        exit(1);
-    }
-    tmp->kind = is_ADnameIdChar;
-    tmp->u.adnameidchar_.char_id_ = p1;
-    return tmp;
-}
-/********************   AEnameIdBitFunc    ********************/
-NAME_ID make_AEnameIdBitFunc(BitFunctionIdentifierToken p1)
-{
-    NAME_ID tmp = (NAME_ID) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AEnameIdBitFunc!\n");
-        exit(1);
-    }
-    tmp->kind = is_AEnameIdBitFunc;
-    tmp->u.aenameidbitfunc_.bitfunctionidentifiertoken_ = p1;
-    return tmp;
-}
-/********************   AFnameIdCharFunc    ********************/
-NAME_ID make_AFnameIdCharFunc(CharFunctionIdentifierToken p1)
-{
-    NAME_ID tmp = (NAME_ID) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AFnameIdCharFunc!\n");
-        exit(1);
-    }
-    tmp->kind = is_AFnameIdCharFunc;
-    tmp->u.afnameidcharfunc_.charfunctionidentifiertoken_ = p1;
-    return tmp;
-}
-/********************   AGnameIdStruct    ********************/
-NAME_ID make_AGnameIdStruct(StructIdentifierToken p1)
-{
-    NAME_ID tmp = (NAME_ID) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AGnameIdStruct!\n");
-        exit(1);
-    }
-    tmp->kind = is_AGnameIdStruct;
-    tmp->u.agnameidstruct_.structidentifiertoken_ = p1;
-    return tmp;
-}
-/********************   AHnameIdStructFunc    ********************/
-NAME_ID make_AHnameIdStructFunc(StructFunctionIdentifierToken p1)
-{
-    NAME_ID tmp = (NAME_ID) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AHnameIdStructFunc!\n");
-        exit(1);
-    }
-    tmp->kind = is_AHnameIdStructFunc;
-    tmp->u.ahnameidstructfunc_.structfunctionidentifiertoken_ = p1;
-    return tmp;
 }/********************   AAdcl_list_comma    ********************/
 DCL_LIST_COMMA make_AAdcl_list_comma(DECLARATION_LIST p1)
 {
@@ -6522,56 +6572,6 @@ ARITH_SPEC make_ACarith_spec(SQ_DQ_NAME p1, PREC_SPEC p2)
     tmp->kind = is_ACarith_spec;
     tmp->u.acarith_spec_.sq_dq_name_ = p1;
     tmp->u.acarith_spec_.prec_spec_ = p2;
-    return tmp;
-}/********************   AAsq_dq_name    ********************/
-SQ_DQ_NAME make_AAsq_dq_name(DOUBLY_QUAL_NAME_HEAD p1, LITERAL_EXP_OR_STAR p2)
-{
-    SQ_DQ_NAME tmp = (SQ_DQ_NAME) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AAsq_dq_name!\n");
-        exit(1);
-    }
-    tmp->kind = is_AAsq_dq_name;
-    tmp->u.aasq_dq_name_.doubly_qual_name_head_ = p1;
-    tmp->u.aasq_dq_name_.literal_exp_or_star_ = p2;
-    return tmp;
-}
-/********************   ABsq_dq_name    ********************/
-SQ_DQ_NAME make_ABsq_dq_name(ARITH_CONV p1)
-{
-    SQ_DQ_NAME tmp = (SQ_DQ_NAME) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ABsq_dq_name!\n");
-        exit(1);
-    }
-    tmp->kind = is_ABsq_dq_name;
-    tmp->u.absq_dq_name_.arith_conv_ = p1;
-    return tmp;
-}/********************   AAdoublyQualNameHeadVector    ********************/
-DOUBLY_QUAL_NAME_HEAD make_AAdoublyQualNameHeadVector()
-{
-    DOUBLY_QUAL_NAME_HEAD tmp = (DOUBLY_QUAL_NAME_HEAD) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AAdoublyQualNameHeadVector!\n");
-        exit(1);
-    }
-    tmp->kind = is_AAdoublyQualNameHeadVector;
-    return tmp;
-}
-/********************   ABdoublyQualNameHeadMatrix    ********************/
-DOUBLY_QUAL_NAME_HEAD make_ABdoublyQualNameHeadMatrix(LITERAL_EXP_OR_STAR p1)
-{
-    DOUBLY_QUAL_NAME_HEAD tmp = (DOUBLY_QUAL_NAME_HEAD) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ABdoublyQualNameHeadMatrix!\n");
-        exit(1);
-    }
-    tmp->kind = is_ABdoublyQualNameHeadMatrix;
-    tmp->u.abdoublyqualnameheadmatrix_.literal_exp_or_star_ = p1;
     return tmp;
 }/********************   AAcompilation    ********************/
 COMPILATION make_AAcompilation(ANY_STATEMENT p1)

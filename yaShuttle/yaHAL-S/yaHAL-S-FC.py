@@ -61,6 +61,7 @@ import sys
 #from pass1 import tokenizeAndParse, tmpFile, compiler, astPrint, captured
 from processSource import processSource
 from interpreterLoop import interpreterLoop
+from PALMAT import constructPALMAT
 
 #Parse the command-line arguments.
 tabSize = 8
@@ -151,8 +152,7 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
             f.close()
             #print(structureTemplates)
         except:
-            print("FYI: Structure-template library file", libraryFilename, \
-                  "doesn't exist yet.", file=sys.stderr)
+            print("FYI: Structure-template library not found.", file=sys.stderr)
     elif param[:1] == "-":
         print("Unknown parameter:", param)
         sys.exit(1)
@@ -191,7 +191,9 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
 
 # Interpret or compile.
 if not interactive:
-    processSource(halsSource, metadata, libraryFilename, structureTemplates,
+    PALMAT = constructPALMAT()
+    processSource(PALMAT, halsSource, metadata, libraryFilename, 
+                    structureTemplates,
                     noCompile, lbnf, bnf, trace)
 else:
     interpreterLoop(libraryFilename, structureTemplates)

@@ -114,9 +114,53 @@ token ArithFieldToken {"a_"} letter ( ( letter | digit | {"_"} )* ( letter | dig
 token IdentifierToken letter ( ( letter | digit | {"_"} )* ( letter | digit ) )? ;
 token StringToken ["'"] ( letter | digit | {"''"} | ["_-]% $()[|*./&¬=<>#@,;:{}!?\""] )* ["'"] ;
 token TextToken ["\""] ( letter | digit | ["_-]% $()[|*./&¬=<>#@,;:{}!?'"] )* ["\""] ;
-token LevelToken ( ["123456789"] | ["12"] digit ) ;
+token LevelToken ( ["123456789"] | ["12"] digit | ["3"]["012"] ) ;
 token NumberToken digit+ ;
 token CompoundToken ( digit+ ( ["."] digit* )? | ["."] digit+ ) ( ["EBH"] ["-"]? digit+ )? ;
+
+--------------------------------------------------------------------------
+
+AAdeclareBody_declarationList . DECLARE_BODY ::= DECLARATION_LIST ;
+ABdeclareBody_attributes_declarationList . DECLARE_BODY ::= ATTRIBUTES "," DECLARATION_LIST ;
+AAattributes_arraySpec_typeAndMinorAttr . ATTRIBUTES ::= ARRAY_SPEC TYPE_AND_MINOR_ATTR ;
+ABattributes_arraySpec . ATTRIBUTES ::= ARRAY_SPEC ;
+ACattributes_typeAndMinorAttr . ATTRIBUTES ::= TYPE_AND_MINOR_ATTR ;
+AAdeclaration_nameId . DECLARATION ::= NAME_ID ;
+ABdeclaration_nameId_attributes . DECLARATION ::= NAME_ID ATTRIBUTES ;
+ACdeclaration_labelToken_procedure_minorAttrList . DECLARATION ::= LabelToken "PROCEDURE" MINOR_ATTR_LIST ;
+ADdeclaration_labelToken_procedure . DECLARATION ::= LabelToken "PROCEDURE" ;
+AEdeclaration_eventToken_event . DECLARATION ::= EventToken "EVENT" ;
+AFdeclaration_eventToken_event_minorAttrList . DECLARATION ::= EventToken "EVENT" MINOR_ATTR_LIST ;
+AGdeclaration_eventToken . DECLARATION ::= EventToken ;
+AHdeclaration_eventToken_minorAttrList . DECLARATION ::= EventToken MINOR_ATTR_LIST ;
+AAarraySpec_arrayHead_literalExpOrStar . ARRAY_SPEC ::= ARRAY_HEAD LITERAL_EXP_OR_STAR ")" ;
+ABarraySpec_function . ARRAY_SPEC ::= "FUNCTION" ;
+ACarraySpec_procedure . ARRAY_SPEC ::= "PROCEDURE" ;
+ADarraySpec_program . ARRAY_SPEC ::= "PROGRAM" ;
+AEarraySpec_task . ARRAY_SPEC ::= "TASK" ;
+AAtypeAndMinorAttr_typeSpec . TYPE_AND_MINOR_ATTR ::= TYPE_SPEC ;
+ABtypeAndMinorAttr_typeSpec_minorAttrList . TYPE_AND_MINOR_ATTR ::= TYPE_SPEC MINOR_ATTR_LIST ;
+ACtypeAndMinorAttr_minorAttrList . TYPE_AND_MINOR_ATTR ::= MINOR_ATTR_LIST ;
+AAidentifier . IDENTIFIER ::= IdentifierToken ;
+AAsQdQName_doublyQualNameHead_literalExpOrStar . SQ_DQ_NAME ::= DOUBLY_QUAL_NAME_HEAD LITERAL_EXP_OR_STAR ")" ;
+ABsQdQName_arithConv . SQ_DQ_NAME ::= ARITH_CONV ;
+AAdoublyQualNameHead_vector . DOUBLY_QUAL_NAME_HEAD ::= "VECTOR" "(" ;
+ABdoublyQualNameHead_matrix_literalExpOrStar . DOUBLY_QUAL_NAME_HEAD ::= "MATRIX" "(" LITERAL_EXP_OR_STAR "," ;
+AAarithConv_integer . ARITH_CONV ::= "INTEGER" ;
+ABarithConv_scalar . ARITH_CONV ::= "SCALAR" ;
+ACarithConv_vector . ARITH_CONV ::= "VECTOR" ;
+ADarithConv_matrix . ARITH_CONV ::= "MATRIX" ;
+
+AAdeclaration_list . DECLARATION_LIST ::= DECLARATION ;
+ABdeclaration_list . DECLARATION_LIST ::= DCL_LIST_COMMA DECLARATION ;
+AAnameId_identifier . NAME_ID ::= IDENTIFIER ;
+ABnameId_identifier_name . NAME_ID ::= IDENTIFIER "NAME" ;
+ACnameId_bitId . NAME_ID ::= BIT_ID ;
+ADnameId_charId . NAME_ID ::= CHAR_ID ;
+AEnameId_bitFunctionIdentifierToken . NAME_ID ::= BitFunctionIdentifierToken ;
+AFnameId_charFunctionIdentifierToken . NAME_ID ::= CharFunctionIdentifierToken ;
+AGnameId_structIdentifierToken . NAME_ID ::= StructIdentifierToken ;
+AHnameId_structFunctionIdentifierToken . NAME_ID ::= StructFunctionIdentifierToken ;
 
 --------------------------------------------------------------------------
 -- Here are just the rules for ARITH_EXP, without reference to BIT_EXP,
@@ -164,7 +208,6 @@ ADlist_exp . LIST_EXP ::= QUAL_STRUCT ;
 AAexpression . EXPRESSION ::= ARITH_EXP ;
 FGarith_id . ARITH_ID ::= IDENTIFIER ;
 FHarith_id . ARITH_ID ::= ArithFieldToken ;
-FFidentifier . IDENTIFIER ::= IdentifierToken ;
 ZZclocktime. NO_ARG_ARITH_FUNC ::= "CLOCKTIME" ;
 ZZdate. NO_ARG_ARITH_FUNC ::= "DATE" ;
 ZZerrgrp. NO_ARG_ARITH_FUNC ::= "ERRGRP" ;
@@ -247,10 +290,6 @@ ABsub_exp . SUB_EXP ::= POUND_EXPRESSION ;
 AApound_expression . POUND_EXPRESSION ::= "#" ;
 ABpound_expression . POUND_EXPRESSION ::= POUND_EXPRESSION PLUS TERM ;
 ACpound_expression . POUND_EXPRESSION ::= POUND_EXPRESSION MINUS TERM ;
-AAarithConvInteger . ARITH_CONV ::= "INTEGER" ;
-ABarithConvScalar . ARITH_CONV ::= "SCALAR" ;
-ACarithConvVector . ARITH_CONV ::= "VECTOR" ;
-ADarithConvMatrix . ARITH_CONV ::= "MATRIX" ;
 ABarith_func_head . ARITH_FUNC_HEAD ::= ARITH_CONV SUBSCRIPT ;
 
 --------------------------------------------------------------------------
@@ -581,27 +620,12 @@ ABiteration_controlToBy . ITERATION_CONTROL ::= "TO" ARITH_EXP "BY" ARITH_EXP ;
 AAforKey . FOR_KEY ::= "FOR" ARITH_VAR EQUALS ;
 ABforKeyTemporary . FOR_KEY ::= "FOR" "TEMPORARY" IDENTIFIER "=" ;
 AAtemporary_stmt . TEMPORARY_STMT ::= "TEMPORARY" DECLARE_BODY ";" ;
-AAdeclare_body . DECLARE_BODY ::= DECLARATION_LIST ;
-ABdeclare_body . DECLARE_BODY ::= ATTRIBUTES "," DECLARATION_LIST ;
-AAdeclaration_list . DECLARATION_LIST ::= DECLARATION ;
-ABdeclaration_list . DECLARATION_LIST ::= DCL_LIST_COMMA DECLARATION ;
 AAconstant . CONSTANT ::= NUMBER ;
 ABconstant . CONSTANT ::= COMPOUND_NUMBER ;
 ACconstant . CONSTANT ::= BIT_CONST ;
 ADconstant . CONSTANT ::= CHAR_CONST ;
-AAattributes . ATTRIBUTES ::= ARRAY_SPEC TYPE_AND_MINOR_ATTR ;
-ABattributes . ATTRIBUTES ::= ARRAY_SPEC ;
-ACattributes . ATTRIBUTES ::= TYPE_AND_MINOR_ATTR ;
-AAarray_spec . ARRAY_SPEC ::= ARRAY_HEAD LITERAL_EXP_OR_STAR ")" ;
-ABarraySpecFunction . ARRAY_SPEC ::= "FUNCTION" ;
-ACarraySpecProcedure . ARRAY_SPEC ::= "PROCEDURE" ;
-ADarraySpecProgram . ARRAY_SPEC ::= "PROGRAM" ;
-AEarraySpecTask . ARRAY_SPEC ::= "TASK" ;
 AAarray_head . ARRAY_HEAD ::= "ARRAY" "(" ;
 ABarray_head . ARRAY_HEAD ::= ARRAY_HEAD LITERAL_EXP_OR_STAR "," ;
-AAtype_and_minor_attr . TYPE_AND_MINOR_ATTR ::= TYPE_SPEC ;
-ABtype_and_minor_attr . TYPE_AND_MINOR_ATTR ::= TYPE_SPEC MINOR_ATTR_LIST ;
-ACtype_and_minor_attr . TYPE_AND_MINOR_ATTR ::= MINOR_ATTR_LIST ;
 AAminor_attr_list . MINOR_ATTR_LIST ::= MINOR_ATTRIBUTE ;
 ABminor_attr_list . MINOR_ATTR_LIST ::= MINOR_ATTR_LIST MINOR_ATTRIBUTE ;
 AAminorAttributeStatic . MINOR_ATTRIBUTE ::= "STATIC" ;
@@ -627,22 +651,6 @@ AErepeated_constant . REPEATED_CONSTANT ::= REPEAT_HEAD ;
 AArepeat_head . REPEAT_HEAD ::= ARITH_EXP "#" SIMPLE_NUMBER ;
 AAnested_repeat_head . NESTED_REPEAT_HEAD ::= REPEAT_HEAD "(" ;
 ABnested_repeat_head . NESTED_REPEAT_HEAD ::= NESTED_REPEAT_HEAD REPEATED_CONSTANT "," ;
-AAdeclarationName . DECLARATION ::= NAME_ID ;
-ABdeclarationNameWithAttributes . DECLARATION ::= NAME_ID ATTRIBUTES ;
-ACdeclarationProcedure . DECLARATION ::= LabelToken "PROCEDURE" MINOR_ATTR_LIST ;
-ADdeclarationProcedure . DECLARATION ::= LabelToken "PROCEDURE" ;
-AEdeclarationEvent . DECLARATION ::= EventToken "EVENT" ;
-AFdeclarationEvent . DECLARATION ::= EventToken "EVENT" MINOR_ATTR_LIST ;
-AGdeclarationEvent . DECLARATION ::= EventToken ;
-AHdeclarationEvent . DECLARATION ::= EventToken MINOR_ATTR_LIST ;
-AAname_id . NAME_ID ::= IDENTIFIER ;
-ABnameIdName . NAME_ID ::= IDENTIFIER "NAME" ;
-ACnameIdBit . NAME_ID ::= BIT_ID ;
-ADnameIdChar . NAME_ID ::= CHAR_ID ;
-AEnameIdBitFunc . NAME_ID ::= BitFunctionIdentifierToken ;
-AFnameIdCharFunc . NAME_ID ::= CharFunctionIdentifierToken ;
-AGnameIdStruct . NAME_ID ::= StructIdentifierToken ;
-AHnameIdStructFunc . NAME_ID ::= StructFunctionIdentifierToken ;
 AAdcl_list_comma . DCL_LIST_COMMA ::= DECLARATION_LIST "," ;
 AAliteralExp . LITERAL_EXP_OR_STAR ::= ARITH_EXP ;
 ABliteralStar . LITERAL_EXP_OR_STAR ::= "*" ;
@@ -662,16 +670,6 @@ AAstruct_spec_head . STRUCT_SPEC_HEAD ::= "-" "STRUCTURE" "(" ;
 AAarith_spec . ARITH_SPEC ::= PREC_SPEC ;
 ABarith_spec . ARITH_SPEC ::= SQ_DQ_NAME ;
 ACarith_spec . ARITH_SPEC ::= SQ_DQ_NAME PREC_SPEC ;
-AAsq_dq_name . SQ_DQ_NAME ::= DOUBLY_QUAL_NAME_HEAD LITERAL_EXP_OR_STAR ")" ;
-{-
-ABsq_dq_name . SQ_DQ_NAME ::= "INTEGER" ;
-ACsq_dq_name . SQ_DQ_NAME ::= "SCALAR" ;
-ADsq_dq_name . SQ_DQ_NAME ::= "VECTOR" ;
-AEsq_dq_name . SQ_DQ_NAME ::= "MATRIX" ;
--}
-ABsq_dq_name . SQ_DQ_NAME ::= ARITH_CONV ;
-AAdoublyQualNameHeadVector . DOUBLY_QUAL_NAME_HEAD ::= "VECTOR" "(" ;
-ABdoublyQualNameHeadMatrix . DOUBLY_QUAL_NAME_HEAD ::= "MATRIX" "(" LITERAL_EXP_OR_STAR "," ;
 
 --------------------------------------------------------------------------
 -- Here are additional rules needed for top-level block types (like 

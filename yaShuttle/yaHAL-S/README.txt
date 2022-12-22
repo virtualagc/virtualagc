@@ -13,6 +13,7 @@ The zipfile yaHAL-S-FC.zip contains:
  Note, that the compiler presently generates code only in an
  intermediate-language format known as "PALMAT", and that to run the 
  compiled HAL/S program it's necessary to have a PALMAT virtual machine.
+ Which, of course, has not yet been created.
  
  However, the compiler does have an interactive mode in which you can
  compile and execute HAL/S source code, one statement at a time.
@@ -75,7 +76,7 @@ names or operator-system aliases:
 
 (Disclaimer: I'm only confident of gcc, or clang insofar as it is
 a drop-in replacement for gcc.  And since those are available for free
-on most systems, or else comes with them, I'm not inclined to explore
+on most systems, or else come with them, I'm not inclined to explore
 or vouch for the use of compilers like cl.  Take anything I say about
 compilers other than gcc or clang with a grain of salt.)
 
@@ -104,7 +105,7 @@ In batch mode, the compiler is invoked as follows:
 	yaHAL-S-FC.py [OPTIONS] SOURCE_FILES
 
 The PALMAT file produced is always yaHAL-S-FC.palmat.  You can see the 
-available options with
+available OPTIONS with
 
 	yaHAL-S-FC.py --help
 	
@@ -348,7 +349,7 @@ As you can see, the trace is very long, so I've had to cut out a bunch of
 it in the middle.  Even so, the trace isn't exactly easy to read.
 However, I think that you can see that the parser got as far as 
 determining that we have an "IF", followed by an "ARITH_EXP" (which is
-its way of referring to the BNF type <ARITH-EXP>), followed by the token
+its way of referring to the BNF type <ARITH EXP>), followed by the token
 "THEN, before bailing out. 
 
 So why did it fail?  Because if you look in the BNF grammar, you find
@@ -357,10 +358,10 @@ followed by a token "THEN".  You do find that "IF" can be followed
 by a <RELATIONAL-EXP> or a <BIT-EXP> ... and aha!  This clues us into
 the fact that any expression following the "IF" is going to have to
 evaluate to a BOOLEAN or BIT, so that it can reduce ultimately to TRUE 
-or FALSE.  Whereas I is numerical and not boolean.  This reminds us that
+or FALSE.  Whereas I is arithmetical and not boolean.  This reminds us that
 HAL/s enforces the distinction between arithmeticals and booleans, and 
 *won't* just automatically say that 0 is the same as FALSE and non-zero 
-is the same as TRUE as many of us are used to.
+is the same as TRUE as many of us are used to in some other languages.
 
 If we instead did the following:
 

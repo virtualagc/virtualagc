@@ -102,6 +102,429 @@ char *showCOMPILATION(COMPILATION p)
   shCOMPILATION(p);
   return buf_;
 }
+void ppDECLARE_BODY(DECLARE_BODY p, int _i_)
+{
+  switch(p->kind)
+  {
+  case is_AAdeclareBody_declarationList:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppDECLARATION_LIST(p->u.aadeclarebody_declarationlist_.declaration_list_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ABdeclareBody_attributes_declarationList:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppATTRIBUTES(p->u.abdeclarebody_attributes_declarationlist_.attributes_, 0);
+    renderC(',');
+    ppDECLARATION_LIST(p->u.abdeclarebody_attributes_declarationlist_.declaration_list_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+
+  default:
+    fprintf(stderr, "Error: bad kind field when printing DECLARE_BODY!\n");
+    exit(1);
+  }
+}
+
+void ppATTRIBUTES(ATTRIBUTES p, int _i_)
+{
+  switch(p->kind)
+  {
+  case is_AAattributes_arraySpec_typeAndMinorAttr:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppARRAY_SPEC(p->u.aaattributes_arrayspec_typeandminorattr_.array_spec_, 0);
+    ppTYPE_AND_MINOR_ATTR(p->u.aaattributes_arrayspec_typeandminorattr_.type_and_minor_attr_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ABattributes_arraySpec:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppARRAY_SPEC(p->u.abattributes_arrayspec_.array_spec_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ACattributes_typeAndMinorAttr:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppTYPE_AND_MINOR_ATTR(p->u.acattributes_typeandminorattr_.type_and_minor_attr_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+
+  default:
+    fprintf(stderr, "Error: bad kind field when printing ATTRIBUTES!\n");
+    exit(1);
+  }
+}
+
+void ppDECLARATION(DECLARATION p, int _i_)
+{
+  switch(p->kind)
+  {
+  case is_AAdeclaration_nameId:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppNAME_ID(p->u.aadeclaration_nameid_.name_id_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ABdeclaration_nameId_attributes:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppNAME_ID(p->u.abdeclaration_nameid_attributes_.name_id_, 0);
+    ppATTRIBUTES(p->u.abdeclaration_nameid_attributes_.attributes_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ACdeclaration_labelToken_procedure_minorAttrList:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppIdent(p->u.acdeclaration_labeltoken_procedure_minorattrlist_.labeltoken_, 0);
+    renderS("PROCEDURE");
+    ppMINOR_ATTR_LIST(p->u.acdeclaration_labeltoken_procedure_minorattrlist_.minor_attr_list_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ADdeclaration_labelToken_procedure:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppIdent(p->u.addeclaration_labeltoken_procedure_.labeltoken_, 0);
+    renderS("PROCEDURE");
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_AEdeclaration_eventToken_event:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppIdent(p->u.aedeclaration_eventtoken_event_.eventtoken_, 0);
+    renderS("EVENT");
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_AFdeclaration_eventToken_event_minorAttrList:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppIdent(p->u.afdeclaration_eventtoken_event_minorattrlist_.eventtoken_, 0);
+    renderS("EVENT");
+    ppMINOR_ATTR_LIST(p->u.afdeclaration_eventtoken_event_minorattrlist_.minor_attr_list_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_AGdeclaration_eventToken:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppIdent(p->u.agdeclaration_eventtoken_.eventtoken_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_AHdeclaration_eventToken_minorAttrList:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppIdent(p->u.ahdeclaration_eventtoken_minorattrlist_.eventtoken_, 0);
+    ppMINOR_ATTR_LIST(p->u.ahdeclaration_eventtoken_minorattrlist_.minor_attr_list_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+
+  default:
+    fprintf(stderr, "Error: bad kind field when printing DECLARATION!\n");
+    exit(1);
+  }
+}
+
+void ppARRAY_SPEC(ARRAY_SPEC p, int _i_)
+{
+  switch(p->kind)
+  {
+  case is_AAarraySpec_arrayHead_literalExpOrStar:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppARRAY_HEAD(p->u.aaarrayspec_arrayhead_literalexporstar_.array_head_, 0);
+    ppLITERAL_EXP_OR_STAR(p->u.aaarrayspec_arrayhead_literalexporstar_.literal_exp_or_star_, 0);
+    renderC(')');
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ABarraySpec_function:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderS("FUNCTION");
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ACarraySpec_procedure:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderS("PROCEDURE");
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ADarraySpec_program:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderS("PROGRAM");
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_AEarraySpec_task:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderS("TASK");
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+
+  default:
+    fprintf(stderr, "Error: bad kind field when printing ARRAY_SPEC!\n");
+    exit(1);
+  }
+}
+
+void ppTYPE_AND_MINOR_ATTR(TYPE_AND_MINOR_ATTR p, int _i_)
+{
+  switch(p->kind)
+  {
+  case is_AAtypeAndMinorAttr_typeSpec:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppTYPE_SPEC(p->u.aatypeandminorattr_typespec_.type_spec_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ABtypeAndMinorAttr_typeSpec_minorAttrList:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppTYPE_SPEC(p->u.abtypeandminorattr_typespec_minorattrlist_.type_spec_, 0);
+    ppMINOR_ATTR_LIST(p->u.abtypeandminorattr_typespec_minorattrlist_.minor_attr_list_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ACtypeAndMinorAttr_minorAttrList:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppMINOR_ATTR_LIST(p->u.actypeandminorattr_minorattrlist_.minor_attr_list_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+
+  default:
+    fprintf(stderr, "Error: bad kind field when printing TYPE_AND_MINOR_ATTR!\n");
+    exit(1);
+  }
+}
+
+void ppIDENTIFIER(IDENTIFIER p, int _i_)
+{
+  switch(p->kind)
+  {
+  case is_AAidentifier:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppIdent(p->u.aaidentifier_.identifiertoken_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+
+  default:
+    fprintf(stderr, "Error: bad kind field when printing IDENTIFIER!\n");
+    exit(1);
+  }
+}
+
+void ppSQ_DQ_NAME(SQ_DQ_NAME p, int _i_)
+{
+  switch(p->kind)
+  {
+  case is_AAsQdQName_doublyQualNameHead_literalExpOrStar:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppDOUBLY_QUAL_NAME_HEAD(p->u.aasqdqname_doublyqualnamehead_literalexporstar_.doubly_qual_name_head_, 0);
+    ppLITERAL_EXP_OR_STAR(p->u.aasqdqname_doublyqualnamehead_literalexporstar_.literal_exp_or_star_, 0);
+    renderC(')');
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ABsQdQName_arithConv:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppARITH_CONV(p->u.absqdqname_arithconv_.arith_conv_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+
+  default:
+    fprintf(stderr, "Error: bad kind field when printing SQ_DQ_NAME!\n");
+    exit(1);
+  }
+}
+
+void ppDOUBLY_QUAL_NAME_HEAD(DOUBLY_QUAL_NAME_HEAD p, int _i_)
+{
+  switch(p->kind)
+  {
+  case is_AAdoublyQualNameHead_vector:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderS("VECTOR");
+    renderC('(');
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ABdoublyQualNameHead_matrix_literalExpOrStar:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderS("MATRIX");
+    renderC('(');
+    ppLITERAL_EXP_OR_STAR(p->u.abdoublyqualnamehead_matrix_literalexporstar_.literal_exp_or_star_, 0);
+    renderC(',');
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+
+  default:
+    fprintf(stderr, "Error: bad kind field when printing DOUBLY_QUAL_NAME_HEAD!\n");
+    exit(1);
+  }
+}
+
+void ppARITH_CONV(ARITH_CONV p, int _i_)
+{
+  switch(p->kind)
+  {
+  case is_AAarithConv_integer:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderS("INTEGER");
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ABarithConv_scalar:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderS("SCALAR");
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ACarithConv_vector:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderS("VECTOR");
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ADarithConv_matrix:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderS("MATRIX");
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+
+  default:
+    fprintf(stderr, "Error: bad kind field when printing ARITH_CONV!\n");
+    exit(1);
+  }
+}
+
+void ppDECLARATION_LIST(DECLARATION_LIST p, int _i_)
+{
+  switch(p->kind)
+  {
+  case is_AAdeclaration_list:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppDECLARATION(p->u.aadeclaration_list_.declaration_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ABdeclaration_list:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppDCL_LIST_COMMA(p->u.abdeclaration_list_.dcl_list_comma_, 0);
+    ppDECLARATION(p->u.abdeclaration_list_.declaration_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+
+  default:
+    fprintf(stderr, "Error: bad kind field when printing DECLARATION_LIST!\n");
+    exit(1);
+  }
+}
+
+void ppNAME_ID(NAME_ID p, int _i_)
+{
+  switch(p->kind)
+  {
+  case is_AAnameId_identifier:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppIDENTIFIER(p->u.aanameid_identifier_.identifier_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ABnameId_identifier_name:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppIDENTIFIER(p->u.abnameid_identifier_name_.identifier_, 0);
+    renderS("NAME");
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ACnameId_bitId:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppBIT_ID(p->u.acnameid_bitid_.bit_id_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ADnameId_charId:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppCHAR_ID(p->u.adnameid_charid_.char_id_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_AEnameId_bitFunctionIdentifierToken:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppIdent(p->u.aenameid_bitfunctionidentifiertoken_.bitfunctionidentifiertoken_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_AFnameId_charFunctionIdentifierToken:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppIdent(p->u.afnameid_charfunctionidentifiertoken_.charfunctionidentifiertoken_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_AGnameId_structIdentifierToken:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppIdent(p->u.agnameid_structidentifiertoken_.structidentifiertoken_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_AHnameId_structFunctionIdentifierToken:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppIdent(p->u.ahnameid_structfunctionidentifiertoken_.structfunctionidentifiertoken_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+
+  default:
+    fprintf(stderr, "Error: bad kind field when printing NAME_ID!\n");
+    exit(1);
+  }
+}
+
 void ppARITH_EXP(ARITH_EXP p, int _i_)
 {
   switch(p->kind)
@@ -761,24 +1184,6 @@ void ppARITH_ID(ARITH_ID p, int _i_)
 
   default:
     fprintf(stderr, "Error: bad kind field when printing ARITH_ID!\n");
-    exit(1);
-  }
-}
-
-void ppIDENTIFIER(IDENTIFIER p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_FFidentifier:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppIdent(p->u.ffidentifier_.identifiertoken_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing IDENTIFIER!\n");
     exit(1);
   }
 }
@@ -1525,45 +1930,6 @@ void ppPOUND_EXPRESSION(POUND_EXPRESSION p, int _i_)
 
   default:
     fprintf(stderr, "Error: bad kind field when printing POUND_EXPRESSION!\n");
-    exit(1);
-  }
-}
-
-void ppARITH_CONV(ARITH_CONV p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_AAarithConvInteger:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderS("INTEGER");
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ABarithConvScalar:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderS("SCALAR");
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ACarithConvVector:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderS("VECTOR");
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ADarithConvMatrix:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderS("MATRIX");
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing ARITH_CONV!\n");
     exit(1);
   }
 }
@@ -4976,59 +5342,6 @@ void ppTEMPORARY_STMT(TEMPORARY_STMT p, int _i_)
   }
 }
 
-void ppDECLARE_BODY(DECLARE_BODY p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_AAdeclare_body:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppDECLARATION_LIST(p->u.aadeclare_body_.declaration_list_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ABdeclare_body:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppATTRIBUTES(p->u.abdeclare_body_.attributes_, 0);
-    renderC(',');
-    ppDECLARATION_LIST(p->u.abdeclare_body_.declaration_list_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing DECLARE_BODY!\n");
-    exit(1);
-  }
-}
-
-void ppDECLARATION_LIST(DECLARATION_LIST p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_AAdeclaration_list:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppDECLARATION(p->u.aadeclaration_list_.declaration_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ABdeclaration_list:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppDCL_LIST_COMMA(p->u.abdeclaration_list_.dcl_list_comma_, 0);
-    ppDECLARATION(p->u.abdeclaration_list_.declaration_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing DECLARATION_LIST!\n");
-    exit(1);
-  }
-}
-
 void ppCONSTANT(CONSTANT p, int _i_)
 {
   switch(p->kind)
@@ -5068,87 +5381,6 @@ void ppCONSTANT(CONSTANT p, int _i_)
   }
 }
 
-void ppATTRIBUTES(ATTRIBUTES p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_AAattributes:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppARRAY_SPEC(p->u.aaattributes_.array_spec_, 0);
-    ppTYPE_AND_MINOR_ATTR(p->u.aaattributes_.type_and_minor_attr_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ABattributes:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppARRAY_SPEC(p->u.abattributes_.array_spec_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ACattributes:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppTYPE_AND_MINOR_ATTR(p->u.acattributes_.type_and_minor_attr_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing ATTRIBUTES!\n");
-    exit(1);
-  }
-}
-
-void ppARRAY_SPEC(ARRAY_SPEC p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_AAarray_spec:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppARRAY_HEAD(p->u.aaarray_spec_.array_head_, 0);
-    ppLITERAL_EXP_OR_STAR(p->u.aaarray_spec_.literal_exp_or_star_, 0);
-    renderC(')');
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ABarraySpecFunction:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderS("FUNCTION");
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ACarraySpecProcedure:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderS("PROCEDURE");
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ADarraySpecProgram:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderS("PROGRAM");
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_AEarraySpecTask:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderS("TASK");
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing ARRAY_SPEC!\n");
-    exit(1);
-  }
-}
-
 void ppARRAY_HEAD(ARRAY_HEAD p, int _i_)
 {
   switch(p->kind)
@@ -5173,39 +5405,6 @@ void ppARRAY_HEAD(ARRAY_HEAD p, int _i_)
 
   default:
     fprintf(stderr, "Error: bad kind field when printing ARRAY_HEAD!\n");
-    exit(1);
-  }
-}
-
-void ppTYPE_AND_MINOR_ATTR(TYPE_AND_MINOR_ATTR p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_AAtype_and_minor_attr:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppTYPE_SPEC(p->u.aatype_and_minor_attr_.type_spec_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ABtype_and_minor_attr:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppTYPE_SPEC(p->u.abtype_and_minor_attr_.type_spec_, 0);
-    ppMINOR_ATTR_LIST(p->u.abtype_and_minor_attr_.minor_attr_list_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ACtype_and_minor_attr:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppMINOR_ATTR_LIST(p->u.actype_and_minor_attr_.minor_attr_list_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing TYPE_AND_MINOR_ATTR!\n");
     exit(1);
   }
 }
@@ -5475,149 +5674,6 @@ void ppNESTED_REPEAT_HEAD(NESTED_REPEAT_HEAD p, int _i_)
   }
 }
 
-void ppDECLARATION(DECLARATION p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_AAdeclarationName:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppNAME_ID(p->u.aadeclarationname_.name_id_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ABdeclarationNameWithAttributes:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppNAME_ID(p->u.abdeclarationnamewithattributes_.name_id_, 0);
-    ppATTRIBUTES(p->u.abdeclarationnamewithattributes_.attributes_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ACdeclarationProcedure:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppIdent(p->u.acdeclarationprocedure_.labeltoken_, 0);
-    renderS("PROCEDURE");
-    ppMINOR_ATTR_LIST(p->u.acdeclarationprocedure_.minor_attr_list_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ADdeclarationProcedure:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppIdent(p->u.addeclarationprocedure_.labeltoken_, 0);
-    renderS("PROCEDURE");
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_AEdeclarationEvent:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppIdent(p->u.aedeclarationevent_.eventtoken_, 0);
-    renderS("EVENT");
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_AFdeclarationEvent:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppIdent(p->u.afdeclarationevent_.eventtoken_, 0);
-    renderS("EVENT");
-    ppMINOR_ATTR_LIST(p->u.afdeclarationevent_.minor_attr_list_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_AGdeclarationEvent:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppIdent(p->u.agdeclarationevent_.eventtoken_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_AHdeclarationEvent:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppIdent(p->u.ahdeclarationevent_.eventtoken_, 0);
-    ppMINOR_ATTR_LIST(p->u.ahdeclarationevent_.minor_attr_list_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing DECLARATION!\n");
-    exit(1);
-  }
-}
-
-void ppNAME_ID(NAME_ID p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_AAname_id:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppIDENTIFIER(p->u.aaname_id_.identifier_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ABnameIdName:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppIDENTIFIER(p->u.abnameidname_.identifier_, 0);
-    renderS("NAME");
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ACnameIdBit:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppBIT_ID(p->u.acnameidbit_.bit_id_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ADnameIdChar:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppCHAR_ID(p->u.adnameidchar_.char_id_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_AEnameIdBitFunc:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppIdent(p->u.aenameidbitfunc_.bitfunctionidentifiertoken_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_AFnameIdCharFunc:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppIdent(p->u.afnameidcharfunc_.charfunctionidentifiertoken_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_AGnameIdStruct:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppIdent(p->u.agnameidstruct_.structidentifiertoken_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_AHnameIdStructFunc:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppIdent(p->u.ahnameidstructfunc_.structfunctionidentifiertoken_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing NAME_ID!\n");
-    exit(1);
-  }
-}
-
 void ppDCL_LIST_COMMA(DCL_LIST_COMMA p, int _i_)
 {
   switch(p->kind)
@@ -5871,62 +5927,6 @@ void ppARITH_SPEC(ARITH_SPEC p, int _i_)
 
   default:
     fprintf(stderr, "Error: bad kind field when printing ARITH_SPEC!\n");
-    exit(1);
-  }
-}
-
-void ppSQ_DQ_NAME(SQ_DQ_NAME p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_AAsq_dq_name:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppDOUBLY_QUAL_NAME_HEAD(p->u.aasq_dq_name_.doubly_qual_name_head_, 0);
-    ppLITERAL_EXP_OR_STAR(p->u.aasq_dq_name_.literal_exp_or_star_, 0);
-    renderC(')');
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ABsq_dq_name:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppARITH_CONV(p->u.absq_dq_name_.arith_conv_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing SQ_DQ_NAME!\n");
-    exit(1);
-  }
-}
-
-void ppDOUBLY_QUAL_NAME_HEAD(DOUBLY_QUAL_NAME_HEAD p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_AAdoublyQualNameHeadVector:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderS("VECTOR");
-    renderC('(');
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ABdoublyQualNameHeadMatrix:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderS("MATRIX");
-    renderC('(');
-    ppLITERAL_EXP_OR_STAR(p->u.abdoublyqualnameheadmatrix_.literal_exp_or_star_, 0);
-    renderC(',');
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing DOUBLY_QUAL_NAME_HEAD!\n");
     exit(1);
   }
 }
@@ -7099,6 +7099,591 @@ void ppCompoundToken(String s, int i)
 }
 
 
+void shDECLARE_BODY(DECLARE_BODY p)
+{
+  switch(p->kind)
+  {
+  case is_AAdeclareBody_declarationList:
+    bufAppendC('(');
+
+    bufAppendS("AAdeclareBody_declarationList");
+
+    bufAppendC(' ');
+
+    shDECLARATION_LIST(p->u.aadeclarebody_declarationlist_.declaration_list_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ABdeclareBody_attributes_declarationList:
+    bufAppendC('(');
+
+    bufAppendS("ABdeclareBody_attributes_declarationList");
+
+    bufAppendC(' ');
+
+    shATTRIBUTES(p->u.abdeclarebody_attributes_declarationlist_.attributes_);
+  bufAppendC(' ');
+    shDECLARATION_LIST(p->u.abdeclarebody_attributes_declarationlist_.declaration_list_);
+
+    bufAppendC(')');
+
+    break;
+
+  default:
+    fprintf(stderr, "Error: bad kind field when showing DECLARE_BODY!\n");
+    exit(1);
+  }
+}
+
+void shATTRIBUTES(ATTRIBUTES p)
+{
+  switch(p->kind)
+  {
+  case is_AAattributes_arraySpec_typeAndMinorAttr:
+    bufAppendC('(');
+
+    bufAppendS("AAattributes_arraySpec_typeAndMinorAttr");
+
+    bufAppendC(' ');
+
+    shARRAY_SPEC(p->u.aaattributes_arrayspec_typeandminorattr_.array_spec_);
+  bufAppendC(' ');
+    shTYPE_AND_MINOR_ATTR(p->u.aaattributes_arrayspec_typeandminorattr_.type_and_minor_attr_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ABattributes_arraySpec:
+    bufAppendC('(');
+
+    bufAppendS("ABattributes_arraySpec");
+
+    bufAppendC(' ');
+
+    shARRAY_SPEC(p->u.abattributes_arrayspec_.array_spec_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ACattributes_typeAndMinorAttr:
+    bufAppendC('(');
+
+    bufAppendS("ACattributes_typeAndMinorAttr");
+
+    bufAppendC(' ');
+
+    shTYPE_AND_MINOR_ATTR(p->u.acattributes_typeandminorattr_.type_and_minor_attr_);
+
+    bufAppendC(')');
+
+    break;
+
+  default:
+    fprintf(stderr, "Error: bad kind field when showing ATTRIBUTES!\n");
+    exit(1);
+  }
+}
+
+void shDECLARATION(DECLARATION p)
+{
+  switch(p->kind)
+  {
+  case is_AAdeclaration_nameId:
+    bufAppendC('(');
+
+    bufAppendS("AAdeclaration_nameId");
+
+    bufAppendC(' ');
+
+    shNAME_ID(p->u.aadeclaration_nameid_.name_id_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ABdeclaration_nameId_attributes:
+    bufAppendC('(');
+
+    bufAppendS("ABdeclaration_nameId_attributes");
+
+    bufAppendC(' ');
+
+    shNAME_ID(p->u.abdeclaration_nameid_attributes_.name_id_);
+  bufAppendC(' ');
+    shATTRIBUTES(p->u.abdeclaration_nameid_attributes_.attributes_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ACdeclaration_labelToken_procedure_minorAttrList:
+    bufAppendC('(');
+
+    bufAppendS("ACdeclaration_labelToken_procedure_minorAttrList");
+
+    bufAppendC(' ');
+
+    shIdent(p->u.acdeclaration_labeltoken_procedure_minorattrlist_.labeltoken_);
+  bufAppendC(' ');
+    shMINOR_ATTR_LIST(p->u.acdeclaration_labeltoken_procedure_minorattrlist_.minor_attr_list_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ADdeclaration_labelToken_procedure:
+    bufAppendC('(');
+
+    bufAppendS("ADdeclaration_labelToken_procedure");
+
+    bufAppendC(' ');
+
+    shIdent(p->u.addeclaration_labeltoken_procedure_.labeltoken_);
+
+    bufAppendC(')');
+
+    break;
+  case is_AEdeclaration_eventToken_event:
+    bufAppendC('(');
+
+    bufAppendS("AEdeclaration_eventToken_event");
+
+    bufAppendC(' ');
+
+    shIdent(p->u.aedeclaration_eventtoken_event_.eventtoken_);
+
+    bufAppendC(')');
+
+    break;
+  case is_AFdeclaration_eventToken_event_minorAttrList:
+    bufAppendC('(');
+
+    bufAppendS("AFdeclaration_eventToken_event_minorAttrList");
+
+    bufAppendC(' ');
+
+    shIdent(p->u.afdeclaration_eventtoken_event_minorattrlist_.eventtoken_);
+  bufAppendC(' ');
+    shMINOR_ATTR_LIST(p->u.afdeclaration_eventtoken_event_minorattrlist_.minor_attr_list_);
+
+    bufAppendC(')');
+
+    break;
+  case is_AGdeclaration_eventToken:
+    bufAppendC('(');
+
+    bufAppendS("AGdeclaration_eventToken");
+
+    bufAppendC(' ');
+
+    shIdent(p->u.agdeclaration_eventtoken_.eventtoken_);
+
+    bufAppendC(')');
+
+    break;
+  case is_AHdeclaration_eventToken_minorAttrList:
+    bufAppendC('(');
+
+    bufAppendS("AHdeclaration_eventToken_minorAttrList");
+
+    bufAppendC(' ');
+
+    shIdent(p->u.ahdeclaration_eventtoken_minorattrlist_.eventtoken_);
+  bufAppendC(' ');
+    shMINOR_ATTR_LIST(p->u.ahdeclaration_eventtoken_minorattrlist_.minor_attr_list_);
+
+    bufAppendC(')');
+
+    break;
+
+  default:
+    fprintf(stderr, "Error: bad kind field when showing DECLARATION!\n");
+    exit(1);
+  }
+}
+
+void shARRAY_SPEC(ARRAY_SPEC p)
+{
+  switch(p->kind)
+  {
+  case is_AAarraySpec_arrayHead_literalExpOrStar:
+    bufAppendC('(');
+
+    bufAppendS("AAarraySpec_arrayHead_literalExpOrStar");
+
+    bufAppendC(' ');
+
+    shARRAY_HEAD(p->u.aaarrayspec_arrayhead_literalexporstar_.array_head_);
+  bufAppendC(' ');
+    shLITERAL_EXP_OR_STAR(p->u.aaarrayspec_arrayhead_literalexporstar_.literal_exp_or_star_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ABarraySpec_function:
+
+    bufAppendS("ABarraySpec_function");
+
+
+
+
+    break;
+  case is_ACarraySpec_procedure:
+
+    bufAppendS("ACarraySpec_procedure");
+
+
+
+
+    break;
+  case is_ADarraySpec_program:
+
+    bufAppendS("ADarraySpec_program");
+
+
+
+
+    break;
+  case is_AEarraySpec_task:
+
+    bufAppendS("AEarraySpec_task");
+
+
+
+
+    break;
+
+  default:
+    fprintf(stderr, "Error: bad kind field when showing ARRAY_SPEC!\n");
+    exit(1);
+  }
+}
+
+void shTYPE_AND_MINOR_ATTR(TYPE_AND_MINOR_ATTR p)
+{
+  switch(p->kind)
+  {
+  case is_AAtypeAndMinorAttr_typeSpec:
+    bufAppendC('(');
+
+    bufAppendS("AAtypeAndMinorAttr_typeSpec");
+
+    bufAppendC(' ');
+
+    shTYPE_SPEC(p->u.aatypeandminorattr_typespec_.type_spec_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ABtypeAndMinorAttr_typeSpec_minorAttrList:
+    bufAppendC('(');
+
+    bufAppendS("ABtypeAndMinorAttr_typeSpec_minorAttrList");
+
+    bufAppendC(' ');
+
+    shTYPE_SPEC(p->u.abtypeandminorattr_typespec_minorattrlist_.type_spec_);
+  bufAppendC(' ');
+    shMINOR_ATTR_LIST(p->u.abtypeandminorattr_typespec_minorattrlist_.minor_attr_list_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ACtypeAndMinorAttr_minorAttrList:
+    bufAppendC('(');
+
+    bufAppendS("ACtypeAndMinorAttr_minorAttrList");
+
+    bufAppendC(' ');
+
+    shMINOR_ATTR_LIST(p->u.actypeandminorattr_minorattrlist_.minor_attr_list_);
+
+    bufAppendC(')');
+
+    break;
+
+  default:
+    fprintf(stderr, "Error: bad kind field when showing TYPE_AND_MINOR_ATTR!\n");
+    exit(1);
+  }
+}
+
+void shIDENTIFIER(IDENTIFIER p)
+{
+  switch(p->kind)
+  {
+  case is_AAidentifier:
+    bufAppendC('(');
+
+    bufAppendS("AAidentifier");
+
+    bufAppendC(' ');
+
+    shIdent(p->u.aaidentifier_.identifiertoken_);
+
+    bufAppendC(')');
+
+    break;
+
+  default:
+    fprintf(stderr, "Error: bad kind field when showing IDENTIFIER!\n");
+    exit(1);
+  }
+}
+
+void shSQ_DQ_NAME(SQ_DQ_NAME p)
+{
+  switch(p->kind)
+  {
+  case is_AAsQdQName_doublyQualNameHead_literalExpOrStar:
+    bufAppendC('(');
+
+    bufAppendS("AAsQdQName_doublyQualNameHead_literalExpOrStar");
+
+    bufAppendC(' ');
+
+    shDOUBLY_QUAL_NAME_HEAD(p->u.aasqdqname_doublyqualnamehead_literalexporstar_.doubly_qual_name_head_);
+  bufAppendC(' ');
+    shLITERAL_EXP_OR_STAR(p->u.aasqdqname_doublyqualnamehead_literalexporstar_.literal_exp_or_star_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ABsQdQName_arithConv:
+    bufAppendC('(');
+
+    bufAppendS("ABsQdQName_arithConv");
+
+    bufAppendC(' ');
+
+    shARITH_CONV(p->u.absqdqname_arithconv_.arith_conv_);
+
+    bufAppendC(')');
+
+    break;
+
+  default:
+    fprintf(stderr, "Error: bad kind field when showing SQ_DQ_NAME!\n");
+    exit(1);
+  }
+}
+
+void shDOUBLY_QUAL_NAME_HEAD(DOUBLY_QUAL_NAME_HEAD p)
+{
+  switch(p->kind)
+  {
+  case is_AAdoublyQualNameHead_vector:
+
+    bufAppendS("AAdoublyQualNameHead_vector");
+
+
+
+
+    break;
+  case is_ABdoublyQualNameHead_matrix_literalExpOrStar:
+    bufAppendC('(');
+
+    bufAppendS("ABdoublyQualNameHead_matrix_literalExpOrStar");
+
+    bufAppendC(' ');
+
+    shLITERAL_EXP_OR_STAR(p->u.abdoublyqualnamehead_matrix_literalexporstar_.literal_exp_or_star_);
+
+    bufAppendC(')');
+
+    break;
+
+  default:
+    fprintf(stderr, "Error: bad kind field when showing DOUBLY_QUAL_NAME_HEAD!\n");
+    exit(1);
+  }
+}
+
+void shARITH_CONV(ARITH_CONV p)
+{
+  switch(p->kind)
+  {
+  case is_AAarithConv_integer:
+
+    bufAppendS("AAarithConv_integer");
+
+
+
+
+    break;
+  case is_ABarithConv_scalar:
+
+    bufAppendS("ABarithConv_scalar");
+
+
+
+
+    break;
+  case is_ACarithConv_vector:
+
+    bufAppendS("ACarithConv_vector");
+
+
+
+
+    break;
+  case is_ADarithConv_matrix:
+
+    bufAppendS("ADarithConv_matrix");
+
+
+
+
+    break;
+
+  default:
+    fprintf(stderr, "Error: bad kind field when showing ARITH_CONV!\n");
+    exit(1);
+  }
+}
+
+void shDECLARATION_LIST(DECLARATION_LIST p)
+{
+  switch(p->kind)
+  {
+  case is_AAdeclaration_list:
+    bufAppendC('(');
+
+    bufAppendS("AAdeclaration_list");
+
+    bufAppendC(' ');
+
+    shDECLARATION(p->u.aadeclaration_list_.declaration_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ABdeclaration_list:
+    bufAppendC('(');
+
+    bufAppendS("ABdeclaration_list");
+
+    bufAppendC(' ');
+
+    shDCL_LIST_COMMA(p->u.abdeclaration_list_.dcl_list_comma_);
+  bufAppendC(' ');
+    shDECLARATION(p->u.abdeclaration_list_.declaration_);
+
+    bufAppendC(')');
+
+    break;
+
+  default:
+    fprintf(stderr, "Error: bad kind field when showing DECLARATION_LIST!\n");
+    exit(1);
+  }
+}
+
+void shNAME_ID(NAME_ID p)
+{
+  switch(p->kind)
+  {
+  case is_AAnameId_identifier:
+    bufAppendC('(');
+
+    bufAppendS("AAnameId_identifier");
+
+    bufAppendC(' ');
+
+    shIDENTIFIER(p->u.aanameid_identifier_.identifier_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ABnameId_identifier_name:
+    bufAppendC('(');
+
+    bufAppendS("ABnameId_identifier_name");
+
+    bufAppendC(' ');
+
+    shIDENTIFIER(p->u.abnameid_identifier_name_.identifier_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ACnameId_bitId:
+    bufAppendC('(');
+
+    bufAppendS("ACnameId_bitId");
+
+    bufAppendC(' ');
+
+    shBIT_ID(p->u.acnameid_bitid_.bit_id_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ADnameId_charId:
+    bufAppendC('(');
+
+    bufAppendS("ADnameId_charId");
+
+    bufAppendC(' ');
+
+    shCHAR_ID(p->u.adnameid_charid_.char_id_);
+
+    bufAppendC(')');
+
+    break;
+  case is_AEnameId_bitFunctionIdentifierToken:
+    bufAppendC('(');
+
+    bufAppendS("AEnameId_bitFunctionIdentifierToken");
+
+    bufAppendC(' ');
+
+    shIdent(p->u.aenameid_bitfunctionidentifiertoken_.bitfunctionidentifiertoken_);
+
+    bufAppendC(')');
+
+    break;
+  case is_AFnameId_charFunctionIdentifierToken:
+    bufAppendC('(');
+
+    bufAppendS("AFnameId_charFunctionIdentifierToken");
+
+    bufAppendC(' ');
+
+    shIdent(p->u.afnameid_charfunctionidentifiertoken_.charfunctionidentifiertoken_);
+
+    bufAppendC(')');
+
+    break;
+  case is_AGnameId_structIdentifierToken:
+    bufAppendC('(');
+
+    bufAppendS("AGnameId_structIdentifierToken");
+
+    bufAppendC(' ');
+
+    shIdent(p->u.agnameid_structidentifiertoken_.structidentifiertoken_);
+
+    bufAppendC(')');
+
+    break;
+  case is_AHnameId_structFunctionIdentifierToken:
+    bufAppendC('(');
+
+    bufAppendS("AHnameId_structFunctionIdentifierToken");
+
+    bufAppendC(' ');
+
+    shIdent(p->u.ahnameid_structfunctionidentifiertoken_.structfunctionidentifiertoken_);
+
+    bufAppendC(')');
+
+    break;
+
+  default:
+    fprintf(stderr, "Error: bad kind field when showing NAME_ID!\n");
+    exit(1);
+  }
+}
+
 void shARITH_EXP(ARITH_EXP p)
 {
   switch(p->kind)
@@ -8035,29 +8620,6 @@ void shARITH_ID(ARITH_ID p)
   }
 }
 
-void shIDENTIFIER(IDENTIFIER p)
-{
-  switch(p->kind)
-  {
-  case is_FFidentifier:
-    bufAppendC('(');
-
-    bufAppendS("FFidentifier");
-
-    bufAppendC(' ');
-
-    shIdent(p->u.ffidentifier_.identifiertoken_);
-
-    bufAppendC(')');
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing IDENTIFIER!\n");
-    exit(1);
-  }
-}
-
 void shNO_ARG_ARITH_FUNC(NO_ARG_ARITH_FUNC p)
 {
   switch(p->kind)
@@ -8950,49 +9512,6 @@ void shPOUND_EXPRESSION(POUND_EXPRESSION p)
 
   default:
     fprintf(stderr, "Error: bad kind field when showing POUND_EXPRESSION!\n");
-    exit(1);
-  }
-}
-
-void shARITH_CONV(ARITH_CONV p)
-{
-  switch(p->kind)
-  {
-  case is_AAarithConvInteger:
-
-    bufAppendS("AAarithConvInteger");
-
-
-
-
-    break;
-  case is_ABarithConvScalar:
-
-    bufAppendS("ABarithConvScalar");
-
-
-
-
-    break;
-  case is_ACarithConvVector:
-
-    bufAppendS("ACarithConvVector");
-
-
-
-
-    break;
-  case is_ADarithConvMatrix:
-
-    bufAppendS("ADarithConvMatrix");
-
-
-
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing ARITH_CONV!\n");
     exit(1);
   }
 }
@@ -13537,80 +14056,6 @@ void shTEMPORARY_STMT(TEMPORARY_STMT p)
   }
 }
 
-void shDECLARE_BODY(DECLARE_BODY p)
-{
-  switch(p->kind)
-  {
-  case is_AAdeclare_body:
-    bufAppendC('(');
-
-    bufAppendS("AAdeclare_body");
-
-    bufAppendC(' ');
-
-    shDECLARATION_LIST(p->u.aadeclare_body_.declaration_list_);
-
-    bufAppendC(')');
-
-    break;
-  case is_ABdeclare_body:
-    bufAppendC('(');
-
-    bufAppendS("ABdeclare_body");
-
-    bufAppendC(' ');
-
-    shATTRIBUTES(p->u.abdeclare_body_.attributes_);
-  bufAppendC(' ');
-    shDECLARATION_LIST(p->u.abdeclare_body_.declaration_list_);
-
-    bufAppendC(')');
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing DECLARE_BODY!\n");
-    exit(1);
-  }
-}
-
-void shDECLARATION_LIST(DECLARATION_LIST p)
-{
-  switch(p->kind)
-  {
-  case is_AAdeclaration_list:
-    bufAppendC('(');
-
-    bufAppendS("AAdeclaration_list");
-
-    bufAppendC(' ');
-
-    shDECLARATION(p->u.aadeclaration_list_.declaration_);
-
-    bufAppendC(')');
-
-    break;
-  case is_ABdeclaration_list:
-    bufAppendC('(');
-
-    bufAppendS("ABdeclaration_list");
-
-    bufAppendC(' ');
-
-    shDCL_LIST_COMMA(p->u.abdeclaration_list_.dcl_list_comma_);
-  bufAppendC(' ');
-    shDECLARATION(p->u.abdeclaration_list_.declaration_);
-
-    bufAppendC(')');
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing DECLARATION_LIST!\n");
-    exit(1);
-  }
-}
-
 void shCONSTANT(CONSTANT p)
 {
   switch(p->kind)
@@ -13670,112 +14115,6 @@ void shCONSTANT(CONSTANT p)
   }
 }
 
-void shATTRIBUTES(ATTRIBUTES p)
-{
-  switch(p->kind)
-  {
-  case is_AAattributes:
-    bufAppendC('(');
-
-    bufAppendS("AAattributes");
-
-    bufAppendC(' ');
-
-    shARRAY_SPEC(p->u.aaattributes_.array_spec_);
-  bufAppendC(' ');
-    shTYPE_AND_MINOR_ATTR(p->u.aaattributes_.type_and_minor_attr_);
-
-    bufAppendC(')');
-
-    break;
-  case is_ABattributes:
-    bufAppendC('(');
-
-    bufAppendS("ABattributes");
-
-    bufAppendC(' ');
-
-    shARRAY_SPEC(p->u.abattributes_.array_spec_);
-
-    bufAppendC(')');
-
-    break;
-  case is_ACattributes:
-    bufAppendC('(');
-
-    bufAppendS("ACattributes");
-
-    bufAppendC(' ');
-
-    shTYPE_AND_MINOR_ATTR(p->u.acattributes_.type_and_minor_attr_);
-
-    bufAppendC(')');
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing ATTRIBUTES!\n");
-    exit(1);
-  }
-}
-
-void shARRAY_SPEC(ARRAY_SPEC p)
-{
-  switch(p->kind)
-  {
-  case is_AAarray_spec:
-    bufAppendC('(');
-
-    bufAppendS("AAarray_spec");
-
-    bufAppendC(' ');
-
-    shARRAY_HEAD(p->u.aaarray_spec_.array_head_);
-  bufAppendC(' ');
-    shLITERAL_EXP_OR_STAR(p->u.aaarray_spec_.literal_exp_or_star_);
-
-    bufAppendC(')');
-
-    break;
-  case is_ABarraySpecFunction:
-
-    bufAppendS("ABarraySpecFunction");
-
-
-
-
-    break;
-  case is_ACarraySpecProcedure:
-
-    bufAppendS("ACarraySpecProcedure");
-
-
-
-
-    break;
-  case is_ADarraySpecProgram:
-
-    bufAppendS("ADarraySpecProgram");
-
-
-
-
-    break;
-  case is_AEarraySpecTask:
-
-    bufAppendS("AEarraySpecTask");
-
-
-
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing ARRAY_SPEC!\n");
-    exit(1);
-  }
-}
-
 void shARRAY_HEAD(ARRAY_HEAD p)
 {
   switch(p->kind)
@@ -13805,55 +14144,6 @@ void shARRAY_HEAD(ARRAY_HEAD p)
 
   default:
     fprintf(stderr, "Error: bad kind field when showing ARRAY_HEAD!\n");
-    exit(1);
-  }
-}
-
-void shTYPE_AND_MINOR_ATTR(TYPE_AND_MINOR_ATTR p)
-{
-  switch(p->kind)
-  {
-  case is_AAtype_and_minor_attr:
-    bufAppendC('(');
-
-    bufAppendS("AAtype_and_minor_attr");
-
-    bufAppendC(' ');
-
-    shTYPE_SPEC(p->u.aatype_and_minor_attr_.type_spec_);
-
-    bufAppendC(')');
-
-    break;
-  case is_ABtype_and_minor_attr:
-    bufAppendC('(');
-
-    bufAppendS("ABtype_and_minor_attr");
-
-    bufAppendC(' ');
-
-    shTYPE_SPEC(p->u.abtype_and_minor_attr_.type_spec_);
-  bufAppendC(' ');
-    shMINOR_ATTR_LIST(p->u.abtype_and_minor_attr_.minor_attr_list_);
-
-    bufAppendC(')');
-
-    break;
-  case is_ACtype_and_minor_attr:
-    bufAppendC('(');
-
-    bufAppendS("ACtype_and_minor_attr");
-
-    bufAppendC(' ');
-
-    shMINOR_ATTR_LIST(p->u.actype_and_minor_attr_.minor_attr_list_);
-
-    bufAppendC(')');
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing TYPE_AND_MINOR_ATTR!\n");
     exit(1);
   }
 }
@@ -14200,228 +14490,6 @@ void shNESTED_REPEAT_HEAD(NESTED_REPEAT_HEAD p)
   }
 }
 
-void shDECLARATION(DECLARATION p)
-{
-  switch(p->kind)
-  {
-  case is_AAdeclarationName:
-    bufAppendC('(');
-
-    bufAppendS("AAdeclarationName");
-
-    bufAppendC(' ');
-
-    shNAME_ID(p->u.aadeclarationname_.name_id_);
-
-    bufAppendC(')');
-
-    break;
-  case is_ABdeclarationNameWithAttributes:
-    bufAppendC('(');
-
-    bufAppendS("ABdeclarationNameWithAttributes");
-
-    bufAppendC(' ');
-
-    shNAME_ID(p->u.abdeclarationnamewithattributes_.name_id_);
-  bufAppendC(' ');
-    shATTRIBUTES(p->u.abdeclarationnamewithattributes_.attributes_);
-
-    bufAppendC(')');
-
-    break;
-  case is_ACdeclarationProcedure:
-    bufAppendC('(');
-
-    bufAppendS("ACdeclarationProcedure");
-
-    bufAppendC(' ');
-
-    shIdent(p->u.acdeclarationprocedure_.labeltoken_);
-  bufAppendC(' ');
-    shMINOR_ATTR_LIST(p->u.acdeclarationprocedure_.minor_attr_list_);
-
-    bufAppendC(')');
-
-    break;
-  case is_ADdeclarationProcedure:
-    bufAppendC('(');
-
-    bufAppendS("ADdeclarationProcedure");
-
-    bufAppendC(' ');
-
-    shIdent(p->u.addeclarationprocedure_.labeltoken_);
-
-    bufAppendC(')');
-
-    break;
-  case is_AEdeclarationEvent:
-    bufAppendC('(');
-
-    bufAppendS("AEdeclarationEvent");
-
-    bufAppendC(' ');
-
-    shIdent(p->u.aedeclarationevent_.eventtoken_);
-
-    bufAppendC(')');
-
-    break;
-  case is_AFdeclarationEvent:
-    bufAppendC('(');
-
-    bufAppendS("AFdeclarationEvent");
-
-    bufAppendC(' ');
-
-    shIdent(p->u.afdeclarationevent_.eventtoken_);
-  bufAppendC(' ');
-    shMINOR_ATTR_LIST(p->u.afdeclarationevent_.minor_attr_list_);
-
-    bufAppendC(')');
-
-    break;
-  case is_AGdeclarationEvent:
-    bufAppendC('(');
-
-    bufAppendS("AGdeclarationEvent");
-
-    bufAppendC(' ');
-
-    shIdent(p->u.agdeclarationevent_.eventtoken_);
-
-    bufAppendC(')');
-
-    break;
-  case is_AHdeclarationEvent:
-    bufAppendC('(');
-
-    bufAppendS("AHdeclarationEvent");
-
-    bufAppendC(' ');
-
-    shIdent(p->u.ahdeclarationevent_.eventtoken_);
-  bufAppendC(' ');
-    shMINOR_ATTR_LIST(p->u.ahdeclarationevent_.minor_attr_list_);
-
-    bufAppendC(')');
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing DECLARATION!\n");
-    exit(1);
-  }
-}
-
-void shNAME_ID(NAME_ID p)
-{
-  switch(p->kind)
-  {
-  case is_AAname_id:
-    bufAppendC('(');
-
-    bufAppendS("AAname_id");
-
-    bufAppendC(' ');
-
-    shIDENTIFIER(p->u.aaname_id_.identifier_);
-
-    bufAppendC(')');
-
-    break;
-  case is_ABnameIdName:
-    bufAppendC('(');
-
-    bufAppendS("ABnameIdName");
-
-    bufAppendC(' ');
-
-    shIDENTIFIER(p->u.abnameidname_.identifier_);
-
-    bufAppendC(')');
-
-    break;
-  case is_ACnameIdBit:
-    bufAppendC('(');
-
-    bufAppendS("ACnameIdBit");
-
-    bufAppendC(' ');
-
-    shBIT_ID(p->u.acnameidbit_.bit_id_);
-
-    bufAppendC(')');
-
-    break;
-  case is_ADnameIdChar:
-    bufAppendC('(');
-
-    bufAppendS("ADnameIdChar");
-
-    bufAppendC(' ');
-
-    shCHAR_ID(p->u.adnameidchar_.char_id_);
-
-    bufAppendC(')');
-
-    break;
-  case is_AEnameIdBitFunc:
-    bufAppendC('(');
-
-    bufAppendS("AEnameIdBitFunc");
-
-    bufAppendC(' ');
-
-    shIdent(p->u.aenameidbitfunc_.bitfunctionidentifiertoken_);
-
-    bufAppendC(')');
-
-    break;
-  case is_AFnameIdCharFunc:
-    bufAppendC('(');
-
-    bufAppendS("AFnameIdCharFunc");
-
-    bufAppendC(' ');
-
-    shIdent(p->u.afnameidcharfunc_.charfunctionidentifiertoken_);
-
-    bufAppendC(')');
-
-    break;
-  case is_AGnameIdStruct:
-    bufAppendC('(');
-
-    bufAppendS("AGnameIdStruct");
-
-    bufAppendC(' ');
-
-    shIdent(p->u.agnameidstruct_.structidentifiertoken_);
-
-    bufAppendC(')');
-
-    break;
-  case is_AHnameIdStructFunc:
-    bufAppendC('(');
-
-    bufAppendS("AHnameIdStructFunc");
-
-    bufAppendC(' ');
-
-    shIdent(p->u.ahnameidstructfunc_.structfunctionidentifiertoken_);
-
-    bufAppendC(')');
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing NAME_ID!\n");
-    exit(1);
-  }
-}
-
 void shDCL_LIST_COMMA(DCL_LIST_COMMA p)
 {
   switch(p->kind)
@@ -14742,74 +14810,6 @@ void shARITH_SPEC(ARITH_SPEC p)
 
   default:
     fprintf(stderr, "Error: bad kind field when showing ARITH_SPEC!\n");
-    exit(1);
-  }
-}
-
-void shSQ_DQ_NAME(SQ_DQ_NAME p)
-{
-  switch(p->kind)
-  {
-  case is_AAsq_dq_name:
-    bufAppendC('(');
-
-    bufAppendS("AAsq_dq_name");
-
-    bufAppendC(' ');
-
-    shDOUBLY_QUAL_NAME_HEAD(p->u.aasq_dq_name_.doubly_qual_name_head_);
-  bufAppendC(' ');
-    shLITERAL_EXP_OR_STAR(p->u.aasq_dq_name_.literal_exp_or_star_);
-
-    bufAppendC(')');
-
-    break;
-  case is_ABsq_dq_name:
-    bufAppendC('(');
-
-    bufAppendS("ABsq_dq_name");
-
-    bufAppendC(' ');
-
-    shARITH_CONV(p->u.absq_dq_name_.arith_conv_);
-
-    bufAppendC(')');
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing SQ_DQ_NAME!\n");
-    exit(1);
-  }
-}
-
-void shDOUBLY_QUAL_NAME_HEAD(DOUBLY_QUAL_NAME_HEAD p)
-{
-  switch(p->kind)
-  {
-  case is_AAdoublyQualNameHeadVector:
-
-    bufAppendS("AAdoublyQualNameHeadVector");
-
-
-
-
-    break;
-  case is_ABdoublyQualNameHeadMatrix:
-    bufAppendC('(');
-
-    bufAppendS("ABdoublyQualNameHeadMatrix");
-
-    bufAppendC(' ');
-
-    shLITERAL_EXP_OR_STAR(p->u.abdoublyqualnameheadmatrix_.literal_exp_or_star_);
-
-    bufAppendC(')');
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing DOUBLY_QUAL_NAME_HEAD!\n");
     exit(1);
   }
 }
