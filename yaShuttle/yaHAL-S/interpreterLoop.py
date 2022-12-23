@@ -11,14 +11,15 @@ History:        2022-12-16 RSB  Split off the nascent form from
 
 from processSource import processSource
 from PALMAT import constructPALMAT
-from p_Functions import removeIdentifier, removeAllIdentifiers, commonAttributes
+from p_Functions import removeIdentifier, removeAllIdentifiers
 
 maxRecent = 25
 def interpreterLoop(libraryFilename, structureTemplates):
     xeq = False
     lbnf = False
     bnf = False
-    trace = False
+    trace1 = False
+    trace2 = False
     recentHal = []
     recentMeta = []
     halCode = False
@@ -78,13 +79,21 @@ def interpreterLoop(libraryFilename, structureTemplates):
                     print("Quitting ...")
                     quitting = True
                     break
-                elif firstWord == "TRACE":
-                    print("TRACE on.")
-                    trace = True
+                elif firstWord == "TRACE1":
+                    print("TRACE1 on.")
+                    trace1 = True
                     continue
-                elif firstWord == "NOTRACE":
-                    print("TRACE off.")
-                    trace = False
+                elif firstWord == "NOTRACE1":
+                    print("TRACE1 off.")
+                    trace1 = False
+                    continue
+                elif firstWord == "TRACE2":
+                    print("TRACE2 on.")
+                    trace2 = True
+                    continue
+                elif firstWord == "NOTRACE2":
+                    print("TRACE2 off.")
+                    trace2 = False
                     continue
                 elif firstWord == "LBNF":
                     print("Display abstract syntax trees (AST) in LBNF.")
@@ -121,7 +130,6 @@ def interpreterLoop(libraryFilename, structureTemplates):
                             for identifier in sorted(identifiers):
                                 print("\t%s:" % identifier[1:-1], \
                                         identifiers[identifier])
-                    #print("commonAttributes =", commonAttributes)
                     continue
                 elif firstWord == "RESET":
                     PALMAT = constructPALMAT()
@@ -144,8 +152,10 @@ def interpreterLoop(libraryFilename, structureTemplates):
                     print("    QUIT     Quit this interpreter program.")
                     print("    WINE     Run Windows compiler in Linux.")
                     print("    NOWINE   Run native compiler version (default).")
-                    print("    TRACE    Turn on parser tracing.")
-                    print("    NOTRACE  Turn off parser tracing.")
+                    print("    TRACE1   Turn on parser tracing.")
+                    print("    NOTRACE1 Turn off parser tracing.")
+                    print("    TRACE2   Turn on code-generator tracing.")
+                    print("    NOTRACE2 Turn off code-generator tracing.")
                     print("    LBNF     Show abstract syntax trees in LBNF.")
                     print("    BNF      Show abstract syntax trees in BNF.")
                     print("    NOAST    Don't show abstract syntax trees.")
@@ -178,5 +188,5 @@ def interpreterLoop(libraryFilename, structureTemplates):
         PALMAT["scopes"][-1]["instructions"] = []
         success, ast = processSource(PALMAT, halsSource, metadata, \
                          libraryFilename, structureTemplates, noCompile, xeq, \
-                         lbnf, bnf, trace, wine)
+                         lbnf, bnf, trace1, wine, trace2)
         

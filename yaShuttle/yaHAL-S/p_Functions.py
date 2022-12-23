@@ -29,39 +29,40 @@ def getOurName(frame):
     return ourName
 
 # Update attribute for identifier.
-currentIdentifier = ""
-commonAttributes = {}
+codeGenerationSubstate = {
+    "currentIdentifier" : "",
+    "commonAttributes" : {}
+}
 def updateCurrentIdentifierAttribute(PALMAT, state, attribute=None, value=True):
-    global commonAttributes
-    #print("*", state, '"%s"' % currentIdentifier, attribute, value)
-    if currentIdentifier == "":
+    global codeGenerationSubstate
+    if codeGenerationSubstate["currentIdentifier"] == "":
         if state == ['declareBody_attributes_declarationList',
-                     'attributes_typeAndMinorAttr']:
+                     'attributes_typeAndMinorAttr'] or \
+                     attribute in ["vector", "matrix", "array"]:
             if attribute != None:
-                commonAttributes[attribute] = value
-            #print("**", commonAttributes)
+                codeGenerationSubstate["commonAttributes"][attribute] = value
         return
     scope = PALMAT["scopes"][-1]
     identifiers = scope["identifiers"]
-    if currentIdentifier not in identifiers:
-        identifiers[currentIdentifier] = { }
-        identifiers[currentIdentifier].update(commonAttributes)
+    if codeGenerationSubstate["currentIdentifier"] not in identifiers:
+        identifiers[codeGenerationSubstate["currentIdentifier"]] = { }
+        identifiers[codeGenerationSubstate["currentIdentifier"]].update(codeGenerationSubstate["commonAttributes"])
     if attribute != None:
-        identifiers[currentIdentifier][attribute] = value
+        identifiers[codeGenerationSubstate["currentIdentifier"]][attribute] = value
 
 def removeCurrentIdentifierAttribute(PALMAT, attribute):
     scope = PALMAT["scopes"][-1]
     identifiers = scope["identifiers"]
-    if currentIdentifier in identifiers:
-        identifierDict = identifiers[currentIdentifier]
+    if codeGenerationSubstate["currentIdentifier"] in identifiers:
+        identifierDict = identifiers[codeGenerationSubstate["currentIdentifier"]]
         if attribute in identifierDict:
             identifierDict.pop(attribute)
 
 def checkCurrentIdentifierAttribute(PALMAT, attribute):    
     scope = PALMAT["scopes"][-1]
     identifiers = scope["identifiers"]
-    if currentIdentifier in identifiers:
-        identifierDict = identifiers[currentIdentifier]
+    if codeGenerationSubstate["currentIdentifier"] in identifiers:
+        identifierDict = identifiers[codeGenerationSubstate["currentIdentifier"]]
         if attribute in identifierDict:
             return True
     return False
@@ -80,40 +81,46 @@ def removeAllIdentifiers(PALMAT):
 # This function is called from generatePALMAT() for a string literal.
 # Returns only True/False for Success/Failure.
 def stringLiteral(PALMAT, state, s):
-    global currentIdentifier, commonAttributes
+    global codeGenerationSubstate
     if s[:1] != "^" and s[:2].isupper():
         s = s[2:]
-    if debug:
-        print("p_Function stringLiteral", s)
     scope = PALMAT["scopes"][-1]
     identifiers = scope["identifiers"]
     if state[-1:] == ["declaration_list"]:
-        currentIdentifier = s
+        codeGenerationSubstate["currentIdentifier"] = s
         if s in identifiers:
             print("Already declared:", s[1:-1])
             return False, state
         identifiers[s] = { }
-        identifiers[s].update(commonAttributes)
+        identifiers[s].update(codeGenerationSubstate["commonAttributes"])
         return True, state
     elif state[-2:] == ["bitSpecBoolean", "number"]:
         updateCurrentIdentifierAttribute(PALMAT, state, "bit", int(s[1:-1]))
     elif state[-2:] == ["typeSpecChar", "number"]:
         updateCurrentIdentifierAttribute(PALMAT, state, "character", int(s[1:-1]))
-    elif state[-2:] == ["sQdQName_doublyQualNameHead_literalExpOrStar", "number"]:
-        if "vector" in identifiers:
-            updateCurrentIdentifierAttribute(PALMAT, state, "vector", int(s[1:-1]))
-        elif "matrix" in identifiers:
-            identifiers[currentIdentifier]["matrix"].append(int(s[1:-1]))
+    elif state[-2:] == ["sQdQName_doublyQualNameHead_literalExpOrStar", "number"] \
+            or state[-1] in ["doublyQualNameHead_matrix_literalExpOrStar",
+                            "arraySpec_arrayHead_literalExpOrStar"]:
+        if codeGenerationSubstate["currentIdentifier"] == "":
+            identifierDict = codeGenerationSubstate["commonAttributes"]
+        else:
+            identifierDict = identifiers[codeGenerationSubstate["currentIdentifier"]]
+        if "vector" in identifierDict:
+            identifierDict["vector"] = int(s[1:-1])
+        elif "matrix" in identifierDict:
+            identifierDict["matrix"].append(int(s[1:-1]))
+        elif "array" in identifierDict:
+            identifierDict["array"].append(int(s[1:-1]))
     return True
 
 #-----------------------------------------------------------------------------
 
 def declare_statement(PALMAT, state):
-    global currentIdentifier, commonAttributes
+    global codeGenerationSubstate
     #print("***", state)
-    currentIdentifier = ""
-    for key in list(commonAttributes.keys()):
-        commonAttributes.pop(key)
+    codeGenerationSubstate["currentIdentifier"] = ""
+    for key in list(codeGenerationSubstate["commonAttributes"].keys()):
+        codeGenerationSubstate["commonAttributes"].pop(key)
     return True, state
     
 def declareBody_declarationList(PALMAT, state):
@@ -182,7 +189,7 @@ def arithConv_vector(PALMAT, state):
     return True, state
     
 def arithConv_matrix(PALMAT, state):
-    updateCurrentIdentifierAttribute(PALMAT, state, "matrix", (3, 3))
+    updateCurrentIdentifierAttribute(PALMAT, state, "matrix", [3, 3])
     return True, state
     
 def bitSpecBoolean(PALMAT, state):
@@ -257,19 +264,23 @@ def doublyQualNameHead_vector(PALMAT, state):
     return True, state + [ourName]
 
 def doublyQualNameHead_matrix(PALMAT, state):
-    updateCurrentIdentifierAttribute(PALMAT, state, "matrix", "^?^")
+    ourName = getOurName(sys._getframe())
+    updateCurrentIdentifierAttribute(PALMAT, state, "matrix", [])
     return True, state
+
+def doublyQualNameHead_matrix_literalExpOrStar(PALMAT, state):
+    ourName = getOurName(sys._getframe())
+    updateCurrentIdentifierAttribute(PALMAT, state, "matrix", [])
+    return True, state + [ourName]
 
 def sQdQName_doublyQualNameHead_literalExpOrStar(PALMAT, state):
     ourName = getOurName(sys._getframe())
     return True, state + [ourName]
 
-def array_head(PALMAT, state):
+def arraySpec_arrayHead_literalExpOrStar(PALMAT, state):
     ourName = getOurName(sys._getframe())
     updateCurrentIdentifierAttribute(PALMAT, state, "array", [])
-    if state[-1] == "attributes_typeAndMinorAttr":
-        state += [ourName]
-    return True, state
+    return True, state + [ourName]
 
 def level(PALMAT, state):
     ourName = getOurName(sys._getframe())
@@ -291,15 +302,23 @@ def literalStar(PALMAT, state):
         updateCurrentIdentifierAttribute(PALMAT, state, "bit", "*")
     elif state[-1] == "typeSpecChar":
         updateCurrentIdentifierAttribute(PALMAT, state, "character", "*")
-    elif state[-1] == "sQdQName_doublyQualNameHead_literalExpOrStar":
+    elif state[-1] in ["sQdQName_doublyQualNameHead_literalExpOrStar",
+                       "doublyQualNameHead_matrix_literalExpOrStar",
+                       "arraySpec_arrayHead_literalExpOrStar"]:
         scope = PALMAT["scopes"][-1]
         identifiers = scope["identifiers"]
-        if currentIdentifier in identifiers:
-            identifier = identifiers[currentIdentifier]
-            if "vector" in identifier:
-                identifier["vector"] = "*"
-            elif "matrix" in identifier:
-                identifier["matrix"].append("*")
+        if codeGenerationSubstate["currentIdentifier"] == "":
+            identifierDict = codeGenerationSubstate["commonAttributes"]
+        elif codeGenerationSubstate["currentIdentifier"] in identifiers:
+            identifierDict = identifiers[codeGenerationSubstate["currentIdentifier"]]
+        else:
+            return True, state
+        if "vector" in identifierDict:
+            identifierDict["vector"] = "*"
+        elif "matrix" in identifierDict:
+            identifierDict["matrix"].append("*")
+        elif "array" in identifierDict:
+            identifierDict["array"].append("*")
     return True, state
 
 #-----------------------------------------------------------------------------

@@ -169,12 +169,16 @@ labels encountered.  The entry state in which no statement is yet being
 processed is state=[].
 '''
 
-def generatePALMAT(ast, PALMAT, state=[]):
+def generatePALMAT(ast, PALMAT, state=[], trace=False):
     newState = state
     lbnfLabelFull = ast["lbnfLabel"]
     lbnfLabel = lbnfLabelFull[2:]
     
     if lbnfLabel in p_Functions.objects:
+        if trace:
+            print("TRACE:", lbnfLabel)
+            print("      ", state)
+            print("      ", p_Functions.codeGenerationSubstate)
         func = p_Functions.objects[lbnfLabel]
         success, newState = func(PALMAT, state)
         if not success:
@@ -183,15 +187,19 @@ def generatePALMAT(ast, PALMAT, state=[]):
     for component in ast["components"]:
         if isinstance(component, str):
             if component[:1] == "^":
+                if trace:
+                    print("TRACE:", component)
+                    print("      ", newState)
+                    print("      ", p_Functions.codeGenerationSubstate)
                 success = p_Functions.stringLiteral(PALMAT, newState, component)
             else:
                 success, PALMAT = generatePALMAT( \
                     { "lbnfLabel": component, "components" : [] }, \
-                    PALMAT, newState )
+                    PALMAT, newState, trace )
             if not success:
                 return False, PALMAT
         else:
-            success, PALMAT = generatePALMAT(component, PALMAT, newState)
+            success, PALMAT = generatePALMAT(component, PALMAT, newState, trace)
             if not success:
                 return False, PALMAT
     
