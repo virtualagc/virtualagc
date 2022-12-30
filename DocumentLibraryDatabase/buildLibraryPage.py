@@ -381,7 +381,7 @@ if shuttle:
     <br><br>
     Finally, this page is auto-generated from a database &mdash; actually a 
     spreadsheet &mdash; and if you desire, you can
-    <a href="DocumentLibraryDatabase/ShuttleLibraryDatabase.tsv">
+    <a href="DocumentLibraryDatabase/ShuttleDocumentDatabase.tsv">
     download the spreadsheet</a>. (In pulling it into your spreadsheet program, 
     you mostly need to know that the columnar data is tab-delimited. There are
     additional rules that apply to fields containing comma-delimited lists or 
