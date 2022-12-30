@@ -383,10 +383,9 @@ if shuttle:
     spreadsheet &mdash; and if you desire, you can
     <a href="DocumentLibraryDatabase/ShuttleDocumentDatabase.tsv">
     download the spreadsheet</a>. (In pulling it into your spreadsheet program, 
-    you mostly need to know that the columnar data is tab-delimited. There are
-    additional rules that apply to fields containing comma-delimited lists or 
-    organizational affiliations, but I won't bother to explain those things 
-    further unless somebody actually asks me about them.)
+    you mostly need to know that the columnar data is tab-delimited. There's 
+    actually a full explanation <a href="https://github.com/virtualagc/virtualagc/blob/gh-pages/DocumentLibraryDatabase/DatabaseMaintenance.md">here</a>,
+    but I can't imagine you'll want to read it.)
     <br><br>
     """
     
@@ -467,10 +466,9 @@ else:
     spreadsheet &mdash; and if you desire, you can
     <a href="DocumentLibraryDatabase/DocumentLibraryDatabase.tsv">
     download the spreadsheet</a>. (In pulling it into your spreadsheet program, 
-    you mostly need to know that the columnar data is tab-delimited. There are
-    additional rules that apply to fields containing comma-delimited lists or 
-    organizational affiliations, but I won't bother to explain those things 
-    further unless somebody actually asks me about them.)
+    you mostly need to know that the columnar data is tab-delimited. There's 
+    actually a full explanation <a href="https://github.com/virtualagc/virtualagc/blob/gh-pages/DocumentLibraryDatabase/DatabaseMaintenance.md">here</a>,
+    but I can't imagine you'll want to read it.)
     """
 
     blurbRecentlyAdded = """
