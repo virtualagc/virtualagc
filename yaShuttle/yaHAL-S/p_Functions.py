@@ -31,7 +31,8 @@ def getOurName(frame):
 # Update attribute for identifier.
 codeGenerationSubstate = {
     "currentIdentifier" : "",
-    "commonAttributes" : {}
+    "commonAttributes" : {},
+    "expressionStack" : []
 }
 def updateCurrentIdentifierAttribute(PALMAT, state, attribute=None, value=True):
     global codeGenerationSubstate
@@ -82,45 +83,94 @@ def removeAllIdentifiers(PALMAT):
 # Returns only True/False for Success/Failure.
 def stringLiteral(PALMAT, state, s):
     global codeGenerationSubstate
+    #-------------------------------------------------------------------------
+    # First extract various state info and variations on the string that we'll
+    # often use no matter what.
+    
+    # Recall that string literals will show up in various forms.  All are 
+    # surrounded by carats (a la ^...^).  In one form, the literal is an 
+    # LBNF label.  Those are prefixed by two capital letters that we'd like
+    # removed.  An another, they are identifiers, which we want to use as-is.
+    # In another, they are stringified numbers that we want to actually convert
+    # to numbers.
+    sp = s
+    isp = None
+    fsp = None
     if s[:1] != "^" and s[:2].isupper():
         s = s[2:]
+    elif s[:1] == "^" and s[-1:] == "^":
+        sp = s[1:-1]
+        try:
+            isp = int(sp)
+            fsp = isp
+        except:
+            try:
+                fsp = float(sp)
+            except:
+                pass
     scope = PALMAT["scopes"][-1]
     identifiers = scope["identifiers"]
-    if state[-1:] == ["declaration_list"]:
+    if len(state) == 0:
+        state1 = None
+    else:
+        state1 = state[-1]
+    state2 = state[-2:]
+    
+    #-------------------------------------------------------------------------
+    # Now do various state-machine-dependent stuff with the string (s) or its
+    # variations (sp, isp, fsp). 
+    
+    if state1 in ["declaration_list", "structure_stmt"]:
         codeGenerationSubstate["currentIdentifier"] = s
         if s in identifiers:
-            print("Already declared:", s[1:-1])
+            print("Already declared:", sp)
             return False, state
         identifiers[s] = { }
+        if state1 == "structure_stmt":
+            codeGenerationSubstate["commonAttributes"]["template"] = []
         identifiers[s].update(codeGenerationSubstate["commonAttributes"])
         return True, state
-    elif state[-2:] == ["bitSpecBoolean", "number"]:
-        updateCurrentIdentifierAttribute(PALMAT, state, "bit", int(s[1:-1]))
-    elif state[-2:] == ["typeSpecChar", "number"]:
-        updateCurrentIdentifierAttribute(PALMAT, state, "character", int(s[1:-1]))
-    elif state[-2:] == ["sQdQName_doublyQualNameHead_literalExpOrStar", "number"] \
-            or state[-1] in ["doublyQualNameHead_matrix_literalExpOrStar",
+    elif state2 == ["bitSpecBoolean", "number"]:
+        updateCurrentIdentifierAttribute(PALMAT, state, "bit", isp)
+    elif state2 == ["typeSpecChar", "number"]:
+        updateCurrentIdentifierAttribute(PALMAT, state, "character", isp)
+    elif state2 == ["sQdQName_doublyQualNameHead_literalExpOrStar", "number"] \
+            or state1 in ["doublyQualNameHead_matrix_literalExpOrStar",
                             "arraySpec_arrayHead_literalExpOrStar"]:
         if codeGenerationSubstate["currentIdentifier"] == "":
             identifierDict = codeGenerationSubstate["commonAttributes"]
         else:
-            identifierDict = identifiers[codeGenerationSubstate["currentIdentifier"]]
+            identifierDict = \
+                identifiers[codeGenerationSubstate["currentIdentifier"]]
         if "vector" in identifierDict:
-            identifierDict["vector"] = int(s[1:-1])
+            identifierDict["vector"] = isp
         elif "matrix" in identifierDict:
-            identifierDict["matrix"].append(int(s[1:-1]))
+            identifierDict["matrix"].append(isp)
         elif "array" in identifierDict:
-            identifierDict["array"].append(int(s[1:-1]))
+            identifierDict["array"].append(isp)
+    
     return True
+
+# Reset the portion of the AST state-machine that handles individual statements.
+def resetStatement():
+    global codeGenerationSubstate
+    codeGenerationSubstate["currentIdentifier"] = ""
+    codeGenerationSubstate["commonAttributes"] = {}
+    codeGenerationSubstate["expressionStack"] = []
 
 #-----------------------------------------------------------------------------
 
 def declare_statement(PALMAT, state):
-    global codeGenerationSubstate
-    #print("***", state)
-    codeGenerationSubstate["currentIdentifier"] = ""
-    for key in list(codeGenerationSubstate["commonAttributes"].keys()):
-        codeGenerationSubstate["commonAttributes"].pop(key)
+    resetStatement()
+    return True, state
+    
+def structure_stmt(PALMAT, state):
+    resetStatement()
+    ourName = getOurName(sys._getframe())
+    return True, state + [ourName]
+
+def any_statement(PALMAT, state):
+    resetStatement()
     return True, state
     
 def declareBody_declarationList(PALMAT, state):
@@ -146,11 +196,13 @@ def declaration_nameId_attributes(PALMAT, state):
     ourName = getOurName(sys._getframe())
     return True, ourName
 '''
-  
-'''  
+
+'''
 def identifier(PALMAT, state):
-    ourName = getOurName(sys._getframe())
-    return True, ourName
+    if state[-1:] == ["structure_stmt"]:
+        ourName = getOurName(sys._getframe())
+        return True, ourName
+    returen True, state
 '''
  
 '''
@@ -284,9 +336,11 @@ def arraySpec_arrayHead_literalExpOrStar(PALMAT, state):
 
 def level(PALMAT, state):
     ourName = getOurName(sys._getframe())
-    if state[-1] in ["bitSpecBoolean", "typeSpecChar", 
+    if len(state) > 0 and \
+            state[-1] in ["bitSpecBoolean", "typeSpecChar", 
                     "sQdQName_doublyQualNameHead_literalExpOrStar"]:
         state += ["number"]
+    
     return True, state
 
 def simple_number(PALMAT, state):
@@ -320,6 +374,14 @@ def literalStar(PALMAT, state):
         elif "array" in identifierDict:
             identifierDict["array"].append("*")
     return True, state
+
+def assignment(PALMAT, state):
+    ourName = getOurName(sys._getframe())
+    return True, state + [ourName]
+
+def variable(PALMAT, state):
+    ourName = getOurName(sys._getframe())
+    return True, state + [ourName]
 
 #-----------------------------------------------------------------------------
 # I think this has to go at the end of the module.

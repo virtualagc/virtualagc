@@ -88,7 +88,7 @@ The way this is applied to correcting a stuck bit is simple:  In all of the word
 
 The drawback of this fix is that the parity bit can now no longer be used for cross-checking the correctness.  However, you can't have everything!
 
-## Down the Rabit Hole
+## Down the Rabbit Hole
 
 As usual with AGC-related matters, it's actually a bit harder and more-complex than the simplified picture painted above suggests.
 
@@ -149,6 +149,8 @@ Software:  Sunrise 38, 45, 69
 Flaws:  None known.
 
 ## 1003133-20-BlockI-Sunrise45+-B28-BadStrand7_BrokenCore167.bin, 1003133-20-BlockI-Sunrise45+-B28-Repaired.bin
+
+See also: 1003733-021-BlockI-Sunrise45+-B28-BadStrand6Parity.bin for additional validation of the repairs discussed.
 
 Source:  An anonymous collector.
 
@@ -287,6 +289,22 @@ Note that `XREGLP -2` and `VERBREG` are both indexed by `INREL` here. Presumably
 ![sunrise](sunrise.gif)
 
 But admittedly, this brief test probably does not exercise all of the repaired memory locations, so a more-intensive validation would be desired.
+
+## 1003733-021-BlockI-Sunrise45+-B28-BadStrand6Parity.bin
+
+See also:  1003133-20-BlockI-Sunrise45+-B28-BadStrand7_BrokenCore167.bin, 1003133-20-BlockI-Sunrise45+-B28-Repaired.bin.
+
+Source:  Larry McClynn.
+
+Software:  Sunrise 45, 69
+
+Flaws:  Strand 6 has bad parity, but no other flaws are known.
+
+This module, though having a different part number, contains the same software revision, Sunrise 45/69, as the previously-dumped module 1003133-20-BlockI-Sunrise45+-B28-BadStrand7_BrokenCore167.bin.  (See preceding section.)  The flaws in that preceding module had already been corrected, and presented as 1003133-20-BlockI-Sunrise45+-B28-Repaired.bin.  That repaired module is identical to the present module, other than the bad strand 6 parity in the present module.  Thus while bad parity is a correctable error, there is no need to actually perform such a correction on the present module, because 1003133-20-BlockI-Sunrise45+-B28-Repaired.bin already contains the full correction.
+
+What's notable, however, is that while some of the corrections previously made to 1003133-20-BlockI-Sunrise45+-B28-BadStrand7_BrokenCore167.bin were straightforward and uncontroversial &mdash; namely, the bad strand 7 of that module &mdash; there had been 8 additional corrections made due to the broken core 167 which while *very likely* correct, were nevertheless made with less confidence than the corrections to strand 7.  Whereas the current module *validates all of the corrections originally made to core 167* in that earlier module.
+
+Thus 1003733-021-BlockI-Sunrise45+-B28-BadStrand6Parity.bin provides a very welcome double-check of all corrections previously made to 1003133-20-BlockI-Sunrise45+-B28-BadStrand7_BrokenCore167.bin, and we can now have a much higher degree of confidence in the recovery of Sunrise 45 and Sunrise 69.
 
 ## 1003733-071-BlockI-Sunrise69-B22-BadBit2.bin, 1003733-071-BlockI-Sunrise69-B22-Repaired.bin
 
