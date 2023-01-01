@@ -124,12 +124,20 @@ def interpreterLoop(libraryFilename, structureTemplates):
                         scope = scopes[i]
                         print("Scope %d:" % (i+1))
                         identifiers = scope["identifiers"]
+                        print("\tIdentifiers:")
                         if len(identifiers) == 0:
-                            print("\t(Empty)")
+                            print("\t    (Empty)")
                         else:
                             for identifier in sorted(identifiers):
-                                print("\t%s:" % identifier[1:-1], \
+                                print("\t    %s:" % identifier[1:-1], \
                                         identifiers[identifier])
+                        instructions = scope["instructions"]
+                        print("\tInstructions:")
+                        if len(instructions) == 0:
+                            print("\t    (None)")
+                        else:
+                            for instruction in instructions:
+                                print("\t   ", instruction)
                     continue
                 elif firstWord == "RESET":
                     PALMAT = constructPALMAT()

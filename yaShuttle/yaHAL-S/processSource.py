@@ -140,7 +140,7 @@ def processSource(PALMAT, halsSource, metadata, libraryFilename,
     # Additional passes ...
     # TBD
 
-    success = generatePALMAT(ast, PALMAT, [], trace2)
+    success = generatePALMAT(ast, PALMAT, { "history" : [] }, trace2)
 
     return success, ast
     

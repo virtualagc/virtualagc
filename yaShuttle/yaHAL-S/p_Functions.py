@@ -15,55 +15,103 @@ The functions (which are called by PALMAT.py's generatePALMAT function)
 all accept the current PALMAT and state as input and return a pair consisting 
 of a boolean (True for success, False for failure) and the new state.  
 """
+
 import sys
+import copy
+
+# This is persistent statelike information, unlike the "state" parameter
+# used for functions that propagates only *into* the recursive descent and
+# is lost when ascending later.
+substate = {
+    # Used globally.
+    "errors" : [],
+    "warnings" : [],
+    # Used for DECLARE statements, and cleared when the processing of those
+    # statements begins.
+    "currentIdentifier" : "",
+    "commonAttributes" : {},
+    # Used while generating code for expressions, prior to generating code.
+    "lhs" : [],
+    "expression" : []
+}
 
 #-----------------------------------------------------------------------------
 
-# An auxiliary function used only internally in this module.  Not normally
-# called directly from outside this module.
+# This function clones a state (as in the parameters of the various functions
+# below named according to labels from the LBNF grammar) and updates its 
+# "history" in one of several ways, depending on the value of fsType.
+fsSet = 1
+fsAugment = 2
+def fixupState(state, fsType, name=None):
+    if name != None:
+        ourName = name
+    else:
+        # This code gets the name of the calling function as a string.
+        frame = sys._getframe(1)
+        ourName = frame.f_code.co_name
+    newState = copy.deepcopy(state)
+    if fsType == fsSet:
+        newState["history"] = [ourName]
+    elif fsType == fsAugment:
+        newState["history"] += [ourName]
+    return newState
+
+'''
 debug = False
 def getOurName(frame):
-    ourName = frame.f_code.co_name
+    if isinstance(frame, str):
+        ourName = frame
+    else:
+        ourName = frame.f_code.co_name
     if debug:
         print("p_Function", ourName)
     return ourName
 
+def augmentState(state, frame):
+    current = getOurName(frame)
+    newState = copy.deepcopy(state)
+    newState["history"].append(current)
+    return newState
+
+def setState(state, frame):
+    current = getOurName(frame)
+    newState = copy.deepcopy(state)
+    newState["history"] = [current]
+    return newState
+'''
+
 # Update attribute for identifier.
-codeGenerationSubstate = {
-    "currentIdentifier" : "",
-    "commonAttributes" : {},
-    "expressionStack" : []
-}
 def updateCurrentIdentifierAttribute(PALMAT, state, attribute=None, value=True):
-    global codeGenerationSubstate
-    if codeGenerationSubstate["currentIdentifier"] == "":
-        if state == ['declareBody_attributes_declarationList',
+    global substate
+    history = state["history"]
+    if substate["currentIdentifier"] == "":
+        if history == ['declareBody_attributes_declarationList',
                      'attributes_typeAndMinorAttr'] or \
                      attribute in ["vector", "matrix", "array"]:
             if attribute != None:
-                codeGenerationSubstate["commonAttributes"][attribute] = value
+                substate["commonAttributes"][attribute] = value
         return
     scope = PALMAT["scopes"][-1]
     identifiers = scope["identifiers"]
-    if codeGenerationSubstate["currentIdentifier"] not in identifiers:
-        identifiers[codeGenerationSubstate["currentIdentifier"]] = { }
-        identifiers[codeGenerationSubstate["currentIdentifier"]].update(codeGenerationSubstate["commonAttributes"])
+    if substate["currentIdentifier"] not in identifiers:
+        identifiers[substate["currentIdentifier"]] = { }
+        identifiers[substate["currentIdentifier"]].update(substate["commonAttributes"])
     if attribute != None:
-        identifiers[codeGenerationSubstate["currentIdentifier"]][attribute] = value
+        identifiers[substate["currentIdentifier"]][attribute] = value
 
 def removeCurrentIdentifierAttribute(PALMAT, attribute):
     scope = PALMAT["scopes"][-1]
     identifiers = scope["identifiers"]
-    if codeGenerationSubstate["currentIdentifier"] in identifiers:
-        identifierDict = identifiers[codeGenerationSubstate["currentIdentifier"]]
+    if substate["currentIdentifier"] in identifiers:
+        identifierDict = identifiers[substate["currentIdentifier"]]
         if attribute in identifierDict:
             identifierDict.pop(attribute)
 
 def checkCurrentIdentifierAttribute(PALMAT, attribute):    
     scope = PALMAT["scopes"][-1]
     identifiers = scope["identifiers"]
-    if codeGenerationSubstate["currentIdentifier"] in identifiers:
-        identifierDict = identifiers[codeGenerationSubstate["currentIdentifier"]]
+    if substate["currentIdentifier"] in identifiers:
+        identifierDict = identifiers[substate["currentIdentifier"]]
         if attribute in identifierDict:
             return True
     return False
@@ -82,7 +130,8 @@ def removeAllIdentifiers(PALMAT):
 # This function is called from generatePALMAT() for a string literal.
 # Returns only True/False for Success/Failure.
 def stringLiteral(PALMAT, state, s):
-    global codeGenerationSubstate
+    global substate
+    history = state["history"]
     #-------------------------------------------------------------------------
     # First extract various state info and variations on the string that we'll
     # often use no matter what.
@@ -110,26 +159,30 @@ def stringLiteral(PALMAT, state, s):
                 pass
     scope = PALMAT["scopes"][-1]
     identifiers = scope["identifiers"]
-    if len(state) == 0:
+    if len(history) == 0:
         state1 = None
     else:
-        state1 = state[-1]
-    state2 = state[-2:]
+        state1 = history[-1]
+    state2 = history[-2:]
     
     #-------------------------------------------------------------------------
     # Now do various state-machine-dependent stuff with the string (s) or its
     # variations (sp, isp, fsp). 
     
     if state1 in ["declaration_list", "structure_stmt"]:
-        codeGenerationSubstate["currentIdentifier"] = s
+        substate["currentIdentifier"] = s
         if s in identifiers:
             print("Already declared:", sp)
             return False, state
         identifiers[s] = { }
         if state1 == "structure_stmt":
-            codeGenerationSubstate["commonAttributes"]["template"] = []
-        identifiers[s].update(codeGenerationSubstate["commonAttributes"])
+            substate["commonAttributes"]["template"] = []
+        identifiers[s].update(substate["commonAttributes"])
         return True, state
+    elif state1 == "number" and "expression" in history:
+        substate["expression"].append({ "number": sp })
+    elif state1 == "identifier" and "expression" in history:
+        substate["expression"].append({ "fetch": sp })
     elif state2 == ["bitSpecBoolean", "number"]:
         updateCurrentIdentifierAttribute(PALMAT, state, "bit", isp)
     elif state2 == ["typeSpecChar", "number"]:
@@ -137,28 +190,38 @@ def stringLiteral(PALMAT, state, s):
     elif state2 == ["sQdQName_doublyQualNameHead_literalExpOrStar", "number"] \
             or state1 in ["doublyQualNameHead_matrix_literalExpOrStar",
                             "arraySpec_arrayHead_literalExpOrStar"]:
-        if codeGenerationSubstate["currentIdentifier"] == "":
-            identifierDict = codeGenerationSubstate["commonAttributes"]
+        if substate["currentIdentifier"] == "":
+            identifierDict = substate["commonAttributes"]
         else:
             identifierDict = \
-                identifiers[codeGenerationSubstate["currentIdentifier"]]
+                identifiers[substate["currentIdentifier"]]
         if "vector" in identifierDict:
             identifierDict["vector"] = isp
         elif "matrix" in identifierDict:
             identifierDict["matrix"].append(isp)
         elif "array" in identifierDict:
             identifierDict["array"].append(isp)
-    
+    elif state2 == ["assignment", "variable"]:
+        # Identifier on LHS of an assignment.
+        if s not in identifiers: 
+            substate["errors"].append("Identifier " + sp + " not DECLARE'd.")
+            print("*", identifiers)
+        else:
+            substate["lhs"].append(sp)
     return True
 
 # Reset the portion of the AST state-machine that handles individual statements.
 def resetStatement():
-    global codeGenerationSubstate
-    codeGenerationSubstate["currentIdentifier"] = ""
-    codeGenerationSubstate["commonAttributes"] = {}
-    codeGenerationSubstate["expressionStack"] = []
+    global substate
+    substate["currentIdentifier"] = ""
+    substate["commonAttributes"] = {}
+    substate["lhs"] = []
+    substate["expression"] = []
 
 #-----------------------------------------------------------------------------
+
+def expression(PALMAT, state):
+    return True, fixupState(state, fsAugment)
 
 def declare_statement(PALMAT, state):
     resetStatement()
@@ -166,67 +229,54 @@ def declare_statement(PALMAT, state):
     
 def structure_stmt(PALMAT, state):
     resetStatement()
-    ourName = getOurName(sys._getframe())
-    return True, state + [ourName]
+    return True, fixupState(state, fsAugment)
 
 def any_statement(PALMAT, state):
     resetStatement()
     return True, state
     
 def declareBody_declarationList(PALMAT, state):
-    ourName = getOurName(sys._getframe())
-    return True, [ourName]
+    return True, fixupState(state, fsSet)
     
 def declareBody_attributes_declarationList(PALMAT, state):
-    ourName = getOurName(sys._getframe())
-    return True, [ourName]
+    return True, fixupState(state, fsSet)
 
 def declaration_list(PALMAT, state):
-    ourName = getOurName(sys._getframe())
-    return True, state + [ourName]
+    return True, fixupState(state, fsAugment)
 
 '''   
 def declaration_nameId(PALMAT, state):
-    ourName = getOurName(sys._getframe())
-    return True, ourName
+    return True, fixupState(state, fsSet)
 '''
 
 '''
 def declaration_nameId_attributes(PALMAT, state):
-    ourName = getOurName(sys._getframe())
-    return True, ourName
+    return True, fixupState(state, fsSet)
 '''
 
-'''
 def identifier(PALMAT, state):
-    if state[-1:] == ["structure_stmt"]:
-        ourName = getOurName(sys._getframe())
-        return True, ourName
-    returen True, state
-'''
+    if "expression" in state["history"]:
+        return True, fixupState(state, fsAugment)
+    return True, state
  
 '''
 def attributes_typeAndMinorAttr(PALMAT, state):
-    ourName = getOurName(sys._getframe())
-    return True, state + [ourName]
+    return True, fixupState(state, fsAugment)
 '''
     
 def attributes_typeAndMinorAttr(PALMAT, state):
-    ourName = getOurName(sys._getframe())
-    return True, state + [ourName]
+    return True, fixupState(state, fsAugment)
 
 '''   
 def typeAndMinorAttr(PALMAT, state):
-    ourName = getOurName(sys._getframe())
-    return True, state + [ourName]
+    return True, fixupState(state, fsAugment)
 '''
 
 def sQdQName_arithConv(PALMAT, state):
     return True, state
     
 def arithConv(PALMAT, state):
-    ourName = getOurName(sys._getframe())
-    return True, state + [ourName]
+    return True, fixupState(state, fsAugment)
 
 def arithConv_scalar(PALMAT, state):
     updateCurrentIdentifierAttribute(PALMAT, state, "scalar")
@@ -245,17 +295,15 @@ def arithConv_matrix(PALMAT, state):
     return True, state
     
 def bitSpecBoolean(PALMAT, state):
-    ourName = getOurName(sys._getframe())
     updateCurrentIdentifierAttribute(PALMAT, state, "bit")
-    if state[-1] == "attributes_typeAndMinorAttr":
-        state += [ourName]
+    if state["history"][-1] == "attributes_typeAndMinorAttr":
+        return True, fixupState(state, fsAugment)
     return True, state
     
 def typeSpecChar(PALMAT, state):
-    ourName = getOurName(sys._getframe())
     updateCurrentIdentifierAttribute(PALMAT, state, "character", "^?^")
-    if state[-1] == "attributes_typeAndMinorAttr":
-        state += [ourName]
+    if state["history"][-1] == "attributes_typeAndMinorAttr":
+        return True, fixupState(state, fsAugment)
     return True, state
     
 def precSpecDouble(PALMAT, state):
@@ -311,60 +359,53 @@ def minorAttributeNonHal(PALMAT, state):
     return True, state
 
 def doublyQualNameHead_vector(PALMAT, state):
-    ourName = getOurName(sys._getframe())
     updateCurrentIdentifierAttribute(PALMAT, state, "vector", "^?^")
-    return True, state + [ourName]
+    return True, fixupState(state, fsAugment)
 
 def doublyQualNameHead_matrix(PALMAT, state):
-    ourName = getOurName(sys._getframe())
     updateCurrentIdentifierAttribute(PALMAT, state, "matrix", [])
     return True, state
 
 def doublyQualNameHead_matrix_literalExpOrStar(PALMAT, state):
-    ourName = getOurName(sys._getframe())
     updateCurrentIdentifierAttribute(PALMAT, state, "matrix", [])
-    return True, state + [ourName]
+    return True, fixupState(state, fsAugment)
 
 def sQdQName_doublyQualNameHead_literalExpOrStar(PALMAT, state):
-    ourName = getOurName(sys._getframe())
-    return True, state + [ourName]
+    return True, fixupState(state, fsAugment)
 
 def arraySpec_arrayHead_literalExpOrStar(PALMAT, state):
-    ourName = getOurName(sys._getframe())
     updateCurrentIdentifierAttribute(PALMAT, state, "array", [])
-    return True, state + [ourName]
+    return True, fixupState(state, fsAugment)
 
 def level(PALMAT, state):
-    ourName = getOurName(sys._getframe())
-    if len(state) > 0 and \
-            state[-1] in ["bitSpecBoolean", "typeSpecChar", 
+    if len(state["history"]) > 0 and \
+            state["history"][-1] in ["bitSpecBoolean", "typeSpecChar", 
                     "sQdQName_doublyQualNameHead_literalExpOrStar"]:
-        state += ["number"]
+        return True, fixupState(state, fsAugment, "number")
     
     return True, state
 
 def simple_number(PALMAT, state):
-    ourName = getOurName(sys._getframe())
-    if state[-1] in ["bitSpecBoolean", "typeSpecChar", 
+    if state["history"][-1] in ["bitSpecBoolean", "typeSpecChar", 
                     "sQdQName_doublyQualNameHead_literalExpOrStar"]:
-        state += ["number"]
+        return True, fixupState(state, fsAugment, "number")
     return True, state
 
 def literalStar(PALMAT, state):
-    ourName = getOurName(sys._getframe())
-    if state[-1] == "bitSpecBoolean":
+    last = state["history"][-1]
+    if last == "bitSpecBoolean":
         updateCurrentIdentifierAttribute(PALMAT, state, "bit", "*")
-    elif state[-1] == "typeSpecChar":
+    elif last == "typeSpecChar":
         updateCurrentIdentifierAttribute(PALMAT, state, "character", "*")
-    elif state[-1] in ["sQdQName_doublyQualNameHead_literalExpOrStar",
+    elif last in ["sQdQName_doublyQualNameHead_literalExpOrStar",
                        "doublyQualNameHead_matrix_literalExpOrStar",
                        "arraySpec_arrayHead_literalExpOrStar"]:
         scope = PALMAT["scopes"][-1]
         identifiers = scope["identifiers"]
-        if codeGenerationSubstate["currentIdentifier"] == "":
-            identifierDict = codeGenerationSubstate["commonAttributes"]
-        elif codeGenerationSubstate["currentIdentifier"] in identifiers:
-            identifierDict = identifiers[codeGenerationSubstate["currentIdentifier"]]
+        if substate["currentIdentifier"] == "":
+            identifierDict = substate["commonAttributes"]
+        elif substate["currentIdentifier"] in identifiers:
+            identifierDict = identifiers[substate["currentIdentifier"]]
         else:
             return True, state
         if "vector" in identifierDict:
@@ -376,12 +417,87 @@ def literalStar(PALMAT, state):
     return True, state
 
 def assignment(PALMAT, state):
-    ourName = getOurName(sys._getframe())
-    return True, state + [ourName]
+    '''
+    Here's the basic theory of how assignments work.  (I'm not quite
+    sure just yet how to handle indexed or structure expressions on
+    the left of an assignment, so this just covers simple variables
+    on the left right now.)
+    
+    All of the identifiers we encounter on the LHS of the equals
+    sign are stored temporarily in substate["LHS"], which is a list
+    holding just the names of those identifiers and nothing else.  If
+    any of those variables have no declaration, they're dutifully
+    recorded in substate["errors"] instead.
+    
+    On the RHS of the equals should be an expression.  As we 
+    recursively-descend through this expression, the significant items
+    (like operators, variables, and constants) are appended to 
+    substate["expression"].  When the end of the expression is finally
+    reached -- which is detected by generatePALMAT() in the PALMAT
+    module -- everything in substate["expression"] is popped and 
+    stored in PALMAT["instructions"] in reverse order, as a reverse-polish
+    style program; i.e., at runtime those RPN instructions will form
+    a program that operates on an execution stack in the emulator, 
+    in the end resulting in a single computed value remaining on that 
+    runtime execution stack.  Finally, everything in substate["LHS"] is 
+    then popped and store in PALMAT["instructions"] as well, again in 
+    RPN style.  In the case of these LHS items, the RPN instructions 
+    they're stored as are not computational in nature, but instead
+    are instructions to take the top of the stack (without removing it
+    from the stack) and storing it in a variable.  Finally, 
+    PALMAT["instructions"] is topped off with a final RPN instruciton
+    to pop the final value from the runtime execution stack.
+    '''
+    return True, fixupState(state, fsAugment)
+
+def arithExpArithExpPlusTerm(PALMAT, state):
+    substate["expression"].append({ "operator": "+" })
+    return True, state
+
+def arithExpArithExpMinusTerm(PALMAT, state):
+    substate["expression"].append({ "operator": "-" })
+    return True, state
+
+def arithMinusTerm(PALMAT, state):
+    substate["expression"].append({ "operator": "U-" })
+    return True, state
+
+def termDivide(PALMAT, state):
+    substate["expression"].append({ "operator": "/" })
+    return True, state
+
+def productMultiplication(PALMAT, state):
+    substate["expression"].append({ "operator": "" })
+    return True, state
+
+def factorExponentiation(PALMAT, state):
+    substate["expression"].append({ "operator": "**" })
+    return True, state
+
+def productDot(PALMAT, state):
+    substate["expression"].append({ "operator": "." })
+    return True, state
+
+def productCross(PALMAT, state):
+    substate["expression"].append({ "operator": "*" })
+    return True, state
+
+'''
+def subscript(PALMAT, state):
+    substate["expression"].append({ "operator": "$" })
+    return True, state
+'''
 
 def variable(PALMAT, state):
-    ourName = getOurName(sys._getframe())
-    return True, state + [ourName]
+    return True, fixupState(state, fsAugment)
+
+def number(PALMAT, state):
+    #if "expression" in state["history"]: # This is just for debugging.
+    #    substate["expression"].append("_number_")
+    return True, fixupState(state, fsAugment, "number")
+
+def variable(PALMAT, state):
+    return True, fixupState(state, fsAugment)
 
 #-----------------------------------------------------------------------------
 # I think this has to go at the end of the module.

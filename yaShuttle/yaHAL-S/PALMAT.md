@@ -171,6 +171,85 @@ Thus the emulator would have to perform a little more work upon entry to such a 
 
 TBD
 
+## PALMAT Instructions
+
+In the final implementation, PALMAT instructions will very likely be encoded numerically in some format intended to efficiently reduce the storage required for storage of the executable and decoding of the instructions by the PALMAT virtual machine executing the code.  However, I don't want to get ahead of myself:  Let's just get it working logically correctly before worrying about efficient storage formats, shall we?
+
+Since the bulk of my HAL/S compiler is in Python and the file-format being used is a JSON version of the Python structures, for *now* PALMAT instructions will be represented as Python dictionaries.
+
+Before presenting any actual instructions, let me add that for computation of expressions (arithmetical, boolean, or otherwise), the PALMAT virtual machine implements an execution-stack based model, such as found in a Reverse Polish Notation (RPN) calculator or in the FORTH computer language.  Therefore, the behavior of PALMAT instructions is often to pop values from this execution stack, perform some computation on them (such as addition), and then to push the result back on the execution stack.
+
+With that in mind, here's a description of some of the available PALMAT instructions.
+
+* `{'number': string}`, where `string` is a stringified version of a number such as 1.35E13B2.  (At some point, I may change this so that `string` is replaced by the actual Python representation of the number, but for now I don't go that far.)  **Recall** that in HAL/S, the minus sign is an operator, and not a character that can prefix a number token, so these numbers are all non-negative.  The action of this instruction at runtime is push the number (*as* a number and no longer as a string) onto the execution stack
+* `{'operator': '+'}`.  The action of this instruction at runtime is to pop the last two numbers from the execution stack, add them, and then to push the result back onto the execution stack.  The execution stack is thus shortened by one element.
+* `{'operator': '-'}`.  This is a binary minus operator, as opposed to a unary negation operator.  The action at runtime is to pop the final two elements from the execution stack, subtracting the 2nd-to-last value from the last value, and then to push the result back onto the execution stack.
+* `{'operator': 'U-'}`.  This is unary negation operator.  The action at runtime is to arithmetically negate the last value on the execution stack.  Thus the execution stack does not change in size.
+* `{'operator': ''}`.  This is the multiplication operator.  The action at runtime is to pop the last two values from the execution stack, multiply them, and then push the result back onto the execution stack.
+* `{'operator': '/'}`.  This is the division operator.  The action at runtime is to pop the final two elements from the execution stack, dividing the last value by the 2nd-to-last value from the last value, and then pushing the result back onto the execution stack.
+* `{'operator': '**'}`.  This is the exponentiation operator.  The action at runtime is to pop the final two elements from the execution stack, raising the last value to the power of the 2nd-to-last value, and then pushing the result back onto the execution stack.
+* `{'fetch': identifier}`, where `identifier` is the name of a variable.  It must correspond to an identifier already in `PALMAT["identifiers"]`, except that the surrounding carats (if any) used as string quotes in the identifier dictionary will not be present.  The action at runtime is to fetch the value of the variable or constant identified and push it onto the execution stack. (I haven't given any thought as of yet as to how to handle vectors, matrices, arrays, or structures as of yet, so temporarily at least, just think of variables or constants storing numbers or booleans.)
+* `{'store': identifier}`, where `identifier` is the name of a variable.  It must correspond to an identifier already in `PALMAT["identifiers"]`, except that the surrounding carats (if any) used as string quotes in the identifier dictionary will not be present.  The action at runtime is to store the last value in the execution stack (without popping it from the stack) into the variable identified.
+* `{'pop': number}`.  Pops `number` of elements from the execution stack and discards them.
+
+For example, consider the following HAL/S code:
+
+    DECLARE SCALAR, A, B, C;
+    A, B, C = 6 ( 2 / (3 + 5) - 7 );
+
+The PALMAT instructions generated from the latter statement are shown below, accompanied by the runtime evolution of the execution stack (growing rightward) as each PALMAT instruction is executed.
+
+    PALMAT Instruction                  Execution Stack Afterward
+    ──────────────────                  ─────────────────────────
+                                        (empty)
+    {'number': '7'}                     7
+    {'number': '5'}                     7, 5
+    {'number': '3'}                     7, 5, 3
+    {'operator': '+'}                   7, 8
+    {'number': '2'}                     7, 8, 2
+    {'operator': '/'}                   7, 0.25
+    {'operator': '-'}                   -6.75
+    {'number': '6'}                     -6.75, 6
+    {'operator': ''}                    -40.5
+    {'store': 'C'}                      -40.5
+    {'store': 'B'}                      -40.5
+    {'store': 'A'}                      -40.5
+    {'pop': 1}                          (empty)
+
+The final result is thus that each of the `SCALAR` variables `A`, `B`, and `C` is assigned the numerical value -40.5.
+
+Or perhaps
+
+    DECLARE SCALAR, A, B, C;
+    B = 2;
+    C = 5;
+    A = 12 C**2 + 3 B + 1;
+
+    PALMAT Instruction                  Execution Stack Afterward
+    ──────────────────                  ─────────────────────────
+                                        (empty)
+    {'number': '2'}                     2
+    {'store': 'B'}                      2
+    {'pop': 1}                          (empty)
+    {'number': '5'}                     5
+    {'store': 'C'}                      5
+    {'pop': 1}                          (empty)
+    {'number': '1'}                     1
+    {'fetch': 'B'}                      1, 2
+    {'number': '3'}                     1, 2, 3
+    {'operator': ''}                    1, 6
+    {'number': '2'}                     1, 6, 2
+    {'fetch': 'C'}                      1, 6, 2, 5
+    {'operator': '**'}                  1, 6, 25
+    {'number': '12'}                    1, 6, 25, 12
+    {'operator': ''}                    1, 6, 300
+    {'operator': '+'}                   1, 306
+    {'operator': '+'}                   307
+    {'store': 'A'}                      307
+    {'pop': 1}                          (empty)
+
+Thus we end up with `B=2`, `C=5`, `A=307`.
+
 ## The Source-Code File List
 
 The source-code file list,

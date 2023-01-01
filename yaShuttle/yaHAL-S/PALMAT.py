@@ -162,14 +162,15 @@ depends not just on the current LBNF label being processed, but on some
             vs
     DECLARE INTEGER, A DOUBLE;
 the INTEGER keyword has to be handle somewhat differently.  The solution I use
-to track the states is that the "state" is a list of the form
+to track the states is that the "state" includes (among other things} a list 
+of the form
     [LBNFlabel1, ..., LBNFlabelN]
 where (as I said) these LBNF labels are some abridged sequence of the LBNF
-labels encountered.  The entry state in which no statement is yet being 
-processed is state=[].
+labels encountered.  I call this list the "history".  The entry state in 
+which no statement is yet being processed is state={ "history" : [] }.
 '''
 
-def generatePALMAT(ast, PALMAT, state=[], trace=False):
+def generatePALMAT(ast, PALMAT, state={ "history":[] }, trace=False):
     newState = state
     lbnfLabelFull = ast["lbnfLabel"]
     lbnfLabel = lbnfLabelFull[2:]
@@ -178,9 +179,11 @@ def generatePALMAT(ast, PALMAT, state=[], trace=False):
         if trace:
             print("TRACE:", lbnfLabel)
             print("      ", state)
-            print("      ", p_Functions.codeGenerationSubstate)
+            print("      ", p_Functions.substate)
         func = p_Functions.objects[lbnfLabel]
         success, newState = func(PALMAT, state)
+        if trace:
+            print("      ", p_Functions.substate)
         if not success:
             return False, PALMAT
         #print(newState)    
@@ -190,8 +193,10 @@ def generatePALMAT(ast, PALMAT, state=[], trace=False):
                 if trace:
                     print("TRACE:", component)
                     print("      ", newState)
-                    print("      ", p_Functions.codeGenerationSubstate)
+                    print("      ", p_Functions.substate)
                 success = p_Functions.stringLiteral(PALMAT, newState, component)
+                if trace:
+                    print("      ", p_Functions.substate)
             else:
                 success, PALMAT = generatePALMAT( \
                     { "lbnfLabel": component, "components" : [] }, \
@@ -202,5 +207,20 @@ def generatePALMAT(ast, PALMAT, state=[], trace=False):
             success, PALMAT = generatePALMAT(component, PALMAT, newState, trace)
             if not success:
                 return False, PALMAT
+    
+    # If this was an assignment, then convert the expression stack to
+    # PALMAT instructions.  Note that if there are multiple variables on
+    # the LHS of the assignment, there will actually be a BNF <ASSIGNMENT>
+    # for each one of them.  Only the first will need to handle the 
+    # expression stack, whereas each of them will result in one assignment
+    if lbnfLabel == "assignment":
+        instructions = PALMAT["scopes"][-1]["instructions"]
+        for entry in reversed(p_Functions.substate["expression"]):
+            instructions.append(entry)
+        p_Functions.substate["expression"] = []
+        instructions.append({ "store": p_Functions.substate["lhs"][-1] })
+        p_Functions.substate["lhs"].pop()
+        if len(p_Functions.substate["lhs"]) == 0:
+            instructions.append({ "pop": 1 })
     
     return True, PALMAT
