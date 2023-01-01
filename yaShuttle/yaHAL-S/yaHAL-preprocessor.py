@@ -187,7 +187,7 @@ print("---------------------------------------------------------------------")
 for i in range(len(halsSource)):
     print(halsSource[i], metadata[i])
 '''
-halsSource, metadata = reorganizer.reorganizer(halsSource, metadata)
+success, halsSource, metadata = reorganizer.reorganizer(halsSource, metadata)
 '''
 print("---------------------------------------------------------------------")
 for i in range(len(halsSource)):

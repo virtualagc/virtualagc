@@ -145,7 +145,7 @@ def reorganizer(halsSource, metadata):
                             if len(parenthesisDepths) == 1:
                                 print("Mismatched parentheses, line %d:" \
                                     % (inputIndex + 1), line, file=sys.stderr)
-                                sys.exit(1)
+                                return False, [], []
                             else:
                                 parenthesisDepths = parenthesisDepths[:-1]
                         else:
@@ -236,7 +236,7 @@ def reorganizer(halsSource, metadata):
                         backtrack = True   
                 else:
                     print("Implementation error.", file=sys.stderr)
-                    sys.exit(1)
+                    return False, [], []
     
     if outputLine != "":
         if comment != "":
@@ -246,7 +246,7 @@ def reorganizer(halsSource, metadata):
         
     if len(parenthesisDepths) != 1 or parenthesisDepths[0] != 0:
         print("Parentheses mismatch.", file = sys.stderr)
-        sys.exit(1)
+        return False, newHalsSource, newMetadata
         
-    return newHalsSource, newMetadata
+    return True, newHalsSource, newMetadata
 

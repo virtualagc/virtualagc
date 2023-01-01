@@ -159,6 +159,7 @@ def stringLiteral(PALMAT, state, s):
                 pass
     scope = PALMAT["scopes"][-1]
     identifiers = scope["identifiers"]
+    instructions = scope["instructions"]
     if len(history) == 0:
         state1 = None
     else:
@@ -181,6 +182,11 @@ def stringLiteral(PALMAT, state, s):
         return True, state
     elif state1 == "number" and "expression" in history:
         substate["expression"].append({ "number": sp })
+    elif state1 == "number" and "write_key" in history:
+        substate["LUN"] = sp
+        #instructions.append({"wstart": sp})
+    elif state1 == "string" and 'write_arg' in history:
+        substate["expression"].append({ "string": sp[1:-1] })
     elif state1 == "identifier" and "expression" in history:
         substate["expression"].append({ "fetch": sp })
     elif state2 == ["bitSpecBoolean", "number"]:
@@ -204,10 +210,8 @@ def stringLiteral(PALMAT, state, s):
     elif state2 == ["assignment", "variable"]:
         # Identifier on LHS of an assignment.
         if s not in identifiers: 
-            substate["errors"].append("Identifier " + sp + " not DECLARE'd.")
-            print("*", identifiers)
-        else:
-            substate["lhs"].append(sp)
+            substate["errors"].append("Identifier " + sp + " undeclared.")
+        substate["lhs"].append(sp)
     return True
 
 # Reset the portion of the AST state-machine that handles individual statements.
@@ -492,12 +496,27 @@ def variable(PALMAT, state):
     return True, fixupState(state, fsAugment)
 
 def number(PALMAT, state):
-    #if "expression" in state["history"]: # This is just for debugging.
-    #    substate["expression"].append("_number_")
     return True, fixupState(state, fsAugment, "number")
+
+def compound_number(PALMAT, state):
+    return True, fixupState(state, fsAugment, "number")
+
+def char_string(PALMAT, state):
+    return True, fixupState(state, fsAugment, "string")
 
 def variable(PALMAT, state):
     return True, fixupState(state, fsAugment)
+
+def basicStatementWritePhrase(PALMAT, state):
+    return True, fixupState(state, fsAugment)
+
+def write_key(PALMAT, state):
+    return True, fixupState(state, fsAugment)
+
+def write_arg(PALMAT, state):
+    return True, fixupState(state, fsAugment)
+
+
 
 #-----------------------------------------------------------------------------
 # I think this has to go at the end of the module.

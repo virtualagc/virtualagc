@@ -177,11 +177,11 @@ In the final implementation, PALMAT instructions will very likely be encoded num
 
 Since the bulk of my HAL/S compiler is in Python and the file-format being used is a JSON version of the Python structures, for *now* PALMAT instructions will be represented as Python dictionaries.
 
-Before presenting any actual instructions, let me add that for computation of expressions (arithmetical, boolean, or otherwise), the PALMAT virtual machine implements an execution-stack based model, such as found in a Reverse Polish Notation (RPN) calculator or in the FORTH computer language.  Therefore, the behavior of PALMAT instructions is often to pop values from this execution stack, perform some computation on them (such as addition), and then to push the result back on the execution stack.
+Before presenting any actual instructions, let me add that for computation of expressions (arithmetical, boolean, or otherwise), the PALMAT virtual machine implements an execution-stack based model, such as found in a Reverse Polish Notation (RPN) calculator or in the FORTH computer language.  Therefore, the behavior of PALMAT instructions is often to pop values from this execution stack, perform some computation on them (such as addition), and then to push the result back on the execution stack.  Each entry of the execution stack can thus hold values of various types.
 
 With that in mind, here's a description of some of the available PALMAT instructions.
 
-* `{'number': string}`, where `string` is a stringified version of a number such as 1.35E13B2.  (At some point, I may change this so that `string` is replaced by the actual Python representation of the number, but for now I don't go that far.)  **Recall** that in HAL/S, the minus sign is an operator, and not a character that can prefix a number token, so these numbers are all non-negative.  The action of this instruction at runtime is push the number (*as* a number and no longer as a string) onto the execution stack
+* `{'number': string}`, where `string` is a stringified version of a number such as 1.35E13B2.  (At some point, I may change this so that `string` is replaced by the actual Python representation of the number, but for now I don't go that far because this method preserves exact values.)  **Recall** that in HAL/S, the minus sign is an operator, and not a character that can prefix a number token, so these numbers are all non-negative.  The action of this instruction at runtime is push the number (*as* a number and no longer as a string) onto the execution stack
 * `{'operator': '+'}`.  The action of this instruction at runtime is to pop the last two numbers from the execution stack, add them, and then to push the result back onto the execution stack.  The execution stack is thus shortened by one element.
 * `{'operator': '-'}`.  This is a binary minus operator, as opposed to a unary negation operator.  The action at runtime is to pop the final two elements from the execution stack, subtracting the 2nd-to-last value from the last value, and then to push the result back onto the execution stack.
 * `{'operator': 'U-'}`.  This is unary negation operator.  The action at runtime is to arithmetically negate the last value on the execution stack.  Thus the execution stack does not change in size.
@@ -192,7 +192,7 @@ With that in mind, here's a description of some of the available PALMAT instruct
 * `{'store': identifier}`, where `identifier` is the name of a variable.  It must correspond to an identifier already in `PALMAT["identifiers"]`, except that the surrounding carats (if any) used as string quotes in the identifier dictionary will not be present.  The action at runtime is to store the last value in the execution stack (without popping it from the stack) into the variable identified.
 * `{'pop': number}`.  Pops `number` of elements from the execution stack and discards them.
 
-For example, consider the following HAL/S code:
+More PALMAT instructions will be defined below, but first let's consider a couple of example.  Look at the following HAL/S code:
 
     DECLARE SCALAR, A, B, C;
     A, B, C = 6 ( 2 / (3 + 5) - 7 );
@@ -218,7 +218,7 @@ The PALMAT instructions generated from the latter statement are shown below, acc
 
 The final result is thus that each of the `SCALAR` variables `A`, `B`, and `C` is assigned the numerical value -40.5.
 
-Or perhaps
+Or consider this example:
 
     DECLARE SCALAR, A, B, C;
     B = 2;
@@ -249,6 +249,31 @@ Or perhaps
     {'pop': 1}                          (empty)
 
 Thus we end up with `B=2`, `C=5`, `A=307`.
+
+Here's another PALMAT instruction pertaining to output:
+
+  * `{'write': lun}` marks the *end* of the PALMAT corresponding to a HAL/S statement of the form `WRITE(lun) ...`.  The only logical unit number understood by the interpreter is `lun=6`, which is output to the console from which the interpreter commands and HAL/S statements are being input.
+
+The full form of a HAL/S `WRITE` statment is
+
+    WRITE(lun) Expression1, Expression2, ..., ExpressionN;
+
+where the expressions can be of any sort:  arithmetical, character, boolean.  *Preceding* the PALMAT `write` instruction will be PALMAT instructions of the kind we've already seen for computing the values of expressions, as well as any other PALMAT instructions we haven't already defined for computing boolean or character expressions.  The result of all of these computations is to leave a sequence of values (arithmetical, boolean, or character) on the expression stack, one for each of the expressions in the HAL/S statement, with the value of the first expression being the last pushed onto the stack and the final expression being the first value pushed onto the stack.  The `write` PALMAT instruction just pops these values off of the expression stack one-by-one and prints them all on the same line of the terminal, with a trailing newline, leaving the expression stack empty at the end of the operation.
+
+For example, here are some PALMAT instructions appropriate for `WRITE(6) A+5, A**2+1, 12 A;`:
+
+	{'fetch': 'A'}
+	{'number': '12'}
+	{'operator': ''}
+	{'number': '1'}
+	{'number': '2'}
+	{'fetch': 'A'}
+	{'operator': '**'}
+	{'operator': '+'}
+	{'number': '5'}
+	{'fetch': 'A'}
+	{'operator': '+'}
+	{'write': '6'}
 
 ## The Source-Code File List
 

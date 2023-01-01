@@ -222,5 +222,11 @@ def generatePALMAT(ast, PALMAT, state={ "history":[] }, trace=False):
         p_Functions.substate["lhs"].pop()
         if len(p_Functions.substate["lhs"]) == 0:
             instructions.append({ "pop": 1 })
+    elif lbnfLabel == "basicStatementWritePhrase":
+        instructions = PALMAT["scopes"][-1]["instructions"]
+        for entry in reversed(p_Functions.substate["expression"]):
+            instructions.append(entry)
+        p_Functions.substate["expression"] = []
+        instructions.append({ "write": p_Functions.substate["LUN"] })        
     
     return True, PALMAT

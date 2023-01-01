@@ -49,7 +49,7 @@ from PALMAT import generatePALMAT, constructPALMAT
 # settings. Return True,ast on success, False,{} on failure.
 def processSource(PALMAT, halsSource, metadata, libraryFilename, 
                     structureTemplates, \
-                    noCompile=False, xeq=True, lbnf=False, bnf=False, \
+                    noCompile=False, lbnf=False, bnf=False, \
                     trace1=False, wine=False, trace2=False):
 
     # Because whitespace is important in E/M/S constructs and (potentially) in 
@@ -73,7 +73,7 @@ def processSource(PALMAT, halsSource, metadata, libraryFilename,
     fatalCount = unEMS.fatalCount
 
     # Reorganize input lines.
-    halsSource, metadata = reorganizer.reorganizer(halsSource, metadata)
+    success, halsSource, metadata = reorganizer.reorganizer(halsSource, metadata)
 
     # Take care of REPLACE ... BY "..." macros.
     replaceBy.replaceBy(halsSource, metadata, \
