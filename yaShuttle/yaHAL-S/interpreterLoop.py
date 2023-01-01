@@ -185,9 +185,6 @@ def interpreterLoop(libraryFilename, structureTemplates):
                     print("Template", fields[3], "not found.")
                     continue
                 metadata.append( { "directive" : True } )
-            elif line[:1] == "C":
-                halsSource.append(line)
-                metadata.append({ "comment" : True })
             else:
                 halsSource.append( " " + line )
                 metadata.append( {} )

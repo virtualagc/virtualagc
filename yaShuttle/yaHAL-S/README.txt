@@ -16,7 +16,8 @@ The zipfile yaHAL-S-FC.zip contains:
  Which, of course, has not yet been created.
  
  However, the compiler does have an interactive mode in which you can
- compile and execute HAL/S source code, one statement at a time.
+ compile HAL/S source code into PALMAT and then immediately execute the 
+ PALMAT.
    
 Setup
 -----
@@ -27,8 +28,8 @@ PATH.
 The Python 3 language must also be installed, and presumably in your
 PATH as well.
 
-Our compiler consists of a completely-portable portion written in 
-Python 3, plus a portion written in C that must itself be compiled
+Our compiler consists of a (hopefully!) completely-portable portion written
+in Python 3, plus a portion written in C that must itself be compiled
 before being runnable on your system.
 
 As I said earlier, the C-language component of the compiler has been
@@ -83,7 +84,7 @@ compilers other than gcc or clang with a grain of salt.)
 I also typically use command-line options instructing the compiler to
 optimize for execution speed, though no options are really necessary.
 Anyway, here are some examples of the commands you might use to build
-from source:
+from source, depending on whichever C compiller you have available:
 
 	gcc -O3 -o modernHAL-S-FC *.c			(in Linux)
 		or
@@ -91,14 +92,14 @@ from source:
 		or
 	clang -O3 -o modernHAL-S-FC-macosx *.c		(in Mac OS X)
 
-Invocation
-----------
+Invocation of the HAL/S Compiler
+--------------------------------
 
 The compiler can be invoked either in a "batch" mode, in which it processes
 whatever HAL/S source files are fed into it for generation of a PALMAT
 output file, or else in "interactive" mode.  In interactive mode, the 
 user can type in HAL/S statements at the keyboard, and those are compiled
-and executed immediately.
+and executed immediately, but no PALMAT output file is saved.
 
 In batch mode, the compiler is invoked as follows:
 
@@ -123,16 +124,13 @@ Interpreter Usage
 
 Upon running the HAL/S interpreter the first time, you're greeted with
 
-	FYI: Structure-template library file yaHAL-default.templates 
-	     doesn't exist yet.
 	[HELP] > 
 
-The FYI isn't important, and you can ignore it.  At the prompt, you 
-typically input HAL/S "statements", though statements can span
-multiple lines, or multiple statements can be packed on a single line.
-The interpreter will accept as many lines as you wish to input, but
-will only process them when it encounters an input line for which the
-final character (including spaces) is a semicolon.
+At the prompt, you typically input HAL/S "statements", though statements 
+can span multiple lines, or multiple statements can be packed on a single 
+line. The interpreter will accept as many lines as you wish to input, but
+will only begin to process them when it encounters an input line for which
+the final character (including spaces) is a semicolon.
 
 For example, you might enter the HAL/S statements:
 
@@ -147,22 +145,19 @@ In pure HAL/S, column 1 has a special interpretation, and must contain
 one of the characters ' ', 'C', 'D', 'E', 'M', or 'S'.  This would be
 very inconvenient in the interpreter, since if you're like me you'd
 always be forgetting to start each line with a space, so the treatment
-of column 1 is somewhat different.  If a line begins with "C " or "D "
-it is still treated as a comment or a compiler directive, just as in
-pure HAL/S.  However, E/M/S (exponent/main/subscript) lines are not
-allowed at all; which frankly is no loss, since they're more useful
-as an output format than as an input format.
+of column 1 is somewhat different.  In fact, the interpreter always 
+just automatically prefixes each line you enter with a space, so 
+column 1 is always empty.  There's one exception that, in that the
+interpreter recognizes compiler directives of the form
 
-Thus in general, the interpreter will accept any lines other that
-full-line comments or compiler directives as regular HAL/S source
-code, and will automatically prepend a single space to them before
-compiling them.  If you want to enter code like "C = 1;" or "D = C + 5",
-which the interpreter will confuse with full-line comments or 
-compiler directives, I'm afraid you'll have to be careful to put a 
-space in front of them yourself, rather than beginning them in column 1.
+	D IMPORT TEMPLATE ...
 
-Moreover, in addition to HAL/S code, you can also input commands for
-the interpreter itself, such as "HELP" to get a list of the commands
+and does not doctor those lines in any way.  However, there's no
+allowance for full-line comments, E/M/S (exponent/main/subscript)
+constructs, or other compiler directives.
+
+On the other hand, in addition to HAL/S code, you can also input commands
+for the interpreter itself, such as "HELP" to get a list of the commands
 recognized by the interpreter.  In fact, if you do that, you might
 see something like this:
 
@@ -173,21 +168,28 @@ see something like this:
 	    QUIT     Quit this interpreter program.
 	    WINE     Run Windows compiler in Linux.
 	    NOWINE   Run native compiler version (default).
-	    TRACE    Turn on parser tracing.
-	    NOTRACE  Turn off parser tracing.
+	    TRACE1   Turn on parser tracing.
+	    NOTRACE1 Turn off parser tracing.
+	    TRACE2   Turn on code-generator tracing.
+	    NOTRACE2 Turn off code-generator tracing.
 	    LBNF     Show abstract syntax trees in LBNF.
 	    BNF      Show abstract syntax trees in BNF.
 	    NOAST    Don't show abstract syntax trees.
 	    EXEC     Execute the HAL/S code.
 	    NOEXEC   Don't execute the HAL/S code.
 	    STATUS   Show the current VM state.
+	    REMOVE D Remove identifier D (current scope).
+	    REMOVE * Remove all identifiers (current scope).
+	    RESET    Reset entire STATUS.
 	    RECENT   Show recent lines of code, numbered.
 	    RERUN    Re-run last line of code.
 	    RERUN D  Re-run numbered line D (from RECENT).
 	[HELP] > 
 
 Many of these are things more helpful to me (for debugging the 
-compiler) than to you, I expect. 
+compiler) than to you, I expect. Nevertheless, you'll want to 
+avoid using any variables with these names in order to avoid
+confusing the interpreter.
 
 Debugging
 ---------
@@ -198,7 +200,7 @@ commands TRACE/NOTRACE and LBNF/BNF/NOAST.
 The compiler processes the HAL/S language in terms of what's known 
 as the "grammar" of HAL/S, which is something typically 
 expressed in a language called BNF (Backus Naur Form).  Unfortunately, 
-BNF, if intendend as a *full* description, applies only to what are 
+BNF, if intended as a *full* description, applies only to what are 
 called "context-free" grammars.  And as originally defined by the team 
 that designed HAL/S back in the 1970's, HAL/S is *not* context-free.
 
@@ -228,8 +230,8 @@ none of which you normally have to think about.
 
 Besides the BNF grammar of Preprocessed HAL/S, there also exists a 
 description of the grammer in the LBNF language.  LBNF stands for
-"labelled" BNF.  In fact, we use LBNF throughout, but also provide
-some documentation in BNF, just because it's more familiar to most
+"labelled" BNF.  In fact, we use LBNF internally, but can also 
+provide trace info in BNF, just because it's more familiar to most
 programmers.  If you're so-inclined, you can compare these
 various grammars at the following links:
 
@@ -271,7 +273,7 @@ BNF analysis for each statement.  For example:
 	░ ░ ░ ░ ░<SQ DQ NAME> : <ARITH CONV>
 	[HELP] > 
 
-Or if you use the interpreter's LBNF command:
+Or if you instead use the interpreter's LBNF command:
 
 	[HELP] > lbnf
 	Display abstract syntax trees (AST) in LBNF.
@@ -302,7 +304,7 @@ I has been declared as AAarithConvInteger; i.e., INTEGER.  But
 I digress!
 
 You can just use the NOAST interpreter command to turn off the printouts
-for these BNF/LBNF analyses.
+for these BNF/LBNF analyses, if you're uninterested in the analysis.
 
 What's particularly useful if a statement *won't* parse, due to some
 bug in the preprocessor or compiler, or I guess, in whatever HAL/S syntax
