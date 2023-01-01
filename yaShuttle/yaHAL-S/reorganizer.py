@@ -30,8 +30,10 @@ import sys
 # be treated differently for the untranslate() function to work properly
 # outside of string literals and comments).
 Not = "¬"
-translatedNot = 0xff
+translatedNot = chr(0xFF)
+translatedComma = chr(0x80)
 def translate(string):
+    #print("T", string)
     translatedString = ""
     isInlineComment = string[:2] == "/*" and string[-2:] == "*/"
     isQuotedString = string[:1] == "'" and string[-1:] == "'"
@@ -44,6 +46,8 @@ def translate(string):
     for c in string:
         if c == Not:
             c = translatedNot
+        elif c == ",":
+            c = translatedComma
         else:
             c = chr(ord(c) + 0x80)
         translatedString += c
@@ -55,12 +59,15 @@ def translate(string):
     
 # Undo translate().
 def untranslate(string):
+    #print("U", string)
     translatedString = ""
     for c in string:
         if c == Not:
             pass
         elif c == translatedNot:
             c = Not
+        elif c == translatedComma:
+            c = ","
         else:
             o = ord(c)
             if o >= 0x80:
