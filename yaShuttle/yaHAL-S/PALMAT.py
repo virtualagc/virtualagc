@@ -12,6 +12,7 @@ History:        2022-12-19 RSB  Created.
 
 import json
 import p_Functions
+from executePALMAT import executePALMAT, hround
 
 #-----------------------------------------------------------------------------
 # File operations.
@@ -120,6 +121,25 @@ def findIdentifier(identifier, PALMAT, scopeIndex=None):
 
 #-----------------------------------------------------------------------------
 # The code generator (ast -> PALMAT).
+
+def isUnmarkedScalar(identifierDict):
+    if "scalar" in identifierDict:
+        return False
+    if "integer" in identifierDict:
+        return False
+    if "vector" in identifierDict:
+        return False
+    if "matrix" in identifierDict:
+        return False
+    if "bit" in identifierDict:
+        return False
+    if "character" in identifierDict:
+        return False
+    if "template" in identifierDict:
+        return False
+    if "structure" in identifierDict:
+        return False
+    return True
 
 '''
 Here's the idea:  generatePALMAT() is a recursive function that works its
@@ -244,22 +264,56 @@ def generatePALMAT(ast, PALMAT, state={ "history":[] }, trace=False):
         identifiers = PALMAT["scopes"][-1]["identifiers"]
         for i in identifiers:
             identifier = identifiers[i]
-            if "scalar" in identifier:
-                continue
-            if "integer" in identifier:
-                continue
-            if "vector" in identifier:
-                continue
-            if "matrix" in identifier:
-                continue
-            if "bit" in identifier:
-                continue
-            if "character" in identifier:
-                continue
-            if "template" in identifier:
-                continue
-            if "structure" in identifier:
-                continue
-            identifier["scalar"] = True
+            if isUnmarkedScalar(identifier):
+                identifier["scalar"] = True
+    elif lbnfLabel == "repeated_constant":
+        # We get to here after an INITIAL(...) or CONSTANT(...)
+        # has been fully processed to the extent of preparing
+        # substate["expression"] for computing the value in 
+        # parenthesis, but without having performed that computation
+        # yet, leaving a bogus "initial" or "constant" attribute.
+        # We now have to perform the actual computation, if possible,
+        # and correct the bogus constant.  Since DECLARE statements
+        # always come at the beginnings of blocks, prior to any 
+        # executable code, we don't have to worry about preserving
+        # any existing PALMAT for the scope.
+        identifiers = PALMAT["scopes"][-1]["identifiers"]
+        instructions = PALMAT["scopes"][-1]["instructions"]
+        instructions.clear()
+        for entry in reversed(p_Functions.substate["expression"]):
+            instructions.append(entry)
+        p_Functions.substate["expression"].clear()
+        computationStack = executePALMAT(PALMAT)
+        #print("*A", instructions)
+        #print("*B", computationStack)
+        if computationStack == None or len(computationStack) != 1:
+            print("Computation of INITIALIZE or CONSTANT failed")
+            return False, PALMAT
+        value = computationStack.pop()
+        currentIdentifier = p_Functions.substate["currentIdentifier"]
+        identifierDict = identifiers[currentIdentifier]
+        if isUnmarkedScalar(identifierDict):
+            identifierDict["scalar"] = True
+        key = None
+        if "initial" in identifierDict and identifierDict["initial"] == "^?^":
+            key = "initial"
+        elif "constant" in identifierDict and identifierDict["constant"] == "^?^":
+            key = "constant"
+        else:
+            print("Discrepancy between INITIAL and CONSTANT.")
+            return False, PALMAT
+        if isinstance(value, (int, float)) and "integer" in identifierDict:
+            value = hround(value)
+        elif isinstance(value, (int, float)) and "scalar" in identifierDict:
+            value = float(value)
+        elif isinstance(value, bool) and "bit" in identifierDict:
+            pass
+        elif isinstance(value, str) and "character" in identifierDict:
+            pass
+        else:
+            print("Datatype mismatch in INITIAL or CONSTANT.")
+            return False, PALMAT
+        identifierDict[key] = value
+        identifierDict["value"] = value
     
     return True, PALMAT

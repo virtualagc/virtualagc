@@ -190,8 +190,8 @@ With that in mind, here's a description of some of the available PALMAT instruct
 * `{'operator': ''}`.  This is the multiplication operator.  The action at runtime is to pop the last two values from the execution stack, multiply them, and then push the result back onto the execution stack.
 * `{'operator': '/'}`.  This is the division operator.  The action at runtime is to pop the final two elements from the execution stack, dividing the last value by the 2nd-to-last value from the last value, and then pushing the result back onto the execution stack.
 * `{'operator': '**'}`.  This is the exponentiation operator.  The action at runtime is to pop the final two elements from the execution stack, raising the last value to the power of the 2nd-to-last value, and then pushing the result back onto the execution stack.
-* `{'fetch': identifier}`, where `identifier` is the name of a variable.  It must correspond to an identifier already in `PALMAT["identifiers"]`, except that the surrounding carats (if any) used as string quotes in the identifier dictionary will not be present.  The action at runtime is to fetch the value of the variable or constant identified and push it onto the execution stack. (I haven't given any thought as of yet as to how to handle vectors, matrices, arrays, or structures as of yet, so temporarily at least, just think of variables or constants storing numbers or booleans.)
-* `{'store': identifier}`, where `identifier` is the name of a variable.  It must correspond to an identifier already in `PALMAT["identifiers"]`, except that the surrounding carats (if any) used as string quotes in the identifier dictionary will not be present.  The action at runtime is to store the last value in the execution stack (without popping it from the stack) into the variable identified.
+* `{'fetch': identifier}`, where `identifier` is the name of a variable.  It must correspond to an identifier already in `PALMAT["identifiers"]`, except that the surrounding carats (if any) used as string quotes in the identifier dictionary will not be present.  The action at runtime is to fetch the value of the variable or constant identified and push it onto the execution stack.  The value is stored in a variable's "value" attribute or in a constant's "constant" attribute. (I haven't given any thought as of yet as to how to handle vectors, matrices, arrays, or structures as of yet, so temporarily at least, just think of variables or constants storing numbers or booleans.)
+* `{'store': identifier}`, where `identifier` is the name of a variable.  It must correspond to an identifier already in `PALMAT["identifiers"]`, except that the surrounding carats (if any) used as string quotes in the identifier dictionary will not be present.  The action at runtime is to store the last value in the execution stack (without popping it from the stack) into the variable identified.  The value is stored in the variable's "value" attribute.
 * `{'pop': number}`.  Pops `number` of elements from the execution stack and discards them.
 
 More PALMAT instructions will be defined below, but first let's consider a couple of example.  Look at the following HAL/S code:
@@ -256,7 +256,7 @@ Thus we end up with `B=2`, `C=5`, `A=307`.
 
 Here's another PALMAT instruction pertaining to output:
 
-  * `{'write': lun}` marks the *end* of the PALMAT corresponding to a HAL/S statement of the form `WRITE(lun) ...`.  The only logical unit number understood by the interpreter is `lun=6`, which is output to the console from which the interpreter commands and HAL/S statements are being input.
+  * `{'write': lun}` marks the *end* of the PALMAT corresponding to a HAL/S statement of the form `WRITE(lun) ...`.  The only logical unit number understood by the interpreter is `lun=6`, which is output to the console from which the interpreter commands and HAL/S statements are being input.  The instruction outputs (and pops) every value on the expression stack.
 
 The full form of a HAL/S `WRITE` statment is
 
@@ -281,13 +281,14 @@ For example, here are some PALMAT instructions appropriate for `WRITE(6) A+5, A*
 
 ### PALMAT Instructions 3: Character Expressions and Built-In Functions
 
-* `{'string': s}` pushes string `s` onto the expression stack.  Note that a string, however many characters it contains, is an atomic object occupying a single position on the stack.  (It does *not*, for example, require a separate stack position for each character.)
+* `{'string': s}` pushes string `s` onto the expression stack.  Note that a string, however many characters it contains, is an atomic object occupying a single position on the stack.  (It does *not*, for example, require a separate stack position for each character.)  Strings placed on the stack in this manner can then subsequently be used (for example) in `WRITE` operations, can be stored in variables, etc.
 * `{'operator': 'C||'}` is the string-concatenation operator.  It pops the top two elements from the stack, which must be strings.  The string that had been the 2nd-from-the-top is concatenated to the end of the string that had been at the top of the stack, and then the full string is pushed back onto the top of the stack. 
-* `{'function': f}` calls the HAL/S built-in function called `f`.  For example, `{'function': 'ABS'}`.  This functions are outlined in Appendix A of the HAL/S Language Specification.
+* `{'function': f}` calls the HAL/S built-in function called `f`.  For example, `{'function': 'ABS'}` or `{'function': 'RANDOM'}`.  These functions are outlined in Appendix A of the HAL/S Language Specification.  Here are some notes about the PALMAT implementation of specific built-in functions which the documentation describes as implementation-dependent:
+    * `CLOCKTIME`.  TBD
+    * `DATE`.  TBD
+    * `RUNTIME`.  This is the elapsed floating-point number of seconds, nominally with nanosecond resolution,from the point at which the software run began.  (This is consistent with the statements on p. 13-15, PDF p. 170, of the 2005 version of the HAL/S Programmer's Guide.)
 
-Strings placed on the stack in this manner can then subsequently be used (for example) in `WRITE` operations, can be stored in variables, etc.
 
-TBD
 
 ## The Source-Code File List
 

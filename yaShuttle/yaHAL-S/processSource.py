@@ -4,7 +4,7 @@
 Copyright:      None - the author (Ron Burkey) declares this software to
                 be in the Public Domain, with no rights reserved.
 Filename:       processSource.py
-Purpose:        This is parte of a preprocessor for the "modern" HAL/S compiler
+Purpose:        This is part of a preprocessor for the "modern" HAL/S compiler
                 which takes care of things I don't think can be handled
                 by the compiler itself (given the BNFC framework for
                 developing the compiler).  It invokes the compiler 

@@ -907,7 +907,7 @@ ARITH_ID make_FHarith_id(ArithFieldToken p0);
 struct NO_ARG_ARITH_FUNC_
 {
   int line_number, char_number;
-  enum { is_ZZclocktime, is_ZZdate, is_ZZerrgrp, is_ZZprio, is_ZZrandom, is_ZZruntime } kind;
+  enum { is_ZZclocktime, is_ZZdate, is_ZZerrgrp, is_ZZerrnum, is_ZZprio, is_ZZrandom, is_ZZrandomg, is_ZZruntime } kind;
   union
   {
   } u;
@@ -916,20 +916,22 @@ struct NO_ARG_ARITH_FUNC_
 NO_ARG_ARITH_FUNC make_ZZclocktime(void);
 NO_ARG_ARITH_FUNC make_ZZdate(void);
 NO_ARG_ARITH_FUNC make_ZZerrgrp(void);
+NO_ARG_ARITH_FUNC make_ZZerrnum(void);
 NO_ARG_ARITH_FUNC make_ZZprio(void);
 NO_ARG_ARITH_FUNC make_ZZrandom(void);
+NO_ARG_ARITH_FUNC make_ZZrandomg(void);
 NO_ARG_ARITH_FUNC make_ZZruntime(void);
 
 struct ARITH_FUNC_
 {
   int line_number, char_number;
-  enum { is_ZZnexttime, is_ZZabs, is_ZZceiling, is_ZZdiv, is_ZZfloor, is_ZZmidval, is_ZZmod, is_ZZodd, is_ZZremainder, is_ZZround, is_ZZsign, is_ZZsignum, is_ZZtruncate, is_ZZarccos, is_ZZarccosh, is_ZZarcsin, is_ZZarcsinh, is_ZZarctan2, is_ZZarctan, is_ZZarctanh, is_ZZcos, is_ZZcosh, is_ZZexp, is_ZZlog, is_ZZsin, is_ZZsinh, is_ZZsqrt, is_ZZtan, is_ZZtanh, is_ZZshl, is_ZZshr, is_ZZabval, is_ZZdet, is_ZZtrace, is_ZZunit, is_ZZmatrix, is_ZZindex, is_ZZlength, is_ZZinverse, is_ZZtranspose, is_ZZprod, is_ZZsum, is_ZZsize, is_ZZmax, is_ZZmin, is_AAarithFuncInteger, is_AAarithFuncScalar } kind;
+  enum { is_ZZnextime, is_ZZabs, is_ZZceiling, is_ZZdiv, is_ZZfloor, is_ZZmidval, is_ZZmod, is_ZZodd, is_ZZremainder, is_ZZround, is_ZZsign, is_ZZsignum, is_ZZtruncate, is_ZZarccos, is_ZZarccosh, is_ZZarcsin, is_ZZarcsinh, is_ZZarctan2, is_ZZarctan, is_ZZarctanh, is_ZZcos, is_ZZcosh, is_ZZexp, is_ZZlog, is_ZZsin, is_ZZsinh, is_ZZsqrt, is_ZZtan, is_ZZtanh, is_ZZshl, is_ZZshr, is_ZZabval, is_ZZdet, is_ZZtrace, is_ZZunit, is_ZZmatrix, is_ZZindex, is_ZZlength, is_ZZinverse, is_ZZtranspose, is_ZZprod, is_ZZsum, is_ZZsize, is_ZZmax, is_ZZmin, is_AAarithFuncInteger, is_AAarithFuncScalar } kind;
   union
   {
   } u;
 };
 
-ARITH_FUNC make_ZZnexttime(void);
+ARITH_FUNC make_ZZnextime(void);
 ARITH_FUNC make_ZZabs(void);
 ARITH_FUNC make_ZZceiling(void);
 ARITH_FUNC make_ZZdiv(void);
@@ -2873,7 +2875,7 @@ ARITH_SPEC make_ACarith_spec(SQ_DQ_NAME p0, PREC_SPEC p1);
 struct COMPILATION_
 {
   int line_number, char_number;
-  enum { is_AAcompilation, is_ABcompilation, is_ACcompilation, is_ADcompilation, is_AEcompilation, is_AFcompilation, is_AGcompilation, is_AHcompilation } kind;
+  enum { is_AAcompilation, is_ABcompilation, is_ACcompilation, is_ADcompilation, is_AEcompilation, is_AFcompilation, is_AGcompilation, is_AHcompilation, is_AZcompilationInitOrConst } kind;
   union
   {
     struct { ANY_STATEMENT any_statement_; } aacompilation_;
@@ -2884,6 +2886,7 @@ struct COMPILATION_
     struct { COMPILATION compilation_; STRUCTURE_STMT structure_stmt_; } afcompilation_;
     struct { REPLACE_STMT replace_stmt_; } agcompilation_;
     struct { COMPILATION compilation_; REPLACE_STMT replace_stmt_; } ahcompilation_;
+    struct { EXPRESSION expression_; INIT_OR_CONST_HEAD init_or_const_head_; } azcompilationinitorconst_;
   } u;
 };
 
@@ -2895,6 +2898,7 @@ COMPILATION make_AEcompilation(STRUCTURE_STMT p0);
 COMPILATION make_AFcompilation(COMPILATION p0, STRUCTURE_STMT p1);
 COMPILATION make_AGcompilation(REPLACE_STMT p0);
 COMPILATION make_AHcompilation(COMPILATION p0, REPLACE_STMT p1);
+COMPILATION make_AZcompilationInitOrConst(INIT_OR_CONST_HEAD p0, EXPRESSION p1);
 
 struct BLOCK_DEFINITION_
 {

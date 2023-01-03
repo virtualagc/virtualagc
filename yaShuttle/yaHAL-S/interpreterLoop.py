@@ -12,7 +12,9 @@ History:        2022-12-16 RSB  Split off the nascent form from
 from processSource import processSource
 from PALMAT import constructPALMAT
 from p_Functions import removeIdentifier, removeAllIdentifiers, substate
-from executePALMAT import executePALMAT
+from executePALMAT import executePALMAT, setupExecutePALMAT
+
+setupExecutePALMAT()
 
 maxRecent = 25
 def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
@@ -34,8 +36,8 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
     noCompile = False
     wine = False
     if shouldColorize:
-        colorize = "\033[31m"
-        colorName = "red"
+        colorize = "\033[35m"
+        colorName = "magenta"
     else:
         colorize = ""
         colorName = ""
@@ -52,12 +54,14 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
         halCode = False
         line = ""
         while line[-1:] != ";" and not quitting:
+            print(colorize, end="")
+            if len(halsSource) == 0:
+                print("HAL/S > ", end="")
+            else:
+                print("  ... > ", end="")
             if colorize != "":
                 print("\033[0m", end="")
-            if len(halsSource) == 0:
-                line = input("HAL/S > ")
-            else:
-                line = input("  ... > ")
+            line = input()
             print(colorize, end="")
             fields = line.strip().split()
             numWords = len(fields)

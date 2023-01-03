@@ -1213,6 +1213,13 @@ void ppNO_ARG_ARITH_FUNC(NO_ARG_ARITH_FUNC p, int _i_)
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
+  case is_ZZerrnum:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderS("ERRNUM");
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
   case is_ZZprio:
     if (_i_ > 0) renderC(_L_PAREN);
     renderS("PRIO");
@@ -1223,6 +1230,13 @@ void ppNO_ARG_ARITH_FUNC(NO_ARG_ARITH_FUNC p, int _i_)
   case is_ZZrandom:
     if (_i_ > 0) renderC(_L_PAREN);
     renderS("RANDOM");
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ZZrandomg:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderS("RANDOMG");
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
@@ -1245,9 +1259,9 @@ void ppARITH_FUNC(ARITH_FUNC p, int _i_)
 {
   switch(p->kind)
   {
-  case is_ZZnexttime:
+  case is_ZZnextime:
     if (_i_ > 0) renderC(_L_PAREN);
-    renderS("NEXTTIME");
+    renderS("NEXTIME");
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
@@ -5997,6 +6011,15 @@ void ppCOMPILATION(COMPILATION p, int _i_)
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
+  case is_AZcompilationInitOrConst:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppINIT_OR_CONST_HEAD(p->u.azcompilationinitorconst_.init_or_const_head_, 0);
+    ppEXPRESSION(p->u.azcompilationinitorconst_.expression_, 0);
+    renderC(')');
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
 
   default:
     fprintf(stderr, "Error: bad kind field when printing COMPILATION!\n");
@@ -8648,6 +8671,14 @@ void shNO_ARG_ARITH_FUNC(NO_ARG_ARITH_FUNC p)
 
 
     break;
+  case is_ZZerrnum:
+
+    bufAppendS("ZZerrnum");
+
+
+
+
+    break;
   case is_ZZprio:
 
     bufAppendS("ZZprio");
@@ -8659,6 +8690,14 @@ void shNO_ARG_ARITH_FUNC(NO_ARG_ARITH_FUNC p)
   case is_ZZrandom:
 
     bufAppendS("ZZrandom");
+
+
+
+
+    break;
+  case is_ZZrandomg:
+
+    bufAppendS("ZZrandomg");
 
 
 
@@ -8683,9 +8722,9 @@ void shARITH_FUNC(ARITH_FUNC p)
 {
   switch(p->kind)
   {
-  case is_ZZnexttime:
+  case is_ZZnextime:
 
-    bufAppendS("ZZnexttime");
+    bufAppendS("ZZnextime");
 
 
 
@@ -14918,6 +14957,20 @@ void shCOMPILATION(COMPILATION p)
     shCOMPILATION(p->u.ahcompilation_.compilation_);
   bufAppendC(' ');
     shREPLACE_STMT(p->u.ahcompilation_.replace_stmt_);
+
+    bufAppendC(')');
+
+    break;
+  case is_AZcompilationInitOrConst:
+    bufAppendC('(');
+
+    bufAppendS("AZcompilationInitOrConst");
+
+    bufAppendC(' ');
+
+    shINIT_OR_CONST_HEAD(p->u.azcompilationinitorconst_.init_or_const_head_);
+  bufAppendC(' ');
+    shEXPRESSION(p->u.azcompilationinitorconst_.expression_);
 
     bufAppendC(')');
 

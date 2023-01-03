@@ -1284,6 +1284,18 @@ NO_ARG_ARITH_FUNC make_ZZerrgrp()
     tmp->kind = is_ZZerrgrp;
     return tmp;
 }
+/********************   ZZerrnum    ********************/
+NO_ARG_ARITH_FUNC make_ZZerrnum()
+{
+    NO_ARG_ARITH_FUNC tmp = (NO_ARG_ARITH_FUNC) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ZZerrnum!\n");
+        exit(1);
+    }
+    tmp->kind = is_ZZerrnum;
+    return tmp;
+}
 /********************   ZZprio    ********************/
 NO_ARG_ARITH_FUNC make_ZZprio()
 {
@@ -1308,6 +1320,18 @@ NO_ARG_ARITH_FUNC make_ZZrandom()
     tmp->kind = is_ZZrandom;
     return tmp;
 }
+/********************   ZZrandomg    ********************/
+NO_ARG_ARITH_FUNC make_ZZrandomg()
+{
+    NO_ARG_ARITH_FUNC tmp = (NO_ARG_ARITH_FUNC) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ZZrandomg!\n");
+        exit(1);
+    }
+    tmp->kind = is_ZZrandomg;
+    return tmp;
+}
 /********************   ZZruntime    ********************/
 NO_ARG_ARITH_FUNC make_ZZruntime()
 {
@@ -1319,16 +1343,16 @@ NO_ARG_ARITH_FUNC make_ZZruntime()
     }
     tmp->kind = is_ZZruntime;
     return tmp;
-}/********************   ZZnexttime    ********************/
-ARITH_FUNC make_ZZnexttime()
+}/********************   ZZnextime    ********************/
+ARITH_FUNC make_ZZnextime()
 {
     ARITH_FUNC tmp = (ARITH_FUNC) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ZZnexttime!\n");
+        fprintf(stderr, "Error: out of memory when allocating ZZnextime!\n");
         exit(1);
     }
-    tmp->kind = is_ZZnexttime;
+    tmp->kind = is_ZZnextime;
     return tmp;
 }
 /********************   ZZabs    ********************/
@@ -6679,6 +6703,20 @@ COMPILATION make_AHcompilation(COMPILATION p1, REPLACE_STMT p2)
     tmp->kind = is_AHcompilation;
     tmp->u.ahcompilation_.compilation_ = p1;
     tmp->u.ahcompilation_.replace_stmt_ = p2;
+    return tmp;
+}
+/********************   AZcompilationInitOrConst    ********************/
+COMPILATION make_AZcompilationInitOrConst(INIT_OR_CONST_HEAD p1, EXPRESSION p2)
+{
+    COMPILATION tmp = (COMPILATION) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AZcompilationInitOrConst!\n");
+        exit(1);
+    }
+    tmp->kind = is_AZcompilationInitOrConst;
+    tmp->u.azcompilationinitorconst_.init_or_const_head_ = p1;
+    tmp->u.azcompilationinitorconst_.expression_ = p2;
     return tmp;
 }/********************   AAblock_definition    ********************/
 BLOCK_DEFINITION make_AAblock_definition(BLOCK_STMT p1, CLOSING p2)
