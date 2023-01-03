@@ -277,23 +277,40 @@ def generatePALMAT(ast, PALMAT, state={ "history":[] }, trace=False):
         # always come at the beginnings of blocks, prior to any 
         # executable code, we don't have to worry about preserving
         # any existing PALMAT for the scope.
-        identifiers = PALMAT["scopes"][-1]["identifiers"]
-        instructions = PALMAT["scopes"][-1]["instructions"]
+        scopes = PALMAT["scopes"]
+        identifiers = scopes[-1]["identifiers"]
+        instructions = scopes[-1]["instructions"]
+        currentIdentifier = p_Functions.substate["currentIdentifier"]
         instructions.clear()
         for entry in reversed(p_Functions.substate["expression"]):
+            if "fetch" in entry:
+                identifier = "^" + entry["fetch"] + "^"
+                for scope in reversed(scopes):
+                    if identifier in scope["identifiers"]:
+                        if "constant" not in scope["identifiers"][identifier]:
+                            print("Can only use constants in computing INITIAL or CONSTANT.")
+                            identifiers.pop(currentIdentifier)
+                            return False, PALMAT
+                        break
             instructions.append(entry)
         p_Functions.substate["expression"].clear()
         computationStack = executePALMAT(PALMAT)
         #print("*A", instructions)
         #print("*B", computationStack)
         if computationStack == None or len(computationStack) != 1:
-            print("Computation of INITIALIZE or CONSTANT failed")
+            print("Computation of INITIAL or CONSTANT failed")
+            identifiers.pop(currentIdentifier)
+            instructions.clear()
             return False, PALMAT
         value = computationStack.pop()
-        currentIdentifier = p_Functions.substate["currentIdentifier"]
         identifierDict = identifiers[currentIdentifier]
         if isUnmarkedScalar(identifierDict):
             identifierDict["scalar"] = True
+        if "initial" in identifierDict and "constant" in identifierDict:
+            print("Identifier", currentIdentifier[1:-1], \
+                    "cannot have both INITIAL and CONSTANT.")
+            identifiers.pop(currentIdentifier)
+            return False, PALMAT
         key = None
         if "initial" in identifierDict and identifierDict["initial"] == "^?^":
             key = "initial"
@@ -301,6 +318,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[] }, trace=False):
             key = "constant"
         else:
             print("Discrepancy between INITIAL and CONSTANT.")
+            identifiers.pop(currentIdentifier)
             return False, PALMAT
         if isinstance(value, (int, float)) and "integer" in identifierDict:
             value = hround(value)
@@ -312,8 +330,10 @@ def generatePALMAT(ast, PALMAT, state={ "history":[] }, trace=False):
             pass
         else:
             print("Datatype mismatch in INITIAL or CONSTANT.")
+            identifiers.pop(currentIdentifier)
             return False, PALMAT
         identifierDict[key] = value
-        identifierDict["value"] = value
+        if key == "initial":
+            identifierDict["value"] = value
     
     return True, PALMAT

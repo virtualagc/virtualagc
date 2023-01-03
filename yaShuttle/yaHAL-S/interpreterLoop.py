@@ -10,7 +10,7 @@ History:        2022-12-16 RSB  Split off the nascent form from
 """
 
 from processSource import processSource
-from PALMAT import constructPALMAT
+from PALMAT import constructPALMAT, writePALMAT, readPALMAT
 from p_Functions import removeIdentifier, removeAllIdentifiers, substate
 from executePALMAT import executePALMAT, setupExecutePALMAT
 
@@ -102,6 +102,20 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
                     removeAllIdentifiers(PALMAT)
                 else: 
                     removeIdentifier(PALMAT, "^" + identifier + "^")
+                continue
+            elif firstWord == "WRITE" and len(fields) > 1:
+                if writePALMAT(PALMAT, fields[1]):
+                    print("Success!")
+                else:
+                    print("Failure!")
+                continue
+            elif firstWord == "READ" and len(fields) > 1:
+                newPALMAT = readPALMAT(fields[1])
+                if newPALMAT == None:
+                    print("Failure!")
+                else:
+                    PALMAT = newPALMAT
+                    print("Success!")
                 continue
             elif numWords == 1:
                 # Handle interpreter commands vs HAL/S source code.
@@ -219,11 +233,11 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
                         print("%2d: %s" % (len(recentHal)-i, recentHal[i]))
                     continue
                 elif firstWord == "WINE":
-                    print("\tIf Linux, will try running Windows version of compiler.")
+                    print("\tEnabled Windows version of compiler in Linux.")
                     wine = True
                     continue
                 elif firstWord == "NOWINE":
-                    print("\tWill run native version of the compiler.")
+                    print("\tDisabled Windows version of compiler in Linux.")
                     wine = False
                     continue
                 elif firstWord == "NOCOLORIZE":
@@ -236,35 +250,39 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
                     print()
                     print("\tHELP         Show this menu.")
                     print("\tQUIT         Quit this interpreter program.")
-                    print("\tCOLORIZE C   Enable colorized output (ANSI terminals).")
+                    print("\tCOLORIZE C   Enable colorizing (ANSI terminals only).")
                     print("\t             C is one of the following words: black,")
                     print("\t             red, green, yellow, blue, magenta, cyan,")
                     print("\t             white, gray, brightred, brightgreen,")
                     print("\t             brightyellow, brightblue, brightmagenta,")
                     print("\t             brightcyan, or brightwhite.")
                     print("\tNOCOLORIZE   Disable colorized output.")
+                    print("\tWRITE F      Write current PALMAT to a file named F.")
+                    print("\tREAD F       Read PALMAT from a file named F.")
                     print("\tDATA         Inspect all variable and constants.")
                     print("\tPALMAT       Inspect recently-generated PALMAT code.")
                     print("\tREMOVE D     Remove identifier D (current scope).")
                     print("\tREMOVE *     Remove all identifiers (current scope).")
                     print("\tRESET        Remove all identifiers (all scopes).")
                     print("\tSTATUS       Show current settings and other info.")
-                    print("\tWINE         Run Windows compiler in Linux.")
-                    print("\tNOWINE       Run native compiler version (default).")
-                    print("\tTRACE1       Turn on parser tracing.")
-                    print("\tNOTRACE1     Turn off parser tracing.")
-                    print("\tTRACE2       Turn on code-generator tracing.")
-                    print("\tNOTRACE2     Turn off code-generator tracing.")
-                    print("\tTRACE3       Turn on execution tracing.")
-                    print("\tNOTRACE3     Turn off execution tracing.")
+                    print("\tWINE         Enable Windows compiler (Linux only).")
+                    print("\tNOWINE       Disable Windows compiler (Linux only).")
+                    print("\tTRACE1       Enable parser tracing.")
+                    print("\tNOTRACE1     Disable parser tracing.")
+                    print("\tTRACE2       Enable code-generator tracing.")
+                    print("\tNOTRACE2     Disable code-generator tracing.")
+                    print("\tTRACE3       Enable execution tracing.")
+                    print("\tNOTRACE3     Disable execution tracing.")
                     print("\tLBNF         Show abstract syntax trees in LBNF.")
                     print("\tBNF          Show abstract syntax trees in BNF.")
                     print("\tNOAST        Don't show abstract syntax trees.")
                     print("\tEXEC         Execute the HAL/S code.")
                     print("\tNOEXEC       Don't execute the HAL/S code.")
+                    '''
                     print("\tRECENT       Show recent lines of code, numbered.")
                     print("\tRERUN        Re-run last line of code.")
                     print("\tRERUN D      Re-run numbered line D (from RECENT).")
+                    '''
                     print()
                     continue
             if len(fields) > 3 and fields[0] == "D" and fields[1] == "INCLUDE" \
