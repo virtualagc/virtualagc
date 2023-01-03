@@ -959,11 +959,11 @@ SUB_OR_QUALIFIER : SUBSCRIPT { $$ = make_AAsub_or_qualifier($1); $$->line_number
 ;
 BIT_QUALIFIER : _SYMB_24 _SYMB_14 _SYMB_2 _SYMB_15 RADIX _SYMB_1 { $$ = make_AAbit_qualifier($5); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
-CHAR_EXP : CHAR_PRIM { $$ = make_AAchar_exp($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | CHAR_EXP CAT CHAR_PRIM { $$ = make_ABchar_exp($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | CHAR_EXP CAT ARITH_EXP { $$ = make_ACchar_exp($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | ARITH_EXP CAT ARITH_EXP { $$ = make_ADchar_exp($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | ARITH_EXP CAT CHAR_PRIM { $$ = make_AEchar_exp($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+CHAR_EXP : CHAR_PRIM { $$ = make_AAcharExpPrim($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | CHAR_EXP CAT CHAR_PRIM { $$ = make_ABcharExpCat($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | CHAR_EXP CAT ARITH_EXP { $$ = make_ACcharExpCat($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | ARITH_EXP CAT ARITH_EXP { $$ = make_ADcharExpCat($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | ARITH_EXP CAT CHAR_PRIM { $$ = make_AEcharExpCat($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 CHAR_PRIM : CHAR_VAR { $$ = make_AAchar_prim($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | CHAR_CONST { $$ = make_ABchar_prim($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }

@@ -2768,45 +2768,45 @@ void ppCHAR_EXP(CHAR_EXP p, int _i_)
 {
   switch(p->kind)
   {
-  case is_AAchar_exp:
+  case is_AAcharExpPrim:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppCHAR_PRIM(p->u.aachar_exp_.char_prim_, 0);
+    ppCHAR_PRIM(p->u.aacharexpprim_.char_prim_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_ABchar_exp:
+  case is_ABcharExpCat:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppCHAR_EXP(p->u.abchar_exp_.char_exp_, 0);
-    ppCAT(p->u.abchar_exp_.cat_, 0);
-    ppCHAR_PRIM(p->u.abchar_exp_.char_prim_, 0);
+    ppCHAR_EXP(p->u.abcharexpcat_.char_exp_, 0);
+    ppCAT(p->u.abcharexpcat_.cat_, 0);
+    ppCHAR_PRIM(p->u.abcharexpcat_.char_prim_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_ACchar_exp:
+  case is_ACcharExpCat:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppCHAR_EXP(p->u.acchar_exp_.char_exp_, 0);
-    ppCAT(p->u.acchar_exp_.cat_, 0);
-    ppARITH_EXP(p->u.acchar_exp_.arith_exp_, 0);
+    ppCHAR_EXP(p->u.accharexpcat_.char_exp_, 0);
+    ppCAT(p->u.accharexpcat_.cat_, 0);
+    ppARITH_EXP(p->u.accharexpcat_.arith_exp_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_ADchar_exp:
+  case is_ADcharExpCat:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppARITH_EXP(p->u.adchar_exp_.arith_exp_1, 0);
-    ppCAT(p->u.adchar_exp_.cat_, 0);
-    ppARITH_EXP(p->u.adchar_exp_.arith_exp_2, 0);
+    ppARITH_EXP(p->u.adcharexpcat_.arith_exp_1, 0);
+    ppCAT(p->u.adcharexpcat_.cat_, 0);
+    ppARITH_EXP(p->u.adcharexpcat_.arith_exp_2, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_AEchar_exp:
+  case is_AEcharExpCat:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppARITH_EXP(p->u.aechar_exp_.arith_exp_, 0);
-    ppCAT(p->u.aechar_exp_.cat_, 0);
-    ppCHAR_PRIM(p->u.aechar_exp_.char_prim_, 0);
+    ppARITH_EXP(p->u.aecharexpcat_.arith_exp_, 0);
+    ppCAT(p->u.aecharexpcat_.cat_, 0);
+    ppCHAR_PRIM(p->u.aecharexpcat_.char_prim_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
@@ -10621,78 +10621,78 @@ void shCHAR_EXP(CHAR_EXP p)
 {
   switch(p->kind)
   {
-  case is_AAchar_exp:
+  case is_AAcharExpPrim:
     bufAppendC('(');
 
-    bufAppendS("AAchar_exp");
+    bufAppendS("AAcharExpPrim");
 
     bufAppendC(' ');
 
-    shCHAR_PRIM(p->u.aachar_exp_.char_prim_);
+    shCHAR_PRIM(p->u.aacharexpprim_.char_prim_);
 
     bufAppendC(')');
 
     break;
-  case is_ABchar_exp:
+  case is_ABcharExpCat:
     bufAppendC('(');
 
-    bufAppendS("ABchar_exp");
+    bufAppendS("ABcharExpCat");
 
     bufAppendC(' ');
 
-    shCHAR_EXP(p->u.abchar_exp_.char_exp_);
+    shCHAR_EXP(p->u.abcharexpcat_.char_exp_);
   bufAppendC(' ');
-    shCAT(p->u.abchar_exp_.cat_);
+    shCAT(p->u.abcharexpcat_.cat_);
   bufAppendC(' ');
-    shCHAR_PRIM(p->u.abchar_exp_.char_prim_);
+    shCHAR_PRIM(p->u.abcharexpcat_.char_prim_);
 
     bufAppendC(')');
 
     break;
-  case is_ACchar_exp:
+  case is_ACcharExpCat:
     bufAppendC('(');
 
-    bufAppendS("ACchar_exp");
+    bufAppendS("ACcharExpCat");
 
     bufAppendC(' ');
 
-    shCHAR_EXP(p->u.acchar_exp_.char_exp_);
+    shCHAR_EXP(p->u.accharexpcat_.char_exp_);
   bufAppendC(' ');
-    shCAT(p->u.acchar_exp_.cat_);
+    shCAT(p->u.accharexpcat_.cat_);
   bufAppendC(' ');
-    shARITH_EXP(p->u.acchar_exp_.arith_exp_);
+    shARITH_EXP(p->u.accharexpcat_.arith_exp_);
 
     bufAppendC(')');
 
     break;
-  case is_ADchar_exp:
+  case is_ADcharExpCat:
     bufAppendC('(');
 
-    bufAppendS("ADchar_exp");
+    bufAppendS("ADcharExpCat");
 
     bufAppendC(' ');
 
-    shARITH_EXP(p->u.adchar_exp_.arith_exp_1);
+    shARITH_EXP(p->u.adcharexpcat_.arith_exp_1);
   bufAppendC(' ');
-    shCAT(p->u.adchar_exp_.cat_);
+    shCAT(p->u.adcharexpcat_.cat_);
   bufAppendC(' ');
-    shARITH_EXP(p->u.adchar_exp_.arith_exp_2);
+    shARITH_EXP(p->u.adcharexpcat_.arith_exp_2);
 
     bufAppendC(')');
 
     break;
-  case is_AEchar_exp:
+  case is_AEcharExpCat:
     bufAppendC('(');
 
-    bufAppendS("AEchar_exp");
+    bufAppendS("AEcharExpCat");
 
     bufAppendC(' ');
 
-    shARITH_EXP(p->u.aechar_exp_.arith_exp_);
+    shARITH_EXP(p->u.aecharexpcat_.arith_exp_);
   bufAppendC(' ');
-    shCAT(p->u.aechar_exp_.cat_);
+    shCAT(p->u.aecharexpcat_.cat_);
   bufAppendC(' ');
-    shCHAR_PRIM(p->u.aechar_exp_.char_prim_);
+    shCHAR_PRIM(p->u.aecharexpcat_.char_prim_);
 
     bufAppendC(')');
 

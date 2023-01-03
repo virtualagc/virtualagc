@@ -174,8 +174,20 @@ def generatePALMAT(ast, PALMAT, state={ "history":[] }, trace=False):
     newState = state
     lbnfLabelFull = ast["lbnfLabel"]
     lbnfLabel = lbnfLabelFull[2:]
+    # HAL/S built-in functions
+    if lbnfLabel in ["abs", "ceiling", "div", "floor", "midval", "mod",
+                     "odd", "remainder", "round", "sign", "signum", "truncate",
+                     "arccos", "arccosh", "arcsin", "arcsinh", "arctan2", 
+                     "arctan", "arctanh", "cos", "cosh", "exp", "log", "sin",
+                     "sinh", "sqrt", "tan", "tanh", "abval", "det", "inverse",
+                     "trace", "transpose", "unit",
+                     "max", "min", "prod", "sum",
+                     "xor", "index", "length", "ljust", "rjust", "trim",
+                     "clocktime", "date", "errgrp", "errnum", "nextime", "prio", "random",
+                     "randomg", "runtime", "shl", "shr", "size"]:
+        p_Functions.halBuiltIn(lbnfLabel)
     
-    if lbnfLabel in p_Functions.objects:
+    elif lbnfLabel in p_Functions.objects:
         if trace:
             print("TRACE:", lbnfLabel)
             print("      ", state)
@@ -227,6 +239,27 @@ def generatePALMAT(ast, PALMAT, state={ "history":[] }, trace=False):
         for entry in reversed(p_Functions.substate["expression"]):
             instructions.append(entry)
         p_Functions.substate["expression"] = []
-        instructions.append({ "write": p_Functions.substate["LUN"] })        
+        instructions.append({ "write": p_Functions.substate["LUN"] })
+    elif lbnfLabel == "declare_statement":
+        identifiers = PALMAT["scopes"][-1]["identifiers"]
+        for i in identifiers:
+            identifier = identifiers[i]
+            if "scalar" in identifier:
+                continue
+            if "integer" in identifier:
+                continue
+            if "vector" in identifier:
+                continue
+            if "matrix" in identifier:
+                continue
+            if "bit" in identifier:
+                continue
+            if "character" in identifier:
+                continue
+            if "template" in identifier:
+                continue
+            if "structure" in identifier:
+                continue
+            identifier["scalar"] = True
     
     return True, PALMAT

@@ -331,9 +331,10 @@ def replaceBy(halsSource, metadata, libraryFilename, templateLibrary):
                             identifier = fields[1]
                         if identifier not in templateLibrary:
                             templateLibrary[identifier] = normalized
-                            f = open(libraryFilename, "a")
-                            print(normalized, file=f)
-                            f.close()
+                            if libraryFilename != None:
+                                f = open(libraryFilename, "a")
+                                print(normalized, file=f)
+                                f.close()
                         elif normalized != templateLibrary[identifier]:
                             unEMS.addError(unEMS.WARNING, \
                                 "Template mismatch between source (" + \

@@ -3158,77 +3158,77 @@ BIT_QUALIFIER make_AAbit_qualifier(RADIX p1)
     tmp->kind = is_AAbit_qualifier;
     tmp->u.aabit_qualifier_.radix_ = p1;
     return tmp;
-}/********************   AAchar_exp    ********************/
-CHAR_EXP make_AAchar_exp(CHAR_PRIM p1)
+}/********************   AAcharExpPrim    ********************/
+CHAR_EXP make_AAcharExpPrim(CHAR_PRIM p1)
 {
     CHAR_EXP tmp = (CHAR_EXP) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating AAchar_exp!\n");
+        fprintf(stderr, "Error: out of memory when allocating AAcharExpPrim!\n");
         exit(1);
     }
-    tmp->kind = is_AAchar_exp;
-    tmp->u.aachar_exp_.char_prim_ = p1;
+    tmp->kind = is_AAcharExpPrim;
+    tmp->u.aacharexpprim_.char_prim_ = p1;
     return tmp;
 }
-/********************   ABchar_exp    ********************/
-CHAR_EXP make_ABchar_exp(CHAR_EXP p1, CAT p2, CHAR_PRIM p3)
+/********************   ABcharExpCat    ********************/
+CHAR_EXP make_ABcharExpCat(CHAR_EXP p1, CAT p2, CHAR_PRIM p3)
 {
     CHAR_EXP tmp = (CHAR_EXP) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ABchar_exp!\n");
+        fprintf(stderr, "Error: out of memory when allocating ABcharExpCat!\n");
         exit(1);
     }
-    tmp->kind = is_ABchar_exp;
-    tmp->u.abchar_exp_.char_exp_ = p1;
-    tmp->u.abchar_exp_.cat_ = p2;
-    tmp->u.abchar_exp_.char_prim_ = p3;
+    tmp->kind = is_ABcharExpCat;
+    tmp->u.abcharexpcat_.char_exp_ = p1;
+    tmp->u.abcharexpcat_.cat_ = p2;
+    tmp->u.abcharexpcat_.char_prim_ = p3;
     return tmp;
 }
-/********************   ACchar_exp    ********************/
-CHAR_EXP make_ACchar_exp(CHAR_EXP p1, CAT p2, ARITH_EXP p3)
+/********************   ACcharExpCat    ********************/
+CHAR_EXP make_ACcharExpCat(CHAR_EXP p1, CAT p2, ARITH_EXP p3)
 {
     CHAR_EXP tmp = (CHAR_EXP) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ACchar_exp!\n");
+        fprintf(stderr, "Error: out of memory when allocating ACcharExpCat!\n");
         exit(1);
     }
-    tmp->kind = is_ACchar_exp;
-    tmp->u.acchar_exp_.char_exp_ = p1;
-    tmp->u.acchar_exp_.cat_ = p2;
-    tmp->u.acchar_exp_.arith_exp_ = p3;
+    tmp->kind = is_ACcharExpCat;
+    tmp->u.accharexpcat_.char_exp_ = p1;
+    tmp->u.accharexpcat_.cat_ = p2;
+    tmp->u.accharexpcat_.arith_exp_ = p3;
     return tmp;
 }
-/********************   ADchar_exp    ********************/
-CHAR_EXP make_ADchar_exp(ARITH_EXP p1, CAT p2, ARITH_EXP p3)
+/********************   ADcharExpCat    ********************/
+CHAR_EXP make_ADcharExpCat(ARITH_EXP p1, CAT p2, ARITH_EXP p3)
 {
     CHAR_EXP tmp = (CHAR_EXP) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ADchar_exp!\n");
+        fprintf(stderr, "Error: out of memory when allocating ADcharExpCat!\n");
         exit(1);
     }
-    tmp->kind = is_ADchar_exp;
-    tmp->u.adchar_exp_.arith_exp_1 = p1;
-    tmp->u.adchar_exp_.cat_ = p2;
-    tmp->u.adchar_exp_.arith_exp_2 = p3;
+    tmp->kind = is_ADcharExpCat;
+    tmp->u.adcharexpcat_.arith_exp_1 = p1;
+    tmp->u.adcharexpcat_.cat_ = p2;
+    tmp->u.adcharexpcat_.arith_exp_2 = p3;
     return tmp;
 }
-/********************   AEchar_exp    ********************/
-CHAR_EXP make_AEchar_exp(ARITH_EXP p1, CAT p2, CHAR_PRIM p3)
+/********************   AEcharExpCat    ********************/
+CHAR_EXP make_AEcharExpCat(ARITH_EXP p1, CAT p2, CHAR_PRIM p3)
 {
     CHAR_EXP tmp = (CHAR_EXP) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating AEchar_exp!\n");
+        fprintf(stderr, "Error: out of memory when allocating AEcharExpCat!\n");
         exit(1);
     }
-    tmp->kind = is_AEchar_exp;
-    tmp->u.aechar_exp_.arith_exp_ = p1;
-    tmp->u.aechar_exp_.cat_ = p2;
-    tmp->u.aechar_exp_.char_prim_ = p3;
+    tmp->kind = is_AEcharExpCat;
+    tmp->u.aecharexpcat_.arith_exp_ = p1;
+    tmp->u.aecharexpcat_.cat_ = p2;
+    tmp->u.aecharexpcat_.char_prim_ = p3;
     return tmp;
 }/********************   AAchar_prim    ********************/
 CHAR_PRIM make_AAchar_prim(CHAR_VAR p1)

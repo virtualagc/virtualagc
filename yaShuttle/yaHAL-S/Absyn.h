@@ -1502,22 +1502,22 @@ BIT_QUALIFIER make_AAbit_qualifier(RADIX p0);
 struct CHAR_EXP_
 {
   int line_number, char_number;
-  enum { is_AAchar_exp, is_ABchar_exp, is_ACchar_exp, is_ADchar_exp, is_AEchar_exp } kind;
+  enum { is_AAcharExpPrim, is_ABcharExpCat, is_ACcharExpCat, is_ADcharExpCat, is_AEcharExpCat } kind;
   union
   {
-    struct { CHAR_PRIM char_prim_; } aachar_exp_;
-    struct { CAT cat_; CHAR_EXP char_exp_; CHAR_PRIM char_prim_; } abchar_exp_;
-    struct { ARITH_EXP arith_exp_; CAT cat_; CHAR_EXP char_exp_; } acchar_exp_;
-    struct { ARITH_EXP arith_exp_1, arith_exp_2; CAT cat_; } adchar_exp_;
-    struct { ARITH_EXP arith_exp_; CAT cat_; CHAR_PRIM char_prim_; } aechar_exp_;
+    struct { CHAR_PRIM char_prim_; } aacharexpprim_;
+    struct { CAT cat_; CHAR_EXP char_exp_; CHAR_PRIM char_prim_; } abcharexpcat_;
+    struct { ARITH_EXP arith_exp_; CAT cat_; CHAR_EXP char_exp_; } accharexpcat_;
+    struct { ARITH_EXP arith_exp_1, arith_exp_2; CAT cat_; } adcharexpcat_;
+    struct { ARITH_EXP arith_exp_; CAT cat_; CHAR_PRIM char_prim_; } aecharexpcat_;
   } u;
 };
 
-CHAR_EXP make_AAchar_exp(CHAR_PRIM p0);
-CHAR_EXP make_ABchar_exp(CHAR_EXP p0, CAT p1, CHAR_PRIM p2);
-CHAR_EXP make_ACchar_exp(CHAR_EXP p0, CAT p1, ARITH_EXP p2);
-CHAR_EXP make_ADchar_exp(ARITH_EXP p0, CAT p1, ARITH_EXP p2);
-CHAR_EXP make_AEchar_exp(ARITH_EXP p0, CAT p1, CHAR_PRIM p2);
+CHAR_EXP make_AAcharExpPrim(CHAR_PRIM p0);
+CHAR_EXP make_ABcharExpCat(CHAR_EXP p0, CAT p1, CHAR_PRIM p2);
+CHAR_EXP make_ACcharExpCat(CHAR_EXP p0, CAT p1, ARITH_EXP p2);
+CHAR_EXP make_ADcharExpCat(ARITH_EXP p0, CAT p1, ARITH_EXP p2);
+CHAR_EXP make_AEcharExpCat(ARITH_EXP p0, CAT p1, CHAR_PRIM p2);
 
 struct CHAR_PRIM_
 {

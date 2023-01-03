@@ -165,34 +165,40 @@ def stringLiteral(PALMAT, state, s):
     else:
         state1 = history[-1]
     state2 = history[-2:]
+    isExpression = ("expression" in history)
     
     #-------------------------------------------------------------------------
     # Now do various state-machine-dependent stuff with the string (s) or its
     # variations (sp, isp, fsp). 
     
-    if state1 in ["declaration_list", "structure_stmt"]:
+    if state1 in ["declaration_list"]:
         substate["currentIdentifier"] = s
         if s in identifiers:
             print("Already declared:", sp)
             return False, state
         identifiers[s] = { }
-        if state1 == "structure_stmt":
-            substate["commonAttributes"]["template"] = []
         identifiers[s].update(substate["commonAttributes"])
+        if s[1:3] == "s_":
+            identifiers[s]["structure"] = True
         return True, state
-    elif state1 == "number" and "expression" in history:
+    elif state1 == "number" and isExpression:
         substate["expression"].append({ "number": sp })
+    elif state1 == "string" and isExpression:
+        substate["expression"].append({ "string": sp[1:-1] })
     elif state1 == "number" and "write_key" in history:
         substate["LUN"] = sp
         #instructions.append({"wstart": sp})
     elif state1 == "string" and 'write_arg' in history:
         substate["expression"].append({ "string": sp[1:-1] })
-    elif state1 == "identifier" and "expression" in history:
+    elif state1 in ["identifier", "char_id"] and isExpression:
         substate["expression"].append({ "fetch": sp })
     elif state2 == ["bitSpecBoolean", "number"]:
         updateCurrentIdentifierAttribute(PALMAT, state, "bit", isp)
     elif state2 == ["typeSpecChar", "number"]:
-        updateCurrentIdentifierAttribute(PALMAT, state, "character", isp)
+        if "declareBody_attributes_declarationList" in history:
+            substate["commonAttributes"]["character"] = isp
+        else:
+            updateCurrentIdentifierAttribute(PALMAT, state, "character", isp)
     elif state2 == ["sQdQName_doublyQualNameHead_literalExpOrStar", "number"] \
             or state1 in ["doublyQualNameHead_matrix_literalExpOrStar",
                             "arraySpec_arrayHead_literalExpOrStar"]:
@@ -221,6 +227,10 @@ def resetStatement():
     substate["commonAttributes"] = {}
     substate["lhs"] = []
     substate["expression"] = []
+
+# A built-in HAL/S function.
+def halBuiltIn(function):
+    substate["expression"].append({ "function": function.upper()})
 
 #-----------------------------------------------------------------------------
 
@@ -263,6 +273,11 @@ def identifier(PALMAT, state):
         return True, fixupState(state, fsAugment)
     return True, state
  
+def char_id(PALMAT, state):
+    if "expression" in state["history"]:
+        return True, fixupState(state, fsAugment)
+    return True, state
+ 
 '''
 def attributes_typeAndMinorAttr(PALMAT, state):
     return True, fixupState(state, fsAugment)
@@ -299,7 +314,7 @@ def arithConv_matrix(PALMAT, state):
     return True, state
     
 def bitSpecBoolean(PALMAT, state):
-    updateCurrentIdentifierAttribute(PALMAT, state, "bit")
+    updateCurrentIdentifierAttribute(PALMAT, state, "bit", 1)
     if state["history"][-1] == "attributes_typeAndMinorAttr":
         return True, fixupState(state, fsAugment)
     return True, state
@@ -486,6 +501,10 @@ def productCross(PALMAT, state):
     substate["expression"].append({ "operator": "*" })
     return True, state
 
+def charExpCat(PALMAT, state):
+    substate["expression"].append({ "operator": "C||" })
+    return True, state
+
 '''
 def subscript(PALMAT, state):
     substate["expression"].append({ "operator": "$" })
@@ -515,8 +534,6 @@ def write_key(PALMAT, state):
 
 def write_arg(PALMAT, state):
     return True, fixupState(state, fsAugment)
-
-
 
 #-----------------------------------------------------------------------------
 # I think this has to go at the end of the module.

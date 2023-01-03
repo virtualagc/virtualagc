@@ -112,8 +112,8 @@ token LabelToken {"l_"} letter ( ( letter | digit | {"_"} )* ( letter | digit ) 
 token EventToken {"e_"} letter ( ( letter | digit | {"_"} )* ( letter | digit ) )? ;
 token ArithFieldToken {"a_"} letter ( ( letter | digit | {"_"} )* ( letter | digit ) )? ;
 token IdentifierToken letter ( ( letter | digit | {"_"} )* ( letter | digit ) )? ;
-token StringToken ["'"] ( letter | digit | {"''"} | ["_+-]% $()[|*./&¬=<>#@,;:{}!?\""] )* ["'"] ;
-token TextToken ["\""] ( letter | digit | ["_+-]% $()[|*./&¬=<>#@,;:{}!?'"] )* ["\""] ;
+token StringToken ["'"] ( letter | digit | {"''"} | ["_+-]% $()[|*./&~¬=<>#@,;:{}!?\""] )* ["'"] ;
+token TextToken ["\""] ( letter | digit | ["_+-]% $()[|*./&~¬=<>#@,;:{}!?'"] )* ["\""] ;
 token LevelToken ( ["123456789"] | ["12"] digit | ["3"]["012"] ) ;
 token NumberToken digit+ ;
 token CompoundToken ( digit+ ( ["."] digit* )? | ["."] digit+ ) ( ["EBH"] ["-"]? digit+ )* ;
@@ -364,11 +364,11 @@ AAbit_qualifier . BIT_QUALIFIER ::= "<" "$" "(" "@" RADIX ")" ;
 --------------------------------------------------------------------------
 -- Here are the additional rules needed for CHAR_EXP.
 ACexpression . EXPRESSION ::= CHAR_EXP ;
-AAchar_exp . CHAR_EXP ::= CHAR_PRIM ;
-ABchar_exp . CHAR_EXP ::= CHAR_EXP CAT CHAR_PRIM ;
-ACchar_exp . CHAR_EXP ::= CHAR_EXP CAT ARITH_EXP ;
-ADchar_exp . CHAR_EXP ::= ARITH_EXP CAT ARITH_EXP ;
-AEchar_exp . CHAR_EXP ::= ARITH_EXP CAT CHAR_PRIM ;
+AAcharExpPrim . CHAR_EXP ::= CHAR_PRIM ;
+ABcharExpCat . CHAR_EXP ::= CHAR_EXP CAT CHAR_PRIM ;
+ACcharExpCat . CHAR_EXP ::= CHAR_EXP CAT ARITH_EXP ;
+ADcharExpCat . CHAR_EXP ::= ARITH_EXP CAT ARITH_EXP ;
+AEcharExpCat . CHAR_EXP ::= ARITH_EXP CAT CHAR_PRIM ;
 AAchar_prim . CHAR_PRIM ::= CHAR_VAR ;
 ABchar_prim . CHAR_PRIM ::= CHAR_CONST ;
 AEchar_prim . CHAR_PRIM ::= CHAR_FUNC_HEAD "(" CALL_LIST ")" ;

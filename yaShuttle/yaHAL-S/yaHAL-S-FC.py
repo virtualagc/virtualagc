@@ -68,6 +68,7 @@ tabSize = 8
 halsSource = []
 metadata = []
 files = []
+noLibrary = False
 libraryFilename = "yaHAL-default.templates"
 structureTemplates = {}
 noCompile = False
@@ -75,6 +76,7 @@ lbnf = False
 bnf = False
 trace = False
 interactive = False
+colorize = False
 for param in ["--library="+libraryFilename] + sys.argv[1:]:
     if param == "--help":
         print("""
@@ -96,6 +98,9 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
                         interactive mode, HAL/S statements are entered from
                         the keyboard and executed one at a time as they are
                         entered.
+        --colorize      Used only with --interactive.  If present, it is
+                        equivalent to the interpreter command COLORIZE RED, 
+                        whereas the default is NOCOLORIZE.
         --tab=N         Tab size in source files; assumed to be 8.  No allowance
                         is made for different tab sizes in different source 
                         files, so let's just hope that never happens!  Probably 
@@ -103,6 +108,7 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
                         supplied on
                         punchcards, but it's certainly possible to accidentally
                         end up with tabs if source is edited in modern editors.
+        --no-library    Do not try to load or update a template library.
         --library=F     Specifies the filename of the library of structure
                         templates.  By default, "yaHAL-default.templates".
                         This option can be used multiple times, but any new
@@ -119,6 +125,8 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
         sys.exit(0)
     elif param == "--interactive":
         interactive = True
+    elif param == "--colorize":
+        colorize = True
     elif param[:6] == "--tab=":
         tabSize = int(param[6:])
     elif param == "--no-compile":
@@ -133,6 +141,11 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
         compiler = param[11:]
     elif param == "--trace":
         trace = True
+    elif param == "--no-library":
+        noLibrary = True
+        structureTemplates = {}
+        libraryFilename = None
+        print("FYI: Disabling template-library file, if any.")
     elif param[:10] == "--library=":
         libraryFilename = param[10:].strip()
         #print("Here", libraryFilename)
@@ -196,5 +209,5 @@ if not interactive:
                     structureTemplates,
                     noCompile, lbnf, bnf, trace)
 else:
-    interpreterLoop(libraryFilename, structureTemplates)
+    interpreterLoop(libraryFilename, structureTemplates, colorize)
 

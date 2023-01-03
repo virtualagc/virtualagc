@@ -179,6 +179,8 @@ Since the bulk of my HAL/S compiler is in Python and the file-format being used 
 
 Before presenting any actual instructions, let me add that for computation of expressions (arithmetical, boolean, or otherwise), the PALMAT virtual machine implements an execution-stack based model, such as found in a Reverse Polish Notation (RPN) calculator or in the FORTH computer language.  Therefore, the behavior of PALMAT instructions is often to pop values from this execution stack, perform some computation on them (such as addition), and then to push the result back on the execution stack.  Each entry of the execution stack can thus hold values of various types.
 
+### PALMAT Instructions 1: Arithmetic
+
 With that in mind, here's a description of some of the available PALMAT instructions.
 
 * `{'number': string}`, where `string` is a stringified version of a number such as 1.35E13B2.  (At some point, I may change this so that `string` is replaced by the actual Python representation of the number, but for now I don't go that far because this method preserves exact values.)  **Recall** that in HAL/S, the minus sign is an operator, and not a character that can prefix a number token, so these numbers are all non-negative.  The action of this instruction at runtime is push the number (*as* a number and no longer as a string) onto the execution stack
@@ -250,6 +252,8 @@ Or consider this example:
 
 Thus we end up with `B=2`, `C=5`, `A=307`.
 
+### PALMAT Instructions 2: Output
+
 Here's another PALMAT instruction pertaining to output:
 
   * `{'write': lun}` marks the *end* of the PALMAT corresponding to a HAL/S statement of the form `WRITE(lun) ...`.  The only logical unit number understood by the interpreter is `lun=6`, which is output to the console from which the interpreter commands and HAL/S statements are being input.
@@ -274,6 +278,16 @@ For example, here are some PALMAT instructions appropriate for `WRITE(6) A+5, A*
 	{'fetch': 'A'}
 	{'operator': '+'}
 	{'write': '6'}
+
+### PALMAT Instructions 3: Character Expressions and Built-In Functions
+
+* `{'string': s}` pushes string `s` onto the expression stack.  Note that a string, however many characters it contains, is an atomic object occupying a single position on the stack.  (It does *not*, for example, require a separate stack position for each character.)
+* `{'operator': 'C||'}` is the string-concatenation operator.  It pops the top two elements from the stack, which must be strings.  The string that had been the 2nd-from-the-top is concatenated to the end of the string that had been at the top of the stack, and then the full string is pushed back onto the top of the stack. 
+* `{'function': f}` calls the HAL/S built-in function called `f`.  For example, `{'function': 'ABS'}`.  This functions are outlined in Appendix A of the HAL/S Language Specification.
+
+Strings placed on the stack in this manner can then subsequently be used (for example) in `WRITE` operations, can be stored in variables, etc.
+
+TBD
 
 ## The Source-Code File List
 

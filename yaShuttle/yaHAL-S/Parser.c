@@ -5622,31 +5622,31 @@ yyreduce:
 
   case 251: /* CHAR_EXP: CHAR_PRIM  */
 #line 962 "HAL_S.y"
-                     { (yyval.char_exp_) = make_AAchar_exp((yyvsp[0].char_prim_)); (yyval.char_exp_)->line_number = (yyloc).first_line; (yyval.char_exp_)->char_number = (yyloc).first_column;  }
+                     { (yyval.char_exp_) = make_AAcharExpPrim((yyvsp[0].char_prim_)); (yyval.char_exp_)->line_number = (yyloc).first_line; (yyval.char_exp_)->char_number = (yyloc).first_column;  }
 #line 5627 "Parser.c"
     break;
 
   case 252: /* CHAR_EXP: CHAR_EXP CAT CHAR_PRIM  */
 #line 963 "HAL_S.y"
-                           { (yyval.char_exp_) = make_ABchar_exp((yyvsp[-2].char_exp_), (yyvsp[-1].cat_), (yyvsp[0].char_prim_)); (yyval.char_exp_)->line_number = (yyloc).first_line; (yyval.char_exp_)->char_number = (yyloc).first_column;  }
+                           { (yyval.char_exp_) = make_ABcharExpCat((yyvsp[-2].char_exp_), (yyvsp[-1].cat_), (yyvsp[0].char_prim_)); (yyval.char_exp_)->line_number = (yyloc).first_line; (yyval.char_exp_)->char_number = (yyloc).first_column;  }
 #line 5633 "Parser.c"
     break;
 
   case 253: /* CHAR_EXP: CHAR_EXP CAT ARITH_EXP  */
 #line 964 "HAL_S.y"
-                           { (yyval.char_exp_) = make_ACchar_exp((yyvsp[-2].char_exp_), (yyvsp[-1].cat_), (yyvsp[0].arith_exp_)); (yyval.char_exp_)->line_number = (yyloc).first_line; (yyval.char_exp_)->char_number = (yyloc).first_column;  }
+                           { (yyval.char_exp_) = make_ACcharExpCat((yyvsp[-2].char_exp_), (yyvsp[-1].cat_), (yyvsp[0].arith_exp_)); (yyval.char_exp_)->line_number = (yyloc).first_line; (yyval.char_exp_)->char_number = (yyloc).first_column;  }
 #line 5639 "Parser.c"
     break;
 
   case 254: /* CHAR_EXP: ARITH_EXP CAT ARITH_EXP  */
 #line 965 "HAL_S.y"
-                            { (yyval.char_exp_) = make_ADchar_exp((yyvsp[-2].arith_exp_), (yyvsp[-1].cat_), (yyvsp[0].arith_exp_)); (yyval.char_exp_)->line_number = (yyloc).first_line; (yyval.char_exp_)->char_number = (yyloc).first_column;  }
+                            { (yyval.char_exp_) = make_ADcharExpCat((yyvsp[-2].arith_exp_), (yyvsp[-1].cat_), (yyvsp[0].arith_exp_)); (yyval.char_exp_)->line_number = (yyloc).first_line; (yyval.char_exp_)->char_number = (yyloc).first_column;  }
 #line 5645 "Parser.c"
     break;
 
   case 255: /* CHAR_EXP: ARITH_EXP CAT CHAR_PRIM  */
 #line 966 "HAL_S.y"
-                            { (yyval.char_exp_) = make_AEchar_exp((yyvsp[-2].arith_exp_), (yyvsp[-1].cat_), (yyvsp[0].char_prim_)); (yyval.char_exp_)->line_number = (yyloc).first_line; (yyval.char_exp_)->char_number = (yyloc).first_column;  }
+                            { (yyval.char_exp_) = make_AEcharExpCat((yyvsp[-2].arith_exp_), (yyvsp[-1].cat_), (yyvsp[0].char_prim_)); (yyval.char_exp_)->line_number = (yyloc).first_line; (yyval.char_exp_)->char_number = (yyloc).first_column;  }
 #line 5651 "Parser.c"
     break;
 
