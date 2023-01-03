@@ -288,7 +288,9 @@ For example, here are some PALMAT instructions appropriate for `WRITE(6) A+5, A*
     * `DATE`.  TBD
     * `RUNTIME`.  This is the elapsed floating-point number of seconds, nominally with nanosecond resolution,from the point at which the software run began.  (This is consistent with the statements on p. 13-15, PDF p. 170, of the 2005 version of the HAL/S Programmer's Guide.)
 
+### PALMAT Instructin 4: Transfer of Control
 
+* `{'goto': n}` transfers control to position `n` in the PALMAT-instruction list of the current scope.
 
 ## The Source-Code File List
 

@@ -181,6 +181,17 @@ def stringLiteral(PALMAT, state, s):
         if s[1:3] == "s_":
             identifiers[s]["structure"] = True
         return True, state
+    elif state1 == "label_definition":
+        if s in identifiers:
+            print("Multiple definitions for", sp)
+            return False, state
+        identifiers[s] = { "label" : len(instructions) }
+    elif state1 == "basicStatementGoTo":
+        if s in identifiers and "label" in identifiers[s]:
+            instructions.append({'goto': identifiers[s]["label"]})
+        else:
+            print("Implementation error, cannot find label", sp)
+            return False, state
     elif state1 == "number" and isExpression:
         substate["expression"].append({ "number": sp })
     elif state1 == "string" and isExpression:
@@ -533,6 +544,12 @@ def write_key(PALMAT, state):
     return True, fixupState(state, fsAugment)
 
 def write_arg(PALMAT, state):
+    return True, fixupState(state, fsAugment)
+
+def label_definition(PALMAT, state):
+    return True, fixupState(state, fsAugment)
+
+def basicStatementGoTo(PALMAT, state):
     return True, fixupState(state, fsAugment)
 
 #-----------------------------------------------------------------------------

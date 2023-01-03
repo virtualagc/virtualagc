@@ -298,6 +298,10 @@ def replaceBy(halsSource, metadata, libraryFilename, templateLibrary):
                     isProcedureOrFunction = True
                     if None != re.search("\\b(FUNCTION|PROCEDURE)\\b", tail):
                         lastFunctionProcedure = i
+                else:
+                    macros[-1][identifier] = { "arguments": [], 
+                                "replacement": "l_" + identifier, 
+                                "pattern": "\\b" + identifier + "\\b" }
             else:
                 match = re.search("(GO\\s+TO|REPEAT|EXIT)\\s+" + \
                         bareIdentifierPattern + "\\s*;", fullLine);

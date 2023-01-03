@@ -83,7 +83,10 @@ def executePALMAT(PALMAT, trace = False, indent=0):
     computationStack = []
     if len(instructions) < 1:
         return []
-    for instruction in instructions:
+    instructionIndex = 0
+    while instructionIndex < len(instructions):
+        instruction = instructions[instructionIndex]
+        instructionIndex += 1
         if trace:
             print("\t==>", computationStack, instruction)
         stackSize = len(computationStack)
@@ -417,6 +420,8 @@ def executePALMAT(PALMAT, trace = False, indent=0):
             else:
                 print("Implementation error, function", function)
                 return None
+        elif "goto" in instruction:
+            instructionIndex = instruction["goto"]
         else:
             print("Implementation error, unknown PALMAT:", instruction)
             return None
