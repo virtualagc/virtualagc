@@ -65,6 +65,23 @@ builtIns = [
     ["MIDVAL"]
 ]
 
+# Returns the dictionary associated with the identifier or else None if
+# not found.  The scope is the dictionary associated with the 
+# current scope ... i.e., it is an entry in PALMAT["scopes"] rather than
+# and index into PALMAT["scopes"].  The search begins at the current 
+# scope, and moves upward through the parent, grandparent, etc.
+# Sibling scopes and descendent scopes are not searched.
+# Note: There's also a findIdentifier() in the PALMAT
+# module which provides the same service but is incompatible
+# API-wise.  Oh well!  I should have researched it better before writing
+# this one.
+def findIdentifier(identifier, scope):
+    while scope != None:
+        if identifier in scope["identifiers"]:
+            return scope["identifiers"][identifier]
+        scope = scope["parent"]
+    return scope
+
 # If this function returns, which in principle it might not if executing
 # an actual flight program, it returns the current computation stack.
 # That would normally be empty if full statements had been executed.
@@ -74,19 +91,18 @@ builtIns = [
 # CONSTANT(...) for DECLARE statements.  If there is failure, for example
 # the use of an unimplemented built-in function or referencing an 
 # uninitialized variable, then None is returned instead.
-def executePALMAT(PALMAT, trace = False, indent=0):
+def executePALMAT(PALMAT, programCounter={"scope":0, "offset":0}, trace = False, indent=0):
     scopes = PALMAT["scopes"]
-    scopeNumber = len(scopes) - 1
+    scopeNumber = programCounter["scope"]
+    instructionIndex = programCounter["offset"]
     scope = scopes[scopeNumber]
     identifiers = scope["identifiers"]
     instructions = scope["instructions"]
     computationStack = []
-    if len(instructions) < 1:
-        return []
-    instructionIndex = 0
     while instructionIndex < len(instructions):
         instruction = instructions[instructionIndex]
         instructionIndex += 1
+        programCounter["offset"] = instructionIndex
         if trace:
             print("\t==>", computationStack, instruction)
         stackSize = len(computationStack)
@@ -164,50 +180,48 @@ def executePALMAT(PALMAT, trace = False, indent=0):
                 identifier = instruction["store"]
                 fetch = False
             identifier = "^" + identifier + "^"
-            for s in reversed(scopes):
-                if identifier in s["identifiers"]:
-                    erroredUp = True
-                    if fetch:
-                        if "value" in s["identifiers"][identifier]:
-                            computationStack.append(s["identifiers"][identifier]["value"])
-                        elif "constant" in s["identifiers"][identifier]:
-                            computationStack.append(s["identifiers"][identifier]["constant"])
-                        else:
-                            print("Identifier %s uninitialized" % identifier)
+            attributes = findIdentifier(identifier, scopes[scopeNumber])
+            if attributes != None:
+                erroredUp = True
+                if fetch:
+                    if "value" in attributes:
+                        computationStack.append(attributes["value"])
+                    elif "constant" in attributes:
+                        computationStack.append(attributes["constant"])
+                    else:
+                        print("Identifier %s uninitialized" % identifier)
+                        return None
+                    
+                else: # store
+                    if len(computationStack) < 1:
+                        print("Implementation error, stack empty for STORE instruction")
+                        return None
+                    value = computationStack[-1]
+                    if "constant" in attributes:
+                        print("Cannot change a value in a CONSTANT.")
+                        return None
+                    if isinstance(value, str):
+                        if "character" not in attributes:
+                            print("Cannot store string in non-CHARACTER variable.")
                             return None
-                        
-                    else: # store
-                        if len(computationStack) < 1:
-                            print("Implementation error, stack empty for STORE instruction")
+                        maxlen = attributes["character"]
+                        value = value[:maxlen]
+                    elif isinstance(value, bool):
+                        if "bit" not in attributes:
+                            print("Cannot store bit/boolean in non-bit/boolean variable.")
                             return None
-                        value = computationStack[-1]
-                        attributes = s["identifiers"][identifier]
-                        if "constant" in attributes:
-                            print("Cannot change a value in a CONSTANT.")
+                    elif isinstance(value, (float, int)):
+                        if "scalar" not in attributes and "integer" not in attributes:
+                            print("Cannot store arithmetic value in non-integer/scalar variable.")
                             return None
-                        if isinstance(value, str):
-                            if "character" not in attributes:
-                                print("Cannot store string in non-CHARACTER variable.")
-                                return None
-                            maxlen = attributes["character"]
-                            value = value[:maxlen]
-                        elif isinstance(value, bool):
-                            if "bit" not in attributes:
-                                print("Cannot store bit/boolean in non-bit/boolean variable.")
-                                return None
-                        elif isinstance(value, (float, int)):
-                            if "scalar" not in attributes and "integer" not in attributes:
-                                print("Cannot store arithmetic value in non-integer/scalar variable.")
-                                return None
-                            if "integer" in attributes:
-                                value = hround(value)
-                            elif "scalar" in attributes:
-                                value = float(value)
-                        else:
-                            print("Implementation error, non-boolean/character/arithmetic not yet implemented.")
-                            return None
-                        attributes["value"] = value
-                    break
+                        if "integer" in attributes:
+                            value = hround(value)
+                        elif "scalar" in attributes:
+                            value = float(value)
+                    else:
+                        print("Implementation error, non-boolean/character/arithmetic not yet implemented.")
+                        return None
+                    attributes["value"] = value
             if not erroredUp:
                 print("Identifier %s not in any accessible scope" % identifier)
                 return None
@@ -421,7 +435,18 @@ def executePALMAT(PALMAT, trace = False, indent=0):
                 print("Implementation error, function", function)
                 return None
         elif "goto" in instruction:
-            instructionIndex = instruction["goto"]
+            s = instruction["goto"]
+            if isinstance(s, str):
+                attributes = findIdentifier(s, scope)
+                if attributes == None or "label" not in attributes:
+                    print("Cannot find target label", s)
+                    return None
+                instruction["goto"] = attributes["label"]
+            s = instruction["goto"]
+            scopeNumber = s[0]
+            instructionIndex = s[1]
+            programCounter["scope"] = scopeNumber
+            programCounter["offset"] = instructionIndex
         else:
             print("Implementation error, unknown PALMAT:", instruction)
             return None

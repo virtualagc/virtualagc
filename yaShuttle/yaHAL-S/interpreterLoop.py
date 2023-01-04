@@ -49,11 +49,12 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
         if len(recentHal) >= maxRecent:
             recentHal = recentHal[-maxLastLines:]
             recentMeta = recentMeta[-maxLastLines:]
-        halsSource = []
-        metadata = []
         halCode = False
         line = ""
         while line[-1:] != ";" and not quitting:
+            if not halCode:
+                halsSource = []
+                metadata = []
             print(colorize, end="")
             if len(halsSource) == 0:
                 print("HAL/S > ", end="")
@@ -66,8 +67,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
             fields = line.strip().split()
             numWords = len(fields)
             if numWords == 0:
-                fields = ["HELP"]
-                numWords = 1
+                continue
             firstWord = fields[0].upper()
             if firstWord == "RERUN":
                 if len(recentHal) == 0:
@@ -197,33 +197,25 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
                         print("\tLBNF                     (vs BNF or NOAST)")
                     else:
                         print("\tNOAST                    (vs BNF or LBNF)")
-                    print("\t%d execution scope(s) found." % len(PALMAT["scopes"]))
-                    print("\t%d identifier(s) in current scope." % len(PALMAT["scopes"][-1]["identifiers"]))
                     continue
                 elif firstWord == "DATA":
-                    scopes = PALMAT["scopes"]
-                    for i in range(len(scopes)):
-                        scope = scopes[i]
-                        print("Scope %d:" % (i+1))
-                        identifiers = scope["identifiers"]
-                        if len(identifiers) == 0:
-                            print("\t(No identifiers declared)")
-                        else:
-                            for identifier in sorted(identifiers):
-                                print("\t%s:" % identifier[1:-1], \
-                                        identifiers[identifier])
+                    scope = PALMAT["scopes"][0]
+                    identifiers = scope["identifiers"]
+                    if len(identifiers) == 0:
+                        print("\t(No identifiers declared)")
+                    else:
+                        for identifier in sorted(identifiers):
+                            print("\t%s:" % identifier[1:-1], \
+                                    identifiers[identifier])
                     continue
                 elif firstWord == "PALMAT":
-                    scopes = PALMAT["scopes"]
-                    for i in range(len(scopes)):
-                        scope = scopes[i]
-                        print("Scope %d:" % (i+1))
-                        instructions = scope["instructions"]
-                        if len(instructions) == 0:
-                            print("\t(No generated code)")
-                        else:
-                            for instruction in instructions:
-                                print("\t%s" % str(instruction))
+                    scope = PALMAT["scopes"][0]
+                    instructions = scope["instructions"]
+                    if len(instructions) == 0:
+                        print("\t(No generated code)")
+                    else:
+                        for instruction in instructions:
+                            print("\t%s" % str(instruction))
                     continue
                 elif firstWord == "RESET":
                     PALMAT = constructPALMAT()
@@ -247,7 +239,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
                     colorize = ""
                     continue
                 elif firstWord == "HELP":
-                    print()
+                    #print()
                     print("\tHELP         Show this menu.")
                     print("\tQUIT         Quit this interpreter program.")
                     print("\tCOLORIZE C   Enable colorizing (ANSI terminals only).")
@@ -261,9 +253,9 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
                     print("\tREAD F       Read PALMAT from a file named F.")
                     print("\tDATA         Inspect all variable and constants.")
                     print("\tPALMAT       Inspect recently-generated PALMAT code.")
-                    print("\tREMOVE D     Remove identifier D (current scope).")
-                    print("\tREMOVE *     Remove all identifiers (current scope).")
-                    print("\tRESET        Remove all identifiers (all scopes).")
+                    print("\tREMOVE D     Remove identifier D.")
+                    print("\tREMOVE *     Remove all identifiers.")
+                    print("\tRESET        Reset all PALMAT.")
                     print("\tSTATUS       Show current settings and other info.")
                     print("\tWINE         Enable Windows compiler (Linux only).")
                     print("\tNOWINE       Disable Windows compiler (Linux only).")
@@ -283,7 +275,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
                     print("\tRERUN        Re-run last line of code.")
                     print("\tRERUN D      Re-run numbered line D (from RECENT).")
                     '''
-                    print()
+                    #print()
                     continue
             if len(fields) > 3 and fields[0] == "D" and fields[1] == "INCLUDE" \
                     and fields[2] == "TEMPLATE":
@@ -294,16 +286,17 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
                     continue
                 metadata.append( { "directive" : True } )
             else:
+                halCode = True
                 halsSource.append( " " + line )
                 metadata.append( {} )
         if quitting:
             break 
-        PALMAT["scopes"][-1]["instructions"] = []
+        PALMAT["scopes"][0]["instructions"] = []
         substate["errors"] = []
         substate["warnings"] = []
         success, ast = processSource(PALMAT, halsSource, metadata, \
                          libraryFilename, structureTemplates, noCompile, \
-                         lbnf, bnf, trace1, wine, trace2)
+                         lbnf, bnf, trace1, wine, trace2, 8)
         if len(substate["warnings"]):
             for warning in substate["warnings"]:
                 print("Warning:", warning)
@@ -311,4 +304,4 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
             for warning in substate["errors"]:
                 print("Error:", warning)
         if len(substate["errors"]) == 0 and xeq:
-            executePALMAT(PALMAT, trace3, 8)
+            executePALMAT(PALMAT, {"scope":0, "offset":0}, trace3, 8)

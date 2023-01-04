@@ -50,7 +50,7 @@ from PALMAT import generatePALMAT, constructPALMAT
 def processSource(PALMAT, halsSource, metadata, libraryFilename, 
                     structureTemplates, \
                     noCompile=False, lbnf=False, bnf=False, \
-                    trace1=False, wine=False, trace2=False):
+                    trace1=False, wine=False, trace2=False, tabSize=8):
 
     # Because whitespace is important in E/M/S constructs and (potentially) in 
     # the positioning our compiler output is going to use for error markers, 
@@ -140,7 +140,7 @@ def processSource(PALMAT, halsSource, metadata, libraryFilename,
     # Additional passes ...
     # TBD
 
-    success = generatePALMAT(ast, PALMAT, { "history" : [] }, trace2)
+    success = generatePALMAT(ast, PALMAT, { "history" : [], "scopeIndex" : 0 }, trace2)
 
     return success, ast
     

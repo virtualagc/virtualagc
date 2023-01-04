@@ -91,7 +91,7 @@ def updateCurrentIdentifierAttribute(PALMAT, state, attribute=None, value=True):
             if attribute != None:
                 substate["commonAttributes"][attribute] = value
         return
-    scope = PALMAT["scopes"][-1]
+    scope = PALMAT["scopes"][state["scopeIndex"]]
     identifiers = scope["identifiers"]
     if substate["currentIdentifier"] not in identifiers:
         identifiers[substate["currentIdentifier"]] = { }
@@ -100,7 +100,7 @@ def updateCurrentIdentifierAttribute(PALMAT, state, attribute=None, value=True):
         identifiers[substate["currentIdentifier"]][attribute] = value
 
 def removeCurrentIdentifierAttribute(PALMAT, attribute):
-    scope = PALMAT["scopes"][-1]
+    scope = PALMAT["scopes"][state["scopeIndex"]]
     identifiers = scope["identifiers"]
     if substate["currentIdentifier"] in identifiers:
         identifierDict = identifiers[substate["currentIdentifier"]]
@@ -108,7 +108,7 @@ def removeCurrentIdentifierAttribute(PALMAT, attribute):
             identifierDict.pop(attribute)
 
 def checkCurrentIdentifierAttribute(PALMAT, attribute):    
-    scope = PALMAT["scopes"][-1]
+    scope = PALMAT["scopes"][state["scopeIndex"]]
     identifiers = scope["identifiers"]
     if substate["currentIdentifier"] in identifiers:
         identifierDict = identifiers[substate["currentIdentifier"]]
@@ -119,13 +119,13 @@ def checkCurrentIdentifierAttribute(PALMAT, attribute):
 # Remove identifiers.  This is not something you can
 # do in HAL/S, but there are interpreter commands for it.
 def removeIdentifier(PALMAT, identifier):
-    scope = PALMAT["scopes"][-1]
+    scope = PALMAT["scopes"][state["scopeIndex"]]
     identifiers = scope["identifiers"]
     if identifier in identifiers:
         identifiers.pop(identifier)
 
 def removeAllIdentifiers(PALMAT):
-    PALMAT["scopes"][-1]["identifiers"] = {}
+    PALMAT["scopes"][state["scopeIndex"]]["identifiers"] = {}
     
 # This function is called from generatePALMAT() for a string literal.
 # Returns only True/False for Success/Failure.
@@ -157,7 +157,8 @@ def stringLiteral(PALMAT, state, s):
                 fsp = float(sp)
             except:
                 pass
-    scope = PALMAT["scopes"][-1]
+    scopeIndex = state["scopeIndex"]
+    scope = PALMAT["scopes"][scopeIndex]
     identifiers = scope["identifiers"]
     instructions = scope["instructions"]
     if len(history) == 0:
@@ -182,16 +183,14 @@ def stringLiteral(PALMAT, state, s):
             identifiers[s]["structure"] = True
         return True, state
     elif state1 == "label_definition":
+        '''
         if s in identifiers:
             print("Multiple definitions for", sp)
             return False, state
-        identifiers[s] = { "label" : len(instructions) }
+        '''
+        identifiers[s] = { "label" : [scopeIndex, len(instructions)] }
     elif state1 == "basicStatementGoTo":
-        if s in identifiers and "label" in identifiers[s]:
-            instructions.append({'goto': identifiers[s]["label"]})
-        else:
-            print("Implementation error, cannot find label", sp)
-            return False, state
+        instructions.append({'goto': s})
     elif state1 == "number" and isExpression:
         substate["expression"].append({ "number": sp })
     elif state1 == "string" and isExpression:
@@ -430,7 +429,7 @@ def literalStar(PALMAT, state):
     elif last in ["sQdQName_doublyQualNameHead_literalExpOrStar",
                        "doublyQualNameHead_matrix_literalExpOrStar",
                        "arraySpec_arrayHead_literalExpOrStar"]:
-        scope = PALMAT["scopes"][-1]
+        scope = PALMAT["scopes"][state["scopeIndex"]]
         identifiers = scope["identifiers"]
         if substate["currentIdentifier"] == "":
             identifierDict = substate["commonAttributes"]
@@ -550,6 +549,25 @@ def label_definition(PALMAT, state):
     return True, fixupState(state, fsAugment)
 
 def basicStatementGoTo(PALMAT, state):
+    return True, fixupState(state, fsAugment)
+
+
+def ifStatement(PALMAT, state):
+    return True, fixupState(state, fsAugment)
+
+def ifThenElseStatement(PALMAT, state):
+    return True, fixupState(state, fsAugment)
+
+def true_part(PALMAT, state):
+    return True, fixupState(state, fsAugment)
+
+def bit_exp(PALMAT, state):
+    return True, fixupState(state, fsAugment)
+
+def relational_exp(PALMAT, state):
+    return True, fixupState(state, fsAugment)
+
+def then(PALMAT, state):
     return True, fixupState(state, fsAugment)
 
 #-----------------------------------------------------------------------------

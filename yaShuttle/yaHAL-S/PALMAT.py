@@ -111,6 +111,9 @@ def printPALMAT(PALMAT, showInstructions=False):
 # current scope and working upward through the parent scope, grandparent scope,
 # and so on.  Returns either the dictionary for the identifier or else None if 
 # not found. 
+# Note: There's also a findIdentifier() in the executePALMAT
+# module which provides the same service but is incompatible
+# API-wise.
 def findIdentifier(identifier, PALMAT, scopeIndex=None):
     while scopeIndex != None:
         scope = PALMAT["scopes"][scopeIndex]
@@ -190,10 +193,12 @@ labels encountered.  I call this list the "history".  The entry state in
 which no statement is yet being processed is state={ "history" : [] }.
 '''
 
-def generatePALMAT(ast, PALMAT, state={ "history":[] }, trace=False):
+def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, trace=False):
     newState = state
     lbnfLabelFull = ast["lbnfLabel"]
     lbnfLabel = lbnfLabelFull[2:]
+    scopes = PALMAT["scopes"]
+    currentScope = scopes[state["scopeIndex"]]
     # HAL/S built-in functions
     if lbnfLabel in ["abs", "ceiling", "div", "floor", "midval", "mod",
                      "odd", "remainder", "round", "sign", "signum", "truncate",
@@ -246,7 +251,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[] }, trace=False):
     # for each one of them.  Only the first will need to handle the 
     # expression stack, whereas each of them will result in one assignment
     if lbnfLabel == "assignment":
-        instructions = PALMAT["scopes"][-1]["instructions"]
+        instructions = currentScope["instructions"]
         for entry in reversed(p_Functions.substate["expression"]):
             instructions.append(entry)
         p_Functions.substate["expression"] = []
@@ -255,13 +260,13 @@ def generatePALMAT(ast, PALMAT, state={ "history":[] }, trace=False):
         if len(p_Functions.substate["lhs"]) == 0:
             instructions.append({ "pop": 1 })
     elif lbnfLabel == "basicStatementWritePhrase":
-        instructions = PALMAT["scopes"][-1]["instructions"]
+        instructions = currentScope["instructions"]
         for entry in reversed(p_Functions.substate["expression"]):
             instructions.append(entry)
         p_Functions.substate["expression"] = []
         instructions.append({ "write": p_Functions.substate["LUN"] })
     elif lbnfLabel == "declare_statement":
-        identifiers = PALMAT["scopes"][-1]["identifiers"]
+        identifiers = currentScope["identifiers"]
         for i in identifiers:
             identifier = identifiers[i]
             if isUnmarkedScalar(identifier):
@@ -277,21 +282,20 @@ def generatePALMAT(ast, PALMAT, state={ "history":[] }, trace=False):
         # always come at the beginnings of blocks, prior to any 
         # executable code, we don't have to worry about preserving
         # any existing PALMAT for the scope.
-        scopes = PALMAT["scopes"]
-        identifiers = scopes[-1]["identifiers"]
-        instructions = scopes[-1]["instructions"]
+        identifiers = currentScope["identifiers"]
+        instructions = currentScope["instructions"]
         currentIdentifier = p_Functions.substate["currentIdentifier"]
         instructions.clear()
         for entry in reversed(p_Functions.substate["expression"]):
             if "fetch" in entry:
                 identifier = "^" + entry["fetch"] + "^"
-                for scope in reversed(scopes):
-                    if identifier in scope["identifiers"]:
-                        if "constant" not in scope["identifiers"][identifier]:
-                            print("Can only use constants in computing INITIAL or CONSTANT.")
-                            identifiers.pop(currentIdentifier)
-                            return False, PALMAT
-                        break
+                attributes = findIdentifier(identifier, PALMAT, scopeIndex)
+                if attributes != None:
+                    if "constant" not in attributes:
+                        print("Can only use constants in computing INITIAL or CONSTANT.")
+                        identifiers.pop(currentIdentifier)
+                        return False, PALMAT
+                    break
             instructions.append(entry)
         p_Functions.substate["expression"].clear()
         computationStack = executePALMAT(PALMAT)

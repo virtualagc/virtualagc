@@ -179,6 +179,8 @@ Since the bulk of my HAL/S compiler is in Python and the file-format being used 
 
 Before presenting any actual instructions, let me add that for computation of expressions (arithmetical, boolean, or otherwise), the PALMAT virtual machine implements an execution-stack based model, such as found in a Reverse Polish Notation (RPN) calculator or in the FORTH computer language.  Therefore, the behavior of PALMAT instructions is often to pop values from this execution stack, perform some computation on them (such as addition), and then to push the result back on the execution stack.  Each entry of the execution stack can thus hold values of various types.
 
+Also, any of the PALMAT instructions listed below optionally have a key `label` whose value is a unique string, and indicates that the instruction is the target of some kind of control-transfer instruction. 
+
 ### PALMAT Instructions 1: Arithmetic
 
 With that in mind, here's a description of some of the available PALMAT instructions.
@@ -288,9 +290,9 @@ For example, here are some PALMAT instructions appropriate for `WRITE(6) A+5, A*
     * `DATE`.  TBD
     * `RUNTIME`.  This is the elapsed floating-point number of seconds, nominally with nanosecond resolution,from the point at which the software run began.  (This is consistent with the statements on p. 13-15, PDF p. 170, of the 2005 version of the HAL/S Programmer's Guide.)
 
-### PALMAT Instructin 4: Transfer of Control
+### PALMAT Instructions 4: Transfer of Control
 
-* `{'goto': n}` transfers control to position `n` in the PALMAT-instruction list of the current scope.
+* `{'goto': [i,n]}` or `{'goto': s}` transfers control to integer position `n` in the PALMAT-instruction list for the scope with integer index `i`, or else to the accessible (scope-wise) PALMAT instruction having a `"label" : s` key-value pair. It is expected that the latter form is the as-compiled form, but that for efficiency purposes, the virtual machine executing PALMAT code would replace the latter form by the former, either upon start or else progressively as execution proceeds.
 
 ## The Source-Code File List
 
