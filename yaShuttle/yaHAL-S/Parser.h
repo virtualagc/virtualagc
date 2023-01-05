@@ -408,6 +408,7 @@ typedef struct YYLTYPE
 #define _SYMB_195 454
 #define _SYMB_196 455
 #define _SYMB_197 456
+#define _SYMB_198 457
 
 extern YYLTYPE yylloc;
 extern YYSTYPE yylval;

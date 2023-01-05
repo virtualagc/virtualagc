@@ -99,9 +99,9 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
             elif firstWord == "REMOVE" and len(fields) > 1:
                 identifier = fields[1]
                 if identifier == "*":
-                    removeAllIdentifiers(PALMAT)
+                    removeAllIdentifiers(PALMAT, 0)
                 else: 
-                    removeIdentifier(PALMAT, "^" + identifier + "^")
+                    removeIdentifier(PALMAT, 0, "^" + identifier + "^")
                 continue
             elif firstWord == "WRITE" and len(fields) > 1:
                 if writePALMAT(PALMAT, fields[1]):
@@ -304,4 +304,4 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
             for warning in substate["errors"]:
                 print("Error:", warning)
         if len(substate["errors"]) == 0 and xeq:
-            executePALMAT(PALMAT, {"scope":0, "offset":0}, trace3, 8)
+            executePALMAT(PALMAT, 0, 0, trace3, 8)

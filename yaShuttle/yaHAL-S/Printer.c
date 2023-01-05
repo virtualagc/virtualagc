@@ -1952,18 +1952,18 @@ void ppBIT_EXP(BIT_EXP p, int _i_)
 {
   switch(p->kind)
   {
-  case is_AAbit_exp:
+  case is_AAbitExpFactor:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppBIT_FACTOR(p->u.aabit_exp_.bit_factor_, 0);
+    ppBIT_FACTOR(p->u.aabitexpfactor_.bit_factor_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_ABbit_exp:
+  case is_ABbitExpOR:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppBIT_EXP(p->u.abbit_exp_.bit_exp_, 0);
-    ppOR(p->u.abbit_exp_.or_, 0);
-    ppBIT_FACTOR(p->u.abbit_exp_.bit_factor_, 0);
+    ppBIT_EXP(p->u.abbitexpor_.bit_exp_, 0);
+    ppOR(p->u.abbitexpor_.or_, 0);
+    ppBIT_FACTOR(p->u.abbitexpor_.bit_factor_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
@@ -1979,18 +1979,18 @@ void ppBIT_FACTOR(BIT_FACTOR p, int _i_)
 {
   switch(p->kind)
   {
-  case is_AAbit_factor:
+  case is_AAbitFactor:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppBIT_CAT(p->u.aabit_factor_.bit_cat_, 0);
+    ppBIT_CAT(p->u.aabitfactor_.bit_cat_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_ABbit_factor:
+  case is_ABbitFactorAnd:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppBIT_FACTOR(p->u.abbit_factor_.bit_factor_, 0);
-    ppAND(p->u.abbit_factor_.and_, 0);
-    ppBIT_CAT(p->u.abbit_factor_.bit_cat_, 0);
+    ppBIT_FACTOR(p->u.abbitfactorand_.bit_factor_, 0);
+    ppAND(p->u.abbitfactorand_.and_, 0);
+    ppBIT_CAT(p->u.abbitfactorand_.bit_cat_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
@@ -2006,36 +2006,36 @@ void ppBIT_CAT(BIT_CAT p, int _i_)
 {
   switch(p->kind)
   {
-  case is_AAbit_cat:
+  case is_AAbitCatPrim:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppBIT_PRIM(p->u.aabit_cat_.bit_prim_, 0);
+    ppBIT_PRIM(p->u.aabitcatprim_.bit_prim_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_ABbit_cat:
+  case is_ABbitCatCat:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppBIT_CAT(p->u.abbit_cat_.bit_cat_, 0);
-    ppCAT(p->u.abbit_cat_.cat_, 0);
-    ppBIT_PRIM(p->u.abbit_cat_.bit_prim_, 0);
+    ppBIT_CAT(p->u.abbitcatcat_.bit_cat_, 0);
+    ppCAT(p->u.abbitcatcat_.cat_, 0);
+    ppBIT_PRIM(p->u.abbitcatcat_.bit_prim_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_ACbit_cat:
+  case is_ACbitCatNotPrim:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppNOT(p->u.acbit_cat_.not_, 0);
-    ppBIT_PRIM(p->u.acbit_cat_.bit_prim_, 0);
+    ppNOT(p->u.acbitcatnotprim_.not_, 0);
+    ppBIT_PRIM(p->u.acbitcatnotprim_.bit_prim_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_ADbit_cat:
+  case is_ADbitCatNotCat:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppBIT_CAT(p->u.adbit_cat_.bit_cat_, 0);
-    ppCAT(p->u.adbit_cat_.cat_, 0);
-    ppNOT(p->u.adbit_cat_.not_, 0);
-    ppBIT_PRIM(p->u.adbit_cat_.bit_prim_, 0);
+    ppBIT_CAT(p->u.adbitcatnotcat_.bit_cat_, 0);
+    ppCAT(p->u.adbitcatnotcat_.cat_, 0);
+    ppNOT(p->u.adbitcatnotcat_.not_, 0);
+    ppBIT_PRIM(p->u.adbitcatnotcat_.bit_prim_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
@@ -2051,14 +2051,14 @@ void ppOR(OR p, int _i_)
 {
   switch(p->kind)
   {
-  case is_AAor:
+  case is_AAOR:
     if (_i_ > 0) renderC(_L_PAREN);
     ppCHAR_VERTICAL_BAR(p->u.aaor_.char_vertical_bar_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_ABor:
+  case is_ABOR:
     if (_i_ > 0) renderC(_L_PAREN);
     renderS("OR");
 
@@ -2094,14 +2094,14 @@ void ppAND(AND p, int _i_)
 {
   switch(p->kind)
   {
-  case is_AAand:
+  case is_AAAND:
     if (_i_ > 0) renderC(_L_PAREN);
     renderC('&');
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_ABand:
+  case is_ABAND:
     if (_i_ > 0) renderC(_L_PAREN);
     renderS("AND");
 
@@ -2249,28 +2249,28 @@ void ppNOT(NOT p, int _i_)
 {
   switch(p->kind)
   {
-  case is_AAnot:
+  case is_AANOT:
     if (_i_ > 0) renderC(_L_PAREN);
     renderC('\172');
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_ABnot:
+  case is_ABNOT:
     if (_i_ > 0) renderC(_L_PAREN);
     renderS("NOT");
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_ACnot:
+  case is_ACNOT:
     if (_i_ > 0) renderC(_L_PAREN);
     renderC('^');
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_ADnot:
+  case is_ADNOT:
     if (_i_ > 0) renderC(_L_PAREN);
     renderC('~');
 
@@ -3436,20 +3436,20 @@ void ppIF_CLAUSE(IF_CLAUSE p, int _i_)
 {
   switch(p->kind)
   {
-  case is_AAif_clause:
+  case is_AAifClauseRelationalExp:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppIF(p->u.aaif_clause_.if_, 0);
-    ppRELATIONAL_EXP(p->u.aaif_clause_.relational_exp_, 0);
-    ppTHEN(p->u.aaif_clause_.then_, 0);
+    ppIF(p->u.aaifclauserelationalexp_.if_, 0);
+    ppRELATIONAL_EXP(p->u.aaifclauserelationalexp_.relational_exp_, 0);
+    ppTHEN(p->u.aaifclauserelationalexp_.then_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_ABif_clause:
+  case is_ABifClauseBitExp:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppIF(p->u.abif_clause_.if_, 0);
-    ppBIT_EXP(p->u.abif_clause_.bit_exp_, 0);
-    ppTHEN(p->u.abif_clause_.then_, 0);
+    ppIF(p->u.abifclausebitexp_.if_, 0);
+    ppBIT_EXP(p->u.abifclausebitexp_.bit_exp_, 0);
+    ppTHEN(p->u.abifclausebitexp_.then_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
@@ -3677,8 +3677,7 @@ void ppRELATIONAL_OP(RELATIONAL_OP p, int _i_)
 
   case is_ABrelationalOpNEQ:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppNOT(p->u.abrelationalopneq_.not_, 0);
-    ppEQUALS(p->u.abrelationalopneq_.equals_, 0);
+    ppIdent(p->u.abrelationalopneq_.neqtoken_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
@@ -3699,30 +3698,14 @@ void ppRELATIONAL_OP(RELATIONAL_OP p, int _i_)
 
   case is_AErelationalOpLE:
     if (_i_ > 0) renderC(_L_PAREN);
-    renderS("<=");
+    ppIdent(p->u.aerelationalople_.letoken_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
   case is_AFrelationalOpGE:
     if (_i_ > 0) renderC(_L_PAREN);
-    renderS(">=");
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_AGrelationalOpNLT:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppNOT(p->u.agrelationalopnlt_.not_, 0);
-    renderC('<');
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_AHrelationalOpNGT:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppNOT(p->u.ahrelationalopngt_.not_, 0);
-    renderC('>');
+    ppIdent(p->u.afrelationalopge_.getoken_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
@@ -7032,6 +7015,24 @@ void ppIdent(String s, int i)
   renderS(s);
 }
 
+void ppNeqToken(String s, int i)
+{
+  renderS(s);
+}
+
+
+void ppLeToken(String s, int i)
+{
+  renderS(s);
+}
+
+
+void ppGeToken(String s, int i)
+{
+  renderS(s);
+}
+
+
 void ppBitIdentifierToken(String s, int i)
 {
   renderS(s);
@@ -9559,30 +9560,30 @@ void shBIT_EXP(BIT_EXP p)
 {
   switch(p->kind)
   {
-  case is_AAbit_exp:
+  case is_AAbitExpFactor:
     bufAppendC('(');
 
-    bufAppendS("AAbit_exp");
+    bufAppendS("AAbitExpFactor");
 
     bufAppendC(' ');
 
-    shBIT_FACTOR(p->u.aabit_exp_.bit_factor_);
+    shBIT_FACTOR(p->u.aabitexpfactor_.bit_factor_);
 
     bufAppendC(')');
 
     break;
-  case is_ABbit_exp:
+  case is_ABbitExpOR:
     bufAppendC('(');
 
-    bufAppendS("ABbit_exp");
+    bufAppendS("ABbitExpOR");
 
     bufAppendC(' ');
 
-    shBIT_EXP(p->u.abbit_exp_.bit_exp_);
+    shBIT_EXP(p->u.abbitexpor_.bit_exp_);
   bufAppendC(' ');
-    shOR(p->u.abbit_exp_.or_);
+    shOR(p->u.abbitexpor_.or_);
   bufAppendC(' ');
-    shBIT_FACTOR(p->u.abbit_exp_.bit_factor_);
+    shBIT_FACTOR(p->u.abbitexpor_.bit_factor_);
 
     bufAppendC(')');
 
@@ -9598,30 +9599,30 @@ void shBIT_FACTOR(BIT_FACTOR p)
 {
   switch(p->kind)
   {
-  case is_AAbit_factor:
+  case is_AAbitFactor:
     bufAppendC('(');
 
-    bufAppendS("AAbit_factor");
+    bufAppendS("AAbitFactor");
 
     bufAppendC(' ');
 
-    shBIT_CAT(p->u.aabit_factor_.bit_cat_);
+    shBIT_CAT(p->u.aabitfactor_.bit_cat_);
 
     bufAppendC(')');
 
     break;
-  case is_ABbit_factor:
+  case is_ABbitFactorAnd:
     bufAppendC('(');
 
-    bufAppendS("ABbit_factor");
+    bufAppendS("ABbitFactorAnd");
 
     bufAppendC(' ');
 
-    shBIT_FACTOR(p->u.abbit_factor_.bit_factor_);
+    shBIT_FACTOR(p->u.abbitfactorand_.bit_factor_);
   bufAppendC(' ');
-    shAND(p->u.abbit_factor_.and_);
+    shAND(p->u.abbitfactorand_.and_);
   bufAppendC(' ');
-    shBIT_CAT(p->u.abbit_factor_.bit_cat_);
+    shBIT_CAT(p->u.abbitfactorand_.bit_cat_);
 
     bufAppendC(')');
 
@@ -9637,62 +9638,62 @@ void shBIT_CAT(BIT_CAT p)
 {
   switch(p->kind)
   {
-  case is_AAbit_cat:
+  case is_AAbitCatPrim:
     bufAppendC('(');
 
-    bufAppendS("AAbit_cat");
+    bufAppendS("AAbitCatPrim");
 
     bufAppendC(' ');
 
-    shBIT_PRIM(p->u.aabit_cat_.bit_prim_);
+    shBIT_PRIM(p->u.aabitcatprim_.bit_prim_);
 
     bufAppendC(')');
 
     break;
-  case is_ABbit_cat:
+  case is_ABbitCatCat:
     bufAppendC('(');
 
-    bufAppendS("ABbit_cat");
+    bufAppendS("ABbitCatCat");
 
     bufAppendC(' ');
 
-    shBIT_CAT(p->u.abbit_cat_.bit_cat_);
+    shBIT_CAT(p->u.abbitcatcat_.bit_cat_);
   bufAppendC(' ');
-    shCAT(p->u.abbit_cat_.cat_);
+    shCAT(p->u.abbitcatcat_.cat_);
   bufAppendC(' ');
-    shBIT_PRIM(p->u.abbit_cat_.bit_prim_);
+    shBIT_PRIM(p->u.abbitcatcat_.bit_prim_);
 
     bufAppendC(')');
 
     break;
-  case is_ACbit_cat:
+  case is_ACbitCatNotPrim:
     bufAppendC('(');
 
-    bufAppendS("ACbit_cat");
+    bufAppendS("ACbitCatNotPrim");
 
     bufAppendC(' ');
 
-    shNOT(p->u.acbit_cat_.not_);
+    shNOT(p->u.acbitcatnotprim_.not_);
   bufAppendC(' ');
-    shBIT_PRIM(p->u.acbit_cat_.bit_prim_);
+    shBIT_PRIM(p->u.acbitcatnotprim_.bit_prim_);
 
     bufAppendC(')');
 
     break;
-  case is_ADbit_cat:
+  case is_ADbitCatNotCat:
     bufAppendC('(');
 
-    bufAppendS("ADbit_cat");
+    bufAppendS("ADbitCatNotCat");
 
     bufAppendC(' ');
 
-    shBIT_CAT(p->u.adbit_cat_.bit_cat_);
+    shBIT_CAT(p->u.adbitcatnotcat_.bit_cat_);
   bufAppendC(' ');
-    shCAT(p->u.adbit_cat_.cat_);
+    shCAT(p->u.adbitcatnotcat_.cat_);
   bufAppendC(' ');
-    shNOT(p->u.adbit_cat_.not_);
+    shNOT(p->u.adbitcatnotcat_.not_);
   bufAppendC(' ');
-    shBIT_PRIM(p->u.adbit_cat_.bit_prim_);
+    shBIT_PRIM(p->u.adbitcatnotcat_.bit_prim_);
 
     bufAppendC(')');
 
@@ -9708,10 +9709,10 @@ void shOR(OR p)
 {
   switch(p->kind)
   {
-  case is_AAor:
+  case is_AAOR:
     bufAppendC('(');
 
-    bufAppendS("AAor");
+    bufAppendS("AAOR");
 
     bufAppendC(' ');
 
@@ -9720,9 +9721,9 @@ void shOR(OR p)
     bufAppendC(')');
 
     break;
-  case is_ABor:
+  case is_ABOR:
 
-    bufAppendS("ABor");
+    bufAppendS("ABOR");
 
 
 
@@ -9758,17 +9759,17 @@ void shAND(AND p)
 {
   switch(p->kind)
   {
-  case is_AAand:
+  case is_AAAND:
 
-    bufAppendS("AAand");
+    bufAppendS("AAAND");
 
 
 
 
     break;
-  case is_ABand:
+  case is_ABAND:
 
-    bufAppendS("ABand");
+    bufAppendS("ABAND");
 
 
 
@@ -9963,33 +9964,33 @@ void shNOT(NOT p)
 {
   switch(p->kind)
   {
-  case is_AAnot:
+  case is_AANOT:
 
-    bufAppendS("AAnot");
-
-
-
-
-    break;
-  case is_ABnot:
-
-    bufAppendS("ABnot");
+    bufAppendS("AANOT");
 
 
 
 
     break;
-  case is_ACnot:
+  case is_ABNOT:
 
-    bufAppendS("ACnot");
+    bufAppendS("ABNOT");
 
 
 
 
     break;
-  case is_ADnot:
+  case is_ACNOT:
 
-    bufAppendS("ADnot");
+    bufAppendS("ACNOT");
+
+
+
+
+    break;
+  case is_ADNOT:
+
+    bufAppendS("ADNOT");
 
 
 
@@ -11562,34 +11563,34 @@ void shIF_CLAUSE(IF_CLAUSE p)
 {
   switch(p->kind)
   {
-  case is_AAif_clause:
+  case is_AAifClauseRelationalExp:
     bufAppendC('(');
 
-    bufAppendS("AAif_clause");
+    bufAppendS("AAifClauseRelationalExp");
 
     bufAppendC(' ');
 
-    shIF(p->u.aaif_clause_.if_);
+    shIF(p->u.aaifclauserelationalexp_.if_);
   bufAppendC(' ');
-    shRELATIONAL_EXP(p->u.aaif_clause_.relational_exp_);
+    shRELATIONAL_EXP(p->u.aaifclauserelationalexp_.relational_exp_);
   bufAppendC(' ');
-    shTHEN(p->u.aaif_clause_.then_);
+    shTHEN(p->u.aaifclauserelationalexp_.then_);
 
     bufAppendC(')');
 
     break;
-  case is_ABif_clause:
+  case is_ABifClauseBitExp:
     bufAppendC('(');
 
-    bufAppendS("ABif_clause");
+    bufAppendS("ABifClauseBitExp");
 
     bufAppendC(' ');
 
-    shIF(p->u.abif_clause_.if_);
+    shIF(p->u.abifclausebitexp_.if_);
   bufAppendC(' ');
-    shBIT_EXP(p->u.abif_clause_.bit_exp_);
+    shBIT_EXP(p->u.abifclausebitexp_.bit_exp_);
   bufAppendC(' ');
-    shTHEN(p->u.abif_clause_.then_);
+    shTHEN(p->u.abifclausebitexp_.then_);
 
     bufAppendC(')');
 
@@ -11905,9 +11906,7 @@ void shRELATIONAL_OP(RELATIONAL_OP p)
 
     bufAppendC(' ');
 
-    shNOT(p->u.abrelationalopneq_.not_);
-  bufAppendC(' ');
-    shEQUALS(p->u.abrelationalopneq_.equals_);
+    shIdent(p->u.abrelationalopneq_.neqtoken_);
 
     bufAppendC(')');
 
@@ -11929,41 +11928,25 @@ void shRELATIONAL_OP(RELATIONAL_OP p)
 
     break;
   case is_AErelationalOpLE:
+    bufAppendC('(');
 
     bufAppendS("AErelationalOpLE");
 
-
-
-
-    break;
-  case is_AFrelationalOpGE:
-
-    bufAppendS("AFrelationalOpGE");
-
-
-
-
-    break;
-  case is_AGrelationalOpNLT:
-    bufAppendC('(');
-
-    bufAppendS("AGrelationalOpNLT");
-
     bufAppendC(' ');
 
-    shNOT(p->u.agrelationalopnlt_.not_);
+    shIdent(p->u.aerelationalople_.letoken_);
 
     bufAppendC(')');
 
     break;
-  case is_AHrelationalOpNGT:
+  case is_AFrelationalOpGE:
     bufAppendC('(');
 
-    bufAppendS("AHrelationalOpNGT");
+    bufAppendS("AFrelationalOpGE");
 
     bufAppendC(' ');
 
-    shNOT(p->u.ahrelationalopngt_.not_);
+    shIdent(p->u.afrelationalopge_.getoken_);
 
     bufAppendC(')');
 
@@ -16335,6 +16318,30 @@ void shIdent(String s)
   bufAppendS(s);
   bufAppendC('\"');
 }
+
+void shNeqToken(String s)
+{
+  bufAppendC('\"');
+  bufAppendS(s);
+  bufAppendC('\"');
+}
+
+
+void shLeToken(String s)
+{
+  bufAppendC('\"');
+  bufAppendS(s);
+  bufAppendC('\"');
+}
+
+
+void shGeToken(String s)
+{
+  bufAppendC('\"');
+  bufAppendS(s);
+  bufAppendC('\"');
+}
+
 
 void shBitIdentifierToken(String s)
 {

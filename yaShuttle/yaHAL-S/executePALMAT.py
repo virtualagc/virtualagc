@@ -82,6 +82,40 @@ def findIdentifier(identifier, scope):
         scope = scope["parent"]
     return scope
 
+# Returns a tuple consisting of a new scope number and
+# offset into the scope, or else returns None if not found.
+# The premise is the that instructionDict has a key/value
+# pair of the form { instructionName: s }, where s is either
+# an ordered pair of a desired new scope index and offset,
+# or else is an identifier giving the name of an accessible
+# label.
+def jump (scope, instructionDict, instructionName):
+    s = instructionDict[instructionName]
+    if isinstance(s, str):
+        attributes = findIdentifier(s, scope)
+        if attributes == None or "label" not in attributes:
+            print("Cannot find target label", s)
+            return None
+        # The following line updates the PALMAT instruction
+        # (goto or iffalse or whatever) in-place, so that
+        # instead of holding the symbolic label that's the
+        # target of the jump, it holds a list with two elements
+        # that are the index of the scope and the offset
+        # into the scope for the target label.  This isn't
+        # 100% necessary; it's just there to slightly improve
+        # the speed at which the jump can be made subsequently,
+        # and might want to be handled differently in some 
+        # other implementation.  (Such as making all of these
+        # corrections when the PALMAT is loaded, or perhaps
+        # having a separate post-compilation processing step
+        # that corrects them all.  It's nice to have the 
+        # labels as long as you can, though, in case you need
+        # to refer to them for some reason.
+        instructionDict[instructionName] = attributes["label"]
+    s = instructionDict[instructionName]
+    #print("*", instructionName, instructionDict, s)
+    return tuple(s)
+                
 # If this function returns, which in principle it might not if executing
 # an actual flight program, it returns the current computation stack.
 # That would normally be empty if full statements had been executed.
@@ -91,10 +125,10 @@ def findIdentifier(identifier, scope):
 # CONSTANT(...) for DECLARE statements.  If there is failure, for example
 # the use of an unimplemented built-in function or referencing an 
 # uninitialized variable, then None is returned instead.
-def executePALMAT(PALMAT, programCounter={"scope":0, "offset":0}, trace = False, indent=0):
+def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
     scopes = PALMAT["scopes"]
-    scopeNumber = programCounter["scope"]
-    instructionIndex = programCounter["offset"]
+    scopeNumber = pcScope
+    instructionIndex = pcOffset
     scope = scopes[scopeNumber]
     identifiers = scope["identifiers"]
     instructions = scope["instructions"]
@@ -102,12 +136,13 @@ def executePALMAT(PALMAT, programCounter={"scope":0, "offset":0}, trace = False,
     while instructionIndex < len(instructions):
         instruction = instructions[instructionIndex]
         instructionIndex += 1
-        programCounter["offset"] = instructionIndex
         if trace:
             print("\t==>", computationStack, instruction)
         stackSize = len(computationStack)
         if "string" in instruction:
             computationStack.append(instruction["string"])
+        elif "boolean" in instruction:
+            computationStack.append(instruction["boolean"])
         elif "number" in instruction:
             stringifiedNumber = instruction["number"]
             multiplier = 1.0
@@ -134,18 +169,27 @@ def executePALMAT(PALMAT, programCounter={"scope":0, "offset":0}, trace = False,
             computationStack.append(float(stringifiedNumber) * multiplier)   
         elif "operator" in instruction:
             operator = instruction["operator"]
-            if operator in ["U-"]: # Unary operators.
+            if operator in ["U-", "NOT"]: # Unary operators.
                 if stackSize < 1:
                     print("Implementation error, not enough operands for operator \"%s\"" % operator)
                     return None
                 operand = computationStack[-1]
                 if operator == "U-":
                     result = -operand
+                elif operator == "NOT":
+                    if isinstance(operand, bool):
+                        result = not operand
+                    elif isinstance(operand, int):
+                        result = ~operand
+                    else:
+                        print("Operand type inappropriate for NOT operator")
+                        return None
                 else:
                     print("Implementation error, unary operator \"%s\" not yet implemented" % operator)
                     return None
                 computationStack[-1] = result
-            elif operator in ["+", "-", "", "/", "**", ".", "*", "C||"]: # binary operators.
+            elif operator in ["+", "-", "", "/", "**", ".", "*", "C||", "OR", "AND", 
+                              "==", "!=", "<", ">", "<=", ">="]: # binary operators.
                 if stackSize < 2:
                     print("Implementation error, not enough operands for operator \"%s\"" % operator)
                     return None
@@ -164,6 +208,26 @@ def executePALMAT(PALMAT, programCounter={"scope":0, "offset":0}, trace = False,
                     result = operand1 ** operand2
                 elif operator == "C||": # string concatenation.
                     result = operand1 + operand2
+                elif operator == "OR":
+                    result = operand1 or operand2
+                elif operator == "AND":
+                    result = operand1 and operand2
+                elif operator == "==":
+                    result = (operand2 == operand1)
+                elif operator == "!=":
+                    result = (operand2 != operand1)
+                elif operator == "<":
+                    result = (operand2 < operand1)
+                elif operator == ">":
+                    result = (operand2 > operand1)
+                elif operator == "<=":
+                    result = (operand2 <= operand1)
+                elif operator == ">=":
+                    result = (operand2 >= operand1)
+                #elif operator == "!<":
+                #    result = not (operand2 < operand1)
+                #elif operator == "!>":
+                #    result = not (operand2 > operand1)
                 else:
                     print("Implementation error, binary operator \"%s\" not yet implemented" % operator)
                     return None
@@ -435,6 +499,7 @@ def executePALMAT(PALMAT, programCounter={"scope":0, "offset":0}, trace = False,
                 print("Implementation error, function", function)
                 return None
         elif "goto" in instruction:
+            '''
             s = instruction["goto"]
             if isinstance(s, str):
                 attributes = findIdentifier(s, scope)
@@ -445,8 +510,14 @@ def executePALMAT(PALMAT, programCounter={"scope":0, "offset":0}, trace = False,
             s = instruction["goto"]
             scopeNumber = s[0]
             instructionIndex = s[1]
-            programCounter["scope"] = scopeNumber
-            programCounter["offset"] = instructionIndex
+            '''
+            scopeNumber, instructionIndex = jump(scope, instruction, "goto")
+        elif "iffalse" in instruction:
+            value = computationStack.pop()
+            if not value:
+                scopeNumber, instructionIndex = jump(scope, instruction, "iffalse")
+        elif "noop" in instruction:
+            pass # Nothing to do!
         else:
             print("Implementation error, unknown PALMAT:", instruction)
             return None

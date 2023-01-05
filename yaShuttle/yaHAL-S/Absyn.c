@@ -2276,140 +2276,140 @@ POUND_EXPRESSION make_ACpound_expression(POUND_EXPRESSION p1, MINUS p2, TERM p3)
     tmp->u.acpound_expression_.minus_ = p2;
     tmp->u.acpound_expression_.term_ = p3;
     return tmp;
-}/********************   AAbit_exp    ********************/
-BIT_EXP make_AAbit_exp(BIT_FACTOR p1)
+}/********************   AAbitExpFactor    ********************/
+BIT_EXP make_AAbitExpFactor(BIT_FACTOR p1)
 {
     BIT_EXP tmp = (BIT_EXP) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating AAbit_exp!\n");
+        fprintf(stderr, "Error: out of memory when allocating AAbitExpFactor!\n");
         exit(1);
     }
-    tmp->kind = is_AAbit_exp;
-    tmp->u.aabit_exp_.bit_factor_ = p1;
+    tmp->kind = is_AAbitExpFactor;
+    tmp->u.aabitexpfactor_.bit_factor_ = p1;
     return tmp;
 }
-/********************   ABbit_exp    ********************/
-BIT_EXP make_ABbit_exp(BIT_EXP p1, OR p2, BIT_FACTOR p3)
+/********************   ABbitExpOR    ********************/
+BIT_EXP make_ABbitExpOR(BIT_EXP p1, OR p2, BIT_FACTOR p3)
 {
     BIT_EXP tmp = (BIT_EXP) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ABbit_exp!\n");
+        fprintf(stderr, "Error: out of memory when allocating ABbitExpOR!\n");
         exit(1);
     }
-    tmp->kind = is_ABbit_exp;
-    tmp->u.abbit_exp_.bit_exp_ = p1;
-    tmp->u.abbit_exp_.or_ = p2;
-    tmp->u.abbit_exp_.bit_factor_ = p3;
+    tmp->kind = is_ABbitExpOR;
+    tmp->u.abbitexpor_.bit_exp_ = p1;
+    tmp->u.abbitexpor_.or_ = p2;
+    tmp->u.abbitexpor_.bit_factor_ = p3;
     return tmp;
-}/********************   AAbit_factor    ********************/
-BIT_FACTOR make_AAbit_factor(BIT_CAT p1)
+}/********************   AAbitFactor    ********************/
+BIT_FACTOR make_AAbitFactor(BIT_CAT p1)
 {
     BIT_FACTOR tmp = (BIT_FACTOR) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating AAbit_factor!\n");
+        fprintf(stderr, "Error: out of memory when allocating AAbitFactor!\n");
         exit(1);
     }
-    tmp->kind = is_AAbit_factor;
-    tmp->u.aabit_factor_.bit_cat_ = p1;
+    tmp->kind = is_AAbitFactor;
+    tmp->u.aabitfactor_.bit_cat_ = p1;
     return tmp;
 }
-/********************   ABbit_factor    ********************/
-BIT_FACTOR make_ABbit_factor(BIT_FACTOR p1, AND p2, BIT_CAT p3)
+/********************   ABbitFactorAnd    ********************/
+BIT_FACTOR make_ABbitFactorAnd(BIT_FACTOR p1, AND p2, BIT_CAT p3)
 {
     BIT_FACTOR tmp = (BIT_FACTOR) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ABbit_factor!\n");
+        fprintf(stderr, "Error: out of memory when allocating ABbitFactorAnd!\n");
         exit(1);
     }
-    tmp->kind = is_ABbit_factor;
-    tmp->u.abbit_factor_.bit_factor_ = p1;
-    tmp->u.abbit_factor_.and_ = p2;
-    tmp->u.abbit_factor_.bit_cat_ = p3;
+    tmp->kind = is_ABbitFactorAnd;
+    tmp->u.abbitfactorand_.bit_factor_ = p1;
+    tmp->u.abbitfactorand_.and_ = p2;
+    tmp->u.abbitfactorand_.bit_cat_ = p3;
     return tmp;
-}/********************   AAbit_cat    ********************/
-BIT_CAT make_AAbit_cat(BIT_PRIM p1)
+}/********************   AAbitCatPrim    ********************/
+BIT_CAT make_AAbitCatPrim(BIT_PRIM p1)
 {
     BIT_CAT tmp = (BIT_CAT) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating AAbit_cat!\n");
+        fprintf(stderr, "Error: out of memory when allocating AAbitCatPrim!\n");
         exit(1);
     }
-    tmp->kind = is_AAbit_cat;
-    tmp->u.aabit_cat_.bit_prim_ = p1;
+    tmp->kind = is_AAbitCatPrim;
+    tmp->u.aabitcatprim_.bit_prim_ = p1;
     return tmp;
 }
-/********************   ABbit_cat    ********************/
-BIT_CAT make_ABbit_cat(BIT_CAT p1, CAT p2, BIT_PRIM p3)
+/********************   ABbitCatCat    ********************/
+BIT_CAT make_ABbitCatCat(BIT_CAT p1, CAT p2, BIT_PRIM p3)
 {
     BIT_CAT tmp = (BIT_CAT) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ABbit_cat!\n");
+        fprintf(stderr, "Error: out of memory when allocating ABbitCatCat!\n");
         exit(1);
     }
-    tmp->kind = is_ABbit_cat;
-    tmp->u.abbit_cat_.bit_cat_ = p1;
-    tmp->u.abbit_cat_.cat_ = p2;
-    tmp->u.abbit_cat_.bit_prim_ = p3;
+    tmp->kind = is_ABbitCatCat;
+    tmp->u.abbitcatcat_.bit_cat_ = p1;
+    tmp->u.abbitcatcat_.cat_ = p2;
+    tmp->u.abbitcatcat_.bit_prim_ = p3;
     return tmp;
 }
-/********************   ACbit_cat    ********************/
-BIT_CAT make_ACbit_cat(NOT p1, BIT_PRIM p2)
+/********************   ACbitCatNotPrim    ********************/
+BIT_CAT make_ACbitCatNotPrim(NOT p1, BIT_PRIM p2)
 {
     BIT_CAT tmp = (BIT_CAT) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ACbit_cat!\n");
+        fprintf(stderr, "Error: out of memory when allocating ACbitCatNotPrim!\n");
         exit(1);
     }
-    tmp->kind = is_ACbit_cat;
-    tmp->u.acbit_cat_.not_ = p1;
-    tmp->u.acbit_cat_.bit_prim_ = p2;
+    tmp->kind = is_ACbitCatNotPrim;
+    tmp->u.acbitcatnotprim_.not_ = p1;
+    tmp->u.acbitcatnotprim_.bit_prim_ = p2;
     return tmp;
 }
-/********************   ADbit_cat    ********************/
-BIT_CAT make_ADbit_cat(BIT_CAT p1, CAT p2, NOT p3, BIT_PRIM p4)
+/********************   ADbitCatNotCat    ********************/
+BIT_CAT make_ADbitCatNotCat(BIT_CAT p1, CAT p2, NOT p3, BIT_PRIM p4)
 {
     BIT_CAT tmp = (BIT_CAT) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ADbit_cat!\n");
+        fprintf(stderr, "Error: out of memory when allocating ADbitCatNotCat!\n");
         exit(1);
     }
-    tmp->kind = is_ADbit_cat;
-    tmp->u.adbit_cat_.bit_cat_ = p1;
-    tmp->u.adbit_cat_.cat_ = p2;
-    tmp->u.adbit_cat_.not_ = p3;
-    tmp->u.adbit_cat_.bit_prim_ = p4;
+    tmp->kind = is_ADbitCatNotCat;
+    tmp->u.adbitcatnotcat_.bit_cat_ = p1;
+    tmp->u.adbitcatnotcat_.cat_ = p2;
+    tmp->u.adbitcatnotcat_.not_ = p3;
+    tmp->u.adbitcatnotcat_.bit_prim_ = p4;
     return tmp;
-}/********************   AAor    ********************/
-OR make_AAor(CHAR_VERTICAL_BAR p1)
+}/********************   AAOR    ********************/
+OR make_AAOR(CHAR_VERTICAL_BAR p1)
 {
     OR tmp = (OR) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating AAor!\n");
+        fprintf(stderr, "Error: out of memory when allocating AAOR!\n");
         exit(1);
     }
-    tmp->kind = is_AAor;
+    tmp->kind = is_AAOR;
     tmp->u.aaor_.char_vertical_bar_ = p1;
     return tmp;
 }
-/********************   ABor    ********************/
-OR make_ABor()
+/********************   ABOR    ********************/
+OR make_ABOR()
 {
     OR tmp = (OR) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ABor!\n");
+        fprintf(stderr, "Error: out of memory when allocating ABOR!\n");
         exit(1);
     }
-    tmp->kind = is_ABor;
+    tmp->kind = is_ABOR;
     return tmp;
 }/********************   CFchar_vertical_bar    ********************/
 CHAR_VERTICAL_BAR make_CFchar_vertical_bar()
@@ -2422,28 +2422,28 @@ CHAR_VERTICAL_BAR make_CFchar_vertical_bar()
     }
     tmp->kind = is_CFchar_vertical_bar;
     return tmp;
-}/********************   AAand    ********************/
-AND make_AAand()
+}/********************   AAAND    ********************/
+AND make_AAAND()
 {
     AND tmp = (AND) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating AAand!\n");
+        fprintf(stderr, "Error: out of memory when allocating AAAND!\n");
         exit(1);
     }
-    tmp->kind = is_AAand;
+    tmp->kind = is_AAAND;
     return tmp;
 }
-/********************   ABand    ********************/
-AND make_ABand()
+/********************   ABAND    ********************/
+AND make_ABAND()
 {
     AND tmp = (AND) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ABand!\n");
+        fprintf(stderr, "Error: out of memory when allocating ABAND!\n");
         exit(1);
     }
-    tmp->kind = is_ABand;
+    tmp->kind = is_ABAND;
     return tmp;
 }/********************   AAbitPrimBitVar    ********************/
 BIT_PRIM make_AAbitPrimBitVar(BIT_VAR p1)
@@ -2614,52 +2614,52 @@ CAT make_ABcat()
     }
     tmp->kind = is_ABcat;
     return tmp;
-}/********************   AAnot    ********************/
-NOT make_AAnot()
+}/********************   AANOT    ********************/
+NOT make_AANOT()
 {
     NOT tmp = (NOT) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating AAnot!\n");
+        fprintf(stderr, "Error: out of memory when allocating AANOT!\n");
         exit(1);
     }
-    tmp->kind = is_AAnot;
+    tmp->kind = is_AANOT;
     return tmp;
 }
-/********************   ABnot    ********************/
-NOT make_ABnot()
+/********************   ABNOT    ********************/
+NOT make_ABNOT()
 {
     NOT tmp = (NOT) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ABnot!\n");
+        fprintf(stderr, "Error: out of memory when allocating ABNOT!\n");
         exit(1);
     }
-    tmp->kind = is_ABnot;
+    tmp->kind = is_ABNOT;
     return tmp;
 }
-/********************   ACnot    ********************/
-NOT make_ACnot()
+/********************   ACNOT    ********************/
+NOT make_ACNOT()
 {
     NOT tmp = (NOT) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ACnot!\n");
+        fprintf(stderr, "Error: out of memory when allocating ACNOT!\n");
         exit(1);
     }
-    tmp->kind = is_ACnot;
+    tmp->kind = is_ACNOT;
     return tmp;
 }
-/********************   ADnot    ********************/
-NOT make_ADnot()
+/********************   ADNOT    ********************/
+NOT make_ADNOT()
 {
     NOT tmp = (NOT) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ADnot!\n");
+        fprintf(stderr, "Error: out of memory when allocating ADNOT!\n");
         exit(1);
     }
-    tmp->kind = is_ADnot;
+    tmp->kind = is_ADNOT;
     return tmp;
 }/********************   AAbit_var    ********************/
 BIT_VAR make_AAbit_var(BIT_ID p1)
@@ -3888,34 +3888,34 @@ IF_STATEMENT make_ABifThenElseStatement(TRUE_PART p1, STATEMENT p2)
     tmp->u.abifthenelsestatement_.true_part_ = p1;
     tmp->u.abifthenelsestatement_.statement_ = p2;
     return tmp;
-}/********************   AAif_clause    ********************/
-IF_CLAUSE make_AAif_clause(IF p1, RELATIONAL_EXP p2, THEN p3)
+}/********************   AAifClauseRelationalExp    ********************/
+IF_CLAUSE make_AAifClauseRelationalExp(IF p1, RELATIONAL_EXP p2, THEN p3)
 {
     IF_CLAUSE tmp = (IF_CLAUSE) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating AAif_clause!\n");
+        fprintf(stderr, "Error: out of memory when allocating AAifClauseRelationalExp!\n");
         exit(1);
     }
-    tmp->kind = is_AAif_clause;
-    tmp->u.aaif_clause_.if_ = p1;
-    tmp->u.aaif_clause_.relational_exp_ = p2;
-    tmp->u.aaif_clause_.then_ = p3;
+    tmp->kind = is_AAifClauseRelationalExp;
+    tmp->u.aaifclauserelationalexp_.if_ = p1;
+    tmp->u.aaifclauserelationalexp_.relational_exp_ = p2;
+    tmp->u.aaifclauserelationalexp_.then_ = p3;
     return tmp;
 }
-/********************   ABif_clause    ********************/
-IF_CLAUSE make_ABif_clause(IF p1, BIT_EXP p2, THEN p3)
+/********************   ABifClauseBitExp    ********************/
+IF_CLAUSE make_ABifClauseBitExp(IF p1, BIT_EXP p2, THEN p3)
 {
     IF_CLAUSE tmp = (IF_CLAUSE) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ABif_clause!\n");
+        fprintf(stderr, "Error: out of memory when allocating ABifClauseBitExp!\n");
         exit(1);
     }
-    tmp->kind = is_ABif_clause;
-    tmp->u.abif_clause_.if_ = p1;
-    tmp->u.abif_clause_.bit_exp_ = p2;
-    tmp->u.abif_clause_.then_ = p3;
+    tmp->kind = is_ABifClauseBitExp;
+    tmp->u.abifclausebitexp_.if_ = p1;
+    tmp->u.abifclausebitexp_.bit_exp_ = p2;
+    tmp->u.abifclausebitexp_.then_ = p3;
     return tmp;
 }/********************   AAtrue_part    ********************/
 TRUE_PART make_AAtrue_part(IF_CLAUSE p1, BASIC_STATEMENT p2)
@@ -4133,7 +4133,7 @@ RELATIONAL_OP make_AArelationalOpEQ(EQUALS p1)
     return tmp;
 }
 /********************   ABrelationalOpNEQ    ********************/
-RELATIONAL_OP make_ABrelationalOpNEQ(NOT p1, EQUALS p2)
+RELATIONAL_OP make_ABrelationalOpNEQ(NeqToken p1)
 {
     RELATIONAL_OP tmp = (RELATIONAL_OP) malloc(sizeof(*tmp));
     if (!tmp)
@@ -4142,8 +4142,7 @@ RELATIONAL_OP make_ABrelationalOpNEQ(NOT p1, EQUALS p2)
         exit(1);
     }
     tmp->kind = is_ABrelationalOpNEQ;
-    tmp->u.abrelationalopneq_.not_ = p1;
-    tmp->u.abrelationalopneq_.equals_ = p2;
+    tmp->u.abrelationalopneq_.neqtoken_ = p1;
     return tmp;
 }
 /********************   ACrelationalOpLT    ********************/
@@ -4171,7 +4170,7 @@ RELATIONAL_OP make_ADrelationalOpGT()
     return tmp;
 }
 /********************   AErelationalOpLE    ********************/
-RELATIONAL_OP make_AErelationalOpLE()
+RELATIONAL_OP make_AErelationalOpLE(LeToken p1)
 {
     RELATIONAL_OP tmp = (RELATIONAL_OP) malloc(sizeof(*tmp));
     if (!tmp)
@@ -4180,10 +4179,11 @@ RELATIONAL_OP make_AErelationalOpLE()
         exit(1);
     }
     tmp->kind = is_AErelationalOpLE;
+    tmp->u.aerelationalople_.letoken_ = p1;
     return tmp;
 }
 /********************   AFrelationalOpGE    ********************/
-RELATIONAL_OP make_AFrelationalOpGE()
+RELATIONAL_OP make_AFrelationalOpGE(GeToken p1)
 {
     RELATIONAL_OP tmp = (RELATIONAL_OP) malloc(sizeof(*tmp));
     if (!tmp)
@@ -4192,32 +4192,7 @@ RELATIONAL_OP make_AFrelationalOpGE()
         exit(1);
     }
     tmp->kind = is_AFrelationalOpGE;
-    return tmp;
-}
-/********************   AGrelationalOpNLT    ********************/
-RELATIONAL_OP make_AGrelationalOpNLT(NOT p1)
-{
-    RELATIONAL_OP tmp = (RELATIONAL_OP) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AGrelationalOpNLT!\n");
-        exit(1);
-    }
-    tmp->kind = is_AGrelationalOpNLT;
-    tmp->u.agrelationalopnlt_.not_ = p1;
-    return tmp;
-}
-/********************   AHrelationalOpNGT    ********************/
-RELATIONAL_OP make_AHrelationalOpNGT(NOT p1)
-{
-    RELATIONAL_OP tmp = (RELATIONAL_OP) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AHrelationalOpNGT!\n");
-        exit(1);
-    }
-    tmp->kind = is_AHrelationalOpNGT;
-    tmp->u.ahrelationalopngt_.not_ = p1;
+    tmp->u.afrelationalopge_.getoken_ = p1;
     return tmp;
 }/********************   AAstatement    ********************/
 STATEMENT make_AAstatement(BASIC_STATEMENT p1)

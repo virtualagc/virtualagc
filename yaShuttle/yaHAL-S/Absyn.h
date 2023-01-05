@@ -9,6 +9,9 @@ typedef char Char;
 typedef double Double;
 typedef char* String;
 typedef char* Ident;
+typedef char* NeqToken;
+typedef char* LeToken;
+typedef char* GeToken;
 typedef char* BitIdentifierToken;
 typedef char* BitFunctionIdentifierToken;
 typedef char* CharFunctionIdentifierToken;
@@ -1133,61 +1136,61 @@ POUND_EXPRESSION make_ACpound_expression(POUND_EXPRESSION p0, MINUS p1, TERM p2)
 struct BIT_EXP_
 {
   int line_number, char_number;
-  enum { is_AAbit_exp, is_ABbit_exp } kind;
+  enum { is_AAbitExpFactor, is_ABbitExpOR } kind;
   union
   {
-    struct { BIT_FACTOR bit_factor_; } aabit_exp_;
-    struct { BIT_EXP bit_exp_; BIT_FACTOR bit_factor_; OR or_; } abbit_exp_;
+    struct { BIT_FACTOR bit_factor_; } aabitexpfactor_;
+    struct { BIT_EXP bit_exp_; BIT_FACTOR bit_factor_; OR or_; } abbitexpor_;
   } u;
 };
 
-BIT_EXP make_AAbit_exp(BIT_FACTOR p0);
-BIT_EXP make_ABbit_exp(BIT_EXP p0, OR p1, BIT_FACTOR p2);
+BIT_EXP make_AAbitExpFactor(BIT_FACTOR p0);
+BIT_EXP make_ABbitExpOR(BIT_EXP p0, OR p1, BIT_FACTOR p2);
 
 struct BIT_FACTOR_
 {
   int line_number, char_number;
-  enum { is_AAbit_factor, is_ABbit_factor } kind;
+  enum { is_AAbitFactor, is_ABbitFactorAnd } kind;
   union
   {
-    struct { BIT_CAT bit_cat_; } aabit_factor_;
-    struct { AND and_; BIT_CAT bit_cat_; BIT_FACTOR bit_factor_; } abbit_factor_;
+    struct { BIT_CAT bit_cat_; } aabitfactor_;
+    struct { AND and_; BIT_CAT bit_cat_; BIT_FACTOR bit_factor_; } abbitfactorand_;
   } u;
 };
 
-BIT_FACTOR make_AAbit_factor(BIT_CAT p0);
-BIT_FACTOR make_ABbit_factor(BIT_FACTOR p0, AND p1, BIT_CAT p2);
+BIT_FACTOR make_AAbitFactor(BIT_CAT p0);
+BIT_FACTOR make_ABbitFactorAnd(BIT_FACTOR p0, AND p1, BIT_CAT p2);
 
 struct BIT_CAT_
 {
   int line_number, char_number;
-  enum { is_AAbit_cat, is_ABbit_cat, is_ACbit_cat, is_ADbit_cat } kind;
+  enum { is_AAbitCatPrim, is_ABbitCatCat, is_ACbitCatNotPrim, is_ADbitCatNotCat } kind;
   union
   {
-    struct { BIT_PRIM bit_prim_; } aabit_cat_;
-    struct { BIT_CAT bit_cat_; BIT_PRIM bit_prim_; CAT cat_; } abbit_cat_;
-    struct { BIT_PRIM bit_prim_; NOT not_; } acbit_cat_;
-    struct { BIT_CAT bit_cat_; BIT_PRIM bit_prim_; CAT cat_; NOT not_; } adbit_cat_;
+    struct { BIT_PRIM bit_prim_; } aabitcatprim_;
+    struct { BIT_CAT bit_cat_; BIT_PRIM bit_prim_; CAT cat_; } abbitcatcat_;
+    struct { BIT_PRIM bit_prim_; NOT not_; } acbitcatnotprim_;
+    struct { BIT_CAT bit_cat_; BIT_PRIM bit_prim_; CAT cat_; NOT not_; } adbitcatnotcat_;
   } u;
 };
 
-BIT_CAT make_AAbit_cat(BIT_PRIM p0);
-BIT_CAT make_ABbit_cat(BIT_CAT p0, CAT p1, BIT_PRIM p2);
-BIT_CAT make_ACbit_cat(NOT p0, BIT_PRIM p1);
-BIT_CAT make_ADbit_cat(BIT_CAT p0, CAT p1, NOT p2, BIT_PRIM p3);
+BIT_CAT make_AAbitCatPrim(BIT_PRIM p0);
+BIT_CAT make_ABbitCatCat(BIT_CAT p0, CAT p1, BIT_PRIM p2);
+BIT_CAT make_ACbitCatNotPrim(NOT p0, BIT_PRIM p1);
+BIT_CAT make_ADbitCatNotCat(BIT_CAT p0, CAT p1, NOT p2, BIT_PRIM p3);
 
 struct OR_
 {
   int line_number, char_number;
-  enum { is_AAor, is_ABor } kind;
+  enum { is_AAOR, is_ABOR } kind;
   union
   {
     struct { CHAR_VERTICAL_BAR char_vertical_bar_; } aaor_;
   } u;
 };
 
-OR make_AAor(CHAR_VERTICAL_BAR p0);
-OR make_ABor(void);
+OR make_AAOR(CHAR_VERTICAL_BAR p0);
+OR make_ABOR(void);
 
 struct CHAR_VERTICAL_BAR_
 {
@@ -1203,14 +1206,14 @@ CHAR_VERTICAL_BAR make_CFchar_vertical_bar(void);
 struct AND_
 {
   int line_number, char_number;
-  enum { is_AAand, is_ABand } kind;
+  enum { is_AAAND, is_ABAND } kind;
   union
   {
   } u;
 };
 
-AND make_AAand(void);
-AND make_ABand(void);
+AND make_AAAND(void);
+AND make_ABAND(void);
 
 struct BIT_PRIM_
 {
@@ -1259,16 +1262,16 @@ CAT make_ABcat(void);
 struct NOT_
 {
   int line_number, char_number;
-  enum { is_AAnot, is_ABnot, is_ACnot, is_ADnot } kind;
+  enum { is_AANOT, is_ABNOT, is_ACNOT, is_ADNOT } kind;
   union
   {
   } u;
 };
 
-NOT make_AAnot(void);
-NOT make_ABnot(void);
-NOT make_ACnot(void);
-NOT make_ADnot(void);
+NOT make_AANOT(void);
+NOT make_ABNOT(void);
+NOT make_ACNOT(void);
+NOT make_ADNOT(void);
 
 struct BIT_VAR_
 {
@@ -1805,16 +1808,16 @@ IF_STATEMENT make_ABifThenElseStatement(TRUE_PART p0, STATEMENT p1);
 struct IF_CLAUSE_
 {
   int line_number, char_number;
-  enum { is_AAif_clause, is_ABif_clause } kind;
+  enum { is_AAifClauseRelationalExp, is_ABifClauseBitExp } kind;
   union
   {
-    struct { IF if_; RELATIONAL_EXP relational_exp_; THEN then_; } aaif_clause_;
-    struct { BIT_EXP bit_exp_; IF if_; THEN then_; } abif_clause_;
+    struct { IF if_; RELATIONAL_EXP relational_exp_; THEN then_; } aaifclauserelationalexp_;
+    struct { BIT_EXP bit_exp_; IF if_; THEN then_; } abifclausebitexp_;
   } u;
 };
 
-IF_CLAUSE make_AAif_clause(IF p0, RELATIONAL_EXP p1, THEN p2);
-IF_CLAUSE make_ABif_clause(IF p0, BIT_EXP p1, THEN p2);
+IF_CLAUSE make_AAifClauseRelationalExp(IF p0, RELATIONAL_EXP p1, THEN p2);
+IF_CLAUSE make_ABifClauseBitExp(IF p0, BIT_EXP p1, THEN p2);
 
 struct TRUE_PART_
 {
@@ -1917,24 +1920,22 @@ COMPARISON make_AEcomparison(NAME_EXP p0, RELATIONAL_OP p1, NAME_EXP p2);
 struct RELATIONAL_OP_
 {
   int line_number, char_number;
-  enum { is_AArelationalOpEQ, is_ABrelationalOpNEQ, is_ACrelationalOpLT, is_ADrelationalOpGT, is_AErelationalOpLE, is_AFrelationalOpGE, is_AGrelationalOpNLT, is_AHrelationalOpNGT } kind;
+  enum { is_AArelationalOpEQ, is_ABrelationalOpNEQ, is_ACrelationalOpLT, is_ADrelationalOpGT, is_AErelationalOpLE, is_AFrelationalOpGE } kind;
   union
   {
     struct { EQUALS equals_; } aarelationalopeq_;
-    struct { EQUALS equals_; NOT not_; } abrelationalopneq_;
-    struct { NOT not_; } agrelationalopnlt_;
-    struct { NOT not_; } ahrelationalopngt_;
+    struct { NeqToken neqtoken_; } abrelationalopneq_;
+    struct { LeToken letoken_; } aerelationalople_;
+    struct { GeToken getoken_; } afrelationalopge_;
   } u;
 };
 
 RELATIONAL_OP make_AArelationalOpEQ(EQUALS p0);
-RELATIONAL_OP make_ABrelationalOpNEQ(NOT p0, EQUALS p1);
+RELATIONAL_OP make_ABrelationalOpNEQ(NeqToken p0);
 RELATIONAL_OP make_ACrelationalOpLT(void);
 RELATIONAL_OP make_ADrelationalOpGT(void);
-RELATIONAL_OP make_AErelationalOpLE(void);
-RELATIONAL_OP make_AFrelationalOpGE(void);
-RELATIONAL_OP make_AGrelationalOpNLT(NOT p0);
-RELATIONAL_OP make_AHrelationalOpNGT(NOT p0);
+RELATIONAL_OP make_AErelationalOpLE(LeToken p0);
+RELATIONAL_OP make_AFrelationalOpGE(GeToken p0);
 
 struct STATEMENT_
 {

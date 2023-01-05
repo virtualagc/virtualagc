@@ -193,12 +193,24 @@ labels encountered.  I call this list the "history".  The entry state in
 which no statement is yet being processed is state={ "history" : [] }.
 '''
 
+uniqueCount = 0
 def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, trace=False):
+    global uniqueCount
     newState = state
     lbnfLabelFull = ast["lbnfLabel"]
     lbnfLabel = lbnfLabelFull[2:]
     scopes = PALMAT["scopes"]
     currentScope = scopes[state["scopeIndex"]]
+    
+    # Some setup needed for some PALMAT statement types.  The main one is
+    # generation of unique labels bypassing code for conditional statements
+    # like "IF ...".
+    endLabel = None
+    if lbnfLabel == "ifStatement":
+        endLabel = "^ue_%d^" % uniqueCount
+        uniqueCount += 1
+    
+    # Main generation of PALMAT for the statement, sans setup and cleanup.
     # HAL/S built-in functions
     if lbnfLabel in ["abs", "ceiling", "div", "floor", "midval", "mod",
                      "odd", "remainder", "round", "sign", "signum", "truncate",
@@ -225,6 +237,8 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, trace=Fa
             return False, PALMAT
         #print(newState)    
     for component in ast["components"]:
+        #if lbnfLabel == "ifStatement":
+        #    print("*", component)
         if isinstance(component, str):
             if component[:1] == "^":
                 if trace:
@@ -241,15 +255,21 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, trace=Fa
             if not success:
                 return False, PALMAT
         else:
+            identifiers = currentScope["identifiers"]
+            instructions = currentScope["instructions"]
+            if lbnfLabel == "ifStatement" and component["lbnfLabel"][2:] == "statement":
+                for entry in reversed(p_Functions.substate["expression"]):
+                    instructions.append(entry)
+                p_Functions.substate["expression"] = []
+                instructions.append({"iffalse": endLabel})
             success, PALMAT = generatePALMAT(component, PALMAT, newState, trace)
             if not success:
                 return False, PALMAT
     
-    # If this was an assignment, then convert the expression stack to
-    # PALMAT instructions.  Note that if there are multiple variables on
-    # the LHS of the assignment, there will actually be a BNF <ASSIGNMENT>
-    # for each one of them.  Only the first will need to handle the 
-    # expression stack, whereas each of them will result in one assignment
+    # Cleanups after generation of the almost-complete PALMAT for this
+    # statement.  Includes stuff like actual assignments to variables
+    # after computation of expressions has all been done, placement of 
+    # compiler-generated labels for the ends of IF statements, and so on.
     if lbnfLabel == "assignment":
         instructions = currentScope["instructions"]
         for entry in reversed(p_Functions.substate["expression"]):
@@ -286,7 +306,8 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, trace=Fa
         instructions = currentScope["instructions"]
         currentIdentifier = p_Functions.substate["currentIdentifier"]
         instructions.clear()
-        for entry in reversed(p_Functions.substate["expression"]):
+        expression = p_Functions.substate["expression"]
+        for entry in reversed(expression):
             if "fetch" in entry:
                 identifier = "^" + entry["fetch"] + "^"
                 attributes = findIdentifier(identifier, PALMAT, scopeIndex)
@@ -297,17 +318,25 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, trace=Fa
                         return False, PALMAT
                     break
             instructions.append(entry)
-        p_Functions.substate["expression"].clear()
+        expression.clear()
         computationStack = executePALMAT(PALMAT)
+        instructions.clear()
         #print("*A", instructions)
         #print("*B", computationStack)
         if computationStack == None or len(computationStack) != 1:
-            print("Computation of INITIAL or CONSTANT failed")
+            print("Computation of INITIAL or CONSTANT failed:")
+            if len(computationStack) == 0:
+                print("       (empty)")
+            else:
+                for entry in computationStack:
+                    print("       ", entry)
             identifiers.pop(currentIdentifier)
-            instructions.clear()
             return False, PALMAT
         value = computationStack.pop()
-        identifierDict = identifiers[currentIdentifier]
+        if currentIdentifier != "":
+            identifierDict = identifiers[currentIdentifier]
+        else:
+            identifierDict = p_Functions.substate["commonAttributes"]
         if isUnmarkedScalar(identifierDict):
             identifierDict["scalar"] = True
         if "initial" in identifierDict and "constant" in identifierDict:
@@ -340,4 +369,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, trace=Fa
         if key == "initial":
             identifierDict["value"] = value
     
+    if endLabel != None:
+        identifiers[endLabel] = { "label": [state["scopeIndex"], len(instructions)] }
+        instructions.append({"noop": True, "label": endLabel})
     return True, PALMAT

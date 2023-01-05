@@ -11,6 +11,14 @@ History:        2022-12-21 RSB  Created.
 
 Refer to PALMAT.py for a higher-level explanation.
 
+The idea here is that most of these functions perform some action based on
+an LBNF "label" in the grammar, and are named identically to those labels,
+except that the labels each have a 2-letter all-cap prefixed which is 
+insignificant and is discarded in the function names.  I've had to take
+some care to avoid LBNF labels that coincided with Python reserved words or
+built-in functionality; in those cases, the LBNF label has simply been
+all-cap'd in the grammar.
+
 The functions (which are called by PALMAT.py's generatePALMAT function)
 all accept the current PALMAT and state as input and return a pair consisting 
 of a boolean (True for success, False for failure) and the new state.  
@@ -99,33 +107,39 @@ def updateCurrentIdentifierAttribute(PALMAT, state, attribute=None, value=True):
     if attribute != None:
         identifiers[substate["currentIdentifier"]][attribute] = value
 
-def removeCurrentIdentifierAttribute(PALMAT, attribute):
-    scope = PALMAT["scopes"][state["scopeIndex"]]
+'''
+def removeCurrentIdentifierAttribute(PALMAT, scopeIndex, attribute):
+    scope = PALMAT["scopes"][scopeIndex]
     identifiers = scope["identifiers"]
     if substate["currentIdentifier"] in identifiers:
         identifierDict = identifiers[substate["currentIdentifier"]]
         if attribute in identifierDict:
             identifierDict.pop(attribute)
-
-def checkCurrentIdentifierAttribute(PALMAT, attribute):    
-    scope = PALMAT["scopes"][state["scopeIndex"]]
+        
+def checkCurrentIdentifierAttribute(PALMAT, scopeIndex, attribute):    
+    scope = PALMAT["scopes"][scopeIndex]
     identifiers = scope["identifiers"]
     if substate["currentIdentifier"] in identifiers:
         identifierDict = identifiers[substate["currentIdentifier"]]
         if attribute in identifierDict:
             return True
     return False
+'''
 
 # Remove identifiers.  This is not something you can
 # do in HAL/S, but there are interpreter commands for it.
-def removeIdentifier(PALMAT, identifier):
-    scope = PALMAT["scopes"][state["scopeIndex"]]
+def removeIdentifier(PALMAT, scopeIndex, identifier):
+    scope = PALMAT["scopes"][scopeIndex]
     identifiers = scope["identifiers"]
     if identifier in identifiers:
         identifiers.pop(identifier)
 
-def removeAllIdentifiers(PALMAT):
-    PALMAT["scopes"][state["scopeIndex"]]["identifiers"] = {}
+def removeAllIdentifiers(PALMAT, scopeIndex):
+    PALMAT["scopes"][scopeIndex]["identifiers"] = {}
+
+def testIfExpression(history):
+    return ("expression" in history) or ("ifClauseBitExp" in history) \
+                    or ("relational_exp" in history)
     
 # This function is called from generatePALMAT() for a string literal.
 # Returns only True/False for Success/Failure.
@@ -166,13 +180,13 @@ def stringLiteral(PALMAT, state, s):
     else:
         state1 = history[-1]
     state2 = history[-2:]
-    isExpression = ("expression" in history)
+    isExpression = testIfExpression(history)
     
     #-------------------------------------------------------------------------
     # Now do various state-machine-dependent stuff with the string (s) or its
     # variations (sp, isp, fsp). 
     
-    if state1 in ["declaration_list"]:
+    if "declaration_list" in history and "expression" not in history:
         substate["currentIdentifier"] = s
         if s in identifiers:
             print("Already declared:", sp)
@@ -200,7 +214,7 @@ def stringLiteral(PALMAT, state, s):
         #instructions.append({"wstart": sp})
     elif state1 == "string" and 'write_arg' in history:
         substate["expression"].append({ "string": sp[1:-1] })
-    elif state1 in ["identifier", "char_id"] and isExpression:
+    elif state1 in ["identifier", "char_id", "bit_id"] and isExpression:
         substate["expression"].append({ "fetch": sp })
     elif state2 == ["bitSpecBoolean", "number"]:
         updateCurrentIdentifierAttribute(PALMAT, state, "bit", isp)
@@ -223,7 +237,7 @@ def stringLiteral(PALMAT, state, s):
             identifierDict["matrix"].append(isp)
         elif "array" in identifierDict:
             identifierDict["array"].append(isp)
-    elif state2 == ["assignment", "variable"]:
+    elif state2 == ["assignment", "variable"] or history[-3:-1] == ["assignment", "variable"]:
         # Identifier on LHS of an assignment.
         if s not in identifiers: 
             substate["errors"].append("Identifier " + sp + " undeclared.")
@@ -279,20 +293,15 @@ def declaration_nameId_attributes(PALMAT, state):
 '''
 
 def identifier(PALMAT, state):
-    if "expression" in state["history"]:
+    if testIfExpression(state["history"]):
         return True, fixupState(state, fsAugment)
     return True, state
  
 def char_id(PALMAT, state):
-    if "expression" in state["history"]:
+    if testIfExpression(state["history"]):
         return True, fixupState(state, fsAugment)
     return True, state
  
-'''
-def attributes_typeAndMinorAttr(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-'''
-    
 def attributes_typeAndMinorAttr(PALMAT, state):
     return True, fixupState(state, fsAugment)
 
@@ -552,7 +561,10 @@ def basicStatementGoTo(PALMAT, state):
     return True, fixupState(state, fsAugment)
 
 
-def ifStatement(PALMAT, state):
+def ifClauseBitExp(PALMAT, state):
+    return True, fixupState(state, fsAugment)
+
+def ifClauseRelExp(PALMAT, state):
     return True, fixupState(state, fsAugment)
 
 def ifThenElseStatement(PALMAT, state):
@@ -569,6 +581,65 @@ def relational_exp(PALMAT, state):
 
 def then(PALMAT, state):
     return True, fixupState(state, fsAugment)
+
+def bit_id(PALMAT, state):
+    return True, fixupState(state, fsAugment)
+
+def bitConstTrue(PALMAT, state):
+    substate["expression"].append({ "boolean": True })
+    return True, state
+
+def bitConstFalse(PALMAT, state):
+    substate["expression"].append({ "boolean": False })
+    return True, state
+
+def NOT(PALMAT, state):
+    substate["expression"].append({ "operator": "NOT" })
+    return True, state
+
+def bitFactorAnd(PALMAT, state):
+    substate["expression"].append({ "operator": "AND"})  
+    return True, state
+
+def bitExpOR(PALMAT, state):
+    substate["expression"].append({ "operator": "OR"})  
+    return True, state
+
+# Used by various LBNF labels for relational operators, 
+# but not itself corresponding to any specific LBNF label.
+def relationalOpCommon(PALMAT, state, operatorName):
+    instructions = PALMAT["scopes"][state["scopeIndex"]]["instructions"]
+    expression = substate["expression"]
+    while len(expression) > 0:
+        instructions.append(expression.pop())
+    substate["expression"].append({ "operator": operatorName})  
+    return True, state
+
+def relationalOpEQ(PALMAT, state):
+    return relationalOpCommon(PALMAT, state, "==")
+
+def relationalOpNEQ(PALMAT, state):
+    return relationalOpCommon(PALMAT, state, "!=")
+
+def relationalOpLT(PALMAT, state):
+    return relationalOpCommon(PALMAT, state, "<")
+
+def relationalOpGT(PALMAT, state):
+    return relationalOpCommon(PALMAT, state, ">")
+
+def relationalOpLE(PALMAT, state):
+    return relationalOpCommon(PALMAT, state, "<=")
+
+def relationalOpGE(PALMAT, state):
+    return relationalOpCommon(PALMAT, state, ">=")
+
+'''
+def relationalOpNLT(PALMAT, state):
+    return relationalOpCommon(PALMAT, state, "!<")
+
+def relationalOpNGT(PALMAT, state):
+    return relationalOpCommon(PALMAT, state, "!>")
+'''
 
 #-----------------------------------------------------------------------------
 # I think this has to go at the end of the module.
