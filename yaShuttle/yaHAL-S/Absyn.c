@@ -2614,19 +2614,7 @@ CAT make_ABcat()
     }
     tmp->kind = is_ABcat;
     return tmp;
-}/********************   AANOT    ********************/
-NOT make_AANOT()
-{
-    NOT tmp = (NOT) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AANOT!\n");
-        exit(1);
-    }
-    tmp->kind = is_AANOT;
-    return tmp;
-}
-/********************   ABNOT    ********************/
+}/********************   ABNOT    ********************/
 NOT make_ABNOT()
 {
     NOT tmp = (NOT) malloc(sizeof(*tmp));
@@ -2636,18 +2624,6 @@ NOT make_ABNOT()
         exit(1);
     }
     tmp->kind = is_ABNOT;
-    return tmp;
-}
-/********************   ACNOT    ********************/
-NOT make_ACNOT()
-{
-    NOT tmp = (NOT) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ACNOT!\n");
-        exit(1);
-    }
-    tmp->kind = is_ACNOT;
     return tmp;
 }
 /********************   ADNOT    ********************/

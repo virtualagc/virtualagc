@@ -1262,15 +1262,13 @@ CAT make_ABcat(void);
 struct NOT_
 {
   int line_number, char_number;
-  enum { is_AANOT, is_ABNOT, is_ACNOT, is_ADNOT } kind;
+  enum { is_ABNOT, is_ADNOT } kind;
   union
   {
   } u;
 };
 
-NOT make_AANOT(void);
 NOT make_ABNOT(void);
-NOT make_ACNOT(void);
 NOT make_ADNOT(void);
 
 struct BIT_VAR_

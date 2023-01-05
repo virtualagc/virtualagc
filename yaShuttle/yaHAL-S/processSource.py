@@ -64,6 +64,7 @@ def processSource(PALMAT, halsSource, metadata, libraryFilename,
         return line
         
     for i in range(len(halsSource)):
+        halsSource[i] = halsSource[i].replace("¬","~").replace("^","~").replace("¢","`")
         halsSource[i] = untab(halsSource[i].rstrip())
 
     # Remove E/M/S multiline constructs. 

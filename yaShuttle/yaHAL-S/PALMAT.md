@@ -14,6 +14,20 @@ Since the PALMAT-generation portion of the modern HAL/S compiler, which will inc
 
 But these abstract points will probably become clearer when details of PALMAT are discussed below.
 
+# PALMAT Character Set
+
+Because of the difficulty of dealing with non-ASCII character sets in the preprocessor and compiler software, as well as certain discrepancies between the theoretical specification for HAL/S and its actual usage, some characters in the extended HAL/S character set are automatically translated to 7-bit ASCII characters for internal usage in the preprocessor, compiler, interpreter, and external-file representations of PALMAT.  Those translations are:
+
+    ¬   &rarr;   ~
+    ^   &rarr;   ~
+    ¢   $rarr;   `
+
+The reverse translations (~ &rarr; ¬ and ` &rarr; ¢) may be performed for printouts or other display purposes, if desired. 
+
+Internally within PALMAT, the ^ character is used for quoting all text strings, resulting in there being three flavors of text strings (^...^, ^'...'^, and ^"..."^) used for different purposes.  Moreover, the backslach character (\) does not appear in the PALMAT character set, but is used in most modern software for test escape sequences, hence it would be awkward to allow it as a PALMAT character.
+
+The net result of all this is that the PALMAT character set is entirely 7-bit ASCII (with no *printable* characters left over aside from the backslash).  However, this is transparent to the user, and any legal HAL/S extended characters (in UTF-8 where necessary) can continue to appear in HAL/S source code.  However, the alternatives ~ and ` may be used in source code as well.
+
 # PALMAT File Format
 
 A PALMAT dataset comprising the compiled form of a HAL/S program or portions of HAL/S programs is, as mentioned, stored in the modern compiler and/or interpreter, which are written in Python, as a Python "dictionary".  

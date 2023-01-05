@@ -2249,23 +2249,9 @@ void ppNOT(NOT p, int _i_)
 {
   switch(p->kind)
   {
-  case is_AANOT:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderC('\172');
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
   case is_ABNOT:
     if (_i_ > 0) renderC(_L_PAREN);
     renderS("NOT");
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ACNOT:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderC('^');
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
@@ -9964,25 +9950,9 @@ void shNOT(NOT p)
 {
   switch(p->kind)
   {
-  case is_AANOT:
-
-    bufAppendS("AANOT");
-
-
-
-
-    break;
   case is_ABNOT:
 
     bufAppendS("ABNOT");
-
-
-
-
-    break;
-  case is_ACNOT:
-
-    bufAppendS("ACNOT");
 
 
 
