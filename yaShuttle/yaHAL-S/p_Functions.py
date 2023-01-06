@@ -26,7 +26,7 @@ of a boolean (True for success, False for failure) and the new state.
 
 import sys
 import copy
-
+from executePALMAT import findIdentifier
 
 # This is persistent statelike information, unlike the "state" parameter
 # used for functions that propagates only *into* the recursive descent and
@@ -96,8 +96,10 @@ def removeAllIdentifiers(PALMAT, scopeIndex):
     PALMAT["scopes"][scopeIndex]["identifiers"] = {}
 
 def testIfExpression(history):
-    return ("expression" in history) or ("ifClauseBitExp" in history) \
-                    or ("relational_exp" in history)
+    return ("expression" in history) \
+            or ("ifClauseBitExp" in history) \
+            or ("relational_exp" in history) \
+            or ("while_clause" in history)
     
 # This function is called from generatePALMAT() for a string literal.
 # Returns only True/False for Success/Failure.
@@ -197,8 +199,9 @@ def stringLiteral(PALMAT, state, s):
             identifierDict["array"].append(isp)
     elif state2 == ["assignment", "variable"] or history[-3:-1] == ["assignment", "variable"]:
         # Identifier on LHS of an assignment.
-        if s not in identifiers: 
-            substate["errors"].append("Identifier " + sp + " undeclared.")
+        identDict = findIdentifier(PALMAT["scopes"], s, scope)
+        if identDict == None: 
+            substate["errors"].append("LHS identifier " + sp + " of assignment undeclared.")
         substate["lhs"].append(sp)
     return True
 
@@ -574,6 +577,9 @@ def relationalOpLE(PALMAT, state):
 
 def relationalOpGE(PALMAT, state):
     return relationalOpCommon(PALMAT, state, ">=")
+
+def while_clause(PALMAT, state):
+    return True, fixupState(state, fsAugment)
 
 #-----------------------------------------------------------------------------
 # I think this has to go at the end of the module.

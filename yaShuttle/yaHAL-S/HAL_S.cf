@@ -519,7 +519,12 @@ AKbasicStatementCall . BASIC_STATEMENT ::= CALL_KEY ASSIGN "(" CALL_ASSIGN_LIST 
 ALbasicStatementCall . BASIC_STATEMENT ::= CALL_KEY "(" CALL_LIST ")" ASSIGN "(" CALL_ASSIGN_LIST ")" ";" ;
 AMbasicStatementReturn . BASIC_STATEMENT ::= "RETURN" ";" ;
 ANbasicStatementReturn . BASIC_STATEMENT ::= "RETURN" EXPRESSION ";" ;
+
+
+--AObasicStatementDo . BASIC_STATEMENT ::= DO_GROUP_HEAD_PURE ENDING ";" ;
+--APdoGroupHeadPure . DO_GROUP_HEAD_PURE ::= DO_GROUP_HEAD ;
 AObasicStatementDo . BASIC_STATEMENT ::= DO_GROUP_HEAD ENDING ";" ;
+
 APbasicStatementReadKey . BASIC_STATEMENT ::= READ_KEY ";" ;
 AQbasicStatementReadPhrase . BASIC_STATEMENT ::= READ_PHRASE ";" ;
 ARbasicStatementWriteKey . BASIC_STATEMENT ::= WRITE_KEY ";" ;

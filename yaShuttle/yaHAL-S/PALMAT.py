@@ -205,6 +205,8 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     # take up any resources.  For example, a basic assignment statement will
     # never need to jump to the end of the statement, but an IF ... THEN ...
     # statement may need to if the conditional is false.
+    beginningLabel = "^ue_%d^" % uniqueCount
+    uniqueCount += 1
     endLabel = "^ue_%d^" % uniqueCount
     uniqueCount += 1
     endLabels.append({ "lbnfLabel": lbnfLabel, "endLabel": endLabel, "used": False})
@@ -217,6 +219,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         state["scopeIndex"] = addScope(PALMAT, preservedScopeIndex)
         currentScope["instructions"].append({'goto': [state["scopeIndex"], 0]})
         currentScope = scopes[state["scopeIndex"]]
+        currentScope["instructions"].append({'noop': True, 'label': beginningLabel})
     
     # Main generation of PALMAT for the statement, sans setup and cleanup.
     # HAL/S built-in functions
@@ -275,12 +278,17 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     # statement.  Includes stuff like actual assignments to variables
     # after computation of expressions has all been done, placement of 
     # compiler-generated labels for the ends of IF statements, and so on.
-    if lbnfLabel in ["comparison", "ifClauseBitExp"]:
+    innerComparisons = ["comparison", "ifClauseBitExp", "while_clause"]
+    outerBlocks = ["ifStatement", "true_part", "basicStatementDo"]
+    if lbnfLabel in innerComparisons:
+        i = innerComparisons.index(lbnfLabel)
         p_Functions.expressionToInstructions(p_Functions.substate["expression"], currentScope["instructions"])
         for entry in reversed(endLabels):
-            if entry["lbnfLabel"] in ["ifStatement", "true_part"]:
+            if entry["lbnfLabel"] == outerBlocks[i]:
                 entry["used"] = True
                 currentScope["instructions"].append({"iffalse": entry["endLabel"]})
+                if lbnfLabel == "while_clause":
+                    entry["recycle"] = True
                 break
     elif lbnfLabel == "true_part":
         p_Functions.expressionToInstructions(p_Functions.substate["expression"], currentScope["instructions"])
@@ -389,9 +397,12 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     #----------------------------------------------------------------------
     # Decide if we need to stick an automatically-generated label at the
     # end of this grammar component or not.
+    instructions = currentScope["instructions"]
+    identifiers = currentScope["identifiers"]
+    if "recycle" in endLabels[-1]:
+        identifiers[beginningLabel] = { "label": [state["scopeIndex"], 0]}
+        instructions.append({"goto": beginningLabel})
     if endLabels[-1]["used"]:
-        instructions = currentScope["instructions"]
-        identifiers = currentScope["identifiers"]
         identifiers[endLabel] = { "label": [state["scopeIndex"], len(instructions)] }
         instructions.append({"noop": True, "label": endLabel})
     endLabels.pop()

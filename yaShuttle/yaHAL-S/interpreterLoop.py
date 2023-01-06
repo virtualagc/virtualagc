@@ -34,8 +34,7 @@ except ModuleNotFoundError:
             print("Only primitive line-editing facilities are available.")
             readlinePresent = False
 if readlinePresent:
-    print("Note: Input-line prompts may temporarily disappear when using")
-    print("      ↑ or ↓ keys to cycle through the line history.")
+    print("Note: Input-line prompts may temporarily disappear when using editing keys ↑, ↓, or BACKSPACE.")
 
 #-------------------------------------------------------------------------
 
@@ -148,6 +147,18 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
                 else:
                     PALMAT = newPALMAT
                     print("Success!")
+                continue
+            elif firstWord == "DATA" and len(fields) == 2 and fields[1] == "*":
+                for i in range(len(PALMAT["scopes"])):
+                    scope = PALMAT["scopes"][i]
+                    print("Scope %d:" % i)
+                    identifiers = scope["identifiers"]
+                    if len(identifiers) == 0:
+                        print("\t(No identifiers declared)")
+                    else:
+                        for identifier in sorted(identifiers):
+                            print("\t%s:" % identifier[1:-1], \
+                                    identifiers[identifier])
                 continue
             elif firstWord == "PALMAT" and len(fields) == 2 and fields[1] == "*":
                 for i in range(len(PALMAT["scopes"])):
@@ -264,6 +275,14 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
                             print("\t%d: %s" % (count, str(instruction)))
                             count += 1
                     continue
+                elif firstWord == "SCOPES":
+                    used = set()
+                    for i in range(len(PALMAT["scopes"])):
+                        scope = PALMAT["scopes"][i]
+                        print("Scope %d:" % i)
+                        print("\tParent:", scope["parent"])
+                        print("\tChildren:", scope["children"])
+                    continue
                 elif firstWord == "RESET":
                     PALMAT = constructPALMAT()
                     continue
@@ -298,9 +317,11 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
                     print("\tNOCOLORIZE   Disable colorized output.")
                     print("\tWRITE F      Write current PALMAT to a file named F.")
                     print("\tREAD F       Read PALMAT from a file named F.")
-                    print("\tDATA         Inspect all variable and constants.")
+                    print("\tDATA         Inspect identifiers in root scope.")
+                    print("\tDATA *       Inspect identifiers in all scopes.")
                     print("\tPALMAT       Inspect PALMAT code in root scope.")
                     print("\tPALMAT *     Inspect PALMAT code in all scopes.")
+                    print("\tSCOPES       Inspect scope hierarchy.")
                     print("\tREMOVE D     Remove identifier D.")
                     print("\tREMOVE *     Remove all identifiers.")
                     print("\tRESET        Reset all PALMAT.")

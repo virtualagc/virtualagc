@@ -507,6 +507,10 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
             value = computationStack.pop()
             if not value:
                 scopeNumber, instructionIndex = jump(scopes, scope, instruction, "iffalse")
+        elif "iftrue" in instruction:
+            value = computationStack.pop()
+            if value:
+                scopeNumber, instructionIndex = jump(scopes, scope, instruction, "iftrue")
         elif "noop" in instruction:
             pass # Nothing to do!
         else:
