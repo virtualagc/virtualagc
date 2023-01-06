@@ -75,11 +75,13 @@ builtIns = [
 # module which provides the same service but is incompatible
 # API-wise.  Oh well!  I should have researched it better before writing
 # this one.
-def findIdentifier(identifier, scope):
+def findIdentifier(scopes, identifier, scope):
     while scope != None:
         if identifier in scope["identifiers"]:
             return scope["identifiers"][identifier]
-        scope = scope["parent"]
+        if scope["parent"] == None:
+            return None
+        scope = scopes[scope["parent"]]
     return scope
 
 # Returns a tuple consisting of a new scope number and
@@ -89,10 +91,10 @@ def findIdentifier(identifier, scope):
 # an ordered pair of a desired new scope index and offset,
 # or else is an identifier giving the name of an accessible
 # label.
-def jump (scope, instructionDict, instructionName):
+def jump (scopes, scope, instructionDict, instructionName):
     s = instructionDict[instructionName]
     if isinstance(s, str):
-        attributes = findIdentifier(s, scope)
+        attributes = findIdentifier(scopes, s, scope)
         if attributes == None or "label" not in attributes:
             print("Cannot find target label", s)
             return None
@@ -130,10 +132,10 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
     scopeNumber = pcScope
     instructionIndex = pcOffset
     scope = scopes[scopeNumber]
-    identifiers = scope["identifiers"]
-    instructions = scope["instructions"]
     computationStack = []
-    while instructionIndex < len(instructions):
+    while instructionIndex < len(scope["instructions"]):
+        identifiers = scope["identifiers"]
+        instructions = scope["instructions"]
         instruction = instructions[instructionIndex]
         instructionIndex += 1
         if trace:
@@ -244,7 +246,7 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
                 identifier = instruction["store"]
                 fetch = False
             identifier = "^" + identifier + "^"
-            attributes = findIdentifier(identifier, scopes[scopeNumber])
+            attributes = findIdentifier(scopes, identifier, scopes[scopeNumber])
             if attributes != None:
                 erroredUp = True
                 if fetch:
@@ -499,23 +501,12 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
                 print("Implementation error, function", function)
                 return None
         elif "goto" in instruction:
-            '''
-            s = instruction["goto"]
-            if isinstance(s, str):
-                attributes = findIdentifier(s, scope)
-                if attributes == None or "label" not in attributes:
-                    print("Cannot find target label", s)
-                    return None
-                instruction["goto"] = attributes["label"]
-            s = instruction["goto"]
-            scopeNumber = s[0]
-            instructionIndex = s[1]
-            '''
-            scopeNumber, instructionIndex = jump(scope, instruction, "goto")
+            scopeNumber, instructionIndex = jump(scopes, scope, instruction, "goto")
+            scope = scopes[scopeNumber]
         elif "iffalse" in instruction:
             value = computationStack.pop()
             if not value:
-                scopeNumber, instructionIndex = jump(scope, instruction, "iffalse")
+                scopeNumber, instructionIndex = jump(scopes, scope, instruction, "iffalse")
         elif "noop" in instruction:
             pass # Nothing to do!
         else:

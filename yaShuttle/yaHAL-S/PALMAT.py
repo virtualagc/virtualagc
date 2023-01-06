@@ -125,23 +125,19 @@ def findIdentifier(identifier, PALMAT, scopeIndex=None):
 #-----------------------------------------------------------------------------
 # The code generator (ast -> PALMAT).
 
+# Variables DECLARE'd without a type are by default SCALAR, though they
+# can be explicitly DECLARE'd as SCALAR as well.  This irks me, because
+# it means that some SCALAR variables have the attribut "scalar" in
+# PALMAT["identifiers"] and some do not.  Declarations of all other 
+# datatypes are, on the other hand, explicit.  The point of the following
+# function is to clean that up by adding the "scalar" attribute to any
+# identifiers not explicitly declared as some other type.
+notUnmarkedScalars = ("scalar", "integer", "vector", "matrix", "bit",
+                      "character", "template", "structure", "label")
 def isUnmarkedScalar(identifierDict):
-    if "scalar" in identifierDict:
-        return False
-    if "integer" in identifierDict:
-        return False
-    if "vector" in identifierDict:
-        return False
-    if "matrix" in identifierDict:
-        return False
-    if "bit" in identifierDict:
-        return False
-    if "character" in identifierDict:
-        return False
-    if "template" in identifierDict:
-        return False
-    if "structure" in identifierDict:
-        return False
+    for s in notUnmarkedScalars:
+        if s in identifierDict:
+            return False
     return True
 
 '''
@@ -194,13 +190,15 @@ which no statement is yet being processed is state={ "history" : [] }.
 '''
 
 uniqueCount = 0
-def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, trace=False, endLabels=[]):
+def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, 
+                   trace=False, endLabels=[]):
     global uniqueCount
     newState = state
     lbnfLabelFull = ast["lbnfLabel"]
     lbnfLabel = lbnfLabelFull[2:]
     scopes = PALMAT["scopes"]
-    currentScope = scopes[state["scopeIndex"]]
+    preservedScopeIndex = state["scopeIndex"]
+    currentScope = scopes[preservedScopeIndex]
     
     # Create a label for the end of this grammar component.  If none of the
     # subcomponents end up using it, we won't bother to use it, and it won't
@@ -210,6 +208,15 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, trace=Fa
     endLabel = "^ue_%d^" % uniqueCount
     uniqueCount += 1
     endLabels.append({ "lbnfLabel": lbnfLabel, "endLabel": endLabel, "used": False})
+
+    # Is this a DO ... END block?  If it is, then we have to do several things:
+    # create a new child scope and make it current, and add a goto PALMAT 
+    # instruction from the existing current scope to the new scope.
+    isDo = lbnfLabel in ["basicStatementDo"]
+    if isDo:
+        state["scopeIndex"] = addScope(PALMAT, preservedScopeIndex)
+        currentScope["instructions"].append({'goto': [state["scopeIndex"], 0]})
+        currentScope = scopes[state["scopeIndex"]]
     
     # Main generation of PALMAT for the statement, sans setup and cleanup.
     # HAL/S built-in functions
@@ -275,14 +282,6 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, trace=Fa
                 entry["used"] = True
                 currentScope["instructions"].append({"iffalse": entry["endLabel"]})
                 break
-        '''
-        elif lbnfLabel == "ifClauseBitExp":
-            #print("*", endLabels)
-            if endLabels[-2]["lbnfLabel"] in ["ifStatement", "true_part"]:
-                p_Functions.expressionToInstructions(p_Functions.substate["expression"], currentScope["instructions"])
-                endLabels[-2]["used"] = True
-                currentScope["instructions"].append({"iffalse": endLabels[-2]["endLabel"]})
-        '''
     elif lbnfLabel == "true_part":
         p_Functions.expressionToInstructions(p_Functions.substate["expression"], currentScope["instructions"])
         endLabels[-2]["used"] = True
@@ -323,7 +322,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, trace=Fa
         for entry in reversed(expression):
             if "fetch" in entry:
                 identifier = "^" + entry["fetch"] + "^"
-                attributes = findIdentifier(identifier, PALMAT, scopeIndex)
+                attributes = findIdentifier(identifier, PALMAT, state["scopeIndex"])
                 if attributes != None:
                     if "constant" not in attributes:
                         print("Can only use constants in computing INITIAL or CONSTANT.")
@@ -396,4 +395,22 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, trace=Fa
         identifiers[endLabel] = { "label": [state["scopeIndex"], len(instructions)] }
         instructions.append({"noop": True, "label": endLabel})
     endLabels.pop()
+    
+    # If this is this a DO ... END block, we need to insert a PALMAT
+    # goto instruction at the end of the block back to the original 
+    # position in the parent scope.
+    if isDo:
+        currentScope["instructions"].append({
+            'goto': [preservedScopeIndex, 
+                     len(PALMAT["scopes"][preservedScopeIndex]["instructions"])]})
+        state["scopeIndex"] = preservedScopeIndex
+        # I originally added the following instruction to make sure that the 
+        # *final* goto added above would have a target to land on, since 
+        # otherwise it could be at an unfilled position one past the end
+        # of the final PALMAT instruction in scope 0.  However, the e
+        # execution loop ends gracefully on that condition, so there's no
+        # point in peppering the code with pointless noop instructions.
+        # That's why the following instruction is now commented out.
+        #PALMAT["scopes"][preservedScopeIndex]["instructions"].append({'noop': True})
+    
     return True, PALMAT

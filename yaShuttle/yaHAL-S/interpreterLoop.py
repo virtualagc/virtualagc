@@ -117,6 +117,19 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
                     PALMAT = newPALMAT
                     print("Success!")
                 continue
+            elif firstWord == "PALMAT" and len(fields) == 2 and fields[1] == "*":
+                for i in range(len(PALMAT["scopes"])):
+                    scope = PALMAT["scopes"][i]
+                    print("Scope %d:" % i)
+                    instructions = scope["instructions"]
+                    if len(instructions) == 0:
+                        print("\t(No generated code)")
+                    else:
+                        count = 0
+                        for instruction in instructions:
+                            print("\t%d: %s" % (count, str(instruction)))
+                            count += 1
+                continue
             elif numWords == 1:
                 # Handle interpreter commands vs HAL/S source code.
                 if firstWord == "QUIT":
@@ -254,7 +267,8 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
                     print("\tWRITE F      Write current PALMAT to a file named F.")
                     print("\tREAD F       Read PALMAT from a file named F.")
                     print("\tDATA         Inspect all variable and constants.")
-                    print("\tPALMAT       Inspect recently-generated PALMAT code.")
+                    print("\tPALMAT       Inspect PALMAT code in root scope.")
+                    print("\tPALMAT *     Inspect PALMAT code in all scopes.")
                     print("\tREMOVE D     Remove identifier D.")
                     print("\tREMOVE *     Remove all identifiers.")
                     print("\tRESET        Reset all PALMAT.")

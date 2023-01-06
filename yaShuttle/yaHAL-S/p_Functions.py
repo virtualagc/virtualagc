@@ -65,30 +65,6 @@ def fixupState(state, fsType, name=None):
         newState["history"] += [ourName]
     return newState
 
-'''
-debug = False
-def getOurName(frame):
-    if isinstance(frame, str):
-        ourName = frame
-    else:
-        ourName = frame.f_code.co_name
-    if debug:
-        print("p_Function", ourName)
-    return ourName
-
-def augmentState(state, frame):
-    current = getOurName(frame)
-    newState = copy.deepcopy(state)
-    newState["history"].append(current)
-    return newState
-
-def setState(state, frame):
-    current = getOurName(frame)
-    newState = copy.deepcopy(state)
-    newState["history"] = [current]
-    return newState
-'''
-
 # Update attribute for identifier.
 def updateCurrentIdentifierAttribute(PALMAT, state, attribute=None, value=True):
     global substate
@@ -107,25 +83,6 @@ def updateCurrentIdentifierAttribute(PALMAT, state, attribute=None, value=True):
         identifiers[substate["currentIdentifier"]].update(substate["commonAttributes"])
     if attribute != None:
         identifiers[substate["currentIdentifier"]][attribute] = value
-
-'''
-def removeCurrentIdentifierAttribute(PALMAT, scopeIndex, attribute):
-    scope = PALMAT["scopes"][scopeIndex]
-    identifiers = scope["identifiers"]
-    if substate["currentIdentifier"] in identifiers:
-        identifierDict = identifiers[substate["currentIdentifier"]]
-        if attribute in identifierDict:
-            identifierDict.pop(attribute)
-        
-def checkCurrentIdentifierAttribute(PALMAT, scopeIndex, attribute):    
-    scope = PALMAT["scopes"][scopeIndex]
-    identifiers = scope["identifiers"]
-    if substate["currentIdentifier"] in identifiers:
-        identifierDict = identifiers[substate["currentIdentifier"]]
-        if attribute in identifierDict:
-            return True
-    return False
-'''
 
 # Remove identifiers.  This is not something you can
 # do in HAL/S, but there are interpreter commands for it.
@@ -289,16 +246,6 @@ def declareBody_attributes_declarationList(PALMAT, state):
 def declaration_list(PALMAT, state):
     return True, fixupState(state, fsAugment)
 
-'''   
-def declaration_nameId(PALMAT, state):
-    return True, fixupState(state, fsSet)
-'''
-
-'''
-def declaration_nameId_attributes(PALMAT, state):
-    return True, fixupState(state, fsSet)
-'''
-
 def identifier(PALMAT, state):
     if testIfExpression(state["history"]):
         return True, fixupState(state, fsAugment)
@@ -311,11 +258,6 @@ def char_id(PALMAT, state):
  
 def attributes_typeAndMinorAttr(PALMAT, state):
     return True, fixupState(state, fsAugment)
-
-'''   
-def typeAndMinorAttr(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-'''
 
 def sQdQName_arithConv(PALMAT, state):
     return True, state
@@ -531,12 +473,6 @@ def charExpCat(PALMAT, state):
     substate["expression"].append({ "operator": "C||" })
     return True, state
 
-'''
-def subscript(PALMAT, state):
-    substate["expression"].append({ "operator": "$" })
-    return True, state
-'''
-
 def variable(PALMAT, state):
     return True, fixupState(state, fsAugment)
 
@@ -638,14 +574,6 @@ def relationalOpLE(PALMAT, state):
 
 def relationalOpGE(PALMAT, state):
     return relationalOpCommon(PALMAT, state, ">=")
-
-'''
-def relationalOpNLT(PALMAT, state):
-    return relationalOpCommon(PALMAT, state, "!<")
-
-def relationalOpNGT(PALMAT, state):
-    return relationalOpCommon(PALMAT, state, "!>")
-'''
 
 #-----------------------------------------------------------------------------
 # I think this has to go at the end of the module.
