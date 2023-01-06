@@ -145,7 +145,7 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
         noLibrary = True
         structureTemplates = {}
         libraryFilename = None
-        print("FYI: Disabling template-library file, if any.")
+        print("Note: Disabling template-library file, if any.")
     elif param[:10] == "--library=":
         libraryFilename = param[10:].strip()
         #print("Here", libraryFilename)
@@ -165,7 +165,7 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
             f.close()
             #print(structureTemplates)
         except:
-            print("FYI: Structure-template library not found.", file=sys.stderr)
+            print("Note: Structure-template library not found.", file=sys.stderr)
     elif param[:1] == "-":
         print("Unknown parameter:", param)
         sys.exit(1)

@@ -5,9 +5,39 @@ Copyright:      None - the author (Ron Burkey) declares this software to
                 be in the Public Domain, with no rights reserved.
 Filename:       interpreterLoop.py
 Purpose:        This is a top-level intepreter loop for HAL/S code.
+Requirements:   READLINE module
 History:        2022-12-16 RSB  Split off the nascent form from 
                                 yaHAL-S-FC.py.
 """
+
+#-------------------------------------------------------------------------
+# The following module is present to make keyboard entry more palatable.
+# for example, on my (Linux) system it enables use of the up- and down-
+# arrows to cycle through the history, as well as the right- and left-
+# arrows to move horizontally in a line of code for editing.  Unfortunately,
+# this kind of functionality apparently has different names on different
+# systems, and the alternatives may not always be 100% comparable; or you
+# may have to explicitly install one of the alternatives using pip3.
+readlinePresent = True
+try:
+    import gnureadline
+    print("Note: Using 'gnureadline' module for line-editing facility.")
+except ModuleNotFoundError:
+    try:
+        import readline
+        print("Note: Using 'readline' module for line-editing facility.")
+    except ModuleNotFoundError:
+        try:
+            import editline
+            print("Note: Using 'editline' module for line-editing facility.")
+        except ModuleNotFoundError:
+            print("Only primitive line-editing facilities are available.")
+            readlinePresent = False
+if readlinePresent:
+    print("Note: Input-line prompts may temporarily disappear when using")
+    print("      ↑ or ↓ keys to cycle through the line history.")
+
+#-------------------------------------------------------------------------
 
 from processSource import processSource
 from PALMAT import constructPALMAT, writePALMAT, readPALMAT
@@ -67,6 +97,8 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
             fields = line.strip().split()
             numWords = len(fields)
             if numWords == 0:
+                if readlinePresent:
+                    print()
                 continue
             firstWord = fields[0].upper()
             if firstWord == "RERUN":
