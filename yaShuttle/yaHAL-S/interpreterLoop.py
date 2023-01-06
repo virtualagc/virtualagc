@@ -214,8 +214,10 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
                     if len(instructions) == 0:
                         print("\t(No generated code)")
                     else:
+                        count = 0
                         for instruction in instructions:
-                            print("\t%s" % str(instruction))
+                            print("\t%d: %s" % (count, str(instruction)))
+                            count += 1
                     continue
                 elif firstWord == "RESET":
                     PALMAT = constructPALMAT()

@@ -194,7 +194,7 @@ which no statement is yet being processed is state={ "history" : [] }.
 '''
 
 uniqueCount = 0
-def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, trace=False):
+def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, trace=False, endLabels=[]):
     global uniqueCount
     newState = state
     lbnfLabelFull = ast["lbnfLabel"]
@@ -202,13 +202,14 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, trace=Fa
     scopes = PALMAT["scopes"]
     currentScope = scopes[state["scopeIndex"]]
     
-    # Some setup needed for some PALMAT statement types.  The main one is
-    # generation of unique labels bypassing code for conditional statements
-    # like "IF ...".
-    endLabel = None
-    if lbnfLabel == "ifStatement":
-        endLabel = "^ue_%d^" % uniqueCount
-        uniqueCount += 1
+    # Create a label for the end of this grammar component.  If none of the
+    # subcomponents end up using it, we won't bother to use it, and it won't
+    # take up any resources.  For example, a basic assignment statement will
+    # never need to jump to the end of the statement, but an IF ... THEN ...
+    # statement may need to if the conditional is false.
+    endLabel = "^ue_%d^" % uniqueCount
+    uniqueCount += 1
+    endLabels.append({ "lbnfLabel": lbnfLabel, "endLabel": endLabel, "used": False})
     
     # Main generation of PALMAT for the statement, sans setup and cleanup.
     # HAL/S built-in functions
@@ -234,6 +235,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, trace=Fa
         if trace:
             print("      ", p_Functions.substate)
         if not success:
+            endLabels.pop()
             return False, PALMAT
         #print(newState)    
     for component in ast["components"]:
@@ -251,39 +253,50 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, trace=Fa
             else:
                 success, PALMAT = generatePALMAT( \
                     { "lbnfLabel": component, "components" : [] }, \
-                    PALMAT, newState, trace )
+                    PALMAT, newState, trace, endLabels )
             if not success:
+                endLabels.pop()
                 return False, PALMAT
         else:
-            identifiers = currentScope["identifiers"]
-            instructions = currentScope["instructions"]
-            if lbnfLabel == "ifStatement" and component["lbnfLabel"][2:] == "statement":
-                for entry in reversed(p_Functions.substate["expression"]):
-                    instructions.append(entry)
-                p_Functions.substate["expression"] = []
-                instructions.append({"iffalse": endLabel})
-            success, PALMAT = generatePALMAT(component, PALMAT, newState, trace)
+            success, PALMAT = generatePALMAT(component, PALMAT, newState, trace, endLabels)
             if not success:
+                endLabels.pop()
                 return False, PALMAT
-    
+
+    # ------------------------------------------------------------------    
     # Cleanups after generation of the almost-complete PALMAT for this
     # statement.  Includes stuff like actual assignments to variables
     # after computation of expressions has all been done, placement of 
     # compiler-generated labels for the ends of IF statements, and so on.
-    if lbnfLabel == "assignment":
+    if lbnfLabel in ["comparison", "ifClauseBitExp"]:
+        p_Functions.expressionToInstructions(p_Functions.substate["expression"], currentScope["instructions"])
+        for entry in reversed(endLabels):
+            if entry["lbnfLabel"] in ["ifStatement", "true_part"]:
+                entry["used"] = True
+                currentScope["instructions"].append({"iffalse": entry["endLabel"]})
+                break
+        '''
+        elif lbnfLabel == "ifClauseBitExp":
+            #print("*", endLabels)
+            if endLabels[-2]["lbnfLabel"] in ["ifStatement", "true_part"]:
+                p_Functions.expressionToInstructions(p_Functions.substate["expression"], currentScope["instructions"])
+                endLabels[-2]["used"] = True
+                currentScope["instructions"].append({"iffalse": endLabels[-2]["endLabel"]})
+        '''
+    elif lbnfLabel == "true_part":
+        p_Functions.expressionToInstructions(p_Functions.substate["expression"], currentScope["instructions"])
+        endLabels[-2]["used"] = True
+        currentScope["instructions"].append({"goto": endLabels[-2]["endLabel"]})
+    elif lbnfLabel == "assignment":
         instructions = currentScope["instructions"]
-        for entry in reversed(p_Functions.substate["expression"]):
-            instructions.append(entry)
-        p_Functions.substate["expression"] = []
+        p_Functions.expressionToInstructions(p_Functions.substate["expression"], instructions)
         instructions.append({ "store": p_Functions.substate["lhs"][-1] })
         p_Functions.substate["lhs"].pop()
         if len(p_Functions.substate["lhs"]) == 0:
             instructions.append({ "pop": 1 })
     elif lbnfLabel == "basicStatementWritePhrase":
         instructions = currentScope["instructions"]
-        for entry in reversed(p_Functions.substate["expression"]):
-            instructions.append(entry)
-        p_Functions.substate["expression"] = []
+        p_Functions.expressionToInstructions(p_Functions.substate["expression"], instructions)
         instructions.append({ "write": p_Functions.substate["LUN"] })
     elif lbnfLabel == "declare_statement":
         identifiers = currentScope["identifiers"]
@@ -315,6 +328,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, trace=Fa
                     if "constant" not in attributes:
                         print("Can only use constants in computing INITIAL or CONSTANT.")
                         identifiers.pop(currentIdentifier)
+                        endLabels.pop()
                         return False, PALMAT
                     break
             instructions.append(entry)
@@ -331,6 +345,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, trace=Fa
                 for entry in computationStack:
                     print("       ", entry)
             identifiers.pop(currentIdentifier)
+            endLabels.pop()
             return False, PALMAT
         value = computationStack.pop()
         if currentIdentifier != "":
@@ -343,6 +358,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, trace=Fa
             print("Identifier", currentIdentifier[1:-1], \
                     "cannot have both INITIAL and CONSTANT.")
             identifiers.pop(currentIdentifier)
+            endLabels.pop()
             return False, PALMAT
         key = None
         if "initial" in identifierDict and identifierDict["initial"] == "^?^":
@@ -352,6 +368,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, trace=Fa
         else:
             print("Discrepancy between INITIAL and CONSTANT.")
             identifiers.pop(currentIdentifier)
+            endLabels.pop()
             return False, PALMAT
         if isinstance(value, (int, float)) and "integer" in identifierDict:
             value = hround(value)
@@ -364,12 +381,19 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, trace=Fa
         else:
             print("Datatype mismatch in INITIAL or CONSTANT.")
             identifiers.pop(currentIdentifier)
+            endLabels.pop()
             return False, PALMAT
         identifierDict[key] = value
         if key == "initial":
             identifierDict["value"] = value
     
-    if endLabel != None:
+    #----------------------------------------------------------------------
+    # Decide if we need to stick an automatically-generated label at the
+    # end of this grammar component or not.
+    if endLabels[-1]["used"]:
+        instructions = currentScope["instructions"]
+        identifiers = currentScope["identifiers"]
         identifiers[endLabel] = { "label": [state["scopeIndex"], len(instructions)] }
         instructions.append({"noop": True, "label": endLabel})
+    endLabels.pop()
     return True, PALMAT

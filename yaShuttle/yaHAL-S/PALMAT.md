@@ -88,7 +88,7 @@ Each individual scope is itself a dictionary, and provides links to both the sco
 
 Note that the entire `PALMAT` object, including `PALMAT["scopes"]`, is formed at compile time.  The logical memory model is not dynamic.  Its structure does not change at runtime.  Only *values* stored in variables (in the "identifiers" dictionary) change at runtime, but the structure of the model is unalterable.
 
-By the way, notice that because the code ("instructions") for a block such as a `DO FOR` are segregated in a different scope from that of the block containing it, the PALMAT code in the parent block treats the code in such a sub-block much like a procedure call, in that it has an instruction the "call" the sub-block, and the exit from the sub-block (if not a `GO TO`) is going to be a return to the parent block.  Yes, there's a slight inefficiency associated with this scheme.
+By the way, notice that because the code ("instructions") for a block such as a `DO FOR` are segregated in a different scope from that of the block containing it, the PALMAT code in the parent block treats the code in such a sub-block much like a procedure call, in that it has an instruction to jump to the sub-block, and the exit from the sub-block is going to be a jump back to the parent block.  Yes, there's a slight inefficiency associated with this scheme, though it can be removed in optimization if desired.
 
 Regarding the elements of the identifiers dictionary, i.e. the variables, constants, nested function definitions, and so on, their most important properties vary by type.  For variables, these are the descriptions of their datatypes and their stored values.  Other, lesser, characteristics may appear in their dictionaries as well.
 

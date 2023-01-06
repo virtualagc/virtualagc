@@ -27,6 +27,7 @@ of a boolean (True for success, False for failure) and the new state.
 import sys
 import copy
 
+
 # This is persistent statelike information, unlike the "state" parameter
 # used for functions that propagates only *into* the recursive descent and
 # is lost when ascending later.
@@ -256,6 +257,12 @@ def resetStatement():
 def halBuiltIn(function):
     substate["expression"].append({ "function": function.upper()})
 
+# Transfer the expression stack to end of the PALMAT instruction list, 
+# in reverse order, and clear the expression stack.
+def expressionToInstructions(expression, instructions):
+    while len(expression) > 0:
+        instructions.append(expression.pop())
+                    
 #-----------------------------------------------------------------------------
 
 def expression(PALMAT, state):
@@ -610,8 +617,7 @@ def bitExpOR(PALMAT, state):
 def relationalOpCommon(PALMAT, state, operatorName):
     instructions = PALMAT["scopes"][state["scopeIndex"]]["instructions"]
     expression = substate["expression"]
-    while len(expression) > 0:
-        instructions.append(expression.pop())
+    expressionToInstructions(expression, instructions)
     substate["expression"].append({ "operator": operatorName})  
     return True, state
 
