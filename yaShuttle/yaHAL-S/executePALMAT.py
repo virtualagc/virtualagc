@@ -112,7 +112,10 @@ def jump (scopes, scope, instructionDict, instructionName):
         # having a separate post-compilation processing step
         # that corrects them all.  It's nice to have the 
         # labels as long as you can, though, in case you need
-        # to refer to them for some reason.
+        # to refer to them for some reason.  Here we save the
+        # symbolic label in a new key, which accomplishes the
+        # same thing, basically.
+        instructionDict["symbolicLabel"] = instructionDict[instructionName]
         instructionDict[instructionName] = attributes["label"]
     s = instructionDict[instructionName]
     #print("*", instructionName, instructionDict, s)
@@ -507,10 +510,12 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
             value = computationStack.pop()
             if not value:
                 scopeNumber, instructionIndex = jump(scopes, scope, instruction, "iffalse")
+                scope = scopes[scopeNumber]
         elif "iftrue" in instruction:
             value = computationStack.pop()
             if value:
                 scopeNumber, instructionIndex = jump(scopes, scope, instruction, "iftrue")
+                scope = scopes[scopeNumber]
         elif "noop" in instruction:
             pass # Nothing to do!
         else:

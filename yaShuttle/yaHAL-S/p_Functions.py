@@ -579,7 +579,13 @@ def relationalOpGE(PALMAT, state):
     return relationalOpCommon(PALMAT, state, ">=")
 
 def while_clause(PALMAT, state):
+    if "isUntil" in substate:
+        substate.pop("isUntil")
     return True, fixupState(state, fsAugment)
+
+def whileKeyUntil(PALMAT, state):
+    substate["isUntil"] = True
+    return True, state
 
 #-----------------------------------------------------------------------------
 # I think this has to go at the end of the module.

@@ -207,9 +207,13 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     # statement may need to if the conditional is false.
     beginningLabel = "^ue_%d^" % uniqueCount
     uniqueCount += 1
+    entryLabel = "^ue_%d^" % uniqueCount
+    uniqueCount += 1
     endLabel = "^ue_%d^" % uniqueCount
     uniqueCount += 1
-    endLabels.append({ "lbnfLabel": lbnfLabel, "endLabel": endLabel, "used": False})
+    endLabels.append({"lbnfLabel": lbnfLabel, 
+                      "endLabel": endLabel, 
+                      "used": False})
 
     # Is this a DO ... END block?  If it is, then we have to do several things:
     # create a new child scope and make it current, and add a goto PALMAT 
@@ -285,9 +289,23 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         p_Functions.expressionToInstructions(p_Functions.substate["expression"], currentScope["instructions"])
         for entry in reversed(endLabels):
             if entry["lbnfLabel"] == outerBlocks[i]:
+                isUntil = "isUntil" in p_Functions.substate
                 entry["used"] = True
-                currentScope["instructions"].append({"iffalse": entry["endLabel"]})
+                if isUntil:
+                    palmatOpcode = "iftrue"
+                else:
+                    palmatOpcode = "iffalse"
+                currentScope["instructions"].append({palmatOpcode: entry["endLabel"]})
                 if lbnfLabel == "while_clause":
+                    if isUntil:
+                        parent = currentScope["parent"]
+                        parentScope = PALMAT["scopes"][parent]
+                        parentScope["identifiers"][entryLabel] = { 
+                            "label": [currentScope["self"], 
+                                      len(currentScope["instructions"])]}
+                        parentScope["instructions"][-1]["goto"] = entryLabel
+                        currentScope["instructions"].append({"noop": True, "label": entryLabel})
+                        p_Functions.substate.pop("isUntil")
                     entry["recycle"] = True
                 break
     elif lbnfLabel == "true_part":
