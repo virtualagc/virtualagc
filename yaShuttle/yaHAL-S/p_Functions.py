@@ -99,7 +99,10 @@ def testIfExpression(history):
     return ("expression" in history) \
             or ("ifClauseBitExp" in history) \
             or ("relational_exp" in history) \
-            or ("while_clause" in history)
+            or ("while_clause" in history) \
+            or ("for_list" in history and \
+                "forKey" not in history and \
+                "forKeyTemporary" not in history)
     
 # This function is called from generatePALMAT() for a string literal.
 # Returns only True/False for Success/Failure.
@@ -174,6 +177,11 @@ def stringLiteral(PALMAT, state, s):
         #instructions.append({"wstart": sp})
     elif state1 == "string" and 'write_arg' in history:
         substate["expression"].append({ "string": sp[1:-1] })
+    elif state1 in ["forKey", "forKeyTemporary"]:
+        if state1 == "forKeyTemporary":
+            identifiers[s] = {"integer": True}
+        
+        # TBD
     elif state1 in ["identifier", "char_id", "bit_id"] and isExpression:
         substate["expression"].append({ "fetch": sp })
     elif state2 == ["bitSpecBoolean", "number"]:
@@ -586,6 +594,15 @@ def while_clause(PALMAT, state):
 def whileKeyUntil(PALMAT, state):
     substate["isUntil"] = True
     return True, state
+
+def for_list(PALMAT, state):
+    return True, fixupState(state, fsAugment)
+
+def forKey(PALMAT, state):
+    return True, fixupState(state, fsAugment)
+
+def forKeyTemporary(PALMAT, state):
+    return True, fixupState(state, fsAugment)
 
 #-----------------------------------------------------------------------------
 # I think this has to go at the end of the module.

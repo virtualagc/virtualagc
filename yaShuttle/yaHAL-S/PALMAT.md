@@ -183,7 +183,7 @@ the initialization is performed only the first time that position in the code is
 
 Thus the emulator would have to perform a little more work upon entry to such a block than just setting `scope` properly.
 
-TBD
+**Note:** Regarding the so-called `TEMPORARY` variables:  Although the documentation fusses over them as if they were something special, to the point of making it seem tricky to implement them, in fact at execution time `TEMPORARY` is just a drop-in replacement for `DECLARE`.  The distinction is entirely syntactical, in that you can only use `DECLARE` in blocks that end with `CLOSE`, whereas you can only use `TEMPORARY` in blocks that end with `END`.  (Well, and there's an extra way to declare temporary integer variables with `FOR TEMPORARY I=... END` vs `FOR I=... END`.)  However, given our underlying model of scopes, there's actually no distinction at all between temporary and non-temporary variables at runtime.  A `TEMPORARY` variable is merely a variable whose scope happens to be a `DO ... END` block rather than (say) a `PROGRAM` or `FUNCTION` block.
 
 ## PALMAT Instructions
 

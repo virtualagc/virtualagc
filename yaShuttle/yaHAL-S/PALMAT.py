@@ -207,6 +207,8 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     # statement may need to if the conditional is false.
     beginningLabel = "^ue_%d^" % uniqueCount
     uniqueCount += 1
+    beginningLabel2 = "^ue_%d^" % uniqueCount
+    uniqueCount += 1
     entryLabel = "^ue_%d^" % uniqueCount
     uniqueCount += 1
     endLabel = "^ue_%d^" % uniqueCount
@@ -221,9 +223,13 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     isDo = lbnfLabel in ["basicStatementDo"]
     if isDo:
         state["scopeIndex"] = addScope(PALMAT, preservedScopeIndex)
-        currentScope["instructions"].append({'goto': [state["scopeIndex"], 0]})
+        currentScope["instructions"].append({'goto': beginningLabel})
+        currentScope["identifiers"][beginningLabel] = {'label': [state["scopeIndex"], len(scopes[state["scopeIndex"]]["instructions"])]}
         currentScope = scopes[state["scopeIndex"]]
         currentScope["instructions"].append({'noop': True, 'label': beginningLabel})
+        # This one's a placeholder in case we discover we need to insert another 
+        # instruction here later (as may happen with DO UNTIL or DO FOR).
+        currentScope["instructions"].append({'noop': True})
     
     # Main generation of PALMAT for the statement, sans setup and cleanup.
     # HAL/S built-in functions
@@ -297,16 +303,22 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                     palmatOpcode = "iffalse"
                 currentScope["instructions"].append({palmatOpcode: entry["endLabel"]})
                 if lbnfLabel == "while_clause":
+                    parent = currentScope["parent"]
+                    parentScope = PALMAT["scopes"][parent]
+                    parentScope["identifiers"][beginningLabel] = { 
+                        "label": [currentScope["self"], 0]}
                     if isUntil:
-                        parent = currentScope["parent"]
-                        parentScope = PALMAT["scopes"][parent]
-                        parentScope["identifiers"][entryLabel] = { 
-                            "label": [currentScope["self"], 
-                                      len(currentScope["instructions"])]}
-                        parentScope["instructions"][-1]["goto"] = entryLabel
+                        parentScope["instructions"][-1]["goto"] = beginningLabel
+                        currentScope["identifiers"][beginningLabel2] = { "label": [currentScope["self"], 1] }
+                        currentScope["instructions"][1]["label"] = beginningLabel2
+                        currentScope["identifiers"][entryLabel] = { "label": [currentScope["self"], len(currentScope["instructions"])]}
                         currentScope["instructions"].append({"noop": True, "label": entryLabel})
+                        currentScope["instructions"][0].pop('noop')
+                        currentScope["instructions"][0]['goto'] = entryLabel
                         p_Functions.substate.pop("isUntil")
-                    entry["recycle"] = True
+                        entry["recycle"] = beginningLabel2
+                    else:
+                        entry["recycle"] = beginningLabel
                 break
     elif lbnfLabel == "true_part":
         p_Functions.expressionToInstructions(p_Functions.substate["expression"], currentScope["instructions"])
@@ -419,7 +431,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     identifiers = currentScope["identifiers"]
     if "recycle" in endLabels[-1]:
         identifiers[beginningLabel] = { "label": [state["scopeIndex"], 0]}
-        instructions.append({"goto": beginningLabel})
+        instructions.append({"goto": endLabels[-1]["recycle"]})
     if endLabels[-1]["used"]:
         identifiers[endLabel] = { "label": [state["scopeIndex"], len(instructions)] }
         instructions.append({"noop": True, "label": endLabel})
