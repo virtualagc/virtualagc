@@ -123,6 +123,138 @@ def findIdentifier(identifier, PALMAT, scopeIndex=None):
     return None
 
 #-----------------------------------------------------------------------------
+'''
+These auxiliary functions are used to create child (DO ... END) blocks and
+to provide the various label identifiers for PALMAT instructions like 'goto',
+'iffalse', and 'iftrue' that are used to jump in, out, and within these
+blocks.  We use a kind of trick to help us with this
+
+For jumping *within* a given DO...END block (as opposed to entering or leaving
+the block) we use a kind of trick.  For each such jump there's a *target* 
+instruction (a 'noop') and one or more jumps to it (using 'goto', 'iftrue',
+or 'iffalse'), associated by a unique label in the scope's identifiers.
+These identifiers are all of the form xx_N, where xx is supposed to unique
+to the purpose, and N is a unique number chosen by the code-generator to 
+insure that the same xx can be used in different scopes without conflict.
+Functions are provided to insert the target instructions and the instructions
+that jump to them.  By convention xx is always lower-case alphabetic characters.
+'''
+uniqueCount = 0
+
+# This function creates a label for an internal jump within a DO...END,
+# and inserts a noop instruction with that label. Returns the new label, 
+# or None on error.  The prefixes "ue", "ur", and "up" are already used
+# by makeDoEnd(), and so are not candidates for createTarget(), though
+# they can be used with jumpToTarget().
+jumpInstructions = ['goto', 'iffalse', 'iftrue']
+def createTarget(currentScope, xx):
+    global uniqueCount
+    identifiers = currentScope["identifiers"]
+    instructions = currentScope["instructions"]
+    prefix = xx + "_"
+    lenxx = len(prefix)
+    for identifier in identifiers:
+        if prefix == identifier[:lenxx]:
+            print("Implementation error, duplicate target anchors:", prefix)
+            return None
+    label = "^%s%d^" % (prefix, uniqueCount)
+    uniqueCount += 1
+    identifiers[label] = {'label': [currentScope['self'], len(instructions)]}
+    instructions.append({'noop': True, 'label': label})
+    # Correct any jumps already added before the label was created.
+    poppable = []
+    incompletes = currentScope["incomplete"] # A list of instruction offsets.
+    for i in incompletes:
+        instruction = instructions[i]
+        for jumpInstruction in jumpInstructions:
+            if jumpInstruction in instruction:
+                if xx == instruction[jumpInstruction]:
+                    instruction[jumpInstruction] = label
+                    poppable.append(i)
+                    break
+    for popit in poppable:
+        incompletes.remove(popit)
+    if len(incompletes) == 0:
+        currentScope.pop("incomplete")
+    return label
+
+# This function inserts a PALMAT instruction that jumps to an target
+# created (previously or later on) by insertTarget().  The palmatOpcode 
+# is one of the jumpInstructions list defined earlier.  jumpToTarget() 
+# can be used multiple times for the same label, and can either precede
+# or follow createTarget(). If preceding createTarget(),
+# however, the label it needs to find doesn't exist, so it uses a
+# placeholder label (xx) which is fixed up later by createTarget().
+def jumpToTarget(currentScope, xx, palmatOpcode):
+
+    # This function finds a label for an internal jump within a DO...END
+    # previously created by createTargetLabel(). Returns the label or None.
+    # It can be taken outside of jumpToTarget() if necessary, but I didn't
+    # find that necessary.
+    def findTargetLabel(currentScope, xx):
+        identifiers = currentScope["identifiers"]
+        instructions = currentScope["instructions"]
+        prefix = "^" + xx + "_"
+        lenxx = len(prefix)
+        for identifier in identifiers:
+            if prefix == identifier[:lenxx]:
+                return identifier
+        return None
+    
+    instructions = currentScope["instructions"]
+    label = findTargetLabel(currentScope, xx)
+    if label == None:
+        currentScope["incomplete"].append(len(instructions))
+        label = xx
+    instructions.append({palmatOpcode: label})
+
+# This function is used by a parent scope to create a child scope that's
+# a DO ... END, and to goto it.  The new child scope is returned.
+# Note that makeDoEnd() creates labels with xx = ue, ur, and up, so 
+# those do not need to be created separately by createTargetLabel().
+def makeDoEnd(PALMAT, currentScope):
+    global uniqueCount
+    indexOfCurrentScope = currentScope["self"]
+    indexOfNewScope = addScope(PALMAT, indexOfCurrentScope)
+    newScope = PALMAT["scopes"][indexOfNewScope]
+    entryLabel = "^ue_%d^" % uniqueCount
+    uniqueCount += 1
+    returnLabel = "^ur_%d^" % uniqueCount
+    uniqueCount += 1
+    currentIdentifiers = currentScope["identifiers"]
+    currentInstructions = currentScope["instructions"]
+    currentIdentifiers[entryLabel] = {"label": [indexOfNewScope, 0]}
+    currentInstructions.append({"goto": entryLabel})
+    currentIdentifiers[returnLabel] = {"label": [indexOfCurrentScope, len(currentInstructions)]}
+    currentInstructions.append({"noop": True, "label": returnLabel})
+    newIdentifiers = newScope["identifiers"]
+    newInstructions = newScope["instructions"]
+    newInstructions.append({'noop': True, "label": entryLabel})
+    recycleLabel = "^up_%d^" % uniqueCount
+    uniqueCount += 1
+    newIdentifiers[recycleLabel] = {'label': [indexOfNewScope, 1]}
+    newInstructions.append({'noop': True, "label": recycleLabel})
+    # The "incomplete" key is temporarily added to the scope.
+    # It's for tracking jumpToTarget() calls that 
+    # occur prior to the label being added to the identifiers.
+    # These references are supposed to be resolved later when 
+    # the label is actually created.  The entire "incomplete" 
+    # key is (hopefully!) removed automatically once all of the
+    # references are fixed.
+    newScope["incomplete"] = []
+    return indexOfNewScope, newScope
+
+# This function is used to exit from a DO loop back to the parent context,
+# assuming it was all set up by makeDoEnd().
+def exitDo(PALMAT, currentScope):
+    parentScope = PALMAT["scopes"][currentScope["parent"]]
+    #print("*A", PALMAT["scopes"])
+    #print("*B", parentScope["instructions"])
+    targetInstruction = parentScope["instructions"][-1]
+    targetLabel = targetInstruction["label"]
+    currentScope["instructions"].append({'goto': targetLabel})
+
+#-----------------------------------------------------------------------------
 # The code generator (ast -> PALMAT).
 
 # Variables DECLARE'd without a type are by default SCALAR, though they
@@ -189,7 +321,6 @@ labels encountered.  I call this list the "history".  The entry state in
 which no statement is yet being processed is state={ "history" : [] }.
 '''
 
-uniqueCount = 0
 def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, 
                    trace=False, endLabels=[]):
     global uniqueCount
@@ -222,14 +353,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     # instruction from the existing current scope to the new scope.
     isDo = lbnfLabel in ["basicStatementDo"]
     if isDo:
-        state["scopeIndex"] = addScope(PALMAT, preservedScopeIndex)
-        currentScope["instructions"].append({'goto': beginningLabel})
-        currentScope["identifiers"][beginningLabel] = {'label': [state["scopeIndex"], len(scopes[state["scopeIndex"]]["instructions"])]}
-        currentScope = scopes[state["scopeIndex"]]
-        currentScope["instructions"].append({'noop': True, 'label': beginningLabel})
-        # This one's a placeholder in case we discover we need to insert another 
-        # instruction here later (as may happen with DO UNTIL or DO FOR).
-        currentScope["instructions"].append({'noop': True})
+        state["scopeIndex"], currentScope = makeDoEnd(PALMAT, currentScope)
     
     # Main generation of PALMAT for the statement, sans setup and cleanup.
     # HAL/S built-in functions
@@ -301,10 +425,12 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                     palmatOpcode = "iftrue"
                 else:
                     palmatOpcode = "iffalse"
-                currentScope["instructions"].append({palmatOpcode: entry["endLabel"]})
+                #currentScope["instructions"].append({palmatOpcode: entry["endLabel"]})
+                jumpToTarget(currentScope, "ux", palmatOpcode)
                 if lbnfLabel == "while_clause":
                     parent = currentScope["parent"]
                     parentScope = PALMAT["scopes"][parent]
+                    '''
                     parentScope["identifiers"][beginningLabel] = { 
                         "label": [currentScope["self"], 0]}
                     if isUntil:
@@ -319,6 +445,13 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                         entry["recycle"] = beginningLabel2
                     else:
                         entry["recycle"] = beginningLabel
+                    '''
+                    if isUntil:
+                        newLabel = createTarget(currentScope, "ub")
+                        currentScope["instructions"][0].pop('noop')
+                        currentScope["instructions"][0]['goto'] = newLabel
+                        p_Functions.substate.pop("isUntil")
+                    entry["recycle"] = "up"
                 break
     elif lbnfLabel == "true_part":
         p_Functions.expressionToInstructions(p_Functions.substate["expression"], currentScope["instructions"])
@@ -430,20 +563,32 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     instructions = currentScope["instructions"]
     identifiers = currentScope["identifiers"]
     if "recycle" in endLabels[-1]:
+        '''
         identifiers[beginningLabel] = { "label": [state["scopeIndex"], 0]}
         instructions.append({"goto": endLabels[-1]["recycle"]})
+        '''
+        jumpToTarget(currentScope, "up", "goto")
     if endLabels[-1]["used"]:
+        '''
         identifiers[endLabel] = { "label": [state["scopeIndex"], len(instructions)] }
         instructions.append({"noop": True, "label": endLabel})
+        '''
+        createTarget(currentScope, "ux")
     endLabels.pop()
     
     # If this is this a DO ... END block, we need to insert a PALMAT
     # goto instruction at the end of the block back to the original 
     # position in the parent scope.
     if isDo:
-        currentScope["instructions"].append({
-            'goto': [preservedScopeIndex, 
-                     len(PALMAT["scopes"][preservedScopeIndex]["instructions"])]})
+        '''
+        returnLabel = "^ue_%d^" % uniqueCount
+        uniqueCount += 1
+        parentScope = PALMAT["scopes"][preservedScopeIndex]
+        currentScope["identifiers"][returnLabel] = { "label": [preservedScopeIndex, len(parentScope["instructions"])]}
+        currentScope["instructions"].append({'goto': returnLabel})
+        parentScope["instructions"].append({'noop': True, "label": returnLabel})
+        '''
+        exitDo(PALMAT, currentScope)
         state["scopeIndex"] = preservedScopeIndex
         # I originally added the following instruction to make sure that the 
         # *final* goto added above would have a target to land on, since 
