@@ -275,6 +275,9 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
                             print("\t%d: %s" % (count, str(instruction)))
                             count += 1
                     continue
+                elif firstWord == "EXECUTE":
+                    executePALMAT(PALMAT, 0, 0, trace3, 8)
+                    continue
                 elif firstWord == "SCOPES":
                     used = set()
                     for i in range(len(PALMAT["scopes"])):
@@ -321,6 +324,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
                     print("\tDATA *       Inspect identifiers in all scopes.")
                     print("\tPALMAT       Inspect PALMAT code in root scope.")
                     print("\tPALMAT *     Inspect PALMAT code in all scopes.")
+                    print("\tEXECUTE      (Re)execute already-compiled PALMAT.")
                     print("\tSCOPES       Inspect scope hierarchy.")
                     print("\tREMOVE D     Remove identifier D.")
                     print("\tREMOVE *     Remove all identifiers.")
@@ -363,6 +367,13 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
         PALMAT["scopes"][0]["instructions"] = []
         substate["errors"] = []
         substate["warnings"] = []
+        identifiers = PALMAT["scopes"][0]["identifiers"]
+        # Get rid of all auto-generated labels from the preceding line.
+        
+        for i in list(identifiers.keys()):
+            fields = i[1:-1].split("_")
+            if len(fields) == 2 and fields[0].islower() and fields[1].isdigit():
+                identifiers.pop(i)
         success, ast = processSource(PALMAT, halsSource, metadata, \
                          libraryFilename, structureTemplates, noCompile, \
                          lbnf, bnf, trace1, wine, trace2, 8)

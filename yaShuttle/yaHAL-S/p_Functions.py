@@ -496,9 +496,6 @@ def compound_number(PALMAT, state):
 def char_string(PALMAT, state):
     return True, fixupState(state, fsAugment, "string")
 
-def variable(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
 def basicStatementWritePhrase(PALMAT, state):
     return True, fixupState(state, fsAugment)
 
@@ -514,6 +511,8 @@ def label_definition(PALMAT, state):
 def basicStatementGoTo(PALMAT, state):
     return True, fixupState(state, fsAugment)
 
+def basicStatementDo(PALMAT, state):
+    return True, fixupState(state, fsAugment)
 
 def ifClauseBitExp(PALMAT, state):
     return True, fixupState(state, fsAugment)
@@ -522,6 +521,9 @@ def ifClauseRelExp(PALMAT, state):
     return True, fixupState(state, fsAugment)
 
 def ifThenElseStatement(PALMAT, state):
+    return True, fixupState(state, fsAugment)
+
+def ifStatement(PALMAT, state):
     return True, fixupState(state, fsAugment)
 
 def true_part(PALMAT, state):
@@ -602,6 +604,9 @@ def forKey(PALMAT, state):
     return True, fixupState(state, fsAugment)
 
 def forKeyTemporary(PALMAT, state):
+    return True, fixupState(state, fsAugment)
+
+def arithExpTerm(PALMAT, state):
     return True, fixupState(state, fsAugment)
 
 #-----------------------------------------------------------------------------

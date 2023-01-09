@@ -13,6 +13,7 @@ History:        2022-12-19 RSB  Created.
 import json
 import p_Functions
 from executePALMAT import executePALMAT, hround
+from expressionSM import expressionSM
 
 #-----------------------------------------------------------------------------
 # File operations.
@@ -51,7 +52,8 @@ def constructScope(selfIndex=0, parentIndex=None):
                 "self"          : selfIndex,
                 "children"      : [ ],
                 "identifiers"   : { },
-                "instructions"  : [ ]
+                "instructions"  : [ ],
+                "incomplete"    : [ ]
             }
 
 # Create a new, empty PALMAT object.
@@ -151,13 +153,13 @@ def createTarget(currentScope, xx):
     global uniqueCount
     identifiers = currentScope["identifiers"]
     instructions = currentScope["instructions"]
-    prefix = xx + "_"
+    prefix = "^" + xx + "_"
     lenxx = len(prefix)
     for identifier in identifiers:
         if prefix == identifier[:lenxx]:
-            print("Implementation error, duplicate target anchors:", prefix)
+            print("Implementation error, duplicate target anchors:", xx)
             return None
-    label = "^%s%d^" % (prefix, uniqueCount)
+    label = "%s%d^" % (prefix, uniqueCount)
     uniqueCount += 1
     identifiers[label] = {'label': [currentScope['self'], len(instructions)]}
     instructions.append({'noop': True, 'label': label})
@@ -174,8 +176,8 @@ def createTarget(currentScope, xx):
                     break
     for popit in poppable:
         incompletes.remove(popit)
-    if len(incompletes) == 0:
-        currentScope.pop("incomplete")
+    #if len(incompletes) == 0:
+    #    currentScope.pop("incomplete")
     return label
 
 # This function inserts a PALMAT instruction that jumps to an target
@@ -209,10 +211,12 @@ def jumpToTarget(currentScope, xx, palmatOpcode):
     instructions.append({palmatOpcode: label})
 
 # This function is used by a parent scope to create a child scope that's
-# a DO ... END, and to goto it.  The new child scope is returned.
-# Note that makeDoEnd() creates labels with xx = ue, ur, and up, so 
-# those do not need to be created separately by createTargetLabel().
-def makeDoEnd(PALMAT, currentScope):
+# a DO ... END, and to goto it.  (Also for IF statements.)  The new child 
+# scope is returned. Note that makeDoEnd() creates labels with xx = ue and ur,
+# so those do not need to be created separately by createTargetLabel().
+# The parameter dummyTargets is an optional array of additional 
+# targets to add after the initial ue_ target. 
+def makeDoEnd(PALMAT, currentScope, dummyTargets=[]):
     global uniqueCount
     indexOfCurrentScope = currentScope["self"]
     indexOfNewScope = addScope(PALMAT, indexOfCurrentScope)
@@ -230,19 +234,12 @@ def makeDoEnd(PALMAT, currentScope):
     newIdentifiers = newScope["identifiers"]
     newInstructions = newScope["instructions"]
     newInstructions.append({'noop': True, "label": entryLabel})
-    recycleLabel = "^up_%d^" % uniqueCount
-    uniqueCount += 1
-    newIdentifiers[recycleLabel] = {'label': [indexOfNewScope, 1]}
-    newInstructions.append({'noop': True, "label": recycleLabel})
-    # The "incomplete" key is temporarily added to the scope.
-    # It's for tracking jumpToTarget() calls that 
-    # occur prior to the label being added to the identifiers.
-    # These references are supposed to be resolved later when 
-    # the label is actually created.  The entire "incomplete" 
-    # key is (hopefully!) removed automatically once all of the
-    # references are fixed.
-    newScope["incomplete"] = []
-    return indexOfNewScope, newScope
+    for xx in dummyTargets:
+        recycleLabel = "^%s_%d^" % (xx, uniqueCount)
+        uniqueCount += 1
+        newIdentifiers[recycleLabel] = {'label': [indexOfNewScope, 1]}
+        newInstructions.append({'noop': True, "label": recycleLabel})
+        return indexOfNewScope, newScope
 
 # This function is used to exit from a DO loop back to the parent context,
 # assuming it was all set up by makeDoEnd().
@@ -336,24 +333,47 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     # take up any resources.  For example, a basic assignment statement will
     # never need to jump to the end of the statement, but an IF ... THEN ...
     # statement may need to if the conditional is false.
-    beginningLabel = "^ue_%d^" % uniqueCount
-    uniqueCount += 1
-    beginningLabel2 = "^ue_%d^" % uniqueCount
-    uniqueCount += 1
-    entryLabel = "^ue_%d^" % uniqueCount
-    uniqueCount += 1
     endLabel = "^ue_%d^" % uniqueCount
     uniqueCount += 1
     endLabels.append({"lbnfLabel": lbnfLabel, 
                       "endLabel": endLabel, 
                       "used": False})
 
+    # The use of a "state machine" object in the state will hopefully be
+    # a more-systematic framework for code-generation than the relatively
+    # inconsistent melange of methods that preceded it.  Right now, though,
+    # it's in early stages and some state machines may run in parallel with
+    # the older method for comparison purposes.  The state-machine function 
+    # associated with the specific type of lbnfLabel is called both upon 
+    # beginning the processing of the component (with an argument of 0),
+    # for strings (with an argument of 1) and
+    # upon finishing it (with an argument of 2).  The state-machine function
+    # itself is what removes the stateMachine object from state, when that
+    # is appropriate.
+    if "stateMachine" in state:
+        state["stateMachine"]["function"](0, lbnfLabel, PALMAT, state, trace)
+    else:
+        # May want to start a state machine for certain component types.
+        if lbnfLabel == "expression":
+            stateMachine = { "function": expressionSM }
+            state["stateMachine"] = stateMachine
+        if "stateMachine" in state:
+            state["stateMachine"]["function"](0, lbnfLabel, PALMAT, state, trace)
+             
     # Is this a DO ... END block?  If it is, then we have to do several things:
     # create a new child scope and make it current, and add a goto PALMAT 
-    # instruction from the existing current scope to the new scope.
-    isDo = lbnfLabel in ["basicStatementDo"]
+    # instruction from the existing current scope to the new scope.  
+    # IF statements are treated like DO statements in this regard, because
+    # they cause me lots of trouble (with nesting them) otherwise.
+    isDo = lbnfLabel in ["basicStatementDo", "otherStatementIf"]
     if isDo:
-        state["scopeIndex"], currentScope = makeDoEnd(PALMAT, currentScope)
+        dummyTargets = []
+        if lbnfLabel == "basicStatementDo":
+            # Alas, the "up" target is needed only for DO FOR and DO UNTIL,
+            # but we don't know yet which flavor of DO we have, so we have to 
+            # make do with what we know.  (Yes, the pun was intended.)
+            dummyTargets = ["up", "ui"]
+        state["scopeIndex"], currentScope = makeDoEnd(PALMAT, currentScope, dummyTargets)
     
     # Main generation of PALMAT for the statement, sans setup and cleanup.
     # HAL/S built-in functions
@@ -376,12 +396,16 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             print("      ", p_Functions.substate)
         func = p_Functions.objects[lbnfLabel]
         success, newState = func(PALMAT, state)
+        if "stateMachine" in state:
+            # We want to make sure that newState's state machine
+            # is the same object as state's, and not merely
+            # a clone of it.
+            newState["stateMachine"] = state["stateMachine"]
         if trace:
             print("      ", p_Functions.substate)
         if not success:
             endLabels.pop()
             return False, PALMAT
-        #print(newState)    
     for component in ast["components"]:
         #if lbnfLabel == "ifStatement":
         #    print("*", component)
@@ -391,6 +415,8 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                     print("TRACE:", component)
                     print("      ", newState)
                     print("      ", p_Functions.substate)
+                if "stateMachine" in newState:
+                    state["stateMachine"]["function"](1, component, PALMAT, newState, trace)
                 success = p_Functions.stringLiteral(PALMAT, newState, component)
                 if trace:
                     print("      ", p_Functions.substate)
@@ -412,51 +438,60 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     # statement.  Includes stuff like actual assignments to variables
     # after computation of expressions has all been done, placement of 
     # compiler-generated labels for the ends of IF statements, and so on.
-    innerComparisons = ["comparison", "ifClauseBitExp", "while_clause"]
-    outerBlocks = ["ifStatement", "true_part", "basicStatementDo"]
-    if lbnfLabel in innerComparisons:
-        i = innerComparisons.index(lbnfLabel)
-        p_Functions.expressionToInstructions(p_Functions.substate["expression"], currentScope["instructions"])
-        for entry in reversed(endLabels):
-            if entry["lbnfLabel"] == outerBlocks[i]:
-                isUntil = "isUntil" in p_Functions.substate
-                entry["used"] = True
-                if isUntil:
-                    palmatOpcode = "iftrue"
-                else:
-                    palmatOpcode = "iffalse"
-                #currentScope["instructions"].append({palmatOpcode: entry["endLabel"]})
-                jumpToTarget(currentScope, "ux", palmatOpcode)
-                if lbnfLabel == "while_clause":
-                    parent = currentScope["parent"]
-                    parentScope = PALMAT["scopes"][parent]
-                    '''
-                    parentScope["identifiers"][beginningLabel] = { 
-                        "label": [currentScope["self"], 0]}
+    
+    # The patterns dictionary is a way of identifying some components that
+    # require post-processing here.  The keys are lbnfLabels for the 
+    # component; the value modifies that by giving a list of relevant 
+    # ancestor (though not necessarily immediate-parent) components.
+    lbnfLabelPatterns = {
+            "relational_exp": ["ifThenElseStatement", "ifStatement"], 
+            "ifClauseBitExp": ["ifThenElseStatement", "ifStatement"], 
+            "while_clause": ["basicStatementDo"]
+        }
+    if lbnfLabel in lbnfLabelPatterns:
+        ancestorLabels = lbnfLabelPatterns[lbnfLabel]
+        for ancestor in ancestorLabels:
+            if ancestor not in state["history"]:
+                continue
+            p_Functions.expressionToInstructions(p_Functions.substate["expression"], currentScope["instructions"])
+            for entry in reversed(endLabels):
+                if entry["lbnfLabel"] == ancestor:
+                    isUntil = "isUntil" in p_Functions.substate
+                    entry["used"] = True
                     if isUntil:
-                        parentScope["instructions"][-1]["goto"] = beginningLabel
-                        currentScope["identifiers"][beginningLabel2] = { "label": [currentScope["self"], 1] }
-                        currentScope["instructions"][1]["label"] = beginningLabel2
-                        currentScope["identifiers"][entryLabel] = { "label": [currentScope["self"], len(currentScope["instructions"])]}
-                        currentScope["instructions"].append({"noop": True, "label": entryLabel})
-                        currentScope["instructions"][0].pop('noop')
-                        currentScope["instructions"][0]['goto'] = entryLabel
-                        p_Functions.substate.pop("isUntil")
-                        entry["recycle"] = beginningLabel2
+                        palmatOpcode = "iftrue"
                     else:
-                        entry["recycle"] = beginningLabel
-                    '''
-                    if isUntil:
-                        newLabel = createTarget(currentScope, "ub")
-                        currentScope["instructions"][0].pop('noop')
-                        currentScope["instructions"][0]['goto'] = newLabel
-                        p_Functions.substate.pop("isUntil")
-                    entry["recycle"] = "up"
-                break
+                        palmatOpcode = "iffalse"
+                    #if lbnfLabel == "ifClauseBitExp":
+                    #    jumpToTarget(currentScope, "ub", palmatOpcode)
+                    #el
+                    if ancestor == "ifThenElseStatement":
+                        jumpToTarget(currentScope, "uf", palmatOpcode)
+                    else:
+                        jumpToTarget(currentScope, "ux", palmatOpcode)
+                    if lbnfLabel == "while_clause":
+                        parent = currentScope["parent"]
+                        parentScope = PALMAT["scopes"][parent]
+                        if isUntil:
+                            newLabel = createTarget(currentScope, "ub")
+                            if newLabel == None:
+                                return False, PALMAT
+                            currentScope["instructions"][0].pop('noop')
+                            currentScope["instructions"][0]['goto'] = newLabel
+                            p_Functions.substate.pop("isUntil")
+                        entry["recycle"] = True
+                    break
+            break
+    # Below are various other patterns not covered by lbnfLabelPatterns above.
+    # The lbnfLabel of the relevant component must not be the same as any key 
+    # in lbnfLabelPatterns.
     elif lbnfLabel == "true_part":
         p_Functions.expressionToInstructions(p_Functions.substate["expression"], currentScope["instructions"])
         endLabels[-2]["used"] = True
-        currentScope["instructions"].append({"goto": endLabels[-2]["endLabel"]})
+        #currentScope["instructions"].append({"goto": endLabels[-2]["endLabel"]})
+        jumpToTarget(currentScope, "ux", "goto")
+        if createTarget(currentScope, "uf") == None:
+            return False, PALMAT
     elif lbnfLabel == "assignment":
         instructions = currentScope["instructions"]
         p_Functions.expressionToInstructions(p_Functions.substate["expression"], instructions)
@@ -563,40 +598,24 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     instructions = currentScope["instructions"]
     identifiers = currentScope["identifiers"]
     if "recycle" in endLabels[-1]:
-        '''
-        identifiers[beginningLabel] = { "label": [state["scopeIndex"], 0]}
-        instructions.append({"goto": endLabels[-1]["recycle"]})
-        '''
         jumpToTarget(currentScope, "up", "goto")
     if endLabels[-1]["used"]:
-        '''
-        identifiers[endLabel] = { "label": [state["scopeIndex"], len(instructions)] }
-        instructions.append({"noop": True, "label": endLabel})
-        '''
-        createTarget(currentScope, "ux")
+        if lbnfLabel == "true_part":
+            if createTarget(currentScope, "ub") == None:
+                return False, PALMAT
+        else:
+            if createTarget(currentScope, "ux") == None:
+                return False, PALMAT
     endLabels.pop()
     
     # If this is this a DO ... END block, we need to insert a PALMAT
     # goto instruction at the end of the block back to the original 
     # position in the parent scope.
     if isDo:
-        '''
-        returnLabel = "^ue_%d^" % uniqueCount
-        uniqueCount += 1
-        parentScope = PALMAT["scopes"][preservedScopeIndex]
-        currentScope["identifiers"][returnLabel] = { "label": [preservedScopeIndex, len(parentScope["instructions"])]}
-        currentScope["instructions"].append({'goto': returnLabel})
-        parentScope["instructions"].append({'noop': True, "label": returnLabel})
-        '''
         exitDo(PALMAT, currentScope)
         state["scopeIndex"] = preservedScopeIndex
-        # I originally added the following instruction to make sure that the 
-        # *final* goto added above would have a target to land on, since 
-        # otherwise it could be at an unfilled position one past the end
-        # of the final PALMAT instruction in scope 0.  However, the e
-        # execution loop ends gracefully on that condition, so there's no
-        # point in peppering the code with pointless noop instructions.
-        # That's why the following instruction is now commented out.
-        #PALMAT["scopes"][preservedScopeIndex]["instructions"].append({'noop': True})
+
+    if "stateMachine" in state:
+        state["stateMachine"]["function"](2, lbnfLabel, PALMAT, state, trace)
     
     return True, PALMAT
