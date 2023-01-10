@@ -77,6 +77,7 @@ bnf = False
 trace = False
 interactive = False
 colorize = False
+noexec = False
 for param in ["--library="+libraryFilename] + sys.argv[1:]:
     if param == "--help":
         print("""
@@ -93,14 +94,6 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
         
         The OPTIONS are: 
         
-        --interactive   Normally, the HAL/S source-code comes from a file or
-                        files specified on the command line.  However, in 
-                        interactive mode, HAL/S statements are entered from
-                        the keyboard and executed one at a time as they are
-                        entered.
-        --colorize      Used only with --interactive.  If present, it is
-                        equivalent to the interpreter command COLORIZE RED, 
-                        whereas the default is NOCOLORIZE.
         --tab=N         Tab size in source files; assumed to be 8.  No allowance
                         is made for different tab sizes in different source 
                         files, so let's just hope that never happens!  Probably 
@@ -121,12 +114,26 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
         --lbnf, --bnf   Display the abstract syntax trees (AST) in LBNF or
                         in BNF.  Default is not to display the ASTs.
         --trace         Enable tracing for compiler front-end parser.
+        --interactive   Normally, the HAL/S source-code comes from a file or
+                        files specified on the command line.  However, in 
+                        interactive mode, HAL/S statements are entered from
+                        the keyboard and executed one at a time as they are
+                        entered.
+        --colorize      Used only with --interactive.  If present, it is
+                        equivalent to the interpreter command COLORIZE RED, 
+                        whereas the default is NOCOLORIZE.
+        --noexec        Used only with --interactive.  If present, it does
+                        not execute source code input interactively, 
+                        although it processes it normally in all other
+                        ways.
         """ % compiler)
         sys.exit(0)
     elif param == "--interactive":
         interactive = True
     elif param == "--colorize":
         colorize = True
+    elif param == "--noexec":
+        noexec = True
     elif param[:6] == "--tab=":
         tabSize = int(param[6:])
     elif param == "--no-compile":
@@ -209,5 +216,6 @@ if not interactive:
                     structureTemplates,
                     noCompile, lbnf, bnf, trace)
 else:
-    interpreterLoop(libraryFilename, structureTemplates, colorize)
+    interpreterLoop(libraryFilename, structureTemplates, colorize, \
+                    not noexec, lbnf, bnf)
 

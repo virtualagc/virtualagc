@@ -1,0 +1,41 @@
+ /* This is just some code I'm using with the yaHAL-S-FC.py interpreter
+    for regression testing, and which I don't feel like manually
+    retyping every time.  Notice that all of the actual HAL/S lines
+    (as opposed to interpreter commands) don't end in ';' (i.e., they
+    have a dummy space at the end) except for the final line, since
+    the interpreter won't process the batch until it finds a line
+    ending in ';'. */
+ DECLARE SCALAR, T, X INITIAL(2.0), Y CONSTANT(3.0), Z DOUBLE; 
+ DECLARE A, B DOUBLE, C INITIAL(4.0), D SCALAR CONSTANT(2 Y - 12); 
+ DECLARE INTEGER, I, J CONSTANT(4 D + 2), K INITIAL(J + D); 
+ DECLARE L INTEGER DOUBLE, M INTEGER; 
+ DECLARE CHARACTER(20), C1, C2 INITIAL('abc'), C3 CONSTANT('def'), 
+ 	 C4 CONSTANT(C3 CAT 'ghi'); 
+ DECLARE C5 CHARACTER(30), C6 CHARACTER(20) INITIAL('sam ' CAT C3); 
+ DECLARE BOOLEAN, B1, B2 CONSTANT(TRUE), B3 INITIAL(NOT B2); 
+ DECLARE B4 BOOLEAN, B5 CONSTANT(NOT B2 AND B2), B6 INITIAL(B2 OR NOT B2); 
+ 
+ WRITE(6) 'Conversion and assignment test:'; 
+ I=1.4; WRITE(6) 'I =', I; 
+ A=2; WRITE(6) 'A =', A; 
+  
+ WRITE(6) 'DO WHILE and RANDOM test:'; 
+ I=0; DO WHILE I < 10; I=I+1; WRITE(6) I, RANDOM; END; 
+ 
+ WRITE(6) 'DO UNTIL and RANDOMG test:'; 
+ I=0; DO UNTIL I >= 10; I=I+1; WRITE(6) I, RANDOMG; END; 
+ 
+ WRITE(6) 'RUNTIME test (increment once per second):'; 
+ I=1; 
+ M=ROUND(RUNTIME); 
+ DO WHILE I <= 10; 
+ 	DO UNTIL L > M; 
+ 		L = ROUND(RUNTIME); 
+ 	END; 
+ 	WRITE(6) I, M; 
+ 	I = I + 1; 
+ 	M = L; 
+ END; 
+ 
+ WRITE(6) 'Done.';
+ 

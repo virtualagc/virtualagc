@@ -218,17 +218,17 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
                 elif operator == "AND":
                     result = operand1 and operand2
                 elif operator == "==":
-                    result = (operand2 == operand1)
+                    result = (operand1 == operand2)
                 elif operator == "!=":
-                    result = (operand2 != operand1)
+                    result = (operand1 != operand2)
                 elif operator == "<":
-                    result = (operand2 < operand1)
+                    result = (operand1 < operand2)
                 elif operator == ">":
-                    result = (operand2 > operand1)
+                    result = (operand1 > operand2)
                 elif operator == "<=":
-                    result = (operand2 <= operand1)
+                    result = (operand1 <= operand2)
                 elif operator == ">=":
-                    result = (operand2 >= operand1)
+                    result = (operand1 >= operand2)
                 #elif operator == "!<":
                 #    result = not (operand2 < operand1)
                 #elif operator == "!>":
@@ -308,8 +308,7 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
             lun = instruction["write"]
             if lun == '6':
                 print("%*s" % (indent, ""), end="")
-                while len(computationStack) > 0:
-                    value = computationStack.pop()
+                for value in computationStack:
                     if isinstance(value, bool):
                         if value:
                             print(" TRUE ", end="")
@@ -319,6 +318,7 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
                         print(" %s " % str(value), end="")
                     else:
                         print(value, end="")
+                computationStack.clear()
                 print()
         elif "function" in instruction:
             function = instruction["function"]

@@ -46,13 +46,11 @@ from executePALMAT import executePALMAT, setupExecutePALMAT
 setupExecutePALMAT()
 
 maxRecent = 25
-def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False):
+def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
+                    xeq=True, lbnf=False, bnf=False):
     colors = ["black", "red", "green", "yellow", "blue", "magenta", "cyan",
               "white", "gray", "brightred", "brightgreen", "brightyellow", 
               "brightblue", "brightmagenta", "brightcyan", "brightwhite"]
-    xeq = True
-    lbnf = False
-    bnf = False
     trace1 = False
     trace2 = False
     trace3 = False

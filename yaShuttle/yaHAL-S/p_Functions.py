@@ -94,16 +94,7 @@ def removeIdentifier(PALMAT, scopeIndex, identifier):
 
 def removeAllIdentifiers(PALMAT, scopeIndex):
     PALMAT["scopes"][scopeIndex]["identifiers"] = {}
-
-def testIfExpression(history):
-    return ("expression" in history) \
-            or ("ifClauseBitExp" in history) \
-            or ("relational_exp" in history) \
-            or ("while_clause" in history) \
-            or ("for_list" in history and \
-                "forKey" not in history and \
-                "forKeyTemporary" not in history)
-    
+   
 # This function is called from generatePALMAT() for a string literal.
 # Returns only True/False for Success/Failure.
 def stringLiteral(PALMAT, state, s):
@@ -143,13 +134,13 @@ def stringLiteral(PALMAT, state, s):
     else:
         state1 = history[-1]
     state2 = history[-2:]
-    isExpression = testIfExpression(history)
     
     #-------------------------------------------------------------------------
     # Now do various state-machine-dependent stuff with the string (s) or its
     # variations (sp, isp, fsp). 
     
-    if "declaration_list" in history and "expression" not in history:
+    if "declaration_list" in history and "expression" not in history \
+            and "char_spec" not in history:
         substate["currentIdentifier"] = s
         if s in identifiers:
             print("Already declared:", sp)
@@ -168,22 +159,16 @@ def stringLiteral(PALMAT, state, s):
         identifiers[s] = { "label" : [scopeIndex, len(instructions)] }
     elif state1 == "basicStatementGoTo":
         instructions.append({'goto': s})
-    elif state1 == "number" and isExpression:
-        substate["expression"].append({ "number": sp })
-    elif state1 == "string" and isExpression:
-        substate["expression"].append({ "string": sp[1:-1] })
     elif state1 == "number" and "write_key" in history:
         substate["LUN"] = sp
         #instructions.append({"wstart": sp})
-    elif state1 == "string" and 'write_arg' in history:
-        substate["expression"].append({ "string": sp[1:-1] })
+    #elif state1 == "string" and 'write_arg' in history:
+    #    substate["expression"].append({ "string": sp[1:-1] })
     elif state1 in ["forKey", "forKeyTemporary"]:
         if state1 == "forKeyTemporary":
             identifiers[s] = {"integer": True}
         
         # TBD
-    elif state1 in ["identifier", "char_id", "bit_id"] and isExpression:
-        substate["expression"].append({ "fetch": sp })
     elif state2 == ["bitSpecBoolean", "number"]:
         updateCurrentIdentifierAttribute(PALMAT, state, "bit", isp)
     elif state2 == ["typeSpecChar", "number"]:
@@ -221,10 +206,6 @@ def resetStatement():
     substate["lhs"] = []
     substate["expression"] = []
 
-# A built-in HAL/S function.
-def halBuiltIn(function):
-    substate["expression"].append({ "function": function.upper()})
-
 # Transfer the expression stack to end of the PALMAT instruction list, 
 # in reverse order, and clear the expression stack.
 def expressionToInstructions(expression, instructions):
@@ -258,13 +239,9 @@ def declaration_list(PALMAT, state):
     return True, fixupState(state, fsAugment)
 
 def identifier(PALMAT, state):
-    if testIfExpression(state["history"]):
-        return True, fixupState(state, fsAugment)
     return True, state
  
 def char_id(PALMAT, state):
-    if testIfExpression(state["history"]):
-        return True, fixupState(state, fsAugment)
     return True, state
  
 def attributes_typeAndMinorAttr(PALMAT, state):
@@ -448,42 +425,6 @@ def assignment(PALMAT, state):
     '''
     return True, fixupState(state, fsAugment)
 
-def arithExpArithExpPlusTerm(PALMAT, state):
-    substate["expression"].append({ "operator": "+" })
-    return True, state
-
-def arithExpArithExpMinusTerm(PALMAT, state):
-    substate["expression"].append({ "operator": "-" })
-    return True, state
-
-def arithMinusTerm(PALMAT, state):
-    substate["expression"].append({ "operator": "U-" })
-    return True, state
-
-def termDivide(PALMAT, state):
-    substate["expression"].append({ "operator": "/" })
-    return True, state
-
-def productMultiplication(PALMAT, state):
-    substate["expression"].append({ "operator": "" })
-    return True, state
-
-def factorExponentiation(PALMAT, state):
-    substate["expression"].append({ "operator": "**" })
-    return True, state
-
-def productDot(PALMAT, state):
-    substate["expression"].append({ "operator": "." })
-    return True, state
-
-def productCross(PALMAT, state):
-    substate["expression"].append({ "operator": "*" })
-    return True, state
-
-def charExpCat(PALMAT, state):
-    substate["expression"].append({ "operator": "C||" })
-    return True, state
-
 def variable(PALMAT, state):
     return True, fixupState(state, fsAugment)
 
@@ -541,26 +482,6 @@ def then(PALMAT, state):
 def bit_id(PALMAT, state):
     return True, fixupState(state, fsAugment)
 
-def bitConstTrue(PALMAT, state):
-    substate["expression"].append({ "boolean": True })
-    return True, state
-
-def bitConstFalse(PALMAT, state):
-    substate["expression"].append({ "boolean": False })
-    return True, state
-
-def NOT(PALMAT, state):
-    substate["expression"].append({ "operator": "NOT" })
-    return True, state
-
-def bitFactorAnd(PALMAT, state):
-    substate["expression"].append({ "operator": "AND"})  
-    return True, state
-
-def bitExpOR(PALMAT, state):
-    substate["expression"].append({ "operator": "OR"})  
-    return True, state
-
 # Used by various LBNF labels for relational operators, 
 # but not itself corresponding to any specific LBNF label.
 def relationalOpCommon(PALMAT, state, operatorName):
@@ -607,6 +528,18 @@ def forKeyTemporary(PALMAT, state):
     return True, fixupState(state, fsAugment)
 
 def arithExpTerm(PALMAT, state):
+    return True, fixupState(state, fsAugment)
+
+def char_spec(PALMAT, state):
+    return True, fixupState(state, fsAugment)
+
+def charExpCat(PALMAT, state):
+    return True, fixupState(state, fsAugment)
+
+def bitConstTrue(PALMAT, state):
+    return True, fixupState(state, fsAugment)
+
+def bitConstFalse(PALMAT, state):
     return True, fixupState(state, fsAugment)
 
 #-----------------------------------------------------------------------------

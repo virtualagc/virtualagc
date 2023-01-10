@@ -339,26 +339,28 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                       "endLabel": endLabel, 
                       "used": False})
 
-    # The use of a "state machine" object in the state will hopefully be
-    # a more-systematic framework for code-generation than the relatively
-    # inconsistent melange of methods that preceded it.  Right now, though,
-    # it's in early stages and some state machines may run in parallel with
-    # the older method for comparison purposes.  The state-machine function 
-    # associated with the specific type of lbnfLabel is called both upon 
-    # beginning the processing of the component (with an argument of 0),
-    # for strings (with an argument of 1) and
-    # upon finishing it (with an argument of 2).  The state-machine function
-    # itself is what removes the stateMachine object from state, when that
-    # is appropriate.
+    '''
+    The use of a "state machine" object in the state will hopefully be
+    a more-systematic framework for code-generation than the relatively
+    inconsistent melange of methods that preceded it.  Right now, though,
+    it's in early stages and some state machines may run in parallel with
+    the older method for comparison purposes.  The state-machine function 
+    associated with the specific type of lbnfLabel is called both upon 
+    beginning the processing of the component (with an argument of 0),
+    for strings (with an argument of 1) and upon finishing it (with an 
+    argument of 2).  The state-machine function itself is what removes 
+    the stateMachine object from state, when that is appropriate.
+    '''
+    stateMachine = None
+    if "stateMachine" not in state and\
+            lbnfLabel in ["expression", "ifClauseBitExp", "relational_exp", 
+                         "bitExpFactor", "write_arg", "read_arg", "char_spec"]:
+        state["stateMachine"] = { "function": expressionSM, "owner": lbnfLabel }
+        if "lbnfLabel" in ["char_spec"]:
+            state["stateMachine"]["compiledExpression"] = []
     if "stateMachine" in state:
-        state["stateMachine"]["function"](0, lbnfLabel, PALMAT, state, trace)
-    else:
-        # May want to start a state machine for certain component types.
-        if lbnfLabel == "expression":
-            stateMachine = { "function": expressionSM }
-            state["stateMachine"] = stateMachine
-        if "stateMachine" in state:
-            state["stateMachine"]["function"](0, lbnfLabel, PALMAT, state, trace)
+        stateMachine = state["stateMachine"]
+        stateMachine["function"](0, lbnfLabel, PALMAT, state, trace)
              
     # Is this a DO ... END block?  If it is, then we have to do several things:
     # create a new child scope and make it current, and add a goto PALMAT 
@@ -376,20 +378,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         state["scopeIndex"], currentScope = makeDoEnd(PALMAT, currentScope, dummyTargets)
     
     # Main generation of PALMAT for the statement, sans setup and cleanup.
-    # HAL/S built-in functions
-    if lbnfLabel in ["abs", "ceiling", "div", "floor", "midval", "mod",
-                     "odd", "remainder", "round", "sign", "signum", "truncate",
-                     "arccos", "arccosh", "arcsin", "arcsinh", "arctan2", 
-                     "arctan", "arctanh", "cos", "cosh", "exp", "log", "sin",
-                     "sinh", "sqrt", "tan", "tanh", "abval", "det", "inverse",
-                     "trace", "transpose", "unit",
-                     "max", "min", "prod", "sum",
-                     "xor", "index", "length", "ljust", "rjust", "trim",
-                     "clocktime", "date", "errgrp", "errnum", "nextime", "prio", "random",
-                     "randomg", "runtime", "shl", "shr", "size"]:
-        p_Functions.halBuiltIn(lbnfLabel)
-    
-    elif lbnfLabel in p_Functions.objects:
+    if lbnfLabel in p_Functions.objects:
         if trace:
             print("TRACE:", lbnfLabel)
             print("      ", state)
@@ -402,6 +391,8 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             # a clone of it.
             newState["stateMachine"] = state["stateMachine"]
         if trace:
+            if "stateMachine" in state:
+                print("      ", state["stateMachine"])
             print("      ", p_Functions.substate)
         if not success:
             endLabels.pop()
@@ -419,6 +410,8 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                     state["stateMachine"]["function"](1, component, PALMAT, newState, trace)
                 success = p_Functions.stringLiteral(PALMAT, newState, component)
                 if trace:
+                    if "stateMachine" in state:
+                        print("      ", state["stateMachine"])
                     print("      ", p_Functions.substate)
             else:
                 success, PALMAT = generatePALMAT( \
@@ -443,6 +436,10 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     # require post-processing here.  The keys are lbnfLabels for the 
     # component; the value modifies that by giving a list of relevant 
     # ancestor (though not necessarily immediate-parent) components.
+    
+    if "stateMachine" in state:
+        state["stateMachine"]["function"](2, lbnfLabel, PALMAT, state, trace)
+
     lbnfLabelPatterns = {
             "relational_exp": ["ifThenElseStatement", "ifStatement"], 
             "ifClauseBitExp": ["ifThenElseStatement", "ifStatement"], 
@@ -523,36 +520,28 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         identifiers = currentScope["identifiers"]
         instructions = currentScope["instructions"]
         currentIdentifier = p_Functions.substate["currentIdentifier"]
-        instructions.clear()
-        expression = p_Functions.substate["expression"]
-        for entry in reversed(expression):
-            if "fetch" in entry:
-                identifier = "^" + entry["fetch"] + "^"
-                attributes = findIdentifier(identifier, PALMAT, state["scopeIndex"])
-                if attributes != None:
-                    if "constant" not in attributes:
-                        print("Can only use constants in computing INITIAL or CONSTANT.")
-                        identifiers.pop(currentIdentifier)
-                        endLabels.pop()
-                        return False, PALMAT
-                    break
-            instructions.append(entry)
-        expression.clear()
-        computationStack = executePALMAT(PALMAT)
-        instructions.clear()
-        #print("*A", instructions)
-        #print("*B", computationStack)
-        if computationStack == None or len(computationStack) != 1:
+        # Note that the expression state machine should have left
+        # a single value on the instruction queue if the expression
+        # was computable at compile time.
+        if len(instructions) != 1:
             print("Computation of INITIAL or CONSTANT failed:")
-            if len(computationStack) == 0:
-                print("       (empty)")
-            else:
-                for entry in computationStack:
-                    print("       ", entry)
-            identifiers.pop(currentIdentifier)
+            if currentIdentifier in identifiers:
+                identifiers.pop(currentIdentifier)
             endLabels.pop()
             return False, PALMAT
-        value = computationStack.pop()
+        value = instructions.pop()
+        if "number" in value:
+            try:
+                value = float(value["number"]);
+            except:
+                print("In INITIAL or CONSTANT, couldn't convert to SCALAR:", \
+                      value)
+                return False, PALMAT
+        elif "boolean" in value:
+            value = value["boolean"]
+        elif "string" in value:
+            value = value["string"]
+        
         if currentIdentifier != "":
             identifierDict = identifiers[currentIdentifier]
         else:
@@ -584,13 +573,35 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         elif isinstance(value, str) and "character" in identifierDict:
             pass
         else:
-            print("Datatype mismatch in INITIAL or CONSTANT.")
+            print("Datatype mismatch in INITIAL or CONSTANT:", value, currentIdentifier)
             identifiers.pop(currentIdentifier)
             endLabels.pop()
             return False, PALMAT
         identifierDict[key] = value
         if key == "initial":
             identifierDict["value"] = value
+    elif lbnfLabel == "char_spec":
+        # For DECLARE C CHARACTER(...);
+        identifiers = currentScope["identifiers"]
+        instructions = currentScope["instructions"]
+        currentIdentifier = p_Functions.substate["currentIdentifier"]
+        # Note that the expression state machine should have left
+        # a single number on the instruction queue if the expression
+        # was computable at compile time.
+        try:
+            value = instructions.pop()
+            maxLen = round(float(value["number"]));
+            if currentIdentifier != "":
+                identifierDict = identifiers[currentIdentifier]
+            else:
+                identifierDict = p_Functions.substate["commonAttributes"]
+            identifierDict["character"] = maxLen
+        except:
+            print("Computation of INITIAL or CONSTANT failed:")
+            print(instructions)
+            identifiers.pop(currentIdentifier)
+            endLabels.pop()
+            return False, PALMAT
     
     #----------------------------------------------------------------------
     # Decide if we need to stick an automatically-generated label at the
@@ -615,7 +626,4 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         exitDo(PALMAT, currentScope)
         state["scopeIndex"] = preservedScopeIndex
 
-    if "stateMachine" in state:
-        state["stateMachine"]["function"](2, lbnfLabel, PALMAT, state, trace)
-    
     return True, PALMAT
