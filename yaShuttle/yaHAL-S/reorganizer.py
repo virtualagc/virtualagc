@@ -229,7 +229,7 @@ def reorganizer(halsSource, metadata):
                            comment = ""
                            danglingComment = False 
                     else:
-                        status = inCommment
+                        status = inComment
                         comment += "*" + c
                 elif status == inDollar:
                     if c == " ":
