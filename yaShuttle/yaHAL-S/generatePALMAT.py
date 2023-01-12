@@ -189,7 +189,8 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                     print("       state (before) =", newState)
                     print("       substate =", p_Functions.substate)
                 if "stateMachine" in newState:
-                    state["stateMachine"]["function"](1, component, PALMAT, newState, trace)
+                    state["stateMachine"]["function"](1, component, PALMAT, \
+                                                      newState, trace)
                 success = p_Functions.stringLiteral(PALMAT, newState, component)
                 if "stateMachine" in state and "stateMachine" not in newState:
                     state.pop("stateMachine")
@@ -207,7 +208,8 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                 endLabels.pop()
                 return False, PALMAT
         else:
-            success, PALMAT = generatePALMAT(component, PALMAT, newState, trace, endLabels)
+            success, PALMAT = generatePALMAT(component, PALMAT, \
+                                             newState, trace, endLabels)
             if "stateMachine" in state and "stateMachine" not in newState:
                 state.pop("stateMachine")
             if not success:
@@ -282,21 +284,24 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     # The lbnfLabel of the relevant component must not be the same as any key 
     # in lbnfLabelPatterns.
     elif lbnfLabel == "true_part":
-        p_Functions.expressionToInstructions(p_Functions.substate["expression"], currentScope["instructions"])
+        p_Functions.expressionToInstructions( \
+            p_Functions.substate["expression"], currentScope["instructions"])
         endLabels[-2]["used"] = True
         jumpToTarget(currentScope, "ux", "goto")
         if createTarget(currentScope, "uf") == None:
             return False, PALMAT
     elif lbnfLabel == "assignment":
         instructions = currentScope["instructions"]
-        p_Functions.expressionToInstructions(p_Functions.substate["expression"], instructions)
+        p_Functions.expressionToInstructions( \
+            p_Functions.substate["expression"], instructions)
         instructions.append({ "store": p_Functions.substate["lhs"][-1] })
         p_Functions.substate["lhs"].pop()
         if len(p_Functions.substate["lhs"]) == 0:
             instructions.append({ "pop": 1 })
     elif lbnfLabel == "basicStatementWritePhrase":
         instructions = currentScope["instructions"]
-        p_Functions.expressionToInstructions(p_Functions.substate["expression"], instructions)
+        p_Functions.expressionToInstructions( \
+            p_Functions.substate["expression"], instructions)
         instructions.append({ "write": p_Functions.substate["LUN"] })
     elif lbnfLabel == "declare_statement":
         identifiers = currentScope["identifiers"]
@@ -360,7 +365,8 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         key = None
         if "initial" in identifierDict and identifierDict["initial"] == "^?^":
             key = "initial"
-        elif "constant" in identifierDict and identifierDict["constant"] == "^?^":
+        elif "constant" in identifierDict and \
+                identifierDict["constant"] == "^?^":
             key = "constant"
         else:
             print("Discrepancy between INITIAL and CONSTANT.")
@@ -376,7 +382,8 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         elif isinstance(value, str) and "character" in identifierDict:
             pass
         else:
-            print("Datatype mismatch in INITIAL or CONSTANT:", value, currentIdentifier)
+            print("Datatype mismatch in INITIAL or CONSTANT:", value, \
+                  currentIdentifier)
             identifiers.pop(currentIdentifier)
             endLabels.pop()
             return False, PALMAT

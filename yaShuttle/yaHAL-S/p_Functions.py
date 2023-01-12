@@ -80,7 +80,8 @@ def updateCurrentIdentifierAttribute(PALMAT, state, attribute=None, value=True):
     identifiers = scope["identifiers"]
     if substate["currentIdentifier"] not in identifiers:
         identifiers[substate["currentIdentifier"]] = { }
-        identifiers[substate["currentIdentifier"]].update(substate["commonAttributes"])
+        identifiers[substate["currentIdentifier"]] \
+                            .update(substate["commonAttributes"])
     if attribute != None:
         identifiers[substate["currentIdentifier"]][attribute] = value
 
@@ -190,11 +191,13 @@ def stringLiteral(PALMAT, state, s):
             identifierDict["matrix"].append(isp)
         elif "array" in identifierDict:
             identifierDict["array"].append(isp)
-    elif state2 == ["assignment", "variable"] or history[-3:-1] == ["assignment", "variable"]:
+    elif state2 == ["assignment", "variable"] or \
+            history[-3:-1] == ["assignment", "variable"]:
         # Identifier on LHS of an assignment.
         identDict = findIdentifier(PALMAT["scopes"], s, scope)
         if identDict == None: 
-            substate["errors"].append("LHS identifier " + sp + " of assignment undeclared.")
+            substate["errors"].append("LHS identifier " + sp + \
+                                      " of assignment undeclared.")
         substate["lhs"].append(sp)
     return True
 

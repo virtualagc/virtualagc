@@ -128,7 +128,8 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace):
             expression.append({ "function": lbnfLabel.upper()})
         if lbnfLabel in ["identifier", "char_id", "bit_id"]:
             internalState = "waitIdentifier"
-        elif lbnfLabel in ["level", "number", "compound_number", "simple_number"]:
+        elif lbnfLabel in ["level", "number", "compound_number", 
+                           "simple_number"]:
             internalState = "waitNumber"
         elif lbnfLabel == "char_string":
             internalState = "waitCharString"
