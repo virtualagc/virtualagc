@@ -158,6 +158,8 @@ def stringLiteral(PALMAT, state, s):
             return False, state
         '''
         identifiers[s] = { "label" : [scopeIndex, len(instructions)] }
+    elif state1 in ["basicStatementExit", "basicStatementRepeat"]:
+        substate["labelExitRepeat"] = s
     elif state1 == "basicStatementGoTo":
         instructions.append({'goto': s})
     elif state1 == "number" and "write_key" in history:
@@ -553,6 +555,12 @@ def bitConstTrue(PALMAT, state):
     return True, fixupState(state, fsAugment)
 
 def bitConstFalse(PALMAT, state):
+    return True, fixupState(state, fsAugment)
+
+def basicStatementExit(PALMAT, state):
+    return True, fixupState(state, fsAugment)
+
+def basicStatementRepeat(PALMAT, state):
     return True, fixupState(state, fsAugment)
 
 #-----------------------------------------------------------------------------

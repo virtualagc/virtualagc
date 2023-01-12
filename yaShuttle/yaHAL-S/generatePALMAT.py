@@ -419,18 +419,23 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             return False, PALMAT
     elif lbnfLabel in ["basicStatementExit", "basicStatementRepeat"]:
         loopScope = findEnclosingLoop(PALMAT, currentScope)
-        if loopScope == None:
-            print("No enclosing loop found for EXIT.")
-            endLabels.pop()
-            return False, PALMAT
-        elif lbnfLabel == "basicStatementExit":
-            xx = "ux"
-        elif loopScope['type'] == "do for":
-            xx = "up"
+        if 'labelExitRepeat' in p_Functions.substate:
+            currentScope["instructions"].append({
+                'goto': p_Functions.substate['labelExitRepeat']})
+            p_Functions.substate.pop('labelExitRepeat')
         else:
-            xx = "ue"
-        jumpToTarget(PALMAT, currentScope["self"], \
-            loopScope["self"], xx, "goto")
+            if loopScope == None:
+                print("No enclosing loop found for EXIT.")
+                endLabels.pop()
+                return False, PALMAT
+            elif lbnfLabel == "basicStatementExit":
+                xx = "ux"
+            elif loopScope['type'] == "do for":
+                xx = "up"
+            else:
+                xx = "ue"
+            jumpToTarget(PALMAT, currentScope["self"], \
+                loopScope["self"], xx, "goto")
 
     #----------------------------------------------------------------------
     # Decide if we need to stick an automatically-generated label at the
