@@ -10,7 +10,7 @@ Purpose:        Part of the code-generation system for the "modern" HAL/S
 History:        2023-01-10 RSB  Adapted from expressionSM.py
 """
 
-from palmatAux import createTarget, jumpToTarget, createUniqueIdentifier, debug
+from palmatAux import createTarget, jumpToTarget, createVariable, debug
 import p_Functions
 
 '''
@@ -50,7 +50,8 @@ def doForSM(stage, lbnfLabel, PALMAT, state, trace):
             instructions[1].pop('label')
             currentScope["identifiers"][label]["label"][1] = offset
         else:
-            createTarget(currentScope, "up")
+            createTarget(PALMAT, currentScope["self"], \
+                         currentScope["self"], "up")
         # Update the loop variable.
         '''
         instructions.append({'fetch': stateMachine['forKey']})
@@ -67,7 +68,8 @@ def doForSM(stage, lbnfLabel, PALMAT, state, trace):
         instructions.append({'fetch': stateMachine['forBY']})
         instructions.append({'+><': stateMachine['forKey']})
 
-        jumpToTarget(currentScope, "ux", 'iftrue')
+        jumpToTarget(PALMAT, currentScope["self"], currentScope["self"], 
+                     "ux", 'iftrue')
         #debug(PALMAT, state, "Pauses: %s" % str(stateMachine['pauses']))
         state.pop("stateMachine")
     
@@ -78,13 +80,13 @@ def doForSM(stage, lbnfLabel, PALMAT, state, trace):
     
     if lbnfLabel == "iteration_controlToBy":
         stateMachine["hasBY"] = True
-        debug(PALMAT, state, "hasBY")
+        #debug(PALMAT, state, "hasBY")
     elif lbnfLabel == "doGroupHeadForWhile":
         stateMachine["hasWHILE"] = True
-        debug(PALMAT, state, "hasWHILE")
+        #debug(PALMAT, state, "hasWHILE")
     elif lbnfLabel == "doGroupHeadForUntil":
         stateMachine["hasUNTIL"] = True
-        debug(PALMAT, state, "hasUNTIL")
+        #debug(PALMAT, state, "hasUNTIL")
     
     try:
         forKey = stateMachine["forKey"]
@@ -106,7 +108,7 @@ def doForSM(stage, lbnfLabel, PALMAT, state, trace):
         
         if internalState == "waitForKey":
             stateMachine["forKey"] = sp
-            debug(PALMAT, state, "Loop index is " + sp)
+            #debug(PALMAT, state, "Loop index is " + sp)
             internalState = "waitForStartExpression"
             
     elif stage == 2:
@@ -142,27 +144,27 @@ def doForSM(stage, lbnfLabel, PALMAT, state, trace):
                     '''
                     finalExpression = instructions[pauses[1]:]
                     del instructions[pauses[1]:]
-                    id1 = createUniqueIdentifier(currentScope, "ud", {
+                    id1 = createVariable(currentScope, "ud", {
                         "scalar": True,
                         "double": True 
                         })
                     instructions.append({"store": id1})
                     instructions.append({"pop": 1})
                     instructions.extend(finalExpression)
-                    id2 = createUniqueIdentifier(currentScope, "ud", {
+                    id2 = createVariable(currentScope, "ud", {
                         "scalar": True,
                         "double": True 
                         })
                     instructions.append({"store": id2})
                 else: 
                     # This is the FOR TO (no BY) case.
-                    id1 = createUniqueIdentifier(currentScope, "ud", {
+                    id1 = createVariable(currentScope, "ud", {
                         "scalar": True,
                         "double": True 
                         })
                     instructions.append({"store": id1})
                     instructions.append({"pop": 1})
-                    id2 = createUniqueIdentifier(currentScope, "ud", {
+                    id2 = createVariable(currentScope, "ud", {
                         "integer": True, "constant": 1
                         })
                     instructions.append({"fetch": id2 })
@@ -171,10 +173,10 @@ def doForSM(stage, lbnfLabel, PALMAT, state, trace):
                 instructions.append({"store": stateMachine["forKey"]})
                 instructions.append({"pop": 1})
                 stateMachine["forEnd"] = id1
-                debug(PALMAT, state, "Ending key stored at " + id1)
+                #debug(PALMAT, state, "Ending key stored at " + id1)
                 stateMachine["forBY"] = id2
-                debug(PALMAT, state, "Key increment stored as constant at "\
-                                         + id2)
+                #debug(PALMAT, state, "Key increment stored as constant at "\
+                #                         + id2)
                 closeout()
     elif stage == 0:
         if internalState == "start":

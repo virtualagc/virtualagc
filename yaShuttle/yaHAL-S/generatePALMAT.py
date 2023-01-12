@@ -81,9 +81,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     # never need to jump to the end of the statement, but an IF ... THEN ...
     # statement may need to if the conditional is false.
     expressionFlush = []
-    endLabel = "^ue_%d^" % getUniqueCount()
     endLabels.append({"lbnfLabel": lbnfLabel, 
-                      "endLabel": endLabel, 
                       "used": False,
                       "expressionFlush": expressionFlush})
 
@@ -94,18 +92,13 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     # they cause me lots of trouble (with nesting them) otherwise.
     isDo = lbnfLabel in ["basicStatementDo", "otherStatementIf"]
     if isDo:
-        dummyTargets = []
         scopeType = "unknown"
         if lbnfLabel == "basicStatementDo":
-            # Alas, the "up" target is needed only for DO FOR and DO UNTIL,
-            # but we don't know yet which flavor of DO we have, so we have to 
-            # make do with what we know.  (Yes, the pun was intended.)
-            dummyTargets = ["up"]
             scopeType = "do"
         elif lbnfLabel == "otherStatementIf":
             scopeType = "if"
         state["scopeIndex"], currentScope = \
-            makeDoEnd(PALMAT, currentScope, dummyTargets, scopeType)
+            makeDoEnd(PALMAT, currentScope, scopeType)
     
     '''
     The use of a "state machine" object in the state will hopefully be
@@ -141,12 +134,12 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         parentStateMachine = state["stateMachine"]
         parentStateMachine["pauses"].append(len(currentScope["instructions"]))
         state.pop("stateMachine")
-        debug(PALMAT, state, "Pausing SM %s, %s" % \
-              (parentStateMachine["owner"], 
-               parentStateMachine["internalState"]))
+        #debug(PALMAT, state, "Pausing SM %s, %s" % \
+        #      (parentStateMachine["owner"], 
+        #       parentStateMachine["internalState"]))
     if "stateMachine" not in state:
         if lbnfLabel in expressionComponents:
-            debug(PALMAT, state, "Starting SM %s" % lbnfLabel)
+            #debug(PALMAT, state, "Starting SM %s" % lbnfLabel)
             state["stateMachine"] = {"function": expressionSM, 
                                      "owner": lbnfLabel,
                                      "pauses": [] }
@@ -247,11 +240,11 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         stateMachine = state["stateMachine"]
         state["stateMachine"]["function"](2, lbnfLabel, PALMAT, state, trace)
         if "stateMachine" not in state:
-            debug(PALMAT, state, "Ending SM %s" % lbnfLabel)
+            #debug(PALMAT, state, "Ending SM %s" % lbnfLabel)
             if parentStateMachine != None:
-                debug(PALMAT, state, "Restoring SM %s, %s" % \
-                      (parentStateMachine["owner"], 
-                       parentStateMachine["internalState"]))
+                #debug(PALMAT, state, "Restoring SM %s, %s" % \
+                #      (parentStateMachine["owner"], 
+                #       parentStateMachine["internalState"]))
                 parentStateMachine["completed"] = lbnfLabel
                 state["stateMachine"] = parentStateMachine
 
@@ -260,6 +253,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             "ifClauseBitExp": ["ifThenElseStatement", "ifStatement"], 
             "while_clause": ["basicStatementDo"]
         }
+    currentIndex = currentScope["self"]
     if lbnfLabel in lbnfLabelPatterns:
         ancestorLabels = lbnfLabelPatterns[lbnfLabel]
         for ancestor in ancestorLabels:
@@ -273,9 +267,11 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                     isUntil = "isUntil" in p_Functions.substate
                     entry["used"] = True
                     if ancestor == "ifThenElseStatement":
-                        jumpToTarget(currentScope, "uf", "iffalse")
+                        jumpToTarget(PALMAT, currentIndex, currentIndex, \
+                                     "uf", "iffalse")
                     elif not isUntil:
-                        jumpToTarget(currentScope, "ux", "iffalse")
+                        jumpToTarget(PALMAT, currentIndex, currentIndex, \
+                                     "ux", "iffalse")
                     if lbnfLabel == "while_clause":
                         for e in reversed(endLabels):
                             if e["lbnfLabel"] == "basicStatementDo":
@@ -421,42 +417,20 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             identifiers.pop(currentIdentifier)
             endLabels.pop()
             return False, PALMAT
-    elif lbnfLabel == "basicStatementExit":
-        # This is tough because EXIT (without a label) is supposed to exit
-        # the current block, but internally we've treated IF statements as if
-        # they're blocks, and exiting the current IF (which is normally where
-        # and EXIT statement would be) is not what we want.  We have to search
-        # upward through the scope hierarchy until we find an actual DO block,
-        # but apparently not PROGRAM/FUNCTION/PROCEDURE, and then exit from it.
+    elif lbnfLabel in ["basicStatementExit", "basicStatementRepeat"]:
         loopScope = findEnclosingLoop(PALMAT, currentScope)
         if loopScope == None:
             print("No enclosing loop found for EXIT.")
             endLabels.pop()
             return False, PALMAT
-        uxId = findIdentifierWithPrefix(loopScope, "ux")
-        if uxId == None:
-            print("Cannot find EXIT target in enclosing loop.")
-            endLabels.pop()
-            return False, PALMAT
-        instructions = currentScope["instructions"]
-        instructions.append({"goto": uxId})
-    elif lbnfLabel == "basicStatementRepeat":
-        # The REPEAT statement is even trickier than the EXIT statement, 
-        # it has to find DO blocks that are actual loops:  i.e., just DO WHILE, 
-        # DO UNTIL, or DO FOR; not just a simple DO ... END, and certainly not
-        # an IF.
-        loopScope = findEnclosingLoop(PALMAT, currentScope)
-        if loopScope == None:
-            print("No enclosing loop found for REPEAT.")
-            endLabels.pop()
-            return False, PALMAT
-        upId = findIdentifierWithPrefix(loopScope, "up")
-        if upId == None:
-            print("Cannot find REPEAT target in enclosing loop.")
-            endLabels.pop()
-            return False, PALMAT
-        instructions = currentScope["instructions"]
-        instructions.append({"goto": upId})
+        elif lbnfLabel == "basicStatementExit":
+            xx = "ux"
+        elif loopScope['type'] == "do for":
+            xx = "up"
+        else:
+            xx = "ue"
+        jumpToTarget(PALMAT, currentScope["self"], \
+            loopScope["self"], xx, "goto")
 
     #----------------------------------------------------------------------
     # Decide if we need to stick an automatically-generated label at the
@@ -470,14 +444,17 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             # This is a buffered set of PALMAT instructions for a an UNTIL
             # conditional expression
             instructions.extend(expressionFlush)
-            jumpToTarget(currentScope, "ux", "iftrue")
-        jumpToTarget(currentScope, "up", "goto")
+            jumpToTarget(PALMAT, currentIndex, currentIndex, "ux", "iftrue")
+        if currentScope["type"] == "do for":
+            jumpToTarget(PALMAT, currentIndex, currentIndex, "up", "goto")
+        else:
+            jumpToTarget(PALMAT, currentIndex, currentIndex, "ue", "goto")
     if endLabels[-1]["used"]:
         if lbnfLabel == "true_part":
-            if createTarget(currentScope, "ub") == None:
+            if createTarget(PALMAT, currentIndex, currentIndex, "ub") == None:
                 return False, PALMAT
         else:
-            if createTarget(currentScope, "ux") == None:
+            if createTarget(PALMAT, currentIndex, currentIndex, "ux") == None:
                 return False, PALMAT
     endLabels.pop()
     
@@ -485,7 +462,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     # goto instruction at the end of the block back to the original 
     # position in the parent scope.
     if isDo:
-        exitDo(PALMAT, currentScope)
+        exitDo(PALMAT, currentScope["self"], preservedScopeIndex)
         state["scopeIndex"] = preservedScopeIndex
         
     return True, PALMAT

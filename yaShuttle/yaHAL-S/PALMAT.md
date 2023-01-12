@@ -74,17 +74,28 @@ Here is the essential layout of a PALMAT dictionary:
 
 ## The Scopes
 
-The "scopes" array is the memory model, incompassing all identifiers used by the code, such as variables and user-defined function names, as well as the code itself. Each individual scope in the array is the memory model for a specific HAL/S block (such as PROGRAM, FUNCTION, PROCEDURE, ...).  The compiler assigns these blocks unique sequence numbers, starting from 0, as it encounters them, and then appends the scope for that block to `PALMAT["scopes"]`.  `PALMAT["scopes"][0]` is the top-level scope.
+The "scopes" array is the memory model, incompassing all identifiers used by the code, such as variables and user-defined function names, as well as the code itself. Each individual scope in the array is the memory model for a specific HAL/S block.  Those include:  
+
+* Top-level blocks (i.e., those which end with a `CLOSE` statement), such as `PROGRAM`, `FUNCTION`, `PROCEDURE`, ....
+* `DO ... END` blocks, including not only simple blocks of statements, but also `DO WHILE`, `DO UNTIL`, and `DO FOR` blocks.
+* `IF THEN` and `IF THEN ELSE` statements.
+
+The compiler assigns these scopes unique sequence numbers, starting from 0, as it encounters them, and then appends the scope for that block to `PALMAT["scopes"]`.  `PALMAT["scopes"][0]` is the top-level scope.
 
 Each individual scope is itself a dictionary, and provides links to both the scope of its parent block and to any immediate child blocks.  The code within any HAL/S block has access to the objects declared within its own scope, including temporaries, as well as the objects of the parent, grandparent, and so on, but not the child blocks.
 
     anyIndividualScope = {
+        "type": "...",              # A string describing the "type" of scope.
         "parent" : ...,             # The integer index of the parent scope within PALMAT["scopes"], or else None if top level.
         "self" : ...,               # The integer index of this scope within PALMAT["scopes"].
         "children" : [ ... ],       # List of integer indices of immediate child scopes within PALMAT["scopes"]
         "identifiers" : { ... },    # The identifiers declared in the current block, keyed by their names.
         "instructions" : [ ... ]    # The PALMAT instructions for the block.
     }
+
+The `type` can be things like "root", "unknown", "if", or "do", but the significant types are really "do while", "do until", and "do for".  That's because the *raison d'être* of the `type` key is enabling searches starting from a given scope upward in the scope hierarchy to determine if the scope is contained within a loop.  Thus, a search is made upward, by means of the `parent` keys, until a "do while", "do until", or "do for" is reached.  That *that's* important for code-generation of HAL/S statements like `EXIT` and `REPEAT` that break out of blocks.
+
+Other keys may be present as well for various *ad hoc* purposes, but these are the common ones.
 
 Note that the entire `PALMAT` object, including `PALMAT["scopes"]`, is formed at compile time.  The logical memory model is not dynamic.  Its structure does not change at runtime.  Only *values* stored in variables (in the "identifiers" dictionary) change at runtime, but the structure of the model is unalterable.
 
@@ -184,6 +195,32 @@ the initialization is performed only the first time that position in the code is
 Thus the emulator would have to perform a little more work upon entry to such a block than just setting `scope` properly.
 
 **Note:** Regarding the so-called `TEMPORARY` variables:  Although the documentation fusses over them as if they were something special, to the point of making it seem tricky to implement them, in fact at execution time `TEMPORARY` is just a drop-in replacement for `DECLARE`.  The distinction is entirely syntactical, in that you can only use `DECLARE` in blocks that end with `CLOSE`, whereas you can only use `TEMPORARY` in blocks that end with `END`.  (Well, and there's an extra way to declare temporary integer variables with `FOR TEMPORARY I=... END` vs `FOR I=... END`.)  However, given our underlying model of scopes, there's actually no distinction at all between temporary and non-temporary variables at runtime.  A `TEMPORARY` variable is merely a variable whose scope happens to be a `DO ... END` block rather than (say) a `PROGRAM` or `FUNCTION` block.
+
+## Automated Labels Within Scopes
+
+For maneuvering within and between scopes, certain types of symbolic labels for certain roles within the scopes are very-commonly needed, and it is necessary for the code-generator to be able to create them systematically on the fly in order to effectively use the scopes.  The techique for doing so is to create labels is usually according to the following pattern,
+
+    xx_N
+
+where `xx` is a prefix that defines the role in a way which is in common among all the scopes, and `N` is the scope index.  There are, however, a couple of exceptions in which the pattern is instead
+
+    xx_N_M
+
+where `N` and `M` are two different scope indices.
+
+This is all transparent to the HAL/S coder, of course, since these labels appear only in PALMAT and not in HAL/S source code.
+
+All of the `xx` prefixes are lower-case alphabetic, which make the generated labels unlikely to be coincide with labels in actual HAL/S flight software ... but not *impossible*.  I may later change the pattern to something for which collisions are actually impossible to being syntactically impossible in HAL/S, such as `N_xx`; but that would have the disadvantage (for debugging purposes) of not being able  explicitly use these labels in the HAL/S interactive interpreter, so I'll leave them this way for now.  Later that may be changed.
+
+The patterns currently in use are:
+
+* `ue_N`.  This is the entry point (i.e., the very first PALMAT instruction) of scope `N`, at which the code generator typically places a `NOOP` instruction (see the PALMAT instructions as defined below) with this label.  The identifier, however, is defined in the namespace of the parent scope rather than in scope `N` itself.
+* `ur_N`.  This is the label (in namespace of the parent scope) of the automatic return to the parent when the end of scope `N` is reached.
+* `ux_N`.  This is the label (in the namespace of scope `N`) of the end of the scope, at which the code-generator typically places a `NOOP` PALMAT instruction with this label.  In looking at this, it seems to me that I could always just leave out this label and this `NOOP` instruction, and instead just jump directly to `ur_N` (see the `ur_N` entry above); well, I'll leave that for the future.
+* `up_N`.  In a loop (`DO WHILE`, `DO UNTIL`, `DO FOR`) this is the label near the top of the block to which the block jumps to start the next iteration, after having reached the end of the block.
+* `uf_N`.  In an `IF THEN ELSE`, this is the label of the `ELSE`, to which we jump when `IF`'s conditional is false.
+
+These labels will not all necessarily be present in the identifier list, since they won't all necessarily be used in any given scope.
 
 ## PALMAT Instructions
 

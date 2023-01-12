@@ -11,7 +11,6 @@ History:        2023-01-10 RSB  Split off from PALMAT.py.
 """
 
 import json
-import re
 
 # Add a `debug` PALMAT instruction.
 def debug(PALMAT, state, message):
@@ -54,7 +53,7 @@ def constructScope(selfIndex=0, parentIndex=None, scopeType="root"):
                 "children"      : [ ],
                 "identifiers"   : { },
                 "instructions"  : [ ],
-                "incomplete"    : [ ],
+                #"incomplete"    : [ ],
                 "type"          : scopeType
             }
     return scope
@@ -72,14 +71,6 @@ def findEnclosingLoop(PALMAT, scope):
         if scope["type"] in ["do while", "do until", "do for"]:
             return scope
         scope = PALMAT["scopes"][scope["parent"]]
-    return None
-
-# Find an identifier in a scope that matches a pattern.
-def findIdentifierWithPrefix(scope, xx):
-    prog = re.compile("\\^" + xx + "_[0-9]+\\^")
-    for identifier in scope["identifiers"]:
-        if prog.fullmatch(identifier) != None:
-            return identifier
     return None
 
 # Add a memory scope to existing PALMAT.  Returns the index of the new scope.
@@ -150,97 +141,53 @@ These auxiliary functions are used to create child (DO ... END) blocks and
 to provide the various label identifiers for PALMAT instructions like 'goto',
 'iffalse', and 'iftrue' that are used to jump in, out, and within these
 blocks.  We use a kind of trick to help us with this
-
-For jumping *within* a given DO...END block (as opposed to entering or leaving
-the block) we use a kind of trick.  For each such jump there's a *target* 
-instruction (a 'noop') and one or more jumps to it (using 'goto', 'iftrue',
-or 'iffalse'), associated by a unique label in the scope's identifiers.
-These identifiers are all of the form xx_N, where xx is supposed to unique
-to the purpose, and N is a unique number chosen by the code-generator to 
-insure that the same xx can be used in different scopes without conflict.
-Functions are provided to insert the target instructions and the instructions
-that jump to them.  By convention xx is always lower-case alphabetic characters.
 '''
-uniqueCount = -1
-def getUniqueCount():
-    global uniqueCount
-    uniqueCount += 1
-    return uniqueCount
 
-def createUniqueIdentifier(currentScope, xx, identDict):
-    identifiers = currentScope["identifiers"]
-    s = "%s_%d" % (xx, getUniqueCount())
-    identifiers["^" + s + "^"] = identDict
-    return s
+def constructLabel(scopeIndex, xx):
+    return "%s_%d" % (xx, scopeIndex)
 
 # This function creates a label for an internal jump within a DO...END,
-# and inserts a noop instruction with that label. Returns the new label, 
-# or None on error.  The prefixes "ue", "ur", and "up" are already used
-# by makeDoEnd(), and so are not candidates for createTarget(), though
-# they can be used with jumpToTarget().
-jumpInstructions = ['goto', 'iffalse', 'iftrue']
-def createTarget(currentScope, xx):
-    identifiers = currentScope["identifiers"]
-    instructions = currentScope["instructions"]
-    prefix = "^" + xx + "_"
-    lenxx = len(prefix)
-    for identifier in identifiers:
-        if prefix == identifier[:lenxx]:
-            print("Implementation error, duplicate target anchors:", xx)
-            return None
-    label = "%s%d^" % (prefix, getUniqueCount())
-    identifiers[label] = {'label': [currentScope['self'], len(instructions)]}
-    instructions.append({'noop': True, 'label': label})
-    # Correct any jumps already added before the label was created.
-    poppable = []
-    incompletes = currentScope["incomplete"] # A list of instruction offsets.
-    for i in incompletes:
-        instruction = instructions[i]
-        for jumpInstruction in jumpInstructions:
-            if jumpInstruction in instruction:
-                if xx == instruction[jumpInstruction]:
-                    instruction[jumpInstruction] = label
-                    poppable.append(i)
-                    break
-    for popit in poppable:
-        incompletes.remove(popit)
-    #if len(incompletes) == 0:
-    #    currentScope.pop("incomplete")
-    return label
+# and inserts a noop instruction with that label. Returns the new label. 
+def createTarget(PALMAT, fromIndex, toIndex, xx, nameFromFrom=False):
+    scopes = PALMAT["scopes"]
+    namespaceIndex = min(fromIndex, toIndex)
+    fromScope = scopes[fromIndex]
+    toScope = scopes[toIndex]
+    namespaceScope = scopes[namespaceIndex]
+    if nameFromFrom:
+        identifier = "^" + constructLabel(fromIndex, xx) + "^"
+    else:
+        identifier = "^" + constructLabel(toIndex, xx) + "^"
+    instructions = toScope["instructions"]
+    toOffset = len(instructions)
+    instructions.append({'noop': True, 'label': identifier})
+    identifiers = namespaceScope['identifiers']
+    identifiers[identifier] = {'label': [toIndex, toOffset] }
+    return identifier
 
 # This function inserts a PALMAT instruction that jumps to an target
-# created (previously or later on) by insertTarget().  The palmatOpcode 
-# is one of the jumpInstructions list defined earlier.  jumpToTarget() 
+# created (previously or later on) by createTarget().  The palmatOpcode 
+# is one of the jumpInstructions list.  jumpToTarget() 
 # can be used multiple times for the same label, and can either precede
-# or follow createTarget(). If preceding createTarget(),
-# however, the label it needs to find doesn't exist, so it uses a
-# placeholder label (xx) which is fixed up later by createTarget().
-# Note: Don't try using targetScope for now.
-def jumpToTarget(currentScope, xx, palmatOpcode, targetScope=None):
+# or follow createTarget(). 
+jumpInstructions = ['goto', 'iffalse', 'iftrue']
+def jumpToTarget(PALMAT, fromIndex, toIndex, xx, palmatOpcode, \
+                 nameFromFrom=False):
 
-    if targetScope == None:
-        targetScope = currentScope
+    instructions = PALMAT["scopes"][fromIndex]["instructions"]
+    if nameFromFrom:
+        label = constructLabel(fromIndex, xx)
+    else:
+        label = constructLabel(toIndex, xx)
+    instructions.append({palmatOpcode: "^" + label + "^"})
 
-    # This function finds a label for an internal jump within a DO...END
-    # previously created by createTargetLabel(). Returns the label or None.
-    # It can be taken outside of jumpToTarget() if necessary, but I didn't
-    # find that necessary.
-    def findTargetLabel(scope, xx):
-        identifiers = scope["identifiers"]
-        instructions = scope["instructions"]
-        prefix = "^" + xx + "_"
-        lenxx = len(prefix)
-        for identifier in identifiers:
-            if prefix == identifier[:lenxx]:
-                return identifier
-        return None
-    
-    instructions = currentScope["instructions"]
-    label = findTargetLabel(targetScope, xx)
-    if label == None:
-        currentScope["incomplete"].append(len(instructions))
-        label = xx
-    instructions.append({palmatOpcode: label})
+uniqueVariableCounter = 0
+def createVariable(scope, xx, attributes):
+    global uniqueVariableCounter
+    identifier = "%s_%d" % (xx, uniqueVariableCounter)
+    uniqueVariableCounter += 1
+    scope["identifiers"]["^" + identifier + "^"] = attributes
+    return identifier
 
 # This function is used by a parent scope to create a child scope that's
 # a DO ... END, and to goto it.  (Also for IF statements.)  The new child 
@@ -248,37 +195,19 @@ def jumpToTarget(currentScope, xx, palmatOpcode, targetScope=None):
 # so those do not need to be created separately by createTargetLabel().
 # The parameter dummyTargets is an optional array of additional 
 # targets to add after the initial ue_ target. 
-def makeDoEnd(PALMAT, currentScope, dummyTargets=[], scopeType="unknown"):
-    indexOfCurrentScope = currentScope["self"]
-    indexOfNewScope = addScope(PALMAT, indexOfCurrentScope, scopeType)
-    newScope = PALMAT["scopes"][indexOfNewScope]
-    entryLabel = "^ue_%d^" % getUniqueCount()
-    returnLabel = "^ur_%d^" % getUniqueCount()
-    currentIdentifiers = currentScope["identifiers"]
-    currentInstructions = currentScope["instructions"]
-    currentIdentifiers[entryLabel] = {"label": [indexOfNewScope, 0]}
-    currentInstructions.append({"goto": entryLabel})
-    currentIdentifiers[returnLabel] = {"label": [indexOfCurrentScope, 
-                                                 len(currentInstructions)]}
-    currentInstructions.append({"noop": True, "label": returnLabel})
-    newIdentifiers = newScope["identifiers"]
-    newInstructions = newScope["instructions"]
-    newInstructions.append({'noop': True, "label": entryLabel})
-    for xx in dummyTargets:
-        recycleLabel = "^%s_%d^" % (xx, getUniqueCount())
-        newIdentifiers[recycleLabel] = {'label': [indexOfNewScope, 1]}
-        newInstructions.append({'noop': True, "label": recycleLabel})
-    return indexOfNewScope, newScope
+def makeDoEnd(PALMAT, parentScope, scopeType="unknown"):
+    parentIndex = parentScope["self"]
+    childIndex = addScope(PALMAT, parentIndex, scopeType)
+    createTarget(PALMAT, parentIndex, childIndex, "ue")
+    jumpToTarget(PALMAT, parentIndex, childIndex, "ue", "goto")
+    createTarget(PALMAT, childIndex, parentIndex, "ur", True)
+    return childIndex, PALMAT["scopes"][childIndex]
 
 # This function is used to exit from a DO loop back to the parent context,
 # assuming it was all set up by makeDoEnd().
-def exitDo(PALMAT, currentScope):
-    parentScope = PALMAT["scopes"][currentScope["parent"]]
-    #print("*A", PALMAT["scopes"])
-    #print("*B", parentScope["instructions"])
-    targetInstruction = parentScope["instructions"][-1]
-    targetLabel = targetInstruction["label"]
-    currentScope["instructions"].append({'goto': targetLabel})
+def exitDo(PALMAT, fromIndex, toIndex):
+    #createTarget(PALMAT, fromIndex, fromIndex, "ux")
+    jumpToTarget(PALMAT, fromIndex, toIndex, "ur", "goto", True)
 
 #-----------------------------------------------------------------------------
 # The code generator (ast -> PALMAT).
