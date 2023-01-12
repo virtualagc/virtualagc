@@ -22,31 +22,95 @@ readlinePresent = True
 try:
     import gnureadline
     print("Note: Using 'gnureadline' module for line-editing facility.")
+    rlModule = gnureadline
 except ModuleNotFoundError:
     try:
         import readline
         print("Note: Using 'readline' module for line-editing facility.")
+        rlModule = readline
     except ModuleNotFoundError:
         try:
             import editline
             print("Note: Using 'editline' module for line-editing facility.")
+            rlModule = editline
         except ModuleNotFoundError:
             print("Only primitive line-editing facilities are available.")
+            rlModule = None
             readlinePresent = False
 if readlinePresent:
-    print("Note: Input-line prompts may temporarily disappear when using editing keys ↑, ↓, or BACKSPACE.")
+    print("Note: Input-line prompts may temporarily disappear when using " + \
+          "editing keys ↑, ↓, or BACKSPACE.")
 
 #-------------------------------------------------------------------------
 
+import atexit
 from processSource import processSource
 from palmatAux import constructPALMAT, writePALMAT, readPALMAT
 from p_Functions import removeIdentifier, removeAllIdentifiers, substate
 from executePALMAT import executePALMAT, setupExecutePALMAT
 
+# The following makes the buffer for user input persistent, or at least tries
+# to.  It works for me anyway.
+if rlModule != None:
+    historyFile = "yaHAL-S-FC.history"
+    try:
+        atexit.register(rlModule.write_history_file, historyFile)
+        rlModule.read_history_file(historyFile)
+        rlModule.set_history_length(1000)
+    except FileNotFoundError:
+        pass
+
 setupExecutePALMAT()
 
 maxRecent = 25
 
+helpMenu = \
+'''\tNote: Interpreter commands are case-insensitive, but
+\tHAL/S source code is case-sensitive.  The available
+\tinterpreter commands are listed below:
+\tHELP         Show this menu.
+\tQUIT         Quit this interpreter program.
+\tSPOOL        Begin spooling all HAL/S source lines for
+\t             later processing.  (The default is to
+\t             process lines one-by-one upon input, and
+\t             to spool only lines not ending in ';'.)
+\t             Note that all interpreter commands are
+\t             acted upon immediately rather than being
+\t             added to the spool.
+\tUNSPOOL      Immediately process all spooled lines.
+\tREVIEW       Redisplay spooled HAL/S source lines.
+\tCOLORIZE C   Enable colorizing (ANSI terminals only).
+\t             C is one of the following words: black,
+\t             red, green, yellow, blue, magenta, cyan,
+\t             white, gray, brightred, brightgreen,
+\t             brightyellow, brightblue, brightmagenta,
+\t             brightcyan, or brightwhite.
+\tNOCOLORIZE   Disable colorized output.
+\tWRITE F      Write current PALMAT to a file named F.
+\tREAD F       Read PALMAT from a file named F.
+\tDATA         Inspect identifiers in root scope.
+\tDATA *       Inspect identifiers in all scopes.
+\tPALMAT       Inspect PALMAT code in root scope.
+\tPALMAT *     Inspect PALMAT code in all scopes.
+\tEXECUTE      (Re)execute already-compiled PALMAT.
+\tSCOPES       Inspect scope hierarchy.
+\tREMOVE D     Remove identifier D.
+\tREMOVE *     Remove all identifiers.
+\tRESET        Reset all PALMAT.
+\tSTATUS       Show current settings and other info.
+\tWINE         Enable Windows compiler (Linux only).
+\tNOWINE       Disable Windows compiler (Linux only).
+\tTRACE1       Enable parser tracing.
+\tNOTRACE1     Disable parser tracing.
+\tTRACE2       Enable code-generator tracing.
+\tNOTRACE2     Disable code-generator tracing.
+\tTRACE3       Enable execution tracing.
+\tNOTRACE3     Disable execution tracing.
+\tLBNF         Show abstract syntax trees in LBNF.
+\tBNF          Show abstract syntax trees in BNF.
+\tNOAST        Don't show abstract syntax trees.
+\tEXEC         Execute the HAL/S code.
+\tNOEXEC       Don't execute the HAL/S code.'''
 
 def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     xeq=True, lbnf=False, bnf=False):
@@ -112,7 +176,8 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                 spooling = True
                 continue
             elif firstWord == "UNSPOOL":
-                print("\tHalting spooling of input. Processing already-spooled input ...")
+                print("\tHalting spooling of input. Processing " + \
+                      "already-spooled input ...")
                 spooling = False
                 line = ""
                 break;
@@ -184,7 +249,8 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                             print("\t%s:" % identifier[1:-1], \
                                     identifiers[identifier])
                 continue
-            elif firstWord == "PALMAT" and len(fields) == 2 and fields[1] == "*":
+            elif firstWord == "PALMAT" and \
+                    len(fields) == 2 and fields[1] == "*":
                 for i in range(len(PALMAT["scopes"])):
                     scope = PALMAT["scopes"][i]
                     print("Scope %d:" % i)
@@ -257,7 +323,8 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     continue
                 elif firstWord == "STATUS":
                     if colorize != "":
-                        print("\tCOLORIZE %-14s  (vs NOCOLORIZE)" % colorName.upper())
+                        print("\tCOLORIZE %-14s  (vs NOCOLORIZE)" \
+                              % colorName.upper())
                     else:
                         print("\tNOCOLORIZE               (vs COLORIZE)")
                     if spooling:
@@ -316,7 +383,8 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     for i in range(len(PALMAT["scopes"])):
                         scope = PALMAT["scopes"][i]
                         print("Scope %d:" % i)
-                        print("\tParent:", scope["parent"])
+                        print("\tType:    ", scope["type"])
+                        print("\tParent:  ", scope["parent"])
                         print("\tChildren:", scope["children"])
                     continue
                 elif firstWord == "RESET":
@@ -341,6 +409,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     colorize = ""
                     continue
                 elif firstWord == "HELP":
+                    '''
                     print("\tNote: Interpreter commands are case-insensitive, but")
                     print("\tHAL/S source code is case-sensitive.  The available")
                     print("\tinterpreter commands are listed below:")
@@ -388,11 +457,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     print("\tEXEC         Execute the HAL/S code.")
                     print("\tNOEXEC       Don't execute the HAL/S code.")
                     '''
-                    print("\tRECENT       Show recent lines of code, numbered.")
-                    print("\tRERUN        Re-run last line of code.")
-                    print("\tRERUN D      Re-run numbered line D (from RECENT).")
-                    '''
-                    # print()
+                    print(helpMenu)
                     continue
             if len(fields) > 3 and fields[0] == "D" and fields[1] == "INCLUDE" \
                     and fields[2] == "TEMPLATE":

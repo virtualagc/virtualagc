@@ -44,13 +44,15 @@ for scopeNumber in range(len(scopes)):
     children = scope["children"]
     identifiers = scope["identifiers"]
     instructions = scope["instructions"]
+    scopeType = scope["scopeType"]
     
-    tabPrint("Parent: %s" % str(parent), tabs)
-    tabPrint("Children: %s" % str(children), tabs)
+    tabPrint("Type:         %s" % scopeType, tabs)
+    tabPrint("Parent:       %s" % str(parent), tabs)
+    tabPrint("Children:     %s" % str(children), tabs)
     
     # Identifiers.
     if identifiers == {}:
-        tabPrint("Identifiers: (none)", tabs)
+        tabPrint("Identifiers:  (none)", tabs)
     else:
         tabPrint("Identifiers:", tabs)
         tabs = tabs + "\t"

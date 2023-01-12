@@ -485,6 +485,7 @@ def then(PALMAT, state):
 def bit_id(PALMAT, state):
     return True, fixupState(state, fsAugment)
 
+'''
 # Used by various LBNF labels for relational operators, 
 # but not itself corresponding to any specific LBNF label.
 def relationalOpCommon(PALMAT, state, operatorName):
@@ -512,12 +513,21 @@ def relationalOpLE(PALMAT, state):
 def relationalOpGE(PALMAT, state):
     return relationalOpCommon(PALMAT, state, ">=")
 
+'''
+
 def while_clause(PALMAT, state):
+    currentScope = PALMAT["scopes"][state["scopeIndex"]]
     if "isUntil" in substate:
         substate.pop("isUntil")
+    else:
+        if currentScope["type"] == "do":
+            currentScope["type"] = "do while"
     return True, fixupState(state, fsAugment)
 
 def whileKeyUntil(PALMAT, state):
+    currentScope = PALMAT["scopes"][state["scopeIndex"]]
+    if currentScope["type"] in ["do", "do while"]:
+        currentScope["type"] = "do until"
     substate["isUntil"] = True
     return True, state
 

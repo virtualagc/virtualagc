@@ -11,6 +11,7 @@ History:        2023-01-10 RSB  Split off from PALMAT.py.
 """
 
 import json
+import re
 
 # Add a `debug` PALMAT instruction.
 def debug(PALMAT, state, message):
@@ -46,14 +47,15 @@ def readPALMAT(filename):
 # PALMAT-object operations.
 
 # Create a new, empty scope.
-def constructScope(selfIndex=0, parentIndex=None):
+def constructScope(selfIndex=0, parentIndex=None, scopeType="root"):
     scope = {
                 "parent"        : parentIndex,
                 "self"          : selfIndex,
                 "children"      : [ ],
                 "identifiers"   : { },
                 "instructions"  : [ ],
-                "incomplete"    : [ ]
+                "incomplete"    : [ ],
+                "type"          : scopeType
             }
     return scope
 
@@ -63,13 +65,30 @@ def constructPALMAT():
                 "scopes" : [ constructScope() ]
             }
 
+# Search upward through the scope hierarchy, trying to find the first enclosing
+# loop. Returns the scope dictionary for the loop, or else None.
+def findEnclosingLoop(PALMAT, scope):
+    while scope != None:
+        if scope["type"] in ["do while", "do until", "do for"]:
+            return scope
+        scope = PALMAT["scopes"][scope["parent"]]
+    return None
+
+# Find an identifier in a scope that matches a pattern.
+def findIdentifierWithPrefix(scope, xx):
+    prog = re.compile("\\^" + xx + "_[0-9]+\\^")
+    for identifier in scope["identifiers"]:
+        if prog.fullmatch(identifier) != None:
+            return identifier
+    return None
+
 # Add a memory scope to existing PALMAT.  Returns the index of the new scope.
 # (There's really no need for it to return even that, since the new scope's
 # index will always be len(PALMAT["scopes"])-1, but it may save the calling 
 # program from having to do that minimal arithmetic.)
-def addScope(PALMAT, parentIndex):
+def addScope(PALMAT, parentIndex, scopeType="unknown"):
     newIndex = len(PALMAT["scopes"])
-    newScope = constructScope(newIndex, parentIndex)
+    newScope = constructScope(newIndex, parentIndex, scopeType)
     parentScope = PALMAT["scopes"][parentIndex]
     parentScope["children"].append(newIndex)
     PALMAT["scopes"].append(newScope)
@@ -196,15 +215,19 @@ def createTarget(currentScope, xx):
 # or follow createTarget(). If preceding createTarget(),
 # however, the label it needs to find doesn't exist, so it uses a
 # placeholder label (xx) which is fixed up later by createTarget().
-def jumpToTarget(currentScope, xx, palmatOpcode):
+# Note: Don't try using targetScope for now.
+def jumpToTarget(currentScope, xx, palmatOpcode, targetScope=None):
+
+    if targetScope == None:
+        targetScope = currentScope
 
     # This function finds a label for an internal jump within a DO...END
     # previously created by createTargetLabel(). Returns the label or None.
     # It can be taken outside of jumpToTarget() if necessary, but I didn't
     # find that necessary.
-    def findTargetLabel(currentScope, xx):
-        identifiers = currentScope["identifiers"]
-        instructions = currentScope["instructions"]
+    def findTargetLabel(scope, xx):
+        identifiers = scope["identifiers"]
+        instructions = scope["instructions"]
         prefix = "^" + xx + "_"
         lenxx = len(prefix)
         for identifier in identifiers:
@@ -213,7 +236,7 @@ def jumpToTarget(currentScope, xx, palmatOpcode):
         return None
     
     instructions = currentScope["instructions"]
-    label = findTargetLabel(currentScope, xx)
+    label = findTargetLabel(targetScope, xx)
     if label == None:
         currentScope["incomplete"].append(len(instructions))
         label = xx
@@ -225,9 +248,9 @@ def jumpToTarget(currentScope, xx, palmatOpcode):
 # so those do not need to be created separately by createTargetLabel().
 # The parameter dummyTargets is an optional array of additional 
 # targets to add after the initial ue_ target. 
-def makeDoEnd(PALMAT, currentScope, dummyTargets=[]):
+def makeDoEnd(PALMAT, currentScope, dummyTargets=[], scopeType="unknown"):
     indexOfCurrentScope = currentScope["self"]
-    indexOfNewScope = addScope(PALMAT, indexOfCurrentScope)
+    indexOfNewScope = addScope(PALMAT, indexOfCurrentScope, scopeType)
     newScope = PALMAT["scopes"][indexOfNewScope]
     entryLabel = "^ue_%d^" % getUniqueCount()
     returnLabel = "^ur_%d^" % getUniqueCount()
@@ -235,7 +258,8 @@ def makeDoEnd(PALMAT, currentScope, dummyTargets=[]):
     currentInstructions = currentScope["instructions"]
     currentIdentifiers[entryLabel] = {"label": [indexOfNewScope, 0]}
     currentInstructions.append({"goto": entryLabel})
-    currentIdentifiers[returnLabel] = {"label": [indexOfCurrentScope, len(currentInstructions)]}
+    currentIdentifiers[returnLabel] = {"label": [indexOfCurrentScope, 
+                                                 len(currentInstructions)]}
     currentInstructions.append({"noop": True, "label": returnLabel})
     newIdentifiers = newScope["identifiers"]
     newInstructions = newScope["instructions"]

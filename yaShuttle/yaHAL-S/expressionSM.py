@@ -14,6 +14,7 @@ History:        2023-01-08 RSB  Created, hopefully for eventually replacing
 
 from executePALMAT import executePALMAT
 from palmatAux import findIdentifier, debug
+from p_Functions import substate
 
 # Return True on success, False on failure.  The stage argument is 0 when
 # called upon starting processing of an lbnfLabel, 2 after otherwise finishing
@@ -111,7 +112,12 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace):
             instructions = stateMachine["compiledExpression"]
         else:
             instructions = PALMAT["scopes"][state["scopeIndex"]]["instructions"]
-        instructions.extend(temporaryInstructions)
+        if "relationalOperator" in stateMachine:
+            temporaryInstructions.append(stateMachine["relationalOperator"])
+        if "expressionFlush" in stateMachine:
+            stateMachine["expressionFlush"].extend(temporaryInstructions)
+        else:
+            instructions.extend(temporaryInstructions)
         state.pop("stateMachine")
     if stage == 0 and internalState == "normal":
         if lbnfLabel in ["abs", "ceiling", "div", "floor", "midval", "mod",
@@ -161,6 +167,18 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace):
             expression.append({ "operator": "AND" })
         elif lbnfLabel == "bitExpOR":
             expression.append({ "operator": "OR" })
+        elif lbnfLabel == "relationalOpEQ":
+            stateMachine["relationalOperator"] = { "operator": "==" }
+        elif lbnfLabel == "relationalOpNEQ":
+            stateMachine["relationalOperator"] = { "operator": "!=" }
+        elif lbnfLabel == "relationalOpLT":
+            stateMachine["relationalOperator"] = { "operator": "<" }
+        elif lbnfLabel == "relationalOpGT":
+            stateMachine["relationalOperator"] = { "operator": ">" }
+        elif lbnfLabel == "relationalOpLE":
+            stateMachine["relationalOperator"] = { "operator": "<=" }
+        elif lbnfLabel == "relationalOpGE":
+            stateMachine["relationalOperator"] = { "operator": ">=" }
     stateMachine["internalState"] = internalState
     return True
         

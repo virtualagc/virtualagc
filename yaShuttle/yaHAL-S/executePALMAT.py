@@ -197,7 +197,10 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
                 print("Implementation error in '+><': Uninitialized variable.")
                 return None
             operand1 += attributes["value"]
-            attributes["value"] = operand1
+            if "integer" in attributes:
+                attributes["value"] = hround(operand1)
+            else:
+                attributes["value"] = operand1
             if negativeIncrement:
                 computationStack[-1] = (operand1 < operand2)
             else:

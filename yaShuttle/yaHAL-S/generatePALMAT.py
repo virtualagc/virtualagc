@@ -80,10 +80,12 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     # take up any resources.  For example, a basic assignment statement will
     # never need to jump to the end of the statement, but an IF ... THEN ...
     # statement may need to if the conditional is false.
+    expressionFlush = []
     endLabel = "^ue_%d^" % getUniqueCount()
     endLabels.append({"lbnfLabel": lbnfLabel, 
                       "endLabel": endLabel, 
-                      "used": False})
+                      "used": False,
+                      "expressionFlush": expressionFlush})
 
     # Is this a DO ... END block?  If it is, then we have to do several things:
     # create a new child scope and make it current, and add a goto PALMAT 
@@ -93,13 +95,17 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     isDo = lbnfLabel in ["basicStatementDo", "otherStatementIf"]
     if isDo:
         dummyTargets = []
+        scopeType = "unknown"
         if lbnfLabel == "basicStatementDo":
             # Alas, the "up" target is needed only for DO FOR and DO UNTIL,
             # but we don't know yet which flavor of DO we have, so we have to 
             # make do with what we know.  (Yes, the pun was intended.)
             dummyTargets = ["up"]
+            scopeType = "do"
+        elif lbnfLabel == "otherStatementIf":
+            scopeType = "if"
         state["scopeIndex"], currentScope = \
-            makeDoEnd(PALMAT, currentScope, dummyTargets)
+            makeDoEnd(PALMAT, currentScope, dummyTargets, scopeType)
     
     '''
     The use of a "state machine" object in the state will hopefully be
@@ -144,9 +150,18 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             state["stateMachine"] = {"function": expressionSM, 
                                      "owner": lbnfLabel,
                                      "pauses": [] }
+            # Note that "isUntil" persists in substate only during processing
+            # of a "while_clause", which does nothing other than to compute
+            # an expression (including relational expressions).
+            for e in reversed(endLabels):
+                if e["lbnfLabel"] == "basicStatementDo":
+                    if "isUntil" in p_Functions.substate:
+                        state["stateMachine"]["expressionFlush"] = \
+                                                        e["expressionFlush"]
             if "lbnfLabel" in ["char_spec"]:
                 state["stateMachine"]["compiledExpression"] = []
         elif lbnfLabel in doForComponents:
+            currentScope["type"] = "do for"
             state["stateMachine"] = {"function": doForSM, 
                                      "owner": lbnfLabel,
                                      "pauses": [] }
@@ -257,26 +272,16 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                 if entry["lbnfLabel"] == ancestor:
                     isUntil = "isUntil" in p_Functions.substate
                     entry["used"] = True
-                    if isUntil:
-                        palmatOpcode = "iftrue"
-                    else:
-                        palmatOpcode = "iffalse"
-                    #if lbnfLabel == "ifClauseBitExp":
-                    #    jumpToTarget(currentScope, "ub", palmatOpcode)
-                    #el
                     if ancestor == "ifThenElseStatement":
-                        jumpToTarget(currentScope, "uf", palmatOpcode)
-                    else:
-                        jumpToTarget(currentScope, "ux", palmatOpcode)
+                        jumpToTarget(currentScope, "uf", "iffalse")
+                    elif not isUntil:
+                        jumpToTarget(currentScope, "ux", "iffalse")
                     if lbnfLabel == "while_clause":
-                        parent = currentScope["parent"]
-                        parentScope = PALMAT["scopes"][parent]
-                        if isUntil and 'isFOR' not in p_Functions.substate:
-                            newLabel = createTarget(currentScope, "ub")
-                            if newLabel == None:
-                                return False, PALMAT
-                            currentScope["instructions"][0].pop('noop')
-                            currentScope["instructions"][0]['goto'] = newLabel
+                        for e in reversed(endLabels):
+                            if e["lbnfLabel"] == "basicStatementDo":
+                                e["recycle"] = True
+                                break;
+                        if isUntil:
                             p_Functions.substate.pop("isUntil")
                     break
             break
@@ -310,22 +315,26 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             if isUnmarkedScalar(identifier):
                 identifier["scalar"] = True
     elif lbnfLabel == "repeated_constant":
-        # We get to here after an INITIAL(...) or CONSTANT(...)
-        # has been fully processed to the extent of preparing
-        # substate["expression"] for computing the value in 
-        # parenthesis, but without having performed that computation
-        # yet, leaving a bogus "initial" or "constant" attribute.
-        # We now have to perform the actual computation, if possible,
-        # and correct the bogus constant.  Since DECLARE statements
-        # always come at the beginnings of blocks, prior to any 
-        # executable code, we don't have to worry about preserving
-        # any existing PALMAT for the scope.
+        '''
+        We get to here after an INITIAL(...) or CONSTANT(...)
+        has been fully processed to the extent of preparing
+        substate["expression"] for computing the value in 
+        parenthesis, but without having performed that computation
+        yet, leaving a bogus "initial" or "constant" attribute.
+        We now have to perform the actual computation, if possible,
+        and correct the bogus constant.  Since DECLARE statements
+        always come at the beginnings of blocks, prior to any 
+        executable code, we don't have to worry about preserving
+        any existing PALMAT for the scope.
+        '''
         identifiers = currentScope["identifiers"]
         instructions = currentScope["instructions"]
         currentIdentifier = p_Functions.substate["currentIdentifier"]
-        # Note that the expression state machine should have left
-        # a single value on the instruction queue if the expression
-        # was computable at compile time.
+        '''
+        Note that the expression state machine should have left
+        a single value on the instruction queue if the expression
+        was computable at compile time.
+        '''
         queueSize = 0
         for ii in instructions:
             if 'debug' not in ii:
@@ -408,17 +417,60 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             identifierDict["character"] = maxLen
         except:
             print("Computation of INITIAL or CONSTANT failed:")
-            print(instructions)
+            #print(instructions)
             identifiers.pop(currentIdentifier)
             endLabels.pop()
             return False, PALMAT
-    
+    elif lbnfLabel == "basicStatementExit":
+        # This is tough because EXIT (without a label) is supposed to exit
+        # the current block, but internally we've treated IF statements as if
+        # they're blocks, and exiting the current IF (which is normally where
+        # and EXIT statement would be) is not what we want.  We have to search
+        # upward through the scope hierarchy until we find an actual DO block,
+        # but apparently not PROGRAM/FUNCTION/PROCEDURE, and then exit from it.
+        loopScope = findEnclosingLoop(PALMAT, currentScope)
+        if loopScope == None:
+            print("No enclosing loop found for EXIT.")
+            endLabels.pop()
+            return False, PALMAT
+        uxId = findIdentifierWithPrefix(loopScope, "ux")
+        if uxId == None:
+            print("Cannot find EXIT target in enclosing loop.")
+            endLabels.pop()
+            return False, PALMAT
+        instructions = currentScope["instructions"]
+        instructions.append({"goto": uxId})
+    elif lbnfLabel == "basicStatementRepeat":
+        # The REPEAT statement is even trickier than the EXIT statement, 
+        # it has to find DO blocks that are actual loops:  i.e., just DO WHILE, 
+        # DO UNTIL, or DO FOR; not just a simple DO ... END, and certainly not
+        # an IF.
+        loopScope = findEnclosingLoop(PALMAT, currentScope)
+        if loopScope == None:
+            print("No enclosing loop found for REPEAT.")
+            endLabels.pop()
+            return False, PALMAT
+        upId = findIdentifierWithPrefix(loopScope, "up")
+        if upId == None:
+            print("Cannot find REPEAT target in enclosing loop.")
+            endLabels.pop()
+            return False, PALMAT
+        instructions = currentScope["instructions"]
+        instructions.append({"goto": upId})
+
     #----------------------------------------------------------------------
     # Decide if we need to stick an automatically-generated label at the
     # end of this grammar component or not.
+    #if lbnfLabel == "basicStatementDo":
+    #    debug(PALMAT, state, "Flush = %s" % str(expressionFlush))
     instructions = currentScope["instructions"]
     identifiers = currentScope["identifiers"]
     if "recycle" in endLabels[-1]:
+        if len(expressionFlush) > 0:
+            # This is a buffered set of PALMAT instructions for a an UNTIL
+            # conditional expression
+            instructions.extend(expressionFlush)
+            jumpToTarget(currentScope, "ux", "iftrue")
         jumpToTarget(currentScope, "up", "goto")
     if endLabels[-1]["used"]:
         if lbnfLabel == "true_part":
