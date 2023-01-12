@@ -13,21 +13,7 @@ History:        2023-01-08 RSB  Created, hopefully for eventually replacing
 """
 
 from executePALMAT import executePALMAT
-
-# Search for an identifier in the scope hierarchy, starting at the
-# current scope and working upward through the parent scope, grandparent scope,
-# and so on.  Returns either the dictionary for the identifier or else None if 
-# not found. 
-# Note: There's also a findIdentifier() in the executePALMAT
-# module which provides the same service but is incompatible
-# API-wise.
-def findIdentifier(identifier, PALMAT, scopeIndex=None):
-    while scopeIndex != None:
-        scope = PALMAT["scopes"][scopeIndex]
-        if identifier in scope["identifiers"]:
-            return scope["identifiers"][identifier]
-        scopeIndex = scope["parent"]
-    return None
+from palmatAux import findIdentifier, debug
 
 # Return True on success, False on failure.  The stage argument is 0 when
 # called upon starting processing of an lbnfLabel, 2 after otherwise finishing
@@ -42,15 +28,19 @@ def findIdentifier(identifier, PALMAT, scopeIndex=None):
 # or at least the "compiledExpression" field of the stateMachine before that
 # final call to expressionSM is made.
 def expressionSM(stage, lbnfLabel, PALMAT, state, trace):
+    
+    #debug(PALMAT, state, "SM expression %d %s" % (stage, lbnfLabel)) 
+    
     stateMachine = state["stateMachine"]
     owningLabel = stateMachine["owner"]
     if stage == 0 and lbnfLabel == owningLabel:
         # First time called.
         stateMachine["internalState"] = "normal"
         stateMachine["expression"] = []
-        #if "expressions" not in state:
-        #    state["expressions"] = []
-        return True
+        # Don't return here.  Fall through, because sometimes we start the
+        # machine with a component that's a subcomponent of an expression
+        # rather than an expression component per se, and the lbnfLabel needs
+        # more processing than ignoring it like I do right here.
     expression = stateMachine["expression"]
     internalState = stateMachine["internalState"]
     if stage == 1 and lbnfLabel[:1] == "^" and lbnfLabel[-1:] == "^":

@@ -43,7 +43,8 @@ import unEMS
 import replaceBy
 import reorganizer
 from pass1 import tokenizeAndParse, tmpFile, compiler, astPrint, captured
-from PALMAT import generatePALMAT, constructPALMAT
+from generatePALMAT import generatePALMAT
+from palmatAux import constructPALMAT
 
 # Preprocess and compile a set of source lines, according to the global 
 # settings. Return True,ast on success, False,{} on failure.

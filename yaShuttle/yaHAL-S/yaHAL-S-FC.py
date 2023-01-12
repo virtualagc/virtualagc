@@ -61,7 +61,7 @@ import sys
 #from pass1 import tokenizeAndParse, tmpFile, compiler, astPrint, captured
 from processSource import processSource
 from interpreterLoop import interpreterLoop
-from PALMAT import constructPALMAT
+from palmatAux import constructPALMAT
 
 #Parse the command-line arguments.
 tabSize = 8

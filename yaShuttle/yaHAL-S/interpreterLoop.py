@@ -39,17 +39,20 @@ if readlinePresent:
 #-------------------------------------------------------------------------
 
 from processSource import processSource
-from PALMAT import constructPALMAT, writePALMAT, readPALMAT
+from palmatAux import constructPALMAT, writePALMAT, readPALMAT
 from p_Functions import removeIdentifier, removeAllIdentifiers, substate
 from executePALMAT import executePALMAT, setupExecutePALMAT
 
 setupExecutePALMAT()
 
 maxRecent = 25
+
+
 def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     xeq=True, lbnf=False, bnf=False):
+    spooling = False
     colors = ["black", "red", "green", "yellow", "blue", "magenta", "cyan",
-              "white", "gray", "brightred", "brightgreen", "brightyellow", 
+              "white", "gray", "brightred", "brightgreen", "brightyellow",
               "brightblue", "brightmagenta", "brightcyan", "brightwhite"]
     trace1 = False
     trace2 = False
@@ -65,9 +68,11 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
     if shouldColorize:
         colorize = "\033[35m"
         colorName = "magenta"
+        debugColor = "\033[33m"
     else:
         colorize = ""
         colorName = ""
+        debugColor = ""
     PALMAT = constructPALMAT()
     while not quitting:
         if halCode:
@@ -77,28 +82,49 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
             recentHal = recentHal[-maxLastLines:]
             recentMeta = recentMeta[-maxLastLines:]
         halCode = False
-        line = ""
-        while line[-1:] != ";" and not quitting:
+        line = " "
+        while (spooling or line[-1:] != ";") and not quitting:
+            if not spooling and line == "":
+                break
             if not halCode:
                 halsSource = []
                 metadata = []
             print(colorize, end="")
             if len(halsSource) == 0:
-                print("HAL/S > ", end="")
+                prompt = "HAL/S > "
             else:
-                print("  ... > ", end="")
+                prompt = "  ... > "
             if colorize != "":
-                print("\033[0m", end="")
-            line = input()
+                prompt = prompt + "\033[0m"
+            line = input(prompt)
             print(colorize, end="")
             fields = line.strip().split()
             numWords = len(fields)
             if numWords == 0:
-                if readlinePresent:
-                    print()
+                #if readlinePresent:
+                #    print()
+                halsSource.append(" ")
+                metadata.append([])
                 continue
             firstWord = fields[0].upper()
-            if firstWord == "RERUN":
+            if firstWord == "SPOOL":
+                print("\tNow spooling input for later processing.")
+                spooling = True
+                continue
+            elif firstWord == "UNSPOOL":
+                print("\tHalting spooling of input. Processing already-spooled input ...")
+                spooling = False
+                line = ""
+                break;
+            elif firstWord == "REVIEW":
+                print("\tReview of spooled input:")
+                if len(halsSource) == 0:
+                    print("\t(no spooled source code)")
+                    continue
+                for line in halsSource:
+                    print("\t%s" % line)
+                continue
+            elif firstWord == "RERUN":
                 if len(recentHal) == 0:
                     continue
                 if numWords <= 2:
@@ -168,7 +194,12 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     else:
                         count = 0
                         for instruction in instructions:
-                            print("\t%d: %s" % (count, str(instruction)))
+                            if 'debug' in instruction:
+                                print("\t%s%d: %s%s" % \
+                                      (debugColor, count, 
+                                       str(instruction), colorize))
+                            else:
+                                print("\t%d: %s" % (count, str(instruction)))
                             count += 1
                 continue
             elif numWords == 1:
@@ -229,6 +260,10 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                         print("\tCOLORIZE %-14s  (vs NOCOLORIZE)" % colorName.upper())
                     else:
                         print("\tNOCOLORIZE               (vs COLORIZE)")
+                    if spooling:
+                        print("\tSPOOL                    (vs UNSPOOL)")
+                    else:
+                        print("\tUNSPOOL                  (vs SPOOL)")
                     if trace1:
                         print("\tTRACE1                   (vs (NOTRACE1)")
                     else:
@@ -289,7 +324,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     continue
                 elif firstWord == "RECENT":
                     for i in range(len(recentHal)):
-                        print("%2d: %s" % (len(recentHal)-i, recentHal[i]))
+                        print("%2d: %s" % (len(recentHal) - i, recentHal[i]))
                     continue
                 elif firstWord == "WINE":
                     print("\tEnabled Windows version of compiler in Linux.")
@@ -306,9 +341,20 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     colorize = ""
                     continue
                 elif firstWord == "HELP":
-                    #print()
+                    print("\tNote: Interpreter commands are case-insensitive, but")
+                    print("\tHAL/S source code is case-sensitive.  The available")
+                    print("\tinterpreter commands are listed below:")
                     print("\tHELP         Show this menu.")
                     print("\tQUIT         Quit this interpreter program.")
+                    print("\tSPOOL        Begin spooling all HAL/S source lines for")
+                    print("\t             later processing.  (The default is to")
+                    print("\t             process lines one-by-one upon input, and")
+                    print("\t             to spool only lines not ending in ';'.)")
+                    print("\t             Note that all interpreter commands are")
+                    print("\t             acted upon immediately rather than being")
+                    print("\t             added to the spool.")
+                    print("\tUNSPOOL      Immediately process all spooled lines.")
+                    print("\tREVIEW       Redisplay spooled HAL/S source lines.")
                     print("\tCOLORIZE C   Enable colorizing (ANSI terminals only).")
                     print("\t             C is one of the following words: black,")
                     print("\t             red, green, yellow, blue, magenta, cyan,")
@@ -346,22 +392,34 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     print("\tRERUN        Re-run last line of code.")
                     print("\tRERUN D      Re-run numbered line D (from RECENT).")
                     '''
-                    #print()
+                    # print()
                     continue
             if len(fields) > 3 and fields[0] == "D" and fields[1] == "INCLUDE" \
                     and fields[2] == "TEMPLATE":
                 if fields[3] in structureTemplates:
-                    halsSource.append(" " + structureTemplates[fields[3]] )
+                    halsSource.append(" " + structureTemplates[fields[3]])
                 else:
                     print("Template", fields[3], "not found.")
                     continue
-                metadata.append( { "directive" : True } )
+                metadata.append({ "directive": True })
             else:
                 halCode = True
-                halsSource.append( " " + line )
-                metadata.append( {} )
+                halsSource.append(" " + line)
+                metadata.append({})
         if quitting:
             break 
+        
+        # For whatever reason, just feed nothing but blanks into the compiler
+        # returns an error, which is not something I want, so detect that case
+        # separately and avoid it.
+        allEmpty = True
+        for line in halsSource:
+            if line.strip() != "":
+                allEmpty = False
+                break
+        if allEmpty:
+            continue
+        
         PALMAT["scopes"][0]["instructions"] = []
         substate["errors"] = []
         substate["warnings"] = []

@@ -120,7 +120,36 @@ def jump (scopes, scope, instructionDict, instructionName):
     s = instructionDict[instructionName]
     #print("*", instructionName, instructionDict, s)
     return tuple(s)
-                
+
+# Convert a stringified HAL/S number (i.e., an INTEGER or SCALAR presented
+# as a string, possibly with B, H, or E type exponents) into a Python
+# float.
+def stringifiedToFloat(stringifiedNumber):
+    multiplier = 1.0
+    # Recall that HAL/S literal numbers can include modifiers like
+    # "B-12" or "H7" in addition to the usual "E23".  Python
+    # has no knowledge of these additional funky modifiers, so
+    # we have to handle them explicitly.  Unfortunately this 
+    # can make the numerical version inexact compared to the 
+    # stringified version, and not inexact in the same way as 
+    # the original IBM 360 or AP-101S representations were. 
+    # At some point I'll probably make the compiler do this work
+    # for the sake of efficiency, but right now I'm going for 
+    # correctness and leaving efficiency optimizations for later.
+    while True:
+        match = re.search("[EBH][-]?[0-9]+$", stringifiedNumber)
+        if match == None:
+            break
+        modifier = match.group()
+        stringifiedNumber = stringifiedNumber[:match.span()[0]]
+        if modifier[0] == "E":
+            multiplier *= 10 ** (int(modifier[1:]))
+        elif modifier[0] == "B":
+            multiplier *= 2 ** (int(modifier[1:]))
+        else: # modifier[0] == "H":
+            multiplier *= 16 ** (int(modifier[1:]))
+    return float(stringifiedNumber) * multiplier
+
 # If this function returns, which in principle it might not if executing
 # an actual flight program, it returns the current computation stack.
 # That would normally be empty if full statements had been executed.
@@ -144,34 +173,35 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
         if trace:
             print("\t==>", computationStack, instruction)
         stackSize = len(computationStack)
-        if "string" in instruction:
+        if "debug" in instruction:
+            pass
+        elif "string" in instruction:
             computationStack.append(instruction["string"])
         elif "boolean" in instruction:
             computationStack.append(instruction["boolean"])
         elif "number" in instruction:
-            stringifiedNumber = instruction["number"]
-            multiplier = 1.0
-            # Recall that HAL/S literal numbers can include modifiers like
-            # "B-12" or "H7" in addition to the usual "E23".  Python
-            # has no knowledge of these additional funky modifiers, so
-            # we have to handle them explicitly.  Unfortunately this 
-            # can make the numerical version inexact compared to the 
-            # stringified version, and not inexact in the same way as 
-            # the original IBM 360 or AP-101S representations were. 
-            # At some point I'll probably make the compiler do this work
-            # for the sake of efficiency, but right now I'm going for 
-            # correctness and leaving efficiency optimizations for later.
-            while True:
-                match = re.search("[BH][-]?[0-9]+$", stringifiedNumber)
-                if match == None:
-                    break
-                modifier = match.group()
-                stringifiedNumber = stringifiedNumber[:match.span()[0]]
-                if modifier[0] == "B":
-                    multiplier *= 2 ** (int(modifier[1:]))
-                else: # modifier[0] == "H":
-                    multiplier *= 16 ** (int(modifier[1:]))
-            computationStack.append(float(stringifiedNumber) * multiplier)   
+            computationStack.append(stringifiedToFloat(instruction["number"]))
+        elif "+><" in instruction:
+            identifier = "^" + instruction["+><"] + "^"
+            if stackSize < 2:
+                print("Implementation error, not enough operands for '+><'.")
+                return None
+            operand1 = computationStack.pop()
+            negativeIncrement = (operand1 < 0)
+            operand2 = computationStack[-1]
+            attributes = findIdentifier(scopes, identifier, scopes[scopeNumber])
+            if "integer" not in attributes and "scalar" not in attributes:
+                print("Implementation error in '+><': Not a number.")
+                return None
+            if "value" not in attributes:
+                print("Implementation error in '+><': Uninitialized variable.")
+                return None
+            operand1 += attributes["value"]
+            attributes["value"] = operand1
+            if negativeIncrement:
+                computationStack[-1] = (operand1 < operand2)
+            else:
+                computationStack[-1] = (operand1 > operand2)
         elif "operator" in instruction:
             operator = instruction["operator"]
             if operator in ["U-", "NOT"]: # Unary operators.

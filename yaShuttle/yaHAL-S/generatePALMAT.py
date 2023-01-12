@@ -3,7 +3,7 @@
 """
 Copyright:      None - the author (Ron Burkey) declares this software to
                 be in the Public Domain, with no rights reserved.
-Filename:       PALMAT.py
+Filename:       generatePALMAT.py
 Reference:      PALMAT.md
 Purpose:        Part of the code-generation system for the "modern" HAL/S
                 compiler yaHAL-S-FC.py+modernHAL-S-FC.c.
@@ -12,262 +12,10 @@ History:        2022-12-19 RSB  Created.
 
 import json
 import p_Functions
+from palmatAux import *
 from executePALMAT import executePALMAT, hround
 from expressionSM import expressionSM
-
-#-----------------------------------------------------------------------------
-# File operations.
-
-# Save an internal PALMAT object to a file. (Actually, it's just a conversion
-# of *any* Python object to JSON for writing it to a file, but our use for it
-# just happens to be for Python objects representing PALMAT datasets.)
-# Returns True for success, False for failure.
-def writePALMAT(PALMAT, filename):
-    try:
-        f = open(filename, "w")
-        print(json.dumps(PALMAT), file=f)
-        f.close()
-        return True
-    except:
-        return False
-
-# Load a PALMAT object from a file into internal storage.  Returns either the
-# PALMAT object on success, or None on failure.
-def readPALMAT(filename):
-    try:
-        f = open(filename, "r")
-        PALMAT = json.loads(f.readline())
-        f.close()
-        return PALMAT
-    except:
-        return None
-
-#-----------------------------------------------------------------------------
-# PALMAT-object operations.
-
-# Create a new, empty scope.
-def constructScope(selfIndex=0, parentIndex=None):
-    return  {
-                "parent"        : parentIndex,
-                "self"          : selfIndex,
-                "children"      : [ ],
-                "identifiers"   : { },
-                "instructions"  : [ ],
-                "incomplete"    : [ ]
-            }
-
-# Create a new, empty PALMAT object.
-def constructPALMAT():
-    return  {
-                "scopes" : [ constructScope() ]
-            }
-
-# Add a memory scope to existing PALMAT.  Returns the index of the new scope.
-# (There's really no need for it to return even that, since the new scope's
-# index will always be len(PALMAT["scopes"])-1, but it may save the calling 
-# program from having to do that minimal arithmetic.)
-def addScope(PALMAT, parentIndex):
-    newIndex = len(PALMAT["scopes"])
-    newScope = constructScope(newIndex, parentIndex)
-    parentScope = PALMAT["scopes"][parentIndex]
-    parentScope["children"].append(newIndex)
-    PALMAT["scopes"].append(newScope)
-    return newIndex
-
-# Print a PALMAT object in a reasonably-human-friendly way, for debugging 
-# purposes.
-def printPALMAT(PALMAT, showInstructions=False):
-    
-    def printSingleScope(scope, showInstructions):
-        print("Scope:  Parent:       ", scope["parent"])
-        print("        Self:         ", scope["self"])
-        print("        Children:     ", scope["children"])
-        first = True
-        for identifier in sorted(scope["identifiers"]):
-            if first:
-                first = False
-                print("        Identifiers:  ", end="")
-            else:
-                print("                      ", end="")
-            print(" %s" % identifier, end="")
-            metadata = scope["identifiers"][identifier]
-            for key in metadata:
-                print(" %s=%r" % (key, metadata[key]), end="")
-            print()
-            if len(scope["instructions"]) == 0:
-                print("        Instructions: [ ]")
-        if showInstructions:
-            print("        Instructions: ", end="")
-            indent = 0
-            instructions = scope["instructions"]
-            for instruction in instructions:
-                print("%*s" % (indent, ""), instruction)
-                indent = 8
-        else:
-            print("        Instructions: [ ... ]")
-
-    for scope in PALMAT["scopes"]:
-        printSingleScope(scope, showInstructions)
-        
-# Search for an identifier in the scope hierarchy, starting at the
-# current scope and working upward through the parent scope, grandparent scope,
-# and so on.  Returns either the dictionary for the identifier or else None if 
-# not found. 
-# Note: There's also a findIdentifier() in the executePALMAT
-# module which provides the same service but is incompatible
-# API-wise.
-def findIdentifier(identifier, PALMAT, scopeIndex=None):
-    while scopeIndex != None:
-        scope = PALMAT["scopes"][scopeIndex]
-        if identifier in scope["identifiers"]:
-            return scope["identifiers"][identifier]
-        scopeIndex = scope["parent"]
-    return None
-
-#-----------------------------------------------------------------------------
-'''
-These auxiliary functions are used to create child (DO ... END) blocks and
-to provide the various label identifiers for PALMAT instructions like 'goto',
-'iffalse', and 'iftrue' that are used to jump in, out, and within these
-blocks.  We use a kind of trick to help us with this
-
-For jumping *within* a given DO...END block (as opposed to entering or leaving
-the block) we use a kind of trick.  For each such jump there's a *target* 
-instruction (a 'noop') and one or more jumps to it (using 'goto', 'iftrue',
-or 'iffalse'), associated by a unique label in the scope's identifiers.
-These identifiers are all of the form xx_N, where xx is supposed to unique
-to the purpose, and N is a unique number chosen by the code-generator to 
-insure that the same xx can be used in different scopes without conflict.
-Functions are provided to insert the target instructions and the instructions
-that jump to them.  By convention xx is always lower-case alphabetic characters.
-'''
-uniqueCount = 0
-
-# This function creates a label for an internal jump within a DO...END,
-# and inserts a noop instruction with that label. Returns the new label, 
-# or None on error.  The prefixes "ue", "ur", and "up" are already used
-# by makeDoEnd(), and so are not candidates for createTarget(), though
-# they can be used with jumpToTarget().
-jumpInstructions = ['goto', 'iffalse', 'iftrue']
-def createTarget(currentScope, xx):
-    global uniqueCount
-    identifiers = currentScope["identifiers"]
-    instructions = currentScope["instructions"]
-    prefix = "^" + xx + "_"
-    lenxx = len(prefix)
-    for identifier in identifiers:
-        if prefix == identifier[:lenxx]:
-            print("Implementation error, duplicate target anchors:", xx)
-            return None
-    label = "%s%d^" % (prefix, uniqueCount)
-    uniqueCount += 1
-    identifiers[label] = {'label': [currentScope['self'], len(instructions)]}
-    instructions.append({'noop': True, 'label': label})
-    # Correct any jumps already added before the label was created.
-    poppable = []
-    incompletes = currentScope["incomplete"] # A list of instruction offsets.
-    for i in incompletes:
-        instruction = instructions[i]
-        for jumpInstruction in jumpInstructions:
-            if jumpInstruction in instruction:
-                if xx == instruction[jumpInstruction]:
-                    instruction[jumpInstruction] = label
-                    poppable.append(i)
-                    break
-    for popit in poppable:
-        incompletes.remove(popit)
-    #if len(incompletes) == 0:
-    #    currentScope.pop("incomplete")
-    return label
-
-# This function inserts a PALMAT instruction that jumps to an target
-# created (previously or later on) by insertTarget().  The palmatOpcode 
-# is one of the jumpInstructions list defined earlier.  jumpToTarget() 
-# can be used multiple times for the same label, and can either precede
-# or follow createTarget(). If preceding createTarget(),
-# however, the label it needs to find doesn't exist, so it uses a
-# placeholder label (xx) which is fixed up later by createTarget().
-def jumpToTarget(currentScope, xx, palmatOpcode):
-
-    # This function finds a label for an internal jump within a DO...END
-    # previously created by createTargetLabel(). Returns the label or None.
-    # It can be taken outside of jumpToTarget() if necessary, but I didn't
-    # find that necessary.
-    def findTargetLabel(currentScope, xx):
-        identifiers = currentScope["identifiers"]
-        instructions = currentScope["instructions"]
-        prefix = "^" + xx + "_"
-        lenxx = len(prefix)
-        for identifier in identifiers:
-            if prefix == identifier[:lenxx]:
-                return identifier
-        return None
-    
-    instructions = currentScope["instructions"]
-    label = findTargetLabel(currentScope, xx)
-    if label == None:
-        currentScope["incomplete"].append(len(instructions))
-        label = xx
-    instructions.append({palmatOpcode: label})
-
-# This function is used by a parent scope to create a child scope that's
-# a DO ... END, and to goto it.  (Also for IF statements.)  The new child 
-# scope is returned. Note that makeDoEnd() creates labels with xx = ue and ur,
-# so those do not need to be created separately by createTargetLabel().
-# The parameter dummyTargets is an optional array of additional 
-# targets to add after the initial ue_ target. 
-def makeDoEnd(PALMAT, currentScope, dummyTargets=[]):
-    global uniqueCount
-    indexOfCurrentScope = currentScope["self"]
-    indexOfNewScope = addScope(PALMAT, indexOfCurrentScope)
-    newScope = PALMAT["scopes"][indexOfNewScope]
-    entryLabel = "^ue_%d^" % uniqueCount
-    uniqueCount += 1
-    returnLabel = "^ur_%d^" % uniqueCount
-    uniqueCount += 1
-    currentIdentifiers = currentScope["identifiers"]
-    currentInstructions = currentScope["instructions"]
-    currentIdentifiers[entryLabel] = {"label": [indexOfNewScope, 0]}
-    currentInstructions.append({"goto": entryLabel})
-    currentIdentifiers[returnLabel] = {"label": [indexOfCurrentScope, len(currentInstructions)]}
-    currentInstructions.append({"noop": True, "label": returnLabel})
-    newIdentifiers = newScope["identifiers"]
-    newInstructions = newScope["instructions"]
-    newInstructions.append({'noop': True, "label": entryLabel})
-    for xx in dummyTargets:
-        recycleLabel = "^%s_%d^" % (xx, uniqueCount)
-        uniqueCount += 1
-        newIdentifiers[recycleLabel] = {'label': [indexOfNewScope, 1]}
-        newInstructions.append({'noop': True, "label": recycleLabel})
-        return indexOfNewScope, newScope
-
-# This function is used to exit from a DO loop back to the parent context,
-# assuming it was all set up by makeDoEnd().
-def exitDo(PALMAT, currentScope):
-    parentScope = PALMAT["scopes"][currentScope["parent"]]
-    #print("*A", PALMAT["scopes"])
-    #print("*B", parentScope["instructions"])
-    targetInstruction = parentScope["instructions"][-1]
-    targetLabel = targetInstruction["label"]
-    currentScope["instructions"].append({'goto': targetLabel})
-
-#-----------------------------------------------------------------------------
-# The code generator (ast -> PALMAT).
-
-# Variables DECLARE'd without a type are by default SCALAR, though they
-# can be explicitly DECLARE'd as SCALAR as well.  This irks me, because
-# it means that some SCALAR variables have the attribut "scalar" in
-# PALMAT["identifiers"] and some do not.  Declarations of all other 
-# datatypes are, on the other hand, explicit.  The point of the following
-# function is to clean that up by adding the "scalar" attribute to any
-# identifiers not explicitly declared as some other type.
-notUnmarkedScalars = ("scalar", "integer", "vector", "matrix", "bit",
-                      "character", "template", "structure", "label")
-def isUnmarkedScalar(identifierDict):
-    for s in notUnmarkedScalars:
-        if s in identifierDict:
-            return False
-    return True
+from doForSM import doForSM
 
 '''
 Here's the idea:  generatePALMAT() is a recursive function that works its
@@ -320,7 +68,6 @@ which no statement is yet being processed is state={ "history" : [] }.
 
 def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, 
                    trace=False, endLabels=[]):
-    global uniqueCount
     newState = state
     lbnfLabelFull = ast["lbnfLabel"]
     lbnfLabel = lbnfLabelFull[2:]
@@ -333,35 +80,11 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     # take up any resources.  For example, a basic assignment statement will
     # never need to jump to the end of the statement, but an IF ... THEN ...
     # statement may need to if the conditional is false.
-    endLabel = "^ue_%d^" % uniqueCount
-    uniqueCount += 1
+    endLabel = "^ue_%d^" % getUniqueCount()
     endLabels.append({"lbnfLabel": lbnfLabel, 
                       "endLabel": endLabel, 
                       "used": False})
 
-    '''
-    The use of a "state machine" object in the state will hopefully be
-    a more-systematic framework for code-generation than the relatively
-    inconsistent melange of methods that preceded it.  Right now, though,
-    it's in early stages and some state machines may run in parallel with
-    the older method for comparison purposes.  The state-machine function 
-    associated with the specific type of lbnfLabel is called both upon 
-    beginning the processing of the component (with an argument of 0),
-    for strings (with an argument of 1) and upon finishing it (with an 
-    argument of 2).  The state-machine function itself is what removes 
-    the stateMachine object from state, when that is appropriate.
-    '''
-    stateMachine = None
-    if "stateMachine" not in state and\
-            lbnfLabel in ["expression", "ifClauseBitExp", "relational_exp", 
-                         "bitExpFactor", "write_arg", "read_arg", "char_spec"]:
-        state["stateMachine"] = { "function": expressionSM, "owner": lbnfLabel }
-        if "lbnfLabel" in ["char_spec"]:
-            state["stateMachine"]["compiledExpression"] = []
-    if "stateMachine" in state:
-        stateMachine = state["stateMachine"]
-        stateMachine["function"](0, lbnfLabel, PALMAT, state, trace)
-             
     # Is this a DO ... END block?  If it is, then we have to do several things:
     # create a new child scope and make it current, and add a goto PALMAT 
     # instruction from the existing current scope to the new scope.  
@@ -374,15 +97,74 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             # Alas, the "up" target is needed only for DO FOR and DO UNTIL,
             # but we don't know yet which flavor of DO we have, so we have to 
             # make do with what we know.  (Yes, the pun was intended.)
-            dummyTargets = ["up", "ui"]
-        state["scopeIndex"], currentScope = makeDoEnd(PALMAT, currentScope, dummyTargets)
+            dummyTargets = ["up"]
+        state["scopeIndex"], currentScope = \
+            makeDoEnd(PALMAT, currentScope, dummyTargets)
     
+    '''
+    The use of a "state machine" object in the state will hopefully be
+    a more-systematic framework for code-generation than the relatively
+    inconsistent melange of methods that preceded it.  Right now, though,
+    it's in early stages and some grammar components are processed using the
+    older (chaotic) method, while others are processed using the new 
+    state-machine framework instead.  The state-machine function 
+    associated with the specific type of lbnfLabel is called both upon 
+    beginning the processing of the component (with an argument of 0),
+    for strings (with an argument of 1) and upon finishing it (with an 
+    argument of 2).  The state-machine function itself is what removes 
+    the stateMachine object from state, when that is appropriate.
+    '''
+    expressionComponents = ["expression", "ifClauseBitExp", "relational_exp", 
+                         "bitExpFactor", "write_arg", "read_arg", "char_spec",
+                         "arithExpTerm", "arithExpArithExpPlusTerm",
+                         "arithExpArithExpMinusTerm", "arithMinusTerm"]
+    doForComponents = ["doGroupHeadFor", "doGroupHeadForWhile", 
+                          "doGroupHeadForUntil"]
+    allComponentsSM = expressionComponents + doForComponents
+    stateMachine = None
+    parentStateMachine = None
+    if "stateMachine" in state \
+            and state["stateMachine"]["owner"] in doForComponents \
+            and lbnfLabel in allComponentsSM:
+        # We want to start a new state machine, but an existing one hasn't
+        # completed yet.  This would occur, for example, for evaluating 
+        # expressions within a DO FOR or nested DO FORs.  We must therefore
+        # pop the existing state machine from the state, while preserving it
+        # for later restoration when this component completes processing,
+        # and insert a newly-created state-machine instead.
+        parentStateMachine = state["stateMachine"]
+        parentStateMachine["pauses"].append(len(currentScope["instructions"]))
+        state.pop("stateMachine")
+        debug(PALMAT, state, "Pausing SM %s, %s" % \
+              (parentStateMachine["owner"], 
+               parentStateMachine["internalState"]))
+    if "stateMachine" not in state:
+        if lbnfLabel in expressionComponents:
+            debug(PALMAT, state, "Starting SM %s" % lbnfLabel)
+            state["stateMachine"] = {"function": expressionSM, 
+                                     "owner": lbnfLabel,
+                                     "pauses": [] }
+            if "lbnfLabel" in ["char_spec"]:
+                state["stateMachine"]["compiledExpression"] = []
+        elif lbnfLabel in doForComponents:
+            state["stateMachine"] = {"function": doForSM, 
+                                     "owner": lbnfLabel,
+                                     "pauses": [] }
+            for e in reversed(endLabels):
+                if e["lbnfLabel"] == "basicStatementDo":
+                    e["recycle"] = True
+                    e["used"] = True
+                    break
+    if "stateMachine" in state:
+        stateMachine = state["stateMachine"]
+        stateMachine["function"](0, lbnfLabel, PALMAT, state, trace)
+             
     # Main generation of PALMAT for the statement, sans setup and cleanup.
+    if trace:
+        print("TRACE: component =", lbnfLabel)
+        print("       state (before) =", state)
+        print("       substate =", p_Functions.substate)
     if lbnfLabel in p_Functions.objects:
-        if trace:
-            print("TRACE:", lbnfLabel)
-            print("      ", state)
-            print("      ", p_Functions.substate)
         func = p_Functions.objects[lbnfLabel]
         success, newState = func(PALMAT, state)
         if "stateMachine" in state:
@@ -392,8 +174,8 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             newState["stateMachine"] = state["stateMachine"]
         if trace:
             if "stateMachine" in state:
-                print("      ", state["stateMachine"])
-            print("      ", p_Functions.substate)
+                print("       state (after) =", state["stateMachine"])
+            print("       substate (after) =", p_Functions.substate)
         if not success:
             endLabels.pop()
             return False, PALMAT
@@ -403,25 +185,31 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         if isinstance(component, str):
             if component[:1] == "^":
                 if trace:
-                    print("TRACE:", component)
-                    print("      ", newState)
-                    print("      ", p_Functions.substate)
+                    print("TRACE: component =", component)
+                    print("       state (before) =", newState)
+                    print("       substate =", p_Functions.substate)
                 if "stateMachine" in newState:
                     state["stateMachine"]["function"](1, component, PALMAT, newState, trace)
                 success = p_Functions.stringLiteral(PALMAT, newState, component)
+                if "stateMachine" in state and "stateMachine" not in newState:
+                    state.pop("stateMachine")
                 if trace:
                     if "stateMachine" in state:
-                        print("      ", state["stateMachine"])
+                        print("       state (after) =", state["stateMachine"])
                     print("      ", p_Functions.substate)
             else:
                 success, PALMAT = generatePALMAT( \
                     { "lbnfLabel": component, "components" : [] }, \
                     PALMAT, newState, trace, endLabels )
+                if "stateMachine" in state and "stateMachine" not in newState:
+                    state.pop("stateMachine")
             if not success:
                 endLabels.pop()
                 return False, PALMAT
         else:
             success, PALMAT = generatePALMAT(component, PALMAT, newState, trace, endLabels)
+            if "stateMachine" in state and "stateMachine" not in newState:
+                state.pop("stateMachine")
             if not success:
                 endLabels.pop()
                 return False, PALMAT
@@ -437,8 +225,18 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     # component; the value modifies that by giving a list of relevant 
     # ancestor (though not necessarily immediate-parent) components.
     
+    stateMachine = None
     if "stateMachine" in state:
+        stateMachine = state["stateMachine"]
         state["stateMachine"]["function"](2, lbnfLabel, PALMAT, state, trace)
+        if "stateMachine" not in state:
+            debug(PALMAT, state, "Ending SM %s" % lbnfLabel)
+            if parentStateMachine != None:
+                debug(PALMAT, state, "Restoring SM %s, %s" % \
+                      (parentStateMachine["owner"], 
+                       parentStateMachine["internalState"]))
+                parentStateMachine["completed"] = lbnfLabel
+                state["stateMachine"] = parentStateMachine
 
     lbnfLabelPatterns = {
             "relational_exp": ["ifThenElseStatement", "ifStatement"], 
@@ -450,7 +248,9 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         for ancestor in ancestorLabels:
             if ancestor not in state["history"]:
                 continue
-            p_Functions.expressionToInstructions(p_Functions.substate["expression"], currentScope["instructions"])
+            p_Functions.expressionToInstructions( \
+                p_Functions.substate["expression"], \
+                currentScope["instructions"])
             for entry in reversed(endLabels):
                 if entry["lbnfLabel"] == ancestor:
                     isUntil = "isUntil" in p_Functions.substate
@@ -469,14 +269,13 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                     if lbnfLabel == "while_clause":
                         parent = currentScope["parent"]
                         parentScope = PALMAT["scopes"][parent]
-                        if isUntil:
+                        if isUntil and 'isFOR' not in p_Functions.substate:
                             newLabel = createTarget(currentScope, "ub")
                             if newLabel == None:
                                 return False, PALMAT
                             currentScope["instructions"][0].pop('noop')
                             currentScope["instructions"][0]['goto'] = newLabel
                             p_Functions.substate.pop("isUntil")
-                        entry["recycle"] = True
                     break
             break
     # Below are various other patterns not covered by lbnfLabelPatterns above.
@@ -485,7 +284,6 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     elif lbnfLabel == "true_part":
         p_Functions.expressionToInstructions(p_Functions.substate["expression"], currentScope["instructions"])
         endLabels[-2]["used"] = True
-        #currentScope["instructions"].append({"goto": endLabels[-2]["endLabel"]})
         jumpToTarget(currentScope, "ux", "goto")
         if createTarget(currentScope, "uf") == None:
             return False, PALMAT
@@ -523,13 +321,18 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         # Note that the expression state machine should have left
         # a single value on the instruction queue if the expression
         # was computable at compile time.
-        if len(instructions) != 1:
+        queueSize = 0
+        for ii in instructions:
+            if 'debug' not in ii:
+                queueSize += 1
+                value = ii
+        if queueSize != 1:
             print("Computation of INITIAL or CONSTANT failed:")
             if currentIdentifier in identifiers:
                 identifiers.pop(currentIdentifier)
             endLabels.pop()
             return False, PALMAT
-        value = instructions.pop()
+        instructions.clear()
         if "number" in value:
             try:
                 value = float(value["number"]);
@@ -625,5 +428,5 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     if isDo:
         exitDo(PALMAT, currentScope)
         state["scopeIndex"] = preservedScopeIndex
-
+        
     return True, PALMAT

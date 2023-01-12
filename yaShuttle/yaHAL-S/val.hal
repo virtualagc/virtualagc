@@ -13,6 +13,10 @@
     interpreter, that wouldn't be an issue.  But I'm cut-and-pasting
     it into the interpreter.
     
+    I've also begun each line in column 2, which isn't necessary
+    for the interpreter, but which allows the file to be processed
+    by the compiler if desired.
+    
     The *original* HAL/S-FC compiler wouldn't accept this code, by the
     way, since it would have to be wrapped in a PROGRAM, FUNCTION,
     or PROCEDURE envelope, rather than just being standalone code
@@ -30,19 +34,75 @@
  DECLARE C5 CHARACTER(30), C6 CHARACTER(20) INITIAL('sam ' CAT C3); 
  DECLARE BOOLEAN, B1, B2 CONSTANT(TRUE), B3 INITIAL(NOT B2); 
  DECLARE B4 BOOLEAN, B5 BOOLEAN CONSTANT(NOT B2 AND B2), 
- 	 B6 BOOLEAN INITIAL(B2 OR NOT B2); 
+ 	 B6 BOOLEAN INITIAL(B2 OR ~B2); 
  
- WRITE(6) 'Conversion and assignment test:'; 
- I=1.4; WRITE(6) 'I =', I; 
- A=2; WRITE(6) 'A =', A; 
-  
- WRITE(6) 'DO WHILE and RANDOM test:'; 
+ WRITE(6) 'Miscellaneous tests:'; 
+ I=1.4; WRITE(6) 'I =', I, '(should be 1)'; 
+ A=2; WRITE(6) 'A =', A, '(should be 2.0)'; 
+ B = 12.6E2B-1 A + 6 ( I A**3 - 21 ) / 4.2; 
+ WRITE(6) 'B =', B, '(should be 1241.428571...)'; 
+ WRITE(6) B2, B3, B5, B6, '(should be TRUE FALSE FALSE TRUE)'; 
+ WRITE(6) B2, ~B2, ~B2 & B2, B2 | NOT B2, '(should be TRUE FALSE FALSE TRUE)'; 
+ WRITE(6) '"' CAT C2 CAT '"', 
+ 	  '"' CAT C3 || '"', 
+ 	  '"' || C4 CAT '"', 
+ 	  '"' || C6 || '"', 
+ 	  ' (should be "abc", "def", "defghi", "sam def")'; 
+ 
+ IF TRUE THEN WRITE(6) TRUE, '(should be TRUE)'; 
+ WRITE(6) 'Test IF FALSE; should be nothing between here ...'; 
+ IF FALSE THEN WRITE(6) FALSE; 
+ WRITE(6) '... and here.'; 
+ WRITE(6) 'Test IF TRUE THEN ...; ELSE ...; should be TRUE:'; 
+ IF TRUE THEN WRITE(6) TRUE; ELSE WRITE(6) FALSE; 
+ WRITE(6) 'Test IF FALSE THEN ...; ELSE ...; should be FALSE:'; 
+ IF FALSE THEN WRITE(6) TRUE; ELSE WRITE(6) FALSE; 
+ WRITE(6) 'The following IF/THEN/ELSE tests should read ',
+ 	'<, >=, >=, <=, <=, >, >, <=, <=, >=, >=, <, ~=, =, ~=, ~=, =, ~= :'; 
+ I = 5; 
+ IF I < 10 THEN WRITE(6) '<'; ELSE WRITE(6) '>='; 
+ IF I < 5 THEN WRITE(6) '<'; ELSE WRITE(6) '>='; 
+ IF I < 2 THEN WRITE(6) '<'; ELSE WRITE(6) '>='; 
+ IF I <= 10 THEN WRITE(6) '<='; ELSE WRITE(6) '>'; 
+ IF I <= 5 THEN WRITE(6) '<='; ELSE WRITE(6) '>'; 
+ IF I <= 2 THEN WRITE(6) '<='; ELSE WRITE(6) '>'; 
+ IF I > 2 THEN WRITE(6) '>'; ELSE WRITE(6) '<='; 
+ IF I > 5 THEN WRITE(6) '>'; ELSE WRITE(6) '<='; 
+ IF I > 10 THEN WRITE(6) '>'; ELSE WRITE(6) '<='; 
+ IF I >= 2 THEN WRITE(6) '>='; ELSE WRITE(6) '<'; 
+ IF I >= 5 THEN WRITE(6) '>='; ELSE WRITE(6) '<'; 
+ IF I >= 10 THEN WRITE(6) '>='; ELSE WRITE(6) '<'; 
+ IF I = 2 THEN WRITE(6) '='; ELSE WRITE(6) '~='; 
+ IF I = 5 THEN WRITE(6) '='; ELSE WRITE(6) '~='; 
+ IF I = 10 THEN WRITE(6) '='; ELSE WRITE(6) '~='; 
+ IF I ~= 2 THEN WRITE(6) '~='; ELSE WRITE(6) '='; 
+ IF I ~= 5 THEN WRITE(6) '~='; ELSE WRITE(6) '='; 
+ IF I ~= 10 THEN WRITE(6) '~='; ELSE WRITE(6) '='; 
+ WRITE(6) 'The following IF THEN ELSE string comparisons should be ',
+ 	'TRUE, TRUE, and FALSE, respectively.'; 
+ IF 'ABC' = 'A' || 'BC' THEN WRITE(6) TRUE; ELSE WRITE(6) FALSE; 
+ IF 'AB' || 'C' = 'ABC' THEN WRITE(6) TRUE; ELSE WRITE(6) FALSE; 
+ IF 'ABC' = 'AB' THEN WRITE(6) TRUE; ELSE WRITE(6) FALSE; 
+ 
+ WRITE(6) 'Print 10 random numbers with DO WHILE arithmetical comparison:'; 
  I=0; DO WHILE I < 10; I=I+1; WRITE(6) I, RANDOM; END; 
+ WRITE(6) 'Print 9 TRUE and 1 FALSE with DO WHILE boolean constant:'; 
+ B1=TRUE; I=0; 
+ DO WHILE B1; 
+ 	I=I+1; 
+ 	IF I>=10 THEN B1=FALSE; 
+ 	WRITE(6) I, B1; 
+ END; 
+ WRITE(6) 'Test DO WHILE FALSE; should be nothing between here ...'; 
+ DO WHILE FALSE; WRITE(6) ' SOMETHING!'; END; 
+ WRITE(6) '... and here.'; 
  
- WRITE(6) 'DO UNTIL and RANDOMG test:'; 
+ WRITE(6) 'Print 10 random (Gaussian) with DO UNTIL arithmetical comparison:'; 
  I=0; DO UNTIL I >= 10; I=I+1; WRITE(6) I, RANDOMG; END; 
- 
- WRITE(6) 'RUNTIME test (increment once per second):'; 
+ WRITE(6) 'Test DO UNTIL FALSE; should be SOMETHING between here ...'; 
+ DO UNTIL TRUE; WRITE(6) ' SOMETHING!'; END; 
+ WRITE(6) '... and here.'; 
+ WRITE(6) 'Built-in RUNTIME function testS (increment once per second):'; 
  I=1; 
  M=ROUND(RUNTIME); 
  DO WHILE I <= 10; 
@@ -54,7 +114,7 @@
  	M = L; 
  END; 
  
- WRITE(6) 'Timing test:'; 
+ WRITE(6) 'Execution-speed timing measurement:'; 
  DECLARE STIME, ETIME; 
  STIME = RUNTIME; 
  M = 100000; 
