@@ -37,17 +37,21 @@ except ModuleNotFoundError:
             print("Only primitive line-editing facilities are available.")
             rlModule = None
             readlinePresent = False
+'''
 if readlinePresent:
     print("Note: Input-line prompts may temporarily disappear when using " + \
           "editing keys ↑, ↓, or BACKSPACE.")
+'''
 
 #-------------------------------------------------------------------------
 
+import re
 import atexit
 from processSource import processSource
 from palmatAux import constructPALMAT, writePALMAT, readPALMAT, collectGarbage
 from p_Functions import removeIdentifier, removeAllIdentifiers, substate
 from executePALMAT import executePALMAT, setupExecutePALMAT
+from replaceBy import bareIdentifierPattern
 
 # The following makes the buffer for user input persistent, or at least tries
 # to.  It works for me anyway.
@@ -421,10 +425,29 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
         substate["errors"] = []
         substate["warnings"] = []
         identifiers = PALMAT["scopes"][0]["identifiers"]
+        
+        # Get rid of all scopes and identifiers that will definitely be unusable
+        # after the next tranche of HAL/S code is processed, leaving only those
+        # which might still be useful.
         collectGarbage(PALMAT)
+        # All existing macros are discarded before processing the next HAL/S.
+        # However, some of those (like prefixing "c_" to character variable
+        # names) remain useful, and indeed necessary.  We regenerate those
+        # from the identifier list.
+        macros = [{}]
+        macro0 = macros[0]
+        for identifier in identifiers:
+            identifier = identifier[1:-1]
+            if None != re.fullmatch("[lbcse]f?_" + bareIdentifierPattern, \
+                                    identifier):
+                fields = identifier.split("_")
+                macro0[fields[1]] = { "arguments": [], 
+                            "replacement": identifier, 
+                            "pattern": "\\b" + fields[1] + "\\b" }
+        
         success, ast = processSource(PALMAT, halsSource, metadata, \
                          libraryFilename, structureTemplates, noCompile, \
-                         lbnf, bnf, trace1, wine, trace2, 8)
+                         lbnf, bnf, trace1, wine, trace2, 8, macros)
         if len(substate["warnings"]):
             for warning in substate["warnings"]:
                 print("Warning:", warning)

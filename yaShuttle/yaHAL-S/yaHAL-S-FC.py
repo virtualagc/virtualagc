@@ -60,8 +60,8 @@ import sys
 #import reorganizer
 #from pass1 import tokenizeAndParse, tmpFile, compiler, astPrint, captured
 from processSource import processSource
-from interpreterLoop import interpreterLoop
 from palmatAux import constructPALMAT
+from pass1 import parms
 
 #Parse the command-line arguments.
 tabSize = 8
@@ -126,7 +126,7 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
                         not execute source code input interactively, 
                         although it processes it normally in all other
                         ways.
-        """ % compiler)
+        """ % parms["compiler"])
         sys.exit(0)
     elif param == "--interactive":
         interactive = True
@@ -145,7 +145,7 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
         bnf = True
         lbnf = False
     elif param[:11] == "--compiler=":
-        compiler = param[11:]
+        parms["compiler"] = param[11:]
     elif param == "--trace":
         trace = True
     elif param == "--no-library":
@@ -216,6 +216,7 @@ if not interactive:
                     structureTemplates,
                     noCompile, lbnf, bnf, trace)
 else:
+    from interpreterLoop import interpreterLoop
     interpreterLoop(libraryFilename, structureTemplates, colorize, \
                     not noexec, lbnf, bnf)
 

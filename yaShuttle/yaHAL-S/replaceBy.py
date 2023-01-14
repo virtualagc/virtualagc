@@ -86,7 +86,7 @@ endblockPattern = '(\\b(END|CLOSE)\\s*;)|(\\b(END|CLOSE)\\s+' + \
 startSpecialBlockPattern = \
     ':\\s*PROGRAM\\s*;|:\\s*FUNCTION\\b|:\\s*PROCEDURE\\b|\\bUPDATE\\s*;' + \
     '|:\\s*TASK\\s*;|\\bCOMPOOL\\s*;'
-startblockPattern = startSpecialBlockPattern + '|\\bDO\\b'
+startBlockPattern = startSpecialBlockPattern + '|\\bDO\\b'
 replacePattern = '\\bREPLACE\\s+' + identifierPattern
 argListPattern = '(\\s*\\([^)]+\\))?'
 byPattern = '\\s+BY\\s+"[^"]*"\\s*;'
@@ -181,11 +181,10 @@ def expandMacros(rawline, macros, maxScopes=1000000):
                                     + line[match.span()[1]:]
     return line, changed
 
-debugIndentation = False
-blockDepth = 0
-macros = [{}] # By depth.
-def replaceBy(halsSource, metadata, libraryFilename, templateLibrary):
-    global blockDepth, macros
+def replaceBy(halsSource, metadata, libraryFilename, templateLibrary, \
+              macros=[{}]):
+    debugIndentation = False
+    blockDepth = 0
     
     def removeComments(string):
         while True:
@@ -225,7 +224,7 @@ def replaceBy(halsSource, metadata, libraryFilename, templateLibrary):
         #print("->", fullLine, file=sys.stderr)
         # At beginning of a block?
         if "child" not in metadata[i]:
-            match = re.search(startblockPattern, fullLine)
+            match = re.search(startBlockPattern, fullLine)
             if match != None:
                 if debugIndentation:
                     print(blockDepth, "->", blockDepth+1, \
@@ -266,7 +265,8 @@ def replaceBy(halsSource, metadata, libraryFilename, templateLibrary):
                         else:
                             pattern += "\\s*[^)]+\\s*\\)"
                 match = re.search(byPattern, macroDefinition)
-                replacementString = match.group()[:-1].strip()[3:].strip().strip('"')
+                replacementString = match.group()[:-1].strip()[3:]\
+                                                    .strip().strip('"')
                 macros[-1][macroName] = {   "arguments" : argumentList, 
                                             "replacement" : replacementString, 
                                             "pattern" : pattern }
@@ -293,15 +293,15 @@ def replaceBy(halsSource, metadata, libraryFilename, templateLibrary):
                             hasType = "cf_"
                         elif datatype == "STRUCTURE":
                             hasType = "sf_"
-                if re.search("\\b(FUNCTION|PROCEDURE|PROGRAM|CLOSE|COMPOOL|TASK|UPDATE)\\b", tail) \
+                if re.search("\\b(FUNCTION|PROCEDURE|PROGRAM|CLOSE|COMPOOL" \
+                             + "|TASK|UPDATE)\\b", tail) \
                         != None:
                     isProcedureOrFunction = True
                     if None != re.search("\\b(FUNCTION|PROCEDURE)\\b", tail):
                         lastFunctionProcedure = i
-                else:
-                    macros[-1][identifier] = { "arguments": [], 
-                                "replacement": "l_" + identifier, 
-                                "pattern": "\\b" + identifier + "\\b" }
+                macros[-1][identifier] = { "arguments": [], 
+                            "replacement": hasType + identifier, 
+                            "pattern": "\\b" + identifier + "\\b" }
             else:
                 match = re.search("(GO\\s+TO|REPEAT|EXIT)\\s+" + \
                         bareIdentifierPattern + "\\s*;", fullLine);
@@ -415,19 +415,20 @@ def replaceBy(halsSource, metadata, libraryFilename, templateLibrary):
                 # A new macro via DECLARE?
                 if fullLine[:8] == "DECLARE ":
                     declarations = fullLine[8:-1].strip()
-                    #print("*", "'" + declarations + "'")
-                    # At this point, the declarations string contains the entire 
-                    # DECLARE statement, in which the leading "DECLARE" and 
-                    # trailing ";" have been removed.  There are (say) N fields
-                    # delimited by commas.  But we can't just split the statement
-                    # at commas, because there could be MATRIX, ARRAY, or INITIAL
-                    # qualifiers that also have comms in their parameter lists.
-                    # So we have to engage in some heavy-fancy parsing.  :-(
-                    # Either N identifiers are declared by the statement (for a 
-                    # "simple declare" or "compound declare") or N-1 identifiers
-                    # (for a "factored declare").  A macro is created for each
-                    # declared identifier of BOOLEAN or CHARACTER type.
-                    # Get rid of all matching (possibly nested) parentheses.
+                    '''
+                    At this point, the declarations string contains the entire 
+                    DECLARE statement, in which the leading "DECLARE" and 
+                    trailing ";" have been removed.  There are (say) N fields
+                    delimited by commas.  But we can't just split the statement
+                    at commas, because there could be MATRIX, ARRAY, or INITIAL
+                    qualifiers that also have comms in their parameter lists.
+                    So we have to engage in some heavy-fancy parsing.  :-(
+                    Either N identifiers are declared by the statement (for a 
+                    "simple declare" or "compound declare") or N-1 identifiers
+                    (for a "factored declare").  A macro is created for each
+                    declared identifier of BOOLEAN or CHARACTER type.
+                    Get rid of all matching (possibly nested) parentheses.
+                    '''
                     depth = 0
                     start = -1
                     end = -1

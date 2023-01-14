@@ -43,11 +43,13 @@ path = re.sub("[^/\\\\]*$", "", os.path.realpath(sys.argv[0]))
 # to run.  The test is crude, to say the least, and none of the compilers are
 # really tested much except the one I run on my own computer.  The compiler 
 # executables must be in the PATH.
-compiler = "modernHAL-S-FC" 
+parms = {
+    "compiler": "modernHAL-S-FC" 
+}
 if platform.system() == "Windows":
-    compiler += ".exe"
+    parms["compiler"] += ".exe"
 elif platform.system() == "Darwin":
-    compiler += "-macosx"
+    parms["compiler"] += "-macosx"
 
 """
  Make the "abstract syntax" obtained as a big string from the compiler 
@@ -153,9 +155,9 @@ def makeTree(abstractSyntax, index=0):
 # cumbersome, but I see no way to use the BNF Converter framework otherwise, 
 # at least not in C.
 captured = { "stderr" : [] }
-tokens = {}
 def tokenizeAndParse(sourceList=[], trace=False, wine=False):
-    global captured, tokens
+    global captured
+    tokens = {}
     if trace and tokens == {}:
         try:
             f = open(path + "HAL_S.y")
@@ -176,9 +178,9 @@ def tokenizeAndParse(sourceList=[], trace=False, wine=False):
             f.writelines(sourceList)
             f.close()
         if wine:
-            compilerAndParameters = ["wine", compiler+".exe"]
+            compilerAndParameters = ["wine", parms["compiler"]+".exe"]
         else:
-            compilerAndParameters = [compiler]
+            compilerAndParameters = [parms["compiler"]]
         if trace:
             compilerAndParameters.append("--trace")
         compilerAndParameters.append(tmpFile)

@@ -18,6 +18,10 @@ import re
 # interpreter, there is an assumulation of PALMAT scopes which can no longer
 # accessed, as well as an accumulation of compiler-created identifiers used
 # with those inaccessible scopes.  This subroutine eliminates those.
+autocreatedLabelPattern = "\\^[a-z][a-z]_[0-9]+\\^"
+def isAutocreatedLabel(identifier):
+    return None != re.fullmatch(autocreatedLabelPattern, identifier)
+
 def collectGarbage(PALMAT):
     
     # Recursive function that marks scopes as unreachable.  Scope 0 is always
@@ -62,7 +66,7 @@ def collectGarbage(PALMAT):
     # or no-longer-existent PALMAT instructions.
     identifiers = PALMAT["scopes"][0]["identifiers"]
     for identifier in list(identifiers.keys()):
-        if None != re.fullmatch("\\^[a-z][a-z]_[0-9]+\\^", identifier):
+        if isAutocreatedLabel(identifier):
             identifiers.pop(identifier)
 
 # Add a `debug` PALMAT instruction.
