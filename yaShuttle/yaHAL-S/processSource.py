@@ -65,7 +65,8 @@ def processSource(PALMAT, halsSource, metadata, libraryFilename,
         return line
         
     for i in range(len(halsSource)):
-        halsSource[i] = halsSource[i].replace("¬","~").replace("^","~").replace("¢","`")
+        halsSource[i] = halsSource[i].replace("¬","~")\
+                                .replace("^","~").replace("¢","`")
         halsSource[i] = untab(halsSource[i].rstrip())
 
     # Remove E/M/S multiline constructs. 
@@ -75,14 +76,15 @@ def processSource(PALMAT, halsSource, metadata, libraryFilename,
     fatalCount = unEMS.fatalCount
 
     # Reorganize input lines.
-    success, halsSource, metadata = reorganizer.reorganizer(halsSource, metadata)
+    success, halsSource, metadata = \
+        reorganizer.reorganizer(halsSource, metadata)
 
     # Take care of REPLACE ... BY "..." macros.
     replaceBy.replaceBy(halsSource, metadata, \
                         libraryFilename, structureTemplates)
 
-    # Output the modified source.  If --no-compile, then simply output to stdout.
-    # If not --no-compile, then output to a file called yaHAL_S.tmp.
+    # Output the modified source.  If --no-compile, then simply output to
+    # stdout. If not --no-compile, then output to a file called yaHAL_S.tmp.
     if noCompile:
         f = sys.stdout
     else:
@@ -142,7 +144,8 @@ def processSource(PALMAT, halsSource, metadata, libraryFilename,
     # Additional passes ...
     # TBD
 
-    success = generatePALMAT(ast, PALMAT, { "history" : [], "scopeIndex" : 0 }, trace2)
+    success = generatePALMAT(ast, PALMAT, \
+                             { "history" : [], "scopeIndex" : 0 }, trace2)
 
     return success, ast
     

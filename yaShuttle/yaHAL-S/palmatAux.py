@@ -11,12 +11,81 @@ History:        2023-01-10 RSB  Split off from PALMAT.py.
 """
 
 import json
+import re
+
+# HAL/S has no dynamic memory allocation, so there's no "garbage" in that 
+# sense.  However, when operating this program (yaHAL-S-FC.py) as an 
+# interpreter, there is an assumulation of PALMAT scopes which can no longer
+# accessed, as well as an accumulation of compiler-created identifiers used
+# with those inaccessible scopes.  This subroutine eliminates those.
+def collectGarbage(PALMAT):
+    
+    # Recursive function that marks scopes as unreachable.  Scope 0 is always
+    # reachable, as are any PROGRAM, FUNCTION, PROCEDURE, COMPOOL, etc. blocks
+    # with identifiers in scope 0.  However, DO, DO FOR, DO WHILE, DO UNTIL,
+    # and IF blocks that are children of scope 0 are not.  And all the children
+    # of all blocks unreachable from block 0 are unreachable as well.
+    def findUnreachableScopes(scopeIndex=0, level=0):
+        scope = PALMAT["scopes"][scopeIndex]
+        if level == 0:
+            # This scope (the root, scopeIndex=0) is a keeper, but its
+            # descendents may not be.
+            pass
+        elif level == 1 and scope["type"] not in \
+                ["do", "do for", "do until", "do while", "if"]:
+            # This scope and all of its descendents are keepers.
+            return
+        else:
+            # This scope and all of its descendents are doomed. 
+            # DOOMED, I tell you!
+            scope["unreachable"] = True
+        for child in scope["children"]:
+            findUnreachableScopes(child, level+1)
+    
+    # I think that all of the unreachable scopes are actually at the end of the
+    # list.  But even if I'm wrong, those are the only ones I'm going to 
+    # remove.
+    findUnreachableScopes()
+    children0 = PALMAT["scopes"][0]["children"]
+    for i in range(len(PALMAT["scopes"])-1, 0, -1):
+        if "unreachable" not in PALMAT["scopes"][i]:
+            break
+        PALMAT["scopes"].pop()
+        if i in children0:
+            children0.remove(i)
+    
+    # Get rid of all PALMAT instructions in scope 0.
+    PALMAT["scopes"][0]["instructions"].clear()
+    
+    # Finally, eliminate all identifiers that are compiler-generated 
+    # identifiers, since every single one of them refers to unreachable blocks,
+    # or no-longer-existent PALMAT instructions.
+    identifiers = PALMAT["scopes"][0]["identifiers"]
+    for identifier in list(identifiers.keys()):
+        if None != re.fullmatch("\\^[a-z][a-z]_[0-9]+\\^", identifier):
+            identifiers.pop(identifier)
 
 # Add a `debug` PALMAT instruction.
 def debug(PALMAT, state, message):
     PALMAT["scopes"][state["scopeIndex"]]["instructions"].append({
             'debug': message
         })
+
+# Compute the length of the instructions array, sans 'debug' instructions.
+def lenInstructions(instructions):
+    i = 0
+    for instruction in instructions:
+        if 'debug' not in instruction:
+            i += 1
+    return i
+
+# Pop the topmost instruction that isn't a 'debug'.
+def popInstruction(instructions):
+    while len(instructions) > 0:
+        instruction = instructions.pop()
+        if 'debug' not in instruction:
+            return instruction
+    return None
 
 # Save an internal PALMAT object to a file. (Actually, it's just a conversion
 # of *any* Python object to JSON for writing it to a file, but our use for it
@@ -220,7 +289,8 @@ def exitDo(PALMAT, fromIndex, toIndex):
 # function is to clean that up by adding the "scalar" attribute to any
 # identifiers not explicitly declared as some other type.
 notUnmarkedScalars = ("scalar", "integer", "vector", "matrix", "bit",
-                      "character", "template", "structure", "label")
+                      "character", "template", "structure", "label", 
+                      "procedure", "program", "compool")
 def isUnmarkedScalar(identifierDict):
     for s in notUnmarkedScalars:
         if s in identifierDict:

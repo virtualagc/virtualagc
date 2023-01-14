@@ -652,8 +652,12 @@ ATTRIBUTES : ARRAY_SPEC TYPE_AND_MINOR_ATTR { $$ = make_AAattributes_arraySpec_t
 ;
 DECLARATION : NAME_ID { $$ = make_AAdeclaration_nameId($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | NAME_ID ATTRIBUTES { $$ = make_ABdeclaration_nameId_attributes($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_188 { $$ = make_ACdeclaration_labelToken($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_188 TYPE_AND_MINOR_ATTR { $$ = make_ACdeclaration_labelToken_type_minorAttrList($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_188 _SYMB_120 MINOR_ATTR_LIST { $$ = make_ACdeclaration_labelToken_procedure_minorAttrList($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_188 _SYMB_120 { $$ = make_ADdeclaration_labelToken_procedure($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_188 _SYMB_86 TYPE_AND_MINOR_ATTR { $$ = make_ACdeclaration_labelToken_function_minorAttrList($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_188 _SYMB_86 { $$ = make_ADdeclaration_labelToken_function($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_189 _SYMB_76 { $$ = make_AEdeclaration_eventToken_event($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_189 _SYMB_76 MINOR_ATTR_LIST { $$ = make_AFdeclaration_eventToken_event_minorAttrList($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_189 { $$ = make_AGdeclaration_eventToken($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }

@@ -450,13 +450,17 @@ ATTRIBUTES make_ACattributes_typeAndMinorAttr(TYPE_AND_MINOR_ATTR p0);
 struct DECLARATION_
 {
   int line_number, char_number;
-  enum { is_AAdeclaration_nameId, is_ABdeclaration_nameId_attributes, is_ACdeclaration_labelToken_procedure_minorAttrList, is_ADdeclaration_labelToken_procedure, is_AEdeclaration_eventToken_event, is_AFdeclaration_eventToken_event_minorAttrList, is_AGdeclaration_eventToken, is_AHdeclaration_eventToken_minorAttrList } kind;
+  enum { is_AAdeclaration_nameId, is_ABdeclaration_nameId_attributes, is_ACdeclaration_labelToken, is_ACdeclaration_labelToken_type_minorAttrList, is_ACdeclaration_labelToken_procedure_minorAttrList, is_ADdeclaration_labelToken_procedure, is_ACdeclaration_labelToken_function_minorAttrList, is_ADdeclaration_labelToken_function, is_AEdeclaration_eventToken_event, is_AFdeclaration_eventToken_event_minorAttrList, is_AGdeclaration_eventToken, is_AHdeclaration_eventToken_minorAttrList } kind;
   union
   {
     struct { NAME_ID name_id_; } aadeclaration_nameid_;
     struct { ATTRIBUTES attributes_; NAME_ID name_id_; } abdeclaration_nameid_attributes_;
+    struct { LabelToken labeltoken_; } acdeclaration_labeltoken_;
+    struct { LabelToken labeltoken_; TYPE_AND_MINOR_ATTR type_and_minor_attr_; } acdeclaration_labeltoken_type_minorattrlist_;
     struct { LabelToken labeltoken_; MINOR_ATTR_LIST minor_attr_list_; } acdeclaration_labeltoken_procedure_minorattrlist_;
     struct { LabelToken labeltoken_; } addeclaration_labeltoken_procedure_;
+    struct { LabelToken labeltoken_; TYPE_AND_MINOR_ATTR type_and_minor_attr_; } acdeclaration_labeltoken_function_minorattrlist_;
+    struct { LabelToken labeltoken_; } addeclaration_labeltoken_function_;
     struct { EventToken eventtoken_; } aedeclaration_eventtoken_event_;
     struct { EventToken eventtoken_; MINOR_ATTR_LIST minor_attr_list_; } afdeclaration_eventtoken_event_minorattrlist_;
     struct { EventToken eventtoken_; } agdeclaration_eventtoken_;
@@ -466,8 +470,12 @@ struct DECLARATION_
 
 DECLARATION make_AAdeclaration_nameId(NAME_ID p0);
 DECLARATION make_ABdeclaration_nameId_attributes(NAME_ID p0, ATTRIBUTES p1);
+DECLARATION make_ACdeclaration_labelToken(LabelToken p0);
+DECLARATION make_ACdeclaration_labelToken_type_minorAttrList(LabelToken p0, TYPE_AND_MINOR_ATTR p1);
 DECLARATION make_ACdeclaration_labelToken_procedure_minorAttrList(LabelToken p0, MINOR_ATTR_LIST p1);
 DECLARATION make_ADdeclaration_labelToken_procedure(LabelToken p0);
+DECLARATION make_ACdeclaration_labelToken_function_minorAttrList(LabelToken p0, TYPE_AND_MINOR_ATTR p1);
+DECLARATION make_ADdeclaration_labelToken_function(LabelToken p0);
 DECLARATION make_AEdeclaration_eventToken_event(EventToken p0);
 DECLARATION make_AFdeclaration_eventToken_event_minorAttrList(EventToken p0, MINOR_ATTR_LIST p1);
 DECLARATION make_AGdeclaration_eventToken(EventToken p0);

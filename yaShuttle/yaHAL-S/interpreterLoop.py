@@ -45,7 +45,7 @@ if readlinePresent:
 
 import atexit
 from processSource import processSource
-from palmatAux import constructPALMAT, writePALMAT, readPALMAT
+from palmatAux import constructPALMAT, writePALMAT, readPALMAT, collectGarbage
 from p_Functions import removeIdentifier, removeAllIdentifiers, substate
 from executePALMAT import executePALMAT, setupExecutePALMAT
 
@@ -61,8 +61,6 @@ if rlModule != None:
         pass
 
 setupExecutePALMAT()
-
-maxRecent = 25
 
 helpMenu = \
 '''\tNote: Interpreter commands are case-insensitive, but
@@ -94,6 +92,12 @@ helpMenu = \
 \tPALMAT *     Inspect PALMAT code in all scopes.
 \tEXECUTE      (Re)execute already-compiled PALMAT.
 \tSCOPES       Inspect scope hierarchy.
+\tGARBAGE      Perform "garbage collection".  This is
+\t             done automatically prior to processing
+\t             any newly-input HAL/S, but it may be
+\t             useful sometimes to do it explictly if
+\t             you want to inspect the environment 
+\t             under which the next HAL/S will run.
 \tREMOVE D     Remove identifier D.
 \tREMOVE *     Remove all identifiers.
 \tRESET        Reset all PALMAT.
@@ -121,8 +125,6 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
     trace1 = False
     trace2 = False
     trace3 = False
-    recentHal = []
-    recentMeta = []
     halCode = False
     quitting = False
     halsSource = []
@@ -139,12 +141,6 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
         debugColor = ""
     PALMAT = constructPALMAT()
     while not quitting:
-        if halCode:
-            recentHal.append(halsSource)
-            recentMeta.append(metadata)
-        if len(recentHal) >= maxRecent:
-            recentHal = recentHal[-maxLastLines:]
-            recentMeta = recentMeta[-maxLastLines:]
         halCode = False
         line = " "
         while (spooling or line[-1:] != ";") and not quitting:
@@ -189,21 +185,6 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                 for line in halsSource:
                     print("\t%s" % line)
                 continue
-            elif firstWord == "RERUN":
-                if len(recentHal) == 0:
-                    continue
-                if numWords <= 2:
-                    N = 1
-                    if numWords == 2:
-                        if fields[1].isdigit():
-                            N = int(fields[1])
-                        else:
-                            continue
-                    if N < 1 or N > len(recentHal):
-                        continue
-                    halsSource = recentHal[-N]
-                    metadata = recentMeta[-N]
-                    continue
             elif firstWord == "COLORIZE" and numWords == 2 \
                     and fields[1].lower() in colors:
                 colorName = fields[1].lower()
@@ -387,12 +368,11 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                         print("\tParent:  ", scope["parent"])
                         print("\tChildren:", scope["children"])
                     continue
+                elif firstWord == "GARBAGE":
+                    collectGarbage(PALMAT)
+                    continue
                 elif firstWord == "RESET":
                     PALMAT = constructPALMAT()
-                    continue
-                elif firstWord == "RECENT":
-                    for i in range(len(recentHal)):
-                        print("%2d: %s" % (len(recentHal) - i, recentHal[i]))
                     continue
                 elif firstWord == "WINE":
                     print("\tEnabled Windows version of compiler in Linux.")
@@ -409,54 +389,6 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     colorize = ""
                     continue
                 elif firstWord == "HELP":
-                    '''
-                    print("\tNote: Interpreter commands are case-insensitive, but")
-                    print("\tHAL/S source code is case-sensitive.  The available")
-                    print("\tinterpreter commands are listed below:")
-                    print("\tHELP         Show this menu.")
-                    print("\tQUIT         Quit this interpreter program.")
-                    print("\tSPOOL        Begin spooling all HAL/S source lines for")
-                    print("\t             later processing.  (The default is to")
-                    print("\t             process lines one-by-one upon input, and")
-                    print("\t             to spool only lines not ending in ';'.)")
-                    print("\t             Note that all interpreter commands are")
-                    print("\t             acted upon immediately rather than being")
-                    print("\t             added to the spool.")
-                    print("\tUNSPOOL      Immediately process all spooled lines.")
-                    print("\tREVIEW       Redisplay spooled HAL/S source lines.")
-                    print("\tCOLORIZE C   Enable colorizing (ANSI terminals only).")
-                    print("\t             C is one of the following words: black,")
-                    print("\t             red, green, yellow, blue, magenta, cyan,")
-                    print("\t             white, gray, brightred, brightgreen,")
-                    print("\t             brightyellow, brightblue, brightmagenta,")
-                    print("\t             brightcyan, or brightwhite.")
-                    print("\tNOCOLORIZE   Disable colorized output.")
-                    print("\tWRITE F      Write current PALMAT to a file named F.")
-                    print("\tREAD F       Read PALMAT from a file named F.")
-                    print("\tDATA         Inspect identifiers in root scope.")
-                    print("\tDATA *       Inspect identifiers in all scopes.")
-                    print("\tPALMAT       Inspect PALMAT code in root scope.")
-                    print("\tPALMAT *     Inspect PALMAT code in all scopes.")
-                    print("\tEXECUTE      (Re)execute already-compiled PALMAT.")
-                    print("\tSCOPES       Inspect scope hierarchy.")
-                    print("\tREMOVE D     Remove identifier D.")
-                    print("\tREMOVE *     Remove all identifiers.")
-                    print("\tRESET        Reset all PALMAT.")
-                    print("\tSTATUS       Show current settings and other info.")
-                    print("\tWINE         Enable Windows compiler (Linux only).")
-                    print("\tNOWINE       Disable Windows compiler (Linux only).")
-                    print("\tTRACE1       Enable parser tracing.")
-                    print("\tNOTRACE1     Disable parser tracing.")
-                    print("\tTRACE2       Enable code-generator tracing.")
-                    print("\tNOTRACE2     Disable code-generator tracing.")
-                    print("\tTRACE3       Enable execution tracing.")
-                    print("\tNOTRACE3     Disable execution tracing.")
-                    print("\tLBNF         Show abstract syntax trees in LBNF.")
-                    print("\tBNF          Show abstract syntax trees in BNF.")
-                    print("\tNOAST        Don't show abstract syntax trees.")
-                    print("\tEXEC         Execute the HAL/S code.")
-                    print("\tNOEXEC       Don't execute the HAL/S code.")
-                    '''
                     print(helpMenu)
                     continue
             if len(fields) > 3 and fields[0] == "D" and fields[1] == "INCLUDE" \
@@ -474,7 +406,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
         if quitting:
             break 
         
-        # For whatever reason, just feed nothing but blanks into the compiler
+        # For whatever reason, just feeding nothing but blanks into the compiler
         # returns an error, which is not something I want, so detect that case
         # separately and avoid it.
         allEmpty = True
@@ -489,12 +421,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
         substate["errors"] = []
         substate["warnings"] = []
         identifiers = PALMAT["scopes"][0]["identifiers"]
-        # Get rid of all auto-generated labels from the preceding line.
-        
-        for i in list(identifiers.keys()):
-            fields = i[1:-1].split("_")
-            if len(fields) == 2 and fields[0].islower() and fields[1].isdigit():
-                identifiers.pop(i)
+        collectGarbage(PALMAT)
         success, ast = processSource(PALMAT, halsSource, metadata, \
                          libraryFilename, structureTemplates, noCompile, \
                          lbnf, bnf, trace1, wine, trace2, 8)

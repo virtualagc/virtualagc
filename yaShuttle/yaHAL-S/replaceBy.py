@@ -510,7 +510,8 @@ def replaceBy(halsSource, metadata, libraryFilename, templateLibrary):
                                     thisType = "bf_"
                                 elif "CHARACTER" in declaration[1:]:
                                     thisType = "cf_"
-                                elif "STRUCTURE" in declaration[2]:
+                                elif len(declaration) > 2 and \
+                                        "STRUCTURE" in declaration[2]:
                                     thisType = "sf_"
                                 else:
                                     thisType = "l_"

@@ -181,6 +181,21 @@ void ppDECLARATION(DECLARATION p, int _i_)
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
+  case is_ACdeclaration_labelToken:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppIdent(p->u.acdeclaration_labeltoken_.labeltoken_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ACdeclaration_labelToken_type_minorAttrList:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppIdent(p->u.acdeclaration_labeltoken_type_minorattrlist_.labeltoken_, 0);
+    ppTYPE_AND_MINOR_ATTR(p->u.acdeclaration_labeltoken_type_minorattrlist_.type_and_minor_attr_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
   case is_ACdeclaration_labelToken_procedure_minorAttrList:
     if (_i_ > 0) renderC(_L_PAREN);
     ppIdent(p->u.acdeclaration_labeltoken_procedure_minorattrlist_.labeltoken_, 0);
@@ -194,6 +209,23 @@ void ppDECLARATION(DECLARATION p, int _i_)
     if (_i_ > 0) renderC(_L_PAREN);
     ppIdent(p->u.addeclaration_labeltoken_procedure_.labeltoken_, 0);
     renderS("PROCEDURE");
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ACdeclaration_labelToken_function_minorAttrList:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppIdent(p->u.acdeclaration_labeltoken_function_minorattrlist_.labeltoken_, 0);
+    renderS("FUNCTION");
+    ppTYPE_AND_MINOR_ATTR(p->u.acdeclaration_labeltoken_function_minorattrlist_.type_and_minor_attr_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ADdeclaration_labelToken_function:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppIdent(p->u.addeclaration_labeltoken_function_.labeltoken_, 0);
+    renderS("FUNCTION");
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
@@ -7225,6 +7257,32 @@ void shDECLARATION(DECLARATION p)
     bufAppendC(')');
 
     break;
+  case is_ACdeclaration_labelToken:
+    bufAppendC('(');
+
+    bufAppendS("ACdeclaration_labelToken");
+
+    bufAppendC(' ');
+
+    shIdent(p->u.acdeclaration_labeltoken_.labeltoken_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ACdeclaration_labelToken_type_minorAttrList:
+    bufAppendC('(');
+
+    bufAppendS("ACdeclaration_labelToken_type_minorAttrList");
+
+    bufAppendC(' ');
+
+    shIdent(p->u.acdeclaration_labeltoken_type_minorattrlist_.labeltoken_);
+  bufAppendC(' ');
+    shTYPE_AND_MINOR_ATTR(p->u.acdeclaration_labeltoken_type_minorattrlist_.type_and_minor_attr_);
+
+    bufAppendC(')');
+
+    break;
   case is_ACdeclaration_labelToken_procedure_minorAttrList:
     bufAppendC('(');
 
@@ -7247,6 +7305,32 @@ void shDECLARATION(DECLARATION p)
     bufAppendC(' ');
 
     shIdent(p->u.addeclaration_labeltoken_procedure_.labeltoken_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ACdeclaration_labelToken_function_minorAttrList:
+    bufAppendC('(');
+
+    bufAppendS("ACdeclaration_labelToken_function_minorAttrList");
+
+    bufAppendC(' ');
+
+    shIdent(p->u.acdeclaration_labeltoken_function_minorattrlist_.labeltoken_);
+  bufAppendC(' ');
+    shTYPE_AND_MINOR_ATTR(p->u.acdeclaration_labeltoken_function_minorattrlist_.type_and_minor_attr_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ADdeclaration_labelToken_function:
+    bufAppendC('(');
+
+    bufAppendS("ADdeclaration_labelToken_function");
+
+    bufAppendC(' ');
+
+    shIdent(p->u.addeclaration_labeltoken_function_.labeltoken_);
 
     bufAppendC(')');
 

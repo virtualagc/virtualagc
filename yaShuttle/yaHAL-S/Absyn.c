@@ -97,6 +97,33 @@ DECLARATION make_ABdeclaration_nameId_attributes(NAME_ID p1, ATTRIBUTES p2)
     tmp->u.abdeclaration_nameid_attributes_.attributes_ = p2;
     return tmp;
 }
+/********************   ACdeclaration_labelToken    ********************/
+DECLARATION make_ACdeclaration_labelToken(LabelToken p1)
+{
+    DECLARATION tmp = (DECLARATION) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ACdeclaration_labelToken!\n");
+        exit(1);
+    }
+    tmp->kind = is_ACdeclaration_labelToken;
+    tmp->u.acdeclaration_labeltoken_.labeltoken_ = p1;
+    return tmp;
+}
+/********************   ACdeclaration_labelToken_type_minorAttrList    ********************/
+DECLARATION make_ACdeclaration_labelToken_type_minorAttrList(LabelToken p1, TYPE_AND_MINOR_ATTR p2)
+{
+    DECLARATION tmp = (DECLARATION) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ACdeclaration_labelToken_type_minorAttrList!\n");
+        exit(1);
+    }
+    tmp->kind = is_ACdeclaration_labelToken_type_minorAttrList;
+    tmp->u.acdeclaration_labeltoken_type_minorattrlist_.labeltoken_ = p1;
+    tmp->u.acdeclaration_labeltoken_type_minorattrlist_.type_and_minor_attr_ = p2;
+    return tmp;
+}
 /********************   ACdeclaration_labelToken_procedure_minorAttrList    ********************/
 DECLARATION make_ACdeclaration_labelToken_procedure_minorAttrList(LabelToken p1, MINOR_ATTR_LIST p2)
 {
@@ -122,6 +149,33 @@ DECLARATION make_ADdeclaration_labelToken_procedure(LabelToken p1)
     }
     tmp->kind = is_ADdeclaration_labelToken_procedure;
     tmp->u.addeclaration_labeltoken_procedure_.labeltoken_ = p1;
+    return tmp;
+}
+/********************   ACdeclaration_labelToken_function_minorAttrList    ********************/
+DECLARATION make_ACdeclaration_labelToken_function_minorAttrList(LabelToken p1, TYPE_AND_MINOR_ATTR p2)
+{
+    DECLARATION tmp = (DECLARATION) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ACdeclaration_labelToken_function_minorAttrList!\n");
+        exit(1);
+    }
+    tmp->kind = is_ACdeclaration_labelToken_function_minorAttrList;
+    tmp->u.acdeclaration_labeltoken_function_minorattrlist_.labeltoken_ = p1;
+    tmp->u.acdeclaration_labeltoken_function_minorattrlist_.type_and_minor_attr_ = p2;
+    return tmp;
+}
+/********************   ADdeclaration_labelToken_function    ********************/
+DECLARATION make_ADdeclaration_labelToken_function(LabelToken p1)
+{
+    DECLARATION tmp = (DECLARATION) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ADdeclaration_labelToken_function!\n");
+        exit(1);
+    }
+    tmp->kind = is_ADdeclaration_labelToken_function;
+    tmp->u.addeclaration_labeltoken_function_.labeltoken_ = p1;
     return tmp;
 }
 /********************   AEdeclaration_eventToken_event    ********************/

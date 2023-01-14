@@ -24,6 +24,38 @@ all accept the current PALMAT and state as input and return a pair consisting
 of a boolean (True for success, False for failure) and the new state.  
 """
 
+'''
+Here's the basic theory of how assignments work.  (I'm not quite
+sure just yet how to handle indexed or structure expressions on
+the left of an assignment, so this just covers simple variables
+on the left right now.)
+
+All of the identifiers we encounter on the LHS of the equals
+sign are stored temporarily in substate["LHS"], which is a list
+holding just the names of those identifiers and nothing else.  If
+any of those variables have no declaration, they're dutifully
+recorded in substate["errors"] instead.
+
+On the RHS of the equals should be an expression.  As we 
+recursively-descend through this expression, the significant items
+(like operators, variables, and constants) are appended to 
+substate["expression"].  When the end of the expression is finally
+reached -- which is detected by generatePALMAT() in the PALMAT
+module -- everything in substate["expression"] is popped and 
+stored in PALMAT["instructions"] in reverse order, as a reverse-polish
+style program; i.e., at runtime those RPN instructions will form
+a program that operates on an execution stack in the emulator, 
+in the end resulting in a single computed value remaining on that 
+runtime execution stack.  Finally, everything in substate["LHS"] is 
+then popped and store in PALMAT["instructions"] as well, again in 
+RPN style.  In the case of these LHS items, the RPN instructions 
+they're stored as are not computational in nature, but instead
+are instructions to take the top of the stack (without removing it
+from the stack) and storing it in a variable.  Finally, 
+PALMAT["instructions"] is topped off with a final RPN instruciton
+to pop the final value from the runtime execution stack.
+'''
+
 import sys
 import copy
 from executePALMAT import findIdentifier
@@ -150,6 +182,13 @@ def stringLiteral(PALMAT, state, s):
         identifiers[s].update(substate["commonAttributes"])
         if s[1:3] == "s_":
             identifiers[s]["structure"] = True
+        if "declaration_labelToken_function" in history or \
+                "nameId_bitFunctionIdentifierToken" in history or \
+                "nameId_charFunctionIdentifierToken" in history or \
+                "declaration_labelToken_function_minorAttrList" in history:
+            identifiers[s]["function"] = True
+        elif "declaration_labelToken_procedure" in history:
+            identifiers[s]["procedure"] = True
         return True, state
     elif state1 == "label_definition":
         '''
@@ -218,9 +257,58 @@ def expressionToInstructions(expression, instructions):
         instructions.append(expression.pop())
                     
 #-----------------------------------------------------------------------------
+# These are lbnfLabels that simply want to be added to the "history" list,
+# and nothing else.  It's safe to call augmentHistory() with any lbnfLabel,
+# because it just ignores the ones it doesn't like.
 
-def expression(PALMAT, state):
-    return True, fixupState(state, fsAugment)
+augmentationCandidates = [
+    "arithConv",
+    "arithExpTerm",
+    "assignment",
+    "attributes_typeAndMinorAttr",
+    "basicStatementDo",
+    "basicStatementExit",
+    "basicStatementGoTo",
+    "basicStatementRepeat",
+    "basicStatementWritePhrase",
+    "bitConstFalse",
+    "bitConstTrue",
+    "bit_id",
+    "bit_exp",
+    "charExpCat",
+    "char_spec",
+    "declaration_labelToken_function",
+    "declaration_labelToken_function_minorAttrList",
+    "declaration_labelToken_procedure",
+    "declaration_list",
+    "declareBody_attributes_declarationList",
+    "declareBody_declarationList",
+    "expression", 
+    "forKey",
+    "forKeyTemporary",
+    "for_list",
+    "ifClauseBitExp",
+    "ifClauseRelExp",
+    "ifStatement",
+    "ifThenElseStatement",
+    "label_definition",
+    "nameId_bitFunctionIdentifierToken",
+    "nameId_charFunctionIdentifierToken",
+    "relational_exp",
+    "then",
+    "true_part",
+    "variable",
+    "write_arg",
+    "write_key",
+    ]
+def augmentHistory(state, lbnfLabel):
+    if lbnfLabel not in augmentationCandidates:
+        return state
+    newState = copy.deepcopy(state)
+    newState["history"].append(lbnfLabel)
+    return newState
+
+#----------------------------------------------------------------------------
 
 def declare_statement(PALMAT, state):
     resetStatement()
@@ -234,30 +322,17 @@ def any_statement(PALMAT, state):
     resetStatement()
     return True, state
     
-def declareBody_declarationList(PALMAT, state):
-    return True, fixupState(state, fsSet)
-    
-def declareBody_attributes_declarationList(PALMAT, state):
-    return True, fixupState(state, fsSet)
-
-def declaration_list(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
+'''
 def identifier(PALMAT, state):
     return True, state
  
 def char_id(PALMAT, state):
     return True, state
  
-def attributes_typeAndMinorAttr(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
 def sQdQName_arithConv(PALMAT, state):
     return True, state
+'''
     
-def arithConv(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
 def arithConv_scalar(PALMAT, state):
     updateCurrentIdentifierAttribute(PALMAT, state, "scalar")
     return True, state
@@ -362,7 +437,6 @@ def level(PALMAT, state):
             state["history"][-1] in ["bitSpecBoolean", "typeSpecChar", 
                     "sQdQName_doublyQualNameHead_literalExpOrStar"]:
         return True, fixupState(state, fsAugment, "number")
-    
     return True, state
 
 def simple_number(PALMAT, state):
@@ -396,43 +470,6 @@ def literalStar(PALMAT, state):
             identifierDict["array"].append("*")
     return True, state
 
-def assignment(PALMAT, state):
-    '''
-    Here's the basic theory of how assignments work.  (I'm not quite
-    sure just yet how to handle indexed or structure expressions on
-    the left of an assignment, so this just covers simple variables
-    on the left right now.)
-    
-    All of the identifiers we encounter on the LHS of the equals
-    sign are stored temporarily in substate["LHS"], which is a list
-    holding just the names of those identifiers and nothing else.  If
-    any of those variables have no declaration, they're dutifully
-    recorded in substate["errors"] instead.
-    
-    On the RHS of the equals should be an expression.  As we 
-    recursively-descend through this expression, the significant items
-    (like operators, variables, and constants) are appended to 
-    substate["expression"].  When the end of the expression is finally
-    reached -- which is detected by generatePALMAT() in the PALMAT
-    module -- everything in substate["expression"] is popped and 
-    stored in PALMAT["instructions"] in reverse order, as a reverse-polish
-    style program; i.e., at runtime those RPN instructions will form
-    a program that operates on an execution stack in the emulator, 
-    in the end resulting in a single computed value remaining on that 
-    runtime execution stack.  Finally, everything in substate["LHS"] is 
-    then popped and store in PALMAT["instructions"] as well, again in 
-    RPN style.  In the case of these LHS items, the RPN instructions 
-    they're stored as are not computational in nature, but instead
-    are instructions to take the top of the stack (without removing it
-    from the stack) and storing it in a variable.  Finally, 
-    PALMAT["instructions"] is topped off with a final RPN instruciton
-    to pop the final value from the runtime execution stack.
-    '''
-    return True, fixupState(state, fsAugment)
-
-def variable(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
 def number(PALMAT, state):
     return True, fixupState(state, fsAugment, "number")
 
@@ -441,81 +478,6 @@ def compound_number(PALMAT, state):
 
 def char_string(PALMAT, state):
     return True, fixupState(state, fsAugment, "string")
-
-def basicStatementWritePhrase(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
-def write_key(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
-def write_arg(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
-def label_definition(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
-def basicStatementGoTo(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
-def basicStatementDo(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
-def ifClauseBitExp(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
-def ifClauseRelExp(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
-def ifThenElseStatement(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
-def ifStatement(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
-def true_part(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
-def bit_exp(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
-def relational_exp(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
-def then(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
-def bit_id(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
-'''
-# Used by various LBNF labels for relational operators, 
-# but not itself corresponding to any specific LBNF label.
-def relationalOpCommon(PALMAT, state, operatorName):
-    instructions = PALMAT["scopes"][state["scopeIndex"]]["instructions"]
-    expression = substate["expression"]
-    expressionToInstructions(expression, instructions)
-    substate["expression"].append({ "operator": operatorName})  
-    return True, state
-
-def relationalOpEQ(PALMAT, state):
-    return relationalOpCommon(PALMAT, state, "==")
-
-def relationalOpNEQ(PALMAT, state):
-    return relationalOpCommon(PALMAT, state, "!=")
-
-def relationalOpLT(PALMAT, state):
-    return relationalOpCommon(PALMAT, state, "<")
-
-def relationalOpGT(PALMAT, state):
-    return relationalOpCommon(PALMAT, state, ">")
-
-def relationalOpLE(PALMAT, state):
-    return relationalOpCommon(PALMAT, state, "<=")
-
-def relationalOpGE(PALMAT, state):
-    return relationalOpCommon(PALMAT, state, ">=")
-
-'''
 
 def while_clause(PALMAT, state):
     currentScope = PALMAT["scopes"][state["scopeIndex"]]
@@ -532,36 +494,6 @@ def whileKeyUntil(PALMAT, state):
         currentScope["type"] = "do until"
     substate["isUntil"] = True
     return True, state
-
-def for_list(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
-def forKey(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
-def forKeyTemporary(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
-def arithExpTerm(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
-def char_spec(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
-def charExpCat(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
-def bitConstTrue(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
-def bitConstFalse(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
-def basicStatementExit(PALMAT, state):
-    return True, fixupState(state, fsAugment)
-
-def basicStatementRepeat(PALMAT, state):
-    return True, fixupState(state, fsAugment)
 
 #-----------------------------------------------------------------------------
 # I think this has to go at the end of the module.
