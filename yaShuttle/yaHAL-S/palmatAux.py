@@ -13,6 +13,13 @@ History:        2023-01-10 RSB  Split off from PALMAT.py.
 import json
 import re
 
+# Add a `debug` PALMAT instruction.
+def debug(PALMAT, state, message):
+    return
+    PALMAT["scopes"][state["scopeIndex"]]["instructions"].append({
+            'debug': message
+        })
+
 # Adds/modifies an attribute for an identifier in an identifier list.
 # The identifier should include its carat quotes.
 def addAttribute(identifiers, identifier, attribute, \
@@ -77,12 +84,6 @@ def collectGarbage(PALMAT):
     for identifier in list(identifiers.keys()):
         if isAutocreatedLabel(identifier):
             identifiers.pop(identifier)
-
-# Add a `debug` PALMAT instruction.
-def debug(PALMAT, state, message):
-    PALMAT["scopes"][state["scopeIndex"]]["instructions"].append({
-            'debug': message
-        })
 
 # Compute the length of the instructions array, sans 'debug' instructions.
 def lenInstructions(instructions):

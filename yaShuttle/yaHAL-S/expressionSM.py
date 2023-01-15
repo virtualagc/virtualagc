@@ -28,13 +28,14 @@ from p_Functions import substate
 # PALMAT.py module, must have some provision for saving either the stateMachine
 # or at least the "compiledExpression" field of the stateMachine before that
 # final call to expressionSM is made.
-def expressionSM(stage, lbnfLabel, PALMAT, state, trace):
+def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
     
     #debug(PALMAT, state, "SM expression %d %s" % (stage, lbnfLabel)) 
     
     stateMachine = state["stateMachine"]
-    owningLabel = stateMachine["owner"]
-    if stage == 0 and lbnfLabel == owningLabel:
+    #owningLabel = stateMachine["owner"]
+    owningDepth = stateMachine["depth"]
+    if stage == 0 and depth == owningDepth: #lbnfLabel == owningLabel:
         # First time called.
         stateMachine["internalState"] = "normal"
         stateMachine["expression"] = []
@@ -58,13 +59,16 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace):
         elif internalState == "waitFunctionName":
             expression.append({ "call": sp })
             internalState = "normal"
-    if stage == 2 and lbnfLabel == owningLabel:
+    if stage == 2 and depth == owningDepth: #lbnfLabel == owningLabel:
         # Transfer the expression stack to the PALMAT instruction queue.
         # But if it's computable at compile-time, then we compute it down
         # to a single number.
         temporaryInstructions = []
         compileTimeComputable = True
         while len(expression) != 0:
+            # Do NOT add breaks to exit this loop once compileTimeExecutable
+            # is known!  It has to run to completion to set up 
+            # temporaryInstructions properly.
             instruction = expression.pop()
             temporaryInstructions.append(instruction)
             if compileTimeComputable:
@@ -72,19 +76,15 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace):
                     identifier = instruction["fetch"]
                     attributes = findIdentifier("^" + identifier + "^", \
                                                 PALMAT, state["scopeIndex"])
-                    #print("*", attributes)
                     if attributes == None or "constant" not in attributes:
                         compileTimeComputable = False
-                        break
                 elif "function" in instruction and \
                         instruction["function"] in \
                             ["RANDOM", "RANDOMG", "DATE", "RUNTIME", 
                              "CLOCKTIME"]:
                     compileTimeComputable = False
-                    break
                 elif "call" in instruction:
                     compileTimeComputable = False
-                    break
         #state[expressions].append(temporaryInstructions)
         if compileTimeComputable:
             # Is computable at compile-time, so let's compute it and just

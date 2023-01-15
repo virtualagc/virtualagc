@@ -118,7 +118,6 @@ def jump (scopes, scope, instructionDict, instructionName):
         instructionDict["symbolicLabel"] = instructionDict[instructionName]
         instructionDict[instructionName] = attributes["label"]
     s = instructionDict[instructionName]
-    #print("*", instructionName, instructionDict, s)
     return tuple(s)
 
 # Convert a stringified HAL/S number (i.e., an INTEGER or SCALAR presented
@@ -279,14 +278,24 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
                 print("Implementation error, unknown binary operator \"%s\"" \
                                                                 % operator)
                 return None
-        elif "fetch" in instruction or "store" in instruction:
+        elif "fetch" in instruction or "store" in instruction or \
+                "storepop" in instruction or "storeupop" in instruction:
             erroredUp = False
+            fetch = False
+            pop = False
+            stackPos = 1
             if "fetch" in instruction:
                 identifier = instruction["fetch"]
                 fetch = True
-            else:
+            elif "store" in instruction:
                 identifier = instruction["store"]
-                fetch = False
+            elif "storepop" in instruction:
+                identifier = instruction["storepop"]
+                pop = True
+            elif "storeupop" in instruction:
+                identifier = instruction["storeupop"]
+                pop = True
+                stackPos = 2
             identifier = "^" + identifier + "^"
             attributes = findIdentifier(scopes, identifier, scopes[scopeNumber])
             if attributes != None:
@@ -301,11 +310,13 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
                         return None
                     
                 else: # store
-                    if len(computationStack) < 1:
-                        print("Implementation error, stack empty for " +
-                              "STORE instruction")
+                    if len(computationStack) < stackPos:
+                        print("Implementation error, stack too short for " +
+                              "STOREXXX instruction")
                         return None
-                    value = computationStack[-1]
+                    value = computationStack[-stackPos]
+                    if pop:
+                        computationStack.pop(-stackPos)
                     if "constant" in attributes:
                         print("Cannot change a value in a CONSTANT.")
                         return None
@@ -574,8 +585,40 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
                 scope = scopes[scopeNumber]
         elif "noop" in instruction:
             pass # Nothing to do!
+        elif "run" in instruction:
+            identifier = "^" + instruction["call"] + "^"
+            attributes = findIdentifier(scopes, identifier, scopes[scopeNumber])
+            if attributes == None:
+                print("Target of RUN not found:", identifier)
+                return None
+            if "program" not in attributes:
+                print("RUN target is not a PROGRAM:", identifier)
+                return None
+            scopeNumber = attributes["scope"]
+            instructionIndex = 0;
+            scope = scopes[scopeNumber]
         elif "call" in instruction:
-            pass
+            identifier = "^" + instruction["call"] + "^"
+            attributes = findIdentifier(scopes, identifier, scopes[scopeNumber])
+            if attributes == None:
+                print("Target of CALL not found:", identifier)
+                return None
+            if "function" not in attributes and "procedure" not in attributes:
+                print("CALL to neither a FUNCTION nor PROCEDURE:", identifier)
+                return None
+            # The return address.
+            computationStack.append([scopeNumber, instructionIndex])
+            # Transfer control.
+            scopeNumber = attributes["scope"]
+            instructionIndex = 0
+            scope = scopes[scopeNumber]
+        elif "return" in instruction:
+            stackPos = instruction["return"]
+            if len(computationStack) < stackPos:
+                print("Implementation error, stack too short on RETURN.")
+                return None
+            scopeNumber, instructionIndex = computationStack.pop(-stackPos)
+            scope = scopes[scopeNumber]
         else:
             print("Implementation error, unknown PALMAT:", instruction)
             return None

@@ -23,7 +23,7 @@ a string literal. The output is a compilation of DO FOR ... END to PALMAT
 instructions.  Those instructions are appended for the PALMAT
 instruction list for the current scope.
 '''
-def doForSM(stage, lbnfLabel, PALMAT, state, trace):
+def doForSM(stage, lbnfLabel, PALMAT, state, trace, depth):
     
     #debug(PALMAT, state, "SM doFor      %d %s" % (stage, lbnfLabel))
     
@@ -148,8 +148,7 @@ def doForSM(stage, lbnfLabel, PALMAT, state, trace):
                         "scalar": True,
                         "double": True 
                         })
-                    instructions.append({"store": id1})
-                    instructions.append({"pop": 1})
+                    instructions.append({"storepop": id1})
                     instructions.extend(finalExpression)
                     id2 = createVariable(currentScope, "ud", {
                         "scalar": True,
@@ -162,16 +161,14 @@ def doForSM(stage, lbnfLabel, PALMAT, state, trace):
                         "scalar": True,
                         "double": True 
                         })
-                    instructions.append({"store": id1})
-                    instructions.append({"pop": 1})
+                    instructions.append({"storepop": id1})
                     id2 = createVariable(currentScope, "ud", {
                         "integer": True, "constant": 1
                         })
                     instructions.append({"fetch": id2 })
                 instructions.append({"fetch": stateMachine["forKey"]})
                 instructions.append({"operator": "-" })
-                instructions.append({"store": stateMachine["forKey"]})
-                instructions.append({"pop": 1})
+                instructions.append({"storepop": stateMachine["forKey"]})
                 stateMachine["forEnd"] = id1
                 #debug(PALMAT, state, "Ending key stored at " + id1)
                 stateMachine["forBY"] = id2
@@ -194,8 +191,7 @@ def doForSM(stage, lbnfLabel, PALMAT, state, trace):
                 the initial assignment of the value to the key, and jump to 
                 the guts of the DO FOR block.
                 '''
-                instructions.append({"store": forKey})
-                instructions.append({"pop": 1})
+                instructions.append({"storepop": forKey})
                 internalState = "waitForEndExpression"
                 stateMachine["pauses"] = []
     stateMachine["internalState"] = internalState

@@ -210,5 +210,50 @@
  WRITE(6) M, 'iterations,', ETIME-STIME, 'seconds, ', 
  	  ROUND(M/(ETIME-STIME)), 'iterations/second.'; 
  
- WRITE(6) 'Done.';
+ WRITE(6) 'Some tests of FUNCTION follow:'; 
+  /* Function that averages 3 floats. */ 
+ AVG3: 
+ FUNCTION(X, Y, Z) SCALAR; 
+ 	DECLARE SCALAR, X, Y, Z, T; 
  
+ 	/* Function that adds 3 floats. */
+ 	ADD3: 
+ 	FUNCTION(X, Y, Z) SCALAR; 
+ 		DECLARE X, Y, Z; 
+ 		DECLARE ADD2 FUNCTION SCALAR; 
+ 		RETURN ADD2(X, ADD2(Y, Z)); 
+ 		
+ 		/* Function that adds 2 floats. */
+ 		ADD2: 
+ 		FUNCTION(X, Y) SCALAR; 
+ 			DECLARE X, Y; 
+ 			RETURN X + Y; 
+ 		CLOSE; 
+ 		
+ 	CLOSE ADD3; 
+ 
+	T = ADD3(X, Y, Z); 
+ 	RETURN T/3; 
+ CLOSE AVG3; 
+ 
+ WRITE(6) 'The following should print out (4+5+7)/3 = 5.33...'; 
+ WRITE(6) AVG3(4, 5, 7); 
+ 
+ /* A "projection" function that picks out just one
+    parameter from among three, using W as an index. */
+ PROJECTION3: 
+ FUNCTION(W, X, Y, Z); 
+ 	DECLARE X, Y, Z; 
+ 	DECLARE W INTEGER; 
+ 	IF W = 1 THEN RETURN X; 
+ 	IF W = 2 THEN RETURN Y; 
+ 	IF W = 3 THEN RETURN Z; 
+ 	RETURN 0; 
+ CLOSE PROJECTION3; 
+ 
+ WRITE(6) 'The following 3 lines should print 100, 200, and 300, respectively.'; 
+ WRITE(6) PROJECTION3(1, 100, 200, 300); 
+ WRITE(6) PROJECTION3(2, 100, 200, 300); 
+ WRITE(6) PROJECTION3(3, 100, 200, 300); 
+ 
+ WRITE(6) 'Done.';

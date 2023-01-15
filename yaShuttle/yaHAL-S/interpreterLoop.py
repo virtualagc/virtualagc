@@ -238,7 +238,15 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     len(fields) == 2 and fields[1] == "*":
                 for i in range(len(PALMAT["scopes"])):
                     scope = PALMAT["scopes"][i]
-                    print("Scope %d:" % i)
+                    if scope["type"] in ["function", "procedure"]:
+                        print("Scope %d, %s %s, parent scope %d:" % \
+                              (i, scope["type"].upper(), scope["name"][1:-1],
+                               scope["parent"]))
+                    elif i > 0:
+                        print("Scope %d, %s, parent scope %d:" % \
+                              (i, scope["type"].upper(), scope["parent"]))
+                    else:
+                        print("Scope %d, %s:" % (i, scope["type"].upper()))
                     instructions = scope["instructions"]
                     if len(instructions) == 0:
                         print("\t(No generated code)")
