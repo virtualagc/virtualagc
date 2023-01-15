@@ -13,6 +13,15 @@ History:        2023-01-10 RSB  Split off from PALMAT.py.
 import json
 import re
 
+# Adds/modifies an attribute for an identifier in an identifier list.
+# The identifier should include its carat quotes.
+def addAttribute(identifiers, identifier, attribute, \
+                 value, overwrite=False):
+    if identifier not in identifiers:
+        identifiers[identifier] = {}
+    if attribute not in identifiers[identifier] or overwrite:
+        identifiers[identifier][attribute] = value
+    
 # HAL/S has no dynamic memory allocation, so there's no "garbage" in that 
 # sense.  However, when operating this program (yaHAL-S-FC.py) as an 
 # interpreter, there is an assumulation of PALMAT scopes which can no longer
@@ -300,4 +309,10 @@ def isUnmarkedScalar(identifierDict):
         if s in identifierDict:
             return False
     return True
+
+def markUnmarkedScalars(identifiers):
+    for i in identifiers:
+        identifier = identifiers[i]
+        if isUnmarkedScalar(identifier):
+            identifier["scalar"] = True
 

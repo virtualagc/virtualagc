@@ -574,6 +574,8 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
                 scope = scopes[scopeNumber]
         elif "noop" in instruction:
             pass # Nothing to do!
+        elif "call" in instruction:
+            pass
         else:
             print("Implementation error, unknown PALMAT:", instruction)
             return None

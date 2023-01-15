@@ -299,9 +299,14 @@ def replaceBy(halsSource, metadata, libraryFilename, templateLibrary, \
                     isProcedureOrFunction = True
                     if None != re.search("\\b(FUNCTION|PROCEDURE)\\b", tail):
                         lastFunctionProcedure = i
-                macros[-1][identifier] = { "arguments": [], 
-                            "replacement": hasType + identifier, 
-                            "pattern": "\\b" + identifier + "\\b" }
+                # Note that these macros have to be defined in the parent
+                # context rather than in the block's context, since the names
+                # of the PROGRAM/FUNCTION/PROCEDURE/... will be referenced from
+                # the parent and thus needs to be accessible to it.
+                if identifier not in macros[-2]:
+                    macros[-2][identifier] = { "arguments": [], 
+                                "replacement": hasType + identifier, 
+                                "pattern": "\\b" + identifier + "\\b" }
             else:
                 match = re.search("(GO\\s+TO|REPEAT|EXIT)\\s+" + \
                         bareIdentifierPattern + "\\s*;", fullLine);

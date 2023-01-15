@@ -58,6 +58,7 @@ to pop the final value from the runtime execution stack.
 
 import sys
 import copy
+from palmatAux import addAttribute
 from executePALMAT import findIdentifier
 
 # This is persistent statelike information, unlike the "state" parameter
@@ -159,7 +160,8 @@ def stringLiteral(PALMAT, state, s):
             except:
                 pass
     scopeIndex = state["scopeIndex"]
-    scope = PALMAT["scopes"][scopeIndex]
+    scopes = PALMAT["scopes"]
+    scope = scopes[scopeIndex]
     identifiers = scope["identifiers"]
     instructions = scope["instructions"]
     if len(history) == 0:
@@ -186,16 +188,21 @@ def stringLiteral(PALMAT, state, s):
                 "nameId_bitFunctionIdentifierToken" in history or \
                 "nameId_charFunctionIdentifierToken" in history or \
                 "declaration_labelToken_function_minorAttrList" in history:
-            identifiers[s]["function"] = True
+            addAttribute(identifiers, s, "function", True)
+            addAttribute(identifiers, s, "scope", len(scopes))
+            addAttribute(identifiers, s, "parameters", [])
         elif "declaration_labelToken_procedure" in history:
             identifiers[s]["procedure"] = True
         return True, state
+    elif state1 == "parameter":
+        identifier = substate["currentIdentifier"]
+        identifiers[identifier]["parameters"].append(s[1:-1])
+    elif "function_name" in history:
+        substate["currentIdentifier"] = s
+        addAttribute(identifiers, s, "function", True)
+        addAttribute(identifiers, s, "scope", len(scopes))
+        addAttribute(identifiers, s, "parameters", [])
     elif state1 == "label_definition":
-        '''
-        if s in identifiers:
-            print("Multiple definitions for", sp)
-            return False, state
-        '''
         identifiers[s] = { "label" : [scopeIndex, len(instructions)] }
     elif state1 in ["basicStatementExit", "basicStatementRepeat"]:
         substate["labelExitRepeat"] = s
@@ -275,6 +282,7 @@ augmentationCandidates = [
     "bitConstTrue",
     "bit_id",
     "bit_exp",
+    "blockHeadFunction",
     "charExpCat",
     "char_spec",
     "declaration_labelToken_function",
@@ -287,6 +295,8 @@ augmentationCandidates = [
     "forKey",
     "forKeyTemporary",
     "for_list",
+    "func_stmt_body",
+    "function_name",
     "ifClauseBitExp",
     "ifClauseRelExp",
     "ifStatement",
@@ -294,6 +304,8 @@ augmentationCandidates = [
     "label_definition",
     "nameId_bitFunctionIdentifierToken",
     "nameId_charFunctionIdentifierToken",
+    "parameter",
+    "prePrimaryFunction",
     "relational_exp",
     "then",
     "true_part",
@@ -321,17 +333,6 @@ def structure_stmt(PALMAT, state):
 def any_statement(PALMAT, state):
     resetStatement()
     return True, state
-    
-'''
-def identifier(PALMAT, state):
-    return True, state
- 
-def char_id(PALMAT, state):
-    return True, state
- 
-def sQdQName_arithConv(PALMAT, state):
-    return True, state
-'''
     
 def arithConv_scalar(PALMAT, state):
     updateCurrentIdentifierAttribute(PALMAT, state, "scalar")

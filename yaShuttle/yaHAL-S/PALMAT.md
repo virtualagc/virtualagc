@@ -196,6 +196,10 @@ Thus the emulator would have to perform a little more work upon entry to such a 
 
 **Note:** Regarding the so-called `TEMPORARY` variables:  Although the documentation fusses over them as if they were something special, to the point of making it seem tricky to implement them, in fact at execution time `TEMPORARY` is just a drop-in replacement for `DECLARE`.  The distinction is entirely syntactical, in that you can only use `DECLARE` in blocks that end with `CLOSE`, whereas you can only use `TEMPORARY` in blocks that end with `END`.  (Well, and there's an extra way to declare temporary integer variables with `FOR TEMPORARY I=... END` vs `FOR I=... END`.)  However, given our underlying model of scopes, there's actually no distinction at all between temporary and non-temporary variables at runtime.  A `TEMPORARY` variable is merely a variable whose scope happens to be a `DO ... END` block rather than (say) a `PROGRAM` or `FUNCTION` block.
 
+## Multiprocessing and Reentrancy
+
+So far I've just been considering single-threaded program execution.  The memory model described above will need modification for the conditions in which code in a given scope might have two or more instantiations simultaneously, and I haven't given any consideration as of yet to that problem.  I'll worry about that once support for single-threaded operation is correct and reasonably comprehensive.
+
 ## Automated Labels Within Scopes
 
 For maneuvering within and between scopes, certain types of symbolic labels for certain roles within the scopes are very-commonly needed, and it is necessary for the code-generator to be able to create them systematically on the fly in order to effectively use the scopes.  The techique for doing so is to create labels is usually according to the following pattern,
@@ -363,6 +367,66 @@ For example, here are some PALMAT instructions appropriate for `WRITE(6) A+5, A*
 * `{'iftrue': s}`.  Pops entry from expression stack and if True performs equivalent of a `{'goto': s}`.
 * `{'debug': s}`.  These instructions are ignored during execution, and are useful for inserting debugging information.
 * `{''+><': 'X'}`.  In contrast to all of the PALMAT instructions discussed so far, which are intended to be used as simple building-blocks for more-complex operations, the present instruction is provided for use with HAL/S code of the form `DO FOR [TEMPORARY] X = Y TO Z BY T; ... END;`.  It is used to perform the update `X = X + T` and then to determine whether this new value of `X` has "exceeded" `Z`.  The latter is tricky because it's equivalent to `X + T > Z` if `T` is itself positive, but it's equivalent to `X + T < Z` when `T` is negative.  Of course, this *could* all be programmed using the simple building-block instead, but it's quite cumbersome to do so.  Specifically, how the `+><` instruction works is as follows:  It assumes that Z is the 2nd entry from the top of the stack, while `T` is at the top of the stack.  It performs the equivalent of the PALMAT instructions `{'fetch': X}`, `{'operator': '+'}`, and `{'store': X}`. Recall that this would leave `Z` and `X`+`T` at the top of the stack.  Depending on whether `T` had been positive or negative, it then performs the equivalent of either the PALMAT instruction `{'operator': '>'}` or `{'operator': '<'}`, respectively.
+
+## Subroutine Linkage
+
+Suppose that a subroutine has `N` parameters `X`<sub>1</sub> through `X`<sub>`N`</sub>.  Recall that a child scope of the parent scope in which the subroutine is defined is created to hold the subroutine's PALMAT code and identifiers. 
+
+When the subroutine is called at runtime, `X`<sub>`1`</sub> is the top element of the stack, `X`<sub>`2`</sub> next-to-top, and so on. This is identical to the setup for the so-called "built-in" functions like `ARCTAN2`.
+
+When the subroutine executes, it pops all `N` of these values from the expression stack.  And if the subroutine is a `FUNCTION` (thus returning a value), the return value is pushed onto the stack in place of the original `N` values.  Again, this is the same as for built-in functions.  If a `PROCEDURE`, there is no return value, and so no additional value is pushed onto the expression stack.
+
+For example, suppose we have an `INTEGER` `FUNCTION`, `F(X,Y,Z)`, whose definition begins in scope `K`, but whose own scope is `L`; suppose further that the function is being called from code in scope `M`.  `FUNCTION F` will be accessible to scope `K` or any of its descendent scopes: i.e., scope `M` must be scope `K` itself or else some descendent.
+
+In scope `K`, showing just the aspects relevant to this example, we have
+
+    PALMAT["scopes"][K] = {
+        "parent": ...,
+        "self": K,
+        "children": [..., L],
+        "identifiers": {
+            ... ,
+            "^l_F^": {
+                "scope": L,
+                "function": True,
+                "integer": True,
+                "parameters": ["X", "Y", "Z"],
+                ...
+            },
+            ...
+        },
+        "instructions": [ ... ],
+        ...
+    }
+
+(Recall that strings such as the identifier name are "quoted" with the carat symbol ^ in under some circumstances, such as the one right now, and that certain types of identifier names are mangled by the preprocessor: in this case, with the added prefix "l_".  Thus "F" becomes "^l_F^".)
+
+Whereas scope `L`, containing the identifier list and PALMAT instructions for the `F FUNCTION` itself, has no unusual features on which to remark:
+
+    PALMAT["scopes"][L] = {
+        "parent": K,
+        "self": L,
+        "children": [...],
+        "identifiers": { ... },
+        "instructions": [ ... ],
+        ...
+    }
+
+Nor do specific changes need to occur in scope `M`, other than that the PALMAT instructions have to perform the subroutine linkage properly.  Those instructions must set up the expression stack (growing from left to right) as follows:
+
+    ... stuff already on the stack ..., X, Y, Z
+
+and then execute the PALMAT instruction
+
+    { 'call': '^l_F^' }
+
+After that return, the expression stack will look like
+
+    ... stuff already on the stack ..., returnValue
+
+`PROCEDURE`s are similar, except that there is no `returnValue` left on the expression stack.
+
+One subtlety I've glossed over is that the PALMAT instruction `call` differs from the PALMAT instruction `function` (used for the built-in functions), not only in the fact that these `FUNCTION`s and `PROCEDURE`s constitute a different namespace than the HAL/S built-in functions, but also in that just prior to transferring control to the child scope (in this case, `L`), the PALMAT `call` instruction somehow stores the return address so that it can be applied later upon a return from the subroutine.  In contrast, the `function` instruction has no need to do that since it never transfers control to a different PALMAT instruction.  The manner in which these manipulations of the return address are performed for `FUNCTION`s and `PROCEDURE`s is yet to be determined, but in any case is transparent to the PALMAT code-generation process.
 
 ## Optimizations
 

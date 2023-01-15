@@ -368,9 +368,14 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     for i in range(len(PALMAT["scopes"])):
                         scope = PALMAT["scopes"][i]
                         print("Scope %d:" % i)
-                        print("\tType:    ", scope["type"])
-                        print("\tParent:  ", scope["parent"])
-                        print("\tChildren:", scope["children"])
+                        print("\ttype:      ", scope["type"])
+                        print("\tparent:    ", scope["parent"])
+                        print("\tchildren:  ", scope["children"])
+                        if scope["type"] in ["function", "procedure"]:
+                            fields = scope["name"][1:-1].split("_")
+                            print("\tname:       %s (%s)" % \
+                                    (fields[1], scope["name"][1:-1]))
+                            print("\tattributes:", scope["attributes"])
                     continue
                 elif firstWord == "GARBAGE":
                     collectGarbage(PALMAT)

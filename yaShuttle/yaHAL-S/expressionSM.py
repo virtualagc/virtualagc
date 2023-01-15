@@ -55,6 +55,9 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace):
         elif internalState == "waitCharString":
             expression.append({ "string": sp[1:-1] })
             internalState = "normal"
+        elif internalState == "waitFunctionName":
+            expression.append({ "call": sp })
+            internalState = "normal"
     if stage == 2 and lbnfLabel == owningLabel:
         # Transfer the expression stack to the PALMAT instruction queue.
         # But if it's computable at compile-time, then we compute it down
@@ -72,11 +75,16 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace):
                     #print("*", attributes)
                     if attributes == None or "constant" not in attributes:
                         compileTimeComputable = False
+                        break
                 elif "function" in instruction and \
                         instruction["function"] in \
                             ["RANDOM", "RANDOMG", "DATE", "RUNTIME", 
                              "CLOCKTIME"]:
                     compileTimeComputable = False
+                    break
+                elif "call" in instruction:
+                    compileTimeComputable = False
+                    break
         #state[expressions].append(temporaryInstructions)
         if compileTimeComputable:
             # Is computable at compile-time, so let's compute it and just
@@ -179,6 +187,8 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace):
             stateMachine["relationalOperator"] = { "operator": "<=" }
         elif lbnfLabel == "relationalOpGE":
             stateMachine["relationalOperator"] = { "operator": ">=" }
+        elif lbnfLabel == "prePrimaryFunction":
+            internalState = "waitFunctionName"
     stateMachine["internalState"] = internalState
     return True
         

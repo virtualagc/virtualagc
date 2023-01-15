@@ -12,6 +12,7 @@ History:        2022-12-19 RSB  Created.
 
 import json
 import p_Functions
+substate = p_Functions.substate
 from palmatAux import *
 from executePALMAT import executePALMAT, hround
 from expressionSM import expressionSM
@@ -31,7 +32,7 @@ def traceIt(state, lbnfLabel, beforeAfter="before", trace=True):
         state["stateMachine"] = stateMachine
     else:
         print("\tstate         =", state)
-    print("\tsubstate      =", p_Functions.substate)
+    print("\tsubstate      =", substate)
 
 '''
 Here's the idea:  generatePALMAT() is a recursive function that works its
@@ -164,7 +165,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             # an expression (including relational expressions).
             for e in reversed(endLabels):
                 if e["lbnfLabel"] == "basicStatementDo":
-                    if "isUntil" in p_Functions.substate:
+                    if "isUntil" in substate:
                         state["stateMachine"]["expressionFlush"] = \
                                                         e["expressionFlush"]
                         break
@@ -275,11 +276,11 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             if ancestor not in state["history"]:
                 continue
             p_Functions.expressionToInstructions( \
-                p_Functions.substate["expression"], \
+                substate["expression"], \
                 currentScope["instructions"])
             for entry in reversed(endLabels):
                 if entry["lbnfLabel"] == ancestor:
-                    isUntil = "isUntil" in p_Functions.substate
+                    isUntil = "isUntil" in substate
                     entry["used"] = True
                     if ancestor == "ifThenElseStatement":
                         jumpToTarget(PALMAT, currentIndex, currentIndex, \
@@ -293,15 +294,56 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                                 e["recycle"] = True
                                 break;
                         if isUntil:
-                            p_Functions.substate.pop("isUntil")
+                            substate.pop("isUntil")
                     break
             break
     # Below are various other patterns not covered by lbnfLabelPatterns above.
     # The lbnfLabel of the relevant component must not be the same as any key 
     # in lbnfLabelPatterns.
+    elif lbnfLabel == "declare_group" and \
+            currentScope["type"] in ["function", "procedure"]:
+        for parameter in currentScope["attributes"]["parameters"]:
+            identifiers = currentScope["identifiers"]
+            instructions = currentScope["instructions"]
+            identifier = "^" + parameter + "^"
+            if identifier not in identifiers:
+                identifier = "^c_" + parameter + "^"
+                if identifier not in identifiers:
+                    identifier = "^b_" + parameter + "^"
+                    if identifier not in identifiers:
+                        identifier = "^s_" + parameter + "^"
+                        if identifier not in identifiers:
+                            identifier = "^e_" + parameter + "^"
+                            if identifier not in identifiers:
+                                print("Implementation error, can't find", \
+                                      parameter)
+                                endLabels.pop()
+                                return False, PALMAT
+            instructions.append({'store': identifier[1:-1]})
+            instructions.append({'pop': 1})
+    elif lbnfLabel == "basicStatementReturn":
+        currentScope["instructions"].append({'return': True})
+    elif lbnfLabel == "closing":
+        instructions = currentScope["instructions"]
+        if currentScope["type"] in ["function", "procedure"] and \
+                (len(instructions) == 0 or 'return' not in instructions[-1]):
+            instructions.append({'return': True})
+        parentIndex = currentScope["parent"]
+        state["scopeIndex"] = parentIndex
+        currentScope = PALMAT["scopes"][parentIndex]
+    elif lbnfLabel == "blockHeadFunction":
+        identifierDict = \
+          currentScope["identifiers"][substate["currentIdentifier"]]
+        if isUnmarkedScalar(identifierDict):
+            identifierDict["scalar"] = True
+        childIndex = addScope(PALMAT, currentScope["self"], "function")
+        state["scopeIndex"] = childIndex
+        currentScope = PALMAT["scopes"][childIndex]
+        currentScope["name"] = substate["currentIdentifier"]
+        currentScope["attributes"] = identifierDict
     elif lbnfLabel == "true_part":
         p_Functions.expressionToInstructions( \
-            p_Functions.substate["expression"], currentScope["instructions"])
+            substate["expression"], currentScope["instructions"])
         endLabels[-2]["used"] = True
         jumpToTarget(PALMAT, currentIndex, currentIndex, "ux", "goto")
         if createTarget(PALMAT, currentIndex, currentIndex, "uf") == None:
@@ -309,22 +351,18 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     elif lbnfLabel == "assignment":
         instructions = currentScope["instructions"]
         p_Functions.expressionToInstructions( \
-            p_Functions.substate["expression"], instructions)
-        instructions.append({ "store": p_Functions.substate["lhs"][-1] })
-        p_Functions.substate["lhs"].pop()
-        if len(p_Functions.substate["lhs"]) == 0:
+            substate["expression"], instructions)
+        instructions.append({ "store": substate["lhs"][-1] })
+        substate["lhs"].pop()
+        if len(substate["lhs"]) == 0:
             instructions.append({ "pop": 1 })
     elif lbnfLabel == "basicStatementWritePhrase":
         instructions = currentScope["instructions"]
         p_Functions.expressionToInstructions( \
-            p_Functions.substate["expression"], instructions)
-        instructions.append({ "write": p_Functions.substate["LUN"] })
+            substate["expression"], instructions)
+        instructions.append({ "write": substate["LUN"] })
     elif lbnfLabel == "declare_statement":
-        identifiers = currentScope["identifiers"]
-        for i in identifiers:
-            identifier = identifiers[i]
-            if isUnmarkedScalar(identifier):
-                identifier["scalar"] = True
+        markUnmarkedScalars(currentScope["identifiers"])
     elif lbnfLabel == "repeated_constant":
         '''
         We get to here after an INITIAL(...) or CONSTANT(...)
@@ -340,7 +378,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         '''
         identifiers = currentScope["identifiers"]
         instructions = currentScope["instructions"]
-        currentIdentifier = p_Functions.substate["currentIdentifier"]
+        currentIdentifier = substate["currentIdentifier"]
         '''
         Note that the expression state machine should have left
         a single value on the instruction queue if the expression
@@ -370,7 +408,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         if currentIdentifier != "":
             identifierDict = identifiers[currentIdentifier]
         else:
-            identifierDict = p_Functions.substate["commonAttributes"]
+            identifierDict = substate["commonAttributes"]
         if isUnmarkedScalar(identifierDict):
             identifierDict["scalar"] = True
         if "initial" in identifierDict and "constant" in identifierDict:
@@ -411,7 +449,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         # For DECLARE C CHARACTER(...);
         identifiers = currentScope["identifiers"]
         instructions = currentScope["instructions"]
-        currentIdentifier = p_Functions.substate["currentIdentifier"]
+        currentIdentifier = substate["currentIdentifier"]
         # Note that the expression state machine should have left
         # a single number on the instruction queue if the expression
         # was computable at compile time.
@@ -421,7 +459,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             if currentIdentifier != "":
                 identifierDict = identifiers[currentIdentifier]
             else:
-                identifierDict = p_Functions.substate["commonAttributes"]
+                identifierDict = substate["commonAttributes"]
             identifierDict["character"] = maxLen
         except:
             print("Computation of CHARACTER(...) failed:", value, instructions)
@@ -431,10 +469,10 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             return False, PALMAT
     elif lbnfLabel in ["basicStatementExit", "basicStatementRepeat"]:
         loopScope = findEnclosingLoop(PALMAT, currentScope)
-        if 'labelExitRepeat' in p_Functions.substate:
+        if 'labelExitRepeat' in substate:
             currentScope["instructions"].append({
-                'goto': p_Functions.substate['labelExitRepeat']})
-            p_Functions.substate.pop('labelExitRepeat')
+                'goto': substate['labelExitRepeat']})
+            substate.pop('labelExitRepeat')
         else:
             if loopScope == None:
                 print("No enclosing loop found for EXIT.")
