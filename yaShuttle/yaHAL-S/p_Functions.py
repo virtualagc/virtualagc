@@ -198,6 +198,15 @@ def stringLiteral(PALMAT, state, s):
         identifier = substate["currentIdentifier"]
         identifiers[identifier]["parameters"].append(s[1:-1])
     elif "function_name" in history:
+        for i in scope["children"]:
+            if "name" in PALMAT["scopes"][i] and \
+                    s == PALMAT["scopes"][i]["name"]:
+                substate["warnings"]\
+                    .append("Subroutine %s already exists; removing" % s[1:-1])
+                scope["children"].remove(i)
+                identifiers.pop(s)
+                PALMAT["scopes"][i]["parent"] = None
+                break
         substate["currentIdentifier"] = s
         addAttribute(identifiers, s, "function", True)
         addAttribute(identifiers, s, "scope", len(scopes))
@@ -246,6 +255,9 @@ def stringLiteral(PALMAT, state, s):
         if identDict == None: 
             substate["errors"].append("LHS identifier " + sp + \
                                       " of assignment undeclared.")
+        if "constant" in identDict or "parameter" in identDict:
+            substate["errors"]\
+                .append("Assignment to a constant or formal parameter.")
         substate["lhs"].append(sp)
     return True
 

@@ -15,6 +15,7 @@ import re
 import math
 import random
 import time
+import copy
 from decimal import Decimal, ROUND_HALF_UP
 
 timeOrigin = 0
@@ -314,29 +315,37 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
                         print("Implementation error, stack too short for " +
                               "STOREXXX instruction")
                         return None
-                    value = computationStack[-stackPos]
+                    value = copy.deepcopy(computationStack[-stackPos])
                     if pop:
                         computationStack.pop(-stackPos)
                     if "constant" in attributes:
-                        print("Cannot change a value in a CONSTANT.")
+                        print("Cannot change value of constant %s." \
+                              % identifier[1:-1])
+                        return None
+                    if "parameter" in attributes and \
+                            "storeupop" not in instruction:
+                        print("Cannot change a formal parameter %s." \
+                              % identifier[1:-1])
                         return None
                     if isinstance(value, str):
                         if "character" not in attributes:
                             print("Cannot store string in non-CHARACTER " +
-                                  "variable.")
+                                  "variable %s." % identifier[1:-1])
                             return None
                         maxlen = attributes["character"]
                         value = value[:maxlen]
                     elif isinstance(value, bool):
                         if "bit" not in attributes:
                             print("Cannot store bit/boolean in " +
-                                  "non-bit/boolean variable.")
+                                  "non-bit/boolean variable %s." \
+                                  % identifier[1:-1])
                             return None
                     elif isinstance(value, (float, int)):
                         if "scalar" not in attributes and \
                                 "integer" not in attributes:
                             print("Cannot store arithmetic value in " + \
-                                  "non-integer/scalar variable.")
+                                  "non-integer/scalar variable %s." \
+                                  % identifier[1:-1])
                             return None
                         if "integer" in attributes:
                             value = hround(value)

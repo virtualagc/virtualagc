@@ -52,6 +52,8 @@ def allDeclaredParameters(currentScope):
                         if identifier not in identifiers:
                             continue
         declared[parameter] = identifier
+        if "parameter" not in identifiers[identifier]:
+            identifiers[identifier]["parameter"] = True
     return declared
 
 '''

@@ -62,9 +62,18 @@ def collectGarbage(PALMAT):
         for child in scope["children"]:
             findUnreachableScopes(child, level+1)
     
-    # I think that all of the unreachable scopes are actually at the end of the
-    # list.  But even if I'm wrong, those are the only ones I'm going to 
-    # remove.
+    def findObsoleted(scopeIndex):
+        scope = PALMAT["scopes"][scopeIndex]
+        scope["unreachable"] = True
+        for i in scope["children"]:
+            findObsoleted(scopeIndex)
+    
+    # Scopes disconnected from the root of the tree are unreachable.
+    for i in range(1, len(PALMAT["scopes"])):
+        if PALMAT["scopes"][i]["parent"] == None:
+            findObsoleted(i)
+    
+    # Now look at the still-connected scopes.
     findUnreachableScopes()
     children0 = PALMAT["scopes"][0]["children"]
     for i in range(len(PALMAT["scopes"])-1, 0, -1):

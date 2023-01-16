@@ -66,6 +66,24 @@ if rlModule != None:
 
 setupExecutePALMAT()
 
+def printScopeHeading(PALMAT, i):
+    scope = PALMAT["scopes"][i]
+    if scope["type"] in ["function", "procedure"]:
+        if scope["parent"] == None:
+            print("Scope %d, %s %s (deleted):" % \
+                  (i, scope["type"].upper(), 
+                   scope["name"][1:-1]))
+        else:
+            print("Scope %d, %s %s, parent scope %d:" % \
+                  (i, scope["type"].upper(), scope["name"][1:-1],
+                   scope["parent"]))
+    elif i > 0:
+        print("Scope %d, %s, parent scope %d:" % \
+              (i, scope["type"].upper(), scope["parent"]))
+    else:
+        print("Scope %d, %s:" % (i, scope["type"].upper()))
+    return scope
+
 helpMenu = \
 '''\tNote: Interpreter commands are case-insensitive, but
 \tHAL/S source code is case-sensitive.  The available
@@ -224,8 +242,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                 continue
             elif firstWord == "DATA" and len(fields) == 2 and fields[1] == "*":
                 for i in range(len(PALMAT["scopes"])):
-                    scope = PALMAT["scopes"][i]
-                    print("Scope %d:" % i)
+                    scope = printScopeHeading(PALMAT, i)
                     identifiers = scope["identifiers"]
                     if len(identifiers) == 0:
                         print("\t(No identifiers declared)")
@@ -237,16 +254,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
             elif firstWord == "PALMAT" and \
                     len(fields) == 2 and fields[1] == "*":
                 for i in range(len(PALMAT["scopes"])):
-                    scope = PALMAT["scopes"][i]
-                    if scope["type"] in ["function", "procedure"]:
-                        print("Scope %d, %s %s, parent scope %d:" % \
-                              (i, scope["type"].upper(), scope["name"][1:-1],
-                               scope["parent"]))
-                    elif i > 0:
-                        print("Scope %d, %s, parent scope %d:" % \
-                              (i, scope["type"].upper(), scope["parent"]))
-                    else:
-                        print("Scope %d, %s:" % (i, scope["type"].upper()))
+                    scope = printScopeHeading(PALMAT, i)
                     instructions = scope["instructions"]
                     if len(instructions) == 0:
                         print("\t(No generated code)")
