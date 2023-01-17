@@ -17,6 +17,7 @@ import random
 import time
 import copy
 from decimal import Decimal, ROUND_HALF_UP
+from palmatAux import findIdentifier
 
 timeOrigin = 0
 # This function is called once at startup, in order to set the 
@@ -66,25 +67,6 @@ builtIns = [
     ["MIDVAL"]
 ]
 
-# Returns the dictionary associated with the identifier or else None if
-# not found.  The scope is the dictionary associated with the 
-# current scope ... i.e., it is an entry in PALMAT["scopes"] rather than
-# and index into PALMAT["scopes"].  The search begins at the current 
-# scope, and moves upward through the parent, grandparent, etc.
-# Sibling scopes and descendent scopes are not searched.
-# Note: There's also a findIdentifier() in the PALMAT
-# module which provides the same service but is incompatible
-# API-wise.  Oh well!  I should have researched it better before writing
-# this one.
-def findIdentifier(scopes, identifier, scope):
-    while scope != None:
-        if identifier in scope["identifiers"]:
-            return scope["identifiers"][identifier]
-        if scope["parent"] == None:
-            return None
-        scope = scopes[scope["parent"]]
-    return scope
-
 # Returns a tuple consisting of a new scope number and
 # offset into the scope, or else returns None if not found.
 # The premise is the that instructionDict has a key/value
@@ -92,10 +74,10 @@ def findIdentifier(scopes, identifier, scope):
 # an ordered pair of a desired new scope index and offset,
 # or else is an identifier giving the name of an accessible
 # label.
-def jump (scopes, scope, instructionDict, instructionName):
+def jump(PALMAT, scopeNumber, instructionDict, instructionName):
     s = instructionDict[instructionName]
     if isinstance(s, str):
-        attributes = findIdentifier(scopes, s, scope)
+        attributes = findIdentifier(s, PALMAT, scopeNumber)
         if attributes == None or "label" not in attributes:
             print("Cannot find target label", s)
             return None
@@ -171,7 +153,7 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
         instruction = instructions[instructionIndex]
         instructionIndex += 1
         if trace:
-            print("\t==>", computationStack, instruction)
+            print("\tTRACE:  ", computationStack, instruction)
         stackSize = len(computationStack)
         if "debug" in instruction:
             pass
@@ -189,7 +171,11 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
             operand1 = computationStack.pop()
             negativeIncrement = (operand1 < 0)
             operand2 = computationStack[-1]
-            attributes = findIdentifier(scopes, identifier, scopes[scopeNumber])
+            attributes = findIdentifier(identifier, PALMAT, scopeNumber)
+            if attributes == None:
+                print("Implementation error, variable %s not found." \
+                      % identifier[1:-1])
+                return None
             if "integer" not in attributes and "scalar" not in attributes:
                 print("Implementation error in '+><': Not a number.")
                 return None
@@ -283,6 +269,7 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
                 "storepop" in instruction or "storeupop" in instruction:
             erroredUp = False
             fetch = False
+            storeupop = False
             pop = False
             stackPos = 1
             if "fetch" in instruction:
@@ -296,9 +283,14 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
             elif "storeupop" in instruction:
                 identifier = instruction["storeupop"]
                 pop = True
+                storeupop = True
                 stackPos = 2
             identifier = "^" + identifier + "^"
-            attributes = findIdentifier(scopes, identifier, scopes[scopeNumber])
+            if fetch or storeupop:
+                attributes = findIdentifier(identifier, PALMAT, scopeNumber)
+            else:
+                attributes = findIdentifier(identifier, PALMAT, \
+                                            scopeNumber, True)
             if attributes != None:
                 erroredUp = True
                 if fetch:
@@ -357,7 +349,8 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
                         return None
                     attributes["value"] = value
             if not erroredUp:
-                print("Identifier %s not in any accessible scope" % identifier)
+                print("Identifier %s not in any accessible scope" \
+                      % identifier[1:-1])
                 return None
         elif "pop" in instruction:
             value = instruction["pop"]
@@ -373,17 +366,28 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
             lun = instruction["write"]
             if lun == '6':
                 print("%*s" % (indent, ""), end="")
-                for value in computationStack:
-                    if isinstance(value, bool):
-                        if value:
-                            print(" TRUE ", end="")
+                # If this instruction is within a subroutine, then we can 
+                # only regress in the computation stack until finding the 
+                # return address, because we want to use that later (for 
+                # returning!) rather than using it now for printing.
+                start = 0
+                for i in range(len(computationStack)-1, -1, -1):
+                    if isinstance(computationStack[i], tuple):
+                        start = i + 1
+                        break
+                if start < len(computationStack):
+                    for value in computationStack[start:]:
+                        if isinstance(value, bool):
+                            if value:
+                                print(" TRUE ", end="")
+                            else:
+                                print(" FALSE ", end="")
+                        elif isinstance(value, (int, float)):
+                            print(" %s " % str(value), end="")
                         else:
-                            print(" FALSE ", end="")
-                    elif isinstance(value, (int, float)):
-                        print(" %s " % str(value), end="")
-                    else:
-                        print(value, end="")
-                computationStack.clear()
+                            print(value, end="")
+                while len(computationStack) > start:
+                    computationStack.pop()
                 print()
         elif "function" in instruction:
             function = instruction["function"]
@@ -577,26 +581,26 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
                 print("Implementation error, function", function)
                 return None
         elif "goto" in instruction:
-            scopeNumber, instructionIndex = jump(scopes, scope, instruction, \
-                                                 "goto")
+            scopeNumber, instructionIndex = \
+                    jump(PALMAT, scopeNumber, instruction, "goto")
             scope = scopes[scopeNumber]
         elif "iffalse" in instruction:
             value = computationStack.pop()
             if not value:
                 scopeNumber, instructionIndex = \
-                    jump(scopes, scope, instruction, "iffalse")
+                    jump(PALMAT, scopeNumber, instruction, "iffalse")
                 scope = scopes[scopeNumber]
         elif "iftrue" in instruction:
             value = computationStack.pop()
             if value:
-                scopeNumber, instructionIndex = jump(scopes, scope, \
-                                                     instruction, "iftrue")
+                scopeNumber, instructionIndex = \
+                    jump(PALMAT, scopeNumber, instruction, "iftrue")
                 scope = scopes[scopeNumber]
         elif "noop" in instruction:
             pass # Nothing to do!
         elif "run" in instruction:
             identifier = "^" + instruction["call"] + "^"
-            attributes = findIdentifier(scopes, identifier, scopes[scopeNumber])
+            attributes = findIdentifier(identifier, PALMAT, scopeNumber)
             if attributes == None:
                 print("Target of RUN not found:", identifier)
                 return None
@@ -608,7 +612,7 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
             scope = scopes[scopeNumber]
         elif "call" in instruction:
             identifier = "^" + instruction["call"] + "^"
-            attributes = findIdentifier(scopes, identifier, scopes[scopeNumber])
+            attributes = findIdentifier(identifier, PALMAT, scopeNumber)
             if attributes == None:
                 print("Target of CALL not found:", identifier)
                 return None
@@ -616,7 +620,7 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
                 print("CALL to neither a FUNCTION nor PROCEDURE:", identifier)
                 return None
             # The return address.
-            computationStack.append([scopeNumber, instructionIndex])
+            computationStack.append((scopeNumber, instructionIndex))
             # Transfer control.
             scopeNumber = attributes["scope"]
             instructionIndex = 0
@@ -632,5 +636,5 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
             print("Implementation error, unknown PALMAT:", instruction)
             return None
     if trace:
-        print("\t==>", computationStack, "(end)")
+        print("\tTRACE:  ", computationStack, "(end)")
     return computationStack

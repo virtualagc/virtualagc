@@ -58,8 +58,7 @@ to pop the final value from the runtime execution stack.
 
 import sys
 import copy
-from palmatAux import addAttribute
-from executePALMAT import findIdentifier
+from palmatAux import addAttribute, findIdentifier, removeAncestors
 
 # This is persistent statelike information, unlike the "state" parameter
 # used for functions that propagates only *into* the recursive descent and
@@ -251,13 +250,18 @@ def stringLiteral(PALMAT, state, s):
     elif state2 == ["assignment", "variable"] or \
             history[-3:-1] == ["assignment", "variable"]:
         # Identifier on LHS of an assignment.
-        identDict = findIdentifier(PALMAT["scopes"], s, scope)
+        identDict = findIdentifier(s, PALMAT, scopeIndex, True)
         if identDict == None: 
-            substate["errors"].append("LHS identifier " + sp + \
-                                      " of assignment undeclared.")
+            substate["errors"].append("Assignment to  " + sp + \
+                                      " not allowed.")
+            removeAncestors(PALMAT, scopeIndex)
+            return False
         if "constant" in identDict or "parameter" in identDict:
             substate["errors"]\
-                .append("Assignment to a constant or formal parameter.")
+                .append("Assignment to constant " + sp \
+                        + " not possible.")
+            removeAncestors(PALMAT, scopeIndex)
+            return False
         substate["lhs"].append(sp)
     return True
 

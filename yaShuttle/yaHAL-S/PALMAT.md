@@ -226,39 +226,49 @@ The patterns currently in use are:
 
 These labels will not all necessarily be present in the identifier list, since they won't all necessarily be used in any given scope.
 
-## PALMAT Instructions
+## PALMAT Instructions and the Computation Stack
 
 In the final implementation, PALMAT instructions will very likely be encoded numerically in some format intended to efficiently reduce the storage required for storage of the executable and decoding of the instructions by the PALMAT virtual machine executing the code.  However, I don't want to get ahead of myself:  Let's just get it working logically correctly before worrying about efficient storage formats, shall we?
 
 Since the bulk of my HAL/S compiler is in Python and the file-format being used is a JSON version of the Python structures, for *now* PALMAT instructions will be represented as Python dictionaries.
 
-Before presenting any actual instructions, let me add that for computation of expressions (arithmetical, boolean, or otherwise), the PALMAT virtual machine implements an execution-stack based model, such as found in a Reverse Polish Notation (RPN) calculator or in the FORTH computer language.  Therefore, the behavior of PALMAT instructions is often to pop values from this execution stack, perform some computation on them (such as addition), and then to push the result back on the execution stack.  Each entry of the execution stack can thus hold values of various types.
-
 Also, any of the PALMAT instructions listed below optionally have a key `label` whose value is a unique string, and indicates that the instruction is the target of some kind of control-transfer instruction. 
+
+Before presenting any actual PALMAT instructions, let me add that for computation of expressions (arithmetical, boolean, or otherwise), the PALMAT virtual machine implements an computation-stack based model, such as found in a Reverse Polish Notation (RPN) calculator or in the FORTH computer language.  Therefore, the behavior of PALMAT instructions is often to pop values from this computation stack, perform some computation on them (such as addition), and then to push the result back on the computation stack.  Each entry of the computation stack can thus hold values of various types.
+
+Regarding the format of entries on the computation stack, this can (and for efficiency *should*) be implementation-dependent.  But as for the Python-based emulator that executes PALMAT instructions directly, we can take advantage of Python's ability to determine the datatype by its own examination of the values, rather than having to invent some (likely more-efficient) implementation at the cost of efficient execution.  So what's on the computation stack in this specific implementation can be:
+
+* Any Python integer or floating-point number.
+* Any Python character string.
+* Any Python boolean value.
+* Any Python list of floats or integers (for HAL/S `VECTOR` types) or list of lists of floats or integers (for HAL/S `MATRIX` types).
+* Any Python dictionary for HAL/S `STRUCTURE`s.
+* Except: HAL/S `ARRAY` types are represented on the stack as dictionaries `{ '_array': A }`, where `A` is a list of lists of ... lists to some depth.  It is done this way rather than just putting `A` on the computation stack directly, so that the emulator can distinguish 1D and 2D `ARRAY`s from `VECTOR` and `MATRIX` types.  I don't know if this is a real distinction at the execution level (as opposed to syntactically), so perhaps this will be changed later.
+* A return address, as represented on the stack as a Python tuple `(scopeIndex, offset)`.
 
 ### PALMAT Instructions 1: Arithmetic
 
 With that in mind, here's a description of some of the available PALMAT instructions.
 
-* `{'number': string}`, where `string` is a stringified version of a number such as 1.35E13B2.  (At some point, I may change this so that `string` is replaced by the actual Python representation of the number, but for now I don't go that far because this method preserves exact values.)  **Recall** that in HAL/S, the minus sign is an operator, and not a character that can prefix a number token, so these numbers are all non-negative.  The action of this instruction at runtime is push the number (*as* a number and no longer as a string) onto the execution stack
-* `{'operator': '+'}`.  The action of this instruction at runtime is to pop the last two numbers from the execution stack, add them, and then to push the result back onto the execution stack.  The execution stack is thus shortened by one element.
-* `{'operator': '-'}`.  This is a binary minus operator, as opposed to a unary negation operator.  The action at runtime is to pop the final two elements from the execution stack, subtracting the 2nd-to-last value from the last value, and then to push the result back onto the execution stack.
-* `{'operator': 'U-'}`.  This is unary negation operator.  The action at runtime is to arithmetically negate the last value on the execution stack.  Thus the execution stack does not change in size.
-* `{'operator': ''}`.  This is the multiplication operator.  The action at runtime is to pop the last two values from the execution stack, multiply them, and then push the result back onto the execution stack.
-* `{'operator': '/'}`.  This is the division operator.  The action at runtime is to pop the final two elements from the execution stack, dividing the last value by the 2nd-to-last value from the last value, and then pushing the result back onto the execution stack.
-* `{'operator': '**'}`.  This is the exponentiation operator.  The action at runtime is to pop the final two elements from the execution stack, raising the last value to the power of the 2nd-to-last value, and then pushing the result back onto the execution stack.
-* `{'fetch': identifier}`, where `identifier` is the name of a variable.  It must correspond to an identifier already in `PALMAT["identifiers"]`, except that the surrounding carats (if any) used as string quotes in the identifier dictionary will not be present.  The action at runtime is to fetch the value of the variable or constant identified and push it onto the execution stack.  (I haven't given any thought as of yet as to how to handle vectors, matrices, arrays, or structures as of yet, while booleans vs bits is somewhat tricky.  So temporarily at least, just think of variables or constants storing numbers or character strings.)
-* `{'store': identifier}`, where `identifier` is the name of a variable.  It must correspond to an identifier already in `PALMAT["identifiers"]`, except that the surrounding carats (if any) used as string quotes in the identifier dictionary will not be present.  The action at runtime is to store the last value in the execution stack (without popping it from the stack) into the variable identified.  The value is stored in the variable's "value" attribute.
-* `{'pop': number}`.  Pops `number` of elements from the execution stack and discards them.
+* `{'number': string}`, where `string` is a stringified version of a number such as 1.35E13B2.  (At some point, I may change this so that `string` is replaced by the actual Python representation of the number, but for now I don't go that far because this method preserves exact values.)  **Recall** that in HAL/S, the minus sign is an operator, and not a character that can prefix a number token, so these numbers are all non-negative.  The action of this instruction at runtime is push the number (*as* a number and no longer as a string) onto the computation stack
+* `{'operator': '+'}`.  The action of this instruction at runtime is to pop the last two numbers from the computation stack, add them, and then to push the result back onto the computation stack.  The computation stack is thus shortened by one element.
+* `{'operator': '-'}`.  This is a binary minus operator, as opposed to a unary negation operator.  The action at runtime is to pop the final two elements from the computation stack, subtracting the 2nd-to-last value from the last value, and then to push the result back onto the computation stack.
+* `{'operator': 'U-'}`.  This is unary negation operator.  The action at runtime is to arithmetically negate the last value on the computation stack.  Thus the computation stack does not change in size.
+* `{'operator': ''}`.  This is the multiplication operator.  The action at runtime is to pop the last two values from the computation stack, multiply them, and then push the result back onto the computation stack.
+* `{'operator': '/'}`.  This is the division operator.  The action at runtime is to pop the final two elements from the computation stack, dividing the last value by the 2nd-to-last value from the last value, and then pushing the result back onto the computation stack.
+* `{'operator': '**'}`.  This is the exponentiation operator.  The action at runtime is to pop the final two elements from the computation stack, raising the last value to the power of the 2nd-to-last value, and then pushing the result back onto the computation stack.
+* `{'fetch': identifier}`, where `identifier` is the name of a variable.  It must correspond to an identifier already in `PALMAT["identifiers"]`, except that the surrounding carats (if any) used as string quotes in the identifier dictionary will not be present.  The action at runtime is to fetch the value of the variable or constant identified and push it onto the computation stack.  (I haven't given any thought as of yet as to how to handle vectors, matrices, arrays, or structures as of yet, while booleans vs bits is somewhat tricky.  So temporarily at least, just think of variables or constants storing numbers or character strings.)
+* `{'store': identifier}`, where `identifier` is the name of a variable.  It must correspond to an identifier already in `PALMAT["identifiers"]`, except that the surrounding carats (if any) used as string quotes in the identifier dictionary will not be present.  The action at runtime is to store the last value in the computation stack (without popping it from the stack) into the variable identified.  The value is stored in the variable's "value" attribute.
+* `{'pop': number}`.  Pops `number` of elements from the computation stack and discards them.
 
 More PALMAT instructions will be defined below, but first let's consider a couple of example.  Look at the following HAL/S code:
 
     DECLARE SCALAR, A, B, C;
     A, B, C = 6 ( 2 / (3 + 5) - 7 );
 
-The PALMAT instructions generated from the latter statement are shown below, accompanied by the runtime evolution of the execution stack (growing rightward) as each PALMAT instruction is executed.
+The PALMAT instructions generated from the latter statement are shown below, accompanied by the runtime evolution of the computation stack (growing rightward) as each PALMAT instruction is executed.
 
-    PALMAT Instruction                  Execution Stack Afterward
+    PALMAT Instruction                  computation stack Afterward
     ──────────────────                  ─────────────────────────
                                         (empty)
     {'number': '7'}                     7
@@ -284,7 +294,7 @@ Or consider this example:
     C = 5;
     A = 12 C**2 + 3 B + 1;
 
-    PALMAT Instruction                  Execution Stack Afterward
+    PALMAT Instruction                  computation stack Afterward
     ──────────────────                  ─────────────────────────
                                         (empty)
     {'number': '2'}                     2
@@ -433,11 +443,11 @@ Nor do specific changes need to occur in scope `M`, other than that the PALMAT i
 
 would thus result in an expression stack at entry to the `FUNCTION` `F` (i.e., just after the `{ 'call': 'l_F'}` instruction is executed) of
 
-    ... stuff already on the stack (if any) ..., Z, Y, X, [M, offset]
+    ... stuff already on the stack (if any) ..., Z, Y, X, (M, offset)
 
-where `[M, offset]` is the return address.  While `F` is executing, the expression stack looks like
+where `(M, offset)` is the return address.  While `F` is executing, the expression stack looks like
 
-    ... stuff already on the stack (if any) ..., [M, offset]
+    ... stuff already on the stack (if any) ..., (M, offset)
 
 And finally, after returning from `F`, 
 
@@ -536,7 +546,7 @@ I've made no real effort to optimize the PALMAT instruction set itself, but in g
 
 With this in mind, we note that there are certain combinations of PALMAT instructions generated very frequently by the compiler's code generator.  Here are some examples:
 
-* `{'store': identifier}`, `{'pop': 1}`.  This combination looks at the top of the execution stack, saves the value it finds there to a variable identified by its `identifier`, and then pops the value from the stack.  But why not extend the PALMAT instruction set with a single `{'storepop': identifier}` instruction that combines both actions?
+* `{'store': identifier}`, `{'pop': 1}`.  This combination looks at the top of the computation stack, saves the value it finds there to a variable identified by its `identifier`, and then pops the value from the stack.  But why not extend the PALMAT instruction set with a single `{'storepop': identifier}` instruction that combines both actions?
 * `{'number': n}`, `{'store': identifier}`, `{'pop': 1}`.  This sequence stores a constant number `n` on the stack, then saves it at `identifier`, and `pop`s it from the stack.  Why not just have a `{'storeconstant': identifier, 'value': n}` PALMAT instruction that saves `n` directly to `identifier`, and bypasses the stack completely?
 
 Well, I won't continue pointing out the very, very obvious here, but there's obviously a lot of potential for reducing the total number of PALMAT instructions needed.

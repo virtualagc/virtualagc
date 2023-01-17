@@ -20,6 +20,19 @@ def debug(PALMAT, state, message):
             'debug': message
         })
 
+# This is used when a problem with a block is sufficiently severe that 
+# it has to be removed.  That necessitates removing its parent, grandparent,
+# and so on that have already been allocated, up to but not including the root.  
+# It suffices to just unlink at the root.
+def removeAncestors(PALMAT, scopeIndex):
+    lastScopeIndex = None
+    while scopeIndex not in [None, 0]:
+        lastScopeIndex = scopeIndex
+        scopeIndex = PALMAT["scopes"][scopeIndex]["parent"]
+    if scopeIndex != None and lastScopeIndex != None:
+        PALMAT["scopes"][scopeIndex]["children"].remove(lastScopeIndex)
+        PALMAT["scopes"][lastScopeIndex]["parent"] = None
+
 # Adds/modifies an attribute for an identifier in an identifier list.
 # The identifier should include its carat quotes.
 def addAttribute(identifiers, identifier, attribute, \
@@ -216,15 +229,28 @@ def printPALMAT(PALMAT, showInstructions=False):
 # current scope and working upward through the parent scope, grandparent scope,
 # and so on.  Returns either the dictionary for the identifier or else None if 
 # not found. 
-# Note: There's also a findIdentifier() in the executePALMAT
-# module which provides the same service but is incompatible
-# API-wise.
-def findIdentifier(identifier, PALMAT, scopeIndex=None):
+# The search works differently when the variable is for writing rather than 
+# reading.  For reading, all variables in ancestor scopes are allowed.
+# Whereas for writing, we cannot look outside of the enclosing FUNCTION or 
+# PROCEDURE.  And indeed, even there, we cannot write to FUNCTION or PROCEDURE
+# parameters.  On the other hand, for variables defined in a PROCEDURE ASSIGN,
+# the restriction is lifted and for those variables alone we can search the
+# ancestors.
+# NOTE:  I haven't figured out yet how ASSIGN actually should be handled, so
+# that's not yet accounted for.
+def findIdentifier(identifier, PALMAT, scopeIndex=None, write=False):
     while scopeIndex != None:
         scope = PALMAT["scopes"][scopeIndex]
+        inFunctionOrProcedure = (scope["type"] in ["function", "procedure"])
         if identifier in scope["identifiers"]:
-            return scope["identifiers"][identifier]
-        scopeIndex = scope["parent"]
+            attributes = scope["identifiers"][identifier]
+            if write and inFunctionOrProcedure and "parameter" in attributes:
+                break
+            return attributes
+        if write and inFunctionOrProcedure:
+            break
+        else:
+            scopeIndex = scope["parent"]
     return None
 
 #-----------------------------------------------------------------------------
