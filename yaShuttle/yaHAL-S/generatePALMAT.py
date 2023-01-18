@@ -14,7 +14,7 @@ import json
 import p_Functions
 substate = p_Functions.substate
 from palmatAux import *
-from executePALMAT import executePALMAT, hround
+from executePALMAT import hround
 from expressionSM import expressionSM
 from doForSM import doForSM
 
@@ -34,7 +34,7 @@ def traceIt(state, lbnfLabel, beforeAfter="before", trace=True, depth=0):
         print("\tstate         =", state)
     print("\tsubstate      =", substate)
 
-# For FUNCTION or PARAMETER blocks.  Gets a list of all subroutine parameters
+# For FUNCTION or PROCEDURE blocks.  Gets a list of all subroutine parameters
 # declared in the subroutine's scope.
 def allDeclaredParameters(currentScope):
     declared = {}
@@ -55,6 +55,27 @@ def allDeclaredParameters(currentScope):
         if "parameter" not in identifiers[identifier]:
             identifiers[identifier]["parameter"] = True
     return declared
+
+# Same as allDeclaredParemters, except for a PROCEDURE's ASSIGNs.
+def allDeclaredAssigns(currentScope):
+    #declared = {}
+    identifiers = currentScope["identifiers"]
+    for assignment in currentScope["attributes"]["assignments"]:
+        identifier = "^" + assignment + "^"
+        if identifier not in identifiers:
+            identifier = "^c_" + assignment + "^"
+            if identifier not in identifiers:
+                identifier = "^b_" + assignment + "^"
+                if identifier not in identifiers:
+                    identifier = "^s_" + assignment + "^"
+                    if identifier not in identifiers:
+                        identifier = "^e_" + assignment + "^"
+                        if identifier not in identifiers:
+                            continue
+        #declared[assignment] = identifier
+        if "assignment" not in identifiers[identifier]:
+            identifiers[identifier]["assignment"] = True
+    #return declared
 
 '''
 Here's the idea:  generatePALMAT() is a recursive function that works its
@@ -326,6 +347,8 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     # in lbnfLabelPatterns.
     elif lbnfLabel == "declare_group" and \
             currentScope["type"] in ["function", "procedure"]:
+        if currentScope["type"] == "procedure":
+            allDeclaredAssigns(currentScope)
         declared = allDeclaredParameters(currentScope)
         parameters = currentScope["attributes"]["parameters"]
         if len(declared) == len(parameters) and \
@@ -335,6 +358,15 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             for parameter in parameters:
                 identifier = declared[parameter][1:-1]
                 instructions.append({'storeupop': identifier})
+    elif lbnfLabel == "basicStatementCall":
+        if "callAssignments" in substate["commonAttributes"]:
+            assignments = substate["commonAttributes"]["callAssignments"]
+            currentScope["instructions"]\
+                        .append({'call': substate["currentIdentifier"][1:-1],
+                                 'assignments': assignments})
+        else:
+            currentScope["instructions"]\
+                        .append({'call': substate["currentIdentifier"][1:-1]})
     elif lbnfLabel == "basicStatementReturn":
         # We need to find the most-narrow context that's a FUNCTION or 
         # PROCEDURE.
@@ -372,6 +404,14 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         currentScope = PALMAT["scopes"][childIndex]
         currentScope["name"] = substate["currentIdentifier"]
         currentScope["attributes"] = identifierDict
+    elif lbnfLabel == "blockHeadProcedure":
+        identifierDict = \
+          currentScope["identifiers"][substate["currentIdentifier"]]
+        childIndex = addScope(PALMAT, currentScope["self"], "procedure")
+        state["scopeIndex"] = childIndex
+        currentScope = PALMAT["scopes"][childIndex]
+        currentScope["name"] = substate["currentIdentifier"]
+        currentScope["attributes"] = identifierDict
     elif lbnfLabel == "true_part":
         p_Functions.expressionToInstructions( \
             substate["expression"], currentScope["instructions"])
@@ -383,10 +423,20 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         instructions = currentScope["instructions"]
         p_Functions.expressionToInstructions( \
             substate["expression"], instructions)
+        base = "store"
+        identifier = substate["lhs"][-1]
+        attributes = findIdentifier("^"+identifier+"^", PALMAT, currentIndex)
+        if attributes == None:
+            print("Assignment variable %s not accessible." % identifier[1:-1])
+            endLabels.pop()
+            return False, PALMAT
+        #print("*", identifier, currentIndex, attributes)
+        #if "assignment" in attributes:
+        base += "u"
         if len(substate["lhs"]) == 1:
-            instructions.append({ "storepop": substate["lhs"][-1] })
+            instructions.append({ base + "pop": substate["lhs"][-1] })
         else:
-            instructions.append({ "store": substate["lhs"][-1] })
+            instructions.append({ base: substate["lhs"][-1] })
     elif lbnfLabel == "basicStatementWritePhrase":
         instructions = currentScope["instructions"]
         p_Functions.expressionToInstructions( \

@@ -190,13 +190,26 @@ def stringLiteral(PALMAT, state, s):
             addAttribute(identifiers, s, "function", True)
             addAttribute(identifiers, s, "scope", len(scopes))
             addAttribute(identifiers, s, "parameters", [])
-        elif "declaration_labelToken_procedure" in history:
-            identifiers[s]["procedure"] = True
+        elif "blockHeadProcedure" in history:
+            addAttribute(identifiers, s, "procedure", True)
+            addAttribute(identifiers, s, "scope", len(scopes))
+            addAttribute(identifiers, s, "parameters", [])
+            addAttribute(identifiers, s, "assignments", [])
         return True, state
+    elif state1 == "variable" and "call_assign_list" in history:
+        if "callAssignments" not in substate["commonAttributes"]:
+            substate["commonAttributes"]["callAssignments"] = []
+        substate["commonAttributes"]["callAssignments"].append(s[1:-1])
+    elif state1 == "call_key":
+        substate["currentIdentifier"] = s
     elif state1 == "parameter":
         identifier = substate["currentIdentifier"]
-        identifiers[identifier]["parameters"].append(s[1:-1])
-    elif "function_name" in history:
+        #print("*", s, identifier, identifiers)
+        if "assign_list" in history:
+            identifiers[identifier]["assignments"].append(s[1:-1])
+        elif "parameter_list" in history:
+            identifiers[identifier]["parameters"].append(s[1:-1])
+    elif "function_name" in history or "procedure_name" in history:
         for i in scope["children"]:
             if "name" in PALMAT["scopes"][i] and \
                     s == PALMAT["scopes"][i]["name"]:
@@ -207,7 +220,11 @@ def stringLiteral(PALMAT, state, s):
                 PALMAT["scopes"][i]["parent"] = None
                 break
         substate["currentIdentifier"] = s
-        addAttribute(identifiers, s, "function", True)
+        if "function_name" in history:
+            addAttribute(identifiers, s, "function", True)
+        elif "procedure_name" in history:
+            addAttribute(identifiers, s, "procedure", True)
+            addAttribute(identifiers, s, "assignments", [])
         addAttribute(identifiers, s, "scope", len(scopes))
         addAttribute(identifiers, s, "parameters", [])
     elif state1 == "label_definition":
@@ -288,7 +305,9 @@ augmentationCandidates = [
     "arithConv",
     "arithExpTerm",
     "assignment",
+    "assign_list",
     "attributes_typeAndMinorAttr",
+    "basicStatementCall",
     "basicStatementDo",
     "basicStatementExit",
     "basicStatementGoTo",
@@ -299,6 +318,9 @@ augmentationCandidates = [
     "bit_id",
     "bit_exp",
     "blockHeadFunction",
+    "blockHeadProcedure",
+    "call_assign_list",
+    "call_key",
     "charExpCat",
     "char_spec",
     "declaration_labelToken_function",
@@ -321,7 +343,9 @@ augmentationCandidates = [
     "nameId_bitFunctionIdentifierToken",
     "nameId_charFunctionIdentifierToken",
     "parameter",
+    "parameter_list",
     "prePrimaryFunction",
+    "procedure_name",
     "relational_exp",
     "then",
     "true_part",

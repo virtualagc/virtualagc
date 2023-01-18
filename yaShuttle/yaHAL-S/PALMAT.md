@@ -24,7 +24,7 @@ Because of the difficulty of dealing with non-ASCII character sets in the prepro
 
 The reverse translations (~ &rarr; ¬ and ` &rarr; ¢) may be performed for printouts or other display purposes, if desired. 
 
-Internally within PALMAT, the ^ character is used for quoting all text strings, resulting in there being three flavors of text strings (^...^, ^'...'^, and ^"..."^) used for different purposes.  Moreover, the backslach character (\) does not appear in the PALMAT character set, but is used in most modern software for test escape sequences, hence it would be awkward to allow it as a PALMAT character.
+Internally within PALMAT, the ^ character is used for quoting all text strings, resulting in there being three flavors of text strings (^...^, ^'...'^, and ^"..."^) used for different purposes.  Moreover, the backslash character (\) does not appear in the PALMAT character set, but is used in most modern software for test escape sequences, hence it would be awkward to allow it as a PALMAT character.
 
 The net result of all this is that the PALMAT character set is entirely 7-bit ASCII (with no *printable* characters left over aside from the backslash).  However, this is transparent to the user, and any legal HAL/S extended characters (in UTF-8 where necessary) can continue to appear in HAL/S source code.  However, the alternatives ~ and ` may be used in source code as well.
 
@@ -196,10 +196,6 @@ Thus the emulator would have to perform a little more work upon entry to such a 
 
 **Note:** Regarding the so-called `TEMPORARY` variables:  Although the documentation fusses over them as if they were something special, to the point of making it seem tricky to implement them, in fact at execution time `TEMPORARY` is just a drop-in replacement for `DECLARE`.  The distinction is entirely syntactical, in that you can only use `DECLARE` in blocks that end with `CLOSE`, whereas you can only use `TEMPORARY` in blocks that end with `END`.  (Well, and there's an extra way to declare temporary integer variables with `FOR TEMPORARY I=... END` vs `FOR I=... END`.)  However, given our underlying model of scopes, there's actually no distinction at all between temporary and non-temporary variables at runtime.  A `TEMPORARY` variable is merely a variable whose scope happens to be a `DO ... END` block rather than (say) a `PROGRAM` or `FUNCTION` block.
 
-## Multiprocessing and Reentrancy
-
-So far I've just been considering single-threaded program execution.  The memory model described above will need modification for the conditions in which code in a given scope might have two or more instantiations simultaneously, and I haven't given any consideration as of yet to that problem.  I'll worry about that once support for single-threaded operation is correct and reasonably comprehensive.
-
 ## Automated Labels Within Scopes
 
 For maneuvering within and between scopes, certain types of symbolic labels for certain roles within the scopes are very-commonly needed, and it is necessary for the code-generator to be able to create them systematically on the fly in order to effectively use the scopes.  The techique for doing so is to create labels is usually according to the following pattern,
@@ -243,8 +239,7 @@ Regarding the format of entries on the computation stack, this can (and for effi
 * Any Python boolean value.
 * Any Python list of floats or integers (for HAL/S `VECTOR` types) or list of lists of floats or integers (for HAL/S `MATRIX` types).
 * Any Python dictionary for HAL/S `STRUCTURE`s.
-* Except: HAL/S `ARRAY` types are represented on the stack as dictionaries `{ '_array': A }`, where `A` is a list of lists of ... lists to some depth.  It is done this way rather than just putting `A` on the computation stack directly, so that the emulator can distinguish 1D and 2D `ARRAY`s from `VECTOR` and `MATRIX` types.  I don't know if this is a real distinction at the execution level (as opposed to syntactically), so perhaps this will be changed later.
-* A return address, as represented on the stack as a Python tuple `(scopeIndex, offset)`.
+* Any Python tuple [of tuples [of tuples [...] ] ] for an `ARRAY`.
 
 ### PALMAT Instructions 1: Arithmetic
 
@@ -259,6 +254,7 @@ With that in mind, here's a description of some of the available PALMAT instruct
 * `{'operator': '**'}`.  This is the exponentiation operator.  The action at runtime is to pop the final two elements from the computation stack, raising the last value to the power of the 2nd-to-last value, and then pushing the result back onto the computation stack.
 * `{'fetch': identifier}`, where `identifier` is the name of a variable.  It must correspond to an identifier already in `PALMAT["identifiers"]`, except that the surrounding carats (if any) used as string quotes in the identifier dictionary will not be present.  The action at runtime is to fetch the value of the variable or constant identified and push it onto the computation stack.  (I haven't given any thought as of yet as to how to handle vectors, matrices, arrays, or structures as of yet, while booleans vs bits is somewhat tricky.  So temporarily at least, just think of variables or constants storing numbers or character strings.)
 * `{'store': identifier}`, where `identifier` is the name of a variable.  It must correspond to an identifier already in `PALMAT["identifiers"]`, except that the surrounding carats (if any) used as string quotes in the identifier dictionary will not be present.  The action at runtime is to store the last value in the computation stack (without popping it from the stack) into the variable identified.  The value is stored in the variable's "value" attribute.
+* `{'storeu': identifier}`.  Like `store`, but not limited to the enclosing subroutine.
 * `{'pop': number}`.  Pops `number` of elements from the computation stack and discards them.
 
 More PALMAT instructions will be defined below, but first let's consider a couple of example.  Look at the following HAL/S code:
@@ -380,26 +376,25 @@ For example, here are some PALMAT instructions appropriate for `WRITE(6) A+5, A*
 
 ## PALMAT Instructions 5: Subroutine Linkage
 
-* `{ 'call': label }`.  Calls a subroutine (`FUNCTION` or `PROCEDURE`) supplied as PALMAT (i.e., compiled from HAL/S source code), as opposed to a built-in library function.  The details of subroutine linkage are described in the text below.
+* `{ 'call': label, 'assignments': [...] }`.  Calls a subroutine (`FUNCTION` or `PROCEDURE`) supplied as PALMAT (i.e., compiled from HAL/S source code), as opposed to a built-in library function.  The details of subroutine linkage are described in the text below.  The `assignments` appears only for `PROCEDURE`s
 * `{ 'return': n }`.  Returns from a `call`'d `FUNCTION` (`n`=2) or `PROCEDURE` (`n`=1).
 * `{ 'run': label }`.  Runs a `PROGRAM`. 
 * `{ 'storepop': variable }`.  Combines a PALMAT `{ 'store': variable }` instruction with a `{ 'pop': 1 }` instruction.
-* `{ 'storeupop': variable }`.  This is like `storepop`, except the the element stored and popped is the element *next*-to-top of the stack; the top-of-stack element is unchanged, other than the fact that it moves downward one location to occupy the space of the now-removed next-to-top element.
+* `{ 'storeupop': variable }`.  This is like `storepop`, except that it releases the limitation `storepop` (and `store`) have of only writing to "writable" locations &mdash; i.e., variables within the current enclosing subroutine that are not themselves subroutine parameters.  Since `storeupop` doesn't have this limitation, it can be used to initialize subroutine parameters or write to `PROCEDURE` `ASSIGN` variables.
 
-Suppose that a subroutine has `N` parameters `X`<sub>1</sub> through `X`<sub>`N`</sub>.  Recall that a child scope of the parent scope in which the subroutine is defined is created to hold the subroutine's PALMAT code and identifiers. 
+For `CALL`s, the return address of the subroutine being called is stored in the `RETURN` key of the subroutine's scope.  This is done automatically by the `CALL` instruction itself, and is not of concern for PALMAT code generation.  Similarly, the `RETURN` instruction uses this return address and pops the `RETURN` key from the scope.  This scheme by itself supports only single-threaded operation (recall that HAL/S does not allow recursivity); refer to the section on reentrancy and multiprocessing for an explanation of how this method of handling return addresses relates to that topic.
+
+Regarding the passage of input parameters and return values, suppose that a subroutine has `N` parameters `X`<sub>1</sub> through `X`<sub>`N`</sub>.  Recall that a child scope of the parent scope in which the subroutine is defined is created to hold the subroutine's PALMAT code and identifiers. 
 
 When the subroutine is called at runtime, the expression stack is arranged as follows upon entry to the subroutine:
 
-* The return address is at the top of the stack.
 * `X`<sub>`1`</sub> is the next-to-top element of the stack.
 * ...
 * `X`<sub>`N`</sub> is the `N`*th*-to-top. 
 
-This is identical to the setup for the so-called "built-in" functions like `ARCTAN2` called using the PALMAT `function` instruction, except that no "return address" is needed in the case of `function` since built-in functions are not provided in PALMAT form and hence no transfer of control occurs as far as PALMAT is concerned.
+This is identical to the setup for the so-called "built-in" functions like `ARCTAN2` called using the PALMAT `function` instruction.
 
-Of these entries on the expression stack, the return address at the top of the stack is provided by the `CALL` instruction itself, whereas the various parameters on the stack are created by the PALMAT instructions generated by the parameters of the subroutine in HAL/S.
-
-When the subroutine executes, it pops all `N` of the parameters from the expression stack upon entry to the subroutine, storing them in local variables, and moving the return address downward on the expression stack in the process.  Upon exit from the subroutine, the return address is finally popped from the expression stack. And if the subroutine is a `FUNCTION` (thus returning a value), the return value is pushed onto the stack in its place.  Again, other than the presence of the return value, this is the same as for built-in functions.  If a `PROCEDURE`, there is no return value, and so no additional value is pushed onto the expression stack.
+When the subroutine executes, it pops all `N` of the parameters from the expression stack upon entry to the subroutine, storing them in local variables.  Upon exit from the subroutine, if the subroutine is a `FUNCTION` (thus returning a value), the return value is pushed onto the computation stack.  Again, this is the same as for built-in functions.  If a `PROCEDURE`, there is no return value, and so no additional value is pushed onto the expression stack.
 
 For example, suppose we have an `INTEGER` `FUNCTION`, `F(X,Y,Z)`, whose definition begins in scope `K`, but whose own scope is `L`; suppose further that the function is being called from code in scope `M`.  `FUNCTION F` will be accessible to scope `K` or any of its descendent scopes: i.e., scope `M` must be scope `K` itself or else some descendent.
 
@@ -443,17 +438,44 @@ Nor do specific changes need to occur in scope `M`, other than that the PALMAT i
 
 would thus result in an expression stack at entry to the `FUNCTION` `F` (i.e., just after the `{ 'call': 'l_F'}` instruction is executed) of
 
-    ... stuff already on the stack (if any) ..., Z, Y, X, (M, offset)
+    ... stuff already on the stack (if any) ..., Z, Y, X
 
-where `(M, offset)` is the return address.  While `F` is executing, the expression stack looks like
+While `F` is executing, the expression stack looks like
 
-    ... stuff already on the stack (if any) ..., (M, offset)
+    ... stuff already on the stack (if any) ..., ... temporary values pushed by F ...
 
 And finally, after returning from `F`, 
 
     ... stuff already on the stack (if any) ..., returnValue
 
-`PROCEDURE`s are similar, except that there is no `returnValue` left on the expression stack.
+`PROCEDURE`s are similar, except that there is no `returnValue` left on the expression stack, and the `call` instructions can have an `assignment` field.  The `assignment` field corresponds to the `ASSIGN` clause in the HAL/S instruction which calls the procedure.
+
+## Multiprocessing and Reentrancy
+
+So far I've just been considering single-threaded program execution.  The memory model described above will need modification for the conditions in which code in a given scope might have two or more instantiations simultaneously, and I haven't given any consideration as of yet to that problem.  I'll worry about that once support for single-threaded operation is correct and reasonably comprehensive.  However, here are a few notes of thoughts I've had.
+
+Python offers both multithreading (the `concurrent` module) and multiprocessing (the `multiprocessing` module), and I'm not sure which is better for our purposes.  Execution would undoubtedly be a lot faster with multiprocessing, but I'm not sure how the choice affects the memory model as discussed below.  So more research is needed.  For future implementations of the emulator in (say) C or C++ rather than Python, the choice could obviously be different.
+
+It seems to me that when any given HAL/S subroutine is instantiated, the following facts are true:
+
+* It is given its own unique computation stack.
+* It is given its own unique PALMAT structure, some of which is specific to the instantiation and some of which is identical to the global PALMAT.
+
+Each process (or thread as the case may be) is started from a separate invocation of `executePALMAT`, and since the computation stack is a local variable of `executePALMAT`, that takes care of the unique computation stacks.
+
+Each invocation of `executePALMAT` has a parameter called `new`, which defaults to `False`, which means that it's just supposed to use the global PALMAT and be part of instantiation 0.  This is good for single-threaded operation at emulation time, or use of `executePALMAT` by the compiler in trying to compute constant expressions at compile-time.
+
+When (say) a second process/thread is started, it is done with `executePALMAT` having `newInstantiation=True`.  This causes `executePALMAT` to create the partial clone of PALMAT that I've mentioned.
+
+Regarding this partial clone of PALMAT, it seems to me that it has to have the following properties:
+
+* All `instructions` lists in all scopes are simply links to the `instructions` lists in the global PALMAT.
+* For the scope of the instantiated subroutine (or PROGRAM) and its descendent scopes, the `identifiers` dictionaries are deep copies of the `identifiers` dictionaries in the global PALMAT.  I.e., they are clones to the extent that no changes in them are mirrored in the global copies.
+* For the scopes which are ancestors to the instantiated subroutine, or are not accessible to it, the `identifiers` dictionaries are just links to the ones in the global PALMAT, and hence any changes in them are mirrored in the global PALMAT.  In general, I think the only possible way this can happen (except perhaps for `COMPOOL`s, which I have not begun to consider) is when `PROCEDURE` `ASSIGN`s are present.
+
+Notice that all of the scopes other than the instantiated scope and its descendents can just be links to the global scopes.
+
+I'm not sure what happens to such a subroutine after it returns, or even if that's a thing, so this speculative discussion is certainly not complete.
 
 ## Optimizations
 

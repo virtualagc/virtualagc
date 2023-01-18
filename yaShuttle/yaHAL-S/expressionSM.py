@@ -101,7 +101,7 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
                 "children"      : [ ],
                 "identifiers"   : temporaryIdentifiers,
                 "instructions"  : temporaryInstructions,
-                "incomplete"    : [ ]
+                "type"          : "compiler"
             }
             temporaryPALMAT = { "scopes": [temporaryScope] }
             computationStack = executePALMAT(temporaryPALMAT)

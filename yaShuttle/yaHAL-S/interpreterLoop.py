@@ -113,6 +113,7 @@ helpMenu = \
 \tPALMAT       Inspect PALMAT code in root scope.
 \tPALMAT *     Inspect PALMAT code in all scopes.
 \tEXECUTE      (Re)execute already-compiled PALMAT.
+\tCLONE        Same as EXECUTE, but clone instantiation.
 \tSCOPES       Inspect scope hierarchy.
 \tGARBAGE      Perform "garbage collection".  This is
 \t             done automatically prior to processing
@@ -377,7 +378,10 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                             count += 1
                     continue
                 elif firstWord == "EXECUTE":
-                    executePALMAT(PALMAT, 0, 0, trace3, 8)
+                    executePALMAT(PALMAT, 0, 0, False, trace3, 8)
+                    continue
+                elif firstWord == "CLONE":
+                    executePALMAT(PALMAT, 0, 0, True, trace3, 8)
                     continue
                 elif firstWord == "SCOPES":
                     used = set()
@@ -476,4 +480,4 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
             for warning in substate["errors"]:
                 print("Error:", warning)
         if len(substate["errors"]) == 0 and xeq:
-            executePALMAT(PALMAT, 0, 0, trace3, 8)
+            executePALMAT(PALMAT, 0, 0, False, trace3, 8)

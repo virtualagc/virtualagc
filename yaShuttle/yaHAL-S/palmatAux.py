@@ -158,15 +158,15 @@ def constructScope(selfIndex=0, parentIndex=None, scopeType="root"):
                 "children"      : [ ],
                 "identifiers"   : { },
                 "instructions"  : [ ],
-                #"incomplete"    : [ ],
                 "type"          : scopeType
             }
     return scope
 
 # Create a new, empty PALMAT object.
-def constructPALMAT():
+def constructPALMAT(instantiation=0):
     return  {
-                "scopes" : [ constructScope() ]
+                "scopes" : [ constructScope() ],
+                "instantiation": 0
             }
 
 # Search upward through the scope hierarchy, trying to find the first enclosing
@@ -242,15 +242,18 @@ def findIdentifier(identifier, PALMAT, scopeIndex=None, write=False):
     while scopeIndex != None:
         scope = PALMAT["scopes"][scopeIndex]
         inFunctionOrProcedure = (scope["type"] in ["function", "procedure"])
+        assignment = False
         if identifier in scope["identifiers"]:
             attributes = scope["identifiers"][identifier]
-            if write and inFunctionOrProcedure and "parameter" in attributes:
-                break
-            return attributes
-        if write and inFunctionOrProcedure:
+            assignment = ("assignment" in attributes)
+            if not assignment:
+                if write and inFunctionOrProcedure and \
+                        "parameter" in attributes:
+                    break
+                return attributes
+        if write and inFunctionOrProcedure and not assignment:
             break
-        else:
-            scopeIndex = scope["parent"]
+        scopeIndex = scope["parent"]
     return None
 
 #-----------------------------------------------------------------------------

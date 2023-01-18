@@ -132,6 +132,50 @@ def stringifiedToFloat(stringifiedNumber):
             multiplier *= 16 ** (int(modifier[1:]))
     return float(stringifiedNumber) * multiplier
 
+# Create a PALMAT for a new process/thread.
+instantiationNumber = 0
+def partiallyClonePALMAT(rawPALMAT, scopeIndex):
+    global instantiationNumber
+    instantiationNumber += 1
+    
+    # For the specified scope, make sure its identifiers are a deep copy
+    # rather than a shallow copy.
+    def deepcopyDescendents(scopeIndex):
+        PALMAT["scopes"][scopeIndex]["identifiers"] \
+            = copy.deepcopy(rawPALMAT["scopes"][scopeIndex]["identifiers"])
+        for childIndex in PALMAT["scopes"][scopeIndex]["children"]:
+            deepcopyDescendents(childIndex)
+    
+    # After the following operation, both PALMAT and PALMAT["scopes"] are
+    # entirely new, but each of the individual scopes PALMAT["scopes"][i]
+    # is linked to the same object as rawPALMAT["scopes"][i]. So this is 
+    # good for everything other than the "identifiers" field at scopeIndex
+    # and its descendents.
+    PALMAT = { 
+        "scopes": [],
+        "instantiation": instantiationNumber
+        }
+    for scope in rawPALMAT["scopes"]:
+        PALMAT["scopes"].append(copy.copy(scope))
+    # Now correct the shallowly-copied indentifiers to deep copies where needed.
+    deepcopyDescendents(scopeIndex)
+    '''
+    print("PALMAT", id(rawPALMAT), id(PALMAT))
+    print("PALMAT['scopes']", id(rawPALMAT['scopes']), id(PALMAT['scopes']))
+    for i in range(len(PALMAT["scopes"])):
+        print("PALMAT['scopes'][%d]" %i , id(rawPALMAT['scopes'][i]), \
+              id(PALMAT['scopes'][i]))
+    for i in range(len(PALMAT["scopes"])):
+        print("PALMAT['scopes'][%d]['identifiers']" %i , \
+              id(rawPALMAT['scopes'][i]['identifiers']), \
+              id(PALMAT['scopes'][i]['identifiers']))
+    for i in range(len(PALMAT["scopes"])):
+        print("PALMAT['scopes'][%d]['instructions']" %i , \
+              id(rawPALMAT['scopes'][i]['instructions']), \
+              id(PALMAT['scopes'][i]['instructions']))
+    '''
+    return PALMAT
+
 # If this function returns, which in principle it might not if executing
 # an actual flight program, it returns the current computation stack.
 # That would normally be empty if full statements had been executed.
@@ -141,7 +185,12 @@ def stringifiedToFloat(stringifiedNumber):
 # CONSTANT(...) for DECLARE statements.  If there is failure, for example
 # the use of an unimplemented built-in function or referencing an 
 # uninitialized variable, then None is returned instead.
-def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
+def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
+                  trace=False, indent=0):
+    if newInstantiation:
+        PALMAT = partiallyClonePALMAT(rawPALMAT, pcScope)
+    else:
+        PALMAT = rawPALMAT
     scopes = PALMAT["scopes"]
     scopeNumber = pcScope
     instructionIndex = pcOffset
@@ -265,11 +314,12 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
                 print("Implementation error, unknown binary operator \"%s\"" \
                                                                 % operator)
                 return None
-        elif "fetch" in instruction or "store" in instruction or \
+        elif "fetch" in instruction or \
+                "store" in instruction or "storeu" in instruction or \
                 "storepop" in instruction or "storeupop" in instruction:
             erroredUp = False
             fetch = False
-            storeupop = False
+            storeu = False
             pop = False
             stackPos = 1
             if "fetch" in instruction:
@@ -277,16 +327,19 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
                 fetch = True
             elif "store" in instruction:
                 identifier = instruction["store"]
+            elif "storeu" in instruction:
+                identifier = instruction["storeu"]
+                storeu = True
             elif "storepop" in instruction:
                 identifier = instruction["storepop"]
                 pop = True
             elif "storeupop" in instruction:
                 identifier = instruction["storeupop"]
                 pop = True
-                storeupop = True
-                stackPos = 2
+                storeu = True
+                #stackPos = 2
             identifier = "^" + identifier + "^"
-            if fetch or storeupop:
+            if fetch or storeu:
                 attributes = findIdentifier(identifier, PALMAT, scopeNumber)
             else:
                 attributes = findIdentifier(identifier, PALMAT, \
@@ -619,18 +672,36 @@ def executePALMAT(PALMAT, pcScope=0, pcOffset=0, trace = False, indent=0):
             if "function" not in attributes and "procedure" not in attributes:
                 print("CALL to neither a FUNCTION nor PROCEDURE:", identifier)
                 return None
-            # The return address.
-            computationStack.append((scopeNumber, instructionIndex))
-            # Transfer control.
-            scopeNumber = attributes["scope"]
-            instructionIndex = 0
-            scope = scopes[scopeNumber]
-        elif "return" in instruction:
-            stackPos = instruction["return"]
-            if len(computationStack) < stackPos:
-                print("Implementation error, stack too short on RETURN.")
+            si = attributes["scope"]
+            s = scopes[si]
+            if "return" in s:
+                print("Recursion in subroutine %s not allowed." \
+                      % identifier[1:-1])
                 return None
-            scopeNumber, instructionIndex = computationStack.pop(-stackPos)
+            # The return address.
+            returnAddress = (scopeNumber, instructionIndex)
+            #computationStack.append((scopeNumber, instructionIndex))
+            # Transfer control.
+            scopeNumber = si
+            instructionIndex = 0
+            scope = s
+            scope["return"] = returnAddress
+        elif "return" in instruction:
+            #stackPos = instruction["return"]
+            #if len(computationStack) < stackPos:
+            #    print("Implementation error, stack too short on RETURN.")
+            #    return None
+            enclosure = scope
+            while enclosure != None:
+                if "return" in enclosure:
+                    scopeNumber, instructionIndex = enclosure["return"]
+                    enclosure.pop("return")
+                    break
+                enclosure = PALMAT["scopes"][enclosure["parent"]]
+            if enclosure == None:
+                print("Implementation error, no return address.")
+                return None
+            #scopeNumber, instructionIndex = computationStack.pop(-stackPos)
             scope = scopes[scopeNumber]
         else:
             print("Implementation error, unknown PALMAT:", instruction)
