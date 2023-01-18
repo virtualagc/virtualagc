@@ -252,9 +252,8 @@ With that in mind, here's a description of some of the available PALMAT instruct
 * `{'operator': ''}`.  This is the multiplication operator.  The action at runtime is to pop the last two values from the computation stack, multiply them, and then push the result back onto the computation stack.
 * `{'operator': '/'}`.  This is the division operator.  The action at runtime is to pop the final two elements from the computation stack, dividing the last value by the 2nd-to-last value from the last value, and then pushing the result back onto the computation stack.
 * `{'operator': '**'}`.  This is the exponentiation operator.  The action at runtime is to pop the final two elements from the computation stack, raising the last value to the power of the 2nd-to-last value, and then pushing the result back onto the computation stack.
-* `{'fetch': identifier}`, where `identifier` is the name of a variable.  It must correspond to an identifier already in `PALMAT["identifiers"]`, except that the surrounding carats (if any) used as string quotes in the identifier dictionary will not be present.  The action at runtime is to fetch the value of the variable or constant identified and push it onto the computation stack.  (I haven't given any thought as of yet as to how to handle vectors, matrices, arrays, or structures as of yet, while booleans vs bits is somewhat tricky.  So temporarily at least, just think of variables or constants storing numbers or character strings.)
-* `{'store': identifier}`, where `identifier` is the name of a variable.  It must correspond to an identifier already in `PALMAT["identifiers"]`, except that the surrounding carats (if any) used as string quotes in the identifier dictionary will not be present.  The action at runtime is to store the last value in the computation stack (without popping it from the stack) into the variable identified.  The value is stored in the variable's "value" attribute.
-* `{'storeu': identifier}`.  Like `store`, but not limited to the enclosing subroutine.
+* `{'fetch': (index, identifier)}`, where `identifier` is the identifier (*sans* carat quotes), typically a variable or constant, and `index` is the index (in `PALMAT["scopes"]`) of the scope in which the identifier was found.  If `index`==-1, it means that the variable is in the `ASSIGN` list of the enclosing `PROCEDURE` and must be replaced by the corresponding variable from the `ASSIGN` list of the `CALL`. The action at runtime is to fetch the value of the variable or constant identified and push it onto the computation stack.
+* `{'store': (index, variable)}`, where `variable` is the name of a variable (*sans* carat quotes) and `index` is the index (in `PALMAT["scopes"]`) of the scope in which the variable was found.
 * `{'pop': number}`.  Pops `number` of elements from the computation stack and discards them.
 
 More PALMAT instructions will be defined below, but first let's consider a couple of example.  Look at the following HAL/S code:
@@ -353,7 +352,7 @@ For example, here are some PALMAT instructions appropriate for `WRITE(6) A+5, A*
 
 ### PALMAT Instructions 4: Transfer of Control
 
-* `{'goto': [i,n]}` or `{'goto': s}` transfers control to integer position `n` in the PALMAT-instruction list for the scope with integer index `i`, or else to the accessible (scope-wise) PALMAT instruction having a `"label" : s` key-value pair. It is expected that the latter form is the as-compiled form, but that for efficiency purposes, the virtual machine executing PALMAT code would replace the latter form by the former, either upon start or else progressively as execution proceeds.
+* `{'goto': [index,n]}` or `{'goto': (index,s)}` transfers control to integer position `n` in the PALMAT-instruction list for the scope with integer index `index`, or else to the accessible (scope-wise) PALMAT instruction having a `"label" : s` key-value pair in scope `index`. It is expected that the latter form is the as-compiled form, but that for efficiency purposes, the virtual machine executing PALMAT code would replace the latter form by the former, either upon start or else progressively as execution proceeds.
 * `{'boolean': t}` where t is True or False.  This instructin pushes the indicated boolean value onto the expression stack.
 * `{'operator': 'NOT'}`. Logically negates the top of the stack.
 * `{'operator': 'AND'}`. Pops the top two elements from the stack, logically ANDs them, and pushes the result onto the stack.
@@ -369,32 +368,33 @@ For example, here are some PALMAT instructions appropriate for `WRITE(6) A+5, A*
 * `{'operator': '!<'}`. Pops the top two elements from the stack, tests if the top is not less than the next-to-top, and pushes the boolean result of the comparison onto the stack.
 * `{'operator': '!>'}`. Pops the top two elements from the stack, tests if the top is not greater than the next-to-top, and pushes the boolean result of the comparison onto the stack.
 * `{'noop': True }`.  A no-op.  It is used primarily for forward-defining the location of a label when the compiler isn't yet aware of the actual PALMAT instruction at that location due to lack of lookahead.  This occurs primarily for unique labels generated by the compiler itself to mark the ends of `IF ... THEN ... ELSE`, `DO WHILE ... END`, and so on.  Machine-independent optimization of the PALMAT instructions can therefore remove the `noop` and transfer the `noop`'s `"label"` key to the next instruction.
-* `{'iffalse': s}`.  Pops entry from expression stack and if False performs equivalent of a `{'goto': s}`.
-* `{'iftrue': s}`.  Pops entry from expression stack and if True performs equivalent of a `{'goto': s}`.
-* `{'debug': s}`.  These instructions are ignored during execution, and are useful for inserting debugging information.
-* `{''+><': 'X'}`.  In contrast to all of the PALMAT instructions discussed so far, which are intended to be used as simple building-blocks for more-complex operations, the present instruction is provided for use with HAL/S code of the form `DO FOR [TEMPORARY] X = Y TO Z BY T; ... END;`.  It is used to perform the update `X = X + T` and then to determine whether this new value of `X` has "exceeded" `Z`.  The latter is tricky because it's equivalent to `X + T > Z` if `T` is itself positive, but it's equivalent to `X + T < Z` when `T` is negative.  Of course, this *could* all be programmed using the simple building-block instead, but it's quite cumbersome to do so.  Specifically, how the `+><` instruction works is as follows:  It assumes that Z is the 2nd entry from the top of the stack, while `T` is at the top of the stack.  It performs the equivalent of the PALMAT instructions `{'fetch': X}`, `{'operator': '+'}`, and `{'store': X}`. Recall that this would leave `Z` and `X`+`T` at the top of the stack.  Depending on whether `T` had been positive or negative, it then performs the equivalent of either the PALMAT instruction `{'operator': '>'}` or `{'operator': '<'}`, respectively.
+* `{'iffalse': (index,s)}`.  Pops entry from expression stack and if False performs equivalent of a `{'goto': (index,s)}`.
+* `{'iftrue': (index,s)}`.  Pops entry from expression stack and if True performs equivalent of a `{'goto': (index,s)}`.
+* `{'debug': string}`.  These instructions are ignored during execution, and are useful for inserting debugging information.
+* `{''+><': (index, X)}`.  In contrast to all of the PALMAT instructions discussed so far, which are intended to be used as simple building-blocks for more-complex operations, the present instruction is provided for use with HAL/S code of the form `DO FOR [TEMPORARY] X = Y TO Z BY T; ... END;`.  It is used to perform the update `X = X + T` and then to determine whether this new value of `X` has "exceeded" `Z`.  The latter is tricky because it's equivalent to `X + T > Z` if `T` is itself positive, but it's equivalent to `X + T < Z` when `T` is negative.  Of course, this *could* all be programmed using the simple building-block instead, but it's quite cumbersome to do so.  Specifically, how the `+><` instruction works is as follows:  It assumes that Z is the 2nd entry from the top of the stack, while `T` is at the top of the stack.  It performs the equivalent of the PALMAT instructions `{'fetch': X}`, `{'operator': '+'}`, and `{'store': (index,X)}`. Recall that this would leave `Z` and `X`+`T` at the top of the stack.  Depending on whether `T` had been positive or negative, it then performs the equivalent of either the PALMAT instruction `{'operator': '>'}` or `{'operator': '<'}`, respectively.
 
 ## PALMAT Instructions 5: Subroutine Linkage
 
-* `{ 'call': label, 'assignments': [...] }`.  Calls a subroutine (`FUNCTION` or `PROCEDURE`) supplied as PALMAT (i.e., compiled from HAL/S source code), as opposed to a built-in library function.  The details of subroutine linkage are described in the text below.  The `assignments` appears only for `PROCEDURE`s
-* `{ 'return': n }`.  Returns from a `call`'d `FUNCTION` (`n`=2) or `PROCEDURE` (`n`=1).
-* `{ 'run': label }`.  Runs a `PROGRAM`. 
-* `{ 'storepop': variable }`.  Combines a PALMAT `{ 'store': variable }` instruction with a `{ 'pop': 1 }` instruction.
-* `{ 'storeupop': variable }`.  This is like `storepop`, except that it releases the limitation `storepop` (and `store`) have of only writing to "writable" locations &mdash; i.e., variables within the current enclosing subroutine that are not themselves subroutine parameters.  Since `storeupop` doesn't have this limitation, it can be used to initialize subroutine parameters or write to `PROCEDURE` `ASSIGN` variables.
+* `{ 'call': (index, label), 'assignments': {...} }`.  Calls a subroutine (`FUNCTION` or `PROCEDURE`) supplied as PALMAT (i.e., compiled from HAL/S source code), as opposed to a built-in library function.  The details of subroutine linkage are described in the text below.  The `assignments` appears only for `PROCEDURE`s
+* `{ 'return': N }`, returns from a `PROCEDURE` (`N`=1) or a `FUNCTION` (`N`=2).
+* `{ 'run': (index, label) }`.  Runs a `PROGRAM`. 
+* `{ 'storepop': (index, variable) }`.  Combines a PALMAT `{ 'store': (index, variable) }` instruction with a `{ 'pop': 1 }` instruction.
 
 For `CALL`s, the return address of the subroutine being called is stored in the `RETURN` key of the subroutine's scope.  This is done automatically by the `CALL` instruction itself, and is not of concern for PALMAT code generation.  Similarly, the `RETURN` instruction uses this return address and pops the `RETURN` key from the scope.  This scheme by itself supports only single-threaded operation (recall that HAL/S does not allow recursivity); refer to the section on reentrancy and multiprocessing for an explanation of how this method of handling return addresses relates to that topic.
 
-Regarding the passage of input parameters and return values, suppose that a subroutine has `N` parameters `X`<sub>1</sub> through `X`<sub>`N`</sub>.  Recall that a child scope of the parent scope in which the subroutine is defined is created to hold the subroutine's PALMAT code and identifiers. 
+### `FUNCTION` Specifics
 
-When the subroutine is called at runtime, the expression stack is arranged as follows upon entry to the subroutine:
+Regarding the passage of input parameters and return values, suppose that a `FUNCTION has `N` parameters `X`<sub>1</sub> through `X`<sub>`N`</sub>.  Recall that a child scope of the parent scope in which the `FUNCTION` is defined is created to hold the `FUNCTION`'s PALMAT code and identifiers. 
 
-* `X`<sub>`1`</sub> is the next-to-top element of the stack.
+When a `FUNCTION` is called at runtime, the expression stack is arranged as follows upon entry to the `FUNCTION`:
+
+* `X`<sub>`1`</sub> is the top element of the stack.
 * ...
-* `X`<sub>`N`</sub> is the `N`*th*-to-top. 
+* `X`<sub>`N`</sub> is the `N`*th* element on the stack.
 
 This is identical to the setup for the so-called "built-in" functions like `ARCTAN2` called using the PALMAT `function` instruction.
 
-When the subroutine executes, it pops all `N` of the parameters from the expression stack upon entry to the subroutine, storing them in local variables.  Upon exit from the subroutine, if the subroutine is a `FUNCTION` (thus returning a value), the return value is pushed onto the computation stack.  Again, this is the same as for built-in functions.  If a `PROCEDURE`, there is no return value, and so no additional value is pushed onto the expression stack.
+When the `FUNCTION` executes, it pops all `N` of the parameters from the expression stack upon entry to the `FUNCTION`, storing them in local variables.  Upon exit from the `FUNCTION`, the return value is pushed onto the computation stack.  Again, this is the same as for built-in functions. 
 
 For example, suppose we have an `INTEGER` `FUNCTION`, `F(X,Y,Z)`, whose definition begins in scope `K`, but whose own scope is `L`; suppose further that the function is being called from code in scope `M`.  `FUNCTION F` will be accessible to scope `K` or any of its descendent scopes: i.e., scope `M` must be scope `K` itself or else some descendent.
 
@@ -448,7 +448,45 @@ And finally, after returning from `F`,
 
     ... stuff already on the stack (if any) ..., returnValue
 
-`PROCEDURE`s are similar, except that there is no `returnValue` left on the expression stack, and the `call` instructions can have an `assignment` field.  The `assignment` field corresponds to the `ASSIGN` clause in the HAL/S instruction which calls the procedure.
+### `PROCEDURE` Specifics
+
+`PROCEDURE`s are similar to `FUNCTION`s in many ways (the PALMAT `call` instruction continues to be used, for example), but they also differ in some obviously-necessary ways and in come stupidly-unnecessary ways.
+
+As far as the obvious ways are concerned:
+
+* There is no `returnValue` left on the expression stack.
+* `PROCEDURE` definitions and `CALL`s to them have an `ASSIGN` clause, which causes the PALMAT `call` instructions to have an extra field, `assignment`.  The value of the `assignment` field, in the Python implementation, is a Python dictionary which has a key for each `ASSIGN` variable in the `PROCEDURE`'s definition.  The value associated with that key is an ordered pair that specifies the corresponding variable from the `ASSIGN` clause of the HAL/S `CALL` to the `PROCEDURE`.  The ordered pair contains the scope in which the identifier for the variable is defined and the string form of the identifier itself.
+
+Consider the following sample HAL/S code:
+
+    DECLARE Z INTEGER;
+    .
+    .
+    .
+    P: PROCEDURE(X) ASSIGN(Y);
+        DECLARE INTEGER, X, Y;
+        Y = X;
+    CLOSE P;
+    .
+    .
+    .
+    CALL P(25) ASSIGN(Z);
+
+In this example, `PROCEDURE P` nominally sets the variable `Y`.  However, when the `CALL P` occurs, the symbol `Y` within `P` is aliases to the variable `Z` outside of `P`.  Therefore the `CALL P` actually ends up setting the variable `Z` to the same value as the `X` parameter of `P`.  In other words, the result is to set `Z` equal to 25.
+
+In terms of the specifics of the PALMAT `call` instruction, it looks like the following in the Python implementation:
+
+    { 'call': (scopeOfIndexOfP, 'l_P'), 'assignments': { 'Y': (scopeOfIndexOfZ, 'Z' } }
+
+(The suffix 'l_' in 'l_P' is due to the name mangling performed by the compiler, and is thus the procedure name used internally.)
+
+As far as stupid, unnecessary differences between `PROCEDURE` and `FUNCTION` calls are concerned, the input parameters for the call to a `PROCEDURE` are in the opposite order on the computation stack as the parameters for a `FUNCTION`.  Thus,
+
+* `X`<sub>`N`</sub> is the top element of the stack.
+* ...
+* `X`<sub>`1`</sub> is the `N`*th* element on the stack.
+
+This has to do with the order in which the compiler's code generator builds the PALMAT instruction list, so I'm afraid it's not exactly a simple fix even if a non-Python implementation of the emulator is created.  This annoys me, but I can't see that it makes any difference other than aesthetically, so I have no current plans to fix it.
 
 ## Multiprocessing and Reentrancy
 

@@ -10,7 +10,8 @@ Purpose:        Part of the code-generation system for the "modern" HAL/S
 History:        2023-01-10 RSB  Adapted from expressionSM.py
 """
 
-from palmatAux import createTarget, jumpToTarget, createVariable, debug
+from palmatAux import createTarget, jumpToTarget, createVariable, \
+    debug, findIdentifier
 import p_Functions
 
 '''
@@ -50,26 +51,19 @@ def doForSM(stage, lbnfLabel, PALMAT, state, trace, depth):
             instructions[1].pop('label')
             currentScope["identifiers"][label]["label"][1] = offset
         else:
-            createTarget(PALMAT, currentScope["self"], \
-                         currentScope["self"], "up")
+            createTarget(PALMAT, scopeNumber, scopeNumber, "up")
         # Update the loop variable.
-        '''
-        instructions.append({'fetch': stateMachine['forKey']})
-        instructions.append({'fetch': stateMachine['forBY']})
-        instructions.append({'operator': "+"})
-        instructions.append({'store': stateMachine['forKey']})
-        # Past the limit?
-        # TBD: We have to condition this test on whether BY is positive or
-        # negative.  Temporarily I'll just assume it's positive
-        instructions.append({'fetch': stateMachine['forEnd']})
-        instructions.append({'operator': '<'})
-        '''
-        instructions.append({'fetch': stateMachine['forEnd']})
-        instructions.append({'fetch': stateMachine['forBY']})
-        instructions.append({'+><': stateMachine['forKey']})
+        si, attributes = \
+            findIdentifier("^"+stateMachine['forEnd']+"^", PALMAT, scopeNumber)
+        instructions.append({'fetch': (si, stateMachine['forEnd'])})
+        si, attributes = \
+            findIdentifier("^"+stateMachine['forBY']+"^", PALMAT, scopeNumber)
+        instructions.append({'fetch': (si, stateMachine['forBY'])})
+        si, attributes = findIdentifier("^"+stateMachine['forKey']+"^", \
+                                        PALMAT, scopeNumber, True)
+        instructions.append({'+><': (si, stateMachine['forKey'])})
 
-        jumpToTarget(PALMAT, currentScope["self"], currentScope["self"], 
-                     "ux", 'iftrue')
+        jumpToTarget(PALMAT, scopeNumber, scopeNumber, "ux", 'iftrue')
         #debug(PALMAT, state, "Pauses: %s" % str(stateMachine['pauses']))
         state.pop("stateMachine")
     
@@ -148,27 +142,34 @@ def doForSM(stage, lbnfLabel, PALMAT, state, trace, depth):
                         "scalar": True,
                         "double": True 
                         })
-                    instructions.append({"storepop": id1})
+                    instructions.append({"storepop": (scopeNumber, id1)})
                     instructions.extend(finalExpression)
                     id2 = createVariable(currentScope, "ud", {
                         "scalar": True,
                         "double": True 
                         })
-                    instructions.append({"store": id2})
+                    instructions.append({"store": (scopeNumber, id2)})
                 else: 
                     # This is the FOR TO (no BY) case.
                     id1 = createVariable(currentScope, "ud", {
                         "scalar": True,
                         "double": True 
                         })
-                    instructions.append({"storepop": id1})
+                    instructions.append({
+                        "storepop": (scopeNumber, id1)})
                     id2 = createVariable(currentScope, "ud", {
                         "integer": True, "constant": 1
                         })
-                    instructions.append({"fetch": id2 })
-                instructions.append({"fetch": stateMachine["forKey"]})
+                    instructions.append(
+                        {"fetch": (scopeNumber, id2) })
+                siForKey, attributesForKey = \
+                    findIdentifier("^" + stateMachine["forKey"] + "^", 
+                                   PALMAT, scopeNumber, True)
+                instructions.append({
+                    "fetch": (siForKey, stateMachine["forKey"])})
                 instructions.append({"operator": "-" })
-                instructions.append({"storepop": stateMachine["forKey"]})
+                instructions.append({
+                    "storepop": (siForKey, stateMachine["forKey"])})
                 stateMachine["forEnd"] = id1
                 #debug(PALMAT, state, "Ending key stored at " + id1)
                 stateMachine["forBY"] = id2
@@ -191,7 +192,9 @@ def doForSM(stage, lbnfLabel, PALMAT, state, trace, depth):
                 the initial assignment of the value to the key, and jump to 
                 the guts of the DO FOR block.
                 '''
-                instructions.append({"storepop": forKey})
+                si, attributes = \
+                    findIdentifier("^" + forKey + "^", PALMAT, scopeNumber)
+                instructions.append({"storepop": (si, forKey)})
                 internalState = "waitForEndExpression"
                 stateMachine["pauses"] = []
     stateMachine["internalState"] = internalState

@@ -199,7 +199,15 @@ def stringLiteral(PALMAT, state, s):
     elif state1 == "variable" and "call_assign_list" in history:
         if "callAssignments" not in substate["commonAttributes"]:
             substate["commonAttributes"]["callAssignments"] = []
-        substate["commonAttributes"]["callAssignments"].append(s[1:-1])
+        si, attributes = findIdentifier(s, PALMAT, scopeIndex)
+        if attributes == None:
+            substate["errors"]\
+                .append("Variable %s in ASSIGN not found." % s[1:-1])
+            scope["children"].remove(i)
+            identifiers.pop(s)
+            PALMAT["scopes"][i]["parent"] = None
+        else:
+            substate["commonAttributes"]["callAssignments"].append((si, s[1:-1]))
     elif state1 == "call_key":
         substate["currentIdentifier"] = s
     elif state1 == "parameter":
@@ -267,7 +275,7 @@ def stringLiteral(PALMAT, state, s):
     elif state2 == ["assignment", "variable"] or \
             history[-3:-1] == ["assignment", "variable"]:
         # Identifier on LHS of an assignment.
-        identDict = findIdentifier(s, PALMAT, scopeIndex, True)
+        si, identDict = findIdentifier(s, PALMAT, scopeIndex, True)
         if identDict == None: 
             substate["errors"].append("Assignment to  " + sp + \
                                       " not allowed.")
@@ -279,7 +287,7 @@ def stringLiteral(PALMAT, state, s):
                         + " not possible.")
             removeAncestors(PALMAT, scopeIndex)
             return False
-        substate["lhs"].append(sp)
+        substate["lhs"].append((si, sp))
     return True
 
 # Reset the portion of the AST state-machine that handles individual statements.

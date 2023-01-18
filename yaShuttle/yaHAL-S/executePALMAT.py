@@ -17,7 +17,6 @@ import random
 import time
 import copy
 from decimal import Decimal, ROUND_HALF_UP
-from palmatAux import findIdentifier
 
 timeOrigin = 0
 # This function is called once at startup, in order to set the 
@@ -75,9 +74,10 @@ builtIns = [
 # or else is an identifier giving the name of an accessible
 # label.
 def jump(PALMAT, scopeNumber, instructionDict, instructionName):
-    s = instructionDict[instructionName]
+    #print("*", scopeNumber, instructionDict, instructionName)
+    si, s = instructionDict[instructionName]
     if isinstance(s, str):
-        attributes = findIdentifier(s, PALMAT, scopeNumber)
+        attributes = PALMAT["scopes"][si]["identifiers"][s]
         if attributes == None or "label" not in attributes:
             print("Cannot find target label", s)
             return None
@@ -213,14 +213,15 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
         elif "number" in instruction:
             computationStack.append(stringifiedToFloat(instruction["number"]))
         elif "+><" in instruction:
-            identifier = "^" + instruction["+><"] + "^"
+            si, identifier = instruction["+><"]
+            identifier = "^" + identifier + "^"
             if stackSize < 2:
                 print("Implementation error, not enough operands for '+><'.")
                 return None
             operand1 = computationStack.pop()
             negativeIncrement = (operand1 < 0)
             operand2 = computationStack[-1]
-            attributes = findIdentifier(identifier, PALMAT, scopeNumber)
+            attributes = PALMAT["scopes"][si]["identifiers"][identifier]
             if attributes == None:
                 print("Implementation error, variable %s not found." \
                       % identifier[1:-1])
@@ -315,92 +316,78 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                                                                 % operator)
                 return None
         elif "fetch" in instruction or \
-                "store" in instruction or "storeu" in instruction or \
-                "storepop" in instruction or "storeupop" in instruction:
+                "store" in instruction or "storepop" in instruction:
             erroredUp = False
             fetch = False
-            storeu = False
             pop = False
             stackPos = 1
             if "fetch" in instruction:
-                identifier = instruction["fetch"]
+                si, identifier = instruction["fetch"]
                 fetch = True
             elif "store" in instruction:
-                identifier = instruction["store"]
-            elif "storeu" in instruction:
-                identifier = instruction["storeu"]
-                storeu = True
+                si, identifier = instruction["store"]
             elif "storepop" in instruction:
-                identifier = instruction["storepop"]
+                si, identifier = instruction["storepop"]
                 pop = True
-            elif "storeupop" in instruction:
-                identifier = instruction["storeupop"]
-                pop = True
-                storeu = True
-                #stackPos = 2
+            if si == -1:
+                si, identifier = scope["assignments"][identifier]
+            try:
+                attributes = PALMAT["scopes"][si]["identifiers"]["^" + identifier + "^"]
+            except:
+                print(si, identifier, instruction)
+                sys.exit(1)
             identifier = "^" + identifier + "^"
-            if fetch or storeu:
-                attributes = findIdentifier(identifier, PALMAT, scopeNumber)
-            else:
-                attributes = findIdentifier(identifier, PALMAT, \
-                                            scopeNumber, True)
-            if attributes != None:
-                erroredUp = True
-                if fetch:
-                    if "value" in attributes:
-                        computationStack.append(attributes["value"])
-                    elif "constant" in attributes:
-                        computationStack.append(attributes["constant"])
-                    else:
-                        print("Identifier %s uninitialized" % identifier)
+            erroredUp = True
+            if fetch:
+                if "value" in attributes:
+                    computationStack.append(attributes["value"])
+                elif "constant" in attributes:
+                    computationStack.append(attributes["constant"])
+                else:
+                    print("Identifier %s uninitialized" % identifier)
+                    return None
+                
+            else: # store
+                if len(computationStack) < stackPos:
+                    print("Implementation error, stack too short for " +
+                          "STOREXXX instruction")
+                    return None
+                value = copy.deepcopy(computationStack[-stackPos])
+                if pop:
+                    computationStack.pop(-stackPos)
+                if "constant" in attributes:
+                    print("Cannot change value of constant %s." \
+                          % identifier[1:-1])
+                    return None
+                if isinstance(value, str):
+                    if "character" not in attributes:
+                        print("Cannot store string in non-CHARACTER " +
+                              "variable %s." % identifier[1:-1])
                         return None
-                    
-                else: # store
-                    if len(computationStack) < stackPos:
-                        print("Implementation error, stack too short for " +
-                              "STOREXXX instruction")
-                        return None
-                    value = copy.deepcopy(computationStack[-stackPos])
-                    if pop:
-                        computationStack.pop(-stackPos)
-                    if "constant" in attributes:
-                        print("Cannot change value of constant %s." \
+                    maxlen = attributes["character"]
+                    value = value[:maxlen]
+                elif isinstance(value, bool):
+                    if "bit" not in attributes:
+                        print("Cannot store bit/boolean in " +
+                              "non-bit/boolean variable %s." \
                               % identifier[1:-1])
                         return None
-                    if "parameter" in attributes and \
-                            "storeupop" not in instruction:
-                        print("Cannot change a formal parameter %s." \
+                elif isinstance(value, (float, int)):
+                    if "scalar" not in attributes and \
+                            "integer" not in attributes:
+                        print("Cannot store arithmetic value in " + \
+                              "non-integer/scalar variable %s." \
                               % identifier[1:-1])
                         return None
-                    if isinstance(value, str):
-                        if "character" not in attributes:
-                            print("Cannot store string in non-CHARACTER " +
-                                  "variable %s." % identifier[1:-1])
-                            return None
-                        maxlen = attributes["character"]
-                        value = value[:maxlen]
-                    elif isinstance(value, bool):
-                        if "bit" not in attributes:
-                            print("Cannot store bit/boolean in " +
-                                  "non-bit/boolean variable %s." \
-                                  % identifier[1:-1])
-                            return None
-                    elif isinstance(value, (float, int)):
-                        if "scalar" not in attributes and \
-                                "integer" not in attributes:
-                            print("Cannot store arithmetic value in " + \
-                                  "non-integer/scalar variable %s." \
-                                  % identifier[1:-1])
-                            return None
-                        if "integer" in attributes:
-                            value = hround(value)
-                        elif "scalar" in attributes:
-                            value = float(value)
-                    else:
-                        print("Implementation error, non-boolean/character/" + \
-                              "arithmetic not yet implemented.")
-                        return None
-                    attributes["value"] = value
+                    if "integer" in attributes:
+                        value = hround(value)
+                    elif "scalar" in attributes:
+                        value = float(value)
+                else:
+                    print("Implementation error, non-boolean/character/" + \
+                          "arithmetic not yet implemented.")
+                    return None
+                attributes["value"] = value
             if not erroredUp:
                 print("Identifier %s not in any accessible scope" \
                       % identifier[1:-1])
@@ -652,8 +639,9 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
         elif "noop" in instruction:
             pass # Nothing to do!
         elif "run" in instruction:
-            identifier = "^" + instruction["call"] + "^"
-            attributes = findIdentifier(identifier, PALMAT, scopeNumber)
+            si, identifier = instruction["run"]
+            identifier = "^" + identifier + "^"
+            attributes = PALMAT["scopes"][si]["identifiers"][identifier]
             if attributes == None:
                 print("Target of RUN not found:", identifier)
                 return None
@@ -664,8 +652,9 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             instructionIndex = 0;
             scope = scopes[scopeNumber]
         elif "call" in instruction:
-            identifier = "^" + instruction["call"] + "^"
-            attributes = findIdentifier(identifier, PALMAT, scopeNumber)
+            si, identifier = instruction["call"]
+            identifier = "^" + identifier + "^"
+            attributes = PALMAT["scopes"][si]["identifiers"][identifier]
             if attributes == None:
                 print("Target of CALL not found:", identifier)
                 return None
@@ -685,17 +674,17 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             scopeNumber = si
             instructionIndex = 0
             scope = s
+            if "assignments" in instruction:
+                scope["assignments"] = copy.deepcopy(instruction["assignments"])
             scope["return"] = returnAddress
         elif "return" in instruction:
-            #stackPos = instruction["return"]
-            #if len(computationStack) < stackPos:
-            #    print("Implementation error, stack too short on RETURN.")
-            #    return None
             enclosure = scope
             while enclosure != None:
                 if "return" in enclosure:
                     scopeNumber, instructionIndex = enclosure["return"]
                     enclosure.pop("return")
+                    if "assignments" in enclosure:
+                        enclosure.pop("assignments")
                     break
                 enclosure = PALMAT["scopes"][enclosure["parent"]]
             if enclosure == None:

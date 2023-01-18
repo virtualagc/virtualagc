@@ -347,26 +347,45 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     # in lbnfLabelPatterns.
     elif lbnfLabel == "declare_group" and \
             currentScope["type"] in ["function", "procedure"]:
+        isProcedure = False
         if currentScope["type"] == "procedure":
             allDeclaredAssigns(currentScope)
+            isProcedure = True
         declared = allDeclaredParameters(currentScope)
         parameters = currentScope["attributes"]["parameters"]
         if len(declared) == len(parameters) and \
                 "alreadyPopped" not in currentScope:
             currentScope["alreadyPopped"] = True
             instructions = currentScope["instructions"]
-            for parameter in parameters:
+            if isProcedure:
+                r = reversed(parameters)
+            else:
+                r = parameters
+            for parameter in r:
                 identifier = declared[parameter][1:-1]
-                instructions.append({'storeupop': identifier})
+                instructions.append({
+                    'storepop': (currentScope["self"], identifier)})
     elif lbnfLabel == "basicStatementCall":
-        if "callAssignments" in substate["commonAttributes"]:
-            assignments = substate["commonAttributes"]["callAssignments"]
-            currentScope["instructions"]\
-                        .append({'call': substate["currentIdentifier"][1:-1],
-                                 'assignments': assignments})
+        currentIdentifier = substate["currentIdentifier"]
+        si, attributes = findIdentifier(currentIdentifier, PALMAT, currentIndex)
+        if "callAssignments" not in substate["commonAttributes"]:
+            assignments = []
         else:
-            currentScope["instructions"]\
-                        .append({'call': substate["currentIdentifier"][1:-1]})
+            assignments = substate["commonAttributes"]["callAssignments"]
+        if "assignments" not in attributes:
+            attributes["assignments"] = []
+        if len(attributes["assignments"]) != len(assignments):
+            print("ASSIGN-list length disagreement in %s, %s vs %s." % \
+              (currentIdentifier[1:-1], assignments, attributes["assignments"]))
+            endLabels.pop()
+            return False, PALMAT
+        assignments = substate["commonAttributes"]["callAssignments"]
+        assDict = {}
+        for i in range(len(assignments)):
+            assDict[attributes["assignments"][i]] = assignments[i]
+        currentScope["instructions"].append({'call': (si, 
+                                                      currentIdentifier[1:-1]),
+                                             'assignments': assDict})
     elif lbnfLabel == "basicStatementReturn":
         # We need to find the most-narrow context that's a FUNCTION or 
         # PROCEDURE.
@@ -424,15 +443,12 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         p_Functions.expressionToInstructions( \
             substate["expression"], instructions)
         base = "store"
-        identifier = substate["lhs"][-1]
-        attributes = findIdentifier("^"+identifier+"^", PALMAT, currentIndex)
+        si, identifier = substate["lhs"][-1]
+        attributes = PALMAT["scopes"][si]["identifiers"]["^"+identifier+"^"]
         if attributes == None:
             print("Assignment variable %s not accessible." % identifier[1:-1])
             endLabels.pop()
             return False, PALMAT
-        #print("*", identifier, currentIndex, attributes)
-        #if "assignment" in attributes:
-        base += "u"
         if len(substate["lhs"]) == 1:
             instructions.append({ base + "pop": substate["lhs"][-1] })
         else:
@@ -466,6 +482,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         was computable at compile time.
         '''
         value = popInstruction(instructions)
+        '''
         if value == None or lenInstructions(instructions) != 0:
             print("Computation of INITIAL(...) or CONSTANT(...) failed:", 
                   value, instructions)
@@ -474,6 +491,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             endLabels.pop()
             return False, PALMAT
         instructions.clear()
+        '''
         if "number" in value:
             try:
                 value = float(value["number"]);
@@ -584,7 +602,15 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         if currentScope["type"] == "do for":
             jumpToTarget(PALMAT, currentIndex, currentIndex, "up", "goto")
         else:
-            jumpToTarget(PALMAT, currentIndex, currentIndex, "ue", "goto")
+            # We've got a little problem here, in that the label we want to
+            # recycle to at the end of a DO WHILE or DO UNTIL is the same
+            # label at which the block is entered from elsewhere.  Hence
+            # the label doesn't appear in the identifier list of the current
+            # block.  We have to find it.
+            identifier = "^ue_%d^" % currentIndex
+            si, attributes = findIdentifier(identifier, PALMAT, currentIndex)
+            jumpToTarget(PALMAT, currentIndex, currentIndex, \
+                         "ue", "goto", False, si)
     if endLabels[-1]["used"]:
         if lbnfLabel == "true_part":
             if createTarget(PALMAT, currentIndex, currentIndex, "ub") == None:

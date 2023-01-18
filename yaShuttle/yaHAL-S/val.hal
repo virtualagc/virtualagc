@@ -256,4 +256,24 @@
  WRITE(6) PROJECTION3(2, 100, 200, 300); 
  WRITE(6) PROJECTION3(3, 100, 200, 300); 
  
+ WRITE(6) 'Some tests of PROCEDUREs ...'; 
+ DECLARE X1 SCALAR INITIAL(0), Y1 SCALAR INITIAL(1), Z1 SCALAR INITIAL(2); 
+ P: 
+ PROCEDURE(X) ASSIGN(Y); 
+	 DECLARE X, Y; 
+	 Y=X; 
+ CLOSE; 
+ CALL P(39) ASSIGN(Z1); 
+ WRITE(6) Y1, Z1, '(should be 1.0 and 39.0)'; 
+ 
+ P2: 
+ PROCEDURE(A, B, C) ASSIGN(D, E, F); 
+	 DECLARE A, B, C, D, E, F; 
+	 D = A; 
+	 E = B; 
+	 F = C; 
+ CLOSE P2; 
+ CALL P2(123, 245, 789) ASSIGN(X1, Y1, Z1); 
+ WRITE(6) X1, Y1, Z1, 'should be 123.0, 245.0, 789.0'; 
+ 
  WRITE(6) 'Done.';

@@ -13,7 +13,7 @@ History:        2023-01-08 RSB  Created, hopefully for eventually replacing
 """
 
 from executePALMAT import executePALMAT
-from palmatAux import findIdentifier, debug
+from palmatAux import debug, findIdentifier
 from p_Functions import substate
 
 # Return True on success, False on failure.  The stage argument is 0 when
@@ -48,7 +48,9 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
     if stage == 1 and lbnfLabel[:1] == "^" and lbnfLabel[-1:] == "^":
         sp = lbnfLabel[1:-1]
         if internalState == "waitIdentifier":
-            expression.append({ "fetch": sp })
+            si, attributes = \
+                    findIdentifier(lbnfLabel, PALMAT, state["scopeIndex"])
+            expression.append({ "fetch": (si, sp) })
             internalState = "normal"
         elif internalState == "waitNumber":
             expression.append({ "number": sp })
@@ -57,7 +59,9 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
             expression.append({ "string": sp[1:-1] })
             internalState = "normal"
         elif internalState == "waitFunctionName":
-            expression.append({ "call": sp })
+            si, attributes = \
+                    findIdentifier(lbnfLabel, PALMAT, state["scopeIndex"])
+            expression.append({ "call": (si, sp) })
             internalState = "normal"
     if stage == 2 and depth == owningDepth: #lbnfLabel == owningLabel:
         # Transfer the expression stack to the PALMAT instruction queue.
@@ -73,9 +77,13 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
             temporaryInstructions.append(instruction)
             if compileTimeComputable:
                 if "fetch" in instruction:
-                    identifier = instruction["fetch"]
-                    attributes = findIdentifier("^" + identifier + "^", \
-                                                PALMAT, state["scopeIndex"])
+                    si, identifier = instruction["fetch"]
+                    try:
+                        attributes = PALMAT["scopes"][si]["identifiers"]\
+                                                        ["^" + identifier + "^"]
+                    except:
+                        print("Identifier %s not found." % identifier)
+                        return False;
                     if attributes == None or "constant" not in attributes:
                         compileTimeComputable = False
                 elif "function" in instruction and \

@@ -109,8 +109,10 @@ helpMenu = \
 \tWRITE F      Write current PALMAT to a file named F.
 \tREAD F       Read PALMAT from a file named F.
 \tDATA         Inspect identifiers in root scope.
+\tDATA N       Inspect identifiers in scope N (integer).
 \tDATA *       Inspect identifiers in all scopes.
 \tPALMAT       Inspect PALMAT code in root scope.
+\tPALMAT N     Inspect PALMAT code in scope N (integer).
 \tPALMAT *     Inspect PALMAT code in all scopes.
 \tEXECUTE      (Re)execute already-compiled PALMAT.
 \tCLONE        Same as EXECUTE, but clone instantiation.
@@ -241,8 +243,16 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     PALMAT = newPALMAT
                     print("Success!")
                 continue
-            elif firstWord == "DATA" and len(fields) == 2 and fields[1] == "*":
-                for i in range(len(PALMAT["scopes"])):
+            elif firstWord == "DATA":
+                if len(fields) == 1:
+                    r = [0]
+                elif fields[1] == "*":
+                    r = range(len(PALMAT["scopes"]))
+                elif fields[1].isdigit():
+                    r = [int(fields[1])]
+                    if r[0] < 0 or r[0] >= len(PALMAT["scopes"]):
+                        continue
+                for i in r:
                     scope = printScopeHeading(PALMAT, i)
                     identifiers = scope["identifiers"]
                     if len(identifiers) == 0:
@@ -252,9 +262,16 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                             print("\t%s:" % identifier[1:-1], \
                                     identifiers[identifier])
                 continue
-            elif firstWord == "PALMAT" and \
-                    len(fields) == 2 and fields[1] == "*":
-                for i in range(len(PALMAT["scopes"])):
+            elif firstWord == "PALMAT":
+                if len(fields) == 1:
+                    r = [0]
+                elif fields[1] == "*":
+                    r = range(len(PALMAT["scopes"]))
+                elif fields[1].isdigit():
+                    r = [int(fields[1])]
+                    if r[0] < 0 or r[0] >= len(PALMAT["scopes"]):
+                        continue
+                for i in r:
                     scope = printScopeHeading(PALMAT, i)
                     instructions = scope["instructions"]
                     if len(instructions) == 0:
@@ -355,27 +372,6 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                         print("\tLBNF                     (vs BNF or NOAST)")
                     else:
                         print("\tNOAST                    (vs BNF or LBNF)")
-                    continue
-                elif firstWord == "DATA":
-                    scope = PALMAT["scopes"][0]
-                    identifiers = scope["identifiers"]
-                    if len(identifiers) == 0:
-                        print("\t(No identifiers declared)")
-                    else:
-                        for identifier in sorted(identifiers):
-                            print("\t%s:" % identifier[1:-1], \
-                                    identifiers[identifier])
-                    continue
-                elif firstWord == "PALMAT":
-                    scope = PALMAT["scopes"][0]
-                    instructions = scope["instructions"]
-                    if len(instructions) == 0:
-                        print("\t(No generated code)")
-                    else:
-                        count = 0
-                        for instruction in instructions:
-                            print("\t%d: %s" % (count, str(instruction)))
-                            count += 1
                     continue
                 elif firstWord == "EXECUTE":
                     executePALMAT(PALMAT, 0, 0, False, trace3, 8)

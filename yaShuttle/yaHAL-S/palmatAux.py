@@ -227,8 +227,8 @@ def printPALMAT(PALMAT, showInstructions=False):
         
 # Search for an identifier in the scope hierarchy, starting at the
 # current scope and working upward through the parent scope, grandparent scope,
-# and so on.  Returns either the dictionary for the identifier or else None if 
-# not found. 
+# and so on.  Returns None if not found, or an ordered pair consisting of the
+# index of the found scope and the attributes of the identifier.
 # The search works differently when the variable is for writing rather than 
 # reading.  For reading, all variables in ancestor scopes are allowed.
 # Whereas for writing, we cannot look outside of the enclosing FUNCTION or 
@@ -236,8 +236,6 @@ def printPALMAT(PALMAT, showInstructions=False):
 # parameters.  On the other hand, for variables defined in a PROCEDURE ASSIGN,
 # the restriction is lifted and for those variables alone we can search the
 # ancestors.
-# NOTE:  I haven't figured out yet how ASSIGN actually should be handled, so
-# that's not yet accounted for.
 def findIdentifier(identifier, PALMAT, scopeIndex=None, write=False):
     while scopeIndex != None:
         scope = PALMAT["scopes"][scopeIndex]
@@ -250,11 +248,13 @@ def findIdentifier(identifier, PALMAT, scopeIndex=None, write=False):
                 if write and inFunctionOrProcedure and \
                         "parameter" in attributes:
                     break
-                return attributes
+                return scopeIndex, attributes
+            else:
+                return -1, attributes
         if write and inFunctionOrProcedure and not assignment:
             break
         scopeIndex = scope["parent"]
-    return None
+    return -1, None
 
 #-----------------------------------------------------------------------------
 '''
@@ -293,14 +293,21 @@ def createTarget(PALMAT, fromIndex, toIndex, xx, nameFromFrom=False):
 # or follow createTarget(). 
 jumpInstructions = ['goto', 'iffalse', 'iftrue']
 def jumpToTarget(PALMAT, fromIndex, toIndex, xx, palmatOpcode, \
-                 nameFromFrom=False):
+                 nameFromFrom=False, parentIndex=None):
 
     instructions = PALMAT["scopes"][fromIndex]["instructions"]
     if nameFromFrom:
-        label = constructLabel(fromIndex, xx)
+        si = fromIndex
     else:
-        label = constructLabel(toIndex, xx)
-    instructions.append({palmatOpcode: "^" + label + "^"})
+        si = toIndex
+    if parentIndex != None:
+        li = parentIndex
+    elif fromIndex <= toIndex:
+        li = fromIndex
+    else:
+        li = toIndex
+    label = constructLabel(si, xx)
+    instructions.append({palmatOpcode: (li, "^" + label + "^")})
 
 uniqueVariableCounter = 0
 def createVariable(scope, xx, attributes):
