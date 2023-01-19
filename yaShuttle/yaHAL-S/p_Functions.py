@@ -217,7 +217,8 @@ def stringLiteral(PALMAT, state, s):
             identifiers[identifier]["assignments"].append(s[1:-1])
         elif "parameter_list" in history:
             identifiers[identifier]["parameters"].append(s[1:-1])
-    elif "function_name" in history or "procedure_name" in history:
+    elif "function_name" in history or "procedure_name" in history or \
+            "blockHeadProgram" in history:
         for i in scope["children"]:
             if "name" in PALMAT["scopes"][i] and \
                     s == PALMAT["scopes"][i]["name"]:
@@ -233,6 +234,8 @@ def stringLiteral(PALMAT, state, s):
         elif "procedure_name" in history:
             addAttribute(identifiers, s, "procedure", True)
             addAttribute(identifiers, s, "assignments", [])
+        elif "blockHeadProgram" in history:
+            addAttribute(identifiers, s, "program", True)
         addAttribute(identifiers, s, "scope", len(scopes))
         addAttribute(identifiers, s, "parameters", [])
     elif state1 == "label_definition":
@@ -327,6 +330,7 @@ augmentationCandidates = [
     "bit_exp",
     "blockHeadFunction",
     "blockHeadProcedure",
+    "blockHeadProgram",
     "call_assign_list",
     "call_key",
     "charExpCat",
@@ -354,6 +358,8 @@ augmentationCandidates = [
     "parameter_list",
     "prePrimaryFunction",
     "procedure_name",
+    "read_arg",
+    "read_key",
     "relational_exp",
     "then",
     "true_part",

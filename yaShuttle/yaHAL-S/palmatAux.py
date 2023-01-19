@@ -239,7 +239,8 @@ def printPALMAT(PALMAT, showInstructions=False):
 def findIdentifier(identifier, PALMAT, scopeIndex=None, write=False):
     while scopeIndex != None:
         scope = PALMAT["scopes"][scopeIndex]
-        inFunctionOrProcedure = (scope["type"] in ["function", "procedure"])
+        inFunctionOrProcedure = \
+            (scope["type"] in ["function", "procedure", "program"])
         assignment = False
         if identifier in scope["identifiers"]:
             attributes = scope["identifiers"][identifier]

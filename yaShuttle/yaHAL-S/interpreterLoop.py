@@ -48,7 +48,8 @@ if readlinePresent:
 import re
 import atexit
 from processSource import processSource
-from palmatAux import constructPALMAT, writePALMAT, readPALMAT, collectGarbage
+from palmatAux import constructPALMAT, writePALMAT, readPALMAT, \
+        collectGarbage, findIdentifier
 from p_Functions import removeIdentifier, removeAllIdentifiers, substate
 from executePALMAT import executePALMAT, setupExecutePALMAT
 from replaceBy import bareIdentifierPattern
@@ -68,7 +69,7 @@ setupExecutePALMAT()
 
 def printScopeHeading(PALMAT, i):
     scope = PALMAT["scopes"][i]
-    if scope["type"] in ["function", "procedure"]:
+    if scope["type"] in ["function", "procedure", "program"]:
         if scope["parent"] == None:
             print("Scope %d, %s %s (deleted):" % \
                   (i, scope["type"].upper(), 
@@ -90,6 +91,12 @@ helpMenu = \
 \tinterpreter commands are listed below:
 \tHELP         Show this menu.
 \tQUIT         Quit this interpreter program.
+\tRUN P [*]    Run PROGRAM P. By default, runs as the 
+\t             "primary", which affects the DATA (see
+\t             below).  If the optional 3rd field is
+\t             present, runs as a "secondary" with 
+\t             cloned DATA structures that persist only
+\t             while PROGRAM P runs, and vanish afterward.
 \tSPOOL        Begin spooling all HAL/S source lines for
 \t             later processing.  (The default is to
 \t             process lines one-by-one upon input, and
@@ -182,6 +189,8 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
             if colorize != "":
                 prompt = prompt + "\033[0m"
             line = input(prompt)
+            if line[:2] == "C " or line[:3] == "C/ ":
+                continue
             print(colorize, end="")
             fields = line.strip().split()
             numWords = len(fields)
@@ -202,6 +211,20 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                 spooling = False
                 line = ""
                 break;
+            elif firstWord == "RUN" and len(fields) >= 2:
+                si, attributes = \
+                    findIdentifier("^l_" + fields[1] + "^", PALMAT, 0)
+                secondary = len(fields) > 2
+                if attributes != None:
+                    if secondary:
+                        print("Running as a secondary thread.")
+                    else:
+                        print("Running as the primary thread.")
+                    executePALMAT(PALMAT, attributes["scope"], 0, \
+                                  secondary, trace3, 8)
+                else:
+                    print("Cannot find program", fields[1])
+                continue
             elif firstWord == "REVIEW":
                 print("\tReview of spooled input:")
                 if len(halsSource) == 0:

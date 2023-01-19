@@ -431,6 +431,14 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         currentScope = PALMAT["scopes"][childIndex]
         currentScope["name"] = substate["currentIdentifier"]
         currentScope["attributes"] = identifierDict
+    elif lbnfLabel == "blockHeadProgram":
+        identifierDict = \
+          currentScope["identifiers"][substate["currentIdentifier"]]
+        childIndex = addScope(PALMAT, currentScope["self"], "program")
+        state["scopeIndex"] = childIndex
+        currentScope = PALMAT["scopes"][childIndex]
+        currentScope["name"] = substate["currentIdentifier"]
+        currentScope["attributes"] = identifierDict
     elif lbnfLabel == "true_part":
         p_Functions.expressionToInstructions( \
             substate["expression"], currentScope["instructions"])
