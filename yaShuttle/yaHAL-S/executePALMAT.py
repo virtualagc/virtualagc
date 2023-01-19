@@ -200,6 +200,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             computationStack.append(instruction["boolean"])
         elif "number" in instruction:
             computationStack.append(stringifiedToFloat(instruction["number"]))
+        elif "bitarray" in instruction:
+            computationStack.append(stringifiedToFloat(instruction["bitarray"]))
         elif "+><" in instruction:
             si, identifier = instruction["+><"]
             identifier = "^" + identifier + "^"
@@ -328,13 +330,17 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             erroredUp = True
             if fetch:
                 if "value" in attributes:
-                    computationStack.append(attributes["value"])
+                    value = attributes["value"]
                 elif "constant" in attributes:
-                    computationStack.append(attributes["constant"])
+                    value = attributes["constant"]
                 else:
                     print("Identifier %s uninitialized" % identifier)
                     return None
-                
+                if value == True: # Convert BOOLEAN to INTEGER.
+                    value = 1
+                elif value == False:
+                    value = 0
+                computationStack.append(value)
             else: # store
                 if len(computationStack) < stackPos:
                     print("Implementation error, stack too short for " +
@@ -355,22 +361,37 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     maxlen = attributes["character"]
                     value = value[:maxlen]
                 elif isinstance(value, bool):
-                    if "bit" not in attributes:
-                        print("Cannot store bit/boolean in " +
-                              "non-bit/boolean variable %s." \
+                    if "bit" not in attributes and "integer" not in attributes:
+                        print("Cannot store bit/boolean in variable %s." \
                               % identifier[1:-1])
                         return None
+                    if "bit" not in attributes or attributes["bit"] != 1:
+                        if value == True:
+                            value = 1
+                        elif value == False:
+                            value = 0
                 elif isinstance(value, (float, int)):
                     if "scalar" not in attributes and \
-                            "integer" not in attributes:
+                            "integer" not in attributes and \
+                            "bit" not in attributes:
                         print("Cannot store arithmetic value in " + \
-                              "non-integer/scalar variable %s." \
+                              "variable %s." \
                               % identifier[1:-1])
                         return None
                     if "integer" in attributes:
                         value = hround(value)
                     elif "scalar" in attributes:
                         value = float(value)
+                    elif "bit" in attributes:
+                        value = hround(value)
+                        if attributes["bit"] == 1:
+                            if value & 1 == 0:
+                                value = False
+                            else:
+                                value = True
+                        else:
+                            value = hround(value) & \
+                                    ((1 << attributes["bit"]) - 1)
                 else:
                     print("Implementation error, non-boolean/character/" + \
                           "arithmetic not yet implemented.")

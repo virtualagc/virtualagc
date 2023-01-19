@@ -488,10 +488,11 @@ As far as stupid, unnecessary differences between `PROCEDURE` and `FUNCTION` cal
 
 This has to do with the order in which the compiler's code generator builds the PALMAT instruction list, so I'm afraid it's not exactly a simple fix even if a non-Python implementation of the emulator is created.  This annoys me, but I can't see that it makes any difference other than aesthetically, so I have no current plans to fix it.
 
-## PALMAT Instructions 6: READ
+## PALMAT Instructions 6: Other
 
 * `{ 'fetchp': (index, identifier) }` causes a "pointer" to an variable to put pushed onto the computation stack.  These are useful as variables for a HAL/S `READ`, and for all I know at this moment, other purposes as well.  The "pointer" is just the given `index, identifier` pair, but with an additional tuple envelope of the form `((index,identifier), (0))`.  (This rather silly form was chosen to distinguishable from an `ARRAY` type; `ARRAY`s are represented on the computation stack as rectangular multi-dimensional tuples, but since the chosen form isn't rectangular, it's distinguishable from an `ARRAY`.)
 * `{ 'read': LUN }`, causes a "read" from the unit identified by the Logical Unit Number (LUN).  Only `LUN`=5 is presently understood by the interpreter, and it is the stdin keyboard.  This instruction causes all variable-pointer values (placed on the computation stack by `fetchp`) to be popped from the stack.  A sequence of values consistent in number with the variable-pointers that have been popped from the computation stack.  The values read from the keyboard are stored in the variables.  The variables are processed in FIFO order rather than the usual LIFO order of a stack.
+* `{ 'bitarray': N, 'len': L }` causes a bit string to be pushed onto the computation stack.  The `len` key is optional, and indicates the number of bits in the string.  In the Python implementation I simply treat bit arrays as identical to integers, bit position 0 corresponding to the least-significant bit, and I allow integers to be assigned to bit-array variables.  Other implementations may treat them differently.
 
 ## Multiprocessing and Reentrancy
 

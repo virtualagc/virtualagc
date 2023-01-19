@@ -499,7 +499,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             value = value["boolean"]
         elif "string" in value:
             value = value["string"]
-        
+            
         if currentIdentifier != "":
             identifierDict = identifiers[currentIdentifier]
         else:
@@ -520,7 +520,8 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             key = "constant"
         else:
             print("Discrepancy between INITIAL and CONSTANT.")
-            identifiers.pop(currentIdentifier)
+            if currentIdentifier in identifiers:
+                identifiers.pop(currentIdentifier)
             endLabels.pop()
             return False, PALMAT
         if isinstance(value, (int, float)) and "integer" in identifierDict:
@@ -540,7 +541,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         identifierDict[key] = value
         if key == "initial":
             identifierDict["value"] = value
-    elif lbnfLabel in ["char_spec", 
+    elif lbnfLabel in ["char_spec", "bitSpecBoolean",  
                        "sQdQName_doublyQualNameHead_literalExpOrStar",
                        "arraySpec_arrayHead_literalExpOrStar"]:
         identifiers = currentScope["identifiers"]
@@ -572,8 +573,12 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                         raise Exception("MATRIX(...) wrong dimension")
             elif lbnfLabel == "arraySpec_arrayHead_literalExpOrStar":
                 datatype = "array"
+            elif lbnfLabel == "bitSpecBoolean":
+                datatype = "bit"
             if datatype in ["matrix", "array"]:
                 identifierDict[datatype].extend(maxLens)
+            elif datatype == "bit" and len(maxLens) == 0:
+                identifierDict[datatype] = 1
             else:
                 identifierDict[datatype] = maxLens[0]
             instructions.clear()

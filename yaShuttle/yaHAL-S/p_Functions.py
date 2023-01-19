@@ -325,6 +325,7 @@ augmentationCandidates = [
     "basicStatementWritePhrase",
     "bitConstFalse",
     "bitConstTrue",
+    "bitConstString",
     "bit_id",
     "bit_exp",
     "blockHeadCompool",

@@ -33,6 +33,8 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
     #debug(PALMAT, state, "SM expression %d %s" % (stage, lbnfLabel)) 
     
     stateMachine = state["stateMachine"]
+    if "radix" not in stateMachine:
+        stateMachine["radix"] = 0
     #owningLabel = stateMachine["owner"]
     owningDepth = stateMachine["depth"]
     if stage == 0 and depth == owningDepth: #lbnfLabel == owningLabel:
@@ -56,7 +58,12 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
             expression.append({ "number": sp })
             internalState = "normal"
         elif internalState == "waitCharString":
-            expression.append({ "string": sp[1:-1] })
+            if stateMachine["radix"] != 0:
+                expression.append({ 
+                    "bitarray": "%d" % int(sp[1:-1], stateMachine["radix"])})
+                stateMachine["radix"] = 0
+            else:
+                expression.append({ "string": sp[1:-1] })
             internalState = "normal"
         elif internalState == "waitFunctionName":
             si, attributes = \
@@ -153,6 +160,14 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
         elif lbnfLabel in ["level", "number", "compound_number", 
                            "simple_number"]:
             internalState = "waitNumber"
+        elif lbnfLabel == "radixBIN":
+            stateMachine["radix"] = 2
+        elif lbnfLabel == "radixDEC":
+            stateMachine["radix"] = 10
+        elif lbnfLabel == "radixHEX":
+            stateMachine["radix"] = 16
+        elif lbnfLabel == "radixOCT":
+            stateMachine["radix"] = 8
         elif lbnfLabel == "char_string":
             internalState = "waitCharString"
         elif lbnfLabel == "arithExpArithExpPlusTerm":
