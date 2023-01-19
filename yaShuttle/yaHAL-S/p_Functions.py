@@ -78,6 +78,14 @@ substate = {
 
 #-----------------------------------------------------------------------------
 
+expressionComponents = ["expression", "ifClauseBitExp", "relational_exp", 
+                     "bitExpFactor", "write_arg", "read_arg", "char_spec",
+                     "arithExpTerm", "arithExpArithExpPlusTerm",
+                     "arithExpArithExpMinusTerm", "arithMinusTerm", 
+                     "literalExp"]
+doForComponents = ["doGroupHeadFor", "doGroupHeadForWhile", 
+                      "doGroupHeadForUntil"]
+
 # This function clones a state (as in the parameters of the various functions
 # below named according to labels from the LBNF grammar) and updates its 
 # "history" in one of several ways, depending on the value of fsType.
@@ -172,13 +180,20 @@ def stringLiteral(PALMAT, state, s):
     #-------------------------------------------------------------------------
     # Now do various state-machine-dependent stuff with the string (s) or its
     # variations (sp, isp, fsp). 
-    
-    if "declaration_list" in history and "expression" not in history \
-            and "char_spec" not in history:
-        substate["currentIdentifier"] = s
+    if False:
+        pass
+    elif state2 == ["typeSpecChar", "number"]:
+        if "declareBody_attributes_declarationList" in history:
+            substate["commonAttributes"]["character"] = isp
+        else:
+            updateCurrentIdentifierAttribute(PALMAT, state, "character", isp)
+    elif "declaration_list" in history and "expression" not in history \
+            and "char_spec" not in history and "literalExp" not in history:
         if s in identifiers:
             print("Already declared:", sp)
+            substate["currentIdentifier"] = ""
             return False, state
+        substate["currentIdentifier"] = s
         identifiers[s] = { }
         identifiers[s].update(substate["commonAttributes"])
         if s[1:3] == "s_":
@@ -259,25 +274,6 @@ def stringLiteral(PALMAT, state, s):
         # TBD
     elif state2 == ["bitSpecBoolean", "number"]:
         updateCurrentIdentifierAttribute(PALMAT, state, "bit", isp)
-    elif state2 == ["typeSpecChar", "number"]:
-        if "declareBody_attributes_declarationList" in history:
-            substate["commonAttributes"]["character"] = isp
-        else:
-            updateCurrentIdentifierAttribute(PALMAT, state, "character", isp)
-    elif state2 == ["sQdQName_doublyQualNameHead_literalExpOrStar", "number"] \
-            or state1 in ["doublyQualNameHead_matrix_literalExpOrStar",
-                            "arraySpec_arrayHead_literalExpOrStar"]:
-        if substate["currentIdentifier"] == "":
-            identifierDict = substate["commonAttributes"]
-        else:
-            identifierDict = \
-                identifiers[substate["currentIdentifier"]]
-        if "vector" in identifierDict:
-            identifierDict["vector"] = isp
-        elif "matrix" in identifierDict:
-            identifierDict["matrix"].append(isp)
-        elif "array" in identifierDict:
-            identifierDict["array"].append(isp)
     elif state2 == ["assignment", "variable"] or \
             history[-3:-1] == ["assignment", "variable"]:
         # Identifier on LHS of an assignment.
@@ -356,6 +352,7 @@ augmentationCandidates = [
     "ifStatement",
     "ifThenElseStatement",
     "label_definition",
+    "literalExp",
     "nameId_bitFunctionIdentifierToken",
     "nameId_charFunctionIdentifierToken",
     "parameter",
@@ -365,8 +362,10 @@ augmentationCandidates = [
     "read_arg",
     "read_key",
     "relational_exp",
+    "sQdQName_doublyQualNameHead_literalExpOrStar",
     "then",
     "true_part",
+    "typeSpecArith",
     "variable",
     "write_arg",
     "write_key",
@@ -482,9 +481,6 @@ def doublyQualNameHead_matrix(PALMAT, state):
 
 def doublyQualNameHead_matrix_literalExpOrStar(PALMAT, state):
     updateCurrentIdentifierAttribute(PALMAT, state, "matrix", [])
-    return True, fixupState(state, fsAugment)
-
-def sQdQName_doublyQualNameHead_literalExpOrStar(PALMAT, state):
     return True, fixupState(state, fsAugment)
 
 def arraySpec_arrayHead_literalExpOrStar(PALMAT, state):

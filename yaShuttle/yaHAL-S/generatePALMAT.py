@@ -17,6 +17,7 @@ from palmatAux import *
 from executePALMAT import hround
 from expressionSM import expressionSM
 from doForSM import doForSM
+from p_Functions import expressionComponents, doForComponents
 
 def traceIt(state, lbnfLabel, beforeAfter="before", trace=True, depth=0):
     if not trace:
@@ -174,12 +175,6 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     argument of 2).  The state-machine function itself is what removes 
     the stateMachine object from state, when that is appropriate.
     '''
-    expressionComponents = ["expression", "ifClauseBitExp", "relational_exp", 
-                         "bitExpFactor", "write_arg", "read_arg", "char_spec",
-                         "arithExpTerm", "arithExpArithExpPlusTerm",
-                         "arithExpArithExpMinusTerm", "arithMinusTerm"]
-    doForComponents = ["doGroupHeadFor", "doGroupHeadForWhile", 
-                          "doGroupHeadForUntil"]
     allComponentsSM = expressionComponents + doForComponents
     stateMachine = None
     parentStateMachine = None
@@ -461,7 +456,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         instructions.append({ "write": substate["LUN"] })
     elif lbnfLabel == "declare_statement":
         markUnmarkedScalars(currentScope["identifiers"])
-    elif lbnfLabel == "repeated_constant":
+    elif lbnfLabel in ["repeated_constant"]:
         '''
         We get to here after an INITIAL(...) or CONSTANT(...)
         has been fully processed to the extent of preparing
@@ -545,25 +540,46 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         identifierDict[key] = value
         if key == "initial":
             identifierDict["value"] = value
-    elif lbnfLabel == "char_spec":
-        # For DECLARE C CHARACTER(...);
+    elif lbnfLabel in ["char_spec", 
+                       "sQdQName_doublyQualNameHead_literalExpOrStar",
+                       "arraySpec_arrayHead_literalExpOrStar"]:
         identifiers = currentScope["identifiers"]
         instructions = currentScope["instructions"]
         currentIdentifier = substate["currentIdentifier"]
         # Note that the expression state machine should have left
-        # a single number on the instruction queue if the expression
+        # a numbers on the instruction queue if the expression
         # was computable at compile time.
-        value = popInstruction(instructions)
         try:
-            maxLen = round(float(value["number"]));
+            maxLens = []
+            for value in instructions:
+                maxLens.append(round(float(value["number"])))
             if currentIdentifier != "":
                 identifierDict = identifiers[currentIdentifier]
             else:
                 identifierDict = substate["commonAttributes"]
-            identifierDict["character"] = maxLen
+            if lbnfLabel == "char_spec":
+                datatype = "character"
+                if len(maxLens) != 1:
+                    raise Exception("CHARACTER(...) wrong dimension")
+            elif lbnfLabel == "sQdQName_doublyQualNameHead_literalExpOrStar":
+                if "vector" in identifierDict:
+                    if len(maxLens) != 1:
+                        raise Exception("VECTOR(...) wrong dimension")
+                    datatype = "vector"
+                elif "matrix" in identifierDict:
+                    datatype = "matrix"
+                    if len(maxLens) != 2:
+                        raise Exception("MATRIX(...) wrong dimension")
+            elif lbnfLabel == "arraySpec_arrayHead_literalExpOrStar":
+                datatype = "array"
+            if datatype in ["matrix", "array"]:
+                identifierDict[datatype].extend(maxLens)
+            else:
+                identifierDict[datatype] = maxLens[0]
+            instructions.clear()
         except:
-            print("Computation of CHARACTER(...) failed:", value, instructions)
-            #print(instructions)
+            print("Computation of datatype length failed:", instructions)
+            instructions.clear()
             identifiers.pop(currentIdentifier)
             endLabels.pop()
             return False, PALMAT
