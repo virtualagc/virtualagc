@@ -189,7 +189,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
             if colorize != "":
                 prompt = prompt + "\033[0m"
             line = input(prompt)
-            if line[:2] == "C " or line[:3] == "C/ ":
+            if line[:2] in ["C ", "C\t"] or line[:3] in ["C/ ", "C/\t"]:
                 continue
             print(colorize, end="")
             fields = line.strip().split()

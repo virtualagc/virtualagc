@@ -134,16 +134,19 @@ def stringifiedToFloat(stringifiedNumber):
 
 # Create a PALMAT for a new process/thread.
 instantiationNumber = 0
-def partiallyClonePALMAT(rawPALMAT, scopeIndex):
+def clonePALMAT(rawPALMAT):
     global instantiationNumber
     instantiationNumber += 1
+    scopeIndex = 0
     
     # For the specified scope, make sure its identifiers are a deep copy
-    # rather than a shallow copy.
+    # rather than a shallow copy.  Except for COMPOOLs.
     def deepcopyDescendents(scopeIndex):
-        PALMAT["scopes"][scopeIndex]["identifiers"] \
-            = copy.deepcopy(rawPALMAT["scopes"][scopeIndex]["identifiers"])
-        for childIndex in PALMAT["scopes"][scopeIndex]["children"]:
+        rawScope = rawPALMAT["scopes"][scopeIndex]
+        scope = PALMAT["scopes"][scopeIndex]
+        if rawScope["type"] != "compool":
+            scope["identifiers"] = copy.deepcopy(rawScope["identifiers"])
+        for childIndex in scope["children"]:
             deepcopyDescendents(childIndex)
     
     # After the following operation, both PALMAT and PALMAT["scopes"] are
@@ -159,21 +162,6 @@ def partiallyClonePALMAT(rawPALMAT, scopeIndex):
         PALMAT["scopes"].append(copy.copy(scope))
     # Now correct the shallowly-copied indentifiers to deep copies where needed.
     deepcopyDescendents(scopeIndex)
-    '''
-    print("PALMAT", id(rawPALMAT), id(PALMAT))
-    print("PALMAT['scopes']", id(rawPALMAT['scopes']), id(PALMAT['scopes']))
-    for i in range(len(PALMAT["scopes"])):
-        print("PALMAT['scopes'][%d]" %i , id(rawPALMAT['scopes'][i]), \
-              id(PALMAT['scopes'][i]))
-    for i in range(len(PALMAT["scopes"])):
-        print("PALMAT['scopes'][%d]['identifiers']" %i , \
-              id(rawPALMAT['scopes'][i]['identifiers']), \
-              id(PALMAT['scopes'][i]['identifiers']))
-    for i in range(len(PALMAT["scopes"])):
-        print("PALMAT['scopes'][%d]['instructions']" %i , \
-              id(rawPALMAT['scopes'][i]['instructions']), \
-              id(PALMAT['scopes'][i]['instructions']))
-    '''
     return PALMAT
 
 # If this function returns, which in principle it might not if executing
@@ -188,7 +176,7 @@ def partiallyClonePALMAT(rawPALMAT, scopeIndex):
 def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                   trace=False, indent=0):
     if newInstantiation:
-        PALMAT = partiallyClonePALMAT(rawPALMAT, pcScope)
+        PALMAT = clonePALMAT(rawPALMAT)
     else:
         PALMAT = rawPALMAT
     scopes = PALMAT["scopes"]

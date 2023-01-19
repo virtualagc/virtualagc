@@ -413,28 +413,21 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         parentIndex = currentScope["parent"]
         state["scopeIndex"] = parentIndex
         currentScope = PALMAT["scopes"][parentIndex]
-    elif lbnfLabel == "blockHeadFunction":
+    elif lbnfLabel in ["blockHeadFunction", "blockHeadProcedure", 
+                       "blockHeadProgram", "blockHeadCompool"]:
+        blockTypes = {
+                "blockHeadFunction": "function",
+                "blockHeadProcedure": "procedure",
+                "blockHeadProgram": "program",
+                "blockHeadCompool": "compool"
+            }
         identifierDict = \
           currentScope["identifiers"][substate["currentIdentifier"]]
-        if isUnmarkedScalar(identifierDict):
+        if lbnfLabel == "blockHeadFunction" and \
+                isUnmarkedScalar(identifierDict):
             identifierDict["scalar"] = True
-        childIndex = addScope(PALMAT, currentScope["self"], "function")
-        state["scopeIndex"] = childIndex
-        currentScope = PALMAT["scopes"][childIndex]
-        currentScope["name"] = substate["currentIdentifier"]
-        currentScope["attributes"] = identifierDict
-    elif lbnfLabel == "blockHeadProcedure":
-        identifierDict = \
-          currentScope["identifiers"][substate["currentIdentifier"]]
-        childIndex = addScope(PALMAT, currentScope["self"], "procedure")
-        state["scopeIndex"] = childIndex
-        currentScope = PALMAT["scopes"][childIndex]
-        currentScope["name"] = substate["currentIdentifier"]
-        currentScope["attributes"] = identifierDict
-    elif lbnfLabel == "blockHeadProgram":
-        identifierDict = \
-          currentScope["identifiers"][substate["currentIdentifier"]]
-        childIndex = addScope(PALMAT, currentScope["self"], "program")
+        childIndex = addScope(PALMAT, currentScope["self"], \
+                              blockTypes[lbnfLabel])
         state["scopeIndex"] = childIndex
         currentScope = PALMAT["scopes"][childIndex]
         currentScope["name"] = substate["currentIdentifier"]

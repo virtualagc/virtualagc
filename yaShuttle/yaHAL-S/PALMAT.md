@@ -237,9 +237,9 @@ Regarding the format of entries on the computation stack, this can (and for effi
 * Any Python integer or floating-point number.
 * Any Python character string.
 * Any Python boolean value.
-* Any Python list of floats or integers (for HAL/S `VECTOR` types) or list of lists of floats or integers (for HAL/S `MATRIX` types).
+* Any Python list of floats or integers (for HAL/S `VECTOR` types) or rectangular list of lists of floats or integers (for HAL/S `MATRIX` types).
 * Any Python dictionary for HAL/S `STRUCTURE`s.
-* Any Python tuple [of tuples [of tuples [...] ] ] for an `ARRAY`.
+* Any Python rectangular tuple [of tuples [of tuples [...] ] ] for an `ARRAY`.
 
 ### PALMAT Instructions 1: Arithmetic
 
@@ -488,6 +488,11 @@ As far as stupid, unnecessary differences between `PROCEDURE` and `FUNCTION` cal
 
 This has to do with the order in which the compiler's code generator builds the PALMAT instruction list, so I'm afraid it's not exactly a simple fix even if a non-Python implementation of the emulator is created.  This annoys me, but I can't see that it makes any difference other than aesthetically, so I have no current plans to fix it.
 
+## PALMAT Instructions 6: READ
+
+* `{ 'fetchp': (index, identifier) }` causes a "pointer" to an variable to put pushed onto the computation stack.  These are useful as variables for a HAL/S `READ`, and for all I know at this moment, other purposes as well.  The "pointer" is just the given `index, identifier` pair, but with an additional tuple envelope of the form `((index,identifier), (0))`.  (This rather silly form was chosen to distinguishable from an `ARRAY` type; `ARRAY`s are represented on the computation stack as rectangular multi-dimensional tuples, but since the chosen form isn't rectangular, it's distinguishable from an `ARRAY`.)
+* `{ 'read': LUN }`, causes a "read" from the unit identified by the Logical Unit Number (LUN).  Only `LUN`=5 is presently understood by the interpreter, and it is the stdin keyboard.  This instruction causes all variable-pointer values (placed on the computation stack by `fetchp`) to be popped from the stack.  A sequence of values consistent in number with the variable-pointers that have been popped from the computation stack.  The values read from the keyboard are stored in the variables.  The variables are processed in FIFO order rather than the usual LIFO order of a stack.
+
 ## Multiprocessing and Reentrancy
 
 So far I've just been considering single-threaded program execution.  The memory model described above will need modification for the conditions in which code in a given scope might have two or more instantiations simultaneously, and I haven't given any consideration as of yet to that problem.  I'll worry about that once support for single-threaded operation is correct and reasonably comprehensive.  However, here are a few notes of thoughts I've had.
@@ -501,19 +506,15 @@ It seems to me that when any given HAL/S subroutine is instantiated, the followi
 
 Each process (or thread as the case may be) is started from a separate invocation of `executePALMAT`, and since the computation stack is a local variable of `executePALMAT`, that takes care of the unique computation stacks.
 
-Each invocation of `executePALMAT` has a parameter called `new`, which defaults to `False`, which means that it's just supposed to use the global PALMAT and be part of instantiation 0.  This is good for single-threaded operation at emulation time, or use of `executePALMAT` by the compiler in trying to compute constant expressions at compile-time.
+Each invocation of `executePALMAT` has a parameter called `newInstantiation`, which defaults to `False`, which means that it's just supposed to use the global PALMAT and be part of instantiation 0.  This is good for single-threaded operation at emulation time, or use of `executePALMAT` by the compiler in trying to compute constant expressions at compile-time.
 
 When (say) a second process/thread is started, it is done with `executePALMAT` having `newInstantiation=True`.  This causes `executePALMAT` to create the partial clone of PALMAT that I've mentioned.
 
 Regarding this partial clone of PALMAT, it seems to me that it has to have the following properties:
 
 * All `instructions` lists in all scopes are simply links to the `instructions` lists in the global PALMAT.
-* For the scope of the instantiated subroutine (or PROGRAM) and its descendent scopes, the `identifiers` dictionaries are deep copies of the `identifiers` dictionaries in the global PALMAT.  I.e., they are clones to the extent that no changes in them are mirrored in the global copies.
-* For the scopes which are ancestors to the instantiated subroutine, or are not accessible to it, the `identifiers` dictionaries are just links to the ones in the global PALMAT, and hence any changes in them are mirrored in the global PALMAT.  In general, I think the only possible way this can happen (except perhaps for `COMPOOL`s, which I have not begun to consider) is when `PROCEDURE` `ASSIGN`s are present.
-
-Notice that all of the scopes other than the instantiated scope and its descendents can just be links to the global scopes.
-
-I'm not sure what happens to such a subroutine after it returns, or even if that's a thing, so this speculative discussion is certainly not complete.
+* All `identifiers` dictionaries in all scopes *except `COMPOOL`s* are "deep copies" of the `identifiers` dictionaries in the global PALMAT.  I.e., they are clones at instantiation time but the values stored in them can diverge after that point.
+* `COMPOOL` scopes are instead shared by all instantiations, and are thus links to the same object (or objects if there is more than one `COMPOOL`).
 
 ## Optimizations
 

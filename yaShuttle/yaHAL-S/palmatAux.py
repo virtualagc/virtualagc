@@ -239,22 +239,31 @@ def printPALMAT(PALMAT, showInstructions=False):
 def findIdentifier(identifier, PALMAT, scopeIndex=None, write=False):
     while scopeIndex != None:
         scope = PALMAT["scopes"][scopeIndex]
-        inFunctionOrProcedure = \
+        inUnit = \
             (scope["type"] in ["function", "procedure", "program"])
         assignment = False
         if identifier in scope["identifiers"]:
             attributes = scope["identifiers"][identifier]
             assignment = ("assignment" in attributes)
             if not assignment:
-                if write and inFunctionOrProcedure and \
+                if write and inUnit and \
                         "parameter" in attributes:
-                    break
+                    return -1, None     # Attempt to write parameter, no good!
                 return scopeIndex, attributes
             else:
-                return -1, attributes
-        if write and inFunctionOrProcedure and not assignment:
-            break
+                return -1, attributes   # An ASSIGN, good!
+        if write and inUnit and not assignment:
+            if scope["type"] == "program":
+                # Better check COMPOOLs.
+                break
+            return -1, None # Didn't find writable in FUNCION or PROCEDURE.
         scopeIndex = scope["parent"]
+    # Haven't found it, and haven't eliminated it.  Check all of the COMPOOLs.
+    topChildren = PALMAT["scopes"][0]["children"]
+    for i in range(len(topChildren)):
+        if PALMAT["scopes"][i]["type"] == "compool" and \
+                identifier in PALMAT["scopes"][i]["identifiers"]:
+            return i, PALMAT["scopes"][i]["identifiers"][identifier]
     return -1, None
 
 #-----------------------------------------------------------------------------
