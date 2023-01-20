@@ -25,6 +25,7 @@
     only complete programs rather than little snippets of code. 
  */
     
+`NOEXEC
  DECLARE SCALAR, T, X INITIAL(2.0), Y CONSTANT(3.0), Z DOUBLE; 
  DECLARE A, B DOUBLE, C INITIAL(4.0), D SCALAR CONSTANT(2 Y - 12); 
  DECLARE INTEGER, I, J CONSTANT(4 D + 2), K INITIAL(J + D); 
@@ -35,7 +36,29 @@
  DECLARE BOOLEAN, B1, B2 CONSTANT(TRUE), B3 INITIAL(NOT B2); 
  DECLARE B4 BOOLEAN, B5 BOOLEAN CONSTANT(NOT B2 AND B2), 
  	 B6 BOOLEAN INITIAL(B2 OR ~B2); 
+ DECLARE CV1 CONSTANT(2); 
+ DECLARE VN1 VECTOR(5); 
+ DECLARE VN1A VECTOR(CV1 + 3); 
+ DECLARE VN2 VECTOR(10) INITIAL(2.47); 
+ DECLARE VN2A VECTOR(10) INITIAL(CV1 + 0.47); 
+ DECLARE VN3 VECTOR(20) INITIAL(1, 2, 3, 4, 5); 
+ DECLARE VN3A VECTOR(2 CV1) INITIAL(1, CV1, 3, 4, 1 + CV1 2); 
+ DECLARE VN4 VECTOR(15) CONSTANT(12); 
+ DECLARE VN4A VECTOR(15) CONSTANT(12, CV1 + 11, 2 CV1 +10); 
  
+ WRITE(6) ; 
+ WRITE(6) 'Some DECLARE tests ...'; 
+ WRITE(6) CV1, '     (should be 2)'; 
+ WRITE(6) VN1, '     (should be [None, None, None, None, None])'; 
+ WRITE(6) VN1A, '     (should be [None, None, None, None, None])'; 
+ WRITE(6) VN2, '     (should be [2.47, ..., 2.47] with 10 entries)'; 
+ WRITE(6) VN2A, '     (same as previous)'; 
+ WRITE(6) VN3, '     (should be [1.0, 2.0, 3.0, 4.0, 5.0, None, ..., None] with 15 None)'; 
+ WRITE(6) VN3A, '     (should be [1.0, 2.0, 3.0, 4.0])'; 
+ WRITE(6) VN4, '     (should be [12.0, 12.0, ...] with 15 entrees)'; 
+ WRITE(6) VN4A, '     (should be [12.0, 13.0, 14.0, None, ..., None] with 12 None)';  
+ WRITE(6) VN4A$2, '     (should be 13.0)'; 
+ WRITE(6) ; 
  WRITE(6) 'Miscellaneous tests:'; 
  I=1.4; WRITE(6) 'I =', I, '(should be 1)'; 
  A=2; WRITE(6) 'A =', A, '(should be 2.0)'; 
@@ -48,7 +71,7 @@
  	  '"' || C4 CAT '"', 
  	  '"' || C6 || '"', 
  	  ' (should be "abc", "def", "defghi", "sam def")'; 
- 
+ WRITE(6) ; 
  IF TRUE THEN WRITE(6) TRUE, '(should be TRUE)'; 
  WRITE(6) 'Test IF FALSE; should be nothing between here ...'; 
  IF FALSE THEN WRITE(6) FALSE; 
@@ -59,6 +82,7 @@
  IF FALSE THEN WRITE(6) TRUE; ELSE WRITE(6) FALSE; 
  WRITE(6) 'The following IF/THEN/ELSE tests should read ',
  	'<, >=, >=, <=, <=, >, >, <=, <=, >=, >=, <, ~=, =, ~=, ~=, =, ~= :'; 
+ WRITE(6) ; 
  I = 5; 
  IF I < 10 THEN WRITE(6) '<'; ELSE WRITE(6) '>='; 
  IF I < 5 THEN WRITE(6) '<'; ELSE WRITE(6) '>='; 
@@ -78,12 +102,13 @@
  IF I ~= 2 THEN WRITE(6) '~='; ELSE WRITE(6) '='; 
  IF I ~= 5 THEN WRITE(6) '~='; ELSE WRITE(6) '='; 
  IF I ~= 10 THEN WRITE(6) '~='; ELSE WRITE(6) '='; 
+ WRITE(6) ; 
  WRITE(6) 'The following IF THEN ELSE string comparisons should be ',
  	'TRUE, TRUE, and FALSE, respectively.'; 
  IF 'ABC' = 'A' || 'BC' THEN WRITE(6) TRUE; ELSE WRITE(6) FALSE; 
  IF 'AB' || 'C' = 'ABC' THEN WRITE(6) TRUE; ELSE WRITE(6) FALSE; 
  IF 'ABC' = 'AB' THEN WRITE(6) TRUE; ELSE WRITE(6) FALSE; 
- 
+ WRITE(6) ; 
  WRITE(6) 'Print 10 random numbers with DO WHILE arithmetical comparison:'; 
  I=0; DO WHILE I < 10; I=I+1; WRITE(6) I, RANDOM; END; 
  WRITE(6) 'Print 9 TRUE and 1 FALSE with DO WHILE boolean constant:'; 
@@ -93,10 +118,11 @@
  	IF I>=10 THEN B1=FALSE; 
  	WRITE(6) I, B1; 
  END; 
+ WRITE(6) ; 
  WRITE(6) 'Test DO WHILE FALSE; should be nothing between here ...'; 
  DO WHILE FALSE; WRITE(6) ' SOMETHING!'; END; 
  WRITE(6) '... and here.'; 
- 
+ WRITE(6) ; 
  WRITE(6) 'Print 10 random (Gaussian) with DO UNTIL arithmetical comparison:'; 
  I=0; DO UNTIL I >= 10; I=I+1; WRITE(6) I, RANDOMG; END; 
  WRITE(6) 'Test DO UNTIL FALSE; should be SOMETHING between here ...'; 
@@ -200,7 +226,7 @@
  	M = L; 
  	WRITE(6) A, M; 
  END; 
- 
+ WRITE(6) ; 
  WRITE(6) 'Execution-speed timing measurement:'; 
  DECLARE STIME, ETIME; 
  STIME = RUNTIME; 
@@ -209,7 +235,7 @@
  ETIME = RUNTIME; 
  WRITE(6) M, 'iterations,', ETIME-STIME, 'seconds, ', 
  	  ROUND(M/(ETIME-STIME)), 'iterations/second.'; 
- 
+ WRITE(6) ; 
  WRITE(6) 'Some tests of FUNCTION follow:'; 
   /* Function that averages 3 floats. */ 
  AVG3: 
@@ -235,10 +261,9 @@
 	T = ADD3(X, Y, Z); 
  	RETURN T/3; 
  CLOSE AVG3; 
- 
  WRITE(6) 'The following should print out (4+5+7)/3 = 5.33...'; 
  WRITE(6) AVG3(4, 5, 7); 
- 
+ WRITE(6) ; 
  /* A "projection" function that picks out just one
     parameter from among three, using W as an index. */
  PROJECTION3: 
@@ -250,12 +275,11 @@
  	IF W = 3 THEN RETURN Z; 
  	RETURN 0; 
  CLOSE PROJECTION3; 
- 
  WRITE(6) 'The following 3 lines should print 100, 200, and 300, respectively.'; 
  WRITE(6) PROJECTION3(1, 100, 200, 300); 
  WRITE(6) PROJECTION3(2, 100, 200, 300); 
  WRITE(6) PROJECTION3(3, 100, 200, 300); 
- 
+ WRITE(6) ; 
  WRITE(6) 'Some tests of PROCEDUREs ...'; 
  DECLARE X1 SCALAR INITIAL(0), Y1 SCALAR INITIAL(1), Z1 SCALAR INITIAL(2); 
  P: 
@@ -275,7 +299,7 @@
  CLOSE P2; 
  CALL P2(123, 245, 789) ASSIGN(X1, Y1, Z1); 
  WRITE(6) X1, Y1, Z1, 'should be 123.0, 245.0, 789.0'; 
- 
+ WRITE(6) ; 
  WRITE(6) 'Test of PROGRAM ... several values of PI R**2 are printed.'; 
   SIMPLE: PROGRAM; 
 C CODE IN THIS TYPEFACE IS 
@@ -287,7 +311,9 @@ C HAL/S SOURCE
 	END; 
  CLOSE SIMPLE;
 
-EXECUTE
-RUN SIMPLE
-
+`EXECUTE
+ WRITE(6) ; 
+`RUN SIMPLE
+`EXEC
+ WRITE(6) ; 
  WRITE(6) 'Done.';

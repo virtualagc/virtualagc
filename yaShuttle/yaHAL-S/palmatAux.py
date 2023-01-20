@@ -12,6 +12,7 @@ History:        2023-01-10 RSB  Split off from PALMAT.py.
 
 import json
 import re
+import copy
 
 # Add a `debug` PALMAT instruction.
 def debug(PALMAT, state, message):
@@ -372,3 +373,50 @@ def markUnmarkedScalars(identifiers):
         if isUnmarkedScalar(identifier):
             identifier["scalar"] = True
 
+# Complete the initialization of a VECTOR, MATRIX, or ARRAY by making sure that
+# INITIALs or CONSTANTs are filled out to the proper geometry with appropriate
+# values.
+def completeInitialConstants(identifiers):
+    for identifier in identifiers:
+        identifierDict = identifiers[identifier]
+        if "vector" not in identifierDict and "matrix" not in identifierDict:
+            continue
+        if "initial" in identifierDict:
+            value = identifierDict["initial"]
+            isInitial = True
+        elif "constant" in identifierDict:
+            value = identifierDict["constant"]
+            isInitial = False
+        elif "vector" in identifierDict:
+            numCols = identifierDict["vector"]
+            value = [None]*numCols
+            identifierDict["value"] = value
+            continue
+        elif "matrix" in identifierDict:
+            numRows, numCols = identifierDict["matrix"]
+            value = []
+            for i in range(numRows):
+                value.append([None]*numCols)
+            identifierDict["value"] = value
+            continue
+        fillValue = None
+        if "vector" in identifierDict:
+            numCols = identifierDict["vector"]
+            if len(value) == 1:
+                fillValue = value[0]
+            while len(value) < numCols:
+                value.append(fillValue)
+        elif "matrix" in identifierDict:
+            numRows, numCols = identifierDict["matrix"]
+            if len(value) == 1 and len(value[0]) == 1:
+                fillValue = value[0][0]
+            row = value[-1]
+            while len(row) < numCols:
+                row.append(fillValue)
+            while len(value) < numRows:
+                value.append([fillValue]*numCols)
+        else:
+            continue
+        if isInitial:
+            identifierDict["value"] = copy.deepcopy(value)
+            

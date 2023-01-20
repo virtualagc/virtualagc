@@ -82,9 +82,14 @@ expressionComponents = ["expression", "ifClauseBitExp", "relational_exp",
                      "bitExpFactor", "write_arg", "read_arg", "char_spec",
                      "arithExpTerm", "arithExpArithExpPlusTerm",
                      "arithExpArithExpMinusTerm", "arithMinusTerm", 
-                     "literalExp"]
+                     "literalExp", "sub_exp"]
+setExpressionComponents = set(expressionComponents)
 doForComponents = ["doGroupHeadFor", "doGroupHeadForWhile", 
                       "doGroupHeadForUntil"]
+
+# Checks for intersection of expressionComponents and a list of components.
+def isNotExpressiony(components):
+    return setExpressionComponents.isdisjoint(components)
 
 # This function clones a state (as in the parameters of the various functions
 # below named according to labels from the LBNF grammar) and updates its 
@@ -182,6 +187,12 @@ def stringLiteral(PALMAT, state, s):
     # variations (sp, isp, fsp). 
     if False:
         pass
+    #elif state1 == "number" and "repeat_head" in history \
+    #        and isNotExpressiony(history):
+    #    print("*lkjlj", sp, instructions)
+    #    instructions.append({ 'number': sp})
+    #    instructions.append({ 'operator': '#'})
+    #    print("*lkjlk", instructions)
     elif state2 == ["typeSpecChar", "number"]:
         if "declareBody_attributes_declarationList" in history:
             substate["commonAttributes"]["character"] = isp
@@ -363,7 +374,9 @@ augmentationCandidates = [
     "read_arg",
     "read_key",
     "relational_exp",
+    #"repeat_head",
     "sQdQName_doublyQualNameHead_literalExpOrStar",
+    "sub_exp",
     "then",
     "true_part",
     "typeSpecArith",

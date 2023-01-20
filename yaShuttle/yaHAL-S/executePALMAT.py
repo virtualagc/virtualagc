@@ -79,7 +79,7 @@ def jump(PALMAT, scopeNumber, instructionDict, instructionName):
     if isinstance(s, str):
         attributes = PALMAT["scopes"][si]["identifiers"][s]
         if attributes == None or "label" not in attributes:
-            print("Cannot find target label", s)
+            print("\tCannot find target label", s)
             return None
         # The following line updates the PALMAT instruction
         # (goto or iffalse or whatever) in-place, so that
@@ -164,6 +164,20 @@ def clonePALMAT(rawPALMAT):
     deepcopyDescendents(scopeIndex)
     return PALMAT
 
+# Get a subscripted value from an object.  At present, this works only if the 
+# subscripts are all numbers.  Returns None on error.
+def subscripted(object, subscripts):
+    for i in range(len(subscripts)):
+        subscript = hround(subscripts[i])
+        try:
+            # Recall that HAL/S subscripts start from 1, while Python 
+            # starts from 0.
+            object = object[subscript-1]
+        except:
+            print("\tSubscript does not exist in object.")
+            return None
+    return copy.deepcopy(object)
+
 # If this function returns, which in principle it might not if executing
 # an actual flight program, it returns the current computation stack.
 # That would normally be empty if full statements had been executed.
@@ -183,11 +197,20 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
     scopeNumber = pcScope
     instructionIndex = pcOffset
     scope = scopes[scopeNumber]
+    scope0 = scopes[0]
     computationStack = []
     while instructionIndex < len(scope["instructions"]):
         identifiers = scope["identifiers"]
         instructions = scope["instructions"]
         instruction = instructions[instructionIndex]
+        if "subscripts" in scope0 and "fetch" not in instruction and \
+                "fetchp" not in instruction:
+            print("\tImplementation error, subscript(s) without variable")
+            return None
+        if "subscripts" in scope0:
+            subscripts = scope0.pop("subscripts")
+        else:
+            subscripts = []
         instructionIndex += 1
         if trace:
             print("\tTRACE:  ", computationStack, instruction)
@@ -206,21 +229,21 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             si, identifier = instruction["+><"]
             identifier = "^" + identifier + "^"
             if stackSize < 2:
-                print("Implementation error, not enough operands for '+><'.")
+                print("\tImplementation error, not enough operands for '+><'.")
                 return None
             operand1 = computationStack.pop()
             negativeIncrement = (operand1 < 0)
             operand2 = computationStack[-1]
             attributes = PALMAT["scopes"][si]["identifiers"][identifier]
             if attributes == None:
-                print("Implementation error, variable %s not found." \
+                print("\tImplementation error, variable %s not found." \
                       % identifier[1:-1])
                 return None
             if "integer" not in attributes and "scalar" not in attributes:
-                print("Implementation error in '+><': Not a number.")
+                print("\tImplementation error in '+><': Not a number.")
                 return None
             if "value" not in attributes:
-                print("Implementation error in '+><': Uninitialized variable.")
+                print("\tImplementation error in '+><': Uninitialized variable.")
                 return None
             operand1 += attributes["value"]
             if "integer" in attributes:
@@ -231,9 +254,33 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 computationStack[-1] = (operand1 < operand2)
             else:
                 computationStack[-1] = (operand1 > operand2)
+        elif "sentinel" in instruction:
+            computationStack.append({"sentinel"})
         elif "operator" in instruction:
             operator = instruction["operator"]
-            if operator in ["U-", "NOT"]: # Unary operators.
+            if False:
+                pass
+            elif operator == "#":
+                if stackSize < 2:
+                    print(("Implementation error, not enough operands " + \
+                          "for operator \"%s\"") % operator)
+                    return None
+                operand1 = computationStack.pop()
+                operand2 = hround(computationStack.pop())
+                while operand2 > 0:
+                    computationStack.append(operand1)
+            elif operator == "subscripts":
+                subscripts = []
+                while True:
+                    value = computationStack.pop()
+                    if value == {"sentinel"}:
+                        break
+                    subscripts.append(value)
+                if len(subscripts) < 1:
+                    print("\tSubscript operator without subscripts.")
+                    return None
+                scope0["subscripts"] = subscripts
+            elif operator in ["U-", "NOT"]: # Unary operators.
                 if stackSize < 1:
                     print(("Implementation error, not enough operands " + \
                           "for operator \"%s\"") % operator)
@@ -247,7 +294,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     elif isinstance(operand, int):
                         result = ~operand
                     else:
-                        print("Operand type inappropriate for NOT operator")
+                        print("\tOperand type inappropriate for NOT operator")
                         return None
                 else:
                     print(("Implementation error, unary operator \"%s\" " + \
@@ -302,16 +349,20 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     return None
                 computationStack[-1] = result
             else:
-                print("Implementation error, unknown binary operator \"%s\"" \
+                print("\tImplementation error, unknown binary operator \"%s\"" \
                                                                 % operator)
                 return None
-        elif "fetch" in instruction or \
+        elif "fetch" in instruction or "fetchp" in instruction or \
                 "store" in instruction or "storepop" in instruction:
             erroredUp = False
             fetch = False
+            fetchp = False
             pop = False
             stackPos = 1
             if "fetch" in instruction:
+                si, identifier = instruction["fetch"]
+                fetch = True
+            elif "fetchp" in instruction:
                 si, identifier = instruction["fetch"]
                 fetch = True
             elif "store" in instruction:
@@ -322,7 +373,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             if si == -1:
                 si, identifier = scope["assignments"][identifier]
             try:
-                attributes = PALMAT["scopes"][si]["identifiers"]["^" + identifier + "^"]
+                attributes = PALMAT["scopes"][si]["identifiers"][\
+                                                        "^" + identifier + "^"]
             except:
                 print(si, identifier, instruction)
                 sys.exit(1)
@@ -330,11 +382,14 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             erroredUp = True
             if fetch:
                 if "value" in attributes:
-                    value = attributes["value"]
+                    value = subscripted(attributes["value"], subscripts)
                 elif "constant" in attributes:
-                    value = attributes["constant"]
+                    value = subscripted(attributes["constant"], subscripts)
                 else:
-                    print("Identifier %s uninitialized" % identifier)
+                    print("\tIdentifier %s uninitialized" % identifier)
+                    return None
+                if value == None:
+                    print("\tCannot compute value.")
                     return None
                 if value == True: # Convert BOOLEAN to INTEGER.
                     value = 1
@@ -343,26 +398,26 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 computationStack.append(value)
             else: # store
                 if len(computationStack) < stackPos:
-                    print("Implementation error, stack too short for " +
+                    print("\tImplementation error, stack too short for " +
                           "STOREXXX instruction")
                     return None
                 value = copy.deepcopy(computationStack[-stackPos])
                 if pop:
                     computationStack.pop(-stackPos)
                 if "constant" in attributes:
-                    print("Cannot change value of constant %s." \
+                    print("\tCannot change value of constant %s." \
                           % identifier[1:-1])
                     return None
                 if isinstance(value, str):
                     if "character" not in attributes:
-                        print("Cannot store string in non-CHARACTER " +
+                        print("\tCannot store string in non-CHARACTER " +
                               "variable %s." % identifier[1:-1])
                         return None
                     maxlen = attributes["character"]
                     value = value[:maxlen]
                 elif isinstance(value, bool):
                     if "bit" not in attributes and "integer" not in attributes:
-                        print("Cannot store bit/boolean in variable %s." \
+                        print("\tCannot store bit/boolean in variable %s." \
                               % identifier[1:-1])
                         return None
                     if "bit" not in attributes or attributes["bit"] != 1:
@@ -374,7 +429,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     if "scalar" not in attributes and \
                             "integer" not in attributes and \
                             "bit" not in attributes:
-                        print("Cannot store arithmetic value in " + \
+                        print("\tCannot store arithmetic value in " + \
                               "variable %s." \
                               % identifier[1:-1])
                         return None
@@ -393,12 +448,12 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                             value = hround(value) & \
                                     ((1 << attributes["bit"]) - 1)
                 else:
-                    print("Implementation error, non-boolean/character/" + \
+                    print("\tImplementation error, non-boolean/character/" + \
                           "arithmetic not yet implemented.")
                     return None
                 attributes["value"] = value
             if not erroredUp:
-                print("Identifier %s not in any accessible scope" \
+                print("\tIdentifier %s not in any accessible scope" \
                       % identifier[1:-1])
                 return None
         elif "pop" in instruction:
@@ -408,7 +463,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     computationStack.pop()
                     value -= 1
             else:
-                print("Implementation error, too many POPs: %d vs %d" \
+                print("\tImplementation error, too many POPs: %d vs %d" \
                       % (value, stackSize))
                 return None
         elif "write" in instruction:
@@ -454,13 +509,13 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     computationStack.append(1.0e-9 * \
                                             (time.time_ns() - timeOrigin))
                 else:
-                    print("HAL/S built-in function", function, \
+                    print("\tHAL/S built-in function", function, \
                           "not yet implemented")
                     return None
             # Now all of the one-argument functions.
             elif function in builtIns[1]:
                 if stackSize < 1:
-                    print("Not enough arguments on stack for function", \
+                    print("\tNot enough arguments on stack for function", \
                           function)
                     return None
                 operand = computationStack[-1]
@@ -534,13 +589,13 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     else:
                         computationStack[-1] = True
                 else:
-                    print("HAL/S built-in function", function, \
+                    print("\tHAL/S built-in function", function, \
                           "not yet implemented")
                     return None
             # Now all of the two-argument functions.
             elif function in builtIns[2]:
                 if stackSize < 2:
-                    print("Not enough arguments on stack for function", \
+                    print("\tNot enough arguments on stack for function", \
                           function)
                     return None
                 operand1 = computationStack.pop()
@@ -600,13 +655,13 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     else:
                         computationStack[-1] = "%*s" % (operand2, operand1)
                 else:
-                    print("HAL/S built-in function", function, \
+                    print("\tHAL/S built-in function", function, \
                           "not yet implemented")
                     return None
             # Now all of the two-argument functions.
             elif function in builtIns[3]:
                 if stackSize < 3:
-                    print("Not enough arguments on stack for function", \
+                    print("\tNot enough arguments on stack for function", \
                           function)
                     return None
                 operand1 = computationStack.pop()
@@ -623,11 +678,11 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     else:
                         computationStack[-1] = operand3
                 else:
-                    print("HAL/S built-in function", function, \
+                    print("\tHAL/S built-in function", function, \
                           "not yet implemented")
                     return None
             else:
-                print("Implementation error, function", function)
+                print("\tImplementation error, function", function)
                 return None
         elif "goto" in instruction:
             scopeNumber, instructionIndex = \
@@ -652,10 +707,10 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             identifier = "^" + identifier + "^"
             attributes = PALMAT["scopes"][si]["identifiers"][identifier]
             if attributes == None:
-                print("Target of RUN not found:", identifier)
+                print("\tTarget of RUN not found:", identifier)
                 return None
             if "program" not in attributes:
-                print("RUN target is not a PROGRAM:", identifier)
+                print("\tRUN target is not a PROGRAM:", identifier)
                 return None
             scopeNumber = attributes["scope"]
             instructionIndex = 0;
@@ -665,15 +720,15 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             identifier = "^" + identifier + "^"
             attributes = PALMAT["scopes"][si]["identifiers"][identifier]
             if attributes == None:
-                print("Target of CALL not found:", identifier)
+                print("\tTarget of CALL not found:", identifier)
                 return None
             if "function" not in attributes and "procedure" not in attributes:
-                print("CALL to neither a FUNCTION nor PROCEDURE:", identifier)
+                print("\tCALL to neither a FUNCTION nor PROCEDURE:", identifier)
                 return None
             si = attributes["scope"]
             s = scopes[si]
             if "return" in s:
-                print("Recursion in subroutine %s not allowed." \
+                print("\tRecursion in subroutine %s not allowed." \
                       % identifier[1:-1])
                 return None
             # The return address.
@@ -697,12 +752,12 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     break
                 enclosure = PALMAT["scopes"][enclosure["parent"]]
             if enclosure == None:
-                print("Implementation error, no return address.")
+                print("\tImplementation error, no return address.")
                 return None
             #scopeNumber, instructionIndex = computationStack.pop(-stackPos)
             scope = scopes[scopeNumber]
         else:
-            print("Implementation error, unknown PALMAT:", instruction)
+            print("\tImplementation error, unknown PALMAT:", instruction)
             return None
     if trace:
         print("\tTRACE:  ", computationStack, "(end)")

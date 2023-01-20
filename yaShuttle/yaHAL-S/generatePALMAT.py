@@ -10,6 +10,7 @@ Purpose:        Part of the code-generation system for the "modern" HAL/S
 History:        2022-12-19 RSB  Created. 
 """
 
+import copy
 import json
 import p_Functions
 substate = p_Functions.substate
@@ -370,7 +371,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         if "assignments" not in attributes:
             attributes["assignments"] = []
         if len(attributes["assignments"]) != len(assignments):
-            print("ASSIGN-list length disagreement in %s, %s vs %s." % \
+            print("\tASSIGN-list length disagreement in %s, %s vs %s." % \
               (currentIdentifier[1:-1], assignments, attributes["assignments"]))
             endLabels.pop()
             return False, PALMAT
@@ -396,7 +397,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                 break
             i = dummy["parent"]
         if stackPos == 0:
-            print("RETURN without parent FUNCTION or PROCEDURE")
+            print("\tRETURN without parent FUNCTION or PROCEDURE")
             endLabels.pop()
             return False, PALMAT
         currentScope["instructions"].append({'return': stackPos})
@@ -442,7 +443,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         si, identifier = substate["lhs"][-1]
         attributes = PALMAT["scopes"][si]["identifiers"]["^"+identifier+"^"]
         if attributes == None:
-            print("Assignment variable %s not accessible." % identifier[1:-1])
+            print("\tAssignment variable %s not accessible." % identifier[1:-1])
             endLabels.pop()
             return False, PALMAT
         if len(substate["lhs"]) == 1:
@@ -456,6 +457,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         instructions.append({ "write": substate["LUN"] })
     elif lbnfLabel == "declare_statement":
         markUnmarkedScalars(currentScope["identifiers"])
+        completeInitialConstants(currentScope["identifiers"])
     elif lbnfLabel in ["repeated_constant"]:
         '''
         We get to here after an INITIAL(...) or CONSTANT(...)
@@ -478,21 +480,11 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         was computable at compile time.
         '''
         value = popInstruction(instructions)
-        '''
-        if value == None or lenInstructions(instructions) != 0:
-            print("Computation of INITIAL(...) or CONSTANT(...) failed:", 
-                  value, instructions)
-            if currentIdentifier in identifiers:
-                identifiers.pop(currentIdentifier)
-            endLabels.pop()
-            return False, PALMAT
-        instructions.clear()
-        '''
         if "number" in value:
             try:
                 value = float(value["number"]);
             except:
-                print("In INITIAL or CONSTANT, couldn't convert to SCALAR:", \
+                print("\tIn INITIAL or CONSTANT, couldn't convert to SCALAR:", \
                       value)
                 return False, PALMAT
         elif "boolean" in value:
@@ -507,40 +499,69 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         if isUnmarkedScalar(identifierDict):
             identifierDict["scalar"] = True
         if "initial" in identifierDict and "constant" in identifierDict:
-            print("Identifier", currentIdentifier[1:-1], \
+            print("\tIdentifier", currentIdentifier[1:-1], \
                     "cannot have both INITIAL and CONSTANT.")
             identifiers.pop(currentIdentifier)
             endLabels.pop()
             return False, PALMAT
         key = None
-        if "initial" in identifierDict and identifierDict["initial"] == "^?^":
+        if "initial" in identifierDict:
             key = "initial"
-        elif "constant" in identifierDict and \
-                identifierDict["constant"] == "^?^":
+        elif "constant" in identifierDict:
             key = "constant"
-        else:
-            print("Discrepancy between INITIAL and CONSTANT.")
-            if currentIdentifier in identifiers:
-                identifiers.pop(currentIdentifier)
-            endLabels.pop()
-            return False, PALMAT
-        if isinstance(value, (int, float)) and "integer" in identifierDict:
+        if False:
+            pass
+        elif isinstance(value, (int, float)) and "integer" in identifierDict:
             value = hround(value)
         elif isinstance(value, (int, float)) and "scalar" in identifierDict:
             value = float(value)
+        elif isinstance(value, (int, float)) and "bit" in identifierDict:
+            length = identifierDict["bit"]
+            value = hround(value) & ((1 << length) - 1)
         elif isinstance(value, bool) and "bit" in identifierDict:
             pass
         elif isinstance(value, str) and "character" in identifierDict:
             pass
+        elif isinstance(value, (int, float)) and "vector" in identifierDict:
+            numCols = identifierDict["vector"]
+            if key not in identifierDict or \
+                    isinstance(identifierDict[key], str):
+                value = [float(value)]
+            else:
+                if len(identifierDict[key]) >= numCols:
+                    print("\tData for INITIAL or CONSTANT of " + \
+                          currentIdentifier + " exceeds dimensions.")
+                    value = identifierDict[key]
+                else:
+                    value = identifierDict[key] + [float(value)]
+        elif isinstance(value, (int, float)) and "matrix" in identifierDict:
+            numRows, numCols = identifierDict["matrix"]
+            if key not in identifierDict or \
+                    isinstance(identifierDict[key], str):
+                value = [[float(value)]]
+            else:
+                matrix = identifierDict[key]
+                row = len(matrix)-1
+                col = len(matrix[row])
+                if col >= numCols:
+                    matrix.append([])
+                    row += 1
+                    col = 0
+                if row >= numRows:
+                    print("\tData for INITIAL or CONSTANT of " + \
+                          currentIdentifier + " exceeds dimensions.")
+                else:
+                    matrix[row] += [float(value)]
+                value = matrix
         else:
-            print("Datatype mismatch in INITIAL or CONSTANT:", value, \
-                  currentIdentifier)
+            print("\tDatatype mismatch in INITIAL or CONSTANT:", value, \
+                  currentIdentifier, identifierDict)
             identifiers.pop(currentIdentifier)
             endLabels.pop()
             return False, PALMAT
         identifierDict[key] = value
         if key == "initial":
-            identifierDict["value"] = value
+            identifierDict["value"] = copy.deepcopy(value)
     elif lbnfLabel in ["char_spec", "bitSpecBoolean",  
                        "sQdQName_doublyQualNameHead_literalExpOrStar",
                        "arraySpec_arrayHead_literalExpOrStar"]:
@@ -583,7 +604,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                 identifierDict[datatype] = maxLens[0]
             instructions.clear()
         except:
-            print("Computation of datatype length failed:", instructions)
+            print("\tComputation of datatype length failed:", instructions)
             instructions.clear()
             identifiers.pop(currentIdentifier)
             endLabels.pop()
@@ -596,7 +617,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             substate.pop('labelExitRepeat')
         else:
             if loopScope == None:
-                print("No enclosing loop found for EXIT.")
+                print("\tNo enclosing loop found for EXIT.")
                 endLabels.pop()
                 return False, PALMAT
             elif lbnfLabel == "basicStatementExit":

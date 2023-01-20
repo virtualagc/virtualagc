@@ -70,6 +70,8 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
                     findIdentifier(lbnfLabel, PALMAT, state["scopeIndex"])
             expression.append({ "call": (si, sp) })
             internalState = "normal"
+    if stage == 2 and lbnfLabel == "subscript":
+        expression.append({ 'sentinel': 'subscripts' })
     if stage == 2 and depth == owningDepth: #lbnfLabel == owningLabel:
         # Transfer the expression stack to the PALMAT instruction queue.
         # But if it's computable at compile-time, then we compute it down
@@ -198,6 +200,8 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
             expression.append({ "operator": "AND" })
         elif lbnfLabel == "bitExpOR":
             expression.append({ "operator": "OR" })
+        elif lbnfLabel == "subscript":
+            expression.append({ "operator": "subscripts"})
         elif lbnfLabel == "relationalOpEQ":
             stateMachine["relationalOperator"] = { "operator": "==" }
         elif lbnfLabel == "relationalOpNEQ":

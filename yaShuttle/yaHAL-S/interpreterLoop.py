@@ -86,67 +86,72 @@ def printScopeHeading(PALMAT, i):
     return scope
 
 helpMenu = \
-'''\tNote: Interpreter commands are case-insensitive, but
-\tHAL/S source code is case-sensitive.  The available
-\tinterpreter commands are listed below:
-\tHELP         Show this menu.
-\tQUIT         Quit this interpreter program.
-\tRUN P [*]    Run PROGRAM P. By default, runs as the 
+'''\tNote: Interpreter commands are case-insensitive, while
+\tHAL/S source code is case-sensitive.  Any input line
+\t beginning with a back-tick (`) is an interpreter command.
+\tThe available interpreter commands are listed below:
+\t`HELP        Show this menu.
+\t`QUIT        Quit this interpreter program.
+\t`CANCEL *    Cancel any uncompleted multi-line source-
+\t             code input.
+\t`CANCEL      Cancel just the preceding line of a 
+\t             multi-line source-code input.
+\t`RUN P [*]   Run PROGRAM P. By default, runs as the 
 \t             "primary", which affects the DATA (see
 \t             below).  If the optional 3rd field is
 \t             present, runs as a "secondary" with 
 \t             cloned DATA structures that persist only
 \t             while PROGRAM P runs, and vanish afterward.
-\tSPOOL        Begin spooling all HAL/S source lines for
+\t`SPOOL       Begin spooling all HAL/S source lines for
 \t             later processing.  (The default is to
 \t             process lines one-by-one upon input, and
 \t             to spool only lines not ending in ';'.)
 \t             Note that all interpreter commands are
 \t             acted upon immediately rather than being
 \t             added to the spool.
-\tUNSPOOL      Immediately process all spooled lines.
-\tREVIEW       Redisplay spooled HAL/S source lines.
-\tCOLORIZE C   Enable colorizing (ANSI terminals only).
+\t`UNSPOOL     Immediately process all spooled lines.
+\t`REVIEW      Redisplay spooled HAL/S source lines.
+\t`COLORIZE C  Enable colorizing (ANSI terminals only).
 \t             C is one of the following words: black,
 \t             red, green, yellow, blue, magenta, cyan,
 \t             white, gray, brightred, brightgreen,
 \t             brightyellow, brightblue, brightmagenta,
 \t             brightcyan, or brightwhite.
-\tNOCOLORIZE   Disable colorized output.
-\tWRITE F      Write current PALMAT to a file named F.
-\tREAD F       Read PALMAT from a file named F.
-\tDATA         Inspect identifiers in root scope.
-\tDATA N       Inspect identifiers in scope N (integer).
-\tDATA *       Inspect identifiers in all scopes.
-\tPALMAT       Inspect PALMAT code in root scope.
-\tPALMAT N     Inspect PALMAT code in scope N (integer).
-\tPALMAT *     Inspect PALMAT code in all scopes.
-\tEXECUTE      (Re)execute already-compiled PALMAT.
-\tCLONE        Same as EXECUTE, but clone instantiation.
-\tSCOPES       Inspect scope hierarchy.
-\tGARBAGE      Perform "garbage collection".  This is
+\t`NOCOLORIZE  Disable colorized output.
+\t`WRITE F     Write current PALMAT to a file named F.
+\t`READ F      Read PALMAT from a file named F.
+\t`DATA        Inspect identifiers in root scope.
+\t`DATA N      Inspect identifiers in scope N (integer).
+\t`DATA *      Inspect identifiers in all scopes.
+\t`PALMAT      Inspect PALMAT code in root scope.
+\t`PALMAT N    Inspect PALMAT code in scope N (integer).
+\t`PALMAT *    Inspect PALMAT code in all scopes.
+\t`EXECUTE     (Re)execute already-compiled PALMAT.
+\t`CLONE       Same as EXECUTE, but clone instantiation.
+\t`SCOPES      Inspect scope hierarchy.
+\t`GARBAGE     Perform "garbage collection".  This is
 \t             done automatically prior to processing
 \t             any newly-input HAL/S, but it may be
 \t             useful sometimes to do it explictly if
 \t             you want to inspect the environment 
 \t             under which the next HAL/S will run.
-\tREMOVE D     Remove identifier D.
-\tREMOVE *     Remove all identifiers.
-\tRESET        Reset all PALMAT.
-\tSTATUS       Show current settings and other info.
-\tWINE         Enable Windows compiler (Linux only).
-\tNOWINE       Disable Windows compiler (Linux only).
-\tTRACE1       Enable parser tracing.
-\tNOTRACE1     Disable parser tracing.
-\tTRACE2       Enable code-generator tracing.
-\tNOTRACE2     Disable code-generator tracing.
-\tTRACE3       Enable execution tracing.
-\tNOTRACE3     Disable execution tracing.
-\tLBNF         Show abstract syntax trees in LBNF.
-\tBNF          Show abstract syntax trees in BNF.
-\tNOAST        Don't show abstract syntax trees.
-\tEXEC         Execute the HAL/S code.
-\tNOEXEC       Don't execute the HAL/S code.'''
+\t`REMOVE D    Remove identifier D.
+\t`REMOVE *    Remove all identifiers.
+\t`RESET       Reset all PALMAT.
+\t`STATUS      Show current settings and other info.
+\t`WINE        Enable Windows compiler (Linux only).
+\t`NOWINE      Disable Windows compiler (Linux only).
+\t`TRACE1      Enable parser tracing.
+\t`NOTRACE1    Disable parser tracing.
+\t`TRACE2      Enable code-generator tracing.
+\t`NOTRACE2    Disable code-generator tracing.
+\t`TRACE3      Enable execution tracing.
+\t`NOTRACE3    Disable execution tracing.
+\t`LBNF        Show abstract syntax trees in LBNF.
+\t`BNF         Show abstract syntax trees in BNF.
+\t`NOAST       Don't show abstract syntax trees.
+\t`EXEC        Execute the HAL/S code.
+\t`NOEXEC      Don't execute the HAL/S code.'''
 
 def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     xeq=True, lbnf=False, bnf=False):
@@ -172,6 +177,8 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
         colorName = ""
         debugColor = ""
     PALMAT = constructPALMAT()
+    print(colorize)
+    print("Input HAL/S or else interpreter commands. Use `HELP for more info.")
     while not quitting:
         halCode = False
         line = " "
@@ -190,6 +197,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                 prompt = prompt + "\033[0m"
             line = input(prompt)
             if line[:2] in ["C ", "C\t"] or line[:3] in ["C/ ", "C/\t"]:
+                print("\tFull-line comment detected and discarded.")
                 continue
             print(colorize, end="")
             fields = line.strip().split()
@@ -200,119 +208,131 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                 halsSource.append(" ")
                 metadata.append([])
                 continue
-            firstWord = fields[0].upper()
-            if firstWord == "SPOOL":
-                print("\tNow spooling input for later processing.")
-                spooling = True
-                continue
-            elif firstWord == "UNSPOOL":
-                print("\tHalting spooling of input. Processing " + \
-                      "already-spooled input ...")
-                spooling = False
-                line = ""
-                break;
-            elif firstWord == "RUN" and len(fields) >= 2:
-                si, attributes = \
-                    findIdentifier("^l_" + fields[1] + "^", PALMAT, 0)
-                secondary = len(fields) > 2
-                if attributes != None:
-                    if secondary:
-                        print("Running as a secondary thread.")
-                    else:
-                        print("Running as the primary thread.")
-                    executePALMAT(PALMAT, attributes["scope"], 0, \
-                                  secondary, trace3, 8)
-                else:
-                    print("Cannot find program", fields[1])
-                continue
-            elif firstWord == "REVIEW":
-                print("\tReview of spooled input:")
-                if len(halsSource) == 0:
-                    print("\t(no spooled source code)")
+            if fields[0][:1] == "`":
+                fields[0] = fields[0][1:]
+                if fields[0] == "":
+                    fields.pop(0)
+                    if len(fields) == 0:
+                        continue
+                firstWord = fields[0].upper()
+                if firstWord == "SPOOL":
+                    print("\tNow spooling input for later processing.")
+                    spooling = True
                     continue
-                for line in halsSource:
-                    print("\t%s" % line)
-                continue
-            elif firstWord == "COLORIZE" and numWords == 2 \
-                    and fields[1].lower() in colors:
-                colorName = fields[1].lower()
-                index = colors.index(colorName)
-                if index < 8:
-                    index += 30
-                else:
-                    index += 90 - 8
-                colorize = "\033[%dm" % index
-                print(colorize, end="")
-                print("\tEnabled colorized output (%s)." % colorName.upper())
-                continue
-            elif firstWord == "REMOVE" and len(fields) > 1:
-                identifier = fields[1]
-                if identifier == "*":
-                    removeAllIdentifiers(PALMAT, 0)
-                else: 
-                    removeIdentifier(PALMAT, 0, "^" + identifier + "^")
-                continue
-            elif firstWord == "WRITE" and len(fields) > 1:
-                if writePALMAT(PALMAT, fields[1]):
-                    print("Success!")
-                else:
-                    print("Failure!")
-                continue
-            elif firstWord == "READ" and len(fields) > 1:
-                newPALMAT = readPALMAT(fields[1])
-                if newPALMAT == None:
-                    print("Failure!")
-                else:
-                    PALMAT = newPALMAT
-                    print("Success!")
-                continue
-            elif firstWord == "DATA":
-                if len(fields) == 1:
-                    r = [0]
-                elif fields[1] == "*":
-                    r = range(len(PALMAT["scopes"]))
-                elif fields[1].isdigit():
-                    r = [int(fields[1])]
-                    if r[0] < 0 or r[0] >= len(PALMAT["scopes"]):
-                        continue
-                for i in r:
-                    scope = printScopeHeading(PALMAT, i)
-                    identifiers = scope["identifiers"]
-                    if len(identifiers) == 0:
-                        print("\t(No identifiers declared)")
+                elif firstWord == "UNSPOOL":
+                    print("\tHalting spooling of input. Processing " + \
+                          "already-spooled input ...")
+                    spooling = False
+                    line = ""
+                    break;
+                elif firstWord == "CANCEL":
+                    if numWords > 1 and fields[1] == "*":
+                        halsSource = []
+                        metadata = []
+                    elif len(halsSource) > 0:
+                        halsSource.pop()
+                        metadata.pop()
+                    continue
+                elif firstWord == "RUN" and len(fields) >= 2:
+                    si, attributes = \
+                        findIdentifier("^l_" + fields[1] + "^", PALMAT, 0)
+                    secondary = len(fields) > 2
+                    if attributes != None:
+                        if secondary:
+                            print("\tRunning as a secondary thread.")
+                        else:
+                            print("\tRunning as the primary thread.")
+                        executePALMAT(PALMAT, attributes["scope"], 0, \
+                                      secondary, trace3, 8)
                     else:
-                        for identifier in sorted(identifiers):
-                            print("\t%s:" % identifier[1:-1], \
-                                    identifiers[identifier])
-                continue
-            elif firstWord == "PALMAT":
-                if len(fields) == 1:
-                    r = [0]
-                elif fields[1] == "*":
-                    r = range(len(PALMAT["scopes"]))
-                elif fields[1].isdigit():
-                    r = [int(fields[1])]
-                    if r[0] < 0 or r[0] >= len(PALMAT["scopes"]):
+                        print("\tCannot find program", fields[1])
+                    continue
+                elif firstWord == "REVIEW":
+                    print("\tReview of spooled input:")
+                    if len(halsSource) == 0:
+                        print("\t(no spooled source code)")
                         continue
-                for i in r:
-                    scope = printScopeHeading(PALMAT, i)
-                    instructions = scope["instructions"]
-                    if len(instructions) == 0:
-                        print("\t(No generated code)")
+                    for line in halsSource:
+                        print("\t%s" % line)
+                    continue
+                elif firstWord == "COLORIZE" and numWords == 2 \
+                        and fields[1].lower() in colors:
+                    colorName = fields[1].lower()
+                    index = colors.index(colorName)
+                    if index < 8:
+                        index += 30
                     else:
-                        count = 0
-                        for instruction in instructions:
-                            if 'debug' in instruction:
-                                print("\t%s%d: %s%s" % \
-                                      (debugColor, count, 
-                                       str(instruction), colorize))
-                            else:
-                                print("\t%d: %s" % (count, str(instruction)))
-                            count += 1
-                continue
-            elif numWords == 1:
-                # Handle interpreter commands vs HAL/S source code.
-                if firstWord == "QUIT":
+                        index += 90 - 8
+                    colorize = "\033[%dm" % index
+                    print(colorize, end="")
+                    print("\tEnabled colorized output (%s)." % colorName.upper())
+                    continue
+                elif firstWord == "REMOVE" and len(fields) > 1:
+                    identifier = fields[1]
+                    if identifier == "*":
+                        removeAllIdentifiers(PALMAT, 0)
+                    else: 
+                        removeIdentifier(PALMAT, 0, "^" + identifier + "^")
+                    continue
+                elif firstWord == "WRITE" and len(fields) > 1:
+                    if writePALMAT(PALMAT, fields[1]):
+                        print("\tSuccess!")
+                    else:
+                        print("\tFailure!")
+                    continue
+                elif firstWord == "READ" and len(fields) > 1:
+                    newPALMAT = readPALMAT(fields[1])
+                    if newPALMAT == None:
+                        print("\tFailure!")
+                    else:
+                        PALMAT = newPALMAT
+                        print("\tSuccess!")
+                    continue
+                elif firstWord == "DATA":
+                    if len(fields) == 1:
+                        r = [0]
+                    elif fields[1] == "*":
+                        r = range(len(PALMAT["scopes"]))
+                    elif fields[1].isdigit():
+                        r = [int(fields[1])]
+                        if r[0] < 0 or r[0] >= len(PALMAT["scopes"]):
+                            continue
+                    for i in r:
+                        scope = printScopeHeading(PALMAT, i)
+                        identifiers = scope["identifiers"]
+                        if len(identifiers) == 0:
+                            print("\t(No identifiers declared)")
+                        else:
+                            for identifier in sorted(identifiers):
+                                print("\t%s:" % identifier[1:-1], \
+                                        identifiers[identifier])
+                    continue
+                elif firstWord == "PALMAT":
+                    if len(fields) == 1:
+                        r = [0]
+                    elif fields[1] == "*":
+                        r = range(len(PALMAT["scopes"]))
+                    elif fields[1].isdigit():
+                        r = [int(fields[1])]
+                        if r[0] < 0 or r[0] >= len(PALMAT["scopes"]):
+                            continue
+                    for i in r:
+                        scope = printScopeHeading(PALMAT, i)
+                        instructions = scope["instructions"]
+                        if len(instructions) == 0:
+                            print("\t(No generated code)")
+                        else:
+                            count = 0
+                            for instruction in instructions:
+                                if 'debug' in instruction:
+                                    print("\t%s%d: %s%s" % \
+                                          (debugColor, count, 
+                                           str(instruction), colorize))
+                                else:
+                                    print("\t%d: %s" % (count, str(instruction)))
+                                count += 1
+                    continue
+                elif firstWord == "QUIT":
                     print("\tQuitting ...")
                     quitting = True
                     break
