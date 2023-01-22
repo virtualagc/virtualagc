@@ -82,7 +82,8 @@ expressionComponents = ["expression", "ifClauseBitExp", "relational_exp",
                      "bitExpFactor", "write_arg", "read_arg", "char_spec",
                      "arithExpTerm", "arithExpArithExpPlusTerm",
                      "arithExpArithExpMinusTerm", "arithMinusTerm", 
-                     "literalExp", "sub_exp"]
+                     "literalExp", "sub_exp", 
+                     "minorAttributeRepeatedConstant"]
 setExpressionComponents = set(expressionComponents)
 doForComponents = ["doGroupHeadFor", "doGroupHeadForWhile", 
                       "doGroupHeadForUntil"]
@@ -187,19 +188,16 @@ def stringLiteral(PALMAT, state, s):
     # variations (sp, isp, fsp). 
     if False:
         pass
-    #elif state1 == "number" and "repeat_head" in history \
-    #        and isNotExpressiony(history):
-    #    print("*lkjlj", sp, instructions)
-    #    instructions.append({ 'number': sp})
-    #    instructions.append({ 'operator': '#'})
-    #    print("*lkjlk", instructions)
+    elif state1 == "number" and "minorAttributeRepeatedConstant" in history:
+        pass
     elif state2 == ["typeSpecChar", "number"]:
         if "declareBody_attributes_declarationList" in history:
             substate["commonAttributes"]["character"] = isp
         else:
             updateCurrentIdentifierAttribute(PALMAT, state, "character", isp)
     elif "declaration_list" in history and "expression" not in history \
-            and "char_spec" not in history and "literalExp" not in history:
+            and "char_spec" not in history and "literalExp" not in history \
+            and state1 != "number":
         if s in identifiers:
             print("Already declared:", sp)
             substate["currentIdentifier"] = ""
@@ -374,7 +372,7 @@ augmentationCandidates = [
     "read_arg",
     "read_key",
     "relational_exp",
-    #"repeat_head",
+    "minorAttributeRepeatedConstant",
     "sQdQName_doublyQualNameHead_literalExpOrStar",
     "sub_exp",
     "then",

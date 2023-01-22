@@ -240,7 +240,10 @@ Regarding the format of entries on the computation stack, this can (and for effi
 * Any Python list of floats or integers (for HAL/S `VECTOR` types) or rectangular list of lists of floats or integers (for HAL/S `MATRIX` types).
 * Any Python dictionary for HAL/S `STRUCTURE`s.
 * Any Python rectangular tuple [of tuples [of tuples [...] ] ] for an `ARRAY`.
-* A Python `None` is used to mark the beginning of a variable-length list of operands.  (There is rare any need for such a thing, but it is used to begin list of subscripts.)
+* The Python `None` is for an unitialized value in a PALMAT instruction `fetch`, `store`, etc.
+* Python sets, to which there's no corresponding datatype in HAL/S can appear on the computation stack as well:
+    * `{ 'sentinel' }` is used to mark the beginning of a variable-length list of operands.  (There is rare any need for such a thing, but it is used to begin list of subscripts.)
+    * TBD
 
 ### PALMAT Instructions 1: Arithmetic
 
@@ -319,7 +322,7 @@ Thus we end up with `B=2`, `C=5`, `A=307`.
 
 Here's another PALMAT instruction pertaining to output:
 
-  * `{'write': lun}` marks the *end* of the PALMAT corresponding to a HAL/S statement of the form `WRITE(lun) ...`.  The only logical unit number understood by the interpreter is `lun=6`, which is output to the console from which the interpreter commands and HAL/S statements are being input.  The instruction outputs every value on the expression stack, in FIFO order (not LIFO stack order), and then clears the stack.
+  * `{'write': lun}` marks the *end* of the PALMAT corresponding to a HAL/S statement of the form `WRITE(lun) ...`.  The only logical unit number understood by the interpreter is `lun=6`, which is output to the console from which the interpreter commands and HAL/S statements are being input.  The instruction outputs every value on the computation stack, in FIFO order (not LIFO stack order), and then clears the stack.  If there is nothing at all on the computation stack, then just a line-feed is printed.
 
 The full form of a HAL/S `WRITE` statment is
 

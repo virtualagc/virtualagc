@@ -72,7 +72,7 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
             internalState = "normal"
     if stage == 2 and lbnfLabel == "subscript":
         expression.append({ 'sentinel': 'subscripts' })
-    if stage == 2 and depth == owningDepth: #lbnfLabel == owningLabel:
+    if stage == 2 and depth == owningDepth:
         # Transfer the expression stack to the PALMAT instruction queue.
         # But if it's computable at compile-time, then we compute it down
         # to a single number.
@@ -121,18 +121,23 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
                 "type"          : "compiler"
             }
             temporaryPALMAT = { "scopes": [temporaryScope] }
-            computationStack = executePALMAT(temporaryPALMAT)
-            if len(computationStack) == 1:
-                value = computationStack[0]
-                if isinstance(value, bool): # must come before (int,float).
-                    temporaryInstructions.clear()
-                    temporaryInstructions.append({"boolean": value})
-                elif isinstance(value, (int, float)):
-                    temporaryInstructions.clear()
-                    temporaryInstructions.append({"number": str(value)})
-                elif isinstance(value, str):
-                    temporaryInstructions.clear()
-                    temporaryInstructions.append({"string": value })
+            print("**A", temporaryInstructions)
+            computationStack = executePALMAT(temporaryPALMAT,0,0,False,True,8)
+            print("**B", computationStack)
+            temporaryInstructions.clear()
+            for v in reversed(computationStack):
+                if isinstance(v, list) and len(v) == 1 \
+                        and isinstance(v[0], tuple):
+                    v = list(v[0])
+                else:
+                    v = [v]
+                for value in v:
+                    if isinstance(value, bool): # must come before (int,float).
+                        temporaryInstructions.append({"boolean": value})
+                    elif isinstance(value, (int, float)):
+                        temporaryInstructions.append({"number": str(value)})
+                    elif isinstance(value, str):
+                        temporaryInstructions.append({"string": value })
         if "compiledExpression" in stateMachine:
             instructions = stateMachine["compiledExpression"]
         else:
@@ -142,7 +147,14 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
         if "expressionFlush" in stateMachine:
             stateMachine["expressionFlush"].extend(temporaryInstructions)
         else:
-            instructions.extend(temporaryInstructions)
+            if len(temporaryInstructions) != 1:
+                # As far as I know, this should happy *only* in the case of
+                # #-style repeat-factor within an INITIAL(...) or 
+                # CONSTANT(...).
+                instructions.append([tuple(temporaryInstructions)])
+            else:
+                instructions.extend(temporaryInstructions)
+            print("**C", instructions)
         state.pop("stateMachine")
     if stage == 0 and internalState == "normal":
         if lbnfLabel in ["abs", "ceiling", "div", "floor", "midval", "mod",
@@ -157,7 +169,9 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
                          "prio", "random", "randomg", "runtime", "shl", 
                          "shr", "size"]:
             expression.append({ "function": lbnfLabel.upper()})
-        if lbnfLabel in ["identifier", "char_id", "bit_id"]:
+        elif lbnfLabel[:9] == "ioControl":
+            expression.append({ "iocontrol": lbnfLabel[9:].upper()})
+        elif lbnfLabel in ["identifier", "char_id", "bit_id"]:
             internalState = "waitIdentifier"
         elif lbnfLabel in ["level", "number", "compound_number", 
                            "simple_number"]:
@@ -200,6 +214,8 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
             expression.append({ "operator": "AND" })
         elif lbnfLabel == "bitExpOR":
             expression.append({ "operator": "OR" })
+        elif lbnfLabel == "repeat_head":
+            expression.append({ "operator": "#"})
         elif lbnfLabel == "subscript":
             expression.append({ "operator": "subscripts"})
         elif lbnfLabel == "relationalOpEQ":

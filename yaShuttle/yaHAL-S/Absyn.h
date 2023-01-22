@@ -2726,11 +2726,11 @@ struct REPEAT_HEAD_
   enum { is_AArepeat_head } kind;
   union
   {
-    struct { ARITH_EXP arith_exp_; NUMBER number_; } aarepeat_head_;
+    struct { ARITH_EXP arith_exp_; } aarepeat_head_;
   } u;
 };
 
-REPEAT_HEAD make_AArepeat_head(ARITH_EXP p0, NUMBER p1);
+REPEAT_HEAD make_AArepeat_head(ARITH_EXP p0);
 
 struct NESTED_REPEAT_HEAD_
 {

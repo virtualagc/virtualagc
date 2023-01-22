@@ -5649,7 +5649,6 @@ void ppREPEAT_HEAD(REPEAT_HEAD p, int _i_)
     if (_i_ > 0) renderC(_L_PAREN);
     ppARITH_EXP(p->u.aarepeat_head_.arith_exp_, 0);
     renderC('#');
-    ppNUMBER(p->u.aarepeat_head_.number_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
@@ -14516,8 +14515,6 @@ void shREPEAT_HEAD(REPEAT_HEAD p)
     bufAppendC(' ');
 
     shARITH_EXP(p->u.aarepeat_head_.arith_exp_);
-  bufAppendC(' ');
-    shNUMBER(p->u.aarepeat_head_.number_);
 
     bufAppendC(')');
 

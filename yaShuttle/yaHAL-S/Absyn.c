@@ -6329,7 +6329,7 @@ REPEATED_CONSTANT make_AErepeated_constant(REPEAT_HEAD p1)
     tmp->u.aerepeated_constant_.repeat_head_ = p1;
     return tmp;
 }/********************   AArepeat_head    ********************/
-REPEAT_HEAD make_AArepeat_head(ARITH_EXP p1, NUMBER p2)
+REPEAT_HEAD make_AArepeat_head(ARITH_EXP p1)
 {
     REPEAT_HEAD tmp = (REPEAT_HEAD) malloc(sizeof(*tmp));
     if (!tmp)
@@ -6339,7 +6339,6 @@ REPEAT_HEAD make_AArepeat_head(ARITH_EXP p1, NUMBER p2)
     }
     tmp->kind = is_AArepeat_head;
     tmp->u.aarepeat_head_.arith_exp_ = p1;
-    tmp->u.aarepeat_head_.number_ = p2;
     return tmp;
 }/********************   AAnested_repeat_head    ********************/
 NESTED_REPEAT_HEAD make_AAnested_repeat_head(REPEAT_HEAD p1)

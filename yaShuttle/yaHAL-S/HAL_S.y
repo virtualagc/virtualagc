@@ -1281,7 +1281,7 @@ REPEATED_CONSTANT : EXPRESSION { $$ = make_AArepeated_constant($1); $$->line_num
   | NESTED_REPEAT_HEAD REPEATED_CONSTANT _SYMB_1 { $$ = make_ADrepeated_constant($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | REPEAT_HEAD { $$ = make_AErepeated_constant($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
-REPEAT_HEAD : ARITH_EXP _SYMB_9 NUMBER { $$ = make_AArepeat_head($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+REPEAT_HEAD : ARITH_EXP _SYMB_9 { $$ = make_AArepeat_head($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 NESTED_REPEAT_HEAD : REPEAT_HEAD _SYMB_2 { $$ = make_AAnested_repeat_head($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | NESTED_REPEAT_HEAD REPEATED_CONSTANT _SYMB_0 { $$ = make_ABnested_repeat_head($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }

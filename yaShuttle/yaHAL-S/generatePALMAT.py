@@ -249,20 +249,20 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     for component in ast["components"]:
         if isinstance(component, str):
             if component[:1] == "^":
-                traceIt(newState, lbnfLabel, "before", trace, depth)
+                traceIt(newState, component, "before", trace, depth)
                 if "stateMachine" in newState:
                     state["stateMachine"]["function"](1, component, PALMAT, \
                                                       newState, trace, depth)
                 success = p_Functions.stringLiteral(PALMAT, newState, component)
                 if "stateMachine" in state and "stateMachine" not in newState:
                     state.pop("stateMachine")
-                traceIt(newState, lbnfLabel, "after", trace, depth)
+                traceIt(newState, component, "after", trace, depth)
             else:
                 success, PALMAT = generatePALMAT( \
                     { "lbnfLabel": component, "components" : [] }, \
                     PALMAT, newState, trace, endLabels, depth )
                 if "stateMachine" in state and "stateMachine" not in newState:
-                    traceIt(newState, lbnfLabel, \
+                    traceIt(newState, component, \
                             "ending state machine \"%s\"" % \
                               state["stateMachine"]["owner"], trace, depth)
                     state.pop("stateMachine")
@@ -450,7 +450,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             instructions.append({ base + "pop": substate["lhs"][-1] })
         else:
             instructions.append({ base: substate["lhs"][-1] })
-    elif lbnfLabel == "basicStatementWritePhrase":
+    elif lbnfLabel in ["basicStatementWritePhrase", "basicStatementWriteKey"]:
         instructions = currentScope["instructions"]
         p_Functions.expressionToInstructions( \
             substate["expression"], instructions)
@@ -458,7 +458,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     elif lbnfLabel == "declare_statement":
         markUnmarkedScalars(currentScope["identifiers"])
         completeInitialConstants(currentScope["identifiers"])
-    elif lbnfLabel in ["repeated_constant"]:
+    elif lbnfLabel in ["minorAttributeRepeatedConstant"]:
         '''
         We get to here after an INITIAL(...) or CONSTANT(...)
         has been fully processed to the extent of preparing
@@ -477,91 +477,99 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         '''
         Note that the expression state machine should have left
         a single value on the instruction queue if the expression
-        was computable at compile time.
+        was computable at compile time.  However, in the case
+        of an INITIAL or CONSTANT, that single value may be
+        several values that have been wrapped in [(...)], and 
+        we have to process each separately.
         '''
-        value = popInstruction(instructions)
-        if "number" in value:
-            try:
-                value = float(value["number"]);
-            except:
-                print("\tIn INITIAL or CONSTANT, couldn't convert to SCALAR:", \
-                      value)
+        v = popInstruction(instructions)
+        if isinstance(v, list) and len(v) == 1 and isinstance(v[0], tuple):
+            pass
+        else:
+            v = [tuple([v])]
+        print("**@", v)
+        for value in v[0]:
+            if "number" in value:
+                try:
+                    value = float(value["number"]);
+                except:
+                    print("\tIn INITIAL or CONSTANT, couldn't convert to SCALAR:", \
+                          value)
+                    return False, PALMAT
+            elif "boolean" in value:
+                value = value["boolean"]
+            elif "string" in value:
+                value = value["string"]
+            if currentIdentifier != "":
+                identifierDict = identifiers[currentIdentifier]
+            else:
+                identifierDict = substate["commonAttributes"]
+            if isUnmarkedScalar(identifierDict):
+                identifierDict["scalar"] = True
+            if "initial" in identifierDict and "constant" in identifierDict:
+                print("\tIdentifier", currentIdentifier[1:-1], \
+                        "cannot have both INITIAL and CONSTANT.")
+                identifiers.pop(currentIdentifier)
+                endLabels.pop()
                 return False, PALMAT
-        elif "boolean" in value:
-            value = value["boolean"]
-        elif "string" in value:
-            value = value["string"]
-            
-        if currentIdentifier != "":
-            identifierDict = identifiers[currentIdentifier]
-        else:
-            identifierDict = substate["commonAttributes"]
-        if isUnmarkedScalar(identifierDict):
-            identifierDict["scalar"] = True
-        if "initial" in identifierDict and "constant" in identifierDict:
-            print("\tIdentifier", currentIdentifier[1:-1], \
-                    "cannot have both INITIAL and CONSTANT.")
-            identifiers.pop(currentIdentifier)
-            endLabels.pop()
-            return False, PALMAT
-        key = None
-        if "initial" in identifierDict:
-            key = "initial"
-        elif "constant" in identifierDict:
-            key = "constant"
-        if False:
-            pass
-        elif isinstance(value, (int, float)) and "integer" in identifierDict:
-            value = hround(value)
-        elif isinstance(value, (int, float)) and "scalar" in identifierDict:
-            value = float(value)
-        elif isinstance(value, (int, float)) and "bit" in identifierDict:
-            length = identifierDict["bit"]
-            value = hround(value) & ((1 << length) - 1)
-        elif isinstance(value, bool) and "bit" in identifierDict:
-            pass
-        elif isinstance(value, str) and "character" in identifierDict:
-            pass
-        elif isinstance(value, (int, float)) and "vector" in identifierDict:
-            numCols = identifierDict["vector"]
-            if key not in identifierDict or \
-                    isinstance(identifierDict[key], str):
-                value = [float(value)]
-            else:
-                if len(identifierDict[key]) >= numCols:
-                    print("\tData for INITIAL or CONSTANT of " + \
-                          currentIdentifier + " exceeds dimensions.")
-                    value = identifierDict[key]
+            key = None
+            if "initial" in identifierDict:
+                key = "initial"
+            elif "constant" in identifierDict:
+                key = "constant"
+            if False:
+                pass
+            elif isinstance(value, (int, float)) and "integer" in identifierDict:
+                value = hround(value)
+            elif isinstance(value, (int, float)) and "scalar" in identifierDict:
+                value = float(value)
+            elif isinstance(value, (int, float)) and "bit" in identifierDict:
+                length = identifierDict["bit"]
+                value = hround(value) & ((1 << length) - 1)
+            elif isinstance(value, bool) and "bit" in identifierDict:
+                pass
+            elif isinstance(value, str) and "character" in identifierDict:
+                pass
+            elif isinstance(value, (int, float)) and "vector" in identifierDict:
+                numCols = identifierDict["vector"]
+                if key not in identifierDict or \
+                        isinstance(identifierDict[key], str):
+                    value = [float(value)]
                 else:
-                    value = identifierDict[key] + [float(value)]
-        elif isinstance(value, (int, float)) and "matrix" in identifierDict:
-            numRows, numCols = identifierDict["matrix"]
-            if key not in identifierDict or \
-                    isinstance(identifierDict[key], str):
-                value = [[float(value)]]
-            else:
-                matrix = identifierDict[key]
-                row = len(matrix)-1
-                col = len(matrix[row])
-                if col >= numCols:
-                    matrix.append([])
-                    row += 1
-                    col = 0
-                if row >= numRows:
-                    print("\tData for INITIAL or CONSTANT of " + \
-                          currentIdentifier + " exceeds dimensions.")
+                    if len(identifierDict[key]) >= numCols:
+                        print("\tData for INITIAL or CONSTANT of " + \
+                              currentIdentifier + " exceeds dimensions.")
+                        value = identifierDict[key]
+                    else:
+                        value = identifierDict[key] + [float(value)]
+            elif isinstance(value, (int, float)) and "matrix" in identifierDict:
+                numRows, numCols = identifierDict["matrix"]
+                if key not in identifierDict or \
+                        isinstance(identifierDict[key], str):
+                    value = [[float(value)]]
                 else:
-                    matrix[row] += [float(value)]
-                value = matrix
-        else:
-            print("\tDatatype mismatch in INITIAL or CONSTANT:", value, \
-                  currentIdentifier, identifierDict)
-            identifiers.pop(currentIdentifier)
-            endLabels.pop()
-            return False, PALMAT
-        identifierDict[key] = value
-        if key == "initial":
-            identifierDict["value"] = copy.deepcopy(value)
+                    matrix = identifierDict[key]
+                    row = len(matrix)-1
+                    col = len(matrix[row])
+                    if col >= numCols:
+                        matrix.append([])
+                        row += 1
+                        col = 0
+                    if row >= numRows:
+                        print("\tData for INITIAL or CONSTANT of " + \
+                              currentIdentifier + " exceeds dimensions.")
+                    else:
+                        matrix[row] += [float(value)]
+                    value = matrix
+            else:
+                print("\tDatatype mismatch in INITIAL or CONSTANT:", value, \
+                      currentIdentifier, identifierDict)
+                identifiers.pop(currentIdentifier)
+                endLabels.pop()
+                return False, PALMAT
+            identifierDict[key] = value
+            if key == "initial":
+                identifierDict["value"] = copy.deepcopy(value)
     elif lbnfLabel in ["char_spec", "bitSpecBoolean",  
                        "sQdQName_doublyQualNameHead_literalExpOrStar",
                        "arraySpec_arrayHead_literalExpOrStar"]:

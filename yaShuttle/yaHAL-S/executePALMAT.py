@@ -19,6 +19,15 @@ import copy
 from decimal import Decimal, ROUND_HALF_UP
 
 timeOrigin = 0
+
+# The following code is intended to determine the precision of 
+# (number of significant digits to the right of the decimal point)
+# of floating-point values.  The precision may actually be one 
+# higher, but subtracting the 1 gets rid of a lot of nasty-looking
+# prints.
+precision = len(str(math.pi).split(".")[1]) - 1
+fpFormat = "%+2." + ("%d" % precision) + "e"
+
 # This function is called once at startup, in order to set the 
 # time origin properaly.  If not, then the time functions will
 # probably work, but they'll be of very low resolution since
@@ -178,6 +187,22 @@ def subscripted(object, subscripts):
             return None
     return copy.deepcopy(object)
 
+def printVectorOrMatrix(vOrM):
+    if isinstance(vOrM, list):
+        for v in vOrM:
+            printVectorOrMatrix(v)
+        return
+    elif isinstance(vOrM, int):
+        value = "%d" % vOrM
+    elif vOrM == 0.0:
+        value = " 0.0"
+    else: # isinstance(vOrM, float)
+        value = fpFormat % vOrM
+        if value[:1] == "+":
+            value = " " + value[1:]
+        value = value.replace("e", "E")
+    print(" " + value + " ", end="")
+    
 # If this function returns, which in principle it might not if executing
 # an actual flight program, it returns the current computation stack.
 # That would normally be empty if full statements had been executed.
@@ -262,13 +287,35 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 pass
             elif operator == "#":
                 if stackSize < 2:
-                    print(("Implementation error, not enough operands " + \
+                    print(("\tImplementation error, not enough operands " + \
                           "for operator \"%s\"") % operator)
                     return None
-                operand1 = computationStack.pop()
-                operand2 = hround(computationStack.pop())
-                while operand2 > 0:
-                    computationStack.append(operand1)
+                operand1 = hround(computationStack.pop())
+                # Recall that if a single item is being repeated, it is present
+                # as itself, but if a group of items are being repeated then
+                # that group appears on the computation stack in the form of 
+                # a single item because the group is wrapped in [(...)].  That
+                # particular wrapping is chosen because it's distinguishable 
+                # from VECTOR, MATRIX, and ARRAY.
+                v = computationStack.pop()
+                if isinstance(v, list) and len(v) == 1 and \
+                        isinstance(v[0], tuple):
+                    operands2 = list(v[0])
+                else:
+                    operands2 = [v]
+                temporaryStack = []
+                while operand1 > 0:
+                    # I want to insert all the elements in operands2 into
+                    # computation stack.  If I use the list .extend method
+                    # for this, I find they end up in reversed order, so I
+                    # want to do the insertion at the beginning rather than
+                    # at the end.  I want to do this in place, without 
+                    # creating a new computationStack object.
+                    #computationStack.extend(operands2)
+                    #computationStack[0:0] = operands2
+                    temporaryStack.extend(operands2)
+                    operand1 -= 1
+                computationStack.append([tuple(temporaryStack)])
             elif operator == "subscripts":
                 subscripts = []
                 while True:
@@ -391,10 +438,11 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 if value == None:
                     print("\tCannot compute value.")
                     return None
-                if value == True: # Convert BOOLEAN to INTEGER.
-                    value = 1
-                elif value == False:
-                    value = 0
+                if isinstance(value, bool):
+                    if value == True: # Convert BOOLEAN to INTEGER.
+                        value = 1
+                    elif value == False:
+                        value = 0
                 computationStack.append(value)
             else: # store
                 if len(computationStack) < stackPos:
@@ -486,13 +534,17 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                                 print(" TRUE ", end="")
                             else:
                                 print(" FALSE ", end="")
-                        elif isinstance(value, (int, float)):
-                            print(" %s " % str(value), end="")
+                        elif isinstance(value, (int, float, list)):
+                            printVectorOrMatrix(value)
                         else:
                             print(value, end="")
                 while len(computationStack) > start:
                     computationStack.pop()
                 print()
+        elif "iocontrol" in instruction:
+            # We just ignore all i/o controls in WRITE for now.
+            if len(computationStack) > 0:
+                computationStack.pop()
         elif "function" in instruction:
             function = instruction["function"]
             # First check all of the no-argument functions.
