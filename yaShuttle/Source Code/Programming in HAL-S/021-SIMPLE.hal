@@ -1,10 +1,15 @@
-C/ This sample comes from PDF p. 21 of "Programming in HAL/S".
+C/ This sample basically comes from PDF p. 21 of "Programming in HAL/S",
+C/ but I've knocked it up a notch.  Bam!
 
   SIMPLE: PROGRAM;
 C CODE IN THIS TYPEFACE IS
 C HAL/S SOURCE
-  DECLARE PI CONSTANT (3.14159266);
-  DECLARE R SCALAR;
-  READ(5) R;
-  WRITE(6) PI R**2;
+	  DECLARE PI CONSTANT (3.14159266);
+	  DECLARE R SCALAR;
+	  WRITE(6) 'Input numbers or else -1 to quit.';
+	  DO WHILE TRUE;
+		  READ(5) R;
+		  IF R < 0 THEN EXIT;
+		  WRITE(6) 'R =', R, 'and PI R**2 =', PI R**2;
+	  END;
   CLOSE SIMPLE;

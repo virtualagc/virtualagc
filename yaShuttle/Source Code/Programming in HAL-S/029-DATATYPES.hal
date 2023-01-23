@@ -1,22 +1,60 @@
-C/ From PDF p. 29 of "Programming in HAL/S"
+C/ From PDF p. 29 of "Programming in HAL/S", with a few additions, and
+C/ PDF pp. 69-72 of the "HAL/S Programmer's Guide", 32.0/17.0 edition.
 
   DATATYPES:
   PROGRAM;
-     DECLARE S SCALAR;
-     DECLARE I INTEGER;
-     DECLARE V VECTOR;
-     DECLARE M MATRIX;
+     DECLARE S SCALAR INITIAL(5);
+     DECLARE I INTEGER INITIAL(6);
+     DECLARE V VECTOR INITIAL(10, 11, 12), VV VECTOR;
+     DECLARE M MATRIX INITIAL(20, 21, 22, 23, 24, 25, 26, 27, 28), MM MATRIX;
+     DECLARE VECTOR, X INITIAL(5, 6, 2), Y INITIAL(1, 1, 1);
+     
+     DECLARE M2 MATRIX(2,2) INITIAL(0, 0.3, -0.1, 0.4);
+     DECLARE V1 VECTOR(3) INITIAL(1.0, -1.0, 1.0);
+     DECLARE V2 VECTOR(2) INITIAL(0.5, 0.6);
+     DECLARE M1A MATRIX(2,3) INITIAL(1.0, 1.0, 2.0, 0.5, -0.5, 1.0);
+     DECLARE M2A MATRIX(3,2) INITIAL(0.0, 0.5, 0.0, 1.0, 0.0, 1.0);
+     DECLARE M3 MATRIX(3,2) INITIAL(0.5, 1.0, 0.0, 1.0, 0.2, 0.4);
+    
+  WRITE(6);
+  WRITE(6) 'Stuff related to "Programming in HAL/S", p. 29.';
 E	 -   -
 M    S = V . V;
-E        -   -
-M    V = V * V;
-E    -   - *
-M    V = V M;
-E    *   - -
-M    M = V V;
-E    *   * *
-M    M = M M;
-E    -   -
-M    V = V S;
+  WRITE(6) 'V =', V;
+  WRITE(6) 'V.V =', S;
+E         -   -
+M    VV = V * V;
+  WRITE(6) 'V*V =', VV;
+  WRITE(6) 'X =', X;
+  WRITE(6) 'Y =', Y;
+  WRITE(6) 'X.Y =', X.Y;
+  WRITE(6) 'X*Y =', X*Y;
+E    -    - *
+M    VV = V M;
+  WRITE(6) 'M =', M;
+  WRITE(6) 'V M =', VV;
+E    *    - -
+M    MM = V V;
+  WRITE(6) 'V V =', MM;
+E    *    * *
+M    MM = M M;
+  WRITE(6) 'M M =', MM;
+E    -    -
+M    VV = V S;
+  WRITE(6) 'V S =', VV;
+  
+  WRITE(6) ;
+  WRITE(6) 'Stuff related to "HAL/S Programmers Guide", pp. 69-72.';
+  I = 10;
+  WRITE(6) 1.5E-2 I, ' (SCALAR times INTEGER, should be 0.15.)';
+  S = 1.5;
+  WRITE(6) S M2, ' SCALAR times MATRIX, should be 0.0 0.45 -0.15 0.6.';
+  WRITE(6) M2 S, ' MATRIX times SCALAR, should be 0.0 0.45 -0.15 0.6.';
+  WRITE(6) V1 V2, ' VECTOR outer product, should be 0.5 0.6 -0.5 -0.6 0.5 0.6.';
+  WRITE(6) V2 V1, ' VECTOR outer product, should be 0.5 -0.5 0.6 0.6 -0.6 0.6.';
+  WRITE(6) M1A M2A, ' MATRIX times MATRIX, should be 0.0 3.5 0.0 0.75';
+  WRITE(6) M2A M1A, ' MATRIX times MATRIX, should be 0.25 -0.25 0.5 0.5 -0.5 1.0 0.5 -0.5 1.0';
+  WRITE(6) V1 M3, ' VECTOR times MATRIX, should be 0.7 0.4.';
+  
   CLOSE DATATYPES;
   

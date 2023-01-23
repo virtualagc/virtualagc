@@ -25,7 +25,6 @@
     only complete programs rather than little snippets of code. 
  */
     
-`NOEXEC
  DECLARE SCALAR, T, X INITIAL(2.0), Y CONSTANT(3.0), Z DOUBLE; 
  DECLARE A, B DOUBLE, C INITIAL(4.0), D SCALAR CONSTANT(2 Y - 12); 
  DECLARE INTEGER, I, J CONSTANT(4 D + 2), K INITIAL(J + D); 
@@ -48,15 +47,15 @@
  
  WRITE(6) ; 
  WRITE(6) 'Some DECLARE tests ...'; 
- WRITE(6) CV1, '     (should be 2)'; 
- WRITE(6) VN1, '     (should be [None, None, None, None, None])'; 
- WRITE(6) VN1A, '     (should be [None, None, None, None, None])'; 
- WRITE(6) VN2, '     (should be [2.47, ..., 2.47] with 10 entries)'; 
+ WRITE(6) CV1, '     (should be 2.0)'; 
+ WRITE(6) VN1, '     (should be X.X X.X X.X X.X X.X)'; 
+ WRITE(6) VN1A, '     (should be X.X X.X X.X X.X X.X)'; 
+ WRITE(6) VN2, '     (should be 2.47 ... 2.47 with 10 entries)'; 
  WRITE(6) VN2A, '     (same as previous)'; 
- WRITE(6) VN3, '     (should be [1.0, 2.0, 3.0, 4.0, 5.0, None, ..., None] with 15 None)'; 
- WRITE(6) VN3A, '     (should be [1.0, 2.0, 3.0, 4.0])'; 
- WRITE(6) VN4, '     (should be [12.0, 12.0, ...] with 15 entrees)'; 
- WRITE(6) VN4A, '     (should be [12.0, 13.0, 14.0, None, ..., None] with 12 None)';  
+ WRITE(6) VN3, '     (should be 1.0 2.0 3.0 4.0 5.0 X.X ... X.X] with 15 X.X)'; 
+ WRITE(6) VN3A, '     (should be 1.0 2.0 3.0 4.0)'; 
+ WRITE(6) VN4, '     (should be 12.0 12.0 ... with 15 entries)'; 
+ WRITE(6) VN4A, '     (should be 12.0 13.0 14.0 X.X ... X.X with 12 X.X)';  
  WRITE(6) VN4A$2, '     (should be 13.0)'; 
  WRITE(6) ; 
  WRITE(6) 'Miscellaneous tests:'; 
@@ -125,9 +124,11 @@
  WRITE(6) ; 
  WRITE(6) 'Print 10 random (Gaussian) with DO UNTIL arithmetical comparison:'; 
  I=0; DO UNTIL I >= 10; I=I+1; WRITE(6) I, RANDOMG; END; 
+ WRITE(6) ;
  WRITE(6) 'Test DO UNTIL FALSE; should be SOMETHING between here ...'; 
  DO UNTIL TRUE; WRITE(6) ' SOMETHING!'; END; 
  WRITE(6) '... and here.'; 
+ WRITE(6) ;
  WRITE(6) 'Built-in RUNTIME function test (increment once per second):'; 
  WRITE(6) 'Uses DO WHILE DO UNTIL for the nested loops.';  
  I=1; 
@@ -275,7 +276,7 @@
  	IF W = 3 THEN RETURN Z; 
  	RETURN 0; 
  CLOSE PROJECTION3; 
- WRITE(6) 'The following 3 lines should print 100, 200, and 300, respectively.'; 
+ WRITE(6) 'The next 3 lines should be 100.0, 200.0, and 300.0, respectively.'; 
  WRITE(6) PROJECTION3(1, 100, 200, 300); 
  WRITE(6) PROJECTION3(2, 100, 200, 300); 
  WRITE(6) PROJECTION3(3, 100, 200, 300); 

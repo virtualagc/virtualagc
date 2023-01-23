@@ -12,9 +12,13 @@ History:        2023-01-08 RSB  Created, hopefully for eventually replacing
                                 the older, more-chaotic method. 
 """
 
-from executePALMAT import executePALMAT
+from executePALMAT import executePALMAT, isBitArray
 from palmatAux import debug, findIdentifier
 from p_Functions import substate
+
+# Set the following to enable tracing of calls to executePALMAT when trying
+# to compute compile-time constants.
+traceCompileTime = False
 
 # Return True on success, False on failure.  The stage argument is 0 when
 # called upon starting processing of an lbnfLabel, 2 after otherwise finishing
@@ -52,7 +56,10 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
         if internalState == "waitIdentifier":
             si, attributes = \
                     findIdentifier(lbnfLabel, PALMAT, state["scopeIndex"])
-            expression.append({ "fetch": (si, sp) })
+            if "readStatement" in stateMachine:
+                expression.append({ "fetchp": (si, sp)})
+            else:
+                expression.append({ "fetch": (si, sp) })
             internalState = "normal"
         elif internalState == "waitNumber":
             expression.append({ "number": sp })
@@ -70,8 +77,14 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
                     findIdentifier(lbnfLabel, PALMAT, state["scopeIndex"])
             expression.append({ "call": (si, sp) })
             internalState = "normal"
-    if stage == 2 and lbnfLabel == "subscript":
-        expression.append({ 'sentinel': 'subscripts' })
+    if stage == 2:
+        if lbnfLabel == "subscript":
+            expression.append({ 'sentinel': 'subscripts' })
+        elif lbnfLabel == "basicStatementReadPhrase":
+            if "readStatement" in stateMachine:
+                stateMachine.pop("readStatement")
+    #if stage == 2 and lbnfLabel == "repeated_constant":
+    #    expression.append({ "condense": "end" })
     if stage == 2 and depth == owningDepth:
         # Transfer the expression stack to the PALMAT instruction queue.
         # But if it's computable at compile-time, then we compute it down
@@ -85,7 +98,9 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
             instruction = expression.pop()
             temporaryInstructions.append(instruction)
             if compileTimeComputable:
-                if "fetch" in instruction:
+                if "fetchp" in instruction:
+                    compileTimeComputable = False
+                elif "fetch" in instruction:
                     si, identifier = instruction["fetch"]
                     try:
                         attributes = PALMAT["scopes"][si]["identifiers"]\
@@ -121,23 +136,33 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
                 "type"          : "compiler"
             }
             temporaryPALMAT = { "scopes": [temporaryScope] }
-            print("**A", temporaryInstructions)
-            computationStack = executePALMAT(temporaryPALMAT,0,0,False,True,8)
-            print("**B", computationStack)
+            computationStack = \
+                executePALMAT(temporaryPALMAT, 0, 0, False, traceCompileTime, 8)
+            # We assume the computation has been successful, so now we replace
+            # the contents of temporaryInstructions with newly-constructed
+            # instructions based on the computation stack.
             temporaryInstructions.clear()
-            for v in reversed(computationStack):
+            for value in reversed(computationStack):
+                '''
                 if isinstance(v, list) and len(v) == 1 \
                         and isinstance(v[0], tuple):
                     v = list(v[0])
                 else:
                     v = [v]
                 for value in v:
-                    if isinstance(value, bool): # must come before (int,float).
-                        temporaryInstructions.append({"boolean": value})
-                    elif isinstance(value, (int, float)):
-                        temporaryInstructions.append({"number": str(value)})
-                    elif isinstance(value, str):
-                        temporaryInstructions.append({"string": value })
+                '''
+                if isBitArray(value):
+                    temporaryInstructions.append({"boolean": value})
+                elif isinstance(value, (int, float)):
+                    temporaryInstructions.append({"number": str(value)})
+                elif isinstance(value, str):
+                    temporaryInstructions.append({"string": value })
+                elif isinstance(value, list) and len(value) > 0:
+                    if isinstance(value[0], list):
+                        temporaryInstructions.append({"matrix": value })
+                    else:
+                        temporaryInstructions.append({"vector": value })
+                
         if "compiledExpression" in stateMachine:
             instructions = stateMachine["compiledExpression"]
         else:
@@ -146,15 +171,18 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
             temporaryInstructions.append(stateMachine["relationalOperator"])
         if "expressionFlush" in stateMachine:
             stateMachine["expressionFlush"].extend(temporaryInstructions)
+            stateMachine["whereTo"] = "expressionFlush"
         else:
-            if len(temporaryInstructions) != 1:
+            stateMachine["whereTo"] = "instructions"
+            if False and len(temporaryInstructions) != 1:
                 # As far as I know, this should happy *only* in the case of
                 # #-style repeat-factor within an INITIAL(...) or 
-                # CONSTANT(...).
+                # CONSTANT(...).  And a WRITE.
                 instructions.append([tuple(temporaryInstructions)])
             else:
                 instructions.extend(temporaryInstructions)
-            print("**C", instructions)
+        stateMachine["instructionCount"] = len(temporaryInstructions)
+        stateMachine["compileTimeComputable"] = compileTimeComputable
         state.pop("stateMachine")
     if stage == 0 and internalState == "normal":
         if lbnfLabel in ["abs", "ceiling", "div", "floor", "midval", "mod",
@@ -169,6 +197,10 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
                          "prio", "random", "randomg", "runtime", "shl", 
                          "shr", "size"]:
             expression.append({ "function": lbnfLabel.upper()})
+        #elif lbnfLabel == "repeated_constant":
+        #    expression.append({ "condense": "start"})
+        elif lbnfLabel == "read_arg":
+            stateMachine["readStatement"] = True
         elif lbnfLabel[:9] == "ioControl":
             expression.append({ "iocontrol": lbnfLabel[9:].upper()})
         elif lbnfLabel in ["identifier", "char_id", "bit_id"]:
@@ -205,9 +237,9 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
         elif lbnfLabel == "charExpCat":
             expression.append({ "operator": "C||" })
         elif lbnfLabel == "bitConstTrue":
-            expression.append({ "boolean": True })
+            expression.append({ "boolean": (1,1) })
         elif lbnfLabel == "bitConstFalse":
-            expression.append({ "boolean": False })
+            expression.append({ "boolean": (0,1) })
         elif lbnfLabel == "NOT":
             expression.append({ "operator": "NOT" })
         elif lbnfLabel == "bitFactorAnd":

@@ -192,6 +192,8 @@ def printVectorOrMatrix(vOrM):
         for v in vOrM:
             printVectorOrMatrix(v)
         return
+    elif vOrM == None:
+        value = "X.X"
     elif isinstance(vOrM, int):
         value = "%d" % vOrM
     elif vOrM == 0.0:
@@ -202,7 +204,75 @@ def printVectorOrMatrix(vOrM):
             value = " " + value[1:]
         value = value.replace("e", "E")
     print(" " + value + " ", end="")
-    
+
+# Read next value (in string form) from LUN 5 ... i.e., stdin.  If a semicolon
+# is encountered that's returned.
+readLineFields = [] # Buffered data for READ statements
+def readItemLUN5():
+    global readLineFields
+    while len(readLineFields) == 0:
+        line = input("READ  > ").replace(";", " ; ")
+        readLineFields = re.split(r"\s*,\s*|\s+", line)
+    return readLineFields.pop(0)
+
+# Test if an object is a vector, and if all its elements are initialized.
+def isVector(object, initialization=True):
+    if not isinstance(object, list):
+        return False
+    for e in object:
+        if isinstance(e, (int, float)):
+            continue
+        if e == None and not initialization:
+            continue
+        return False
+    return True
+
+# Test if an object is a matrix, and if all its elements are initialized.
+def isMatrix(object, initialization=True):
+    if not isinstance(object, list):
+        return False
+    numRows = len(object)
+    if numRows < 1 or not isinstance(object[0], list):
+        return False
+    numCols = len(object[0])
+    for row in object:
+        if not isinstance(row, list) or len(row) != numCols:
+            return False
+        for e in row:
+            if isinstance(e, (int, float)):
+                continue
+            if e == None and not initialization:
+                continue
+            return False
+    return True
+
+# Test if a value on the computation stack is a boolean.
+def isBitArray(value):
+    if isinstance(value, tuple) and len(value) == 2 and \
+            isinstance(value[0], int) and isinstance(value[1], int):
+        return True
+    return False
+
+# Converts True or False to a bit-array representation for the computation 
+# stack.
+def convertToBitArray(b):
+    if b:
+        return (1, 1)
+    else:
+        return (0, 1)
+
+# Check operand type for INTEGER vs SCALAR vs VECTOR vs MATRIX.
+def checkArithmeticalDatatype(operand):
+    if isinstance(operand, int):
+        return True, True, False, False
+    if isinstance(operand, float):
+        return False, True, False, False
+    if isVector(operand):
+        return False, False, True, False
+    if isMatrix(operand):
+        return False, False, False, True
+    return False, False, False, False
+
 # If this function returns, which in principle it might not if executing
 # an actual flight program, it returns the current computation stack.
 # That would normally be empty if full statements had been executed.
@@ -248,6 +318,10 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             computationStack.append(instruction["boolean"])
         elif "number" in instruction:
             computationStack.append(stringifiedToFloat(instruction["number"]))
+        elif "vector" in instruction:
+            computationStack.append(instruction["vector"])
+        elif "matrix" in instruction:
+            computationStack.append(instruction["matrix"])
         elif "bitarray" in instruction:
             computationStack.append(stringifiedToFloat(instruction["bitarray"]))
         elif "+><" in instruction:
@@ -276,11 +350,30 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             else:
                 attributes["value"] = operand1
             if negativeIncrement:
-                computationStack[-1] = (operand1 < operand2)
+                computationStack[-1] = convertToBitArray(operand1 < operand2)
             else:
-                computationStack[-1] = (operand1 > operand2)
+                computationStack[-1] = convertToBitArray(operand1 > operand2)
         elif "sentinel" in instruction:
             computationStack.append({"sentinel"})
+        elif False and "condense" in instruction:
+            if instruction["condense"] == "end":
+                computationStack.append({"condense"})
+            else:
+                popped = []
+                while True:
+                    value = computationStack.pop()
+                    if value == {"condense"}:
+                        break
+                    popped.append(value)
+                condensed = []
+                for v in reversed(popped):
+                    if isinstance(v, list) and len(v) == 1 \
+                            and isinstance(v[0], tuple):
+                        v = list(v[0])
+                    else:
+                        v = [v]
+                    condensed.extend(v)
+                computationStack.append(condensed)
         elif "operator" in instruction:
             operator = instruction["operator"]
             if False:
@@ -329,20 +422,37 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 scope0["subscripts"] = subscripts
             elif operator in ["U-", "NOT"]: # Unary operators.
                 if stackSize < 1:
-                    print(("Implementation error, not enough operands " + \
+                    print(("\tImplementation error, not enough operands " + \
                           "for operator \"%s\"") % operator)
                     return None
                 operand = computationStack[-1]
                 if operator == "U-":
-                    result = -operand
-                elif operator == "NOT":
-                    if isinstance(operand, bool):
-                        result = not operand
-                    elif isinstance(operand, int):
-                        result = ~operand
+                    isi,isis,isv,ism = checkArithmeticalDatatype(operand)
+                    if ism:
+                        numRows = len(operand)
+                        numCols = len(operand[0])
+                        result = []
+                        for i in range(numRows):
+                            row = []
+                            for j in range(numCols):
+                                row.append(-operand[i][j])
+                            result.append(row)
+                    elif isv:
+                        numCols = len(operand)
+                        result = []
+                        for j in range(numCols):
+                            result.append(-operand[j])
+                    elif isis:
+                        result = -operand
                     else:
-                        print("\tOperand type inappropriate for NOT operator")
+                        print("\tIncompatible operand for negation.")
                         return None
+                elif operator == "NOT":
+                    if not isBitArray(operand):
+                        print("\tNot bit array:", operand)
+                        return None
+                    numbits = operand[1]
+                    result = (((1<<numbits)-1) & ~operand[0], numbits)
                 else:
                     print(("Implementation error, unary operator \"%s\" " + \
                            "not yet implemented") % operator)
@@ -355,50 +465,230 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     print(("Implementation error, not enough operands " + \
                           "for operator \"%s\"") % operator)
                     return None
+                result = None
                 operand1 = computationStack[-1]
                 operand2 = computationStack[-2]
                 computationStack.pop()
-                if operator == "+":
-                    result = operand1 + operand2
-                elif operator == "-":
-                    result = operand1 - operand2
-                elif operator == "":
-                    result = operand1 * operand2
-                elif operator == "/":
-                    result = operand1 / operand2
-                elif operator == "**":
-                    result = operand1 ** operand2
-                elif operator == "C||": # string concatenation.
-                    result = operand1 + operand2
-                elif operator == "OR":
-                    result = operand1 or operand2
-                elif operator == "AND":
-                    result = operand1 and operand2
-                elif operator == "==":
-                    result = (operand1 == operand2)
-                elif operator == "!=":
-                    result = (operand1 != operand2)
-                elif operator == "<":
-                    result = (operand1 < operand2)
-                elif operator == ">":
-                    result = (operand1 > operand2)
-                elif operator == "<=":
-                    result = (operand1 <= operand2)
-                elif operator == ">=":
-                    result = (operand1 >= operand2)
-                #elif operator == "!<":
-                #    result = not (operand2 < operand1)
-                #elif operator == "!>":
-                #    result = not (operand2 > operand1)
+                computationStack[-1] = None
+                # For some overloaded operators, check out types of operands.
+                if operator in ["+", "-", "", "/", "**", ".", "*"]:
+                    isi1,isis1,isv1,ism1 = checkArithmeticalDatatype(operand1)
+                    isi2,isis2,isv2,ism2 = checkArithmeticalDatatype(operand2)
+                # When VECTOR and MATRIX datatypes are involved in operations
+                # like addition, multiplication, etc., refer to the "HAL/S 
+                # Programmer's Guide", Chapter 7, for lists of compatible 
+                # datatypes for operand1 and operand2, as well as details about
+                # the results that are supposed to be produced.
+                if operand1 != None and operand2 != None:
+                    if operator == "+":
+                        if ism1 and ism2 and \
+                                len(operand1) == len(operand2) and \
+                                len(operand1[0]) == len(operand2[0]):
+                            numRows = len(operand1)
+                            numCols = len(operand1[0])
+                            result = []
+                            for i in range(numRows):
+                                row = []
+                                for j in range(numCols):
+                                    row.append(operand1[i][j] + operand2[i][j])
+                                result.append(row)
+                        elif isv1 and isv2 and \
+                                len(operand1) == len(operand2):
+                            numCols = len(operand1)
+                            result = []
+                            for j in range(numCols):
+                                result.append(operand1[j] + operand2[j])
+                        elif isi1 and isi2:
+                            result = operand1 + operand2
+                        elif isis1 and isis2:
+                            result = float(operand1) + float(operand2)
+                        else:
+                            print("\tIncompatible operands for addition.")
+                            return None
+                    elif operator == "-":
+                        if ism1 and ism2 and \
+                                len(operand1) == len(operand2) and \
+                                len(operand1[0]) == len(operand2[0]):
+                            numRows = len(operand1)
+                            numCols = len(operand1[0])
+                            result = []
+                            for i in range(numRows):
+                                row = []
+                                for j in range(numCols):
+                                    row.append(operand1[i][j] - operand2[i][j])
+                                result.append(row)
+                        elif isv1 and isv2 and \
+                                len(operand1) == len(operand2):
+                            numCols = len(operand1)
+                            result = []
+                            for j in range(numCols):
+                                result.append(operand1[j] - operand2[j])
+                        elif isi1 and isi2:
+                            result = operand1 - operand2
+                        elif isis1 and isis2:
+                            result = float(operand1) - float(operand2)
+                        else:
+                            print("\tIncompatible operands for addition.")
+                            return None
+                    elif operator == "":
+                        #print("**", isi1, isi2, isis1, isis2, operand1, operand2)
+                        if isi1 and isi2:
+                            result = operand1 * operand2
+                        elif isis1 and isis2:
+                            result = float(operand1) * float(operand2)
+                        elif (isis1 and isv2) or (isv1 and isis2):
+                            if isis1:
+                                s = operand1
+                                v = operand2
+                            else:
+                                s = operand2
+                                v = operand1
+                            numCols = len(v)
+                            result = []
+                            for i in range(numCols):
+                                result.append(s * v[i])
+                        elif (isis1 and ism2) or (ism1 and isis2):
+                            if isis1:
+                                s = operand1
+                                m = operand2
+                            else:
+                                s = operand2
+                                m = operand1
+                            numRows = len(m)
+                            numCols = len(m[0])
+                            result = []
+                            for i in range(numRows):
+                                row = []
+                                for j in range(numCols):
+                                    row.append(s * m[i][j])
+                                result.append(row)
+                        elif isv1 and isv2:
+                            numRows = len(operand1)
+                            numCols = len(operand2)
+                            result = []
+                            for i in range(numRows):
+                                row = []
+                                for j in range(numCols):
+                                    row.append(operand1[i] * operand2[j])
+                                result.append(row)
+                        elif ism1 and ism2 and \
+                                len(operand1[0]) == len(operand2):
+                            numRows = len(operand1)
+                            numCols = len(operand2[0])
+                            numInner = len(operand2)
+                            result = []
+                            for i in range(numRows):
+                                row = []
+                                for j in range(numCols):
+                                    s = 0
+                                    for k in range(numInner):
+                                        s += operand1[i][k] * operand2[k][j]
+                                    row.append(s)
+                                result.append(row)
+                        elif isv1 and ism2 and len(operand1) == len(operand2):
+                            numInner = len(operand1)
+                            numCols = len(operand2[0])
+                            result = []
+                            for j in range(numCols):
+                                s = 0
+                                for k in range(numInner):
+                                    s += operand1[k] * operand2[k][j]
+                                result.append(s)
+                        elif ism1 and isv2 and len(operand1[0]) == len(operand2):
+                            numRows = len(operand1)
+                            numInner = len(operand2)
+                            result = []
+                            for i in range(numRows):
+                                s = 0
+                                for k in range(numInner):
+                                    s += operand1[i][k] * operand2[k]
+                                result.append(s)
+                        else:
+                            print("\tIncompatible operands for multiplication.")
+                            return None
+                    elif operator == "/":
+                        # I've so far not found any explanation of what happens
+                        # with division by zero.
+                        if not isis2:
+                            print("\tIncompatible datatype for divisor.")
+                            return None
+                        operand2 = float(operand2)
+                        if ism1:
+                            numRows = len(operand1)
+                            numCols = len(operand1[0])
+                            result = []
+                            for i in range(numRows):
+                                row = []
+                                for j in range(numCols):
+                                    row.append(operand1[i][j] / operand2)
+                                result.append(row)
+                        elif isv1:
+                            numCols = len(operand1)
+                            result = []
+                            for j in range(numCols):
+                                result.append(operand1[j] / operand2)
+                        elif isis1:
+                            result = float(operand1) / operand2
+                        else:
+                            print("\tIncompatible datatype for dividend.")
+                            return None
+                    elif operator == "**":
+                        result = operand1 ** operand2
+                    elif operator == "C||": # string concatenation.
+                        result = operand1 + operand2
+                    elif operator in ["AND", "OR" ]:
+                        if not isBitArray(operand1):
+                            print("\tNot bit array:", operand1)
+                            return None
+                        if not isBitArray(operand2):
+                            print("\tNot bit array:", operand2)
+                            return None
+                        numbits = min(operand1[1], operand2[1])
+                        if operator == "OR":
+                            result = (operand1[0] | operand2[0], numbits)
+                        else: # "AND"
+                            result = (operand1[0] & operand2[0], numbits)
+                    elif operator == "==":
+                        result = convertToBitArray(operand1 == operand2)
+                    elif operator == "!=":
+                        result = convertToBitArray(operand1 != operand2)
+                    elif operator == "<":
+                        result = convertToBitArray(operand1 < operand2)
+                    elif operator == ">":
+                        result = convertToBitArray(operand1 > operand2)
+                    elif operator == "<=":
+                        result = convertToBitArray(operand1 <= operand2)
+                    elif operator == ">=":
+                        result = convertToBitArray(operand1 >= operand2)
+                    elif operator == ".":
+                        if isVector(operand1) and isVector(operand2) \
+                                and len(operand1) == len(operand2):
+                            result = 0
+                            for i in range(len(operand1)):
+                                result += operand1[i] * operand2[i]
+                    elif operator == "*":
+                        if isVector(operand1) and isVector(operand2) \
+                                and len(operand1) == 3 and len(operand2) == 3:
+                            result = [
+                                operand1[1]*operand2[2]-operand1[2]*operand2[1],
+                                operand1[2]*operand2[0]-operand1[0]*operand2[2],
+                                operand1[0]*operand2[1]-operand1[1]*operand2[0]                                
+                                ]
+                        else:
+                            print("\tOperands of * must be initialized 3-vectors.")
+                            return None
+                    else:
+                        print(("\tImplementation error, binary operator \"%s\" " + \
+                               "not yet implemented") % operator)
+                        return None
+                    if result == None:
+                        print("\tUninitialized values in expression.")
+                        return None
+                    computationStack[-1] = result
                 else:
-                    print(("Implementation error, binary operator \"%s\" " + \
-                           "not yet implemented") % operator)
+                    print("\tImplementation error, unknown binary operator \"%s\"" \
+                                                                    % operator)
                     return None
-                computationStack[-1] = result
-            else:
-                print("\tImplementation error, unknown binary operator \"%s\"" \
-                                                                % operator)
-                return None
         elif "fetch" in instruction or "fetchp" in instruction or \
                 "store" in instruction or "storepop" in instruction:
             erroredUp = False
@@ -410,8 +700,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 si, identifier = instruction["fetch"]
                 fetch = True
             elif "fetchp" in instruction:
-                si, identifier = instruction["fetch"]
-                fetch = True
+                si, identifier = instruction["fetchp"]
+                fetchp = True
             elif "store" in instruction:
                 si, identifier = instruction["store"]
             elif "storepop" in instruction:
@@ -438,12 +728,9 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 if value == None:
                     print("\tCannot compute value.")
                     return None
-                if isinstance(value, bool):
-                    if value == True: # Convert BOOLEAN to INTEGER.
-                        value = 1
-                    elif value == False:
-                        value = 0
                 computationStack.append(value)
+            elif fetchp:
+                computationStack.append(tuple([(si, identifier)]))
             else: # store
                 if len(computationStack) < stackPos:
                     print("\tImplementation error, stack too short for " +
@@ -463,16 +750,10 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                         return None
                     maxlen = attributes["character"]
                     value = value[:maxlen]
-                elif isinstance(value, bool):
-                    if "bit" not in attributes and "integer" not in attributes:
-                        print("\tCannot store bit/boolean in variable %s." \
-                              % identifier[1:-1])
-                        return None
-                    if "bit" not in attributes or attributes["bit"] != 1:
-                        if value == True:
-                            value = 1
-                        elif value == False:
-                            value = 0
+                elif isBitArray(value):
+                    pass
+                elif isinstance(value, list):
+                    pass
                 elif isinstance(value, (float, int)):
                     if "scalar" not in attributes and \
                             "integer" not in attributes and \
@@ -485,16 +766,6 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                         value = hround(value)
                     elif "scalar" in attributes:
                         value = float(value)
-                    elif "bit" in attributes:
-                        value = hround(value)
-                        if attributes["bit"] == 1:
-                            if value & 1 == 0:
-                                value = False
-                            else:
-                                value = True
-                        else:
-                            value = hround(value) & \
-                                    ((1 << attributes["bit"]) - 1)
                 else:
                     print("\tImplementation error, non-boolean/character/" + \
                           "arithmetic not yet implemented.")
@@ -514,32 +785,98 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 print("\tImplementation error, too many POPs: %d vs %d" \
                       % (value, stackSize))
                 return None
-        elif "write" in instruction:
-            lun = instruction["write"]
-            if lun == '6':
-                print("%*s" % (indent, ""), end="")
+        elif "read" in instruction:
+            lun = instruction["read"]
+            if lun == '5':
                 # If this instruction is within a subroutine, then we can 
                 # only regress in the computation stack until finding the 
                 # return address, because we want to use that later (for 
                 # returning!) rather than using it now for printing.
                 start = 0
                 for i in range(len(computationStack)-1, -1, -1):
-                    if isinstance(computationStack[i], tuple):
-                        start = i + 1
-                        break
+                    entry = computationStack[i]
+                    # The return address, if it's present, is of the form
+                    # (index, offset), whereas there are likely a lot of 
+                    # "pointers" to variables, of the form 
+                    # ((index, identifier)).  So in looking for the start of
+                    # the list of variables to be read, we have to distinguish
+                    # between tuples with and without a nested tuple.
+                    if not isinstance(entry, tuple) or len(entry) != 2:
+                        continue
+                    start = i + 1
+                    break
                 if start < len(computationStack):
+                    semicolon = False
                     for value in computationStack[start:]:
-                        if isinstance(value, bool):
-                            if value:
-                                print(" TRUE ", end="")
+                        if semicolon:
+                            break
+                        # In reality, we could have subscripted VECTOR, MATRIX,
+                        # or ARRAY variables here. For now, I'm just ignoring 
+                        # that possibility and implementing unsubscripted
+                        # variables.
+                        si = value[0][0]
+                        identifier = value[0][1]
+                        attributes = \
+                            PALMAT["scopes"][si]["identifiers"][identifier]
+                        if "vector" in attributes:
+                            rowLength = attributes["vector"]
+                            for i in range(rowLength):
+                                value = readItemLUN5()
+                                if value == ";":
+                                    semicolon = True
+                                    break
+                                if value == "":
+                                    continue
+                                attributes["value"][i] = float(value)
+                        elif "matrix" in attributes:
+                            numRows, numCols = attributes["matrix"]
+                            for i in range(numRows):
+                                if semicolon:
+                                    break
+                                for j in range(numCols):
+                                    value = readItemLUN5()
+                                    if value == ";":
+                                        semicolon = True
+                                        break
+                                    if value == "":
+                                        continue
+                                    attributes["value"][i][j] = float(value)
+                        elif "integer" in attributes:
+                            value = readItemLUN5()
+                            if value == ";":
+                                semicolon = True
+                            attributes["value"] = int(value)
+                        elif "scalar" in attributes:
+                            value = readItemLUN5()
+                            if value == ";":
+                                semicolon = True
+                            attributes["value"] = float(value)
+                        elif "bit" in attributes:
+                            value = readItemLUN5()
+                            bitLength = attributes["bit"]
+                            if value == ";":
+                                semicolon = True
+                            value = int(value) & ((1 << bitLength) - 1)
+                            if bitLength == 1:
+                                attributes["value"] = value != 0
                             else:
-                                print(" FALSE ", end="")
-                        elif isinstance(value, (int, float, list)):
-                            printVectorOrMatrix(value)
-                        else:
-                            print(value, end="")
+                                attributes["value"] = value
+                        pass
                 while len(computationStack) > start:
                     computationStack.pop()
+                #print()
+        elif "write" in instruction:
+            lun = instruction["write"]
+            if lun == '6':
+                print("%*s" % (indent, ""), end="")
+                for value in computationStack:
+                    if isBitArray(value):
+                        print(" %d " % value[0], end="")
+                    elif isinstance(value, (int, float, list)):
+                        printVectorOrMatrix(value)
+                    else:
+                        print(value, end="")
+                computationStack.clear()
                 print()
         elif "iocontrol" in instruction:
             # We just ignore all i/o controls in WRITE for now.
@@ -637,9 +974,55 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     # Note that this function returns a boolean.
                     operand = hround(operand)
                     if (operand & 1) == 0:
-                        computationStack[-1] = False
+                        computationStack[-1] = (0, 1)
                     else:
-                        computationStack[-1] = True
+                        computationStack[-1] = (1, 1)
+                elif function == "ABVAL":
+                    vector = computationStack[-1]
+                    if not isVector(vector):
+                        print("\tABVAL requires a vector argument.")
+                        return None
+                    sum = 0.0
+                    for v in vector:
+                        sum += v * v
+                    computationStack[-1] = math.sqrt(sum)
+                elif function == "UNIT":
+                    vector = computationStack[-1]
+                    if not isVector(vector):
+                        print("\tUNIT requires a vector argument.")
+                        return None
+                    sum = 0.0
+                    for v in vector:
+                        sum += v * v
+                    length = math.sqrt(sum)
+                    try:
+                        for i in range(len(vector)):
+                            vector[i] /= length
+                    except:
+                        print("\tDivide by zero in UNIT function; using [1,0,...].")
+                        vector = [0.0]*len(vector)
+                        vector[0] = 1.0
+                    computationStack[-1] = vector
+                elif function == "TRACE":
+                    matrix = computationStack[-1]
+                    if not isMatrix(matrix) or len(matrix) != len(matrix[0]):
+                        print("\TRACE requires a square matrix argument.")
+                        return None
+                    sum = 0.0
+                    for i in range(len(matrix)):
+                        sum += matrix[i][i]
+                    computationStack[-1] = sum
+                elif function == "TRANSPOSE":
+                    matrix = computationStack[-1]
+                    numRows = len(matrix)
+                    numCols = len(matrix[0])
+                    transposed = []
+                    for i in range(numCols):
+                        transposed.append([0]*numRows)
+                    for i in range(numCols):
+                        for j in range(numRows):
+                            transposed[i][j] = matrix[j][i]
+                    computationStack[-1] = sum
                 else:
                     print("\tHAL/S built-in function", function, \
                           "not yet implemented")
@@ -668,7 +1051,15 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 elif function == "ARCTAN2":
                     computationStack[-1] = math.atan2(operand2, operand1)
                 elif function == "XOR":
-                    computationStack[-1] = operand1 ^ operand2
+                    if not isBitArray(operand1):
+                        print("\tNot bit array:", operand1)
+                        return None
+                    if not isBitArray(operand2):
+                        print("\tNot bit array:", operand2)
+                        return None
+                    numbits = min(operand1[1], operand2[1])
+                    computationStack[-1] = \
+                        ((operand1 ^ operand2) & ((1<<numbits)-1), numbits)
                 elif function == "SHL":
                     operand1 = hround(operand1)
                     operand2 = hround(operand2)
@@ -742,13 +1133,13 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             scope = scopes[scopeNumber]
         elif "iffalse" in instruction:
             value = computationStack.pop()
-            if not value:
+            if (value[0] & 1) == 0:
                 scopeNumber, instructionIndex = \
                     jump(PALMAT, scopeNumber, instruction, "iffalse")
                 scope = scopes[scopeNumber]
         elif "iftrue" in instruction:
             value = computationStack.pop()
-            if value:
+            if (value[0] & 1) != 0:
                 scopeNumber, instructionIndex = \
                     jump(PALMAT, scopeNumber, instruction, "iftrue")
                 scope = scopes[scopeNumber]

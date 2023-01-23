@@ -401,7 +401,6 @@ def completeInitialConstants(identifiers):
             continue
         fillValue = None
         if "vector" in identifierDict:
-            print("**D", value)
             numCols = identifierDict["vector"]
             if len(value) == 1:
                 fillValue = value[0]

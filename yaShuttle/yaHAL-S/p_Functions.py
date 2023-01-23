@@ -116,8 +116,8 @@ def updateCurrentIdentifierAttribute(PALMAT, state, attribute=None, value=True):
     global substate
     history = state["history"]
     if substate["currentIdentifier"] == "":
-        if history == ['declareBody_attributes_declarationList',
-                     'attributes_typeAndMinorAttr'] or \
+        if ('declareBody_attributes_declarationList' in history and \
+            'attributes_typeAndMinorAttr' in history) or \
                      attribute in ["vector", "matrix", "array"]:
             if attribute != None:
                 substate["commonAttributes"][attribute] = value
@@ -271,7 +271,8 @@ def stringLiteral(PALMAT, state, s):
         substate["labelExitRepeat"] = s
     elif state1 == "basicStatementGoTo":
         instructions.append({'goto': s})
-    elif state1 == "number" and "write_key" in history:
+    elif state1 == "number" and \
+            ("write_key" in history or "read_key" in history):
         substate["LUN"] = sp
         #instructions.append({"wstart": sp})
     #elif state1 == "string" and 'write_arg' in history:

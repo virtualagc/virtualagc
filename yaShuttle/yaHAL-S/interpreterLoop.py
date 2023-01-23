@@ -96,6 +96,14 @@ helpMenu = \
 \t             code input.
 \t`CANCEL      Cancel just the preceding line of a 
 \t             multi-line source-code input.
+\t`NOSTRICT    This is the default, for convenience in
+\t             using the interpreter.  In this mode, column
+\t             1 is not special, and thus full-line comments
+\t             (C in column 1), compiler directives (D), and
+\t             multiline math input (E/M/S) are not 
+\t             available.
+\t`STRICT      Enables the special the special treatment of
+\t             column 1 specified by HAL/S documentation.
 \t`RUN P [*]   Run PROGRAM P. By default, runs as the 
 \t             "primary", which affects the DATA (see
 \t             below).  If the optional 3rd field is
@@ -156,6 +164,7 @@ helpMenu = \
 def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     xeq=True, lbnf=False, bnf=False):
     spooling = False
+    strict = False
     colors = ["black", "red", "green", "yellow", "blue", "magenta", "cyan",
               "white", "gray", "brightred", "brightgreen", "brightyellow",
               "brightblue", "brightmagenta", "brightcyan", "brightwhite"]
@@ -196,9 +205,11 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
             if colorize != "":
                 prompt = prompt + "\033[0m"
             line = input(prompt)
+            '''
             if line[:2] in ["C ", "C\t"] or line[:3] in ["C/ ", "C/\t"]:
                 print("\tFull-line comment detected and discarded.")
                 continue
+            '''
             print(colorize, end="")
             fields = line.strip().split()
             numWords = len(fields)
@@ -336,6 +347,14 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     print("\tQuitting ...")
                     quitting = True
                     break
+                elif firstWord == "STRICT":
+                    print("\tSTRICT on.")
+                    strict = True
+                    continue
+                elif firstWord == "NOSTRICT":
+                    print("\tSTRICT off.")
+                    strict = False
+                    continue
                 elif firstWord == "TRACE1":
                     print("\tTRACE1 on.")
                     trace1 = True
@@ -393,6 +412,10 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                         print("\tSPOOL                    (vs UNSPOOL)")
                     else:
                         print("\tUNSPOOL                  (vs SPOOL)")
+                    if strict:
+                        print("\tSTRICT                   (vs NOSTRICT)")
+                    else:
+                        print("\tNOSTRICT                 (vs STRICT)")
                     if trace1:
                         print("\tTRACE1                   (vs (NOTRACE1)")
                     else:
@@ -459,6 +482,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                 elif firstWord == "HELP":
                     print(helpMenu)
                     continue
+            '''
             if len(fields) > 3 and fields[0] == "D" and fields[1] == "INCLUDE" \
                     and fields[2] == "TEMPLATE":
                 if fields[3] in structureTemplates:
@@ -468,9 +492,13 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     continue
                 metadata.append({ "directive": True })
             else:
-                halCode = True
+            '''
+            halCode = True
+            if strict:
+                halsSource.append(line)
+            else:
                 halsSource.append(" " + line)
-                metadata.append({})
+            metadata.append({})
         if quitting:
             break 
         
