@@ -273,6 +273,23 @@ def checkArithmeticalDatatype(operand):
         return False, False, False, True
     return False, False, False, False
 
+# Compute determinant of a square matrix.
+def determinant(m):
+    #print("**m", m)
+    n = len(m)
+    if n == 1:
+        return m[0][0]
+    d = 0.0
+    s = 1
+    for i in range(n):
+        bottom = copy.deepcopy(m[1:])
+        for row in bottom:
+            row.pop(i)
+        #print("**o", s, m[0][i], bottom)
+        d += s * m[0][i] * determinant(bottom)
+        s = -s
+    return d
+
 # If this function returns, which in principle it might not if executing
 # an actual flight program, it returns the current computation stack.
 # That would normally be empty if full statements had been executed.
@@ -1006,7 +1023,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 elif function == "TRACE":
                     matrix = computationStack[-1]
                     if not isMatrix(matrix) or len(matrix) != len(matrix[0]):
-                        print("\TRACE requires a square matrix argument.")
+                        print("\tTRACE requires a square matrix argument.")
                         return None
                     sum = 0.0
                     for i in range(len(matrix)):
@@ -1014,6 +1031,9 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     computationStack[-1] = sum
                 elif function == "TRANSPOSE":
                     matrix = computationStack[-1]
+                    if not isMatrix(matrix):
+                        print("\tTRANSPOSE requires a matrix argument.")
+                        return None
                     numRows = len(matrix)
                     numCols = len(matrix[0])
                     transposed = []
@@ -1023,6 +1043,12 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                         for j in range(numRows):
                             transposed[i][j] = matrix[j][i]
                     computationStack[-1] = sum
+                elif function == "DET":
+                    matrix = computationStack[-1]
+                    if not isMatrix(matrix) or len(matrix) != len(matrix[0]):
+                        print("\tDET requires a square-matrix argument.")
+                        return None
+                    computationStack[-1] = determinant(matrix)
                 else:
                     print("\tHAL/S built-in function", function, \
                           "not yet implemented")

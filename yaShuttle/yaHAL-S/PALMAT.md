@@ -236,13 +236,13 @@ Regarding the format of entries on the computation stack, this can (and for effi
 
 * Any Python integer or floating-point number.
 * Any Python character string.
-* Any Python boolean value.
+* A tuple `(value, numbits)`, where both `value` and `numbits` are integers, is used to represent a HAL/S bit array.  The special case of `numbits`=1 is for a HAL/S `BOOLEAN`.  In computation, bit arrays act basically like integers, but without a `numbits` to determine the array size, `NOT` operations cannot work correctly.
 * Any Python list of floats or integers (for HAL/S `VECTOR` types) or rectangular list of lists of floats or integers (for HAL/S `MATRIX` types).
 * Any Python dictionary for HAL/S `STRUCTURE`s.
-* Any Python rectangular tuple [of tuples [of tuples [...] ] ] for an `ARRAY`.
+* Any Python rectangular tuple of tuples of ... tuples, other than the special case for bit arrays listed above, for an `ARRAY`.  The carve-out for bit arrays means that this implementation doesn't fully allow an `ARRAY` of dimension 1&times;2.
 * The Python `None` is for an unitialized value in a PALMAT instruction `fetch`, `store`, etc.
 * Python sets, to which there's no corresponding datatype in HAL/S can appear on the computation stack as well:
-    * `{ 'sentinel' }` is used to mark the beginning of a variable-length list of operands.  (There is rare any need for such a thing, but it is used to begin list of subscripts.)
+    * `{ 'sentinel' }` is used to mark the beginning of a variable-length list of operands.  (There is rarely any need for such a thing, but it is used to begin a list of subscripts.)
     * TBD
 
 ### PALMAT Instructions 1: Arithmetic
@@ -499,6 +499,8 @@ This has to do with the order in which the compiler's code generator builds the 
 * `{ 'bitarray': N, 'len': L }` causes a bit string to be pushed onto the computation stack.  The `len` key is optional, and indicates the number of valid bits in the string; i.e., it allows you to know how many otherwise-undetectable more-significant bits of 0 there are.  If the field is missing, infinite precision is assumed.  However, when such values are stored in a `BIT(N)` variable, they are always truncated to `N` bits.  In the Python implementation I simply treat bit arrays as identical to integers, bit position 0 corresponding to the least-significant bit, and I allow integers to be assigned to bit-array variables.  Other implementations may treat them differently.
 * `{ 'operator': 'subscripts' }` indicates that the elements at the top of the computation stack (see also `sentinel` below) form subscripts for the *next* PALMAT instruction encountered, which should be a `fetch` or `fetchp`.  The top element of the computation stack is the first subscript, the next-to-top is the 2nd subscript, and so on; the next element on the computation stack below the subscripts themselves is a `sentinel` element.  Upon execution, the `subscripts` instruction pops all of these from the instruction stack and stores them in some implementation-dependent way to be applied to the succeeding `fetch` or `fetchp` instruction.
 * `{ 'sentinel': s }` places a "sentinel" value on the computation stack.  (This is used in those rare cases where there is some PALMAT instruction, such as the `subscript` operator, which operates on a variable number of operands.  The `sentinel` instruction marks the beginning of an operand list, and the instruction for the problematic operator marks the end of the operant list.)  The value `s` is arbitrary, but for human-readability of the PALMAT it's reasonable for it to be some indicator of the PALMAT instruction to which it corresponds.  For example, the code-generator creates a `{ 'sentinel': 'subscripts' }` for an `{ 'operator': 'subscripts' }`.  However, the sentinel marker placed on the computation stack is the same regardless.
+* ` { 'vector': [...] }` pushes a constant vector onto the computation stack.
+* ` { 'matrix': [[...],...] }` pushes a constant matrix onto the computation stack.
 
 Regarding the internal representation of values associated with identifiers `DECLARE`'d as `BIT(N)` or `BOOLEAN`:
 
