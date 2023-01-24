@@ -683,16 +683,18 @@ PRODUCT make_ADproductMultiplication(FACTOR p0, PRODUCT p1);
 struct FACTOR_
 {
   int line_number, char_number;
-  enum { is_AAfactor, is_ABfactorExponentiation } kind;
+  enum { is_AAfactor, is_ABfactorExponentiation, is_ABfactorTranspose } kind;
   union
   {
     struct { PRIMARY primary_; } aafactor_;
     struct { EXPONENTIATION exponentiation_; FACTOR factor_; PRIMARY primary_; } abfactorexponentiation_;
+    struct { PRIMARY primary_; } abfactortranspose_;
   } u;
 };
 
 FACTOR make_AAfactor(PRIMARY p0);
 FACTOR make_ABfactorExponentiation(PRIMARY p0, EXPONENTIATION p1, FACTOR p2);
+FACTOR make_ABfactorTranspose(PRIMARY p0);
 
 struct EXPONENTIATION_
 {

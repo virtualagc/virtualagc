@@ -736,6 +736,14 @@ void ppFACTOR(FACTOR p, int _i_)
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
+  case is_ABfactorTranspose:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppPRIMARY(p->u.abfactortranspose_.primary_, 0);
+    renderS("**T");
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
 
   default:
     fprintf(stderr, "Error: bad kind field when printing FACTOR!\n");
@@ -8028,6 +8036,18 @@ void shFACTOR(FACTOR p)
     shEXPONENTIATION(p->u.abfactorexponentiation_.exponentiation_);
   bufAppendC(' ');
     shFACTOR(p->u.abfactorexponentiation_.factor_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ABfactorTranspose:
+    bufAppendC('(');
+
+    bufAppendS("ABfactorTranspose");
+
+    bufAppendC(' ');
+
+    shPRIMARY(p->u.abfactortranspose_.primary_);
 
     bufAppendC(')');
 

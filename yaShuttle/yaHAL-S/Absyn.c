@@ -768,6 +768,19 @@ FACTOR make_ABfactorExponentiation(PRIMARY p1, EXPONENTIATION p2, FACTOR p3)
     tmp->u.abfactorexponentiation_.exponentiation_ = p2;
     tmp->u.abfactorexponentiation_.factor_ = p3;
     return tmp;
+}
+/********************   ABfactorTranspose    ********************/
+FACTOR make_ABfactorTranspose(PRIMARY p1)
+{
+    FACTOR tmp = (FACTOR) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ABfactorTranspose!\n");
+        exit(1);
+    }
+    tmp->kind = is_ABfactorTranspose;
+    tmp->u.abfactortranspose_.primary_ = p1;
+    return tmp;
 }/********************   AAexponentiation    ********************/
 EXPONENTIATION make_AAexponentiation()
 {

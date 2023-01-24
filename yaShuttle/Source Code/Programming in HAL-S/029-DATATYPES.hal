@@ -21,7 +21,7 @@ C/ PDF pp. 69-72 of the "HAL/S Programmer's Guide", 32.0/17.0 edition.
      DECLARE A3I MATRIX(3,3);
      DECLARE A4A MATRIX(4,4) INITIAL(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16);
      DECLARE A4B MATRIX(4,4) INITIAL(1,2,3,4,8,5,6,7,9,12,10,11,13,14,16,15);
-     DECLARE A4I MATRIX(4,4);
+     DECLARE A4I MATRIX(4,4), A4C MATRIX(4,4);
      DECLARE A5A MATRIX(5,5) INITIAL(1,2,3,4,1,8,5,6,7,2,9,12,10,11,3,
      				     13,14,16,15,4,10,8,6,4,2);
      DECLARE A5I MATRIX(5,5);
@@ -87,8 +87,12 @@ M    VV = V S;
   A4I = INVERSE(A4A);
   WRITE(6) '... but due to roundoff error, perhaps not!';
   A4I = INVERSE(A4B);
+  A4C = A4B**(-1);
   WRITE(6) A4B A4I, ' should be 4x4 identity.';
   WRITE(6) A4I A4B, ' should be 4x4 identity.';
+  WRITE(6);
+  WRITE(6) A4C A4B, ' should be 4x4 identity.';
+  WRITE(6);
   A5I = INVERSE(A5A);
   WRITE(6) A5A A5I, ' should be 5x5 identity.';
   WRITE(6) A5I A5A, ' should be 5x5 identity.';

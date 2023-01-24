@@ -246,6 +246,32 @@ def isMatrix(object, initialization=True):
             return False
     return True
 
+# Test if an object is an array, and if all its elements are initialized.
+# The function is used recursively.  Returns a tuple:
+#    Boolean        True if geometrically an array (i.e., rectangular tuple
+#                   hierarchies), False otherwise.
+#    Boolean        True if all elements initialized, False otherwise.  This
+#                   can't be detected reliably, since some elements could be
+#                   structures, I think, but at least we can detect missing
+#                   array elements.
+#    [...]          List of widths at each dimension, or [] if not an array.
+def isArray(object):
+    # !!! Needs a lot more thought !!!
+    if object == None:
+        return False, True, []
+    if not isinstance(object, tuple):
+        return True, []
+    dimensions = [len(object)]
+    lastSubDimensions = None
+    for subObject in object:
+        subInitialized, subDimensions = isArray(subObject)
+        if lastSubDimensions == None:
+            lastSubDimensions = subDimensions
+        if subDimensions != lastSubDimensions or not subInitialized:
+            return subInitialized, []
+    dimensions.extend(subDimensions)
+    return True, dimensions
+
 # Test if a value on the computation stack is a boolean.
 def isBitArray(value):
     if isinstance(value, tuple) and len(value) == 2 and \
@@ -354,6 +380,87 @@ def matrixInverse(m):
         for i in range(n):
             a[row][i] /= e
     return a
+
+# The following function is used to apply a HAL/S built-in "array function"
+# like MAX, MIN, PROD to an array of integers and/or scalars.  The function
+# doesn't check the legality of the array, but merely uses the fact that 
+# the input object is some hierarchy of tuples in which the atomic elements
+# are integers and/or scalars.  The accumulation parameter is a list with a 
+# single element, namely the "accumulated" value.  the accumulation function 
+# (MAX, MIN, ...) adjusts that value in place; it acts like a global variable 
+# throughout the recursion, but a separate invocation of accumulate() with a 
+# different accumation parameter wouldn't conflict with it.
+# The accumulation can either be initialized to an appriate value before 
+# entry (such as 0.0 for SUM or 1.0 for PROD), or it can be set to True (i.e.,
+# accumulation = [True]), in which case the very first atomic array element
+# encountered is used.  Note that accumulation=[None] is used to indicate that
+# uninitialized or incompatible array values were encountered, so this setting
+# should not be used when invoking accumulate().
+fnMAX = 0
+fnMIN = 1
+fnPROD = 2
+fnSUM = 3
+def accumulate(array, function, accumulation):
+    
+    def prod(x, y):
+        return x * y
+    
+    def sum(x, y):
+        return x + y
+    
+    if accumulation[0] == None:
+        return
+    if array == None:
+        accumulation[0] = None
+        return
+    if functionType == fnMAX:
+        function = max
+    elif functionType == fnMIN:
+        function = min
+    elif functionType == fnPROD:
+        function = prod
+    elif functionType == fnSUM:
+        function = sum
+    else:
+        accumulation[0] = None
+        return
+    
+    if isinstance(array, tuple):
+        for e in array:
+            accumulate(e, functionType, accumulation)
+            if accumulation[0] == None:
+                return 
+    elif accumulation[0] == True:
+        accumulation[0] = array
+    else:
+        try:
+            accumulation[0] = function(accumulation[0], array)
+        except:
+            accumulation[0] = None
+
+def identityMatrix(n):
+    result = []
+    for i in range(n):
+        row = [0]*n
+        row[i] = 1
+    result.append(row)
+    return result
+
+# Assumes the inner dimensions match and all entries are initialized (!= None)
+def matrixMultiply(a, b):
+    numRows = len(a)
+    numCols = len(b[0])
+    numInner = len(b) # == len(a[0])
+    result = []
+    for i in range(numRows):
+        row = []
+        for j in range(numCols):
+            s = 0
+            for k in range(numInner):
+                s += a[i][k] * b[k][j]
+            row.append(s)
+        result.append(row)
+    return result
 
 # If this function returns, which in principle it might not if executing
 # an actual flight program, it returns the current computation stack.
@@ -613,7 +720,6 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                             print("\tIncompatible operands for addition.")
                             return None
                     elif operator == "":
-                        #print("**", isi1, isi2, isis1, isis2, operand1, operand2)
                         if isi1 and isi2:
                             result = operand1 * operand2
                         elif isis1 and isis2:
@@ -655,18 +761,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                                 result.append(row)
                         elif ism1 and ism2 and \
                                 len(operand1[0]) == len(operand2):
-                            numRows = len(operand1)
-                            numCols = len(operand2[0])
-                            numInner = len(operand2)
-                            result = []
-                            for i in range(numRows):
-                                row = []
-                                for j in range(numCols):
-                                    s = 0
-                                    for k in range(numInner):
-                                        s += operand1[i][k] * operand2[k][j]
-                                    row.append(s)
-                                result.append(row)
+                            result = matrixMultiply(operand1, operand2)
                         elif isv1 and ism2 and len(operand1) == len(operand2):
                             numInner = len(operand1)
                             numCols = len(operand2[0])
@@ -715,7 +810,28 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                             print("\tIncompatible datatype for dividend.")
                             return None
                     elif operator == "**":
-                        result = operand1 ** operand2
+                        if ism1 and isis2 and len(operand1) == len(operand1[0]):
+                            n = len(operand1)
+                            operand2 = hround(operand2)
+                            if operand2 == 0:
+                                result = identityMatrix(n)
+                            elif operand2 < 0:
+                                operand1 = matrixInverse(operand1)
+                                result = copy.deepcopy(operand1)
+                                operand2 = -operand2
+                                if operand1 == None:
+                                    print("\tMatrix is singular.")
+                                    return None
+                            else:
+                                result = copy.deepcopy(operand1)
+                            while operand2 > 1:
+                                result = matrixMultiply(operand1, result)
+                                operand2 -= 1
+                        elif isis1 and isis2:
+                            result = operand1 ** operand2
+                        else:
+                            print("\tUnsupported operand type(s) for **.")
+                            return None
                     elif operator == "C||": # string concatenation.
                         result = operand1 + operand2
                     elif operator in ["AND", "OR" ]:
@@ -835,6 +951,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 elif isBitArray(value):
                     pass
                 elif isinstance(value, list):
+                    # We have to check compatibility:
+                    # TBD
                     pass
                 elif isinstance(value, (float, int)):
                     if "scalar" not in attributes and \
@@ -990,7 +1108,37 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                           function)
                     return None
                 operand = computationStack[-1]
-                if function == "ABS":
+                if False:
+                    pass
+                elif function == "MAX":
+                    accumulation = [True]
+                    accumulate(operand, fnMAX, accumulation)
+                    if accumulation[0] in [None, True]:
+                        print("\tCannot compute array function", function)
+                        return None
+                    computationStack[-1] = accumulation[0]
+                elif function == "MIN":
+                    accumulation = [True]
+                    accumulate(operand, fnMIN, accumulation)
+                    if accumulation[0] in [None, True]:
+                        print("\tCannot compute array function", function)
+                        return None
+                    computationStack[-1] = accumulation[0]
+                elif function == "PROD":
+                    accumulation = [True]
+                    accumulate(operand, fnPROD, accumulation)
+                    if accumulation[0] in [None, True]:
+                        print("\tCannot compute array function", function)
+                        return None
+                    computationStack[-1] = accumulation[0]
+                elif function == "SUM":
+                    accumulation = [True]
+                    accumulate(operand, fnSUM, accumulation)
+                    if accumulation[0] in [None, True]:
+                        print("\tCannot compute array function", function)
+                        return None
+                    computationStack[-1] = accumulation[0]
+                elif function == "ABS":
                     computationStack[-1] = abs(operand)
                 elif function == "CEILING":
                     computationStack[-1] = math.ceil(operand)
@@ -1107,7 +1255,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     for i in range(numCols):
                         for j in range(numRows):
                             transposed[i][j] = matrix[j][i]
-                    computationStack[-1] = sum
+                    computationStack[-1] = transposed
                 elif function == "DET":
                     matrix = computationStack[-1]
                     if not isMatrix(matrix) or len(matrix) != len(matrix[0]):

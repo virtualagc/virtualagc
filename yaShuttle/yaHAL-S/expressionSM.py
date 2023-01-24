@@ -264,6 +264,8 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
             stateMachine["relationalOperator"] = { "operator": ">=" }
         elif lbnfLabel == "prePrimaryFunction":
             internalState = "waitFunctionName"
+        elif lbnfLabel == "factorTranspose":
+            expression.append({"function": "TRANSPOSE"})
     stateMachine["internalState"] = internalState
     return True
         
