@@ -18,10 +18,15 @@ C/ PDF pp. 69-72 of the "HAL/S Programmer's Guide", 32.0/17.0 edition.
      
      DECLARE A2A MATRIX(2,2) INITIAL(3, 7, 1, -4);
      DECLARE A3A MATRIX(3,3) INITIAL(-2,2,-3,-1,1,3,2,0,-1);
+     DECLARE A3I MATRIX(3,3);
      DECLARE A4A MATRIX(4,4) INITIAL(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16);
      DECLARE A4B MATRIX(4,4) INITIAL(1,2,3,4,8,5,6,7,9,12,10,11,13,14,16,15);
+     DECLARE A4I MATRIX(4,4);
      DECLARE A5A MATRIX(5,5) INITIAL(1,2,3,4,1,8,5,6,7,2,9,12,10,11,3,
      				     13,14,16,15,4,10,8,6,4,2);
+     DECLARE A5I MATRIX(5,5);
+     DECLARE A6A MATRIX(2,2) INITIAL(-1, 1.5, 1, -1);
+     DECLARE A6B MATRIX(2,2);
     
   WRITE(6);
   WRITE(6) 'Stuff related to "Programming in HAL/S", p. 29.';
@@ -63,11 +68,31 @@ M    VV = V S;
   WRITE(6) M2A M1A, ' MATRIX times MATRIX, should be 0.25 -0.25 0.5 0.5 -0.5 1.0 0.5 -0.5 1.0';
   WRITE(6) V1 M3, ' VECTOR times MATRIX, should be 0.7 0.4.';
   WRITE(6);
+  WRITE(6) 'Stuff related to matrix determinants.';
   WRITE(6) DET(A2A), ' 2x2 determinant should be -19.';
   WRITE(6) DET(A3A), ' 3x3 determinant should be 18.0.';
   WRITE(6) DET(A4A), ' 4x4 determinant should be 0.0.';
   WRITE(6) DET(A4B), ' 4x4 determinant should be -348.0.';
   WRITE(6) DET(A5A), ' 5x5 determinant should be -240.0.';
+  WRITE(6);
+  WRITE(6) 'Stuff related to matrix inverses.';
+  A6B = INVERSE(A6A);
+  WRITE(6) A6B, ' 2x2 inverse should be 2.0 3.0 2.0 2.0';
+  WRITE(6) A6A A6B, ' should be 2x2 identity.';
+  WRITE(6) A6B A6A, ' should be 2x2 identity.';
+  A3I = INVERSE(A3A);
+  WRITE(6) A3A A3I, ' should be 3x3 identity.';
+  WRITE(6) A3I A3A, ' should be 3x3 identity.';
+  WRITE(6) 'Should nominally see a singular-matrix error immediately below ...';
+  A4I = INVERSE(A4A);
+  WRITE(6) '... but due to roundoff error, perhaps not!';
+  A4I = INVERSE(A4B);
+  WRITE(6) A4B A4I, ' should be 4x4 identity.';
+  WRITE(6) A4I A4B, ' should be 4x4 identity.';
+  A5I = INVERSE(A5A);
+  WRITE(6) A5A A5I, ' should be 5x5 identity.';
+  WRITE(6) A5I A5A, ' should be 5x5 identity.';
+
   
   CLOSE DATATYPES;
   

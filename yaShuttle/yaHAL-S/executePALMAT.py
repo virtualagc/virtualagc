@@ -273,7 +273,8 @@ def checkArithmeticalDatatype(operand):
         return False, False, False, True
     return False, False, False, False
 
-# Compute determinant of a square matrix.
+# Compute determinant of a square matrix.  I have *not* researched optimal
+# methods.  This is simply the one that stuck in my mind from schooldays.
 def determinant(m):
     #print("**m", m)
     n = len(m)
@@ -289,6 +290,70 @@ def determinant(m):
         d += s * m[0][i] * determinant(bottom)
         s = -s
     return d
+
+# Compute the inverse of a matrix.  There are innumerable methods for doing 
+# this, all of them accompanied by disclaimers as to why that particular method
+# is incredible for some specific kind of matrix, and all other methods are
+# horrible; and in the usual unhelpful web style, still other statements of the
+# form "are you sure you really want to invert that matrix anyway ... stupid!"
+# Of course, I haven't the slightest idea what the properties of the matrices 
+# that are going to be inverted are, nor however stupid it may be, any means
+# whatever of bypassing inversion. That being the case, here is simple Gaussian 
+# elimination with no frills whatever.  Returns either the inverse, or else
+# None if m is singular.
+def matrixInverse(m):
+    # Augment m by attaching an identity matrix to the right.
+    n = len(m)
+    n2 = n + n
+    a = []
+    for i in range(n):
+        addition = [0]*n
+        addition[i] = 1
+        a.append(m[i] + addition)
+    # Reduce so that the left-hand side of the augmented matrix is in
+    # upper-triangular form.
+    for col in range(n):
+        # At this step. only row = col and downard are considered.
+        # First I find the row in this section with the largest element
+        # in the column, and move it upward to row = col.
+        maxElement = abs(a[col][col])
+        maxRow = col
+        for row in range(col + 1, n):
+            e = abs(a[col][row])
+            if e > maxElement:
+                maxElement = e
+                maxRow = row
+        if maxElement == 0: # The matrix must be singular.
+            return None
+        if maxRow != col:
+            a[col],a[maxRow] = a[maxRow],a[col]
+        # Now we can subtract multiples of a[col) from all the rows below it
+        # to make the elements in that column 0. 
+        for row in range(col + 1, n):
+            scale = a[row][col] / a[col][col]
+            if scale == 0:
+                continue
+            #a[row][col] = 0
+            for i in range(col, n2):
+                a[row][i] -= scale * a[col][i]
+    # Now reduce the upper triangle.
+    for col in range(1, n):
+        for row in range(col):
+            scale = a[row][col] / a[col][col]
+            if scale == 0:
+                continue
+            a[row][col] = 0
+            for i in range(col + 1, n2):
+                a[row][i] -= scale * a[col][i]
+    # Finally, scale each row so that the diagonals on the left-hand side are
+    # all 1, and pick off the left=hand side of the augmented matrix, since it's
+    # the inverse.
+    for row in range(n):
+        e = a[row][row]
+        a[row] = a[row][n:]
+        for i in range(n):
+            a[row][i] /= e
+    return a
 
 # If this function returns, which in principle it might not if executing
 # an actual flight program, it returns the current computation stack.
@@ -1049,6 +1114,16 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                         print("\tDET requires a square-matrix argument.")
                         return None
                     computationStack[-1] = determinant(matrix)
+                elif function == "INVERSE":
+                    matrix = computationStack[-1]
+                    if not isMatrix(matrix) or len(matrix) != len(matrix[0]):
+                        print("\tINVERSE requires a square-matrix argument.")
+                        return None
+                    inverse = matrixInverse(matrix)
+                    if inverse == None:
+                        print("\tMatrix is singular, and cannot be inverted.")
+                        return None
+                    computationStack[-1] = inverse
                 else:
                     print("\tHAL/S built-in function", function, \
                           "not yet implemented")
