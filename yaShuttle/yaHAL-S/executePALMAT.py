@@ -441,9 +441,9 @@ def accumulate(array, function, accumulation):
 def identityMatrix(n):
     result = []
     for i in range(n):
-        row = [0]*n
-        row[i] = 1
-    result.append(row)
+        row = [0.0]*n
+        row[i] = 1.0
+        result.append(row)
     return result
 
 # Assumes the inner dimensions match and all entries are initialized (!= None)
@@ -948,12 +948,6 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                         return None
                     maxlen = attributes["character"]
                     value = value[:maxlen]
-                elif isBitArray(value):
-                    pass
-                elif isinstance(value, list):
-                    # We have to check compatibility:
-                    # TBD
-                    pass
                 elif isinstance(value, (float, int)):
                     if "scalar" not in attributes and \
                             "integer" not in attributes and \
@@ -966,9 +960,21 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                         value = hround(value)
                     elif "scalar" in attributes:
                         value = float(value)
+                elif isBitArray(value) and "bit" in attributes:
+                    length = attributes["bit"]
+                    value = (value[0] & ((1 << length)-1) , value[1])
+                elif isVector(value) and "vector" in attributes:
+                    numRows = len(value)
+                    if numRows != attributes["vector"]:
+                        print("\tVector length mismatch in store operation.")
+                        return None
+                elif isMatrix(value) and "matrix" in attributes:
+                    dimensions = [len(value), len(value[0])]
+                    if dimensions != attributes["matrix"]:
+                        print("\tMatrix geometry mismatch in store operation.")
+                        return None
                 else:
-                    print("\tImplementation error, non-boolean/character/" + \
-                          "arithmetic not yet implemented.")
+                    print("\tMismatched datypes in store operation.")
                     return None
                 attributes["value"] = value
             if not erroredUp:

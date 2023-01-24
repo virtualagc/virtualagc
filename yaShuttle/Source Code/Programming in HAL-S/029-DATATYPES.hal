@@ -17,6 +17,7 @@ C/ PDF pp. 69-72 of the "HAL/S Programmer's Guide", 32.0/17.0 edition.
      DECLARE M3 MATRIX(3,2) INITIAL(0.5, 1.0, 0.0, 1.0, 0.2, 0.4);
      
      DECLARE A2A MATRIX(2,2) INITIAL(3, 7, 1, -4);
+     DECLARE MATRIX(2,2), A2B INITIAL(0.5, 1.0, -0.5, 0.0), A2C;
      DECLARE A3A MATRIX(3,3) INITIAL(-2,2,-3,-1,1,3,2,0,-1);
      DECLARE A3I MATRIX(3,3);
      DECLARE A4A MATRIX(4,4) INITIAL(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16);
@@ -27,6 +28,7 @@ C/ PDF pp. 69-72 of the "HAL/S Programmer's Guide", 32.0/17.0 edition.
      DECLARE A5I MATRIX(5,5);
      DECLARE A6A MATRIX(2,2) INITIAL(-1, 1.5, 1, -1);
      DECLARE A6B MATRIX(2,2);
+     DECLARE A23A MATRIX(2,3) INITIAL(1.0, 0.0, 3.0, 2.0, 0.0, 4.0);
     
   WRITE(6);
   WRITE(6) 'Stuff related to "Programming in HAL/S", p. 29.';
@@ -90,13 +92,17 @@ M    VV = V S;
   A4C = A4B**(-1);
   WRITE(6) A4B A4I, ' should be 4x4 identity.';
   WRITE(6) A4I A4B, ' should be 4x4 identity.';
-  WRITE(6);
   WRITE(6) A4C A4B, ' should be 4x4 identity.';
-  WRITE(6);
   A5I = INVERSE(A5A);
   WRITE(6) A5A A5I, ' should be 5x5 identity.';
   WRITE(6) A5I A5A, ' should be 5x5 identity.';
-
+  WRITE(6);
+  WRITE(6) 'Stuff related to matrix "exponentiation".';
+  WRITE(6) A2B**2, ' should be -0.25 0.5 -0.25 -0.5.';
+  WRITE(6) A2B**(-1), ' should be 0.0 -2.0 1.0 1.0.';
+  WRITE(6) A2B**0, ' should be 1.0 0.0 0.0 1.0.';
+  WRITE(6) A2B**T, ' should be 0.5 -0.5 1.0 0.0.';
+  WRITE(6) A23A**T, ' should be 1.0 2.0 0.0 0.0 3.0 4.0.';
   
   CLOSE DATATYPES;
   
