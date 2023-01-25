@@ -106,7 +106,7 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
                         attributes = PALMAT["scopes"][si]["identifiers"]\
                                                         ["^" + identifier + "^"]
                     except:
-                        print("Identifier %s not found." % identifier)
+                        print("\tIdentifier %s not found." % identifier)
                         return False;
                     if attributes == None or "constant" not in attributes:
                         compileTimeComputable = False
@@ -123,34 +123,45 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
             # add the single computed element to the existing instructions.
             # We need to construct an entirely new PALMAT to hold the 
             # identifiers and instructions for that calculation.  It will
-            # have just one scope.
+            # have just one scope, which is a flattened form of the existing
+            # hierarchy of scopes.  Similarly, the temporary instructions for
+            # computing the expression remain the same, except the PALMAT
+            # `fetch` instructions used to fetch the values of constants have
+            # to be fixed to reflect the flattened scopes.
+            parentage = [state["scopeIndex"]]
+            while True:
+                dummyScope = PALMAT["scopes"][parentage[-1]]
+                dummyParent = dummyScope["parent"]
+                if dummyParent == None:
+                    break
+                parentage.append(dummyParent)
             temporaryIdentifiers = {}
-            for scope in PALMAT["scopes"]:
-                temporaryIdentifiers.update(scope["identifiers"])
+            for i in reversed(parentage):
+                temporaryIdentifiers.update(PALMAT["scopes"][i]["identifiers"])
+            doctoredInstructions = []
+            for instruction in temporaryInstructions:
+                if "fetch" in instruction:
+                    instruction["fetch"] = (0, instruction["fetch"][1])
+                doctoredInstructions.append(instruction)
             temporaryScope = {
                 "parent"        : None,
                 "self"          : 0,
                 "children"      : [ ],
                 "identifiers"   : temporaryIdentifiers,
-                "instructions"  : temporaryInstructions,
+                "instructions"  : doctoredInstructions,
                 "type"          : "compiler"
             }
             temporaryPALMAT = { "scopes": [temporaryScope] }
             computationStack = \
                 executePALMAT(temporaryPALMAT, 0, 0, False, traceCompileTime, 8)
+            if computationStack == None:
+                print("\tAborting compile-time computation.")
+                return False
             # We assume the computation has been successful, so now we replace
             # the contents of temporaryInstructions with newly-constructed
             # instructions based on the computation stack.
             temporaryInstructions.clear()
             for value in reversed(computationStack):
-                '''
-                if isinstance(v, list) and len(v) == 1 \
-                        and isinstance(v[0], tuple):
-                    v = list(v[0])
-                else:
-                    v = [v]
-                for value in v:
-                '''
                 if isBitArray(value):
                     temporaryInstructions.append({"boolean": value})
                 elif isinstance(value, (int, float)):

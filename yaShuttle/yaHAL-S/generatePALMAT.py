@@ -515,6 +515,9 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         else:
             counter = lastExpressionSM["instructionCount"]
             while counter > 0:
+                if len(instructions) < counter:
+                    print("\tImplementation error, cannot pop instruction.")
+                    return False, PALMAT
                 value = instructions.pop(-counter)
                 counter -= 1
                 if "number" in value:

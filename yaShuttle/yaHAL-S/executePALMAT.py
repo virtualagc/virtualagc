@@ -907,12 +907,17 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 pop = True
             if si == -1:
                 si, identifier = scope["assignments"][identifier]
+            caratIdentifier = "^" + identifier + "^"
             try:
                 attributes = PALMAT["scopes"][si]["identifiers"][\
-                                                        "^" + identifier + "^"]
+                                                        caratIdentifier]
             except:
-                print(si, identifier, instruction)
-                sys.exit(1)
+                print("\tProblem with PALMAT instruction:", instruction)
+                print("\tnum scopes =", len(PALMAT["scopes"]))
+                print("\ttype of si =", type(si))
+                print("\tscope number =", si, " identifier =", caratIdentifier)
+                print("\tidentifiers =", PALMAT["scopes"][si]["identifiers"])
+                return None
             identifier = "^" + identifier + "^"
             erroredUp = True
             if fetch:
