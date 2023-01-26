@@ -473,8 +473,11 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         instructions.append({ "read": substate["LUN"] })
     elif lbnfLabel == "declare_statement":
         markUnmarkedScalars(currentScope["identifiers"])
-        completeInitialConstants(currentScope["identifiers"])
-    elif lbnfLabel in ["minorAttributeRepeatedConstant"]:
+        messages = completeInitialConstants(currentScope["identifiers"])
+        if messages != []:
+            print("\tGeometry mismatch for INITIAL or CONSTANT data,", messages)
+            return False, PALMAT
+    elif lbnfLabel in ["minorAttributeRepeatedConstant", "minorAttributeStar"]:
         '''
         We get to here after an INITIAL(...) or CONSTANT(...)
         has been fully processed to the extent of preparing
@@ -590,27 +593,17 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                             if value != None:
                                 value = float(value)
                             value = identifierDict[key] + [value]
-                elif isinstance(value, list) and \
-                        "vector" in identifierDict:
-                    numCols = identifierDict["vector"]
-                    if key not in identifierDict or \
-                            isinstance(identifierDict[key], str):
-                        value = [float(value)]
-                    else:
-                        if len(identifierDict[key]) >= numCols:
-                            print("\tData for INITIAL or CONSTANT of " + \
-                                  currentIdentifier + " exceeds dimensions.")
-                            value = identifierDict[key]
-                        else:
-                            value = identifierDict[key] + [float(value)]
-                elif isinstance(value, (int, float)) and \
+                elif (value == None or isinstance(value, (int, float))) and \
                         "matrix" in identifierDict:
                     numRows, numCols = identifierDict["matrix"]
                     if key not in identifierDict or \
                             isinstance(identifierDict[key], str):
-                        value = [[float(value)]]
+                        if value != None:
+                            value = float(value)
+                        value = [[value]]
                     else:
                         matrix = identifierDict[key]
+                        print("**", identifierDict, key)
                         row = len(matrix)-1
                         col = len(matrix[row])
                         if col >= numCols:
@@ -621,8 +614,13 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                             print("\tData for INITIAL or CONSTANT of " + \
                                   currentIdentifier + " exceeds dimensions.")
                         else:
-                            matrix[row] += [float(value)]
+                            if value != None:
+                                value = float(value)
+                            matrix[row].append(value)
                         value = matrix
+                elif value == { "fill": True }:
+                    identifierDict["fill"] = key
+                    continue
                 else:
                     print("\tDatatype mismatch in INITIAL or CONSTANT:", \
                           value, currentIdentifier, identifierDict)

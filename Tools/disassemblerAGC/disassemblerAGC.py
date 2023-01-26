@@ -916,7 +916,6 @@ if cli.findFilename != "":
         if cli.disjoint and coreUsed[bank][address % sizeCoreBank]:
             symbols = []
         if len(symbols) == 0:
-            #print("I am here")
             return True
         forElimination = []
         for symbol in symbols:

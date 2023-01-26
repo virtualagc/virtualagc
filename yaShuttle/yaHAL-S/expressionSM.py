@@ -18,7 +18,7 @@ from p_Functions import substate
 
 # Set the following to enable tracing of calls to executePALMAT when trying
 # to compute compile-time constants.
-traceCompileTime = True
+traceCompileTime = False
 
 # Return True on success, False on failure.  The stage argument is 0 when
 # called upon starting processing of an lbnfLabel, 2 after otherwise finishing
@@ -148,8 +148,8 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
                 if "fetch" in instruction:
                     instruction["fetch"] = (0, instruction["fetch"][1])
                 doctoredInstructions.append(instruction)
-            if stateMachine["foundPound"]:
-                print("foundPound:", doctoredInstructions)
+            #if True or stateMachine["foundPound"]:
+            #    print("foundPound:", doctoredInstructions)
             temporaryScope = {
                 "parent"        : None,
                 "self"          : 0,
@@ -171,6 +171,8 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
             for value in reversed(computationStack):
                 if value == None:
                     temporaryInstructions.append({"empty": True})
+                elif value == { "fill" }:
+                    temporaryInstructions.append({"fill": True})
                 elif isBitArray(value):
                     temporaryInstructions.append({"boolean": value})
                 elif isinstance(value, (int, float)):
@@ -181,8 +183,7 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
                     if isinstance(value[0], list):
                         temporaryInstructions.append({"matrix": value })
                     else:
-                        temporaryInstructions.append({"vector": value })
-                
+                        temporaryInstructions.append({"vector": value })                
         if "compiledExpression" in stateMachine:
             instructions = stateMachine["compiledExpression"]
         else:
@@ -194,13 +195,7 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
             stateMachine["whereTo"] = "expressionFlush"
         else:
             stateMachine["whereTo"] = "instructions"
-            if False and len(temporaryInstructions) != 1:
-                # As far as I know, this should happy *only* in the case of
-                # #-style repeat-factor within an INITIAL(...) or 
-                # CONSTANT(...).  And a WRITE.
-                instructions.append([tuple(temporaryInstructions)])
-            else:
-                instructions.extend(temporaryInstructions)
+            instructions.extend(temporaryInstructions)
         stateMachine["instructionCount"] = len(temporaryInstructions)
         stateMachine["compileTimeComputable"] = compileTimeComputable
         state.pop("stateMachine")
@@ -269,6 +264,8 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
         elif lbnfLabel == "repeat_head":
             expression.append({ "operator": "#"})
             stateMachine["foundPound"] = True
+        elif lbnfLabel == "minorAttributeStar":
+            expression.append({ "fill": True })
         elif lbnfLabel == "subscript":
             expression.append({ "operator": "subscripts"})
         elif lbnfLabel == "relationalOpEQ":

@@ -375,8 +375,9 @@ def markUnmarkedScalars(identifiers):
 
 # Complete the initialization of a VECTOR, MATRIX, or ARRAY by making sure that
 # INITIALs or CONSTANTs are filled out to the proper geometry with appropriate
-# values.
+# values.  Returns [] on success, or a list of identifiers which failed.
 def completeInitialConstants(identifiers):
+    messages = []
     for identifier in identifiers:
         identifierDict = identifiers[identifier]
         if "vector" not in identifierDict and "matrix" not in identifierDict:
@@ -408,21 +409,42 @@ def completeInitialConstants(identifiers):
         fillValue = None
         if "vector" in identifierDict:
             numCols = identifierDict["vector"]
-            if len(value) == 1:
-                fillValue = value[0]
+            if "fill" not in identifierDict:
+                if len(value) == 1:
+                    fillValue = value[0]
+                elif len(value) != numCols:
+                    messages.append(identifier)
+                    continue
+            elif len(value) > numCols:
+                messages.append(identifier)
+                continue
             while len(value) < numCols:
                 value.append(fillValue)
+            if "fill" in identifierDict:
+                identifierDict.pop("fill")
         elif "matrix" in identifierDict:
             numRows, numCols = identifierDict["matrix"]
-            if len(value) == 1 and len(value[0]) == 1:
-                fillValue = value[0][0]
+            if "fill" not in identifierDict:
+                if len(value) == 1 and len(value[0]) == 1:
+                    fillValue = value[0][0]
+                elif len(value) != numRows or len(value[-1]) != numCols:
+                    messages.append(identifier)
+                    continue
+            elif len(value) > numCols:
+                messages.append(identifier)
+                continue
             row = value[-1]
             while len(row) < numCols:
                 row.append(fillValue)
             while len(value) < numRows:
                 value.append([fillValue]*numCols)
+            if "fill" in identifierDict:
+                identifierDict.pop("fill")
         else:
             continue
         if isInitial:
             identifierDict["value"] = copy.deepcopy(value)
-            
+    for identifier in messages:
+        identifiers.pop(identifier)
+    return messages
+    

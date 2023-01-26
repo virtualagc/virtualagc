@@ -83,7 +83,7 @@ expressionComponents = ["expression", "ifClauseBitExp", "relational_exp",
                      "arithExpTerm", "arithExpArithExpPlusTerm",
                      "arithExpArithExpMinusTerm", "arithMinusTerm", 
                      "literalExp", "sub_exp", 
-                     "minorAttributeRepeatedConstant"]
+                     "minorAttributeRepeatedConstant", "minorAttributeStar"]
 setExpressionComponents = set(expressionComponents)
 doForComponents = ["doGroupHeadFor", "doGroupHeadForWhile", 
                       "doGroupHeadForUntil"]

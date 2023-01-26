@@ -302,7 +302,6 @@ def checkArithmeticalDatatype(operand):
 # Compute determinant of a square matrix.  I have *not* researched optimal
 # methods.  This is simply the one that stuck in my mind from schooldays.
 def determinant(m):
-    #print("**m", m)
     n = len(m)
     if n == 1:
         return m[0][0]
@@ -312,7 +311,6 @@ def determinant(m):
         bottom = copy.deepcopy(m[1:])
         for row in bottom:
             row.pop(i)
-        #print("**o", s, m[0][i], bottom)
         d += s * m[0][i] * determinant(bottom)
         s = -s
     return d
@@ -512,6 +510,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             pass
         elif "empty" in instruction:
             computationStack.append(None)
+        elif "fill" in instruction:
+            computationStack.append({"fill"})
         elif "string" in instruction:
             computationStack.append(instruction["string"])
         elif "boolean" in instruction:
