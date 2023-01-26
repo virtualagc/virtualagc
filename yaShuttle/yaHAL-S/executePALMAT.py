@@ -462,6 +462,15 @@ def matrixMultiply(a, b):
         result.append(row)
     return result
 
+# "Flatten" a composite object (list of lists of ... or tuple of tuples of ...)
+# onto the end of a list.
+def flatten(object, onto):
+    if isinstance(object, (list, tuple)):
+        for e in object:
+            flatten(e, onto)
+    else:
+        onto.append(object)
+
 # If this function returns, which in principle it might not if executing
 # an actual flight program, it returns the current computation stack.
 # That would normally be empty if full statements had been executed.
@@ -501,6 +510,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
         stackSize = len(computationStack)
         if "debug" in instruction:
             pass
+        elif "empty" in instruction:
+            computationStack.append(None)
         elif "string" in instruction:
             computationStack.append(instruction["string"])
         elif "boolean" in instruction:
@@ -579,13 +590,16 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 # a single item because the group is wrapped in [(...)].  That
                 # particular wrapping is chosen because it's distinguishable 
                 # from VECTOR, MATRIX, and ARRAY.
-                v = computationStack.pop()
-                if isinstance(v, list) and len(v) == 1 and \
-                        isinstance(v[0], tuple):
-                    operands2 = list(v[0])
+                if computationStack[-1] == {'sentinel'}:
+                    computationStack.pop()
+                    operands2 = [None]
                 else:
-                    operands2 = [v]
-                temporaryStack = []
+                    operands2 = []
+                    while True:
+                        value = computationStack.pop()
+                        if value == {'sentinel'}:
+                            break
+                        flatten(value, operands2)
                 while operand1 > 0:
                     # I want to insert all the elements in operands2 into
                     # computation stack.  If I use the list .extend method
@@ -595,9 +609,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     # creating a new computationStack object.
                     #computationStack.extend(operands2)
                     #computationStack[0:0] = operands2
-                    temporaryStack.extend(operands2)
+                    computationStack.extend(reversed(operands2))
                     operand1 -= 1
-                computationStack.append([tuple(temporaryStack)])
             elif operator == "subscripts":
                 subscripts = []
                 while True:
@@ -906,6 +919,9 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 si, identifier = instruction["storepop"]
                 pop = True
             if si == -1:
+                if "assignments" not in scope:
+                    print("\tCannot find identifier", identifier)
+                    return None
                 si, identifier = scope["assignments"][identifier]
             caratIdentifier = "^" + identifier + "^"
             try:

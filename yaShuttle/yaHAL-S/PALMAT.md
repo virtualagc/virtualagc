@@ -240,10 +240,10 @@ Regarding the format of entries on the computation stack, this can (and for effi
 * Any Python list of floats or integers (for HAL/S `VECTOR` types) or rectangular list of lists of floats or integers (for HAL/S `MATRIX` types).
 * Any Python dictionary for HAL/S `STRUCTURE`s.
 * Any Python rectangular tuple of tuples of ... tuples, other than the special case for bit arrays listed above, for an `ARRAY`.  The carve-out for bit arrays means that this implementation doesn't fully allow an `ARRAY` of dimension 1&times;2.
-* The Python `None` is for an unitialized value in a PALMAT instruction `fetch`, `store`, etc.
+* The Python `None` is for an unitialized value in a PALMAT instruction `fetch`, `store`, or `storep`.  It is not supported in arithmetical operations.
 * Python sets, to which there's no corresponding datatype in HAL/S can appear on the computation stack as well:
     * `{ 'sentinel' }` is used to mark the beginning of a variable-length list of operands.  (There is rarely any need for such a thing, but it is used to begin a list of subscripts.)
-    * TBD
+    * `{ 'fill' }` can appear, under certain circumstances, as the final operand in a flattened list of values such as is generated for an `INITIAL` or `CONSTANT` clause in a `DECLARE` statement, or in a "shaping function" like `VECTOR()` or `MATRIX()`.  It indicates that the remaining items in the composite object being created are uninitialized.
 
 ### PALMAT Instructions 1: Arithmetic
 
@@ -484,7 +484,7 @@ In terms of the specifics of the PALMAT `call` instruction, it looks like the fo
 
 (The suffix 'l_' in 'l_P' is due to the name mangling performed by the compiler, and is thus the procedure name used internally.)
 
-As far as stupid, unnecessary differences between `PROCEDURE` and `FUNCTION` calls are concerned, the input parameters for the call to a `PROCEDURE` are in the opposite order on the computation stack as the parameters for a `FUNCTION`.  Thus,
+As far as stupid, unnecessary differences between `PROCEDURE` and `FUNCTION` calls are concerned, the input parameters for the call to a `PROCEDURE` are in the opposite order on the computation stack as the parameters for a `FUNCTION`.  Thus,"
 
 * `X`<sub>`N`</sub> is the top element of the stack.
 * ...
@@ -499,15 +499,55 @@ This has to do with the order in which the compiler's code generator builds the 
 * `{ 'bitarray': N, 'len': L }` causes a bit string to be pushed onto the computation stack.  The `len` key is optional, and indicates the number of valid bits in the string; i.e., it allows you to know how many otherwise-undetectable more-significant bits of 0 there are.  If the field is missing, infinite precision is assumed.  However, when such values are stored in a `BIT(N)` variable, they are always truncated to `N` bits.  In the Python implementation I simply treat bit arrays as identical to integers, bit position 0 corresponding to the least-significant bit, and I allow integers to be assigned to bit-array variables.  Other implementations may treat them differently.
 * `{ 'operator': 'subscripts' }` indicates that the elements at the top of the computation stack (see also `sentinel` below) form subscripts for the *next* PALMAT instruction encountered, which should be a `fetch` or `fetchp`.  The top element of the computation stack is the first subscript, the next-to-top is the 2nd subscript, and so on; the next element on the computation stack below the subscripts themselves is a `sentinel` element.  Upon execution, the `subscripts` instruction pops all of these from the instruction stack and stores them in some implementation-dependent way to be applied to the succeeding `fetch` or `fetchp` instruction.
 * `{ 'sentinel': s }` places a "sentinel" value on the computation stack.  (This is used in those rare cases where there is some PALMAT instruction, such as the `subscript` operator, which operates on a variable number of operands.  The `sentinel` instruction marks the beginning of an operand list, and the instruction for the problematic operator marks the end of the operant list.)  The value `s` is arbitrary, but for human-readability of the PALMAT it's reasonable for it to be some indicator of the PALMAT instruction to which it corresponds.  For example, the code-generator creates a `{ 'sentinel': 'subscripts' }` for an `{ 'operator': 'subscripts' }`.  However, the sentinel marker placed on the computation stack is the same regardless.
-* ` { 'vector': [...] }` pushes a constant vector onto the computation stack.
-* ` { 'matrix': [[...],...] }` pushes a constant matrix onto the computation stack.
+* `{ 'vector': [...] }` pushes a constant vector onto the computation stack.
+* `{ 'matrix': [[...],...] }` pushes a constant matrix onto the computation stack.
+* `{ 'shaping': s }`, where s is 'integer', 'scalar', etc.  What these "shaping functions do is basically to recast the data type of a value on the computation stack.  The explanation of the configuration of the computation stack is rather complex, and so is given later on in this section.  Here are all of the possibilities for `s`:
+    * `integer`:  Converts a value or values on the computation stack into an `INTEGER` or `ARRAY` of `INTEGER`. 
+    * `scalar`:  Converts a value or values on the computation stack into a `SCALAR` or `ARRAY` of `SCALAR`.
+    * `vector`:  Converts values on the computation stack into a `VECTOR`.
+    * `matrix`:  Converts values on the computation stack into a `MATRIX`.
+    * `doubleinteger`, `doublescalar`, `doublevector`, `doublematrix`:  These are double-precision variants of the shaping functions listed above.  But note that all `INTEGER` are double-precision in our Python implementation anyway, so the code generator won't necessarily generate any PALMAT `doubleXXXXX` instructions, and even if it does, their behaviors won't differ from the single-precision versions.
+* `{ 'operator': '#' }`, is the repetition operator.  It has a variable number of operands.  The operand at the top of the computation stack is the repetition factor.  The other operands on the computation stack, down to the first `{'sentinel'}` encountered, comprise the sequence to be replicated.  Any operands among these latter which are composites &mdash; i.e., `VECTOR`, `MATRIX`, or `ARRAY` &mdash; are flattened to their constituent simple values in the process.  (I have no idea how or if `STRUCTURE`s are handled in this scenario, so at least for the present they are not allowed.)  The Python value `None` is also an allowed operand, and indicated an unused position in the sequence.  If the repetition factor is immediately followed by the `{'sentinel'}` without intervening operands to be replicated, it means that the value `None` is being replicated.  The value `{'fill'}` can also be present as the final operand preceding `{'sentinel'}`; this item cannot be replicated.  All of the operands, including the `{'sentinel'}`, are popped from the computation stack, and replaced with the desired replicated sequence of operands (and no added `{'sentinel'}`s).  An example appears below.
+* `{ 'empty': True }` pushes a value of `None` onto the computation stack.
 
-Regarding the internal representation of values associated with identifiers `DECLARE`'d as `BIT(N)` or `BOOLEAN`:
+Regarding the internal representation of values associated with identifiers `DECLARE`'d as `BIT(N)` or `BOOLEAN`, on the computation stack these are stored as tuples `(N, V)`, where `V` is an integer representation of the value with all bits packed into the least-significant `N` positions.  In particular, `TRUE` and `FALSE` are stored as `(1,1)` and `(1,0)`.
 
-* A `BIT(N)` for `N`!=1 is stored as a Python non-negative integer.
-* A `BOOLEAN`, though logically indistinguishable from a `BIT(1)`, is stored as either a Python `True` or Python `False`.
+Regarding the shaping functions and how the computation stack is configured for them, it depends whether or not the shaping functions have subscripts or not in the HAL/S source code.  Here's the full explanation:
 
-This distinction is solely historical, due to the order in which I worked the problem, but since `BOOLEAN` is indistinguishable from `BIT(1)` from the coder's perspective, I wish that from the beginning I had treated them as `BIT(1)` internally as well.  Perhaps I'll change it in the future.  The Python implementation of the emulator converts them all to integers when computations are actually performed with them.
+HAL/S source code `INTEGER(SIMPLE VALUE)`, where `SIMPLE VALUE` computes to a *single* `INTEGER`, `BIT`, `SCALAR`, `CHARACTER`, `VECTOR`, `MATRIX`, or `ARRAY`.  For `INTEGER`, `BIT`, `SCALAR`, or `CHARACTER` the `{'shaping': 'integer'}` function is presented with the computed value of the `SIMPLE VALUE` at the top of the stack, and replaces it with an integer conversion of it.  (All `INTEGER` conversions from `SCALAR` are rounded.  Similarly, conversions from `CHARACTER` assume that the string contais a human-readable version of the number, such as "123.45".  I won't keep repeating these particular factoids.)  If the `SIMPLE VALUE` is instead a `VECTOR`, `MATRIX`, or `ARRAY`, the converted value remains of that type, but *each element* of the `VECTOR`, `MATRIX`, or `ARRAY` is converted to an `INTEGER`.
+
+HAL/S source code `INTEGER(MULTIPLE VALUES)`, where by `MULTIPLE VALUES` I mean a list of multiple arguments (as opposed to a single argument).  Each argument, again, must be `INTEGER`, `BIT`, `SCALAR`, `CHARACTER`, `VECTOR`, `MATRIX`, or `ARRAY`.  However in this case, each of the arguments in the `MULTIPLE VALUES` is *flattened* in row-major order (as in a `DECLARE` `INITIAL` or `CONSTANT` list) and is converted to a 1-dimensional `ARRAY` of `INTEGER` with a corresponding length.  Upon entry, the top *two* entries on the stack are `{'sentinel'}`, followed by the arguments in FIFO order (meaning that the final argument is third on the stack), followed by yet another `{'sentinel'}`.  All of these elements are popped from the computation stack, and then the newly-created `ARRAY` is pushed onto the stack in their place.  Note that just as with `INITIAL` or `CONSTANT`, #-style repetition factors are allowed; however, these repitition factors will all have been resolved by the shaping function is entered.
+
+HAL/S source code `INTEGER$(N,...,M)(VALUES)`, where by `VALUES` I mean one or more arguments of `SCALAR`, `INTEGER`, `BIT`, `CHARACTER`, `VECTOR`, `MATRIX`, or `ARRAY` types.  The `VALUES` are flattened as described above, and a single `ARRAY(N,...,M)` is created in their place.  The length of the flattened list of `VALUES` must equal `N`&times;...&times;`M`.  Upon entry, top of the computation stack is a `{'sentinel'}`, followed by `N`, ..., `M`, followed by another `{'sentinel'}`, followed by the arguments (i.e., the `VALUES`), followed by yet another `{'sentinel'}`.  All of these are popped from the computation stack and replaced by the newly-created `ARRAY`.  Note that all of the subscripts (`N`,...,`M`) must be computable at compile-time.
+
+HAL/S source code `SCALAR(SIMPLE VALUE)`, `SCALAR(MULTIPLE VALUES)`, or `SCALAR$(N,...,M)(VALUES)`:  Same thing as `INTEGER`, but with the conversions of individual values being to `SCALAR`.
+
+HAL/S source code `VECTOR(VALUES)`:  Flattens the `VALUES`, and as long as there are exactly 3 values after flattening, converts them to a `VECTOR(3)`.  Upon entry, the computation stack, from top downward, is `{'sentinel'}`, `{'sentinel'}`, ... flattened `VALUES`, `{'sentinel'}`.
+
+HAL/S source code `VECTOR$N(VALUES)`:  Flattens the `VALUES`, and as long as there are exactly `N` values after flattening, with `N` computable at compile time, converts them to `VECTOR(N)`.  Upon entry, the computation stack, from top downward, is `{'sentinel'}`, `N`, `{'sentinel'}`, ... flattened `VALUES`, `{'sentinel'}`.
+
+HAL/S source code `MATRIX(VALUES)`:  Flattens the `VALUES`, and as long as there are exactly 9 values after flattening, converts them to a `MATRIX(3,3)`.  Upon entry, the computation stack, from top downward, is `{'sentinel'}`, `{'sentinel'}`, ... flattened `VALUES`, `{'sentinel'}`.
+
+HAL/S source code `MATRIX$(N,M)(VALUES)`:  Flattens the `VALUES`, and as long as there are exactly `N`*`M` values after flattening, with `N` and `M` computable at compile time, converts them to `MATRIX(N,M)`.  Upon entry, the computation stack, from top downward, is `{'sentinel'}`, `N`, `M`, `{'sentinel'}`, ... flattened `VALUES`, `{'sentinel'}`.
+
+Regarding the repetition operator (`#`), consider the following sequence of PALMAT instructions, which could correspond, say, to the `CONSTANT` clause in the HAL/S code `DECLARE V VECTOR(32) CONSTANT(16, 5#(3#5, 2#6, 62), 1)`, shown with the contents of the computation stack (at the right, and growing to the right) after each PALMAT instruction is executed:
+
+    {'number': '1'}         [1]
+    {'sentinel': 'repeat'}  [1, {'sentinel'}]
+    {'number': '62'}        [1, {'sentinel'}, 62]
+    {'sentinel': 'repeat'}  [1, {'sentinel'}, 62, {'sentinel'}]
+    {'number': '6'}         [1, {'sentinel'}, 62, {'sentinel'}, 6]
+    {'number': '2'}         [1, {'sentinel'}, 62, {'sentinel'}, 6, 2]
+    {'operator': '#'}       [1, {'sentinel'}, 62, 6, 6]
+    {'sentinel': 'repeat'}  [1, {'sentinel'}, 62, 6, 6, {'sentinel'}]
+    {'number': '5'}         [1, {'sentinel'}, 62, 6, 6, {'sentinel'}, 5]
+    {'number': '3'}         [1, {'sentinel'}, 62, 6, 6, {'sentinel'}, 5, 3]
+    {'operator': '#'}       [1, {'sentinel'}, 62, 6, 6, 5, 5, 5]
+    {'number': '5'}         [1, {'sentinel'}, 62, 6, 6, 5, 5, 5, 5]
+    {'operator': '#'}       [1, 62, 6, 6, 5, 5, 5, 62, 6, 6, 5, 5, 5, 62, 6, 6, 5, 5, 5, 62, 6, 6, 5, 5, 5, 62, 6, 6, 5, 5, 5]
+    {'number': '16'}]       [1, 62, 6, 6, 5, 5, 5, 62, 6, 6, 5, 5, 5, 62, 6, 6, 5, 5, 5, 62, 6, 6, 5, 5, 5, 62, 6, 6, 5, 5, 5, 16]
+
+This is unraveled in LIFO order to form the constant value(s) for vector `V`, which hopefully are obvious by inspection to correspond to `CONSTANT(16, 5#(3#5, 2#6, 62), 1)`.
 
 ## Multiprocessing and Reentrancy
 

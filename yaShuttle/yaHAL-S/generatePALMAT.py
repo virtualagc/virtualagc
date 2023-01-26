@@ -520,7 +520,11 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                     return False, PALMAT
                 value = instructions.pop(-counter)
                 counter -= 1
-                if "number" in value:
+                if False:
+                    pass
+                elif "empty" in value:
+                    value = None
+                elif "number" in value:
                     try:
                         value = float(value["number"]);
                     except:
@@ -531,6 +535,11 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                     value = value["boolean"]
                 elif "string" in value:
                     value = value["string"]
+                elif "vector" in value:
+                    # This will be a list of values rather than a single value.
+                    # It won't be a HAL/S VECTOR type, in the sense that the 
+                    # values in the list may not be SCALAR.
+                    value = list(value["vector"][0])
                 if currentIdentifier != "":
                     identifierDict = identifiers[currentIdentifier]
                 else:
@@ -564,7 +573,24 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                     pass
                 elif isinstance(value, str) and "character" in identifierDict:
                     pass
-                elif isinstance(value, (int, float)) and \
+                elif (value == None or isinstance(value, (int, float))) and \
+                        "vector" in identifierDict:
+                    numCols = identifierDict["vector"]
+                    if key not in identifierDict or \
+                            isinstance(identifierDict[key], str):
+                        if value != None:
+                            value = float(value)
+                        value = [value]
+                    else:
+                        if len(identifierDict[key]) >= numCols:
+                            print("\tData for INITIAL or CONSTANT of " + \
+                                  currentIdentifier + " exceeds dimensions.")
+                            value = identifierDict[key]
+                        else:
+                            if value != None:
+                                value = float(value)
+                            value = identifierDict[key] + [value]
+                elif isinstance(value, list) and \
                         "vector" in identifierDict:
                     numCols = identifierDict["vector"]
                     if key not in identifierDict or \

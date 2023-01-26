@@ -1278,10 +1278,10 @@ INIT_OR_CONST_HEAD : _SYMB_94 _SYMB_2 { $$ = make_AAinit_or_const_headInitial();
   | INIT_OR_CONST_HEAD REPEATED_CONSTANT _SYMB_0 { $$ = make_ACinit_or_const_headRepeatedConstant($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 REPEATED_CONSTANT : EXPRESSION { $$ = make_AArepeated_constant($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | REPEAT_HEAD VARIABLE { $$ = make_ABrepeated_constant($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | REPEAT_HEAD CONSTANT { $$ = make_ACrepeated_constant($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | NESTED_REPEAT_HEAD REPEATED_CONSTANT _SYMB_1 { $$ = make_ADrepeated_constant($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | REPEAT_HEAD { $$ = make_AErepeated_constant($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | REPEAT_HEAD VARIABLE { $$ = make_ABrepeated_constantMark($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | REPEAT_HEAD CONSTANT { $$ = make_ACrepeated_constantMark($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | NESTED_REPEAT_HEAD REPEATED_CONSTANT _SYMB_1 { $$ = make_ADrepeated_constantMark($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | REPEAT_HEAD { $$ = make_AErepeated_constantMark($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 REPEAT_HEAD : ARITH_EXP _SYMB_10 { $$ = make_AArepeat_head($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;

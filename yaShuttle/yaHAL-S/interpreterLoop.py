@@ -542,9 +542,9 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                          lbnf, bnf, trace1, wine, trace2, 8, macros)
         if len(substate["warnings"]):
             for warning in substate["warnings"]:
-                print("Warning:", warning)
+                print("\tWarning:", warning)
         if len(substate["errors"]):
             for warning in substate["errors"]:
-                print("Error:", warning)
+                print("\tError:", warning)
         if len(substate["errors"]) == 0 and xeq:
             executePALMAT(PALMAT, 0, 0, False, trace3, 8)

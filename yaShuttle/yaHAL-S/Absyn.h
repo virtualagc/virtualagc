@@ -2705,22 +2705,22 @@ INIT_OR_CONST_HEAD make_ACinit_or_const_headRepeatedConstant(INIT_OR_CONST_HEAD 
 struct REPEATED_CONSTANT_
 {
   int line_number, char_number;
-  enum { is_AArepeated_constant, is_ABrepeated_constant, is_ACrepeated_constant, is_ADrepeated_constant, is_AErepeated_constant } kind;
+  enum { is_AArepeated_constant, is_ABrepeated_constantMark, is_ACrepeated_constantMark, is_ADrepeated_constantMark, is_AErepeated_constantMark } kind;
   union
   {
     struct { EXPRESSION expression_; } aarepeated_constant_;
-    struct { REPEAT_HEAD repeat_head_; VARIABLE variable_; } abrepeated_constant_;
-    struct { CONSTANT constant_; REPEAT_HEAD repeat_head_; } acrepeated_constant_;
-    struct { NESTED_REPEAT_HEAD nested_repeat_head_; REPEATED_CONSTANT repeated_constant_; } adrepeated_constant_;
-    struct { REPEAT_HEAD repeat_head_; } aerepeated_constant_;
+    struct { REPEAT_HEAD repeat_head_; VARIABLE variable_; } abrepeated_constantmark_;
+    struct { CONSTANT constant_; REPEAT_HEAD repeat_head_; } acrepeated_constantmark_;
+    struct { NESTED_REPEAT_HEAD nested_repeat_head_; REPEATED_CONSTANT repeated_constant_; } adrepeated_constantmark_;
+    struct { REPEAT_HEAD repeat_head_; } aerepeated_constantmark_;
   } u;
 };
 
 REPEATED_CONSTANT make_AArepeated_constant(EXPRESSION p0);
-REPEATED_CONSTANT make_ABrepeated_constant(REPEAT_HEAD p0, VARIABLE p1);
-REPEATED_CONSTANT make_ACrepeated_constant(REPEAT_HEAD p0, CONSTANT p1);
-REPEATED_CONSTANT make_ADrepeated_constant(NESTED_REPEAT_HEAD p0, REPEATED_CONSTANT p1);
-REPEATED_CONSTANT make_AErepeated_constant(REPEAT_HEAD p0);
+REPEATED_CONSTANT make_ABrepeated_constantMark(REPEAT_HEAD p0, VARIABLE p1);
+REPEATED_CONSTANT make_ACrepeated_constantMark(REPEAT_HEAD p0, CONSTANT p1);
+REPEATED_CONSTANT make_ADrepeated_constantMark(NESTED_REPEAT_HEAD p0, REPEATED_CONSTANT p1);
+REPEATED_CONSTANT make_AErepeated_constantMark(REPEAT_HEAD p0);
 
 struct REPEAT_HEAD_
 {

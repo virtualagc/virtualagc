@@ -197,7 +197,7 @@ def stringLiteral(PALMAT, state, s):
             updateCurrentIdentifierAttribute(PALMAT, state, "character", isp)
     elif "declaration_list" in history and "expression" not in history \
             and "char_spec" not in history and "literalExp" not in history \
-            and state1 != "number":
+            and state1 != "number" and "repeated_constantMark" not in history:
         if s in identifiers:
             print("Already declared:", sp)
             substate["currentIdentifier"] = ""
@@ -374,6 +374,7 @@ augmentationCandidates = [
     "read_key",
     "relational_exp",
     "minorAttributeRepeatedConstant",
+    "repeated_constantMark",
     "sQdQName_doublyQualNameHead_literalExpOrStar",
     "sub_exp",
     "then",
@@ -485,7 +486,7 @@ def minorAttributeNonHal(PALMAT, state):
     return True, state
 
 def doublyQualNameHead_vector(PALMAT, state):
-    updateCurrentIdentifierAttribute(PALMAT, state, "vector", "^?^")
+    updateCurrentIdentifierAttribute(PALMAT, state, "vector", [])
     return True, fixupState(state, fsAugment)
 
 def doublyQualNameHead_matrix(PALMAT, state):

@@ -18,7 +18,7 @@ from p_Functions import substate
 
 # Set the following to enable tracing of calls to executePALMAT when trying
 # to compute compile-time constants.
-traceCompileTime = False
+traceCompileTime = True
 
 # Return True on success, False on failure.  The stage argument is 0 when
 # called upon starting processing of an lbnfLabel, 2 after otherwise finishing
@@ -39,6 +39,9 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
     stateMachine = state["stateMachine"]
     if "radix" not in stateMachine:
         stateMachine["radix"] = 0
+    # "foundPound" is just for debugging repetition factors.
+    if "foundPound" not in stateMachine:
+        stateMachine["foundPound"] = False
     #owningLabel = stateMachine["owner"]
     owningDepth = stateMachine["depth"]
     if stage == 0 and depth == owningDepth: #lbnfLabel == owningLabel:
@@ -83,6 +86,8 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
         elif lbnfLabel == "basicStatementReadPhrase":
             if "readStatement" in stateMachine:
                 stateMachine.pop("readStatement")
+        elif lbnfLabel == "repeated_constantMark":
+            expression.append({ "sentinel": "repeat"})
     #if stage == 2 and lbnfLabel == "repeated_constant":
     #    expression.append({ "condense": "end" })
     if stage == 2 and depth == owningDepth:
@@ -143,6 +148,8 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
                 if "fetch" in instruction:
                     instruction["fetch"] = (0, instruction["fetch"][1])
                 doctoredInstructions.append(instruction)
+            if stateMachine["foundPound"]:
+                print("foundPound:", doctoredInstructions)
             temporaryScope = {
                 "parent"        : None,
                 "self"          : 0,
@@ -162,7 +169,9 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
             # instructions based on the computation stack.
             temporaryInstructions.clear()
             for value in reversed(computationStack):
-                if isBitArray(value):
+                if value == None:
+                    temporaryInstructions.append({"empty": True})
+                elif isBitArray(value):
                     temporaryInstructions.append({"boolean": value})
                 elif isinstance(value, (int, float)):
                     temporaryInstructions.append({"number": str(value)})
@@ -259,6 +268,7 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
             expression.append({ "operator": "OR" })
         elif lbnfLabel == "repeat_head":
             expression.append({ "operator": "#"})
+            stateMachine["foundPound"] = True
         elif lbnfLabel == "subscript":
             expression.append({ "operator": "subscripts"})
         elif lbnfLabel == "relationalOpEQ":

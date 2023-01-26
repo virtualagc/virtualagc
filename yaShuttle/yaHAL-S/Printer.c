@@ -5610,34 +5610,34 @@ void ppREPEATED_CONSTANT(REPEATED_CONSTANT p, int _i_)
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_ABrepeated_constant:
+  case is_ABrepeated_constantMark:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppREPEAT_HEAD(p->u.abrepeated_constant_.repeat_head_, 0);
-    ppVARIABLE(p->u.abrepeated_constant_.variable_, 0);
+    ppREPEAT_HEAD(p->u.abrepeated_constantmark_.repeat_head_, 0);
+    ppVARIABLE(p->u.abrepeated_constantmark_.variable_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_ACrepeated_constant:
+  case is_ACrepeated_constantMark:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppREPEAT_HEAD(p->u.acrepeated_constant_.repeat_head_, 0);
-    ppCONSTANT(p->u.acrepeated_constant_.constant_, 0);
+    ppREPEAT_HEAD(p->u.acrepeated_constantmark_.repeat_head_, 0);
+    ppCONSTANT(p->u.acrepeated_constantmark_.constant_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_ADrepeated_constant:
+  case is_ADrepeated_constantMark:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppNESTED_REPEAT_HEAD(p->u.adrepeated_constant_.nested_repeat_head_, 0);
-    ppREPEATED_CONSTANT(p->u.adrepeated_constant_.repeated_constant_, 0);
+    ppNESTED_REPEAT_HEAD(p->u.adrepeated_constantmark_.nested_repeat_head_, 0);
+    ppREPEATED_CONSTANT(p->u.adrepeated_constantmark_.repeated_constant_, 0);
     renderC(')');
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_AErepeated_constant:
+  case is_AErepeated_constantMark:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppREPEAT_HEAD(p->u.aerepeated_constant_.repeat_head_, 0);
+    ppREPEAT_HEAD(p->u.aerepeated_constantmark_.repeat_head_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
@@ -14462,56 +14462,56 @@ void shREPEATED_CONSTANT(REPEATED_CONSTANT p)
     bufAppendC(')');
 
     break;
-  case is_ABrepeated_constant:
+  case is_ABrepeated_constantMark:
     bufAppendC('(');
 
-    bufAppendS("ABrepeated_constant");
+    bufAppendS("ABrepeated_constantMark");
 
     bufAppendC(' ');
 
-    shREPEAT_HEAD(p->u.abrepeated_constant_.repeat_head_);
+    shREPEAT_HEAD(p->u.abrepeated_constantmark_.repeat_head_);
   bufAppendC(' ');
-    shVARIABLE(p->u.abrepeated_constant_.variable_);
+    shVARIABLE(p->u.abrepeated_constantmark_.variable_);
 
     bufAppendC(')');
 
     break;
-  case is_ACrepeated_constant:
+  case is_ACrepeated_constantMark:
     bufAppendC('(');
 
-    bufAppendS("ACrepeated_constant");
+    bufAppendS("ACrepeated_constantMark");
 
     bufAppendC(' ');
 
-    shREPEAT_HEAD(p->u.acrepeated_constant_.repeat_head_);
+    shREPEAT_HEAD(p->u.acrepeated_constantmark_.repeat_head_);
   bufAppendC(' ');
-    shCONSTANT(p->u.acrepeated_constant_.constant_);
+    shCONSTANT(p->u.acrepeated_constantmark_.constant_);
 
     bufAppendC(')');
 
     break;
-  case is_ADrepeated_constant:
+  case is_ADrepeated_constantMark:
     bufAppendC('(');
 
-    bufAppendS("ADrepeated_constant");
+    bufAppendS("ADrepeated_constantMark");
 
     bufAppendC(' ');
 
-    shNESTED_REPEAT_HEAD(p->u.adrepeated_constant_.nested_repeat_head_);
+    shNESTED_REPEAT_HEAD(p->u.adrepeated_constantmark_.nested_repeat_head_);
   bufAppendC(' ');
-    shREPEATED_CONSTANT(p->u.adrepeated_constant_.repeated_constant_);
+    shREPEATED_CONSTANT(p->u.adrepeated_constantmark_.repeated_constant_);
 
     bufAppendC(')');
 
     break;
-  case is_AErepeated_constant:
+  case is_AErepeated_constantMark:
     bufAppendC('(');
 
-    bufAppendS("AErepeated_constant");
+    bufAppendS("AErepeated_constantMark");
 
     bufAppendC(' ');
 
-    shREPEAT_HEAD(p->u.aerepeated_constant_.repeat_head_);
+    shREPEAT_HEAD(p->u.aerepeated_constantmark_.repeat_head_);
 
     bufAppendC(')');
 

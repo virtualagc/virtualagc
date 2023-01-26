@@ -6287,59 +6287,59 @@ REPEATED_CONSTANT make_AArepeated_constant(EXPRESSION p1)
     tmp->u.aarepeated_constant_.expression_ = p1;
     return tmp;
 }
-/********************   ABrepeated_constant    ********************/
-REPEATED_CONSTANT make_ABrepeated_constant(REPEAT_HEAD p1, VARIABLE p2)
+/********************   ABrepeated_constantMark    ********************/
+REPEATED_CONSTANT make_ABrepeated_constantMark(REPEAT_HEAD p1, VARIABLE p2)
 {
     REPEATED_CONSTANT tmp = (REPEATED_CONSTANT) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ABrepeated_constant!\n");
+        fprintf(stderr, "Error: out of memory when allocating ABrepeated_constantMark!\n");
         exit(1);
     }
-    tmp->kind = is_ABrepeated_constant;
-    tmp->u.abrepeated_constant_.repeat_head_ = p1;
-    tmp->u.abrepeated_constant_.variable_ = p2;
+    tmp->kind = is_ABrepeated_constantMark;
+    tmp->u.abrepeated_constantmark_.repeat_head_ = p1;
+    tmp->u.abrepeated_constantmark_.variable_ = p2;
     return tmp;
 }
-/********************   ACrepeated_constant    ********************/
-REPEATED_CONSTANT make_ACrepeated_constant(REPEAT_HEAD p1, CONSTANT p2)
+/********************   ACrepeated_constantMark    ********************/
+REPEATED_CONSTANT make_ACrepeated_constantMark(REPEAT_HEAD p1, CONSTANT p2)
 {
     REPEATED_CONSTANT tmp = (REPEATED_CONSTANT) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ACrepeated_constant!\n");
+        fprintf(stderr, "Error: out of memory when allocating ACrepeated_constantMark!\n");
         exit(1);
     }
-    tmp->kind = is_ACrepeated_constant;
-    tmp->u.acrepeated_constant_.repeat_head_ = p1;
-    tmp->u.acrepeated_constant_.constant_ = p2;
+    tmp->kind = is_ACrepeated_constantMark;
+    tmp->u.acrepeated_constantmark_.repeat_head_ = p1;
+    tmp->u.acrepeated_constantmark_.constant_ = p2;
     return tmp;
 }
-/********************   ADrepeated_constant    ********************/
-REPEATED_CONSTANT make_ADrepeated_constant(NESTED_REPEAT_HEAD p1, REPEATED_CONSTANT p2)
+/********************   ADrepeated_constantMark    ********************/
+REPEATED_CONSTANT make_ADrepeated_constantMark(NESTED_REPEAT_HEAD p1, REPEATED_CONSTANT p2)
 {
     REPEATED_CONSTANT tmp = (REPEATED_CONSTANT) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ADrepeated_constant!\n");
+        fprintf(stderr, "Error: out of memory when allocating ADrepeated_constantMark!\n");
         exit(1);
     }
-    tmp->kind = is_ADrepeated_constant;
-    tmp->u.adrepeated_constant_.nested_repeat_head_ = p1;
-    tmp->u.adrepeated_constant_.repeated_constant_ = p2;
+    tmp->kind = is_ADrepeated_constantMark;
+    tmp->u.adrepeated_constantmark_.nested_repeat_head_ = p1;
+    tmp->u.adrepeated_constantmark_.repeated_constant_ = p2;
     return tmp;
 }
-/********************   AErepeated_constant    ********************/
-REPEATED_CONSTANT make_AErepeated_constant(REPEAT_HEAD p1)
+/********************   AErepeated_constantMark    ********************/
+REPEATED_CONSTANT make_AErepeated_constantMark(REPEAT_HEAD p1)
 {
     REPEATED_CONSTANT tmp = (REPEATED_CONSTANT) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating AErepeated_constant!\n");
+        fprintf(stderr, "Error: out of memory when allocating AErepeated_constantMark!\n");
         exit(1);
     }
-    tmp->kind = is_AErepeated_constant;
-    tmp->u.aerepeated_constant_.repeat_head_ = p1;
+    tmp->kind = is_AErepeated_constantMark;
+    tmp->u.aerepeated_constantmark_.repeat_head_ = p1;
     return tmp;
 }/********************   AArepeat_head    ********************/
 REPEAT_HEAD make_AArepeat_head(ARITH_EXP p1)

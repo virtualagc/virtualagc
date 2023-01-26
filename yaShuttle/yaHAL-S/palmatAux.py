@@ -383,9 +383,15 @@ def completeInitialConstants(identifiers):
             continue
         if "initial" in identifierDict:
             value = identifierDict["initial"]
+            if not isinstance(value, list):
+                value = []
+                identifierDict["initial"] = value
             isInitial = True
         elif "constant" in identifierDict:
             value = identifierDict["constant"]
+            if not isinstance(value, list):
+                value = []
+                identifierDict["constant"] = value
             isInitial = False
         elif "vector" in identifierDict:
             numCols = identifierDict["vector"]
