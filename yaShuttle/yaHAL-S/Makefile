@@ -32,6 +32,10 @@ HFILES = Absyn.h Parser.h Printer.h
 
 all : DemoHAL_S ${APP} ${APP2} yaHAL-S-FC.zip
 
+counterexamples :
+	-rm temp/Parser.c
+	make -C temp BISON_OPTS=-Wcounterexamples Parser.c 
+
 clean :
 	rm -f ${APP} ${APP}.o ${APP2}
 	if [ -d temp ] ; then rm temp/* -rf; fi

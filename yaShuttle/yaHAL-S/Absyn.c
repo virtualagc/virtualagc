@@ -993,7 +993,7 @@ PRE_PRIMARY make_ACpre_primary(COMPOUND_NUMBER p1)
     return tmp;
 }
 /********************   ADprePrimaryRtlFunction    ********************/
-PRE_PRIMARY make_ADprePrimaryRtlFunction(ARITH_FUNC_HEAD p1, CALL_LIST p2)
+PRE_PRIMARY make_ADprePrimaryRtlFunction(ARITH_FUNC p1, CALL_LIST p2)
 {
     PRE_PRIMARY tmp = (PRE_PRIMARY) malloc(sizeof(*tmp));
     if (!tmp)
@@ -1002,8 +1002,34 @@ PRE_PRIMARY make_ADprePrimaryRtlFunction(ARITH_FUNC_HEAD p1, CALL_LIST p2)
         exit(1);
     }
     tmp->kind = is_ADprePrimaryRtlFunction;
-    tmp->u.adpreprimaryrtlfunction_.arith_func_head_ = p1;
+    tmp->u.adpreprimaryrtlfunction_.arith_func_ = p1;
     tmp->u.adpreprimaryrtlfunction_.call_list_ = p2;
+    return tmp;
+}
+/********************   ADprePrimaryRtlShaping    ********************/
+PRE_PRIMARY make_ADprePrimaryRtlShaping(SHAPING_HEAD p1)
+{
+    PRE_PRIMARY tmp = (PRE_PRIMARY) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ADprePrimaryRtlShaping!\n");
+        exit(1);
+    }
+    tmp->kind = is_ADprePrimaryRtlShaping;
+    tmp->u.adpreprimaryrtlshaping_.shaping_head_ = p1;
+    return tmp;
+}
+/********************   ADprePrimaryRtlShapingStar    ********************/
+PRE_PRIMARY make_ADprePrimaryRtlShapingStar(SHAPING_HEAD p1)
+{
+    PRE_PRIMARY tmp = (PRE_PRIMARY) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ADprePrimaryRtlShapingStar!\n");
+        exit(1);
+    }
+    tmp->kind = is_ADprePrimaryRtlShapingStar;
+    tmp->u.adpreprimaryrtlshapingstar_.shaping_head_ = p1;
     return tmp;
 }
 /********************   AEprePrimaryFunction    ********************/
@@ -1135,31 +1161,47 @@ MODIFIED_ARITH_FUNC make_AEmodified_arith_func(QUAL_STRUCT p1, NO_ARG_ARITH_FUNC
     tmp->u.aemodified_arith_func_.no_arg_arith_func_ = p2;
     tmp->u.aemodified_arith_func_.subscript_ = p3;
     return tmp;
-}/********************   AAarith_func_head    ********************/
-ARITH_FUNC_HEAD make_AAarith_func_head(ARITH_FUNC p1)
+}/********************   ADprePrimaryRtlShapingHead    ********************/
+SHAPING_HEAD make_ADprePrimaryRtlShapingHead(ARITH_CONV p1, REPEATED_CONSTANT p2)
 {
-    ARITH_FUNC_HEAD tmp = (ARITH_FUNC_HEAD) malloc(sizeof(*tmp));
+    SHAPING_HEAD tmp = (SHAPING_HEAD) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating AAarith_func_head!\n");
+        fprintf(stderr, "Error: out of memory when allocating ADprePrimaryRtlShapingHead!\n");
         exit(1);
     }
-    tmp->kind = is_AAarith_func_head;
-    tmp->u.aaarith_func_head_.arith_func_ = p1;
+    tmp->kind = is_ADprePrimaryRtlShapingHead;
+    tmp->u.adpreprimaryrtlshapinghead_.arith_conv_ = p1;
+    tmp->u.adpreprimaryrtlshapinghead_.repeated_constant_ = p2;
     return tmp;
 }
-/********************   ABarith_func_head    ********************/
-ARITH_FUNC_HEAD make_ABarith_func_head(ARITH_CONV p1, SUBSCRIPT p2)
+/********************   ADprePrimaryRtlShapingHeadSubscript    ********************/
+SHAPING_HEAD make_ADprePrimaryRtlShapingHeadSubscript(ARITH_CONV p1, SUBSCRIPT p2, REPEATED_CONSTANT p3)
 {
-    ARITH_FUNC_HEAD tmp = (ARITH_FUNC_HEAD) malloc(sizeof(*tmp));
+    SHAPING_HEAD tmp = (SHAPING_HEAD) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ABarith_func_head!\n");
+        fprintf(stderr, "Error: out of memory when allocating ADprePrimaryRtlShapingHeadSubscript!\n");
         exit(1);
     }
-    tmp->kind = is_ABarith_func_head;
-    tmp->u.abarith_func_head_.arith_conv_ = p1;
-    tmp->u.abarith_func_head_.subscript_ = p2;
+    tmp->kind = is_ADprePrimaryRtlShapingHeadSubscript;
+    tmp->u.adpreprimaryrtlshapingheadsubscript_.arith_conv_ = p1;
+    tmp->u.adpreprimaryrtlshapingheadsubscript_.subscript_ = p2;
+    tmp->u.adpreprimaryrtlshapingheadsubscript_.repeated_constant_ = p3;
+    return tmp;
+}
+/********************   ADprePrimaryRtlShapingHeadRepeated    ********************/
+SHAPING_HEAD make_ADprePrimaryRtlShapingHeadRepeated(SHAPING_HEAD p1, REPEATED_CONSTANT p2)
+{
+    SHAPING_HEAD tmp = (SHAPING_HEAD) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ADprePrimaryRtlShapingHeadRepeated!\n");
+        exit(1);
+    }
+    tmp->kind = is_ADprePrimaryRtlShapingHeadRepeated;
+    tmp->u.adpreprimaryrtlshapingheadrepeated_.shaping_head_ = p1;
+    tmp->u.adpreprimaryrtlshapingheadrepeated_.repeated_constant_ = p2;
     return tmp;
 }/********************   AAcall_list    ********************/
 CALL_LIST make_AAcall_list(LIST_EXP p1)
@@ -1200,18 +1242,18 @@ LIST_EXP make_AAlist_exp(EXPRESSION p1)
     tmp->u.aalist_exp_.expression_ = p1;
     return tmp;
 }
-/********************   ABlist_exp    ********************/
-LIST_EXP make_ABlist_exp(ARITH_EXP p1, EXPRESSION p2)
+/********************   ABlist_expRepeated    ********************/
+LIST_EXP make_ABlist_expRepeated(ARITH_EXP p1, EXPRESSION p2)
 {
     LIST_EXP tmp = (LIST_EXP) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ABlist_exp!\n");
+        fprintf(stderr, "Error: out of memory when allocating ABlist_expRepeated!\n");
         exit(1);
     }
-    tmp->kind = is_ABlist_exp;
-    tmp->u.ablist_exp_.arith_exp_ = p1;
-    tmp->u.ablist_exp_.expression_ = p2;
+    tmp->kind = is_ABlist_expRepeated;
+    tmp->u.ablist_exprepeated_.arith_exp_ = p1;
+    tmp->u.ablist_exprepeated_.expression_ = p2;
     return tmp;
 }
 /********************   ADlist_exp    ********************/
@@ -1830,18 +1872,6 @@ ARITH_FUNC make_ZZunit()
     tmp->kind = is_ZZunit;
     return tmp;
 }
-/********************   ZZmatrix    ********************/
-ARITH_FUNC make_ZZmatrix()
-{
-    ARITH_FUNC tmp = (ARITH_FUNC) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ZZmatrix!\n");
-        exit(1);
-    }
-    tmp->kind = is_ZZmatrix;
-    return tmp;
-}
 /********************   ZZindex    ********************/
 ARITH_FUNC make_ZZindex()
 {
@@ -1948,30 +1978,6 @@ ARITH_FUNC make_ZZmin()
         exit(1);
     }
     tmp->kind = is_ZZmin;
-    return tmp;
-}
-/********************   AAarithFuncInteger    ********************/
-ARITH_FUNC make_AAarithFuncInteger()
-{
-    ARITH_FUNC tmp = (ARITH_FUNC) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AAarithFuncInteger!\n");
-        exit(1);
-    }
-    tmp->kind = is_AAarithFuncInteger;
-    return tmp;
-}
-/********************   AAarithFuncScalar    ********************/
-ARITH_FUNC make_AAarithFuncScalar()
-{
-    ARITH_FUNC tmp = (ARITH_FUNC) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AAarithFuncScalar!\n");
-        exit(1);
-    }
-    tmp->kind = is_AAarithFuncScalar;
     return tmp;
 }/********************   AAsubscript    ********************/
 SUBSCRIPT make_AAsubscript(SUB_HEAD p1)

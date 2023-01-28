@@ -83,8 +83,8 @@ struct SIMPLE_NUMBER_;
 typedef struct SIMPLE_NUMBER_ *SIMPLE_NUMBER;
 struct MODIFIED_ARITH_FUNC_;
 typedef struct MODIFIED_ARITH_FUNC_ *MODIFIED_ARITH_FUNC;
-struct ARITH_FUNC_HEAD_;
-typedef struct ARITH_FUNC_HEAD_ *ARITH_FUNC_HEAD;
+struct SHAPING_HEAD_;
+typedef struct SHAPING_HEAD_ *SHAPING_HEAD;
 struct CALL_LIST_;
 typedef struct CALL_LIST_ *CALL_LIST;
 struct LIST_EXP_;
@@ -754,13 +754,15 @@ ARITH_VAR make_ADarith_var(QUAL_STRUCT p0, ARITH_ID p1, SUBSCRIPT p2);
 struct PRE_PRIMARY_
 {
   int line_number, char_number;
-  enum { is_AApre_primary, is_ABpre_primary, is_ACpre_primary, is_ADprePrimaryRtlFunction, is_AEprePrimaryFunction } kind;
+  enum { is_AApre_primary, is_ABpre_primary, is_ACpre_primary, is_ADprePrimaryRtlFunction, is_ADprePrimaryRtlShaping, is_ADprePrimaryRtlShapingStar, is_AEprePrimaryFunction } kind;
   union
   {
     struct { ARITH_EXP arith_exp_; } aapre_primary_;
     struct { NUMBER number_; } abpre_primary_;
     struct { COMPOUND_NUMBER compound_number_; } acpre_primary_;
-    struct { ARITH_FUNC_HEAD arith_func_head_; CALL_LIST call_list_; } adpreprimaryrtlfunction_;
+    struct { ARITH_FUNC arith_func_; CALL_LIST call_list_; } adpreprimaryrtlfunction_;
+    struct { SHAPING_HEAD shaping_head_; } adpreprimaryrtlshaping_;
+    struct { SHAPING_HEAD shaping_head_; } adpreprimaryrtlshapingstar_;
     struct { CALL_LIST call_list_; LabelToken labeltoken_; } aepreprimaryfunction_;
   } u;
 };
@@ -768,7 +770,9 @@ struct PRE_PRIMARY_
 PRE_PRIMARY make_AApre_primary(ARITH_EXP p0);
 PRE_PRIMARY make_ABpre_primary(NUMBER p0);
 PRE_PRIMARY make_ACpre_primary(COMPOUND_NUMBER p0);
-PRE_PRIMARY make_ADprePrimaryRtlFunction(ARITH_FUNC_HEAD p0, CALL_LIST p1);
+PRE_PRIMARY make_ADprePrimaryRtlFunction(ARITH_FUNC p0, CALL_LIST p1);
+PRE_PRIMARY make_ADprePrimaryRtlShaping(SHAPING_HEAD p0);
+PRE_PRIMARY make_ADprePrimaryRtlShapingStar(SHAPING_HEAD p0);
 PRE_PRIMARY make_AEprePrimaryFunction(LabelToken p0, CALL_LIST p1);
 
 struct NUMBER_
@@ -839,19 +843,21 @@ MODIFIED_ARITH_FUNC make_ACmodified_arith_func(NO_ARG_ARITH_FUNC p0, SUBSCRIPT p
 MODIFIED_ARITH_FUNC make_ADmodified_arith_func(QUAL_STRUCT p0, NO_ARG_ARITH_FUNC p1);
 MODIFIED_ARITH_FUNC make_AEmodified_arith_func(QUAL_STRUCT p0, NO_ARG_ARITH_FUNC p1, SUBSCRIPT p2);
 
-struct ARITH_FUNC_HEAD_
+struct SHAPING_HEAD_
 {
   int line_number, char_number;
-  enum { is_AAarith_func_head, is_ABarith_func_head } kind;
+  enum { is_ADprePrimaryRtlShapingHead, is_ADprePrimaryRtlShapingHeadSubscript, is_ADprePrimaryRtlShapingHeadRepeated } kind;
   union
   {
-    struct { ARITH_FUNC arith_func_; } aaarith_func_head_;
-    struct { ARITH_CONV arith_conv_; SUBSCRIPT subscript_; } abarith_func_head_;
+    struct { ARITH_CONV arith_conv_; REPEATED_CONSTANT repeated_constant_; } adpreprimaryrtlshapinghead_;
+    struct { ARITH_CONV arith_conv_; REPEATED_CONSTANT repeated_constant_; SUBSCRIPT subscript_; } adpreprimaryrtlshapingheadsubscript_;
+    struct { REPEATED_CONSTANT repeated_constant_; SHAPING_HEAD shaping_head_; } adpreprimaryrtlshapingheadrepeated_;
   } u;
 };
 
-ARITH_FUNC_HEAD make_AAarith_func_head(ARITH_FUNC p0);
-ARITH_FUNC_HEAD make_ABarith_func_head(ARITH_CONV p0, SUBSCRIPT p1);
+SHAPING_HEAD make_ADprePrimaryRtlShapingHead(ARITH_CONV p0, REPEATED_CONSTANT p1);
+SHAPING_HEAD make_ADprePrimaryRtlShapingHeadSubscript(ARITH_CONV p0, SUBSCRIPT p1, REPEATED_CONSTANT p2);
+SHAPING_HEAD make_ADprePrimaryRtlShapingHeadRepeated(SHAPING_HEAD p0, REPEATED_CONSTANT p1);
 
 struct CALL_LIST_
 {
@@ -870,17 +876,17 @@ CALL_LIST make_ABcall_list(CALL_LIST p0, LIST_EXP p1);
 struct LIST_EXP_
 {
   int line_number, char_number;
-  enum { is_AAlist_exp, is_ABlist_exp, is_ADlist_exp } kind;
+  enum { is_AAlist_exp, is_ABlist_expRepeated, is_ADlist_exp } kind;
   union
   {
     struct { EXPRESSION expression_; } aalist_exp_;
-    struct { ARITH_EXP arith_exp_; EXPRESSION expression_; } ablist_exp_;
+    struct { ARITH_EXP arith_exp_; EXPRESSION expression_; } ablist_exprepeated_;
     struct { QUAL_STRUCT qual_struct_; } adlist_exp_;
   } u;
 };
 
 LIST_EXP make_AAlist_exp(EXPRESSION p0);
-LIST_EXP make_ABlist_exp(ARITH_EXP p0, EXPRESSION p1);
+LIST_EXP make_ABlist_expRepeated(ARITH_EXP p0, EXPRESSION p1);
 LIST_EXP make_ADlist_exp(QUAL_STRUCT p0);
 
 struct EXPRESSION_
@@ -938,7 +944,7 @@ NO_ARG_ARITH_FUNC make_ZZruntime(void);
 struct ARITH_FUNC_
 {
   int line_number, char_number;
-  enum { is_ZZnextime, is_ZZabs, is_ZZceiling, is_ZZdiv, is_ZZfloor, is_ZZmidval, is_ZZmod, is_ZZodd, is_ZZremainder, is_ZZround, is_ZZsign, is_ZZsignum, is_ZZtruncate, is_ZZarccos, is_ZZarccosh, is_ZZarcsin, is_ZZarcsinh, is_ZZarctan2, is_ZZarctan, is_ZZarctanh, is_ZZcos, is_ZZcosh, is_ZZexp, is_ZZlog, is_ZZsin, is_ZZsinh, is_ZZsqrt, is_ZZtan, is_ZZtanh, is_ZZshl, is_ZZshr, is_ZZabval, is_ZZdet, is_ZZtrace, is_ZZunit, is_ZZmatrix, is_ZZindex, is_ZZlength, is_ZZinverse, is_ZZtranspose, is_ZZprod, is_ZZsum, is_ZZsize, is_ZZmax, is_ZZmin, is_AAarithFuncInteger, is_AAarithFuncScalar } kind;
+  enum { is_ZZnextime, is_ZZabs, is_ZZceiling, is_ZZdiv, is_ZZfloor, is_ZZmidval, is_ZZmod, is_ZZodd, is_ZZremainder, is_ZZround, is_ZZsign, is_ZZsignum, is_ZZtruncate, is_ZZarccos, is_ZZarccosh, is_ZZarcsin, is_ZZarcsinh, is_ZZarctan2, is_ZZarctan, is_ZZarctanh, is_ZZcos, is_ZZcosh, is_ZZexp, is_ZZlog, is_ZZsin, is_ZZsinh, is_ZZsqrt, is_ZZtan, is_ZZtanh, is_ZZshl, is_ZZshr, is_ZZabval, is_ZZdet, is_ZZtrace, is_ZZunit, is_ZZindex, is_ZZlength, is_ZZinverse, is_ZZtranspose, is_ZZprod, is_ZZsum, is_ZZsize, is_ZZmax, is_ZZmin } kind;
   union
   {
   } u;
@@ -979,7 +985,6 @@ ARITH_FUNC make_ZZabval(void);
 ARITH_FUNC make_ZZdet(void);
 ARITH_FUNC make_ZZtrace(void);
 ARITH_FUNC make_ZZunit(void);
-ARITH_FUNC make_ZZmatrix(void);
 ARITH_FUNC make_ZZindex(void);
 ARITH_FUNC make_ZZlength(void);
 ARITH_FUNC make_ZZinverse(void);
@@ -989,8 +994,6 @@ ARITH_FUNC make_ZZsum(void);
 ARITH_FUNC make_ZZsize(void);
 ARITH_FUNC make_ZZmax(void);
 ARITH_FUNC make_ZZmin(void);
-ARITH_FUNC make_AAarithFuncInteger(void);
-ARITH_FUNC make_AAarithFuncScalar(void);
 
 struct SUBSCRIPT_
 {

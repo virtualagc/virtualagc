@@ -18,7 +18,7 @@ from p_Functions import substate
 
 # Set the following to enable tracing of calls to executePALMAT when trying
 # to compute compile-time constants.
-traceCompileTime = False
+traceCompileTime = True
 
 # Return True on success, False on failure.  The stage argument is 0 when
 # called upon starting processing of an lbnfLabel, 2 after otherwise finishing
@@ -88,6 +88,16 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
                 stateMachine.pop("readStatement")
         elif lbnfLabel == "repeated_constantMark":
             expression.append({ "sentinel": "repeat"})
+        elif lbnfLabel in ["prePrimaryRtlShaping", "prePrimaryRtlShapingStar"]:
+            expression.append({ "sentinel": "shaping3"})
+        elif lbnfLabel == "arithConv_integer":
+            expression.append({ "shaping": "integer" })
+            expression.append({ "sentinel": "shaping1" })
+            expression.append({ "sentinel": "shaping2" })
+        elif lbnfLabel == "arithConv_scalar":
+            expression.append({ "shaping": "scalar" })
+            expression.append({ "sentinel": "shaping1" })
+            expression.append({ "sentinel": "shaping2" })
     #if stage == 2 and lbnfLabel == "repeated_constant":
     #    expression.append({ "condense": "end" })
     if stage == 2 and depth == owningDepth:
@@ -96,6 +106,7 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
         # to a single number.
         temporaryInstructions = []
         compileTimeComputable = True
+        state["finalExpression"] = list(reversed(expression))
         while len(expression) != 0:
             # Do NOT add breaks to exit this loop once compileTimeExecutable
             # is known!  It has to run to completion to set up 
@@ -183,7 +194,9 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
                     if isinstance(value[0], list):
                         temporaryInstructions.append({"matrix": value })
                     else:
-                        temporaryInstructions.append({"vector": value })                
+                        temporaryInstructions.append({"vector": value }) 
+                elif isinstance(value, tuple):
+                    temporaryInstructions.append({"array": value })               
         if "compiledExpression" in stateMachine:
             instructions = stateMachine["compiledExpression"]
         else:
@@ -284,6 +297,7 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
             internalState = "waitFunctionName"
         elif lbnfLabel == "factorTranspose":
             expression.append({"function": "TRANSPOSE"})
+            
     stateMachine["internalState"] = internalState
     return True
         

@@ -921,9 +921,27 @@ void ppPRE_PRIMARY(PRE_PRIMARY p, int _i_)
 
   case is_ADprePrimaryRtlFunction:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppARITH_FUNC_HEAD(p->u.adpreprimaryrtlfunction_.arith_func_head_, 0);
+    ppARITH_FUNC(p->u.adpreprimaryrtlfunction_.arith_func_, 0);
     renderC('(');
     ppCALL_LIST(p->u.adpreprimaryrtlfunction_.call_list_, 0);
+    renderC(')');
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ADprePrimaryRtlShaping:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppSHAPING_HEAD(p->u.adpreprimaryrtlshaping_.shaping_head_, 0);
+    renderC(')');
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ADprePrimaryRtlShapingStar:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppSHAPING_HEAD(p->u.adpreprimaryrtlshapingstar_.shaping_head_, 0);
+    renderC(',');
+    renderC('*');
     renderC(')');
 
     if (_i_ > 0) renderC(_R_PAREN);
@@ -1070,28 +1088,41 @@ void ppMODIFIED_ARITH_FUNC(MODIFIED_ARITH_FUNC p, int _i_)
   }
 }
 
-void ppARITH_FUNC_HEAD(ARITH_FUNC_HEAD p, int _i_)
+void ppSHAPING_HEAD(SHAPING_HEAD p, int _i_)
 {
   switch(p->kind)
   {
-  case is_AAarith_func_head:
+  case is_ADprePrimaryRtlShapingHead:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppARITH_FUNC(p->u.aaarith_func_head_.arith_func_, 0);
+    ppARITH_CONV(p->u.adpreprimaryrtlshapinghead_.arith_conv_, 0);
+    renderC('(');
+    ppREPEATED_CONSTANT(p->u.adpreprimaryrtlshapinghead_.repeated_constant_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_ABarith_func_head:
+  case is_ADprePrimaryRtlShapingHeadSubscript:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppARITH_CONV(p->u.abarith_func_head_.arith_conv_, 0);
-    ppSUBSCRIPT(p->u.abarith_func_head_.subscript_, 0);
+    ppARITH_CONV(p->u.adpreprimaryrtlshapingheadsubscript_.arith_conv_, 0);
+    ppSUBSCRIPT(p->u.adpreprimaryrtlshapingheadsubscript_.subscript_, 0);
+    renderC('(');
+    ppREPEATED_CONSTANT(p->u.adpreprimaryrtlshapingheadsubscript_.repeated_constant_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ADprePrimaryRtlShapingHeadRepeated:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppSHAPING_HEAD(p->u.adpreprimaryrtlshapingheadrepeated_.shaping_head_, 0);
+    renderC(',');
+    ppREPEATED_CONSTANT(p->u.adpreprimaryrtlshapingheadrepeated_.repeated_constant_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
 
   default:
-    fprintf(stderr, "Error: bad kind field when printing ARITH_FUNC_HEAD!\n");
+    fprintf(stderr, "Error: bad kind field when printing SHAPING_HEAD!\n");
     exit(1);
   }
 }
@@ -1134,11 +1165,11 @@ void ppLIST_EXP(LIST_EXP p, int _i_)
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_ABlist_exp:
+  case is_ABlist_expRepeated:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppARITH_EXP(p->u.ablist_exp_.arith_exp_, 0);
+    ppARITH_EXP(p->u.ablist_exprepeated_.arith_exp_, 0);
     renderC('#');
-    ppEXPRESSION(p->u.ablist_exp_.expression_, 0);
+    ppEXPRESSION(p->u.ablist_exprepeated_.expression_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
@@ -1544,13 +1575,6 @@ void ppARITH_FUNC(ARITH_FUNC p, int _i_)
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_ZZmatrix:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderS("MATRIX");
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
   case is_ZZindex:
     if (_i_ > 0) renderC(_L_PAREN);
     renderS("INDEX");
@@ -1610,20 +1634,6 @@ void ppARITH_FUNC(ARITH_FUNC p, int _i_)
   case is_ZZmin:
     if (_i_ > 0) renderC(_L_PAREN);
     renderS("MIN");
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_AAarithFuncInteger:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderS("INTEGER");
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_AAarithFuncScalar:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderS("SCALAR");
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
@@ -8305,9 +8315,33 @@ void shPRE_PRIMARY(PRE_PRIMARY p)
 
     bufAppendC(' ');
 
-    shARITH_FUNC_HEAD(p->u.adpreprimaryrtlfunction_.arith_func_head_);
+    shARITH_FUNC(p->u.adpreprimaryrtlfunction_.arith_func_);
   bufAppendC(' ');
     shCALL_LIST(p->u.adpreprimaryrtlfunction_.call_list_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ADprePrimaryRtlShaping:
+    bufAppendC('(');
+
+    bufAppendS("ADprePrimaryRtlShaping");
+
+    bufAppendC(' ');
+
+    shSHAPING_HEAD(p->u.adpreprimaryrtlshaping_.shaping_head_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ADprePrimaryRtlShapingStar:
+    bufAppendC('(');
+
+    bufAppendS("ADprePrimaryRtlShapingStar");
+
+    bufAppendC(' ');
+
+    shSHAPING_HEAD(p->u.adpreprimaryrtlshapingstar_.shaping_head_);
 
     bufAppendC(')');
 
@@ -8504,39 +8538,57 @@ void shMODIFIED_ARITH_FUNC(MODIFIED_ARITH_FUNC p)
   }
 }
 
-void shARITH_FUNC_HEAD(ARITH_FUNC_HEAD p)
+void shSHAPING_HEAD(SHAPING_HEAD p)
 {
   switch(p->kind)
   {
-  case is_AAarith_func_head:
+  case is_ADprePrimaryRtlShapingHead:
     bufAppendC('(');
 
-    bufAppendS("AAarith_func_head");
+    bufAppendS("ADprePrimaryRtlShapingHead");
 
     bufAppendC(' ');
 
-    shARITH_FUNC(p->u.aaarith_func_head_.arith_func_);
+    shARITH_CONV(p->u.adpreprimaryrtlshapinghead_.arith_conv_);
+  bufAppendC(' ');
+    shREPEATED_CONSTANT(p->u.adpreprimaryrtlshapinghead_.repeated_constant_);
 
     bufAppendC(')');
 
     break;
-  case is_ABarith_func_head:
+  case is_ADprePrimaryRtlShapingHeadSubscript:
     bufAppendC('(');
 
-    bufAppendS("ABarith_func_head");
+    bufAppendS("ADprePrimaryRtlShapingHeadSubscript");
 
     bufAppendC(' ');
 
-    shARITH_CONV(p->u.abarith_func_head_.arith_conv_);
+    shARITH_CONV(p->u.adpreprimaryrtlshapingheadsubscript_.arith_conv_);
   bufAppendC(' ');
-    shSUBSCRIPT(p->u.abarith_func_head_.subscript_);
+    shSUBSCRIPT(p->u.adpreprimaryrtlshapingheadsubscript_.subscript_);
+  bufAppendC(' ');
+    shREPEATED_CONSTANT(p->u.adpreprimaryrtlshapingheadsubscript_.repeated_constant_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ADprePrimaryRtlShapingHeadRepeated:
+    bufAppendC('(');
+
+    bufAppendS("ADprePrimaryRtlShapingHeadRepeated");
+
+    bufAppendC(' ');
+
+    shSHAPING_HEAD(p->u.adpreprimaryrtlshapingheadrepeated_.shaping_head_);
+  bufAppendC(' ');
+    shREPEATED_CONSTANT(p->u.adpreprimaryrtlshapingheadrepeated_.repeated_constant_);
 
     bufAppendC(')');
 
     break;
 
   default:
-    fprintf(stderr, "Error: bad kind field when showing ARITH_FUNC_HEAD!\n");
+    fprintf(stderr, "Error: bad kind field when showing SHAPING_HEAD!\n");
     exit(1);
   }
 }
@@ -8594,16 +8646,16 @@ void shLIST_EXP(LIST_EXP p)
     bufAppendC(')');
 
     break;
-  case is_ABlist_exp:
+  case is_ABlist_expRepeated:
     bufAppendC('(');
 
-    bufAppendS("ABlist_exp");
+    bufAppendS("ABlist_expRepeated");
 
     bufAppendC(' ');
 
-    shARITH_EXP(p->u.ablist_exp_.arith_exp_);
+    shARITH_EXP(p->u.ablist_exprepeated_.arith_exp_);
   bufAppendC(' ');
-    shEXPRESSION(p->u.ablist_exp_.expression_);
+    shEXPRESSION(p->u.ablist_exprepeated_.expression_);
 
     bufAppendC(')');
 
@@ -9092,14 +9144,6 @@ void shARITH_FUNC(ARITH_FUNC p)
 
 
     break;
-  case is_ZZmatrix:
-
-    bufAppendS("ZZmatrix");
-
-
-
-
-    break;
   case is_ZZindex:
 
     bufAppendS("ZZindex");
@@ -9167,22 +9211,6 @@ void shARITH_FUNC(ARITH_FUNC p)
   case is_ZZmin:
 
     bufAppendS("ZZmin");
-
-
-
-
-    break;
-  case is_AAarithFuncInteger:
-
-    bufAppendS("AAarithFuncInteger");
-
-
-
-
-    break;
-  case is_AAarithFuncScalar:
-
-    bufAppendS("AAarithFuncScalar");
 
 
 

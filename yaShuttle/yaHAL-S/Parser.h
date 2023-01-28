@@ -35,7 +35,7 @@ typedef union
   COMPOUND_NUMBER compound_number_;
   SIMPLE_NUMBER simple_number_;
   MODIFIED_ARITH_FUNC modified_arith_func_;
-  ARITH_FUNC_HEAD arith_func_head_;
+  SHAPING_HEAD shaping_head_;
   CALL_LIST call_list_;
   LIST_EXP list_exp_;
   EXPRESSION expression_;

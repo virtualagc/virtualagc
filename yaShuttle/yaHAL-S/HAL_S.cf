@@ -212,13 +212,18 @@ CLcompound_number . COMPOUND_NUMBER ::= CompoundToken ;
 CKsimple_number . SIMPLE_NUMBER ::= NumberToken ;
 ABprimary . PRIMARY ::= MODIFIED_ARITH_FUNC ;
 AAmodified_arith_func . MODIFIED_ARITH_FUNC ::= NO_ARG_ARITH_FUNC ;
-ADprePrimaryRtlFunction . PRE_PRIMARY ::= ARITH_FUNC_HEAD "(" CALL_LIST ")" ;
+ADprePrimaryRtlFunction . PRE_PRIMARY ::= ARITH_FUNC "(" CALL_LIST ")" ;
+ADprePrimaryRtlShaping . PRE_PRIMARY ::= SHAPING_HEAD ")" ;
+ADprePrimaryRtlShapingStar . PRE_PRIMARY ::= SHAPING_HEAD "," "*" ")" ;
+ADprePrimaryRtlShapingHead . SHAPING_HEAD ::= ARITH_CONV "(" REPEATED_CONSTANT ;
+ADprePrimaryRtlShapingHeadSubscript . SHAPING_HEAD ::= ARITH_CONV SUBSCRIPT "(" REPEATED_CONSTANT ;
+ADprePrimaryRtlShapingHeadRepeated . SHAPING_HEAD ::= SHAPING_HEAD "," REPEATED_CONSTANT ;
 AEprePrimaryFunction . PRE_PRIMARY ::= LabelToken "(" CALL_LIST ")" ;
-AAarith_func_head . ARITH_FUNC_HEAD ::= ARITH_FUNC ;
+-- AAarith_func_head . ARITH_FUNC_HEAD ::= ARITH_FUNC ;
 AAcall_list . CALL_LIST ::= LIST_EXP ;
 ABcall_list . CALL_LIST ::= CALL_LIST "," LIST_EXP ;
 AAlist_exp . LIST_EXP ::= EXPRESSION ;
-ABlist_exp . LIST_EXP ::= ARITH_EXP "#" EXPRESSION ;
+ABlist_expRepeated . LIST_EXP ::= ARITH_EXP "#" EXPRESSION ;
 --AClist_exp . LIST_EXP ::= STRUCTURE_ID ;
 ADlist_exp . LIST_EXP ::= QUAL_STRUCT ;
 AAexpression . EXPRESSION ::= ARITH_EXP ;
@@ -267,7 +272,7 @@ ZZabval. ARITH_FUNC ::= "ABVAL" ;
 ZZdet. ARITH_FUNC ::= "DET" ;
 ZZtrace. ARITH_FUNC ::= "TRACE" ;
 ZZunit. ARITH_FUNC ::= "UNIT" ;
-ZZmatrix. ARITH_FUNC ::= "MATRIX" ;
+--ZZmatrix. ARITH_FUNC ::= "MATRIX" ;
 
 --------------------------------------------------------------------------
 -- Here are the additional rules needed for SUBSCRIPT.
@@ -308,7 +313,7 @@ ABsub_exp . SUB_EXP ::= POUND_EXPRESSION ;
 AApound_expression . POUND_EXPRESSION ::= "#" ;
 ABpound_expression . POUND_EXPRESSION ::= POUND_EXPRESSION PLUS TERM ;
 ACpound_expression . POUND_EXPRESSION ::= POUND_EXPRESSION MINUS TERM ;
-ABarith_func_head . ARITH_FUNC_HEAD ::= ARITH_CONV SUBSCRIPT ;
+-- ABarith_func_head . ARITH_FUNC_HEAD ::= ARITH_CONV SUBSCRIPT ;
 
 --------------------------------------------------------------------------
 -- Here are the additional rules needed for BIT_EXP.
@@ -817,9 +822,9 @@ AAstruc_inline_def . STRUC_INLINE_DEF ::= "FUNCTION" STRUCT_SPEC ";" ;
 -- Some leftovers.
 AEprimary . PRIMARY ::= PRE_PRIMARY QUALIFIER ;
 ABany_statement . ANY_STATEMENT ::= BLOCK_DEFINITION ;
-AAarithFuncInteger . ARITH_FUNC ::= "INTEGER" ;
+--AAarithFuncInteger . ARITH_FUNC ::= "INTEGER" ;
 AAcharFuncCharacter . CHAR_FUNC ::= "CHARACTER" ;
-AAarithFuncScalar . ARITH_FUNC ::= "SCALAR" ;
+--AAarithFuncScalar . ARITH_FUNC ::= "SCALAR" ;
 
 --------------------------------------------------------------------------
 -- The following rules are commented out "permanently" because they  

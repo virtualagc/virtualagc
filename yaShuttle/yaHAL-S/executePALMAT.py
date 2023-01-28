@@ -255,7 +255,7 @@ def isMatrix(object, initialization=True):
 #                   structures, I think, but at least we can detect missing
 #                   array elements.
 #    [...]          List of widths at each dimension, or [] if not an array.
-def isArray(object):
+def isArray0(object):
     # !!! Needs a lot more thought !!!
     if object == None:
         return False, True, []
@@ -271,6 +271,26 @@ def isArray(object):
             return subInitialized, []
     dimensions.extend(subDimensions)
     return True, dimensions
+
+def isArray(object, dimensions):
+    if len(dimensions) == 0:
+        # Object is an atomic element.  If we want to check that all of the 
+        # types of the array elements are the same and/or initialized, this
+        # is where we do it.
+        return True
+    if object == None:
+        return False
+    if not isinstance(object, tuple):
+        return False
+    if len(object) != dimensions[0]:
+        return False
+    # This level of the array is okay.  Now go on to the sub-levels.
+    subDimensions = dimensions[1:]
+    for subObject in object:
+        if isArray(subObject, subDimensions):
+            continue
+        return False
+    return True
 
 # Test if a value on the computation stack is a boolean.
 def isBitArray(value):
@@ -496,7 +516,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
         instruction = instructions[instructionIndex]
         if "subscripts" in scope0 and "fetch" not in instruction and \
                 "fetchp" not in instruction:
-            print("\tImplementation error, subscript(s) without variable")
+            print("\tImplementation error, subscript(s) without variable in instruction:", \
+                  instruction)
             return None
         if "subscripts" in scope0:
             subscripts = scope0.pop("subscripts")
@@ -522,6 +543,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             computationStack.append(instruction["vector"])
         elif "matrix" in instruction:
             computationStack.append(instruction["matrix"])
+        elif "array" in instruction:
+            computationStack.append(instruction["array"])
         elif "bitarray" in instruction:
             computationStack.append(stringifiedToFloat(instruction["bitarray"]))
         elif "+><" in instruction:
@@ -987,15 +1010,23 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 elif isVector(value) and "vector" in attributes:
                     numRows = len(value)
                     if numRows != attributes["vector"]:
-                        print("\tVector length mismatch in store operation.")
+                        print("\tVector length mismatch in store operation:", \
+                              identifier[1:-1])
                         return None
                 elif isMatrix(value) and "matrix" in attributes:
                     dimensions = [len(value), len(value[0])]
                     if dimensions != attributes["matrix"]:
-                        print("\tMatrix geometry mismatch in store operation.")
+                        print("\tMatrix geometry mismatch in store operation:",\
+                              identifier[1:-1])
+                        return None
+                elif "array" in attributes:
+                    dimensions = attributes["array"]
+                    if not isArray(value, dimensions):
+                        print("\tArray geometry wrong in store operation:", \
+                              identifier[1:-1])
                         return None
                 else:
-                    print("\tMismatched datypes in store operation.")
+                    print("\tMismatched datatypes in store operation.")
                     return None
                 attributes["value"] = value
             if not erroredUp:
@@ -1109,6 +1140,72 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             # We just ignore all i/o controls in WRITE for now.
             if len(computationStack) > 0:
                 computationStack.pop()
+        elif "shaping" in instruction:
+            shapingFunction = instruction["shaping"]
+            if shapingFunction in ["integer", "scalar", "vector", "matrix",
+                                   "doubleinteger", "doublescalar",
+                                   "doublevector", "doublematrix"]:
+                operand = computationStack.pop()
+                if operand == {"sentinel"}:
+                    # The shaping function has subscripts, and hence has
+                    # operands representing both the dimensionality of the
+                    # array, vector, or matrix to be produced, but also the
+                    # data to fill the object.  First collect the dimensions.
+                    dimensions = []
+                    while True:
+                        operand = computationStack.pop()
+                        if operand == {"sentinel"}:
+                            break
+                        dimensions.append(operand)
+                    # We now have the dimensionality, so let's create a Python
+                    # object to hold the data.  This will be a hierarchy of 
+                    # lists, for convenience while we're working with it, but
+                    # depending on datatype, may need to be be converted to
+                    # a hierarchy of tuples when we stick the result back on
+                    # the computation stack.  If the dimensions list is empty,
+                    # for an integer or scalar shaping function it means that 
+                    # it's a one-dimensionsl object but the
+                    # length is unknown and should be tailored to fit the 
+                    # available data; whereas for a vector it means the length
+                    # is the default (3) and for a matrix it means that the
+                    # geometry is the default (3x3).
+                    if len(dimensions) == 0:
+                        if shapingFunction in ["vector", "doublevector"]:
+                            dimensions.append(3)
+                        elif shapingFunction in ["matrix", "doublematrix"]:
+                            dimensions.append(3)
+                            dimensions.append(3)
+                        else:
+                            # We have no predefined length for the scalar or
+                            # integer array we're supposed to produce, so let's
+                            # just start pull in all of the data and build it!
+                            object = []
+                            while True:
+                                operand = computationStack.pop()
+                                if operand == {"sentinel"}:
+                                    break
+                                flatten(operand, object)
+                            if shapingFunction in ["integer", "doubleinteger"]:
+                                for i in range(len(object)):
+                                    object[i] = int(object[i])
+                            elif shapingFunction in ["scalar", "doublescalar"]:
+                                for i in range(len(object)):
+                                    object[i] = float(object[i])
+                            computationStack.append(tuple(object))
+                elif shapingFunction in ["integer", "doubleinteger"]:
+                    computationStack.append(int(operand))
+                elif shapingFunction in ["scalar", "doublescalar"]:
+                    computationStack.append(float(operand))
+                elif shapingFunction in ["vector", "doublevector"]:
+                    print("\tNot yet implemented")
+                    return None
+                elif shapingFunction in ["scalar", "doublescalar"]:
+                    print("\tNot yet implemented")
+                    return None
+            else:
+                print("\tImplementation error, unknown shaping function:", \
+                      shapingFunction)
+                return None
         elif "function" in instruction:
             function = instruction["function"]
             # First check all of the no-argument functions.

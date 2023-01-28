@@ -81,7 +81,7 @@ COMPILATION psCOMPILATION(const char *str)
   COMPOUND_NUMBER compound_number_;
   SIMPLE_NUMBER simple_number_;
   MODIFIED_ARITH_FUNC modified_arith_func_;
-  ARITH_FUNC_HEAD arith_func_head_;
+  SHAPING_HEAD shaping_head_;
   CALL_LIST call_list_;
   LIST_EXP list_exp_;
   EXPRESSION expression_;
@@ -475,7 +475,7 @@ COMPILATION psCOMPILATION(const char *str)
 %type <compound_number_> COMPOUND_NUMBER
 %type <simple_number_> SIMPLE_NUMBER
 %type <modified_arith_func_> MODIFIED_ARITH_FUNC
-%type <arith_func_head_> ARITH_FUNC_HEAD
+%type <shaping_head_> SHAPING_HEAD
 %type <call_list_> CALL_LIST
 %type <list_exp_> LIST_EXP
 %type <expression_> EXPRESSION
@@ -740,7 +740,9 @@ ARITH_VAR : ARITH_ID { $$ = make_AAarith_var($1); $$->line_number = @$.first_lin
 PRE_PRIMARY : _SYMB_2 ARITH_EXP _SYMB_1 { $$ = make_AApre_primary($2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | NUMBER { $$ = make_ABpre_primary($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | COMPOUND_NUMBER { $$ = make_ACpre_primary($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | ARITH_FUNC_HEAD _SYMB_2 CALL_LIST _SYMB_1 { $$ = make_ADprePrimaryRtlFunction($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | ARITH_FUNC _SYMB_2 CALL_LIST _SYMB_1 { $$ = make_ADprePrimaryRtlFunction($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | SHAPING_HEAD _SYMB_1 { $$ = make_ADprePrimaryRtlShaping($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | SHAPING_HEAD _SYMB_0 _SYMB_6 _SYMB_1 { $$ = make_ADprePrimaryRtlShapingStar($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_189 _SYMB_2 CALL_LIST _SYMB_1 { $$ = make_AEprePrimaryFunction($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 NUMBER : SIMPLE_NUMBER { $$ = make_AAnumber($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
@@ -757,14 +759,15 @@ MODIFIED_ARITH_FUNC : NO_ARG_ARITH_FUNC { $$ = make_AAmodified_arith_func($1); $
   | QUAL_STRUCT _SYMB_7 NO_ARG_ARITH_FUNC { $$ = make_ADmodified_arith_func($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | QUAL_STRUCT _SYMB_7 NO_ARG_ARITH_FUNC SUBSCRIPT { $$ = make_AEmodified_arith_func($1, $3, $4); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
-ARITH_FUNC_HEAD : ARITH_FUNC { $$ = make_AAarith_func_head($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | ARITH_CONV SUBSCRIPT { $$ = make_ABarith_func_head($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+SHAPING_HEAD : ARITH_CONV _SYMB_2 REPEATED_CONSTANT { $$ = make_ADprePrimaryRtlShapingHead($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | ARITH_CONV SUBSCRIPT _SYMB_2 REPEATED_CONSTANT { $$ = make_ADprePrimaryRtlShapingHeadSubscript($1, $2, $4); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | SHAPING_HEAD _SYMB_0 REPEATED_CONSTANT { $$ = make_ADprePrimaryRtlShapingHeadRepeated($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 CALL_LIST : LIST_EXP { $$ = make_AAcall_list($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | CALL_LIST _SYMB_0 LIST_EXP { $$ = make_ABcall_list($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 LIST_EXP : EXPRESSION { $$ = make_AAlist_exp($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | ARITH_EXP _SYMB_10 EXPRESSION { $$ = make_ABlist_exp($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | ARITH_EXP _SYMB_10 EXPRESSION { $$ = make_ABlist_expRepeated($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | QUAL_STRUCT { $$ = make_ADlist_exp($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 EXPRESSION : ARITH_EXP { $$ = make_AAexpression($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
@@ -820,7 +823,6 @@ ARITH_FUNC : _SYMB_109 { $$ = make_ZZnextime(); $$->line_number = @$.first_line;
   | _SYMB_67 { $$ = make_ZZdet(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_167 { $$ = make_ZZtrace(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_172 { $$ = make_ZZunit(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_103 { $$ = make_ZZmatrix(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_93 { $$ = make_ZZindex(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_98 { $$ = make_ZZlength(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_96 { $$ = make_ZZinverse(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
@@ -830,8 +832,6 @@ ARITH_FUNC : _SYMB_109 { $$ = make_ZZnextime(); $$->line_number = @$.first_line;
   | _SYMB_151 { $$ = make_ZZsize(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_104 { $$ = make_ZZmax(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_106 { $$ = make_ZZmin(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_95 { $$ = make_AAarithFuncInteger(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_139 { $$ = make_AAarithFuncScalar(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 SUBSCRIPT : SUB_HEAD _SYMB_1 { $$ = make_AAsubscript($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | QUALIFIER { $$ = make_ABsubscript($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
