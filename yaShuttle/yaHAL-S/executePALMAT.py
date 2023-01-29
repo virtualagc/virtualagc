@@ -205,6 +205,30 @@ def printVectorOrMatrix(vOrM):
         value = value.replace("e", "E")
     print(" " + value + " ", end="")
 
+def printArray(array):
+    if isinstance(array, tuple):
+        for a in array:
+            printArray(a)
+        return
+    elif array == None:
+        value = 'None'
+    elif isinstance(array, int):
+        value = "%d" % array
+    elif array == 0.0:
+        value = " 0.0"
+    elif isinstance(array, float):
+        value = fpFormat % array
+        if value[:1] == "+":
+            value = " " + value[1:]
+        value = value.replace("e", "E")
+    elif isBitArray(array):
+        value = "%d" % array[0][0]
+    elif isinstance(array, str):
+        value = array
+    else:
+        value = "(unimplemented)"
+    print(" " + value + " ", end="")
+
 # Read next value (in string form) from LUN 5 ... i.e., stdin.  If a semicolon
 # is encountered that's returned.
 readLineFields = [] # Buffered data for READ statements
@@ -246,32 +270,6 @@ def isMatrix(object, initialization=True):
             return False
     return True
 
-# Test if an object is an array, and if all its elements are initialized.
-# The function is used recursively.  Returns a tuple:
-#    Boolean        True if geometrically an array (i.e., rectangular tuple
-#                   hierarchies), False otherwise.
-#    Boolean        True if all elements initialized, False otherwise.  This
-#                   can't be detected reliably, since some elements could be
-#                   structures, I think, but at least we can detect missing
-#                   array elements.
-#    [...]          List of widths at each dimension, or [] if not an array.
-def isArray0(object):
-    # !!! Needs a lot more thought !!!
-    if object == None:
-        return False, True, []
-    if not isinstance(object, tuple):
-        return True, []
-    dimensions = [len(object)]
-    lastSubDimensions = None
-    for subObject in object:
-        subInitialized, subDimensions = isArray(subObject)
-        if lastSubDimensions == None:
-            lastSubDimensions = subDimensions
-        if subDimensions != lastSubDimensions or not subInitialized:
-            return subInitialized, []
-    dimensions.extend(subDimensions)
-    return True, dimensions
-
 def isArray(object, dimensions):
     if len(dimensions) == 0:
         # Object is an atomic element.  If we want to check that all of the 
@@ -294,8 +292,9 @@ def isArray(object, dimensions):
 
 # Test if a value on the computation stack is a boolean.
 def isBitArray(value):
-    if isinstance(value, tuple) and len(value) == 2 and \
-            isinstance(value[0], int) and isinstance(value[1], int):
+    if isinstance(value, list) and len(value) == 1 and \
+            isinstance(value[0], tuple) and len(value[0]) == 2 and \
+            isinstance(value[0][0], int) and isinstance(value[0][1], int):
         return True
     return False
 
@@ -303,9 +302,9 @@ def isBitArray(value):
 # stack.
 def convertToBitArray(b):
     if b:
-        return (1, 1)
+        return [(1, 1)]
     else:
-        return (0, 1)
+        return [(0, 1)]
 
 # Check operand type for INTEGER vs SCALAR vs VECTOR vs MATRIX.
 def checkArithmeticalDatatype(operand):
@@ -483,11 +482,42 @@ def matrixMultiply(a, b):
 # "Flatten" a composite object (list of lists of ... or tuple of tuples of ...)
 # onto the end of a list.
 def flatten(object, onto):
-    if isinstance(object, (list, tuple)):
+    if isBitArray(object):
+        onto.append(object)
+    elif isinstance(object, (list, tuple)):
         for e in object:
             flatten(e, onto)
     else:
         onto.append(object)
+
+# Apply the INTEGER or SCALAR shaping function (with no subscripts) to a 
+# single INTEGER, SCALAR, BIT(N), CHARACTER(N), VECTOR(N), MATRIX(N,M), or 
+# an ARRAY(N,...,M) of any of those.
+def toIntegerOrScalar(object, toInteger=True):
+    if object == None:
+        return None
+    elif isinstance(object, (int, float)):
+        if toInteger:
+            return int(object)
+        return float(object) 
+    elif isBitArray(object):
+        object = object[0][0]
+        if toInteger:
+            return object
+        return float(object)
+    elif isinstance(object, str):
+        value = stringifiedToFloat(object)
+        if toInteger:
+            return int(value)
+        return value
+    elif isinstance(object, list):
+        for i in range(len(object)):
+            object[i] = toIntegerOrScalar(object[i], toInteger)
+    elif isinstance(object, tuple):
+        object = list(object)
+        for i in range(len(object)):
+            object[i] = toIntegerOrScalar(object[i], toInteger)
+        return tuple(object)
 
 # If this function returns, which in principle it might not if executing
 # an actual flight program, it returns the current computation stack.
@@ -515,7 +545,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
         instructions = scope["instructions"]
         instruction = instructions[instructionIndex]
         if "subscripts" in scope0 and "fetch" not in instruction and \
-                "fetchp" not in instruction:
+                "fetchp" not in instruction and "shaping" not in instruction \
+                and "unravel" not in instruction:
             print("\tImplementation error, subscript(s) without variable in instruction:", \
                   instruction)
             return None
@@ -676,8 +707,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     if not isBitArray(operand):
                         print("\tNot bit array:", operand)
                         return None
-                    numbits = operand[1]
-                    result = (((1<<numbits)-1) & ~operand[0], numbits)
+                    numbits = operand[0][1]
+                    result = [(((1<<numbits)-1) & ~operand[0][0], numbits)]
                 else:
                     print(("Implementation error, unary operator \"%s\" " + \
                            "not yet implemented") % operator)
@@ -877,11 +908,11 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                         if not isBitArray(operand2):
                             print("\tNot bit array:", operand2)
                             return None
-                        numbits = min(operand1[1], operand2[1])
+                        numbits = min(operand1[0][1], operand2[0][1])
                         if operator == "OR":
-                            result = (operand1[0] | operand2[0], numbits)
+                            result = [(operand1[0][0] | operand2[0][0], numbits)]
                         else: # "AND"
-                            result = (operand1[0] & operand2[0], numbits)
+                            result = [(operand1[0][0] & operand2[0][0], numbits)]
                     elif operator == "==":
                         result = convertToBitArray(operand1 == operand2)
                     elif operator == "!=":
@@ -923,16 +954,22 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     print("\tImplementation error, unknown binary operator \"%s\"" \
                                                                     % operator)
                     return None
-        elif "fetch" in instruction or "fetchp" in instruction or \
+        elif "fetch" in instruction or "unravel" in instruction \
+                or "fetchp" in instruction or \
                 "store" in instruction or "storepop" in instruction:
             erroredUp = False
             fetch = False
             fetchp = False
             pop = False
+            unravel = False
             stackPos = 1
             if "fetch" in instruction:
                 si, identifier = instruction["fetch"]
                 fetch = True
+            elif "unravel" in instruction:
+                si, identifier = instruction["unravel"]
+                fetch = True
+                unravel = True
             elif "fetchp" in instruction:
                 si, identifier = instruction["fetchp"]
                 fetchp = True
@@ -970,7 +1007,12 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 if value == None:
                     print("\tCannot compute value.")
                     return None
-                computationStack.append(value)
+                if unravel:
+                    onto = []
+                    flatten(value, onto)
+                    computationStack.extend(reversed(onto))
+                else:
+                    computationStack.append(value)
             elif fetchp:
                 computationStack.append(tuple([(si, identifier)]))
             else: # store
@@ -1006,7 +1048,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                         value = float(value)
                 elif isBitArray(value) and "bit" in attributes:
                     length = attributes["bit"]
-                    value = (value[0] & ((1 << length)-1) , value[1])
+                    value = [(value[0][0] & ((1 << length)-1) , value[0][1])]
                 elif isVector(value) and "vector" in attributes:
                     numRows = len(value)
                     if numRows != attributes["vector"]:
@@ -1115,10 +1157,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                             if value == ";":
                                 semicolon = True
                             value = int(value) & ((1 << bitLength) - 1)
-                            if bitLength == 1:
-                                attributes["value"] = value != 0
-                            else:
-                                attributes["value"] = value
+                            attributes["value"] = [(value, bitLength)]
                         pass
                 while len(computationStack) > start:
                     computationStack.pop()
@@ -1129,9 +1168,11 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 print("%*s" % (indent, ""), end="")
                 for value in computationStack:
                     if isBitArray(value):
-                        print(" %d " % value[0], end="")
+                        print(" %d " % value[0][0], end="")
                     elif isinstance(value, (int, float, list)):
                         printVectorOrMatrix(value)
+                    elif isinstance(value, tuple):
+                        printArray(value)
                     else:
                         print(value, end="")
                 computationStack.clear()
@@ -1145,63 +1186,65 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             if shapingFunction in ["integer", "scalar", "vector", "matrix",
                                    "doubleinteger", "doublescalar",
                                    "doublevector", "doublematrix"]:
-                operand = computationStack.pop()
-                if operand == {"sentinel"}:
-                    # The shaping function has subscripts, and hence has
-                    # operands representing both the dimensionality of the
-                    # array, vector, or matrix to be produced, but also the
-                    # data to fill the object.  First collect the dimensions.
-                    dimensions = []
+                dimensions = []
+                if computationStack[-1] == {"subscripts"}:
+                    computationStack.pop()
                     while True:
                         operand = computationStack.pop()
                         if operand == {"sentinel"}:
                             break
                         dimensions.append(operand)
-                    # We now have the dimensionality, so let's create a Python
-                    # object to hold the data.  This will be a hierarchy of 
-                    # lists, for convenience while we're working with it, but
-                    # depending on datatype, may need to be be converted to
-                    # a hierarchy of tuples when we stick the result back on
-                    # the computation stack.  If the dimensions list is empty,
-                    # for an integer or scalar shaping function it means that 
-                    # it's a one-dimensionsl object but the
-                    # length is unknown and should be tailored to fit the 
-                    # available data; whereas for a vector it means the length
-                    # is the default (3) and for a matrix it means that the
-                    # geometry is the default (3x3).
-                    if len(dimensions) == 0:
-                        if shapingFunction in ["vector", "doublevector"]:
-                            dimensions.append(3)
-                        elif shapingFunction in ["matrix", "doublematrix"]:
-                            dimensions.append(3)
-                            dimensions.append(3)
+                if len(dimensions) == 0:
+                    if shapingFunction in ["vector", "doublevector"]:
+                        dimensions.append(3)
+                    elif shapingFunction in ["matrix", "doublematrix"]:
+                        dimensions.append(3)
+                        dimensions.append(3)
+                # We now have the dimensionality, so let's create a Python
+                # object to hold the data.  If the dimension list is empty,
+                # there are a number of special cases (presumably originally
+                # intended as convenience features for the code) that we need
+                # to consider.
+                if len(dimensions) == 0:
+                        # The shaping function has no subscripts, and the 
+                        # shaping function is integer or scalar, single or 
+                        # double precision, though in this Python implementation
+                        # single and double precision are treated as identical.
+                        object = []
+                        operand = computationStack.pop()
+                        if computationStack[-1] == {"sentinel"}:
+                            # If we're here, it's because there's a single
+                            # argument to the shaping function, currently 
+                            # stored in operand.
+                            computationStack[-1] = \
+                                toIntegerOrScalar(operand, \
+                                                  shapingFunction in \
+                                                  ["integer", "doubleinteger"])
                         else:
-                            # We have no predefined length for the scalar or
-                            # integer array we're supposed to produce, so let's
-                            # just start pull in all of the data and build it!
-                            object = []
-                            while True:
-                                operand = computationStack.pop()
-                                if operand == {"sentinel"}:
-                                    break
+                            # If we're here, then there are multiple arguments
+                            # to the shaping functions, none of which we've yet
+                            # pulled from the stack and we're supposed to 
+                            # produce a variable-length ARRAY by unraveling all
+                            # of the arguments.
+                            fill = False # TBD ... *do* something with fill!
+                            while operand != {"sentinel"}:
+                                if operand == {"fill"}:
+                                    fill = True
+                                    continue
                                 flatten(operand, object)
+                                operand = computationStack.pop()
                             if shapingFunction in ["integer", "doubleinteger"]:
                                 for i in range(len(object)):
-                                    object[i] = int(object[i])
+                                    if object[i] != None:
+                                        object[i] = int(object[i])
                             elif shapingFunction in ["scalar", "doublescalar"]:
                                 for i in range(len(object)):
-                                    object[i] = float(object[i])
+                                    if object[i] != None:
+                                        object[i] = float(object[i])
                             computationStack.append(tuple(object))
-                elif shapingFunction in ["integer", "doubleinteger"]:
-                    computationStack.append(int(operand))
-                elif shapingFunction in ["scalar", "doublescalar"]:
-                    computationStack.append(float(operand))
-                elif shapingFunction in ["vector", "doublevector"]:
-                    print("\tNot yet implemented")
-                    return None
-                elif shapingFunction in ["scalar", "doublescalar"]:
-                    print("\tNot yet implemented")
-                    return None
+                        continue
+                print("\tHaven't yet implemented shaping functions with subscripts.")
+                return None
             else:
                 print("\tImplementation error, unknown shaping function:", \
                       shapingFunction)
@@ -1328,9 +1371,9 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     # Note that this function returns a boolean.
                     operand = hround(operand)
                     if (operand & 1) == 0:
-                        computationStack[-1] = (0, 1)
+                        computationStack[-1] = [(0, 1)]
                     else:
-                        computationStack[-1] = (1, 1)
+                        computationStack[-1] = [(1, 1)]
                 elif function == "ABVAL":
                     vector = computationStack[-1]
                     if not isVector(vector):
@@ -1430,9 +1473,10 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     if not isBitArray(operand2):
                         print("\tNot bit array:", operand2)
                         return None
-                    numbits = min(operand1[1], operand2[1])
+                    numbits = min(operand1[0][1], operand2[0][1])
                     computationStack[-1] = \
-                        ((operand1 ^ operand2) & ((1<<numbits)-1), numbits)
+                        [((operand1[0][0] ^ operand2[0][0]) \
+                          & ((1<<numbits)-1), numbits)]
                 elif function == "SHL":
                     operand1 = hround(operand1)
                     operand2 = hround(operand2)
@@ -1506,13 +1550,13 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             scope = scopes[scopeNumber]
         elif "iffalse" in instruction:
             value = computationStack.pop()
-            if (value[0] & 1) == 0:
+            if (value[0][0] & 1) == 0:
                 scopeNumber, instructionIndex = \
                     jump(PALMAT, scopeNumber, instruction, "iffalse")
                 scope = scopes[scopeNumber]
         elif "iftrue" in instruction:
             value = computationStack.pop()
-            if (value[0] & 1) != 0:
+            if (value[0][0] & 1) != 0:
                 scopeNumber, instructionIndex = \
                     jump(PALMAT, scopeNumber, instruction, "iftrue")
                 scope = scopes[scopeNumber]

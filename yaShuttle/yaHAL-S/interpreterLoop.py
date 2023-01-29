@@ -155,6 +155,8 @@ helpMenu = \
 \t`NOTRACE2    Disable code-generator tracing.
 \t`TRACE3      Enable execution tracing.
 \t`NOTRACE3    Disable execution tracing.
+\t`TRACE4      Enable tracing of compile-time calculations.
+\t`NOTRACE4    Disable compile-time calculation tracing.
 \t`LBNF        Show abstract syntax trees in LBNF.
 \t`BNF         Show abstract syntax trees in BNF.
 \t`NOAST       Don't show abstract syntax trees.
@@ -171,6 +173,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
     trace1 = False
     trace2 = False
     trace3 = False
+    trace4 = False
     halCode = False
     quitting = False
     halsSource = []
@@ -379,6 +382,14 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     print("\tTRACE3 off.")
                     trace3 = False
                     continue
+                elif firstWord == "TRACE4":
+                    print("\tTRACE4 on.")
+                    trace3 = True
+                    continue
+                elif firstWord == "NOTRACE4":
+                    print("\tTRACE4 off.")
+                    trace3 = False
+                    continue
                 elif firstWord == "LBNF":
                     print("\tDisplaying abstract syntax trees (AST) in LBNF.")
                     lbnf = True
@@ -428,6 +439,10 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                         print("\tTRACE3                   (vs NOTRACE3)")
                     else:
                         print("\tNOTRACE3                 (vs TRACE3)")
+                    if trace4:
+                        print("\tTRACE4                   (vs NOTRACE4)")
+                    else:
+                        print("\tNOTRACE4                 (vs TRACE4)")
                     if xeq:
                         print("\tEXEC                     (vs NOEXEC)")
                     else:
@@ -539,7 +554,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
         
         success, ast = processSource(PALMAT, halsSource, metadata, \
                          libraryFilename, structureTemplates, noCompile, \
-                         lbnf, bnf, trace1, wine, trace2, 8, macros)
+                         lbnf, bnf, trace1, wine, trace2, 8, macros, trace4)
         if len(substate["warnings"]):
             for warning in substate["warnings"]:
                 print("\tWarning:", warning)

@@ -130,7 +130,7 @@ which no statement is yet being processed is state={ "history" : [] }.
 
 lastExpressionSM = None
 def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 }, 
-                   trace=False, endLabels=[], depth=-1):
+                   trace=False, endLabels=[], depth=-1, trace4=False):
     global lastExpressionSM
     depth += 1
     newState = state
@@ -262,7 +262,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             else:
                 success, PALMAT = generatePALMAT( \
                     { "lbnfLabel": component, "components" : [] }, \
-                    PALMAT, newState, trace, endLabels, depth )
+                    PALMAT, newState, trace, endLabels, depth, trace4 )
                 if "stateMachine" in state and "stateMachine" not in newState:
                     traceIt(newState, component, \
                             "ending state machine \"%s\"" % \
@@ -273,7 +273,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                 return False, PALMAT
         else:
             success, PALMAT = generatePALMAT(component, PALMAT, \
-                                             newState, trace, endLabels, depth)
+                                    newState, trace, endLabels, depth, trace4)
             if "stateMachine" in state and "stateMachine" not in newState:
                 state.pop("stateMachine")
             if not success:
@@ -542,7 +542,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                     # This will be a list of values rather than a single value.
                     # It won't be a HAL/S VECTOR type, in the sense that the 
                     # values in the list may not be SCALAR.
-                    value = list(value["vector"][0])
+                    value = list(value["vector"])
                 if currentIdentifier != "":
                     identifierDict = identifiers[currentIdentifier]
                 else:
@@ -571,7 +571,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                 elif isinstance(value, (int, float)) and \
                         "bit" in identifierDict:
                     length = identifierDict["bit"]
-                    value = hround(value) & ((1 << length) - 1)
+                    value = [(hround(value) & ((1 << length) - 1), length)]
                 elif isBitArray(value) and "bit" in identifierDict:
                     pass
                 elif isinstance(value, str) and "character" in identifierDict:
@@ -633,16 +633,32 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     elif lbnfLabel in ["char_spec", "bitSpecBoolean",  
                        "sQdQName_doublyQualNameHead_literalExpOrStar",
                        "arraySpec_arrayHead_literalExpOrStar"]:
+        # I wish I had commented this when I first wrote it!  What I think
+        # is going on here is that in a DECLARE for a BIT, CHARACTER, VECTOR,
+        # MATRIX, or ARRAY, list of dimensions will have been computed by the
+        # time we've reached this point and (unfortunately!) left on the list
+        # of instructions.  This was fine (I thought), because declarations are
+        # always at the beginnings of blocks, and hence there are never any
+        # instructions to confuse the process of retrieving those dimensions.
+        # However, if you're running the interpreter, in which DECLARE 
+        # statements can appear anywhere, and if you've `spool'd a bunch of
+        # HAL/S code, then the list of instructions may *not* be empty when
+        # you encounter a DECLARE.  So I've had to add a bit of code to the 
+        # following in order to work around that.
         identifiers = currentScope["identifiers"]
         instructions = currentScope["instructions"]
         currentIdentifier = substate["currentIdentifier"]
         # Note that the expression state machine should have left
-        # a numbers on the instruction queue if the expression
+        # a number on the instruction queue if the expression
         # was computable at compile time.
         try:
             maxLens = []
-            for value in instructions:
-                maxLens.append(round(float(value["number"])))
+            # This shouldn't collide with any actual instructions previously
+            # present, because a {"number":...} couldn't have been the last
+            # PALMAT instruction generated for a statement.
+            while len(instructions) > 0 and "number" in instructions[-1]:
+                value = instructions.pop()
+                maxLens[0:0] = [ round(float(value["number"])) ]
             if currentIdentifier != "":
                 identifierDict = identifiers[currentIdentifier]
             else:
@@ -670,10 +686,10 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                 identifierDict[datatype] = 1
             else:
                 identifierDict[datatype] = maxLens[0]
-            instructions.clear()
+            #instructions.clear()
         except:
-            print("\tComputation of datatype length failed:", instructions)
-            instructions.clear()
+            print("\tComputation of datatype length failed:", lbnfLabel)
+            #instructions.clear()
             identifiers.pop(currentIdentifier)
             endLabels.pop()
             return False, PALMAT

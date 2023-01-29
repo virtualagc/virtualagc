@@ -40,10 +40,10 @@
  DECLARE VN1A VECTOR(CV1 + 3); 
  DECLARE VN2 VECTOR(10) INITIAL(2.47); 
  DECLARE VN2A VECTOR(10) INITIAL(CV1 + 0.47); 
- DECLARE VN3 VECTOR(20) INITIAL(1, 2, 3, 4, 5); 
- DECLARE VN3A VECTOR(2 CV1) INITIAL(1, CV1, 3, 4, 1 + CV1 2); 
+ DECLARE VN3 VECTOR(20) INITIAL(1, 2, 3, 4, 5, *); 
+ DECLARE VN3A VECTOR(3 CV1) INITIAL(1, CV1, 3, 4, 1 + CV1 2, *); 
  DECLARE VN4 VECTOR(15) CONSTANT(12); 
- DECLARE VN4A VECTOR(15) CONSTANT(12, CV1 + 11, 2 CV1 +10); 
+ DECLARE VN4A VECTOR(15) CONSTANT(12, CV1 + 11, 2 CV1 +10, *); 
  
  WRITE(6) ; 
  WRITE(6) 'Some DECLARE tests ...'; 
@@ -63,21 +63,21 @@
  A=2; WRITE(6) 'A =', A, '(should be 2.0)'; 
  B = 12.6E2B-1 A + 6 ( I A**3 - 21 ) / 4.2; 
  WRITE(6) 'B =', B, '(should be 1241.428571...)'; 
- WRITE(6) B2, B3, B5, B6, '(should be TRUE FALSE FALSE TRUE)'; 
- WRITE(6) B2, ~B2, ~B2 & B2, B2 | NOT B2, '(should be TRUE FALSE FALSE TRUE)'; 
+ WRITE(6) B2, B3, B5, B6, '(should be 1 0 0 1)'; 
+ WRITE(6) B2, ~B2, ~B2 & B2, B2 | NOT B2, '(should be 1 0 0 1)'; 
  WRITE(6) '"' CAT C2 CAT '"', 
  	  '"' CAT C3 || '"', 
  	  '"' || C4 CAT '"', 
  	  '"' || C6 || '"', 
  	  ' (should be "abc", "def", "defghi", "sam def")'; 
  WRITE(6) ; 
- IF TRUE THEN WRITE(6) TRUE, '(should be TRUE)'; 
+ IF TRUE THEN WRITE(6) TRUE, '(should be 1)'; 
  WRITE(6) 'Test IF FALSE; should be nothing between here ...'; 
  IF FALSE THEN WRITE(6) FALSE; 
  WRITE(6) '... and here.'; 
- WRITE(6) 'Test IF TRUE THEN ...; ELSE ...; should be TRUE:'; 
+ WRITE(6) 'Test IF TRUE THEN ...; ELSE ...; should be 1:'; 
  IF TRUE THEN WRITE(6) TRUE; ELSE WRITE(6) FALSE; 
- WRITE(6) 'Test IF FALSE THEN ...; ELSE ...; should be FALSE:'; 
+ WRITE(6) 'Test IF FALSE THEN ...; ELSE ...; should be 0:'; 
  IF FALSE THEN WRITE(6) TRUE; ELSE WRITE(6) FALSE; 
  WRITE(6) 'The following IF/THEN/ELSE tests should read ',
  	'<, >=, >=, <=, <=, >, >, <=, <=, >=, >=, <, ~=, =, ~=, ~=, =, ~= :'; 
@@ -110,7 +110,7 @@
  WRITE(6) ; 
  WRITE(6) 'Print 10 random numbers with DO WHILE arithmetical comparison:'; 
  I=0; DO WHILE I < 10; I=I+1; WRITE(6) I, RANDOM; END; 
- WRITE(6) 'Print 9 TRUE and 1 FALSE with DO WHILE boolean constant:'; 
+ WRITE(6) 'Print nine 1 and one 0 with DO WHILE boolean constant:'; 
  B1=TRUE; I=0; 
  DO WHILE B1; 
  	I=I+1; 
@@ -301,7 +301,38 @@
  CALL P2(123, 245, 789) ASSIGN(X1, Y1, Z1); 
  WRITE(6) X1, Y1, Z1, 'should be 123.0, 245.0, 789.0'; 
  WRITE(6) ; 
- WRITE(6) 'Test of PROGRAM ... several values of PI R**2 are printed.'; 
+ DECLARE VC100 VECTOR(5) CONSTANT(1, 1#, 3, *);
+ DECLARE VC101 VECTOR(20) CONSTANT(VC100, 2#(2#(1,2,3), 4), 24);
+ DECLARE VC102 VECTOR(5) CONSTANT(1, 1#2, 3, 4, 5);
+ DECLARE VC103 VECTOR(5) CONSTANT(VC102);
+ DECLARE VC104 VECTOR(20) CONSTANT(VC102, 2#(2#(1,2,3), 4), 24);
+ DECLARE VC105 VECTOR(10) CONSTANT(1, 2, VC102, 3, 4, 5);
+ DECLARE A100 ARRAY(20) INTEGER;
+ DECLARE B100 ARRAY(20) SCALAR;
+ A100 = INTEGER(2#VC100, 10#5);
+ B100 = SCALAR(3#VC100, 5#6);
+ WRITE(6) 'The following should be 1.0 X.X 3.0 X.X X.X';
+ WRITE(6) VC100;
+ WRITE(6) 'The following should be 1.0 X.X 3.0 X.X X.X 1.0 2.0 3.0 1.0 2.0 3.0 4.0 1.0 2.0 3.0 1.0 2.0 3.0 4.0 24.0';
+ WRITE(6) VC101;
+ WRITE(6) 'The following should be 1.0 2.0 3.0 4.0 5.0';
+ WRITE(6) VC102;
+ WRITE(6) 'The following should be 1.0 2.0 3.0 4.0 5.0';
+ WRITE(6) VC103;
+ WRITE(6) 'The following should be 1.0 2.0 3.0 4.0 5.0 1.0 2.0 3.0 1.0 2.0 3.0 4.0 1.0 2.0 3.0 1.0 2.0 3.0 4.0 24.0';
+ WRITE(6) VC104;
+ WRITE(6) 'The following should be 1.0 2.0 1.0 2.0 3.0 4.0 5.0 3.0 4.0 5.0';
+ WRITE(6) VC105;
+ WRITE(6) 'The following should be 1.0 None 3.0 None None 1.0 None 3.0 None None 5.0 5.0 5.0 5.0 5.0 5.0 5.0 5.0 5.0 5.0';
+ WRITE(6) A100;
+ WRITE(6) 'The following should be 1.0 None 3.0 None None 1.0 None 3.0 None None 1.0 None 3.0 None None 6.0 6.0 6.0 6.0 6.0';
+ WRITE(6) B100 ;
+ WRITE(6) ;
+ WRITE(6) 'The following should be 10 repetitions of N 1 2 3 4 M 6 7 8 9 10,';
+ WRITE(6) 'where N varies from 1 to 10 and M varies from 2 to 20 by 2.';
+ DECLARE A201 ARRAY(10) INTEGER;  
+ DO FOR TEMPORARY I=1 TO 10; A201 = INTEGER(1, 2, 3, 4, 2 I, 6, 7, 8, 9, 10); WRITE(6) I, ':', A201; END;
+ WRITE(6);
   SIMPLE: PROGRAM; 
 C CODE IN THIS TYPEFACE IS 
 C HAL/S SOURCE 
@@ -311,5 +342,4 @@ C HAL/S SOURCE
 		WRITE(6) R, PI R**2; 
 	END; 
  CLOSE SIMPLE; 
- WRITE(6) ; 
- WRITE(6) 'Done.';
+  WRITE(6) 'Done.';

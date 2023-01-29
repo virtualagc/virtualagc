@@ -16,10 +16,6 @@ from executePALMAT import executePALMAT, isBitArray
 from palmatAux import debug, findIdentifier
 from p_Functions import substate
 
-# Set the following to enable tracing of calls to executePALMAT when trying
-# to compute compile-time constants.
-traceCompileTime = True
-
 # Return True on success, False on failure.  The stage argument is 0 when
 # called upon starting processing of an lbnfLabel, 2 after otherwise finishing
 # the processing of an lbnfLabel, or 1 when called with the lbnfLabel being 
@@ -32,7 +28,8 @@ traceCompileTime = True
 # PALMAT.py module, must have some provision for saving either the stateMachine
 # or at least the "compiledExpression" field of the stateMachine before that
 # final call to expressionSM is made.
-def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
+def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth, \
+                 traceCompileTime=False):
     
     #debug(PALMAT, state, "SM expression %d %s" % (stage, lbnfLabel)) 
     
@@ -42,6 +39,8 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
     # "foundPound" is just for debugging repetition factors.
     if "foundPound" not in stateMachine:
         stateMachine["foundPound"] = False
+    if lbnfLabel == "repeated_constant":
+        stateMachine["repeatedConstant"] = True
     #owningLabel = stateMachine["owner"]
     owningDepth = stateMachine["depth"]
     if stage == 0 and depth == owningDepth: #lbnfLabel == owningLabel:
@@ -62,7 +61,10 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
             if "readStatement" in stateMachine:
                 expression.append({ "fetchp": (si, sp)})
             else:
-                expression.append({ "fetch": (si, sp) })
+                if "repeatedConstant" in stateMachine:
+                    expression.append({ "unravel": (si, sp) })
+                else:
+                    expression.append({ "fetch": (si, sp) })
             internalState = "normal"
         elif internalState == "waitNumber":
             expression.append({ "number": sp })
@@ -88,16 +90,15 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
                 stateMachine.pop("readStatement")
         elif lbnfLabel == "repeated_constantMark":
             expression.append({ "sentinel": "repeat"})
-        elif lbnfLabel in ["prePrimaryRtlShaping", "prePrimaryRtlShapingStar"]:
-            expression.append({ "sentinel": "shaping3"})
+        elif lbnfLabel in ["prePrimaryRtlShaping"]:
+            expression.append({ "sentinel": "shaping"})
+        elif lbnfLabel in ["prePrimaryRtlShapingStar"]:
+            expression.append({ "fill": True })
+            expression.append({ "sentinel": "shaping"})
         elif lbnfLabel == "arithConv_integer":
             expression.append({ "shaping": "integer" })
-            expression.append({ "sentinel": "shaping1" })
-            expression.append({ "sentinel": "shaping2" })
         elif lbnfLabel == "arithConv_scalar":
             expression.append({ "shaping": "scalar" })
-            expression.append({ "sentinel": "shaping1" })
-            expression.append({ "sentinel": "shaping2" })
     #if stage == 2 and lbnfLabel == "repeated_constant":
     #    expression.append({ "condense": "end" })
     if stage == 2 and depth == owningDepth:
@@ -116,14 +117,18 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
             if compileTimeComputable:
                 if "fetchp" in instruction:
                     compileTimeComputable = False
-                elif "fetch" in instruction:
-                    si, identifier = instruction["fetch"]
+                elif "fetch" in instruction or "unravel" in instruction:
+                    if "fetch" in instruction:
+                        si, identifier = instruction["fetch"]
+                    else:
+                        si, identifier = instruction["unravel"]
                     try:
                         attributes = PALMAT["scopes"][si]["identifiers"]\
                                                         ["^" + identifier + "^"]
                     except:
-                        print("\tIdentifier %s not found." % identifier)
-                        return False;
+                        # I don't think this can happen, but if it does, then
+                        # it's defitely not computable. 
+                        attributes = None
                     if attributes == None or "constant" not in attributes:
                         compileTimeComputable = False
                 elif "function" in instruction and \
@@ -265,9 +270,9 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth):
         elif lbnfLabel == "charExpCat":
             expression.append({ "operator": "C||" })
         elif lbnfLabel == "bitConstTrue":
-            expression.append({ "boolean": (1,1) })
+            expression.append({ "boolean": [(1,1)] })
         elif lbnfLabel == "bitConstFalse":
-            expression.append({ "boolean": (0,1) })
+            expression.append({ "boolean": [(0,1)] })
         elif lbnfLabel == "NOT":
             expression.append({ "operator": "NOT" })
         elif lbnfLabel == "bitFactorAnd":
