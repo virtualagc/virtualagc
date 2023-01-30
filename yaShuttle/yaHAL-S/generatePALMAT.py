@@ -603,7 +603,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                         value = [[value]]
                     else:
                         matrix = identifierDict[key]
-                        print("**", identifierDict, key)
+                        #print("**", identifierDict, key)
                         row = len(matrix)-1
                         col = len(matrix[row])
                         if col >= numCols:
