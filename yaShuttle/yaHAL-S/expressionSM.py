@@ -61,7 +61,7 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth, \
             if "readStatement" in stateMachine:
                 expression.append({ "fetchp": (si, sp)})
             else:
-                if "repeatedConstant" in stateMachine:
+                if False and "repeatedConstant" in stateMachine:
                     expression.append({ "unravel": (si, sp) })
                 else:
                     expression.append({ "fetch": (si, sp) })

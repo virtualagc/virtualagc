@@ -508,11 +508,12 @@ def toIntegerOrScalar(object, toInteger=True):
     elif isinstance(object, str):
         value = stringifiedToFloat(object)
         if toInteger:
-            return int(value)
+            return hround(value)
         return value
     elif isinstance(object, list):
         for i in range(len(object)):
             object[i] = toIntegerOrScalar(object[i], toInteger)
+        return object
     elif isinstance(object, tuple):
         object = list(object)
         for i in range(len(object)):
@@ -569,7 +570,11 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
         elif "boolean" in instruction:
             computationStack.append(instruction["boolean"])
         elif "number" in instruction:
-            computationStack.append(stringifiedToFloat(instruction["number"]))
+            try:
+                value = int(instruction["number"])
+            except:
+                value = stringifiedToFloat(instruction["number"])
+            computationStack.append(value)
         elif "vector" in instruction:
             computationStack.append(instruction["vector"])
         elif "matrix" in instruction:
@@ -577,7 +582,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
         elif "array" in instruction:
             computationStack.append(instruction["array"])
         elif "bitarray" in instruction:
-            computationStack.append(stringifiedToFloat(instruction["bitarray"]))
+            computationStack.append(instruction["bitarray"][0][0])
         elif "+><" in instruction:
             si, identifier = instruction["+><"]
             identifier = "^" + identifier + "^"
@@ -1046,6 +1051,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                         value = hround(value)
                     elif "scalar" in attributes:
                         value = float(value)
+                    elif "bit" in attributes:
+                        value = hround(value) & ((1 << attributes["bit"])-1)
                 elif isBitArray(value) and "bit" in attributes:
                     length = attributes["bit"]
                     value = [(value[0][0] & ((1 << length)-1) , value[0][1])]

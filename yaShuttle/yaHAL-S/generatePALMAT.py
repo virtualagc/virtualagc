@@ -444,16 +444,16 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         p_Functions.expressionToInstructions( \
             substate["expression"], instructions)
         base = "store"
-        si, identifier = substate["lhs"][-1]
-        attributes = PALMAT["scopes"][si]["identifiers"]["^"+identifier+"^"]
-        if attributes == None:
-            print("\tAssignment variable %s not accessible." % identifier[1:-1])
-            endLabels.pop()
-            return False, PALMAT
-        if len(substate["lhs"]) == 1:
-            instructions.append({ base + "pop": substate["lhs"][-1] })
-        else:
-            instructions.append({ base: substate["lhs"][-1] })
+        while len(substate["lhs"]) > 0:
+            si, identifier = substate["lhs"].pop()
+            attributes = PALMAT["scopes"][si]["identifiers"]["^"+identifier+"^"]
+            if attributes == None:
+                print("\tAssignment variable %s not accessible." % identifier[1:-1])
+                endLabels.pop()
+                return False, PALMAT
+            if len(substate["lhs"]) == 0:
+                base = base + "pop"
+            instructions.append({ base: (si, identifier) })
     elif lbnfLabel in ["basicStatementWritePhrase", "basicStatementWriteKey"]:
         instructions = currentScope["instructions"]
         p_Functions.expressionToInstructions( \

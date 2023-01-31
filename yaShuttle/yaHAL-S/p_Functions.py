@@ -73,6 +73,7 @@ substate = {
     "commonAttributes" : {},
     # Used while generating code for expressions, prior to generating code.
     "lhs" : [],
+    "lhsSubscripts" : [],
     "expression" : []
 }
 
@@ -82,7 +83,7 @@ expressionComponents = ["expression", "ifClauseBitExp", "relational_exp",
                      "bitExpFactor", "write_arg", "read_arg", "char_spec",
                      "arithExpTerm", "arithExpArithExpPlusTerm",
                      "arithExpArithExpMinusTerm", "arithMinusTerm", 
-                     "literalExp", "sub_exp", 
+                     "literalExp", "sub_exp", "subscript",
                      "minorAttributeRepeatedConstant", "minorAttributeStar"]
 setExpressionComponents = set(expressionComponents)
 doForComponents = ["doGroupHeadFor", "doGroupHeadForWhile", 
@@ -300,6 +301,12 @@ def stringLiteral(PALMAT, state, s):
             removeAncestors(PALMAT, scopeIndex)
             return False
         substate["lhs"].append((si, sp))
+        '''
+        if "finalExpression" in state:
+            substate["lhsSubscripts"].append(state["finalExpression"])
+        else:
+            substate["lhsSubscripts"].append(None)
+        '''
     return True
 
 # Reset the portion of the AST state-machine that handles individual statements.
@@ -377,6 +384,7 @@ augmentationCandidates = [
     "repeated_constantMark",
     "sQdQName_doublyQualNameHead_literalExpOrStar",
     "sub_exp",
+    "subscript",
     "then",
     "true_part",
     "typeSpecArith",
