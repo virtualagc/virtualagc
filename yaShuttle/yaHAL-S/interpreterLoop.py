@@ -37,6 +37,8 @@ except ModuleNotFoundError:
             print("Only primitive line-editing facilities are available.")
             rlModule = None
             readlinePresent = False
+if readlinePresent:
+    rlModule.set_history_length(100) # Default, -1, means infinite.
 '''
 if readlinePresent:
     print("Note: Input-line prompts may temporarily disappear when using " + \

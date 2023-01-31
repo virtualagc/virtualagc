@@ -550,6 +550,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 and "unravel" not in instruction:
             print("\tImplementation error, subscript(s) without variable in instruction:", \
                   instruction)
+            print(scope0)
             return None
         if "subscripts" in scope0:
             subscripts = scope0.pop("subscripts")
@@ -961,12 +962,14 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     return None
         elif "fetch" in instruction or "unravel" in instruction \
                 or "fetchp" in instruction or \
-                "store" in instruction or "storepop" in instruction:
+                "store" in instruction or "storepop" in instruction or \
+                "substore" in instruction or "substorepop" in instruction:
             erroredUp = False
             fetch = False
             fetchp = False
             pop = False
             unravel = False
+            lhsSubscripts = False
             stackPos = 1
             if "fetch" in instruction:
                 si, identifier = instruction["fetch"]
@@ -983,11 +986,34 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             elif "storepop" in instruction:
                 si, identifier = instruction["storepop"]
                 pop = True
+            elif "substore" in instruction:
+                si, identifier = instruction["substore"]
+                lhsSubscripts = True
+            elif "substorepop" in instruction:
+                si, identifier = instruction["substorepop"]
+                pop = True
+                lhsSubscripts = True
+            lhsSubscriptList = []
+            if lhsSubscripts:
+                subscript = computationStack.pop()
+                while subscript != {"sentinel"}:
+                    lhsSubscriptList.append(subscript)
+                    subscript = computationStack.pop()
+            '''
             if si == -1:
                 if "assignments" not in scope:
                     print("\tCannot find identifier", identifier)
                     return None
                 si, identifier = scope["assignments"][identifier]
+            '''
+            if si == -1:
+                dummyScope = scope
+                while "assignments" not in dummyScope:
+                    if dummyScope["parent"] == None:
+                        print("\tCannot find identifier", identifier)
+                        return None
+                    dummyScope = PALMAT["scopes"][dummyScope["parent"]]
+                si, identifier = dummyScope["assignments"][identifier]
             caratIdentifier = "^" + identifier + "^"
             try:
                 attributes = PALMAT["scopes"][si]["identifiers"][\
@@ -1009,7 +1035,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 else:
                     print("\tIdentifier %s uninitialized" % identifier)
                     return None
-                if value == None:
+                if False and value == None:
                     print("\tCannot compute value.")
                     return None
                 if unravel:
@@ -1032,7 +1058,13 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     print("\tCannot change value of constant %s." \
                           % identifier[1:-1])
                     return None
-                if isinstance(value, str):
+                # Apply conversions to the data as necessary, if the datatype
+                # found on the computation stack was not precisely what the
+                # variable being assigned expects.
+                dimensions = []
+                if value == None:
+                    pass
+                elif isinstance(value, str):
                     if "character" not in attributes:
                         print("\tCannot store string in non-CHARACTER " +
                               "variable %s." % identifier[1:-1])
@@ -1040,6 +1072,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     maxlen = attributes["character"]
                     value = value[:maxlen]
                 elif isinstance(value, (float, int)):
+                    '''
                     if "scalar" not in attributes and \
                             "integer" not in attributes and \
                             "bit" not in attributes:
@@ -1047,22 +1080,29 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                               "variable %s." \
                               % identifier[1:-1])
                         return None
+                    '''
                     if "integer" in attributes:
                         value = hround(value)
                     elif "scalar" in attributes:
                         value = float(value)
                     elif "bit" in attributes:
                         value = hround(value) & ((1 << attributes["bit"])-1)
+                    elif "character" in attributes:
+                        # TBD
+                        print("\tStoring number in CHARACTER not yet implemented.")
+                        value = "?"
                 elif isBitArray(value) and "bit" in attributes:
                     length = attributes["bit"]
                     value = [(value[0][0] & ((1 << length)-1) , value[0][1])]
-                elif isVector(value) and "vector" in attributes:
+                elif isVector(value, False) and "vector" in attributes \
+                        and not lhsSubscripts:
                     numRows = len(value)
                     if numRows != attributes["vector"]:
                         print("\tVector length mismatch in store operation:", \
                               identifier[1:-1])
                         return None
-                elif isMatrix(value) and "matrix" in attributes:
+                elif isMatrix(value, False) and "matrix" in attributes \
+                        and not lhsSubscripts:
                     dimensions = [len(value), len(value[0])]
                     if dimensions != attributes["matrix"]:
                         print("\tMatrix geometry mismatch in store operation:",\
@@ -1070,14 +1110,47 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                         return None
                 elif "array" in attributes:
                     dimensions = attributes["array"]
-                    if not isArray(value, dimensions):
+                    if not lhsSubscripts and not isArray(value, dimensions):
                         print("\tArray geometry wrong in store operation:", \
                               identifier[1:-1])
                         return None
                 else:
-                    print("\tMismatched datatypes in store operation.")
+                    print("\tMismatched datatypes in instruction:", \
+                          instruction, value)
                     return None
-                attributes["value"] = value
+                if lhsSubscriptList == []:
+                    attributes["value"] = value
+                else:
+                    if "vector" in attributes:
+                        dimensions = [attributes["vector"]]
+                    elif "matrix" in attributes:
+                        dimensions = attributes["matrix"]
+                    elif "array" in attributes:
+                        dimensions = attributes["array"]
+                    else:
+                        dimensions = []
+                    if len(lhsSubscriptList) != len(dimensions):
+                        print("\tDimensionality of value and variable differ.")
+                        #print(lhsSubscriptList, "vs", dimensions)
+                        return None
+                    for i in range(len(dimensions)):
+                        if lhsSubscriptList[i] < 1 or \
+                                lhsSubscriptList[i] > dimensions[i]:
+                            print("\tSubscript out of range in assignment")
+                            return None
+                    # Recall that in python, the following manipulations of 
+                    # "row" operate on pointers.  So the final "row" we end up 
+                    # with is actually a pointer to a stored row existing 
+                    # already in the VECTOR, MATRIX, or ARRAY variable.
+                    # Recall also that HAL/S indexes from 1 while Python indexes
+                    # from 0.  Recall finally that even uninitialized composite
+                    # data in our HAL/S scopes have the proper dimensionality,
+                    # but with unused elements set to None, so the sought row
+                    # does actually exist.
+                    row = attributes["value"]
+                    for i in range(len(dimensions)-1):
+                        row = row[lhsSubscriptList[i]-1]
+                    row[lhsSubscriptList[-1]-1] = value
             if not erroredUp:
                 print("\tIdentifier %s not in any accessible scope" \
                       % identifier[1:-1])
@@ -1174,7 +1247,9 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             if lun == '6':
                 print("%*s" % (indent, ""), end="")
                 for value in computationStack:
-                    if isBitArray(value):
+                    if value == None:
+                        print(" None ", end="")
+                    elif isBitArray(value):
                         print(" %d " % value[0][0], end="")
                     elif isinstance(value, (int, float, list)):
                         printVectorOrMatrix(value)
@@ -1418,7 +1493,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     computationStack[-1] = sum
                 elif function == "TRANSPOSE":
                     matrix = computationStack[-1]
-                    if not isMatrix(matrix):
+                    if not isMatrix(matrix, False):
                         print("\tTRANSPOSE requires a matrix argument.")
                         return None
                     numRows = len(matrix)

@@ -113,7 +113,7 @@ def doForSM(stage, lbnfLabel, PALMAT, state, trace, depth):
                 There are two cases here.  It may be that the expression 
                 state machine has been used either once or twice since our 
                 last doFor state-machine processing.  That's because the 
-                grammar has no components intermediat between the two 
+                grammar has no components intermediate between the two 
                 expressions Z and T in 
                                 DO FOR X=Y TO Z BY T.
                 However, our stateMachine object has a key in it called 

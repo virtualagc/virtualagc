@@ -73,7 +73,7 @@ substate = {
     "commonAttributes" : {},
     # Used while generating code for expressions, prior to generating code.
     "lhs" : [],
-    "lhsSubscripts" : [],
+    "lhsSubscripts" : {},
     "expression" : []
 }
 
@@ -275,18 +275,14 @@ def stringLiteral(PALMAT, state, s):
     elif state1 == "number" and \
             ("write_key" in history or "read_key" in history):
         substate["LUN"] = sp
-        #instructions.append({"wstart": sp})
-    #elif state1 == "string" and 'write_arg' in history:
-    #    substate["expression"].append({ "string": sp[1:-1] })
     elif state1 in ["forKey", "forKeyTemporary"]:
         if state1 == "forKeyTemporary":
             identifiers[s] = {"integer": True}
-        
-        # TBD
     elif state2 == ["bitSpecBoolean", "number"]:
         updateCurrentIdentifierAttribute(PALMAT, state, "bit", isp)
-    elif state2 == ["assignment", "variable"] or \
-            history[-3:-1] == ["assignment", "variable"]:
+    elif (state2 == ["assignment", "variable"] or \
+            history[-3:-1] == ["assignment", "variable"]) and \
+                "subscript" not in history:
         # Identifier on LHS of an assignment.
         si, identDict = findIdentifier(s, PALMAT, scopeIndex, True)
         if identDict == None: 
@@ -301,12 +297,6 @@ def stringLiteral(PALMAT, state, s):
             removeAncestors(PALMAT, scopeIndex)
             return False
         substate["lhs"].append((si, sp))
-        '''
-        if "finalExpression" in state:
-            substate["lhsSubscripts"].append(state["finalExpression"])
-        else:
-            substate["lhsSubscripts"].append(None)
-        '''
     return True
 
 # Reset the portion of the AST state-machine that handles individual statements.

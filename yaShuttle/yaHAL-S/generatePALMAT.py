@@ -439,19 +439,50 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         jumpToTarget(PALMAT, currentIndex, currentIndex, "ux", "goto")
         if createTarget(PALMAT, currentIndex, currentIndex, "uf") == None:
             return False, PALMAT
+    elif lbnfLabel == "subscript" and \
+            state["history"][-2:] == ["assignment", "variable"] and \
+            "finalExpression" in state:
+        substate["lhsSubscripts"][len(substate["lhs"])-1] = \
+                                                    state["finalExpression"]
+        if lastExpressionSM["whereTo"] == "instructions" and \
+                not lastExpressionSM["compileTimeComputable"]:
+            count = lastExpressionSM["instructionCount"]
+            currentScope["instructions"][-count:] = []
     elif lbnfLabel == "assignment":
         instructions = currentScope["instructions"]
         p_Functions.expressionToInstructions( \
             substate["expression"], instructions)
-        base = "store"
-        while len(substate["lhs"]) > 0:
-            si, identifier = substate["lhs"].pop()
-            attributes = PALMAT["scopes"][si]["identifiers"]["^"+identifier+"^"]
+        lhsIdentifiers = substate["lhs"]
+        lhsSubscripts = substate["lhsSubscripts"]
+        count = len(substate["lhs"])
+        while count > 0:
+            count -= 1
+            si, identifier = lhsIdentifiers.pop()
+            if count in lhsSubscripts:
+                base = "substore"
+                subscript = lhsSubscripts[count]
+                lhsSubscripts.pop(count)
+            else:
+                base = "store"
+                subscript = None
+            if si == -1:
+                '''
+                print("**A", si, currentIndex)
+                print("**B", PALMAT["scopes"][currentIndex]["identifiers"])
+                attributes = \
+                    PALMAT["scopes"][currentIndex]["identifiers"]["^"+identifier+"^"]
+                '''
+                dummy, attributes = findIdentifier("^"+identifier+"^", PALMAT, currentIndex, True)
+            else:
+                attributes = \
+                    PALMAT["scopes"][si]["identifiers"]["^"+identifier+"^"]
             if attributes == None:
                 print("\tAssignment variable %s not accessible." % identifier[1:-1])
                 endLabels.pop()
                 return False, PALMAT
-            if len(substate["lhs"]) == 0:
+            if subscript != None:
+                instructions.extend(subscript[:-1])
+            if count == 0:
                 base = base + "pop"
             instructions.append({ base: (si, identifier) })
     elif lbnfLabel in ["basicStatementWritePhrase", "basicStatementWriteKey"]:
