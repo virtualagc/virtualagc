@@ -17,6 +17,7 @@ import random
 import time
 import copy
 from decimal import Decimal, ROUND_HALF_UP
+from palmatAux import flatten, isBitArray
 
 timeOrigin = 0
 
@@ -290,14 +291,6 @@ def isArray(object, dimensions):
         return False
     return True
 
-# Test if a value on the computation stack is a boolean.
-def isBitArray(value):
-    if isinstance(value, list) and len(value) == 1 and \
-            isinstance(value[0], tuple) and len(value[0]) == 2 and \
-            isinstance(value[0][0], int) and isinstance(value[0][1], int):
-        return True
-    return False
-
 # Converts True or False to a bit-array representation for the computation 
 # stack.
 def convertToBitArray(b):
@@ -478,17 +471,6 @@ def matrixMultiply(a, b):
             row.append(s)
         result.append(row)
     return result
-
-# "Flatten" a composite object (list of lists of ... or tuple of tuples of ...)
-# onto the end of a list.
-def flatten(object, onto):
-    if isBitArray(object):
-        onto.append(object)
-    elif isinstance(object, (list, tuple)):
-        for e in object:
-            flatten(e, onto)
-    else:
-        onto.append(object)
 
 # Apply the INTEGER or SCALAR shaping function (with no subscripts) to a 
 # single INTEGER, SCALAR, BIT(N), CHARACTER(N), VECTOR(N), MATRIX(N,M), or 

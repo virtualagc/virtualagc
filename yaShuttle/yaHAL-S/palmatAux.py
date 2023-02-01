@@ -21,6 +21,25 @@ def debug(PALMAT, state, message):
             'debug': message
         })
 
+# Test if a value on the computation stack is a boolean.
+def isBitArray(value):
+    if isinstance(value, list) and len(value) == 1 and \
+            isinstance(value[0], tuple) and len(value[0]) == 2 and \
+            isinstance(value[0][0], int) and isinstance(value[0][1], int):
+        return True
+    return False
+
+# "Flatten" a composite object (list of lists of ... or tuple of tuples of ...)
+# onto the end of a list.
+def flatten(object, onto):
+    if isBitArray(object):
+        onto.append(object)
+    elif isinstance(object, (list, tuple)):
+        for e in object:
+            flatten(e, onto)
+    else:
+        onto.append(object)
+
 # This is used when a problem with a block is sufficiently severe that 
 # it has to be removed.  That necessitates removing its parent, grandparent,
 # and so on that have already been allocated, up to but not including the root.  

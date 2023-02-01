@@ -554,113 +554,142 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                     return False, PALMAT
                 value = instructions.pop(-counter)
                 counter -= 1
-                if False:
-                    pass
-                elif "empty" in value:
-                    value = None
-                elif "number" in value:
-                    try:
-                        value = float(value["number"]);
-                    except:
-                        print("\tINITIAL or CONSTANT not SCALAR or INTEGER:", \
-                              value)
+                if "vector" in value or "matrix" in value:
+                    valueList = []
+                    if "vector" in value:
+                        flatten(value["vector"], valueList)
+                    else:
+                        flatten(value["matrix"], valueList)
+                    for i in range(len(valueList)):
+                        if valueList[i] == None:
+                            valueList[i] = { "empty"}
+                        else:
+                            valueList[i] = {"number": valueList[i] }
+                elif "array" in value:
+                    # I don't know quite what to do about this as of yet.
+                    # I need to know what the type (INTEGER, ...) of the ARRAY
+                    # is, in order to know how to set the individual values.
+                    # The following is just a temporary bandaid.
+                    valueList = []
+                    flatten(value["array"], valueList)
+                    for i in range(len(valueList)):
+                        if valueList[i] == None:
+                            valueList[i] = { "empty"}
+                        elif isinstance(valueList[i], (int, float)):
+                            valueList[i] = {"number": valueList[i] }
+                        elif isinstance(valueList[i], str):
+                            valueList[i] = {"string": valueList[i] }
+                        else:
+                            valueList[i] = 0
+                else:
+                    valueList = [value]
+                for value in valueList:
+                    if False:
+                        pass
+                    elif "empty" in value:
+                        value = None
+                    elif "number" in value:
+                        try:
+                            value = float(value["number"]);
+                        except:
+                            print("\tINITIAL or CONSTANT not SCALAR or INTEGER:", \
+                                  value)
+                            return False, PALMAT
+                    elif "boolean" in value:
+                        value = value["boolean"]
+                    elif "string" in value:
+                        value = value["string"]
+                    elif "vector" in value:
+                        # This will be a list of values rather than a single value.
+                        # It won't be a HAL/S VECTOR type, in the sense that the 
+                        # values in the list may not be SCALAR.
+                        value = list(value["vector"])
+                    if currentIdentifier != "":
+                        identifierDict = identifiers[currentIdentifier]
+                    else:
+                        identifierDict = substate["commonAttributes"]
+                    if isUnmarkedScalar(identifierDict):
+                        identifierDict["scalar"] = True
+                    if "initial" in identifierDict and "constant" in identifierDict:
+                        print("\tIdentifier", currentIdentifier[1:-1], \
+                                "cannot have both INITIAL and CONSTANT.")
+                        identifiers.pop(currentIdentifier)
+                        endLabels.pop()
                         return False, PALMAT
-                elif "boolean" in value:
-                    value = value["boolean"]
-                elif "string" in value:
-                    value = value["string"]
-                elif "vector" in value:
-                    # This will be a list of values rather than a single value.
-                    # It won't be a HAL/S VECTOR type, in the sense that the 
-                    # values in the list may not be SCALAR.
-                    value = list(value["vector"])
-                if currentIdentifier != "":
-                    identifierDict = identifiers[currentIdentifier]
-                else:
-                    identifierDict = substate["commonAttributes"]
-                if isUnmarkedScalar(identifierDict):
-                    identifierDict["scalar"] = True
-                if "initial" in identifierDict and "constant" in identifierDict:
-                    print("\tIdentifier", currentIdentifier[1:-1], \
-                            "cannot have both INITIAL and CONSTANT.")
-                    identifiers.pop(currentIdentifier)
-                    endLabels.pop()
-                    return False, PALMAT
-                key = None
-                if "initial" in identifierDict:
-                    key = "initial"
-                elif "constant" in identifierDict:
-                    key = "constant"
-                if False:
-                    pass
-                elif isinstance(value, (int, float)) and \
-                        "integer" in identifierDict:
-                    value = hround(value)
-                elif isinstance(value, (int, float)) and \
-                        "scalar" in identifierDict:
-                    value = float(value)
-                elif isinstance(value, (int, float)) and \
-                        "bit" in identifierDict:
-                    length = identifierDict["bit"]
-                    value = [(hround(value) & ((1 << length) - 1), length)]
-                elif isBitArray(value) and "bit" in identifierDict:
-                    pass
-                elif isinstance(value, str) and "character" in identifierDict:
-                    pass
-                elif (value == None or isinstance(value, (int, float))) and \
-                        "vector" in identifierDict:
-                    numCols = identifierDict["vector"]
-                    if key not in identifierDict or \
-                            isinstance(identifierDict[key], str):
-                        if value != None:
-                            value = float(value)
-                        value = [value]
-                    else:
-                        if len(identifierDict[key]) >= numCols:
-                            print("\tData for INITIAL or CONSTANT of " + \
-                                  currentIdentifier + " exceeds dimensions.")
-                            value = identifierDict[key]
-                        else:
+                    key = None
+                    if "initial" in identifierDict:
+                        key = "initial"
+                    elif "constant" in identifierDict:
+                        key = "constant"
+                    if False:
+                        pass
+                    elif isinstance(value, (int, float)) and \
+                            "integer" in identifierDict:
+                        value = hround(value)
+                    elif isinstance(value, (int, float)) and \
+                            "scalar" in identifierDict:
+                        value = float(value)
+                    elif isinstance(value, (int, float)) and \
+                            "bit" in identifierDict:
+                        length = identifierDict["bit"]
+                        value = [(hround(value) & ((1 << length) - 1), length)]
+                    elif isBitArray(value) and "bit" in identifierDict:
+                        pass
+                    elif isinstance(value, str) and "character" in identifierDict:
+                        pass
+                    elif (value == None or isinstance(value, (int, float))) and \
+                            "vector" in identifierDict:
+                        numCols = identifierDict["vector"]
+                        if key not in identifierDict or \
+                                isinstance(identifierDict[key], str):
                             if value != None:
                                 value = float(value)
-                            value = identifierDict[key] + [value]
-                elif (value == None or isinstance(value, (int, float))) and \
-                        "matrix" in identifierDict:
-                    numRows, numCols = identifierDict["matrix"]
-                    if key not in identifierDict or \
-                            isinstance(identifierDict[key], str):
-                        if value != None:
-                            value = float(value)
-                        value = [[value]]
-                    else:
-                        matrix = identifierDict[key]
-                        #print("**", identifierDict, key)
-                        row = len(matrix)-1
-                        col = len(matrix[row])
-                        if col >= numCols:
-                            matrix.append([])
-                            row += 1
-                            col = 0
-                        if row >= numRows:
-                            print("\tData for INITIAL or CONSTANT of " + \
-                                  currentIdentifier + " exceeds dimensions.")
+                            value = [value]
                         else:
+                            if len(identifierDict[key]) >= numCols:
+                                print("\tData for INITIAL or CONSTANT of " + \
+                                      currentIdentifier + " exceeds dimensions.")
+                                value = identifierDict[key]
+                            else:
+                                if value != None:
+                                    value = float(value)
+                                value = identifierDict[key] + [value]
+                    elif (value == None or isinstance(value, (int, float))) and \
+                            "matrix" in identifierDict:
+                        numRows, numCols = identifierDict["matrix"]
+                        if key not in identifierDict or \
+                                isinstance(identifierDict[key], str):
                             if value != None:
                                 value = float(value)
-                            matrix[row].append(value)
-                        value = matrix
-                elif value == { "fill": True }:
-                    identifierDict["fill"] = key
-                    continue
-                else:
-                    print("\tDatatype mismatch in INITIAL or CONSTANT:", \
-                          value, currentIdentifier, identifierDict)
-                    identifiers.pop(currentIdentifier)
-                    endLabels.pop()
-                    return False, PALMAT
-                identifierDict[key] = value
-                if key == "initial":
-                    identifierDict["value"] = copy.deepcopy(value)
+                            value = [[value]]
+                        else:
+                            matrix = identifierDict[key]
+                            row = len(matrix)-1
+                            col = len(matrix[row])
+                            if col >= numCols:
+                                matrix.append([])
+                                row += 1
+                                col = 0
+                            if row >= numRows:
+                                print("\tData for INITIAL or CONSTANT of " + \
+                                      currentIdentifier + " exceeds dimensions.")
+                            else:
+                                if value != None:
+                                    value = float(value)
+                                matrix[row].append(value)
+                            value = matrix
+                    elif value == { "fill": True }:
+                        identifierDict["fill"] = key
+                        continue
+                    else:
+                        print("\tDatatype mismatch in INITIAL or CONSTANT:", \
+                              value, currentIdentifier, identifierDict)
+                        identifiers.pop(currentIdentifier)
+                        endLabels.pop()
+                        return False, PALMAT
+                    identifierDict[key] = value
+                    if key == "initial":
+                        identifierDict["value"] = copy.deepcopy(value)
     elif lbnfLabel in ["char_spec", "bitSpecBoolean",  
                        "sQdQName_doublyQualNameHead_literalExpOrStar",
                        "arraySpec_arrayHead_literalExpOrStar"]:
