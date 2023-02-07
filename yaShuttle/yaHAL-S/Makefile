@@ -77,5 +77,5 @@ modernHAL-S-FC-macosx: modernHAL-S-FC.c ${CFILES} ${HFILES}
 	strip $@
 	
 # Make a zipfile for distributing just the preprocess+compiler executables and source.
-yaHAL-S-FC.zip:
-	zip $@ *.c *.h *.py modernHAL* *.cf *.y *.pdf README.txt
+yaHAL-S-FC.zip: 
+	zip $@ *.c *.h *.py modernHAL* *.cf *.y *.pdf README.txt Makefile
