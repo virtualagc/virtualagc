@@ -1,8 +1,8 @@
 *************************************************************
-NOTE: The stuff in this folder is in the very early stages of 
-development, so don't expect it to do anything as of yet!
-The descriptions below relate to my gameplan for what I hope
-it to do eventually.
+NOTE: The work in this folder has now been completed, but 
+it's unclear if I ever updated this documentation (which I 
+wrote during the implementation process) to reflect 100% how
+it ended up working.  I sure hope I did!
 *************************************************************
 
 This folder contains files that allow building a drawing tree.
@@ -195,5 +195,6 @@ nonsense, so makeAllDrilldowns.sh does it something like this:
 	'cd' into the VirtualAGC gh-pages repo branch
 	cat AgcDrawingIndex*.html | AgcDrawingIndex.py >drawings.csv
 	MakeTipueSearch.py <drawings.csv >TipueSearch/tipuesearch_content.js
-	move drawings.csv into the DrawingTree/ folder of the VirtualAGC schematics repo branch
+	move drawings.csv into the DrawingTree/ folder 
+		of the VirtualAGC schematics repo branch
 
