@@ -203,8 +203,8 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth, \
             instructions = stateMachine["compiledExpression"]
         else:
             instructions = PALMAT["scopes"][state["scopeIndex"]]["instructions"]
-        if "relationalOperator" in stateMachine:
-            temporaryInstructions.append(stateMachine["relationalOperator"])
+        #if "relationalOperator" in stateMachine:
+        #    temporaryInstructions.append(stateMachine["relationalOperator"])
         if "expressionFlush" in stateMachine:
             stateMachine["expressionFlush"].extend(temporaryInstructions)
             stateMachine["whereTo"] = "expressionFlush"
@@ -283,18 +283,34 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth, \
             expression.append({ "fill": True })
         elif lbnfLabel == "subscript":
             expression.append({ "operator": "subscripts"})
-        elif lbnfLabel == "relationalOpEQ":
-            stateMachine["relationalOperator"] = { "operator": "==" }
-        elif lbnfLabel == "relationalOpNEQ":
-            stateMachine["relationalOperator"] = { "operator": "!=" }
-        elif lbnfLabel == "relationalOpLT":
-            stateMachine["relationalOperator"] = { "operator": "<" }
-        elif lbnfLabel == "relationalOpGT":
-            stateMachine["relationalOperator"] = { "operator": ">" }
-        elif lbnfLabel == "relationalOpLE":
-            stateMachine["relationalOperator"] = { "operator": "<=" }
-        elif lbnfLabel == "relationalOpGE":
-            stateMachine["relationalOperator"] = { "operator": ">=" }
+        #elif lbnfLabel == "relationalOpEQ":
+        #    stateMachine["relationalOperator"] = { "operator": "==" }
+        #elif lbnfLabel == "relationalOpNEQ":
+        #    stateMachine["relationalOperator"] = { "operator": "!=" }
+        #elif lbnfLabel == "relationalOpLT":
+        #    stateMachine["relationalOperator"] = { "operator": "<" }
+        #elif lbnfLabel == "relationalOpGT":
+        #    stateMachine["relationalOperator"] = { "operator": ">" }
+        #elif lbnfLabel == "relationalOpLE":
+        #    stateMachine["relationalOperator"] = { "operator": "<=" }
+        #elif lbnfLabel == "relationalOpGE":
+        #    stateMachine["relationalOperator"] = { "operator": ">=" }
+        elif lbnfLabel == "comparisonEQ":
+            expression.append({ "operator": "==" })
+        elif lbnfLabel == "comparisonNEQ":
+            expression.append({ "operator": "!=" })
+        elif lbnfLabel == "comparisonLT":
+            expression.append({ "operator": "<" })
+        elif lbnfLabel == "comparisonGT":
+            expression.append({ "operator": ">" })
+        elif lbnfLabel == "comparisonLE":
+            expression.append({ "operator": "<=" })
+        elif lbnfLabel == "comparisonGE":
+            expression.append({ "operator": ">=" })
+        elif lbnfLabel == "relational_factorAND":
+            expression.append({ "operator": "AND" })
+        elif lbnfLabel == "relational_expOR":
+            expression.append({ "operator": "OR" })
         elif lbnfLabel == "prePrimaryFunction":
             internalState = "waitFunctionName"
         elif lbnfLabel == "factorTranspose":

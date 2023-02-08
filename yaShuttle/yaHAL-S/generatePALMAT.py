@@ -310,7 +310,8 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                 state["stateMachine"] = parentStateMachine
 
     lbnfLabelPatterns = {
-            "relational_exp": ["ifThenElseStatement", "ifStatement"], 
+            #"relational_exp": ["ifThenElseStatement", "ifStatement"], 
+            "ifClauseRelationalExp": ["ifThenElseStatement", "ifStatement"], 
             "ifClauseBitExp": ["ifThenElseStatement", "ifStatement"], 
             "while_clause": ["basicStatementDo"]
         }

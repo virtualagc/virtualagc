@@ -142,6 +142,9 @@ COMPILATION psCOMPILATION(const char *str)
   STRUCTURE_ID structure_id_;
   ASSIGNMENT assignment_;
   EQUALS equals_;
+  STATEMENT statement_;
+  BASIC_STATEMENT basic_statement_;
+  OTHER_STATEMENT other_statement_;
   IF_STATEMENT if_statement_;
   IF_CLAUSE if_clause_;
   TRUE_PART true_part_;
@@ -151,10 +154,6 @@ COMPILATION psCOMPILATION(const char *str)
   RELATIONAL_FACTOR relational_factor_;
   REL_PRIM rel_prim_;
   COMPARISON comparison_;
-  RELATIONAL_OP relational_op_;
-  STATEMENT statement_;
-  BASIC_STATEMENT basic_statement_;
-  OTHER_STATEMENT other_statement_;
   ANY_STATEMENT any_statement_;
   ON_PHRASE on_phrase_;
   ON_CLAUSE on_clause_;
@@ -536,6 +535,9 @@ COMPILATION psCOMPILATION(const char *str)
 %type <structure_id_> STRUCTURE_ID
 %type <assignment_> ASSIGNMENT
 %type <equals_> EQUALS
+%type <statement_> STATEMENT
+%type <basic_statement_> BASIC_STATEMENT
+%type <other_statement_> OTHER_STATEMENT
 %type <if_statement_> IF_STATEMENT
 %type <if_clause_> IF_CLAUSE
 %type <true_part_> TRUE_PART
@@ -545,10 +547,6 @@ COMPILATION psCOMPILATION(const char *str)
 %type <relational_factor_> RELATIONAL_FACTOR
 %type <rel_prim_> REL_PRIM
 %type <comparison_> COMPARISON
-%type <relational_op_> RELATIONAL_OP
-%type <statement_> STATEMENT
-%type <basic_statement_> BASIC_STATEMENT
-%type <other_statement_> OTHER_STATEMENT
 %type <any_statement_> ANY_STATEMENT
 %type <on_phrase_> ON_PHRASE
 %type <on_clause_> ON_CLAUSE
@@ -1037,41 +1035,6 @@ ASSIGNMENT : VARIABLE EQUALS EXPRESSION { $$ = make_AAassignment($1, $2, $3); $$
 ;
 EQUALS : _SYMB_24 { $$ = make_AAequals(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
-IF_STATEMENT : IF_CLAUSE STATEMENT { $$ = make_AAifStatement($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | TRUE_PART STATEMENT { $$ = make_ABifThenElseStatement($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-;
-IF_CLAUSE : IF RELATIONAL_EXP THEN { $$ = make_AAifClauseRelationalExp($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | IF BIT_EXP THEN { $$ = make_ABifClauseBitExp($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-;
-TRUE_PART : IF_CLAUSE BASIC_STATEMENT _SYMB_71 { $$ = make_AAtrue_part($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-;
-IF : _SYMB_90 { $$ = make_AAif(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-;
-THEN : _SYMB_165 { $$ = make_AAthen(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-;
-RELATIONAL_EXP : RELATIONAL_FACTOR { $$ = make_AArelational_exp($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | RELATIONAL_EXP OR RELATIONAL_FACTOR { $$ = make_ABrelational_exp($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-;
-RELATIONAL_FACTOR : REL_PRIM { $$ = make_AArelational_factor($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | RELATIONAL_FACTOR AND REL_PRIM { $$ = make_ABrelational_factor($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-;
-REL_PRIM : _SYMB_2 RELATIONAL_EXP _SYMB_1 { $$ = make_AArel_prim($2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | NOT _SYMB_2 RELATIONAL_EXP _SYMB_1 { $$ = make_ABrel_prim($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | COMPARISON { $$ = make_ACrel_prim($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-;
-COMPARISON : ARITH_EXP RELATIONAL_OP ARITH_EXP { $$ = make_AAcomparison($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | CHAR_EXP RELATIONAL_OP CHAR_EXP { $$ = make_ABcomparison($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | BIT_CAT RELATIONAL_OP BIT_CAT { $$ = make_ACcomparison($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | STRUCTURE_EXP RELATIONAL_OP STRUCTURE_EXP { $$ = make_ADcomparison($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | NAME_EXP RELATIONAL_OP NAME_EXP { $$ = make_AEcomparison($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-;
-RELATIONAL_OP : EQUALS { $$ = make_AArelationalOpEQ($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_180 { $$ = make_ABrelationalOpNEQ($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_23 { $$ = make_ACrelationalOpLT(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_25 { $$ = make_ADrelationalOpGT(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_181 { $$ = make_AErelationalOpLE($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_182 { $$ = make_AFrelationalOpGE($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-;
 STATEMENT : BASIC_STATEMENT { $$ = make_AAstatement($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | OTHER_STATEMENT { $$ = make_ABstatement($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | INLINE_DEFINITION { $$ = make_AZstatement($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
@@ -1121,6 +1084,59 @@ BASIC_STATEMENT : ASSIGNMENT _SYMB_17 { $$ = make_ABbasicStatementAssignment($1)
 OTHER_STATEMENT : IF_STATEMENT { $$ = make_ABotherStatementIf($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | ON_PHRASE STATEMENT { $$ = make_AAotherStatementOn($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | LABEL_DEFINITION OTHER_STATEMENT { $$ = make_ACother_statement($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+;
+IF_STATEMENT : IF_CLAUSE STATEMENT { $$ = make_AAifStatement($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | TRUE_PART STATEMENT { $$ = make_ABifThenElseStatement($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+;
+IF_CLAUSE : IF RELATIONAL_EXP THEN { $$ = make_AAifClauseRelationalExp($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | IF BIT_EXP THEN { $$ = make_ABifClauseBitExp($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+;
+TRUE_PART : IF_CLAUSE BASIC_STATEMENT _SYMB_71 { $$ = make_AAtrue_part($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+;
+IF : _SYMB_90 { $$ = make_AAif(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+;
+THEN : _SYMB_165 { $$ = make_AAthen(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+;
+RELATIONAL_EXP : RELATIONAL_FACTOR { $$ = make_AArelational_exp($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | RELATIONAL_EXP OR RELATIONAL_FACTOR { $$ = make_ABrelational_expOR($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+;
+RELATIONAL_FACTOR : REL_PRIM { $$ = make_AArelational_factor($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | RELATIONAL_FACTOR AND REL_PRIM { $$ = make_ABrelational_factorAND($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+;
+REL_PRIM : _SYMB_2 RELATIONAL_EXP _SYMB_1 { $$ = make_AArel_prim($2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | NOT _SYMB_2 RELATIONAL_EXP _SYMB_1 { $$ = make_ABrel_prim($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | COMPARISON { $$ = make_ACrel_prim($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+;
+COMPARISON : ARITH_EXP EQUALS ARITH_EXP { $$ = make_AAcomparisonEQ($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | CHAR_EXP EQUALS CHAR_EXP { $$ = make_ABcomparisonEQ($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | BIT_CAT EQUALS BIT_CAT { $$ = make_ACcomparisonEQ($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | STRUCTURE_EXP EQUALS STRUCTURE_EXP { $$ = make_ADcomparisonEQ($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | NAME_EXP EQUALS NAME_EXP { $$ = make_AEcomparisonEQ($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | ARITH_EXP _SYMB_180 ARITH_EXP { $$ = make_AAcomparisonNEQ($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | CHAR_EXP _SYMB_180 CHAR_EXP { $$ = make_ABcomparisonNEQ($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | BIT_CAT _SYMB_180 BIT_CAT { $$ = make_ACcomparisonNEQ($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | STRUCTURE_EXP _SYMB_180 STRUCTURE_EXP { $$ = make_ADcomparisonNEQ($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | NAME_EXP _SYMB_180 NAME_EXP { $$ = make_AEcomparisonNEQ($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | ARITH_EXP _SYMB_23 ARITH_EXP { $$ = make_AAcomparisonLT($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | CHAR_EXP _SYMB_23 CHAR_EXP { $$ = make_ABcomparisonLT($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | BIT_CAT _SYMB_23 BIT_CAT { $$ = make_ACcomparisonLT($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | STRUCTURE_EXP _SYMB_23 STRUCTURE_EXP { $$ = make_ADcomparisonLT($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | NAME_EXP _SYMB_23 NAME_EXP { $$ = make_AEcomparisonLT($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | ARITH_EXP _SYMB_25 ARITH_EXP { $$ = make_AAcomparisonGT($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | CHAR_EXP _SYMB_25 CHAR_EXP { $$ = make_ABcomparisonGT($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | BIT_CAT _SYMB_25 BIT_CAT { $$ = make_ACcomparisonGT($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | STRUCTURE_EXP _SYMB_25 STRUCTURE_EXP { $$ = make_ADcomparisonGT($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | NAME_EXP _SYMB_25 NAME_EXP { $$ = make_AEcomparisonGT($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | ARITH_EXP _SYMB_181 ARITH_EXP { $$ = make_AAcomparisonLE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | CHAR_EXP _SYMB_181 CHAR_EXP { $$ = make_ABcomparisonLE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | BIT_CAT _SYMB_181 BIT_CAT { $$ = make_ACcomparisonLE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | STRUCTURE_EXP _SYMB_181 STRUCTURE_EXP { $$ = make_ADcomparisonLE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | NAME_EXP _SYMB_181 NAME_EXP { $$ = make_AEcomparisonLE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | ARITH_EXP _SYMB_182 ARITH_EXP { $$ = make_AAcomparisonGE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | CHAR_EXP _SYMB_182 CHAR_EXP { $$ = make_ABcomparisonGE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | BIT_CAT _SYMB_182 BIT_CAT { $$ = make_ACcomparisonGE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | STRUCTURE_EXP _SYMB_182 STRUCTURE_EXP { $$ = make_ADcomparisonGE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | NAME_EXP _SYMB_182 NAME_EXP { $$ = make_AEcomparisonGE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 ANY_STATEMENT : STATEMENT { $$ = make_AAany_statement($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | BLOCK_DEFINITION { $$ = make_ABany_statement($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }

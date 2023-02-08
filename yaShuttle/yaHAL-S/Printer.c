@@ -3441,318 +3441,6 @@ void ppEQUALS(EQUALS p, int _i_)
   }
 }
 
-void ppIF_STATEMENT(IF_STATEMENT p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_AAifStatement:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppIF_CLAUSE(p->u.aaifstatement_.if_clause_, 0);
-    ppSTATEMENT(p->u.aaifstatement_.statement_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ABifThenElseStatement:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppTRUE_PART(p->u.abifthenelsestatement_.true_part_, 0);
-    ppSTATEMENT(p->u.abifthenelsestatement_.statement_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing IF_STATEMENT!\n");
-    exit(1);
-  }
-}
-
-void ppIF_CLAUSE(IF_CLAUSE p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_AAifClauseRelationalExp:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppIF(p->u.aaifclauserelationalexp_.if_, 0);
-    ppRELATIONAL_EXP(p->u.aaifclauserelationalexp_.relational_exp_, 0);
-    ppTHEN(p->u.aaifclauserelationalexp_.then_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ABifClauseBitExp:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppIF(p->u.abifclausebitexp_.if_, 0);
-    ppBIT_EXP(p->u.abifclausebitexp_.bit_exp_, 0);
-    ppTHEN(p->u.abifclausebitexp_.then_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing IF_CLAUSE!\n");
-    exit(1);
-  }
-}
-
-void ppTRUE_PART(TRUE_PART p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_AAtrue_part:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppIF_CLAUSE(p->u.aatrue_part_.if_clause_, 0);
-    ppBASIC_STATEMENT(p->u.aatrue_part_.basic_statement_, 0);
-    renderS("ELSE");
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing TRUE_PART!\n");
-    exit(1);
-  }
-}
-
-void ppIF(IF p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_AAif:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderS("IF");
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing IF!\n");
-    exit(1);
-  }
-}
-
-void ppTHEN(THEN p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_AAthen:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderS("THEN");
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing THEN!\n");
-    exit(1);
-  }
-}
-
-void ppRELATIONAL_EXP(RELATIONAL_EXP p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_AArelational_exp:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppRELATIONAL_FACTOR(p->u.aarelational_exp_.relational_factor_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ABrelational_exp:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppRELATIONAL_EXP(p->u.abrelational_exp_.relational_exp_, 0);
-    ppOR(p->u.abrelational_exp_.or_, 0);
-    ppRELATIONAL_FACTOR(p->u.abrelational_exp_.relational_factor_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing RELATIONAL_EXP!\n");
-    exit(1);
-  }
-}
-
-void ppRELATIONAL_FACTOR(RELATIONAL_FACTOR p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_AArelational_factor:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppREL_PRIM(p->u.aarelational_factor_.rel_prim_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ABrelational_factor:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppRELATIONAL_FACTOR(p->u.abrelational_factor_.relational_factor_, 0);
-    ppAND(p->u.abrelational_factor_.and_, 0);
-    ppREL_PRIM(p->u.abrelational_factor_.rel_prim_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing RELATIONAL_FACTOR!\n");
-    exit(1);
-  }
-}
-
-void ppREL_PRIM(REL_PRIM p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_AArel_prim:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderC('(');
-    ppRELATIONAL_EXP(p->u.aarel_prim_.relational_exp_, 0);
-    renderC(')');
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ABrel_prim:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppNOT(p->u.abrel_prim_.not_, 0);
-    renderC('(');
-    ppRELATIONAL_EXP(p->u.abrel_prim_.relational_exp_, 0);
-    renderC(')');
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ACrel_prim:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppCOMPARISON(p->u.acrel_prim_.comparison_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing REL_PRIM!\n");
-    exit(1);
-  }
-}
-
-void ppCOMPARISON(COMPARISON p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_AAcomparison:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppARITH_EXP(p->u.aacomparison_.arith_exp_1, 0);
-    ppRELATIONAL_OP(p->u.aacomparison_.relational_op_, 0);
-    ppARITH_EXP(p->u.aacomparison_.arith_exp_2, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ABcomparison:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppCHAR_EXP(p->u.abcomparison_.char_exp_1, 0);
-    ppRELATIONAL_OP(p->u.abcomparison_.relational_op_, 0);
-    ppCHAR_EXP(p->u.abcomparison_.char_exp_2, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ACcomparison:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppBIT_CAT(p->u.accomparison_.bit_cat_1, 0);
-    ppRELATIONAL_OP(p->u.accomparison_.relational_op_, 0);
-    ppBIT_CAT(p->u.accomparison_.bit_cat_2, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ADcomparison:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppSTRUCTURE_EXP(p->u.adcomparison_.structure_exp_1, 0);
-    ppRELATIONAL_OP(p->u.adcomparison_.relational_op_, 0);
-    ppSTRUCTURE_EXP(p->u.adcomparison_.structure_exp_2, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_AEcomparison:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppNAME_EXP(p->u.aecomparison_.name_exp_1, 0);
-    ppRELATIONAL_OP(p->u.aecomparison_.relational_op_, 0);
-    ppNAME_EXP(p->u.aecomparison_.name_exp_2, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing COMPARISON!\n");
-    exit(1);
-  }
-}
-
-void ppRELATIONAL_OP(RELATIONAL_OP p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_AArelationalOpEQ:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppEQUALS(p->u.aarelationalopeq_.equals_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ABrelationalOpNEQ:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppIdent(p->u.abrelationalopneq_.neqtoken_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ACrelationalOpLT:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderC('<');
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ADrelationalOpGT:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderC('>');
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_AErelationalOpLE:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppIdent(p->u.aerelationalople_.letoken_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_AFrelationalOpGE:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppIdent(p->u.afrelationalopge_.getoken_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing RELATIONAL_OP!\n");
-    exit(1);
-  }
-}
-
 void ppSTATEMENT(STATEMENT p, int _i_)
 {
   switch(p->kind)
@@ -4205,6 +3893,490 @@ void ppOTHER_STATEMENT(OTHER_STATEMENT p, int _i_)
 
   default:
     fprintf(stderr, "Error: bad kind field when printing OTHER_STATEMENT!\n");
+    exit(1);
+  }
+}
+
+void ppIF_STATEMENT(IF_STATEMENT p, int _i_)
+{
+  switch(p->kind)
+  {
+  case is_AAifStatement:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppIF_CLAUSE(p->u.aaifstatement_.if_clause_, 0);
+    ppSTATEMENT(p->u.aaifstatement_.statement_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ABifThenElseStatement:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppTRUE_PART(p->u.abifthenelsestatement_.true_part_, 0);
+    ppSTATEMENT(p->u.abifthenelsestatement_.statement_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+
+  default:
+    fprintf(stderr, "Error: bad kind field when printing IF_STATEMENT!\n");
+    exit(1);
+  }
+}
+
+void ppIF_CLAUSE(IF_CLAUSE p, int _i_)
+{
+  switch(p->kind)
+  {
+  case is_AAifClauseRelationalExp:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppIF(p->u.aaifclauserelationalexp_.if_, 0);
+    ppRELATIONAL_EXP(p->u.aaifclauserelationalexp_.relational_exp_, 0);
+    ppTHEN(p->u.aaifclauserelationalexp_.then_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ABifClauseBitExp:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppIF(p->u.abifclausebitexp_.if_, 0);
+    ppBIT_EXP(p->u.abifclausebitexp_.bit_exp_, 0);
+    ppTHEN(p->u.abifclausebitexp_.then_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+
+  default:
+    fprintf(stderr, "Error: bad kind field when printing IF_CLAUSE!\n");
+    exit(1);
+  }
+}
+
+void ppTRUE_PART(TRUE_PART p, int _i_)
+{
+  switch(p->kind)
+  {
+  case is_AAtrue_part:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppIF_CLAUSE(p->u.aatrue_part_.if_clause_, 0);
+    ppBASIC_STATEMENT(p->u.aatrue_part_.basic_statement_, 0);
+    renderS("ELSE");
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+
+  default:
+    fprintf(stderr, "Error: bad kind field when printing TRUE_PART!\n");
+    exit(1);
+  }
+}
+
+void ppIF(IF p, int _i_)
+{
+  switch(p->kind)
+  {
+  case is_AAif:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderS("IF");
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+
+  default:
+    fprintf(stderr, "Error: bad kind field when printing IF!\n");
+    exit(1);
+  }
+}
+
+void ppTHEN(THEN p, int _i_)
+{
+  switch(p->kind)
+  {
+  case is_AAthen:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderS("THEN");
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+
+  default:
+    fprintf(stderr, "Error: bad kind field when printing THEN!\n");
+    exit(1);
+  }
+}
+
+void ppRELATIONAL_EXP(RELATIONAL_EXP p, int _i_)
+{
+  switch(p->kind)
+  {
+  case is_AArelational_exp:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppRELATIONAL_FACTOR(p->u.aarelational_exp_.relational_factor_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ABrelational_expOR:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppRELATIONAL_EXP(p->u.abrelational_expor_.relational_exp_, 0);
+    ppOR(p->u.abrelational_expor_.or_, 0);
+    ppRELATIONAL_FACTOR(p->u.abrelational_expor_.relational_factor_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+
+  default:
+    fprintf(stderr, "Error: bad kind field when printing RELATIONAL_EXP!\n");
+    exit(1);
+  }
+}
+
+void ppRELATIONAL_FACTOR(RELATIONAL_FACTOR p, int _i_)
+{
+  switch(p->kind)
+  {
+  case is_AArelational_factor:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppREL_PRIM(p->u.aarelational_factor_.rel_prim_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ABrelational_factorAND:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppRELATIONAL_FACTOR(p->u.abrelational_factorand_.relational_factor_, 0);
+    ppAND(p->u.abrelational_factorand_.and_, 0);
+    ppREL_PRIM(p->u.abrelational_factorand_.rel_prim_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+
+  default:
+    fprintf(stderr, "Error: bad kind field when printing RELATIONAL_FACTOR!\n");
+    exit(1);
+  }
+}
+
+void ppREL_PRIM(REL_PRIM p, int _i_)
+{
+  switch(p->kind)
+  {
+  case is_AArel_prim:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderC('(');
+    ppRELATIONAL_EXP(p->u.aarel_prim_.relational_exp_, 0);
+    renderC(')');
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ABrel_prim:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppNOT(p->u.abrel_prim_.not_, 0);
+    renderC('(');
+    ppRELATIONAL_EXP(p->u.abrel_prim_.relational_exp_, 0);
+    renderC(')');
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ACrel_prim:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppCOMPARISON(p->u.acrel_prim_.comparison_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+
+  default:
+    fprintf(stderr, "Error: bad kind field when printing REL_PRIM!\n");
+    exit(1);
+  }
+}
+
+void ppCOMPARISON(COMPARISON p, int _i_)
+{
+  switch(p->kind)
+  {
+  case is_AAcomparisonEQ:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppARITH_EXP(p->u.aacomparisoneq_.arith_exp_1, 0);
+    ppEQUALS(p->u.aacomparisoneq_.equals_, 0);
+    ppARITH_EXP(p->u.aacomparisoneq_.arith_exp_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ABcomparisonEQ:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppCHAR_EXP(p->u.abcomparisoneq_.char_exp_1, 0);
+    ppEQUALS(p->u.abcomparisoneq_.equals_, 0);
+    ppCHAR_EXP(p->u.abcomparisoneq_.char_exp_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ACcomparisonEQ:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppBIT_CAT(p->u.accomparisoneq_.bit_cat_1, 0);
+    ppEQUALS(p->u.accomparisoneq_.equals_, 0);
+    ppBIT_CAT(p->u.accomparisoneq_.bit_cat_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ADcomparisonEQ:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppSTRUCTURE_EXP(p->u.adcomparisoneq_.structure_exp_1, 0);
+    ppEQUALS(p->u.adcomparisoneq_.equals_, 0);
+    ppSTRUCTURE_EXP(p->u.adcomparisoneq_.structure_exp_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_AEcomparisonEQ:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppNAME_EXP(p->u.aecomparisoneq_.name_exp_1, 0);
+    ppEQUALS(p->u.aecomparisoneq_.equals_, 0);
+    ppNAME_EXP(p->u.aecomparisoneq_.name_exp_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_AAcomparisonNEQ:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppARITH_EXP(p->u.aacomparisonneq_.arith_exp_1, 0);
+    ppIdent(p->u.aacomparisonneq_.neqtoken_, 0);
+    ppARITH_EXP(p->u.aacomparisonneq_.arith_exp_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ABcomparisonNEQ:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppCHAR_EXP(p->u.abcomparisonneq_.char_exp_1, 0);
+    ppIdent(p->u.abcomparisonneq_.neqtoken_, 0);
+    ppCHAR_EXP(p->u.abcomparisonneq_.char_exp_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ACcomparisonNEQ:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppBIT_CAT(p->u.accomparisonneq_.bit_cat_1, 0);
+    ppIdent(p->u.accomparisonneq_.neqtoken_, 0);
+    ppBIT_CAT(p->u.accomparisonneq_.bit_cat_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ADcomparisonNEQ:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppSTRUCTURE_EXP(p->u.adcomparisonneq_.structure_exp_1, 0);
+    ppIdent(p->u.adcomparisonneq_.neqtoken_, 0);
+    ppSTRUCTURE_EXP(p->u.adcomparisonneq_.structure_exp_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_AEcomparisonNEQ:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppNAME_EXP(p->u.aecomparisonneq_.name_exp_1, 0);
+    ppIdent(p->u.aecomparisonneq_.neqtoken_, 0);
+    ppNAME_EXP(p->u.aecomparisonneq_.name_exp_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_AAcomparisonLT:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppARITH_EXP(p->u.aacomparisonlt_.arith_exp_1, 0);
+    renderC('<');
+    ppARITH_EXP(p->u.aacomparisonlt_.arith_exp_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ABcomparisonLT:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppCHAR_EXP(p->u.abcomparisonlt_.char_exp_1, 0);
+    renderC('<');
+    ppCHAR_EXP(p->u.abcomparisonlt_.char_exp_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ACcomparisonLT:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppBIT_CAT(p->u.accomparisonlt_.bit_cat_1, 0);
+    renderC('<');
+    ppBIT_CAT(p->u.accomparisonlt_.bit_cat_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ADcomparisonLT:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppSTRUCTURE_EXP(p->u.adcomparisonlt_.structure_exp_1, 0);
+    renderC('<');
+    ppSTRUCTURE_EXP(p->u.adcomparisonlt_.structure_exp_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_AEcomparisonLT:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppNAME_EXP(p->u.aecomparisonlt_.name_exp_1, 0);
+    renderC('<');
+    ppNAME_EXP(p->u.aecomparisonlt_.name_exp_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_AAcomparisonGT:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppARITH_EXP(p->u.aacomparisongt_.arith_exp_1, 0);
+    renderC('>');
+    ppARITH_EXP(p->u.aacomparisongt_.arith_exp_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ABcomparisonGT:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppCHAR_EXP(p->u.abcomparisongt_.char_exp_1, 0);
+    renderC('>');
+    ppCHAR_EXP(p->u.abcomparisongt_.char_exp_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ACcomparisonGT:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppBIT_CAT(p->u.accomparisongt_.bit_cat_1, 0);
+    renderC('>');
+    ppBIT_CAT(p->u.accomparisongt_.bit_cat_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ADcomparisonGT:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppSTRUCTURE_EXP(p->u.adcomparisongt_.structure_exp_1, 0);
+    renderC('>');
+    ppSTRUCTURE_EXP(p->u.adcomparisongt_.structure_exp_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_AEcomparisonGT:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppNAME_EXP(p->u.aecomparisongt_.name_exp_1, 0);
+    renderC('>');
+    ppNAME_EXP(p->u.aecomparisongt_.name_exp_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_AAcomparisonLE:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppARITH_EXP(p->u.aacomparisonle_.arith_exp_1, 0);
+    ppIdent(p->u.aacomparisonle_.letoken_, 0);
+    ppARITH_EXP(p->u.aacomparisonle_.arith_exp_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ABcomparisonLE:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppCHAR_EXP(p->u.abcomparisonle_.char_exp_1, 0);
+    ppIdent(p->u.abcomparisonle_.letoken_, 0);
+    ppCHAR_EXP(p->u.abcomparisonle_.char_exp_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ACcomparisonLE:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppBIT_CAT(p->u.accomparisonle_.bit_cat_1, 0);
+    ppIdent(p->u.accomparisonle_.letoken_, 0);
+    ppBIT_CAT(p->u.accomparisonle_.bit_cat_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ADcomparisonLE:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppSTRUCTURE_EXP(p->u.adcomparisonle_.structure_exp_1, 0);
+    ppIdent(p->u.adcomparisonle_.letoken_, 0);
+    ppSTRUCTURE_EXP(p->u.adcomparisonle_.structure_exp_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_AEcomparisonLE:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppNAME_EXP(p->u.aecomparisonle_.name_exp_1, 0);
+    ppIdent(p->u.aecomparisonle_.letoken_, 0);
+    ppNAME_EXP(p->u.aecomparisonle_.name_exp_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_AAcomparisonGE:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppARITH_EXP(p->u.aacomparisonge_.arith_exp_1, 0);
+    ppIdent(p->u.aacomparisonge_.getoken_, 0);
+    ppARITH_EXP(p->u.aacomparisonge_.arith_exp_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ABcomparisonGE:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppCHAR_EXP(p->u.abcomparisonge_.char_exp_1, 0);
+    ppIdent(p->u.abcomparisonge_.getoken_, 0);
+    ppCHAR_EXP(p->u.abcomparisonge_.char_exp_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ACcomparisonGE:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppBIT_CAT(p->u.accomparisonge_.bit_cat_1, 0);
+    ppIdent(p->u.accomparisonge_.getoken_, 0);
+    ppBIT_CAT(p->u.accomparisonge_.bit_cat_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ADcomparisonGE:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppSTRUCTURE_EXP(p->u.adcomparisonge_.structure_exp_1, 0);
+    ppIdent(p->u.adcomparisonge_.getoken_, 0);
+    ppSTRUCTURE_EXP(p->u.adcomparisonge_.structure_exp_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_AEcomparisonGE:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppNAME_EXP(p->u.aecomparisonge_.name_exp_1, 0);
+    ppIdent(p->u.aecomparisonge_.getoken_, 0);
+    ppNAME_EXP(p->u.aecomparisonge_.name_exp_2, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+
+  default:
+    fprintf(stderr, "Error: bad kind field when printing COMPARISON!\n");
     exit(1);
   }
 }
@@ -11621,444 +11793,6 @@ void shEQUALS(EQUALS p)
   }
 }
 
-void shIF_STATEMENT(IF_STATEMENT p)
-{
-  switch(p->kind)
-  {
-  case is_AAifStatement:
-    bufAppendC('(');
-
-    bufAppendS("AAifStatement");
-
-    bufAppendC(' ');
-
-    shIF_CLAUSE(p->u.aaifstatement_.if_clause_);
-  bufAppendC(' ');
-    shSTATEMENT(p->u.aaifstatement_.statement_);
-
-    bufAppendC(')');
-
-    break;
-  case is_ABifThenElseStatement:
-    bufAppendC('(');
-
-    bufAppendS("ABifThenElseStatement");
-
-    bufAppendC(' ');
-
-    shTRUE_PART(p->u.abifthenelsestatement_.true_part_);
-  bufAppendC(' ');
-    shSTATEMENT(p->u.abifthenelsestatement_.statement_);
-
-    bufAppendC(')');
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing IF_STATEMENT!\n");
-    exit(1);
-  }
-}
-
-void shIF_CLAUSE(IF_CLAUSE p)
-{
-  switch(p->kind)
-  {
-  case is_AAifClauseRelationalExp:
-    bufAppendC('(');
-
-    bufAppendS("AAifClauseRelationalExp");
-
-    bufAppendC(' ');
-
-    shIF(p->u.aaifclauserelationalexp_.if_);
-  bufAppendC(' ');
-    shRELATIONAL_EXP(p->u.aaifclauserelationalexp_.relational_exp_);
-  bufAppendC(' ');
-    shTHEN(p->u.aaifclauserelationalexp_.then_);
-
-    bufAppendC(')');
-
-    break;
-  case is_ABifClauseBitExp:
-    bufAppendC('(');
-
-    bufAppendS("ABifClauseBitExp");
-
-    bufAppendC(' ');
-
-    shIF(p->u.abifclausebitexp_.if_);
-  bufAppendC(' ');
-    shBIT_EXP(p->u.abifclausebitexp_.bit_exp_);
-  bufAppendC(' ');
-    shTHEN(p->u.abifclausebitexp_.then_);
-
-    bufAppendC(')');
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing IF_CLAUSE!\n");
-    exit(1);
-  }
-}
-
-void shTRUE_PART(TRUE_PART p)
-{
-  switch(p->kind)
-  {
-  case is_AAtrue_part:
-    bufAppendC('(');
-
-    bufAppendS("AAtrue_part");
-
-    bufAppendC(' ');
-
-    shIF_CLAUSE(p->u.aatrue_part_.if_clause_);
-  bufAppendC(' ');
-    shBASIC_STATEMENT(p->u.aatrue_part_.basic_statement_);
-
-    bufAppendC(')');
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing TRUE_PART!\n");
-    exit(1);
-  }
-}
-
-void shIF(IF p)
-{
-  switch(p->kind)
-  {
-  case is_AAif:
-
-    bufAppendS("AAif");
-
-
-
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing IF!\n");
-    exit(1);
-  }
-}
-
-void shTHEN(THEN p)
-{
-  switch(p->kind)
-  {
-  case is_AAthen:
-
-    bufAppendS("AAthen");
-
-
-
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing THEN!\n");
-    exit(1);
-  }
-}
-
-void shRELATIONAL_EXP(RELATIONAL_EXP p)
-{
-  switch(p->kind)
-  {
-  case is_AArelational_exp:
-    bufAppendC('(');
-
-    bufAppendS("AArelational_exp");
-
-    bufAppendC(' ');
-
-    shRELATIONAL_FACTOR(p->u.aarelational_exp_.relational_factor_);
-
-    bufAppendC(')');
-
-    break;
-  case is_ABrelational_exp:
-    bufAppendC('(');
-
-    bufAppendS("ABrelational_exp");
-
-    bufAppendC(' ');
-
-    shRELATIONAL_EXP(p->u.abrelational_exp_.relational_exp_);
-  bufAppendC(' ');
-    shOR(p->u.abrelational_exp_.or_);
-  bufAppendC(' ');
-    shRELATIONAL_FACTOR(p->u.abrelational_exp_.relational_factor_);
-
-    bufAppendC(')');
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing RELATIONAL_EXP!\n");
-    exit(1);
-  }
-}
-
-void shRELATIONAL_FACTOR(RELATIONAL_FACTOR p)
-{
-  switch(p->kind)
-  {
-  case is_AArelational_factor:
-    bufAppendC('(');
-
-    bufAppendS("AArelational_factor");
-
-    bufAppendC(' ');
-
-    shREL_PRIM(p->u.aarelational_factor_.rel_prim_);
-
-    bufAppendC(')');
-
-    break;
-  case is_ABrelational_factor:
-    bufAppendC('(');
-
-    bufAppendS("ABrelational_factor");
-
-    bufAppendC(' ');
-
-    shRELATIONAL_FACTOR(p->u.abrelational_factor_.relational_factor_);
-  bufAppendC(' ');
-    shAND(p->u.abrelational_factor_.and_);
-  bufAppendC(' ');
-    shREL_PRIM(p->u.abrelational_factor_.rel_prim_);
-
-    bufAppendC(')');
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing RELATIONAL_FACTOR!\n");
-    exit(1);
-  }
-}
-
-void shREL_PRIM(REL_PRIM p)
-{
-  switch(p->kind)
-  {
-  case is_AArel_prim:
-    bufAppendC('(');
-
-    bufAppendS("AArel_prim");
-
-    bufAppendC(' ');
-
-    shRELATIONAL_EXP(p->u.aarel_prim_.relational_exp_);
-
-    bufAppendC(')');
-
-    break;
-  case is_ABrel_prim:
-    bufAppendC('(');
-
-    bufAppendS("ABrel_prim");
-
-    bufAppendC(' ');
-
-    shNOT(p->u.abrel_prim_.not_);
-  bufAppendC(' ');
-    shRELATIONAL_EXP(p->u.abrel_prim_.relational_exp_);
-
-    bufAppendC(')');
-
-    break;
-  case is_ACrel_prim:
-    bufAppendC('(');
-
-    bufAppendS("ACrel_prim");
-
-    bufAppendC(' ');
-
-    shCOMPARISON(p->u.acrel_prim_.comparison_);
-
-    bufAppendC(')');
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing REL_PRIM!\n");
-    exit(1);
-  }
-}
-
-void shCOMPARISON(COMPARISON p)
-{
-  switch(p->kind)
-  {
-  case is_AAcomparison:
-    bufAppendC('(');
-
-    bufAppendS("AAcomparison");
-
-    bufAppendC(' ');
-
-    shARITH_EXP(p->u.aacomparison_.arith_exp_1);
-  bufAppendC(' ');
-    shRELATIONAL_OP(p->u.aacomparison_.relational_op_);
-  bufAppendC(' ');
-    shARITH_EXP(p->u.aacomparison_.arith_exp_2);
-
-    bufAppendC(')');
-
-    break;
-  case is_ABcomparison:
-    bufAppendC('(');
-
-    bufAppendS("ABcomparison");
-
-    bufAppendC(' ');
-
-    shCHAR_EXP(p->u.abcomparison_.char_exp_1);
-  bufAppendC(' ');
-    shRELATIONAL_OP(p->u.abcomparison_.relational_op_);
-  bufAppendC(' ');
-    shCHAR_EXP(p->u.abcomparison_.char_exp_2);
-
-    bufAppendC(')');
-
-    break;
-  case is_ACcomparison:
-    bufAppendC('(');
-
-    bufAppendS("ACcomparison");
-
-    bufAppendC(' ');
-
-    shBIT_CAT(p->u.accomparison_.bit_cat_1);
-  bufAppendC(' ');
-    shRELATIONAL_OP(p->u.accomparison_.relational_op_);
-  bufAppendC(' ');
-    shBIT_CAT(p->u.accomparison_.bit_cat_2);
-
-    bufAppendC(')');
-
-    break;
-  case is_ADcomparison:
-    bufAppendC('(');
-
-    bufAppendS("ADcomparison");
-
-    bufAppendC(' ');
-
-    shSTRUCTURE_EXP(p->u.adcomparison_.structure_exp_1);
-  bufAppendC(' ');
-    shRELATIONAL_OP(p->u.adcomparison_.relational_op_);
-  bufAppendC(' ');
-    shSTRUCTURE_EXP(p->u.adcomparison_.structure_exp_2);
-
-    bufAppendC(')');
-
-    break;
-  case is_AEcomparison:
-    bufAppendC('(');
-
-    bufAppendS("AEcomparison");
-
-    bufAppendC(' ');
-
-    shNAME_EXP(p->u.aecomparison_.name_exp_1);
-  bufAppendC(' ');
-    shRELATIONAL_OP(p->u.aecomparison_.relational_op_);
-  bufAppendC(' ');
-    shNAME_EXP(p->u.aecomparison_.name_exp_2);
-
-    bufAppendC(')');
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing COMPARISON!\n");
-    exit(1);
-  }
-}
-
-void shRELATIONAL_OP(RELATIONAL_OP p)
-{
-  switch(p->kind)
-  {
-  case is_AArelationalOpEQ:
-    bufAppendC('(');
-
-    bufAppendS("AArelationalOpEQ");
-
-    bufAppendC(' ');
-
-    shEQUALS(p->u.aarelationalopeq_.equals_);
-
-    bufAppendC(')');
-
-    break;
-  case is_ABrelationalOpNEQ:
-    bufAppendC('(');
-
-    bufAppendS("ABrelationalOpNEQ");
-
-    bufAppendC(' ');
-
-    shIdent(p->u.abrelationalopneq_.neqtoken_);
-
-    bufAppendC(')');
-
-    break;
-  case is_ACrelationalOpLT:
-
-    bufAppendS("ACrelationalOpLT");
-
-
-
-
-    break;
-  case is_ADrelationalOpGT:
-
-    bufAppendS("ADrelationalOpGT");
-
-
-
-
-    break;
-  case is_AErelationalOpLE:
-    bufAppendC('(');
-
-    bufAppendS("AErelationalOpLE");
-
-    bufAppendC(' ');
-
-    shIdent(p->u.aerelationalople_.letoken_);
-
-    bufAppendC(')');
-
-    break;
-  case is_AFrelationalOpGE:
-    bufAppendC('(');
-
-    bufAppendS("AFrelationalOpGE");
-
-    bufAppendC(' ');
-
-    shIdent(p->u.afrelationalopge_.getoken_);
-
-    bufAppendC(')');
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing RELATIONAL_OP!\n");
-    exit(1);
-  }
-}
-
 void shSTATEMENT(STATEMENT p)
 {
   switch(p->kind)
@@ -12676,6 +12410,749 @@ void shOTHER_STATEMENT(OTHER_STATEMENT p)
 
   default:
     fprintf(stderr, "Error: bad kind field when showing OTHER_STATEMENT!\n");
+    exit(1);
+  }
+}
+
+void shIF_STATEMENT(IF_STATEMENT p)
+{
+  switch(p->kind)
+  {
+  case is_AAifStatement:
+    bufAppendC('(');
+
+    bufAppendS("AAifStatement");
+
+    bufAppendC(' ');
+
+    shIF_CLAUSE(p->u.aaifstatement_.if_clause_);
+  bufAppendC(' ');
+    shSTATEMENT(p->u.aaifstatement_.statement_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ABifThenElseStatement:
+    bufAppendC('(');
+
+    bufAppendS("ABifThenElseStatement");
+
+    bufAppendC(' ');
+
+    shTRUE_PART(p->u.abifthenelsestatement_.true_part_);
+  bufAppendC(' ');
+    shSTATEMENT(p->u.abifthenelsestatement_.statement_);
+
+    bufAppendC(')');
+
+    break;
+
+  default:
+    fprintf(stderr, "Error: bad kind field when showing IF_STATEMENT!\n");
+    exit(1);
+  }
+}
+
+void shIF_CLAUSE(IF_CLAUSE p)
+{
+  switch(p->kind)
+  {
+  case is_AAifClauseRelationalExp:
+    bufAppendC('(');
+
+    bufAppendS("AAifClauseRelationalExp");
+
+    bufAppendC(' ');
+
+    shIF(p->u.aaifclauserelationalexp_.if_);
+  bufAppendC(' ');
+    shRELATIONAL_EXP(p->u.aaifclauserelationalexp_.relational_exp_);
+  bufAppendC(' ');
+    shTHEN(p->u.aaifclauserelationalexp_.then_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ABifClauseBitExp:
+    bufAppendC('(');
+
+    bufAppendS("ABifClauseBitExp");
+
+    bufAppendC(' ');
+
+    shIF(p->u.abifclausebitexp_.if_);
+  bufAppendC(' ');
+    shBIT_EXP(p->u.abifclausebitexp_.bit_exp_);
+  bufAppendC(' ');
+    shTHEN(p->u.abifclausebitexp_.then_);
+
+    bufAppendC(')');
+
+    break;
+
+  default:
+    fprintf(stderr, "Error: bad kind field when showing IF_CLAUSE!\n");
+    exit(1);
+  }
+}
+
+void shTRUE_PART(TRUE_PART p)
+{
+  switch(p->kind)
+  {
+  case is_AAtrue_part:
+    bufAppendC('(');
+
+    bufAppendS("AAtrue_part");
+
+    bufAppendC(' ');
+
+    shIF_CLAUSE(p->u.aatrue_part_.if_clause_);
+  bufAppendC(' ');
+    shBASIC_STATEMENT(p->u.aatrue_part_.basic_statement_);
+
+    bufAppendC(')');
+
+    break;
+
+  default:
+    fprintf(stderr, "Error: bad kind field when showing TRUE_PART!\n");
+    exit(1);
+  }
+}
+
+void shIF(IF p)
+{
+  switch(p->kind)
+  {
+  case is_AAif:
+
+    bufAppendS("AAif");
+
+
+
+
+    break;
+
+  default:
+    fprintf(stderr, "Error: bad kind field when showing IF!\n");
+    exit(1);
+  }
+}
+
+void shTHEN(THEN p)
+{
+  switch(p->kind)
+  {
+  case is_AAthen:
+
+    bufAppendS("AAthen");
+
+
+
+
+    break;
+
+  default:
+    fprintf(stderr, "Error: bad kind field when showing THEN!\n");
+    exit(1);
+  }
+}
+
+void shRELATIONAL_EXP(RELATIONAL_EXP p)
+{
+  switch(p->kind)
+  {
+  case is_AArelational_exp:
+    bufAppendC('(');
+
+    bufAppendS("AArelational_exp");
+
+    bufAppendC(' ');
+
+    shRELATIONAL_FACTOR(p->u.aarelational_exp_.relational_factor_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ABrelational_expOR:
+    bufAppendC('(');
+
+    bufAppendS("ABrelational_expOR");
+
+    bufAppendC(' ');
+
+    shRELATIONAL_EXP(p->u.abrelational_expor_.relational_exp_);
+  bufAppendC(' ');
+    shOR(p->u.abrelational_expor_.or_);
+  bufAppendC(' ');
+    shRELATIONAL_FACTOR(p->u.abrelational_expor_.relational_factor_);
+
+    bufAppendC(')');
+
+    break;
+
+  default:
+    fprintf(stderr, "Error: bad kind field when showing RELATIONAL_EXP!\n");
+    exit(1);
+  }
+}
+
+void shRELATIONAL_FACTOR(RELATIONAL_FACTOR p)
+{
+  switch(p->kind)
+  {
+  case is_AArelational_factor:
+    bufAppendC('(');
+
+    bufAppendS("AArelational_factor");
+
+    bufAppendC(' ');
+
+    shREL_PRIM(p->u.aarelational_factor_.rel_prim_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ABrelational_factorAND:
+    bufAppendC('(');
+
+    bufAppendS("ABrelational_factorAND");
+
+    bufAppendC(' ');
+
+    shRELATIONAL_FACTOR(p->u.abrelational_factorand_.relational_factor_);
+  bufAppendC(' ');
+    shAND(p->u.abrelational_factorand_.and_);
+  bufAppendC(' ');
+    shREL_PRIM(p->u.abrelational_factorand_.rel_prim_);
+
+    bufAppendC(')');
+
+    break;
+
+  default:
+    fprintf(stderr, "Error: bad kind field when showing RELATIONAL_FACTOR!\n");
+    exit(1);
+  }
+}
+
+void shREL_PRIM(REL_PRIM p)
+{
+  switch(p->kind)
+  {
+  case is_AArel_prim:
+    bufAppendC('(');
+
+    bufAppendS("AArel_prim");
+
+    bufAppendC(' ');
+
+    shRELATIONAL_EXP(p->u.aarel_prim_.relational_exp_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ABrel_prim:
+    bufAppendC('(');
+
+    bufAppendS("ABrel_prim");
+
+    bufAppendC(' ');
+
+    shNOT(p->u.abrel_prim_.not_);
+  bufAppendC(' ');
+    shRELATIONAL_EXP(p->u.abrel_prim_.relational_exp_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ACrel_prim:
+    bufAppendC('(');
+
+    bufAppendS("ACrel_prim");
+
+    bufAppendC(' ');
+
+    shCOMPARISON(p->u.acrel_prim_.comparison_);
+
+    bufAppendC(')');
+
+    break;
+
+  default:
+    fprintf(stderr, "Error: bad kind field when showing REL_PRIM!\n");
+    exit(1);
+  }
+}
+
+void shCOMPARISON(COMPARISON p)
+{
+  switch(p->kind)
+  {
+  case is_AAcomparisonEQ:
+    bufAppendC('(');
+
+    bufAppendS("AAcomparisonEQ");
+
+    bufAppendC(' ');
+
+    shARITH_EXP(p->u.aacomparisoneq_.arith_exp_1);
+  bufAppendC(' ');
+    shEQUALS(p->u.aacomparisoneq_.equals_);
+  bufAppendC(' ');
+    shARITH_EXP(p->u.aacomparisoneq_.arith_exp_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_ABcomparisonEQ:
+    bufAppendC('(');
+
+    bufAppendS("ABcomparisonEQ");
+
+    bufAppendC(' ');
+
+    shCHAR_EXP(p->u.abcomparisoneq_.char_exp_1);
+  bufAppendC(' ');
+    shEQUALS(p->u.abcomparisoneq_.equals_);
+  bufAppendC(' ');
+    shCHAR_EXP(p->u.abcomparisoneq_.char_exp_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_ACcomparisonEQ:
+    bufAppendC('(');
+
+    bufAppendS("ACcomparisonEQ");
+
+    bufAppendC(' ');
+
+    shBIT_CAT(p->u.accomparisoneq_.bit_cat_1);
+  bufAppendC(' ');
+    shEQUALS(p->u.accomparisoneq_.equals_);
+  bufAppendC(' ');
+    shBIT_CAT(p->u.accomparisoneq_.bit_cat_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_ADcomparisonEQ:
+    bufAppendC('(');
+
+    bufAppendS("ADcomparisonEQ");
+
+    bufAppendC(' ');
+
+    shSTRUCTURE_EXP(p->u.adcomparisoneq_.structure_exp_1);
+  bufAppendC(' ');
+    shEQUALS(p->u.adcomparisoneq_.equals_);
+  bufAppendC(' ');
+    shSTRUCTURE_EXP(p->u.adcomparisoneq_.structure_exp_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_AEcomparisonEQ:
+    bufAppendC('(');
+
+    bufAppendS("AEcomparisonEQ");
+
+    bufAppendC(' ');
+
+    shNAME_EXP(p->u.aecomparisoneq_.name_exp_1);
+  bufAppendC(' ');
+    shEQUALS(p->u.aecomparisoneq_.equals_);
+  bufAppendC(' ');
+    shNAME_EXP(p->u.aecomparisoneq_.name_exp_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_AAcomparisonNEQ:
+    bufAppendC('(');
+
+    bufAppendS("AAcomparisonNEQ");
+
+    bufAppendC(' ');
+
+    shARITH_EXP(p->u.aacomparisonneq_.arith_exp_1);
+  bufAppendC(' ');
+    shIdent(p->u.aacomparisonneq_.neqtoken_);
+  bufAppendC(' ');
+    shARITH_EXP(p->u.aacomparisonneq_.arith_exp_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_ABcomparisonNEQ:
+    bufAppendC('(');
+
+    bufAppendS("ABcomparisonNEQ");
+
+    bufAppendC(' ');
+
+    shCHAR_EXP(p->u.abcomparisonneq_.char_exp_1);
+  bufAppendC(' ');
+    shIdent(p->u.abcomparisonneq_.neqtoken_);
+  bufAppendC(' ');
+    shCHAR_EXP(p->u.abcomparisonneq_.char_exp_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_ACcomparisonNEQ:
+    bufAppendC('(');
+
+    bufAppendS("ACcomparisonNEQ");
+
+    bufAppendC(' ');
+
+    shBIT_CAT(p->u.accomparisonneq_.bit_cat_1);
+  bufAppendC(' ');
+    shIdent(p->u.accomparisonneq_.neqtoken_);
+  bufAppendC(' ');
+    shBIT_CAT(p->u.accomparisonneq_.bit_cat_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_ADcomparisonNEQ:
+    bufAppendC('(');
+
+    bufAppendS("ADcomparisonNEQ");
+
+    bufAppendC(' ');
+
+    shSTRUCTURE_EXP(p->u.adcomparisonneq_.structure_exp_1);
+  bufAppendC(' ');
+    shIdent(p->u.adcomparisonneq_.neqtoken_);
+  bufAppendC(' ');
+    shSTRUCTURE_EXP(p->u.adcomparisonneq_.structure_exp_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_AEcomparisonNEQ:
+    bufAppendC('(');
+
+    bufAppendS("AEcomparisonNEQ");
+
+    bufAppendC(' ');
+
+    shNAME_EXP(p->u.aecomparisonneq_.name_exp_1);
+  bufAppendC(' ');
+    shIdent(p->u.aecomparisonneq_.neqtoken_);
+  bufAppendC(' ');
+    shNAME_EXP(p->u.aecomparisonneq_.name_exp_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_AAcomparisonLT:
+    bufAppendC('(');
+
+    bufAppendS("AAcomparisonLT");
+
+    bufAppendC(' ');
+
+    shARITH_EXP(p->u.aacomparisonlt_.arith_exp_1);
+  bufAppendC(' ');
+    shARITH_EXP(p->u.aacomparisonlt_.arith_exp_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_ABcomparisonLT:
+    bufAppendC('(');
+
+    bufAppendS("ABcomparisonLT");
+
+    bufAppendC(' ');
+
+    shCHAR_EXP(p->u.abcomparisonlt_.char_exp_1);
+  bufAppendC(' ');
+    shCHAR_EXP(p->u.abcomparisonlt_.char_exp_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_ACcomparisonLT:
+    bufAppendC('(');
+
+    bufAppendS("ACcomparisonLT");
+
+    bufAppendC(' ');
+
+    shBIT_CAT(p->u.accomparisonlt_.bit_cat_1);
+  bufAppendC(' ');
+    shBIT_CAT(p->u.accomparisonlt_.bit_cat_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_ADcomparisonLT:
+    bufAppendC('(');
+
+    bufAppendS("ADcomparisonLT");
+
+    bufAppendC(' ');
+
+    shSTRUCTURE_EXP(p->u.adcomparisonlt_.structure_exp_1);
+  bufAppendC(' ');
+    shSTRUCTURE_EXP(p->u.adcomparisonlt_.structure_exp_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_AEcomparisonLT:
+    bufAppendC('(');
+
+    bufAppendS("AEcomparisonLT");
+
+    bufAppendC(' ');
+
+    shNAME_EXP(p->u.aecomparisonlt_.name_exp_1);
+  bufAppendC(' ');
+    shNAME_EXP(p->u.aecomparisonlt_.name_exp_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_AAcomparisonGT:
+    bufAppendC('(');
+
+    bufAppendS("AAcomparisonGT");
+
+    bufAppendC(' ');
+
+    shARITH_EXP(p->u.aacomparisongt_.arith_exp_1);
+  bufAppendC(' ');
+    shARITH_EXP(p->u.aacomparisongt_.arith_exp_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_ABcomparisonGT:
+    bufAppendC('(');
+
+    bufAppendS("ABcomparisonGT");
+
+    bufAppendC(' ');
+
+    shCHAR_EXP(p->u.abcomparisongt_.char_exp_1);
+  bufAppendC(' ');
+    shCHAR_EXP(p->u.abcomparisongt_.char_exp_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_ACcomparisonGT:
+    bufAppendC('(');
+
+    bufAppendS("ACcomparisonGT");
+
+    bufAppendC(' ');
+
+    shBIT_CAT(p->u.accomparisongt_.bit_cat_1);
+  bufAppendC(' ');
+    shBIT_CAT(p->u.accomparisongt_.bit_cat_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_ADcomparisonGT:
+    bufAppendC('(');
+
+    bufAppendS("ADcomparisonGT");
+
+    bufAppendC(' ');
+
+    shSTRUCTURE_EXP(p->u.adcomparisongt_.structure_exp_1);
+  bufAppendC(' ');
+    shSTRUCTURE_EXP(p->u.adcomparisongt_.structure_exp_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_AEcomparisonGT:
+    bufAppendC('(');
+
+    bufAppendS("AEcomparisonGT");
+
+    bufAppendC(' ');
+
+    shNAME_EXP(p->u.aecomparisongt_.name_exp_1);
+  bufAppendC(' ');
+    shNAME_EXP(p->u.aecomparisongt_.name_exp_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_AAcomparisonLE:
+    bufAppendC('(');
+
+    bufAppendS("AAcomparisonLE");
+
+    bufAppendC(' ');
+
+    shARITH_EXP(p->u.aacomparisonle_.arith_exp_1);
+  bufAppendC(' ');
+    shIdent(p->u.aacomparisonle_.letoken_);
+  bufAppendC(' ');
+    shARITH_EXP(p->u.aacomparisonle_.arith_exp_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_ABcomparisonLE:
+    bufAppendC('(');
+
+    bufAppendS("ABcomparisonLE");
+
+    bufAppendC(' ');
+
+    shCHAR_EXP(p->u.abcomparisonle_.char_exp_1);
+  bufAppendC(' ');
+    shIdent(p->u.abcomparisonle_.letoken_);
+  bufAppendC(' ');
+    shCHAR_EXP(p->u.abcomparisonle_.char_exp_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_ACcomparisonLE:
+    bufAppendC('(');
+
+    bufAppendS("ACcomparisonLE");
+
+    bufAppendC(' ');
+
+    shBIT_CAT(p->u.accomparisonle_.bit_cat_1);
+  bufAppendC(' ');
+    shIdent(p->u.accomparisonle_.letoken_);
+  bufAppendC(' ');
+    shBIT_CAT(p->u.accomparisonle_.bit_cat_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_ADcomparisonLE:
+    bufAppendC('(');
+
+    bufAppendS("ADcomparisonLE");
+
+    bufAppendC(' ');
+
+    shSTRUCTURE_EXP(p->u.adcomparisonle_.structure_exp_1);
+  bufAppendC(' ');
+    shIdent(p->u.adcomparisonle_.letoken_);
+  bufAppendC(' ');
+    shSTRUCTURE_EXP(p->u.adcomparisonle_.structure_exp_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_AEcomparisonLE:
+    bufAppendC('(');
+
+    bufAppendS("AEcomparisonLE");
+
+    bufAppendC(' ');
+
+    shNAME_EXP(p->u.aecomparisonle_.name_exp_1);
+  bufAppendC(' ');
+    shIdent(p->u.aecomparisonle_.letoken_);
+  bufAppendC(' ');
+    shNAME_EXP(p->u.aecomparisonle_.name_exp_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_AAcomparisonGE:
+    bufAppendC('(');
+
+    bufAppendS("AAcomparisonGE");
+
+    bufAppendC(' ');
+
+    shARITH_EXP(p->u.aacomparisonge_.arith_exp_1);
+  bufAppendC(' ');
+    shIdent(p->u.aacomparisonge_.getoken_);
+  bufAppendC(' ');
+    shARITH_EXP(p->u.aacomparisonge_.arith_exp_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_ABcomparisonGE:
+    bufAppendC('(');
+
+    bufAppendS("ABcomparisonGE");
+
+    bufAppendC(' ');
+
+    shCHAR_EXP(p->u.abcomparisonge_.char_exp_1);
+  bufAppendC(' ');
+    shIdent(p->u.abcomparisonge_.getoken_);
+  bufAppendC(' ');
+    shCHAR_EXP(p->u.abcomparisonge_.char_exp_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_ACcomparisonGE:
+    bufAppendC('(');
+
+    bufAppendS("ACcomparisonGE");
+
+    bufAppendC(' ');
+
+    shBIT_CAT(p->u.accomparisonge_.bit_cat_1);
+  bufAppendC(' ');
+    shIdent(p->u.accomparisonge_.getoken_);
+  bufAppendC(' ');
+    shBIT_CAT(p->u.accomparisonge_.bit_cat_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_ADcomparisonGE:
+    bufAppendC('(');
+
+    bufAppendS("ADcomparisonGE");
+
+    bufAppendC(' ');
+
+    shSTRUCTURE_EXP(p->u.adcomparisonge_.structure_exp_1);
+  bufAppendC(' ');
+    shIdent(p->u.adcomparisonge_.getoken_);
+  bufAppendC(' ');
+    shSTRUCTURE_EXP(p->u.adcomparisonge_.structure_exp_2);
+
+    bufAppendC(')');
+
+    break;
+  case is_AEcomparisonGE:
+    bufAppendC('(');
+
+    bufAppendS("AEcomparisonGE");
+
+    bufAppendC(' ');
+
+    shNAME_EXP(p->u.aecomparisonge_.name_exp_1);
+  bufAppendC(' ');
+    shIdent(p->u.aecomparisonge_.getoken_);
+  bufAppendC(' ');
+    shNAME_EXP(p->u.aecomparisonge_.name_exp_2);
+
+    bufAppendC(')');
+
+    break;
+
+  default:
+    fprintf(stderr, "Error: bad kind field when showing COMPARISON!\n");
     exit(1);
   }
 }

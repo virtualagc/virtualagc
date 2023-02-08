@@ -34,9 +34,14 @@ except ModuleNotFoundError:
             print("Note: Using 'editline' module for line-editing facility.")
             rlModule = editline
         except ModuleNotFoundError:
-            print("Only primitive line-editing facilities are available.")
-            rlModule = None
-            readlinePresent = False
+            try:
+                import pyreadline
+                print("Note: Using 'pyreadline' module for line-editing facility.")
+                rlModule = pyreadline
+            except ModuleNotFoundError:
+                print("Only primitive line-editing facilities are available.")
+                rlModule = None
+                readlinePresent = False
 if readlinePresent:
     rlModule.set_history_length(100) # Default, -1, means infinite.
 '''
@@ -90,7 +95,7 @@ def printScopeHeading(PALMAT, i):
 helpMenu = \
 '''\tNote: Interpreter commands are case-insensitive, while
 \tHAL/S source code is case-sensitive.  Any input line
-\t beginning with a back-tick (`) is an interpreter command.
+\tbeginning with a back-tick (`) is an interpreter command.
 \tThe available interpreter commands are listed below:
 \t`HELP        Show this menu.
 \t`QUIT        Quit this interpreter program.
@@ -183,9 +188,16 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
     noCompile = False
     wine = False
     if shouldColorize:
-        colorize = "\033[35m"
+        # Regarding the wrappers of \001 ... \002 around all of the ANSI 
+        # control sequences, these are apparently helpful for preventing
+        # READLINE from becoming confuses about that's visible and not visible,
+        # and thus keep it from losing track of the beginning of the line.
+        # On a different note, the colorization of the prompt may be 
+        # temporarily lost while scrolling up and down through the history,
+        # and I have no cure for that.
+        colorize = "\001\033[35m\002"
         colorName = "magenta"
-        debugColor = "\033[33m"
+        debugColor = "\001\033[33m\002"
     else:
         colorize = ""
         colorName = ""
@@ -208,7 +220,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
             else:
                 prompt = "  ... > "
             if colorize != "":
-                prompt = prompt + "\033[0m"
+                prompt = prompt + "\001\033[0m\002"
             line = input(prompt)
             '''
             if line[:2] in ["C ", "C\t"] or line[:3] in ["C/ ", "C/\t"]:
@@ -279,7 +291,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                         index += 30
                     else:
                         index += 90 - 8
-                    colorize = "\033[%dm" % index
+                    colorize = "\001\033[%dm\002" % index
                     print(colorize, end="")
                     print("\tEnabled colorized output (%s)." % colorName.upper())
                     continue
@@ -492,7 +504,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     continue
                 elif firstWord == "NOCOLORIZE":
                     if colorize != "":
-                        print("\033[0m", end="")
+                        print("\001\033[0m\002", end="")
                     print("\tDisabled colorized output.")
                     colorize = ""
                     continue

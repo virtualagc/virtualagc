@@ -44,7 +44,7 @@ path = re.sub("[^/\\\\]*$", "", os.path.realpath(sys.argv[0]))
 # really tested much except the one I run on my own computer.  The compiler 
 # executables must be in the PATH.
 parms = {
-    "compiler": "modernHAL-S-FC" 
+    "compiler": path + "modernHAL-S-FC" 
 }
 if platform.system() == "Windows":
     parms["compiler"] += ".exe"

@@ -205,6 +205,12 @@ struct ASSIGNMENT_;
 typedef struct ASSIGNMENT_ *ASSIGNMENT;
 struct EQUALS_;
 typedef struct EQUALS_ *EQUALS;
+struct STATEMENT_;
+typedef struct STATEMENT_ *STATEMENT;
+struct BASIC_STATEMENT_;
+typedef struct BASIC_STATEMENT_ *BASIC_STATEMENT;
+struct OTHER_STATEMENT_;
+typedef struct OTHER_STATEMENT_ *OTHER_STATEMENT;
 struct IF_STATEMENT_;
 typedef struct IF_STATEMENT_ *IF_STATEMENT;
 struct IF_CLAUSE_;
@@ -223,14 +229,6 @@ struct REL_PRIM_;
 typedef struct REL_PRIM_ *REL_PRIM;
 struct COMPARISON_;
 typedef struct COMPARISON_ *COMPARISON;
-struct RELATIONAL_OP_;
-typedef struct RELATIONAL_OP_ *RELATIONAL_OP;
-struct STATEMENT_;
-typedef struct STATEMENT_ *STATEMENT;
-struct BASIC_STATEMENT_;
-typedef struct BASIC_STATEMENT_ *BASIC_STATEMENT;
-struct OTHER_STATEMENT_;
-typedef struct OTHER_STATEMENT_ *OTHER_STATEMENT;
 struct ANY_STATEMENT_;
 typedef struct ANY_STATEMENT_ *ANY_STATEMENT;
 struct ON_PHRASE_;
@@ -1802,152 +1800,6 @@ struct EQUALS_
 
 EQUALS make_AAequals(void);
 
-struct IF_STATEMENT_
-{
-  int line_number, char_number;
-  enum { is_AAifStatement, is_ABifThenElseStatement } kind;
-  union
-  {
-    struct { IF_CLAUSE if_clause_; STATEMENT statement_; } aaifstatement_;
-    struct { STATEMENT statement_; TRUE_PART true_part_; } abifthenelsestatement_;
-  } u;
-};
-
-IF_STATEMENT make_AAifStatement(IF_CLAUSE p0, STATEMENT p1);
-IF_STATEMENT make_ABifThenElseStatement(TRUE_PART p0, STATEMENT p1);
-
-struct IF_CLAUSE_
-{
-  int line_number, char_number;
-  enum { is_AAifClauseRelationalExp, is_ABifClauseBitExp } kind;
-  union
-  {
-    struct { IF if_; RELATIONAL_EXP relational_exp_; THEN then_; } aaifclauserelationalexp_;
-    struct { BIT_EXP bit_exp_; IF if_; THEN then_; } abifclausebitexp_;
-  } u;
-};
-
-IF_CLAUSE make_AAifClauseRelationalExp(IF p0, RELATIONAL_EXP p1, THEN p2);
-IF_CLAUSE make_ABifClauseBitExp(IF p0, BIT_EXP p1, THEN p2);
-
-struct TRUE_PART_
-{
-  int line_number, char_number;
-  enum { is_AAtrue_part } kind;
-  union
-  {
-    struct { BASIC_STATEMENT basic_statement_; IF_CLAUSE if_clause_; } aatrue_part_;
-  } u;
-};
-
-TRUE_PART make_AAtrue_part(IF_CLAUSE p0, BASIC_STATEMENT p1);
-
-struct IF_
-{
-  int line_number, char_number;
-  enum { is_AAif } kind;
-  union
-  {
-  } u;
-};
-
-IF make_AAif(void);
-
-struct THEN_
-{
-  int line_number, char_number;
-  enum { is_AAthen } kind;
-  union
-  {
-  } u;
-};
-
-THEN make_AAthen(void);
-
-struct RELATIONAL_EXP_
-{
-  int line_number, char_number;
-  enum { is_AArelational_exp, is_ABrelational_exp } kind;
-  union
-  {
-    struct { RELATIONAL_FACTOR relational_factor_; } aarelational_exp_;
-    struct { OR or_; RELATIONAL_EXP relational_exp_; RELATIONAL_FACTOR relational_factor_; } abrelational_exp_;
-  } u;
-};
-
-RELATIONAL_EXP make_AArelational_exp(RELATIONAL_FACTOR p0);
-RELATIONAL_EXP make_ABrelational_exp(RELATIONAL_EXP p0, OR p1, RELATIONAL_FACTOR p2);
-
-struct RELATIONAL_FACTOR_
-{
-  int line_number, char_number;
-  enum { is_AArelational_factor, is_ABrelational_factor } kind;
-  union
-  {
-    struct { REL_PRIM rel_prim_; } aarelational_factor_;
-    struct { AND and_; RELATIONAL_FACTOR relational_factor_; REL_PRIM rel_prim_; } abrelational_factor_;
-  } u;
-};
-
-RELATIONAL_FACTOR make_AArelational_factor(REL_PRIM p0);
-RELATIONAL_FACTOR make_ABrelational_factor(RELATIONAL_FACTOR p0, AND p1, REL_PRIM p2);
-
-struct REL_PRIM_
-{
-  int line_number, char_number;
-  enum { is_AArel_prim, is_ABrel_prim, is_ACrel_prim } kind;
-  union
-  {
-    struct { RELATIONAL_EXP relational_exp_; } aarel_prim_;
-    struct { NOT not_; RELATIONAL_EXP relational_exp_; } abrel_prim_;
-    struct { COMPARISON comparison_; } acrel_prim_;
-  } u;
-};
-
-REL_PRIM make_AArel_prim(RELATIONAL_EXP p0);
-REL_PRIM make_ABrel_prim(NOT p0, RELATIONAL_EXP p1);
-REL_PRIM make_ACrel_prim(COMPARISON p0);
-
-struct COMPARISON_
-{
-  int line_number, char_number;
-  enum { is_AAcomparison, is_ABcomparison, is_ACcomparison, is_ADcomparison, is_AEcomparison } kind;
-  union
-  {
-    struct { ARITH_EXP arith_exp_1, arith_exp_2; RELATIONAL_OP relational_op_; } aacomparison_;
-    struct { CHAR_EXP char_exp_1, char_exp_2; RELATIONAL_OP relational_op_; } abcomparison_;
-    struct { BIT_CAT bit_cat_1, bit_cat_2; RELATIONAL_OP relational_op_; } accomparison_;
-    struct { RELATIONAL_OP relational_op_; STRUCTURE_EXP structure_exp_1, structure_exp_2; } adcomparison_;
-    struct { NAME_EXP name_exp_1, name_exp_2; RELATIONAL_OP relational_op_; } aecomparison_;
-  } u;
-};
-
-COMPARISON make_AAcomparison(ARITH_EXP p0, RELATIONAL_OP p1, ARITH_EXP p2);
-COMPARISON make_ABcomparison(CHAR_EXP p0, RELATIONAL_OP p1, CHAR_EXP p2);
-COMPARISON make_ACcomparison(BIT_CAT p0, RELATIONAL_OP p1, BIT_CAT p2);
-COMPARISON make_ADcomparison(STRUCTURE_EXP p0, RELATIONAL_OP p1, STRUCTURE_EXP p2);
-COMPARISON make_AEcomparison(NAME_EXP p0, RELATIONAL_OP p1, NAME_EXP p2);
-
-struct RELATIONAL_OP_
-{
-  int line_number, char_number;
-  enum { is_AArelationalOpEQ, is_ABrelationalOpNEQ, is_ACrelationalOpLT, is_ADrelationalOpGT, is_AErelationalOpLE, is_AFrelationalOpGE } kind;
-  union
-  {
-    struct { EQUALS equals_; } aarelationalopeq_;
-    struct { NeqToken neqtoken_; } abrelationalopneq_;
-    struct { LeToken letoken_; } aerelationalople_;
-    struct { GeToken getoken_; } afrelationalopge_;
-  } u;
-};
-
-RELATIONAL_OP make_AArelationalOpEQ(EQUALS p0);
-RELATIONAL_OP make_ABrelationalOpNEQ(NeqToken p0);
-RELATIONAL_OP make_ACrelationalOpLT(void);
-RELATIONAL_OP make_ADrelationalOpGT(void);
-RELATIONAL_OP make_AErelationalOpLE(LeToken p0);
-RELATIONAL_OP make_AFrelationalOpGE(GeToken p0);
-
 struct STATEMENT_
 {
   int line_number, char_number;
@@ -2065,6 +1917,182 @@ struct OTHER_STATEMENT_
 OTHER_STATEMENT make_ABotherStatementIf(IF_STATEMENT p0);
 OTHER_STATEMENT make_AAotherStatementOn(ON_PHRASE p0, STATEMENT p1);
 OTHER_STATEMENT make_ACother_statement(LABEL_DEFINITION p0, OTHER_STATEMENT p1);
+
+struct IF_STATEMENT_
+{
+  int line_number, char_number;
+  enum { is_AAifStatement, is_ABifThenElseStatement } kind;
+  union
+  {
+    struct { IF_CLAUSE if_clause_; STATEMENT statement_; } aaifstatement_;
+    struct { STATEMENT statement_; TRUE_PART true_part_; } abifthenelsestatement_;
+  } u;
+};
+
+IF_STATEMENT make_AAifStatement(IF_CLAUSE p0, STATEMENT p1);
+IF_STATEMENT make_ABifThenElseStatement(TRUE_PART p0, STATEMENT p1);
+
+struct IF_CLAUSE_
+{
+  int line_number, char_number;
+  enum { is_AAifClauseRelationalExp, is_ABifClauseBitExp } kind;
+  union
+  {
+    struct { IF if_; RELATIONAL_EXP relational_exp_; THEN then_; } aaifclauserelationalexp_;
+    struct { BIT_EXP bit_exp_; IF if_; THEN then_; } abifclausebitexp_;
+  } u;
+};
+
+IF_CLAUSE make_AAifClauseRelationalExp(IF p0, RELATIONAL_EXP p1, THEN p2);
+IF_CLAUSE make_ABifClauseBitExp(IF p0, BIT_EXP p1, THEN p2);
+
+struct TRUE_PART_
+{
+  int line_number, char_number;
+  enum { is_AAtrue_part } kind;
+  union
+  {
+    struct { BASIC_STATEMENT basic_statement_; IF_CLAUSE if_clause_; } aatrue_part_;
+  } u;
+};
+
+TRUE_PART make_AAtrue_part(IF_CLAUSE p0, BASIC_STATEMENT p1);
+
+struct IF_
+{
+  int line_number, char_number;
+  enum { is_AAif } kind;
+  union
+  {
+  } u;
+};
+
+IF make_AAif(void);
+
+struct THEN_
+{
+  int line_number, char_number;
+  enum { is_AAthen } kind;
+  union
+  {
+  } u;
+};
+
+THEN make_AAthen(void);
+
+struct RELATIONAL_EXP_
+{
+  int line_number, char_number;
+  enum { is_AArelational_exp, is_ABrelational_expOR } kind;
+  union
+  {
+    struct { RELATIONAL_FACTOR relational_factor_; } aarelational_exp_;
+    struct { OR or_; RELATIONAL_EXP relational_exp_; RELATIONAL_FACTOR relational_factor_; } abrelational_expor_;
+  } u;
+};
+
+RELATIONAL_EXP make_AArelational_exp(RELATIONAL_FACTOR p0);
+RELATIONAL_EXP make_ABrelational_expOR(RELATIONAL_EXP p0, OR p1, RELATIONAL_FACTOR p2);
+
+struct RELATIONAL_FACTOR_
+{
+  int line_number, char_number;
+  enum { is_AArelational_factor, is_ABrelational_factorAND } kind;
+  union
+  {
+    struct { REL_PRIM rel_prim_; } aarelational_factor_;
+    struct { AND and_; RELATIONAL_FACTOR relational_factor_; REL_PRIM rel_prim_; } abrelational_factorand_;
+  } u;
+};
+
+RELATIONAL_FACTOR make_AArelational_factor(REL_PRIM p0);
+RELATIONAL_FACTOR make_ABrelational_factorAND(RELATIONAL_FACTOR p0, AND p1, REL_PRIM p2);
+
+struct REL_PRIM_
+{
+  int line_number, char_number;
+  enum { is_AArel_prim, is_ABrel_prim, is_ACrel_prim } kind;
+  union
+  {
+    struct { RELATIONAL_EXP relational_exp_; } aarel_prim_;
+    struct { NOT not_; RELATIONAL_EXP relational_exp_; } abrel_prim_;
+    struct { COMPARISON comparison_; } acrel_prim_;
+  } u;
+};
+
+REL_PRIM make_AArel_prim(RELATIONAL_EXP p0);
+REL_PRIM make_ABrel_prim(NOT p0, RELATIONAL_EXP p1);
+REL_PRIM make_ACrel_prim(COMPARISON p0);
+
+struct COMPARISON_
+{
+  int line_number, char_number;
+  enum { is_AAcomparisonEQ, is_ABcomparisonEQ, is_ACcomparisonEQ, is_ADcomparisonEQ, is_AEcomparisonEQ, is_AAcomparisonNEQ, is_ABcomparisonNEQ, is_ACcomparisonNEQ, is_ADcomparisonNEQ, is_AEcomparisonNEQ, is_AAcomparisonLT, is_ABcomparisonLT, is_ACcomparisonLT, is_ADcomparisonLT, is_AEcomparisonLT, is_AAcomparisonGT, is_ABcomparisonGT, is_ACcomparisonGT, is_ADcomparisonGT, is_AEcomparisonGT, is_AAcomparisonLE, is_ABcomparisonLE, is_ACcomparisonLE, is_ADcomparisonLE, is_AEcomparisonLE, is_AAcomparisonGE, is_ABcomparisonGE, is_ACcomparisonGE, is_ADcomparisonGE, is_AEcomparisonGE } kind;
+  union
+  {
+    struct { ARITH_EXP arith_exp_1, arith_exp_2; EQUALS equals_; } aacomparisoneq_;
+    struct { CHAR_EXP char_exp_1, char_exp_2; EQUALS equals_; } abcomparisoneq_;
+    struct { BIT_CAT bit_cat_1, bit_cat_2; EQUALS equals_; } accomparisoneq_;
+    struct { EQUALS equals_; STRUCTURE_EXP structure_exp_1, structure_exp_2; } adcomparisoneq_;
+    struct { EQUALS equals_; NAME_EXP name_exp_1, name_exp_2; } aecomparisoneq_;
+    struct { ARITH_EXP arith_exp_1, arith_exp_2; NeqToken neqtoken_; } aacomparisonneq_;
+    struct { CHAR_EXP char_exp_1, char_exp_2; NeqToken neqtoken_; } abcomparisonneq_;
+    struct { BIT_CAT bit_cat_1, bit_cat_2; NeqToken neqtoken_; } accomparisonneq_;
+    struct { NeqToken neqtoken_; STRUCTURE_EXP structure_exp_1, structure_exp_2; } adcomparisonneq_;
+    struct { NAME_EXP name_exp_1, name_exp_2; NeqToken neqtoken_; } aecomparisonneq_;
+    struct { ARITH_EXP arith_exp_1, arith_exp_2; } aacomparisonlt_;
+    struct { CHAR_EXP char_exp_1, char_exp_2; } abcomparisonlt_;
+    struct { BIT_CAT bit_cat_1, bit_cat_2; } accomparisonlt_;
+    struct { STRUCTURE_EXP structure_exp_1, structure_exp_2; } adcomparisonlt_;
+    struct { NAME_EXP name_exp_1, name_exp_2; } aecomparisonlt_;
+    struct { ARITH_EXP arith_exp_1, arith_exp_2; } aacomparisongt_;
+    struct { CHAR_EXP char_exp_1, char_exp_2; } abcomparisongt_;
+    struct { BIT_CAT bit_cat_1, bit_cat_2; } accomparisongt_;
+    struct { STRUCTURE_EXP structure_exp_1, structure_exp_2; } adcomparisongt_;
+    struct { NAME_EXP name_exp_1, name_exp_2; } aecomparisongt_;
+    struct { ARITH_EXP arith_exp_1, arith_exp_2; LeToken letoken_; } aacomparisonle_;
+    struct { CHAR_EXP char_exp_1, char_exp_2; LeToken letoken_; } abcomparisonle_;
+    struct { BIT_CAT bit_cat_1, bit_cat_2; LeToken letoken_; } accomparisonle_;
+    struct { LeToken letoken_; STRUCTURE_EXP structure_exp_1, structure_exp_2; } adcomparisonle_;
+    struct { LeToken letoken_; NAME_EXP name_exp_1, name_exp_2; } aecomparisonle_;
+    struct { ARITH_EXP arith_exp_1, arith_exp_2; GeToken getoken_; } aacomparisonge_;
+    struct { CHAR_EXP char_exp_1, char_exp_2; GeToken getoken_; } abcomparisonge_;
+    struct { BIT_CAT bit_cat_1, bit_cat_2; GeToken getoken_; } accomparisonge_;
+    struct { GeToken getoken_; STRUCTURE_EXP structure_exp_1, structure_exp_2; } adcomparisonge_;
+    struct { GeToken getoken_; NAME_EXP name_exp_1, name_exp_2; } aecomparisonge_;
+  } u;
+};
+
+COMPARISON make_AAcomparisonEQ(ARITH_EXP p0, EQUALS p1, ARITH_EXP p2);
+COMPARISON make_ABcomparisonEQ(CHAR_EXP p0, EQUALS p1, CHAR_EXP p2);
+COMPARISON make_ACcomparisonEQ(BIT_CAT p0, EQUALS p1, BIT_CAT p2);
+COMPARISON make_ADcomparisonEQ(STRUCTURE_EXP p0, EQUALS p1, STRUCTURE_EXP p2);
+COMPARISON make_AEcomparisonEQ(NAME_EXP p0, EQUALS p1, NAME_EXP p2);
+COMPARISON make_AAcomparisonNEQ(ARITH_EXP p0, NeqToken p1, ARITH_EXP p2);
+COMPARISON make_ABcomparisonNEQ(CHAR_EXP p0, NeqToken p1, CHAR_EXP p2);
+COMPARISON make_ACcomparisonNEQ(BIT_CAT p0, NeqToken p1, BIT_CAT p2);
+COMPARISON make_ADcomparisonNEQ(STRUCTURE_EXP p0, NeqToken p1, STRUCTURE_EXP p2);
+COMPARISON make_AEcomparisonNEQ(NAME_EXP p0, NeqToken p1, NAME_EXP p2);
+COMPARISON make_AAcomparisonLT(ARITH_EXP p0, ARITH_EXP p1);
+COMPARISON make_ABcomparisonLT(CHAR_EXP p0, CHAR_EXP p1);
+COMPARISON make_ACcomparisonLT(BIT_CAT p0, BIT_CAT p1);
+COMPARISON make_ADcomparisonLT(STRUCTURE_EXP p0, STRUCTURE_EXP p1);
+COMPARISON make_AEcomparisonLT(NAME_EXP p0, NAME_EXP p1);
+COMPARISON make_AAcomparisonGT(ARITH_EXP p0, ARITH_EXP p1);
+COMPARISON make_ABcomparisonGT(CHAR_EXP p0, CHAR_EXP p1);
+COMPARISON make_ACcomparisonGT(BIT_CAT p0, BIT_CAT p1);
+COMPARISON make_ADcomparisonGT(STRUCTURE_EXP p0, STRUCTURE_EXP p1);
+COMPARISON make_AEcomparisonGT(NAME_EXP p0, NAME_EXP p1);
+COMPARISON make_AAcomparisonLE(ARITH_EXP p0, LeToken p1, ARITH_EXP p2);
+COMPARISON make_ABcomparisonLE(CHAR_EXP p0, LeToken p1, CHAR_EXP p2);
+COMPARISON make_ACcomparisonLE(BIT_CAT p0, LeToken p1, BIT_CAT p2);
+COMPARISON make_ADcomparisonLE(STRUCTURE_EXP p0, LeToken p1, STRUCTURE_EXP p2);
+COMPARISON make_AEcomparisonLE(NAME_EXP p0, LeToken p1, NAME_EXP p2);
+COMPARISON make_AAcomparisonGE(ARITH_EXP p0, GeToken p1, ARITH_EXP p2);
+COMPARISON make_ABcomparisonGE(CHAR_EXP p0, GeToken p1, CHAR_EXP p2);
+COMPARISON make_ACcomparisonGE(BIT_CAT p0, GeToken p1, BIT_CAT p2);
+COMPARISON make_ADcomparisonGE(STRUCTURE_EXP p0, GeToken p1, STRUCTURE_EXP p2);
+COMPARISON make_AEcomparisonGE(NAME_EXP p0, GeToken p1, NAME_EXP p2);
 
 struct ANY_STATEMENT_
 {

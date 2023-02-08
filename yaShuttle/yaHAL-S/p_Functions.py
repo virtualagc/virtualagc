@@ -80,6 +80,7 @@ substate = {
 #-----------------------------------------------------------------------------
 
 expressionComponents = ["expression", "ifClauseBitExp", "relational_exp", 
+                        "relational_expOR",
                      "bitExpFactor", "write_arg", "read_arg", "char_spec",
                      "arithExpTerm", "arithExpArithExpPlusTerm",
                      "arithExpArithExpMinusTerm", "arithMinusTerm", 
@@ -200,7 +201,7 @@ def stringLiteral(PALMAT, state, s):
             and "char_spec" not in history and "literalExp" not in history \
             and state1 != "number" and "repeated_constantMark" not in history:
         if s in identifiers:
-            print("Already declared:", sp)
+            print("\tAlready declared:", sp)
             substate["currentIdentifier"] = ""
             return False, state
         substate["currentIdentifier"] = s
@@ -370,6 +371,7 @@ augmentationCandidates = [
     "read_arg",
     "read_key",
     "relational_exp",
+    "relational_expOR",
     "minorAttributeRepeatedConstant",
     "repeated_constantMark",
     "sQdQName_doublyQualNameHead_literalExpOrStar",

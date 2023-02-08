@@ -3910,339 +3910,6 @@ EQUALS make_AAequals()
     }
     tmp->kind = is_AAequals;
     return tmp;
-}/********************   AAifStatement    ********************/
-IF_STATEMENT make_AAifStatement(IF_CLAUSE p1, STATEMENT p2)
-{
-    IF_STATEMENT tmp = (IF_STATEMENT) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AAifStatement!\n");
-        exit(1);
-    }
-    tmp->kind = is_AAifStatement;
-    tmp->u.aaifstatement_.if_clause_ = p1;
-    tmp->u.aaifstatement_.statement_ = p2;
-    return tmp;
-}
-/********************   ABifThenElseStatement    ********************/
-IF_STATEMENT make_ABifThenElseStatement(TRUE_PART p1, STATEMENT p2)
-{
-    IF_STATEMENT tmp = (IF_STATEMENT) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ABifThenElseStatement!\n");
-        exit(1);
-    }
-    tmp->kind = is_ABifThenElseStatement;
-    tmp->u.abifthenelsestatement_.true_part_ = p1;
-    tmp->u.abifthenelsestatement_.statement_ = p2;
-    return tmp;
-}/********************   AAifClauseRelationalExp    ********************/
-IF_CLAUSE make_AAifClauseRelationalExp(IF p1, RELATIONAL_EXP p2, THEN p3)
-{
-    IF_CLAUSE tmp = (IF_CLAUSE) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AAifClauseRelationalExp!\n");
-        exit(1);
-    }
-    tmp->kind = is_AAifClauseRelationalExp;
-    tmp->u.aaifclauserelationalexp_.if_ = p1;
-    tmp->u.aaifclauserelationalexp_.relational_exp_ = p2;
-    tmp->u.aaifclauserelationalexp_.then_ = p3;
-    return tmp;
-}
-/********************   ABifClauseBitExp    ********************/
-IF_CLAUSE make_ABifClauseBitExp(IF p1, BIT_EXP p2, THEN p3)
-{
-    IF_CLAUSE tmp = (IF_CLAUSE) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ABifClauseBitExp!\n");
-        exit(1);
-    }
-    tmp->kind = is_ABifClauseBitExp;
-    tmp->u.abifclausebitexp_.if_ = p1;
-    tmp->u.abifclausebitexp_.bit_exp_ = p2;
-    tmp->u.abifclausebitexp_.then_ = p3;
-    return tmp;
-}/********************   AAtrue_part    ********************/
-TRUE_PART make_AAtrue_part(IF_CLAUSE p1, BASIC_STATEMENT p2)
-{
-    TRUE_PART tmp = (TRUE_PART) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AAtrue_part!\n");
-        exit(1);
-    }
-    tmp->kind = is_AAtrue_part;
-    tmp->u.aatrue_part_.if_clause_ = p1;
-    tmp->u.aatrue_part_.basic_statement_ = p2;
-    return tmp;
-}/********************   AAif    ********************/
-IF make_AAif()
-{
-    IF tmp = (IF) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AAif!\n");
-        exit(1);
-    }
-    tmp->kind = is_AAif;
-    return tmp;
-}/********************   AAthen    ********************/
-THEN make_AAthen()
-{
-    THEN tmp = (THEN) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AAthen!\n");
-        exit(1);
-    }
-    tmp->kind = is_AAthen;
-    return tmp;
-}/********************   AArelational_exp    ********************/
-RELATIONAL_EXP make_AArelational_exp(RELATIONAL_FACTOR p1)
-{
-    RELATIONAL_EXP tmp = (RELATIONAL_EXP) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AArelational_exp!\n");
-        exit(1);
-    }
-    tmp->kind = is_AArelational_exp;
-    tmp->u.aarelational_exp_.relational_factor_ = p1;
-    return tmp;
-}
-/********************   ABrelational_exp    ********************/
-RELATIONAL_EXP make_ABrelational_exp(RELATIONAL_EXP p1, OR p2, RELATIONAL_FACTOR p3)
-{
-    RELATIONAL_EXP tmp = (RELATIONAL_EXP) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ABrelational_exp!\n");
-        exit(1);
-    }
-    tmp->kind = is_ABrelational_exp;
-    tmp->u.abrelational_exp_.relational_exp_ = p1;
-    tmp->u.abrelational_exp_.or_ = p2;
-    tmp->u.abrelational_exp_.relational_factor_ = p3;
-    return tmp;
-}/********************   AArelational_factor    ********************/
-RELATIONAL_FACTOR make_AArelational_factor(REL_PRIM p1)
-{
-    RELATIONAL_FACTOR tmp = (RELATIONAL_FACTOR) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AArelational_factor!\n");
-        exit(1);
-    }
-    tmp->kind = is_AArelational_factor;
-    tmp->u.aarelational_factor_.rel_prim_ = p1;
-    return tmp;
-}
-/********************   ABrelational_factor    ********************/
-RELATIONAL_FACTOR make_ABrelational_factor(RELATIONAL_FACTOR p1, AND p2, REL_PRIM p3)
-{
-    RELATIONAL_FACTOR tmp = (RELATIONAL_FACTOR) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ABrelational_factor!\n");
-        exit(1);
-    }
-    tmp->kind = is_ABrelational_factor;
-    tmp->u.abrelational_factor_.relational_factor_ = p1;
-    tmp->u.abrelational_factor_.and_ = p2;
-    tmp->u.abrelational_factor_.rel_prim_ = p3;
-    return tmp;
-}/********************   AArel_prim    ********************/
-REL_PRIM make_AArel_prim(RELATIONAL_EXP p1)
-{
-    REL_PRIM tmp = (REL_PRIM) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AArel_prim!\n");
-        exit(1);
-    }
-    tmp->kind = is_AArel_prim;
-    tmp->u.aarel_prim_.relational_exp_ = p1;
-    return tmp;
-}
-/********************   ABrel_prim    ********************/
-REL_PRIM make_ABrel_prim(NOT p1, RELATIONAL_EXP p2)
-{
-    REL_PRIM tmp = (REL_PRIM) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ABrel_prim!\n");
-        exit(1);
-    }
-    tmp->kind = is_ABrel_prim;
-    tmp->u.abrel_prim_.not_ = p1;
-    tmp->u.abrel_prim_.relational_exp_ = p2;
-    return tmp;
-}
-/********************   ACrel_prim    ********************/
-REL_PRIM make_ACrel_prim(COMPARISON p1)
-{
-    REL_PRIM tmp = (REL_PRIM) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ACrel_prim!\n");
-        exit(1);
-    }
-    tmp->kind = is_ACrel_prim;
-    tmp->u.acrel_prim_.comparison_ = p1;
-    return tmp;
-}/********************   AAcomparison    ********************/
-COMPARISON make_AAcomparison(ARITH_EXP p1, RELATIONAL_OP p2, ARITH_EXP p3)
-{
-    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AAcomparison!\n");
-        exit(1);
-    }
-    tmp->kind = is_AAcomparison;
-    tmp->u.aacomparison_.arith_exp_1 = p1;
-    tmp->u.aacomparison_.relational_op_ = p2;
-    tmp->u.aacomparison_.arith_exp_2 = p3;
-    return tmp;
-}
-/********************   ABcomparison    ********************/
-COMPARISON make_ABcomparison(CHAR_EXP p1, RELATIONAL_OP p2, CHAR_EXP p3)
-{
-    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ABcomparison!\n");
-        exit(1);
-    }
-    tmp->kind = is_ABcomparison;
-    tmp->u.abcomparison_.char_exp_1 = p1;
-    tmp->u.abcomparison_.relational_op_ = p2;
-    tmp->u.abcomparison_.char_exp_2 = p3;
-    return tmp;
-}
-/********************   ACcomparison    ********************/
-COMPARISON make_ACcomparison(BIT_CAT p1, RELATIONAL_OP p2, BIT_CAT p3)
-{
-    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ACcomparison!\n");
-        exit(1);
-    }
-    tmp->kind = is_ACcomparison;
-    tmp->u.accomparison_.bit_cat_1 = p1;
-    tmp->u.accomparison_.relational_op_ = p2;
-    tmp->u.accomparison_.bit_cat_2 = p3;
-    return tmp;
-}
-/********************   ADcomparison    ********************/
-COMPARISON make_ADcomparison(STRUCTURE_EXP p1, RELATIONAL_OP p2, STRUCTURE_EXP p3)
-{
-    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ADcomparison!\n");
-        exit(1);
-    }
-    tmp->kind = is_ADcomparison;
-    tmp->u.adcomparison_.structure_exp_1 = p1;
-    tmp->u.adcomparison_.relational_op_ = p2;
-    tmp->u.adcomparison_.structure_exp_2 = p3;
-    return tmp;
-}
-/********************   AEcomparison    ********************/
-COMPARISON make_AEcomparison(NAME_EXP p1, RELATIONAL_OP p2, NAME_EXP p3)
-{
-    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AEcomparison!\n");
-        exit(1);
-    }
-    tmp->kind = is_AEcomparison;
-    tmp->u.aecomparison_.name_exp_1 = p1;
-    tmp->u.aecomparison_.relational_op_ = p2;
-    tmp->u.aecomparison_.name_exp_2 = p3;
-    return tmp;
-}/********************   AArelationalOpEQ    ********************/
-RELATIONAL_OP make_AArelationalOpEQ(EQUALS p1)
-{
-    RELATIONAL_OP tmp = (RELATIONAL_OP) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AArelationalOpEQ!\n");
-        exit(1);
-    }
-    tmp->kind = is_AArelationalOpEQ;
-    tmp->u.aarelationalopeq_.equals_ = p1;
-    return tmp;
-}
-/********************   ABrelationalOpNEQ    ********************/
-RELATIONAL_OP make_ABrelationalOpNEQ(NeqToken p1)
-{
-    RELATIONAL_OP tmp = (RELATIONAL_OP) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ABrelationalOpNEQ!\n");
-        exit(1);
-    }
-    tmp->kind = is_ABrelationalOpNEQ;
-    tmp->u.abrelationalopneq_.neqtoken_ = p1;
-    return tmp;
-}
-/********************   ACrelationalOpLT    ********************/
-RELATIONAL_OP make_ACrelationalOpLT()
-{
-    RELATIONAL_OP tmp = (RELATIONAL_OP) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ACrelationalOpLT!\n");
-        exit(1);
-    }
-    tmp->kind = is_ACrelationalOpLT;
-    return tmp;
-}
-/********************   ADrelationalOpGT    ********************/
-RELATIONAL_OP make_ADrelationalOpGT()
-{
-    RELATIONAL_OP tmp = (RELATIONAL_OP) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ADrelationalOpGT!\n");
-        exit(1);
-    }
-    tmp->kind = is_ADrelationalOpGT;
-    return tmp;
-}
-/********************   AErelationalOpLE    ********************/
-RELATIONAL_OP make_AErelationalOpLE(LeToken p1)
-{
-    RELATIONAL_OP tmp = (RELATIONAL_OP) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AErelationalOpLE!\n");
-        exit(1);
-    }
-    tmp->kind = is_AErelationalOpLE;
-    tmp->u.aerelationalople_.letoken_ = p1;
-    return tmp;
-}
-/********************   AFrelationalOpGE    ********************/
-RELATIONAL_OP make_AFrelationalOpGE(GeToken p1)
-{
-    RELATIONAL_OP tmp = (RELATIONAL_OP) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating AFrelationalOpGE!\n");
-        exit(1);
-    }
-    tmp->kind = is_AFrelationalOpGE;
-    tmp->u.afrelationalopge_.getoken_ = p1;
-    return tmp;
 }/********************   AAstatement    ********************/
 STATEMENT make_AAstatement(BASIC_STATEMENT p1)
 {
@@ -4868,6 +4535,629 @@ OTHER_STATEMENT make_ACother_statement(LABEL_DEFINITION p1, OTHER_STATEMENT p2)
     tmp->kind = is_ACother_statement;
     tmp->u.acother_statement_.label_definition_ = p1;
     tmp->u.acother_statement_.other_statement_ = p2;
+    return tmp;
+}/********************   AAifStatement    ********************/
+IF_STATEMENT make_AAifStatement(IF_CLAUSE p1, STATEMENT p2)
+{
+    IF_STATEMENT tmp = (IF_STATEMENT) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AAifStatement!\n");
+        exit(1);
+    }
+    tmp->kind = is_AAifStatement;
+    tmp->u.aaifstatement_.if_clause_ = p1;
+    tmp->u.aaifstatement_.statement_ = p2;
+    return tmp;
+}
+/********************   ABifThenElseStatement    ********************/
+IF_STATEMENT make_ABifThenElseStatement(TRUE_PART p1, STATEMENT p2)
+{
+    IF_STATEMENT tmp = (IF_STATEMENT) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ABifThenElseStatement!\n");
+        exit(1);
+    }
+    tmp->kind = is_ABifThenElseStatement;
+    tmp->u.abifthenelsestatement_.true_part_ = p1;
+    tmp->u.abifthenelsestatement_.statement_ = p2;
+    return tmp;
+}/********************   AAifClauseRelationalExp    ********************/
+IF_CLAUSE make_AAifClauseRelationalExp(IF p1, RELATIONAL_EXP p2, THEN p3)
+{
+    IF_CLAUSE tmp = (IF_CLAUSE) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AAifClauseRelationalExp!\n");
+        exit(1);
+    }
+    tmp->kind = is_AAifClauseRelationalExp;
+    tmp->u.aaifclauserelationalexp_.if_ = p1;
+    tmp->u.aaifclauserelationalexp_.relational_exp_ = p2;
+    tmp->u.aaifclauserelationalexp_.then_ = p3;
+    return tmp;
+}
+/********************   ABifClauseBitExp    ********************/
+IF_CLAUSE make_ABifClauseBitExp(IF p1, BIT_EXP p2, THEN p3)
+{
+    IF_CLAUSE tmp = (IF_CLAUSE) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ABifClauseBitExp!\n");
+        exit(1);
+    }
+    tmp->kind = is_ABifClauseBitExp;
+    tmp->u.abifclausebitexp_.if_ = p1;
+    tmp->u.abifclausebitexp_.bit_exp_ = p2;
+    tmp->u.abifclausebitexp_.then_ = p3;
+    return tmp;
+}/********************   AAtrue_part    ********************/
+TRUE_PART make_AAtrue_part(IF_CLAUSE p1, BASIC_STATEMENT p2)
+{
+    TRUE_PART tmp = (TRUE_PART) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AAtrue_part!\n");
+        exit(1);
+    }
+    tmp->kind = is_AAtrue_part;
+    tmp->u.aatrue_part_.if_clause_ = p1;
+    tmp->u.aatrue_part_.basic_statement_ = p2;
+    return tmp;
+}/********************   AAif    ********************/
+IF make_AAif()
+{
+    IF tmp = (IF) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AAif!\n");
+        exit(1);
+    }
+    tmp->kind = is_AAif;
+    return tmp;
+}/********************   AAthen    ********************/
+THEN make_AAthen()
+{
+    THEN tmp = (THEN) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AAthen!\n");
+        exit(1);
+    }
+    tmp->kind = is_AAthen;
+    return tmp;
+}/********************   AArelational_exp    ********************/
+RELATIONAL_EXP make_AArelational_exp(RELATIONAL_FACTOR p1)
+{
+    RELATIONAL_EXP tmp = (RELATIONAL_EXP) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AArelational_exp!\n");
+        exit(1);
+    }
+    tmp->kind = is_AArelational_exp;
+    tmp->u.aarelational_exp_.relational_factor_ = p1;
+    return tmp;
+}
+/********************   ABrelational_expOR    ********************/
+RELATIONAL_EXP make_ABrelational_expOR(RELATIONAL_EXP p1, OR p2, RELATIONAL_FACTOR p3)
+{
+    RELATIONAL_EXP tmp = (RELATIONAL_EXP) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ABrelational_expOR!\n");
+        exit(1);
+    }
+    tmp->kind = is_ABrelational_expOR;
+    tmp->u.abrelational_expor_.relational_exp_ = p1;
+    tmp->u.abrelational_expor_.or_ = p2;
+    tmp->u.abrelational_expor_.relational_factor_ = p3;
+    return tmp;
+}/********************   AArelational_factor    ********************/
+RELATIONAL_FACTOR make_AArelational_factor(REL_PRIM p1)
+{
+    RELATIONAL_FACTOR tmp = (RELATIONAL_FACTOR) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AArelational_factor!\n");
+        exit(1);
+    }
+    tmp->kind = is_AArelational_factor;
+    tmp->u.aarelational_factor_.rel_prim_ = p1;
+    return tmp;
+}
+/********************   ABrelational_factorAND    ********************/
+RELATIONAL_FACTOR make_ABrelational_factorAND(RELATIONAL_FACTOR p1, AND p2, REL_PRIM p3)
+{
+    RELATIONAL_FACTOR tmp = (RELATIONAL_FACTOR) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ABrelational_factorAND!\n");
+        exit(1);
+    }
+    tmp->kind = is_ABrelational_factorAND;
+    tmp->u.abrelational_factorand_.relational_factor_ = p1;
+    tmp->u.abrelational_factorand_.and_ = p2;
+    tmp->u.abrelational_factorand_.rel_prim_ = p3;
+    return tmp;
+}/********************   AArel_prim    ********************/
+REL_PRIM make_AArel_prim(RELATIONAL_EXP p1)
+{
+    REL_PRIM tmp = (REL_PRIM) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AArel_prim!\n");
+        exit(1);
+    }
+    tmp->kind = is_AArel_prim;
+    tmp->u.aarel_prim_.relational_exp_ = p1;
+    return tmp;
+}
+/********************   ABrel_prim    ********************/
+REL_PRIM make_ABrel_prim(NOT p1, RELATIONAL_EXP p2)
+{
+    REL_PRIM tmp = (REL_PRIM) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ABrel_prim!\n");
+        exit(1);
+    }
+    tmp->kind = is_ABrel_prim;
+    tmp->u.abrel_prim_.not_ = p1;
+    tmp->u.abrel_prim_.relational_exp_ = p2;
+    return tmp;
+}
+/********************   ACrel_prim    ********************/
+REL_PRIM make_ACrel_prim(COMPARISON p1)
+{
+    REL_PRIM tmp = (REL_PRIM) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ACrel_prim!\n");
+        exit(1);
+    }
+    tmp->kind = is_ACrel_prim;
+    tmp->u.acrel_prim_.comparison_ = p1;
+    return tmp;
+}/********************   AAcomparisonEQ    ********************/
+COMPARISON make_AAcomparisonEQ(ARITH_EXP p1, EQUALS p2, ARITH_EXP p3)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AAcomparisonEQ!\n");
+        exit(1);
+    }
+    tmp->kind = is_AAcomparisonEQ;
+    tmp->u.aacomparisoneq_.arith_exp_1 = p1;
+    tmp->u.aacomparisoneq_.equals_ = p2;
+    tmp->u.aacomparisoneq_.arith_exp_2 = p3;
+    return tmp;
+}
+/********************   ABcomparisonEQ    ********************/
+COMPARISON make_ABcomparisonEQ(CHAR_EXP p1, EQUALS p2, CHAR_EXP p3)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ABcomparisonEQ!\n");
+        exit(1);
+    }
+    tmp->kind = is_ABcomparisonEQ;
+    tmp->u.abcomparisoneq_.char_exp_1 = p1;
+    tmp->u.abcomparisoneq_.equals_ = p2;
+    tmp->u.abcomparisoneq_.char_exp_2 = p3;
+    return tmp;
+}
+/********************   ACcomparisonEQ    ********************/
+COMPARISON make_ACcomparisonEQ(BIT_CAT p1, EQUALS p2, BIT_CAT p3)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ACcomparisonEQ!\n");
+        exit(1);
+    }
+    tmp->kind = is_ACcomparisonEQ;
+    tmp->u.accomparisoneq_.bit_cat_1 = p1;
+    tmp->u.accomparisoneq_.equals_ = p2;
+    tmp->u.accomparisoneq_.bit_cat_2 = p3;
+    return tmp;
+}
+/********************   ADcomparisonEQ    ********************/
+COMPARISON make_ADcomparisonEQ(STRUCTURE_EXP p1, EQUALS p2, STRUCTURE_EXP p3)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ADcomparisonEQ!\n");
+        exit(1);
+    }
+    tmp->kind = is_ADcomparisonEQ;
+    tmp->u.adcomparisoneq_.structure_exp_1 = p1;
+    tmp->u.adcomparisoneq_.equals_ = p2;
+    tmp->u.adcomparisoneq_.structure_exp_2 = p3;
+    return tmp;
+}
+/********************   AEcomparisonEQ    ********************/
+COMPARISON make_AEcomparisonEQ(NAME_EXP p1, EQUALS p2, NAME_EXP p3)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AEcomparisonEQ!\n");
+        exit(1);
+    }
+    tmp->kind = is_AEcomparisonEQ;
+    tmp->u.aecomparisoneq_.name_exp_1 = p1;
+    tmp->u.aecomparisoneq_.equals_ = p2;
+    tmp->u.aecomparisoneq_.name_exp_2 = p3;
+    return tmp;
+}
+/********************   AAcomparisonNEQ    ********************/
+COMPARISON make_AAcomparisonNEQ(ARITH_EXP p1, NeqToken p2, ARITH_EXP p3)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AAcomparisonNEQ!\n");
+        exit(1);
+    }
+    tmp->kind = is_AAcomparisonNEQ;
+    tmp->u.aacomparisonneq_.arith_exp_1 = p1;
+    tmp->u.aacomparisonneq_.neqtoken_ = p2;
+    tmp->u.aacomparisonneq_.arith_exp_2 = p3;
+    return tmp;
+}
+/********************   ABcomparisonNEQ    ********************/
+COMPARISON make_ABcomparisonNEQ(CHAR_EXP p1, NeqToken p2, CHAR_EXP p3)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ABcomparisonNEQ!\n");
+        exit(1);
+    }
+    tmp->kind = is_ABcomparisonNEQ;
+    tmp->u.abcomparisonneq_.char_exp_1 = p1;
+    tmp->u.abcomparisonneq_.neqtoken_ = p2;
+    tmp->u.abcomparisonneq_.char_exp_2 = p3;
+    return tmp;
+}
+/********************   ACcomparisonNEQ    ********************/
+COMPARISON make_ACcomparisonNEQ(BIT_CAT p1, NeqToken p2, BIT_CAT p3)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ACcomparisonNEQ!\n");
+        exit(1);
+    }
+    tmp->kind = is_ACcomparisonNEQ;
+    tmp->u.accomparisonneq_.bit_cat_1 = p1;
+    tmp->u.accomparisonneq_.neqtoken_ = p2;
+    tmp->u.accomparisonneq_.bit_cat_2 = p3;
+    return tmp;
+}
+/********************   ADcomparisonNEQ    ********************/
+COMPARISON make_ADcomparisonNEQ(STRUCTURE_EXP p1, NeqToken p2, STRUCTURE_EXP p3)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ADcomparisonNEQ!\n");
+        exit(1);
+    }
+    tmp->kind = is_ADcomparisonNEQ;
+    tmp->u.adcomparisonneq_.structure_exp_1 = p1;
+    tmp->u.adcomparisonneq_.neqtoken_ = p2;
+    tmp->u.adcomparisonneq_.structure_exp_2 = p3;
+    return tmp;
+}
+/********************   AEcomparisonNEQ    ********************/
+COMPARISON make_AEcomparisonNEQ(NAME_EXP p1, NeqToken p2, NAME_EXP p3)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AEcomparisonNEQ!\n");
+        exit(1);
+    }
+    tmp->kind = is_AEcomparisonNEQ;
+    tmp->u.aecomparisonneq_.name_exp_1 = p1;
+    tmp->u.aecomparisonneq_.neqtoken_ = p2;
+    tmp->u.aecomparisonneq_.name_exp_2 = p3;
+    return tmp;
+}
+/********************   AAcomparisonLT    ********************/
+COMPARISON make_AAcomparisonLT(ARITH_EXP p1, ARITH_EXP p2)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AAcomparisonLT!\n");
+        exit(1);
+    }
+    tmp->kind = is_AAcomparisonLT;
+    tmp->u.aacomparisonlt_.arith_exp_1 = p1;
+    tmp->u.aacomparisonlt_.arith_exp_2 = p2;
+    return tmp;
+}
+/********************   ABcomparisonLT    ********************/
+COMPARISON make_ABcomparisonLT(CHAR_EXP p1, CHAR_EXP p2)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ABcomparisonLT!\n");
+        exit(1);
+    }
+    tmp->kind = is_ABcomparisonLT;
+    tmp->u.abcomparisonlt_.char_exp_1 = p1;
+    tmp->u.abcomparisonlt_.char_exp_2 = p2;
+    return tmp;
+}
+/********************   ACcomparisonLT    ********************/
+COMPARISON make_ACcomparisonLT(BIT_CAT p1, BIT_CAT p2)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ACcomparisonLT!\n");
+        exit(1);
+    }
+    tmp->kind = is_ACcomparisonLT;
+    tmp->u.accomparisonlt_.bit_cat_1 = p1;
+    tmp->u.accomparisonlt_.bit_cat_2 = p2;
+    return tmp;
+}
+/********************   ADcomparisonLT    ********************/
+COMPARISON make_ADcomparisonLT(STRUCTURE_EXP p1, STRUCTURE_EXP p2)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ADcomparisonLT!\n");
+        exit(1);
+    }
+    tmp->kind = is_ADcomparisonLT;
+    tmp->u.adcomparisonlt_.structure_exp_1 = p1;
+    tmp->u.adcomparisonlt_.structure_exp_2 = p2;
+    return tmp;
+}
+/********************   AEcomparisonLT    ********************/
+COMPARISON make_AEcomparisonLT(NAME_EXP p1, NAME_EXP p2)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AEcomparisonLT!\n");
+        exit(1);
+    }
+    tmp->kind = is_AEcomparisonLT;
+    tmp->u.aecomparisonlt_.name_exp_1 = p1;
+    tmp->u.aecomparisonlt_.name_exp_2 = p2;
+    return tmp;
+}
+/********************   AAcomparisonGT    ********************/
+COMPARISON make_AAcomparisonGT(ARITH_EXP p1, ARITH_EXP p2)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AAcomparisonGT!\n");
+        exit(1);
+    }
+    tmp->kind = is_AAcomparisonGT;
+    tmp->u.aacomparisongt_.arith_exp_1 = p1;
+    tmp->u.aacomparisongt_.arith_exp_2 = p2;
+    return tmp;
+}
+/********************   ABcomparisonGT    ********************/
+COMPARISON make_ABcomparisonGT(CHAR_EXP p1, CHAR_EXP p2)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ABcomparisonGT!\n");
+        exit(1);
+    }
+    tmp->kind = is_ABcomparisonGT;
+    tmp->u.abcomparisongt_.char_exp_1 = p1;
+    tmp->u.abcomparisongt_.char_exp_2 = p2;
+    return tmp;
+}
+/********************   ACcomparisonGT    ********************/
+COMPARISON make_ACcomparisonGT(BIT_CAT p1, BIT_CAT p2)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ACcomparisonGT!\n");
+        exit(1);
+    }
+    tmp->kind = is_ACcomparisonGT;
+    tmp->u.accomparisongt_.bit_cat_1 = p1;
+    tmp->u.accomparisongt_.bit_cat_2 = p2;
+    return tmp;
+}
+/********************   ADcomparisonGT    ********************/
+COMPARISON make_ADcomparisonGT(STRUCTURE_EXP p1, STRUCTURE_EXP p2)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ADcomparisonGT!\n");
+        exit(1);
+    }
+    tmp->kind = is_ADcomparisonGT;
+    tmp->u.adcomparisongt_.structure_exp_1 = p1;
+    tmp->u.adcomparisongt_.structure_exp_2 = p2;
+    return tmp;
+}
+/********************   AEcomparisonGT    ********************/
+COMPARISON make_AEcomparisonGT(NAME_EXP p1, NAME_EXP p2)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AEcomparisonGT!\n");
+        exit(1);
+    }
+    tmp->kind = is_AEcomparisonGT;
+    tmp->u.aecomparisongt_.name_exp_1 = p1;
+    tmp->u.aecomparisongt_.name_exp_2 = p2;
+    return tmp;
+}
+/********************   AAcomparisonLE    ********************/
+COMPARISON make_AAcomparisonLE(ARITH_EXP p1, LeToken p2, ARITH_EXP p3)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AAcomparisonLE!\n");
+        exit(1);
+    }
+    tmp->kind = is_AAcomparisonLE;
+    tmp->u.aacomparisonle_.arith_exp_1 = p1;
+    tmp->u.aacomparisonle_.letoken_ = p2;
+    tmp->u.aacomparisonle_.arith_exp_2 = p3;
+    return tmp;
+}
+/********************   ABcomparisonLE    ********************/
+COMPARISON make_ABcomparisonLE(CHAR_EXP p1, LeToken p2, CHAR_EXP p3)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ABcomparisonLE!\n");
+        exit(1);
+    }
+    tmp->kind = is_ABcomparisonLE;
+    tmp->u.abcomparisonle_.char_exp_1 = p1;
+    tmp->u.abcomparisonle_.letoken_ = p2;
+    tmp->u.abcomparisonle_.char_exp_2 = p3;
+    return tmp;
+}
+/********************   ACcomparisonLE    ********************/
+COMPARISON make_ACcomparisonLE(BIT_CAT p1, LeToken p2, BIT_CAT p3)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ACcomparisonLE!\n");
+        exit(1);
+    }
+    tmp->kind = is_ACcomparisonLE;
+    tmp->u.accomparisonle_.bit_cat_1 = p1;
+    tmp->u.accomparisonle_.letoken_ = p2;
+    tmp->u.accomparisonle_.bit_cat_2 = p3;
+    return tmp;
+}
+/********************   ADcomparisonLE    ********************/
+COMPARISON make_ADcomparisonLE(STRUCTURE_EXP p1, LeToken p2, STRUCTURE_EXP p3)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ADcomparisonLE!\n");
+        exit(1);
+    }
+    tmp->kind = is_ADcomparisonLE;
+    tmp->u.adcomparisonle_.structure_exp_1 = p1;
+    tmp->u.adcomparisonle_.letoken_ = p2;
+    tmp->u.adcomparisonle_.structure_exp_2 = p3;
+    return tmp;
+}
+/********************   AEcomparisonLE    ********************/
+COMPARISON make_AEcomparisonLE(NAME_EXP p1, LeToken p2, NAME_EXP p3)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AEcomparisonLE!\n");
+        exit(1);
+    }
+    tmp->kind = is_AEcomparisonLE;
+    tmp->u.aecomparisonle_.name_exp_1 = p1;
+    tmp->u.aecomparisonle_.letoken_ = p2;
+    tmp->u.aecomparisonle_.name_exp_2 = p3;
+    return tmp;
+}
+/********************   AAcomparisonGE    ********************/
+COMPARISON make_AAcomparisonGE(ARITH_EXP p1, GeToken p2, ARITH_EXP p3)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AAcomparisonGE!\n");
+        exit(1);
+    }
+    tmp->kind = is_AAcomparisonGE;
+    tmp->u.aacomparisonge_.arith_exp_1 = p1;
+    tmp->u.aacomparisonge_.getoken_ = p2;
+    tmp->u.aacomparisonge_.arith_exp_2 = p3;
+    return tmp;
+}
+/********************   ABcomparisonGE    ********************/
+COMPARISON make_ABcomparisonGE(CHAR_EXP p1, GeToken p2, CHAR_EXP p3)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ABcomparisonGE!\n");
+        exit(1);
+    }
+    tmp->kind = is_ABcomparisonGE;
+    tmp->u.abcomparisonge_.char_exp_1 = p1;
+    tmp->u.abcomparisonge_.getoken_ = p2;
+    tmp->u.abcomparisonge_.char_exp_2 = p3;
+    return tmp;
+}
+/********************   ACcomparisonGE    ********************/
+COMPARISON make_ACcomparisonGE(BIT_CAT p1, GeToken p2, BIT_CAT p3)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ACcomparisonGE!\n");
+        exit(1);
+    }
+    tmp->kind = is_ACcomparisonGE;
+    tmp->u.accomparisonge_.bit_cat_1 = p1;
+    tmp->u.accomparisonge_.getoken_ = p2;
+    tmp->u.accomparisonge_.bit_cat_2 = p3;
+    return tmp;
+}
+/********************   ADcomparisonGE    ********************/
+COMPARISON make_ADcomparisonGE(STRUCTURE_EXP p1, GeToken p2, STRUCTURE_EXP p3)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ADcomparisonGE!\n");
+        exit(1);
+    }
+    tmp->kind = is_ADcomparisonGE;
+    tmp->u.adcomparisonge_.structure_exp_1 = p1;
+    tmp->u.adcomparisonge_.getoken_ = p2;
+    tmp->u.adcomparisonge_.structure_exp_2 = p3;
+    return tmp;
+}
+/********************   AEcomparisonGE    ********************/
+COMPARISON make_AEcomparisonGE(NAME_EXP p1, GeToken p2, NAME_EXP p3)
+{
+    COMPARISON tmp = (COMPARISON) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AEcomparisonGE!\n");
+        exit(1);
+    }
+    tmp->kind = is_AEcomparisonGE;
+    tmp->u.aecomparisonge_.name_exp_1 = p1;
+    tmp->u.aecomparisonge_.getoken_ = p2;
+    tmp->u.aecomparisonge_.name_exp_2 = p3;
     return tmp;
 }/********************   AAany_statement    ********************/
 ANY_STATEMENT make_AAany_statement(STATEMENT p1)

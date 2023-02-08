@@ -284,8 +284,13 @@ readLineFields = [] # Buffered data for READ statements
 def readItemLUN5():
     global readLineFields
     while len(readLineFields) == 0:
-        line = input("READ  > ").replace(";", " ; ")
-        readLineFields = re.split(r"\s*,\s*|\s+", line)
+        line = input("READ  > ").replace(";", " ; ").strip()
+        if line == "":
+            continue
+        if "`" in line:
+            print("The back-tick (`) is not a legal character for input data in a READ statement.")
+            continue
+        readLineFields = re.split(r"\s*,\s*|\s+", line.strip())
     return readLineFields.pop(0)
 
 # Test if an object is a vector, and (optionally) if all its elements are 
@@ -978,6 +983,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                             result = [( operand1[0][0] | operand2[0][0], 
                                         numbits )]
                         elif operator == "AND":
+                            numbits = min(operand1[0][1], operand2[0][1])
                             result = [( operand1[0][0] & operand2[0][0], 
                                         numbits )]
                         elif operator == "ORNOT":
@@ -1296,20 +1302,28 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                             value = readItemLUN5()
                             if value == ";":
                                 semicolon = True
-                            attributes["value"] = int(value)
+                            elif value == "":
+                                attributes["value"] == None
+                            else:
+                                attributes["value"] = int(value)
                         elif "scalar" in attributes:
                             value = readItemLUN5()
                             if value == ";":
                                 semicolon = True
-                            attributes["value"] = float(value)
+                            elif value == "":
+                                attributes["value"] == None
+                            else:
+                                attributes["value"] = float(value)
                         elif "bit" in attributes:
                             value = readItemLUN5()
                             bitLength = attributes["bit"]
                             if value == ";":
                                 semicolon = True
-                            value = int(value) & ((1 << bitLength) - 1)
-                            attributes["value"] = [(value, bitLength)]
-                        pass
+                            elif value == "":
+                                attributes["value"] == [(None, bitLength)]
+                            else:
+                                value = int(value) & ((1 << bitLength) - 1)
+                                attributes["value"] = [(value, bitLength)]
                 while len(computationStack) > start:
                     computationStack.pop()
                 #print()

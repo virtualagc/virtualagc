@@ -470,6 +470,10 @@ AAequals . EQUALS ::= "=" ;
 
 --------------------------------------------------------------------------
 -- Here are the additional rules needed for IF_STATEMENT. 
+AAstatement . STATEMENT ::= BASIC_STATEMENT ;
+ABstatement . STATEMENT ::= OTHER_STATEMENT ;
+ABbasicStatementAssignment . BASIC_STATEMENT ::= ASSIGNMENT ";" ;
+ABotherStatementIf . OTHER_STATEMENT ::= IF_STATEMENT ;
 AAifStatement . IF_STATEMENT ::= IF_CLAUSE STATEMENT ;
 ABifThenElseStatement . IF_STATEMENT ::= TRUE_PART STATEMENT ;
 AAifClauseRelationalExp . IF_CLAUSE ::= IF RELATIONAL_EXP THEN ;
@@ -478,9 +482,9 @@ AAtrue_part . TRUE_PART ::= IF_CLAUSE BASIC_STATEMENT "ELSE" ;
 AAif . IF ::= "IF" ;
 AAthen . THEN ::= "THEN" ;
 AArelational_exp . RELATIONAL_EXP ::= RELATIONAL_FACTOR ;
-ABrelational_exp . RELATIONAL_EXP ::= RELATIONAL_EXP OR RELATIONAL_FACTOR ;
+ABrelational_expOR . RELATIONAL_EXP ::= RELATIONAL_EXP OR RELATIONAL_FACTOR ;
 AArelational_factor . RELATIONAL_FACTOR ::= REL_PRIM ;
-ABrelational_factor . RELATIONAL_FACTOR ::= RELATIONAL_FACTOR AND REL_PRIM ;
+ABrelational_factorAND . RELATIONAL_FACTOR ::= RELATIONAL_FACTOR AND REL_PRIM ;
 -- The following two lines originally had "1" RELATIONAL_EXP rather than just
 -- RELATIONAL_EXP on the right.  Both the language specification and
 -- the comments in SYNTHESI agree.  I find no explanation in any documentation
@@ -492,24 +496,49 @@ ABrelational_factor . RELATIONAL_FACTOR ::= RELATIONAL_FACTOR AND REL_PRIM ;
 AArel_prim . REL_PRIM ::= "(" RELATIONAL_EXP ")" ;
 ABrel_prim . REL_PRIM ::= NOT "(" RELATIONAL_EXP ")" ;
 ACrel_prim . REL_PRIM ::= COMPARISON ;
+{-
 AAcomparison . COMPARISON ::= ARITH_EXP RELATIONAL_OP ARITH_EXP ;
 ABcomparison . COMPARISON ::= CHAR_EXP RELATIONAL_OP CHAR_EXP ;
 ACcomparison . COMPARISON ::= BIT_CAT RELATIONAL_OP BIT_CAT ;
 ADcomparison . COMPARISON ::= STRUCTURE_EXP RELATIONAL_OP STRUCTURE_EXP ;
 AEcomparison . COMPARISON ::= NAME_EXP RELATIONAL_OP NAME_EXP ;
 AArelationalOpEQ . RELATIONAL_OP ::= EQUALS ;
--- ABrelationalOpNEQ . RELATIONAL_OP ::= NOT EQUALS ;
 ABrelationalOpNEQ . RELATIONAL_OP ::= NeqToken ;
 ACrelationalOpLT . RELATIONAL_OP ::= "<" ;
 ADrelationalOpGT . RELATIONAL_OP ::= ">" ;
 AErelationalOpLE . RELATIONAL_OP ::= LeToken ;
 AFrelationalOpGE . RELATIONAL_OP ::= GeToken ;
--- AGrelationalOpNLT . RELATIONAL_OP ::= NOT "<" ;
--- AHrelationalOpNGT . RELATIONAL_OP ::= NOT ">" ;
-AAstatement . STATEMENT ::= BASIC_STATEMENT ;
-ABstatement . STATEMENT ::= OTHER_STATEMENT ;
-ABbasicStatementAssignment . BASIC_STATEMENT ::= ASSIGNMENT ";" ;
-ABotherStatementIf . OTHER_STATEMENT ::= IF_STATEMENT ;
+-}
+AAcomparisonEQ . COMPARISON ::= ARITH_EXP EQUALS ARITH_EXP ;
+ABcomparisonEQ . COMPARISON ::= CHAR_EXP EQUALS CHAR_EXP ;
+ACcomparisonEQ . COMPARISON ::= BIT_CAT EQUALS BIT_CAT ;
+ADcomparisonEQ . COMPARISON ::= STRUCTURE_EXP EQUALS STRUCTURE_EXP ;
+AEcomparisonEQ . COMPARISON ::= NAME_EXP EQUALS NAME_EXP ;
+AAcomparisonNEQ . COMPARISON ::= ARITH_EXP NeqToken ARITH_EXP ;
+ABcomparisonNEQ . COMPARISON ::= CHAR_EXP NeqToken CHAR_EXP ;
+ACcomparisonNEQ . COMPARISON ::= BIT_CAT NeqToken BIT_CAT ;
+ADcomparisonNEQ . COMPARISON ::= STRUCTURE_EXP NeqToken STRUCTURE_EXP ;
+AEcomparisonNEQ . COMPARISON ::= NAME_EXP NeqToken NAME_EXP ;
+AAcomparisonLT . COMPARISON ::= ARITH_EXP "<" ARITH_EXP ;
+ABcomparisonLT . COMPARISON ::= CHAR_EXP "<" CHAR_EXP ;
+ACcomparisonLT . COMPARISON ::= BIT_CAT "<" BIT_CAT ;
+ADcomparisonLT . COMPARISON ::= STRUCTURE_EXP "<" STRUCTURE_EXP ;
+AEcomparisonLT . COMPARISON ::= NAME_EXP "<" NAME_EXP ;
+AAcomparisonGT . COMPARISON ::= ARITH_EXP ">" ARITH_EXP ;
+ABcomparisonGT . COMPARISON ::= CHAR_EXP ">" CHAR_EXP ;
+ACcomparisonGT . COMPARISON ::= BIT_CAT ">" BIT_CAT ;
+ADcomparisonGT . COMPARISON ::= STRUCTURE_EXP ">" STRUCTURE_EXP ;
+AEcomparisonGT . COMPARISON ::= NAME_EXP ">" NAME_EXP ;
+AAcomparisonLE . COMPARISON ::= ARITH_EXP LeToken ARITH_EXP ;
+ABcomparisonLE . COMPARISON ::= CHAR_EXP LeToken CHAR_EXP ;
+ACcomparisonLE. COMPARISON ::= BIT_CAT LeToken BIT_CAT ;
+ADcomparisonLE . COMPARISON ::= STRUCTURE_EXP LeToken STRUCTURE_EXP ;
+AEcomparisonLE. COMPARISON ::= NAME_EXP LeToken NAME_EXP ;
+AAcomparisonGE . COMPARISON ::= ARITH_EXP GeToken ARITH_EXP ;
+ABcomparisonGE . COMPARISON ::= CHAR_EXP GeToken CHAR_EXP ;
+ACcomparisonGE . COMPARISON ::= BIT_CAT GeToken BIT_CAT ;
+ADcomparisonGE . COMPARISON ::= STRUCTURE_EXP GeToken STRUCTURE_EXP ;
+AEcomparisonGE . COMPARISON ::= NAME_EXP GeToken NAME_EXP ;
 
 --------------------------------------------------------------------------
 -- Additional rules for more types of STATEMENTs, except BLOCKs. 

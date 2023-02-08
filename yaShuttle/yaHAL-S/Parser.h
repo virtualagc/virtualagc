@@ -96,6 +96,9 @@ typedef union
   STRUCTURE_ID structure_id_;
   ASSIGNMENT assignment_;
   EQUALS equals_;
+  STATEMENT statement_;
+  BASIC_STATEMENT basic_statement_;
+  OTHER_STATEMENT other_statement_;
   IF_STATEMENT if_statement_;
   IF_CLAUSE if_clause_;
   TRUE_PART true_part_;
@@ -105,10 +108,6 @@ typedef union
   RELATIONAL_FACTOR relational_factor_;
   REL_PRIM rel_prim_;
   COMPARISON comparison_;
-  RELATIONAL_OP relational_op_;
-  STATEMENT statement_;
-  BASIC_STATEMENT basic_statement_;
-  OTHER_STATEMENT other_statement_;
   ANY_STATEMENT any_statement_;
   ON_PHRASE on_phrase_;
   ON_CLAUSE on_clause_;
