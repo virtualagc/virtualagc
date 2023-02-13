@@ -1,0 +1,1638 @@
+<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+  <head>
+    <title>Virtual AGC Document Library Page</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="Author" content="Ronald Burkey">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="author" content="Ronald S. Burkey">
+    <script type="text/javascript" src="Header.js"></script>
+  </head>
+  <body style="background-image: url(gray3.jpg);">
+    <script type="text/javascript">
+document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@SUBTITLE@","User's Manual"))
+</script><br>
+    <h1>Table of Contents </h1>
+    <ul>
+      <li> <a moz-do-not-send="true" href="#Introduction">Introduction</a></li>
+      <li><a moz-do-not-send="true" href="#Readings">Readings</a></li>
+      <li><a moz-do-not-send="true" href="#Installation">Installation of
+          the Interpreter (Linux, Windows, Mac)</a></li>
+      <li><a moz-do-not-send="true" href="#Invocation">Invocation of the
+          Interpreter</a><br>
+      </li>
+      <li><a moz-do-not-send="true" href="#HelloWorld">Hello, World!</a></li>
+      <li><a moz-do-not-send="true" href="#Tools">Tools Provided by the
+          Interpreter</a><br>
+      </li>
+    </ul>
+    <h1><a name="Introduction"></a>Introduction</h1>
+    <p>Much of the Space Shuttle's flight software was written in the
+      high-level language called HAL/S.&nbsp; This language was not
+      ultimately used for much else, and thus is not well-known
+      today.&nbsp; Moreover, while several HAL/S compilers were created
+      back in the day, none are presently available in a useful form, as
+      far as we know.&nbsp; Therefore, in order to compile Space Shuttle
+      flight software, <a moz-do-not-send="true"
+        href="hal-s-compiler.html">a "modern" compiler for HAL/S is
+        currently being developed by the Virtual AGC Project</a>.<br>
+    </p>
+    <p>However, the lack of public awareness of HAL/S is not reflected
+      merely in the unavailability of development tools for it, but also
+      in a general lack of awareness of the language and of any means to
+      acquire proficiency in it.</p>
+    <p>For that reason, as well as to facilitate debugging and
+      development of the modern HAL/S compiler, the modern compiler is
+      configured in such a way as to allow running it interactively as
+      an interpreter that executes each HAL/S statement individually as
+      it is input by the user.&nbsp; Moreover, it provides means to
+      examine the effect of that code on the values of variables, as
+      well as to examine the compiled code.&nbsp; This page is a user
+      manual for the modern HAL/S compiler when run in this interpretive
+      mode.<br>
+    </p>
+    <h1><a name="Readings"></a>Readings</h1>
+    <p>Before working with the HAL/S interpreter too much, you might
+      want to read a few chapters in the excellent introductory book <a
+        moz-do-not-send="true"
+        href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf"><i>Programming
+
+
+
+          in HAL/S</i></a> and/or the more formal <a
+        moz-do-not-send="true"
+        href="Shuttle/HAL_S%20Programmers%20Guide%20Nov%202005.pdf"><i>HAL/S
+
+
+
+          Programmers' Guide</i></a>.<br>
+    </p>
+    <h1><a name="Installation"></a>Installation of the Interpreter
+      (Linux, Windows, Mac)</h1>
+    <blockquote>
+      <p><font size="-1"><b>Aside:</b>&nbsp; I'm going to be mentioning
+          "colorization" fairly frequently for a while.&nbsp; What is
+          it?&nbsp; Well, there can be a lot of screen clutter involved
+          when you use the HAL/S interpreter, making it more confusing
+          to use than it needs to be.&nbsp; But the interpreter can
+          colorize inputs and output differently, making it much easier
+          to distinguish visually between what <i>you</i> input and
+          what <i>it</i> outputs.&nbsp; I personally consider this
+          colorization to be extremely useful — enough so that I
+          bothered writing the code to do it in the first place&nbsp; —
+          but <i>you</i> may not care about it at all.&nbsp; It's your
+          call whether or not to take my emphasis on colorization
+          seriously.&nbsp; You might want to briefly skim through <a
+            moz-do-not-send="true" href="#HelloWorld">the Hello World
+            section below</a> and try to imagine what all of the samples
+          would like if they were simply black.<br>
+        </font></p>
+    </blockquote>
+    <ol>
+      <li>Install Python 3 if it's not already installed on your
+        computer.</li>
+      <li>Install (using <tt>pip</tt> or <tt>pip3</tt>, whichever is
+        appropriate for Python 3 on your system) the following Python
+        modules, if not already installed.&nbsp; Unfortunately this is
+        not necessarily a complete list, depending on your system type,
+        but it's in the right ballpark:<br>
+      </li>
+      <ol>
+      </ol>
+      <ul>
+        <li><tt>gnureadline</tt>&nbsp; (or failing that, perhaps <tt>readline</tt>;
+          or failing that, perhaps <tt> editline</tt> or <tt>pyreadline</tt>)</li>
+        <li><tt>json</tt></li>
+      </ul>
+      <ol>
+      </ol>
+      <li>Download the installation-file <a moz-do-not-send="true"
+          href="Shuttle/yaHAL-S-FC.zip">yaHAL-S-FC.zip</a>.</li>
+      <li>Unzip it someplace on your local drive.</li>
+      <li>You may now proceed to the next section.&nbsp; But if when you
+        actually try out the interpreter you keep getting unexplained
+        compiler errors, then come back here to step 6, because you may
+        need to rebuild the parser program from source.&nbsp; Otherwise
+        you're good to go.<br>
+      </li>
+      <li>If you experience problems with the provided parser program,
+        you rebuild it thusly.&nbsp; First <tt>cd</tt> into the
+        yaHAL-S-FC folder from a command line.&nbsp; Then:</li>
+      <ol>
+      </ol>
+      <ul>
+        <li>If you're running Windows, try this: <tt>cl /O2 /out
+            modernHAL-S-FC.exe Absyn.c Lexer.c Parser.c Printer.c
+            modernHAL-S-FC.c</tt><br>
+        </li>
+        <li>If you're running Mac OS, try this: <tt>clang -O3 -o
+            modernHAL-S-FC-macosx Absyn.c Lexer.c Parser.c Printer.c
+            modernHAL-S-FC.c</tt></li>
+        <li>If you're running Linux, or any other system with <tt>gcc</tt>
+          installed (like MSYS2), this will work: <tt><tt>gcc -O3 -o
+              modernHAL-S-FC Absyn.c Lexer.c Parser.c Printer.c
+              modernHAL-S-FC.c</tt></tt></li>
+        <li>If you're running any system with <tt>clang</tt> installed,
+          other than Mac OS, this should work: <tt>clang -O3 -o
+            modernHAL-S-FC Absyn.c Lexer.c Parser.c Printer.c
+            modernHAL-S-FC.c</tt></li>
+      </ul>
+      <ol>
+      </ol>
+    </ol>
+    <p>Just to be clear, the HAL/S interpreter is very much a work in
+      progress.&nbsp; You're getting it as-is.&nbsp; The HAL/S
+      interpreter has been used extensively only on Linux Mint 21 with
+      the <tt>gnureadline</tt> module installed in Python 3.&nbsp; I
+      have much less confidence in any other configuration.&nbsp; I've
+      done just enough with the interpreter in the now-ancient Windows 7
+      and Mac OS 10.7.5 merely to offer a very few tentative opinions
+      about how the interpreter may or may not work on Windows or Mac OS
+      in general.&nbsp; If they don't work yet ... well then, they don't
+      work yet!<br>
+    </p>
+    <h1><a name="Invocation"></a>Invocation of the Interpreter</h1>
+    <p>Note that while using the HAL/S interactive interpreter, and
+      invoking it, you'll always be working from a command line
+      (otherwise known as a console). You'll also be using the folder
+      you got by unzipping the installation file yaHAL-S-FC.zip (see
+      prior section) as your working directory.&nbsp; So the first thing
+      to do is to '<tt>cd</tt>' to that folder. <br>
+    </p>
+    <p>How to invoke the HAL/S interpreter depends on your operating
+      system and system configuration:<br>
+    </p>
+    <blockquote>
+      <p><tt>./yaHAL-S-FC.py --interactive --colorize --no-library&nbsp;
+          &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; # in
+          Linux or Mac OS, or probably any other *NIX type system<br>
+        </tt></p>
+      <blockquote>
+        <p><i>or</i><br>
+        </p>
+      </blockquote>
+      <tt><tt>yaHAL-S-FC.py --interactive --no-library &nbsp;
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
+          # in Windows (or any other system), not having an
+          ANSI-compatible command line.<br>
+        </tt></tt>
+      <blockquote><i>or</i><tt><br>
+        </tt></blockquote>
+      <tt>yaHAL-S-FC.py --interactive --colorize --no-wrapper
+        --no-library&nbsp;&nbsp;&nbsp; # in Windows, with an
+        ANSI-compatible command line (such as Cmder).</tt><br>
+    </blockquote>
+    If after this you see some garbage printed on the screen or you see
+    nothing in color, here are some trouble-shooting steps:<br>
+    <ul>
+      <li>If you see some <font color="#993399">magenta</font> colored
+        text but some garbage characters are printed as well:&nbsp;
+        Eliminate add the <tt>--no-wrapper</tt> command-line switch.</li>
+      <li>Whereas if all the text is black <i>and</i> some garbage
+        characters are printed too:</li>
+      <ul>
+        <li>Remove the <tt>--colorize</tt> switch and resign yourself
+          to having no colorization.<br>
+        </li>
+        <li><i>Or</i> figure out how to enable ANSI support for your
+          existing command-line program.<br>
+        </li>
+        <li><i>Or</i> install a replacement ANSI-compatible command-line
+          program on your system; in Microsoft Windows, installing and
+          using <a moz-do-not-send="true" href="https://cmder.app/">Cmder</a>
+          has worked for me.<br>
+        </li>
+      </ul>
+    </ul>
+    <ol>
+      <ul>
+      </ul>
+    </ol>
+    <h1><a name="HelloWorld"></a>Hello, World!</h1>
+    <p>In this section, we take a very brief tour of the interpreter.</p>
+    <p>Upon successfully starting the interpreter, you should see a
+      prompt something like the following:<br>
+    </p>
+    <blockquote>
+      <p><font color="#993399"><tt>Input HAL/S or else interpreter
+            commands. Use `HELP for more info.</tt><tt><br>
+          </tt><tt>HAL/S &gt;</tt> </font><br>
+      </p>
+    </blockquote>
+    This is an invitation for you to input a HAL/S "statement", which
+    we'll <i>temporarily</i> pretend is any line ending with a
+    semicolon as the final character.&nbsp; When the <tt>--colorize</tt>
+    command-line switch has been used, whatever <i>you</i> input is in
+    black, whereas whatever the interpreter outputs is by default in <font
+      color="#993399">magenta</font>.&nbsp; Otherwise, without the <tt>--colorize</tt>
+    switch, everything is in black, or at least whatever default color
+    your console's style setting dictate.&nbsp; You can also change the
+    coloring from magenta to something else.&nbsp; (See <a
+      moz-do-not-send="true" href="#Colorize">the explanation of the
+      interpreter's <tt>`colorize</tt> command</a>.)<br>
+    <br>
+    Input the following, making sure that the semicolon is the final
+    character before you hit the Enter key:<br>
+    <blockquote><font color="#993399"><tt>HAL/S &gt;<font
+            color="#000000"> WRITE(6) 'Hello, world!';<br>
+          </font></tt></font></blockquote>
+    In response, you should see:<br>
+    <blockquote><font color="#993399"><tt>HAL/S &gt;<font
+            color="#000000"> WRITE(6) 'Hello, world!';<br>
+            &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font color="#993399">Hello,
+
+
+
+              world!</font><br>
+          </font></tt></font></blockquote>
+    Now, if before trying this you have skimmed a bit of the book <i>Programming
+
+
+
+      in HAL/S</i> as I advised earlier, you may notice some peculiar
+    things.&nbsp; For one thing, HAL/S isn't supposed to have "global"
+    lines of code like this that exist outside the context of a <tt>PROGRAM</tt>,
+    <tt>FUNCTION</tt>, or <tt>PROCEDURE</tt>.&nbsp; But the interpreter
+    <i>does</i> allow HAL/S statements outside the context of <tt>PROGRAM</tt>s
+    and subroutines, and that's perhaps the most-significant of the
+    conveniences the interpreter allows you vs a compiler.<br>
+    <br>
+    For another, in HAL/S source code can generally appear in a
+    free-form fashion, in which most white-space is ignored, multiple
+    statements can appear on the same line, individual statements can be
+    broken across multiple lines, and so forth ... <i>except</i> that
+    column 1 has a special purpose and you can't just put anything you
+    like there.&nbsp; In fact, the HAL/S documentation tells us that the
+    only things that can appear in column 1 are a blank space or else
+    one of the letters 'C', 'D', 'E', 'M', or 'S'.&nbsp; So how come we
+    were able to put the 'W' in <tt>WRITE(6)</tt> there?<br>
+    <br>
+    Well, that's because it turns out that when you're working
+    interactively, dedicating column 1 as having some special but
+    very-rarely used interpretation is very, very inconvenient, because
+    you simply keep forgetting about that when you're entering
+    code.&nbsp; The interpreter therefore has two modes of
+    operation:&nbsp; "strict mode", in which the special purpose for
+    column is just as the documentation describes; and what we might
+    call "loose mode".&nbsp; Loose mode is the default for the
+    interpreter, and in it the interpreter simply automatically sticks a
+    blank space at the front of every line you input, leaving you free
+    to start inputting HAL/S code at column 1 if you like.&nbsp; But as
+    a consequence, in loose mode you can't have full-line comments (C),
+    compiler directives (D), or multi-line math input (E, M, S).&nbsp;
+    Instead, in loose mode, all input is truly free-form.<br>
+    <br>
+    Loose mode has its own inconveniences, though.&nbsp; If you try to
+    cut-and-paste "real" HAL/S code into the interpreter, perhaps a
+    sample from <i>Programming in HAL/S</i>, it will often fail,
+    because such code will often contain things like full-line comments
+    that aren't supported in loose mode.<br>
+    <br>
+    A dilemma!&nbsp; Fortunately, the interpreter allows you to switch
+    back and forth from loose mode to strict mode relatively
+    easily.&nbsp; The interpreter command for enabling strict mode is<br>
+    <blockquote><tt><font color="#993399">HAL/S &gt; </font>`strict</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font
+          color="#993399">STRICT on.</font></tt><br>
+    </blockquote>
+    while you can return to loose mode with<br>
+    <blockquote><tt><font color="#993399">HAL/S &gt; </font>`nostrict</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font
+          color="#993399">STRICT off.</font></tt><br>
+    </blockquote>
+    Incidentally, this illustrates a general principle of the
+    interpreter, namely that commands to the interpreter, as opposed to
+    HAL/S source code lines, are always on a line by themselves and are
+    always preceded by a back-tick character (`).&nbsp; The back-tick
+    isn't a legal character in HAL/S, so that means we can always
+    distinguish perfectly between interpreter commands and valid HAL/S
+    source code.<br>
+    <br>
+    HAL/S is a strictly-typed language, in which any variable must be
+    explicitly declared before use.&nbsp; Try the following HAL/S
+    declaration:<br>
+    <blockquote><tt><font color="#993399">HAL/S &gt;</font></tt><tt>
+        DECLARE I INTEGER;</tt><br>
+    </blockquote>
+    Notice that the interpreter simply accepts this silently.&nbsp; Did
+    it do actually anything or not?&nbsp; Well, you can find out by
+    asking the interpreter to show you what variables, constants, and
+    other identifiers have been defined so far.&nbsp; You do that like
+    so:<br>
+    <blockquote><tt><font color="#993399">HAL/S &gt;</font> `data</tt><tt><br>
+      </tt><font color="#993399"><tt>Scope 0, ROOT:</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; I: {'integer':
+          True}</tt></font><br>
+    </blockquote>
+    If you want to understand this response in detail, you'll want to
+    read what our page dedicated to the modern HAL/S compiler has to say
+    about "<a moz-do-not-send="true" href="hal-s-compiler.html#Scopes">scopes</a>"
+    and about the "<a moz-do-not-send="true"
+      href="hal-s-compiler.html#Data">data model</a>".&nbsp; But perhaps
+    not just yet!&nbsp; It's probably clear enough to you that this is
+    saying <tt>I</tt> is an <tt>INTEGER</tt>, and that's good enough
+    for right now.&nbsp; And I'll say more about it below, anyway.<br>
+    <br>
+    So now <tt>I</tt> has been declared, but it hasn't been assigned
+    any value yet.&nbsp; Let's try this:<br>
+    <blockquote><tt><font color="#993399">HAL/S &gt;<font
+            color="#000000"> I = 1; </font></font>WRITE(6) 'I =', I;</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font
+          color="#993399">I = 1 </font></tt><font color="#993399"><tt><br>
+        </tt></font><tt><font color="#993399">HAL/S &gt;</font> `data</tt><tt><br>
+      </tt><font color="#993399"><tt>Scope 0, ROOT:</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; I: {'integer':
+          True, 'value': 1}</tt></font><br>
+    </blockquote>
+    The HAL/S interpreter is really just a way of exploiting the HAL/S
+    compiler.&nbsp; In fact, when you enter a line of HAL/S source code
+    into the interpreter, it basically just runs that line through the
+    compiler and then executes the object code produced by the
+    compiler.&nbsp; <br>
+    <blockquote><font size="-1"><b>Aside:</b>&nbsp; Or more accurately,
+        although you probably won't be too interested in it at this
+        point, the compiler produces a sequence of instructions in what
+        I call the PALMAT intermediate language.&nbsp; To be clear, the
+        original HAL/S compiler did something similar to this, except in
+        an intermediate language it called HALMAT.&nbsp; Unfortunately,
+        not enough surviving documentation about HALMAT is presently
+        available to meaningfully implement HALMAT, and that's part of
+        the reason PALMAT was created.<br>
+        <br>
+        The interpreter includes an emulator module that can and does
+        execute the PALMAT code thus generated.&nbsp; You can actually
+        view the PALMAT code generated from the last source code that
+        was input.&nbsp; In the case of the HAL/S code just input in the
+        last example, the generated PALMAT instructions look like the
+        following:<br>
+      </font>
+      <blockquote><font size="-1"><tt><font color="#993399">HAL/S &gt;</font>
+            `palmat</tt><tt><br>
+          </tt><font color="#993399"><tt>Scope 0, ROOT:</tt><tt><br>
+            </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 0: {'number':
+              '1'}</tt><tt><br>
+            </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 1:
+              {'storepop': (0, 'I')}</tt><tt><br>
+            </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 2: {'string':
+              'I ='}</tt><tt><br>
+            </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 3: {'fetch':
+              (0, 'I')}</tt><tt><br>
+            </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 4: {'write':
+              '6'}</tt></font><br>
+        </font></blockquote>
+      <font size="-1">What do these PALMAT instructions do?&nbsp;
+        Instruction 0 pushes the number 1 onto the stack.&nbsp;
+        Instruction 1 pops that value from the stack and stores it in
+        the variable <tt>I</tt>.&nbsp; Instruction 2 pushes the string
+        '<tt>I =</tt>' onto the stack.&nbsp; Instruction 3 pushes
+        whatever value had been assigned to <tt>I</tt> onto the
+        stack.&nbsp; Instruction 4 takes everything currently on the
+        stack, which in this case is '<tt>I =</tt>' and 1, and prints it
+        to the display.&nbsp; If you're interested, <a
+          moz-do-not-send="true" href="hal-s-compiler.html#PALMAT">you
+          can read all about PALMAT on our HAL/S compiler page</a>,
+        though as I said, it's not too likely to be of interest to you
+        unless you're interested in helping advance HAL/S compiler
+        development to the next stage.</font><br>
+    </blockquote>
+    Here are a few other sample declarations:<br>
+    <blockquote><tt><font color="#993399">HAL/S &gt;</font> DECLARE
+        INTEGER, J INITIAL(5), K CONSTANT(10);</tt><tt><br>
+      </tt><tt><font color="#993399">HAL/S &gt;</font> `data</tt><tt><br>
+      </tt><font color="#993399"><tt>Scope 0, ROOT:</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; I: {'integer':
+          True, 'value': 1}</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; J: {'integer':
+          True, 'initial': 5, 'value': 5}</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; K: {'integer':
+          True, 'constant': 10}</tt></font><br>
+    </blockquote>
+    HAL/S doesn't allow re-declaration of variables:<br>
+    <blockquote><tt><font color="#993399">HAL/S &gt;</font> DECLARE I
+        SCALAR INITIAL(1.5);</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font
+          color="#993399">Already declared: I</font></tt><br>
+    </blockquote>
+    But the interpreter is a little bit forgiving, and does allow us to
+    remove identifiers we've already defined.&nbsp; Subsequently we can
+    redefine them once they've been removed:<br>
+    <blockquote><tt><font color="#993399">HAL/S &gt;</font> `remove I</tt><tt><br>
+      </tt><tt><font color="#993399">HAL/S &gt;</font> DECLARE I SCALAR
+        INITIAL(1.5);</tt><tt><br>
+      </tt><tt><font color="#993399">HAL/S &gt;</font> `data</tt><tt><br>
+      </tt><font color="#993399"><tt>Scope 0, ROOT:</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; I: {'scalar':
+          True, 'initial': 1.5, 'value': 1.5}</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; J: {'integer':
+          True, 'initial': 5, 'value': 5}</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; K: {'integer':
+          True, 'constant': 10}<br>
+        </tt></font></blockquote>
+    By the way, you can get a list of all of the available interpreter
+    commands as follows,<br>
+    <blockquote><tt><font color="#993399">HAL/S &gt;</font> `help</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font
+          color="#993399">Note: Interpreter commands are
+          case-insensitive, while</font></tt><font color="#993399"><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; HAL/S source code
+          is case-sensitive.&nbsp; Any input line</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; beginning with a
+          back-tick (`) is an interpreter command.</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; The available
+          interpreter commands are listed below:</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          `HELP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Show this
+          menu.<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          `QUIT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Quit this
+          interpreter program.<br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .</tt></font><br>
+    </blockquote>
+    I'll describe these commands in detail later, in <a
+      moz-do-not-send="true" href="#Tools">the Tools section</a>
+    below.&nbsp; Even though I've abbreviated this list, you can still
+    see the most important interpreter command, <tt>`quit</tt>.<br>
+    <br>
+    So far, the only example of arithmetic we've seen is a simple
+    assignment, <tt>I=1</tt>, which isn't really very impressive.&nbsp;
+    Consider a quadratic equation with real coefficients:<br>
+    <blockquote><i>A X</i><sup>2</sup> + <i>B</i><i> X</i> + <i>C</i>
+      = 0.<br>
+    </blockquote>
+    The roots of the equation are given by the quadratic formula, which
+    if we're lucky (i.e., if <i>B</i><sup>2</sup> ≥ 4 <i>A C</i>) will
+    both be real, as opposed to complex. We can program this in HAL/S,
+    say with <i>A</i>=1, <i>B</i>=3, <i>C</i>=2, as<br>
+    <blockquote><tt><font color="#993399">HAL/S &gt;</font> DECLARE
+        SCALAR, A, B, C, X1, X2;</tt><tt><br>
+      </tt><tt><font color="#993399">HAL/S &gt;</font> A = 1;</tt><tt><br>
+      </tt><tt><font color="#993399">HAL/S &gt;</font> B = 3;</tt><tt><br>
+      </tt><tt><font color="#993399">HAL/S &gt;</font> C = 2;</tt><tt><br>
+      </tt><tt><font color="#993399">HAL/S &gt;</font> X1 = (-B + (B**2
+        - 4 A C)**(1/2)) / (2 A);</tt><tt><br>
+      </tt><tt><font color="#993399">HAL/S &gt;</font> X2 = (-B - (B**2
+        - 4 A C)**(1/2)) / (2 A);</tt><tt><br>
+      </tt><tt><font color="#993399">HAL/S &gt;</font> WRITE(6) 'First
+        root =', X1, ' and second root =', X2;</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font
+          color="#993399">First root = -1.00000000000000E+00&nbsp; and
+          second root = -2.00000000000000E+00</font> </tt><br>
+    </blockquote>
+    Or if we wanted to be really fancy, we <i>could</i> use HAL/S
+    multi-line math to enter these formulas.&nbsp; We'd have to turn on
+    <tt>`strict</tt> mode first, so that the <tt>E</tt> and <tt>M</tt>
+    in column 1 of the exponent lines and main lines were properly
+    interpreted.&nbsp; (No <tt>S</tt> lines for subscripts are needed
+    in this example.)&nbsp; We'd admittedly be daft to do so, because
+    multi-line math so unwieldy for code entry, but it's certainly a
+    possibility:<br>
+    <blockquote><tt><font color="#993399">HAL/S &gt; <font
+            color="#000000">`strict</font><br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; STRICT on.<br>
+          HAL/S &gt; <font color="#000000">E&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+            2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1/2</font><br>
+          &nbsp; ... &gt; <font color="#000000">M X1 = (-B + (B - 4 A
+            C)&nbsp;&nbsp; ) / (2 A);</font><br>
+          HAL/S &gt; <font color="#000000">E&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+            2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1/2</font><br>
+          &nbsp; ... &gt; <font color="#000000">M X2 = (-B - (B - 4 A
+            C)&nbsp;&nbsp; ) / (2 A);</font><br>
+        </font></tt><tt><font color="#993399">HAL/S &gt;</font>&nbsp;&nbsp;
+
+
+
+        WRITE(6) 'First root =', X1, ' and second root =', X2;</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font
+          color="#993399">First root = -1.00000000000000E+00&nbsp; and
+          second root = -2.00000000000000E+00<br>
+          HAL/S &gt; <font color="#000000">`nostrict</font><br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; STRICT off.<br>
+        </font></tt></blockquote>
+    And of course, we could double-check the results by inserting the
+    computed roots into the polynomial, and verifying that the
+    polynomial evaluates to 0:<br>
+    <blockquote><tt><font color="#993399">HAL/S &gt;</font> WRITE(6) A
+        X1**2 + B X1 + C, A X2**2 + B X2 + C;</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font
+          color="#993399">&nbsp;&nbsp; 0.0&nbsp;&nbsp; 0.0 </font></tt><br>
+    </blockquote>
+    All of which is fine if all we need is a rather simple-minded
+    calculator.&nbsp; But of course, we really wouldn't write the
+    software in this manner.&nbsp; We'd be more likely to create a <tt>FUNCTION</tt>
+    to do the dirty work, and then we'd invoke that function (in this
+    case called <tt>ROOTS</tt>):<br>
+    <blockquote><tt><font color="#993399">HAL/S &gt;</font> `spool</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; Now spooling input
+        for later processing.</tt><tt><br>
+      </tt><tt><font color="#993399">HAL/S &gt;</font> ROOTS:
+        FUNCTION(A, B, C) VECTOR(2);</tt><tt><br>
+      </tt><tt><font color="#993399">&nbsp; ... &gt;</font>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+        DECLARE SCALAR, A, B, C;</tt><tt><br>
+      </tt><tt><font color="#993399">&nbsp; ... &gt;</font>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+        DECLARE V VECTOR(2);</tt><tt><br>
+      </tt><tt><font color="#993399">&nbsp; ... &gt;</font>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+        V$1 = (-B + (B**2 - 4 A C)**(1/2)) / (2 A);</tt><tt><br>
+      </tt><tt><font color="#993399">&nbsp; ... &gt;</font>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+        V$2 = (-B - (B**2 - 4 A C)**(1/2)) / (2 A);</tt><tt><br>
+      </tt><tt><font color="#993399">&nbsp; ... &gt;</font>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+        RETURN V;</tt><tt><br>
+      </tt><tt><font color="#993399">&nbsp; ... &gt;</font> CLOSE ROOTS;</tt><tt><br>
+      </tt><tt><font color="#993399"><tt><font color="#993399">&nbsp;
+              ... &gt;</font> <font color="#000000">`unspool</font></tt><tt><br>
+          </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; Halting
+            spooling of input. Processing already-spooled input ...</tt><tt><br>
+          </tt>HAL/S &gt;</font> WRITE(6) ROOTS(1, 3, 2);</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        -1.00000000000000E+00&nbsp; -2.00000000000000E+00 </tt><br>
+    </blockquote>
+    I won't bother to explain the HAL/S code here, because that's what
+    books like <i>Programming in HAL/S</i> are for, and they do it
+    better than I would.&nbsp; And probably using less words than I
+    would!&nbsp; But as for interpreter commands ... <tt>`spool</tt>?&nbsp;
+    <tt>`unspool</tt>?&nbsp; What are they?&nbsp; Why are they there?<br>
+    <br>
+    Well, the interpreter tries to compile each HAL/S statement as soon
+    as you input it.&nbsp; That works fine for basic statements that can
+    fit on a single line, like declarations, assignments, or if/then
+    statements, but it doesn't work out well at all for complex
+    statements which are blocks of multiple statements spread out over
+    multiple lines, such as a <tt>FUNCTION</tt> definition.&nbsp; <br>
+    <br>
+    There's more than one way to handle such multi-line constructs in
+    the interpreter.&nbsp; One simple workaround is simply to cram
+    everything onto one very long line.&nbsp; Or, use multiple lines,
+    but with spaces at the end of every line, making sure that none of
+    the lines end in a semicolon until the final line.&nbsp; But while
+    these are easy tricks if you're only working with 2-3 lines of code,
+    they get pretty cumbersome and error-prone if you have lots of lines
+    in something like a <tt>FUNCTION</tt> definition.&nbsp; <br>
+    <br>
+    An easier approach is usually to "spool" the input lines, via the
+    interpreter's <tt>`spool</tt> command.&nbsp; While spooling, the
+    interpreter just saves everything (whether or not the lines end in
+    semicolons or spaces) without attempting to process any of them, and
+    then it processes all of the spooled input together when it sees the
+    <tt>`unspool</tt> at the end.&nbsp; In particular, if you were
+    cut-and-pasting a bunch of "real" HAL/S code into the interpreter,
+    you'd probably set <tt>`strict</tt> and <tt>`spool</tt> before
+    pasting, and then <tt>`unspool</tt> and <tt>`nostrict</tt> after
+    pasting.<br>
+    <br>
+    By the way, when you create a definition of a HAL/S <tt>PROGRAM</tt>,
+    <tt>FUNCTION</tt>, or <tt>PROCEDURE</tt> like this, the interpreter
+    remembers the definitions, so you can use them over and over without
+    re-inputting the definition ... until you <tt>`reset</tt> the
+    workspace or leave the interpreter, of course.&nbsp; (The next time
+    you run the interpreter, it will remember nothing you've done in
+    previous sessions except for the history of what you typed in at the
+    prompts.&nbsp; Though there are commands <tt>`write</tt> and <tt>`read</tt>
+    to save your workspace and restore it later.&nbsp; That's something
+    you have to remember to do manually if you want it, and it doesn't
+    happen automatically.)<br>
+    <br>
+    Thus, now that <tt>ROOTS</tt> has been defined, we could follow up
+    and do something like this if we wanted (though why you might want
+    to I couldn't say):<br>
+    <blockquote><tt><font color="#993399">HAL/S &gt; </font>`nostrict<br>
+        <font color="#993399">HAL/S &gt;</font> DO FOR TEMPORARY I = 1
+        TO 100; WRITE(6) I, 2 I, I-1, ROOTS(I, 2 I, I-1); END;</tt><tt><br>
+      </tt><font color="#993399"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+          1&nbsp; 2&nbsp; 0&nbsp;&nbsp; 0.0&nbsp; -2.00000000000000E+00
+          <br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;
+          4&nbsp; 1&nbsp; -2.92893218813452E-01&nbsp;
+          -1.70710678118655E+00 <br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3&nbsp;
+          6&nbsp; 2&nbsp; -4.22649730810374E-01&nbsp;
+          -1.57735026918963E+00 <br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4&nbsp;
+          8&nbsp; 3&nbsp; -5.00000000000000E-01&nbsp;
+          -1.50000000000000E+00 <br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 100&nbsp;
+          200&nbsp; 99&nbsp; -9.00000000000000E-01&nbsp;
+          -1.10000000000000E+00 <br>
+        </tt></font></blockquote>
+    Or for that matter, we could go whole-hog and really juice up <tt>ROOTS</tt>
+    a lot more. In the version shown below, <tt>ROOTS</tt> allows you
+    to repeatedly input the polynomial coefficients from the keyboard
+    (until the illegal combination 0, 0, 0 is input), for which it
+    computes not only real roots of the polynomial but also the complex
+    roots, as well as checking the results by plugging the roots back
+    into the polynomials:<br>
+    <blockquote><tt><font color="#993399">HAL/S &gt;</font> `reset<br>
+        <font color="#993399">HAL/S &gt; </font>`strict</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font
+          color="#993399">STRICT on.</font></tt><tt><br>
+      </tt><tt><tt><font color="#993399">HAL/S &gt;</font></tt> `spool</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font
+          color="#993399">Now spooling input for later processing.</font></tt><tt><br>
+      </tt><tt><tt><font color="#993399">HAL/S &gt;</font></tt> C/ This
+        sample was adapted from p. 37 of "Programming in HAL/S".</tt><tt><br>
+      </tt><tt><font color="#993399">&nbsp; ... &gt;</font> C/ It
+        computed the roots of 3 * X**2 + 4 * X - 10.&nbsp; I pepped it
+        up a bit,</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt> C/
+        to have an input loop, to double-check the result by recomputing
+        the</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt> C/
+        polynomial using the roots, and to allow complex roots.</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt> </tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;
+
+
+        ROOTS: PROGRAM;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        DECLARE SCALAR, A, B, C, D, ROOT1, ROOT2;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        DO WHILE TRUE;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        WRITE(6) ;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        WRITE(6) 'Enter A, B, C (0,0,0 to quit):';</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        READ(5) A, B, C;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        IF A = 0 AND B = 0 AND C = 0 THEN</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        DO;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        WRITE(6) 'Quitting ...';</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        EXIT;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        END;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        D = B**2 - 4 A C;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        IF D &gt;= 0 THEN </tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        DO;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        D = D**0.5;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        ROOT1 = (-B + D) / (2 A);</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        ROOT2 = (-B - D) / (2 A);</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        WRITE(6) 'Real roots of', A, 'X**2 +', B, 'X +', C, 'are:',</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        ROOT1, ROOT2;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        WRITE(6) 'Check:', </tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        A ROOT1**2 + B ROOT1 + C,</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        A ROOT2**2 + B ROOT2 + C;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        END;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        ELSE</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        DO;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        TEMPORARY RE, IM, RE2, IM2;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        D = (-D)**0.5;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        RE = -B / (2 A);</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        IM = D / (2 A);</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        WRITE(6) 'Complex roots of', A, 'X**2 +', B, 'X +', C, 'are:',</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        RE, '+/-', IM, 'i';</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        RE2 = RE**2 - IM**2; /* Compute root squared RE2 +/- IM2 i. */</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        IM2 = 2 RE IM;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        WRITE(6) 'Check:', A RE2 + B RE + C, '+/-', A IM2 + B IM, 'i';</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        END;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        END;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;
+
+
+        CLOSE ROOTS;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>
+        `unspool</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font
+          color="#993399">Halting spooling of input. Processing
+          already-spooled input ...<br>
+          HAL/S &gt;<br>
+        </font></tt></blockquote>
+    The <tt>`reset</tt> command at the beginning clears the
+    interpreter's workspace.&nbsp; I did that to make it easier to
+    redefine <tt>ROOTS</tt>.&nbsp; Notice that this version of <tt>ROOTS</tt>
+    is now a HAL/S <tt>PROGRAM</tt>, rather than a <tt>FUNCTION</tt>,
+    and we can't invoke it from HAL/S code any longer as we could have
+    with a <tt>FUNCTION</tt> or <tt>PROCEDURE</tt>.&nbsp; In point of
+    fact, HAL/S provides no way to invoke a HAL/S <tt>PROGRAM</tt> from
+    HAL/S code.&nbsp; That's because a <tt>PROGRAM</tt> is run by the
+    operating system's "monitor" rather than by other HAL/S code.&nbsp;
+    This allows multiple <tt>PROGRAM</tt>s to be run simultaneously in
+    a time-sharing or distributed fashion. &nbsp; However, we can still
+    run a <tt>PROGRAM</tt> from the interpreter, by using the
+    interpreter's <tt>`run</tt> command:<br>
+    <blockquote><tt><font color="#993399">HAL/S &gt;</font> `run ROOTS</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font
+          color="#993399">Running as the primary thread.</font></tt><font
+        color="#993399"><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Enter A, B,
+          C (0,0,0 to quit):</tt><tt><br>
+        </tt></font><tt><font color="#993399">READ&nbsp; &gt;</font> 1 2
+        3</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font
+          color="#993399">Complex roots of&nbsp; 1.00000000000000E+00
+          X**2 +&nbsp; 2.00000000000000E+00 X +&nbsp;
+          3.00000000000000E+00 are: -1.00000000000000E+00 +/-&nbsp;
+          1.41421356237310E+00 i</font></tt><font color="#993399"><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Check:
+          -4.44089209850063E-16 +/-&nbsp; 0.0 i</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Enter A, B,
+          C (0,0,0 to quit):</tt><tt><br>
+        </tt></font><tt><font color="#993399">READ&nbsp; &gt;</font> 1 3
+        2</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font
+          color="#993399">Real roots of&nbsp; 1.00000000000000E+00 X**2
+          +&nbsp; 3.00000000000000E+00 X +&nbsp; 2.00000000000000E+00
+          are: -1.00000000000000E+00&nbsp; -2.00000000000000E+00 </font></tt><font
+        color="#993399"><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Check:&nbsp;
+          0.0&nbsp;&nbsp; 0.0 </tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Enter A, B,
+          C (0,0,0 to quit):</tt><tt><br>
+        </tt></font><tt><font color="#993399">READ&nbsp; &gt;</font> 0,
+        0, 0</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font
+          color="#993399">Quitting ...</font></tt><font color="#993399"><tt><br>
+        </tt></font><tt><font color="#993399">HAL/S &gt;</font> </tt><br>
+    </blockquote>
+    Something you may wonder about from the source code of <tt>PROGRAM
+      ROOTS</tt> is why the full-line comments begin with "<tt>C/</tt>"
+    in columns 1 and 2, rather than "<tt>C </tt>".&nbsp; This has to do
+    with a convention I will be using with the Shuttle flight software,
+    if/when any if its source code becomes available for
+    compilation.&nbsp; Full-line comments <i>originally</i> present in
+    the flight software will remain as-is, presumably beginning with "<tt>C
+    </tt>", but <i>modern</i> comments added by the Virtual AGC Project
+    but not originally present will instead begin with "<tt>C/</tt>" to
+    distinguish the modern from the original.&nbsp; Of course, this is
+    transparent to the compiler, which doesn't care one way or the other
+    about whatever follows that initial "<tt>C</tt>".&nbsp; Similarly,
+    HAL/S allows inline comments wrapped between the delimiters "<tt>/*</tt>"
+    and "<tt>*/</tt>", but by convention <i>modern</i> inline comments
+    will use "<tt>/*/</tt>" and "<tt>*/</tt>".<br>
+    <br>
+    Another point about the <tt>PROGRAM ROOTS</tt> that I think is
+    worth mentioning is that the book <i>Programming in HAL/S</i> has
+    been scoured for sample HAL/S code which can be used, possibly after
+    extensive adaptation, for checking the HAL/S compiler and
+    interpreter.&nbsp; Those files have been included in the
+    interpreter's installation file, where they have names like "<i>NNN-XXXX</i>.hal":&nbsp;
+
+
+    <i>NNN</i> represents the page number in the book, and <i>XXXX</i>
+    is name (if any) that the book gives to the sample.&nbsp; The <tt>ROOTS
+
+
+      PROGRAM</tt> is actually just the contents of the sample file
+    037-ROOTS.hal.&nbsp; But each of these source-code files from <i>Programming
+      in HAL/S</i>, in principle, will eventually be available for
+    cut-and-pasting into the interpreter.&nbsp; (Just at the moment,
+    since the compiler/interpreter is still under development, many of
+    these samples won't yet work in an informative way.)<br>
+    <br>
+    For example, consider the sample file 021-SIMPLE.hal, which
+    repeatedly asks for values of a radius (<i>R</i>) and then computes
+    <i>πR</i><sup>2</sup> until a negative radius is input:<br>
+    <blockquote><tt><font color="#993399">HAL/S &gt;</font> `reset<br>
+        <font color="#993399">HAL/S &gt; </font>`strict</tt><tt><br>
+      </tt><font color="#993399"><tt>&nbsp;&nbsp;&nbsp;
+          &nbsp;&nbsp;&nbsp; STRICT on.</tt></font><tt><br>
+      </tt><tt><tt><font color="#993399">HAL/S &gt;</font></tt> `spool</tt><tt><br>
+      </tt><font color="#993399"><tt>&nbsp;&nbsp;&nbsp;
+          &nbsp;&nbsp;&nbsp; Now spooling input for later processing.</tt></font><tt><br>
+      </tt><tt><tt><font color="#993399">HAL/S &gt;</font></tt> C/ This
+        sample basically comes from PDF p. 21 of "Programming in HAL/S",</tt><tt><br>
+      </tt><tt><font color="#993399">&nbsp; ... &gt;</font> C/ but I've
+        knocked it up a notch.&nbsp; Bam!</tt><tt><br>
+      </tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;
+
+
+        SIMPLE: PROGRAM;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt> C
+        CODE IN THIS TYPEFACE IS</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt> C
+        HAL/S SOURCE</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        DECLARE PI CONSTANT (3.14159266);</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        DECLARE R SCALAR;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        WRITE(6) 'Input values of R to compute PI R**2, or else -1 to
+        quit.';</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        DO WHILE TRUE;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        READ(5) R;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        IF R &lt; 0 THEN EXIT;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        WRITE(6) 'R =', R, 'and PI R**2 =', PI R**2;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        END;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;
+
+
+        CLOSE SIMPLE;</tt><tt><br>
+      </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>
+        `unspool</tt><tt><br>
+      </tt><font color="#993399"><tt>&nbsp;&nbsp;&nbsp;
+          &nbsp;&nbsp;&nbsp; Halting spooling of input. Processing
+          already-spooled input ...</tt></font><tt><br>
+      </tt><tt><tt><font color="#993399">HAL/S &gt;</font></tt> `run
+        SIMPLE</tt><tt><br>
+      </tt><font color="#993399"><tt>&nbsp;&nbsp;&nbsp;
+          &nbsp;&nbsp;&nbsp; Running as the primary thread.</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Input values
+          of R to compute PI R**2, or else -1 to quit.</tt></font><tt><br>
+      </tt><tt><font color="#993399">READ&nbsp; &gt;</font> 0</tt><tt><br>
+      </tt><font color="#993399"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+          R =&nbsp; 0.0 and PI R**2 =&nbsp; 0.0 </tt></font><tt><br>
+      </tt><tt><tt><font color="#993399">READ&nbsp; &gt;</font></tt> 1 2
+        3 4</tt><tt><br>
+      </tt><font color="#993399"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+          R =&nbsp; 1.00000000000000E+00 and PI R**2 =&nbsp;
+          3.14159266000000E+00 </tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; R =&nbsp;
+          2.00000000000000E+00 and PI R**2 =&nbsp; 1.25663706400000E+01
+        </tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; R =&nbsp;
+          3.00000000000000E+00 and PI R**2 =&nbsp; 2.82743339400000E+01
+        </tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; R =&nbsp;
+          4.00000000000000E+00 and PI R**2 =&nbsp; 5.02654825600000E+01
+        </tt><tt><br>
+        </tt></font><tt><tt><font color="#993399">READ&nbsp; &gt;</font></tt>
+        5, 6 ,7 , 8,9</tt><tt><br>
+      </tt><font color="#993399"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+          R =&nbsp; 5.00000000000000E+00 and PI R**2 =&nbsp;
+          7.85398165000000E+01 </tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; R =&nbsp;
+          6.00000000000000E+00 and PI R**2 =&nbsp; 1.13097335760000E+02
+        </tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; R =&nbsp;
+          7.00000000000000E+00 and PI R**2 =&nbsp; 1.53938040340000E+02
+        </tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; R =&nbsp;
+          8.00000000000000E+00 and PI R**2 =&nbsp; 2.01061930240000E+02
+        </tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; R =&nbsp;
+          9.00000000000000E+00 and PI R**2 =&nbsp; 2.54469005460000E+02
+        </tt></font><tt><br>
+      </tt><tt><tt><font color="#993399">READ&nbsp; &gt;</font></tt> -1</tt><tt><br>
+      </tt><tt><tt><font color="#993399">HAL/S &gt;</font></tt> <br>
+      </tt></blockquote>
+    This is perhaps a good time to briefly point out some of the
+    underpinnings of the PALMAT intermediate language that are <i>not</i>
+    shared (presumably) by the original HAL/S compiler or its own
+    intermediate language (HALMAT). <br>
+    <br>
+    You'll recall that when you interrogate the interpreter to find out
+    the current values of all defined identifiers (like variables,
+    constants, or symbolic labels), some aspects of what the interpreter
+    displays for you aren't immediately understandable without
+    additional explanations.&nbsp; For example, let's use the
+    interrogation commands (<tt>`data</tt> and <tt>`palmat</tt>) I've
+    already showed you to see what the code sample we just used (<tt>PROGRAM
+
+      SIMPLE</tt>) did to the definitions in our workspace:<br>
+    <blockquote><tt><font color="#993399">HAL/S &gt;</font> `data</tt><tt><br>
+      </tt><font color="#993399"><tt>Scope 0, ROOT:</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; l_SIMPLE:
+          {'program': True, 'scope': 1}</tt><tt><br>
+        </tt></font><tt><font color="#993399">HAL/S &gt; <font
+            color="#000000">`palmat</font><br>
+          Scope 0, ROOT:<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; (No generated code)<br>
+          HAL/S &gt;&nbsp; </font></tt><br>
+    </blockquote>
+    Not terribly informative!&nbsp; Where is <tt>PI</tt>?&nbsp; Where
+    is <tt>R</tt>?&nbsp; What is "<tt>l_SIMPLE</tt>"?&nbsp; Where are
+    all of the PALMAT instructions?<br>
+    <br>
+    Well, let's take care of "<tt>l_SIMPLE</tt>" first.&nbsp; For
+    technical reasons, the modern HAL/S compiler/interpreter sometimes
+    has to "mangle" names of identifiers a bit, rather than using the
+    identifiers as-is from the HAL/S source code, so as to give some
+    indication as to what datatype the identifiers are associated
+    with.&nbsp; This is done by adding a short prefix to the name.&nbsp;
+    Sometimes the interpreter hides this mangling-prefix from you (for
+    your convenience in reading the interpreter's messages), and
+    sometimes it may fail to do so.&nbsp; The prefix "<tt>l_</tt>"
+    happens to be the mangling used for symbolic names associated with
+    some types of positions in the instruction stream, including names
+    of <tt>PROGRAM</tt>s, <tt>PROCEDURE</tt>s, and some <tt>FUNCTION</tt>s.&nbsp;
+
+
+    Similarly, "<tt>b_</tt>" is the mangling prefix for <tt>BIT/BOOLEAN</tt>
+    variables, "<tt>c_</tt>" is the mangling prefix for <tt>CHARACTER</tt>
+    variables, and so on.&nbsp; In our present example, in other words,
+    <tt>l_SIMPLE</tt> refers to <tt>SIMPLE</tt>.&nbsp; For the most
+    part, you can just ignore these mangling prefixes as if they weren't
+    there at all.<br>
+    <br>
+    Now as far as the missing variables <tt>PI</tt> and <tt>R</tt> are
+    concerned, when the modern compiler compiles HAL/S source code into
+    the PALMAT intermediate language, the PALMAT is partitioned into a
+    hierarchy of what I call "scopes".&nbsp; Each scope contains <i>some</i>
+    of the identifiers and <i>some</i> of the PALMAT instructions; it's
+    only the complete hierarchy of scopes that together comprise the
+    complete set of identifiers and complete set of PALMAT
+    instructions.&nbsp; The interpreter commands we used above, <tt>`palmat</tt>
+    and <tt>`data</tt>, only show us the very top-level scope:&nbsp;
+    i.e., what you might think of as the "global" scope.&nbsp; All the
+    global scope has in it is the definition of the <tt>SIMPLE PROGRAM</tt>,
+    so that's all we see with these commands.<br>
+    <br>
+    But there are extended forms of the <tt>`data</tt> and <tt>`palmat</tt>
+    commands which show us <i>all</i> of the scopes:<br>
+    <blockquote><font color="#993399"><tt>HAL/S &gt; <font
+            color="#000000">`data *</font></tt><tt><br>
+        </tt><tt>Scope 0, ROOT:</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; l_SIMPLE:
+          {'program': True, 'scope': 1}</tt><tt><br>
+        </tt><tt>Scope 1, PROGRAM l_SIMPLE, parent scope 0:</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; PI: {'constant':
+          3.14159266, 'scalar': True}</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; R: {'scalar':
+          True, 'value': -1.0}</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ue_2: {'label':
+          [2, 0]}</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ur_2: {'label':
+          [1, 3]}</tt><tt><br>
+        </tt><tt>Scope 2, DO WHILE, parent scope 1:</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ue_3: {'label':
+          [3, 0]}</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ur_3: {'label':
+          [2, 6]}</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ux_2: {'label':
+          [2, 17]}</tt><tt><br>
+        </tt><tt>Scope 3, IF, parent scope 2:</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ux_3: {'label':
+          [3, 6]}</tt><tt><br>
+        </tt><tt>HAL/S &gt; <font color="#000000">`palmat *</font></tt><tt><br>
+        </tt><tt>Scope 0, ROOT:</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; (No generated
+          code)</tt><tt><br>
+        </tt><tt>Scope 1, PROGRAM l_SIMPLE, parent scope 0:</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp; &nbsp;&nbsp; &nbsp; 0: {'string': 'Input
+          values of R to compute PI R**2, or else -1 to quit.'}</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 1: {'write': '6'}</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp; &nbsp;&nbsp; &nbsp; 2: {'goto': [2, 0],
+          'symbolicLabel': (1, '^ue_2^')}</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp; &nbsp;&nbsp; &nbsp; 3: {'noop': True,
+          'label': '^ur_2^'}</tt><tt><br>
+        </tt><tt>Scope 2, DO WHILE, parent scope 1:</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp; &nbsp; 0: {'noop': True,
+          'label': '^ue_2^'}</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp; &nbsp; 1: {'boolean': [(1,
+          1)]}</tt><tt><br>
+        </tt><tt>&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; 2: {'iffalse': (2,
+          '^ux_2^')}</tt><tt><br>
+        </tt><tt>&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; 3: {'fetchp': (1,
+          'R')}</tt><tt><br>
+        </tt><tt>&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; 4: {'read': '5'}</tt><tt><br>
+        </tt><tt>&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; 5: {'goto': [3, 0],
+          'symbolicLabel': (2, '^ue_3^')}</tt><tt><br>
+        </tt><tt>&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; 6: {'noop': True,
+          'label': '^ur_3^'}</tt><tt><br>
+        </tt><tt>&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; 7: {'string': 'R ='}</tt><tt><br>
+        </tt><tt>&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; 8: {'fetch': (1, 'R')}</tt><tt><br>
+        </tt><tt>&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; 9: {'string': 'and PI
+          R**2 ='}</tt><tt><br>
+        </tt><tt>&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; 10: {'number': '2'}</tt><tt><br>
+        </tt><tt>&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; 11: {'fetch': (1,
+          'R')}</tt><tt><br>
+        </tt><tt>&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; 12: {'operator': '**'}</tt><tt><br>
+        </tt><tt>&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; 13: {'fetch': (1,
+          'PI')}</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 14: {'operator':
+          ''}</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 15: {'write':
+          '6'}</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp; &nbsp; 16: {'goto': [2, 0],
+          'symbolicLabel': (1, '^ue_2^')}</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp; &nbsp; 17: {'noop': True,
+          'label': '^ux_2^'}</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp; &nbsp; 18: {'goto': [1, 3],
+          'symbolicLabel': (1, '^ur_2^')}</tt><tt><br>
+        </tt><tt>Scope 3, IF, parent scope 2:</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp; &nbsp;&nbsp; &nbsp; 0: {'noop': True,
+          'label': '^ue_3^'}</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp; &nbsp;&nbsp; &nbsp; 1: {'number': '0'}</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp; &nbsp;&nbsp; &nbsp; 2: {'fetch': (1, 'R')}</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp; &nbsp;&nbsp; &nbsp; 3: {'operator':
+          '&lt;'}</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp; &nbsp;&nbsp; &nbsp; 4: {'iffalse': [3, 6],
+          'symbolicLabel': (3, '^ux_3^')}</tt><tt><br>
+        </tt><tt>&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; 5: {'goto': [2, 17],
+          'symbolicLabel': (2, '^ux_2^')}</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp; &nbsp;&nbsp; &nbsp; 6: {'noop': True,
+          'label': '^ux_3^'}</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp; &nbsp;&nbsp; &nbsp; 7: {'goto': [2, 6],
+          'symbolicLabel': (2, '^ur_3^')}</tt><tt><br>
+        </tt><tt>HAL/S &gt; </tt></font><br>
+    </blockquote>
+    Thus there are 4 scopes overall, numbered 0 through 3.&nbsp; Aside
+    from the global scope (0), a new scope is generated for each <tt>PROGRAM</tt>,
+    <tt>FUNCTION</tt>, <tt>PROCEDURE</tt>, <tt>COMPOOL</tt>, <tt>DO</tt>,
+    or <tt>IF</tt>.&nbsp; So in our example, a new scope (1) is
+    generated for the definition of <tt>PROGRAM SIMPLE</tt>, plus yet
+    another scope (2) for the <tt>DO WHILE ... END</tt> loop within <tt>SIMPLE</tt>,
+    and a final scope (3) for the <tt>IF THEN ...</tt> within the <tt>DO
+
+
+      WHILE ... END</tt> loop.&nbsp; As for the question of where <tt>PI</tt>
+    and <tt>R</tt> are, they're in scope 1 (the <tt>SIMPLE PROGRAM</tt>)
+    where they belong.<br>
+    <br>
+    Because the PALMAT instructions are distributed throughout the
+    hierarchy of scopes rather than being in a strict linear sequence as
+    would be the case for (say) assembly-language instructions, the
+    compiler's code-generator explicitly adds in program labels and
+    PALMAT <tt>goto</tt> instructions it has constructed specifically
+    for maneuvering back and forth between the scopes.&nbsp; These are
+    the identifiers like "<tt>ue_1</tt>" or "<tt>ur_2</tt>" cluttering
+    the code.<br>
+    <blockquote><font size="-1"><b>Aside:</b>&nbsp; You may have noticed
+        that the constructed program labels I just mentioned, such as "<tt>ue_1</tt>"
+        sometimes appear in that form, and other times in what I call
+        carat-quoted form as "<tt>^ue_1^</tt>".&nbsp; Like the
+        identifier mangling I told you about earlier, these
+        carat-quotations are present for technical reasons, and the
+        interpreter just isn't as good at always hiding them from you as
+        perhaps it ought to be.&nbsp; Like the identifiers'
+        mangling-prefixes, you can just ignore carat-quoting.&nbsp; An
+        identifier represented as the carat-quoted "<tt>^ue_1^</tt>" is
+        nothing more or less than the same identifier represented
+        without carat-quoting just as "<tt>ue_1</tt>".</font><br>
+    </blockquote>
+    Finally, insofar as scope are concerned, as I mentioned they are in
+    a hierarchical relationship that you can see as follows:<br>
+    <blockquote><font color="#993399"><tt>HAL/S &gt; <font
+            color="#000000">`scopes</font></tt><tt><br>
+        </tt><tt>Scope 0:</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          type:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; root</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          parent:&nbsp;&nbsp;&nbsp;&nbsp; None</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          children:&nbsp;&nbsp; [1]</tt><tt><br>
+        </tt><tt>Scope 1:</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          type:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; program</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          parent:&nbsp;&nbsp;&nbsp;&nbsp; 0</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          children:&nbsp;&nbsp; [2]</tt><tt><br>
+        </tt><tt>Scope 2:</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          type:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; do while</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          parent:&nbsp;&nbsp;&nbsp;&nbsp; 1</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          children:&nbsp;&nbsp; [3]</tt><tt><br>
+        </tt><tt>Scope 3:</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          type:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          parent:&nbsp;&nbsp;&nbsp;&nbsp; 2</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          children:&nbsp;&nbsp; []</tt><tt><br>
+        </tt></font><tt><font color="#993399">HAL/S &gt;</font> </tt><br>
+    </blockquote>
+    For example, looking at scope 2 (the <tt>DO WHILE ... END</tt>
+    scope), we see that its parent scope is 1 (the <tt>PROGRAM</tt>
+    scope) and that scope 3 (the <tt>IF THEN ...</tt> scope) is its
+    child.&nbsp; The reason I call these "scopes" is that they determine
+    the scopes of identifiers.&nbsp; Any given scope (within certain
+    limitations) can assess the identifiers in its ancestor (parent,
+    granparent, ...) scopes, but not in its descendant scopes (children,
+    grandchildren, ...), cousins, aunts and uncles, etc.&nbsp; Thus
+    scope 3 (<tt>IF THEN ...</tt>") and scope 2 (<tt>DO WHILE ... END</tt>)
+    can access <tt>PI</tt> and <tt>R</tt> in scope 1 (<tt>PROGRAM</tt>),
+
+
+    but scope 0 (global or "root") cannot.<br>
+    <br>
+    By means of this "scope" system, any number of HAL/S <tt>PROGRAM</tt>s
+    (or <tt>FUNCTION</tt>s, <tt>PROCEDURE</tt>s, etc.) can coexist
+    within the same PALMAT workspace.<br>
+    <br>
+    Moreover, any number of <tt>PROGRAM</tt>s can be run simultaneously
+    using it.&nbsp; This involves cloning the scope hierarchy, with a
+    separate copy of the hierarchy for each running program, so that
+    changes to variables by one <tt>PROGRAM</tt> do not affect the
+    other running <tt>PROGRAM</tt>s.&nbsp; A slight proviso to that is
+    that <tt>COMPOOL</tt> scopes are not cloned, but merely shared by
+    all running <tt>PROGRAM</tt>s; moreover, the PALMAT instruction
+    streams can all be shared as well, and don't need to be cloned,
+    since HAL/S code is not self-modifying.&nbsp;&nbsp; I.e., PALMAT
+    instructions for each scope are generated at compile time, and never
+    change afterward.<br>
+    <h1><a name="Tools"></a>Tools Provided by the Interpreter</h1>
+    Earlier, I simply glossed over the various interpreter commands
+    available, just discussing a few of them when I needed to.&nbsp;
+    Some of the tools I glossed over are pretty helpful, albeit
+    sometimes more helpful for the compiler development I'm doing than
+    (perhaps) for someone more interested in playing with HAL/S than in
+    the underpinnings.&nbsp; Still, here they are, in alphabetical
+    order.<br>
+    <br>
+    Note that the interpreter commands are case-insensitive, and thus
+    can be entered in either upper-, lower-, or mixed-case.&nbsp;
+    However, HAL/S source code and HAL/S identifiers are
+    case-sensitive.&nbsp; When a HAL/S identifier is used in an
+    interpreter command, the interpreter-command keyword can be in any
+    case, but the HAL/S identifier must be in its correct case.<br>
+    <h2>`BNF</h2>
+    <p>(See also <tt>`lbnf</tt> and <tt>`noast</tt>, of which the
+      latter is the default.)&nbsp; The <tt>`bnf</tt> command enables
+      display of a syntax tree in Backus-Naur Form (BNF) for HAL/S code
+      submitted to the interpreter.&nbsp; The "official" description of
+      HAL/S used by the modern compiler is in LBNF rather than BNF, but
+      BNF is more-commonly understood than LBNF and thus is provided as
+      an alternative.&nbsp; The full BNF definition of preprocessed
+      HAL/S (derived from the "official" LBNF description) is the file
+      "HAL-S BNF.pdf" provided in the interpreter's installation
+      zipfile.<br>
+    </p>
+    <h2>`CANCEL and `CANCEL *</h2>
+    <p>Speaking for myself, it often happens that I enter part of a
+      HAL/S source line or part of an interpreter command, or just a
+      flat-out wrong interpreter command, and get stuck in a loop where
+      I keep getting "<font color="#993399"><tt> ... &gt;</tt></font>"
+      prompts from the interpreter as it waits for me to put the final
+      semicolon in place for my bogus input.&nbsp; Well of course, you <i>could</i>
+      do that, and suffer the indignity of an error message that your
+      HAL/S code is bollixed.&nbsp; Usually it's more-calming to use the
+      <tt>`cancel</tt> command, which simply discards the previous line
+      of input, or else the <tt>`cancel *</tt> command to discard all
+      of the buffered input lines at once.<br>
+    </p>
+    <h2>`CLONE</h2>
+    <p>The <tt>`clone</tt> command is a variant of the <tt>`execute</tt>
+      command (see below).&nbsp; The <tt>`clone</tt> command executes
+      (or re-executes as the case may be) the PALMAT instruction stream
+      (beginning at scope 0 offset 0), but before doing so it clones the
+      entire PALMAT scopes hierarchy.&nbsp; Thus even if this
+      (re-)execution changes the values of variables, those changes will
+      be in the cloned workspace, and any changes to the workspace will
+      revert after the (re-)execution completes.<br>
+    </p>
+    <p> </p>
+    <h2><a name="Colorize"></a>`COLORIZE and `NOCOLORIZE</h2>
+    <p>The <tt>`colorize <i>C</i></tt> command changes the
+      colorization from the default magenta to the color specified by <tt><i>C</i></tt>.&nbsp;
+
+
+      There are only 16 available choices for <tt><i>C</i></tt>,
+      however, namely:&nbsp; black, red, green, yellow, blue, magenta,
+      cyan, white, gray, brightred, brightgreen, brightyellow,
+      brightblue, brightmagenta, brightcyan, and brightwhite.&nbsp; Thus
+      <tt>`colorize magenta</tt> is the default.<br>
+    </p>
+    <p>The <tt>`nocolorize</tt> command disables colorization
+      altogether.</p>
+    <h2>`DATA</h2>
+    As already explained, the command <tt>`data</tt> shows the
+    identifiers defined in scope 0 (i.e., globally), whereas <tt>`data
+      *</tt> shows the identifiers of <i>every</i> scope.<br>
+    <br>
+    Besides those, the command <tt>`data <i>N</i></tt>, where <tt><i>N</i></tt>
+    is some specific integer, shows just the identifiers defined in
+    scope <tt><i>N</i></tt>.<br>
+    <h2>`EXEC and `NOEXEC</h2>
+    <p>By default, when you input HAL/S source code into the
+      interpreter, the interpreter attempts to execute the PALMAT
+      intermediate-language code it generates by compiling the HAL/S
+      source.&nbsp; If you use the <tt>--noexec</tt> command-line
+      switch when invoking the interpreter, this is reversed:&nbsp; The
+      interpreter compiles the HAL/S source code you input, but does not
+      attempt to immediately execute it.&nbsp; Of course, for some types
+      of input code, such as <tt>DECLARE</tt> statements or <tt>PROGRAM</tt>,
+      <tt>FUNCTION</tt>, or <tt>PROCEDURE</tt> definitions, there's no
+      code to immediately execute anyway because the definitions are
+      just stored away for later, so the distinction doesn't matter.<br>
+    </p>
+    <p>The <tt>`exec</tt> and <tt>`noexec</tt> commands override those
+      command-line switches, thus enabling and disabling automatic
+      execution respectively.<br>
+    </p>
+    <p>Even if execution is delayed, the compiled code can still be
+      executed afterward via the <tt>`execute</tt> command (see below)
+      or <tt>`clone</tt> command (see above).<br>
+    </p>
+    <p>Delaying of execution isn't normally what a user of the
+      interpreter wants, but it can be useful in several ways as a
+      development tool.&nbsp; For one thing, if there are implementation
+      bugs in the emulator that cause the interpreter to abort back to a
+      command line, delaying execution lets you see what the PALMAT
+      instruction stream looked like prior to failure.&nbsp; The <tt>`trace3</tt>
+      command (see below) is also useful in this regard.<br>
+    </p>
+    <h2>`EXECUTE</h2>
+    <p>The <tt>`execute</tt> command executes (or re-executes as the
+      case may be) the PALMAT instruction stream (beginning at scope 0
+      offset 0).&nbsp; See also <tt>`clone</tt>.<br>
+    </p>
+    <h2>`GARBAGE</h2>
+    <p>The <tt>`garbage</tt> command performs "garbage collection" on
+      the PALMAT scopes hierarchy.&nbsp; Of course, HAL/S does not
+      support dynamic memory allocation, so it doesn't have memory-space
+      "garbage" that needs cleaning in the conventional techno-babble
+      sense of the word.&nbsp; However, when you use the interpreter,
+      you will often create scopes that are inaccessible to all future
+      code, even though temporarily visible by interpreter commands such
+      as <tt>`scopes, `data</tt>, <tt>`palmat</tt>, <tt>`execute</tt>,
+      or <tt>`clone</tt>.&nbsp; For example, if you input the HAL/S
+      code<br>
+    </p>
+    <blockquote><tt><font color="#993399">HAL/S &gt;</font> DO FOR
+        TEMPORARY I = 1 TO 10; IF I &gt; 5 THEN WRITE(6) I; END;</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font
+          color="#993399">6 </font></tt><font color="#993399"><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 7 </tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 8 </tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 9 </tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10 </tt><tt><br>
+        </tt><tt>HAL/S &gt;</tt></font> <br>
+    </blockquote>
+    then new scopes will have been generated for the <tt>DO FOR ... END</tt>
+    loop and for the <tt>IF</tt> loop inside of it.&nbsp; But these
+    scopes are inaccessible to any HAL/S code input <i>after</i>
+    that.&nbsp; Even if you input the <i>identical</i> source code line
+    once again, the interpreter can't recognize that the object code it
+    has already generated matches it, and hence will generate two new
+    scopes instead.&nbsp; To avoid this inexorable build-up of clutter,
+    the interpreter automatically performs a "garbage collection" and
+    removes unusable scopes before compiling any new HAL/S source-code
+    you input.&nbsp; (Admittedly, it's not perfect at doing so, and
+    sometimes an unreachable scope will be buried among reachable scopes
+    in a way that makes it inconvenient to remove; well, too bad!)&nbsp;
+    Garbage collection does <i>not</i> remove scopes containing
+    definitions of <tt>PROGRAM</tt>s, <tt>FUNCTION</tt>s, <tt>PROCEDURE</tt>s,
+    <tt>COMPOOL</tt>s, or any of their descendant scopes.<br>
+    <br>
+    What the <tt>`garbage</tt> command does is to perform this cleanup
+    immediately, rather than waiting or you to enter new HAL/S source
+    code.&nbsp; Using the <tt>`scopes</tt>, <tt>`data</tt>, or <tt>`palmat</tt>
+    commands you can then directly see what the effect of the cleanup
+    was.&nbsp; Though unless you want to examine the scopes in this way,
+    there's no need ever to explicitly use the <tt>`garbage</tt>
+    command.
+    <h2>`HELP</h2>
+    <p>As has already been mentioned, <tt>`help</tt> displays all
+      available interpreter commands, in a more-abbreviated form than
+      the descriptions I'm giving you right now.<br>
+    </p>
+    <h2>`LBNF</h2>
+    <p>(See also <tt>`bnf</tt> and <tt>`noast</tt>, of which the
+      latter is the default.)&nbsp; The <tt>`lbnf</tt> command enables
+      display of the syntax tree in Labeled Backus-Naur Form (LBNF) for
+      HAL/S code submitted to the interpreter.&nbsp; The description of
+      the (preprocessed) HAL/S language used by the modern HAL/S
+      compiler is in LBNF, so this format (as opposed to <tt>`bnf</tt>)
+      is the most-useful way to understanding how the HAL/S code was
+      parsed.&nbsp; The full LBNF description is the file HAL-S.cf,
+      included in the interpreter installation zipfile.<br>
+    </p>
+    <h2>`NOAST</h2>
+    <p>(See also <tt>`bnf</tt> and <tt>`lbnf</tt>.&nbsp; The default,
+      <i>vs</i> <tt>`bnf</tt> and <tt>`lbnf</tt>, is <tt>`noast</tt>.)&nbsp;
+
+      The <tt>`noast</tt> command disables display of the abstract
+      syntax tree (AST) generated by the compiler when it parses
+      preprocessed HAL/S source code.<br>
+    </p>
+    <h2>`PALMAT</h2>
+    <p>As already explained, the <tt>`palmat</tt> command displays the
+      PALMAT instruction stream of scope 0 (the global context), while <tt>`palmat
+
+        *</tt> displays the PALMAT instruction streams from all scopes.<br>
+    </p>
+    <p>Besides those, the command <tt>`palmat <i>N</i></tt>, where <tt><i>N</i></tt>
+      is some specific integer, shows just the PALMAT instruction stream
+      from scope <tt><i>N</i></tt>.</p>
+    <h2>`QUIT<br>
+    </h2>
+    <p>The <tt>`quit</tt> command exits from the interpreter to the
+      command line.&nbsp; Incidentally, when it does so it saves a
+      history file (yaHAL-S-FC.history), which will be automatically be
+      reloaded the next time the interpreter runs.&nbsp; This history
+      file contains all of the inputs typed into the interpreter's
+      prompt, and you can use the up/down arrow keys to browse through
+      the list, as well as the right/left arrows and other keys to edit
+      those lines and re-run them if you like<br>
+    </p>
+    <h2>`READ</h2>
+    <p>The <tt>`read <i>Filename</i></tt> command reads a PALMAT file
+      named <tt><i>Filename</i></tt> into the interpreter's workspace,
+      first clearing out anything already in the workspace.<br>
+    </p>
+    <h2>`REMOVE</h2>
+    <p>As explained earlier, the command <tt>`remove </tt><tt><i>identifier</i></tt>
+      can be used to remove an <tt><i>identifier</i></tt> from scope 0
+      (the global context).&nbsp; Besides that, <tt>`remove *</tt> will
+      remove all identifiers from scope 0.<br>
+    </p>
+    <p>No mechanism is provided to remove identifiers from scopes other
+      than 0, but see the <tt>`reset</tt> command.<br>
+    </p>
+    <h2>`RESET</h2>
+    <p>The <tt>`reset</tt> command removes all scopes from the PALMAT
+      hierarchy other than scope 0 (the global context), and it removes
+      all identifiers and all PALMAT instructions from scope 0.&nbsp; In
+      other words, it clears the entire workspace, as if you had exited
+      from the interpreter and restarted it.</p>
+    <h2>`REVIEW</h2>
+    <p>This command is particularly useful when you've input a bunch of
+      lines that haven't ended in semicolons, so that the interpreter
+      hasn't compiled or executed them yet, but is simply waiting for
+      you to finish up and put in a final semicolon.&nbsp; The command
+      shows all of the buffered input, in case you've gotten confused
+      about what has been buffered and what has not.&nbsp; For example,
+      below I enter a bunch of nonsense (but not a complete HAL/S
+      statement), review it, and then discard it.&nbsp; Why?&nbsp; Who
+      knows?&nbsp; Perhaps the cat was helping with code entry, and it
+      turned out not to be all that helpful!<br>
+    </p>
+    <blockquote><tt><font color="#993399">HAL/S &gt;</font> bm </tt><tt><br>
+      </tt><tt><font color="#993399">&nbsp; ... &gt;</font> bam </tt><tt><br>
+      </tt><tt><font color="#993399">&nbsp; ... &gt;</font> poozer</tt><tt><br>
+      </tt><tt><font color="#993399">&nbsp; ... &gt;</font> potato .</tt><tt><br>
+      </tt><tt><font color="#993399">&nbsp; ... &gt;</font> `review</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <font
+          color="#993399">Review of spooled input:</font></tt><font
+        color="#993399"><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp; bm </tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp; bam </tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp; poozer</tt><tt><br>
+        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp; potato .</tt><tt><br>
+        </tt></font><tt><font color="#993399">&nbsp; ... &gt;</font>
+        `cancel *</tt><tt><br>
+      </tt><font color="#993399"><tt>HAL/S &gt;</tt></font> <br>
+    </blockquote>
+    <blockquote> </blockquote>
+    <h2>`RUN and `RUN *</h2>
+    <p>The command <tt>`run <i>ProgramName</i></tt>, as already
+      mentioned, runs an already-input HAL/S <tt>PROGRAM</tt> (named <tt><i>ProgramName</i></tt>)
+      lurking somewhere in the interpreter's workspace.&nbsp; It does
+      this in the "foreground", meaning that you can only run one
+      program at a time using this method.<br>
+    </p>
+    <p>In contrast, <tt>`run <i>ProgramName</i> *</tt> runs the
+      program as well, but it first clones the workspace and runs the
+      program it as an independent thread or process, allowing you to
+      run multiple programs or multiple copies of the same program at
+      once.&nbsp; Or at least it <i>will</i> do so, once I have time to
+      get it working fully.<br>
+    </p>
+    <h2>`SCOPES</h2>
+    <p>The <tt>`scopes</tt> command lists all of the scopes in the
+      PALMAT hierarchy.<br>
+    </p>
+    <p> </p>
+    <h2>`SPOOL and `UNSPOOL</h2>
+    <p>As already mentioned, once spooling due to a <tt>`spool</tt>
+      command, the interpreter just saves up whatever you're inputting
+      without trying to compile or execute it, and only processes it
+      once it sees an <tt>`unspool</tt>.&nbsp; This is useful for
+      inputting complex statements like <tt>PROGRAM</tt> definitions or
+      for cut-and-pasting in HAL/S source code, and is often paired with
+      <tt>`strict</tt> and <tt>`nostrict</tt> respectively when
+      cutting-and-pasting.<br>
+    </p>
+    <h2>`STATUS</h2>
+    <p>The <tt>`status</tt> command displays all of the current
+      interpreter settings, such as "strict" vs "nostrict", "exec" vs
+      "noexec", etc.<br>
+    </p>
+    <h2>`STRICT and `NOSTRICT</h2>
+    <p>The <tt>`strict</tt> command enables the interpreter's "strict"
+      mode, in which column 1 has the dedicated purpose described in the
+      HAL/S documentation and can only contain one of the characters '
+      ', 'C', 'D', 'E', 'M', or 'S'.&nbsp; Whereas <tt>`nostrict</tt>
+      (the default) instead enables "loose" mode, in which column 1 has
+      no particular special interpretation, and full-line comments,
+      compiler directives, and multi-line math input lines are not
+      allowed.<br>
+    </p>
+    <h2>`TRACE1 and `NOTRACE1</h2>
+    <p>The <tt>`trace1</tt> command enables detailed tracing of the
+      parser's analysis of preprocessed HAL/S source code.&nbsp; This is
+      useful for tracking down bugs in the LBNF description of the HAL/S
+      language or sometimes in the action of the preprocessor.&nbsp; The
+      <tt>`notrace1</tt> command disables that tracing.<br>
+    </p>
+    <h2>`TRACE2 and `NOTRACE2</h2>
+    <p>The <tt>`trace2</tt> command enables tracing of the compiler's
+      code-generator.&nbsp; This is useful for tracking down bugs in the
+      code generator, and particularly in implementing code-generation
+      for HAL/S features not previously supported.&nbsp; The <tt>`notrace2</tt>
+      command disables the tracing.<br>
+    </p>
+    <h2>`TRACE3 and `NOTRACE3</h2>
+    <p>The <tt>`trace3</tt> command enables tracing of PALMAT
+      instructions during emulation.&nbsp; Specifically, it displays
+      each PALMAT instruction as it's executed, along with the state of
+      the computation stack at the time the instruction is
+      executed.&nbsp; The <tt>`notrace3</tt> command disables the
+      tracing.<br>
+    </p>
+    <h2>`TRACE4 and `NOTRACE4</h2>
+    <p>The <tt>`trace4</tt> and <tt>`notrace4</tt> commands are
+      similar to <tt>`trace3</tt> and <tt>`notrace3</tt>, except that
+      the tracing is performed at compile-time rather than
+      emulation-time.&nbsp; It's needed because the compiler's
+      code-generator actually uses the PALMAT-emulation module to
+      determine which expressions are computable at compile-time, and to
+      compute their values.&nbsp; For example, in the HAL/S statement <tt>DECLARE
+
+        X INITIAL(12 (34+32/7))</tt>, the <tt>INITIAL</tt> value is
+      computed at compile-time rather than at run-time.&nbsp; (In fact,
+      <i>all</i> <tt>INITIAL</tt> and <tt>CONSTANT</tt> clauses are
+      computed at compile-time, but all other expressions are candidates
+      for compile-time computation as well.&nbsp; Admittedly, the modern
+      compiler isn't very good at this, since it works only with entire
+      expressions rather than with the sub-expressions, but at least it
+      gives it a shot!)<br>
+    </p>
+    <h2>`WINE and `NOWINE</h2>
+    <p>(Linux only.)&nbsp; The <tt>`wine</tt> command enables use of
+      the Windows version of the HAL/S parser, running under Linux's
+      WINE subsystem.&nbsp; The <tt>`nowine</tt> command reverses that
+      instead re-enables use of the native Linux version of the HAL/S
+      parser.&nbsp; (This is useful only for debugging the Windows
+      version of the parser without my having to actually run Windows to
+      do it.&nbsp; So most likely, this is a feature only useful for
+      me.&nbsp; By the way, it's monstrously slow!)<br>
+    </p>
+    <h2>`WRITE</h2>
+    <p>The command <tt>`write <i>Filename</i></tt> writes out the
+      entire interpreter workspace as a PALMAT file named <tt><i>Filename</i></tt>.<br>
+    </p>
+    <br>
+    <hr style="width: 100%; height: 2px;">
+    <center><br>
+      <span style="color: rgb(84, 89, 93); font-family: sans-serif;
+        font-size: 11.05px; font-style: normal; font-variant: normal;
+        font-weight: normal; letter-spacing: normal; line-height:
+        16.575px; orphans: auto; text-align: center; text-indent: 0px;
+        text-transform: none; white-space: normal; widows: 1;
+        word-spacing: 0px; -webkit-text-stroke-width: 0px; display:
+        inline !important; float: none; background-color: rgb(255, 255,
+        255);"> This page is available under the <a
+          href="https://creativecommons.org/publicdomain/zero/1.0/">
+          Creative Commons No Rights Reserved License</a> </span><br>
+      <i><font size="-1">Last modified by <a
+            href="mailto:info@sandroid.org">Ronald Burkey</a> on
+          2023-02-09<br>
+          <br>
+          <a href="https://www.ibiblio.org"> <img style="border: 0px
+              solid ; width: 300px; height: 100px;" alt="Virtual AGC is
+              hosted by ibiblio.org" src="hosted.png" width="300"
+              height="100"></a><br>
+        </font></i></center>
+    <br>
+  </body>
+</html>

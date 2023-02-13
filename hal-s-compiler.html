@@ -1,0 +1,1980 @@
+<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+  <head>
+    <title>Virtual AGC Document Library Page</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="Author" content="Ronald Burkey">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="author" content="Ronald S. Burkey">
+    <script type="text/javascript" src="Header.js"></script>
+  </head>
+  <body style="background-image: url(gray3.jpg);">
+    <script type="text/javascript">
+document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace("@SUBTITLE@","Roadmap and Theory of Operation"))
+</script><br>
+    <div align="center"><i>(This page is under construction.)</i><br>
+    </div>
+    <h1>Table of Contents </h1>
+    <ul>
+      <li><a moz-do-not-send="true" href="#Introduction">Introduction</a></li>
+      <li><a moz-do-not-send="true" href="#Roadmap">Roadmap</a></li>
+      <li><a moz-do-not-send="true" href="#Preliminary">Preliminary Version of the Compiler</a></li>
+      <ul>
+        <li><a moz-do-not-send="true" href="#Code">Code</a></li>
+        <li><a moz-do-not-send="true" href="#Testing">Testing</a><br></li>
+        <li><a moz-do-not-send="true" href="#Preprocessor">Preprocessor</a></li>
+        <li><a moz-do-not-send="true" href="#Parser">Parser and Tokenizer</a></li>
+        <li><a moz-do-not-send="true" href="#Generator">PALMAT Code Generator</a></li>
+        <li><a moz-do-not-send="true" href="#Interpreter">PALMAT Interpreter</a></li>
+        <li><a moz-do-not-send="true" href="#Linker">PALMAT Linker</a><br></li>
+      </ul>
+      <li><a moz-do-not-send="true" href="#Advanced">Advanced Version of the Compiler</a></li>
+      <li><a moz-do-not-send="true" href="#PALMAT">Appendix: PALMAT Specification</a></li>
+      <ul>
+        <li><a moz-do-not-send="true" href="#Background">Background</a></li>
+        <li><a moz-do-not-send="true" href="#Datatypes">Representation of HAL/S Data Types</a><br></li>
+        <li><a moz-do-not-send="true" href="#ComputationStack">The Computation Stack</a><br></li>
+        <li><a moz-do-not-send="true" href="#Scopes">Scopes</a></li>
+        <li><a moz-do-not-send="true" href="#Data">Data Model</a></li>
+        <li><a moz-do-not-send="true" href="#Instructions">Instructions</a></li>
+        <ul>
+          <li><a moz-do-not-send="true" href="#Calculations">Operations on the Computation Stack</a></li>
+          <ul>
+            <li><a moz-do-not-send="true" href="#Pushing">Pushing onto the Computation Stack</a></li>
+            <li><a moz-do-not-send="true" href="#Computations">Standard Computations on the Stack</a></li>
+            <li><a moz-do-not-send="true" href="MiscellaneousStack">Storing and Popping from the Stack</a><br></li>
+          </ul>
+          <li><a moz-do-not-send="true" href="#ControlTransfer">Transfer of Control</a></li>
+          <li><a moz-do-not-send="true" href="#Miscellaneous">Miscellaneous Instructions</a><br></li>
+        </ul>
+      </ul>
+    </ul>
+    <h1><a name="Introduction"></a>Introduction</h1>
+    <p>It is not feasible at the present time to run the original Shuttle-era version of the compiler for the HAL/S language to compile Space Shuttle flight software.&nbsp; Refer to <a moz-do-not-send="true" href="Shuttle.html">our Space Shuttle flight-software page</a> for more context.<br></p>
+    <p>That orginal HAL/S compiler was known as <tt>HAL/S-FC</tt>.&nbsp; Even if it were possible to run that original compiler, it would in any case produce only object code which could be run on an IBM System/360 mainframe, or else on the IBM AP-101S General Purpose Computers (GPC) of the Shuttle itself ... neither of which (with certain provisos insofar as System/360 is concerned) can be run on "modern" computers likely to be available or useful to most folks interested in this Virtual AGC Project website.<br></p>
+    <p>Therefore, for the Shuttle flight software to be generally accessible, we instead need modern versions of several HAL/S-related development tools, including at minimum:<br></p>
+    <ul>
+      <li>A HAL/S compiler.</li>
+      <li>A linker for HAL/S object code.</li>
+      <li>An emulator for HAL/S executable code.</li>
+    </ul>
+    <p>The ideal HAL/S emulator and executable-code format would be such that the emulator could be easily integrated with spaceflight-simulation systems such as Orbiter or FlightGear, and would execute the HAL/S software rapidly and efficiently, supporting the entire HAL/S language and its entire feature set.<br></p>
+    <p>The "ideal" just mentioned is quite difficult to achieve in one giant leap forward, and so I intend to achieve it in two stages, which I refer to as "preliminary" and "advanced".&nbsp; Potentially even-more-advanced stages may follow those, and I suppose there may be potential intermediate stages as well, but I don't care to speculate about them at the present time.&nbsp; I expect to implement the entire preliminary stage entirely by myself, but I also expect that help (any volunteers?) will be needed to reach the advanced stage.<br></p>
+    <p>Sections below are devoted to a summary of the roadmap, and to the (in-progress, partially-implemented) preliminary version of the compiler.<br></p>
+    <h1><a name="Roadmap"></a>Roadmap</h1>
+    <p>In brief, the "modern" HAL/S compiler is structured as follows:<br></p>
+    <ol>
+      <li>A preprocessor.</li>
+      <li>A combined tokenizer+parser.</li>
+      <li>A code generator.</li>
+    </ol>
+    <p>Because modules of HAL/S code may be separately compiled, thus producing multiple output object-code files, an additional linker program is potentially needed to combine the object-code files into a single executable file.<br></p>
+    <p>To produce efficient code, it is likely that some additional optimizer program will be needed for processing the object-code files and/or executable files, so eliminating redundant or useless instructions, replacing code sequences by more-efficient code sequences, and so on.<br></p>
+    <p>Finally, unless the executable file is itself natively executable on the target computer system, then it will necessarily be in some format that must itself be executable only in an emulator program, and thus such an emulator program is needed as well.<br></p>
+    <p>Of the software components mentioned above, the "preliminary" stage of the development tools includes:<br></p>
+    <ul>
+      <li>The preprocessor</li>
+      <li>The tokenizer+parser</li>
+      <li>A code generator for the PALMAT intermediate language (discussed in <a moz-do-not-send="true" href="#PALMAT">the Appendix</a>).</li>
+      <li>An emulator for the PALMAT intermediate language.</li>
+      <li>An <i>interpreter</i> loop (not mentioned among the minimal requirements earlier), which uses the items above for inputting and immediately executing lines of code not necessarily comprising an entire HAL/S program.</li>
+    </ul>
+    <p>I have no firm schedule for completing "preliminary" development.&nbsp; The preliminary version is partially usable now (February 2023), with a restricted HAL/S feature set.&nbsp; I certainly hope it will be complete prior to the end of 2023.&nbsp; But it isn't required for the preliminary version to be 100% complete before commencing the "advanced" development.<br></p>
+    <p>Of the preliminary components mentioned above, most but not all of them can be suitably retained in the "advanced" stage.&nbsp; The problem begins with the PALMAT intermediate language, because it does not employ an encoding conducive to efficient storage of the object files, and the problems continue with the PALMAT emulator, because in addition to the inefficiency of the PALMAT format itself, the emulator is written in Python and cannot be adequately improved in terms of execution speed.<br></p>
+    <p>Therefore, once the preliminary stage of development is completed, the preprocessor, parser, and PALMAT code generator can continue to be used but the following advanced development, at minimum, needs to take place as well:<br></p>
+    <ol type="a">
+      <li>An efficient object language must be designed, perhaps just a better way of encoding PALMAT numerically rather than its current JSON representation.&nbsp; For the sake of discussion, I'll call this efficient represention "GALMAT", but in practice it may not have that name.&nbsp; For example, one <i>could</i> develop a PALMAT-to-C translator, and then GALMAT would simply be C.&nbsp; I argue neither for nor against that, but it would have some obvious advantages and some unobvious disadvantages.<br></li>
+      <li>Software for translating PALMAT to GALMAT must be created.</li>
+      <li>Optimization sofware for PALMAT and/or GALMAT object code must be created.</li>
+      <li>A linker for GALMAT code must be created.</li>
+      <li>An emulator for GALMAT files must be created, preferentially written in C for integration purposes.</li>
+    </ol>
+    <p>No interactive interpreter loop is needed in the advanced stage.<br></p>
+    <h1><a name="Preliminary"></a>Preliminary Version of the Compiler</h1>
+    <p>By the way, it's helpful to understand Python (or JavaScript) datatypes somewhat, in order to understand the description that follows.&nbsp; At the very least, you should know the distinctions between "lists" vs "tuples" vs "sets" vs "dictionaries".
+</p>
+    <h2><a name="Code"></a>Code</h2>
+    <h3>Folder Setup</h3>
+    <p>All Virtual AGC software related to the Space Shuttle, both "modern" and from the original Shuttle project, appears in <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle">the yaShuttle folder of Virtual AGC's GitHub repository</a>.  At the present time, all such software is incomplete and/or under development, and it is <i>not</i> automatically built when building Virtual AGC from source.<br></p>
+    <p>There are three main categories of material found in the afore-mentioned yaShuttle folder:<br></p>
+    <ul>
+      <li>Original Shuttle-era software:</li>
+      <ul>
+        <li>The subfolder called "yaShuttle/Source Code/HAL-S-FC-REL32V0/" contains partial source code of the original HAL/S compiler.</li>
+      </ul>
+      <li>HAL/S source-code samples from contemporary documentation:</li>
+      <ul>
+        <li>The subfolder called "yaShuttle/Source Code/Programming in HAL-S/", contains numerous excerpts of sample code found the book <i>Programming in HAL/S</i> or adapted from it.</li>
+      </ul>
+      <li>"Modern" material in yaShuttle/ itself:</li>
+      <ul>
+        <li>The file HAL_S.cf is a description of the HAL/S language in so-called Labeled Backus-Naur Form (LBNF).  It is the basis for the modern HAL/S compiler and differs somewhat from the original Shuttle-era BNF description of HAL/S.</li>
+        <li>Most of the *.py and *.c files comprise the modern compiler, although a few *.py files represent some utilities instead.</li>
+      </ul>
+    </ul>
+    <p>The bulk of the modern code is written in Python 3, and thus can be run in any Python 3 installation without other preparation.  <br></p>
+    <p>However, the tokenizer+parser is a program in the C language, and must be compiled for the target platform.  There are two approaches to this, depending on whether or not the LBNF description of HAL/S (i.e., the HAL_S.cf file mentioned above) has changed or not.  For the sake of discussion, let's call these <i>deep builds</i> (HAL_S.cf changed) vs <i>shallow builds</i> (HAL_S.cf unchanged).  I've not as of yet given much thought or put much effort into the most-convenient way to build this program on a target-platform by target-platform basis, so I'll just explain the way I currently do it.<br></p>
+    <h3>Shallow Build</h3>
+    <p>As mentioned above, a "shallow build" is one in which the file HAL_S.cf has not changed.<br></p>
+    <p>The current Makefile is written for my own setup, namely Linux Mint 21 with the usual C compiler (<tt>gcc</tt>) and a Windows cross-compiler (<tt>x86_64-w64-mingw32-gcc</tt>) installed, though I expect it would work on may versions of Linux as-is.  Simply running the command <tt>make</tt> from the folder yaShuttle/ builds both the native Linux version of the tokenizer+compiler (namely <tt>modernHAL-S-FC</tt>) and a 64-bit Windows version of it (<tt>x86_64-w64-mingw32-gcc.exe</tt>).  I've not tried to build the Windows version of the program directly on Windows, but the one included in the yaShuttle/ folder already in the repository should work fine, so there's not much need to rebuild it directly on Windows.  It even works in Linux, under WINE, though I don't recommend doing so.<br></p>
+    <p>The yaShuttle/ folder in the repository also has a pre-compiled Mac OS version of the tokenizer+Parser (<tt>modernHAL-S-FC-macosx</tt>), but since Mac OS programs can really be built from Linux, and since it's a great hassle for me to build it directly on Mac OS, the Mac version is unlikely to be fully up-to-date.  Thus if you have Mac OS, you're very likely to have to build it from source yourself.  Fortunately, it's easy.  Just clone the Virtual AGC GitHub repository onto your Mac; in a console, descend into the yaShuttle/ folder, and do <tt>make modernHAL-S-FC-macosx</tt>.<br></p>
+    <p>If you have some platform other than Linux, Windows 64, or Mac OS, or are using some other C compiler than what I've anticipated, you should still be able to do a shallow build of the tokenizer+parser quite easily.  Just compile all of the files yaShuttle/*.c together.  The default name the modern HAL/S compiler expects this program to have is <tt>modernHAL-S-FC.exe</tt> on Windows, <tt>modernHAL-S-FC-macosx</tt> on Mac, or <tt>modernHAL-S-FC</tt> everywhere else, but you can override this command-line switch at when you invoke the modern HAL/S compiler.  The command-line switch needed is <tt>--compiler=</tt><tt><i>NameOfCompiler</i></tt>. <br></p>
+    <h3>Deep Build</h3>
+    <p>A "deep build" is one in which the file HAL_S.cf has been modified in some way <i>other</i> than what's available in our GitHub repository.  (In other words, if you don't like <i>my</i> LBNF description of HAL/S, and want to make your own tweaks to it.)  In this case, an extra processing step is needed to create the *.c and *.h files for a shallow build of the tokenizer+parser as described above.<br></p>
+    <p>This extra processing step requires installation of the so-called <a moz-do-not-send="true" href="https://bnfc.digitalgrammars.com/">BNF Converter (BNFC) framework</a>, which builds tokenizers and parsers from an LBNF description of a context-free language, such as our LBNF file HAL_S.cf, so ...<br></p>
+    <blockquote>
+      <p><b>One-time setup</b>:  Install BNF Converter.<br></p>
+    </blockquote>
+    <p>But I must warn you, while BNF Converter purports to be platform-independent, it achieves that independence by using whatever standardized tokenizer builders and parser builders are popular on the platform on which it is running.  On Linux, for example, it uses the flex <i>tokenizer</i> library and the <i>bison</i> parser library.  On other platforms it uses other libraries.  Hence, I have no way in the world to guarantee the results when running BNFC on some platform other than Linux.  Maybe it'll work, maybe it won't.<br></p>
+    <p>You should be able to perform a deep build using the following command:<br></p>
+    <blockquote>
+      <p><tt>make distclean all</tt><br></p>
+    </blockquote>
+    This operation creates a subfolder called yaShuttle/temp/, uses it
+    as a working directory for building new *.c and *.h files for the
+    tokenizer+parser, copies those files into yaShuttle/, and then
+    performs the steps for a shallow build as described above.<br>
+    <p>Again ... if this doesn't work for you, I have little advice other than "next time, try Linuxing."<br></p>
+    <h3>Invocation of the Modern HAL/S Compiler<br>
+    </h3>
+    <p>At any rate, given that a native version of the tokenizer+parser is available, the modern compiler is invoked by the command<br></p>
+    <blockquote>
+      <p><tt>yaHAL-S-FC.py [OPTIONS] <i>HalSourceFiles</i><br></tt></p>
+    </blockquote>
+    <p>You can see what <tt>OPTIONS</tt> are available by instead using the command<br></p>
+    <p>	<tt>yaHAL-S-FC.py --help</tt><br></p>
+    <p>However, at this stage of development, rather than using the compiler <i>as</i> a compiler (i.e., to compile source files into executable object files), you'd be more-likely to want to run it interactively as an interpreter.  I would advise you to consult the <a moz-do-not-send="true" href="hal-s-interpreter.html">HAL/S Interpreter page</a> dedicated to that particular usage.<br></p>
+    <h2><a name="Testing"></a>Testing</h2>
+    <p>TBD<br></p>
+    <h2><a name="Preprocessor"></a>Preprocessor</h2>
+    <p>TBD<br></p>
+    <h2><a name="Parser"></a>Parser and Tokenizer</h2>
+    <p>TBD<br></p>
+    <h2><a name="Generator"></a>PALMAT Code Generator</h2>
+    <p>TBD<br></p>
+    <h2><a name="Interpreter"></a>PALMAT Interpreter</h2>
+    <p>TBD<br></p>
+    <h2><a name="Linker"></a>PALMAT Linker</h2>
+    <p>TBD<br></p>
+    <h1><a name="Advanced"></a>Advanced Version of the Compiler</h1>
+    <p>TBD<br></p>
+    <h1><a name="PALMAT"></a>Appendix: PALMAT Specification</h1>
+    <h2><a name="Background"></a>Background</h2>
+    <p>The "preliminary" version of the HAL/S compiler produces object files in the form of an intermediate language named "PALMAT".&nbsp; This name derives from the fact that the original Shuttle era compiler, HAL/S-FC, produced an intermediate language known as "HALMAT"; but I'm not sure why HALMAT was given that name.&nbsp; HALMAT was machine-independent.&nbsp; The original compiler then optimized the HALMAT intermediate code, and translated it to whatever machine-dependent form was needed for the target computer.&nbsp; In the case of IBM System/360 (mainframe) or IBM AP-101S (Shuttle GPC) target systems, the target language was some variant of IBM's Basic Assembly Language (BAL).<br></p>
+    <p>As a matter of fact, I would have simply had the modern compiler produce HALMAT instead of inventing my own intermediate language for that purpose, except that there was insufficient available surviving documentation of HALMAT to accomplish that.&nbsp; Essentially the only useful available documentation about HALMAT was in Appendix A of the document "HAL/S-360 Compiler System Specification", but the only copy we have of that is partial, and is missing perhaps 80% of Appendix A.&nbsp; I have ongoing FOIA requests in place for additional documentation, and it remains to be seen if my requested documents can be found or not; but regardless, I have chosen not to wait to find out, and that has turned out to be the correct decision.<br></p>
+    <p>Thus ... PALMAT!<br></p>
+    <p>The PALMAT language has a minimal instruction set intended to have behaviors that are very easy to implement in an emulator.&nbsp; Since the preliminary code compiler code generator and the preliminary emulator are written in Python, the format of a PALMAT dataset makes heavy usage of Python datatypes such as dictionaries, lists, and tuples; moreover, these PALMAT object files are basically just JSON representations of the Python internal dataset, and are thus both very human-friendly and very easily output from and input into Python programs.&nbsp; But use of Python-style datatypes and JSON storage formats is <i>not</i> conducive to rapid emulation.<br></p>
+    <p>PALMAT is thus described in detail here in the hope of aiding translation from PALMST to a more-efficient representation for both storage and emulation.<br></p>
+    <h2><a name="Datatypes"></a>Representation of HAL/S Data Types</h2>
+    <p>In PALMAT, the various HAL/S data types are represented as follows:<br></p>
+    <ul>
+      <li>An individual <tt>INTEGER</tt> is represented as a Python integer.</li>
+      <li>An individual <tt>SCALAR</tt> is represented as a Python float.</li>
+      <li>HAL/S double-quoted strings, as appearing in <tt>REPLACE</tt> statements, are handled entirely by the compiler's preprocessor and do not appear at all in PALMAT.</li>
+      <li>HAL/S single-quoted strings (<tt>CHARACTER</tt> datatype) are represented as Python character strings.</li>
+      <li>A HAL/S bit-string (<tt>BIT</tt> or <tt>BOOLEAN</tt> datatype) is represented as a Python <strike>2-tuple of integers wrapped in a Python list, thusly:&nbsp; [(value, length)].</strike> list of three elements, thusly: <tt>[<i>value</i>, <i>length</i>, "b"]</tt>. Here, <i><tt>value</tt></i> is an integer representation of the bit string, with each bit position representing one of the bits of the bit-string, and the <i><tt>length</tt></i> is the maximum number of bits in the bit-string.&nbsp; The "first" bit in the string is the most-significant bit of the value, and the "last" bit of the string is the least-significant bit of the value.&nbsp; The case of <i><tt>length</tt></i>=1 corresponds to the HAL/S <tt>BOOLEAN</tt> datatype.<br></li>
+      <li><tt>VECTOR</tt> is represented as a Python list of floats, though integers are tolerated as well.</li>
+      <li><tt>MATRIX</tt> is represented as a Python list of lists of floats, with integers tolerated.&nbsp; The outer list represents the rows, and the inner lists represents the column-positions within the rows.&nbsp; All of the inner lists have the same length.</li>
+      <li>A <tt>STRUCTURE</tt> is represented as a Python dictionary, in the obvious way.&nbsp; Note that this way of representing a structure loses certain information significant in HAL/S, specifically the defined ordering of the various fields of the structure.&nbsp; The ordering is important in HAL/S because <tt>INITIAL</tt> and <tt>CONSTANT</tt> clauses in <tt>DECLARE</tt> statements rely on knowledge of it.&nbsp; Therefore, information is maintained about this ordering, but it is separate in the identifier attributes of the identifier dictionary (see <a moz-do-not-send="true" href="#Identifiers">Identifiers</a>) rather than a part of the Python dictionary associated with the structure.</li>
+      <li><tt>ARRAY</tt> is represented <strike>as a Python tuple of tuples of tuples ... out to whatever the dimensionality of the array is</strike> to <tt>MATRIX</tt> as a hierarchy of lists, <i>except</i> that the number of dimensions may be any integer 1 or higher (rather than always 2) <i>and</i> that every sublist has final entry of <tt>'a'</tt>.&nbsp; Each level of lists in this hierarchy has lists all of the same length.&nbsp; Elements of the final level of lists can be any of the datatypes described above, but are all of the <i>same</i> datatype.&nbsp; An example appears at the end of this section.</li>
+      <li>A "pointer" to a variable is represented by the Python <strike>tuple structure </strike><strike><tt>((index, identifier), 0)</tt></strike> list <tt>[<i>index</i>, <i>identifier</i>, 'p']</tt>, where <i><tt>identifier</tt></i> is the name (a string) of the variable and <i><tt>index</tt></i> is for the scope in which the identifier's declaration appears.&nbsp; Note that pointers to variables do not appear except for the specific use of specifying target variables for a HAL/S <tt>READ</tt> statement.<br></li>
+      <li>An uninitialized individual data value of any simple type (i.e., not <tt>VECTOR</tt>, <tt>MATRIX</tt>, <tt>ARRAY</tt>, or <tt>STRUCTURE</tt>) is represented by a Python <tt>None</tt>.&nbsp; Uninitialized elements of a composite type like <tt>VECTOR</tt> are represented by <tt>None</tt>, but the composite as a whole retains its structure (as a list, list of lists, structure, etc.).</li>
+      <li>Additionally, though not representing any specific HAL/S data types, the Python set datatype is used in place of data under some circumstances (see <a moz-do-not-send="true" href="#ComputationStack">Computation Stack</a> below).&nbsp; The Python set <tt>{ "sentinel" }</tt> is the principal example of this, and it is used sometimes to terminate a variable-length sequence of data values, without itself being confusable with any existing HAL/S datatype.<br></li>
+    </ul>
+    <p>Here are a few examples of the representation of the <tt>ARRAY</tt> vs <tt>VECTOR</tt> and <tt>MATRIX</tt> types of comparable geometries.<br></p>
+    <p>Example 1:  <tt>VECTOR(5)</tt> would be represented as:<br></p>
+    <blockquote><tt>[<i><br>
+        </i></tt><tt><i> &nbsp;&nbsp;&nbsp; </i></tt><tt><i><tt><i>scalar</i></tt></i><sub>1</sub>,
+        <br>
+        <i>&nbsp;&nbsp;&nbsp; </i></tt><tt><i><tt><i>scalar</i></tt></i><sub>2</sub>,
+        <i><br>
+          &nbsp;&nbsp;&nbsp; </i></tt><tt><i><tt><i>scalar</i></tt></i><sub>3</sub>,
+        <i><br>
+          &nbsp;&nbsp;&nbsp; </i></tt><tt><i><tt><i>scalar</i></tt></i><sub>4</sub>,
+        <i><br>
+          &nbsp;&nbsp;&nbsp; </i></tt><tt><i><tt><i>scalar</i></tt></i><sub>5</sub><br>
+        ]</tt>.</blockquote>
+    <p>Example 2:  <tt>ARRAY(5) SCALAR</tt> would be represented as:<br></p>
+    <blockquote><tt>[<i><br>
+        </i></tt><tt><i> &nbsp;&nbsp;&nbsp; </i></tt><tt><i><tt><i>scalar</i></tt></i><sub>1</sub>,
+        <br>
+        <i>&nbsp;&nbsp;&nbsp; </i></tt><tt><i><tt><i>scalar</i></tt></i><sub>2</sub>,
+        <i><br>
+          &nbsp;&nbsp;&nbsp; </i></tt><tt><i><tt><i>scalar</i></tt></i><sub>3</sub>,
+        <i><br>
+          &nbsp;&nbsp;&nbsp; </i></tt><tt><i><tt><i>scalar</i></tt></i><sub>4</sub>,
+        <i><br>
+          &nbsp;&nbsp;&nbsp; </i></tt><tt><i><tt><i>scalar</i></tt></i><sub>5</sub>,
+        <br>
+        &nbsp;&nbsp;&nbsp; 'a'<br>
+        ]</tt>.<br>
+    </blockquote>
+    <p>Example 3:  <tt>MATRIX(3, 2)</tt> would be represented as:<br></p>
+    <blockquote><tt>[</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; [</tt><tt><i>scalar</i></tt><tt><sub>11</sub></tt><tt>,
+      </tt><tt><i>scalar</i></tt><tt><sub>12</sub></tt><tt>],</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; [</tt><tt><i>scalar</i></tt><tt><sub>21</sub></tt><tt>,
+      </tt><tt><i>scalar</i></tt><tt><sub>22</sub></tt><tt>],</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; [</tt><tt><i>scalar</i></tt><tt><sub>31</sub></tt><tt>,
+      </tt><tt><i>scalar</i></tt><tt><sub>32</sub></tt><tt>]</tt><tt><br>
+      </tt><tt>]</tt></blockquote>
+    <p>Example 2:  <tt>ARRAY(3, 2) SCALAR</tt> would be represented as:<br></p>
+    <blockquote><tt>[</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; [</tt><tt><i>scalar</i></tt><tt><sub>11</sub></tt><tt>,
+      </tt><tt><i>scalar</i></tt><tt><sub>12</sub></tt><tt>, 'a'],</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; [</tt><tt><i>scalar</i></tt><tt><sub>21</sub></tt><tt>,
+      </tt><tt><i>scalar</i></tt><tt><sub>22</sub></tt><tt><tt>, 'a'</tt>],</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; [</tt><tt><i>scalar</i></tt><tt><sub>31</sub></tt><tt>,
+      </tt><tt><i>scalar</i></tt><tt><sub>32</sub></tt><tt><tt>, 'a'</tt>],</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; 'a'</tt><tt><br>
+      </tt><tt>]</tt><br>
+    </blockquote>
+    Example 3: <tt>ARRAY(3) VECTOR(2)</tt> would be represented as:<br>
+    <blockquote><tt>[</tt><br>
+      <tt>
+      </tt><tt>&nbsp;&nbsp;&nbsp; [</tt><tt><i>scalar</i></tt><tt><sub>11</sub></tt><tt>,
+      </tt><tt><i>scalar</i></tt><tt><sub>12</sub></tt><tt>],</tt><br>
+      <tt>
+      </tt><tt>&nbsp;&nbsp;&nbsp; [</tt><tt><i>scalar</i></tt><tt><sub>21</sub></tt><tt>,
+      </tt><tt><i>scalar</i></tt><tt><sub>22</sub></tt><tt>],</tt><br>
+      <tt>
+      </tt><tt>&nbsp;&nbsp;&nbsp; [</tt><tt><i>scalar</i></tt><tt><sub>31</sub></tt><tt>,
+      </tt><tt><i>scalar</i></tt><tt><sub>32</sub></tt><tt>],</tt><br>
+      <tt>
+      </tt><tt>&nbsp;&nbsp;&nbsp; 'a'</tt><br>
+      <tt>
+      </tt><tt>]</tt><br>
+    </blockquote>
+    <h2><a name="ComputationStack"></a>The Computation Stack</h2>
+    <p>To understand some of the descriptions below, particularly in the <a moz-do-not-send="true" href="#Instructions">Instructions Section</a>, it's helpful to have some idea of the computational model PALMAT envisages.<br></p>
+    <p>Specifically, whenever PALMAT instructions are engaged in any activities that require computation of a value, it employs a construct that I call the "computation stack".&nbsp; The computation stack is simply a last-in first-out buffer, onto which the PALMAT instructions (discussed later) can do things like push numerical values, pop numerical values to perform mathematical operations on them, and so forth.&nbsp; By combining various primitive operations of this kind, the values of expressions of any complexity can be computed, including some operations (like the HAL/S <tt>#</tt> operator) that have no analogs in programming languages which tend to be familiar.&nbsp; I'll refer to it quite often later.<br></p>
+    <p>Elements of any of the types described in the preceding section can appear on the computation stack, but not objects of any other kind.<br></p>
+    <p>However, the computation stack does not form any part of the PALMAT structure we're discussing, and I mention it merely as background information; it's an an entirely separate object within the emulator from the PALMAT structure.<br></p>
+    <h2><a name="Scopes"></a>Scopes</h2>
+    At any rate, at the topmost level, a PALMAT structure is little more
+    than a list (which is the Python term for an array) of "scopes":<br>
+    <blockquote>
+      <p><tt>PALMAT = { <br>&nbsp;&nbsp;&nbsp; "scopes" : [ SCOPE0, SCOPE1, SCOPE2, ... ], <br>&nbsp;&nbsp;&nbsp; "instantiation" : <i>N</i> <br>}</tt><br></p>
+    </blockquote>
+    <p>There <i>can</i> be other elements in the PALMAT structure, such as the "instantiation" key/value pair you see above.&nbsp; The <tt>"instantiation"</tt> is a serialization, starting at 0, and is a unique value for each PALMAT dataset created.&nbsp; If multiple PALMAT datasets were being emulated simultaneously, you could think of it as a process-identification number.&nbsp; But it's the <i>scopes</i> that concern us here.<br></p>
+    <p>What these scopes signify, and the reason they are called "scopes", is that they let us determine which identifiers (variables, constants, program labels) are accessible from any given point in the code.&nbsp; As you'll see in a moment, the scopes are actually in a hierarchical arrangement that's more complex than the simple list structure shown above, and a given scope (with some exceptions) can generally access identifiers defined in itself or in its ancestors in the hierarchy, but not in its descendents or in sideways relationships like cousins, or uncles.<br></p>
+    <p>Scope 0 is the top-level scope, of which all other scopes are descendents, and essentially represents what you might call "global" elements.&nbsp; Each scope comprises the dictionary of the identifiers (variables, program labels) defined in it, along with their properties, and the list of PALMAT instructions defined in the scope, plus other items.&nbsp; Pure HAL/S actually has no <i>global</i> variables or statements that can be compiled to instructions, but it does have other top-level compilation objects, each of which has an associated identifier, such as <br></p>
+    <ul>
+      <li><tt>PROGRAM</tt></li>
+      <li><tt>FUNCTION</tt></li>
+      <li><tt>PROCEDURE</tt></li>
+      <li><tt>COMPOOL</tt></li>
+    </ul>
+    <p>(In HAL/S, a <tt>COMPOOL</tt> is a set of variables which can be shared among programs, functions, or procedures which normally could not do so, perhaps due to being in separate source-code files.&nbsp; A <tt>COMPOOL</tt> is the closest thing in HAL/S to a set of global variables.) Thus in pure HAL/S, Scope 0 would be basically be just a collection of child scopes, one for each of the programs, functions, procedures, or compools defined in it.<br></p>
+    <p>However, for several reasons, such as our desire to have a HAL/S interpreter, our own implementation is "impure" in the sense that we actually <i>do</i> allow the global scope to have global variables as well as active code not wrapped in any program, function, procedure, or compool.&nbsp; These "impure" possibilities are transparent to existing Shuttle software written in "pure" HAL/S.<br></p>
+    <p>To illustrate with an example, consider the HAL/S source code, <br></p>
+    <blockquote>
+      <p><tt>DECLARE I INTEGER INITIAL(5);</tt><tt><br></tt><tt>WRITE(6) I;</tt><br></p>
+    </blockquote>
+    <p>which simply prints out the value 5.&nbsp; This code is impure since it exists outside of any containing <tt>PROGRAM</tt>.&nbsp; Upon compilation we get a PALMAT structure that looks like this:<br></p>
+    <blockquote>
+      <p><tt>PALMAT = {<br>&nbsp;&nbsp;&nbsp; "scopes": [<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "parent": None, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "self": 0, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "children": [], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "identifiers": {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "^I^": {"integer": true, "initial": 5, "value": 5}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "instructions": [<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"fetch": [0, "I"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"write": "6"}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "type": "root"<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }<br>&nbsp;&nbsp;&nbsp; ], <br>&nbsp;&nbsp;&nbsp; "instantiation": 0<br>}<br></tt></p>
+    </blockquote>
+    <p>This structure contains everything needed to run the sample code just mentioned.</p>
+    <p>There's only a single scope here, and everything occurs within this scope, but most of the basic parts are present that would appear in any scope. So what are the properties of that scope?<br></p>
+    <ul>
+      <li><tt>parent, self, children</tt>:&nbsp; The scopes are in a strict hierarchical arrangement, in which each scope has a parent (unless it is the global scope, 0), itself, and a list of 0 or more children.&nbsp; Each of these is identified by a corresponding numerical index within the <tt>P</tt><tt>ALMAT["scopes"]</tt> array.&nbsp; Since we have only scope 0 in our example, it has no parent, and thus its <tt>parent</tt> is listed as <tt>None</tt>, which is an object used in Python that we use here to mean that there is no assigned value.&nbsp; Moreover, it has no children.&nbsp; But it will always have itself, which it identifies as <tt>SELF 0</tt>.<br></li>
+      <li><tt>identifiers</tt>:&nbsp; This is a Python dictionary of all of the identifiers (variables, constants, program labels) defined in the scope.&nbsp; In this case, there's only one variable, <tt>I</tt>.&nbsp; It has various attributes, in this case "integer", "initial", and "value", which I'll discuss later.</li>
+      <li><tt>instructions</tt>:&nbsp; This a Python list of all of the PALMAT instructions for the scope, in the order in which they're executed.&nbsp; The available PALMAT instructions and their behaviors will be discussed in a later section.&nbsp; In this particular example, the first instruction <tt>{"fetch": [0, "I"]}</tt> gets the value of the variable I from scope 0, and the second instruction, <tt>{"write": "6"}</tt>, prints it out.<br></li>
+      <li><tt>type</tt>:&nbsp; This is an indication of what type of compilation unit the scope is associated with.&nbsp; I'll get to those in a moment.&nbsp; The <tt>type</tt> is useful because there are cases in which a given scope has access to identifiers defined in their ancestor scopes, but only to a certain point; the <tt>type</tt> allows those demarcation points to be known in searches for identifiers within the scope hierarchy.&nbsp; (Such searches are very rare in emulation of PALMAT object code, since most can be resolved at compile-time; however, emulation-time searches associated with <tt>ASSIGN</tt> clauses in <tt>PROCEDURE</tt> calls may still be needed, until/unless I see how to eliminate them.)<br></li>
+    </ul>
+    <p>As I began by saying, this example is "impure" HAL/S.&nbsp; But we can convert it to a "pure" HAL/S example if we provide a <tt>PROGRAM</tt> wrapper:</p>
+    <blockquote><tt>EXAMPLE: PROGRAM;</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; DECLARE I INTEGER INITIAL(5);</tt><tt><br>
+      </tt><tt> </tt><tt>&nbsp;&nbsp;&nbsp; WRITE(6) I;<br>
+        CLOSE EXAMPLE;<br>
+      </tt></blockquote>
+    Having done that, the compiled PALMAT representation becomes
+    instead:<br>
+    <blockquote><tt>{<br>
+        &nbsp;&nbsp;&nbsp; "scopes": [<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        "parent": null, <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "self":
+        0, <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        "children": [1], <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        "identifiers": {<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; "^l_EXAMPLE^": {"program": true, "scope": 1}<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }, <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        "instructions": [], <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "type":
+        "root"<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }, <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        "parent": 0, <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "self":
+        1, <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        "children": [], <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        "identifiers": {<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; "^I^": {"integer": true, "initial": 5,
+        "value": 5}<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }, <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        "instructions": [<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; {"fetch": [1, "I"]}, <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; {"write": "6"}<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ], <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "type":
+        "program", <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "name":
+        "^l_EXAMPLE^", <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        "attributes": {"program": true, "scope": 1}}<br>
+        &nbsp;&nbsp;&nbsp; ], <br>
+        &nbsp;&nbsp;&nbsp; "instantiation": 0<br>
+        }</tt><br>
+    </blockquote>
+    Thus we now have two scopes rather than just the one.&nbsp; Scope 0
+    is now largely empty, just as we should have expected, except that
+    it defines a single identifier, namely <tt>EXAMPLE</tt>, the
+    newly-defined <tt>PROGRAM</tt>.&nbsp; Similarly, scope 1 now
+    contains everything that our earlier scope 0 used to, with a few
+    relatively-minor changes.&nbsp; One such change is that it now has <tt>type
+
+      "program"</tt>, which is presumably self explanatory, as well as
+    fields <tt>"name"</tt> and <tt>"attributes"</tt> that simply
+    duplicate the declaration in scope 0.&nbsp; <br>
+    <blockquote><font size="-1"><b>Aside:</b>&nbsp; If we were to run
+        this code, starting from instruction 0 in scope 0, it would
+        actually do nothing at all, for there are no instructions listed
+        in scope 0.&nbsp; That's perfect HAL/S behavior, since HAL/S
+        imagines the existence of a "monitor" program as part of the
+        operating system, and it is the monitor which initiates and
+        supervises execution of a list of HAL/S <tt>PROGRAM</tt>s it is
+        given, on a timesharing basis. </font><br>
+    </blockquote>
+    However, top-level compilation units like <tt>PROGRAM</tt>, <tt>FUNCTION</tt>,
+    <tt>PROCEDURE</tt>, and <tt>COMPOOL</tt> are not the only things
+    that are segregated into their own dedicated scopes by the
+    compiler's code generator.&nbsp; Any HAL/S <tt>DO</tt> block or <tt>IF</tt>
+    statement will trigger creation of a new child scope dedicated to it
+    as well, and mark the new scope with the associated <tt>type</tt>.&nbsp;
+
+    Here are the values of <tt>type</tt> that have been used up to now:<br>
+    <ul>
+      <li>"root"<br></li>
+      <li>"program"</li>
+      <li>"function"</li>
+      <li>"procedure"</li>
+      <li>"compool"</li>
+      <li>"do"</li>
+      <li>"do for"</li>
+      <li>"do while"</li>
+      <li>"do until"</li>
+      <li>"if"<br></li>
+      <li>"unknown"</li>
+    </ul>
+    <p>As one final example, consider the HAL/S code, which contains several of the block types just mentioned:<br></p>
+    <blockquote>
+      <p><tt>DECLARE I INTEGER INITIAL(0);</tt><tt><br></tt><tt>DO WHILE TRUE;</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; WRITE(6) I;</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; I = I + 1;</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; IF I &gt;= 10 THEN EXIT;</tt><tt><br></tt><tt>END;</tt><br></p>
+    </blockquote>
+    <p>This produces a PALMAT structure like the one below.&nbsp; Since my purpose here in this section is just to illustrate how scopes interact, I won't dissect it in detail for you (exercise for the reader!), except to say that the various identifiers you see whose names are of the form <tt>xx_X</tt>, where <tt>xx</tt> is a pair of lower-case letters and <tt>X</tt> is a number, are program labels automatically created by the compiler's code generator.&nbsp; They are used both by PALMAT instructions like "<tt>goto</tt>" (discussed later) that cause some kind of jump to a different address, and by the PALMAT instructions that are the targets of such jumps.&nbsp; Thus, for example, you'll see an instruction <tt>{"goto": [0, "^ue_1^"]}</tt> in scope 0 and a matching instruction <tt>{"noop": true, "label": "^ue_1^"}</tt> in scope 1.&nbsp; The former is a jump to the latter.&nbsp; When this code is executed, beginning at instruction 0 in scope 0, the first thing that happens is a jump to instruction 0 in scope 1, which represents the <tt>DO WHILE</tt> block.&nbsp; Several instructions in the <tt>DO WHILE</tt> block are executed, until near the end of the block we see the instruction <tt>{"goto": [1, "^ue_2^"]}</tt>, which is a jump to scope 2, the <tt>IF</tt> block.&nbsp; Eventually, after scope 2 does its works it returns to scope 1 (via the instruction <tt>{"goto": [1, "^ur_2^"]}</tt>), and scope 1 eventually returns to scope 0 (via <tt>{"goto": [0, "^ur_1^"]}</tt>), at which point scope 0 runs out of instructions to execute, and emulation halts.<br></p>
+    <blockquote>
+      <p><tt>{<br>&nbsp;&nbsp;&nbsp; "scopes": [<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "parent": null, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "self": 0, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "children": [1], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "identifiers": {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "^I^": {"integer": true, "initial": 0, "value": 0}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "^ue_1^": {"label": [1, 0]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "^ur_1^": {"label": [0, 1]}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "instructions": [<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"goto": [0, "^ue_1^"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"noop": true, "label": "^ur_1^"}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "type": "root"<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "parent": 0, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "self": 1, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "children": [2], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "identifiers": {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "^ue_2^": {"label": [2, 0]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "^ur_2^": {"label": [1, 10]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "^ux_1^": {"label": [1, 12]}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "instructions": [<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"noop": true, "label": "^ue_1^"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"boolean": [[1, 1]]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"iffalse": [1, "^ux_1^"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"fetch": [0, "I"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"write": "6"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"number": "1"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"fetch": [0, "I"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"operator": "+"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"storepop": [0, "I"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"goto": [1, "^ue_2^"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"noop": true, "label": "^ur_2^"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"goto": [0, "^ue_1^"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"noop": true, "label": "^ux_1^"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"goto": [0, "^ur_1^"]}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "type": "do while"<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "parent": 1, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "self": 2, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "children": [], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "identifiers": {"^ux_2^": {"label": [2, 6]}}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "instructions": [<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"noop": true, "label": "^ue_2^"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"number": "10"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"fetch": [0, "I"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"operator": "&gt;="}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"iffalse": [2, "^ux_2^"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"goto": [1, "^ux_1^"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"noop": true, "label": "^ux_2^"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"goto": [1, "^ur_2^"]}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "type": "if"<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }<br>&nbsp;&nbsp;&nbsp; ], <br>&nbsp;&nbsp;&nbsp; "instantiation": 0<br>}</tt><br></p>
+    </blockquote>
+    <p>This particular example happens to illustrate an interesting point about some program-label identifiers, namely that they may be <i>defined</i> in one scope but actually <i>be</i> in a descendent scope.&nbsp; This is the case with the program labels <tt>ue_1</tt> and <tt>ue_2</tt>.&nbsp; Recall that I mentioned earlier that scopes have access to identifiers declared in their ancestor scopes, but ancestors have no access to identifiers defined in their descendent scopes.&nbsp; That's what's happening here.&nbsp; Both scopes 0 and 1 need the definition of <tt>ue_1</tt> to be accessible to them, and scope 1 has access to scope 0's definitions, but not vice-versa.&nbsp; This forces the code generator to define <tt>ue_1</tt> in scope 0, even though the label itself really refers to an address in scope 1.<br></p>
+    <p>As you can probably imagine by now, any practical example of HAL/S code will compile to quite a large hierarchy of scopes, descending to many levels deep, and quite wide in terms of the numbers of sibling scopes.&nbsp; Part of the job of a linker program would be arrange all of these scopes linearly in memory in a reasonably efficient way to eliminate useless jumps; whereas when emulating PALMAT directly, each scope exists essentially in its own memory space that is essentially independent of all the others, rather than being in any particular memory order with respect to them.<br></p>
+    <h2><a name="Data"></a>Data Model</h2>
+    <p>By the "data model" for a scope, I mean the "identifiers" dictionary in the scope, which was illustrated a little bit in the preceding section.&nbsp; The <tt>identifiers</tt> dictionary has an entry — i.e., a key/value pair — for each identifier accessible to the scope and its descendent scopes, but not to other scopes.&nbsp; Very often these identifiers will be the names of variables or constants for which actual space within the scope is allocated.&nbsp; Sometimes, however, the identifiers will be program labels, either for named entities (like a <tt>PROGRAM</tt>, <tt>FUNCTION</tt>, or <tt>PROCEDURE</tt>) or positions in the PALMAT instruction stream not explicitly named by the HAL/S source code but for which a label has been transparently created by the compiler's code generator.&nbsp; Often, as mentioned above, these program labels will not be in the scope where they're defined in the identifiers dictionary, but rather in some descendent scope.&nbsp;&nbsp;&nbsp; For example, in HAL/S code such as the following,<br></p>
+    <blockquote>
+      <p><tt>F: FUNCTION(X);<br>&nbsp;&nbsp;&nbsp; .<br>&nbsp;&nbsp;&nbsp; .<br>&nbsp;&nbsp;&nbsp; .<br>&nbsp;&nbsp;&nbsp; G: FUNCTION(Y);<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>&nbsp;&nbsp;&nbsp; CLOSE G;<br>&nbsp;&nbsp;&nbsp; .<br>&nbsp;&nbsp;&nbsp; .<br>&nbsp;&nbsp;&nbsp; .<br>&nbsp;&nbsp;&nbsp; Z = G(X);<br>&nbsp;&nbsp;&nbsp; .<br>&nbsp;&nbsp;&nbsp; .<br>&nbsp;&nbsp;&nbsp; .<br>CLOSE F;<br></tt></p>
+    </blockquote>
+    function <tt>G</tt> (and hence the program label "<tt>G</tt>") will
+    always be in a child scope of the scope of function <tt>F</tt>, and
+    yet the identifier <tt>G</tt> itself will always be defined in the
+    <tt>F</tt>'s scope.<br>
+    <blockquote>
+      <p><font size="-1"><b>Aside:</b>&nbsp; Let me detour for a moment to cover technical issues you may have noticed concerning the names of identifiers.&nbsp; There are two of these issues to be aware of:<br></font></p>
+      <ul>
+        <li><font size="-1">In the identifier dictionary, you'll always find identifiers decorated by what I refer to as "carat quotes".&nbsp; For example, for a declaration like <tt>DECLARE I INTEGER</tt>, you'd find that <tt>^I^</tt> appeared as a key in the identifier dictionary rather than merely <tt>I</tt>. <br></font></li>
+        <li><font size="-1"><i>Some</i> types of identifiers appear in "mangled" forms related to their datatypes.&nbsp; This mangling, discussed later in the <a moz-do-not-send="true" href="#Preprocessor">Preprocessor Section</a>, takes the form of a suffix of either 1 or 2 lower-case letters and an underline.&nbsp; Thus in the examples you saw earlier, the <tt>PROGRAM EXAMPLE</tt> turned into the identifier "<tt>^l_EXAMPLE^</tt>".</font></li>
+      </ul>
+      <p><font size="-1">Both of these modifications to the identifier names are inherited from details of the inner workings of the preprocessor and parser; I won't go into detail with that here, except to say that there is no good reason for either of these modifications to persist once PALMAT has been generated and is going to be emulated.&nbsp; Both types of modifications can simply be stripped away in "advanced" stage development.&nbsp; (Though I've seen no actual Shuttle HAL/S source code as of yet, my belief is that it is all upper case, while the carat (^) is not a legal character in HAL/S.&nbsp; So there should be no identifiers in the Shuttle flight software that can mimic these modifications.)</font><br></p>
+    </blockquote>
+    The value associated with an identifier key, i.e. <tt>PALMAT["scopes"][index]["identifiers"][identifier]</tt>,
+    is itself a dictionary of key/value pairs describing the
+    identifier's attributes.&nbsp; At the time I'm writing this, I don't
+    necessarily know all of the possible attributes an identifier may
+    have, but here are the ones I do know about:<br>
+    <ul>
+      <li>For variables:</li>
+      <ul>
+        <li>One (and only one) of the following keys:&nbsp; "scalar", "integer", "bit", "character", "vector", "matrix", or "structure".&nbsp; As for the values associated with these keys:<br></li>
+        <ul>
+          <li>"scalar" or "integer":&nbsp; The value is always the boolean <tt>True</tt>.</li>
+          <li>"bit", "character", or "vector":&nbsp; The value is an integer, giving the width of the bit-string, character-string, or vector stored in the variable.</li>
+          <li>"matrix": The value is a list of two integers defining the geometry, thusly:&nbsp; [number of rows, number of columns].</li>
+          <li>"structure": TBD</li>
+        </ul>
+        <li>Optional "array".&nbsp; The associated value is a list of the array's dimensions:&nbsp; [N<sub>1</sub>, N<sub>2</sub>, ..., N<sub>M</sub>] for an M-dimensional array.</li>
+        <li>Optional "initial".&nbsp; This is the initial value assigned to the variable, prior to execution of any code in the scope.&nbsp; See the <a moz-do-not-send="true" href="#Datatypes">Datatypes Section</a> for an explanation of the nature of this data.<br></li>
+        <li>Optional "value".&nbsp; This is the value assigned to the variable.&nbsp; I've noted here that it's "optional", because it may be omitted from the variable's attributes prior to any assignment occurring.&nbsp; But regarding unitialized values, see also the comments about <tt>None</tt> in the <a moz-do-not-send="true" href="#Datatypes">Datatypes Section</a>.</li>
+        <li>Optional "static".&nbsp; Always <tt>True</tt> if present.&nbsp; It means that the initialization of a variable specified by the "initial" attribute (see above) is performed just once, at startup, and is not performed again if the defining block (<tt>FUNCTION</tt>, <tt>PROCEDURE</tt>, etc.) is executed again later.&nbsp; This is the default.<br></li>
+        <li>Optional "automatic".&nbsp; Always <tt>True</tt> if present.&nbsp; It means that the 
+initialization of a variable specified by the "initial" attribute (see 
+above) is performed anew every time the defining block is executed.</li>
+        <li>Optional "aligned".&nbsp; Always <tt>True</tt> if present. It means that data is aligned on "appropriate" storage boundaries.&nbsp; Appropriateness is undefined, but apparently means appropriate for fastest execution.&nbsp; This is not applicable to the PALMAT implementation in Python, and is thus ignored in the "preliminary" PALMAT-based implementation.<br></li>
+        <li>Optional "dense".&nbsp; Always <tt>True</tt> if present. It means that data is aligned to require the least amount of memory, potentially at the cost of reduced execution speed.&nbsp; Essentially, it is the opposite of "aligned".&nbsp; And like "aligned", it is ignored in the Python PALMAT-based "preliminary" implementation.</li>
+        <li>Optional "access".&nbsp; Always <tt>True</tt> if present.&nbsp; This refers to a managerial control apparently used in the original Shuttle development, namely that blocks of code can be granted specific access rights to variables that define what code has permissions to do what to that variable.&nbsp; In other words, some programmers were trusted to use certain variables in certain ways, and others were not.&nbsp; However ... this managerial concept may have been useful <i>prior</i> to code creation, but has no relevance at all after the code has been written and released, because any source code surviving to that point is guaranteed to obey the imposed access controls even if the access mechanism is no longer actively in place.&nbsp; Hence, the modern implementation (at least in the "preliminary" version) simply ignores this attribute.<br></li>
+        <li>Optional "lock".&nbsp; If present, it has an integer value that refers to the "lock group" to which it pertains.&nbsp; This refers to temporary locks placed on variables shared in <tt>COMPOOL</tt>s by multiple simultaneous HAL/S processes.<br></li>
+        <li>Optional "remote".&nbsp; If present, it has the value <tt>True</tt>.&nbsp; This attribute means that the variable may be seldom-used, an hence may reside in some form of auxiliary memory that's slow to access, rather than in quickly-accessed local memory.&nbsp; This concept of memory maintenance has no relevance to the modern implementation in which essentially unlimited amounts of fast memory are available, and hence is ignored.</li>
+        <li>Optional "rigid".&nbsp; If present, it has the value <tt>True</tt>.&nbsp; It implies that the compiler is not allowed to reorder <tt>STRUCTURE</tt> fields, but instead requires them to remain in the same order in memory as implied by their HAL/S declarations.&nbsp; I'm not certain yet whether this concept is irrelevant to the modern implementation or not; but for the present it is being ignored.&nbsp; But see the "ordering" key immediately below.</li>
+        <li>Optional "ordering".&nbsp; This field is present only for certain <tt>STRUCTURE</tt>s.&nbsp; <a moz-do-not-send="true" href="#Datatypes">Recall</a> that HAL/S <tt>STRUCTURE</tt>s are implemented in PALMAT as Python dictionaries, and that Python dictionaries do not have any concept of the ordering of the keys therein.&nbsp; On the other hand, recall also <tt>INITIAL</tt> and <tt>CONSTANT</tt> clauses in HAL/S <tt>DEFINE</tt> statements rely on a known ordering of the elements of composite datatypes (like <tt>STRUCTURE</tt>s).&nbsp; That being the case, if <tt>INITIAL</tt> or <tt>CONSTANT</tt> is present, or <tt>RIGID</tt> (see immediately above), knowledge of the expected ordering of <tt>STRUCTURE</tt> fields must be preserved.&nbsp; The "ordering" field provides that knowledge.&nbsp; The value associated with the "ordering" key is TBD.<br></li>
+      </ul>
+      <li>For constants, the attributes are generally similar to variables as just described.&nbsp; But here are a few differences:</li>
+      <ul>
+        <li>The "constant" key/value pair stores the value of the constant. <br></li>
+        <li>"value" and "initial" aren't allowed.</li>
+      </ul>
+      <li>For <tt>PROGRAM</tt> names:</li>
+      <ul>
+        <li>"program" is always <tt>True</tt>.</li>
+        <li>"scope" is the index within <tt>PALMAT["scopes"]</tt> of the scope dedicated to the program.&nbsp; (The entry address of the scope's code is always 0, and is therefore not specified.)</li>
+      </ul>
+      <li>For <tt>FUNCTION</tt> names:</li>
+      <ul>
+        <li>"function" is always <tt>True</tt>.</li>
+        <li>"parameters" is a Python list, possibly empty, of the formal names of the function's parameters.&nbsp; These are mangled names (i.e., sometimes with prefixes like <tt>xx_</tt> indicating the datatype) but without so-called carat-quotes.</li>
+        <li>"scope" is the index within <tt>PALMAT["scopes"]</tt> of the scope dedicated to the function.&nbsp; (The entry address of the scope's code is always 0, and is therefore not specified.)</li>
+        <li>One and only one of the datatype fields described above for variables, i.e., "scalar", "integer", "bit", etc.&nbsp; These describe the return value of the function.&nbsp; Other of the attributes described for variables may be used as well, such as "array".</li>
+      </ul>
+      <li>For <tt>PROCEDURE</tt> names:</li>
+      <ul>
+        <li>"procedure" is always <tt>True</tt>.</li>
+        <li>"parameters" is a Python list, possibly empty, of the formal names 
+of the procedure's parameters.&nbsp; These are mangled names (i.e., sometimes 
+with prefixes like <tt>xx_</tt> indicating the datatype) but without so-called carat-quotes.</li>
+        <li>"assignments" is a Python list, possibly empty, of the formal names of parameters in the <tt>ASSIGN</tt> clause. These are mangled names (i.e., sometimes 
+with prefixes like <tt>xx_</tt> indicating the datatype) but without so-called carat-quotes.</li>
+        <li>"scope" is the index within <tt>PALMAT["scopes"]</tt> of the scope dedicated to the procedure.&nbsp; (The entry address of the scope's code is always 0, and is therefore not specified.)</li>
+      </ul>
+      <li>For <tt>COMPOOL</tt> names:</li>
+      <ul>
+        <li>"compool" is always <tt>True</tt>.</li>
+        <li>"scope" is the index within <tt>PALMAT["scopes"]</tt> of the scope dedicated to the compool.</li>
+      </ul>
+      <li>For program labels, i.e., symbolic labels for positions within PALMAT instruction streams, other than the <tt>PROGRAM</tt>, <tt>FUNCTION</tt>, and <tt>PROCEDURE</tt> entry points mentioned above.</li>
+      <ul>
+        <li>"label" has a Python list value of the form [scope index, offset within the instructions of the scope].</li>
+      </ul>
+      <li>Other ... TBD<br></li>
+    </ul>
+    <h2><a name="Instructions"></a>Instructions</h2>
+    <p>This section covers all available PALMAT instructions which can appear in an instruction stream, i.e., in <tt>PALMAT["scopes"][index]["instructions"]</tt>.&nbsp; I've grouped them below according to my categorization of their functionality.<br></p>
+    <h3><a name="Calculations"></a>Operations on the Computation Stack<br>
+    </h3>
+    <p>Recall the discussion of the so-called <a moz-do-not-send="true" href="#ComputationStack">Computation Stack</a> from earlier.&nbsp; Below, if there is a single operand on the computation stack, I'll simply refer to it as "operand".&nbsp; If there are two operands on the stack, I'll refer to the one at the top of the stack (i.e., the first to be popped) as "operand1" and the next-to-top as "operand2".<br></p>
+    <p>In general, if the operands in one of the operations described below are Python integers, and if the result can continue to be represented exactly as an integer, then the result will continue to be a Python integer.&nbsp; More usually, however, operations results will be Python floating-point values.<br></p>
+    <p>Note also that several <a moz-do-not-send="true" href="#ControlTransfer">control-transfer instructions</a> and <a moz-do-not-send="true" href="#Miscellaneous">miscellaneous instructions</a> also affect the computation stack in a generally-trivial way without that being their principal function, but are not included in the table below.<br></p>
+    <h4><a name="Pushing"></a>Pushing onto the Computation Stack<br>
+    </h4>
+    <table width="100%" cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top">Mnemonic<br>
+          </th>
+          <th valign="top" nowrap="nowrap">Python Form of the
+            Instruction<br>
+          </th>
+          <th valign="top">Description<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top"><tt>number</tt><tt><br>
+            </tt></td>
+          <td valign="top" nowrap="nowrap"><tt>{'number': string}</tt><tt><br>
+            </tt></td>
+          <td valign="top">Pushes a literal number (HAL/S <tt>INTEGER</tt>
+            or <tt>SCALAR</tt> onto the computation stack.&nbsp; In
+            this "preliminary" Python implementation, the number within
+            the instruction is given in string form, and hence must be
+            converted by the emulator at runtime into a Python integer
+            or float before pushing it onto the stack.&nbsp; (In an
+            instruction corresponding to this in an "advanced"
+            implementation, the literal constant would presumably
+            already be in the required native arithmetical format, and
+            would need no conversion.)&nbsp; That's because the
+            compiler's code generator retains exponential modifiers like
+            <tt>B5</tt> (power of 2) and <tt>H-2</tt> (power of 16)
+            as-is, accepting the loss of runtime efficiency.&nbsp; Of
+            course, Python understands only exponential modifiers like "<tt>E12</tt>",
+
+
+            and does not understand these alternate exponential
+            modifiers, nor the potential use of multiple exponential
+            identifiers within the same literal.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>string</tt></td>
+          <td valign="top" nowrap="nowrap"><tt>{'string': string}</tt></td>
+          <td valign="top">Pushes a literal <tt>CHARACTER</tt> string
+            onto the computation stack as a single entry.</td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>vector<br>
+            </tt></td>
+          <td valign="top"><tt>{'vector': [...]}<br>
+            </tt></td>
+          <td valign="top">Pushes a literal <tt>VECTOR</tt> onto the
+            computation stack as a single entry.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>matrix<br>
+            </tt></td>
+          <td valign="top"><tt>{'matrix': [[...],...,[...]]}<br>
+            </tt></td>
+          <td valign="top">Pushes a literal <tt>MATRIX</tt> into the
+            computation stack as a single entry.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>array<br>
+            </tt></td>
+          <td valign="top"><tt>{'array': ((...),...)}<br>
+            </tt></td>
+          <td valign="top">Pushes a literal <tt>ARRAY</tt> onto the
+            computation stack as a single entry.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>boolean<br>
+            </tt></td>
+          <td valign="top" nowrap="nowrap"><tt>{'boolean': [(value,
+              length)]}<br>
+            </tt></td>
+          <td valign="top">Pushes a <tt>BOOLEAN</tt> or <tt>BIT</tt>-stream
+
+            literal onto the computation stack.&nbsp; The <tt>BOOLEAN</tt>
+            type is distinguished from <tt>BIT</tt> types only in that
+            length=1.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>bitarray</tt><br>
+          </td>
+          <td valign="top"><tt>{'bitarray': N}</tt><tt><br>
+            </tt></td>
+          <td valign="top">TBD ... I'm confused about this one; may be
+            some legacy thing no longer doing what it was originally
+            intended for.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>fetch</tt></td>
+          <td valign="top"><tt>{'fetch': (index, identifier)}</tt></td>
+          <td valign="top">Finds the identifier (a Python string,
+            mangled, but without carat quotes) representing a variable
+            or constant in the indicated scope, and pushes the current
+            or constant value of it onto the computation stack.&nbsp; If
+            it's an uninitialized variable, then a Python <tt>None</tt>
+            is pushed onto the stack.&nbsp; Note that the value being
+            pushed onto the stack can be of any supported datatype,
+            including <tt>VECTOR</tt>, <tt>MATRIX</tt>, <tt>ARRAY</tt>,
+            and <tt>STRUCTURE</tt>, and that the values are pushed
+            as-is, without conversion of any kind. See the explanation
+            of <a moz-do-not-send="true" href="#Datatypes">datatype
+              representation</a> given earlier.<br>
+            <br>
+            Note that an immediately-preceding <tt>subscripts</tt>
+            instruction, if present, is used to indicate subscripts if
+            the chosen variable is for a composite object like a <tt>VECTOR</tt>,
+            <tt>MATRIX</tt>, or <tt>ARRAY</tt>.<br>
+            <br>
+            As a special case, the provided scope index can be -1.&nbsp;
+            This is used within the scope of a <tt>PROCEDURE</tt> if
+            the identifier is for a variable that's in the <tt>ASSIGN</tt>
+            clause of the <tt>PROCEDURE</tt>'s definition.&nbsp; In
+            this case, the value that is fetched is not from the local
+            scope of the <tt>PROCEDURE</tt>, but rather that of the
+            corresponding variable in the <tt>ASSIGN</tt> clause of the
+            call to the procedure.&nbsp; To clarify, consider the
+            following sample HAL/S code:<br>
+            <blockquote><tt>P: PROCEDURE ASSIGN(X);</tt><tt><br>
+              </tt><tt>&nbsp;&nbsp;&nbsp; ...</tt><tt><br>
+              </tt><tt>&nbsp;&nbsp;&nbsp; Y = X;</tt><tt><br>
+              </tt><tt>&nbsp;&nbsp;&nbsp; ...</tt><tt><br>
+              </tt><tt>CLOSE P;</tt><tt><br>
+              </tt><tt>...</tt><tt><br>
+              </tt><tt>CALL P ASSIGN(Z);</tt><br>
+            </blockquote>
+            Not surprisingly, the compilation of "<tt>Y = X;</tt>"
+            involves the PALMAT <tt>fetch</tt> instruction, but what
+            needs to be fetched is not the value of <tt>X</tt> local to
+            <tt>P</tt>, but rather the variable <tt>Z</tt> in an
+            entirely different scope.&nbsp; The actual PALMAT
+            instruction generated is <tt>{'fetch': (-1, X)}</tt>,
+            causing the emulator to determine at runtime that <tt>X</tt>
+            must be replaced (by <tt>Z</tt>) and that -1 must be
+            replaced (by <tt>Z</tt>'s scope index).<br>
+            <br>
+            If some manner is found in the future of having the
+            compiler's code-generator perform this lookup at compile
+            time rather than forcing the emulator to do it at runtime,
+            then the exception for <tt>index=-1</tt> will become
+            unnecessary, though emulator code for it will be retained
+            (to avoid the necessity of recompilation) if that situation
+            arises.&nbsp; The preliminary implementation of the emulator
+            transparently replaces these indirect references directly
+            within the identifier dictionary whenever it performs one of
+            these searches, so any given search is never performed more
+            than once in any session.</td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>fetchp<br>
+            </tt></td>
+          <td valign="top"><tt>{'fetchp': (index, identifier)}<br>
+            </tt></td>
+          <td valign="top">This is similar to a <tt>fetch</tt>
+            instruction, except that instead of placing the current
+            value of a variable on the computation stack, a "pointer" to
+            the variable is placed there instead.&nbsp; In this
+            preliminary implementation, a "pointer" to the variable
+            specified by <tt>(<i>index</i>, <i>identifier</i>)</tt> is
+            simply the Python construct<br>
+            <blockquote><tt>[<i>index</i>, <i>identifier</i>, 'p']</tt><br>
+            </blockquote>
+            At this writing, the only envisaged use for the <tt>fetchp</tt>
+            instruction is in setup of the computation stack for a <tt>read</tt>
+            instruction.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>unravel</tt><tt><br>
+            </tt></td>
+          <td valign="top"><tt>{'unravel': (index, identifier)}</tt><tt><br>
+            </tt></td>
+          <td valign="top">Like the <tt>fetch</tt> instruction, except
+            that if the variable whose value is being fetched is
+            composite (i.e., <tt>VECTOR</tt>, <tt>MATRIX</tt>, <tt>ARRAY</tt>,
+            <tt>STRUCTURE</tt>) it is unraveled in the process of being
+            fetched.&nbsp; For example, if fetching a <tt>VECTOR(20)</tt>,
+            then 20 locations on the computation stack are used instead
+            of the single location used by <tt>fetch</tt>.&nbsp;
+            Unraveling is in row-major order.<br>
+            <br>
+            <b>Note:</b>&nbsp; I no longer believe this instruction is
+            needed or used.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>empty<br>
+            </tt></td>
+          <td valign="top"><tt>{'empty': True}<br>
+            </tt></td>
+          <td valign="top">Pushes an "uninitialized" value (Python <tt>None</tt>
+            in the preliminary implementation) onto the computation
+            stack.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>sentinel</tt><tt><br>
+            </tt></td>
+          <td valign="top"><tt>{'sentinel': string}</tt><tt><br>
+            </tt></td>
+          <td valign="top">Pushes a "sentinel" object (Python <tt>{'sentinel'}</tt>
+            in the preliminary implementation) onto the computation
+            stack.&nbsp; It acts as a delimiter for a variable-length
+            sequence of operands on the computation stack.&nbsp; The <tt>string</tt>
+            is discarded, and does not affect the stack; it's intended
+            to be used for debugging/documentation purposes, though I
+            have a sense that the preliminary implementation of the
+            emulator may sometimes use the values the it expects <tt>string</tt>
+            to take, in order to more-certainly detect potential
+            implementation errors.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>fill</tt><tt><br>
+            </tt></td>
+          <td valign="top"><tt>{'fill': True}</tt><tt><br>
+            </tt></td>
+          <td valign="top">Pushes a "fill" object (Python <tt>{'fill'}</tt>
+            in the preliminary implementation) onto the computation
+            stack.&nbsp; This corresponds to the presence of a "*" at
+            the end of a HAL/S repetition list.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h4><a name="Computations"></a>Standard Computations on the Stack</h4>
+    <table width="100%" cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top">Mnemonic<br>
+          </th>
+          <th valign="top" nowrap="nowrap">Python Form of the
+            Instruction<br>
+          </th>
+          <th valign="top">Description<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top"><tt>+<br>
+            </tt></td>
+          <td valign="top" nowrap="nowrap"><tt>{'operator': '+'}<br>
+            </tt></td>
+          <td valign="top">Pops operand1 and operand2 from the stack and
+            pushes operand1+operand2 back onto the stack.&nbsp; Note
+            that this encompasses not just the addition of simple
+            numbers, but of various other datatypes as well:<br>
+            <ul>
+              <li>(<tt>INTEGER</tt> or <tt>SCALAR</tt>) + (<tt>INTEGER</tt> or <tt>SCALAR</tt>)</li>
+              <li><tt>VECTOR</tt> + <tt>VECTOR</tt></li>
+              <li><tt>MATRIX</tt> + <tt>MATRIX</tt><br>
+          </li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>-<br>
+            </tt></td>
+          <td valign="top" nowrap="nowrap"><tt>{'operator': '-'}<br>
+            </tt></td>
+          <td valign="top">Pops operand1 and operand2 from the stack and
+            pushes operand1-operand2 back onto the stack.&nbsp;
+            Supports:<br>
+            <ul>
+              <li>(<tt>INTEGER</tt> or <tt>SCALAR</tt>) - (<tt>INTEGER</tt> or <tt>SCALAR</tt>)</li>
+              <li><tt>VECTOR</tt> - <tt>VECTOR</tt></li>
+              <li><tt>MATRIX</tt> - <tt>MATRIX</tt><br>
+  </li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>U-<br>
+            </tt></td>
+          <td valign="top" nowrap="nowrap"><tt>{'operator': 'U-'}<br>
+            </tt></td>
+          <td valign="top">Pops the operand from the stack and pushes
+            -operand back onto the stack.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>times<br>
+            </tt></td>
+          <td valign="top" nowrap="nowrap"><tt>{'operator': ''}<br>
+            </tt></td>
+          <td valign="top">Pops operand1 and operand2 from the stack and
+            pushes operand1 times operand2 back onto the stack.&nbsp;
+            I.e., the operands are multiplied.&nbsp; Supports:<br>
+            <ul>
+              <li>(<tt>INTEGER</tt> or <tt>SCALAR</tt>) times (<tt>INTEGER</tt> or <tt>SCALAR</tt>) is just multiplication in the normal sense of the word.</li>
+              <li>(<tt>INTEGER</tt> or <tt>SCALAR</tt>) times (<tt>VECTOR</tt> or <tt>MATRIX</tt>), or (<tt>VECTOR</tt> or <tt>MATRIX</tt>) times (<tt>INTEGER</tt> or <tt>SCALAR</tt>), separately multiplies each component of the vector or the matrix by the integer or scalar.<br>
+          </li>
+              <li><tt>VECTOR</tt> times <tt>VECTOR</tt> is an <i>outer product</i> of the two vectors.&nbsp; Thus an <tt>N</tt>-vector times a <tt>M</tt>-vector would be an <tt>N</tt>×<tt>M</tt> matrix.<br>
+</li>
+              <li><tt>MATRIX</tt> times <tt>MATRIX</tt> is normal matrix multiplication in the sense of linear algebra.</li>
+              <li><tt>VECTOR</tt> times <tt>MATRIX</tt>, or <tt>MATRIX</tt> times <tt>VECTOR</tt>, also performs a matrix multiplication in the sense of linear algebra.<br>
+          </li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>/<br>
+            </tt></td>
+          <td valign="top" nowrap="nowrap"><tt>{'operator': '/'}<br>
+            </tt></td>
+          <td valign="top">Pops operand1 and operand2 from the stack and
+            pushes operand1/operand2 back onto the stack.&nbsp; I.e.,
+            this is a division operation in the normal sense of the
+            word.&nbsp; There is no "integer division" operator as such,
+            and the results of divisions will be integers only if the
+            dividend and divisor are both integers, and if the dividend
+            is an integral multiple of the divisor.&nbsp; The result of
+            a division by zero is presently TBD.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>**<br>
+            </tt></td>
+          <td valign="top" nowrap="nowrap"><tt>{'operator': '**'}<br>
+            </tt></td>
+          <td valign="top">Pops operand1 and operand2 from the stack and
+            pushes operand1**operand2 back onto the stack.&nbsp; I.e.,
+            operand1 is raised to the operand2 power.&nbsp; The result
+            of operations like 0**0 or (-1)**0.5 are presently TBD.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>C||<br>
+            </tt></td>
+          <td valign="top" nowrap="nowrap"><tt>{'operator': 'C||'}<br>
+            </tt></td>
+          <td valign="top">The string-concatenation operator.&nbsp; It
+            pops operand1 and operand2 from the stack.&nbsp; Operand2 is
+            concatenated to the end of operand1, and then the
+            combination is pushed onto the stack.&nbsp; Note that the
+            computation stack does not track the declared maximum length
+            of strings; the resulting string is simply as long as
+            required by the actual (vs maximum) lengths of the operands.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>not<br>
+            </tt></td>
+          <td valign="top" nowrap="nowrap"><tt>{'operator': 'NOT'}<br>
+            </tt></td>
+          <td valign="top">Pops the operand from the stack, performs a
+            bitwise inversion on it, and pushes the result back onto the
+            stack.<br>
+            <br>
+            At present, in the preliminary implementation this
+            instruction does not perform any automatic type conversions,
+            so the operand must be a <tt>BIT</tt>-string.&nbsp; It is
+            TBD whether or not <tt>INTEGER</tt> or <tt>SCALAR</tt>
+            values should be automatically converted to <tt>BIT</tt>-strings.&nbsp;
+
+            But note that even if they were converted, their lengths
+            (number of significant bits) would still be unknown.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>and<br>
+            </tt></td>
+          <td valign="top" nowrap="nowrap"><tt>{'operator': 'AND'}</tt><br>
+          </td>
+          <td valign="top">Pops operand1 and operand2 from the stack,
+            performs a bitwise <tt>AND</tt>, and pushes the result back
+            onto the stack.&nbsp; The length (number of significant
+            bits) of the result is the minimum of the lengths of
+            operand1 and operand2.<br>
+            <br>
+            At present, in the preliminary implementation this
+            instruction does not perform any automatic type conversions,
+            so both operands must be <tt>BIT</tt>-strings.&nbsp; It is
+            TBD whether or not <tt>INTEGER</tt> or <tt>SCALAR</tt>
+            values should be automatically converted to <tt>BIT</tt>-strings.&nbsp;
+
+            But note that even if they were converted, their lengths
+            (number of significant bits) would still be unknown.</td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>or<br>
+            </tt></td>
+          <td valign="top"><tt>{'operator': 'OR'}<br>
+            </tt></td>
+          <td valign="top">Pops operand1 and operand2 from the stack,
+            performs a bitwise <tt>OR</tt>, and pushes the result back
+            onto the stack.&nbsp; The length (number of significant
+            bits) of the result is the minimum of the lengths of
+            operand1 and operand2.<br>
+            <br>
+            At present, in the preliminary implementation this
+            instruction does not perform any automatic type conversions,
+            so both operands must be <tt>BIT</tt>-strings.&nbsp; It is
+            TBD whether or not <tt>INTEGER</tt> or <tt>SCALAR</tt>
+            values should be automatically converted to <tt>BIT</tt>-strings.&nbsp;
+
+            But note that even if they were converted, their lengths
+            (number of significant bits) would still be unknown.</td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>ornot<br>
+            </tt></td>
+          <td valign="top"><tt>{'operator': 'ORNOT'}<br>
+            </tt><br>
+          </td>
+          <td valign="top">Pops operand1 and operand2 from the stack,
+            performs the bitwise operation <br>
+            <blockquote>operand1 OR NOT operand2<br>
+            </blockquote>
+            and pushes the result back onto the stack.&nbsp; The length
+            (number of significant bits) of the result is the minimum of
+            the lengths of operand1 and operand2.<br>
+            <br>
+            At present, in the preliminary implementation this
+            instruction does not perform any automatic type conversions,
+            so both operands must be <tt>BIT</tt>-strings.&nbsp; It is
+            TBD whether or not <tt>INTEGER</tt> or <tt>SCALAR</tt>
+            values should be automatically converted to <tt>BIT</tt>-strings.&nbsp;
+
+            But note that even if they were converted, their lengths
+            (number of significant bits) would still be unknown.</td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>B||<br>
+            </tt></td>
+          <td valign="top"><tt>{'operator': 'B||'}<br>
+            </tt></td>
+          <td valign="top">This is the <tt>BIT</tt>-string
+            concatentation operation.&nbsp; It pops operand1 and
+            operand2 from the stack, shifts operand1 leftward by the
+            defined length of operand2, and then fills the rightmost
+            portion with operand2, and pushes the result back onto the
+            stack.&nbsp; The defined length of the result is equal to
+            the sum of the lengths of the defined lengths of the
+            operands.<br>
+            <br>
+            At present, in the preliminary implementation this
+            instruction does not perform any automatic type conversions,
+            so both operands must be <tt>BIT</tt>-strings.&nbsp; It is
+            TBD whether or not <tt>INTEGER</tt> or <tt>SCALAR</tt>
+            values should be automatically converted to <tt>BIT</tt>-strings.&nbsp;
+
+            But it's unclear what the result of the operation should be
+            if operand2 has no known maximum length.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>==<br>
+            </tt></td>
+          <td valign="top"><tt>{'operator': '=='}<br>
+            </tt></td>
+          <td valign="top">Pops operand1 and operand2 from the
+            stack.&nbsp; If they are equal, pushes the <tt>BIT</tt>-string
+
+            corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[(1,1)]</tt>,
+            onto the stack; otherwises, pushes <tt>FALSE</tt>, <tt>[(0,1)]</tt>,
+            onto the stack.<br>
+            <br>
+            Note that the BNF specification for HAL/S places some
+            pretty-severe limits on the datatypes comparable by means of
+            relational operators.&nbsp; The allowed comparisons
+            are:&nbsp; arithmetical (<tt>SCALAR</tt>, <tt>INTEGER</tt>,
+            <tt>VECTOR</tt>, <tt>MATRIX</tt>) to arithmetical, <tt>CHARACTER</tt>
+            to <tt>CHARACTER</tt>, <tt>BIT/BOOLEAN</tt> to <tt>BIT/BOOLEAN</tt>,
+            <tt>STRUCTURE</tt> to <tt>STRUCTURE</tt>, or name to
+            name.&nbsp; Thus there are no datatype-conversion
+            considerations with this operator.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>!=<br>
+            </tt></td>
+          <td valign="top"><tt>{'operator': '!='}<br>
+            </tt></td>
+          <td valign="top">Pops operand1 and operand2 from the
+            stack.&nbsp; If they are not equal, pushes the <tt>BIT</tt>-string
+
+            corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[(1,1)]</tt>,
+            onto the stack; otherwises, pushes <tt>FALSE</tt>, <tt>[(0,1)]</tt>,
+            onto the stack.<br>
+            <br>
+            Note that the BNF specification for HAL/S places some
+            pretty-severe limits on the datatypes comparable by means of
+            relational operators.&nbsp; The allowed comparisons
+            are:&nbsp; arithmetical (<tt>SCALAR</tt>, <tt>INTEGER</tt>,
+            <tt>VECTOR</tt>, <tt>MATRIX</tt>) to arithmetical, <tt>CHARACTER</tt>
+            to <tt>CHARACTER</tt>, <tt>BIT/BOOLEAN</tt> to <tt>BIT/BOOLEAN</tt>,
+            <tt>STRUCTURE</tt> to <tt>STRUCTURE</tt>, or name to
+            name.&nbsp; Thus there are no datatype-conversion
+            considerations with this operator.</td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>&lt;<br>
+            </tt></td>
+          <td valign="top"><tt>{'operator': '&lt;'}<br>
+            </tt></td>
+          <td valign="top">Pops operand1 and operand2 from the
+            stack.&nbsp; If operand1 &lt; operand2, pushes the <tt>BIT</tt>-string
+
+            corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[(1,1)]</tt>,
+            onto the stack; otherwises, pushes <tt>FALSE</tt>, <tt>[(0,1)]</tt>,
+            onto the stack.<br>
+            <br>
+            Note that the BNF specification for HAL/S places some
+            pretty-severe limits on the datatypes comparable by means of
+            relational operators.&nbsp; The allowed comparisons
+            are:&nbsp; arithmetical (<tt>SCALAR</tt>, <tt>INTEGER</tt>,
+            <tt>VECTOR</tt>, <tt>MATRIX</tt>) to arithmetical, <tt>CHARACTER</tt>
+            to <tt>CHARACTER</tt>, <tt>BIT/BOOLEAN</tt> to <tt>BIT/BOOLEAN</tt>,
+            <tt>STRUCTURE</tt> to <tt>STRUCTURE</tt>, or name to
+            name.&nbsp; Thus there are no datatype-conversion
+            considerations with this operator.<br>
+            <br>
+            The interpretation of "&lt;" when the operands are not <tt>SCALAR</tt>
+            or <tt>INTEGER</tt> is TBD.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>&gt;<br>
+            </tt></td>
+          <td valign="top"><tt>{'operator': '&gt;'}<br>
+            </tt></td>
+          <td valign="top">Pops operand1 and operand2 from the
+            stack.&nbsp; If operand1 &gt; operand2, pushes the <tt>BIT</tt>-string
+
+            corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[(1,1)]</tt>,
+            onto the stack; otherwises, pushes <tt>FALSE</tt>, <tt>[(0,1)]</tt>,
+            onto the stack.<br>
+            <br>
+            Note that the BNF specification for HAL/S places some
+            pretty-severe limits on the datatypes comparable by means of
+            relational operators.&nbsp; The allowed comparisons
+            are:&nbsp; arithmetical (<tt>SCALAR</tt>, <tt>INTEGER</tt>,
+            <tt>VECTOR</tt>, <tt>MATRIX</tt>) to arithmetical, <tt>CHARACTER</tt>
+            to <tt>CHARACTER</tt>, <tt>BIT/BOOLEAN</tt> to <tt>BIT/BOOLEAN</tt>,
+            <tt>STRUCTURE</tt> to <tt>STRUCTURE</tt>, or name to
+            name.&nbsp; Thus there are no datatype-conversion
+            considerations with this operator.<br>
+            <br>
+            The interpretation of "&gt;" when the operands are not <tt>SCALAR</tt>
+            or <tt>INTEGER</tt> is TBD.</td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>&lt;=<br>
+            </tt></td>
+          <td valign="top"><tt>{'operator': '&lt;='}<br>
+            </tt></td>
+          <td valign="top">Pops operand1 and operand2 from the
+            stack.&nbsp; If operand1 ≤ operand2, pushes the <tt>BIT</tt>-string
+
+            corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[(1,1)]</tt>,
+            onto the stack; otherwises, pushes <tt>FALSE</tt>, <tt>[(0,1)]</tt>,
+            onto the stack.<br>
+            <br>
+            Note that the BNF specification for HAL/S places some
+            pretty-severe limits on the datatypes comparable by means of
+            relational operators.&nbsp; The allowed comparisons
+            are:&nbsp; arithmetical (<tt>SCALAR</tt>, <tt>INTEGER</tt>,
+            <tt>VECTOR</tt>, <tt>MATRIX</tt>) to arithmetical, <tt>CHARACTER</tt>
+            to <tt>CHARACTER</tt>, <tt>BIT/BOOLEAN</tt> to <tt>BIT/BOOLEAN</tt>,
+            <tt>STRUCTURE</tt> to <tt>STRUCTURE</tt>, or name to
+            name.&nbsp; Thus there are no datatype-conversion
+            considerations with this operator.<br>
+            <br>
+            The interpretation of "≤" when the operands are not <tt>SCALAR</tt>
+            or <tt>INTEGER</tt> is TBD.</td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>&gt;=<br>
+            </tt></td>
+          <td valign="top"><tt>{'operator': '&gt;='}<br>
+            </tt></td>
+          <td valign="top">Pops operand1 and operand2 from the
+            stack.&nbsp; If operand1 ≥ operand2, pushes the <tt>BIT</tt>-string
+
+            corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[(1,1)]</tt>,
+            onto the stack; otherwises, pushes <tt>FALSE</tt>, <tt>[(0,1)]</tt>,
+            onto the stack.<br>
+            <br>
+            Note that the BNF specification for HAL/S places some
+            pretty-severe limits on the datatypes comparable by means of
+            relational operators.&nbsp; The allowed comparisons
+            are:&nbsp; arithmetical (<tt>SCALAR</tt>, <tt>INTEGER</tt>,
+            <tt>VECTOR</tt>, <tt>MATRIX</tt>) to arithmetical, <tt>CHARACTER</tt>
+            to <tt>CHARACTER</tt>, <tt>BIT/BOOLEAN</tt> to <tt>BIT/BOOLEAN</tt>,
+            <tt>STRUCTURE</tt> to <tt>STRUCTURE</tt>, or name to
+            name.&nbsp; Thus there are no datatype-conversion
+            considerations with this operator.<br>
+            <br>
+            The interpretation of "≥" when the operands are not <tt>SCALAR</tt>
+            or <tt>INTEGER</tt> is TBD.</td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>#<br>
+            </tt></td>
+          <td valign="top"><tt>{'operator': '#'}<br>
+            </tt></td>
+          <td valign="top">
+            <meta name="qrichtext" content="1">
+            <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><!--StartFragment-->This is the repetition operator.  It has a variable number of operands, terminated by a sentinel (Python <tt>{'sentinel'}</tt> in the preliminary implementation).  The operand at the top of the computation stack is the repetition factor.  The remaining operands on the computation stack, down to the first sentinel encountered, comprise the sequence to be replicated.  Any operands among these latter which are composites — i.e., <tt>VECTOR</tt>, <tt>MATRIX</tt>, or <tt>ARRAY</tt> — are "unraveled" in row-major order to their constituent simple values in the process.  (The handling of unraveling of <tt>STRUCTURE</tt>s is TBD.)  The Python value <tt>None</tt> is also an allowed operand, and indicated an unused position in the sequence.  If the repetition factor is immediately followed by the sentinel without intervening operands to be replicated, it means that the value <tt>None</tt> is being replicated.  The value <tt>{'fill'}</tt> (in the preliminary Python-based implementation) can also be present as the final operand preceding the sentinel. (It corresponds to a trailing "*" in HAL/S, meaning that all remaining positions are left uninitialized. But since that's the default behavior of the emulator in the preliminary implementaion anyway, the fill element is essentially ignored.)  All of the operands, including the sentinel, are popped from the computation stack, and replaced with the desired replicated sequence of operands (and <i>no</i> added sentinel).  <br></p>
+            <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br>An example may clarify.  Consider the HAL/S statement <br></p>
+            <blockquote><tt>DECLARE V VECTOR(32) CONSTANT(16, 5#(3#5,
+                2#6, 62), 1);</tt><br>
+            </blockquote>
+            The <tt>CONSTANT</tt> expression is computed on the
+            computation stack, though it happens to be done at
+            compile-time rather than at runtime.&nbsp; Nevertheless, it
+            is done using the operations described within this table,
+            including the repetition operator.&nbsp; Below we see the
+            PALMAT instructions which the compiler generates to perform
+            the computation, and to the right of that the state of the
+            computation stack (growing to the right) after each
+            instruction is executed:<br>
+            <blockquote>
+              <meta name="qrichtext" content="1">
+              <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><!--StartFragment--><tt>{'number': '1'}         [1]</tt></p>
+              <tt> </tt>
+              <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><tt>{'sentinel': 'repeat'}  [1, {'sentinel'}]</tt></p>
+              <tt> </tt>
+              <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><tt>{'number': '62'}        [1, {'sentinel'}, 62]</tt></p>
+              <tt> </tt>
+              <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><tt>{'sentinel': 'repeat'}  [1, {'sentinel'}, 62, {'sentinel'}]</tt></p>
+              <tt> </tt>
+              <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><tt>{'number': '6'}         [1, {'sentinel'}, 62, {'sentinel'}, 6]</tt></p>
+              <tt> </tt>
+              <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><tt>{'number': '2'}         [1, {'sentinel'}, 62, {'sentinel'}, 6, 2]</tt></p>
+              <tt> </tt>
+              <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><tt>{'operator': '#'}       [1, {'sentinel'}, 62, 6, 6]</tt></p>
+              <tt> </tt>
+              <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><tt>{'sentinel': 'repeat'}  [1, {'sentinel'}, 62, 6, 6, {'sentinel'}]</tt></p>
+              <tt> </tt>
+              <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><tt>{'number': '5'}         [1, {'sentinel'}, 62, 6, 6, {'sentinel'}, 5]</tt></p>
+              <tt> </tt>
+              <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><tt>{'number': '3'}         [1, {'sentinel'}, 62, 6, 6, {'sentinel'}, 5, 3]</tt></p>
+              <tt> </tt>
+              <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><tt>{'operator': '#'}       [1, {'sentinel'}, 62, 6, 6, 5, 5, 5]</tt></p>
+              <tt> </tt>
+              <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><tt>{'number': '5'}         [1, {'sentinel'}, 62, 6, 6, 5, 5, 5, 5]</tt></p>
+              <tt> </tt>
+              <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><tt>{'operator': '#'}       [1, 62, 6, 6, 5, 5, 5, 62, 6, 6, 5, 5, 5, 62, 6, 6, 5, 5, 5, 62, 6, 6, 5, 5, 5, 62, 6, 6, 5, 5, 5]</tt></p>
+              <tt> </tt>
+              <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><tt>{'number': '16'}]       [1, 62, 6, 6, 5, 5, 5, 62, 6, 6, 5, 5, 5, 62, 6, 6, 5, 5, 5, 62, 6, 6, 5, 5, 5, 62, 6, 6, 5, 5, 5, 16]<br></tt></p>
+            </blockquote>
+            The values in the computation stack at the end of this
+            computation are in LIFO order, thus the 32 positions of <tt>VECTOR
+
+              V</tt> are initialized to 16, 5, 5, 5, 6, 6, 62, ..., 1.<br>
+            <blockquote> </blockquote>
+            <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><!--EndFragment--></p>
+            <meta http-equiv="Content-Type" content="text/html;
+              charset=UTF-8">
+            <style type="text/css">
+p, li { white-space: pre-wrap; }
+</style></td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>+&gt;&lt;</tt><tt><br>
+            </tt></td>
+          <td valign="top"><tt>{'+&gt;&lt;': (index, identifier)}<br>
+            </tt></td>
+          <td valign="top">This operation is difficult to describe
+            concisely, because unlike almost all other PALMAT
+            instructions (which are intended to be simple building
+            blocks for flexibly implementing more-complex operations),
+            this instruction performs a rather complex operation for a
+            dedicated purpose.&nbsp; Its observable effects are simple,
+            however:&nbsp; Two operands are popped from the computation
+            stack, and a single <tt>BOOLEAN</tt> is pushed onto the
+            stack in their place.<br>
+            <br>
+            Conceptually, if you have a HAL/S statement of the form<br>
+            <blockquote><tt>DO FOR [TEMPORARY] X = Y TO Z BY T; ...;
+                END;</tt><br>
+            </blockquote>
+            then the <tt>+&gt;&lt;</tt> PALMAT instruction is used for
+            updating the loop variable <tt>X</tt> to <tt>X+T</tt> and
+            then comparing the result to <tt>Z</tt> to determine if the
+            end-condition of the for-loop has been met, taking into
+            account for the comparison whether the step-size <tt>T</tt>
+            is positive or negative.<br>
+            <br>
+            The stack setup for this instruction is that <tt>T</tt> is
+            operand1 (the top of stack) and <tt>Z</tt> is operand2 (the
+            next-to-top).&nbsp; The <tt>index</tt> and <tt>identifier</tt>
+            encoded in the instruction itself specify the loop variable
+            <tt>X</tt>.<br>
+            <br>
+            Specifically, the <tt>+&gt;&lt;</tt> instruction can be
+            said to begin with the equivalent of the PALMAT instructions<br>
+            <blockquote><tt>{'fetch': (index, X)}</tt><tt><br>
+              </tt><tt>{'operator': '+'}</tt><tt><br>
+              </tt><tt>{'store': (index, X)}</tt><br>
+            </blockquote>
+            which update the loop variable in memory and leave the
+            updated value of it at the top of the stack.&nbsp; Depending
+            on whether <tt>T</tt> is positive or negative, <tt>+&gt;&lt;</tt>
+            then ends up with the equivalent of either the PALMAT
+            instruction<br>
+            <blockquote><tt>{'operator': '&gt;'}</tt><br>
+            </blockquote>
+            or <br>
+            <blockquote><tt>{'operator': '&lt;'}</tt><br>
+            </blockquote>
+            respectively, either of which removes all remaining operands
+            from the stack, leaving a single <tt>TRUE</tt> or <tt>FALSE</tt>
+            to tell us if the end-condition has been met.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>builtin</tt><br>
+          </td>
+          <td valign="top"><tt>{'function': f}</tt></td>
+          <td valign="top">Calls a Run-Time Library (RTL) function,
+            otherwise known as a "built-in function".&nbsp; The name of
+            the desired run-time library function is the string <tt>f</tt>.&nbsp;
+
+            The HAL/S run-time library functions are documented in the
+            HAL/S documentation, particularly the <a
+              moz-do-not-send="true"
+              href="Shuttle/HAL_S%20Programmers%20Guide%20Nov%202005.pdf#page=415">"HAL/S
+
+              Programmer's Guide", Appendix B</a>, and I see no reason
+            to duplicate that information here.&nbsp; In general, these
+            functions pop 0, 1, 2, or 3 operands from the computation
+            stack, and push a result back onto the stack.&nbsp; The
+            functions presently implemented in the preliminary
+            implementation are the following, though others will
+            presumably be implemented over time until complete support
+            is achieved:<br>
+            <ul>
+              <li>ABS</li>
+              <li>ABVAL          </li>
+              <li>ARCCOS</li>
+              <li>ARCCOSH</li>
+              <li>ARCSIN</li>
+              <li>ARCSINH</li>
+              <li>ARCTAN</li>
+              <li>ARCTAN2          </li>
+              <li>ARCTANH          </li>
+              <li>CEILING</li>
+              <li>COS</li>
+              <li>COSH</li>
+              <li>DET</li>
+              <li>DIV          </li>
+              <li>EXP          </li>
+              <li>FLOOR</li>
+              <li>INDEX          </li>
+              <li>INVERSE          </li>
+              <li>LENGTH</li>
+              <li>LJUST          </li>
+              <li>LOG          </li>
+              <li>MAX</li>
+              <li>MIDVAL          </li>
+              <li>MIN</li>
+              <li>MOD          </li>
+              <li>ODD          </li>
+              <li>PROD</li>
+              <li>RANDOM</li>
+              <li>RANDOMG</li>
+              <li>REMAINDER</li>
+              <li>RJUST          </li>
+              <li>ROUND          </li>
+              <li>RUNTIME</li>
+              <li>SHL</li>
+              <li>SHR          </li>
+              <li>SIGN</li>
+              <li>SIGNUM</li>
+              <li>SIN</li>
+              <li>SINH</li>
+              <li>SQRT          </li>
+              <li>SUM</li>
+              <li>TAN</li>
+              <li>TANH</li>
+              <li>TRACE</li>
+              <li>TRANSPOSE          </li>
+              <li>TRIM          </li>
+              <li>TRUNCATE</li>
+              <li>UNIT</li>
+              <li>XOR</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>typeof<br>
+            </tt></td>
+          <td valign="top"><tt>{'modern': 'TYPEOF'}<br>
+            </tt></td>
+          <td valign="top">This PALMAT instruction is related to a
+            built-in function I've invented to aid creation of
+            validation programs written in HAL/S for the "modern" HAL/S
+            compiler, but not present in original implementations of
+            HAL/S.&nbsp; The <tt>typeof</tt> instruction is generated
+            when something like the following appears in a HAL/S
+            expression:<br>
+            <blockquote><tt>TYPEOF('<i>IDENTIFIER</i>')</tt><br>
+            </blockquote>
+            Here, <tt>TYPEOF</tt> is my invented built-in function and
+            <tt><i>IDENTIFIER</i></tt> is the name of any defined
+            identifier within the scope, presented as a HAL/S
+            string.&nbsp; Note that so-called carat-quotations should <i>not</i>
+            be used.&nbsp; Name-mangling prefixes, if known, can be used
+            or not, but I'd recommend <i>not</i> doing so since the
+            emulator can find the identifiers without them anyway
+            (albeit more slowly) and by omitting them you avoid
+            potentially providing them incorrectly.<br>
+            <br>
+            The instruction pops the operand string from the computation
+            stack and replaces it with an <tt>ARRAY</tt> of strings
+            that describe the attributes of the chosen identifier.&nbsp;
+            In essence it provides much the same information as the
+            modern HAL/S interpreter's <tt>`data</tt> command, but in a
+            form available to a test program written in HAL/S
+            itself.&nbsp; The <tt>ARRAY</tt> is one-dimensional, of
+            length 20, and has the following entries.&nbsp; (In general,
+            an entry of an empty string, "", indicates an unused
+            position.<br>
+            <ol>
+              <li>The datatype of the identifier, which is one of the following:  "MISSING" (if the identifier is not found), "INTEGER", "SCALAR", "VECTOR", "MATRIX", "BIT", "CHARACTER", "STRUCTURE", "LABEL", "EVENT", or "?" (indicating a datatype <tt>TYPEOF</tt> cannot identify, presumably due to inadequate implementation).</li>
+              <li>The maximum length of a bit-string or character-string, the length of a vector, or the number of rows of a matrix. <br></li>
+              <li>The number of columns of a matrix.</li>
+              <li>Stringified value of a <tt>CONSTANT</tt> clause in the declaration.  In the case of an <tt>INTEGER</tt> or <tt>SCALAR</tt>, this is just the numerical value formatted as a string.  In the case of a bit-string, this is the "<i>N</i>, <i>L</i>", where <i>N</i> is the integer value of the array and <i>L</i> is the length in bits.  In the case of a <tt>VECTOR</tt> or <tt>MATRIX</tt>, it is an unraveling of all of the data, separated by commas and a space.  In general, floating-point numbers are rounded to no more than 5 fractional decimal places if the numbers are small enough that there is no E-style exponent.</li>
+              <li>Stringified value of an <tt>INITIAL</tt> clause in the declaration.</li>
+              <li>Reserved for future use.  (These reserved positions are for attributes such as <tt>DOUBLE</tt>, <tt>AUTOMATIC</tt>, <tt>STATIC</tt>, and so on, which I haven't yet chosen to implement in <tt>TYPEOF</tt> but may at some point.)</li>
+              <li>Reserved for future use.</li>
+              <li>Reserved for future use.</li>
+              <li>Reserved for future use.</li>
+              <li>Reserved for future use.</li>
+              <li>Reserved for future use.</li>
+              <li>Reserved for future use.</li>
+              <li>Reserved for future use.</li>
+              <li>Reserved for future use.</li>
+              <li>Reserved for future use.</li>
+              <li>If an ARRAY, then the 1st ARRAY dimension.</li>
+              <li>If an ARRAY 2D or higher, then the 2nd ARRAY dimension.</li>
+              <li>If an ARRAY 3D or higher, then the 3rd ARRAY dimension.</li>
+              <li>If an ARRAY 4D or higher, then the 4th ARRAY dimension.</li>
+              <li>If an ARRAY 5D or higher, then the 5th ARRAY dimension. (There's no provision for displaying higher dimensions.)</li>
+            </ol>
+            <p>For example, the HAL/S code<br></p>
+            <blockquote><tt>DECLARE I INTEGER CONSTANT(5), M
+                MATRIX(3,5);</tt><tt><br>
+              </tt><tt>WRITE(6) TYPEOF('I');<br>
+                WRITE(6) TYPEOF('M');<br>
+              </tt></blockquote>
+            prints<br>
+            <blockquote><tt>"INTEGER"&nbsp; ""&nbsp; ""&nbsp; "5"&nbsp;
+                ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
+                ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; -1<br>
+                "MATRIX"&nbsp; "3"&nbsp; "5"&nbsp; ""&nbsp; ""&nbsp;
+                ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
+                ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; -1 <br>
+              </tt></blockquote>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>typeofv<br>
+            </tt></td>
+          <td valign="top"><tt>{'modern': 'TYPEOFV'}<br>
+            </tt></td>
+          <td valign="top">This PALMAT instruction is related to a
+            built-in function I've invented to aid creation of
+            validation programs written in HAL/S for the "modern" HAL/S
+            compiler, but not present in original implementations of
+            HAL/S.&nbsp; It is generated when something like the
+            following appears in a HAL/S expression:<br>
+            <blockquote><tt>TYPEOFV(<i>EXPRESSION</i>)</tt><br>
+            </blockquote>
+            <tt>TYPEOFV</tt> is similar to <tt>TYPEOF</tt> (see above)
+            except that it analyzes the result of a computation — i.e.,
+            of a <i>value</i> — rather than the properties of a
+            declared identifier.&nbsp; Both instructions pop the operand
+            from the computation stack and replace it with an <tt>ARRAY</tt>
+            of attributes.&nbsp; The output, moreover, is in the same
+            format and is interpreted in the same way.&nbsp; Of course,
+            <tt>TYPEOFV</tt> has no access to attributes like <tt>CONSTANT</tt>
+            and <tt>INITIAL</tt>, and attributes to which it has no
+            access are always reported as empty strings.<br>
+            <p>For example, the HAL/S code<br></p>
+            <blockquote><tt>DECLARE I INTEGER CONSTANT(5);</tt><tt><br>
+              </tt><tt>WRITE(6) TYPEOF('I');<br>
+                WRITE(6) TYPEOFV(I);<br>
+                WRITE(6) TYPEOFV(I+12);<br>
+              </tt>
+            </blockquote>
+            prints<br>
+            <blockquote><tt>"INTEGER"&nbsp; ""&nbsp; ""&nbsp; "5"&nbsp;
+                ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
+                ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; -1<br>
+                "INTEGER"&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
+                ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
+                ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; -1 </tt><br>
+              <tt><tt>"INTEGER"&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
+                  ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
+                  ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; -1 </tt></tt>
+            </blockquote>
+            Moreover, <tt>TYPEOFV</tt> can analyze any datatype found
+            on the computation stack, and that's not quite the same as
+            the datatypes accessible to <tt>TYPEOF</tt>.&nbsp; Some
+            additional types reported by <tt>TYPEOFV</tt> but not by <tt>TYPEOF</tt>
+            are: "SENTINEL" (for <tt>{'sentinel'}</tt> objects), "*"
+            (for <tt>{'fill'}</tt> objects), "POINTER" (for pointers to
+            identifiers, from the PALMAT <tt>fetchp</tt> instruction),
+            and "NONE" for uninitialized data.&nbsp; Most of these extra
+            types actually cannot appear to <tt>TYPEOFV</tt> for <i>correctly</i>-generated
+            and -executed PALMAT, but remember that the purpose of <tt>TYPEOFV</tt>
+            is to help detect <i>incorrect</i> PALMAT generation or
+            execution.<br>
+            <br>
+            Finally, in reporting the datatype of an <tt>ARRAY</tt>,
+            say array <tt>A</tt>, <tt>TYPEOFV</tt> only analyzes the
+            datatype of array element <tt>A$(1,...,1)</tt>.&nbsp; It
+            does not check that <i>every</i> element of array <tt>A</tt>
+            has the same (or compatible) datatype, so it could
+            theoretically be fooled by an illegal <tt>ARRAY</tt>-like
+            construct like <tt>(1, 2, 'HELLO', FALSE)</tt> into
+            thinking that it had found an <tt>ARRAY(4) INTEGER</tt>.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>shaping</tt><tt><br>
+            </tt></td>
+          <td valign="top"><tt>{'shaping': s}</tt><tt><br>
+            </tt></td>
+          <td valign="top">Indicates invocation of a "shaping function",
+            as specified by the string <tt>s</tt>.&nbsp; The choices
+            for <tt>s</tt> are <tt>integer</tt>, <tt>scalar</tt>, <tt>vector</tt>,
+            <tt>matrix</tt>, <tt>doubleinteger</tt>, <tt>doublescalar</tt>,
+            <tt>doublevector</tt>, or <tt>doublematrix</tt>.&nbsp; In
+            the preliminary implementation, all arithmetical datatypes
+            are double-precision, so there is no distinction in the
+            preliminary implementation between the <tt>doubleXXXX</tt>
+            shaping functions and the non-double ones.&nbsp; The shaping
+            functions both perform datatype conversions (to integer and
+            floating-point types) and recast the geometry of composite
+            objects.&nbsp; Refer to HAL/S documentation for the detailed
+            effects.<br>
+            <br>
+            Note that an immediately-preceding <tt>subscripts</tt>
+            instruction, if present, is used for specification of
+            geometry.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>sliceAT<br>
+              sliceTO<br>
+            </tt></td>
+          <td valign="top"><tt>{'shaping': 'sliceAT'}<br>
+              {'shaping': 'sliceTO'}<br>
+            </tt></td>
+          <td valign="top">These are similar to the aforementioned
+            instructions <tt>{'shaping': 'vector'}</tt> and <tt>{'shaping':
+              integer}</tt>, respectively.&nbsp; They're used in
+            implementing the HAL/S subscripting conventions "<tt><i>length</i>
+              AT <i>start</i></tt>" and "<tt><i>start</i> TO <i>end</i></tt>".&nbsp;
+            They're intended to execute more efficiently than the full
+            shaping instructions, by eliminating all flexibility and
+            checking.&nbsp; At runtime, either instruction pops operand1
+            and operand2, which are supposed to be <tt>INTEGER</tt>, or
+            at worst <tt>SCALAR</tt>.&nbsp; The <tt>sliceAT</tt>
+            instruction then pushes the Python list <tt>[round(operand1),
+              round(operand2)]</tt> in their place, while the <tt>sliceTO</tt>
+            instruction instead pushes the Python tuple <tt>(round(operand1),
+              round(operand2))</tt>.&nbsp; Subscript-list processing
+            recognizes these forms as describing "slices" and
+            consequently will not confuse them with the <tt>VECTOR(2)</tt>
+            or <tt>ARRAY(2) INTEGER</tt> types they otherwise match.<br>
+            <br>
+            See <a moz-do-not-send="true" href="#Miscellaneous">the <tt>subscripts</tt>
+              instruction</a>.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h4><a name="MiscellaneousStack"></a>Storing and Popping from the
+      Stack<br>
+    </h4>
+    <table width="100%" cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top">Mnemonic<br>
+          </th>
+          <th valign="top" nowrap="nowrap">Python Form of the
+            Instruction<br>
+          </th>
+          <th valign="top">Description<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top"><tt>pop<br>
+            </tt></td>
+          <td valign="top"><tt>{'pop': number}<br>
+            </tt></td>
+          <td valign="top">Pops the indicated <tt>number</tt> of
+            elements from the top of the computation stack.</td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>store<br>
+            </tt></td>
+          <td valign="top" nowrap="nowrap"><tt>{'store': (index,
+              identifier)}</tt><br>
+          </td>
+          <td valign="top">The <tt>store</tt> instruction mostly has
+            the same characteristics as the <tt>fetch</tt> instruction
+            (see above), except that it stores the top of the
+            computation stack into a specified variable instead of
+            vice-versa.&nbsp; In particular, it has the same exception
+            of <tt>index=-1</tt> as do <tt>ASSIGN</tt> clauses.<br>
+            <br>
+            Note, though, that the operand is <i>not</i> popped from
+            the computation stack, and remains on the stack even after
+            its value has been stored elsewhere.&nbsp; This is to
+            facilitate HAL/S capability of performing assignments to
+            multiple variables in a single assignment statement.&nbsp;
+            See also the <tt>storepop</tt> and <tt>pop</tt>
+            instructions below.<br>
+            <br>
+            Note also that the <tt>store</tt> instruction will perform
+            any automatic type conversions (if possible) needed to make
+            the operand conform to the attributes of the variable into
+            which the value is supposed to be stored.&nbsp; It makes
+            these conversions in the manner specified in the HAL/S
+            documentation.&nbsp; For example, if the operand is a Python
+            float and the variable for storage is a HAL/S <tt>INTEGER</tt>
+            (i.e., if in the identifier dictionary it has the attribute
+            <tt>"integer":True</tt>), then the operand will be rounded
+            to the nearest integer before storage.&nbsp; It's worth
+            noting explicitly that these automatic conversions include
+            arithmetical-to-string, and string-to-arithmetical.&nbsp;
+            Thus if we tried to store the number 1 to a string variable,
+            it would be stored as the string '1'.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>storepop<br>
+            </tt></td>
+          <td valign="top" nowrap="nowrap"><tt>{'storepop': (index,
+              indentifier)}<br>
+            </tt></td>
+          <td valign="top">Equivalent to the two-instruction sequence<br>
+            <blockquote><tt>{'store': (index, identifier)}</tt><tt><br>
+              </tt><tt>{'pop': 1}</tt><br>
+            </blockquote>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>substore</tt><tt><br>
+            </tt></td>
+          <td valign="top"><tt>{'substore': (index, identifier)}</tt></td>
+          <td valign="top">This is like the <tt>store</tt> instruction,
+            but provides for subscripting if the targeted variable is a
+            composite one such as a <tt>MATRIX</tt>.&nbsp; (Note that
+            the <tt>subscripts</tt> operator is not explicitly used in
+            this particular application, but all other considerations
+            about the nature of the subscripts are the same.)&nbsp; The
+            computation-stack setup for this instruction, growing to the
+            right, is:<br>
+            <blockquote>..., value to be saved, sentinel, last
+              subscript, ..., first subscript<br>
+            </blockquote>
+            The subscripts and sentinel are popped from the computation
+            stack, but the value is left intact.<br>
+            <br>
+            At present, this mechanism handles only individual
+            subscripts, and not HAL/S subscript constructs like <tt>AT</tt>,
+            <tt>TO</tt>, or <tt>*</tt>.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>substorepop</tt><tt><br>
+            </tt></td>
+          <td valign="top"><tt>{'substorepop': (index, indentifier)}<br>
+            </tt></td>
+          <td valign="top">Like <tt>substore</tt>, but additionally
+            pops the save-value from the computation stack.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h3><a name="ControlTransfer"></a>Transfer of Control</h3>
+    <table width="100%" cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top">Mnemonic<br>
+          </th>
+          <th valign="top" nowrap="nowrap">Python Form of the
+            Instruction<br>
+          </th>
+          <th valign="top">Description<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top"><tt>goto<br>
+            </tt> </td>
+          <td valign="top" nowrap="nowrap"><tt>{'goto': (indexD,
+              identifier)}<br>
+              {'goto': (indexT, offset)} <br>
+              {'goto': (indexT, offset), 'symbolicLabel': (indexD,
+              identifier)}<br>
+            </tt> </td>
+          <td valign="top">Each of these three alternative variants of
+            the instruction unconditionally transfer control to a
+            different location in the PALMAT instruction stream, but
+            they differ in the manner in which they specify the target
+            location.&nbsp; <br>
+            <br>
+            Specifications of the form <tt>(indexD, identifier)</tt>
+            transfer control to a PALMAT instruction (in the scope
+            having the specified index <tt>indexD</tt>) having the
+            associated symbolic label "<tt>identifier</tt>".&nbsp; Such
+            symbolic labels are attached to a PALMAT instruction by
+            means of an added "<tt>label</tt>" field.&nbsp; For example,
+            in the preceding section we encountered the PALMAT <tt>write</tt>
+            instruction, which had the form <tt>{'write': lun}</tt>.&nbsp;
+
+            To attach a symbolic label (say "<tt>MYLABEL</tt>") to the
+            write instruction, the instruction would be modified to <tt>{'write':
+
+              lun, 'label': 'MYLABEL'}</tt>.&nbsp; Note, however, that
+            the <tt>indexD</tt> is the index of the scope in which the
+            <tt>identifier</tt> is <i>defined</i>, and not the scope in
+            which the targetted location resides.<br>
+            <br>
+            Specifications of the form <tt>(indexT, offset)</tt>
+            instead transfer control to the specific numeric <tt>offset</tt>
+            within the PALMAT instruction stream in the scope having the
+            index <tt>indexT</tt>.&nbsp; Thus the <tt>indexT</tt> is
+            not interpreted the same way as <tt>indexD</tt>.<br>
+            <br>
+            The variant in which the instruction contains both a "<tt>goto</tt>"
+            key and a "<tt>symbolicLabel</tt>" key is a combination of
+            the two above.&nbsp; The compiler's code-generator will have
+            generated the <tt>(indexD, identifier)</tt> variant of the
+            instruction, but after executing the instruction once, the
+            emulator will have chosen to transparently replace it by the
+            <tt>(indexT, offset)</tt> form in order to avoid having to
+            perform the same identifier lookup again if the same address
+            is revisited.&nbsp; The emulator saves the original form in
+            a newly-created "<tt>symbolicLabel</tt>" field for debugging
+            purposes, but does not itself use that preserved
+            information.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>iffalse<br>
+            </tt> </td>
+          <td valign="top" nowrap="nowrap"><tt><tt>{'iffalse': (indexD,
+                identifier)}<br>
+                {'iffalse': (indexT, offset)} <br>
+                {'iffalse': (indexT, offset), 'symbolicLabel': (indexD,
+                identifier)}</tt></tt> </td>
+          <td valign="top">This instruction is generally similar to the
+            <tt>goto</tt> instruction described above.&nbsp; It differs
+            only in that it performs a jump to the target location only
+            if the top of the computation stack, which the instruction
+            pops from the stack as an operand, is <tt>FALSE</tt>.&nbsp;
+            Whereas if the operand is <tt>TRUE</tt>, control simply
+            passes normally to the next PALMAT instruction in the
+            stream.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>iftrue<br>
+            </tt> </td>
+          <td valign="top" nowrap="nowrap"><tt><tt><tt>{'iftrue':
+                  (indexD, identifier)}<br>
+                  {'iftrue': (indexT, offset)} <br>
+                  {'iftrue': (indexT, offset), 'symbolicLabel': (indexD,
+                  identifier)}</tt></tt></tt> </td>
+          <td valign="top">This instruction is generally similar to the
+            <tt>goto</tt> instruction described above.&nbsp; It differs
+            only in that it performs a jump to the target location only
+            if the top of the computation stack, which the instruction
+            pops from the stack as an operand, is <tt>TRUE</tt>.&nbsp;
+            Whereas if the operand is <tt>FALSE</tt>, control simply
+            passes normally to the next PALMAT instruction in the
+            stream. </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>call<br>
+            </tt> </td>
+          <td valign="top" nowrap="nowrap"><tt>{'call': (index,
+              identifier)}<br>
+              {'call': (index, identifier), 'assignments': {...}}<br>
+            </tt> </td>
+          <td valign="top">Calls a subroutine (i.e., a <tt>FUNCTION</tt>
+            or <tt>PROCEDURE</tt>) written in HAL/S (vs a HAL/S
+            built-in function that instead would be invoked by the <tt>function</tt>
+            instruction).&nbsp; <br>
+            <br>
+            In terms of the setup for this instruction, the parameters
+            of the <tt>FUNCTION</tt> or <tt>PARAMETER</tt> are placed
+            on the computation stack, with the first parameter being the
+            top of the stack, the second parameter being next to the
+            top, and so on.&nbsp; Each such subroutine has a fixed
+            number of parameters, invariable, and it must pop all of
+            those parameters from the stack when it is <tt>CALL</tt>'d.<br>
+            <br>
+            As far as the return address of the subroutine is concerned,
+            the <tt>call</tt> instruction automatically creates a key
+            called "<tt>RETURN</tt>" in the <tt>subroutine</tt>'s scope
+            to hold it.&nbsp; Realize that subroutines in HAL/S are not
+            reentrant, so this "<tt>RETURN</tt>" key cannot accidentally
+            be overwritten by nested calls.&nbsp; As far as
+            multiprocessing is concerned, separate programs running
+            simultaneously would have separate clones of the
+            subroutine's scope, and thus separate "<tt>RETURN</tt>"
+            keys, and therefore also would not accidentally overwrite
+            the return value.<br>
+            <br>
+            The instruction variant which includes the "<tt>assignments</tt>"
+            key is only present for <tt>PROCEDURE</tt> calls, but this
+            alone cannot be used by the emulator to differentiate
+            between <tt>FUNCTION</tt> vs <tt>PROCEDURE</tt> calls,
+            since some <tt>PROCEDURE</tt> definitions do not have an <tt>ASSIGN</tt>
+            clause.&nbsp; Recall that in HAL/S, both the code which
+            declares a procedure, such as<br>
+            <blockquote><tt>P: PROCEDURE(...) ASSIGN(...); ...; CLOSE P;</tt><br>
+            </blockquote>
+            and the code which calls the procedure,<br>
+            <blockquote><tt>CALL P(...) ASSIGN(...);</tt><br>
+            </blockquote>
+            <i>typically</i> but not always have <tt>ASSIGN</tt>
+            clauses, with each identifier listed in the
+            procedure-definition's <tt>ASSIGN</tt> clause being paired
+            with a variable in the call's <tt>ASSIGN</tt> clause when
+            the <tt>CALL</tt> occurs.&nbsp; The "<tt>assignments</tt>"
+            field in the <tt>call</tt> instruction lists the variables
+            selected by the function call's <tt>ASSIGN</tt> clause and
+            their relationships to the corresponding variables in the
+            procedure's <tt>ASSIGN</tt> clause.&nbsp; This may seem
+            inelegant, but it obviates the need for having constructs
+            like "pointers" to variables, and it eliminates within the
+            parameter lists of <tt>PROCEDURE</tt>s the need to somehow
+            distinguish explicit values vs pointers to variables.<br>
+            <br>
+            Perhaps this is best illustrated by an example.&nbsp;
+            Consider the following HAL/S code, in the global scope (0):<br>
+            <blockquote><tt>P: PROCEDURE(X) ASSIGN(Y); DECLARE X, Y; Y =
+                X; CLOSE P;</tt><tt><br>
+              </tt><tt>DECLARE Y INITIAL(5), Z;</tt><tt><br>
+              </tt><tt>CALL P(Y) ASSIGN(Z);</tt><br>
+            </blockquote>
+            Thus we have a <tt>PROCEDURE</tt>, <tt>P</tt>, which does
+            nothing more than assign <tt>Y</tt> (from its <tt>ASSIGN</tt>
+            clause) the value <tt>X</tt> (its sole parameter).&nbsp;
+            When the <tt>PROCEDURE</tt> is called, with a parameter
+            equal to 5, its <tt>ASSIGN</tt> clause specifies the
+            variable <tt>Z</tt>.&nbsp; So while <tt>P</tt> is
+            executing in the context of this <tt>CALL</tt>, it's own <tt>Y</tt>
+            is identified with the calling code's <tt>Z</tt>.&nbsp; In
+            other words, when <tt>P(5)</tt> is called, we'd expect the
+            calling code's <tt>Z</tt> variable to be set to 5.<br>
+            <br>
+            In terms of the PALMAT instructions generated by the
+            compiler, the <tt>CALL</tt> looks like this:<br>
+            <blockquote><tt>{'fetch': (0, 'Y')}<br>
+                {'call': (0, 'l_P'), 'assignments': {'Y': (0, 'Z')}}</tt><br>
+            </blockquote>
+            (Recall that <tt>PROCEDURE</tt> names are mangled by the
+            compiler with an added prefix "<tt>l_</tt>".)&nbsp; So the
+            emulator must be able to preserve the dictionary stored in
+            the "<tt>assignments</tt>" field of the <tt>call</tt>
+            instruction, and use it as a source of aliases of variables
+            within the <tt>PROCEDURE</tt>.&nbsp; As mentioned for the <tt>fetch</tt>
+            instruction, variables which must be aliased in this fashion
+            due to their presence in the <tt>PROCEDURE</tt>'s <tt>ASSIGN</tt>
+            clause are represented as belonging to scope -1.&nbsp; Since
+            there is no scope -1, the emulator looks in this "<tt>assignments</tt>"
+            dictionary to determine the actual scope index and
+            identifier.&nbsp; The PALMAT code generated for PROCEDURE P
+            looks like the following, <i>in toto</i>:<br>
+            <blockquote><tt>{'storepop': (1, 'X')}</tt><tt><br>
+              </tt><tt>{'fetch': (1, 'X')}</tt><tt><br>
+              </tt><tt>{'storepop': (-1, 'Y')}</tt><tt><br>
+              </tt><tt>{'return': 1}</tt><br>
+            </blockquote>
+            The first instruction pops the operand from the computation
+            stack and store's it in <tt>PROCEDURE P</tt>'s own <tt>X</tt>
+            variable.&nbsp; It then pushes the value of <tt>X</tt> back
+            onto the stack — a clever code optimizer could simply remove
+            both of the first two instructions — in preparation for the
+            third instruction.&nbsp; For that third instruction, the
+            emulator looks at the index of -1, consults the "<tt>assignments</tt>",
+
+            and (in effect, but not literally) replaces the entire third
+            instruction by <tt>{'storepop': (0, 'Z')}</tt>.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>return<br>
+            </tt> </td>
+          <td valign="top" nowrap="nowrap"><tt>{'return': 1}<br>
+              {'return': 2}<br>
+            </tt> </td>
+          <td valign="top">This instruction returns from a <tt>CALL</tt>'d
+
+            subroutine.&nbsp; (See the preceding entry.)<br>
+            <br>
+            The first variant of the instruction is for return from a <tt>PROCEDURE</tt>,
+            while the second variant is for return from a <tt>FUNCTION</tt>.&nbsp;
+
+            The distinction is that while either type of subroutine will
+            have popped all of its input parameters from the computation
+            stack, the <tt>FUNCTION</tt> will have additionally pushed
+            its return value back onto the stack before returning.&nbsp;
+            Thus for a <tt>{'return": 1}</tt> the computation stack
+            will be left empty, while for a <tt>{'return': 2}</tt> the
+            emulator will not clean up the computation stack.&nbsp; In
+            principle, for correctly written code the computation stack
+            should have the correct number of values on it anyway, so
+            the emulator shouldn't have to do anything different in the
+            two cases.&nbsp; In practice, this can be used at runtime to
+            detect conditions like functions not returning any value or
+            procedures which do return values.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>run<br>
+            </tt> </td>
+          <td valign="top" nowrap="nowrap"><tt>{'run': (index,
+              identifier)}<br>
+            </tt> </td>
+          <td valign="top">Runs the <tt>PROGRAM</tt> whose name is
+            given by the identifier defined in the specified
+            scope.&nbsp; In principle, I don't think there's any way to
+            define a <tt>PROGRAM</tt> other than in the scope with <tt>index=0</tt>.&nbsp;
+
+            Also in principle, I don't believe there's any HAL/S code
+            whose compilation is capable of generating this instruction.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    <h3><a name="Miscellaneous"></a>Miscellaneous Instructions</h3>
+    <table width="100%" cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <th valign="top">Mnemonic<br>
+          </th>
+          <th valign="top" nowrap="nowrap">Python Form of the
+            Instruction<br>
+          </th>
+          <th valign="top">Description<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top"><tt>noop<br>
+            </tt></td>
+          <td valign="top" nowrap="nowrap"><tt>{'noop': True}<br>
+              {'noop': True, 'label': identifier}<br>
+            </tt></td>
+          <td valign="top">This is the "no-operation" instruction, and
+            it performs no action when executed other than to advance to
+            the next instruction in the stream.&nbsp; It is typically
+            present only in the second form, and is generally inserted
+            by the compiler's code-generator only as a receptacle for a
+            symbolic label for a location in the instruction
+            stream.&nbsp; <br>
+            <br>
+            In all (or almost all) cases a <tt>noop</tt> instruction
+            can be eliminated during optimization of PALMAT code simply
+            moving the <tt>label</tt> attribute into the succeeding
+            PALMAT instruction, and then fixing any the side effects of
+            that action.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>debug<br>
+            </tt> </td>
+          <td valign="top" nowrap="nowrap"><tt>{'debug': string}<br>
+            </tt> </td>
+          <td valign="top">This instruction is ignored during execution,
+            similar to a <tt>noop</tt>, though it would not be
+            recommended to a attach a label to a <tt>debug</tt>
+            instruction.&nbsp; As the name indicates, it's useful
+            primarily for embedding debugging messages into the PALMAT
+            instruction stream.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>write<br>
+            </tt> </td>
+          <td valign="top" nowrap="nowrap"><tt><tt>{'write': lun}<br>
+              </tt></tt> </td>
+          <td valign="top">Prints out the entire contents of the
+            computation stack to the specified "logical unit number" (<tt>lun</tt>).&nbsp;
+
+            Note that the preliminary implementation supports only <tt>lun=6</tt>,
+            namely <i>stdout</i> (i.e., the console).&nbsp; The values
+            to be printed are removed from the stack in first-in
+            first-out (FIFO) order, rather than in the last-in first-out
+            (LIFO) order usual for the computation stack (and stacks in
+            general).&nbsp; If the computation stack is empty, then a
+            single line-feed is printed.<br>
+            <br>
+            Any datatype may be printed (including composite types such
+            as <tt>ARRAY</tt>), and the printout is in the format
+            described by the HAL/S documentation.&nbsp; For example, 0.0
+            is printed as " 0.0" (note the leading space), while 0.1 is
+            printed as " 1.00000000000000E-01".<br>
+            <br>
+            Note, however, that so-called "i/o controls" affecting the
+            output format are not supported in the preliminary
+            implementation, and are simply ignored by the emulator. </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>read<br>
+            </tt> </td>
+          <td valign="top" nowrap="nowrap"><tt>{'read': lun}<br>
+            </tt> </td>
+          <td valign="top">Reads values from the "logical unit number (<tt>lun</tt>).&nbsp;
+
+            Note that the preliminary implementation only supports
+            lun=5, namely <i>stdin</i> (i.e., the keyboard).&nbsp; The
+            values to be read are specified on the computation stack,
+            and must be placed on the stack by the <tt>fetchp</tt>
+            PALMAT instruction.&nbsp; Note that the entries on the
+            computation stack are consumed by the read instruction in
+            first-in first-out (FIFO) order, rather than the usual
+            last-in first-out (LIFO) order of stack operations, and that
+            the computation stack is left empty.<br>
+            <br>
+            Input data is delimited by whitespace (including linefeeds)
+            and/or commas.&nbsp; Missing values, interpreted as
+            uninitialized data are indicated in the input stream by
+            adjacent commas optionally separated by whitespace.&nbsp; A
+            semicolon in the input stream, whether or not delimited by
+            whitespace and/or commas, is treated as the end of input,
+            and all of the variables whose read-requests have not yet
+            been fulfilled are filled with uninitialized data.<br>
+            <br>
+            There is no provision for reading a string variable
+            containing spaces, commas, or semicolons. </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>subscripts</tt><tt><br>
+            </tt></td>
+          <td valign="top"><tt>{'operator': 'subscripts'}</tt><tt><br>
+            </tt></td>
+          <td valign="top">
+            <meta name="qrichtext" content="1">
+            <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><!--StartFragment-->Indicates that the elements at the top of the computation stack, ended by a <tt>{'sentinel'}</tt>, form subscripts for the <i>next</i> PALMAT instruction encountered, which should be a <tt>fetch</tt>, <tt>fetchp</tt>, or <tt>shaping</tt>.  The top element of the computation stack is the first subscript, the next-to-top is the 2nd subscript, and so on.  Upon execution, the <tt>subscripts</tt> instruction pops all of these from the instruction stack and stores them in some implementation-dependent way to be applied to the succeeding PALMAT instruction.<br></p>
+            <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br>This instruction may also appear in standalone computation of subscripts, as may occur when processing the variable-names appearing in the left-hand side of a HAL/S assignment statement, and thus appear as the final step in such an evaluation, without there being any succeeding PALMAT instruction at all.<br></p>
+            <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br>The subscripts appearing on the computation stack are of three possible forms:<br></p>
+            <ol>
+              <li>A simple <tt>INTEGER</tt> or <tt>SCALAR</tt> (which will be automatically rounded to an INTEGER during execution) picks out a single element along the affected dimension.</li>
+              <li>A Python list, <tt>[</tt><tt><i><tt><i>length</i></tt></i></tt><i><i>, </i></i><tt><i>start</i>]</tt>, of two <tt>INTEGER</tt>s indicates a range of <tt><i>length</i></tt> elements along the affected dimension.  This corresponds to the HAL/S "<tt><i>length</i> AT <i>start</i></tt>" subscripting convention.  HAL/S requires <tt><i>length</i></tt> (2 up to the dimensionality of the corresponding index) to be known at compile time, with <i><tt>start</tt></i> being computable, but PALMAT doesn't enforce compile-time computability.  See also <a moz-do-not-send="true" href="#Computations">the <tt>sliceAT</tt> instruction</a>.</li>
+              <li>A Python tuple, <tt>(<i>start</i>, <i>end</i>)</tt>, of two <tt>INTEGER</tt>s indicates a range of <tt><i>end</i>-<i>start</i>+1</tt> elements along the affected dimension, beginning at <tt><i>start</i></tt> and ending at <i><tt>end</tt></i>.  This corresponds to the HAL/S subscripting convention "<tt><i>start</i></tt><tt> TO <i>end</i></tt>".  HAL/S requires both start and end to be known (or computable) at compile-time, but this limitation is not enforced by PALMAT. See also <a moz-do-not-send="true" href="#Computations">the <tt>sliceTO</tt> instruction</a>.</li>
+            </ol>
+            <p>Other subscripting conventions of HAL/S, namely "<tt>#</tt>" and "<tt>#</tt><tt>±<i>N</i></tt>" to mean the last element in the affected direction and elements relative to it, and "<tt>*</tt>" to mean every element along the affected direction, are handled by the compiler's code generator, and thus reduced to subscripts of the forms listed above.<br></p>
+            <p>Note that although in an <tt>ARRAY</tt> of <tt>VECTOR</tt>, <tt>MATRIX</tt>, <tt>BIT</tt> or <tt>CHARACTER</tt> HAL/S visually distinguishes between the <tt>ARRAY</tt> indices and the <tt>VECTOR</tt>/<tt>MATRIX</tt>/<tt>BIT</tt>/<tt>CHARACTER</tt> indices by having a colon (:) between the two groups indices rather than a comma (,), PALMAT makes no such distinction.  Rather, if subscripts are present, it expects the number of subscripts to correspond <i>either</i> to the dimensionality of the <tt>ARRAY</tt> or else to the dimensionality of the <tt>ARRAY</tt> <i>plus</i> the dimensionality of the <tt>VECTOR</tt>/<tt>MATRIX</tt>/<tt>BIT</tt>/<tt>CHARACTER</tt> objects comprising the <tt>ARRAY</tt>.</p>
+            <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><!--EndFragment--></p>
+            <meta http-equiv="Content-Type" content="text/html;
+              charset=UTF-8">
+            <style type="text/css">
+p, li { white-space: pre-wrap; }
+</style></td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    <hr style="width: 100%; height: 2px;"><br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <center><br>
+      <span style="color: rgb(84, 89, 93); font-family: sans-serif;
+        font-size: 11.05px; font-style: normal; font-variant: normal;
+        font-weight: normal; letter-spacing: normal; line-height:
+        16.575px; orphans: auto; text-align: center; text-indent: 0px;
+        text-transform: none; white-space: normal; widows: 1;
+        word-spacing: 0px; -webkit-text-stroke-width: 0px; display:
+        inline !important; float: none; background-color: rgb(255, 255,
+        255);"> This page is available under the <a
+          href="https://creativecommons.org/publicdomain/zero/1.0/">
+          Creative Commons No Rights Reserved License</a> </span><br>
+      <i><font size="-1">Last modified by <a
+            href="mailto:info@sandroid.org">Ronald Burkey</a> on
+          2023-02-12<br>
+          <br>
+          <a href="https://www.ibiblio.org"> <img style="border: 0px
+              solid ; width: 300px; height: 100px;" alt="Virtual AGC is
+              hosted by ibiblio.org" src="hosted.png" width="300"
+              height="100"></a><br>
+        </font></i></center>
+    <br>
+  </body>
+</html>
