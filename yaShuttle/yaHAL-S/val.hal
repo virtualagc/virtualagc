@@ -1,244 +1,410 @@
  /* 
     License:    Declared to be in the Public Domain by its author,
     		Ron Burkey.
+    Purpose:	Validation and regression testing of the "modern" HAL/S
+    		compiler
     Filename:	val.hal
-    
-    This is just some code I'm using with the yaHAL-S-FC.py interpreter
-    for simple regression testing, and which I don't feel like manually
-    retyping every time.  Notice that all of the actual HAL/S lines
-    (as opposed to interpreter commands) don't end in ';' (i.e., they
-    have a dummy space at the end) except for the final line, since
-    the interpreter won't process the batch until it finds a line
-    ending in ';'. If fed directly to the compiler rather than the
-    interpreter, that wouldn't be an issue.  But I'm cut-and-pasting
-    it into the interpreter.
-    
-    I've also begun each line in column 2, which isn't necessary
-    for the interpreter, but which allows the file to be processed
-    by the compiler if desired.
-    
-    The *original* HAL/S-FC compiler wouldn't accept this code, by the
-    way, since it would have to be wrapped in a PROGRAM, FUNCTION,
-    or PROCEDURE envelope, rather than just being standalone code
-    like this. But I've configured the modern compiler to accept it, 
-    largely because the interpreter be pretty useless if it accepted
-    only complete programs rather than little snippets of code. 
  */
-    
- DECLARE SCALAR, T, X INITIAL(2.0), Y CONSTANT(3.0), Z DOUBLE; 
- DECLARE A, B DOUBLE, C INITIAL(4.0), D SCALAR CONSTANT(2 Y - 12); 
- DECLARE INTEGER, I, J CONSTANT(4 D + 2), K INITIAL(J + D); 
- DECLARE L INTEGER DOUBLE, M INTEGER; 
- DECLARE CHARACTER(20), C1, C2 INITIAL('abc'), C3 CONSTANT('def'), 
- 	 C4 CONSTANT(C3 CAT 'ghi'); 
- DECLARE C5 CHARACTER(30), C6 CHARACTER(20) INITIAL('sam ' CAT C3); 
- DECLARE BOOLEAN, B1, B2 CONSTANT(TRUE), B3 INITIAL(NOT B2); 
+ 
+ /* This constant either enables (TRUE) or disables (FALSE) the time-consuming
+    4.xx tests. */
+ DECLARE TEST4 BOOLEAN CONSTANT(FALSE);
+ 
+ /* 
+ 	-------------------------------------------------------------
+ 	Some functions for helping to automate tests of declarations.
+ 	-------------------------------------------------------------
+ */
+ 
+ TESTCHAR: FUNCTION(IDENTIFIER, TYPE, FIELD, VALUE) BOOLEAN;
+ 	DECLARE CHARACTER(32), TYPE, IDENTIFIER;
+ 	DECLARE CHARACTER(2048), VALUE;
+ 	DECLARE INTEGER, FIELD;
+ 	DECLARE TEST ARRAY(20) CHARACTER(32);
+ 	TEST = TYPEOF(IDENTIFIER);
+ 	IF TEST$1 = TYPE AND TEST$FIELD = VALUE THEN RETURN TRUE;
+ 	RETURN FALSE;
+ CLOSE TESTCHAR;
+ 
+ TESTINT: FUNCTION(IDENTIFIER, TYPE, FIELD, VALUE) BOOLEAN;
+ 	DECLARE CHARACTER(32), TYPE, IDENTIFIER;
+ 	DECLARE INTEGER, FIELD, VALUE;
+ 	DECLARE TEST ARRAY(20) CHARACTER(32);
+ 	TEST = TYPEOF(IDENTIFIER);
+ 	IF TEST$1 = TYPE AND INTEGER(TEST$FIELD) = VALUE THEN RETURN TRUE;
+ 	RETURN FALSE;
+ CLOSE TESTINT;
+ 
+ TESTSCALAR: FUNCTION(IDENTIFIER, TYPE, FIELD, VALUE) BOOLEAN;
+ 	DECLARE CHARACTER(32), IDENTIFIER, TYPE;
+ 	DECLARE INTEGER, FIELD;
+ 	DECLARE SCALAR, VALUE;
+ 	DECLARE TEST ARRAY(20) CHARACTER(32);
+ 	TEST = TYPEOF(IDENTIFIER);
+ 	IF TEST$1 = TYPE AND SCALAR(TEST$FIELD) = VALUE THEN RETURN TRUE;
+ 	RETURN FALSE;
+ CLOSE TESTSCALAR;
+
+ /* 
+ 	-------------------------------------------------------------
+ 	The tests themselves.
+ 	-------------------------------------------------------------
+ */
+ 
+ WRITE(6) ;
+ WRITE(6) 'Each test has a test number, such as 1.23 or 4.56B.';
+ WRITE(6) 'Unless otherwise stated, 1 represents success and 0 is failure.';
+ WRITE(6) ;
+ 
+ DECLARE SCALAR, T, X INITIAL(2.0), Y CONSTANT(3.0), Z DOUBLE;
+ WRITE(6) '1.00:', 
+ 	TESTCHAR('T', 'SCALAR', 15, ''),
+ 	TESTSCALAR('X', 'SCALAR', 5, 2.0),
+ 	TESTSCALAR('Y', 'SCALAR', 4, 3.0),
+ 	TESTCHAR('Z', 'SCALAR', 6, 'DOUBLE');
+ 	
+ DECLARE A, B DOUBLE, C INITIAL(4.0), D SCALAR CONSTANT(2 Y - 12);
+ WRITE(6) '1.01:',
+ 	TESTCHAR('A', 'SCALAR', 6, ''),
+ 	TESTCHAR('B', 'SCALAR', 6, 'DOUBLE'),
+ 	TESTSCALAR('C', 'SCALAR', 5, 4.0),
+ 	TESTSCALAR('D', 'SCALAR', 4, -6.0);
+ 	
+ DECLARE INTEGER, I, J CONSTANT(4 D + 2), K INITIAL(J + D);
+ WRITE(6) '1.02:',
+ 	TESTCHAR('I', 'INTEGER', 4, ''),
+ 	TESTINT('J', 'INTEGER', 4, -22),
+ 	TESTINT('K', 'INTEGER', 5, -28);
+ 
+ DECLARE L INTEGER DOUBLE, M INTEGER;
+ WRITE(6) '1.03:',
+ 	TESTCHAR('L', 'INTEGER', 6, 'DOUBLE'),
+ 	TESTCHAR('M', 'INTEGER', 6, '');
+ 
+ DECLARE CHARACTER(20), C1, C2 INITIAL('abc'), C3 CONSTANT('def'),
+ 	C4 CONSTANT(C3 CAT 'ghi');
+ WRITE(6) '1.04:',
+ 	TESTINT('C1', 'CHARACTER', 2, 20),
+ 	TESTCHAR('C2', 'CHARACTER', 5, 'abc'),
+ 	TESTCHAR('C3', 'CHARACTER', 4, 'def'),
+ 	TESTCHAR('C4', 'CHARACTER', 4, 'defghi');
+ 	
+ DECLARE C5 CHARACTER(30), C6 CHARACTER(20) INITIAL('sam ' CAT C3);
+ WRITE(6) '1.05:',
+ 	TESTINT('C5', 'CHARACTER', 2, 30),
+ 	TESTCHAR('C6', 'CHARACTER', 5, 'sam def');
+ 	
+ DECLARE BOOLEAN, B1, B2 CONSTANT(TRUE), B3 INITIAL(NOT B2);
+ WRITE(6) '1.06A:', TESTINT('B1', 'BIT', 2, 1);
+ IF B2 AND TESTINT('B2', 'BIT', 2, 1) THEN WRITE(6) '1.06B:', TRUE; 
+ ELSE WRITE(6) '1.06B:', FALSE;
+ IF NOT B3 AND TESTINT('B3', 'BIT', 2, 1) THEN WRITE(6) '1.06C:', TRUE; 
+ ELSE WRITE(6) '1.06C', FALSE;
+ /* 
+    I wanted to write some of the 1.06x tests in the form
+ 	IF B2 = TRUE AND TESTINT(...) THEN ...
+    and
+    	IF B3 = FALSE AND TESTINT(...) THEN ...
+    but curiously, even though a <RELATIONAL EXP> like B2=TRUE evaluates
+    to a BOOLEAN value, you can't use it in a <BIT EXP>.
+    I don't know if that's a real thing, or a bug in the BNF.
+ */
+ 	
  DECLARE B4 BOOLEAN, B5 BOOLEAN CONSTANT(NOT B2 AND B2), 
  	 B6 BOOLEAN INITIAL(B2 OR ~B2); 
+ WRITE(6) '1.07A:', TESTINT('B4', 'BIT', 2, 1);
+ IF NOT B5 AND TESTCHAR('B5', 'BIT', 4, '0, 1') THEN WRITE(6) '1.07B:', TRUE;
+ ELSE WRITE(6) '1.07B', FALSE;
+ IF B6 AND TESTCHAR('B6', 'BIT', 5, '1, 1') THEN WRITE(6) '1.07C:', TRUE;
+ ELSE WRITE(6) '1.07C', FALSE;
+ 
  DECLARE CV1 CONSTANT(2); 
  DECLARE VN1 VECTOR(5); 
  DECLARE VN1A VECTOR(CV1 + 3); 
+ WRITE(6) '1.08A',
+ 	TESTSCALAR('CV1', 'SCALAR', 4, 2.0),
+ 	TESTINT('VN1', 'VECTOR', 2, 5),
+ 	TESTINT('VN1A', 'VECTOR', 2, 5);
  DECLARE VN2 VECTOR(10) INITIAL(2.47); 
  DECLARE VN2A VECTOR(10) INITIAL(CV1 + 0.47); 
  DECLARE VN3 VECTOR(20) INITIAL(1, 2, 3, 4, 5, *); 
+ WRITE(6) '1.08B',
+ 	TESTCHAR('VN2', 'VECTOR', 5, 
+ 		'2.47, 2.47, 2.47, 2.47, 2.47, 2.47, 2.47, 2.47, 2.47, 2.47'), 
+ 	TESTCHAR('VN2A', 'VECTOR', 5, 
+ 		'2.47, 2.47, 2.47, 2.47, 2.47, 2.47, 2.47, 2.47, 2.47, 2.47'), 
+ 	TESTCHAR('VN3', 'VECTOR', 5,
+ 		'1.0, 2.0, 3.0, 4.0, 5.0, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None');
  DECLARE VN3A VECTOR(3 CV1) INITIAL(1, CV1, 3, 4, 1 + CV1 2, *); 
  DECLARE VN4 VECTOR(15) CONSTANT(12); 
  DECLARE VN4A VECTOR(15) CONSTANT(12, CV1 + 11, 2 CV1 +10, *); 
- 
- WRITE(6) ; 
- WRITE(6) 'Some DECLARE tests ...'; 
- WRITE(6) CV1, '     (should be 2.0)'; 
- WRITE(6) VN1, '     (should be X.X X.X X.X X.X X.X)'; 
- WRITE(6) VN1A, '     (should be X.X X.X X.X X.X X.X)'; 
- WRITE(6) VN2, '     (should be 2.47 ... 2.47 with 10 entries)'; 
- WRITE(6) VN2A, '     (same as previous)'; 
- WRITE(6) VN3, '     (should be 1.0 2.0 3.0 4.0 5.0 X.X ... X.X] with 15 X.X)'; 
- WRITE(6) VN3A, '     (should be 1.0 2.0 3.0 4.0)'; 
- WRITE(6) VN4, '     (should be 12.0 12.0 ... with 15 entries)'; 
- WRITE(6) VN4A, '     (should be 12.0 13.0 14.0 X.X ... X.X with 12 X.X)';  
- WRITE(6) VN4A$2, '     (should be 13.0)'; 
- WRITE(6) ; 
- WRITE(6) 'Miscellaneous tests:'; 
- I=1.4; WRITE(6) 'I =', I, '(should be 1)'; 
- A=2; WRITE(6) 'A =', A, '(should be 2.0)'; 
- B = 12.6E2B-1 A + 6 ( I A**3 - 21 ) / 4.2; 
- WRITE(6) 'B =', B, '(should be 1241.428571...)'; 
- WRITE(6) B2, B3, B5, B6, '(should be 1 0 0 1)'; 
- WRITE(6) B2, ~B2, ~B2 & B2, B2 | NOT B2, '(should be 1 0 0 1)'; 
- WRITE(6) '"' CAT C2 CAT '"', 
- 	  '"' CAT C3 || '"', 
- 	  '"' || C4 CAT '"', 
- 	  '"' || C6 || '"', 
- 	  ' (should be "abc", "def", "defghi", "sam def")'; 
- WRITE(6) ; 
- IF TRUE THEN WRITE(6) TRUE, '(should be 1)'; 
- WRITE(6) 'Test IF FALSE; should be nothing between here ...'; 
- IF FALSE THEN WRITE(6) FALSE; 
- WRITE(6) '... and here.'; 
- WRITE(6) 'Test IF TRUE THEN ...; ELSE ...; should be 1:'; 
- IF TRUE THEN WRITE(6) TRUE; ELSE WRITE(6) FALSE; 
- WRITE(6) 'Test IF FALSE THEN ...; ELSE ...; should be 0:'; 
- IF FALSE THEN WRITE(6) TRUE; ELSE WRITE(6) FALSE; 
- WRITE(6) 'The following IF/THEN/ELSE tests should read ',
- 	'<, >=, >=, <=, <=, >, >, <=, <=, >=, >=, <, ~=, =, ~=, ~=, =, ~= :'; 
- WRITE(6) ; 
+ WRITE(6) '1.08C',
+ 	TESTCHAR('VN3A', 'VECTOR', 5,
+ 		'1.0, 2.0, 3.0, 4.0, 5.0, None'),
+ 	TESTCHAR('VN4', 'VECTOR', 4,
+ 		'12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0'),
+ 	TESTCHAR('VN4A', 'VECTOR', 4,
+ 		'12.0, 13.0, 14.0, None, None, None, None, None, None, None, None, None, None, None, None');
+ 		
+ WRITE(6) ;
+ I = 1.4;
+ A = 2;
+ B = 12.6E2B-1 A + 6 ( I A**3 - 21 ) / 4.2;
+ IF I = 1 THEN WRITE(6) '2.00A:', TRUE;
+ ELSE WRITE(6) '2.00A:', FALSE;
+ IF A = 2.0 THEN WRITE(6) '2.00B:', TRUE;
+ ELSE WRITE(6) '2.00B:', FALSE;
+ IF ABS(B - 1241.428571) <= 0.0000005 THEN WRITE(6) '2.00C:', TRUE; 
+ ELSE WRITE(6) '2.00C:', FALSE;
+ IF TRUE THEN WRITE(6) '2.00D:', TRUE;
+ ELSE WRITE(6) '2.00D:', FALSE;
+ IF FALSE THEN WRITE(6) '2.00E:', FALSE;
+ ELSE WRITE(6) '2.00D:', TRUE;
+ IF NOT FALSE THEN WRITE(6) '2.00D:', TRUE;
+ ELSE WRITE(6) '2.00D:', FALSE;
+ IF NOT TRUE THEN WRITE(6) '2.00E:', FALSE;
+ ELSE WRITE(6) '2.00E:', TRUE;
  I = 5; 
- IF I < 10 THEN WRITE(6) '<'; ELSE WRITE(6) '>='; 
- IF I < 5 THEN WRITE(6) '<'; ELSE WRITE(6) '>='; 
- IF I < 2 THEN WRITE(6) '<'; ELSE WRITE(6) '>='; 
- IF I <= 10 THEN WRITE(6) '<='; ELSE WRITE(6) '>'; 
- IF I <= 5 THEN WRITE(6) '<='; ELSE WRITE(6) '>'; 
- IF I <= 2 THEN WRITE(6) '<='; ELSE WRITE(6) '>'; 
- IF I > 2 THEN WRITE(6) '>'; ELSE WRITE(6) '<='; 
- IF I > 5 THEN WRITE(6) '>'; ELSE WRITE(6) '<='; 
- IF I > 10 THEN WRITE(6) '>'; ELSE WRITE(6) '<='; 
- IF I >= 2 THEN WRITE(6) '>='; ELSE WRITE(6) '<'; 
- IF I >= 5 THEN WRITE(6) '>='; ELSE WRITE(6) '<'; 
- IF I >= 10 THEN WRITE(6) '>='; ELSE WRITE(6) '<'; 
- IF I = 2 THEN WRITE(6) '='; ELSE WRITE(6) '~='; 
- IF I = 5 THEN WRITE(6) '='; ELSE WRITE(6) '~='; 
- IF I = 10 THEN WRITE(6) '='; ELSE WRITE(6) '~='; 
- IF I ~= 2 THEN WRITE(6) '~='; ELSE WRITE(6) '='; 
- IF I ~= 5 THEN WRITE(6) '~='; ELSE WRITE(6) '='; 
- IF I ~= 10 THEN WRITE(6) '~='; ELSE WRITE(6) '='; 
- WRITE(6) ; 
- WRITE(6) 'The following IF THEN ELSE string comparisons should be ',
- 	'TRUE, TRUE, and FALSE, respectively.'; 
- IF 'ABC' = 'A' || 'BC' THEN WRITE(6) TRUE; ELSE WRITE(6) FALSE; 
- IF 'AB' || 'C' = 'ABC' THEN WRITE(6) TRUE; ELSE WRITE(6) FALSE; 
- IF 'ABC' = 'AB' THEN WRITE(6) TRUE; ELSE WRITE(6) FALSE; 
- WRITE(6) ; 
- WRITE(6) 'Print 10 random numbers with DO WHILE arithmetical comparison:'; 
- I=0; DO WHILE I < 10; I=I+1; WRITE(6) I, RANDOM; END; 
- WRITE(6) 'Print nine 1 and one 0 with DO WHILE boolean constant:'; 
+ IF I < 10 THEN WRITE(6) '2.01A:', TRUE;
+ ELSE WRITE(6) '2.01A', FALSE; 
+ IF I < 5 THEN WRITE(6) '2.01B:', FALSE; 
+ ELSE WRITE(6) '2.01B:', TRUE; 
+ IF I < 2 THEN WRITE(6) '2.01C:', FALSE; 
+ ELSE WRITE(6) '2.01C:', TRUE; 
+ IF I <= 10 THEN WRITE(6) '2.01D:', TRUE; 
+ ELSE WRITE(6) '2.01D:', FALSE; 
+ IF I <= 5 THEN WRITE(6) '2.01E:', TRUE; 
+ ELSE WRITE(6) '2.01E:', FALSE; 
+ IF I <= 2 THEN WRITE(6) '2.01F:', FALSE; 
+ ELSE WRITE(6) '2.01F:', TRUE; 
+ IF I > 2 THEN WRITE(6) '2.01G:', TRUE; 
+ ELSE WRITE(6) '2.01G:', FALSE; 
+ IF I > 5 THEN WRITE(6) '2.01H:', FALSE; 
+ ELSE WRITE(6) '2.01H:', TRUE; 
+ IF I > 10 THEN WRITE(6) '2.01I:', FALSE; 
+ ELSE WRITE(6) '2.01I:', TRUE; 
+ IF I >= 2 THEN WRITE(6) '2.01J:', TRUE; 
+ ELSE WRITE(6) '2.01J:', FALSE; 
+ IF I >= 5 THEN WRITE(6) '2.01K:', TRUE; 
+ ELSE WRITE(6) '2.01K:', FALSE; 
+ IF I >= 10 THEN WRITE(6) '2.01L:', FALSE; 
+ ELSE WRITE(6) '2.01L:', TRUE; 
+ IF I = 2 THEN WRITE(6) '2.01M:', FALSE; 
+ ELSE WRITE(6) '2.01M:', TRUE; 
+ IF I = 5 THEN WRITE(6) '2.01N:', TRUE; 
+ ELSE WRITE(6) '2.01N:', FALSE; 
+ IF I = 10 THEN WRITE(6) '2.01O:', FALSE; 
+ ELSE WRITE(6) '2.01O:', TRUE; 
+ IF I ~= 2 THEN WRITE(6) '2.01P:', TRUE; 
+ ELSE WRITE(6) '2.01P:', FALSE; 
+ IF I ~= 5 THEN WRITE(6) '2.01Q:', FALSE; 
+ ELSE WRITE(6) '2.01Q:', TRUE; 
+ IF I ~= 10 THEN WRITE(6) '2.01R:', TRUE; 
+ ELSE WRITE(6) '2.01R:', FALSE; 
+
+ IF 'ABC' = 'A' || 'BC' THEN WRITE(6) '2.02A:', TRUE; 
+ ELSE WRITE(6) '2.02A:', FALSE; 
+ IF 'AB' || 'C' = 'ABC' THEN WRITE(6) '2.02B:', TRUE; 
+ ELSE WRITE(6) '2.02B:', FALSE; 
+ IF 'ABC' = 'AB' THEN WRITE(6) '2.02C:', FALSE; 
+ ELSE WRITE(6) '2.02C:', TRUE; 
+ 
+ WRITE(6) ;
+ DO FOR TEMPORARY I = 1 TO 10; VN2$I = 1; END;
+ WRITE(6) '3.00:', ROUND(VN2$1), ROUND(VN2$2), ROUND(VN2$3), ROUND(VN2$4), 
+ 	ROUND(VN2$5), 
+ 	ROUND(VN2$6), ROUND(VN2$7), ROUND(VN2$8), ROUND(VN2$9), ROUND(VN2$10);
+ I = 0; DO WHILE I < 10; I = I + 1; VN2$I = I; END;
+ WRITE(6) '3.01:', ROUND(VN2$1 + 0), ROUND(-1 + VN2$2), ROUND(VN2$3 / 3), 
+ 	ROUND(0.25 VN2$4), ROUND(VN2$5 0.2), 
+ 	ROUND(VN2$6 - 5), ROUND(VN2$7 - 6), ROUND(VN2$8 - 7), 
+ 	ROUND(VN2$9 - 8), ROUND(VN2$10 - 9);
+ 	
+ DO FOR TEMPORARY I = 1 TO 10; VN2$I = 1; END;
+ K = 0; DO FOR TEMPORARY I = 1 TO 10; IF VN2$I = 1 THEN K = K + 1; END;
+ IF K = 10 THEN WRITE(6) '3.02:', TRUE; ELSE WRITE(6) '3.02:', FALSE;
  B1=TRUE; I=0; 
  DO WHILE B1; 
  	I=I+1; 
  	IF I>=10 THEN B1=FALSE; 
- 	WRITE(6) I, B1; 
- END; 
- WRITE(6) ; 
- WRITE(6) 'Test DO WHILE FALSE; should be nothing between here ...'; 
- DO WHILE FALSE; WRITE(6) ' SOMETHING!'; END; 
- WRITE(6) '... and here.'; 
- WRITE(6) ; 
- WRITE(6) 'Print 10 random (Gaussian) with DO UNTIL arithmetical comparison:'; 
- I=0; DO UNTIL I >= 10; I=I+1; WRITE(6) I, RANDOMG; END; 
- WRITE(6) ; 
- WRITE(6) 'Test DO UNTIL FALSE; should be SOMETHING between here ...'; 
- DO UNTIL TRUE; WRITE(6) ' SOMETHING!'; END; 
- WRITE(6) '... and here.'; 
- WRITE(6) ; 
- WRITE(6) 'Built-in RUNTIME function test (increment once per second):'; 
- WRITE(6) 'Uses DO WHILE DO UNTIL for the nested loops.';  
- I=1; 
- M=ROUND(RUNTIME); 
- DO WHILE I <= 10; 
- 	DO UNTIL L > M; 
- 		L = ROUND(RUNTIME); 
+ 	VN2$I = I; 
+ END; 	
+ K = 0; DO FOR TEMPORARY I = 1 TO 10; IF VN2$I = I THEN K = K + 1; END;
+ IF K = 10 THEN WRITE(6) '3.03:', TRUE; ELSE WRITE(6) '3.03:', FALSE;
+ 
+ B1 = TRUE; DO WHILE FALSE; B1 = FALSE; END;
+ WRITE(6) '3.04:', B1;
+ B1 = FALSE; DO UNTIL TRUE; B1 = TRUE; END;
+ WRITE(6) '3.05:', B1;
+ 
+ DO FOR TEMPORARY I = 1 TO 10; VN2$I = 1; END;
+ I=0; DO UNTIL I >= 10; I=I+1; VN2$I = I; END; 
+ K = 0; DO FOR TEMPORARY I = 1 TO 10; IF VN2$I = I THEN K = K + 1; END;
+ IF K = 10 THEN WRITE(6) '3.06:', TRUE; ELSE WRITE(6) '3.06:', FALSE;
+ 
+ WRITE(6) ;
+ /* Make TEST4 TRUE to run the various loop tests. As written, they're 
+    too time-consuming to do every time, so making TEST4 FALSE skips them. */
+ IF TEST4 THEN DO;
+ 
+ WRITE(6) 'The following timing tests take about 3 seconds each ...';
+ TEMPORARY SCALAR, START, THISSTART, THISTIME, STOP;
+ TEMPORARY INTEGER, DELTA, RUNS CONSTANT(3);
+ 
+ START = RUNTIME; 
+ THISSTART = START;
+ I = 1; DO WHILE I <= RUNS; 
+ 	THISTIME = RUNTIME;
+ 	DO WHILE THISTIME - THISSTART < 1.0; 
+ 		THISTIME = RUNTIME; 
  	END; 
- 	WRITE(6) I, M; 
  	I = I + 1; 
- 	M = L; 
+ 	THISSTART = THISTIME; 
  END; 
- WRITE(6) 'Again, but with DO UNTIL DO WHILE loop nesting:'; 
- I=1; 
- M=ROUND(RUNTIME); 
- DO UNTIL I > 10; 
- 	L = ROUND(RUNTIME); 
- 	DO WHILE L <= M; 
- 		L = ROUND(RUNTIME); 
+ STOP = RUNTIME;
+ DELTA = ROUND(STOP - START);
+ IF DELTA = RUNS THEN B1 = TRUE; ELSE B1 = FALSE;
+ WRITE(6) '4.00:', B1;
+ 
+ START = RUNTIME; 
+ THISSTART = START;
+ I = 1; DO WHILE I <= RUNS; 
+ 	DO UNTIL THISTIME - THISSTART >= 1.0; 
+ 		THISTIME = RUNTIME; 
  	END; 
- 	WRITE(6) I, M; 
  	I = I + 1; 
- 	M = L; 
+ 	THISSTART = THISTIME; 
  END; 
- WRITE(6) 'And still again, with DO UNTIL DO UNTIL loop nesting:'; 
- I=1; 
- M=ROUND(RUNTIME); 
- DO UNTIL I > 10; 
- 	DO UNTIL L > M; 
- 		L = ROUND(RUNTIME); 
+ STOP = RUNTIME;
+ DELTA = ROUND(STOP - START);
+ IF DELTA = RUNS THEN B1 = TRUE; ELSE B1 = FALSE;
+ WRITE(6) '4.01:', B1;
+ 
+ START = RUNTIME; 
+ THISSTART = START;
+ I = 1; DO UNTIL I > RUNS; 
+ 	THISTIME = RUNTIME;
+ 	DO WHILE THISTIME < THISSTART + 1.0; 
+ 		THISTIME = RUNTIME ;
  	END; 
- 	WRITE(6) I, M; 
  	I = I + 1; 
- 	M = L; 
+ 	THISSTART = THISTIME; 
  END; 
- WRITE(6) 'This time, with a DO FOR TEMPORARY loop:'; 
- M=ROUND(RUNTIME); 
- DO FOR TEMPORARY I = 1 TO 10; 
- 	DO UNTIL L > M; 
- 		L = ROUND(RUNTIME); 
+ STOP = RUNTIME;
+ DELTA = ROUND(STOP - START);
+ IF DELTA = RUNS THEN B1 = TRUE; ELSE B1 = FALSE;
+ WRITE(6) '4.02:', B1;
+ 
+ START = RUNTIME; 
+ THISSTART = START;
+ I=1; DO UNTIL I > RUNS; 
+ 	DO UNTIL THISTIME >= THISSTART + 1.0; 
+ 		THISTIME = RUNTIME;
  	END; 
- 	M = L; 
- 	WRITE(6) I, M; 
+ 	I = I + 1; 
+ 	THISSTART = THISTIME; 
  END; 
- WRITE(6) 'This time with a DO FOR TEMPORARY BY 2:'; 
- M=ROUND(RUNTIME); 
- DO FOR TEMPORARY I = 1 TO 20 BY 2; 
- 	DO UNTIL L > M; 
- 		L = ROUND(RUNTIME); 
+ STOP = RUNTIME;
+ DELTA = ROUND(STOP - START);
+ IF DELTA = RUNS THEN B1 = TRUE; ELSE B1 = FALSE;
+ WRITE(6) '4.03:', B1;
+ 
+ START = RUNTIME; 
+ THISSTART = START;
+ DO FOR TEMPORARY I = 1 TO RUNS; 
+ 	DO UNTIL THISTIME >= THISSTART + 1.0; 
+ 		THISTIME = RUNTIME; 
  	END; 
- 	M = L; 
- 	WRITE(6) I, M; 
+ 	THISSTART = THISTIME; 
  END; 
- WRITE(6) 'This time, DO FOR BY -1:'; 
- M=ROUND(RUNTIME); 
- DO FOR TEMPORARY I = 10 TO 1 BY -1; 
- 	DO UNTIL L > M; 
- 		L = ROUND(RUNTIME); 
+ STOP = RUNTIME;
+ DELTA = ROUND(STOP - START);
+ IF DELTA = RUNS THEN B1 = TRUE; ELSE B1 = FALSE;
+ WRITE(6) '4.04:', B1;
+ 
+ START = RUNTIME; 
+ THISSTART = START;
+ DO FOR TEMPORARY I = 1 TO 2 RUNS BY 2; 
+ 	DO UNTIL THISTIME >= THISSTART + 1.0; 
+ 		THISTIME = RUNTIME; 
  	END; 
- 	M = L; 
- 	WRITE(6) I, M; 
+ 	THISSTART = THISTIME; 
  END; 
- WRITE(6) 'This time, DO FOR UNTIL:'; 
- M=ROUND(RUNTIME); 
- DO FOR TEMPORARY I = 1 TO 100 UNTIL I >= 10; 
- 	DO UNTIL L > M; 
- 		L = ROUND(RUNTIME); 
+ STOP = RUNTIME;
+ DELTA = ROUND(STOP - START);
+ IF DELTA = RUNS THEN B1 = TRUE; ELSE B1 = FALSE;
+ WRITE(6) '4.05:', B1;
+ 
+ START = RUNTIME; 
+ THISSTART = START;
+ DO FOR TEMPORARY I = RUNS TO 1 BY -1; 
+ 	DO UNTIL THISTIME >= THISSTART + 1.0; 
+ 		THISTIME = RUNTIME; 
  	END; 
- 	M = L; 
- 	WRITE(6) I, M; 
+ 	THISSTART = THISTIME; 
  END; 
- WRITE(6) 'This time, DO FOR WHILE:'; 
- M=ROUND(RUNTIME); 
- DO FOR TEMPORARY I = 1 TO 100 WHILE I <= 10; 
- 	DO UNTIL L > M; 
- 		L = ROUND(RUNTIME); 
+ STOP = RUNTIME;
+ DELTA = ROUND(STOP - START);
+ IF DELTA = RUNS THEN B1 = TRUE; ELSE B1 = FALSE;
+ WRITE(6) '4.06:', B1;
+ 
+ START = RUNTIME; 
+ THISSTART = START;
+ DO FOR TEMPORARY I = 1 TO 100 UNTIL I >= RUNS; 
+ 	DO UNTIL THISTIME >= THISSTART + 1.0; 
+ 		THISTIME = RUNTIME; 
  	END; 
- 	M = L; 
- 	WRITE(6) I, M; 
+ 	THISSTART = THISTIME; 
  END; 
- WRITE(6) 'This time with a SCALAR loop index (1.4 to 26.3 by 1.7):'; 
- M=ROUND(RUNTIME); 
+ STOP = RUNTIME;
+ DELTA = ROUND(STOP - START);
+ IF DELTA = RUNS THEN B1 = TRUE; ELSE B1 = FALSE;
+ WRITE(6) '4.07:', B1;
+ 
+ START = RUNTIME; 
+ THISSTART = START;
+ DO FOR TEMPORARY I = 1 TO 100 WHILE I <= RUNS; 
+ 	DO UNTIL THISTIME >= THISSTART + 1.0; 
+ 		THISTIME = RUNTIME; 
+ 	END; 
+ 	THISSTART = THISTIME; 
+ END; 
+ STOP = RUNTIME;
+ DELTA = ROUND(STOP - START);
+ IF DELTA = RUNS THEN B1 = TRUE; ELSE B1 = FALSE;
+ WRITE(6) '4.08:', B1;
+ 
+ WRITE(6) 'The following timing tests take about 15 seconds each ...';
+ START = RUNTIME; 
+ THISSTART = START;
  DO FOR A = 1.4 TO 26.3 BY 1.7; 
- 	DO UNTIL L > M; 
- 		L = ROUND(RUNTIME); 
+ 	DO UNTIL THISTIME >= THISSTART + 1.0; 
+ 		THISTIME = RUNTIME; 
  	END; 
- 	M = L; 
- 	WRITE(6) A, M; 
+ 	THISSTART = THISTIME; 
  END; 
- WRITE(6) 'Again, but backwards (25.2 to 0.0 by -1.7):'; 
- M=ROUND(RUNTIME); 
+ STOP = RUNTIME;
+ DELTA = ROUND(STOP - START);
+ IF DELTA = 15 THEN B1 = TRUE; ELSE B1 = FALSE;
+ WRITE(6) '4.09:', B1;
+ 
+ START = RUNTIME; 
+ THISSTART = START;
  DO FOR A = 25.2 TO 0.0 BY -1.7; 
- 	DO UNTIL L > M; 
- 		L = ROUND(RUNTIME); 
+ 	DO UNTIL THISTIME >= THISSTART + 1.0; 
+ 		THISTIME = RUNTIME; 
  	END; 
- 	M = L; 
- 	WRITE(6) A, M; 
+ 	THISSTART = THISTIME; 
  END; 
- WRITE(6) ; 
- WRITE(6) 'Execution-speed timing measurement:'; 
- DECLARE STIME, ETIME; 
- STIME = RUNTIME; 
- M = 100000; 
- I = 0; DO WHILE I < M; I = I + 1; END; 
- ETIME = RUNTIME; 
- WRITE(6) M, 'iterations,', ETIME-STIME, 'seconds, ', 
- 	  ROUND(M/(ETIME-STIME)), 'iterations/second.'; 
- WRITE(6) ; 
- WRITE(6) 'Some tests of FUNCTION follow:'; 
-  /* Function that averages 3 floats. */ 
+ STOP = RUNTIME;
+ DELTA = ROUND(STOP - START);
+ IF DELTA = 15 THEN B1 = TRUE; ELSE B1 = FALSE;
+ WRITE(6) '4.10:', B1;
+ 
+ END; ELSE WRITE(6) 'Skipping 4.xx tests.';
+ 
+ WRITE(6) ;
+ /* Function that averages 3 floats. */ 
  AVG3: 
  FUNCTION(X, Y, Z) SCALAR; 
  	DECLARE SCALAR, X, Y, Z, T; 
@@ -262,9 +428,9 @@
 	T = ADD3(X, Y, Z); 
  	RETURN T/3; 
  CLOSE AVG3; 
- WRITE(6) 'The following should print out (4+5+7)/3 = 5.33...'; 
- WRITE(6) AVG3(4, 5, 7); 
- WRITE(6) ; 
+ IF ABS(AVG3(4, 5, 7) - 5.33333) <= 0.000005 THEN B1 = TRUE; ELSE B1 = FALSE;
+ WRITE(6) '5.00:', B1;
+ 
  /* A "projection" function that picks out just one
     parameter from among three, using W as an index. */
  PROJECTION3: 
@@ -276,12 +442,13 @@
  	IF W = 3 THEN RETURN Z; 
  	RETURN 0; 
  CLOSE PROJECTION3; 
- WRITE(6) 'The next 3 lines should be 100.0, 200.0, and 300.0, respectively.'; 
- WRITE(6) PROJECTION3(1, 100, 200, 300); 
- WRITE(6) PROJECTION3(2, 100, 200, 300); 
- WRITE(6) PROJECTION3(3, 100, 200, 300); 
- WRITE(6) ; 
- WRITE(6) 'Some tests of PROCEDUREs ...'; 
+ IF PROJECTION3(1, 100, 200, 300) = 100.0 THEN B1 = TRUE; ELSE B1 = FALSE;
+ WRITE(6) '5.01A:', B1;
+ IF PROJECTION3(2, 100, 200, 300) = 200.0 THEN B1 = TRUE; ELSE B1 = FALSE;
+ WRITE(6) '5.01B:', B1;
+ IF PROJECTION3(3, 100, 200, 300) = 300.0 THEN B1 = TRUE; ELSE B1 = FALSE;
+ WRITE(6) '5.01C:', B1;
+ 
  DECLARE X1 SCALAR INITIAL(0), Y1 SCALAR INITIAL(1), Z1 SCALAR INITIAL(2); 
  P: 
  PROCEDURE(X) ASSIGN(Y); 
@@ -289,7 +456,8 @@
 	 Y=X; 
  CLOSE; 
  CALL P(39) ASSIGN(Z1); 
- WRITE(6) Y1, Z1, '(should be 1.0 and 39.0)'; 
+ IF Y1 = 1.0 AND Z1 = 39.0 THEN B1 = TRUE; ELSE B1 = FALSE;
+ WRITE(6) '5.02:', B1;
  
  P2: 
  PROCEDURE(A, B, C) ASSIGN(D, E, F); 
@@ -299,84 +467,145 @@
 	 F = C; 
  CLOSE P2; 
  CALL P2(123, 245, 789) ASSIGN(X1, Y1, Z1); 
- WRITE(6) X1, Y1, Z1, 'should be 123.0, 245.0, 789.0'; 
- WRITE(6) ; 
+ IF X1 = 123.0 AND Y1 = 245.0 AND Z1 = 789.0 THEN B1 = TRUE; ELSE B1 = FALSE;
+ WRITE(6) '5.03:', B1;
  
- WRITE(6) 'A here'; 
+ WRITE(6) ;
  DECLARE VC100 VECTOR(5) CONSTANT(1, 1#, 3, *); 
- WRITE(6) 'B here'; 
+ WRITE(6) '6.00:', TESTCHAR('VC100', 'VECTOR', 4, '1.0, None, 3.0, None, None');
  DECLARE VC101 VECTOR(20) CONSTANT(VC100, 2#(2#(1,2,3), 4), 24); 
- WRITE(6) 'C here'; 
+ WRITE(6) '6.01:', TESTCHAR('VC101', 'VECTOR', 4, 
+ 	'1.0, None, 3.0, None, None, 1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 4.0, 24.0');
  DECLARE VC102 VECTOR(5) CONSTANT(1, 1#2, 3, 4, 5); 
- WRITE(6) 'D here'; 
+ WRITE(6) '6.02:', TESTCHAR('VC102', 'VECTOR', 4, '1.0, 2.0, 3.0, 4.0, 5.0');
  DECLARE VC103 VECTOR(5) CONSTANT(VC102); 
- WRITE(6) 'E here'; 
+ WRITE(6) '6.03:', TESTCHAR('VC103', 'VECTOR', 4, '1.0, 2.0, 3.0, 4.0, 5.0');
  DECLARE VC104 VECTOR(20) CONSTANT(VC102, 2#(2#(1,2,3), 4), 24); 
- WRITE(6) 'F here'; 
+ WRITE(6) '6.04:', TESTCHAR('VC104', 'VECTOR', 4, 
+ 	'1.0, 2.0, 3.0, 4.0, 5.0, 1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 4.0, 24.0');
  DECLARE VC105 VECTOR(10) CONSTANT(1, 2, VC102, 3, 4, 5); 
- WRITE(6) 'G here'; 
+ WRITE(6) '6.05:', TESTCHAR('VC105', 'VECTOR', 4,
+ 	'1.0, 2.0, 1.0, 2.0, 3.0, 4.0, 5.0, 3.0, 4.0, 5.0');
  DECLARE A100 ARRAY(20) INTEGER; 
- WRITE(6) 'H here'; 
+ WRITE(6) '6.06:', TESTINT('A100', 'INTEGER', 16, 20);
  DECLARE B100 ARRAY(20) SCALAR; 
- WRITE(6) 'I here'; 
+ WRITE(6) '6.07:', TESTINT('B100', 'SCALAR', 16, 20);
  A100 = INTEGER(2#VC100, 10#5); 
- WRITE(6) 'J here'; 
+ WRITE(6) '6.08A:', 
+ 	ROUND(A100$1/VC100$1), 
+ 	ROUND(A100$3/VC100$3), 
+ 	ROUND(A100$6/VC100$1),
+ 	ROUND(A100$8/VC100$3),
+ 	ROUND(A100$11/5), ROUND(A100$12/5), ROUND(A100$13/5), ROUND(A100$14/5), 
+ 	ROUND(A100$15/5), ROUND(A100$16/5), ROUND(A100$17/5), ROUND(A100$18/5), 
+ 	ROUND(A100$19/5), ROUND(A100$20/5);
+ DECLARE MYTYPE ARRAY(20) CHARACTER(2048);
+ MYTYPE = TYPEOFV(INTEGER(2#VC100, 10#5));
+ IF MYTYPE$1 = 'INTEGER' AND MYTYPE$16 = '20' THEN B1 = TRUE; ELSE B1 = FALSE;
+ WRITE(6) '6.08B:', B1;
  B100 = SCALAR(3#VC100, 5#6); 
- WRITE(6) 'The following should be 1.0 X.X 3.0 X.X X.X'; 
- WRITE(6) VC100; 
- WRITE(6) 'The following should be 1.0 X.X 3.0 X.X X.X 1.0 2.0 3.0 1.0 2.0 3.0 4.0 1.0 2.0 3.0 1.0 2.0 3.0 4.0 24.0'; 
- WRITE(6) VC101; 
- WRITE(6) 'The following should be 1.0 2.0 3.0 4.0 5.0'; 
- WRITE(6) VC102; 
- WRITE(6) 'The following should be 1.0 2.0 3.0 4.0 5.0'; 
- WRITE(6) VC103; 
- WRITE(6) 'The following should be 1.0 2.0 3.0 4.0 5.0 1.0 2.0 3.0 1.0 2.0 3.0 4.0 1.0 2.0 3.0 1.0 2.0 3.0 4.0 24.0'; 
- WRITE(6) VC104; 
- WRITE(6) 'The following should be 1.0 2.0 1.0 2.0 3.0 4.0 5.0 3.0 4.0 5.0'; 
- WRITE(6) VC105; 
- WRITE(6) 'The following should be 1.0 None 3.0 None None 1.0 None 3.0 None None 5.0 5.0 5.0 5.0 5.0 5.0 5.0 5.0 5.0 5.0'; 
- WRITE(6) A100; 
- WRITE(6) 'The following should be 1.0 None 3.0 None None 1.0 None 3.0 None None 1.0 None 3.0 None None 6.0 6.0 6.0 6.0 6.0'; 
- WRITE(6) B100 ; 
- WRITE(6) ; 
- WRITE(6) 'The following should be 10 repetitions of N 1 2 3 4 M 6 7 8 9 10,'; 
- WRITE(6) 'where N varies from 1 to 10 and M varies from 2 to 20 by 2.'; 
- DECLARE A201 ARRAY(10) INTEGER;  
- DO FOR TEMPORARY I=1 TO 10; A201 = INTEGER(1, 2, 3, 4, 2 I, 6, 7, 8, 9, 10); WRITE(6) I, ':', A201; END; 
- WRITE(6); 
- WRITE(6) 'All of the following should be integer 34:'; 
- DECLARE B300 BIT(6); 
- WRITE(6) 34; 
- WRITE(6) INTEGER(34); 
- WRITE(6) INTEGER(34.0); 
- B300 = 34.2; 
- WRITE(6) B300; 
- B300 = 98; 
- WRITE(6) B300; 
- WRITE(6) INTEGER(B300); 
- WRITE(6) INTEGER('34'); 
- WRITE(6) INTEGER('34.2'); 
- WRITE(6) ; 
- WRITE(6) 'All of the following should be float 34.0:'; 
- DECLARE B300 BIT(6); 
- WRITE(6) 34.0; 
- WRITE(6) SCALAR(34); 
- WRITE(6) SCALAR(34.0); 
- B300 = 98; 
- WRITE(6) SCALAR(B300); 
- WRITE(6) SCALAR('34'); 
- WRITE(6) SCALAR('34.2'), ' but this one should be 34.2'; 
- WRITE(6) ; 
+ WRITE(6) '6.09A:', 
+ 	ROUND(B100$1/VC100$1), 
+ 	ROUND(B100$3/VC100$3), 
+ 	ROUND(B100$6/VC100$1),
+ 	ROUND(B100$8/VC100$3),
+ 	ROUND(B100$11/VC100$1),
+ 	ROUND(B100$13/VC100$3),
+ 	ROUND(B100$16/6), ROUND(B100$17/6), ROUND(B100$18/6), 
+ 	ROUND(B100$19/6), ROUND(B100$20/6);
+ MYTYPE = TYPEOFV(SCALAR(3#VC100, 5#6));
+ IF MYTYPE$1 = 'SCALAR' AND MYTYPE$16 = '20' THEN B1 = TRUE; ELSE B1 = FALSE;
+ WRITE(6) '6.09B:', B1;
+ I = 27; K = 52;
+ DECLARE A201 ARRAY(10) INTEGER, BB BOOLEAN; 
+ BB = TRUE; 
+ DO FOR TEMPORARY I = 1 TO 10; 
+ 	A201 = INTEGER(1, 2, 3, 4, 2 I, 6, 7, 8, 9, 10); 
+ 	DO FOR TEMPORARY K = 1 TO 10;
+ 		IF K = 5 AND A201$K ~= 2 I THEN BB = FALSE;
+ 		ELSE IF K ~= 5 AND A201$K ~= K THEN BB = FALSE; 
+ 	END;
+ END; 
+ WRITE(6) '6.09C:', BB, ROUND(I / 27), ROUND(K / 52);
+ 
+ WRITE(6) ;
+ DECLARE B300 BIT(6);
+ WRITE(6) '7.00:', TESTINT('B300', 'BIT', 2, 6);
+ MYTYPE = TYPEOFV(34);
+ IF MYTYPE$1 = 'INTEGER' THEN BB = TRUE; ELSE BB = FALSE;
+ WRITE(6) '7.00A:', BB;
+ MYTYPE = TYPEOFV(34.2);
+ IF MYTYPE$1 = 'SCALAR' THEN BB = TRUE; ELSE BB = FALSE;
+ WRITE(6) '7.00B:', BB;
+ B300 = 34.2;
+ IF INTEGER(B300) = 34 THEN BB = TRUE; ELSE BB = FALSE;
+ WRITE(6) '7.00C:', BB;
+ B300 = 98;
+ IF INTEGER(B300) = 34 THEN BB = TRUE; ELSE BB = FALSE;
+ WRITE(6) '7.00D:', BB;
+ MYTYPE = TYPEOFV(INTEGER(B300));
+ IF MYTYPE$1 = 'INTEGER' THEN BB = TRUE; ELSE BB = FALSE;
+ WRITE(6) '7.00E:', BB;
+ MYTYPE = TYPEOFV(INTEGER('34'));
+ IF MYTYPE$1 = 'INTEGER' THEN BB = TRUE; ELSE BB = FALSE;
+ WRITE(6) '7.00F:', BB;
+ MYTYPE = TYPEOFV(INTEGER('34.2'));
+ IF MYTYPE$1 = 'INTEGER' THEN BB = TRUE; ELSE BB = FALSE;
+ WRITE(6) '7.00G:', BB;
+ 
+ MYTYPE = TYPEOFV(34.0);
+ IF MYTYPE$1 = 'SCALAR' THEN BB = TRUE; ELSE BB = FALSE;
+ WRITE(6) '7.01A:', BB;
+ MYTYPE = TYPEOFV(34.0);
+ IF MYTYPE$1 = 'SCALAR' THEN BB = TRUE; ELSE BB = FALSE;
+ WRITE(6) '7.01B:', BB;
+ B300 = 98;
+ MYTYPE = TYPEOFV(SCALAR(B300));
+ IF MYTYPE$1 = 'SCALAR' THEN BB = TRUE; ELSE BB = FALSE;
+ WRITE(6) '7.01E:', BB;
+ MYTYPE = TYPEOFV(SCALAR('34'));
+ IF MYTYPE$1 = 'SCALAR' THEN BB = TRUE; ELSE BB = FALSE;
+ WRITE(6) '7.01F:', BB;
+ MYTYPE = TYPEOFV(SCALAR('34.2'));
+ IF MYTYPE$1 = 'SCALAR' THEN BB = TRUE; ELSE BB = FALSE;
+ WRITE(6) '7.01G:', BB;
+ 
  DECLARE VECTOR, V300 CONSTANT(1.0, 2.0, 3.0), V301, V302; 
  DECLARE MATRIX, M300 CONSTANT(1, 2, 3, 4, 5, 6, 7, 8, 9), M301, M302; 
  DECLARE ARRAY(3), A300; 
  DECLARE A301 ARRAY(9) SCALAR; 
- WRITE(6) V300; 
- WRITE(6) INTEGER(V300); 
+ WRITE(6) '7.02A:', TESTCHAR('V300', 'VECTOR', 4, '1.0, 2.0, 3.0');
+ WRITE(6) '7.02B:', TESTINT('V301', 'VECTOR', 2, 3);
+ WRITE(6) '7.02C:', TESTINT('V302', 'VECTOR', 2, 3);
+ WRITE(6) '7.02D:', TESTCHAR('M300', 'MATRIX', 4, 
+ 				'1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0');
+ WRITE(6) '7.02E:', TESTINT('M301', 'MATRIX', 2, 3);
+ WRITE(6) '7.02F:', TESTINT('M301', 'MATRIX', 3, 3);
+ WRITE(6) '7.02G:', TESTINT('M302', 'MATRIX', 2, 3);
+ WRITE(6) '7.02H:', TESTINT('M302', 'MATRIX', 3, 3);
+ WRITE(6) '7.02I:', TESTINT('A300', 'SCALAR', 16, 3);
+ WRITE(6) '7.02J:', TESTINT('A301', 'SCALAR', 16, 9);
+ IF V300$1 = 1.0 AND V300$2 = 2.0 AND V300$3 = 3.0 THEN BB = TRUE; 
+ ELSE BB = FALSE;
+ WRITE(6) '7.02K:', BB;
+ MYTYPE = TYPEOFV(INTEGER(V300));
+ IF MYTYPE$1 = 'VECTOR' AND MYTYPE$2 = '3' AND MYTYPE$3 = '' THEN BB = TRUE;
+ ELSE BB = FALSE;
+ WRITE(6) '7.02L:', BB;
  V301 = INTEGER(V300); 
- WRITE(6) V301; 
+ MYTYPE = TYPEOFV(V301$1);
+ IF MYTYPE$1 = 'INTEGER' THEN BB = TRUE; ELSE BB = FALSE;
+ WRITE(6) '7.02M:', BB;
+ IF V301$1 = 1 AND V301$2 = 2 AND V301$3 = 3 THEN BB = TRUE; ELSE BB = FALSE;
+ WRITE(6) '7.02N:', BB;
+ MYTYPE = TYPEOFV(INTEGER(1#V300));
+ IF MYTYPE$1 = 'INTEGER' AND MYTYPE$16 = '3' THEN BB = TRUE; ELSE BB = FALSE;
+ WRITE(6) '7.02O:', BB;
  A300 = INTEGER(1#V300); 
- WRITE(6) A300; 
+ IF A300$1 = 1 AND V300$2 = 2 AND V300$3 = 3 THEN BB = TRUE; ELSE BB = FALSE;
+ WRITE(6) '7.02P:', BB;
+ 	
+ /****************************************************************************
  WRITE(6) M300; 
  WRITE(6) INTEGER(M300); 
  M301 = INTEGER(M300); 
@@ -440,6 +669,50 @@
  	END; 
  CLOSE MYTRANSPOSE; 
  CALL MYTRANSPOSE(M400) ASSIGN(M401); 
- WRITE(6) M401; 
+ WRITE(6) M401;
+ 
+  WRITE(6) ; 
+ WRITE(6) '10.00: Some WRITE tests ...'; 
+ WRITE(6) CV1, '     (should be 2.0)'; 
+ WRITE(6) VN1, '     (should be X.X X.X X.X X.X X.X)'; 
+ WRITE(6) VN1A, '     (should be X.X X.X X.X X.X X.X)'; 
+ WRITE(6) VN2, '     (should be 2.47 ... 2.47 with 10 entries)'; 
+ WRITE(6) VN2A, '     (same as previous)'; 
+ WRITE(6) VN3, '     (should be 1.0 2.0 3.0 4.0 5.0 X.X ... X.X] with 15 X.X)'; 
+ WRITE(6) VN3A, '     (should be 1.0 2.0 3.0 4.0)'; 
+ WRITE(6) VN4, '     (should be 12.0 12.0 ... with 15 entries)'; 
+ WRITE(6) VN4A, '     (should be 12.0 13.0 14.0 X.X ... X.X with 12 X.X)';  
+ WRITE(6) VN4A$2, '     (should be 13.0)'; 
+ 
+
+ WRITE(6) 'Execution-speed timing measurement:'; 
+ DECLARE STIME, ETIME; 
+ STIME = RUNTIME; 
+ M = 100000; 
+ I = 0; DO WHILE I < M; I = I + 1; END; 
+ ETIME = RUNTIME; 
+ WRITE(6) M, 'iterations,', ETIME-STIME, 'seconds, ', 
+ 	  ROUND(M/(ETIME-STIME)), 'iterations/second.'; 
+ WRITE(6) ; 
+ 
+ WRITE(6) 'J here'; 
+ WRITE(6) 'The following should be 1.0 X.X 3.0 X.X X.X'; 
+ WRITE(6) VC100; 
+ WRITE(6) 'The following should be 1.0 X.X 3.0 X.X X.X 1.0 2.0 3.0 1.0 2.0 3.0 4.0 1.0 2.0 3.0 1.0 2.0 3.0 4.0 24.0'; 
+ WRITE(6) VC101; 
+ WRITE(6) 'The following should be 1.0 2.0 3.0 4.0 5.0'; 
+ WRITE(6) VC102; 
+ WRITE(6) 'The following should be 1.0 2.0 3.0 4.0 5.0'; 
+ WRITE(6) VC103; 
+ WRITE(6) 'The following should be 1.0 2.0 3.0 4.0 5.0 1.0 2.0 3.0 1.0 2.0 3.0 4.0 1.0 2.0 3.0 1.0 2.0 3.0 4.0 24.0'; 
+ WRITE(6) VC104; 
+ WRITE(6) 'The following should be 1.0 2.0 1.0 2.0 3.0 4.0 5.0 3.0 4.0 5.0'; 
+ WRITE(6) VC105; 
+ WRITE(6) 'The following should be 1.0 None 3.0 None None 1.0 None 3.0 None None 5.0 5.0 5.0 5.0 5.0 5.0 5.0 5.0 5.0 5.0'; 
+ WRITE(6) A100; 
+ WRITE(6) 'The following should be 1.0 None 3.0 None None 1.0 None 3.0 None None 1.0 None 3.0 None None 6.0 6.0 6.0 6.0 6.0'; 
+ WRITE(6) B100 ; 
+ WRITE(6) ; 
+ */
  WRITE(6); 
-   WRITE(6) 'Done.'; 
+ WRITE(6) 'Done.'; 

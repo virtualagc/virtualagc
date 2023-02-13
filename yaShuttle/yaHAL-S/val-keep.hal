@@ -1,0 +1,445 @@
+ /* 
+    License:    Declared to be in the Public Domain by its author,
+    		Ron Burkey.
+    Filename:	val.hal
+    
+    This is just some code I'm using with the yaHAL-S-FC.py interpreter
+    for simple regression testing, and which I don't feel like manually
+    retyping every time.  Notice that all of the actual HAL/S lines
+    (as opposed to interpreter commands) don't end in ';' (i.e., they
+    have a dummy space at the end) except for the final line, since
+    the interpreter won't process the batch until it finds a line
+    ending in ';'. If fed directly to the compiler rather than the
+    interpreter, that wouldn't be an issue.  But I'm cut-and-pasting
+    it into the interpreter.
+    
+    I've also begun each line in column 2, which isn't necessary
+    for the interpreter, but which allows the file to be processed
+    by the compiler if desired.
+    
+    The *original* HAL/S-FC compiler wouldn't accept this code, by the
+    way, since it would have to be wrapped in a PROGRAM, FUNCTION,
+    or PROCEDURE envelope, rather than just being standalone code
+    like this. But I've configured the modern compiler to accept it, 
+    largely because the interpreter be pretty useless if it accepted
+    only complete programs rather than little snippets of code. 
+ */
+    
+ DECLARE SCALAR, T, X INITIAL(2.0), Y CONSTANT(3.0), Z DOUBLE; 
+ DECLARE A, B DOUBLE, C INITIAL(4.0), D SCALAR CONSTANT(2 Y - 12); 
+ DECLARE INTEGER, I, J CONSTANT(4 D + 2), K INITIAL(J + D); 
+ DECLARE L INTEGER DOUBLE, M INTEGER; 
+ DECLARE CHARACTER(20), C1, C2 INITIAL('abc'), C3 CONSTANT('def'), 
+ 	 C4 CONSTANT(C3 CAT 'ghi'); 
+ DECLARE C5 CHARACTER(30), C6 CHARACTER(20) INITIAL('sam ' CAT C3); 
+ DECLARE BOOLEAN, B1, B2 CONSTANT(TRUE), B3 INITIAL(NOT B2); 
+ DECLARE B4 BOOLEAN, B5 BOOLEAN CONSTANT(NOT B2 AND B2), 
+ 	 B6 BOOLEAN INITIAL(B2 OR ~B2); 
+ DECLARE CV1 CONSTANT(2); 
+ DECLARE VN1 VECTOR(5); 
+ DECLARE VN1A VECTOR(CV1 + 3); 
+ DECLARE VN2 VECTOR(10) INITIAL(2.47); 
+ DECLARE VN2A VECTOR(10) INITIAL(CV1 + 0.47); 
+ DECLARE VN3 VECTOR(20) INITIAL(1, 2, 3, 4, 5, *); 
+ DECLARE VN3A VECTOR(3 CV1) INITIAL(1, CV1, 3, 4, 1 + CV1 2, *); 
+ DECLARE VN4 VECTOR(15) CONSTANT(12); 
+ DECLARE VN4A VECTOR(15) CONSTANT(12, CV1 + 11, 2 CV1 +10, *); 
+ 
+ WRITE(6) ; 
+ WRITE(6) 'Some DECLARE tests ...'; 
+ WRITE(6) CV1, '     (should be 2.0)'; 
+ WRITE(6) VN1, '     (should be X.X X.X X.X X.X X.X)'; 
+ WRITE(6) VN1A, '     (should be X.X X.X X.X X.X X.X)'; 
+ WRITE(6) VN2, '     (should be 2.47 ... 2.47 with 10 entries)'; 
+ WRITE(6) VN2A, '     (same as previous)'; 
+ WRITE(6) VN3, '     (should be 1.0 2.0 3.0 4.0 5.0 X.X ... X.X] with 15 X.X)'; 
+ WRITE(6) VN3A, '     (should be 1.0 2.0 3.0 4.0)'; 
+ WRITE(6) VN4, '     (should be 12.0 12.0 ... with 15 entries)'; 
+ WRITE(6) VN4A, '     (should be 12.0 13.0 14.0 X.X ... X.X with 12 X.X)';  
+ WRITE(6) VN4A$2, '     (should be 13.0)'; 
+ WRITE(6) ; 
+ WRITE(6) 'Miscellaneous tests:'; 
+ I=1.4; WRITE(6) 'I =', I, '(should be 1)'; 
+ A=2; WRITE(6) 'A =', A, '(should be 2.0)'; 
+ B = 12.6E2B-1 A + 6 ( I A**3 - 21 ) / 4.2; 
+ WRITE(6) 'B =', B, '(should be 1241.428571...)'; 
+ WRITE(6) B2, B3, B5, B6, '(should be 1 0 0 1)'; 
+ WRITE(6) B2, ~B2, ~B2 & B2, B2 | NOT B2, '(should be 1 0 0 1)'; 
+ WRITE(6) '"' CAT C2 CAT '"', 
+ 	  '"' CAT C3 || '"', 
+ 	  '"' || C4 CAT '"', 
+ 	  '"' || C6 || '"', 
+ 	  ' (should be "abc", "def", "defghi", "sam def")'; 
+ WRITE(6) ; 
+ IF TRUE THEN WRITE(6) TRUE, '(should be 1)'; 
+ WRITE(6) 'Test IF FALSE; should be nothing between here ...'; 
+ IF FALSE THEN WRITE(6) FALSE; 
+ WRITE(6) '... and here.'; 
+ WRITE(6) 'Test IF TRUE THEN ...; ELSE ...; should be 1:'; 
+ IF TRUE THEN WRITE(6) TRUE; ELSE WRITE(6) FALSE; 
+ WRITE(6) 'Test IF FALSE THEN ...; ELSE ...; should be 0:'; 
+ IF FALSE THEN WRITE(6) TRUE; ELSE WRITE(6) FALSE; 
+ WRITE(6) 'The following IF/THEN/ELSE tests should read ',
+ 	'<, >=, >=, <=, <=, >, >, <=, <=, >=, >=, <, ~=, =, ~=, ~=, =, ~= :'; 
+ WRITE(6) ; 
+ I = 5; 
+ IF I < 10 THEN WRITE(6) '<'; ELSE WRITE(6) '>='; 
+ IF I < 5 THEN WRITE(6) '<'; ELSE WRITE(6) '>='; 
+ IF I < 2 THEN WRITE(6) '<'; ELSE WRITE(6) '>='; 
+ IF I <= 10 THEN WRITE(6) '<='; ELSE WRITE(6) '>'; 
+ IF I <= 5 THEN WRITE(6) '<='; ELSE WRITE(6) '>'; 
+ IF I <= 2 THEN WRITE(6) '<='; ELSE WRITE(6) '>'; 
+ IF I > 2 THEN WRITE(6) '>'; ELSE WRITE(6) '<='; 
+ IF I > 5 THEN WRITE(6) '>'; ELSE WRITE(6) '<='; 
+ IF I > 10 THEN WRITE(6) '>'; ELSE WRITE(6) '<='; 
+ IF I >= 2 THEN WRITE(6) '>='; ELSE WRITE(6) '<'; 
+ IF I >= 5 THEN WRITE(6) '>='; ELSE WRITE(6) '<'; 
+ IF I >= 10 THEN WRITE(6) '>='; ELSE WRITE(6) '<'; 
+ IF I = 2 THEN WRITE(6) '='; ELSE WRITE(6) '~='; 
+ IF I = 5 THEN WRITE(6) '='; ELSE WRITE(6) '~='; 
+ IF I = 10 THEN WRITE(6) '='; ELSE WRITE(6) '~='; 
+ IF I ~= 2 THEN WRITE(6) '~='; ELSE WRITE(6) '='; 
+ IF I ~= 5 THEN WRITE(6) '~='; ELSE WRITE(6) '='; 
+ IF I ~= 10 THEN WRITE(6) '~='; ELSE WRITE(6) '='; 
+ WRITE(6) ; 
+ WRITE(6) 'The following IF THEN ELSE string comparisons should be ',
+ 	'TRUE, TRUE, and FALSE, respectively.'; 
+ IF 'ABC' = 'A' || 'BC' THEN WRITE(6) TRUE; ELSE WRITE(6) FALSE; 
+ IF 'AB' || 'C' = 'ABC' THEN WRITE(6) TRUE; ELSE WRITE(6) FALSE; 
+ IF 'ABC' = 'AB' THEN WRITE(6) TRUE; ELSE WRITE(6) FALSE; 
+ WRITE(6) ; 
+ WRITE(6) 'Print 10 random numbers with DO WHILE arithmetical comparison:'; 
+ I=0; DO WHILE I < 10; I=I+1; WRITE(6) I, RANDOM; END; 
+ WRITE(6) 'Print nine 1 and one 0 with DO WHILE boolean constant:'; 
+ B1=TRUE; I=0; 
+ DO WHILE B1; 
+ 	I=I+1; 
+ 	IF I>=10 THEN B1=FALSE; 
+ 	WRITE(6) I, B1; 
+ END; 
+ WRITE(6) ; 
+ WRITE(6) 'Test DO WHILE FALSE; should be nothing between here ...'; 
+ DO WHILE FALSE; WRITE(6) ' SOMETHING!'; END; 
+ WRITE(6) '... and here.'; 
+ WRITE(6) ; 
+ WRITE(6) 'Print 10 random (Gaussian) with DO UNTIL arithmetical comparison:'; 
+ I=0; DO UNTIL I >= 10; I=I+1; WRITE(6) I, RANDOMG; END; 
+ WRITE(6) ; 
+ WRITE(6) 'Test DO UNTIL FALSE; should be SOMETHING between here ...'; 
+ DO UNTIL TRUE; WRITE(6) ' SOMETHING!'; END; 
+ WRITE(6) '... and here.'; 
+ WRITE(6) ; 
+ WRITE(6) 'Built-in RUNTIME function test (increment once per second):'; 
+ WRITE(6) 'Uses DO WHILE DO UNTIL for the nested loops.';  
+ I=1; 
+ M=ROUND(RUNTIME); 
+ DO WHILE I <= 10; 
+ 	DO UNTIL L > M; 
+ 		L = ROUND(RUNTIME); 
+ 	END; 
+ 	WRITE(6) I, M; 
+ 	I = I + 1; 
+ 	M = L; 
+ END; 
+ WRITE(6) 'Again, but with DO UNTIL DO WHILE loop nesting:'; 
+ I=1; 
+ M=ROUND(RUNTIME); 
+ DO UNTIL I > 10; 
+ 	L = ROUND(RUNTIME); 
+ 	DO WHILE L <= M; 
+ 		L = ROUND(RUNTIME); 
+ 	END; 
+ 	WRITE(6) I, M; 
+ 	I = I + 1; 
+ 	M = L; 
+ END; 
+ WRITE(6) 'And still again, with DO UNTIL DO UNTIL loop nesting:'; 
+ I=1; 
+ M=ROUND(RUNTIME); 
+ DO UNTIL I > 10; 
+ 	DO UNTIL L > M; 
+ 		L = ROUND(RUNTIME); 
+ 	END; 
+ 	WRITE(6) I, M; 
+ 	I = I + 1; 
+ 	M = L; 
+ END; 
+ WRITE(6) 'This time, with a DO FOR TEMPORARY loop:'; 
+ M=ROUND(RUNTIME); 
+ DO FOR TEMPORARY I = 1 TO 10; 
+ 	DO UNTIL L > M; 
+ 		L = ROUND(RUNTIME); 
+ 	END; 
+ 	M = L; 
+ 	WRITE(6) I, M; 
+ END; 
+ WRITE(6) 'This time with a DO FOR TEMPORARY BY 2:'; 
+ M=ROUND(RUNTIME); 
+ DO FOR TEMPORARY I = 1 TO 20 BY 2; 
+ 	DO UNTIL L > M; 
+ 		L = ROUND(RUNTIME); 
+ 	END; 
+ 	M = L; 
+ 	WRITE(6) I, M; 
+ END; 
+ WRITE(6) 'This time, DO FOR BY -1:'; 
+ M=ROUND(RUNTIME); 
+ DO FOR TEMPORARY I = 10 TO 1 BY -1; 
+ 	DO UNTIL L > M; 
+ 		L = ROUND(RUNTIME); 
+ 	END; 
+ 	M = L; 
+ 	WRITE(6) I, M; 
+ END; 
+ WRITE(6) 'This time, DO FOR UNTIL:'; 
+ M=ROUND(RUNTIME); 
+ DO FOR TEMPORARY I = 1 TO 100 UNTIL I >= 10; 
+ 	DO UNTIL L > M; 
+ 		L = ROUND(RUNTIME); 
+ 	END; 
+ 	M = L; 
+ 	WRITE(6) I, M; 
+ END; 
+ WRITE(6) 'This time, DO FOR WHILE:'; 
+ M=ROUND(RUNTIME); 
+ DO FOR TEMPORARY I = 1 TO 100 WHILE I <= 10; 
+ 	DO UNTIL L > M; 
+ 		L = ROUND(RUNTIME); 
+ 	END; 
+ 	M = L; 
+ 	WRITE(6) I, M; 
+ END; 
+ WRITE(6) 'This time with a SCALAR loop index (1.4 to 26.3 by 1.7):'; 
+ M=ROUND(RUNTIME); 
+ DO FOR A = 1.4 TO 26.3 BY 1.7; 
+ 	DO UNTIL L > M; 
+ 		L = ROUND(RUNTIME); 
+ 	END; 
+ 	M = L; 
+ 	WRITE(6) A, M; 
+ END; 
+ WRITE(6) 'Again, but backwards (25.2 to 0.0 by -1.7):'; 
+ M=ROUND(RUNTIME); 
+ DO FOR A = 25.2 TO 0.0 BY -1.7; 
+ 	DO UNTIL L > M; 
+ 		L = ROUND(RUNTIME); 
+ 	END; 
+ 	M = L; 
+ 	WRITE(6) A, M; 
+ END; 
+ WRITE(6) ; 
+ WRITE(6) 'Execution-speed timing measurement:'; 
+ DECLARE STIME, ETIME; 
+ STIME = RUNTIME; 
+ M = 100000; 
+ I = 0; DO WHILE I < M; I = I + 1; END; 
+ ETIME = RUNTIME; 
+ WRITE(6) M, 'iterations,', ETIME-STIME, 'seconds, ', 
+ 	  ROUND(M/(ETIME-STIME)), 'iterations/second.'; 
+ WRITE(6) ; 
+ WRITE(6) 'Some tests of FUNCTION follow:'; 
+  /* Function that averages 3 floats. */ 
+ AVG3: 
+ FUNCTION(X, Y, Z) SCALAR; 
+ 	DECLARE SCALAR, X, Y, Z, T; 
+ 
+ 	/* Function that adds 3 floats. */
+ 	ADD3: 
+ 	FUNCTION(X, Y, Z) SCALAR; 
+ 		DECLARE X, Y, Z; 
+ 		DECLARE ADD2 FUNCTION SCALAR; 
+ 		RETURN ADD2(X, ADD2(Y, Z)); 
+ 		
+ 		/* Function that adds 2 floats. */
+ 		ADD2: 
+ 		FUNCTION(X, Y) SCALAR; 
+ 			DECLARE X, Y; 
+ 			RETURN X + Y; 
+ 		CLOSE; 
+ 		
+ 	CLOSE ADD3; 
+ 
+	T = ADD3(X, Y, Z); 
+ 	RETURN T/3; 
+ CLOSE AVG3; 
+ WRITE(6) 'The following should print out (4+5+7)/3 = 5.33...'; 
+ WRITE(6) AVG3(4, 5, 7); 
+ WRITE(6) ; 
+ /* A "projection" function that picks out just one
+    parameter from among three, using W as an index. */
+ PROJECTION3: 
+ FUNCTION(W, X, Y, Z); 
+ 	DECLARE X, Y, Z; 
+ 	DECLARE W INTEGER; 
+ 	IF W = 1 THEN RETURN X; 
+ 	IF W = 2 THEN RETURN Y; 
+ 	IF W = 3 THEN RETURN Z; 
+ 	RETURN 0; 
+ CLOSE PROJECTION3; 
+ WRITE(6) 'The next 3 lines should be 100.0, 200.0, and 300.0, respectively.'; 
+ WRITE(6) PROJECTION3(1, 100, 200, 300); 
+ WRITE(6) PROJECTION3(2, 100, 200, 300); 
+ WRITE(6) PROJECTION3(3, 100, 200, 300); 
+ WRITE(6) ; 
+ WRITE(6) 'Some tests of PROCEDUREs ...'; 
+ DECLARE X1 SCALAR INITIAL(0), Y1 SCALAR INITIAL(1), Z1 SCALAR INITIAL(2); 
+ P: 
+ PROCEDURE(X) ASSIGN(Y); 
+	 DECLARE X, Y; 
+	 Y=X; 
+ CLOSE; 
+ CALL P(39) ASSIGN(Z1); 
+ WRITE(6) Y1, Z1, '(should be 1.0 and 39.0)'; 
+ 
+ P2: 
+ PROCEDURE(A, B, C) ASSIGN(D, E, F); 
+	 DECLARE A, B, C, D, E, F; 
+	 D = A; 
+	 E = B; 
+	 F = C; 
+ CLOSE P2; 
+ CALL P2(123, 245, 789) ASSIGN(X1, Y1, Z1); 
+ WRITE(6) X1, Y1, Z1, 'should be 123.0, 245.0, 789.0'; 
+ WRITE(6) ; 
+ 
+ WRITE(6) 'A here'; 
+ DECLARE VC100 VECTOR(5) CONSTANT(1, 1#, 3, *); 
+ WRITE(6) 'B here'; 
+ DECLARE VC101 VECTOR(20) CONSTANT(VC100, 2#(2#(1,2,3), 4), 24); 
+ WRITE(6) 'C here'; 
+ DECLARE VC102 VECTOR(5) CONSTANT(1, 1#2, 3, 4, 5); 
+ WRITE(6) 'D here'; 
+ DECLARE VC103 VECTOR(5) CONSTANT(VC102); 
+ WRITE(6) 'E here'; 
+ DECLARE VC104 VECTOR(20) CONSTANT(VC102, 2#(2#(1,2,3), 4), 24); 
+ WRITE(6) 'F here'; 
+ DECLARE VC105 VECTOR(10) CONSTANT(1, 2, VC102, 3, 4, 5); 
+ WRITE(6) 'G here'; 
+ DECLARE A100 ARRAY(20) INTEGER; 
+ WRITE(6) 'H here'; 
+ DECLARE B100 ARRAY(20) SCALAR; 
+ WRITE(6) 'I here'; 
+ A100 = INTEGER(2#VC100, 10#5); 
+ WRITE(6) 'J here'; 
+ B100 = SCALAR(3#VC100, 5#6); 
+ WRITE(6) 'The following should be 1.0 X.X 3.0 X.X X.X'; 
+ WRITE(6) VC100; 
+ WRITE(6) 'The following should be 1.0 X.X 3.0 X.X X.X 1.0 2.0 3.0 1.0 2.0 3.0 4.0 1.0 2.0 3.0 1.0 2.0 3.0 4.0 24.0'; 
+ WRITE(6) VC101; 
+ WRITE(6) 'The following should be 1.0 2.0 3.0 4.0 5.0'; 
+ WRITE(6) VC102; 
+ WRITE(6) 'The following should be 1.0 2.0 3.0 4.0 5.0'; 
+ WRITE(6) VC103; 
+ WRITE(6) 'The following should be 1.0 2.0 3.0 4.0 5.0 1.0 2.0 3.0 1.0 2.0 3.0 4.0 1.0 2.0 3.0 1.0 2.0 3.0 4.0 24.0'; 
+ WRITE(6) VC104; 
+ WRITE(6) 'The following should be 1.0 2.0 1.0 2.0 3.0 4.0 5.0 3.0 4.0 5.0'; 
+ WRITE(6) VC105; 
+ WRITE(6) 'The following should be 1.0 None 3.0 None None 1.0 None 3.0 None None 5.0 5.0 5.0 5.0 5.0 5.0 5.0 5.0 5.0 5.0'; 
+ WRITE(6) A100; 
+ WRITE(6) 'The following should be 1.0 None 3.0 None None 1.0 None 3.0 None None 1.0 None 3.0 None None 6.0 6.0 6.0 6.0 6.0'; 
+ WRITE(6) B100 ; 
+ WRITE(6) ; 
+ WRITE(6) 'The following should be 10 repetitions of N 1 2 3 4 M 6 7 8 9 10,'; 
+ WRITE(6) 'where N varies from 1 to 10 and M varies from 2 to 20 by 2.'; 
+ DECLARE A201 ARRAY(10) INTEGER;  
+ DO FOR TEMPORARY I=1 TO 10; A201 = INTEGER(1, 2, 3, 4, 2 I, 6, 7, 8, 9, 10); WRITE(6) I, ':', A201; END; 
+ WRITE(6); 
+ WRITE(6) 'All of the following should be integer 34:'; 
+ DECLARE B300 BIT(6); 
+ WRITE(6) 34; 
+ WRITE(6) INTEGER(34); 
+ WRITE(6) INTEGER(34.0); 
+ B300 = 34.2; 
+ WRITE(6) B300; 
+ B300 = 98; 
+ WRITE(6) B300; 
+ WRITE(6) INTEGER(B300); 
+ WRITE(6) INTEGER('34'); 
+ WRITE(6) INTEGER('34.2'); 
+ WRITE(6) ; 
+ WRITE(6) 'All of the following should be float 34.0:'; 
+ DECLARE B300 BIT(6); 
+ WRITE(6) 34.0; 
+ WRITE(6) SCALAR(34); 
+ WRITE(6) SCALAR(34.0); 
+ B300 = 98; 
+ WRITE(6) SCALAR(B300); 
+ WRITE(6) SCALAR('34'); 
+ WRITE(6) SCALAR('34.2'), ' but this one should be 34.2'; 
+ WRITE(6) ; 
+ DECLARE VECTOR, V300 CONSTANT(1.0, 2.0, 3.0), V301, V302; 
+ DECLARE MATRIX, M300 CONSTANT(1, 2, 3, 4, 5, 6, 7, 8, 9), M301, M302; 
+ DECLARE ARRAY(3), A300; 
+ DECLARE A301 ARRAY(9) SCALAR; 
+ WRITE(6) V300; 
+ WRITE(6) INTEGER(V300); 
+ V301 = INTEGER(V300); 
+ WRITE(6) V301; 
+ A300 = INTEGER(1#V300); 
+ WRITE(6) A300; 
+ WRITE(6) M300; 
+ WRITE(6) INTEGER(M300); 
+ M301 = INTEGER(M300); 
+ WRITE(6) M301; 
+ A301 = INTEGER(1#M300); 
+ WRITE(6) A301; 
+ WRITE(6) SCALAR(V301); 
+ V302 = SCALAR(V301); 
+ WRITE(6) V302; 
+ A300 = SCALAR(1#V301); 
+ WRITE(6) A300; 
+ WRITE(6) SCALAR(M301); 
+ M302 = SCALAR(M301); 
+ WRITE(6) M302; 
+ A301 = SCALAR(1#M301); 
+ WRITE(6) A301; 
+ WRITE(6); 
+ WRITE(6) 'Some tests of simple subscripting ...'; 
+ DECLARE V400 VECTOR(10), V401 VECTOR(10), V402 VECTOR(10); 
+ DECLARE MATRIX, M400, M401, M402; 
+ V400$1=100; 
+ V400$3=200; 
+ V400$5=300; 
+ WRITE(6) V400; 
+ WRITE(6) V400$1, V400$2, V400$3, V400$4, V400$5, V400$6, V400$7, V400$8,
+ 	  V400$9, V400$10; 
+ DO FOR TEMPORARY I = 1 TO 10; 
+ 	WRITE(6) 'V400(', I, ') =', V400$I; 
+ END; 
+ 
+ MYREVERSE:
+ PROCEDURE(V) ASSIGN(W); 
+ 	DECLARE VECTOR(10), V, W; 
+ 	W = V; 
+ 	DO FOR TEMPORARY I = 1 TO 10; 
+ 		W$I = V$(11-I); 
+ 	END; 
+ CLOSE MYREVERSE; 
+ CALL MYREVERSE(V400) ASSIGN(V402); 
+ WRITE(6) V402; 
+ 
+ DO FOR TEMPORARY I = 1 TO 3; 
+ 	DO FOR TEMPORARY J = 1 TO 3; 
+ 		M400$(I,J) = 10 I + J; 
+ 	END; 
+ END; 
+ WRITE(6) M400; 
+ DO FOR TEMPORARY I = 1 TO 3; 
+ 	DO FOR TEMPORARY J = 1 TO 3; 
+ 		WRITE(6) 'M400(', I, ',', J, ') =', M400$(I,J); 
+ 	END; 
+ END; 
+ 
+ MYTRANSPOSE:
+ PROCEDURE(M) ASSIGN(MT); 
+ 	DECLARE MATRIX, M, MT; 
+ 	DO FOR TEMPORARY I = 1 TO 3; 
+ 		DO FOR TEMPORARY J = 1 TO 3; 
+ 			MT$(I, J) = M$(J, I); 
+ 		END; 
+ 	END; 
+ CLOSE MYTRANSPOSE; 
+ CALL MYTRANSPOSE(M400) ASSIGN(M401); 
+ WRITE(6) M401; 
+ WRITE(6); 
+   WRITE(6) 'Done.'; 

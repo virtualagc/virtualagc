@@ -124,8 +124,9 @@ def processSource(PALMAT, halsSource, metadata, libraryFilename,
             fields = fields[1].strip().split(",")
             i = int(fields[0]) - 1
             j = int(fields[1])
-            print(reorganizer.untranslate(halsSource[i]))
-            print("%*s^" % (j-1, "")) 
+            if i >= 0 and i < len(halsSource):
+                print(reorganizer.untranslate(halsSource[i]))
+                print("%*s^" % (j-1, "")) 
         else:
             print(error)
     if success:

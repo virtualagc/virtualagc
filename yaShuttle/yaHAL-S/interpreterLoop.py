@@ -171,7 +171,7 @@ helpMenu = \
 \t`NOEXEC      Don't execute the HAL/S code.'''
 
 def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
-                    xeq=True, lbnf=False, bnf=False):
+                    xeq=True, lbnf=False, bnf=False, ansiWrapper=True):
     spooling = False
     strict = False
     colors = ["black", "red", "green", "yellow", "blue", "magenta", "cyan",
@@ -195,9 +195,15 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
         # On a different note, the colorization of the prompt may be 
         # temporarily lost while scrolling up and down through the history,
         # and I have no cure for that.
-        colorize = "\001\033[35m\002"
+        if ansiWrapper:
+            ansiPrefix = "\001"
+            ansiSuffix = "\002"
+        else:
+            ansiPrefix = ""
+            ansiSuffix = ""
+        colorize = ansiPrefix + "\033[35m" + ansiSuffix
         colorName = "magenta"
-        debugColor = "\001\033[33m\002"
+        debugColor = ansiPrefix + "\033[33m" + ansiSuffix
     else:
         colorize = ""
         colorName = ""
@@ -220,7 +226,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
             else:
                 prompt = "  ... > "
             if colorize != "":
-                prompt = prompt + "\001\033[0m\002"
+                prompt = prompt + ansiPrefix + "\033[0m" + ansiSuffix
             line = input(prompt)
             '''
             if line[:2] in ["C ", "C\t"] or line[:3] in ["C/ ", "C/\t"]:
@@ -291,7 +297,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                         index += 30
                     else:
                         index += 90 - 8
-                    colorize = "\001\033[%dm\002" % index
+                    colorize = ansiPrefix + ("\033[%dm" % index) + ansiSuffix
                     print(colorize, end="")
                     print("\tEnabled colorized output (%s)." % colorName.upper())
                     continue
@@ -398,11 +404,11 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     continue
                 elif firstWord == "TRACE4":
                     print("\tTRACE4 on.")
-                    trace3 = True
+                    trace4 = True
                     continue
                 elif firstWord == "NOTRACE4":
                     print("\tTRACE4 off.")
-                    trace3 = False
+                    trace4 = False
                     continue
                 elif firstWord == "LBNF":
                     print("\tDisplaying abstract syntax trees (AST) in LBNF.")
@@ -487,6 +493,8 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                             print("\tname:       %s (%s)" % \
                                     (fields[1], scope["name"][1:-1]))
                             print("\tattributes:", scope["attributes"])
+                            if "return" in scope:
+                                print("\treturn:    ", scope["return"])
                     continue
                 elif firstWord == "GARBAGE":
                     collectGarbage(PALMAT)
@@ -504,7 +512,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     continue
                 elif firstWord == "NOCOLORIZE":
                     if colorize != "":
-                        print("\001\033[0m\002", end="")
+                        print(ansiPrefix + "\033[0m" + ansiSuffix, end="")
                     print("\tDisabled colorized output.")
                     colorize = ""
                     continue

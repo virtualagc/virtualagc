@@ -374,8 +374,6 @@ def replaceBy(halsSource, metadata, libraryFilename, templateLibrary, \
                                                 bareIdentifierPattern + \
                                                 "$", identifier):
                                 continue
-                            #print("*", fullLine)
-                            #print("*", subfields)
                             thisType = ""
                             if "STRUCTURE" == subfields[2][-9:]:
                                 thisType = "s_"
@@ -565,10 +563,7 @@ def replaceBy(halsSource, metadata, libraryFilename, templateLibrary, \
                 if blockDepth < 0:
                     print("Negative block depth implementation error.", \
                             file=sys.stderr)
-                #print("*1", halsSource[i])
-                #print("*2", macros)
                 macros = macros[:-1]
-                #print("*3", macros)
                 
         # If we've gotten here, then we have a line which is eligible for macro
         # expansions.  

@@ -752,13 +752,15 @@ ARITH_VAR make_ADarith_var(QUAL_STRUCT p0, ARITH_ID p1, SUBSCRIPT p2);
 struct PRE_PRIMARY_
 {
   int line_number, char_number;
-  enum { is_AApre_primary, is_ABpre_primary, is_ACpre_primary, is_ADprePrimaryRtlFunction, is_ADprePrimaryRtlShaping, is_ADprePrimaryRtlShapingStar, is_AEprePrimaryFunction } kind;
+  enum { is_AApre_primary, is_ABpre_primary, is_ACpre_primary, is_ADprePrimaryRtlFunction, is_ADprePrimaryTypeof, is_ADprePrimaryTypeofv, is_ADprePrimaryRtlShaping, is_ADprePrimaryRtlShapingStar, is_AEprePrimaryFunction } kind;
   union
   {
     struct { ARITH_EXP arith_exp_; } aapre_primary_;
     struct { NUMBER number_; } abpre_primary_;
     struct { COMPOUND_NUMBER compound_number_; } acpre_primary_;
     struct { ARITH_FUNC arith_func_; CALL_LIST call_list_; } adpreprimaryrtlfunction_;
+    struct { CALL_LIST call_list_; } adpreprimarytypeof_;
+    struct { CALL_LIST call_list_; } adpreprimarytypeofv_;
     struct { SHAPING_HEAD shaping_head_; } adpreprimaryrtlshaping_;
     struct { SHAPING_HEAD shaping_head_; } adpreprimaryrtlshapingstar_;
     struct { CALL_LIST call_list_; LabelToken labeltoken_; } aepreprimaryfunction_;
@@ -769,6 +771,8 @@ PRE_PRIMARY make_AApre_primary(ARITH_EXP p0);
 PRE_PRIMARY make_ABpre_primary(NUMBER p0);
 PRE_PRIMARY make_ACpre_primary(COMPOUND_NUMBER p0);
 PRE_PRIMARY make_ADprePrimaryRtlFunction(ARITH_FUNC p0, CALL_LIST p1);
+PRE_PRIMARY make_ADprePrimaryTypeof(CALL_LIST p0);
+PRE_PRIMARY make_ADprePrimaryTypeofv(CALL_LIST p0);
 PRE_PRIMARY make_ADprePrimaryRtlShaping(SHAPING_HEAD p0);
 PRE_PRIMARY make_ADprePrimaryRtlShapingStar(SHAPING_HEAD p0);
 PRE_PRIMARY make_AEprePrimaryFunction(LabelToken p0, CALL_LIST p1);
@@ -844,17 +848,29 @@ MODIFIED_ARITH_FUNC make_AEmodified_arith_func(QUAL_STRUCT p0, NO_ARG_ARITH_FUNC
 struct SHAPING_HEAD_
 {
   int line_number, char_number;
-  enum { is_ADprePrimaryRtlShapingHead, is_ADprePrimaryRtlShapingHeadSubscript, is_ADprePrimaryRtlShapingHeadRepeated } kind;
+  enum { is_ADprePrimaryRtlShapingHeadInteger, is_ADprePrimaryRtlShapingHeadScalar, is_ADprePrimaryRtlShapingHeadVector, is_ADprePrimaryRtlShapingHeadMatrix, is_ADprePrimaryRtlShapingHeadIntegerSubscript, is_ADprePrimaryRtlShapingHeadScalarSubscript, is_ADprePrimaryRtlShapingHeadVectorSubscript, is_ADprePrimaryRtlShapingHeadMatrixSubscript, is_ADprePrimaryRtlShapingHeadRepeated } kind;
   union
   {
-    struct { ARITH_CONV arith_conv_; REPEATED_CONSTANT repeated_constant_; } adpreprimaryrtlshapinghead_;
-    struct { ARITH_CONV arith_conv_; REPEATED_CONSTANT repeated_constant_; SUBSCRIPT subscript_; } adpreprimaryrtlshapingheadsubscript_;
+    struct { REPEATED_CONSTANT repeated_constant_; } adpreprimaryrtlshapingheadinteger_;
+    struct { REPEATED_CONSTANT repeated_constant_; } adpreprimaryrtlshapingheadscalar_;
+    struct { REPEATED_CONSTANT repeated_constant_; } adpreprimaryrtlshapingheadvector_;
+    struct { REPEATED_CONSTANT repeated_constant_; } adpreprimaryrtlshapingheadmatrix_;
+    struct { REPEATED_CONSTANT repeated_constant_; SUBSCRIPT subscript_; } adpreprimaryrtlshapingheadintegersubscript_;
+    struct { REPEATED_CONSTANT repeated_constant_; SUBSCRIPT subscript_; } adpreprimaryrtlshapingheadscalarsubscript_;
+    struct { REPEATED_CONSTANT repeated_constant_; SUBSCRIPT subscript_; } adpreprimaryrtlshapingheadvectorsubscript_;
+    struct { REPEATED_CONSTANT repeated_constant_; SUBSCRIPT subscript_; } adpreprimaryrtlshapingheadmatrixsubscript_;
     struct { REPEATED_CONSTANT repeated_constant_; SHAPING_HEAD shaping_head_; } adpreprimaryrtlshapingheadrepeated_;
   } u;
 };
 
-SHAPING_HEAD make_ADprePrimaryRtlShapingHead(ARITH_CONV p0, REPEATED_CONSTANT p1);
-SHAPING_HEAD make_ADprePrimaryRtlShapingHeadSubscript(ARITH_CONV p0, SUBSCRIPT p1, REPEATED_CONSTANT p2);
+SHAPING_HEAD make_ADprePrimaryRtlShapingHeadInteger(REPEATED_CONSTANT p0);
+SHAPING_HEAD make_ADprePrimaryRtlShapingHeadScalar(REPEATED_CONSTANT p0);
+SHAPING_HEAD make_ADprePrimaryRtlShapingHeadVector(REPEATED_CONSTANT p0);
+SHAPING_HEAD make_ADprePrimaryRtlShapingHeadMatrix(REPEATED_CONSTANT p0);
+SHAPING_HEAD make_ADprePrimaryRtlShapingHeadIntegerSubscript(SUBSCRIPT p0, REPEATED_CONSTANT p1);
+SHAPING_HEAD make_ADprePrimaryRtlShapingHeadScalarSubscript(SUBSCRIPT p0, REPEATED_CONSTANT p1);
+SHAPING_HEAD make_ADprePrimaryRtlShapingHeadVectorSubscript(SUBSCRIPT p0, REPEATED_CONSTANT p1);
+SHAPING_HEAD make_ADprePrimaryRtlShapingHeadMatrixSubscript(SUBSCRIPT p0, REPEATED_CONSTANT p1);
 SHAPING_HEAD make_ADprePrimaryRtlShapingHeadRepeated(SHAPING_HEAD p0, REPEATED_CONSTANT p1);
 
 struct CALL_LIST_

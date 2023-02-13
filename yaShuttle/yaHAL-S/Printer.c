@@ -929,6 +929,26 @@ void ppPRE_PRIMARY(PRE_PRIMARY p, int _i_)
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
+  case is_ADprePrimaryTypeof:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderS("TYPEOF");
+    renderC('(');
+    ppCALL_LIST(p->u.adpreprimarytypeof_.call_list_, 0);
+    renderC(')');
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ADprePrimaryTypeofv:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderS("TYPEOFV");
+    renderC('(');
+    ppCALL_LIST(p->u.adpreprimarytypeofv_.call_list_, 0);
+    renderC(')');
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
   case is_ADprePrimaryRtlShaping:
     if (_i_ > 0) renderC(_L_PAREN);
     ppSHAPING_HEAD(p->u.adpreprimaryrtlshaping_.shaping_head_, 0);
@@ -1092,21 +1112,78 @@ void ppSHAPING_HEAD(SHAPING_HEAD p, int _i_)
 {
   switch(p->kind)
   {
-  case is_ADprePrimaryRtlShapingHead:
+  case is_ADprePrimaryRtlShapingHeadInteger:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppARITH_CONV(p->u.adpreprimaryrtlshapinghead_.arith_conv_, 0);
+    renderS("INTEGER");
     renderC('(');
-    ppREPEATED_CONSTANT(p->u.adpreprimaryrtlshapinghead_.repeated_constant_, 0);
+    ppREPEATED_CONSTANT(p->u.adpreprimaryrtlshapingheadinteger_.repeated_constant_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_ADprePrimaryRtlShapingHeadSubscript:
+  case is_ADprePrimaryRtlShapingHeadScalar:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppARITH_CONV(p->u.adpreprimaryrtlshapingheadsubscript_.arith_conv_, 0);
-    ppSUBSCRIPT(p->u.adpreprimaryrtlshapingheadsubscript_.subscript_, 0);
+    renderS("SCALAR");
     renderC('(');
-    ppREPEATED_CONSTANT(p->u.adpreprimaryrtlshapingheadsubscript_.repeated_constant_, 0);
+    ppREPEATED_CONSTANT(p->u.adpreprimaryrtlshapingheadscalar_.repeated_constant_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ADprePrimaryRtlShapingHeadVector:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderS("VECTOR");
+    renderC('(');
+    ppREPEATED_CONSTANT(p->u.adpreprimaryrtlshapingheadvector_.repeated_constant_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ADprePrimaryRtlShapingHeadMatrix:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderS("MATRIX");
+    renderC('(');
+    ppREPEATED_CONSTANT(p->u.adpreprimaryrtlshapingheadmatrix_.repeated_constant_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ADprePrimaryRtlShapingHeadIntegerSubscript:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderS("INTEGER");
+    ppSUBSCRIPT(p->u.adpreprimaryrtlshapingheadintegersubscript_.subscript_, 0);
+    renderC('(');
+    ppREPEATED_CONSTANT(p->u.adpreprimaryrtlshapingheadintegersubscript_.repeated_constant_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ADprePrimaryRtlShapingHeadScalarSubscript:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderS("SCALAR");
+    ppSUBSCRIPT(p->u.adpreprimaryrtlshapingheadscalarsubscript_.subscript_, 0);
+    renderC('(');
+    ppREPEATED_CONSTANT(p->u.adpreprimaryrtlshapingheadscalarsubscript_.repeated_constant_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ADprePrimaryRtlShapingHeadVectorSubscript:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderS("VECTOR");
+    ppSUBSCRIPT(p->u.adpreprimaryrtlshapingheadvectorsubscript_.subscript_, 0);
+    renderC('(');
+    ppREPEATED_CONSTANT(p->u.adpreprimaryrtlshapingheadvectorsubscript_.repeated_constant_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ADprePrimaryRtlShapingHeadMatrixSubscript:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderS("MATRIX");
+    ppSUBSCRIPT(p->u.adpreprimaryrtlshapingheadmatrixsubscript_.subscript_, 0);
+    renderC('(');
+    ppREPEATED_CONSTANT(p->u.adpreprimaryrtlshapingheadmatrixsubscript_.repeated_constant_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
@@ -8494,6 +8571,30 @@ void shPRE_PRIMARY(PRE_PRIMARY p)
     bufAppendC(')');
 
     break;
+  case is_ADprePrimaryTypeof:
+    bufAppendC('(');
+
+    bufAppendS("ADprePrimaryTypeof");
+
+    bufAppendC(' ');
+
+    shCALL_LIST(p->u.adpreprimarytypeof_.call_list_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ADprePrimaryTypeofv:
+    bufAppendC('(');
+
+    bufAppendS("ADprePrimaryTypeofv");
+
+    bufAppendC(' ');
+
+    shCALL_LIST(p->u.adpreprimarytypeofv_.call_list_);
+
+    bufAppendC(')');
+
+    break;
   case is_ADprePrimaryRtlShaping:
     bufAppendC('(');
 
@@ -8714,32 +8815,106 @@ void shSHAPING_HEAD(SHAPING_HEAD p)
 {
   switch(p->kind)
   {
-  case is_ADprePrimaryRtlShapingHead:
+  case is_ADprePrimaryRtlShapingHeadInteger:
     bufAppendC('(');
 
-    bufAppendS("ADprePrimaryRtlShapingHead");
+    bufAppendS("ADprePrimaryRtlShapingHeadInteger");
 
     bufAppendC(' ');
 
-    shARITH_CONV(p->u.adpreprimaryrtlshapinghead_.arith_conv_);
-  bufAppendC(' ');
-    shREPEATED_CONSTANT(p->u.adpreprimaryrtlshapinghead_.repeated_constant_);
+    shREPEATED_CONSTANT(p->u.adpreprimaryrtlshapingheadinteger_.repeated_constant_);
 
     bufAppendC(')');
 
     break;
-  case is_ADprePrimaryRtlShapingHeadSubscript:
+  case is_ADprePrimaryRtlShapingHeadScalar:
     bufAppendC('(');
 
-    bufAppendS("ADprePrimaryRtlShapingHeadSubscript");
+    bufAppendS("ADprePrimaryRtlShapingHeadScalar");
 
     bufAppendC(' ');
 
-    shARITH_CONV(p->u.adpreprimaryrtlshapingheadsubscript_.arith_conv_);
+    shREPEATED_CONSTANT(p->u.adpreprimaryrtlshapingheadscalar_.repeated_constant_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ADprePrimaryRtlShapingHeadVector:
+    bufAppendC('(');
+
+    bufAppendS("ADprePrimaryRtlShapingHeadVector");
+
+    bufAppendC(' ');
+
+    shREPEATED_CONSTANT(p->u.adpreprimaryrtlshapingheadvector_.repeated_constant_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ADprePrimaryRtlShapingHeadMatrix:
+    bufAppendC('(');
+
+    bufAppendS("ADprePrimaryRtlShapingHeadMatrix");
+
+    bufAppendC(' ');
+
+    shREPEATED_CONSTANT(p->u.adpreprimaryrtlshapingheadmatrix_.repeated_constant_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ADprePrimaryRtlShapingHeadIntegerSubscript:
+    bufAppendC('(');
+
+    bufAppendS("ADprePrimaryRtlShapingHeadIntegerSubscript");
+
+    bufAppendC(' ');
+
+    shSUBSCRIPT(p->u.adpreprimaryrtlshapingheadintegersubscript_.subscript_);
   bufAppendC(' ');
-    shSUBSCRIPT(p->u.adpreprimaryrtlshapingheadsubscript_.subscript_);
+    shREPEATED_CONSTANT(p->u.adpreprimaryrtlshapingheadintegersubscript_.repeated_constant_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ADprePrimaryRtlShapingHeadScalarSubscript:
+    bufAppendC('(');
+
+    bufAppendS("ADprePrimaryRtlShapingHeadScalarSubscript");
+
+    bufAppendC(' ');
+
+    shSUBSCRIPT(p->u.adpreprimaryrtlshapingheadscalarsubscript_.subscript_);
   bufAppendC(' ');
-    shREPEATED_CONSTANT(p->u.adpreprimaryrtlshapingheadsubscript_.repeated_constant_);
+    shREPEATED_CONSTANT(p->u.adpreprimaryrtlshapingheadscalarsubscript_.repeated_constant_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ADprePrimaryRtlShapingHeadVectorSubscript:
+    bufAppendC('(');
+
+    bufAppendS("ADprePrimaryRtlShapingHeadVectorSubscript");
+
+    bufAppendC(' ');
+
+    shSUBSCRIPT(p->u.adpreprimaryrtlshapingheadvectorsubscript_.subscript_);
+  bufAppendC(' ');
+    shREPEATED_CONSTANT(p->u.adpreprimaryrtlshapingheadvectorsubscript_.repeated_constant_);
+
+    bufAppendC(')');
+
+    break;
+  case is_ADprePrimaryRtlShapingHeadMatrixSubscript:
+    bufAppendC('(');
+
+    bufAppendS("ADprePrimaryRtlShapingHeadMatrixSubscript");
+
+    bufAppendC(' ');
+
+    shSUBSCRIPT(p->u.adpreprimaryrtlshapingheadmatrixsubscript_.subscript_);
+  bufAppendC(' ');
+    shREPEATED_CONSTANT(p->u.adpreprimaryrtlshapingheadmatrixsubscript_.repeated_constant_);
 
     bufAppendC(')');
 

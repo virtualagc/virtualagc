@@ -20,7 +20,7 @@ from expressionSM import expressionSM
 from doForSM import doForSM
 from p_Functions import expressionComponents, doForComponents
 
-def traceIt(state, lbnfLabel, beforeAfter="before", trace=True, depth=0):
+def traceIt(state, endLabels, lbnfLabel, beforeAfter="before", trace=True, depth=0):
     if not trace:
         return
     print("TRACE:  %s, depth=%d" % (beforeAfter, depth))
@@ -35,6 +35,10 @@ def traceIt(state, lbnfLabel, beforeAfter="before", trace=True, depth=0):
     else:
         print("\tstate         =", state)
     print("\tsubstate      =", substate)
+    if len(endLabels) <= 3:
+        print("\tendLabels     =", endLabels)
+    else:
+        print("\tendLabels     =", ["..."] + endLabels[-3:])
 
 # For FUNCTION or PROCEDURE blocks.  Gets a list of all subroutine parameters
 # declared in the subroutine's scope.
@@ -227,11 +231,12 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                     break
     if "stateMachine" in state:
         stateMachine = state["stateMachine"]
-        stateMachine["function"](0, lbnfLabel, PALMAT, state, trace, depth)
+        stateMachine["function"](0, lbnfLabel, PALMAT, state, trace, depth, \
+                                 trace4)
 
     #--------------------------------------------------------------------------
     # Main generation of PALMAT for the statement, sans setup and cleanup.
-    traceIt(state, lbnfLabel, "before", trace, depth)
+    traceIt(state, endLabels, lbnfLabel, "before", trace, depth)
     newState = p_Functions.augmentHistory(state, lbnfLabel)
     if newState != state:
         if "stateMachine" in state:
@@ -244,27 +249,28 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             # is the same object as state's, and not merely
             # a clone of it.
             newState["stateMachine"] = state["stateMachine"]
-        traceIt(state, lbnfLabel, "after", trace, depth)
+        traceIt(state, endLabels, lbnfLabel, "after", trace, depth)
         if not success:
             endLabels.pop()
             return False, PALMAT
     for component in ast["components"]:
         if isinstance(component, str):
             if component[:1] == "^":
-                traceIt(newState, component, "before", trace, depth)
+                traceIt(newState, endLabels, component, "before", trace, depth)
                 if "stateMachine" in newState:
                     state["stateMachine"]["function"](1, component, PALMAT, \
-                                                      newState, trace, depth)
+                                                      newState, trace, depth, \
+                                                      trace4)
                 success = p_Functions.stringLiteral(PALMAT, newState, component)
                 if "stateMachine" in state and "stateMachine" not in newState:
                     state.pop("stateMachine")
-                traceIt(newState, component, "after", trace, depth)
+                traceIt(newState, endLabels, component, "after", trace, depth)
             else:
                 success, PALMAT = generatePALMAT( \
                     { "lbnfLabel": component, "components" : [] }, \
                     PALMAT, newState, trace, endLabels, depth, trace4 )
                 if "stateMachine" in state and "stateMachine" not in newState:
-                    traceIt(newState, component, \
+                    traceIt(newState, endLabels, component, \
                             "ending state machine \"%s\"" % \
                               state["stateMachine"]["owner"], trace, depth)
                     state.pop("stateMachine")
@@ -295,10 +301,10 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     if "stateMachine" in state:
         stateMachine = state["stateMachine"]
         state["stateMachine"]["function"](2, lbnfLabel, PALMAT, \
-                                          state, trace, depth)
+                                          state, trace, depth, trace4)
         if "stateMachine" not in state:
             debug(PALMAT, state, "ending SM \"%s\"" % lbnfLabel)
-            traceIt(state, lbnfLabel, "ending SM \"%s\"" % lbnfLabel, \
+            traceIt(state, endLabels, lbnfLabel, "ending SM \"%s\"" % lbnfLabel, \
                     trace, depth)
             if stateMachine["function"] == expressionSM:
                 lastExpressionSM = stateMachine
@@ -317,7 +323,19 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         }
     currentIndex = currentScope["self"]
     if lbnfLabel in lbnfLabelPatterns:
-        ancestorLabels = lbnfLabelPatterns[lbnfLabel]
+        aLabels = lbnfLabelPatterns[lbnfLabel]
+        # Since ifThenElseStatement is processed differently than ifStatement,
+        # and since these may be nested, we need to determine which of them,
+        # if either, is the inner.
+        ancestorLabels = []
+        for ancestor in reversed(state["history"]):
+            if ancestor in aLabels:
+                ancestorLabels = [ancestor]
+                break        
+        # The following is a loop because I originally thought that 
+        # ancestorLabels might be longer than 1.  It's not, so this could be
+        # rewritten as an if, but there's no advantage in doing so, and possibly
+        # lots of hassle, so I'm just letting it this way.
         for ancestor in ancestorLabels:
             if ancestor not in state["history"]:
                 continue
@@ -467,12 +485,6 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                 base = "store"
                 subscript = None
             if si == -1:
-                '''
-                print("**A", si, currentIndex)
-                print("**B", PALMAT["scopes"][currentIndex]["identifiers"])
-                attributes = \
-                    PALMAT["scopes"][currentIndex]["identifiers"]["^"+identifier+"^"]
-                '''
                 dummy, attributes = findIdentifier("^"+identifier+"^", PALMAT, currentIndex, True)
             else:
                 attributes = \
@@ -490,13 +502,6 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         instructions = currentScope["instructions"]
         p_Functions.expressionToInstructions( \
             substate["expression"], instructions)
-        '''
-        entry = instructions[-1]
-        if isinstance(entry, list) and len(entry) == 1 \
-                and isinstance(entry[0], tuple):
-            instructions.pop()
-            instructions.extend(list(entry[0]))
-        '''
         instructions.append({ "write": substate["LUN"] })
     elif lbnfLabel in ["basicStatementReadPhrase"]:
         instructions = currentScope["instructions"]
@@ -506,6 +511,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     elif lbnfLabel == "declare_statement":
         markUnmarkedScalars(currentScope["identifiers"])
         messages = completeInitialConstants(currentScope["identifiers"])
+        setUninitialized(currentScope["identifiers"])
         if messages != []:
             print("\tGeometry mismatch for INITIAL or CONSTANT data,", messages)
             return False, PALMAT
@@ -521,6 +527,8 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         always come at the beginnings of blocks, prior to any 
         executable code, we don't have to worry about preserving
         any existing PALMAT for the scope.
+        Later ... sez you!  In the interpreter, we do indeed allow DECLARE
+        statements practically anywhere.
         '''
         identifiers = currentScope["identifiers"]
         instructions = currentScope["instructions"]
@@ -549,6 +557,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             return False, PALMAT
         else:
             counter = lastExpressionSM["instructionCount"]
+            arrayList = []
             while counter > 0:
                 if len(instructions) < counter:
                     print("\tImplementation error, cannot pop instruction.")
@@ -624,6 +633,9 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                         key = "constant"
                     if False:
                         pass
+                    elif "array" in identifierDict:
+                        appendValue(value, arrayList, identifierDict)
+                        continue
                     elif isinstance(value, (int, float)) and \
                             "integer" in identifierDict:
                         value = hround(value)
@@ -691,6 +703,11 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                     identifierDict[key] = value
                     if key == "initial":
                         identifierDict["value"] = copy.deepcopy(value)
+            if "array" in identifierDict:
+                makeTuple(identifierDict, arrayList)
+                identifierDict[key] = arrayList
+                if key == "initial":
+                    identifierDict["value"] = copy.deepcopy(arrayList)
     elif lbnfLabel in ["char_spec", "bitSpecBoolean",  
                        "sQdQName_doublyQualNameHead_literalExpOrStar",
                        "arraySpec_arrayHead_literalExpOrStar"]:

@@ -28,6 +28,9 @@ BISON_OPTS = -t -pHAL_S
 CFILES = Absyn.c Parser.c Lexer.c Printer.c
 HFILES = Absyn.h Parser.h Printer.h
 
+# Just for me
+INSTALLATION = ~/Desktop/sandroid.org/public_html/apollo/Shuttle
+
 .PHONY : clean distclean
 
 all : DemoHAL_S ${APP} ${APP2} yaHAL-S-FC.zip
@@ -60,6 +63,14 @@ DemoHAL_S ${CFILES} ${HFILES} : HAL_S.cf fixPrinter.c
 	sed -e '1h;2,$$H;$$!d;g' -re \
 		's/void\s+bufAppendC\s*\([^)]*\)\s*\{/void bufAppendC(const char c)\n{\n\#include "fixPrinter.c"\n/' \
 		temp/Printer.c >Printer.c
+	bnfc --latex HAL_S.cf
+	sed --in-place -e 's@HAL_S@HAL/S@g' \
+		-e 's@literals are recognized by the regular expression@=@' \
+		-e 's@The Language HAL/S@Preprocessed HAL/S@' \
+		-e 's@\\documentclass\[a4paper,11pt\][{]article[}]@\\documentclass[10pt]{article}\n\\usepackage[letterpaper, margin=1in]{geometry}@' \
+		 HAL_S.tex
+	pdflatex HAL_S.tex
+	mv HAL_S.pdf "HAL-S BNF.pdf"
 
 ${APP} : modernHAL-S-FC.c ${CFILES} ${HFILES}
 	${CC} ${CCFLAGS} -o $@ modernHAL-S-FC.c ${CFILES}
@@ -78,4 +89,6 @@ modernHAL-S-FC-macosx: modernHAL-S-FC.c ${CFILES} ${HFILES}
 	
 # Make a zipfile for distributing just the preprocess+compiler executables and source.
 yaHAL-S-FC.zip: 
-	zip $@ *.c *.h *.py modernHAL* *.cf *.y *.pdf README.txt Makefile
+	zip -j $@ *.c *.h *.py modernHAL* *.cf *.y *.pdf README.txt Makefile ../"Source Code"/"Programming in HAL-S"/*.hal
+	-cp $@ ${INSTALLATION}
+	

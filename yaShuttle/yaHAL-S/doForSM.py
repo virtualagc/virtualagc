@@ -24,7 +24,7 @@ a string literal. The output is a compilation of DO FOR ... END to PALMAT
 instructions.  Those instructions are appended for the PALMAT
 instruction list for the current scope.
 '''
-def doForSM(stage, lbnfLabel, PALMAT, state, trace, depth):
+def doForSM(stage, lbnfLabel, PALMAT, state, trace, depth, trace4=False):
     
     #debug(PALMAT, state, "SM doFor      %d %s" % (stage, lbnfLabel))
     

@@ -13,7 +13,7 @@ History:        2023-01-08 RSB  Created, hopefully for eventually replacing
 """
 
 from executePALMAT import executePALMAT, isBitArray
-from palmatAux import debug, findIdentifier
+from palmatAux import debug, findIdentifier, hTRUE, hFALSE, isArrayQuick
 from p_Functions import substate
 
 # Return True on success, False on failure.  The stage argument is 0 when
@@ -30,8 +30,6 @@ from p_Functions import substate
 # final call to expressionSM is made.
 def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth, \
                  traceCompileTime=False):
-    
-    #debug(PALMAT, state, "SM expression %d %s" % (stage, lbnfLabel)) 
     
     stateMachine = state["stateMachine"]
     if "radix" not in stateMachine:
@@ -92,10 +90,10 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth, \
         elif lbnfLabel in ["prePrimaryRtlShapingStar"]:
             expression.append({ "fill": True })
             expression.append({ "sentinel": "shaping"})
-        elif lbnfLabel == "arithConv_integer":
-            expression.append({ "shaping": "integer" })
-        elif lbnfLabel == "arithConv_scalar":
-            expression.append({ "shaping": "scalar" })
+        #elif lbnfLabel == "arithConv_integer":
+        #    expression.append({ "shaping": "integer" })
+        #elif lbnfLabel == "arithConv_scalar":
+        #    expression.append({ "shaping": "scalar" })
     #if stage == 2 and lbnfLabel == "repeated_constant":
     #    expression.append({ "condense": "end" })
     if stage == 2 and depth == owningDepth:
@@ -197,7 +195,7 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth, \
                         temporaryInstructions.append({"matrix": value })
                     else:
                         temporaryInstructions.append({"vector": value }) 
-                elif isinstance(value, tuple):
+                elif isArrayQuick(value):
                     temporaryInstructions.append({"array": value })               
         if "compiledExpression" in stateMachine:
             instructions = stateMachine["compiledExpression"]
@@ -227,8 +225,20 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth, \
                          "prio", "random", "randomg", "runtime", "shl", 
                          "shr", "size"]:
             expression.append({ "function": lbnfLabel.upper()})
+        elif lbnfLabel == "prePrimaryTypeof":
+            expression.append({ "modern": "TYPEOF"})
+        elif lbnfLabel == "prePrimaryTypeofv":
+            expression.append({ "modern": "TYPEOFV"})
         #elif lbnfLabel == "repeated_constant":
         #    expression.append({ "condense": "start"})
+        elif lbnfLabel == "prePrimaryRtlShapingHeadInteger":
+            expression.append({ "shaping": "integer"})
+        elif lbnfLabel == "prePrimaryRtlShapingHeadScalar":
+            expression.append({ "shaping": "scalar"})
+        elif lbnfLabel == "prePrimaryRtlShapingHeadVector":
+            expression.append({ "shaping": "vector"})
+        elif lbnfLabel == "prePrimaryRtlShapingHeadMatrix":
+            expression.append({ "shaping": "matrix"})
         elif lbnfLabel == "read_arg":
             stateMachine["readStatement"] = True
         elif lbnfLabel[:9] == "ioControl":
@@ -267,9 +277,9 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth, \
         elif lbnfLabel == "charExpCat":
             expression.append({ "operator": "C||" })
         elif lbnfLabel == "bitConstTrue":
-            expression.append({ "boolean": [(1,1)] })
+            expression.append({ "boolean": hTRUE })
         elif lbnfLabel == "bitConstFalse":
-            expression.append({ "boolean": [(0,1)] })
+            expression.append({ "boolean": hFALSE })
         elif lbnfLabel == "NOT":
             expression.append({ "operator": "NOT" })
         elif lbnfLabel == "bitFactorAnd":
@@ -311,7 +321,8 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth, \
             expression.append({ "operator": "AND" })
         elif lbnfLabel == "relational_expOR":
             expression.append({ "operator": "OR" })
-        elif lbnfLabel == "prePrimaryFunction":
+        elif lbnfLabel in ["prePrimaryFunction", "userBitFunction", 
+                           "userCharFunction", "userStructFunc"]:
             internalState = "waitFunctionName"
         elif lbnfLabel == "factorTranspose":
             expression.append({"function": "TRANSPOSE"})

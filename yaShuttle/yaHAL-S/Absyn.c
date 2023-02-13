@@ -1006,6 +1006,32 @@ PRE_PRIMARY make_ADprePrimaryRtlFunction(ARITH_FUNC p1, CALL_LIST p2)
     tmp->u.adpreprimaryrtlfunction_.call_list_ = p2;
     return tmp;
 }
+/********************   ADprePrimaryTypeof    ********************/
+PRE_PRIMARY make_ADprePrimaryTypeof(CALL_LIST p1)
+{
+    PRE_PRIMARY tmp = (PRE_PRIMARY) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ADprePrimaryTypeof!\n");
+        exit(1);
+    }
+    tmp->kind = is_ADprePrimaryTypeof;
+    tmp->u.adpreprimarytypeof_.call_list_ = p1;
+    return tmp;
+}
+/********************   ADprePrimaryTypeofv    ********************/
+PRE_PRIMARY make_ADprePrimaryTypeofv(CALL_LIST p1)
+{
+    PRE_PRIMARY tmp = (PRE_PRIMARY) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ADprePrimaryTypeofv!\n");
+        exit(1);
+    }
+    tmp->kind = is_ADprePrimaryTypeofv;
+    tmp->u.adpreprimarytypeofv_.call_list_ = p1;
+    return tmp;
+}
 /********************   ADprePrimaryRtlShaping    ********************/
 PRE_PRIMARY make_ADprePrimaryRtlShaping(SHAPING_HEAD p1)
 {
@@ -1161,33 +1187,112 @@ MODIFIED_ARITH_FUNC make_AEmodified_arith_func(QUAL_STRUCT p1, NO_ARG_ARITH_FUNC
     tmp->u.aemodified_arith_func_.no_arg_arith_func_ = p2;
     tmp->u.aemodified_arith_func_.subscript_ = p3;
     return tmp;
-}/********************   ADprePrimaryRtlShapingHead    ********************/
-SHAPING_HEAD make_ADprePrimaryRtlShapingHead(ARITH_CONV p1, REPEATED_CONSTANT p2)
+}/********************   ADprePrimaryRtlShapingHeadInteger    ********************/
+SHAPING_HEAD make_ADprePrimaryRtlShapingHeadInteger(REPEATED_CONSTANT p1)
 {
     SHAPING_HEAD tmp = (SHAPING_HEAD) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ADprePrimaryRtlShapingHead!\n");
+        fprintf(stderr, "Error: out of memory when allocating ADprePrimaryRtlShapingHeadInteger!\n");
         exit(1);
     }
-    tmp->kind = is_ADprePrimaryRtlShapingHead;
-    tmp->u.adpreprimaryrtlshapinghead_.arith_conv_ = p1;
-    tmp->u.adpreprimaryrtlshapinghead_.repeated_constant_ = p2;
+    tmp->kind = is_ADprePrimaryRtlShapingHeadInteger;
+    tmp->u.adpreprimaryrtlshapingheadinteger_.repeated_constant_ = p1;
     return tmp;
 }
-/********************   ADprePrimaryRtlShapingHeadSubscript    ********************/
-SHAPING_HEAD make_ADprePrimaryRtlShapingHeadSubscript(ARITH_CONV p1, SUBSCRIPT p2, REPEATED_CONSTANT p3)
+/********************   ADprePrimaryRtlShapingHeadScalar    ********************/
+SHAPING_HEAD make_ADprePrimaryRtlShapingHeadScalar(REPEATED_CONSTANT p1)
 {
     SHAPING_HEAD tmp = (SHAPING_HEAD) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ADprePrimaryRtlShapingHeadSubscript!\n");
+        fprintf(stderr, "Error: out of memory when allocating ADprePrimaryRtlShapingHeadScalar!\n");
         exit(1);
     }
-    tmp->kind = is_ADprePrimaryRtlShapingHeadSubscript;
-    tmp->u.adpreprimaryrtlshapingheadsubscript_.arith_conv_ = p1;
-    tmp->u.adpreprimaryrtlshapingheadsubscript_.subscript_ = p2;
-    tmp->u.adpreprimaryrtlshapingheadsubscript_.repeated_constant_ = p3;
+    tmp->kind = is_ADprePrimaryRtlShapingHeadScalar;
+    tmp->u.adpreprimaryrtlshapingheadscalar_.repeated_constant_ = p1;
+    return tmp;
+}
+/********************   ADprePrimaryRtlShapingHeadVector    ********************/
+SHAPING_HEAD make_ADprePrimaryRtlShapingHeadVector(REPEATED_CONSTANT p1)
+{
+    SHAPING_HEAD tmp = (SHAPING_HEAD) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ADprePrimaryRtlShapingHeadVector!\n");
+        exit(1);
+    }
+    tmp->kind = is_ADprePrimaryRtlShapingHeadVector;
+    tmp->u.adpreprimaryrtlshapingheadvector_.repeated_constant_ = p1;
+    return tmp;
+}
+/********************   ADprePrimaryRtlShapingHeadMatrix    ********************/
+SHAPING_HEAD make_ADprePrimaryRtlShapingHeadMatrix(REPEATED_CONSTANT p1)
+{
+    SHAPING_HEAD tmp = (SHAPING_HEAD) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ADprePrimaryRtlShapingHeadMatrix!\n");
+        exit(1);
+    }
+    tmp->kind = is_ADprePrimaryRtlShapingHeadMatrix;
+    tmp->u.adpreprimaryrtlshapingheadmatrix_.repeated_constant_ = p1;
+    return tmp;
+}
+/********************   ADprePrimaryRtlShapingHeadIntegerSubscript    ********************/
+SHAPING_HEAD make_ADprePrimaryRtlShapingHeadIntegerSubscript(SUBSCRIPT p1, REPEATED_CONSTANT p2)
+{
+    SHAPING_HEAD tmp = (SHAPING_HEAD) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ADprePrimaryRtlShapingHeadIntegerSubscript!\n");
+        exit(1);
+    }
+    tmp->kind = is_ADprePrimaryRtlShapingHeadIntegerSubscript;
+    tmp->u.adpreprimaryrtlshapingheadintegersubscript_.subscript_ = p1;
+    tmp->u.adpreprimaryrtlshapingheadintegersubscript_.repeated_constant_ = p2;
+    return tmp;
+}
+/********************   ADprePrimaryRtlShapingHeadScalarSubscript    ********************/
+SHAPING_HEAD make_ADprePrimaryRtlShapingHeadScalarSubscript(SUBSCRIPT p1, REPEATED_CONSTANT p2)
+{
+    SHAPING_HEAD tmp = (SHAPING_HEAD) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ADprePrimaryRtlShapingHeadScalarSubscript!\n");
+        exit(1);
+    }
+    tmp->kind = is_ADprePrimaryRtlShapingHeadScalarSubscript;
+    tmp->u.adpreprimaryrtlshapingheadscalarsubscript_.subscript_ = p1;
+    tmp->u.adpreprimaryrtlshapingheadscalarsubscript_.repeated_constant_ = p2;
+    return tmp;
+}
+/********************   ADprePrimaryRtlShapingHeadVectorSubscript    ********************/
+SHAPING_HEAD make_ADprePrimaryRtlShapingHeadVectorSubscript(SUBSCRIPT p1, REPEATED_CONSTANT p2)
+{
+    SHAPING_HEAD tmp = (SHAPING_HEAD) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ADprePrimaryRtlShapingHeadVectorSubscript!\n");
+        exit(1);
+    }
+    tmp->kind = is_ADprePrimaryRtlShapingHeadVectorSubscript;
+    tmp->u.adpreprimaryrtlshapingheadvectorsubscript_.subscript_ = p1;
+    tmp->u.adpreprimaryrtlshapingheadvectorsubscript_.repeated_constant_ = p2;
+    return tmp;
+}
+/********************   ADprePrimaryRtlShapingHeadMatrixSubscript    ********************/
+SHAPING_HEAD make_ADprePrimaryRtlShapingHeadMatrixSubscript(SUBSCRIPT p1, REPEATED_CONSTANT p2)
+{
+    SHAPING_HEAD tmp = (SHAPING_HEAD) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ADprePrimaryRtlShapingHeadMatrixSubscript!\n");
+        exit(1);
+    }
+    tmp->kind = is_ADprePrimaryRtlShapingHeadMatrixSubscript;
+    tmp->u.adpreprimaryrtlshapingheadmatrixsubscript_.subscript_ = p1;
+    tmp->u.adpreprimaryrtlshapingheadmatrixsubscript_.repeated_constant_ = p2;
     return tmp;
 }
 /********************   ADprePrimaryRtlShapingHeadRepeated    ********************/

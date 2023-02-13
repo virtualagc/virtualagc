@@ -78,6 +78,7 @@ trace = False
 interactive = False
 colorize = False
 noexec = False
+ansiWrapper = True
 for param in ["--library="+libraryFilename] + sys.argv[1:]:
     if param == "--help":
         print("""
@@ -122,6 +123,8 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
         --colorize      Used only with --interactive.  If present, it is
                         equivalent to the interpreter command COLORIZE RED, 
                         whereas the default is NOCOLORIZE.
+        --no-wrapper    Changes the way colorization works which is sometimes
+                        useful in Windows.
         --noexec        Used only with --interactive.  If present, it does
                         not execute source code input interactively, 
                         although it processes it normally in all other
@@ -132,6 +135,8 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
         interactive = True
     elif param == "--colorize":
         colorize = True
+    elif param == "--no-wrapper":
+        ansiWrapper = False
     elif param == "--noexec":
         noexec = True
     elif param[:6] == "--tab=":
@@ -218,5 +223,5 @@ if not interactive:
 else:
     from interpreterLoop import interpreterLoop
     interpreterLoop(libraryFilename, structureTemplates, colorize, \
-                    not noexec, lbnf, bnf)
+                    not noexec, lbnf, bnf, ansiWrapper)
 

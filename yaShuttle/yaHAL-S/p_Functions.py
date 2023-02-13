@@ -238,7 +238,6 @@ def stringLiteral(PALMAT, state, s):
         substate["currentIdentifier"] = s
     elif state1 == "parameter":
         identifier = substate["currentIdentifier"]
-        #print("*", s, identifier, identifiers)
         if "assign_list" in history:
             identifiers[identifier]["assignments"].append(s[1:-1])
         elif "parameter_list" in history:
@@ -373,6 +372,14 @@ augmentationCandidates = [
     "relational_exp",
     "relational_expOR",
     "minorAttributeRepeatedConstant",
+    "prePrimaryRtlShapingHeadInteger",
+    "prePrimaryRtlShapingHeadScalar",
+    "prePrimaryRtlShapingHeadVector",
+    "prePrimaryRtlShapingHeadMatrix",
+    "prePrimaryRtlShapingHeadIntegerSubscript",
+    "prePrimaryRtlShapingHeadScalarSubscript",
+    "prePrimaryRtlShapingHeadVectorSubscript",
+    "prePrimaryRtlShapingHeadMatrixSubscript",
     "repeated_constantMark",
     "sQdQName_doublyQualNameHead_literalExpOrStar",
     "sub_exp",

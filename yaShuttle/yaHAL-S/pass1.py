@@ -255,6 +255,8 @@ def readGrammar(filename):
 #indenter = "   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |"
 indenter = "░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ "
 indenter += indenter
+indenter += indenter
+indenter += indenter
 def astPrint(ast, lbnf=True, bnf=False, indent=0):
     if not (lbnf or bnf):
         return

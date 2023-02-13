@@ -8,6 +8,13 @@ Purpose:        Part of the code-generation system for the "modern" HAL/S
                 compiler yaHAL-S-FC.py+modernHAL-S-FC.c. Some auxliary functions
                 used in several modules.
 History:        2023-01-10 RSB  Split off from PALMAT.py.
+                2023-02-13 RSB  Refactored all bit arrays from the old format
+                                [(value, length)] to the new format of
+                                [value, length, "b"].  Introduced the new 
+                                functions formBitArray() and parseBitArray(),
+                                so that if other modules use these functions,
+                                they'll be insulated from future changes to the
+                                format (of which I don't expect any).
 """
 
 import json
@@ -21,20 +28,43 @@ def debug(PALMAT, state, message):
             'debug': message
         })
 
+# Quick check if value is array.  Fuller test is isArrayGeometry() in
+# executePALMAT.
+def isArrayQuick(value):
+    if not isinstance(value, list) or len(value) < 2 or value[-1] != "a":
+        return False
+    return True
+
 # Test if a value on the computation stack is a boolean.
 def isBitArray(value):
-    if isinstance(value, list) and len(value) == 1 and \
-            isinstance(value[0], tuple) and len(value[0]) == 2 and \
-            isinstance(value[0][0], int) and isinstance(value[0][1], int):
-        return True
-    return False
+    return isinstance(value, list) and len(value) == 3 and value[2] == "b" \
+            and isinstance(value[0], int) and isinstance(value[1], int)
 
-# "Flatten" a composite object (list of lists of ... or tuple of tuples of ...)
-# onto the end of a list.
+def formBitArray(value, length):
+    if isinstance(value, int):
+        pass
+    elif isinstance(value, float):
+        value = hround(value)
+    elif isinstance(value, str):
+        value = int(value)
+    elif isBitArray(value):
+        value = value[0]
+    return [value & ((1 << length) - 1), length, "b"]
+hTRUE = formBitArray(1, 1)
+hFALSE = formBitArray(0, 1)
+
+def parseBitArray(bitArray):
+    return bitArray[0], bitArray[1]
+
+# "Flatten" a composite object (VECTOR, MATRIX, ARRAY) onto the end of a list.
+# Not sure what to do about STRUCTURE yet.
 def flatten(object, onto):
     if isBitArray(object):
         onto.append(object)
-    elif isinstance(object, (list, tuple)):
+    elif isArrayQuick(object):
+        for e in object[:-1]:
+            flatten(e, onto)
+    elif isinstance(object, list):
         for e in object:
             flatten(e, onto)
     else:
@@ -286,6 +316,21 @@ def findIdentifier(identifier, PALMAT, scopeIndex=None, write=False):
             return i, PALMAT["scopes"][i]["identifiers"][identifier]
     return -1, None
 
+# This is for searching for identifiers when the proper name-mangling prefix
+# isn't known.  All it does is to return a tuple consisting of the scope index
+# and the mangled identifier, or else -1 if not found.
+def flexFindIdentifier(identifier, PALMAT, scopeIndex):
+    prefixes = ["", "l_", "b_", "c_", "s_", "e_", "a_", "bf_", "cf_", "sf_"]
+    while scopeIndex != None:
+        scope = PALMAT["scopes"][scopeIndex]
+        identifiers = scope["identifiers"]
+        for p in prefixes:
+            mangled = "^" + p + identifier + "^"
+            if mangled in identifiers:
+                return scopeIndex, mangled
+        scopeIndex = scope["parent"]
+    return -1, identifier
+
 #-----------------------------------------------------------------------------
 '''
 These auxiliary functions are used to create child (DO ... END) blocks and
@@ -467,3 +512,42 @@ def completeInitialConstants(identifiers):
         identifiers.pop(identifier)
     return messages
     
+# Make sure every variable in the scope has a "value", even if it's 
+# uninitialized.
+def setUninitialized(identifiers):
+    
+    def uninitializeLevel(arrayDimensions, dimensions):
+        level = []
+        if len(arrayDimensions) > 0:
+            for i in range(arrayDimensions[0]):
+                level.append(uninitializeLevel(arrayDimensions[1:], \
+                                               dimensions[1:]))
+            level.append("a")
+        elif len(dimensions) > 0:
+            for i in range(dimensions[0]):
+                level.append(uninitializeLevel([], dimensions[1:]))
+        else:
+            level = None
+        return level
+    
+    for identifier in identifiers:
+        attributes = identifiers[identifier]
+        if "value" not in attributes and "constant" not in attributes and \
+                ("integer" in attributes or "scalar" in attributes or \
+                 "vector" in attributes or "matrix" in attributes or \
+                 "bit" in attributes or "character" in attributes):
+            dimensions = []
+            arrayDimensions = []
+            if "array" in attributes:
+                isArray = True
+                arrayDimensions = attributes["array"]
+                dimensions.extend(arrayDimensions)
+            if "vector" in attributes:
+                dimensions.append(attributes["vector"])
+            elif "matrix" in attributes:
+                dimensions.extend(attributes["matrix"])
+            if len(dimensions) == 0:
+                value = None
+            else:
+                value = uninitializeLevel(arrayDimensions, dimensions)
+            attributes["value"] = value
