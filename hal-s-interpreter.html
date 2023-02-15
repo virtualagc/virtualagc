@@ -19,7 +19,9 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
       <li><a moz-do-not-send="true" href="#Installation">Installation of
           the Interpreter (Linux, Windows, Mac)</a></li>
       <li><a moz-do-not-send="true" href="#Invocation">Invocation of the
-          Interpreter</a><br>
+          Interpreter</a></li>
+      <li><a moz-do-not-send="true" href="#Advice">What NOT to do in the
+          Interpreter (and the Modern Compiler)</a><br>
       </li>
       <li><a moz-do-not-send="true" href="#HelloWorld">Hello, World!</a></li>
       <li><a moz-do-not-send="true" href="#Tools">Tools Provided by the
@@ -203,8 +205,72 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
         <li><i>Or</i> install a replacement ANSI-compatible command-line
           program on your system; in Microsoft Windows, installing and
           using <a moz-do-not-send="true" href="https://cmder.app/">Cmder</a>
-          has worked for me.<br>
-        </li>
+          has worked for me.</li>
+      </ul>
+    </ul>
+    <h1><a name="Advice"></a>What NOT to do in the Interpreter (and the
+      Modern Compiler)</h1>
+    If you read the contemporary material I've recommended — <i>Programming
+      in HAL/S</i> and/or the <i>HAL/S Programmers' Guide</i> — you
+    will notice that the symbol ¬ is the operator for logical negation,
+    used in contexts like "<tt>IF X </tt><tt>¬= Y THEN ...</tt>" or "<tt>MYBOOLEAN
+      = </tt><tt>¬YOURBOOLEAN</tt>".&nbsp; You'll also notice that you
+    probably have no clue in the world as to how to enter this character
+    into your HAL/S source code.<br>
+    <p>If you dig enough in the original HAL/S documentation, part of
+      the rationale for using his symbol was that it was included in
+      both the EBCDIC character set (as used by the IBM computers on
+      which the original HAL/S compiler ran) and the ASCII character set
+      (universally used today, and I guess that back in the early 1970's
+      they could see it coming even then).&nbsp; Well, both of those
+      notions are wrong ... at least in ASCII as it is standardized
+      today.&nbsp; It is in <i>some</i> but not all extensions of 7-bit
+      ASCII to 8 bits, and in <i>some</i> but not all variants of
+      EBCDIC.&nbsp; In fact, there is no way to use this symbol today,
+      confining yourself to byte-sized character sets, that works on
+      everybody's computer.&nbsp; And not even on every (or most)
+      Americans' computers.&nbsp; Perhaps some day.&nbsp; But as for
+      today, what a mess!<br>
+    </p>
+    <p>For reasons which I think are good, but would probably bore you,
+      the modern compiler/interpreter accepts any of the following as a
+      logical-NOT operator:<br>
+    </p>
+    <ul>
+      <li>¬ (encoded in UTF-8)<br>
+      </li>
+      <li>^ (encoded in 7-bit ASCII)<br>
+      </li>
+      <li>~ (encoded in 7-bit ASCII)</li>
+      <li><tt>NOT</tt><br>
+      </li>
+    </ul>
+    <p>You can use any of these that you can figure out how to input
+      into your computer.&nbsp; Whichever you use of ¬ ^ ~ is
+      transparently converted internally by the compiler into ~.&nbsp;
+      My recommendation is to use ~ or to use <tt>NOT</tt> (which is
+      part of the original HAL/S specification and doesn't need any
+      rationalization of mine).<br>
+    </p>
+    <p>Similar comments apply to the cent symbol (¢).&nbsp; Fortunately,
+      this symbol is only rarely used in HAL/S source code, and only
+      within certain quoted character strings, so it doesn't cause as
+      much of a problem.&nbsp; It is a kind of escape-code for embedding
+      a character not in the HAL/S character set into a string literal
+      if the string is going to be passed to non-HAL/S code for
+      subsequent processing.&nbsp; The modern compiler/interpreter will
+      accept either:<br>
+    </p>
+    <ul>
+      <li>¢ (encoded in UTF-8)</li>
+      <li>` (encoded in 7-bit ASCII)</li>
+    </ul>
+    <p>Internally, either of these is converted transparently to the
+      back-tick (`), and my recommendation is to just use ` if you find
+      you need this feature of HAL/S.<br>
+    </p>
+    <ul>
+      <ul>
       </ul>
     </ul>
     <ol>
@@ -309,9 +375,9 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
     interpreter, namely that commands to the interpreter, as opposed to
     HAL/S source code lines, are always on a line by themselves and are
     always preceded by a back-tick character (`).&nbsp; The back-tick
-    isn't a legal character in HAL/S, so that means we can always
-    distinguish perfectly between interpreter commands and valid HAL/S
-    source code.<br>
+    isn't a legal character in HAL/S, at least not outside of quoted
+    string literals, so that means we can always distinguish perfectly
+    between interpreter commands and valid HAL/S source code. <br>
     <br>
     HAL/S is a strictly-typed language, in which any variable must be
     explicitly declared before use.&nbsp; Try the following HAL/S
